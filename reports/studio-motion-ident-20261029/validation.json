@@ -1,0 +1,21 @@
+{
+  "nativeAuthorColdReopen": true,
+  "sameAcceptedJobApiRestartRecovery": true,
+  "independentExactStudioDocumentRestore": true,
+  "canonicalPrivateAlphaExport": true,
+  "finalMovieSha256": "12c1cad04b060531fda0aa95bd0a5ff740d833e7cfabff438ab87c181d85a870",
+  "finalRealSignedNumberKeyboardEntry": true,
+  "finalContextualHelpAnswer": true,
+  "anonymousViewportComparisons": 8,
+  "tests": {
+    "backend": 53,
+    "frontend": 29,
+    "renderer": 32,
+    "overlayTransfer": 13,
+    "productHelp": 51,
+    "total": 178
+  },
+  "wholeCreativeRequestComplete": false,
+  "productionOrCreativeReadinessPromoted": false,
+  "scheduled": false
+}

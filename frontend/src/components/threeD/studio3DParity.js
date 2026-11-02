@@ -36,6 +36,7 @@ add(
   "approximate",
   "Both engines apply these choices with different shaders and geometry."
 );
+add("objects", "approximate", "Independent bounded mesh objects and their local pose keys reach both Three.js and Blender; shaders/raster pixels remain approximate.");
 add(
   "x y z scale rotationX rotationY rotationZ keyframes",
   "approximate",

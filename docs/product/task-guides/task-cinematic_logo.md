@@ -30,7 +30,7 @@ Use owned branding and supported authored scene movement; no public-quality logo
 
 - studio.export — **PARTIAL**: Requests a final movie and downloads the exact completed output after applicable ownership and review checks. Full preview parity and all product combinations are not qualified.
 - creative.logo_brand — **PARTIAL**: Draft template slots accept owned branding and a reviewed reveal. Rejected earlier logo films remain rejected and are not approved public examples.
-- studio.three_d — **PARTIAL**: Authors bounded 3D scenes and renders them through the existing 3D worker path. Supported transforms are approximate across browser and final render, and several displayed fields are disabled for final output.
+- studio.three_d — **PARTIAL**: Builds bounded mesh compositions and continuously flowing ribbon surfaces. Individual objects retain colours, surfaces, roughness, transforms and pose keys; browser and final lighting/materials remain approximate.
 - studio.sfx — **PARTIAL**: Places sound cues on the native timeline. Included sound-design presets synthesize deterministic PCM; owned external sound files can be used in the supported audio path.
 - studio.vector_artwork — **PARTIAL**: Author editable cubic artwork with single or compound contours, even-odd counters, fill/gradient and stroke; animate it with normal layer keys.
 

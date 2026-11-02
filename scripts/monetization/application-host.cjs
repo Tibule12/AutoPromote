@@ -52,6 +52,11 @@ const firestore = Object.assign(() => db, {
 let gateway;
 const bucket = new Proxy(rawBucket, {
   get(target, key) {
+    if (key === "upload") return async (file, options) => {
+      if (options?.destination?.startsWith("temp_studio_3d/") && options.destination.endsWith("/overlay.mov") && fs.statSync(file).size > 100 * 1024 ** 2)
+        return require("./upload-local-alpha.cjs")({ file, options, bucket: target, origin: config.storageOrigin, cohort: config.cohort });
+      return target.upload(file, options);
+    };
     // Firebase's local Storage emulator has no bucket-IAM metadata endpoint.
     // Model its private transport capability; object bytes/metadata still use SDK I/O.
     if (key === "getMetadata")
@@ -342,7 +347,15 @@ app.get("/api/credit-pilot/object/:id", async (req, res, next) => {
   }
 });
 app.use("/api/auth", require("../../src/authRoutes"));
-app.use("/api/product-assistance", require("../../src/routes/productAssistanceRoutes")());
+{
+  // Match the application's existing public, bounded documentation route.
+  // It has no model/provider/project actions; its journal belongs to this demo.
+  const { createAssistance } = require("../../src/productAssistance");
+  const { privateJournal } = require("../../src/productAssistance/journal");
+  app.use("/api/product-assistance", require("../../src/routes/productAssistanceRoutes")({
+    service: createAssistance({ journal: privateJournal(path.join(path.dirname(process.argv[2]), "product-help.private.json")) }),
+  }));
+}
 app.use("/api/paypal-subscriptions", (req, res, next) => {
   if (req.method === "GET" && req.path === "/plans")
     return require("../../src/routes/paypalSubscriptionRoutes")(req, res, next);

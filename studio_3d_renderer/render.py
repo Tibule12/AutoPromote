@@ -98,7 +98,11 @@ def render_files(spec, temp_dir, asset_file=None):
     preview = root / "preview.mp4"
     overlay = root / "overlay.mov"
     run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i", f"color=c=0x0c1020:s={spec['width']}x{spec['height']}:r={spec['fps']}:d={spec['duration']}", "-framerate", str(spec["fps"]), "-i", pattern, "-filter_complex", "[0:v][1:v]overlay=shortest=1:format=auto,format=yuv420p[v]", "-map", "[v]", "-c:v", "libx264", "-preset", "veryfast", "-crf", "19", "-movflags", "+faststart", "-an", str(preview)], timeout=180)
-    run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-framerate", str(spec["fps"]), "-i", pattern, "-c:v", "qtrle", "-pix_fmt", "argb", "-an", str(overlay)], timeout=180)
+    # Sculptural surfaces change across much of the frame. PNG video retains
+    # exact RGBA pixels within the existing bounded artifact size; legacy
+    # scenes keep their prior QuickTime Animation encoding.
+    alpha_codec, alpha_format = ("png", "rgba") if spec["scene"].get("lightingRig") == "sculpture" else ("qtrle", "argb")
+    run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-framerate", str(spec["fps"]), "-i", pattern, "-c:v", alpha_codec, "-pix_fmt", alpha_format, "-an", str(overlay)], timeout=180)
     probe = run(["ffprobe", "-v", "error", "-show_entries", "stream=codec_name,width,height,pix_fmt,duration", "-show_entries", "format=duration", "-of", "json", str(preview)], timeout=30)
     video_info = json.loads(probe)
     stream = next((stream for stream in video_info.get("streams", []) if stream.get("codec_name") == "h264"), None)

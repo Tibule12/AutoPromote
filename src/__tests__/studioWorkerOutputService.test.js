@@ -11,10 +11,27 @@ const mockBucket = { name:'private-test-bucket', upload:mockUploads,
   }) };
 jest.mock('firebase-admin',()=>({storage:()=>({bucket:()=>mockBucket})}));
 const {workerBucketOutputPath,persistWorkerBucketOutput} = require('../services/studioWorkerOutputService');
+const {retainedLocalCompletionHash}=require('../services/studioWorkerOutputService');
 const owner='owner-1',job='viral_job-1',source=`processed/${job}_viral.mp4`,target=`studio/exports/${owner}/${job}/render.mp4`;
 const bytes=Buffer.from('actual streamed movie bytes');
 const digest=crypto.createHash('sha256').update(bytes).digest('hex');
 const input={url:`https://storage.googleapis.com/private-test-bucket/${source}?expired=signature`,userId:owner,jobId:job,expectedSha256:digest};
+test('retained local recovery is off in production and without an explicit directory',async()=>{
+ expect(await retainedLocalCompletionHash('bad',{NODE_ENV:'production',STUDIO_LOCAL_COMPLETION_ROOT:'/tmp'})).toBeNull();
+ expect(await retainedLocalCompletionHash('bad',{NODE_ENV:'development'})).toBeNull();
+});
+test('retained local recovery hashes only the exact private canonical job file',async()=>{
+ const os=require('os'),path=require('path'),folder=fs.mkdtempSync(path.join(os.tmpdir(),'retained-completion-'));
+ const jobId='viral_'+'f'.repeat(64),file=path.join(folder,jobId+'_viral.mp4');
+ const env={NODE_ENV:'development',STUDIO_LOCAL_COMPLETION_ROOT:folder,MEDIA_WORKER_URL:'http://127.0.0.1:8028'};
+ try{
+  fs.writeFileSync(file,bytes);expect(await retainedLocalCompletionHash(jobId,env)).toBe(digest);
+  expect(await retainedLocalCompletionHash('viral_'+'e'.repeat(64),env)).toBeNull();
+  await expect(retainedLocalCompletionHash('../escape',env)).rejects.toThrow('binding');
+  await expect(retainedLocalCompletionHash(jobId,{...env,MEDIA_WORKER_URL:'https://remote.example'})).rejects.toThrow('binding');
+  fs.unlinkSync(file);fs.symlinkSync(__filename,file);await expect(retainedLocalCompletionHash(jobId,env)).rejects.toThrow();
+ }finally{fs.rmSync(folder,{recursive:true,force:true});}
+});
 beforeEach(()=>{
   mockObjects.clear();mockReads.length=0;mockUploads.mockReset();mockNonce=0;
   mockObjects.set(source,{bytes,metadata:{size:String(bytes.length),generation:'123'}});

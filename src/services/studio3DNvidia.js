@@ -78,7 +78,7 @@ async function render({ config, jobId, spec, bucket, onRendering }) {
   try {
     await ssh(config, `umask 077; mkdir -p ${quote(remote + '/renderer/assets')} ${quote(remote + '/output')}`);
     const renderer = path.resolve(__dirname, '../..', 'studio_3d_renderer');
-    for (const name of ['spec.py', 'render.py', 'blender_scene.py', 'scene_motion.py', 'plane_scene.py', 'brand_ident.py', 'vector_geometry.py', 'assets/autopromote-vector-logo.json']) await copy(config, path.join(renderer, name), `${remote}/renderer/${name}`);
+    for (const name of ['spec.py', 'objects.py', 'render.py', 'blender_scene.py', 'scene_motion.py', 'plane_scene.py', 'brand_ident.py', 'vector_geometry.py', 'assets/autopromote-vector-logo.json']) await copy(config, path.join(renderer, name), `${remote}/renderer/${name}`);
     const specFile = path.join(directory, 'spec.json');
     await fs.writeFile(specFile, JSON.stringify(spec), { mode: 0o600 });
     await copy(config, specFile, `${remote}/spec.json`);
@@ -118,7 +118,8 @@ async function render({ config, jobId, spec, bucket, onRendering }) {
       const { stdout } = await execute('ffprobe', ['-v', 'error', '-show_streams', '-show_format', '-of', 'json', file], { timeout: 30000 });
       const probe = JSON.parse(stdout);
       const video = probe.streams?.[0];
-      if (probe.streams?.length !== 1 || video?.codec_type !== 'video' || video.width !== spec.width || video.height !== spec.height || Math.abs(Number(probe.format?.duration) - spec.duration) > .1 || video.codec_name !== (name === 'preview.mp4' ? 'h264' : 'qtrle') || (name === 'overlay.mov' && video.pix_fmt !== 'argb')) throw new Error('NVIDIA output failed independent validation');
+      const sculptural = spec.scene?.lightingRig === 'sculpture';
+      if (probe.streams?.length !== 1 || video?.codec_type !== 'video' || video.width !== spec.width || video.height !== spec.height || Math.abs(Number(probe.format?.duration) - spec.duration) > .1 || video.codec_name !== (name === 'preview.mp4' ? 'h264' : sculptural ? 'png' : 'qtrle') || (name === 'overlay.mov' && video.pix_fmt !== (sculptural ? 'rgba' : 'argb'))) throw new Error('NVIDIA output failed independent validation');
       await execute('ffmpeg', ['-v', 'error', '-i', file, '-f', 'null', '-'], { timeout: 120000, maxBuffer: 1024 * 1024 });
       const destination = `temp_studio_3d/${spec.ownerUid}/${jobId}/${name}`;
       await bucket.upload(file, { destination, resumable: false, metadata: { contentType: type, metadata: { ownerUid: spec.ownerUid, sha256: expected.sha256 } } });

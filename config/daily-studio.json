@@ -3,7 +3,8 @@
   "startDate": "2026-10-17",
   "timezone": "Africa/Johannesburg",
   "storiesPerDay": 4,
-  "publicVideoSeconds": 60,
+  "publicVideoDuration": "demonstration-driven",
+  "ownerReviewBeforeScheduling": true,
   "platforms": ["youtube", "tiktok", "instagram", "linkedin", "facebook", "reddit"],
   "slots": {
     "youtube": ["09:00", "13:00", "17:00", "21:15"],

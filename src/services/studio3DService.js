@@ -2,22 +2,25 @@ const crypto = require("crypto");
 const admin = require("firebase-admin");
 const { GoogleAuth } = require("google-auth-library");
 const nvidia = require("./studio3DNvidia");
+const { validateStudio3DObjects } = require("./studio3DObjects");
 const local = require('./studio3DLocal');
 
-const TEMPLATES = new Set(["cinematic_title", "neon_logo", "chrome_lyric", "audio_reactive_text", "floating_callout", "impact_explosion", "speaker_intro", "comparison_card", "media_plane"]);
+const TEMPLATES = new Set(["object_scene", "cinematic_title", "neon_logo", "chrome_lyric", "audio_reactive_text", "floating_callout", "impact_explosion", "speaker_intro", "comparison_card", "media_plane"]);
 const MATERIALS = new Set(["chrome", "glass", "neon", "gold", "matte", "holographic"]);
 const ANIMATIONS = new Set(["dolly", "orbit", "burst", "pulse", "float", "slide", "fade"]);
 const SCENE_KEYS = new Set(["version", "id", "template", "name", "text", "secondary", "startTime", "duration", "endTime", "layerOrder", "assetUrl", "assetStoragePath", "assetName", "assetType", "assetSourceStart", "assetAspect", "assetContentHash", "fontFamily", "fontWeight", "textAlign", "lineSpacing", "material", "primaryColor", "secondaryColor", "glowColor", "extrusionDepth", "bevel", "x", "y", "z", "scale", "rotationX", "rotationY", "rotationZ", "entrance", "hold", "exit", "easing", "intensity", "audioReactiveIntensity", "cameraMotion", "focalLength", "lightDirection", "lightColor", "lightIntensity", "shadows", "reflections", "bloom", "background", "enabled", "quality", "hqPreviewUrl", "hqPreviewRevision", "hqPreviewJobId", "keyframes"]);
 const KEYFRAME_FIELDS = new Set(["x", "y", "z", "scale", "rotationX", "rotationY", "rotationZ"]);
+SCENE_KEYS.add("lightingRig");
 const validText = (value, max) => typeof value === "string" && value.length <= max && !/[\x00-\x1f]/.test(value);
 const number = (value, low, high) => typeof value === "number" && Number.isFinite(value) && value >= low && value <= high;
 const oneOf = (value, allowed) => allowed.has(value);
 const color = value => typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value);
 
 function validateStudio3DScene(scene, ownerUid) {
-  if (!scene || typeof scene !== "object" || Array.isArray(scene) || scene.version !== 1 || Object.keys(scene).some(key => !SCENE_KEYS.has(key))) throw new Error("Invalid 3D scene");
+  if (!scene || typeof scene !== "object" || Array.isArray(scene) || scene.version !== 1 || Object.keys(scene).some(key => !SCENE_KEYS.has(key) && key !== "objects")) throw new Error("Invalid 3D scene");
   if (!validText(scene.id, 100) || !/^[A-Za-z0-9_-]{1,100}$/.test(scene.id)) throw new Error("Invalid scene ID");
   if (!oneOf(scene.template, TEMPLATES) || !oneOf(scene.material, MATERIALS) || !oneOf(scene.entrance, ANIMATIONS) || !oneOf(scene.hold, new Set(["still", "float", "pulse", "orbit"])) || !oneOf(scene.exit, new Set(["fade", "dolly", "spin", "burst"])) || !oneOf(scene.easing, new Set(["ease_out", "ease_in_out", "spring", "linear"]))) throw new Error("Invalid 3D template or motion");
+  if (scene.lightingRig !== undefined && (scene.template !== "object_scene" || scene.lightingRig !== "sculpture")) throw new Error("Invalid object lighting rig");
   for (const [key, max] of Object.entries({ name: 80, text: 80, secondary: 100, assetName: 128 })) if (!validText(scene[key], max)) throw new Error(`Invalid ${key}`);
   for (const key of ["primaryColor", "secondaryColor", "glowColor", "lightColor"]) if (!color(scene[key])) throw new Error(`Invalid ${key}`);
   const bounds = { startTime: [0, 86400], duration: [.5, 15], layerOrder: [0, 100], lineSpacing: [.7, 2], extrusionDepth: [.01, 1.5], bevel: [0, .2], x: [5, 95], y: [5, 95], z: [-4, 4], scale: [.2, 3], rotationX: [-180, 180], rotationY: [-180, 180], rotationZ: [-180, 180], intensity: [0, 1], audioReactiveIntensity: [0, 1], cameraMotion: [0, 1], focalLength: [24, 85], lightDirection: [-180, 180], lightIntensity: [0, 5], bloom: [0, 1] };
@@ -43,6 +46,8 @@ function validateStudio3DScene(scene, ownerUid) {
   const prefix=video?`studio/sources/${ownerUid}/`:`uploads/images/${ownerUid}/`;
   if (assetPath && (!assetPath.startsWith(prefix) || assetPath.includes("..") || !/^[A-Za-z0-9_.-]{1,160}$/.test(assetPath.slice(prefix.length)))) throw new Error("Asset must be an owned media upload");
   if (scene.assetUrl && !assetPath) throw new Error("Save the logo asset before HQ rendering");
+  if (scene.template === "object_scene") validateStudio3DObjects(scene.objects, scene.duration);
+  else if (scene.objects !== undefined) throw new Error("Object layers require an object composition");
   return { ...scene, assetUrl: "", hqPreviewUrl: "", hqPreviewRevision: "", hqPreviewJobId: "", assetStoragePath: assetPath };
 }
 
@@ -62,13 +67,19 @@ function studio3DBucket() {
   const name = process.env.STUDIO_3D_BUCKET;
   // Retained GPU execution uses the application's existing private bucket.
   // Cloud Run retains its explicitly configured, isolated bucket requirement.
-  if (!name && nvidia.configuration(process.env, { requireWindow: false })) return admin.storage().bucket();
+  if (!name && (local.configuration() || nvidia.configuration(process.env, { requireWindow: false }))) return admin.storage().bucket();
   if (!name || !/^[-a-z0-9.]{3,222}$/.test(name)) throw new Error("Private 3D storage bucket is not configured");
   return admin.storage().bucket(name);
 }
 
 async function dispatchStudio3DJob(jobId) {
-  const localConfig=local.configuration();
+  const localConfig = local.configuration();
+  if (localConfig?.durable) {
+    const ref = admin.firestore().collection("studio_3d_jobs").doc(jobId), doc = await ref.get(), data = doc.data();
+    if (!doc.exists || data.status !== "queued" || data.spec?.ownerUid !== data.ownerUid) throw Error("Invalid local Blender job");
+    const execution = await local.launch({ config: localConfig, jobId, spec: data.spec, sceneHash: data.hash, bucket: studio3DBucket(), beforeSpawn: execution => ref.update(execution) });
+    return execution.executionName;
+  }
   const config = localConfig || nvidia.configuration();
   if (config) {
     const db = admin.firestore();
@@ -117,6 +128,7 @@ async function createStudio3DPreview({ ownerUid, scene, aspect = "9:16", clientR
   if (!/^[A-Za-z0-9_-]{1,100}$/.test(ownerUid || "") || !/^[A-Za-z0-9_-]{8,100}$/.test(clientRequestId || "")) throw new Error("Invalid request identity");
   if (!["9:16", "16:9", "1:1"].includes(aspect)) throw new Error("Invalid preview aspect ratio");
   const clean = validateStudio3DScene(scene, ownerUid);
+  const localConfig = local.configuration();
   const sourceBucket = admin.storage().bucket();
   const previewBucket = studio3DBucket();
   if (clean.assetStoragePath) {
@@ -126,6 +138,12 @@ async function createStudio3DPreview({ ownerUid, scene, aspect = "9:16", clientR
     }else if (Number(metadata.size) <= 0 || Number(metadata.size) > 5 * 1024 * 1024 || !["image/png", "image/jpeg", "image/webp"].includes(metadata.contentType) || metadata.metadata?.ownerUid !== ownerUid) throw new Error("Logo asset failed ownership or size validation");
   }
   const spec = { version: 1, ownerUid, mode: "preview", width: aspect === "9:16" ? 720 : aspect === "1:1" ? 720 : 1280, height: aspect === "9:16" ? 1280 : 720, fps: 30, duration: Math.min(10, clean.duration), scene: { ...clean } };
+  // Local CPU renders use an explicit bounded profile; the receipt carries its
+  // actual dimensions/rate so it is never mistaken for a720p GPU result.
+  if (localConfig) {
+    const short = localConfig.quality === "720p" ? 720 : 360, long = localConfig.quality === "720p" ? 1280 : 640;
+    Object.assign(spec, { width: aspect === "16:9" ? long : short, height: aspect === "9:16" ? long : short, fps: 24 });
+  }
   const db = admin.firestore();
   const leaseRef = db.collection("studio_3d_capacity").doc("global");
   const day = new Date().toISOString().slice(0, 10);
@@ -139,10 +157,13 @@ async function createStudio3DPreview({ ownerUid, scene, aspect = "9:16", clientR
   }
   const jobRef = db.collection("studio_3d_jobs").doc(jobId);
   const hash = stableSceneHash(clean);
-  const config = nvidia.configuration();
+  const config = localConfig ? null : nvidia.configuration();
   // Check transport capacity before charging a new request's daily allowance.
   // Idempotent polling/retries can still resolve an already accepted request.
-  if (config && !(await requestRef.get()).exists) await nvidia.available(config);
+  if (!(await requestRef.get()).exists) {
+    if (localConfig) await local.available(localConfig);
+    else if (config) await nvidia.available(config);
+  }
   const now = Date.now();
   const result = await db.runTransaction(async tx => {
     const [existing, lease, userUsage, globalUsage] = await Promise.all([tx.get(requestRef), tx.get(leaseRef), tx.get(userUsageRef), tx.get(globalUsageRef)]);
@@ -154,7 +175,7 @@ async function createStudio3DPreview({ ownerUid, scene, aspect = "9:16", clientR
     if (lease.exists && Number(lease.data().expiresAtMs) > now) throw new Error("3D preview capacity is busy; retry shortly");
     if (Number(userUsage.data()?.count || 0) >= 4 || Number(globalUsage.data()?.count || 0) >= 20) throw new Error("3D preview daily limit reached");
     tx.create(requestRef, { ownerUid, hash, aspect, jobId, createdAtMs: now });
-    tx.set(leaseRef, { jobId, ownerUid, expiresAtMs: now + 20 * 60 * 1000 });
+    tx.set(leaseRef, { jobId, ownerUid, expiresAtMs: now + (localConfig?.quality === "720p" ? 35 : 20) * 60 * 1000 });
     tx.set(userUsageRef, { count: Number(userUsage.data()?.count || 0) + 1, day, ownerUid });
     tx.set(globalUsageRef, { count: Number(globalUsage.data()?.count || 0) + 1, day });
     tx.create(jobRef, { jobId, ownerUid, spec, hash, status: "queued", createdAt: admin.firestore.FieldValue.serverTimestamp(), expiresAtMs: now + 24 * 60 * 60 * 1000 });
@@ -166,7 +187,7 @@ async function createStudio3DPreview({ ownerUid, scene, aspect = "9:16", clientR
       await sourceBucket.file(clean.assetStoragePath).copy(previewBucket.file(spec.scene.assetStoragePath));
     }
     const executionName = await dispatchStudio3DJob(jobId);
-    await jobRef.update({ executionName });
+    if (!executionName.startsWith("local-blender/")) await jobRef.update({ executionName });
   } catch (error) {
     await Promise.all([jobRef.update({ status: "failed", errorCode: "DISPATCH_FAILED" }), db.runTransaction(async tx => { const current = await tx.get(leaseRef); if (current.data()?.jobId === jobId) tx.delete(leaseRef); })]);
     throw new Error("3D preview could not be queued");
@@ -179,8 +200,14 @@ async function getOwnedStudio3DPreview({ ownerUid, jobId }) {
   const db = admin.firestore();
   const doc = await db.collection("studio_3d_jobs").doc(jobId).get();
   if (!doc.exists || doc.data().ownerUid !== ownerUid) return null;
-  const data = doc.data();
-  const response = { jobId, status: data.status, hash: data.hash, errorCode: data.errorCode || null };
+  let data = doc.data();
+  if (["queued", "rendering"].includes(data.status) && data.executionName?.startsWith("local-blender/")) {
+    const config = local.configuration();
+    if (!config) throw Error("Restore the local Blender runtime configuration to check this accepted job");
+    data = await local.reconcile({ config, jobId, data, bucket: studio3DBucket(), jobRef: db.collection("studio_3d_jobs").doc(jobId), db });
+  }
+  const response = { jobId, status: data.status, hash: data.hash, errorCode: data.errorCode || null,
+    ...(data.executionName?.startsWith("local-blender/") ? { renderProfile: { backend: data.localRenderDevice === "cuda" ? "local_cuda" : "local_cpu", width: data.spec.width, height: data.spec.height, fps: data.spec.fps } } : {}) };
   if (data.status === "completed" && data.previewPath) {
     if (data.renderReceipt) response.renderReceipt = data.renderReceipt;
     const file=studio3DBucket().file(data.previewPath);

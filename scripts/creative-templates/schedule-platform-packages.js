@@ -13,6 +13,9 @@ async function main(){
  assert(!/^(AutoPromote|Made in AutoPromote|Timeline|EMBER|VELO|ONDA|MAKE SOME NOISE)/i.test(post.title));
  assert.equal(digest(post.media),post.mediaSha256);assert(Date.parse(post.scheduledAt)>Date.now()+60000,'Choose a future time');
  const reconcile=process.argv.includes('--reconcile');
+ if(!reconcile)require('../daily-studio/publication-policy').assertOwnerPublicationApproval(post,{
+  mediaSha256:digest(post.media),thumbnailSha256:post.thumbnail?digest(post.thumbnail):null,
+ });
  assert(!post.queueVerified,'Already verified; do not duplicate');
  if(reconcile)assert(post.contentId&&post.status==='UPLOAD_ACKNOWLEDGED_QUEUE_UNVERIFIED','Reconcile only an existing acknowledged content record');
  else assert(!['SUBMITTING','SUBMISSION_UNCERTAIN','UPLOAD_ACKNOWLEDGED_QUEUE_UNVERIFIED'].includes(post.status),'Reconcile the existing acknowledgement before retrying');

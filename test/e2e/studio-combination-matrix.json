@@ -1,78 +1,326 @@
 {
-  "cinematicEvidence20261031": {
-    "date": "2026-10-31",
-    "status": "LOCAL_PROGRAMME_WORKFLOW_VERIFIED_CREATIVE_OPEN",
-    "report": "reports/cinematic-evidence-20261031/README.md",
-    "sourceBase": "eedf45a4a6f0bb3f14ff34f24f70f48df1ee15bd",
-    "retainedStudioFoundation": "4305b6da",
-    "sceneCollection": "threeDScenes",
-    "canonicalLayerType": "three_d",
-    "schema": "cinematic_evidence v1 / evidence_stage_v1",
-    "verifiedScope": [
-      "actual Studio component in isolated local shell",
-      "Director plan to editable timeline scene",
-      "camera/light/material/text/source controls",
-      "360p real Blender CPU movie and source comparison",
-      "native save/cold reopen and Undo/Redo",
-      "pending-autosave history regression repaired",
-      "current-revision invalidation and identical-output reuse",
-      "native download SHA-256 matches real output",
-      "processed-scene programme review and complete muted timeline recording",
-      "720p completed scene and native export cache verification",
-      "actual local source append, ordinary title editing and Bring forward stack",
-      "16-second canonical programme assembly, native download and complete timeline playback",
-      "192/384 exact output frames and shared fractional-frame placement regression",
-      "shared denoiser latency/tail correction; measured programme speech lag zero samples"
+  "threePhysicalMotionFilms20261029": {
+    "date": "2026-10-29",
+    "state": "REJECTED_BY_OWNER_20261030",
+    "report": "reports/three-real-motion-films-20261029/README.md",
+    "deliveryFolder": "/home/tibule12/Videos/AutoPromote-Real-Motion-2026-10-29",
+    "films": [
+      {
+        "identity": "aperture",
+        "file": "01-APERTURE.mp4",
+        "durationSeconds": 110.33333333333334,
+        "sha256": "61d937608f48209b96766ef0f3b1182e752fc4208c115e666a66e46d41d04275",
+        "thumbnailSha256": "7df4fe2976b28e275eccb97c18b5ef31326e5c17c2d8d29b8d3ba9c2df343806",
+        "nativeProjectHash": "cd9255592f8dc395dd1aaccb38ccd8ba40f4906212258b02da0937f7439ae680",
+        "completeMatchingPlayback": true,
+        "independentExactRestore": true,
+        "ownerApproved": false,
+        "scheduled": false
+      },
+      {
+        "identity": "city",
+        "file": "02-BLOCK-LIGHT.mp4",
+        "durationSeconds": 110.25,
+        "sha256": "293b95984eac8620b7134c55987f5ea89a5ce80a8765cf648fc1dc998ea71384",
+        "thumbnailSha256": "c101fd669f8d005af45e3f8e58dc1d8a4afa3466cf24098ebb56c8f46d86c06c",
+        "nativeProjectHash": "e1878c0b1375d131bae9b76acb63f80fbf5aea3f4ffae1a3f824d10d670b5c77",
+        "completeMatchingPlayback": true,
+        "independentExactRestore": true,
+        "ownerApproved": false,
+        "scheduled": false
+      },
+      {
+        "identity": "chrono",
+        "file": "03-CHRONO.mp4",
+        "durationSeconds": 110,
+        "sha256": "2070d6e329b15fb0226bb92482bf9e0b2a87585376d1054d13173dc128aa7241",
+        "thumbnailSha256": "6022350c85ea641907e1f134ca7f793788dc54df93802727173fea13247c43fc",
+        "nativeProjectHash": "f854304a4867f058d55196ed406bf80706660ef7c16cd4a5f20184c555030525",
+        "completeMatchingPlayback": true,
+        "independentExactRestore": true,
+        "ownerApproved": false,
+        "scheduled": false
+      }
+    ],
+    "objectCounts": {
+      "aperture": 21,
+      "city": 22,
+      "chrono": 22
+    },
+    "actualWorkflow": "Ordinary signed-in object authoring in fresh local emulators; exact saved scene inputs through the canonical local CUDA Blender renderer; ordinary signed-in result import, native main sequence/graphics/narration/score and final CPU export in Studio.",
+    "profile": {
+      "core": [
+        1280,
+        720,
+        24,
+        8
+      ],
+      "lesson": [
+        1600,
+        1000,
+        24
+      ],
+      "localGpu": "Quadro M1200",
+      "cloudGpuAllocated": false
+    },
+    "newSurfaceWork": [
+      "Per-object surface and bounded box/cylinder bevel",
+      "Object-only clear glass, fine bump and architecture window grid",
+      "Object-scene broad fill and browser environment reflections",
+      "Opaque backing objects now participate in browser glass transmission; scene fades and legacy transparency are retained",
+      "Optional explicit nonproduction CUDA/720p profile and accepted-runtime binding"
     ],
     "tests": {
-      "frontendFocusedDistinctPasses": 140,
-      "nodeDistinctPasses": 7,
-      "pythonDistinctPasses": 28,
-      "totalDistinctPasses": 175,
-      "fullMountedEditorSuite": "INCONCLUSIVE: interrupted long run; scoped history suite had one load-related 15s timeout; same B-roll case passes unchanged with Blender briefly paused",
-      "continuation": {
-        "frontend": 36,
-        "mountedEditor": 4,
-        "node": 10,
-        "python": 13,
-        "total": 63,
-        "scope": "Focused suites and four selected mounted-editor cases; not a complete editor/account suite rerun"
-      }
+      "backend": 55,
+      "frontend": 29,
+      "python": 46,
+      "totalFocused": 130,
+      "priorProductKnowledgeAndHelp": 51,
+      "anonymousFinalClientViewports": 8,
+      "finalGlassCandidateOrdinarySignedInWorkspaceAndHelp": true
     },
-    "renderProfileQualification": {
-      "preview360p": "VERIFIED: 192 frames, 8 seconds",
-      "export720p": "VERIFIED: 192 frames, 8 seconds",
-      "programme720p": "VERIFIED: 384 frames, 16 seconds, exact native download SHA-256"
+    "clientBuild": "Exact separately checked glass candidate adopted only in the task-owned local demo. Active API origin/UI flags, old build and hashed assets retained.",
+    "failedAppPreviews": {
+      "jobIds": [
+        "eef15ead-9de3-4e86-9192-38361a46615b",
+        "5a59dafa-0559-42ff-9448-03fc9b86a927"
+      ],
+      "first": "Supervisor termination after observed denoise cost",
+      "second": "Original Python840-second limit",
+      "remainFailed": true,
+      "directCanonicalRenderIsNotRecovery": true
     },
-    "realAccountFlow": false,
-    "productionFirebaseAccess": false,
-    "paidGpuOrModelUsed": false,
+    "recordings": "Actual full workspace/controls/authoring and complete matching final playback retained; 5–6fps observation does not qualify playback smoothness.",
+    "materialAndLightingPixelParityQualified": false,
+    "wholePredictiveParityQualified": false,
+    "ownerApproved": false,
+    "scheduled": false,
+    "paidCloudExecution": false,
+    "mainMerge": false,
     "deployed": false,
-    "creativeApproval": "NOT_CLAIMED",
-    "parity": {
-      "sameSceneBuilder": true,
-      "processedMovieReview": "VERIFIED",
-      "interactiveAuthoringPictureAudio": "UNQUALIFIED: independent decoder drift observed",
-      "pixelParity": "NOT_CLAIMED",
-      "processedProgrammeReview": "VERIFIED: exact assembled movie in existing finished-file monitor; independent authoring parity remains unqualified"
-    },
-    "remainingBlockers": [
-      "production tenant-owned storage/receipt resolution and controlled cloud dispatch",
-      "additional unsupported timeline effects, speed, captions and audio tracks in the local adapter",
-      "grounded clock narration and accepted evidence media beyond illustrative local cues",
-      "reliable interactive authoring playback and whole-picture colour/edge parity",
-      "portable local-media backup/relinking",
-      "real-account, cloud isolation/concurrency and owner creative/listening qualification"
+    "formalReadinessCountsUnchanged": true,
+    "remaining": [
+      "S02 full picture/processed sound/colour/edges/low-alpha/material/lighting parity, latency and long-job reconciliation; typography13/16 strict failures remain",
+      "Normal App full720p/optional CUDA end-to-end success and longer-job recovery remain unqualified after two actual failures; new longer bounds are source/test evidence only",
+      "S04 contour morphs/procedural operators/richer motion; object keys across cuts, retiming and trimmed boundaries",
+      "S03 occurrence/group/source ownership",
+      "Owner creative/listening approval and real phone/platform presentation"
     ],
-    "nextTask": "Extend this validated local programme boundary to tenant-owned source/receipt resolution and controlled existing dispatch; continue S02/S04/S03 and additional effects/media qualification. No paid execution, deployment or readiness promotion.",
-    "programmeEvidence": {
-      "nativeVerification": "reports/cinematic-evidence-20261031/review/programme-verification.json",
-      "frames": 384,
-      "duration": 16,
-      "sha256": "fb8a1cf41783debe4f49bb420d1e63f2dd69650e649f22f4506b197bb9d13447",
-      "additionalBlenderRenders": 0,
-      "speechLagSamples": 0
-    }
+    "nextTask": "Owner watches exact films/thumbnails; keep all five Queue holds. Continue failed long-job reconciliation and bounded normal App720p qualification, alongside shared S02/S04/S03. Do not schedule or promote the showroom without exact owner approval."
+  },
+  "nativeObjectBlenderIntegration20261029": {
+    "date": "2026-10-29",
+    "state": "BOUNDED_NATIVE_LOCAL_INTEGRATION",
+    "report": "reports/studio-motion-ident-20261029/README.md",
+    "ownerDirection": "Substantial motion graphics beyond words/logos; agent completes integrations. Whole Studio editing and spoken teaching; duration follows the demonstration. Review exact final movie/thumbnail before scheduling.",
+    "implemented": [
+      "Native object composition: five mesh primitives, per-object colour/pose keys, same saved decisions in preview and canonical Blender",
+      "Explicit nonproduction local CPU transport with private accepted-input/artifact bindings, independent worker, deadline and owned reconciliation",
+      "Stable request identity and saved accepted job; same-job API restart recovery",
+      "Native private-alpha final compositor export and exact independent whole-document backup restore"
+    ],
+    "nativeProof": {
+      "jobId": "1be25df7-1fb2-4dd7-9d61-33ea473517a6",
+      "sameJobAfterApiRestart": true,
+      "objectCount": 2,
+      "sourceProfile": {
+        "width": 640,
+        "height": 360,
+        "fps": 24,
+        "durationSeconds": 3.5
+      },
+      "finalProfile": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30,
+        "durationSeconds": 4,
+        "blenderLayerUpscaled": true
+      },
+      "finalMovieSha256": "12c1cad04b060531fda0aa95bd0a5ff740d833e7cfabff438ab87c181d85a870",
+      "wholeDocumentIndependentRestoreExact": true,
+      "headlessMuted": true,
+      "graphOrResultInjection": false,
+      "totalBlenderAdmissionsIncludingPriming": 2,
+      "creativeDeliverable": false
+    },
+    "tests": {
+      "backend": 53,
+      "frontend": 29,
+      "pythonRenderer": 32,
+      "localAndProductionOverlay": 13,
+      "total": 178,
+      "anonymousViewportChecks": 8,
+      "finalRealSignedInWorkspaceAndContextualHelp": true,
+      "productKnowledgeAndHelp": 51
+    },
+    "creativeStatus": "THREE_NEW_PRIVATE_FILMS_DELIVERED_FOR_REVIEW_SEE_threePhysicalMotionFilms20261029",
+    "scheduled": false,
+    "paidExecution": false,
+    "productionDeployment": false,
+    "formalReadinessCountsUnchanged": true,
+    "wholePredictiveParityQualified": false,
+    "remaining": [
+      "S04 contour morphs, procedural operators and richer object authoring",
+      "Object keys across cuts/retiming/trimmed boundaries unqualified",
+      "S02 picture/audio/colour/edges/low-alpha/lighting/material/latency; strict typography13/16 failures unchanged",
+      "Durable dispatch before worker establishment, host/worker loss and historical long-job timeout",
+      "S03 occurrence/group/source ownership"
+    ],
+    "nextTask": "Owner watches exact films/thumbnails; keep all five Queue holds. Continue failed long-job reconciliation and bounded normal App720p qualification, alongside shared S02/S04/S03. Do not schedule or promote the showroom without exact owner approval."
+  },
+  "wholeStudioWalkthrough20261029": {
+    "state": "REJECTED_BY_OWNER_20261029",
+    "date": "2026-10-29",
+    "report": "reports/motion-redesign-20261029/README.md",
+    "ownerDirection": "Keep the complete Studio workspace, tools, preview and editable timeline visible. Teach the actual edit with narration and show its result.",
+    "durationSeconds": 161.5,
+    "dimensions": [
+      1600,
+      900
+    ],
+    "frames": 3876,
+    "fps": 24,
+    "nativeMovieSha256": "6d4b731f8503e10d928e285b4fad783c35117d4bb6479e756f08dd87d30ade16",
+    "thumbnailSha256": "67167efbc72854b3b41453255cad0adef8aa1a3108becdd87969070a5d3fb462",
+    "portraitResultSha256": "2ebb0b104f60fa5ff2a1e4d0cc4eb79706b0c66fff736bc210c8b67b88e7416f",
+    "wholeWorkspaceChapters": 11,
+    "renderedResultShots": 5,
+    "sourceScreenCropping": false,
+    "nativeMainSequence": true,
+    "graphInjection": false,
+    "nativeCoreWholePlaybackAndExactRestore": true,
+    "nativeGuideWholePlaybackAndExactRestore": true,
+    "narration": "Cached synthetic Kokoro bf_emma preset; no cloned voice or music bed.",
+    "zeroOffsetSpeechCorrelation": 0.9999055258373931,
+    "originalProtectedFilesByteIdentical": 25,
+    "earlierBatch": "Rejected and retained; generated speech and browser observation supplements retained in verified lossless private archives.",
+    "ownerApproved": false,
+    "scheduled": false,
+    "schedulingHeld": true,
+    "physicalIPhoneVerified": false,
+    "allStudioFeaturesQualified": false,
+    "wholePredictiveParityQualified": false,
+    "formalReadinessCountsUnchanged": true,
+    "sharedRemaining": [
+      "S02 whole picture/audio/colour/edge/low-alpha/latency and long-job reconciliation",
+      "S04 motion/vector/glyph depth",
+      "S03 occurrence/group/source ownership"
+    ],
+    "nextTask": "Preserve this rejected ZEST walkthrough and its valid technical evidence. Complete deeper native motion integration and the requested substantial creative film; keep scheduling held."
+  },
+  "nativeMotionDemonstrations20261029": {
+    "date": "2026-10-29",
+    "report": "reports/motion-graphics-rebuild-20261029/README.md",
+    "state": "REJECTED_BY_AGENT_AFTER_OWNER_CHALLENGE",
+    "films": [
+      {
+        "story": "product",
+        "durationSeconds": 142.125,
+        "frames": 3411,
+        "portraitSha256": "af53c4d8d4e139aef2e542f99ea017c807ec049ae6dc0514392b9eadeb44fb95",
+        "feedSha256": "29af1b834bf233721b99aef093eb6a794e0781ac0f3d681032884686f74d93d6",
+        "wholeNativeDeliveryTimelinePlayback": true,
+        "independentExactDeliveryRestore": true,
+        "deliveryProjectIsImportedCompletedFilm": false
+      },
+      {
+        "story": "logo",
+        "durationSeconds": 92.20833333333334,
+        "frames": 2213,
+        "portraitSha256": "d88154b24132cd050aefcf231688dd1249ae8382a34bd9259155cf7897ab9388",
+        "feedSha256": "e2e5e5eb35958035aa97fbbfcd34e862f50deef8037b01db730cf5907183f4a6",
+        "wholeNativeDeliveryTimelinePlayback": true,
+        "independentExactDeliveryRestore": true,
+        "deliveryProjectIsImportedCompletedFilm": false
+      },
+      {
+        "story": "transition",
+        "durationSeconds": 175.125,
+        "frames": 4203,
+        "portraitSha256": "88c8fd462a117b31f09c5234bb82c74f41ed5ec48120532bea1cb03b8ade6599",
+        "feedSha256": "1553aea18eed4c9688662051bba096d9d4e178bab51cc75f91428649cd790439",
+        "wholeNativeDeliveryTimelinePlayback": true,
+        "independentExactDeliveryRestore": true,
+        "deliveryProjectIsImportedCompletedFilm": true
+      }
+    ],
+    "nativeShortMotionResultsComplete": 3,
+    "presetNarration": true,
+    "musicBed": false,
+    "thumbnailsFromActualMovies": true,
+    "fittedFeedDimensions": [
+      720,
+      900
+    ],
+    "portraitDimensions": [
+      720,
+      1280
+    ],
+    "originalLayeredTransitionAssemblyIndependentlyRestored": true,
+    "originalTransitionJob": "Remains failed after62-minute HTTP timeout. Actual completed worker artifact preserved; imported normally into a new native delivery project. No original-job successful receipt recovery or financial settlement is claimed.",
+    "sharedFileUploadRuntime": "Patched isolated client builds used for actual owned exports; two focused component tests and20 server tests passed earlier. Full component-file run did not complete.",
+    "qualifiedLocalEntryChecks": {
+      "anonymousComparisonsPerQualifiedBuild": 8,
+      "realSignedInHelpChecksPerQualifiedBuild": 3
+    },
+    "publicationPolicyTestsPassed": 16,
+    "originalFilesHashVerified": 25,
+    "dailyCreativeTimer": "disabled/inactive",
+    "ownerApproved": false,
+    "scheduled": false,
+    "physicalIPhoneExternalCheck": false,
+    "wholePredictiveParityQualified": false,
+    "readinessPromotion": false,
+    "nextWork": "Rebuild one coherent motion demonstration around a stronger result and visible action-to-result teaching before making further variants. Keep the actual result prominent, remove idle holds, and use a layout designed for its frame. Preserve all native source projects and prior files. No automatic scheduling, paid generation, GPU allocation or deployment is authorized.",
+    "creativeReviewReport": "reports/motion-graphics-rebuild-20261029/creative-rejection.json",
+    "creativeFindings": [
+      "Large empty margins surround a narrow inspector recording for most of each lesson.",
+      "The finished motion result receives too little screen time relative to numeric control panels.",
+      "Actions are not consistently followed by a clearly visible before/after result.",
+      "Some headings overlap the captured interface, and numeric fields are cramped.",
+      "Fitted feed copies shrink an already small presentation instead of designing the lesson for that frame.",
+      "The artwork and simple transform reveals do not establish the impressive motion design requested."
+    ]
+  },
+  "mobileNarratedLesson20261028": {
+    "date": "2026-10-28",
+    "report": "reports/video-revision-20261028/README.md",
+    "scope": "First privately retained narrated native mobile lesson; rejected batch remains held",
+    "nativeMinute": {
+      "durationSeconds": 60,
+      "dimensions": [
+        720,
+        1280
+      ],
+      "fps": 24,
+      "frames": 1440,
+      "wholeMatchingTimelinePlayback": true,
+      "thumbnailFromActualMovie": true
+    },
+    "nativeEditingActionsRecorded": true,
+    "presetNarration": {
+      "disclosed": true,
+      "voiceCloning": false,
+      "musicBed": false
+    },
+    "sharedFileUploadRepair": {
+      "focusedComponentTestsPassed": 2,
+      "sourceOnlyNotDeployed": true,
+      "wholeComponentFileAttemptCompleted": false
+    },
+    "ownedRawUploadRecoveryRepair": {
+      "serverTestsPassed": 20,
+      "nativeLayeredBackupRecoveryPassed": true,
+      "ownerAndMediaTypeChecksRetained": true
+    },
+    "originalFilesHashVerified": 25,
+    "rejectedBatchRemainingSchedulesPaused": 5,
+    "otherRejectedConcepts": "NEEDS_REVISION",
+    "newPublishing": false,
+    "physicalIPhoneExternalCheck": false,
+    "wholePredictiveParityQualified": false,
+    "readinessPromotion": false,
+    "nextWork": "Preserve rejection/holds and finish the remaining rejected concepts; retain S02 picture/audio/colour/edge/low-alpha/latency, S04 motion/vector/glyph depth and S03 occurrence/group ownership."
   },
   "playwrightLoopbackRepair20261028": {
     "date": "2026-10-28",
@@ -9093,6 +9341,198 @@
       "S04",
       "S03"
     ]
+  },
+  "cinematicAbstractContinuation20261030": {
+    "date": "2026-10-30",
+    "state": "THREE_CINEMATIC_ABSTRACT_FILMS_DELIVERED_FOR_OWNER_REVIEW",
+    "report": "reports/cinematic-abstract-20261030/README.md",
+    "deliveryFolder": "/home/tibule12/Videos/AutoPromote-Cinematic-Abstract-2026-10-30",
+    "films": [
+      {
+        "identity": "current",
+        "file": "01-CURRENT.mp4",
+        "durationSeconds": 24,
+        "sha256": "d83e2dfc6dfdf492520f2335a9eca0353317c2e688f93fc3d17e05ec6ee6f4e7",
+        "walkthroughDuration": 121.41666666666666,
+        "walkthroughSha256": "31370440dfa239f5fb8d41cc2ed193376bfc0a4afa5d7c4d6c41304443d694ca",
+        "thumbnailSha256": "5b83675208e2eea19261cbdd99970f1457c62487b3dc5c166812bf7c49abde23",
+        "nativeProjectHash": "c3afacd136f8998cb07812b2b86109b927e392e17a2cbaf6f07a5d95407245f6",
+        "completeMatchingPlayback": true,
+        "independentExactRestore": true,
+        "ownerApproved": false,
+        "scheduled": false
+      },
+      {
+        "identity": "prism",
+        "file": "02-PRISM.mp4",
+        "durationSeconds": 24,
+        "sha256": "cb65c829e76b1c83560ba4e93183b9d3a2eed21c7fa55c68fd9da4242e0e531f",
+        "walkthroughDuration": 119.375,
+        "walkthroughSha256": "8bf493346538b257b43b1f97e7682eab02ebe86078ca3239ebc344df477b1d3b",
+        "thumbnailSha256": "9a0cca677812466bff358ef3a3f41100d5775c40eee79e42a0cf07a67fe7eac7",
+        "nativeProjectHash": "86998e9269fab48d4803dcb3a2d7d872a561ec7c845626324cfaccd72188a36a",
+        "completeMatchingPlayback": true,
+        "independentExactRestore": true,
+        "ownerApproved": false,
+        "scheduled": false
+      },
+      {
+        "identity": "fold",
+        "file": "03-FOLD.mp4",
+        "durationSeconds": 24,
+        "sha256": "5619f34a34e255a7907c19594651ee37b13b7c3e7c7e57e793eb5d43297a41c2",
+        "walkthroughDuration": 119.5,
+        "walkthroughSha256": "bb54f3d0ca263799fbbc719987a102ae5235102818d15b5c36efc7f05404d390",
+        "thumbnailSha256": "922ae320efd7aee1e6758f02c9dcade03063996c9c8a74ff1779d0b5f849769a",
+        "nativeProjectHash": "1c155f6c867c95d045b8e9d21fc15ac507790b233ab7135682d2563f824e9ce0",
+        "completeMatchingPlayback": true,
+        "independentExactRestore": true,
+        "ownerApproved": false,
+        "scheduled": false
+      }
+    ],
+    "actualWorkflow": "Ordinary signed-in Studio scene controls in fresh emulators, canonical local CUDA Blender jobs through the App, verified private alpha storage and native compositing. Final native sequence/CPU exports used the existing signed-in account and its ordinary private source/output Storage. Separate narrated whole-Studio teaching and editable backups.",
+    "profile": {
+      "films": [
+        1280,
+        720,
+        24,
+        24
+      ],
+      "walkthroughs": [
+        1600,
+        1000,
+        24
+      ],
+      "localGpu": "Quadro M1200",
+      "currentSamples": 32,
+      "prismAndFoldSamples": 16,
+      "cloudGpuAllocated": false
+    },
+    "surfaces": [
+      "Closed swept deforming ribbons with bounded path/width/thickness/wave/lobes/twist/speed/phase",
+      "Brushed metal, silk, per-object roughness and full plane backdrop",
+      "Opt-in sculpture reflection lighting",
+      "Persistent browser renderer/environment across form edits",
+      "Exact RGBA PNG alpha with verified large loopback Firebase resumable transfer"
+    ],
+    "tests": {
+      "frontend": 43,
+      "backendBeforeFinalSampleBudget": 65,
+      "python": 57,
+      "finalLocalSampleBudgetSuite": 11,
+      "finalOwnedOutputRecoverySuites": 39,
+      "anonymousFinalClientViewports": 8,
+      "signedInFinalClientEditableSceneAndHelp": true
+    },
+    "originalPreservation": {
+      "files": 25,
+      "allHashesUnchanged": true,
+      "loginPreserved": true,
+      "queueHolds": 5,
+      "dailyTimer": "inactive/disabled"
+    },
+    "initialFailures": [
+      "First current GPU alpha transfer exceeded emulator per-request bound; same accepted job recovered with verified chunked handoff, no extra GPU dispatch",
+      "Initial glass 32-sample job terminated at 1740 seconds; remains failed. Explicit revised native light setting and new16-sample accepted job supply the final glass",
+      "Walkthrough source download failed transiently; actual owner-scoped failed status retained before retry",
+      "Earlier local API and raw worker completion observations omitted final output integrity before the Node persistence step. Completed versions and explicit mix revision remain retained; owned recovery waits for the actual verified output hash",
+      "Initial finished-file playback records failed due local output CORS/finished-selection access; corrected ordinary receipt recovery and complete captures retained"
+    ],
+    "recordings": "Actual authoring, controls and complete matching final playback; muted headless capture cadence is separate from 24fps movie quality.",
+    "materialLightingPixelParityQualified": false,
+    "wholePredictiveParityQualified": false,
+    "humanListeningApproval": false,
+    "ownerApproved": false,
+    "scheduled": false,
+    "paidCloudComputeStarted": false,
+    "deployed": false,
+    "mainMerged": false,
+    "formalReadinessCountsUnchanged": true,
+    "retentionLimit": "The ephemeral emulator services stopped after the three native cores completed, before a complete Firestore export. Actual Storage emulator files/metadata, worker signed outcomes/media, accepted Blender specs/receipts, recordings and native backups remain. A complete original Firestore/wallet replay snapshot is unavailable. CURRENT/PRISM source backups restored exactly before shutdown; FOLD authoring cold-reopen passed, but its extra post-export source restore could not run after shutdown. All six final film/walkthrough backups and finished bytes independently restore through the existing signed-in App.",
+    "remaining": [
+      "S02 picture/processed audio/colour/edges/low-alpha/material-lighting parity, latency and long-job reconciliation; strict typography 13/16 failures remain",
+      "S04 additional contours/procedural motion, object keys across cuts/retiming/trimmed boundaries",
+      "S03 occurrence/group/source ownership",
+      "Owner creative/listening approval and phone/platform presentation; sparse headless capture does not qualify smooth UI playback",
+      "Original emulator Firestore snapshot and extra FOLD post-export native-source restore are unavailable after ephemeral services ended"
+    ],
+    "nextTask": "Owner review of exact three movies and matching thumbnails; keep all five Queue holds. Continue shared S02/S04/S03 gaps without promoting showroom or production readiness."
+  },
+  "cinematicEvidence20261031": {
+    "date": "2026-10-31",
+    "status": "LOCAL_PROGRAMME_WORKFLOW_VERIFIED_CREATIVE_OPEN",
+    "report": "reports/cinematic-evidence-20261031/README.md",
+    "sourceBase": "eedf45a4a6f0bb3f14ff34f24f70f48df1ee15bd",
+    "retainedStudioFoundation": "4305b6da",
+    "sceneCollection": "threeDScenes",
+    "canonicalLayerType": "three_d",
+    "schema": "cinematic_evidence v1 / evidence_stage_v1",
+    "verifiedScope": [
+      "actual Studio component in isolated local shell",
+      "Director plan to editable timeline scene",
+      "camera/light/material/text/source controls",
+      "360p real Blender CPU movie and source comparison",
+      "native save/cold reopen and Undo/Redo",
+      "pending-autosave history regression repaired",
+      "current-revision invalidation and identical-output reuse",
+      "native download SHA-256 matches real output",
+      "processed-scene programme review and complete muted timeline recording",
+      "720p completed scene and native export cache verification",
+      "actual local source append, ordinary title editing and Bring forward stack",
+      "16-second canonical programme assembly, native download and complete timeline playback",
+      "192/384 exact output frames and shared fractional-frame placement regression",
+      "shared denoiser latency/tail correction; measured programme speech lag zero samples"
+    ],
+    "tests": {
+      "frontendFocusedDistinctPasses": 140,
+      "nodeDistinctPasses": 7,
+      "pythonDistinctPasses": 28,
+      "totalDistinctPasses": 175,
+      "fullMountedEditorSuite": "INCONCLUSIVE: interrupted long run; scoped history suite had one load-related 15s timeout; same B-roll case passes unchanged with Blender briefly paused",
+      "continuation": {
+        "frontend": 36,
+        "mountedEditor": 4,
+        "node": 10,
+        "python": 13,
+        "total": 63,
+        "scope": "Focused suites and four selected mounted-editor cases; not a complete editor/account suite rerun"
+      }
+    },
+    "renderProfileQualification": {
+      "preview360p": "VERIFIED: 192 frames, 8 seconds",
+      "export720p": "VERIFIED: 192 frames, 8 seconds",
+      "programme720p": "VERIFIED: 384 frames, 16 seconds, exact native download SHA-256"
+    },
+    "realAccountFlow": false,
+    "productionFirebaseAccess": false,
+    "paidGpuOrModelUsed": false,
+    "deployed": false,
+    "creativeApproval": "NOT_CLAIMED",
+    "parity": {
+      "sameSceneBuilder": true,
+      "processedMovieReview": "VERIFIED",
+      "interactiveAuthoringPictureAudio": "UNQUALIFIED: independent decoder drift observed",
+      "pixelParity": "NOT_CLAIMED",
+      "processedProgrammeReview": "VERIFIED: exact assembled movie in existing finished-file monitor; independent authoring parity remains unqualified"
+    },
+    "remainingBlockers": [
+      "production tenant-owned storage/receipt resolution and controlled cloud dispatch",
+      "additional unsupported timeline effects, speed, captions and audio tracks in the local adapter",
+      "grounded clock narration and accepted evidence media beyond illustrative local cues",
+      "reliable interactive authoring playback and whole-picture colour/edge parity",
+      "portable local-media backup/relinking",
+      "real-account, cloud isolation/concurrency and owner creative/listening qualification"
+    ],
+    "nextTask": "Extend this validated local programme boundary to tenant-owned source/receipt resolution and controlled existing dispatch; continue S02/S04/S03 and additional effects/media qualification. No paid execution, deployment or readiness promotion.",
+    "programmeEvidence": {
+      "nativeVerification": "reports/cinematic-evidence-20261031/review/programme-verification.json",
+      "frames": 384,
+      "duration": 16,
+      "sha256": "fb8a1cf41783debe4f49bb420d1e63f2dd69650e649f22f4506b197bb9d13447",
+      "additionalBlenderRenders": 0,
+      "speechLagSamples": 0
+    }
   },
   "unmutedComeback20261031": {
     "date": "2026-10-31",

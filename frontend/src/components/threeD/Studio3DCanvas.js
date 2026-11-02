@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry";
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import studioFont from "./helvetiker_bold.typeface.json";
@@ -7,6 +9,8 @@ import { normalizeStudio3DScene, studio3DPose } from "./studio3DModel";
 import { studio3DCameraProjection } from "./studio3DProjection";
 import { studio3DFrameSample, studio3DTextureFrameRequest, studio3DCanShareVideo } from "./studio3DSampling";
 import { loadStudioSourceFrame } from "../studioSourceFrameClient";
+import { studio3DObjectPose } from "./studio3DObjects";
+import { ribbonMesh } from "./studio3DRibbon";
 import "./studio3D.css";
 
 const font = new FontLoader().parse(studioFont);
@@ -78,14 +82,29 @@ function animateLogo(group, scene, local, portrait) {
 function materialFor(scene) {
   const color = new THREE.Color(scene.primaryColor);
   const glow = new THREE.Color(scene.glowColor);
-  const common = { color, metalness: 0.25, roughness: 0.4, transparent: true };
+  // Transmission samples the opaque scene. Marking every object transparent
+  // hides the dial/lens parts behind glass in Three's transmission pass.
+  const common = { color, metalness: 0.25, roughness: scene.surfaceRoughness ?? .4, transparent: scene.template !== "object_scene" };
+  const rough = value => scene.surfaceRoughness ?? value;
   switch (scene.material) {
-    case "chrome": return new THREE.MeshPhysicalMaterial({ ...common, metalness: 1, roughness: 0.16, clearcoat: 1 });
-    case "gold": return new THREE.MeshPhysicalMaterial({ ...common, color: "#e7ba55", metalness: 0.85, roughness: 0.21, clearcoat: 0.8 });
-    case "glass": return new THREE.MeshPhysicalMaterial({ ...common, metalness: 0.1, roughness: 0.08, transmission: 0.38, thickness: 0.25, side: THREE.DoubleSide });
-    case "neon": return new THREE.MeshStandardMaterial({ ...common, emissive: glow, emissiveIntensity: 0.28 + scene.bloom * 0.36, metalness: 0.1 });
-    case "holographic": return new THREE.MeshPhysicalMaterial({ ...common, metalness: 0.7, roughness: 0.18, iridescence: 1, iridescenceIOR: 1.5, clearcoat: 1 });
-    default: return new THREE.MeshStandardMaterial({ ...common, roughness: 0.72 });
+    case "architecture": {
+      const canvas = document.createElement("canvas"); canvas.width = 128; canvas.height = 256;
+      const context = canvas.getContext("2d"); context.fillStyle = scene.primaryColor; context.fillRect(0, 0, 128, 256);
+      context.fillStyle = "#143140";
+      for (let row = 0; row < 12; row++) for (let column = 0; column < 4; column++) context.fillRect(column * 32 + 5, row * 21 + 4, 22, 14);
+      const map = new THREE.CanvasTexture(canvas); map.colorSpace = THREE.SRGBColorSpace;
+      return new THREE.MeshPhysicalMaterial({ ...common, color: "#ffffff", map, metalness: .5, roughness: rough(.24) });
+    }
+    case "chrome": return new THREE.MeshPhysicalMaterial({ ...common, metalness: 1, roughness: rough(.16), clearcoat: 1 });
+    case "gold": return new THREE.MeshPhysicalMaterial({ ...common, color: scene.template === "object_scene" ? color : "#e7ba55", metalness: 0.85, roughness: rough(.21), clearcoat: 0.8 });
+    case "glass": return new THREE.MeshPhysicalMaterial({ ...common, metalness: scene.template === "object_scene" ? 0 : .1,
+      roughness: rough(scene.template === "object_scene" ? .045 : .08), transmission: scene.template === "object_scene" ? 1 : .38,
+      ior: 1.45, thickness: 0.25, side: THREE.DoubleSide });
+    case "brushed": return new THREE.MeshPhysicalMaterial({ ...common, metalness: 1, roughness: rough(.24), anisotropy: .7 });
+    case "silk": return new THREE.MeshPhysicalMaterial({ ...common, metalness: 0, roughness: rough(.38), sheen: .9, sheenRoughness: .35, sheenColor: new THREE.Color("#fff1df") });
+    case "neon": return new THREE.MeshStandardMaterial({ ...common, roughness: rough(.4), emissive: glow, emissiveIntensity: 0.28 + scene.bloom * 0.36, metalness: 0.1 });
+    case "holographic": return new THREE.MeshPhysicalMaterial({ ...common, metalness: 0.7, roughness: rough(.18), iridescence: 1, iridescenceIOR: 1.5, clearcoat: 1 });
+    default: return new THREE.MeshStandardMaterial({ ...common, roughness: rough(.72) });
   }
 }
 
@@ -169,6 +188,29 @@ function addAccent(group, scene) {
 
 function makeGroup(scene) {
   const group = new THREE.Group();
+  if (scene.template === "object_scene") {
+    group.userData.sceneObjects = scene.objects.map(object => {
+      let geometry;
+      if (object.shape === "ribbon") {
+        const data = ribbonMesh(object.ribbon);
+        geometry = new THREE.BufferGeometry();
+        geometry.setAttribute("position", new THREE.Float32BufferAttribute(data.positions, 3));
+        const uv = [];
+        for (let index = 0; index < data.positions.length / 3; index += 1) uv.push(Math.floor(index / 16) / 192, (index % 16) / 16);
+        geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
+        geometry.setIndex(data.indices); geometry.computeVertexNormals(); geometry.computeTangents();
+      }
+      else if (object.shape === "plane") geometry = new THREE.PlaneGeometry(10, 10);
+      else if (object.shape === "sphere") geometry = new THREE.SphereGeometry(1, 32, 16);
+      else if (object.shape === "torus") geometry = new THREE.TorusGeometry(1, .22, 12, 48);
+      else if (object.shape === "cylinder") { geometry = new THREE.CylinderGeometry(1, 1, 2, 48); geometry.rotateX(Math.PI / 2); }
+      else if (object.shape === "icosphere") geometry = new THREE.IcosahedronGeometry(1, 1);
+      else geometry = object.bevel ? new RoundedBoxGeometry(2, 2, 2, 3, object.bevel) : new THREE.BoxGeometry(2, 2, 2);
+      const mesh = new THREE.Mesh(geometry, materialFor({ ...scene, primaryColor: object.color, glowColor: object.color, material: object.material || scene.material, surfaceRoughness: object.roughness }));
+      mesh.name = object.name; group.add(mesh); return { object, mesh };
+    });
+    return group;
+  }
   const material = materialFor(scene);
   let title = textMesh(scene.text, scene, scene.text.length > 22 ? 0.4 : scene.text.length > 13 ? 0.55 : 0.78, material);
   if (scene.template === "neon_logo" && scene.text.toLowerCase() === "autopromote") {
@@ -278,9 +320,12 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSour
     }, 300);
     return () => { clearTimeout(timer); clearTimeout(deadline); controller.abort(); };
   }, [textureRequestKey]);
+  const modelRef = useRef({ scenes, signature });
+  modelRef.current = { scenes, signature };
+  const hasScenes = scenes.length > 0;
 
   useEffect(() => {
-    if (!scenes.length || !hostRef.current) return undefined;
+    if (!hasScenes || !hostRef.current) return undefined;
     const host = hostRef.current;
     let renderer;
     try {
@@ -295,6 +340,7 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSour
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     host.appendChild(renderer.domElement);
     const world = new THREE.Scene();
+    let environment;
     const camera = new THREE.PerspectiveCamera(43, 1, 0.1, 100);
     camera.position.set(0, 0, 13);
     const ambient = new THREE.AmbientLight("#bfc9ff", 0.8);
@@ -303,12 +349,11 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSour
     const rim = new THREE.DirectionalLight("#8899ff", 0.65);
     rim.position.set(4, -2, -4);
     world.add(ambient, key, rim);
-    const objects = scenes.map(raw => {
-      const scene = normalizeStudio3DScene(raw);
-      const group = makeGroup(scene);
-      group.visible = false;
-      world.add(group);
-      return { scene, group };
+    let objects = [], lastSignature, retired = [];
+    const disposeGroup = group => group.traverse(object => {
+      object.geometry?.dispose?.();
+      const materials = Array.isArray(object.material) ? object.material : [object.material];
+      materials.forEach(material => { material?.map?.dispose?.(); material?.dispose?.(); });
     });
     let width = 0, height = 0, raf, lastPlayhead, lastAudioLevel;
     const draw = () => {
@@ -316,6 +361,23 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSour
       if (document.hidden) return;
       const rect = { width: host.clientWidth, height: host.clientHeight };
       if (!rect.width || !rect.height) return;
+      const changed = lastSignature !== modelRef.current.signature;
+      if (changed) {
+        // Reuse the context, reflection environment and shader programmes when
+        // editing. Retire old materials after the replacement's first draw.
+        for (const { group } of objects) { world.remove(group); retired.push(group); }
+        const needsEnvironment = modelRef.current.scenes.some(scene => scene.template === "object_scene");
+        if (needsEnvironment && !environment) {
+          const pmrem = new THREE.PMREMGenerator(renderer), room = new RoomEnvironment();
+          environment = pmrem.fromScene(room, .04); room.dispose(); pmrem.dispose();
+        }
+        world.environment = needsEnvironment ? environment.texture : null;
+        objects = modelRef.current.scenes.map(raw => {
+          const scene = normalizeStudio3DScene(raw), group = makeGroup(scene);
+          group.visible = false; world.add(group); return { scene, group };
+        });
+        lastSignature = modelRef.current.signature;
+      }
       const resized = rect.width !== width || rect.height !== height;
       if (rect.width && rect.height && (rect.width !== width || rect.height !== height)) {
         width = rect.width; height = rect.height;
@@ -401,7 +463,7 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSour
       }
       const reactive = objects.some(({ scene }) => scene.audioReactiveIntensity > 0);
       const audio = reactive ? levelRef.current : 0;
-      if (!resized && !textureChanged && playhead === lastPlayhead && audio === lastAudioLevel) return;
+      if (!resized && !textureChanged && !changed && playhead === lastPlayhead && audio === lastAudioLevel) return;
       lastPlayhead = playhead;
       lastAudioLevel = audio;
       for (const { scene, group } of objects) {
@@ -417,10 +479,29 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSour
         group.position.set(pose.x, pose.y, pose.z);
         group.scale.setScalar(pose.scale * sound);
         group.rotation.set(pose.rotationX * Math.PI / 180, pose.rotationY * Math.PI / 180, pose.rotationZ * Math.PI / 180, 'ZYX');
+        ambient.intensity = scene.lightingRig === "sculpture" ? .13 : .8;
+        rim.intensity = scene.lightingRig === "sculpture" ? 1.15 : .65;
+        for (const { object, mesh } of group.userData.sceneObjects || []) {
+          if (object.shape === "ribbon" && object.ribbon.speed !== 0) {
+            mesh.geometry.attributes.position.array.set(ribbonMesh(object.ribbon, playhead - scene.startTime).positions);
+            mesh.geometry.attributes.position.needsUpdate = true; mesh.geometry.computeVertexNormals(); mesh.geometry.computeTangents();
+          }
+          const current = studio3DObjectPose(object, playhead - scene.startTime);
+          mesh.position.set(current.x, current.y, current.z);
+          mesh.scale.set(current.scaleX, current.scaleY, current.scaleZ);
+          mesh.rotation.set(current.rotationX * Math.PI / 180, current.rotationY * Math.PI / 180, current.rotationZ * Math.PI / 180);
+        }
         group.traverse(child => {
-          if (child.isMesh && child.material?.transparent) {
+          if (child.isMesh && child.material && (scene.template === "object_scene" || child.material.transparent)) {
             if (child.material.userData.baseOpacity === undefined) child.material.userData.baseOpacity = child.material.opacity;
             child.material.opacity = pose.opacity * child.material.userData.baseOpacity;
+            if (scene.template === "object_scene") {
+              const transparent = child.material.opacity < 1;
+              if (child.material.transparent !== transparent) {
+                child.material.transparent = transparent;
+                child.material.needsUpdate = true;
+              }
+            }
           }
         });
         key.color.set(scene.lightColor);
@@ -432,10 +513,12 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSour
         camera.updateProjectionMatrix();
       }
       renderer.render(world, camera);
+      retired.forEach(disposeGroup); retired = [];
     };
     draw();
     return () => {
       cancelAnimationFrame(raf);
+      retired.forEach(disposeGroup);
       world.traverse(object => {
         const asset=object.userData?.videoAsset;
         if(asset){asset.video.pause();asset.video.removeAttribute('src');asset.video.load();asset.texture.dispose();asset.pausedTexture?.dispose();asset.sharedTexture?.dispose();}
@@ -444,9 +527,10 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSour
         materials.forEach(material => { material?.map?.dispose?.(); material?.dispose?.(); });
       });
       renderer.dispose();
+      environment?.dispose();
       if (renderer.domElement.parentNode === host) host.removeChild(renderer.domElement);
     };
-  }, [signature]);
+  }, [hasScenes]);
 
   if (!scenes.length) return null;
   return <div className="studio-3d-canvas" ref={hostRef} style={zIndex === undefined ? undefined : { zIndex }} data-testid="studio-3d-preview" aria-label="3D motion graphics preview">

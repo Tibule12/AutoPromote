@@ -17,8 +17,12 @@ const folder = path.resolve(process.env.STUDIO_QA_PROOF_DIR || 'reports/welcome-
 fs.mkdirSync(folder, { recursive: true });
 const hash = value => crypto.createHash('sha256').update(value).digest('hex');
 async function main() {
-  const browser = await chromium.launch({ channel: 'chromium', headless: true, args: ['--mute-audio', '--host-resolver-rules=MAP localhost 127.0.0.1', '--disk-cache-size=1048576'] });
-  const deadline = setTimeout(() => browser.close().finally(() => process.exit(1)), 180000);
+  const addresses = [process.env.PREVIEW_CANDIDATE_LOOPBACK || '127.0.0.1', process.env.PREVIEW_BASELINE_LOOPBACK || '127.0.0.1'];
+  for (const address of addresses) assert(require('node:net').isIPv4(address) && address.startsWith('127.'), 'Loopback preview address required');
+  const launch = address => chromium.launch({ channel: 'chromium', headless: true, args: ['--mute-audio', `--host-resolver-rules=MAP localhost ${address}`, '--disk-cache-size=1048576'] });
+  const browser = await launch(addresses[0]);
+  const baselineBrowser = baseline && addresses[1] !== addresses[0] ? await launch(addresses[1]) : browser;
+  const deadline = setTimeout(() => Promise.all([browser.close(), baselineBrowser === browser ? Promise.resolve() : baselineBrowser.close()]).finally(() => process.exit(1)), 180000);
   const errors = [], writes = [], checks = [];
   const localOnly = async context => context.route('**/*', route => {
     const url = new URL(route.request().url());
@@ -33,7 +37,7 @@ async function main() {
     for (const [width, height] of [[1440, 1000], [390, 844], [360, 800], [1200, 900]]) {
       const snapshots = [];
       for (const [name, url] of [['baseline', baseline], ['candidate', candidate]].filter(([, url]) => url)) {
-        const context = await browser.newContext({ viewport: { width, height }, reducedMotion: 'reduce', timezoneId: 'Africa/Johannesburg' });
+        const context = await (name === 'baseline' ? baselineBrowser : browser).newContext({ viewport: { width, height }, reducedMotion: 'reduce', timezoneId: 'Africa/Johannesburg' });
         await localOnly(context);
         const page = await context.newPage(); page.setDefaultTimeout(20000); observe(page);
         try {
@@ -90,8 +94,13 @@ async function main() {
           await dialog.getByRole('button', { name: 'Ask', exact: true }).click();
           const response = await pending;
           assert.equal(response.status(), 200);
-          const reply = await response.json(); assert.equal(reply.features[0].feature_id, expected);
+          const reply = await response.json();
+          fs.writeFileSync(path.join(folder, `help-reply-${expected}-${question.startsWith('Where') ? 'follow-up' : 'initial'}.private.json`), JSON.stringify({ request: response.request().postDataJSON(), reply }, null, 2) + '\n', { mode: 0o600 });
+          assert(reply.features?.[0], `Help did not select ${expected}; inspect its retained private reply.`);
+          assert.equal(reply.features[0].feature_id, expected);
           await dialog.locator('.product-assistance-answer').waitFor();
+          await page.waitForFunction(answer => document.querySelector('.product-assistance-answer')?.textContent === answer, reply.answer);
+          await dialog.getByRole('button', { name: 'Ask', exact: true }).waitFor();
           assert.equal(await dialog.getByRole('alert').count(), 0);
         }
         await dialog.screenshot({ path: path.join(folder, 'candidate-authenticated-chat.png') });
@@ -101,9 +110,9 @@ async function main() {
     }
     assert.deepEqual(errors, []);
     assert(writes.every(p => p === '/api/product-assistance/ask'));
-    const result = { checkedAt: new Date().toISOString(), baseline, candidate, headless: true, muted: true, mockedResponses: false, matchingWelcomeContent: Boolean(baseline), checks, authenticated, browserErrors: errors, apiWrites: writes };
+    const result = { checkedAt: new Date().toISOString(), baseline, candidate, candidateLoopback: addresses[0], baselineLoopback: addresses[1], headless: true, muted: true, mockedResponses: false, matchingWelcomeContent: Boolean(baseline), checks, authenticated, browserErrors: errors, apiWrites: writes };
     fs.writeFileSync(path.join(folder, 'verification.json'), JSON.stringify(result, null, 2) + '\n');
     console.log(JSON.stringify({ result: 'PASS', anonymousViewportChecks: checks.length, matchingWelcomeContent: Boolean(baseline), authenticated, browserErrors: errors.length }));
-  } finally { clearTimeout(deadline); await browser.close(); }
+  } finally { clearTimeout(deadline); await browser.close(); if (baselineBrowser !== browser) await baselineBrowser.close(); }
 }
 main().catch(error => { console.error(error.message); process.exitCode = 1; });

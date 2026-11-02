@@ -83,6 +83,76 @@ def material(name, scene):
     if style == "neon":
         bsdf.inputs["Emission Color"].default_value = rgba(scene["glowColor"])
         bsdf.inputs["Emission Strength"].default_value = .28 + scene["bloom"] * .36
+    if scene.get("template") == "object_scene":
+        if style == "brushed":
+            bsdf.inputs["Metallic"].default_value = 1
+            bsdf.inputs["Roughness"].default_value = .24
+            bsdf.inputs["Anisotropic"].default_value = .7
+        elif style == "silk":
+            bsdf.inputs["Metallic"].default_value = 0
+            bsdf.inputs["Roughness"].default_value = .38
+            bsdf.inputs["Sheen Weight"].default_value = .9
+            bsdf.inputs["Sheen Roughness"].default_value = .35
+        if style == "glass":
+            bsdf.inputs["Metallic"].default_value = 0
+            bsdf.inputs["Roughness"].default_value = .045
+            bsdf.inputs["Transmission Weight"].default_value = 1
+            bsdf.inputs["IOR"].default_value = 1.45
+        links = mat.node_tree.links
+        noise = nodes.new("ShaderNodeTexNoise")
+        noise.inputs["Scale"].default_value = 145
+        noise.inputs["Detail"].default_value = 2
+        bump = nodes.new("ShaderNodeBump")
+        bump.inputs["Strength"].default_value = .11 if style == "matte" else .025
+        bump.inputs["Distance"].default_value = .035 if style == "matte" else .008
+        links.new(noise.outputs["Fac"], bump.inputs["Height"])
+        links.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
+        if scene.get("lightingRig") == "sculpture":
+            bump.inputs["Distance"].default_value = .00003 if style == "glass" else .00015
+        if style in {"brushed", "silk"}:
+            noise.inputs["Scale"].default_value = 380
+            bump.inputs["Strength"].default_value = .08
+            bump.inputs["Distance"].default_value = .0007
+            if style == "brushed":
+                coordinates = nodes.new("ShaderNodeTexCoord")
+                stretch = nodes.new("ShaderNodeVectorMath"); stretch.operation = "MULTIPLY"
+                stretch.inputs[1].default_value = (1, 24, 1)
+                links.new(coordinates.outputs["UV"], stretch.inputs[0])
+                links.new(stretch.outputs["Vector"], noise.inputs["Vector"])
+        if style == "architecture":
+            tex = nodes.new("ShaderNodeTexCoord")
+            separate = nodes.new("ShaderNodeSeparateXYZ")
+            links.new(tex.outputs["Generated"], separate.inputs[0])
+            def math_node(op, a, b):
+                node = nodes.new("ShaderNodeMath"); node.operation = op
+                if isinstance(a, (int, float)): node.inputs[0].default_value = a
+                else: links.new(a, node.inputs[0])
+                if isinstance(b, (int, float)): node.inputs[1].default_value = b
+                else: links.new(b, node.inputs[1])
+                return node.outputs[0]
+            def window_axis(socket, count):
+                fraction = math_node("FRACT", math_node("MULTIPLY", socket, count), 0)
+                return math_node("MULTIPLY", math_node("GREATER_THAN", fraction, .16), math_node("LESS_THAN", fraction, .84))
+            horizontal = math_node("MAXIMUM", window_axis(separate.outputs["X"], 4), window_axis(separate.outputs["Z"], 4))
+            windows = math_node("MULTIPLY", horizontal, window_axis(separate.outputs["Y"], 12))
+            roof_guard = math_node("MULTIPLY", math_node("GREATER_THAN", separate.outputs["Y"], .035), math_node("LESS_THAN", separate.outputs["Y"], .965))
+            windows = math_node("MULTIPLY", windows, roof_guard)
+            mix = nodes.new("ShaderNodeMixRGB")
+            mix.blend_type = "MIX"
+            links.new(windows, mix.inputs[0]); mix.inputs[1].default_value = rgba(scene["primaryColor"])
+            mix.inputs[2].default_value = rgba("#143140")
+            links.new(mix.outputs[0], bsdf.inputs["Base Color"])
+            links.new(windows, bsdf.inputs["Metallic"])
+            rough = nodes.new("ShaderNodeMapRange")
+            rough.inputs["From Min"].default_value = 0; rough.inputs["From Max"].default_value = 1
+            rough.inputs["To Min"].default_value = .62; rough.inputs["To Max"].default_value = .16
+            links.new(windows, rough.inputs["Value"]); links.new(rough.outputs[0], bsdf.inputs["Roughness"])
+            bump.inputs["Strength"].default_value = .2; bump.inputs["Distance"].default_value = .055
+            links.new(windows, bump.inputs["Height"])
+        if scene.get("surfaceRoughness") is not None:
+            for link in list(bsdf.inputs["Roughness"].links):
+                links.remove(link)
+            bsdf.inputs["Roughness"].default_value = scene["surfaceRoughness"]
     return mat
 
 
@@ -144,9 +214,16 @@ def setup_scene(spec, asset_file=None):
     s = spec["scene"]
     world = bpy.context.scene
     configure_render_device(world)
+    if s["template"] == "object_scene" and world.render.engine == "CYCLES":
+        world.cycles.denoising_prefilter = "FAST"
+        world.cycles.denoising_input_passes = "RGB_ALBEDO"
     world.render.resolution_x = spec["width"]
     world.render.resolution_y = spec["height"]
     world.render.resolution_percentage = 100
+    if s["template"] == "object_scene":
+        # Retain the canonical geometry/lighting across frames; transforms still
+        # update normally. This avoids rebuilding unchanged mesh acceleration.
+        world.render.use_persistent_data = True
     world.render.film_transparent = True
     world.render.image_settings.file_format = "PNG"
     world.render.image_settings.color_mode = "RGBA"
@@ -165,10 +242,12 @@ def setup_scene(spec, asset_file=None):
     sub = simple_material("Supporting text", s["secondaryColor"], roughness=.65)
     accent = simple_material("Glow accents", s["glowColor"], emission=.65 + s["bloom"] * .4)
     plate = simple_material("Dark glass plate", "#090d1c", metallic=.12, roughness=.42)
-    title = text_object(s["text"], .78 if len(s["text"]) <= 13 else .52, main, root, s, .05 if s["secondary"] else -.35)
-    title.name = "Main wordmark"
+    title = None
+    if s["template"] != "object_scene":
+        title = text_object(s["text"], .78 if len(s["text"]) <= 13 else .52, main, root, s, .05 if s["secondary"] else -.35)
+        title.name = "Main wordmark"
     subtitle = None
-    if s["secondary"]:
+    if s["secondary"] and s["template"] != "object_scene":
         subtitle = text_object(s["secondary"], .28, sub, root, s, -.7 * s["lineSpacing"], dimensional=False)
         subtitle.name = "Supporting line"
     template = s["template"]
@@ -277,6 +356,34 @@ def setup_scene(spec, asset_file=None):
     rim.data.energy = 360
     rim.data.color = (.52, .63, 1)
     rim.data.size = 4
+    if s["template"] == "object_scene":
+        # A physical broad fill and soft environment expose dark materials and
+        # give independently authored metal/glass objects readable reflections.
+        world.world.use_nodes = True
+        background = world.world.node_tree.nodes.get("Background")
+        background.inputs["Color"].default_value = (.32, .38, .48, 1)
+        background.inputs["Strength"].default_value = .3
+        bpy.ops.object.light_add(type="AREA", location=(-5, 1, 5))
+        fill = bpy.context.object
+        fill.name = "Object studio broad fill"
+        fill.data.energy, fill.data.shape, fill.data.size = 700, "RECTANGLE", 5
+        fill.data.size_y = 8
+        if s.get("lightingRig") == "sculpture":
+            # Deliberate reflection cards: aimed strips instead of uniform fill.
+            from mathutils import Vector
+            background.inputs["Color"].default_value = (.1, .12, .16, 1)
+            background.inputs["Strength"].default_value = .035
+            def card(obj, location, energy, width, height, color):
+                obj.location = location
+                obj.rotation_euler = (Vector((0, 0, 0)) - obj.location).to_track_quat("-Z", "Y").to_euler()
+                obj.data.shape = "RECTANGLE"
+                obj.data.energy, obj.data.size, obj.data.size_y = energy, width, height
+                obj.data.color = color
+            card(key, (-3.2, 3, 5), 1150*s["lightIntensity"]/2.2, 2.8, 5, rgba(s["lightColor"])[:3])
+            card(rim, (4, .6, 2), 1300, .45, 6, (.75, .85, 1))
+            card(fill, (-1, -3.5, 3), 250, 4, .7, (1, .86, .7))
+            bpy.ops.object.light_add(type="AREA", location=(0, 4, -1))
+            card(bpy.context.object, (0, 4, -1), 850, 4, .5, (1, 1, 1))
     # Apply the shared pose opacity to the rendered alpha on every frame.
     # Work in straight alpha so fading does not distort the glow's RGB values.
     world.use_nodes = True
@@ -324,6 +431,9 @@ def setup_scene(spec, asset_file=None):
         for child in animated["mark"].children:
             child["base_location"] = list(child.location)
             child["base_scale"] = list(child.scale)
+    if s["template"] == "object_scene":
+        from objects import build_objects
+        animated["objects"] = build_objects(s, root, material)
     return world, root, camera, animated
 
 
@@ -432,6 +542,9 @@ def main():
             animate(animated, camera, spec['scene'], index / spec['fps'], spec['duration'], spec['width'] / spec['height'])
         elif spec["scene"]["template"] == "neon_logo":
             animate_logo(animated, index / spec["fps"], spec["duration"])
+        if animated.get("objects"):
+            from objects import animate_objects
+            animate_objects(animated["objects"], index / spec["fps"])
         if not animated.get('native_brand'):
             camera.location.x = math.sin(index / spec["fps"] * .6) * spec["scene"]["cameraMotion"] * .22
         world.render.filepath = os.path.join(out_dir, f"frame_{index:04d}.png")

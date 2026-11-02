@@ -4,6 +4,7 @@ const fs=require('node:fs/promises'),path=require('node:path'),os=require('node:
 const {execFile}=require('node:child_process'),{promisify}=require('node:util');
 const execute=promisify(execFile);
 function configuration(env=process.env){
+  if(env.STUDIO_3D_LOCAL_ENABLED==='true')return {...require('./studio3DLocalDurable').configuration(env),durable:true};
   if(env.STUDIO_3D_LOCAL_CPU!=='1')return null;
   if(env.GCLOUD_PROJECT!=='demo-autopromote-credits'||env.GOOGLE_CLOUD_PROJECT!=='demo-autopromote-credits'||
     env.UNIFIED_CREDITS_SANDBOX!=='true'||!env.FIRESTORE_EMULATOR_HOST?.startsWith('127.0.0.1:')||
@@ -73,4 +74,7 @@ async function render({jobId,spec,bucket,onRendering}){
     return {receipt,outputs};
   }finally{await fs.rm(directory,{recursive:true,force:true});}
 }
-module.exports={configuration,render,publicUrl,uploadArtifact};
+module.exports={configuration,render,publicUrl,uploadArtifact,
+ available:config=>config.durable?require('./studio3DLocalDurable').available(config):Promise.resolve(),
+ launch:options=>require('./studio3DLocalDurable').launch(options),
+ reconcile:options=>options.config.durable?require('./studio3DLocalDurable').reconcile(options):Promise.resolve(options.data)};

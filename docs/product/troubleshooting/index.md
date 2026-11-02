@@ -305,7 +305,7 @@ Exposed generation/render workflows display estimates and apply account allowanc
 
 **Controls:** No source-qualified editable control is recorded.
 
-**Guides:** [Turn an image into a cinematic scene](../task-guides/task-image_cinematic.md), [Create a 3D title/logo scene](../task-guides/task-three_d_title.md), [Export a final film](../task-guides/task-final_export.md)
+**Guides:** [Turn an image into a cinematic scene](../task-guides/task-image_cinematic.md), [Create a 3D object, title or logo scene](../task-guides/task-three_d_title.md), [Export a final film](../task-guides/task-final_export.md)
 
 **Templates:** No pinned shared-template binding recorded.
 

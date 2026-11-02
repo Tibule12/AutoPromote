@@ -5531,10 +5531,15 @@ const ViralClipStudio = ({
       const response = await fetch(API_ENDPOINTS.STUDIO_3D_PREVIEW, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ scene: normalizeStudio3DScene(scene), aspect: reframeAspect, clientRequestId: createSecureId("studio-3d-preview") }),
+        // The same authored scene/aspect recovers its accepted request after a
+        // reload or lost response instead of launching duplicate Blender work.
+        body: JSON.stringify({ scene: normalizeStudio3DScene(scene), aspect: reframeAspect,
+          clientRequestId: `studio-3d-${revision}-${reframeAspect}`.replace(/[^A-Za-z0-9_-]/g, "_") }),
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok || !result.jobId) throw new Error(result.error || "3D preview could not be queued.");
+      setThreeDScenes(current => current.map(item => item.id === sceneId && studio3DSceneRevision(item) === revision
+        ? { ...item, hqPreviewJobId: result.jobId, hqPreviewRevision: revision } : item));
       const poll = async () => {
         try {
           const statusResponse = await fetch(API_ENDPOINTS.STUDIO_3D_PREVIEW_STATUS(result.jobId), { headers: { Authorization: `Bearer ${token}` } });
@@ -5547,11 +5552,11 @@ const ViralClipStudio = ({
           }
           if (status.status === "completed" && status.url) {
             setThreeDScenes(current => current.map(item => item.id === sceneId ? { ...item, hqPreviewJobId: result.jobId, hqPreviewRevision: revision } : item));
-            setThreeDPreviewState({ sceneId, revision, status: "completed", url: status.url, jobId: result.jobId, hash: status.hash });
+            setThreeDPreviewState({ sceneId, revision, status: "completed", url: status.url, jobId: result.jobId, hash: status.hash, renderProfile: status.renderProfile });
             return;
           }
           if (status.status === "failed") throw new Error("The HQ 3D render failed. Retry after checking the scene asset.");
-          setThreeDPreviewState({ sceneId, revision, status: status.status === "rendering" ? "rendering" : "queued", jobId: result.jobId });
+          setThreeDPreviewState({ sceneId, revision, status: status.status === "rendering" ? "rendering" : "queued", jobId: result.jobId, renderProfile: status.renderProfile });
           threeDPreviewPollRef.current = setTimeout(poll, 3000);
         } catch (error) {
           setThreeDPreviewState({ sceneId, revision, status: "failed", message: error.message });
@@ -12334,23 +12339,28 @@ const ViralClipStudio = ({
                 ? fileToUpload.name.split(".").pop()
                 : "bin";
             const fileName = `${createSecureId("overlay")}.${ext}`;
-            const uploadResult = await uploadSourceFileViaBackend({
-              file: fileToUpload,
-              token,
-              getToken: forceRefresh => getMediaAuthToken(forceRefresh),
-              mediaType:
-                finalOverlay.type === "video"
-                  ? "video"
-                  : finalOverlay.type === "image"
-                    ? "image"
-                    : "audio",
-              fileName,
-              purpose: finalOverlay.type === "video" ? "studio_project" : undefined,
-              onProgress: (transferred, total) => {
-                const percent = total > 0 ? Math.round((transferred / total) * 100) : 0;
-                setExportStatusLabel(`Uploading layers ${percent}%`);
-              },
-            });
+            let pendingUpload = overlaySourceUploads.get(fileToUpload);
+            if (!pendingUpload) {
+              pendingUpload = uploadSourceFileViaBackend({
+                file: fileToUpload,
+                token,
+                getToken: forceRefresh => getMediaAuthToken(forceRefresh),
+                mediaType:
+                  finalOverlay.type === "video"
+                    ? "video"
+                    : finalOverlay.type === "image"
+                      ? "image"
+                      : "audio",
+                fileName,
+                purpose: finalOverlay.type === "video" ? "studio_project" : undefined,
+                onProgress: (transferred, total) => {
+                  const percent = total > 0 ? Math.round((transferred / total) * 100) : 0;
+                  setExportStatusLabel(`Uploading layers ${percent}%`);
+                },
+              });
+              overlaySourceUploads.set(fileToUpload, pendingUpload);
+            }
+            const uploadResult = await pendingUpload;
             const url = uploadResult.url;
 
             finalOverlay.src = url;

@@ -18,7 +18,7 @@ Readiness is scoped to each entry. FUNCTIONAL does not mean professional or prod
 - [Correct reversed clean-audio channels](task-reversed_channels.md) — PARTIAL; SUPPORTED_WITH_LIMITATIONS
 - [Create captions and correct transcription](task-captions_correct.md) — BROKEN; SUPPORTED_WITH_LIMITATIONS
 - [Add B-roll](task-add_broll.md) — PARTIAL; SUPPORTED_WITH_LIMITATIONS
-- [Create a 3D title/logo scene](task-three_d_title.md) — PARTIAL; SUPPORTED_WITH_LIMITATIONS
+- [Create a 3D object, title or logo scene](task-three_d_title.md) — PARTIAL; SUPPORTED_WITH_LIMITATIONS
 - [Use a creative template](task-use_template.md) — PARTIAL; SUPPORTED_WITH_LIMITATIONS
 - [Modify Director edits manually](task-director_manual.md) — PARTIAL; SUPPORTED_WITH_LIMITATIONS
 - [Export a final film](task-final_export.md) — PARTIAL; SUPPORTED_WITH_LIMITATIONS

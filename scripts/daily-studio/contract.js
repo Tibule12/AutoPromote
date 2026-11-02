@@ -40,7 +40,7 @@ function prepare(root, date) {
     timezone: policy.timezone,
     status: "PREPARED",
     createdAt: new Date().toISOString(),
-    target: { stories: 4, destinations: 24, videoSeconds: policy.publicVideoSeconds },
+    target: { stories: 4, destinations: 24, videoDurationMode: policy.publicVideoDuration },
     stories: [],
     posts: [],
     attempts: [],
@@ -168,20 +168,20 @@ function validateDay(root, book, { requireSchedules = false, priorHashes = [] } 
     "Need four reviewed stories, not filler slots"
   );
   const stories = book.stories.map(s => validateStory(root, s));
-  if (book.target?.videoSeconds !== undefined) {
-    assert.equal(book.target.videoSeconds, policy.publicVideoSeconds);
+  if (book.target?.videoSeconds !== undefined || book.target?.videoDurationMode === "demonstration-driven") {
     for (const story of book.stories) {
       assert(story.engagementQuestion?.trim().length > 15,
-        "A minute-long story needs a specific viewer question");
+        "A public story needs a specific viewer question");
       assert(story.review?.retentionBeats?.length >= 3,
-        "Review the hook, development and payoff across the minute");
+        "Review the hook, development and payoff across the demonstration");
       const publicReceipt = JSON.parse(artifact(root, story.recordingRenderReceipt).bytes);
       assert.equal(publicReceipt.outputSha256, story.recordingSha256,
-        "Minute duration receipt belongs to different public media");
+        "Duration receipt belongs to different public media");
       assert(publicReceipt.actualNativeDownload && publicReceipt.technical?.passed &&
         publicReceipt.technical?.independentFullDecode, "Verify the native public movie");
-      assert(Math.abs(publicReceipt.technical.seconds - book.target.videoSeconds) <= 1 / 24,
-        "Public videos must be one minute; do not stretch short recordings into filler");
+      require('./publication-policy').assertPublicDuration(publicReceipt.technical.seconds,
+        book.target.videoDurationMode === 'demonstration-driven'
+          ? story.publicDurationSeconds : book.target.videoSeconds);
     }
   }
   assert.equal(new Set(stories.map(s => s.id)).size, 4);

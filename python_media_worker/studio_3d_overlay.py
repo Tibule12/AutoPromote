@@ -82,6 +82,7 @@ def validate_overlay_media(path, expected_duration):
         width, height = int(video["width"]), int(video["height"])
     except (KeyError, ValueError, StopIteration, TypeError) as exc:
         raise ValueError("3D overlay metadata is invalid") from exc
-    if len(streams) != 1 or video["codec_name"] != "qtrle" or video["pix_fmt"] != "argb" or width * height > 1280 * 720 or min(width, height) < 160 or duration < expected_duration - .15 or duration > 10.2:
+    lossless_alpha = (video["codec_name"], video["pix_fmt"]) in {("qtrle", "argb"), ("png", "rgba")}
+    if len(streams) != 1 or not lossless_alpha or width * height > 1280 * 720 or min(width, height) < 160 or duration < expected_duration - .15 or duration > 10.2:
         raise ValueError("3D overlay format or duration is invalid")
     return True
