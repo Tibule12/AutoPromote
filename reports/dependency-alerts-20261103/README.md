@@ -1,0 +1,16 @@
+# Dependency security repair — 3 November 2026
+
+Baseline: `3b2c3379` on main. Branch `security/dependency-alerts-20261103`. Twelve alerts were independently confirmed open through GitHub's read-only API. No alert has been dismissed or disabled.
+
+| Alerts | Change | Verification / remaining limit |
+| --- | --- | --- |
+| #884, #881 — follow-redirects | Root/frontend overrides and locks move to **1.16.2**; Functions' override also requires that fix if this package enters its graph. | A real loopback cross-host redirect strips a custom credential header supplied through a different JavaScript realm while retaining ordinary headers. |
+| #887, #880 — Joi | Root and Functions declarations/locks move to **18.3.1**. | Valid/invalid email semantics and 200 KB whitespace with default/custom multiple-address separators. Hostile cases run in a child with a five-second bound. |
+| #886, #883, #879, #877 — minimatch | All four locks now use the actual registry **11.0.4** package; obsolete version-specific overrides are removed. | A version-bound postinstall adapter exposes the fixed CommonJS matcher as both a callable function and its modern namespace. Its matching algorithm and ESM entry are unchanged. Tests cover legacy/class/named/ESM consumers, braces/negation/dot/case options and bounded optimization-level-2 preprocessing. Fresh build/lint/CLI checks remain required before release. |
+| #874, #864, #862, #860 — deepmerge | Preserve the existing version-bound prototype-poisoning guard in all three source/runtime entries. | No patched upstream release is published: registry latest is **4.3.1** and the advisory's patched version is null. These four version-based alerts remain open even when the guard passes. Do not rename the package, falsify its version or describe local mitigation as upstream resolution. |
+
+The existing installer applies the same guard implementation to API, frontend, Functions and TodoApp. The new credential-free CI matrix performs a clean install with real postinstall scripts for each project, then tests its own installed modules. Verification itself never patches modules, so a missing lifecycle guard fails. Separate normal CI checks the application build, full unit/browser suites, backend and repaired security permissions. No production seed or cloud workload is part of these tests.
+
+Local evidence: the installed-package security contracts pass against an isolated patched dependency fixture. **52 application regressions in nine suites pass** across payments, subscriber entitlements, scheduling, publishing sources and Studio source/billing paths; provider boundaries are mocked. Existing shared node_modules, production Rules/authority, subscription prices, balances, projects/media and the deployed worker source are preserved. Normal CI still needs to qualify the complete new dependency graph; no release is claimed by this preparation checkpoint.
+
+Official records: [redirect advisory](https://github.com/advisories/GHSA-mrwp-f3q8-3g9p), [Joi advisory](https://github.com/advisories/GHSA-4528-x5fx-h6hg), [matcher advisory](https://github.com/advisories/GHSA-g3hv-75wg-m249), [merge advisory](https://github.com/advisories/GHSA-gcqx-w48m-w2h4).
