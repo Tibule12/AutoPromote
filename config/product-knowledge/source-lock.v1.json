@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Explicit CFR packet clock in sequential grade and reframe joins preserves compressed frames and exact end duration across FFmpeg versions; no product control or readiness promotion.",
-  "reviewed_at": "2026-11-02T19:01:20.488Z",
+  "reason": "Security-only package/lock updates for Joi and redirect advisories; upstream fixed minimatch with legacy CommonJS adapter; deepmerge remains locally guarded with no upstream fix. Product controls, entitlements and readiness are unchanged.",
+  "reviewed_at": "2026-11-03T03:10:26.492Z",
   "catalog_sha256": "98c30d5b7319da7d57821fd52c9471d77ca3d116716f0013a044ba60ff56667b",
   "sources": [
     {
@@ -387,7 +387,7 @@
     },
     {
       "path": "package.json",
-      "sha256": "18b3f61d62ba545b67fab2da676884ebf7489daf3614ecd2b9b0d2036646929f"
+      "sha256": "3d1155ea362df81b2e650e7664dad81ec2b3426497b9a9047561722196a04ff1"
     },
     {
       "path": "python_media_worker/assets/studio-text-metrics.v1.json",
