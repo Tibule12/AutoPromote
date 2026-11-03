@@ -1,8 +1,8 @@
 "use strict";
 
-// Narrow, version-bound guards for advisories without a compatible published
-// release in the installed graph. Keep lock versions and scanner findings
-// visible; these mitigations are not a claim that upstream released a fix.
+// Narrow, version-bound guards and CommonJS compatibility adapters. Keep lock
+// versions and scanner findings visible; local guards do not imply that an
+// upstream fix was released for an advisory that still has no patched version.
 const fs = require("node:fs");
 const path = require("node:path");
 const marker = "AUTOPROMOTE_SECURITY_GUARD_20261022";
@@ -22,6 +22,19 @@ function patchSecurityDependencies(projectDir = process.cwd()) {
     if (!relative.startsWith("node_modules/")) continue;
     const folder = path.join(projectDir, relative);
     if (!fs.existsSync(folder)) continue;
+    if (relative.endsWith("node_modules/minimatch") && metadata.version === "11.0.4") {
+      // Use the upstream fixed matcher everywhere. Legacy ESLint/filelist
+      // callers invoke require('minimatch') directly; modern callers use its
+      // named exports. Only adapt the CJS export shape, never the algorithm.
+      replaceOnce(
+        path.join(folder, "dist/commonjs/index.js"),
+        "exports.minimatch.unescape = unescape_js_1.unescape;",
+        `exports.minimatch.unescape = unescape_js_1.unescape;
+// AUTOPROMOTE_MINIMATCH_COMPAT_20261103: retain both supported CJS call shapes.
+module.exports = Object.assign(exports.minimatch, exports);`,
+        "AUTOPROMOTE_MINIMATCH_COMPAT_20261103"
+      );
+    }
     if (relative.endsWith("node_modules/deepmerge") && metadata.version === "4.3.1") {
       // GHSA-gcqx-w48m-w2h4 has no upstream release. Filter both source and
       // target keys, including nested merges and null-prototype targets.

@@ -11,7 +11,7 @@
     "@hono/node-server": "^2.0.12",
     "protobufjs": "7.6.5",
     "@babel/plugin-transform-modules-systemjs": "7.29.7",
-    "follow-redirects": "^1.16.1",
+    "follow-redirects": "^1.16.2",
     "@xmldom/xmldom": "0.9.12",
     "nth-check": "2.1.1",
     "postcss": "8.5.25",
@@ -48,9 +48,7 @@
     "shell-quote": "1.11.0",
     "brace-expansion": "5.0.12",
     "nanoid": "3.3.18",
-    "minimatch": {
-      "brace-expansion": "5.0.12"
-    },
+    "minimatch": "11.0.4",
     "qs": "6.16.2",
     "uuid": "^14.0.0",
     "ws": "8.21.0",
@@ -71,18 +69,6 @@
     },
     "tinyglobby": {
       "picomatch": "4.0.4"
-    },
-    "minimatch@3": {
-      "brace-expansion": "1.1.21"
-    },
-    "minimatch@5": {
-      "brace-expansion": "2.1.7"
-    },
-    "minimatch@6": {
-      "brace-expansion": "2.1.7"
-    },
-    "minimatch@10": {
-      "brace-expansion": "5.0.12"
     },
     "cosmiconfig@6": {
       "yaml": "1.10.3"

@@ -53,9 +53,7 @@
     "ws": "8.21.0",
     "shell-quote": "1.11.0",
     "brace-expansion": "5.0.12",
-    "minimatch": {
-      "brace-expansion": "5.0.12"
-    },
+    "minimatch": "11.0.4",
     "router": {
       "path-to-regexp": "8.4.0"
     },
@@ -76,21 +74,6 @@
     },
     "jest-util": {
       "picomatch": "4.0.4"
-    },
-    "minimatch@3": {
-      "brace-expansion": "1.1.21"
-    },
-    "minimatch@5": {
-      "brace-expansion": "2.1.7"
-    },
-    "minimatch@6": {
-      "brace-expansion": "2.1.7"
-    },
-    "minimatch@9": {
-      "brace-expansion": "2.1.7"
-    },
-    "minimatch@10": {
-      "brace-expansion": "5.0.12"
     },
     "compression": "1.8.2",
     "proxy-addr": "2.0.8",

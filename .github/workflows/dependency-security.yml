@@ -1,0 +1,59 @@
+name: Dependency Security Contracts
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '**/package.json'
+      - '**/package-lock.json'
+      - autopromote-functions/security-dependency-guards.js
+      - scripts/patch-security-dependencies.js
+      - test/security/dependency-remediation.cjs
+      - .github/workflows/dependency-security.yml
+  push:
+    branches: [main]
+    paths:
+      - '**/package.json'
+      - '**/package-lock.json'
+      - autopromote-functions/security-dependency-guards.js
+      - scripts/patch-security-dependencies.js
+      - test/security/dependency-remediation.cjs
+      - .github/workflows/dependency-security.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Installed dependency security (${{ matrix.project }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { project: root, directory: '.', node: '22.22.0' }
+          - { project: frontend, directory: frontend, node: '22.22.0' }
+          - { project: functions, directory: autopromote-functions, node: '24' }
+          - { project: mobile, directory: TodoApp, node: '24' }
+    env:
+      CI: 'true'
+      HUSKY: '0'
+      RENDER: 'false'
+      RENDER_SERVICE_ID: ''
+      GCLOUD_PROJECT: demo-autopromote-security
+      GOOGLE_CLOUD_PROJECT: demo-autopromote-security
+      FIREBASE_PROJECT_ID: demo-autopromote-security
+      ENABLE_BACKGROUND_JOBS: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+          cache-dependency-path: ${{ matrix.directory }}/package-lock.json
+      - name: Clean install with real lifecycle guards
+        run: npm ci --prefix "${{ matrix.directory }}" --no-audit --no-fund
+      - name: Verify installed matcher, email, redirect and merge behaviour
+        run: node test/security/dependency-remediation.cjs "${{ matrix.directory }}"

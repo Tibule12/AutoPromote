@@ -32,7 +32,7 @@
     "form-data": "^4.0.6",
     "googleapis": "^132.0.0",
     "helmet": "^6.0.1",
-    "joi": "^18.2.5",
+    "joi": "^18.3.1",
     "multer": "^2.5.0",
     "node-fetch": "^2.7.0",
     "streamifier": "^0.1.1",
@@ -51,7 +51,7 @@
     "protobufjs": "7.6.5",
     "form-data": "$form-data",
     "basic-ftp": "6.2.3",
-    "follow-redirects": "^1.16.1",
+    "follow-redirects": "^1.16.2",
     "brace-expansion": "5.0.12",
     "js-yaml": "4.3.2",
     "browserslist": "4.28.7",
@@ -60,7 +60,7 @@
     "ts-deepmerge": "8.0.0",
     "@babel/core": "7.29.7",
     "glob": "^11.1.0",
-    "minimatch": "^10.2.3",
+    "minimatch": "11.0.4",
     "node-forge": "1.4.2",
     "@tootallnate/once": "3.0.1",
     "@grpc/grpc-js": "1.14.5",
@@ -87,21 +87,6 @@
     },
     "jest-util": {
       "picomatch": "4.0.4"
-    },
-    "minimatch@3": {
-      "brace-expansion": "1.1.21"
-    },
-    "minimatch@5": {
-      "brace-expansion": "2.1.7"
-    },
-    "minimatch@6": {
-      "brace-expansion": "2.1.7"
-    },
-    "minimatch@9": {
-      "brace-expansion": "2.1.7"
-    },
-    "minimatch@10": {
-      "brace-expansion": "5.0.12"
     },
     "compression": "$compression",
     "proxy-addr": "2.0.8",
