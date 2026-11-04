@@ -98,7 +98,7 @@ before(async () => {
     if (url === "https://discord.com/api/oauth2/token")
       return reply({ access_token: "fixture-access", scope: "identify webhook.incoming", webhook });
     if (url === "https://discord.com/api/users/@me")
-      return reply({ id: "501", username: "Creator" });
+      return reply({ id: "501000000000000000", username: "Creator" });
     if (url.startsWith("https://discord.com/api/v10/webhooks/")) {
       if (options.method !== "POST") return reply(webhook);
       if (lostResponse) throw new Error("fixture network loss");
@@ -479,4 +479,96 @@ test("a read-only workspace member cannot authorise a new publishing destination
     .send({ chatId: "@creatorchannel" });
   assert.equal(response.status, 403);
   assert.equal(calls.length, 0);
+});
+
+async function freshDiscord() {
+  const request = await service.prepareDiscord("owner");
+  return { state: new URL(request.authUrl).searchParams.get("state"), code: "fixture-code" };
+}
+test("Discord distinguishes expired, replayed and malformed connection links", async () => {
+  const request = await freshDiscord();
+  await db
+    .collection("oauth_states")
+    .doc(request.state)
+    .update({ expiresAt: Date.now() - 1 });
+  await assert.rejects(
+    service.completeDiscord(request),
+    error => service.describeDiscordFailure(error).code === "state_expired"
+  );
+  await db.collection("oauth_states").doc(request.state).delete();
+  await assert.rejects(
+    service.completeDiscord(request),
+    error => service.describeDiscordFailure(error).code === "state_unavailable"
+  );
+  await assert.rejects(
+    service.completeDiscord({ state: "forged:owner", code: "fixture" }),
+    error => service.describeDiscordFailure(error).code === "invalid_request"
+  );
+  assert.equal(calls.length, 0);
+});
+test("Discord reports changed client binding without exchanging a code", async () => {
+  const request = await freshDiscord();
+  await db.collection("oauth_states").doc(request.state).update({ clientId: "different-client" });
+  await assert.rejects(
+    service.completeDiscord(request),
+    error => service.describeDiscordFailure(error).code === "client_changed"
+  );
+  assert.equal(calls.length, 0);
+});
+test("Discord token rejection exposes only an allowlisted provider code", async () => {
+  const request = await freshDiscord(),
+    original = global.fetch;
+  global.fetch = async () =>
+    reply({ error: "invalid_client", error_description: "private-fixture-code-and-secret" }, 401);
+  try {
+    await assert.rejects(service.completeDiscord(request), error => {
+      const detail = service.describeDiscordFailure(error);
+      assert.equal(detail.code, "token_exchange");
+      assert.equal(detail.providerCode, "invalid_client");
+      assert(!JSON.stringify(detail).includes("private-fixture"));
+      return true;
+    });
+  } finally {
+    global.fetch = original;
+  }
+});
+test("Discord webhook/identity contract failures retain their actual stage", async () => {
+  const original = global.fetch;
+  for (const [response, expected] of [
+    [{ access_token: "fixture", scope: "identify webhook.incoming" }, "webhook_missing"],
+    [
+      {
+        access_token: "fixture",
+        scope: "identify webhook.incoming",
+        webhook: { ...webhook, application_id: "other-client" },
+      },
+      "webhook_contract",
+    ],
+    [
+      { access_token: "fixture", scope: "identify webhook.incoming", webhook },
+      "identity_lookup",
+    ],
+  ]) {
+    const request = await freshDiscord();
+    global.fetch = async url =>
+      reply(url.endsWith("/users/@me") ? { id: "invalid-identity" } : response);
+    try {
+      await assert.rejects(
+        service.completeDiscord(request),
+        error => service.describeDiscordFailure(error).code === expected
+      );
+    } finally {
+      global.fetch = original;
+    }
+  }
+});
+test("untrusted exception fields cannot leak callback codes, tokens or descriptions", () => {
+  const secret = "private-fixture-callback-and-token";
+  const detail = service.describeDiscordFailure({
+    message: secret,
+    discordCode: secret,
+    oauthError: secret,
+  });
+  assert.equal(detail.code, "callback_failed");
+  assert(!JSON.stringify(detail).includes(secret));
 });

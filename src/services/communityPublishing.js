@@ -8,6 +8,63 @@ const { publishingError } = require("./publishingTaskErrors");
 const idOf = value => crypto.createHash("sha256").update(String(value)).digest("hex");
 const fail = (message, kind = "validation", status = 409) => publishingError(message, kind, status);
 const snowflake = value => /^\d{5,22}$/.test(String(value || ""));
+const OAUTH_ERROR_CODES = new Set([
+  "invalid_client",
+  "invalid_grant",
+  "invalid_scope",
+  "invalid_request",
+  "access_denied",
+]);
+function discordFailure(code, message, status = 400) {
+  const error = fail(message, "auth", status);
+  error.discordCode = code;
+  return error;
+}
+async function discordStage(code, action) {
+  try {
+    return await action();
+  } catch (error) {
+    error.discordCode ||= code;
+    throw error;
+  }
+}
+function describeDiscordFailure(error) {
+  // Public support codes are a closed vocabulary. Never return provider bodies,
+  // callback parameters, raw exception messages or OAuth/webhook credentials.
+  const messages = {
+    invalid_request:
+      "This Discord connection link is invalid. Start Connect again from AutoPromote.",
+    state_unavailable:
+      "This Discord connection was already used or is no longer available. Start Connect again from AutoPromote.",
+    state_expired:
+      "This Discord connection expired after 10 minutes. Start a fresh connection from AutoPromote.",
+    client_changed:
+      "The Discord connection settings changed. Start a fresh connection from AutoPromote.",
+    encryption_unavailable:
+      "Discord connection storage is temporarily unavailable. Please contact AutoPromote support.",
+    connection_limit:
+      "Your account could not authorise another publishing connection. Return to AutoPromote to review your connections.",
+    state_lookup: "The connection could not be checked. Start Connect again from AutoPromote.",
+    token_exchange:
+      "Discord did not accept this authorisation. Start Connect again from AutoPromote.",
+    webhook_missing:
+      "Discord did not authorise a publishing channel. Start Connect again and select a server and channel.",
+    webhook_contract:
+      "Discord's channel authorisation could not be verified. Please contact AutoPromote support.",
+    identity_lookup:
+      "Your Discord identity could not be verified. Start Connect again from AutoPromote.",
+    connection_storage:
+      "The Discord connection could not be saved. Please contact AutoPromote support.",
+  };
+  const code = Object.hasOwn(messages, error?.discordCode) ? error.discordCode : "callback_failed";
+  return {
+    code,
+    message:
+      messages[code] ||
+      "Discord publishing authorisation failed. Start Connect again from AutoPromote.",
+    ...(OAUTH_ERROR_CODES.has(error?.oauthError) ? { providerCode: error.oauthError } : {}),
+  };
+}
 const connection = (uid, platform) =>
   db.collection("users").doc(uid).collection("connections").doc(platform);
 const destinations = (uid, platform) =>
@@ -36,13 +93,15 @@ async function provider(url, options = {}) {
   const json = await response.json().catch(() => null);
   if (!response.ok || !json || json.ok === false) {
     const status = json?.error_code || response.status;
-    throw fail(
+    const error = fail(
       status === 429
         ? "Provider rate limit reached."
         : "Provider denied access. Check channel permissions and reconnect.",
       status === 429 ? "rate_limit" : status >= 500 ? "transient" : "auth",
       status
     );
+    if (OAUTH_ERROR_CODES.has(json?.error)) error.oauthError = json.error;
+    throw error;
   }
   return json;
 }
@@ -281,37 +340,48 @@ async function completeDiscord({ state, code }) {
     !code ||
     code.length > 2048
   )
-    throw fail("Invalid Discord connection. Start again.", "auth", 400);
-  if (!vault.hasEncryption()) throw fail("Server token encryption is required.", "auth", 503);
+    throw discordFailure("invalid_request", "Invalid Discord connection. Start again.");
+  if (!vault.hasEncryption())
+    throw discordFailure("encryption_unavailable", "Server token encryption is required.", 503);
   const ref = db.collection("oauth_states").doc(state);
-  const s = await db.runTransaction(async tx => {
-    const snap = await tx.get(ref),
-      data = snap.exists && snap.data();
-    if (
-      !data ||
-      data.platform !== "discord" ||
-      data.purpose !== "publishing_webhook" ||
-      !data.uid ||
-      data.expiresAt <= Date.now() ||
-      data.clientId !== process.env.DISCORD_CLIENT_ID
-    )
-      throw fail("Expired Discord connection. Start again.", "auth", 400);
-    tx.delete(ref);
-    return data;
-  });
-  await require("./billingService").checkConnectionLimit(s.uid, "discord");
-  const token = await provider("https://discord.com/api/oauth2/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      grant_type: "authorization_code",
-      code,
-      redirect_uri: s.redirect,
-      client_id: s.clientId,
-      client_secret: process.env.DISCORD_CLIENT_SECRET,
-    }),
-  });
+  const s = await discordStage("state_lookup", () =>
+    db.runTransaction(async tx => {
+      const snap = await tx.get(ref),
+        data = snap.exists && snap.data();
+      if (
+        !data ||
+        data.platform !== "discord" ||
+        data.purpose !== "publishing_webhook" ||
+        !data.uid
+      )
+        throw discordFailure("state_unavailable", "Invalid Discord connection. Start again.");
+      if (!Number.isFinite(data.expiresAt) || data.expiresAt <= Date.now())
+        throw discordFailure("state_expired", "Expired Discord connection. Start again.");
+      if (data.clientId !== process.env.DISCORD_CLIENT_ID)
+        throw discordFailure("client_changed", "Discord connection settings changed. Start again.");
+      tx.delete(ref);
+      return data;
+    })
+  );
+  await discordStage("connection_limit", () =>
+    require("./billingService").checkConnectionLimit(s.uid, "discord")
+  );
+  const token = await discordStage("token_exchange", () =>
+    provider("https://discord.com/api/oauth2/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        grant_type: "authorization_code",
+        code,
+        redirect_uri: s.redirect,
+        client_id: s.clientId,
+        client_secret: process.env.DISCORD_CLIENT_SECRET,
+      }),
+    })
+  );
   const h = token.webhook;
+  if (!h)
+    throw discordFailure("webhook_missing", "Discord did not authorise a publishing channel.");
   if (
     !token.access_token ||
     !String(token.scope || "")
@@ -323,13 +393,24 @@ async function completeDiscord({ state, code }) {
     !/^[\w.-]{20,200}$/.test(h.token || "") ||
     String(h.application_id) !== String(s.clientId)
   )
-    throw fail("Discord did not authorise a publishing channel. Reconnect.", "auth");
-  const identity = await provider("https://discord.com/api/users/@me", {
-    headers: { Authorization: `Bearer ${token.access_token}` },
-  });
+    throw discordFailure(
+      "webhook_contract",
+      "Discord did not authorise a publishing channel. Reconnect."
+    );
+  const identity = await discordStage("identity_lookup", () =>
+    provider("https://discord.com/api/users/@me", {
+      headers: { Authorization: `Bearer ${token.access_token}` },
+    })
+  );
+  if (!snowflake(identity.id))
+    throw discordFailure("identity_lookup", "Discord identity could not be verified.");
   const encryptedWebhookToken = vault.encryptToken(h.token);
   if (!encryptedWebhookToken || encryptedWebhookToken === h.token)
-    throw fail("Could not securely store channel authorisation.", "auth", 503);
+    throw discordFailure(
+      "encryption_unavailable",
+      "Could not securely store channel authorisation.",
+      503
+    );
   const d = {
     id: idOf(h.channel_id),
     platform: "discord",
@@ -363,7 +444,7 @@ async function completeDiscord({ state, code }) {
     },
     { merge: true }
   );
-  await batch.commit();
+  await discordStage("connection_storage", () => batch.commit());
   require("../utils/simpleCache").setCache(`platform_connections_status_${s.uid}`, null, 0);
   return publicDestination(d);
 }
@@ -383,4 +464,5 @@ module.exports = {
   provider,
   idOf,
   publicDestination,
+  describeDiscordFailure,
 };

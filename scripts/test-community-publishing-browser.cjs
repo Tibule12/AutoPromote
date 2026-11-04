@@ -209,7 +209,7 @@ async function main() {
           webhook: hook,
         });
       if (url === "https://discord.com/api/users/@me")
-        return response({ id: "501", username: "Creator" });
+        return response({ id: "501000000000000000", username: "Creator" });
       if (url.startsWith("https://discord.com/api/v10/webhooks/")) {
         if (options.method !== "POST") return response(hook);
         providerDeliveries.push({
