@@ -23,7 +23,8 @@ require("node:child_process").execFileSync("ffmpeg", [
   "-f",
   "lavfi",
   "-i",
-  "color=c=purple:s=320x180:d=1",
+  process.env.STUDIO_AUDIO_QA === "true" ? "testsrc2=s=320x180:r=24:d=30" : "color=c=purple:s=320x180:d=1",
+  ...(process.env.STUDIO_AUDIO_QA === "true" ? ["-f", "lavfi", "-i", "sine=frequency=440:sample_rate=48000:duration=30", "-c:a", "aac"] : []),
   "-c:v",
   "libx264",
   "-pix_fmt",
@@ -130,7 +131,12 @@ async function main() {
       storage: () => ({
         bucket: () => ({
           name: project,
-          file: () => ({
+          file: storagePath => process.env.STUDIO_AUDIO_QA === "true" ? {
+            name: storagePath, bucket: { name: project },
+            getMetadata: async () => [{ generation: "1", size: fs.statSync(path.join(directory, "source.mp4")).size,
+              contentType: "video/mp4", metadata: { ownerUid: storagePath?.match(/^uploads\/videos\/([^/]+)\//)?.[1], purpose: "studio_project" } }],
+            getSignedUrl: async () => [origin + "/qa-studio-audio-source.mp4"],
+          } : ({
             getMetadata: async () => {
               throw new Error("No Storage object in this read-only fixture");
             },
@@ -254,6 +260,9 @@ async function main() {
       app = express();
     app.use(rateLimit({ windowMs: 60000, max: 2000, legacyHeaders: false, standardHeaders: true }));
     app.use(express.json());
+    if (process.env.STUDIO_AUDIO_QA === "true") {
+      app.get("/qa-studio-audio-source.mp4", (_req, res) => res.sendFile(path.join(directory, "source.mp4")));
+    }
     if (process.env.MOBILE_FORMS_QA === "true") {
       // Render the real plan catalogue, with every payment/status mutation and
       // provider synchronisation endpoint deliberately outside this fixture.
@@ -266,6 +275,9 @@ async function main() {
     }
     app.use("/api/auth", require(path.join(root, "src/authRoutes")));
     app.use("/api/users", require(path.join(root, "src/userRoutes")));
+    if (process.env.STUDIO_AUDIO_QA === "true") app.use("/api/media",
+      (req, res, next) => (req.method === "POST" && req.path === "/studio-assets/resolve") || (req.method === "GET" && req.path === "/credits") ? next() : res.sendStatus(404),
+      require(path.join(root, "src/mediaRoutes")));
     app.use("/api/content", require(path.join(root, "src/contentRoutes")));
     app.use("/api/telegram", require(path.join(root, "src/routes/telegramRoutes")));
     app.use("/api/platform", require(path.join(root, "src/routes/platformConnectionsRoutes")));
@@ -447,6 +459,20 @@ async function main() {
       width: process.env.MOBILE_FORMS_QA === "true" ? 390 : 1280,
       height: 900,
     });
+    if (process.env.STUDIO_AUDIO_QA === "true") {
+      // This newly registered demo account needs the existing editing plan to
+      // exercise Studio. This is an emulator precondition, never a live grant.
+      await db.collection("users").doc(identity.localId).update({ subscriptionPlan: "pro", subscriptionTier: "pro", subscriptionStatus: "active", subscription: { planId: "pro", status: "active" } });
+      await db.collection("user_billing").doc(identity.localId).set({ tier: "pro", subscriptionStatus: "active", subscription: { status: "active" } }, { merge: true });
+      const studioBaseline = (await db.collection("users").doc(identity.localId).get()).data();
+      await page.reload();
+      await require("./qa/studio-audio-browser.cjs")({ page, context, origin, directory, navigateWorkspace, uid: identity.localId });
+      const after = (await db.collection("users").doc(identity.localId).get()).data();
+      for (const key of ["credits", "subscriptionTier", "subscriptionStatus", "role", "isAdmin"])
+        assert.deepEqual(after[key], studioBaseline[key]);
+      console.log("PASS: actual Studio sound/pitch transport; production and financial state untouched");
+      return;
+    }
     if (process.env.MOBILE_FORMS_QA === "true") {
       await navigateWorkspace("Security");
       await page.locator(".security-password-details summary").click();
