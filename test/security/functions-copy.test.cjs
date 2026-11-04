@@ -35,6 +35,7 @@ it("packages the repaired authority helper and application sources without stale
       "userController.js",
       "userRoutes.js",
       "utils/authAuthority.js",
+      "utils/emailVerification.js",
       // Application routes now import these guarded helpers even when the
       // emulator-only credit integration is disabled. Packaging must retain them.
       "services/unifiedCredits/application.js",

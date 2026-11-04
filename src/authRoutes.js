@@ -7,6 +7,7 @@ const { strictLimiter } = require("./middleware/rateLimiter");
 const rateLimitBasic = require("./middlewares/rateLimitBasic");
 const authMiddleware = require("./authMiddleware");
 const { hasAdminClaim, authorityFromVerifiedIdentity } = require("./utils/authAuthority");
+const { generateVerificationLink, requireVerifiedEmail } = require("./utils/emailVerification");
 
 const PASSWORD_RESET_WINDOW_MINUTES = 15;
 const SAFE_PASSWORD_RESET_RESPONSE = "If an account exists, a password reset email has been sent.";
@@ -16,14 +17,6 @@ function normalizeEmail(email) {
   return String(email || "")
     .trim()
     .toLowerCase();
-}
-
-function getVerificationRedirectUrl() {
-  const frontendUrl = String(process.env.FRONTEND_URL || "https://autopromote.org").replace(
-    /\/$/,
-    ""
-  );
-  return process.env.VERIFY_REDIRECT_URL || `${frontendUrl}/#/`;
 }
 
 function buildResetTokenHash(rawToken) {
@@ -168,21 +161,20 @@ router.post("/register", async (req, res) => {
     // the client can fall back to Firebase's mail service when needed.
     let verificationEmailSent = false;
     let verificationProvider = null;
+    let verificationErrorCode = null;
     try {
-      const verifyLink = await admin.auth().generateEmailVerificationLink(userRecord.email, {
-        url: getVerificationRedirectUrl(),
-      });
+      const verifyLink = await generateVerificationLink(admin.auth(), userRecord.email);
       const delivery = await sendVerificationEmail({ email: userRecord.email, link: verifyLink });
       verificationProvider = delivery?.provider || null;
       verificationEmailSent = delivery?.ok === true && verificationProvider !== "console";
       if (!verificationEmailSent) {
         console.warn(
-          "Verification email was not externally delivered; client fallback required for",
-          normalizeEmail(email)
+          "[auth] Verification provider did not confirm delivery; client fallback required"
         );
       }
     } catch (e) {
-      console.log("⚠️ Could not send verification email:", e.message);
+      verificationErrorCode = e.code || "verification_delivery_unavailable";
+      console.warn("[auth] Verification delivery failed:", verificationErrorCode);
     }
 
     res.status(201).json({
@@ -192,6 +184,7 @@ router.post("/register", async (req, res) => {
       requiresEmailVerification: true,
       verificationEmailSent,
       verificationProvider,
+      verificationErrorCode,
     });
   } catch (error) {
     console.error("Registration error:", error);
@@ -251,9 +244,7 @@ router.post("/resend-verification", async (req, res) => {
       .catch(() => null);
     if (!user) return res.status(404).json({ error: "User not found" });
     if (user.emailVerified) return res.json({ message: "Already verified" });
-    const link = await admin.auth().generateEmailVerificationLink(email, {
-      url: getVerificationRedirectUrl(),
-    });
+    const link = await generateVerificationLink(admin.auth(), user.email);
     const delivery = await sendVerificationEmail({ email, link });
     const externallyDelivered = delivery?.ok === true && delivery?.provider !== "console";
     if (!externallyDelivered) {
@@ -269,7 +260,16 @@ router.post("/resend-verification", async (req, res) => {
       provider: delivery.provider,
     });
   } catch (e) {
-    return res.status(500).json({ error: e.message });
+    const limited = e.code === "auth/too-many-requests";
+    if (limited) res.set("Retry-After", "120");
+    console.warn("[auth] Verification resend failed:", e.code || "verification_delivery_unavailable");
+    return res.status(limited ? 429 : 503).json({
+      error: limited ? "too_many_requests" : "verification_delivery_unavailable",
+      message: limited
+        ? "Verification email is temporarily limited. Please wait before trying again."
+        : "We could not send the verification email. Please try again shortly.",
+      ...(limited ? { retryAfterSeconds: 120 } : {}),
+    });
   }
 });
 
@@ -541,82 +541,17 @@ router.post("/login", async (req, res) => {
       fromCollection,
     });
 
-    // Email verification handling (ENFORCED by default now)
-    // Policy:
-    //  - If user email not verified => block login with 403
-    //  - Allow temporary override ONLY if ALLOW_UNVERIFIED_LOGIN=true (for staging/testing)
-    //  - Resend endpoint available at /api/auth/resend-verification
-    let emailVerified = true;
-    let authUser = null;
-    try {
-      authUser = await admin.auth().getUser(decodedToken.uid);
-      emailVerified = !!authUser.emailVerified;
-    } catch (_) {
-      emailVerified = false;
-    }
-
-    // Verification enforcement policy (adjusted):
-    //  - Default: DO NOT block login for unverified users (previous behavior enforced by default)
-    //  - To enforce blocking, set ENFORCE_VERIFICATION_ON_LOGIN=true
-    //  - Deprecated override ALLOW_UNVERIFIED_LOGIN remains for backward compat (will log warning)
-    const enforceLoginVerification = process.env.ENFORCE_VERIFICATION_ON_LOGIN === "true";
-    const allowUnverifiedLegacy = process.env.ALLOW_UNVERIFIED_LOGIN === "true";
-    if (allowUnverifiedLegacy && enforceLoginVerification) {
-      console.warn(
-        "[auth] Both ENFORCE_VERIFICATION_ON_LOGIN and ALLOW_UNVERIFIED_LOGIN set. ALLOW_UNVERIFIED_LOGIN wins (allowing unverified)."
-      );
-    }
-    const allowUnverified = !enforceLoginVerification || allowUnverifiedLegacy; // default allow unless enforcement explicitly on
-
-    // Grandfather policy: only relevant if enforcement is ON
-    // Allow existing (older) accounts to login unverified if created before cutoff
-    // Configure with ISO8601 datetime string e.g. 2025-02-20T00:00:00Z
-    const grandfatherCutoffRaw = process.env.EMAIL_VERIFICATION_GRANDFATHER_BEFORE;
-    let isGrandfathered = false;
-    let grandfatherCutoff = null;
-    if (grandfatherCutoffRaw) {
-      const parsed = Date.parse(grandfatherCutoffRaw);
-      if (!isNaN(parsed)) {
-        grandfatherCutoff = new Date(parsed);
-        try {
-          // Prefer Auth user creation time (metadata) fallback to Firestore createdAt
-          const creationTime = authUser?.metadata?.creationTime
-            ? Date.parse(authUser.metadata.creationTime)
-            : null;
-          let firestoreCreated = null;
-          if (userData && userData.createdAt && userData.createdAt.toDate) {
-            try {
-              firestoreCreated = userData.createdAt.toDate().getTime();
-            } catch (_) {}
-          }
-          const createdMs = creationTime || firestoreCreated;
-          if (createdMs && createdMs < grandfatherCutoff.getTime()) {
-            isGrandfathered = true;
-            console.log(
-              "[auth] Grandfather exemption applied for user",
-              decodedToken.uid,
-              "created",
-              new Date(createdMs).toISOString(),
-              "cutoff",
-              grandfatherCutoff.toISOString()
-            );
-          }
-        } catch (_) {
-          /* swallow */
-        }
-      }
-    }
-
-    if (enforceLoginVerification && !emailVerified && !allowUnverified && !isGrandfathered) {
+    // Verification is mandatory. Legacy environment/grandfather switches must
+    // never admit an unverified account or mint it a custom login token.
+    const authUser = await admin.auth().getUser(decodedToken.uid);
+    if (!authUser.emailVerified) {
       return res.status(403).json({
         error: "email_not_verified",
-        message:
-          "Please verify your email before logging in. Check your inbox or request a new link.",
+        message: "Please verify your email before signing in.",
         requiresEmailVerification: true,
-        grandfathered: false,
-        grandfatherPolicyCutoff: grandfatherCutoff ? grandfatherCutoff.toISOString() : null,
       });
     }
+    const emailVerified = true;
 
     // Create a custom token if we're using email/password login
     let tokenToReturn = idToken;
@@ -644,8 +579,8 @@ router.post("/login", async (req, res) => {
         fromCollection: fromCollection,
         emailVerified: emailVerified,
         needsEmailVerification: !emailVerified,
-        grandfathered: isGrandfathered,
-        grandfatherPolicyCutoff: grandfatherCutoff ? grandfatherCutoff.toISOString() : null,
+        grandfathered: false,
+        grandfatherPolicyCutoff: null,
       },
     };
 
@@ -685,6 +620,7 @@ router.post("/admin-login", async (req, res) => {
     console.log("Verifying Firebase ID token for admin login... (truncated token)");
     // Verify the Firebase ID token
     const decodedToken = await admin.auth().verifyIdToken(idToken, true);
+    if (!requireVerifiedEmail(decodedToken, res)) return;
     console.log("Admin token verified for uid=%s", decodedToken.uid);
 
     // Variables to store user data
@@ -846,6 +782,7 @@ router.get("/verify", async (req, res) => {
 
     // Verify the Firebase token
     const decodedToken = await admin.auth().verifyIdToken(token, true);
+    if (!requireVerifiedEmail(decodedToken, res)) return;
 
     // Profiles provide display fields only. Verify authority independently for both
     // claim-based admins and legacy server-managed admins collection members.

@@ -1,8 +1,12 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
+    function isVerified() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
     function isOwner(userId) {
-      return request.auth != null && request.auth.uid == userId;
+      return isVerified() && request.auth.uid == userId;
     }
     function canUpload(userId) {
       return isOwner(userId) &&
@@ -10,7 +14,7 @@ service firebase.storage {
          firestore.get(/databases/(default)/documents/users/$(userId)).data.get('uploadBlocked', false) != true);
     }
     function isTrustedAdmin() {
-      return request.auth != null && request.auth.uid in ['bf04dPKELvVMivWoUyLsAVyw2sg2'];
+      return isVerified() && request.auth.uid in ['bf04dPKELvVMivWoUyLsAVyw2sg2'];
     }
 
     // SDK uploads in current Publisher/sourceUpload use this UID-scoped layout.

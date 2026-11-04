@@ -42,7 +42,10 @@ const candidateRules = () =>
     .replaceAll(productionOwnerUid, "trusted");
 const seed = async (collection, id, data) => db.collection(collection).doc(id).set(data);
 const owner = () =>
-  environment.authenticatedContext("alice", { email: "alice@example.test" }).firestore();
+  verifiedContext("alice", { email: "alice@example.test" }).firestore();
+function verifiedContext(uid, claims = {}) {
+  return environment.authenticatedContext(uid, { email_verified: true, ...claims });
+}
 const financial = {
   credits: 31,
   balance: 12,
@@ -210,7 +213,7 @@ describe("repaired user-profile rules", () => {
     assert.equal((await db.collection("users").doc("alice").get()).data().name, "Alice");
   });
   it("allows safe profile creation but rejects initial financial fields and backdated creation", async () => {
-    const client = environment.authenticatedContext("new-user").firestore();
+    const client = verifiedContext("new-user").firestore();
     await assertFails(setDoc(doc(client, "users/new-user"), { role: "admin", credits: 100 }));
     await assertFails(
       setDoc(doc(client, "users/new-user"), { name: "Name", createdAt: new Date("2000-01-01") })
@@ -225,7 +228,7 @@ describe("repaired user-profile rules", () => {
   it("denies anonymous and cross-account access", async () => {
     await assertFails(getDoc(doc(environment.unauthenticatedContext().firestore(), "users/alice")));
     await assertFails(
-      updateDoc(doc(environment.authenticatedContext("bob").firestore(), "users/alice"), {
+      updateDoc(doc(verifiedContext("bob").firestore(), "users/alice"), {
         name: "Forged",
       })
     );
@@ -244,20 +247,20 @@ describe("repaired user-profile rules", () => {
     for (const claims of [{ admin: true }, { isAdmin: true }, { role: "admin" }]) {
       await assertSucceeds(
         setDoc(
-          doc(environment.authenticatedContext("trusted", claims).firestore(), "analytics/test"),
+          doc(verifiedContext("trusted", claims).firestore(), "analytics/test"),
           { ok: true }
         )
       );
     }
     await seed("admins", "legacy-admin", { role: "admin" });
     await assertFails(
-      getDoc(doc(environment.authenticatedContext("legacy-admin").firestore(), "users/alice"))
+      getDoc(doc(verifiedContext("legacy-admin").firestore(), "users/alice"))
     );
     await assertFails(
       setDoc(
         doc(
           environment
-            .authenticatedContext("unreviewed", { admin: true, role: "admin" })
+            .authenticatedContext("unreviewed", { email_verified: true, admin: true, role: "admin" })
             .firestore(),
           "analytics/forged"
         ),
@@ -267,7 +270,7 @@ describe("repaired user-profile rules", () => {
     await assertSucceeds(
       setDoc(
         doc(
-          environment.authenticatedContext("trusted").firestore(),
+          verifiedContext("trusted").firestore(),
           "analytics/owner-without-legacy-claim"
         ),
         { ok: true }
@@ -276,7 +279,7 @@ describe("repaired user-profile rules", () => {
     await assertFails(
       getDoc(
         doc(
-          environment.authenticatedContext("impostor", { admin: "true" }).firestore(),
+          verifiedContext("impostor", { admin: "true" }).firestore(),
           "analytics/test"
         )
       )
@@ -306,7 +309,7 @@ describe("repaired user-profile rules", () => {
     );
   });
   it("preserves production's server-owned Studio model collections even for client admin claims", async () => {
-    const trusted = environment.authenticatedContext("trusted", { admin: true }).firestore();
+    const trusted = verifiedContext("trusted", { admin: true }).firestore();
     for (const collection of [
       "studio_model_capability_jobs",
       "studio_model_capability_artifacts",
@@ -358,7 +361,7 @@ describe("repaired user-profile rules", () => {
         title: "Shared source",
       })
     );
-    const viewer = environment.authenticatedContext("viewer").firestore();
+    const viewer = verifiedContext("viewer").firestore();
     await assertSucceeds(getDoc(doc(viewer, "content/team-source")));
     await assertFails(
       setDoc(doc(viewer, "content/forged-team-source"), {
@@ -456,6 +459,20 @@ describe("repaired user-profile rules", () => {
   }
 });
 
+describe("mandatory verification in direct Firestore access", () => {
+  it("denies unverified owners even when their stored profile says verified", async () => {
+    await seed("users", "alice", { ...financial, emailVerified: true });
+    const client = environment.authenticatedContext("alice", { email_verified: false }).firestore();
+    await assertFails(getDoc(doc(client, "users/alice")));
+    await assertFails(updateDoc(doc(client, "users/alice"), { name: "Bypass" }));
+    await assertFails(setDoc(doc(client, "workspaces/unverified"), { ownerUid: "alice" }));
+  });
+  it("denies a trusted UID with an unverified email too", async () => {
+    const client = environment.authenticatedContext("trusted", { email_verified: false, admin: true }).firestore();
+    await assertFails(getDoc(doc(client, "users/alice")));
+  });
+});
+
 // Mock only identity verification/provider delivery; the real Express handlers and
 // real demo Firestore are exercised. Never import the application's production Admin app.
 const revokedTokens = new Set();
@@ -469,7 +486,7 @@ const auth = {
     if (revokedTokens.has(token))
       throw Object.assign(new Error("revoked"), { code: "auth/id-token-revoked" });
     if (!tokens.has(token)) throw new Error("invalid token");
-    return tokens.get(token);
+    return { email_verified: true, ...tokens.get(token) };
   },
   async getUser(uid) {
     if (!accounts.has(uid)) throw new Error("missing auth user");
@@ -571,6 +588,60 @@ describe("real authentication and registration handlers with isolated identity f
       emailVerified: true,
       customClaims: { feature: "preserve" },
     });
+  });
+  it("blocks unverified login and protected APIs despite profile flags and legacy bypass settings", async () => {
+    const original = { ...process.env };
+    process.env.ALLOW_UNVERIFIED_LOGIN = "true";
+    process.env.ENFORCE_VERIFICATION_ON_LOGIN = "false";
+    process.env.EMAIL_VERIFICATION_GRANDFATHER_BEFORE = "2999-01-01T00:00:00Z";
+    tokens.set(ordinaryToken, { uid: "alice", email: "alice@example.test", email_verified: false });
+    accounts.get("alice").emailVerified = false;
+    await seed("users", "alice", { ...financial, emailVerified: true, email_verified: true });
+    try {
+      for (const path of ["/identity", "/auth/verify", "/users/profile"]) {
+        const response = await bearer(request(app).get(path)).expect(403);
+        assert.equal(response.body.error, "email_not_verified");
+      }
+      await request(app).post("/auth/login").send({ idToken: ordinaryToken }).expect(403);
+      assert.equal(tokenMints.length, 0);
+      assert.equal((await db.collection("users").doc("alice").get()).data().credits, financial.credits);
+    } finally { process.env = original; }
+  });
+  it("restores access only with verified Firebase identity after the email action", async () => {
+    tokens.set(ordinaryToken, { uid: "alice", email: "alice@example.test", email_verified: true });
+    accounts.get("alice").emailVerified = true;
+    await bearer(request(app).get("/identity")).expect(200);
+    await request(app).post("/auth/login").send({ idToken: ordinaryToken }).expect(200);
+  });
+  it("resend uses the signed Firebase hosted action if the optional return domain is rejected", async () => {
+    const original = auth.generateEmailVerificationLink;
+    const calls = [];
+    accounts.get("alice").emailVerified = false;
+    auth.generateEmailVerificationLink = async (...args) => {
+      calls.push(args);
+      if (calls.length === 1) throw Object.assign(new Error("fixture domain"), { code: "auth/unauthorized-continue-uri" });
+      return "https://example.test/verification";
+    };
+    try {
+      await request(app).post("/auth/resend-verification").send({ email: "alice@example.test" }).expect(200);
+      assert.deepEqual(calls[1], ["alice@example.test"]);
+      assert.equal(accounts.get("alice").emailVerified, false);
+    } finally { auth.generateEmailVerificationLink = original; }
+  });
+  it("resend reports a bounded retry delay when Firebase throttles without retrying", async () => {
+    const original = auth.generateEmailVerificationLink;
+    let calls = 0;
+    accounts.get("alice").emailVerified = false;
+    auth.generateEmailVerificationLink = async () => {
+      calls++;
+      throw Object.assign(new Error("fixture rate limit"), { code: "auth/too-many-requests" });
+    };
+    try {
+      const result = await request(app).post("/auth/resend-verification").send({ email: "alice@example.test" }).expect(429);
+      assert.equal(result.headers["retry-after"], "120");
+      assert.equal(result.body.retryAfterSeconds, 120);
+      assert.equal(calls, 1);
+    } finally { auth.generateEmailVerificationLink = original; }
   });
   it("blocks existing forged profile flags, nested claims and identity substitution", async () => {
     await seed("users", "alice", {

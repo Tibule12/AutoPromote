@@ -1,0 +1,18 @@
+{
+  "project": "demo-autopromote-credits",
+  "productionTraffic": false,
+  "externalRequestsBlocked": [],
+  "actualAppBuild": true,
+  "registration201": true,
+  "reloadRemainsLockedBeforeVerification": true,
+  "unverifiedBackend403": true,
+  "emailActionAppliedThroughEmulatorLink": true,
+  "automaticSessionAfterReturn": true,
+  "verifiedSessionSurvivesReload": true,
+  "manualVerifiedButtonAbsent": true,
+  "storedFinancialAndAuthorityFieldsUnchanged": true,
+  "viewportScreenshots": [
+    "1280x900",
+    "390x844"
+  ]
+}

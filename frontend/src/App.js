@@ -10,7 +10,6 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  sendEmailVerification,
   updateProfile,
   signOut,
   signInWithCustomToken,
@@ -32,6 +31,8 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { API_ENDPOINTS, API_BASE_URL, PUBLIC_SITE_URL } from "./config";
+import EmailVerificationScreen from "./components/EmailVerificationScreen";
+import { resendAccountVerification, sendFirebaseVerification, watchEmailVerification } from "./utils/emailVerification";
 import { parseJsonSafe } from "./utils/parseJsonSafe";
 import { clearSessionPreservingRenderAttempts } from "./utils/viralRenderRecovery";
 import {
@@ -212,6 +213,7 @@ function App() {
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
+  const [pendingVerification, setPendingVerification] = useState(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [logoutInProgress, setLogoutInProgress] = useState(false);
   const [content, setContent] = useState([]);
@@ -275,6 +277,7 @@ function App() {
           return; // keep the E2E bypass user
         }
         setUser(null);
+        setPendingVerification(null);
         setIsAdmin(false);
         clearSessionPreservingRenderAttempts();
         setContent([]); // Clear content on logout
@@ -283,16 +286,19 @@ function App() {
         } catch (_) {}
         return;
       }
+      if (!firebaseUser.emailVerified) {
+        setUser(null);
+        setIsAdmin(false);
+        localStorage.removeItem("user");
+        setPendingVerification(current => current?.uid === firebaseUser.uid ? current : {
+          uid: firebaseUser.uid, email: firebaseUser.email,
+        });
+        return;
+      }
       try {
         const token = await firebaseUser.getIdToken(true);
         const userData = await getVerifiedSessionUser(firebaseUser, token);
         if (auth.currentUser?.uid !== firebaseUser.uid) return;
-        if (!firebaseUser.emailVerified && !userData.isAdmin) {
-          setUser(null);
-          setIsAdmin(false);
-          localStorage.removeItem("user");
-          return;
-        }
         // Before allowing the app to enter the dashboard, ensure terms are accepted.
         const ok = await ensureTermsAccepted(token, userData, "authState");
         if (!ok) {
@@ -302,6 +308,9 @@ function App() {
         if (auth.currentUser?.uid !== firebaseUser.uid) return;
         // Proceed to set user and prefetch content once terms are satisfied.
         setUser({ ...userData, token }); // keep token in memory in React state only
+        setPendingVerification(null);
+        setShowRegister(false);
+        setShowLogin(false);
         try {
           if (Sentry && typeof Sentry.setUser === "function")
             Sentry.setUser({ id: userData.uid, username: userData.email, email: userData.email });
@@ -329,6 +338,18 @@ function App() {
       } catch (_) {}
     };
   }, []);
+
+  useEffect(() => {
+    if (!pendingVerification?.uid) return undefined;
+    return watchEmailVerification(auth, async firebaseUser => {
+      await processLoginSuccess({ user: firebaseUser });
+      setPendingVerification(null);
+      setShowRegister(false);
+      setShowLogin(false);
+    });
+    // The watcher is bound to one identity and rechecks it after every await.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingVerification?.uid]);
 
   // If E2E bypass is enabled, set a pre-authorized test user and fetch content
   // Run when E2E_AUTH_BYPASS toggles; fetchUserContent intentionally omitted from deps
@@ -758,15 +779,20 @@ function App() {
 
       let verificationEmailSent = responseBody.verificationEmailSent === true;
       let verificationDelivery = responseBody.verificationProvider || null;
+      let verificationMessage = "";
+      let verificationRetryAfterSeconds = verificationEmailSent ? 60 : 0;
       if (!verificationEmailSent) {
         try {
-          await sendEmailVerification(firebaseUser, {
-            url: `${String(PUBLIC_SITE_URL || window.location.origin).replace(/\/$/, "")}/#/`,
-          });
+          if (responseBody.verificationErrorCode === "auth/too-many-requests") {
+            throw Object.assign(new Error("Verification email is temporarily limited. Please wait before trying again."), { retryAfterSeconds: 120 });
+          }
+          await sendFirebaseVerification(firebaseUser);
           verificationEmailSent = true;
           verificationDelivery = "firebase";
+          verificationRetryAfterSeconds = 60;
         } catch (verificationError) {
-          console.error("Firebase verification fallback failed:", verificationError);
+          verificationMessage = verificationError.message;
+          verificationRetryAfterSeconds = verificationError.retryAfterSeconds || 30;
         }
       }
 
@@ -774,11 +800,18 @@ function App() {
       // Firebase's verified delivery path. onAuthStateChanged still blocks the
       // dashboard until Firebase reports emailVerified=true.
 
-      return {
+      const result = {
         email,
         verificationEmailSent,
         verificationDelivery,
+        verificationMessage,
+        verificationRetryAfterSeconds,
       };
+      setPendingVerification(current => current?.uid === firebaseUser.uid ? {
+        ...current, sent: verificationEmailSent, message: verificationMessage,
+        retryAfterSeconds: verificationRetryAfterSeconds,
+      } : current);
+      return result;
     } catch (error) {
       await signOut(auth); // Ensure signed out on error
       alert("Registration failed: " + (error.message || "Unknown error"));
@@ -787,39 +820,7 @@ function App() {
   };
 
   const resendVerificationEmail = async email => {
-    const normalizedEmail = String(email || "")
-      .trim()
-      .toLowerCase();
-    if (!normalizedEmail) throw new Error("Enter the email address used to create the account.");
-
-    const currentUser = auth.currentUser;
-    if (
-      currentUser &&
-      String(currentUser.email || "")
-        .trim()
-        .toLowerCase() === normalizedEmail &&
-      !currentUser.emailVerified
-    ) {
-      await sendEmailVerification(currentUser, {
-        url: `${String(PUBLIC_SITE_URL || window.location.origin).replace(/\/$/, "")}/#/`,
-      });
-      return { sent: true, provider: "firebase" };
-    }
-
-    const response = await fetch(API_ENDPOINTS.RESEND_VERIFICATION, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({ email: normalizedEmail }),
-    });
-    const body = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      throw new Error(
-        body.message ||
-          body.error ||
-          "The verification email could not be sent. Please try again shortly."
-      );
-    }
-    return { sent: true, provider: body.provider || "email" };
+    return resendAccountVerification(email, auth.currentUser);
   };
 
   const handleLogin = async userData => {
@@ -1716,14 +1717,16 @@ function App() {
                 {/* If no user, show welcome/login page */}
                 {!user ? (
                   <>
-                    {!showLogin && !showRegister && (
+                    {pendingVerification ? (
+                      <EmailVerificationScreen {...pendingVerification} onResend={resendVerificationEmail} />
+                    ) : !showLogin && !showRegister && (
                       <WelcomePage
                         onGetStarted={() => setShowRegister(true)}
                         onSignIn={() => setShowLogin(true)}
                       />
                     )}
                     {/* Show login modal if requested */}
-                    {showLogin && (
+                    {showLogin && !pendingVerification && (
                       <div
                         className="modal-overlay open auth-route-overlay"
                         onTransitionEnd={() => {}}
@@ -1741,7 +1744,7 @@ function App() {
                       </div>
                     )}
                     {/* Show register modal if requested */}
-                    {showRegister && (
+                    {showRegister && !pendingVerification && (
                       <div
                         className="modal-overlay open auth-route-overlay"
                         onClick={e => e.stopPropagation()}

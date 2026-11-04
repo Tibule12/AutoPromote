@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Publish the reviewed owner-scoped policies only after the repaired backend is live.
+"""Publish the reviewed verified-email policies only after the repaired backend is live.
 
 No user documents, objects, billing, IAM, claims or sessions are modified.
 The default only verifies local artifacts and runtime; --execute publishes Rules.
@@ -18,8 +18,8 @@ import urllib.request
 PROJECT = "autopromote-cc6d3"
 POLICY = "security-owner-bootstrap-20261027"
 TARGETS = [
-    ("cloud.firestore", "config/security/firestore.owner-scoped.rules", "2115bff8-a189-4179-9ecc-516c895d132a"),
-    ("firebase.storage/autopromote-cc6d3.firebasestorage.app", "config/security/storage.owner-scoped.rules", "7d9cee7f-2189-492d-9d46-9bf7b0bf1200"),
+    ("cloud.firestore", "config/security/firestore.owner-scoped.rules", "26b2a18a-c068-46ab-b16a-f73c7caa0699"),
+    ("firebase.storage/autopromote-cc6d3.firebasestorage.app", "config/security/storage.owner-scoped.rules", "f9e3b66b-aa66-43eb-855d-5fdced75a979"),
 ]
 
 
@@ -37,7 +37,7 @@ def main():
     manifest = json.loads((root / "config/security/owner-rules-manifest.json").read_text())
     receipt = {"project": PROJECT, "startedAtUtc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
                "execute": args.execute, "expectedRuntimeCommit": args.expected_runtime_commit,
-               "authorization": "User authorised autonomous security remediation; AdSense and monetisation excluded",
+               "authorization": "User requested mandatory email verification and automatic session restoration; no account data changes",
                "scope": "Only two Rules releases; no document/object/Auth/IAM/billing changes", "runtime": [], "releases": []}
     sources = {}
     for target, name, _ in TARGETS:
@@ -69,7 +69,7 @@ def main():
             release_name = f"projects/{PROJECT}/releases/{target}"
             current = request("GET", release_name)
             if current.get("rulesetName") != f"projects/{PROJECT}/rulesets/{expected}":
-                raise ValueError("Active release differs from recorded E1; investigate instead of overwriting")
+                raise ValueError("Active release differs from the inspected owner-scoped baseline; investigate instead of overwriting")
             receipt["releases"].append({"release": release_name, "before": current["rulesetName"], "source": name, "sha256": sources[target][2]})
         if args.execute:
             for index, (target, _, _) in enumerate(TARGETS):

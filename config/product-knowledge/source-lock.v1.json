@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Security-only package/lock updates for Joi and redirect advisories; upstream fixed minimatch with legacy CommonJS adapter; deepmerge remains locally guarded with no upstream fix. Product controls, entitlements and readiness are unchanged.",
-  "reviewed_at": "2026-11-03T03:10:26.492Z",
+  "reason": "Mandatory verified-email onboarding, canonical verification return URL and automatic session restoration; owner authority, pricing and product readiness remain unchanged.",
+  "reviewed_at": "2026-11-04T08:02:02.222Z",
   "catalog_sha256": "98c30d5b7319da7d57821fd52c9471d77ca3d116716f0013a044ba60ff56667b",
   "sources": [
     {
@@ -35,7 +35,7 @@
     },
     {
       "path": "frontend/src/App.js",
-      "sha256": "ae99463c46a8bdb61c49aa8a6b67455a3958884865b8773cf50a9a6228004f69"
+      "sha256": "f39318d076a2ed33f5bcaf4ab169309d7f47985eb16496086b3c5288b2fd3183"
     },
     {
       "path": "frontend/src/Docs.js",
@@ -547,7 +547,7 @@
     },
     {
       "path": "src/server.js",
-      "sha256": "75f2b6a2980a16ab6c3588bf23f5894b21744652eb999bf5bec3b607508af028"
+      "sha256": "1450b418610dc5c852a52feea3ec794780f5364bb553a4eabcc45e822c1d6c19"
     },
     {
       "path": "src/services/__tests__/publishedVideoRetention.test.js",

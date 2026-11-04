@@ -24,6 +24,9 @@ for (const key of ["FIRESTORE_EMULATOR_HOST", "FIREBASE_STORAGE_EMULATOR_HOST"])
   assert.match(process.env[key] || "", /^127\.0\.0\.1:\d+$/);
 const root = path.resolve(__dirname, "../..");
 let env;
+function verifiedContext(uid, claims = {}) {
+  return env.authenticatedContext(uid, { email_verified: true, ...claims });
+}
 const upload = (ctx, file, metadata) =>
   uploadBytes(ref(ctx.storage(bucket), file), Buffer.from("fixture"), metadata);
 before(async () => {
@@ -66,7 +69,7 @@ after(async () => {
   await env?.cleanup();
 });
 it("preserves current Publisher upload, owner download/list and owner cleanup", async () => {
-  const owner = env.authenticatedContext("owner");
+  const owner = verifiedContext("owner");
   const file = "uploads/videos/owner/source.mp4";
   await assertSucceeds(
     upload(owner, file, { customMetadata: { ownerUid: "owner", sourcePurpose: "publisher" } })
@@ -79,11 +82,11 @@ it("preserves current Publisher upload, owner download/list and owner cleanup", 
   await assertSucceeds(deleteObject(ref(owner.storage(bucket), file)));
 });
 it("blocks cross-owner read, listing, overwrite, delete and forged owner metadata", async () => {
-  const owner = env.authenticatedContext("owner");
+  const owner = verifiedContext("owner");
   const file = "uploads/images/owner/private.png";
   await assertSucceeds(upload(owner, file, { customMetadata: { ownerUid: "owner" } }));
   for (const claims of [{}, { admin: true, isAdmin: true, role: "admin" }]) {
-    const attacker = env.authenticatedContext("attacker", claims);
+    const attacker = verifiedContext("attacker", claims);
     await assertFails(getBytes(ref(attacker.storage(bucket), file)));
     await assertFails(listAll(ref(attacker.storage(bucket), "uploads/images/owner")));
     await assertFails(upload(attacker, file, { customMetadata: { ownerUid: "attacker" } }));
@@ -92,7 +95,7 @@ it("blocks cross-owner read, listing, overwrite, delete and forged owner metadat
   }
 });
 it("requires Find Viral Clips ownership and scan-purpose metadata", async () => {
-  const owner = env.authenticatedContext("owner");
+  const owner = verifiedContext("owner");
   const file = "temp_scans/owner/scan.mp4";
   await assertFails(upload(owner, file));
   await assertFails(
@@ -102,11 +105,11 @@ it("requires Find Viral Clips ownership and scan-purpose metadata", async () => 
     upload(owner, file, { customMetadata: { ownerUid: "owner", sourcePurpose: "viral_scan" } })
   );
   await assertSucceeds(getBytes(ref(owner.storage(bucket), file)));
-  await assertFails(getBytes(ref(env.authenticatedContext("attacker").storage(bucket), file)));
+  await assertFails(getBytes(ref(verifiedContext("attacker").storage(bucket), file)));
 });
 it("preserves current editor, thumbnail, source and Cam Combiner SDK layouts", async () => {
-  const owner = env.authenticatedContext("owner");
-  const attacker = env.authenticatedContext("attacker");
+  const owner = verifiedContext("owner");
+  const attacker = verifiedContext("attacker");
   for (const prefix of [
     "temp_sources",
     "temp_uploads",
@@ -126,7 +129,7 @@ it("preserves current editor, thumbnail, source and Cam Combiner SDK layouts", a
   }
 });
 it("enforces server-controlled upload blocks on every restored private layout", async () => {
-  const blocked = env.authenticatedContext("blocked");
+  const blocked = verifiedContext("blocked");
   for (const file of [
     "uploads/videos/blocked/a.mp4",
     "temp_scans/blocked/a.mp4",
@@ -142,7 +145,7 @@ it("enforces server-controlled upload blocks on every restored private layout", 
 });
 it("keeps unowned legacy, unrelated, model and analysis paths API-only even for trusted admins", async () => {
   for (const uid of ["owner", "bf04dPKELvVMivWoUyLsAVyw2sg2"]) {
-    const ctx = env.authenticatedContext(uid, { admin: true });
+    const ctx = verifiedContext(uid, { admin: true });
     for (const file of [
       "private/owner.txt",
       "uploads/videos/legacy.mp4",
@@ -161,11 +164,21 @@ it("preserves public reads while denying ordinary/forged-admin public writes", a
   const anon = env.unauthenticatedContext();
   for (const file of ["public/logo.png", "landing-pages/index.html"])
     await assertSucceeds(getBytes(ref(anon.storage(bucket), file)));
-  const attacker = env.authenticatedContext("attacker", { admin: true, role: "admin" });
+  const attacker = verifiedContext("attacker", { admin: true, role: "admin" });
   await assertFails(upload(attacker, "public/logo.png"));
   await assertFails(upload(attacker, "landing-pages/index.html"));
-  const owner = env.authenticatedContext("owner");
+  const owner = verifiedContext("owner");
   await assertSucceeds(upload(owner, "content/owner/published/video.mp4"));
   await assertSucceeds(getBytes(ref(anon.storage(bucket), "content/owner/published/video.mp4")));
   await assertFails(upload(attacker, "content/owner/published/video.mp4"));
+});
+
+it("denies unverified owner uploads and private reads without deleting existing media", async () => {
+  const file = "uploads/videos/owner/verification.mp4";
+  await assertSucceeds(upload(verifiedContext("owner"), file, { customMetadata: { ownerUid: "owner" } }));
+  const unverified = env.authenticatedContext("owner", { email_verified: false });
+  await assertFails(getBytes(ref(unverified.storage(bucket), file)));
+  await assertFails(upload(unverified, file, { customMetadata: { ownerUid: "owner" } }));
+  await assertFails(deleteObject(ref(unverified.storage(bucket), file)));
+  await assertSucceeds(getBytes(ref(verifiedContext("owner").storage(bucket), file)));
 });

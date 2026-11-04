@@ -154,10 +154,10 @@ try {
       fbAdmin.admin.auth = () => ({
         verifyIdToken: async _token => {
           // Use the provided _token parameter (or fall back to stub behavior).
-          if (!_token) return { uid: "stub-uid" };
+          if (!_token) return { uid: "stub-uid", email_verified: true };
           const t = String(_token);
-          if (t.startsWith("test-token-for-")) return { uid: t.replace("test-token-for-", "") };
-          return { uid: "stub-uid" };
+          if (t.startsWith("test-token-for-")) return { uid: t.replace("test-token-for-", ""), email_verified: true };
+          return { uid: "stub-uid", email_verified: true };
         },
         listUsers: async n => ({ users: [] }),
       });
