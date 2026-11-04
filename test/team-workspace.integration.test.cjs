@@ -208,6 +208,15 @@ test("approved dispatch atomically schedules both destinations once under concur
   assert.equal(content.workspace_id, workspaceId);
   assert.ok(readiness > 0 && verification > 0);
 });
+test("a stored destination object with a forged length cannot create unbounded dispatch work", async () => {
+  const release = await submit();
+  await approve(release);
+  await db.collection("workspaces").doc(workspaceId).collection("releases").doc(release.id)
+    .update({ "payload.platforms": { 0: "telegram", length: 1000000000 } });
+  await assert.rejects(team.dispatch(workspaceId, "admin", release.id, 1), code("invalid_release"));
+  assert.equal(readiness, 0);
+  assert.equal((await db.collection("promotion_schedules").where("workspace_id", "==", workspaceId).get()).size, 0);
+});
 test("revision invalidates approval and rejects stale reviewer requests", async () => {
   const release = await submit();
   await approve(release);

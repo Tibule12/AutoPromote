@@ -334,6 +334,9 @@ function createTeamWorkspace({
     const release = snapshot.data();
     if (release.status === "scheduled" && release.revision === revision)
       return { scheduleIds: release.scheduleIds, replay: true };
+    // Stored records remain an input boundary, including historical/corrupt
+    // records that did not pass through the current submission validator.
+    releasePayload(release.payload);
     if (
       release.status !== "approved" ||
       revision !== release.revision ||
@@ -413,7 +416,11 @@ function createTeamWorkspace({
         lastMediaDependencyAt: new Date(now()).toISOString(),
       };
       tx.create(contentRef, content);
-      for (let index = 0; index < scheduleIds.length; index++) {
+      releasePayload(record.payload);
+      // The server-owned platform catalogue bounds work even if persisted
+      // data is malformed. Never use a stored object's length as the ceiling.
+      for (let index = 0; index < PLATFORMS.length; index++) {
+        if (index >= scheduleIds.length) break;
         const platform = record.payload.platforms[index];
         const time = record.payload.time || new Date(now() + 1000).toISOString();
         if (Date.parse(time) < now())

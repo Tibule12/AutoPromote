@@ -1,5 +1,6 @@
 """No network or credentials: exercise release guards with fake API responses."""
 import importlib.util
+import hashlib
 import io
 import json
 from pathlib import Path
@@ -14,7 +15,7 @@ spec.loader.exec_module(publisher)
 
 
 class PublisherTests(unittest.TestCase):
-    def run_publisher(self, *, execute=False, wrong_runtime=False, changed_release=False):
+    def run_publisher(self, *, execute=False, wrong_runtime=False, changed_release=False, changed_source=False):
         calls = []
         sources = {}
         releases = {f"projects/{publisher.PROJECT}/releases/{target}": f"projects/{publisher.PROJECT}/rulesets/{expected}"
@@ -43,13 +44,28 @@ class PublisherTests(unittest.TestCase):
             return io.BytesIO(json.dumps(data).encode())
 
         with tempfile.TemporaryDirectory() as scratch:
+            # Test the publisher protocol using an isolated reviewed fixture.
+            # Never rewrite the historical approval manifest to bless newer
+            # application Rules; the actual publication guard stays intact.
+            fixture = Path(scratch) / "fixture-root"
+            manifest = {"sources": {}}
+            for target, name, _ in publisher.TARGETS:
+                file = fixture / name
+                file.parent.mkdir(parents=True, exist_ok=True)
+                content = "rules_version = '2';\n// isolated fake-API source for " + target + "\n"
+                file.write_text(content)
+                manifest["sources"][name] = hashlib.sha256(content.encode()).hexdigest()
+            (fixture / "config/security/owner-rules-manifest.json").write_text(json.dumps(manifest))
+            if changed_source:
+                (fixture / publisher.TARGETS[0][1]).write_text("unreviewed fixture")
             receipt = Path(scratch) / "receipt.json"
             argv = ["publisher", "--expected-runtime-commit", "a" * 40, "--receipt", str(receipt)]
             if execute:
                 argv += ["--execute"]
-            with patch("sys.argv", argv), patch.object(publisher.urllib.request, "urlopen", side_effect=fake_open), \
+            with patch.object(publisher, "__file__", str(fixture / "scripts/security/publish-reviewed-rules.py")), \
+                    patch("sys.argv", argv), patch.object(publisher.urllib.request, "urlopen", side_effect=fake_open), \
                     patch.object(publisher.subprocess, "check_output", return_value="fake-fixture-token"), patch("builtins.print"):
-                if wrong_runtime or changed_release:
+                if wrong_runtime or changed_release or changed_source:
                     with self.assertRaises(ValueError):
                         publisher.main()
                 else:
@@ -60,6 +76,11 @@ class PublisherTests(unittest.TestCase):
     def test_refuses_changes_until_exact_repaired_runtime_is_live(self):
         calls, _ = self.run_publisher(execute=True, wrong_runtime=True)
         self.assertFalse(any(method != "GET" for method, _ in calls))
+
+    def test_unreviewed_local_source_stops_before_any_network_or_credential_read(self):
+        calls, receipt = self.run_publisher(execute=True, changed_source=True)
+        self.assertEqual(calls, [])
+        self.assertIsNone(receipt)
 
     def test_refuses_to_overwrite_an_unexpected_release(self):
         calls, receipt = self.run_publisher(execute=True, changed_release=True)

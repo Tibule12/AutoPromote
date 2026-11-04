@@ -1,6 +1,8 @@
 # Team workspace continuation — 4 November 2026
 
-Local branch `feat/team-workspace-permissions-20261104`, based on main `8edaf4e2`. No push, merge, deployment, live post, payment, balance migration, IAM change or production record modification. The original `.env` and other worktrees remain untouched.
+Implementation checkpoint: branch `feat/team-workspace-permissions-20261104`, based on main `8edaf4e2`. The original local verification performed no push, merge, deployment, live post, payment, balance migration, IAM change or production record modification. The original `.env` and other worktrees remain untouched.
+
+Publication follow-up: the owner subsequently approved pushing the other saved updates. Team/Billing are now in [draft PR #520](https://github.com/Tibule12/AutoPromote/pull/520), separate from the approved Studio release. A CI follow-up bounds dispatch by the server's eight-platform catalogue and revalidates stored destination shapes (CodeQL #1226), with a forged-length regression. The emulator suite now passes **31 cases**. The fake-API Rules-publisher tests use a private synthetic reviewed fixture and add rejection of a changed source before any network/credential call: **five passed**. The real historical approval manifest and guarded publisher remain unchanged; this does not approve or enable publication of the new Team Rules. Remote rerun results belong to the PR. An earlier branch-push CI job also timed out downloading the CPU prerequisites; that is separate from the corrected test/source failures.
 
 The separate Billing contrast correction is checkpoint `81f6b128`; its [report](../billing-contrast-20261104/README.md) records 780 actual App text checks at six widths, minimum 5.49:1. It can be reviewed independently of Team.
 
