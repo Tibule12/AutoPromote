@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Dashboard OAuth navigation uses the existing exact provider allowlist; fixes Snapchat redirect blocking while preserving email verification, financial/security behavior and readiness.",
-  "reviewed_at": "2026-11-04T09:55:26.603Z",
+  "reason": "Review Snapchat PKCE, product-specific OAuth endpoints, identity-only connection display and authenticated completion refresh; existing product capabilities and commercial policies unchanged.",
+  "reviewed_at": "2026-11-04T10:29:03.763Z",
   "catalog_sha256": "98c30d5b7319da7d57821fd52c9471d77ca3d116716f0013a044ba60ff56667b",
   "sources": [
     {
@@ -55,7 +55,7 @@
     },
     {
       "path": "frontend/src/UserDashboard_full.js",
-      "sha256": "cb433ec367f4d35b97175f72f10282a0ea418059ebd1955163f9b964e1ecd8f9"
+      "sha256": "25c901d67c27293aa63db6e835c47a144ceff6165a4dbe41b7dfdfb631f81bee"
     },
     {
       "path": "frontend/src/WelcomePage.js",
@@ -387,7 +387,7 @@
     },
     {
       "path": "package.json",
-      "sha256": "3d1155ea362df81b2e650e7664dad81ec2b3426497b9a9047561722196a04ff1"
+      "sha256": "856cbc04ca71ee03aa2e8701c9b32904f51d757b8c7340cb36541c18a0de6566"
     },
     {
       "path": "python_media_worker/assets/studio-text-metrics.v1.json",

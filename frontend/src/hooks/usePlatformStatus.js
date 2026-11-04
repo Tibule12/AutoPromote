@@ -135,7 +135,14 @@ const PLATFORM_CONFIG = {
   snapchat: {
     endpoint: API_ENDPOINTS.SNAPCHAT_STATUS,
     metadataEndpoint: API_ENDPOINTS.SNAPCHAT_METADATA,
-    mapResponse: d => ({ connected: !!d.connected, profile: d.profile || null }),
+    mapResponse: d => ({
+      connected: !!d.connected,
+      profile: d.profile || d.meta?.profile || null,
+      identityOnly:
+        d.identityOnly === true ||
+        d.oauthProduct === "login_kit" ||
+        d.meta?.oauthProduct === "login_kit",
+    }),
   },
 };
 

@@ -1,0 +1,18 @@
+{
+  "actualAppBuild": true,
+  "realEmulatorRegistrationAndEmailVerification": true,
+  "actualConnectionsButton": true,
+  "realPrepareAndCallbackRouters": true,
+  "providerBoundary": "controlled fixture; not real Snapchat consent",
+  "authorizationRequestS256": true,
+  "verifierCheckedAgainstChallenge": true,
+  "samePublicClientBothSteps": true,
+  "privateVerifierAbsentFromBrowserResponse": true,
+  "encryptedOwnedConnection": true,
+  "popupRefreshAndReload": true,
+  "isolatedOpenerRecoveryAfterReload": false,
+  "identityOnlyClearlyLabelled": true,
+  "consumedStateRemoved": true,
+  "productionRecordsModified": false,
+  "realProviderConsent": false
+}

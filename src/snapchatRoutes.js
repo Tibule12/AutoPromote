@@ -8,7 +8,6 @@ const { admin: _admin, db } = require("./firebaseAdmin");
 void _admin;
 const { safeFetch } = require("./utils/ssrfGuard");
 const { rateLimiter } = require("./middlewares/globalRateLimiter");
-const DEBUG_SNAPCHAT_OAUTH = process.env.DEBUG_SNAPCHAT_OAUTH === "true";
 
 // Normalize/canonicalize redirect URIs to our custom domain
 function canonicalizeRedirectUri(uri) {
@@ -54,60 +53,12 @@ if (_rawRedirectEnv && _effectiveRedirect !== _rawRedirectEnv) {
   } catch (_) {}
 }
 
-// Canonical scope aliases -> official Snapchat OAuth scope URLs
-const SCOPE_ALIASES = {
-  display_name: "https://auth.snapchat.com/oauth2/api/user.display_name",
-  external_id: "https://auth.snapchat.com/oauth2/api/user.external_id",
-  "bitmoji.avatar": "https://auth.snapchat.com/oauth2/api/user.bitmoji.avatar",
-  camkit_lens_push_to_device: "https://auth.snapchat.com/oauth2/api/camkit_lens_push_to_device",
-  // Legacy alias from earlier implementation (marketing shorthand). Kept for compatibility.
-  "snapchat-marketing-api": "https://auth.snapchat.com/oauth2/api/marketing-api",
-};
+const oauth = require("./services/snapchatOAuth");
+const { normalizeScopes } = oauth;
 
-const ALLOWED_SCOPE_URLS = new Set(Object.values(SCOPE_ALIASES));
-
-function normalizeScopes(input) {
-  // Accept null/undefined -> default to [display_name] logically elsewhere
-  if (!input) return { scopeList: [], scope: "" };
-
-  // Accept arrays, comma or space separated strings
-  let raw = [];
-  if (Array.isArray(input)) raw = input;
-  else if (typeof input === "string") {
-    raw = input.split(/[ ,]+/).filter(Boolean);
-  } else {
-    raw = [String(input)];
-  }
-
-  const out = [];
-  for (const r of raw) {
-    // If full URL, accept if in allowlist
-    if (r.startsWith("https://")) {
-      if (ALLOWED_SCOPE_URLS.has(r)) out.push(r);
-      continue;
-    }
-    // Try alias match (case-sensitive simple match)
-    if (SCOPE_ALIASES[r]) {
-      out.push(SCOPE_ALIASES[r]);
-      continue;
-    }
-    // also accept alias without dot for bitmoji.avatar -> bitmoji.avatar
-    const lowered = r.toLowerCase();
-    if (SCOPE_ALIASES[lowered]) {
-      out.push(SCOPE_ALIASES[lowered]);
-      continue;
-    }
-    // unknown tokens are ignored (validation will handle if none remain)
-  }
-
-  // De-duplicate while preserving order
-  const seen = new Set();
-  const deduped = out.filter(x => (seen.has(x) ? false : seen.add(x)));
-  return { scopeList: deduped, scope: deduped.join(" ") };
-}
 // Support explicit env vars to avoid mixing Public vs Confidential IDs.
-// - `SNAPCHAT_PUBLIC_CLIENT_ID` is used for building the authorize URL (browser step).
-// - `SNAPCHAT_CONFIDENTIAL_CLIENT_ID` + `SNAPCHAT_CLIENT_SECRET` are used for the server-side token exchange.
+// Login Kit public clients use the same ID and PKCE for both OAuth steps.
+// Marketing uses its own confidential client ID/secret for both steps.
 // For backwards compatibility, `SNAPCHAT_CLIENT_ID` will be used as a fallback for both roles.
 const config = {
   publicClientId:
@@ -128,26 +79,9 @@ function activeConfig() {
 }
 
 // For dashboard redirect
-const DASHBOARD_URL = process.env.DASHBOARD_URL || "https://www.autopromote.org";
-
-function ensureSnapchatEnv(res, cfg, opts = { requireSecret: true }) {
-  const missing = [];
-  // Require a public client id for authorize URL construction. If absent
-  // the confidentialClientId will be used as a fallback.
-  if (!cfg.publicClientId && !cfg.confidentialClientId)
-    missing.push("SNAPCHAT_PUBLIC_CLIENT_ID or SNAPCHAT_CLIENT_ID");
-  if (opts.requireSecret && !cfg.secret) missing.push("SNAPCHAT_CLIENT_SECRET");
-  if (!cfg.redirect) missing.push("SNAPCHAT_REDIRECT_URI");
-
-  if (missing.length > 0) {
-    return res.status(500).json({
-      error: "Snapchat environment not configured",
-      missing: missing,
-      message:
-        "Please configure the required Snapchat environment variables. Note: Snapchat only supports production environment.",
-    });
-  }
-}
+const dashboardUrl = new URL(process.env.DASHBOARD_URL || "https://autopromote.org");
+if (dashboardUrl.hostname === "www.autopromote.org") dashboardUrl.hostname = "autopromote.org";
+const DASHBOARD_URL = dashboardUrl.href;
 
 // Lightweight health for diagnostics
 router.get("/health", (req, res) => {
@@ -155,11 +89,11 @@ router.get("/health", (req, res) => {
     const cfg = activeConfig();
     const mask = s => (s ? `${String(s).slice(0, 8)}…${String(s).slice(-4)}` : null);
     return res.json({
-      ok: !!(
-        (cfg.publicClientId || cfg.confidentialClientId) &&
-        (cfg.secret || process.env.ALLOW_NO_SECRET === "true") &&
-        cfg.redirect
+      ok: !!oauth.createRequest(
+        cfg,
+        process.env.SNAPCHAT_DEFAULT_SCOPE || "snapchat-marketing-api"
       ),
+      pkceMethod: "S256",
       hasPublicClientId: !!cfg.publicClientId,
       hasConfidentialClientId: !!cfg.confidentialClientId,
       hasClientSecret: !!cfg.secret,
@@ -168,292 +102,87 @@ router.get("/health", (req, res) => {
       confidentialClientIdMasked: mask(cfg.confidentialClientId),
     });
   } catch (e) {
-    return res.status(500).json({ ok: false, error: e.message });
+    return res.status(503).json({ ok: false, error: e.code || "snapchat_oauth_unavailable" });
   }
 });
 
-// 1. Get Snapchat OAuth authorization URL (redirect)
-router.get("/auth", (req, res) => {
-  const cfg = activeConfig();
-  ensureSnapchatEnv(res, cfg);
-  if (res.headersSent) return;
-
-  // Snapchat expects scopes to be space-separated. Using commas can produce
-  // an invalid request for some OAuth endpoints and lead to 500/invalid errors.
-  const requestedQueryScope = req.query && req.query.test_scope ? req.query.test_scope : null;
-  const envDefaultScope = process.env.SNAPCHAT_DEFAULT_SCOPE || null;
-  let normalized = { scopeList: [], scope: "" };
-  if (requestedQueryScope) normalized = normalizeScopes(requestedQueryScope);
-  else if (envDefaultScope) normalized = normalizeScopes(envDefaultScope);
-  else normalized = normalizeScopes("snapchat-marketing-api");
-  const scope =
-    normalized.scope && normalized.scope.length > 0 ? normalized.scope : SCOPE_ALIASES.display_name;
-  const stateRaw = req.query.state || "snapchat_oauth_state";
-  // Prefer explicit public client id for the browser authorize URL; fall back
-  // to the confidential client id if no public id provided (back-compat).
-  const clientIdForAuthorize = cfg.publicClientId || cfg.confidentialClientId;
-  const authUrl = `https://accounts.snapchat.com/login/oauth2/authorize?client_id=${clientIdForAuthorize}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(stateRaw)}`;
-
-  if (DEBUG_SNAPCHAT_OAUTH) {
-    console.log("Snapchat OAuth URL present=%s", !!authUrl);
-  }
-
-  res.json({ authUrl });
-});
-
-// 2. Prepare Snapchat OAuth (returns JSON authUrl for frontend)
-// Apply a modest per-user rate limit to OAuth prepare to mitigate abuse
+// OAuth starts must be owned by a verified AutoPromote identity. Public preflight
+// URLs are diagnostic only; their unpersisted state cannot complete a connection.
 const oauthPrepareLimiter = rateLimiter({
   capacity: parseInt(process.env.SNAPCHAT_OAUTH_PREPARE_CAP || "60", 10),
   refillPerSec: 5,
   windowHint: "snapchat_oauth_prepare",
 });
-router.post("/oauth/prepare", authMiddleware, oauthPrepareLimiter, async (req, res) => {
-  const cfg = activeConfig();
-  ensureSnapchatEnv(res, cfg);
-  if (res.headersSent) return;
-
+async function prepareSnapchat(req, res) {
+  res.set("Cache-Control", "no-store");
   try {
-    // Determine scope to request. Priority:
-    // 1) `test_scope` body param (for quick debugging)
-    // 2) `SNAPCHAT_DEFAULT_SCOPE` env var (configurable on Render)
-    // 3) hardcoded default 'snapchat-marketing-api'
-    const requestedScope = (req.body && req.body.test_scope) || null;
-    const envDefaultScope = process.env.SNAPCHAT_DEFAULT_SCOPE || null;
-
-    // Normalize requested or env-provided scope(s) to canonical URLs
-    let scopeSource = "default";
-    let normalized = { scopeList: [], scope: "" };
-    if (requestedScope) {
-      normalized = normalizeScopes(requestedScope);
-      scopeSource = "request";
-    } else if (envDefaultScope) {
-      normalized = normalizeScopes(envDefaultScope);
-      scopeSource = "env";
-    } else {
-      normalized = normalizeScopes("snapchat-marketing-api");
-      scopeSource = "default";
-    }
-
-    // If normalization yielded no allowed scopes, fall back to display_name
-    const displayNameUrl = SCOPE_ALIASES.display_name;
-    if (!normalized.scopeList || normalized.scopeList.length === 0) {
-      normalized = { scopeList: [displayNameUrl], scope: displayNameUrl };
-    }
-
-    const { v4: uuidv4 } = require("../lib/uuid-compat");
-    const state = uuidv4();
-    const userId = req.userId || "anonymous";
-
-    // Store state temporarily in Firestore
-    const popupRequested = !!(req.body && req.body.popup === true);
+    const cfg = activeConfig();
+    const requestedScope = req.method === "GET" ? req.query.test_scope : req.body?.test_scope;
+    const result = oauth.createRequest(
+      cfg,
+      requestedScope || process.env.SNAPCHAT_DEFAULT_SCOPE || "snapchat-marketing-api"
+    );
+    const uid = req.userId;
+    if (!uid || uid === "anonymous")
+      return res.status(401).json({ error: "Authentication required" });
+    const popup = req.body?.popup === true;
     await db
       .collection("oauth_states")
-      .doc(state)
-      .set({
-        uid: userId,
-        platform: "snapchat",
-        popup: popupRequested,
-        scope: normalized.scope,
-        scopeList: normalized.scopeList,
-        createdAt: new Date().toISOString(),
-        expiresAt: Date.now() + 10 * 60 * 1000, // 10 minutes
-      });
-
-    const clientIdForAuthorize = cfg.publicClientId || cfg.confidentialClientId;
-
-    // Explicitly log the auth parameters to help user debug redirect_uri mismatches
-    console.log(
-      "[Snapchat] OAuth Prepare: client_id=%s redirect_uri=%s scope=%s",
-      clientIdForAuthorize,
-      cfg.redirect,
-      normalized.scope
-    );
-
-    let authUrl = `https://accounts.snapchat.com/login/oauth2/authorize?client_id=${clientIdForAuthorize}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(normalized.scope)}&state=${encodeURIComponent(state)}`;
-
-    // Perform a quick server-side probe of the auth URL. Some providers
-    // return 5xx for certain scope combinations or misconfigurations; when
-    // that happens try a reduced scope fallback automatically so the
-    // frontend receives a working auth URL instead of immediately failing.
-    let probeStatusVar = null;
-    try {
-      // Probe the provider URL, but validate destination first to avoid SSRF.
-      const probe = await safeFetch(authUrl, fetch, {
-        allowHosts: ["accounts.snapchat.com"],
-        requireHttps: true,
-        fetchOptions: { method: "GET", redirect: "manual" },
-      });
-      // Treat 5xx as provider error; 2xx or 3xx are acceptable (redirect to UI)
-      probeStatusVar = probe.status;
-      if (probe.status >= 500) {
-        const fallbackScope = "display_name";
-        const fallbackUrl = `https://accounts.snapchat.com/login/oauth2/authorize?client_id=${clientIdForAuthorize}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(fallbackScope)}&state=${encodeURIComponent(state)}`;
-        const probe2 = await safeFetch(fallbackUrl, fetch, {
-          allowHosts: ["accounts.snapchat.com"],
-          requireHttps: true,
-          fetchOptions: { method: "GET", redirect: "manual" },
-        });
-        probeStatusVar = probe2.status;
-        if (probe2.status < 500) {
-          if (DEBUG_SNAPCHAT_OAUTH)
-            console.log(
-              "snapchat: primary auth URL returned",
-              probe.status,
-              "using fallback scope; probe2=",
-              probe2.status
-            );
-          authUrl = fallbackUrl;
-        } else {
-          if (DEBUG_SNAPCHAT_OAUTH)
-            console.warn(
-              "snapchat: both primary and fallback auth URLs returned 5xx",
-              probe.status,
-              probe2.status
-            );
-          // If both attempts returned 5xx, return a 503 so the frontend can
-          // surface a friendly 'service unavailable' message instead of
-          // opening the provider page and showing a generic provider error.
-          return res.status(503).json({
-            error: "provider_unavailable",
-            details: "Snapchat returned 5xx for primary and fallback auth URLs",
-            probeStatus: { primary: probe.status, fallback: probe2.status },
-          });
-        }
-      } else {
-        if (DEBUG_SNAPCHAT_OAUTH) console.log("snapchat: auth URL probe OK status=", probe.status);
-      }
-    } catch (probeErr) {
-      // Network/probe error — don't block the flow, return the constructed URL
-      if (DEBUG_SNAPCHAT_OAUTH) console.warn("snapchat: auth URL probe failed", probeErr.message);
-    }
-
-    if (DEBUG_SNAPCHAT_OAUTH) {
-      // Mask client id for safe logging (show first & last 4 chars)
-      const mask = s => {
-        try {
-          if (!s) return null;
-          const st = String(s);
-          return st.length > 8 ? `${st.slice(0, 8)}…${st.slice(-4)}` : st;
-        } catch (_) {
-          return null;
-        }
-      };
-      console.log("Snapchat OAuth prepare URL present=%s", !!authUrl);
-      console.log(
-        "snapchat: auth prepare clientId=%s redirect=%s scope=%s authUrlSnippet=%s",
-        mask(clientIdForAuthorize),
-        cfg.redirect,
-        normalized.scope,
-        authUrl.slice(0, 200)
-      );
-    }
-
-    // Return the scope and a probeStatus to help client diagnostics
-    const scopeWarning =
-      normalized.scope && normalized.scope.includes("marketing-api")
-        ? "This scope may require Snapchat Marketing API approval. If you see an authorization error, try using the display_name scope URL or request API access in the Snapchat developer console."
-        : null;
-    if (DEBUG_SNAPCHAT_OAUTH)
-      console.log("snapchat: selected scope=%s source=%s", normalized.scope, scopeSource);
-    res.json({
-      authUrl,
-      state,
-      popup: popupRequested,
-      scope: normalized.scope,
-      scopeList: normalized.scopeList,
-      scopeSource,
-      probeStatus: probeStatusVar,
-      scopeWarning,
+      .doc(result.state)
+      .create({ ...result.request, uid, popup });
+    return res.json({
+      authUrl: result.authUrl,
+      state: result.state,
+      popup,
+      scope: result.request.scope,
+      scopeList: result.request.scopeList,
+      scopeSource: requestedScope
+        ? "request"
+        : process.env.SNAPCHAT_DEFAULT_SCOPE
+          ? "env"
+          : "default",
+      oauthProduct: result.request.product,
+      pkceMethod: "S256",
+      probeStatus: null,
     });
-  } catch (err) {
-    console.error("Snapchat OAuth prepare error:", err);
-    res.status(500).json({ error: "OAuth prepare failed", details: err.message });
+  } catch (error) {
+    console.warn("[snapchat] prepare failed", error.code || "oauth_prepare_failed");
+    return res
+      .status(503)
+      .json({
+        error: error.code || "snapchat_oauth_unavailable",
+        message: "Snapchat connection is not configured correctly. Please contact support.",
+      });
   }
-});
-
-// Public preflight (no auth): report constructed auth URL and provider status (no secrets leaked)
+}
+router.get("/auth", authMiddleware, oauthPrepareLimiter, prepareSnapchat);
+router.post("/oauth/prepare", authMiddleware, oauthPrepareLimiter, prepareSnapchat);
 router.get(
   "/oauth/preflight",
   rateLimiter({ capacity: 60, refillPerSec: 10, windowHint: "snapchat_preflight" }),
   async (req, res) => {
-    const cfg = activeConfig();
-    ensureSnapchatEnv(res, cfg, { requireSecret: false });
-    if (res.headersSent) return;
     try {
-      const state = require("../lib/uuid-compat").v4();
-      const envDefaultScope = process.env.SNAPCHAT_DEFAULT_SCOPE || null;
-      const requestedQueryScope = req.query && req.query.test_scope ? req.query.test_scope : null;
-
-      // Normalize scope(s) using aliases/full-URLs
-      let scopeSource = "default";
-      let normalized = { scopeList: [], scope: "" };
-      if (requestedQueryScope) {
-        normalized = normalizeScopes(requestedQueryScope);
-        scopeSource = "request";
-      } else if (envDefaultScope) {
-        normalized = normalizeScopes(envDefaultScope);
-        scopeSource = "env";
-      } else {
-        normalized = normalizeScopes("snapchat-marketing-api");
-        scopeSource = "default";
-      }
-      // Fallback to display_name if nothing valid
-      const displayNameUrl = SCOPE_ALIASES.display_name;
-      if (!normalized.scopeList || normalized.scopeList.length === 0) {
-        normalized = { scopeList: [displayNameUrl], scope: displayNameUrl };
-      }
-
-      const clientIdForAuthorize = cfg.publicClientId || cfg.confidentialClientId;
-      const url = `https://accounts.snapchat.com/login/oauth2/authorize?client_id=${clientIdForAuthorize}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(normalized.scope)}&state=${encodeURIComponent(state)}`;
-      let status = null;
-      let location = null;
-      try {
-        const r = await safeFetch(url, fetch, {
-          allowHosts: ["accounts.snapchat.com"],
-          requireHttps: true,
-          fetchOptions: { method: "GET", redirect: "manual" },
-        });
-        status = r.status;
-        location = r.headers.get ? r.headers.get("location") : null;
-      } catch (e) {
-        status = "probe_error";
-      }
-      if (DEBUG_SNAPCHAT_OAUTH) {
-        const mask = s => {
-          try {
-            if (!s) return null;
-            const st = String(s);
-            return st.length > 8 ? `${st.slice(0, 8)}…${st.slice(-4)}` : st;
-          } catch (_) {
-            return null;
-          }
-        };
-        console.log(
-          "snapchat: preflight authUrl clientId=%s redirect=%s probe=%s scope=%s source=%s",
-          mask(clientIdForAuthorize),
-          cfg.redirect,
-          status,
-          normalized.scope,
-          scopeSource
-        );
-      }
-      const scopeWarning =
-        normalized.scope && normalized.scope.includes("marketing-api")
-          ? "This scope may require Snapchat Marketing API approval. If you see an authorization error, try using the display_name scope URL or request API access in the Snapchat developer console."
-          : null;
-      res.json({
+      const result = oauth.createRequest(
+        activeConfig(),
+        req.query.test_scope || process.env.SNAPCHAT_DEFAULT_SCOPE || "snapchat-marketing-api"
+      );
+      return res.json({
         ok: true,
-        authUrl: url,
-        probeStatus: status,
-        location,
-        scope: normalized.scope,
-        scopeList: normalized.scopeList,
-        scopeSource,
-        scopeWarning,
+        authUrl: result.authUrl,
+        scope: result.request.scope,
+        scopeList: result.request.scopeList,
+        scopeSource: req.query.test_scope
+          ? "request"
+          : process.env.SNAPCHAT_DEFAULT_SCOPE
+            ? "env"
+            : "default",
+        oauthProduct: result.request.product,
+        pkceMethod: "S256",
+        requiresAuthenticatedPrepare: true,
+        probeStatus: null,
       });
-    } catch (e) {
-      res.status(500).json({ ok: false, error: e.message });
+    } catch (error) {
+      return res.status(503).json({ ok: false, error: error.code || "snapchat_oauth_unavailable" });
     }
   }
 );
@@ -467,221 +196,147 @@ const callbackLimiter = rateLimiter({
   windowHint: "snapchat_callback",
 });
 router.all("/auth/callback", callbackLimiter, async (req, res) => {
-  // Accept code/state from query (GET) or body (POST)
-  const code = req.method === "GET" ? req.query.code : req.body.code;
-  const state = req.method === "GET" ? req.query.state : req.body.state;
-  if (DEBUG_SNAPCHAT_OAUTH) {
-    const mask = s => {
-      try {
-        if (!s) return null;
-        const st = String(s);
-        return st.length > 8 ? `${st.slice(0, 8)}…${st.slice(-4)}` : st;
-      } catch (_) {
-        return null;
-      }
-    };
-    try {
-      console.log(
-        "snapchat: callback invoked method=%s remote=%s",
-        req.method,
-        req.ip || req.connection?.remoteAddress || "unknown"
-      );
-      // Log query/body with masking for tokens
-      const q = Object.assign({}, req.query || {});
-      const b = Object.assign({}, req.body || {});
-      if (q.client_id) q.client_id = mask(q.client_id);
-      if (b.client_id) b.client_id = mask(b.client_id);
-      if (q.code) q.code = mask(q.code);
-      if (b.code) b.code = mask(b.code);
-      if (q.error) q.error = String(q.error).slice(0, 200);
-      if (b.error) b.error = String(b.error).slice(0, 200);
-      // Avoid logging potentially sensitive query/body values; only log the keys present
-      console.debug("snapchat: callback query keys=%o", Object.keys(q));
-      console.debug("snapchat: callback body keys=%o", Object.keys(b));
-    } catch (e) {
-      console.warn("snapchat: callback debug log failed", e && e.message);
+  res.set("Cache-Control", "no-store");
+  const payload = req.method === "GET" ? req.query : req.body || {};
+  const failCallback = (code, message, status = 400) => {
+    if (req.method === "GET") {
+      const target = new URL(DASHBOARD_URL);
+      target.searchParams.set("snapchat", "error");
+      target.searchParams.set("oauth", "snapchat");
+      target.searchParams.set("status", "error");
+      target.searchParams.set("message", message);
+      return res.redirect(target.href);
     }
-  }
-  if (!code) {
-    return res.status(400).json({ error: "Authorization code required" });
-  }
-
-  const cfg = activeConfig();
-  ensureSnapchatEnv(res, cfg);
-  if (res.headersSent) return;
-
-  try {
-    // Look up the oauth state document to recover the original uid (if any)
-    let userId = req.userId || null;
-    let isPopup = false; // default
-    let savedScope = null;
-    if (state) {
-      try {
-        const st = await db.collection("oauth_states").doc(state).get();
-        if (st.exists) {
-          const v = st.data() || {};
-          if (v.uid) userId = v.uid;
-          if (v.popup) isPopup = !!v.popup;
-          if (v.scope) savedScope = v.scope;
-          // Clean up state after we read it
-          try {
-            await db.collection("oauth_states").doc(state).delete();
-          } catch (_) {}
-        }
-      } catch (e) {
-        // ignore state lookup errors - proceed with available userId
-        console.warn("snapchat: oauth state lookup failed:", e.message);
-      }
-    }
-    if (!userId) userId = "anonymous";
-
-    // Exchange code for access token (validated host)
-    if (DEBUG_SNAPCHAT_OAUTH)
-      console.log(
-        "snapchat: token exchange for state=%s user=%s scope=%s",
-        state,
-        userId,
-        savedScope || null
-      );
-    const tokenRes = await safeFetch(
-      "https://accounts.snapchat.com/login/oauth2/access_token",
-      fetch,
-      {
-        allowHosts: ["accounts.snapchat.com"],
-        requireHttps: true,
-        fetchOptions: {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            // Use the confidential client id for the token exchange. If a
-            // dedicated confidential client id is not provided, fall back to
-            // the legacy client id value.
-            Authorization: `Basic ${Buffer.from(`${cfg.confidentialClientId}:${cfg.secret}`).toString("base64")}`,
-          },
-          body: new URLSearchParams({
-            grant_type: "authorization_code",
-            code: code,
-            redirect_uri: cfg.redirect,
-          }),
-        },
-      }
+    return res.status(status).json({ error: code, message });
+  };
+  if (!payload.state)
+    return failCallback(
+      "invalid_oauth_state",
+      "This Snapchat connection request is invalid. Start Connect Snapchat again."
     );
-
-    const tokenData = await tokenRes.json();
-    if (!tokenRes.ok) {
-      // If provider returned an error, include it for debugging
-      console.error("snapchat: token exchange failed", {
-        scope: savedScope || null,
-        status: tokenRes.status,
-        error: tokenData.error,
-        error_description: tokenData.error_description,
-      });
-
-      // If the provider reports an invalid scope, give a clear UX path:
-      // - For browser GET flows, redirect to dashboard with a helpful query param
-      // - For programmatic POST flows, return a clear error explaining scope needs
-      if (tokenData && tokenData.error === "invalid_scope") {
-        console.warn("snapchat: invalid_scope reported by provider for state=", state);
-        if (req.method === "GET") {
-          // Redirect to dashboard with a query param so frontend can show an explanation
-          return res.redirect(
-            `${DASHBOARD_URL}?snapchat=error_invalid_scope&message=${encodeURIComponent(
-              "Snapchat rejected the requested scope. Request Marketing API access or retry with scope=display_name."
-            )}`
-          );
-        }
-
-        return res.status(400).json({
-          error: "invalid_scope",
-          message:
-            "Requested scope is not allowed for this Snapchat app. Request Marketing API access in the Snapchat developer console or retry with scope=display_name.",
-          details: { error: tokenData.error, error_description: tokenData.error_description },
-        });
-      }
-
-      // Avoid returning token/secret details; only return minimal error info
-      return res.status(400).json({
-        error: "Failed to exchange code for token",
-        details: { error: tokenData.error, error_description: tokenData.error_description },
-      });
-    }
-
-    // Get user profile information
-    // Fetch profile from Snapchat Ads API (validate host)
-    const profileRes = await safeFetch("https://adsapi.snapchat.com/v1/me", fetch, {
-      allowHosts: ["adsapi.snapchat.com"],
+  try {
+    const saved = await oauth.consumeRequest(db, payload.state);
+    if (payload.error)
+      return failCallback(
+        "snapchat_authorization_denied",
+        "Snapchat did not authorize the connection. Start Connect Snapchat again."
+      );
+    const token = oauth.tokenRequest(activeConfig(), saved, payload.code);
+    const tokenRes = await safeFetch(token.endpoint, fetch, {
+      allowHosts: ["accounts.snapchat.com"],
       requireHttps: true,
       fetchOptions: {
-        headers: {
-          Authorization: `Bearer ${tokenData.access_token}`,
-        },
+        method: "POST",
+        redirect: "error",
+        timeout: 15000,
+        size: 1048576,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: token.body,
       },
     });
-
-    const profileData = await profileRes.json();
-    if (!profileRes.ok) {
-      console.error("snapchat: profile fetch failed", profileData);
-      return res.status(400).json({ error: "Failed to get user profile", details: profileData });
+    const tokenData = await tokenRes.json();
+    if (!tokenRes.ok || typeof tokenData.access_token !== "string" || !tokenData.access_token) {
+      console.warn("[snapchat] token exchange rejected", tokenRes.status, saved.product);
+      return failCallback(
+        "snapchat_token_exchange_failed",
+        "Snapchat could not complete the connection. Start a new connection attempt."
+      );
     }
-
-    const { encryptToken } = require("./services/secretVault");
-    // Store connection in Firestore under the resolved userId (encrypt tokens)
+    const expiresIn = Number(tokenData.expires_in);
+    if (!Number.isSafeInteger(expiresIn) || expiresIn <= 0)
+      throw Object.assign(new Error("Invalid token expiry"), {
+        code: "SNAPCHAT_INVALID_TOKEN_RESPONSE",
+      });
+    const profile = oauth.profileRequest(saved, tokenData.access_token);
+    const profileRes = await safeFetch(profile.url, fetch, {
+      allowHosts: saved.product === "login_kit" ? ["kit.snapchat.com"] : ["adsapi.snapchat.com"],
+      requireHttps: true,
+      fetchOptions: { headers: profile.headers, redirect: "error", timeout: 15000, size: 1048576 },
+    });
+    const rawProfile = await profileRes.json();
+    const profileData = saved.product === "login_kit" ? rawProfile.data?.me : rawProfile;
+    if (!profileRes.ok || !profileData || rawProfile.errors?.length) {
+      return failCallback(
+        "snapchat_profile_failed",
+        "Snapchat authorization completed, but account details could not be loaded. Please reconnect."
+      );
+    }
+    const { encryptToken, hasEncryption } = require("./services/secretVault");
+    if (require("./utils/authAuthority").isHostedRuntime() && !hasEncryption()) {
+      throw Object.assign(new Error("Token storage unavailable"), {
+        code: "TOKEN_ENCRYPTION_UNAVAILABLE",
+      });
+    }
+    const plaintext = JSON.stringify({
+      access_token: tokenData.access_token,
+      refresh_token: tokenData.refresh_token || null,
+      expires_in: expiresIn,
+    });
+    const encrypted = encryptToken(plaintext);
+    if (hasEncryption() && encrypted === plaintext) {
+      throw Object.assign(new Error("Token encryption failed"), {
+        code: "TOKEN_ENCRYPTION_FAILED",
+      });
+    }
     await db
       .collection("users")
-      .doc(userId)
+      .doc(saved.uid)
       .collection("connections")
       .doc("snapchat")
       .set({
-        tokens: encryptToken(
-          JSON.stringify({
-            access_token: tokenData.access_token,
-            refresh_token: tokenData.refresh_token,
-            expires_in: tokenData.expires_in,
-          })
-        ),
-        hasEncryption: true,
-        expiresAt: Date.now() + tokenData.expires_in * 1000,
+        tokens: encrypted,
+        hasEncryption: hasEncryption(),
+        expiresAt: Date.now() + expiresIn * 1000,
         profile: profileData,
+        oauthProduct: saved.product,
+        scope: saved.scope,
+        capabilities: {
+          identity: true,
+          publishing:
+            saved.product === "marketing" && saved.scopeList.includes("snapchat-marketing-api"),
+        },
         connectedAt: new Date().toISOString(),
       });
-
-    // If this was a browser redirect (GET), redirect back to the dashboard
+    require("./utils/simpleCache").setCache(`platform_connections_status_${saved.uid}`, null, 0);
     if (req.method === "GET") {
-      // Use the isPopup we recovered earlier from the state doc (if any)
-
-      if (isPopup) {
-        res.set("Content-Type", "text/html");
-        return res.send(`<!doctype html><html><head><meta charset="utf-8"><title>Snapchat Connected</title></head><body>
-          <script>
-            if (window.opener) {
-              window.opener.postMessage('snapchat_oauth_complete', '${DASHBOARD_URL}');
-              window.close();
-            } else {
-              window.location.href = '${DASHBOARD_URL}?snapchat=connected';
-            }
-          </script>
-        </body></html>`);
-      } else {
-        const successUrl = `${DASHBOARD_URL}?snapchat=connected`;
-        return res.redirect(successUrl);
+      const target = new URL(DASHBOARD_URL);
+      target.searchParams.set("snapchat", "connected");
+      target.searchParams.set("oauth", "snapchat");
+      target.searchParams.set("status", "success");
+      if (saved.popup) {
+        // JSON-encode script strings and use an origin (never a path) for postMessage.
+        const destination = JSON.stringify(target.href).replace(/</g, "\\u003c");
+        const origin = JSON.stringify(target.origin).replace(/</g, "\\u003c");
+        const nonce = require("crypto").randomBytes(18).toString("base64");
+        res.set(
+          "Content-Security-Policy",
+          `default-src 'none'; script-src 'nonce-${nonce}'; base-uri 'none'; frame-ancestors 'none'`
+        );
+        res.set("Cache-Control", "no-store");
+        res.type("html");
+        return res.send(`<!doctype html><html><head><meta charset="utf-8"><title>Snapchat Connected</title></head><body><script nonce="${nonce}">
+          if (window.opener) window.opener.postMessage('snapchat_oauth_complete', ${origin});
+          window.close();
+          window.location.replace(${destination});
+          </script></body></html>`);
       }
+      return res.redirect(target.href);
     }
-
-    // Otherwise return JSON for programmatic callers
     return res.json({
       success: true,
       message: "Snapchat connected successfully",
       profile: profileData,
+      oauthProduct: saved.product,
     });
-  } catch (err) {
-    console.error("Snapchat OAuth callback error:", err);
-    if (req.method === "GET") {
-      // Redirect to dashboard with error on GET flows
-      return res.redirect(
-        `${DASHBOARD_URL}?snapchat=error&message=${encodeURIComponent(err.message || "oauth_failed")}`
-      );
-    }
-    return res.status(500).json({ error: "OAuth callback failed", details: err.message });
+  } catch (error) {
+    const invalidState = error.code === "SNAPCHAT_INVALID_STATE";
+    console.warn("[snapchat] callback failed", error.code || "oauth_callback_failed");
+    return failCallback(
+      invalidState ? "invalid_oauth_state" : "snapchat_connection_failed",
+      invalidState
+        ? "This Snapchat connection request expired or was already used. Start Connect Snapchat again."
+        : "Snapchat could not complete the connection. Start Connect Snapchat again."
+    );
   }
 });
 
@@ -712,6 +367,9 @@ router.get(
         profile: data.profile,
         expiresAt: data.expiresAt,
         connectedAt: data.connectedAt,
+        oauthProduct: data.oauthProduct || null,
+        capabilities: data.capabilities || null,
+        identityOnly: data.oauthProduct === "login_kit",
         message: isExpired ? "Token expired - please reconnect" : "Connected to Snapchat",
       });
     } catch (err) {
@@ -742,6 +400,12 @@ router.get(
       }
 
       const connection = snap.data();
+      if (connection.oauthProduct === "login_kit") {
+        return res.json({
+          success: true,
+          meta: { organizations: [], oauthProduct: "login_kit", publishingReady: false },
+        });
+      }
       const { tokensFromDoc } = require("./services/connectionTokenUtils");
       const tokens = tokensFromDoc(connection) || connection.tokens || null;
       const accessToken = tokens?.access_token;
@@ -850,6 +514,9 @@ router.post("/creative", authMiddleware, apiActionLimiter, async (req, res) => {
     }
 
     const connection = snap.data();
+    if (connection.oauthProduct === "login_kit") {
+      return res.status(403).json({ error: "snapchat_publishing_permission_required" });
+    }
     const { tokensFromDoc } = require("./services/connectionTokenUtils");
     const tokens = tokensFromDoc(connection) || connection.tokens || null;
     const accessToken = tokens?.access_token;
@@ -1002,6 +669,9 @@ router.get("/analytics/:creativeId", authMiddleware, apiActionLimiter, async (re
     }
 
     const connection = snap.data();
+    if (connection.oauthProduct === "login_kit") {
+      return res.status(403).json({ error: "snapchat_publishing_permission_required" });
+    }
     const { tokensFromDoc } = require("./services/connectionTokenUtils");
     const tokens = tokensFromDoc(connection) || connection.tokens || null;
     const accessToken = tokens?.access_token;
@@ -1094,73 +764,3 @@ router.get("/analytics/:creativeId", authMiddleware, apiActionLimiter, async (re
 router.normalizeScopes = normalizeScopes;
 
 module.exports = router;
-
-// Debug probe (only in non-production when DEBUG_SNAPCHAT_OAUTH=true)
-// Performs a server-side GET to the Snapchat authorize endpoint to capture status and a short body
-if (DEBUG_SNAPCHAT_OAUTH && process.env.NODE_ENV !== "production") {
-  router.get("/_debug/authorize_probe", async (req, res) => {
-    try {
-      const cfg = activeConfig();
-      ensureSnapchatEnv(res, cfg, { requireSecret: false });
-      if (res.headersSent) return;
-      const state = req.query.state || require("../lib/uuid-compat").v4();
-      const scope =
-        req.query &&
-        req.query.test_scope &&
-        ["snapchat-marketing-api", "display_name"].includes(req.query.test_scope)
-          ? req.query.test_scope
-          : "snapchat-marketing-api";
-      const clientIdForAuthorize = cfg.publicClientId || cfg.confidentialClientId;
-      const authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${clientIdForAuthorize}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}`;
-      const r = await safeFetch(authUrl, fetch, {
-        allowHosts: ["accounts.snapchat.com"],
-        requireHttps: true,
-        fetchOptions: { method: "GET" },
-      });
-      const text = await r.text().catch(() => "");
-      return res.json({ ok: true, url: authUrl, status: r.status, snippet: text.slice(0, 1000) });
-    } catch (e) {
-      return res.status(500).json({ ok: false, error: e.message });
-    }
-  });
-}
-
-// Public debug probe (guarded by environment, blocked in production)
-// Set SNAPCHAT_DEBUG_ALLOW=true in the environment to enable.
-if (process.env.SNAPCHAT_DEBUG_ALLOW === "true" && process.env.NODE_ENV !== "production") {
-  router.get("/_debug/authorize_probe_public", async (req, res) => {
-    try {
-      const cfg = activeConfig();
-      ensureSnapchatEnv(res, cfg, { requireSecret: false });
-      if (res.headersSent) return;
-      const state = req.query.state || require("../lib/uuid-compat").v4();
-      const scope =
-        req.query &&
-        req.query.test_scope &&
-        ["snapchat-marketing-api", "display_name"].includes(req.query.test_scope)
-          ? req.query.test_scope
-          : "snapchat-marketing-api";
-      const clientIdForAuthorize = cfg.publicClientId || cfg.confidentialClientId;
-      const authUrl = `https://accounts.snapchat.com/accounts/oauth2/auth?client_id=${clientIdForAuthorize}&redirect_uri=${encodeURIComponent(cfg.redirect)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}`;
-      const r = await safeFetch(authUrl, fetch, {
-        allowHosts: ["accounts.snapchat.com"],
-        requireHttps: true,
-        fetchOptions: { method: "GET", redirect: "manual" },
-      });
-      const headers = {};
-      r.headers.forEach((v, k) => {
-        headers[k] = v;
-      });
-      const text = await r.text().catch(() => "");
-      return res.json({
-        ok: true,
-        url: authUrl,
-        status: r.status,
-        headers,
-        snippet: text.slice(0, 1000),
-      });
-    } catch (e) {
-      return res.status(500).json({ ok: false, error: e.message });
-    }
-  });
-}

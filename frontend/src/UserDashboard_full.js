@@ -453,6 +453,7 @@ const UserDashboard = ({
     platformSummary,
     setStatus: setPlatformStatusByName,
     loadAllUnified: loadAllPlatformStatusesUnified,
+    loadPlatformStatus,
   } = usePlatformStatus();
 
   // Aliases so existing prop names and JSX references stay unchanged
@@ -970,6 +971,46 @@ const UserDashboard = ({
   );
 
   const refreshAllStatus = loadAllPlatformStatusesUnified;
+  const snapchatConnectPending = useRef(0);
+
+  useEffect(() => {
+    const refreshSnapchat = () => {
+      clearCache();
+      // Read Snapchat's uncached status last: a different API instance may still
+      // have a briefly cached aggregate from before the callback completed.
+      refreshAllStatus().then(() => loadPlatformStatus("snapchat"));
+    };
+    const onSnapchatComplete = event => {
+      if (
+        event.origin !== new URL(API_BASE_URL, window.location.origin).origin ||
+        event.data !== "snapchat_oauth_complete"
+      )
+        return;
+      // The message only triggers an authenticated server refresh; it cannot
+      // mark an account connected or grant publishing rights on its own.
+      snapchatConnectPending.current = 0;
+      refreshSnapchat();
+    };
+    // Browser opener isolation can sever OAuth popup messages. Returning to the
+    // original tab then refreshes its authenticated status, never client claims.
+    const onReturn = () => {
+      if (
+        document.hidden ||
+        !snapchatConnectPending.current ||
+        Date.now() - snapchatConnectPending.current > 15 * 60 * 1000
+      )
+        return;
+      refreshSnapchat();
+    };
+    window.addEventListener("message", onSnapchatComplete);
+    window.addEventListener("focus", onReturn);
+    document.addEventListener("visibilitychange", onReturn);
+    return () => {
+      window.removeEventListener("message", onSnapchatComplete);
+      window.removeEventListener("focus", onReturn);
+      document.removeEventListener("visibilitychange", onReturn);
+    };
+  }, [refreshAllStatus, loadPlatformStatus]);
 
   useEffect(() => {
     // Check URL params for OAuth callback success/error
@@ -1146,8 +1187,12 @@ const UserDashboard = ({
     else toast("Opening standard Twitter authentication");
     await openProviderAuth(endpoint);
   };
-  const handleConnectSnapchat = async () =>
-    openProviderAuth(API_ENDPOINTS.SNAPCHAT_AUTH_PREPARE || API_ENDPOINTS.SNAPCHAT_AUTH_START);
+  const handleConnectSnapchat = async () => {
+    snapchatConnectPending.current = Date.now();
+    await openProviderAuth(
+      API_ENDPOINTS.SNAPCHAT_AUTH_PREPARE || API_ENDPOINTS.SNAPCHAT_AUTH_START
+    );
+  };
   const handleConnectSpotify = async () => openProviderAuth(API_ENDPOINTS.SPOTIFY_AUTH_START);
   const handleConnectReddit = async () => openProviderAuth(API_ENDPOINTS.REDDIT_AUTH_START);
   const handleConnectDiscord = async () => openProviderAuth(API_ENDPOINTS.DISCORD_AUTH_START);
@@ -1816,7 +1861,6 @@ const UserDashboard = ({
           />
         )}
 
-
         {activeTab === "schedules" && (
           <SchedulesPanel
             schedulesList={schedulesList}
@@ -1842,7 +1886,6 @@ const UserDashboard = ({
             onNavigate={handleNav}
           />
         )}
-
 
         {activeTab === "rewards" && <RewardsPanel badges={badges} />}
 

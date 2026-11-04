@@ -47,6 +47,9 @@ jobs:
       - name: Verify authority and registration security in isolated emulator
         run: npm run test:security:profile
 
+      - name: Verify Snapchat PKCE lifecycle in an owned isolated emulator
+        run: npm run test:snapchat:oauth
+
       - name: Verify owner Storage access and restrictive containment
         run: node scripts/security/test-containment.cjs
 

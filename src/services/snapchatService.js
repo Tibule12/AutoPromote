@@ -40,6 +40,14 @@ async function postToSnapchat({ contentId, payload, reason: _reason, uid }) {
     if (snap.exists) conn = snap.data() || {};
   } catch (_) {}
 
+  if (conn?.oauthProduct === "login_kit") {
+    return {
+      platform: "snapchat",
+      success: false,
+      error: "snapchat_publishing_permission_required",
+    };
+  }
+
   // Normalize tokens
   if (conn) {
     const tokens = tokensFromDoc(conn);

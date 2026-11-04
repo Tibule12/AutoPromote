@@ -42,7 +42,7 @@ const PLATFORM_CONFIG = [
   {
     id: "snapchat",
     label: "Snapchat",
-    helper: "Publish Snaps when account access is enabled.",
+    helper: "Connect your Snapchat account. Publishing requires separate permissions.",
   },
   {
     id: "spotify",
@@ -155,6 +155,7 @@ const ConnectionsPanelRedesign = ({
 
   const getReadiness = platformId => {
     if (!isConnected(platformId)) return "Not connected";
+    if (platformId === "snapchat" && snapchatStatus?.identityOnly) return "Identity connected";
     if (platformId === "tiktok" && !tiktokStatus?.publishReady) return "Reconnect for publishing";
     return "Connected";
   };
@@ -209,7 +210,11 @@ const ConnectionsPanelRedesign = ({
                     {getReadiness(platform.id)}
                   </span>
                 </div>
-                <small>{identity || platform.helper}</small>
+                <small>
+                  {platform.id === "snapchat" && snapchatStatus?.identityOnly
+                    ? "Account connected. Publishing permissions are required separately."
+                    : identity || platform.helper}
+                </small>
               </div>
               <div className="connection-platform-actions">
                 <button

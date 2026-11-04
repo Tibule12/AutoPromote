@@ -1,0 +1,54 @@
+{
+  "recordedAt": "2026-11-04T10:37:43.368176+00:00",
+  "baseRevision": "92da3b16fa4d7c40822a2eb01dab93a9284bc60a",
+  "checks": {
+    "snapchatOwnedEmulator": 27,
+    "existingSnapchatServer": 10,
+    "frontendConnectionsAndAuth": 34,
+    "authoritySecurity": 99,
+    "paymentSubscriptions": 20,
+    "failures": 0,
+    "frontendBuild": "passed; 47 public pages",
+    "lintSyntaxWhitespace": "passed",
+    "realSnapchatConsent": "not performed; provider fixtures only"
+  },
+  "protectedSources": [
+    {
+      "path": "firestore.rules",
+      "unchangedFromBaseline": true,
+      "sha256": "a6f2ddfe1a3d4f48d15b91d7e112736cb45e235bdd68dc01259d451682823deb"
+    },
+    {
+      "path": "firestore-production.rules",
+      "unchangedFromBaseline": true,
+      "sha256": "2a2e528239918f67f314b887ae130b45892b83c998340e20d99d1a365e3b85ed"
+    },
+    {
+      "path": "storage.rules",
+      "unchangedFromBaseline": true,
+      "sha256": "b362e56ed1980cc781b051299e57838c61e66923083809fc844625c2ea6c52a3"
+    },
+    {
+      "path": "src/authMiddleware.js",
+      "unchangedFromBaseline": true,
+      "sha256": "1be59fd6288f26f93dc079c1f964ff2e443d2cef7aefdaf4ef783e9fe3590ea0"
+    },
+    {
+      "path": "src/authRoutes.js",
+      "unchangedFromBaseline": true,
+      "sha256": "5f647515bfa0bc7d11a89a6b537c3c26dcc22f90f3e2982460bf918876ed6523"
+    },
+    {
+      "path": "src/config/trustedAdminPolicy.json",
+      "unchangedFromBaseline": true,
+      "sha256": "64701a5ea95f7fbf69ddd5e442751e84f9e19448624673ddcdbfab46b0ade4ac"
+    },
+    {
+      "path": "src/services/billingService.js",
+      "unchangedFromBaseline": true,
+      "sha256": "39c041750c5c1f6805ade61ab224a71490086932c33342132316207d084d631a"
+    }
+  ],
+  "productionDataWrites": false,
+  "paidWorkloads": false
+}
