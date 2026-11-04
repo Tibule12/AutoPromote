@@ -1022,12 +1022,17 @@ router.get("/reddit/auth/callback", platformPublicLimiter, async (req, res) => {
 
 // Discord publishing consent must use an owned, expiring, single-use state.
 router.get("/discord/auth/callback", platformPublicLimiter, async (req, res) => {
+  res.setHeader("Referrer-Policy", "no-referrer");
+  res.setHeader("Cache-Control", "no-store");
   try {
     await require("../services/communityPublishing").completeDiscord(req.query);
     platformStatusCache.clear();
     return res.redirect("https://autopromote.org/?oauth=discord&status=success");
-  } catch (_) {
-    return sendPlain(res, 400, "Discord publishing authorisation failed or expired. Return to AutoPromote and connect again.");
+  } catch (error) {
+    const failure = require("../services/communityPublishing").describeDiscordFailure(error);
+    const reference = require("crypto").randomUUID();
+    console.warn("[discord][callback]", { code: failure.code, providerCode: failure.providerCode || null, reference });
+    return sendPlain(res, 400, `${failure.message} Reference: ${failure.code}${failure.providerCode ? "." + failure.providerCode : ""} / ${reference}`);
   }
 });
 
