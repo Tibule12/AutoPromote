@@ -1,0 +1,48 @@
+{
+  "productionDeployed": false,
+  "viewports": [
+    {
+      "width": 320,
+      "samples": 130,
+      "minimumRatio": 5.4928674915472,
+      "failuresBelow4_5": 0
+    },
+    {
+      "width": 360,
+      "samples": 130,
+      "minimumRatio": 5.4928674915472,
+      "failuresBelow4_5": 0
+    },
+    {
+      "width": 390,
+      "samples": 130,
+      "minimumRatio": 5.4928674915472,
+      "failuresBelow4_5": 0
+    },
+    {
+      "width": 430,
+      "samples": 130,
+      "minimumRatio": 5.4928674915472,
+      "failuresBelow4_5": 0
+    },
+    {
+      "width": 768,
+      "samples": 130,
+      "minimumRatio": 5.4928674915472,
+      "failuresBelow4_5": 0
+    },
+    {
+      "width": 1280,
+      "samples": 130,
+      "minimumRatio": 5.4928674915472,
+      "failuresBelow4_5": 0
+    }
+  ],
+  "measuredTextChecks": 780,
+  "scope": "Actual App signed-in Billing with real GET-only plan catalogue; no checkout or payment/status sync",
+  "pricingOrBillingLogicChanged": false,
+  "files": {
+    "frontend/src/components/BillingContrast.css": "eed9b69daab9b55fbf78996f02a7df94132a1262d7931464bc60732d439ef1f1",
+    "frontend/src/components/PayPalSubscriptionPanel.js": "8bd01cf79fd28dbb4647826dd0c3b07a1efd9e742658c8e18159e169810bb8c2"
+  }
+}

@@ -131,6 +131,7 @@ function createMobileFormChecks(directory) {
         result.issues.push(
           "Password labels have insufficient contrast against the form background"
         );
+      if (name === "billing") await require("./billing-contrast.cjs").checkBillingContrast(page, directory, width);
       results.push(result);
       fs.writeFileSync(
         path.join(directory, "mobile-form-layout.json"),

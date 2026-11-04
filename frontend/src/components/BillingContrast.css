@@ -1,0 +1,114 @@
+/* Keep dashboard Billing text and its surfaces together. The component also
+   appears on light public checkout pages, which retain their existing theme. */
+.ap-dashboard-redesign .paypal-subscription-panel h2 {
+  background: none;
+  color: #f8fafc;
+  -webkit-text-fill-color: #f8fafc;
+}
+
+.ap-dashboard-redesign
+  .paypal-subscription-panel
+  :is(
+    .feature-value,
+    .usage-count,
+    .usage-number,
+    .topup-price,
+    .plan-price .price,
+    .subscription-price .price,
+    .topup-credits
+  ) {
+  color: #f8fafc;
+}
+
+.ap-dashboard-redesign
+  .paypal-subscription-panel
+  :is(
+    .paypal-subscription-panel-subtitle,
+    .feature-name,
+    .period,
+    .period-info,
+    .plan-editing-copy,
+    .topup-copy,
+    .topup-name,
+    .topup-savings,
+    .checkout-helper-text,
+    .downgrade-note,
+    .usage-detail,
+    .usage-subtext,
+    .billing-payment-card p,
+    .billing-payment-card dt,
+    .billing-legal-footer,
+    .secure-payment-badge p,
+    .usage-item > span,
+    .usage-cost-item > span
+  ) {
+  color: #cbd5e1;
+  opacity: 1;
+}
+
+.ap-dashboard-redesign
+  .paypal-subscription-panel
+  :is(.plan-editing-summary, .topup-section, .secure-payment-badge) {
+  color: #f8fafc;
+  background: #101d31;
+  border: 1px solid #40516c;
+  box-shadow: none;
+}
+
+.ap-dashboard-redesign .paypal-subscription-panel .plan-editing-block {
+  background: transparent !important;
+}
+
+.ap-dashboard-redesign
+  .paypal-subscription-panel
+  :is(
+    .plan-editing-title,
+    .billing-card-kicker,
+    .billing-payment-card > div:nth-child(2) > span,
+    .billing-plan-options > summary > span:last-child
+  ) {
+  color: #ddd6fe;
+}
+
+.ap-dashboard-redesign .paypal-subscription-panel .feature-item {
+  border-color: #40516c;
+}
+.ap-dashboard-redesign .paypal-subscription-panel .free-label {
+  color: #86efac;
+}
+.ap-dashboard-redesign .paypal-subscription-panel .current-plan-badge {
+  background: #166534;
+  color: #fff;
+}
+.ap-dashboard-redesign .paypal-subscription-panel :is(.subscribe-btn, .recommended-badge) {
+  background: linear-gradient(135deg, #6d28d9, #4338ca);
+  color: #fff;
+}
+.ap-dashboard-redesign .paypal-subscription-panel .subscribe-btn.secondary {
+  background: #18283f;
+  color: #f8fafc;
+  border-color: #8294ad;
+}
+.ap-dashboard-redesign .paypal-subscription-panel .suggested-badge {
+  background: #9a3412;
+  color: #fff;
+}
+.ap-dashboard-redesign .paypal-subscription-panel .paypal-sdk-notice.warning {
+  background: #382714;
+  color: #ffedd5;
+  border-color: #b7793a;
+}
+.ap-dashboard-redesign .paypal-subscription-panel .paypal-sdk-notice.neutral {
+  background: #102b46;
+  color: #e0f2fe;
+  border-color: #5284af;
+}
+.ap-dashboard-redesign .paypal-subscription-panel .billing-legal-footer a {
+  color: #a5e9ff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.ap-dashboard-redesign .paypal-subscription-panel :is(button, a, summary):focus-visible {
+  outline: 3px solid #67e8f9;
+  outline-offset: 3px;
+}
