@@ -155,10 +155,11 @@ async function main() {
     });
     const realFetch = global.fetch;
     const hook = {
+      type: 1,
       id: "123456789012345678",
       channel_id: "223456789012345678",
       guild_id: "323456789012345678",
-      application_id: process.env.DISCORD_CLIENT_ID,
+      application_id: null,
       token: "fixture-only-webhook-token",
       name: "Creator announcements",
     };
@@ -208,8 +209,13 @@ async function main() {
           scope: "identify webhook.incoming",
           webhook: hook,
         });
-      if (url === "https://discord.com/api/users/@me")
-        return response({ id: "501000000000000000", username: "Creator" });
+      if (url === "https://discord.com/api/v10/oauth2/@me")
+        return response({
+          application: { id: process.env.DISCORD_CLIENT_ID },
+          scopes: ["identify", "webhook.incoming"],
+          expires: new Date(Date.now() + 3600000).toISOString(),
+          user: { id: "501000000000000000", username: "Creator" },
+        });
       if (url.startsWith("https://discord.com/api/v10/webhooks/")) {
         if (options.method !== "POST") return response(hook);
         providerDeliveries.push({

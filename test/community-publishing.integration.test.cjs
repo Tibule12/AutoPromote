@@ -28,6 +28,7 @@ let db,
   channel;
 const mediaUrl = "https://storage.googleapis.com/demo-autopromote-community-publishing/source.mp4";
 const webhook = {
+  type: 1,
   id: "123456789012345678",
   channel_id: "223456789012345678",
   guild_id: "323456789012345678",
@@ -97,8 +98,13 @@ before(async () => {
     }
     if (url === "https://discord.com/api/oauth2/token")
       return reply({ access_token: "fixture-access", scope: "identify webhook.incoming", webhook });
-    if (url === "https://discord.com/api/users/@me")
-      return reply({ id: "501000000000000000", username: "Creator" });
+    if (url === "https://discord.com/api/v10/oauth2/@me")
+      return reply({
+        application: { id: webhook.application_id },
+        scopes: ["identify", "webhook.incoming"],
+        expires: new Date(Date.now() + 3600000).toISOString(),
+        user: { id: "501000000000000000", username: "Creator" },
+      });
     if (url.startsWith("https://discord.com/api/v10/webhooks/")) {
       if (options.method !== "POST") return reply(webhook);
       if (lostResponse) throw new Error("fixture network loss");
@@ -481,8 +487,8 @@ test("a read-only workspace member cannot authorise a new publishing destination
   assert.equal(calls.length, 0);
 });
 
-async function freshDiscord() {
-  const request = await service.prepareDiscord("owner");
+async function freshDiscord(uid = "owner") {
+  const request = await service.prepareDiscord(uid);
   return { state: new URL(request.authUrl).searchParams.get("state"), code: "fixture-code" };
 }
 test("Discord distinguishes expired, replayed and malformed connection links", async () => {
@@ -542,16 +548,18 @@ test("Discord webhook/identity contract failures retain their actual stage", asy
         scope: "identify webhook.incoming",
         webhook: { ...webhook, application_id: "other-client" },
       },
-      "webhook_contract",
+      "webhook_application",
     ],
-    [
-      { access_token: "fixture", scope: "identify webhook.incoming", webhook },
-      "identity_lookup",
-    ],
+    [{ access_token: "fixture", scope: "identify webhook.incoming", webhook }, "identity_lookup"],
   ]) {
     const request = await freshDiscord();
-    global.fetch = async url =>
-      reply(url.endsWith("/users/@me") ? { id: "invalid-identity" } : response);
+    global.fetch = async (url, options) => {
+      if (url.endsWith("/oauth2/@me")) {
+        const grant = await (await original(url, options)).json();
+        return reply({ ...grant, user: { id: "invalid-identity" } });
+      }
+      return reply(response);
+    };
     try {
       await assert.rejects(
         service.completeDiscord(request),
@@ -571,4 +579,123 @@ test("untrusted exception fields cannot leak callback codes, tokens or descripti
   });
   assert.equal(detail.code, "callback_failed");
   assert(!JSON.stringify(detail).includes(secret));
+});
+
+test("nullable webhook app ID and omitted scope echo require a verified live OAuth grant", async () => {
+  const original = global.fetch,
+    seen = [];
+  const hook = { ...webhook, application_id: null };
+  global.fetch = async (url, options) => {
+    seen.push({ url, method: options?.method || "GET" });
+    if (url.endsWith("/oauth2/token"))
+      return reply({ access_token: "fixture-access", webhook: hook });
+    if (url.includes("/webhooks/")) return reply(hook);
+    return original(url, options);
+  };
+  try {
+    const d = await service.completeDiscord(await freshDiscord("nullable-hook-owner"));
+    const stored = (
+      await service.destinations("nullable-hook-owner", "discord").doc(d.id).get()
+    ).data();
+    assert.equal(stored.verificationVersion, 2);
+    assert.equal(stored.oauthApplicationId, webhook.application_id);
+    assert.notEqual(stored.encryptedWebhookToken, webhook.token);
+    assert(!JSON.stringify(d).includes(webhook.token));
+    assert.equal(
+      (await service.resolveDestination("nullable-hook-owner", "discord", { destinationId: d.id }))
+        .targetId,
+      webhook.channel_id
+    );
+    assert(seen.some(x => x.url.endsWith("/oauth2/@me") && x.method === "GET"));
+    assert.equal(seen.filter(x => x.url.includes("/webhooks/")).length, 2);
+    assert.equal(seen.filter(x => x.method === "POST").length, 1); // Token exchange only; no message.
+  } finally {
+    global.fetch = original;
+  }
+});
+
+for (const [label, patch, expected] of [
+  ["different application", { application: { id: "923456789012345678" } }, "grant_application"],
+  ["missing publishing scope", { scopes: ["identify"] }, "grant_scopes"],
+  ["missing identity scope", { scopes: ["webhook.incoming"] }, "grant_scopes"],
+  ["expired grant", { expires: "2000-01-01T00:00:00Z" }, "grant_expired"],
+  ["invalid expiry", { expires: "invalid" }, "grant_expired"],
+  ["missing human identity", { user: null }, "identity_lookup"],
+]) {
+  test(`Discord rejects ${label} before storing a nullable-app webhook`, async () => {
+    const uid = "invalid-grant-" + expected + "-" + label.replaceAll(" ", "-");
+    const original = global.fetch;
+    global.fetch = async (url, options) => {
+      const data = await (await original(url, options)).json();
+      if (url.endsWith("/oauth2/token"))
+        return reply({ ...data, webhook: { ...webhook, application_id: null } });
+      return reply(url.endsWith("/oauth2/@me") ? { ...data, ...patch } : data);
+    };
+    try {
+      await assert.rejects(
+        service.completeDiscord(await freshDiscord(uid)),
+        error => service.describeDiscordFailure(error).code === expected
+      );
+      assert.equal((await service.destinations(uid, "discord").get()).size, 0);
+      assert.equal(calls.filter(x => x.url.includes("/webhooks/")).length, 0);
+    } finally {
+      global.fetch = original;
+    }
+  });
+}
+
+test("Discord rejects changed live webhook channel, guild, application, ID or type", async () => {
+  const original = global.fetch;
+  for (const patch of [
+    { channel_id: "923456789012345678" },
+    { guild_id: "923456789012345678" },
+    { application_id: "923456789012345678" },
+    { id: "923456789012345678" },
+    { type: 2 },
+  ]) {
+    const uid = "bad-live-hook-" + Object.keys(patch)[0];
+    global.fetch = async (url, options) =>
+      url.includes("/webhooks/") ? reply({ ...webhook, ...patch }) : original(url, options);
+    try {
+      await assert.rejects(
+        service.completeDiscord(await freshDiscord(uid)),
+        error => service.describeDiscordFailure(error).code === "webhook_binding"
+      );
+      assert.equal((await service.destinations(uid, "discord").get()).size, 0);
+    } finally {
+      global.fetch = original;
+    }
+  }
+});
+
+test("dispatch requires the stored OAuth application binding and preserves legacy fail-closed behaviour", async () => {
+  const uid = "nullable-hook-owner",
+    id = service.idOf(webhook.channel_id);
+  const ref = service.destinations(uid, "discord").doc(id),
+    saved = (await ref.get()).data();
+  const original = global.fetch;
+  global.fetch = async () => reply({ ...webhook, application_id: null });
+  try {
+    await ref.set({ ...saved, oauthApplicationId: "other-client" });
+    await assert.rejects(
+      service.resolveDestination(uid, "discord", { destinationId: id }),
+      /changed/
+    );
+    const legacy = { ...saved };
+    delete legacy.verificationVersion;
+    delete legacy.oauthApplicationId;
+    await ref.set(legacy);
+    await assert.rejects(
+      service.resolveDestination(uid, "discord", { destinationId: id }),
+      /changed/
+    );
+    await ref.set(saved);
+    assert.equal(
+      (await service.resolveDestination(uid, "discord", { destinationId: id })).targetId,
+      webhook.channel_id
+    );
+  } finally {
+    global.fetch = original;
+    await ref.set(saved);
+  }
 });
