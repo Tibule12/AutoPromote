@@ -1,0 +1,57 @@
+{
+  "baseline": "8edaf4e2283cad19dba95fef9bdd4efefb72fb05",
+  "files": [
+    {
+      "path": "frontend/public/studio-audio-pitch-v1.js",
+      "sha256": "81801cfaf64397c6c753bad36b5edf6a4c9116fa3e22cf76e68e2285e1605b15"
+    },
+    {
+      "path": "frontend/src/components/ViralClipStudio.js",
+      "sha256": "461d7e5c1cc681bc85a2a7a886714a42b8de826bb50ca8b40e3c67f60166804d"
+    },
+    {
+      "path": "frontend/src/components/__tests__/ViralClipStudio.test.js",
+      "sha256": "a386a729a579525ac05322798e1a0b824e44055893424fb2a9fe1666cff12974"
+    },
+    {
+      "path": "frontend/src/components/audio/AudioRemixPanel.js",
+      "sha256": "398e28448230a09febff9a65492d4175424a849012d4f81673ca57b6f05e773a"
+    },
+    {
+      "path": "frontend/src/components/audio/AudioRemixPanel.test.js",
+      "sha256": "7e1457454eac4eafd8fc75f302f8a28344b39fed78616704e75f325544f5befe"
+    },
+    {
+      "path": "frontend/src/components/audio/audioRemixPreview.js",
+      "sha256": "d2ac987dd8bfd56a1722d2b9dda009bc5ac224e34906f0f2bad530bbe4f803bb"
+    },
+    {
+      "path": "frontend/src/components/audio/audioRemixPreview.test.js",
+      "sha256": "df73c75c9a8d81c8feee7659d500d63f05a0c7b8350ce5a624afd39c6acdb81e"
+    },
+    {
+      "path": "frontend/src/components/audio/studioPitchProcessor.test.js",
+      "sha256": "7289c6e19f1659a34e88f01bd40ed13afc8621455dac2dead0bb2cd859482097"
+    },
+    {
+      "path": "scripts/qa/studio-audio-browser.cjs",
+      "sha256": "d84087492824f0952cb70b78a7372413c6312c8622e18f88a6e4a9df4e23c261"
+    },
+    {
+      "path": "scripts/test-community-publishing-browser.cjs",
+      "sha256": "f89832577205cfd7af69920905217fba7302febe667f044eeb79505f6469e03b"
+    },
+    {
+      "path": "test/e2e/studio-capability-matrix.json",
+      "sha256": "d49e461406181a6b20cf6392460ef1dbf8802329a967d3c4319ae9615a1a550d"
+    },
+    {
+      "path": "test/e2e/studio-combination-matrix.json",
+      "sha256": "8804bcc02df65e5606506b617e04d31063631fdf7a881da6ba0fbee382e1c249"
+    },
+    {
+      "path": "test/e2e/studio-preview-render-parity.json",
+      "sha256": "a594a957f865ebee56f79d6c12420320d294d0d42eb4df09c1748a27f54f131d"
+    }
+  ]
+}

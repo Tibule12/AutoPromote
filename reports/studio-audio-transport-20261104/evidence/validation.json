@@ -1,0 +1,45 @@
+{
+  "date": "2026-11-04",
+  "timezone": "Africa/Johannesburg",
+  "baseline": "8edaf4e2283cad19dba95fef9bdd4efefb72fb05",
+  "branch": "fix/studio-audio-transport-20261104",
+  "tests": {
+    "audioAndMeterHelpers": 50,
+    "editorFocusedDistinct": 8,
+    "canonicalCpuWorker": 11,
+    "distinctTotal": 69,
+    "fullEditorSuiteRun": false
+  },
+  "actualApp": {
+    "presets": 11,
+    "minimumSourceAdvanceSeconds": 0.9922080000000015,
+    "minimumPlayheadAdvanceSeconds": 1.0416666666666998,
+    "maximumObservedLongTaskMs": 54,
+    "auditionLongTaskCount": 2,
+    "saveAndColdReopen": true,
+    "contextsClosed": true
+  },
+  "build": {
+    "passed": true,
+    "privateDirectory": "/tmp/autopromote-community-browser-7UlmB0",
+    "workletSha256": "81801cfaf64397c6c753bad36b5edf6a4c9116fa3e22cf76e68e2285e1605b15"
+  },
+  "productionChanges": false,
+  "pushed": false,
+  "merged": false,
+  "deployed": false,
+  "paidCloudWorkloads": 0,
+  "privateLogs": [
+    "/tmp/autopromote-studio-audio-unit-20261104-r3.log",
+    "/tmp/autopromote-studio-audio-editor-20261104-final.log",
+    "/tmp/autopromote-studio-audio-finished-mode-20261104.log",
+    "/tmp/autopromote-studio-audio-worker-20261104-r3.log",
+    "/tmp/autopromote-studio-audio-browser-20261104-final.log",
+    "/tmp/autopromote-studio-audio-lint-20261104-final-valid.log"
+  ],
+  "staticChecks": {
+    "lint": "passed with installed React Hooks plugin",
+    "studioContract": "passed, counts unchanged",
+    "diffCheck": "passed"
+  }
+}

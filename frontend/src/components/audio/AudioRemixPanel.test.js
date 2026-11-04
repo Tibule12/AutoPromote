@@ -1,9 +1,23 @@
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import AudioRemixPanel from "./AudioRemixPanel";
 import { AUDIO_REMIX_PRESETS, DEFAULT_AUDIO_REMIX, applyAudioRemixPreset } from "./audioRemixModel";
+import * as preview from "./audioRemixPreview";
 
 describe("AudioRemixPanel", () => {
+  test("audio meter refreshes its panel without rerendering the Studio parent", () => {
+    let emit, parentRenders = 0;
+    const stop = jest.fn();
+    const subscription = jest.spyOn(preview, "subscribeAudioRemixMeter").mockImplementation((_media, listener) => { emit = listener; return stop; });
+    const mediaRef = { current: document.createElement("video") };
+    function Editor() { parentRenders++; return <AudioRemixPanel value={applyAudioRemixPreset("chipmunk")} previewMediaRef={mediaRef} previewMediaKey="source-1" onChange={jest.fn()} />; }
+    const view = render(<Editor />);
+    const renders = parentRenders;
+    act(() => emit({ peakDb: -8, rmsDb: -16, clipping: false }));
+    expect(parentRenders).toBe(renders);
+    view.unmount(); expect(stop).toHaveBeenCalledTimes(1);
+    subscription.mockRestore();
+  });
   test.each(AUDIO_REMIX_PRESETS)("selecting $name highlights that card and keeps it selected after a control edit", preset => {
     const Editor = () => {
       const [value, onChange] = React.useState(DEFAULT_AUDIO_REMIX);
@@ -83,7 +97,7 @@ describe("AudioRemixPanel", () => {
     }));
     rerender(<AudioRemixPanel {...props} value={onChange.mock.calls[0][0]} />);
     expect(screen.getByTestId("audio-remix-preset-chipmunk")).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByText(/hear the Chipmunk voice/)).toBeInTheDocument();
+    expect(screen.getByText(/hear the Chipmunk voice/i)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /Preview Remix/ }));
     expect(onPreview).toHaveBeenCalledTimes(1);
   });
