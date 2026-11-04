@@ -1,0 +1,79 @@
+.telegram-connect-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgb(3 7 18 / 78%);
+}
+.telegram-connect-dialog {
+  position: relative;
+  width: min(100%, 500px);
+  max-height: calc(100dvh - 40px);
+  overflow: auto;
+  padding: 32px;
+  border: 1px solid #644a99;
+  border-radius: 20px;
+  background: #101329;
+  color: #f4f1ff;
+  box-shadow: 0 20px 80px #0008;
+}
+.telegram-connect-dialog h2 {
+  margin: 0 28px 14px 0;
+  font-size: 26px;
+}
+.telegram-connect-dialog p,
+.telegram-connect-dialog li {
+  line-height: 1.6;
+  color: #d2cee5;
+}
+.telegram-connect-dialog ol {
+  padding-left: 22px;
+}
+.telegram-connect-close {
+  position: absolute;
+  right: 14px;
+  top: 12px;
+  padding: 6px 12px;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-size: 26px;
+  cursor: pointer;
+}
+.telegram-connect-actions {
+  display: grid;
+  gap: 12px;
+  margin-top: 22px;
+}
+.telegram-connect-actions a,
+.telegram-connect-dialog > button.telegram-connect-primary {
+  display: block;
+  padding: 13px 18px;
+  border: 1px solid #7a5bb0;
+  border-radius: 10px;
+  text-align: center;
+  text-decoration: none;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+.telegram-connect-dialog .telegram-connect-primary {
+  background: #7731d0;
+  color: #fff;
+}
+.telegram-connect-dialog .telegram-connect-note {
+  font-size: 13px;
+  margin-bottom: 0;
+}
+.telegram-connect-dialog a:focus-visible,
+.telegram-connect-dialog button:focus-visible {
+  outline: 3px solid #43d5ff;
+  outline-offset: 3px;
+}
+@media (max-width: 480px) {
+  .telegram-connect-dialog {
+    padding: 26px 20px;
+  }
+}

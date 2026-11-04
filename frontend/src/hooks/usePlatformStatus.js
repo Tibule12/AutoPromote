@@ -125,6 +125,7 @@ const PLATFORM_CONFIG = {
       meta: d.meta || null,
       userId: d.userId || null,
       username: d.username || null,
+      profile: d.profile || (d.username ? { username: d.username } : null),
     }),
   },
   pinterest: {
@@ -217,10 +218,13 @@ export default function usePlatformStatus() {
           data = await fetchStatus();
         }
 
-        setStatus(platformName, config.mapResponse(data));
+        if (auth.currentUser?.uid !== cur.uid) return;
+        const mapped = config.mapResponse(data);
+        setStatus(platformName, mapped);
         if (data.metadata) {
           setPlatformMetadata(prev => ({ ...prev, [platformName]: data.metadata }));
         }
+        return mapped;
       } catch {
         setStatus(platformName, { ...DEFAULT_STATUS });
       }

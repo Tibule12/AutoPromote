@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Review Snapchat PKCE, product-specific OAuth endpoints, identity-only connection display and authenticated completion refresh; existing product capabilities and commercial policies unchanged.",
-  "reviewed_at": "2026-11-04T10:29:03.763Z",
+  "reason": "Telegram connection uses an explicit browser/app choice preserving the bot-start parameter and bounded authenticated return checks; existing Snapchat, billing, security and product capabilities are preserved.",
+  "reviewed_at": "2026-11-04T11:54:45.556Z",
   "catalog_sha256": "98c30d5b7319da7d57821fd52c9471d77ca3d116716f0013a044ba60ff56667b",
   "sources": [
     {
@@ -55,7 +55,7 @@
     },
     {
       "path": "frontend/src/UserDashboard_full.js",
-      "sha256": "25c901d67c27293aa63db6e835c47a144ceff6165a4dbe41b7dfdfb631f81bee"
+      "sha256": "71dd5cb44736a81a19ef0d46121be91732ab8c8b6837ec8d832a8205de358fa3"
     },
     {
       "path": "frontend/src/WelcomePage.js",

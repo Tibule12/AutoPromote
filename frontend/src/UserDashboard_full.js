@@ -44,6 +44,8 @@ import {
   withWorkspaceHeaders,
 } from "./utils/workspace";
 import usePlatformStatus from "./hooks/usePlatformStatus";
+import useTelegramConnection from "./hooks/useTelegramConnection";
+import TelegramConnectDialog from "./components/TelegramConnectDialog";
 import "./DashboardRedesign.css";
 
 const DEFAULT_IMAGE = `${process.env.PUBLIC_URL || ""}/image.png`;
@@ -971,6 +973,8 @@ const UserDashboard = ({
   );
 
   const refreshAllStatus = loadAllPlatformStatusesUnified;
+  const telegramConnection = useTelegramConnection({ uid: user?.uid,
+    connected: telegramStatus?.connected === true, refreshStatus: loadPlatformStatus });
   const snapchatConnectPending = useRef(0);
 
   useEffect(() => {
@@ -1197,8 +1201,13 @@ const UserDashboard = ({
   const handleConnectReddit = async () => openProviderAuth(API_ENDPOINTS.REDDIT_AUTH_START);
   const handleConnectDiscord = async () => openProviderAuth(API_ENDPOINTS.DISCORD_AUTH_START);
   const handleConnectLinkedin = async () => openProviderAuth(API_ENDPOINTS.LINKEDIN_AUTH_START);
-  const handleConnectTelegram = async () =>
-    openProviderAuth(API_ENDPOINTS.TELEGRAM_AUTH_PREPARE || API_ENDPOINTS.TELEGRAM_AUTH_START);
+  const handleConnectTelegram = async () => {
+    if (getActiveWorkspaceId() && getActiveWorkspaceRole() !== "owner") {
+      toast.error("Only the workspace owner can connect publishing destinations.");
+      return;
+    }
+    await telegramConnection.prepare();
+  };
   const handleConnectPinterest = async () => openProviderAuth(API_ENDPOINTS.PINTEREST_AUTH_START);
 
   const handleDisconnectPlatform = async platform => {
@@ -1943,6 +1952,8 @@ const UserDashboard = ({
           </div>
         )}
 
+        <TelegramConnectDialog state={telegramConnection.dialog} onClose={telegramConnection.close}
+          onRetry={handleConnectTelegram} />
         {activeTab === "connections" && (
           <ConnectionsPanel
             platformSummary={platformSummary}

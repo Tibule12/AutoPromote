@@ -335,11 +335,18 @@ router.get("/status", authMiddleware, workspaceScope, async (req, res) => {
     res.json({
       connected: true,
       platform: "telegram",
-      userId: connection.userId,
-      username: connection.username,
-      firstName: connection.firstName,
-      lastName: connection.lastName,
-      photoUrl: connection.photoUrl,
+      userId:
+        connection.userId || connection.profile?.id || connection.meta?.chatId || connection.chatId,
+      username:
+        connection.username || connection.profile?.username || connection.meta?.username || null,
+      firstName:
+        connection.firstName ||
+        connection.profile?.first_name ||
+        connection.meta?.firstName ||
+        null,
+      lastName:
+        connection.lastName || connection.profile?.last_name || connection.meta?.lastName || null,
+      photoUrl: connection.photoUrl || connection.profile?.photo_url || null,
       connectedAt: connection.connectedAt,
     });
   } catch (error) {
@@ -442,6 +449,12 @@ router.post("/webhook", async (req, res) => {
                       },
                       { merge: true }
                     );
+
+                  require("../utils/simpleCache").setCache(
+                    `platform_connections_status_${uid}`,
+                    null,
+                    0
+                  );
 
                   // Mark state as used/delete it
                   await db.collection("oauth_states").doc(token).delete();

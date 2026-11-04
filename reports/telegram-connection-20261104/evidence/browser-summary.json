@@ -1,0 +1,21 @@
+{
+  "actualAppBuild": true,
+  "realEmulatorRegistrationAndEmailVerification": true,
+  "actualConnectionsButton": true,
+  "realPrepareWebhookStatusRouters": true,
+  "telegramProviderBoundary": "controlled local fixture; not real provider authorization or messaging",
+  "explicitWebAndInstalledAppChoices": true,
+  "noAutomaticDesktopAppHandoff": true,
+  "webStartParameterPreserved": true,
+  "normalStartButton": true,
+  "secretAuthenticatedWebhook": true,
+  "serverConfirmedConnection": true,
+  "automaticStatusRefresh": true,
+  "connectionSurvivesColdReload": true,
+  "privateOwnedConnection": true,
+  "productionDataOrBotChanges": false,
+  "viewports": [
+    "1280x900",
+    "390x844"
+  ]
+}
