@@ -101,7 +101,7 @@ before(async () => {
     if (url === "https://discord.com/api/v10/oauth2/@me")
       return reply({
         application: { id: webhook.application_id },
-        scopes: ["identify", "webhook.incoming"],
+        scopes: ["identify"],
         expires: new Date(Date.now() + 3600000).toISOString(),
         user: { id: "501000000000000000", username: "Creator" },
       });
@@ -616,7 +616,7 @@ test("nullable webhook app ID and omitted scope echo require a verified live OAu
 
 for (const [label, patch, expected] of [
   ["different application", { application: { id: "923456789012345678" } }, "grant_application"],
-  ["missing publishing scope", { scopes: ["identify"] }, "grant_scopes"],
+  ["malformed scope list", { scopes: null }, "grant_scopes"],
   ["missing identity scope", { scopes: ["webhook.incoming"] }, "grant_scopes"],
   ["expired grant", { expires: "2000-01-01T00:00:00Z" }, "grant_expired"],
   ["invalid expiry", { expires: "invalid" }, "grant_expired"],

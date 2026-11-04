@@ -212,7 +212,7 @@ async function main() {
       if (url === "https://discord.com/api/v10/oauth2/@me")
         return response({
           application: { id: process.env.DISCORD_CLIENT_ID },
-          scopes: ["identify", "webhook.incoming"],
+          scopes: ["identify"],
           expires: new Date(Date.now() + 3600000).toISOString(),
           user: { id: "501000000000000000", username: "Creator" },
         });

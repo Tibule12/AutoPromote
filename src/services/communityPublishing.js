@@ -60,7 +60,7 @@ function describeDiscordFailure(error) {
     grant_application:
       "Discord's authorisation does not match AutoPromote. Please contact AutoPromote support.",
     grant_scopes:
-      "Discord did not grant the required identity and publishing permissions. Start Connect again from AutoPromote.",
+      "Discord's signed-in identity permission could not be verified. Start Connect again from AutoPromote.",
     grant_expired: "Discord's authorisation has expired. Start Connect again from AutoPromote.",
     webhook_lookup:
       "Discord's publishing channel could not be checked. Start Connect again from AutoPromote.",
@@ -429,11 +429,12 @@ async function completeDiscord({ state, code }) {
   );
   if (String(grant.application?.id) !== String(s.clientId))
     throw discordFailure("grant_application", "Discord OAuth application mismatch.");
-  if (
-    !Array.isArray(grant.scopes) ||
-    !["identify", "webhook.incoming"].every(scope => grant.scopes.includes(scope))
-  )
-    throw discordFailure("grant_scopes", "Required Discord OAuth permissions were not granted.");
+  // webhook.incoming is a passthrough authorisation that issues the webhook
+  // capability; it need not remain in the bearer's scope list. Publishing
+  // authority is the webhook returned by this bound code exchange AND the live
+  // capability verification below, never the scope echo or a browser claim.
+  if (!Array.isArray(grant.scopes) || !grant.scopes.includes("identify"))
+    throw discordFailure("grant_scopes", "Discord identity permission was not granted.");
   if (!Number.isFinite(Date.parse(grant.expires)) || Date.parse(grant.expires) <= Date.now())
     throw discordFailure("grant_expired", "Discord OAuth grant expired.");
   const identity = grant.user;
