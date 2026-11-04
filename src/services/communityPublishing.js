@@ -51,6 +51,21 @@ function describeDiscordFailure(error) {
       "Discord did not authorise a publishing channel. Start Connect again and select a server and channel.",
     webhook_contract:
       "Discord's channel authorisation could not be verified. Please contact AutoPromote support.",
+    webhook_fields:
+      "Discord returned incomplete publishing channel details. Please contact AutoPromote support.",
+    webhook_application:
+      "Discord returned a channel for a different application. Please contact AutoPromote support.",
+    grant_lookup:
+      "Discord's application authorisation could not be checked. Start Connect again from AutoPromote.",
+    grant_application:
+      "Discord's authorisation does not match AutoPromote. Please contact AutoPromote support.",
+    grant_scopes:
+      "Discord did not grant the required identity and publishing permissions. Start Connect again from AutoPromote.",
+    grant_expired: "Discord's authorisation has expired. Start Connect again from AutoPromote.",
+    webhook_lookup:
+      "Discord's publishing channel could not be checked. Start Connect again from AutoPromote.",
+    webhook_binding:
+      "Discord's publishing channel details do not match the authorisation. Please contact AutoPromote support.",
     identity_lookup:
       "Your Discord identity could not be verified. Start Connect again from AutoPromote.",
     connection_storage:
@@ -247,10 +262,19 @@ async function resolveDestination(uid, platform, options = {}) {
   else {
     const url = webhookUrl(d);
     const hook = await provider(url);
+    // New grants are bound to the app through Discord's authenticated OAuth
+    // information. A webhook's application_id is documented as nullable.
+    // Historical destinations retain their original, stricter app-ID check.
+    const verifiedGrant =
+      d.verificationVersion === 2 && d.oauthApplicationId === process.env.DISCORD_CLIENT_ID;
     if (
       String(hook.id) !== d.webhookId ||
       String(hook.channel_id) !== d.targetId ||
-      String(hook.application_id) !== String(process.env.DISCORD_CLIENT_ID)
+      (d.verificationVersion === 2 && !verifiedGrant) ||
+      (verifiedGrant && (hook.type !== 1 || String(hook.guild_id) !== d.guildId)) ||
+      (hook.application_id != null
+        ? String(hook.application_id) !== String(process.env.DISCORD_CLIENT_ID)
+        : !verifiedGrant)
     )
       throw fail("Discord channel authorisation changed. Reconnect.", "auth");
   }
@@ -383,27 +407,52 @@ async function completeDiscord({ state, code }) {
   if (!h)
     throw discordFailure("webhook_missing", "Discord did not authorise a publishing channel.");
   if (
+    typeof token.access_token !== "string" ||
     !token.access_token ||
-    !String(token.scope || "")
-      .split(" ")
-      .includes("webhook.incoming") ||
-    !h ||
     !snowflake(h.id) ||
     !snowflake(h.channel_id) ||
-    !/^[\w.-]{20,200}$/.test(h.token || "") ||
-    String(h.application_id) !== String(s.clientId)
+    !/^[\w.-]{20,200}$/.test(h.token || "")
   )
     throw discordFailure(
-      "webhook_contract",
-      "Discord did not authorise a publishing channel. Reconnect."
+      "webhook_fields",
+      "Discord returned incomplete publishing channel details."
     );
-  const identity = await discordStage("identity_lookup", () =>
-    provider("https://discord.com/api/users/@me", {
+  if (h.application_id != null && String(h.application_id) !== String(s.clientId))
+    throw discordFailure("webhook_application", "Discord webhook application mismatch.");
+  // Do not use nullable webhook.application_id or the token response's optional
+  // scope echo as the sole application/permission authority. Verify the actual
+  // grant with Discord, including the identity belonging to that same token.
+  const grant = await discordStage("grant_lookup", () =>
+    provider("https://discord.com/api/v10/oauth2/@me", {
       headers: { Authorization: `Bearer ${token.access_token}` },
     })
   );
-  if (!snowflake(identity.id))
+  if (String(grant.application?.id) !== String(s.clientId))
+    throw discordFailure("grant_application", "Discord OAuth application mismatch.");
+  if (
+    !Array.isArray(grant.scopes) ||
+    !["identify", "webhook.incoming"].every(scope => grant.scopes.includes(scope))
+  )
+    throw discordFailure("grant_scopes", "Required Discord OAuth permissions were not granted.");
+  if (!Number.isFinite(Date.parse(grant.expires)) || Date.parse(grant.expires) <= Date.now())
+    throw discordFailure("grant_expired", "Discord OAuth grant expired.");
+  const identity = grant.user;
+  if (!snowflake(identity?.id))
     throw discordFailure("identity_lookup", "Discord identity could not be verified.");
+  // Only contact a canonical Discord endpoint assembled from validated fields,
+  // never a provider-supplied URL. This GET does not send a test message.
+  const liveHook = await discordStage("webhook_lookup", () =>
+    provider(`https://discord.com/api/v10/webhooks/${h.id}/${h.token}`)
+  );
+  if (
+    liveHook.type !== 1 ||
+    String(liveHook.id) !== String(h.id) ||
+    String(liveHook.channel_id) !== String(h.channel_id) ||
+    !snowflake(liveHook.guild_id) ||
+    (h.guild_id != null && String(h.guild_id) !== String(liveHook.guild_id)) ||
+    (liveHook.application_id != null && String(liveHook.application_id) !== String(s.clientId))
+  )
+    throw discordFailure("webhook_binding", "Discord live webhook binding mismatch.");
   const encryptedWebhookToken = vault.encryptToken(h.token);
   if (!encryptedWebhookToken || encryptedWebhookToken === h.token)
     throw discordFailure(
@@ -418,7 +467,9 @@ async function completeDiscord({ state, code }) {
     label: h.name || `Discord channel ${h.channel_id}`,
     type: "channel",
     webhookId: String(h.id),
-    guildId: String(h.guild_id || ""),
+    guildId: String(liveHook.guild_id),
+    verificationVersion: 2,
+    oauthApplicationId: String(grant.application.id),
     ownerProviderUserId: String(identity.id),
     encryptedWebhookToken,
     verifiedAt: new Date().toISOString(),
