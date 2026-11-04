@@ -357,6 +357,7 @@ async function main() {
       REACT_APP_FIREBASE_MEASUREMENT_ID: "",
       REACT_APP_CREDITS_PILOT: "false",
       REACT_APP_LOCAL_EMULATORS: "true",
+      REACT_APP_TEAM_COLLABORATION_LOCAL: process.env.TEAM_WORKSPACE_QA === "true" ? "true" : "false",
       REACT_APP_CREDITS_AUTH_EMULATOR: `http://127.0.0.1:${authPort}`,
       REACT_APP_CREDITS_FIRESTORE_EMULATOR: `http://127.0.0.1:${firestorePort}`,
       REACT_APP_CREDITS_STORAGE_EMULATOR: origin,

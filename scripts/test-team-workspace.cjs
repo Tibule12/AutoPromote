@@ -17,6 +17,8 @@ async function main() {
     ...process.env,
     NODE_ENV: "test",
     TEAM_TEST_PROJECT: "demo-autopromote-team",
+    GCLOUD_PROJECT: "demo-autopromote-team",
+    TEAM_WORKSPACE_QA: "true",
     FIRESTORE_EMULATOR_HOST: `127.0.0.1:${port}`,
   };
   for (const key of ["GOOGLE_APPLICATION_CREDENTIALS", "FIREBASE_TOKEN", "FIREBASE_CONFIG"])

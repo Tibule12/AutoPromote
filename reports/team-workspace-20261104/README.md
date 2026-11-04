@@ -6,6 +6,8 @@ Publication follow-up: the owner subsequently approved pushing the other saved u
 
 The separate Billing contrast correction is checkpoint `81f6b128`; its [report](../billing-contrast-20261104/README.md) records 780 actual App text checks at six widths, minimum 5.49:1. It can be reviewed independently of Team.
 
+Merge preparation: the owner subsequently approved merging PR #520 to main. Normal application deployment does not publish the candidate Firestore Rules or index. New shared publishing, review/project APIs and shared owner resource context are therefore **disabled in hosted runtimes**, including workers. They remain testable only in the explicitly enabled loopback demo. The ordinary production frontend stays in personal publishing context, retains membership management and explains that shared review is not yet available. A local-storage workspace value cannot enable it. Billing styling and the prior Studio repair can ship normally. This merges the implementation without activating the unqualified Team rollout, changing Rules, publishing content or changing balances/subscriptions. Coordinated Rules/index, authority audit, Storage and financial gates below remain unresolved.
+
 ## Implemented
 
 - Preserve the authenticated human identity. Workspace resource ownership and billing context are explicit fields rather than impersonating the owner. Membership is checked on every scoped request; unknown/inactive roles are denied.

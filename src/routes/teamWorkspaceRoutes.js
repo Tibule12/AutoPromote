@@ -3,6 +3,7 @@ const rateLimit = require("express-rate-limit");
 const router = express.Router({ mergeParams: true });
 router.use(require("../authMiddleware"));
 router.use(rateLimit({ windowMs: 60000, max: 60, standardHeaders: true, legacyHeaders: false }));
+router.use(require("../config/teamRollout").requireTeamCollaboration);
 router.use((req, res, next) => {
   res.set("Cache-Control", "no-store");
   if (req.params.releaseId && !/^[a-f0-9]{64}$/.test(req.params.releaseId))

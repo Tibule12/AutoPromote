@@ -13,6 +13,9 @@ async function workspaceScope(req, res, next) {
   const workspaceId = getWorkspaceId(req);
   if (!workspaceId) return next();
 
+  if (!require("../config/teamRollout").teamCollaborationAvailable())
+    return require("../config/teamRollout").requireTeamCollaboration(req, res, next);
+
   const actorUid = req.user?.uid || req.userId;
   if (!actorUid) return res.status(401).json({ ok: false, error: "unauthorized" });
 

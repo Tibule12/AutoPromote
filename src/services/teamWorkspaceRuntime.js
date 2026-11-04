@@ -97,6 +97,7 @@ const service = createTeamWorkspace({
 
 async function verifyTeamTaskMedia(content) {
   if (!content.teamReleaseId) return;
+  require("../config/teamRollout").assertTeamCollaborationAvailable();
   const media = content.source;
   if (!media?.generation) error(409, "team_media_unbound");
   const resolved = await resolveMedia({ uid: media.ownerUid, media });
@@ -112,6 +113,7 @@ async function prepareTeamDispatch(contentId, platform, scheduleId) {
   const snapshot = await db.collection("content").doc(contentId).get();
   // Historical IDs with a team_ prefix are not necessarily reviewed releases.
   if (!snapshot.exists || !snapshot.data().teamReleaseId) return null;
+  require("../config/teamRollout").assertTeamCollaborationAvailable();
   const content = snapshot.data();
   const releaseDoc = await db
     .collection("workspaces")

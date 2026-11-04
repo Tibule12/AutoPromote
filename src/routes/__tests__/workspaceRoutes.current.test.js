@@ -80,4 +80,17 @@ describe("GET /api/workspaces/current", () => {
     expect(response.statusCode).toBe(404);
     expect(response.body).toEqual({ ok: false, error: "workspace_not_found" });
   });
+
+  test.each([
+    ["get", "/api/workspaces/unreviewed/team"],
+    ["post", "/api/workspaces/unreviewed/team/releases"],
+    ["post", "/api/workspaces/unreviewed/team/projects"],
+  ])("gates %s %s before any shared data or runtime access", async (method, path) => {
+    const response = await request(buildApp())[method](path)
+      .set("X-Workspace-Id", "unreviewed").send({ release: {}, backup: {} });
+    expect(response.statusCode).toBe(503);
+    expect(response.body.error).toBe("team_rollout_pending");
+    expect(mockWorkspaceCollection.doc).not.toHaveBeenCalled();
+    expect(mockWorkspaceCollection.get).not.toHaveBeenCalled();
+  });
 });
