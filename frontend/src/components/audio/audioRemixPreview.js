@@ -1,6 +1,52 @@
 import { normalizeAudioRemix } from "./audioRemixModel";
 
 const graphs = new WeakMap();
+const pitchModules = new WeakMap();
+
+async function setLivePitch(graph, semitones, request) {
+  if (!graph.pitch && Math.abs(semitones) < .001) return true;
+  try {
+    if (!graph.pitch) {
+      if (!graph.context.audioWorklet || !window.AudioWorkletNode) return false;
+      let module = pitchModules.get(graph.context);
+      if (!module) {
+        module = graph.context.audioWorklet.addModule(`${process.env.PUBLIC_URL || ""}/studio-audio-pitch-v1.js`);
+        pitchModules.set(graph.context, module);
+        module.catch(() => pitchModules.delete(graph.context));
+      }
+      await module;
+      // A newer preset/Before/disabled request wins while the module loads.
+      if (graph.updateRequest !== request) return false;
+      if (!graph.pitch) {
+        const node = new window.AudioWorkletNode(graph.context, "studio-pitch-v1", {
+          numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [2],
+        });
+        node.connect(graph.bass);
+        graph.source.disconnect(graph.bass);
+        graph.source.connect(node);
+        graph.pitch = node;
+        graph.resetPitch = () => node.port?.postMessage({ type: "reset" });
+        graph.media.addEventListener("seeking", graph.resetPitch);
+        graph.media.addEventListener("emptied", graph.resetPitch);
+        node.onprocessorerror = () => {
+          // A failed audio thread must not silence ordinary preview playback.
+          graph.source.disconnect(node);
+          node.disconnect();
+          graph.source.connect(graph.bass);
+          graph.pitch = null;
+          graph.media.removeEventListener("seeking", graph.resetPitch);
+          graph.media.removeEventListener("emptied", graph.resetPitch);
+          graph.media.dispatchEvent(new Event("studio-remix-pitch-error"));
+        };
+      }
+    }
+    if (graph.updateRequest !== request) return false;
+    setAudioParam(graph.pitch.parameters.get("semitones"), semitones, graph.context);
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
 
 const dbToGain = db => 10 ** (Number(db || 0) / 20);
 
@@ -139,6 +185,7 @@ export function ensureAudioRemixPreview(media) {
     unlockAudio();
 
     const graph = {
+      media,
       context,
       source,
       bass,
@@ -154,6 +201,7 @@ export function ensureAudioRemixPreview(media) {
       meterSubscribers: new Set(),
       meterFrame: null,
       lastMeterAt: 0,
+      unlockAudio,
     };
 
     graphs.set(media, graph);
@@ -195,12 +243,16 @@ export async function updateAudioRemixPreview(media, value, bypass = false, { pl
     ? Math.max(.25, Math.min(4, Number(playbackRate))) : 1;
   const rate = active ? remix.speed : fallbackRate;
   if (media.playbackRate !== rate) media.playbackRate = rate;
-  media.preservesPitch = active ? remix.keepPitch : true;
+  // Speed is the programme pacing decision. Independent pitch is applied in
+  // the audio graph, never by speeding the picture or compounding native pitch.
+  media.preservesPitch = true;
   media.mozPreservesPitch = media.preservesPitch;
   media.webkitPreservesPitch = media.preservesPitch;
 
   const graph = remix.enabled ? ensureAudioRemixPreview(media) : graphs.get(media) || media.__audioRemixGraph;
   if (!graph) return false;
+  const request = (graph.updateRequest || 0) + 1;
+  graph.updateRequest = request;
 
   if (graph.context.state === "suspended") {
     try {
@@ -209,6 +261,7 @@ export async function updateAudioRemixPreview(media, value, bypass = false, { pl
       // Background retry
     }
   }
+  if (graph.updateRequest !== request) return false;
 
   const amount = active ? remix.intensity / 100 : 0;
   setAudioParam(graph.bass.gain, remix.bass * amount, graph.context);
@@ -246,7 +299,7 @@ export async function updateAudioRemixPreview(media, value, bypass = false, { pl
   setAudioParam(graph.compressor.attack, dynamics.attack, graph.context);
   setAudioParam(graph.compressor.release, dynamics.release, graph.context);
 
-  return true;
+  return setLivePitch(graph, active && !remix.keepPitch ? remix.pitch * amount : 0, request);
 }
 
 const measureGraph = (graph, now) => {
@@ -292,4 +345,20 @@ export function subscribeAudioRemixMeter(media, listener) {
       graph.meterFrame = null;
     }
   };
+}
+
+export function disposeAudioRemixPreview(media) {
+  const graph = media && (graphs.get(media) || media.__audioRemixGraph);
+  if (!graph || graph.disposed) return;
+  graph.disposed = true;
+  graph.updateRequest = (graph.updateRequest || 0) + 1;
+  graph.meterSubscribers.clear();
+  if (graph.meterFrame !== null) window.cancelAnimationFrame?.(graph.meterFrame);
+  graph.meterFrame = null;
+  for (const event of ["play", "playing", "timeupdate"]) media.removeEventListener(event, graph.unlockAudio);
+  for (const event of ["click", "pointerdown", "keydown"]) window.removeEventListener(event, graph.unlockAudio);
+  graph.source.disconnect();
+  graph.pitch?.disconnect();
+  if (graph.resetPitch) for (const event of ["seeking", "emptied"]) media.removeEventListener(event, graph.resetPitch);
+  if (graph.context.state !== "closed") graph.context.close?.().catch(() => {});
 }

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   AUDIO_CONTENT_TYPES,
   AUDIO_REMIX_PRESETS,
@@ -7,7 +7,7 @@ import {
   normalizeAudioRemix,
   patchAudioRemix,
 } from "./audioRemixModel";
-import { unlockAudioRemixContext } from "./audioRemixPreview";
+import { subscribeAudioRemixMeter, unlockAudioRemixContext } from "./audioRemixPreview";
 import "./audioRemix.css";
 
 const signed = value => `${value > 0 ? "+" : ""}${Number(value).toFixed(0)}`;
@@ -18,14 +18,25 @@ export default function AudioRemixPanel({
   bypass,
   onBefore,
   onPreview,
-  meter = { peakDb: -60, rmsDb: -60, clipping: false },
+  meter: suppliedMeter,
+  previewMediaRef,
+  previewMediaKey,
   loopActive = false,
   onToggleLoop,
   hasMusic = false,
   exactPreviewStatus = "idle",
   exactPreviewError = "",
+  livePreviewError = "",
 }) {
   const remix = normalizeAudioRemix(value);
+  const [liveMeter, setLiveMeter] = useState({ peakDb: -60, rmsDb: -60, clipping: false });
+  const meter = suppliedMeter || liveMeter;
+  useEffect(() => {
+    if (!previewMediaRef || !remix.enabled) return undefined;
+    // Meter updates stay within this panel; they must not redraw the complete
+    // Studio editor and timeline twelve times a second during playback.
+    return subscribeAudioRemixMeter(previewMediaRef.current, setLiveMeter);
+  }, [previewMediaRef, previewMediaKey, remix.enabled]);
   const patch = update => onChange(patchAudioRemix(remix, update));
   const step = (key, amount) => patch({ [key]: Number(remix[key]) + amount });
   const eq = [
@@ -74,8 +85,9 @@ export default function AudioRemixPanel({
       </div>
 
       {remix.enabled && remix.preset === "chipmunk" && !remix.keepPitch ? (
-        <p className="audio-remix-note">Use Preview Remix to hear the Chipmunk voice at the original timing.</p>
+        <p className="audio-remix-note">Hear the Chipmunk voice live at the original picture timing. Preview Remix compares the final mastering.</p>
       ) : null}
+      {livePreviewError ? <p role="status" className="audio-remix-preview-status is-error">{livePreviewError}</p> : null}
 
       <div className="audio-remix-hero-controls">
         <div className="audio-remix-stepper">

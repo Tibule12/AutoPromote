@@ -1,10 +1,58 @@
-import { applyStudioMediaGain, ensureAudioRemixPreview, updateAudioRemixPreview } from "./audioRemixPreview";
-import { DEFAULT_AUDIO_REMIX } from "./audioRemixModel";
+import { applyStudioMediaGain, disposeAudioRemixPreview, ensureAudioRemixPreview, updateAudioRemixPreview } from "./audioRemixPreview";
+import { applyAudioRemixPreset, DEFAULT_AUDIO_REMIX } from "./audioRemixModel";
 import { gainTestContext } from "../__tests__/fixtures/studioAudioGraph";
 
 describe("Studio native media bus gain", () => {
   const previousContext = window.AudioContext;
-  afterEach(() => { window.AudioContext = previousContext; });
+  const previousWorklet = window.AudioWorkletNode;
+  afterEach(() => { window.AudioContext = previousContext; window.AudioWorkletNode = previousWorklet; });
+
+  test("Chipmunk uses one audio-thread pitch node and keeps the picture at 1x", async () => {
+    const context = gainTestContext();
+    context.audioWorklet = { addModule: jest.fn(() => Promise.resolve()) };
+    window.AudioContext = jest.fn(() => context);
+    const parameter = { value: 0 };
+    window.AudioWorkletNode = jest.fn(() => ({ connect: jest.fn(), disconnect: jest.fn(), parameters: new Map([["semitones", parameter]]) }));
+    const video = document.createElement("video");
+    expect(await updateAudioRemixPreview(video, applyAudioRemixPreset("chipmunk"))).toBe(true);
+    expect(parameter.value).toBe(12); expect(video.playbackRate).toBe(1); expect(video.preservesPitch).toBe(true);
+    await updateAudioRemixPreview(video, applyAudioRemixPreset("deep_voice"));
+    expect(parameter.value).toBeCloseTo(-2.8);
+    await updateAudioRemixPreview(video, DEFAULT_AUDIO_REMIX, true);
+    expect(parameter.value).toBe(0);
+    expect(context.audioWorklet.addModule).toHaveBeenCalledTimes(1);
+    expect(window.AudioWorkletNode).toHaveBeenCalledTimes(1);
+  });
+
+  test("Before wins against a late pitch module and unsupported pitch keeps ordinary sound connected", async () => {
+    const context = gainTestContext(); let finish;
+    context.audioWorklet = { addModule: jest.fn(() => new Promise(resolve => { finish = resolve; })) };
+    window.AudioContext = jest.fn(() => context);
+    window.AudioWorkletNode = jest.fn();
+    const video = document.createElement("video");
+    const loading = updateAudioRemixPreview(video, applyAudioRemixPreset("chipmunk"));
+    await updateAudioRemixPreview(video, DEFAULT_AUDIO_REMIX, true);
+    finish(); await loading;
+    expect(window.AudioWorkletNode).not.toHaveBeenCalled();
+    window.AudioWorkletNode = undefined;
+    expect(await updateAudioRemixPreview(video, applyAudioRemixPreset("chipmunk"))).toBe(false);
+    expect(video.__audioRemixGraph.source.disconnect).not.toHaveBeenCalled();
+    expect(video.playbackRate).toBe(1);
+  });
+
+  test("disposing a closed editor releases its audio context and rejects late pitch preparation", async () => {
+    const context = gainTestContext(); let finish;
+    context.close = jest.fn(() => Promise.resolve());
+    context.audioWorklet = { addModule: jest.fn(() => new Promise(resolve => { finish = resolve; })) };
+    window.AudioContext = jest.fn(() => context); window.AudioWorkletNode = jest.fn();
+    const video = document.createElement("video");
+    const pending = updateAudioRemixPreview(video, applyAudioRemixPreset("chipmunk"));
+    disposeAudioRemixPreview(video); disposeAudioRemixPreview(video);
+    finish(); await pending;
+    expect(context.close).toHaveBeenCalledTimes(1);
+    expect(window.AudioWorkletNode).not.toHaveBeenCalled();
+    expect(video.__audioRemixGraph.source.disconnect).toHaveBeenCalled();
+  });
 
   test("an untreated prepared decoder retains its pacing rate without native rate resets", async () => {
     const video = document.createElement("video");

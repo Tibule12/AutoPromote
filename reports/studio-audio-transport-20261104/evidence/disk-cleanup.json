@@ -1,0 +1,191 @@
+{
+  "preservedFinalBuilds": [
+    "autopromote-community-browser-9TgzUn",
+    "autopromote-community-browser-AS6gKT",
+    "autopromote-community-browser-gcPvGO",
+    "autopromote-community-browser-jkTE2N",
+    "autopromote-community-browser-wGAfno"
+  ],
+  "onlyGeneratedBuildDirectories": [
+    {
+      "build": "/tmp/autopromote-community-browser-ZKKHdq/build",
+      "allocatedBytes": 92508160
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-y9Lf8O/build",
+      "allocatedBytes": 92471296
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-k0G7ip/build",
+      "allocatedBytes": 92553216
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-goUadS/build",
+      "allocatedBytes": 92508160
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-bNiO6k/build",
+      "allocatedBytes": 92475392
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-3iAgjo/build",
+      "allocatedBytes": 92487680
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-VTLdYq/build",
+      "allocatedBytes": 92561408
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-xbzPwX/build",
+      "allocatedBytes": 92508160
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-hPUidB/build",
+      "allocatedBytes": 92557312
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-BYl9wu/build",
+      "allocatedBytes": 92491776
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-4v4PJY/build",
+      "allocatedBytes": 92495872
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-EcTqSs/build",
+      "allocatedBytes": 92524544
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-Tq592y/build",
+      "allocatedBytes": 92499968
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-cMfsXL/build",
+      "allocatedBytes": 92553216
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-6J7t5m/build",
+      "allocatedBytes": 92479488
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-pRfKiH/build",
+      "allocatedBytes": 92532736
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-KIdg3b/build",
+      "allocatedBytes": 92536832
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-17rZnF/build",
+      "allocatedBytes": 92528640
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-zwCKDX/build",
+      "allocatedBytes": 92483584
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-LH0e9A/build",
+      "allocatedBytes": 92536832
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-ta0FS8/build",
+      "allocatedBytes": 92545024
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-fyObMW/build",
+      "allocatedBytes": 92536832
+    }
+  ],
+  "removed": [
+    {
+      "build": "/tmp/autopromote-community-browser-ZKKHdq/build",
+      "allocatedBytes": 92508160
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-y9Lf8O/build",
+      "allocatedBytes": 92471296
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-k0G7ip/build",
+      "allocatedBytes": 92553216
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-goUadS/build",
+      "allocatedBytes": 92508160
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-bNiO6k/build",
+      "allocatedBytes": 92475392
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-3iAgjo/build",
+      "allocatedBytes": 92487680
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-VTLdYq/build",
+      "allocatedBytes": 92561408
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-xbzPwX/build",
+      "allocatedBytes": 92508160
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-hPUidB/build",
+      "allocatedBytes": 92557312
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-BYl9wu/build",
+      "allocatedBytes": 92491776
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-4v4PJY/build",
+      "allocatedBytes": 92495872
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-EcTqSs/build",
+      "allocatedBytes": 92524544
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-Tq592y/build",
+      "allocatedBytes": 92499968
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-cMfsXL/build",
+      "allocatedBytes": 92553216
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-6J7t5m/build",
+      "allocatedBytes": 92479488
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-pRfKiH/build",
+      "allocatedBytes": 92532736
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-KIdg3b/build",
+      "allocatedBytes": 92536832
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-17rZnF/build",
+      "allocatedBytes": 92528640
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-zwCKDX/build",
+      "allocatedBytes": 92483584
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-LH0e9A/build",
+      "allocatedBytes": 92536832
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-ta0FS8/build",
+      "allocatedBytes": 92545024
+    },
+    {
+      "build": "/tmp/autopromote-community-browser-fyObMW/build",
+      "allocatedBytes": 92536832
+    }
+  ],
+  "retained": "All parent directories, test logs, screenshots, backups, generated source media and protected final builds remain.",
+  "availableGiBAtReport": 3.12
+}

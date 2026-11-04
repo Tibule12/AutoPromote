@@ -229,7 +229,7 @@ import {
 } from "./audio/audioRemixModel";
 import {
   ensureAudioRemixPreview,
-  subscribeAudioRemixMeter,
+  disposeAudioRemixPreview,
   unlockAudioRemixContext,
   updateAudioRemixPreview,
 } from "./audio/audioRemixPreview";
@@ -3015,11 +3015,9 @@ const ViralClipStudio = ({
   const [soundEffects, setSoundEffects] = useState([]);
   const [audioRemix, setAudioRemix] = useState(() => normalizeAudioRemix(DEFAULT_AUDIO_REMIX));
   const [audioRemixBypass, setAudioRemixBypass] = useState(false);
-  const [audioRemixMeter, setAudioRemixMeter] = useState({
-    peakDb: -60,
-    rmsDb: -60,
-    clipping: false,
-  });
+  const [audioRemixPlaybackRequest, setAudioRemixPlaybackRequest] = useState(0);
+  const [audioRemixLiveError, setAudioRemixLiveError] = useState("");
+  const remixPreviewMediaRef = useRef(new Set());
   const [audioRemixLoop, setAudioRemixLoop] = useState(null);
   const [exactAudioRemixPreview, setExactAudioRemixPreview] = useState({
     status: "idle",
@@ -4614,6 +4612,12 @@ const ViralClipStudio = ({
       }
       for (const context of speechAnalysisContextsRef.current) context.close().catch(() => {});
       speechAnalysisContextsRef.current.clear();
+      // Real unmount releases each bounded decoder's audio graph. React's
+      // development effect replay keeps the connected elements alive.
+      const media = [...remixPreviewMediaRef.current];
+      queueMicrotask(() => {
+        for (const element of media) if (!element.isConnected) disposeAudioRemixPreview(element);
+      });
       speechAnalyserRef.current = null;
       soundEffectObjectUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
       soundEffectObjectUrlsRef.current.clear();
@@ -7991,7 +7995,7 @@ const ViralClipStudio = ({
   // Speech analysis follows the active native element. Each bounded slot owns
   // its reusable Web Audio graph, so original dialogue also keeps ready cuts.
   const sourceSequenceDoubleBuffer = timeline.length > 1 && !renderedOutputUrl &&
-    !speakerStackPreviewIsLive && !directorModeActive && !audioRemix.enabled;
+    !speakerStackPreviewIsLive && !directorModeActive;
   const activeProgrammeSlot = sourceSequenceDoubleBuffer ? activeTimelineIndex % 3 : 0;
   useLayoutEffect(() => {
     const previous = videoRef.current;
@@ -8109,10 +8113,10 @@ const ViralClipStudio = ({
     if (play) safePlayMediaElement(afterVideo);
   };
 
-  const toggleComparisonPlayback = async () => {
+  const toggleComparisonPlayback = async ({ resumeOnly = false } = {}) => {
     const playRequest = ++previewPlaybackStartRef.current;
     // Pause must remain available while owned media links are being refreshed.
-    if (!isPreviewPaused) {
+    if (!resumeOnly && !isPreviewPaused) {
       pauseSynchronizedPreview();
       return;
     }
@@ -8123,7 +8127,7 @@ const ViralClipStudio = ({
     const video = videoRef.current;
     if (!video) return;
     const windowEnd = Number(currentTimelineWindow.end || video.duration || 0);
-    if (isPreviewPaused) {
+    if (resumeOnly || isPreviewPaused) {
       if (!renderedOutputUrl) {
         const expectedProject = activeProjectIdRef.current, expectedSeek = programmeSeekIntentRef.current.version;
         try { const pendingVoice = preparedVoiceBusRef.current?.prepare(); if (pendingVoice) await pendingVoice; }
@@ -11502,19 +11506,34 @@ const ViralClipStudio = ({
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return undefined;
+    let current = true;
+    remixPreviewMediaRef.current.add(video);
+    const pitchFailure = () => setAudioRemixLiveError("Live voice pitch is unavailable in this browser. Use Preview Remix to hear the mastered voice.");
+    video.addEventListener("studio-remix-pitch-error", pitchFailure);
     if (audioRemix.enabled && !renderedOutputUrl) {
-      void updateAudioRemixPreview(video, audioRemix, audioRemixBypass);
-      return subscribeAudioRemixMeter(video, setAudioRemixMeter);
+      void updateAudioRemixPreview(video, audioRemix, audioRemixBypass, { playbackRate: previewSpeed }).then(ready => {
+        if (current) setAudioRemixLiveError(!ready && !audioRemixBypass && !audioRemix.keepPitch && audioRemix.pitch
+          ? "Live voice pitch is unavailable in this browser. Use Preview Remix to hear the mastered voice." : "");
+      });
     } else {
       void updateAudioRemixPreview(video, { ...audioRemix, enabled: false }, true);
       video.playbackRate = renderedOutputUrl ? 1 : previewSpeed;
       video.preservesPitch = true;
       video.mozPreservesPitch = true;
       video.webkitPreservesPitch = true;
-      setAudioRemixMeter({ peakDb: -60, rmsDb: -60, clipping: false });
+      setAudioRemixLiveError("");
     }
-    return undefined;
+    return () => { current = false; video.removeEventListener("studio-remix-pitch-error", pitchFailure); };
   }, [activeTimelineIndex, currentTimelineClip, previewSpeed, audioRemix, audioRemixBypass, renderedOutputUrl]);
+
+  useEffect(() => {
+    if (!audioRemixPlaybackRequest) return;
+    // Apply source/rate/ref changes first, then use the same preparation,
+    // intention and transport as the ordinary Studio Play control.
+    void toggleComparisonPlayback({ resumeOnly: true });
+    // Each explicit Sound action is one request, not a restart on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [audioRemixPlaybackRequest]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -26196,13 +26215,16 @@ const ViralClipStudio = ({
                   <AudioRemixPanel
                     value={audioRemix}
                     bypass={audioRemixBypass}
-                    meter={audioRemixMeter}
+                    previewMediaRef={videoRef}
+                    previewMediaKey={`${activeTimelineIndex}:${activeProgrammeSlot}:${renderedOutputUrl || "live"}`}
                     loopActive={!!audioRemixLoop}
                     hasMusic={addMusic && !!musicTrack}
                     exactPreviewStatus={exactAudioRemixPreview.status}
                     exactPreviewError={exactAudioRemixPreview.error}
+                    livePreviewError={audioRemixLiveError}
                     onChange={next => {
                       const normalized = normalizeAudioRemix(next);
+                      setPreviewFinishedFile(false);
                       setAudioRemix(normalized);
                       setAudioRemixBypass(false);
                       setPreviewSpeed(normalized.speed);
@@ -26210,24 +26232,26 @@ const ViralClipStudio = ({
                       const video = videoRef.current;
                       if (video) {
                         unlockAudioRemixContext(video);
-                        safePlayMediaElement(video);
                       }
+                      setAudioRemixPlaybackRequest(request => request + 1);
                       setStudioActionMessage(
                         normalized.preset === "chipmunk"
-                          ? "Chipmunk selected. Press Preview Remix to hear the high voice; it is also applied on export."
+                          ? "Chipmunk voice is playing at the original picture timing. Preview Remix compares the final mastering."
                           : `${normalized.preset.replaceAll("_", " ")} remix is live. EQ, reverb and speed are active in After.`
                       );
                     }}
                     onBefore={() => {
+                      setPreviewFinishedFile(false);
                       exactAudioRemixPreviewRef.current?.pause();
                       backgroundSoundPreviewSuppressedRef.current = false;
                       setAudioRemixBypass(true);
                       setComparisonMode("after");
-                      safePlayMediaElement(videoRef.current);
+                      setAudioRemixPlaybackRequest(request => request + 1);
                       setStudioActionMessage("Before is playing with the original audio tone.");
                     }}
                     onPreview={handleExactAudioRemixPreview}
                     onToggleLoop={() => {
+                      setPreviewFinishedFile(false);
                       const video = videoRef.current;
                       if (audioRemixLoop) {
                         setAudioRemixLoop(null);
@@ -26241,7 +26265,7 @@ const ViralClipStudio = ({
                       const end = Math.min(duration || start + 8, start + 8);
                       setAudioRemixLoop({ start, end: Math.max(start + 0.5, end) });
                       setAudioRemixBypass(false);
-                      safePlayMediaElement(video);
+                      setAudioRemixPlaybackRequest(request => request + 1);
                       setStudioActionMessage(
                         `Looping ${formatPreviewTimePrecise(start)}–${formatPreviewTimePrecise(
                           Math.max(start + 0.5, end)

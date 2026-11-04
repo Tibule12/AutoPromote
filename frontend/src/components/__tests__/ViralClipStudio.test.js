@@ -230,6 +230,31 @@ describe("ViralClipStudio timeline sequencing", () => {
     return { video, props, ...rendered };
   };
 
+  test.each(["slowed_reverb", "chipmunk", "deep_voice"])("Sound %s resumes the real transport and updates the playhead", async preset => {
+    const { video } = mountNativePreview();
+    fireEvent.click(within(screen.getByRole("navigation", { name: "Creative tools" }))
+      .getByRole("button", { name: "Sound", exact: true }));
+    expect(screen.getByRole("button", { name: "Play comparison", exact: true })).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId(`audio-remix-preset-${preset}`));
+    await waitFor(() => expect(video.paused).toBe(false));
+    expect(screen.getByRole("button", { name: "Pause comparison", exact: true })).toBeInTheDocument();
+    const before = Number(screen.getByLabelText("Edited output position").value);
+    video.currentTime = 6; fireEvent.timeUpdate(video);
+    await waitFor(() => expect(Number(screen.getByLabelText("Edited output position").value)).toBeGreaterThan(before));
+    fireEvent.click(screen.getByRole("button", { name: "Pause comparison", exact: true }));
+    expect(video.paused).toBe(true);
+    expect(global.fetch.mock.calls.filter(([url]) => String(url).includes("preview-audio-remix"))).toHaveLength(0);
+  });
+
+  test("Sound selection leaves a finished movie and auditions the editable source", async () => {
+    mountNativePreview({ renderedOutput: { url: "https://example.com/completed.mp4" } });
+    expect(screen.getByTestId("studio-after-video")).toHaveAttribute("src", "https://example.com/completed.mp4");
+    fireEvent.click(within(screen.getByRole("navigation", { name: "Creative tools" }))
+      .getByRole("button", { name: "Sound", exact: true }));
+    fireEvent.click(screen.getByTestId("audio-remix-preset-chipmunk"));
+    await waitFor(() => expect(screen.getByTestId("studio-after-video")).toHaveAttribute("src", "https://example.com/source.mp4"));
+  });
+
   const readyCutawaySource = (duration, pausePreview = true) => {
     const video = screen.getByTestId('studio-after-video');
     Object.defineProperties(video, {
