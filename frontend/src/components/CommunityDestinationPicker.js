@@ -139,17 +139,18 @@ export default function CommunityDestinationPicker({
         </label>
       )}
       {manage && (
-        <ul>
+        <ul className="community-destination-list">
           {items.map(d => (
             <li key={d.id}>
-              {d.label} · {d.targetId}
+              <strong>{d.label}</strong>
+              <span>{d.targetId}</span>
             </li>
           ))}
         </ul>
       )}
       {!busy && !items.length && <p>No publishing destination is authorised yet.</p>}
       {platform === "telegram" ? (
-        <div>
+        <div className="community-destination-field">
           <label>
             Telegram channel or group
             <input
@@ -159,12 +160,22 @@ export default function CommunityDestinationPicker({
               onChange={e => setChat(e.target.value)}
             />
           </label>
-          <button type="button" disabled={busy || !chat.trim()} onClick={verify}>
+          <button
+            className="community-destination-primary"
+            type="button"
+            disabled={busy || !chat.trim()}
+            onClick={verify}
+          >
             Verify destination
           </button>
         </div>
       ) : (
-        <button type="button" disabled={busy} onClick={authoriseDiscord}>
+        <button
+          className="community-destination-primary"
+          type="button"
+          disabled={busy}
+          onClick={authoriseDiscord}
+        >
           Authorise Discord channel
         </button>
       )}

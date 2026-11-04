@@ -598,6 +598,82 @@
   color: #1d4ed8;
 }
 
+/* Phone forms keep readable fields and scroll naturally above the keyboard. */
+@media (max-width: 768px) {
+  :is(.auth-container, .auth-shell)
+    :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+    min-width: 0;
+    min-height: 44px;
+    font-size: 16px;
+  }
+  :is(.auth-container, .auth-shell) .auth-form :is(button, .auth-link) {
+    min-height: 44px;
+    white-space: normal;
+  }
+  .auth-shell,
+  .auth-shell__inner,
+  .auth-shell .auth-form {
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .auth-shell__inner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+  .auth-shell {
+    min-height: 100dvh;
+    padding: 24px 16px;
+    align-items: flex-start;
+  }
+  .auth-shell .auth-form {
+    width: 100%;
+    margin: 0;
+    padding: 22px 18px;
+    max-width: none;
+    overflow: visible;
+  }
+  .auth-shell .auth-panel-copy h1 {
+    font-size: 28px;
+    line-height: 1.2;
+  }
+  .auth-container .auth-form .auth-form__fields .form-label,
+  .auth-container .password-requirements {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .auth-container :is(.error-message, .success-message, .verification-card) {
+    overflow-wrap: anywhere;
+  }
+  .auth-container .auth-form {
+    width: 100%;
+    margin: 0;
+  }
+  .auth-container .terms-row {
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    min-height: 44px;
+  }
+  .auth-container .auth-form .terms-row .form-label {
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .auth-container .terms-row input[type="checkbox"] {
+    flex: 0 0 20px;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    margin: 2px 0 0;
+  }
+  .auth-container .auth-form__inline {
+    flex-wrap: wrap;
+  }
+  .auth-container :is(.auth-form__inline, .auth-action-row) {
+    gap: 12px;
+  }
+}
+
 .auth-form__inline {
   display: flex;
   justify-content: space-between;

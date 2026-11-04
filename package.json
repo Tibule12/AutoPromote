@@ -19,6 +19,7 @@
     "test:security:profile": "node scripts/test-profile-security.cjs",
     "test:community:publishing": "node scripts/test-community-publishing.cjs",
     "test:community:browser": "node scripts/test-community-publishing-browser.cjs",
+    "test:mobile:forms": "cross-env MOBILE_FORMS_QA=true MOBILE_FORMS_ASSERT=true node scripts/test-community-publishing-browser.cjs",
     "test:snapchat:oauth": "node scripts/test-snapchat-oauth.cjs",
     "preflight": "node ./scripts/preflight-critical-files.js && node ./scripts/check-encryption-env.js && node ./autopromote-functions/validate-imports.js",
     "preflight:local": "node ./scripts/preflight-critical-files.js && node ./autopromote-functions/validate-imports.js",

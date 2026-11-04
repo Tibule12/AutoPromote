@@ -200,6 +200,16 @@
   }
 }
 @media (max-width: 600px) {
+  .contact-compose :is(input, select, textarea) {
+    min-width: 0;
+    min-height: 44px;
+    font-size: 16px;
+  }
+  .contact-compose form button {
+    min-height: 44px;
+    width: 100%;
+    white-space: normal;
+  }
   .public-site-about .public-hero,
   .public-site-contact .public-hero {
     padding-top: 36px;

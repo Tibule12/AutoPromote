@@ -254,6 +254,16 @@ async function main() {
       app = express();
     app.use(rateLimit({ windowMs: 60000, max: 2000, legacyHeaders: false, standardHeaders: true }));
     app.use(express.json());
+    if (process.env.MOBILE_FORMS_QA === "true") {
+      // Render the real plan catalogue, with every payment/status mutation and
+      // provider synchronisation endpoint deliberately outside this fixture.
+      app.use(
+        "/api/paypal-subscriptions",
+        (req, res, next) =>
+          req.method === "GET" && req.path === "/plans" ? next() : res.sendStatus(404),
+        require(path.join(root, "src/routes/paypalSubscriptionRoutes"))
+      );
+    }
     app.use("/api/auth", require(path.join(root, "src/authRoutes")));
     app.use("/api/users", require(path.join(root, "src/userRoutes")));
     app.use("/api/content", require(path.join(root, "src/contentRoutes")));
@@ -310,7 +320,9 @@ async function main() {
     console.log("Build passed; starting isolated real Auth browser flow");
     const { chromium } = require("playwright");
     browser = await chromium.launch({ headless: true, args: ["--mute-audio"] });
-    const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    const context = await browser.newContext({
+      viewport: { width: process.env.MOBILE_FORMS_QA === "true" ? 390 : 1280, height: 900 },
+    });
     const external = [];
     context.setDefaultTimeout(30000);
     await context.route("**/*", route => {
@@ -338,13 +350,38 @@ async function main() {
       }
     });
     const page = await context.newPage();
+    const checkMobileForm = require("./qa/mobile-form-checks.cjs").createMobileFormChecks(
+      directory
+    );
+    const navigateWorkspace = async name => {
+      await page.locator(".dashboard-root").waitFor({ state: "visible" });
+      if (page.viewportSize().width <= 1023) {
+        const toggle = page.locator(".dashboard-topbar .hamburger");
+        await toggle.waitFor({ state: "visible" });
+        if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+      }
+      await page.locator(".dashboard-sidebar").getByRole("button", { name, exact: true }).click();
+    };
     observedPage = page;
     page.on("pageerror", e => console.log("Browser page error:", e.message));
+    if (process.env.MOBILE_FORMS_QA === "true") {
+      await page.goto(origin + "/#/contact");
+      await checkMobileForm(page, "contact", ".contact-compose");
+      await page.goto(origin);
+      await page
+        .getByRole("button", { name: /sign in/i })
+        .first()
+        .click();
+      await checkMobileForm(page, "login", ".auth-container--login");
+      await page.goto(origin + "/#/forgot-password");
+      await checkMobileForm(page, "password-recovery", ".auth-shell");
+    }
     await page.goto(origin);
     await page
       .getByRole("button", { name: /get started|create.*account|start creating/i })
       .first()
       .click();
+    await checkMobileForm(page, "registration", ".auth-container--register");
     const emailAddress = "verification-flow@example.test",
       password = "Isolated-test-password!24";
     await page.getByPlaceholder("Enter your full name").fill("Verification Test");
@@ -357,6 +394,7 @@ async function main() {
     await page.getByRole("button", { name: /create autopromote account/i }).click();
     assert.equal((await registration).status(), 201);
     await page.getByRole("heading", { name: "Verify your email", exact: true }).waitFor();
+    await checkMobileForm(page, "verification", ".verification-card");
     assert.equal(await page.getByRole("button", { name: /I verified|go to sign in/i }).count(), 0);
     await page.screenshot({ path: path.join(directory, "verification-locked-desktop.png") });
     await page.reload();
@@ -405,7 +443,25 @@ async function main() {
       .getByRole("button", { name: "Queue", exact: true })
       .first()
       .waitFor({ timeout: 60000 });
-    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.setViewportSize({
+      width: process.env.MOBILE_FORMS_QA === "true" ? 390 : 1280,
+      height: 900,
+    });
+    if (process.env.MOBILE_FORMS_QA === "true") {
+      await navigateWorkspace("Security");
+      await page.locator(".security-password-details summary").click();
+      await checkMobileForm(page, "security", ".security-panel");
+      await navigateWorkspace("Team");
+      await page.locator(".team-panel form input").first().waitFor({ state: "visible" });
+      await checkMobileForm(page, "team", ".team-panel");
+      await navigateWorkspace("Billing");
+      await page.locator(".paypal-subscription-panel .billing-plan-options > summary").click();
+      await page
+        .locator(".paypal-subscription-panel .plan-card")
+        .first()
+        .waitFor({ state: "visible" });
+      await checkMobileForm(page, "billing", ".paypal-subscription-panel");
+    }
     await db.doc("users/" + identity.localId + "/connections/telegram").set({
       connected: true,
       profile: { id: 987654321, username: "FixtureTelegram" },
@@ -447,11 +503,12 @@ async function main() {
       })
     );
     await page.reload();
-    await page.getByRole("button", { name: "Connections", exact: true }).first().click();
+    await navigateWorkspace("Connections");
     const telegramCard = page
       .locator(".connection-platform-card")
       .filter({ has: page.locator("strong").filter({ hasText: /^Telegram$/ }) });
     await telegramCard.getByRole("button", { name: "Manage", exact: true }).click();
+    await checkMobileForm(page, "telegram-connection", ".connections-panel");
     await telegramCard
       .getByRole("textbox", { name: "Telegram channel or group" })
       .fill("@CreatorChannel");
@@ -466,12 +523,44 @@ async function main() {
     });
     await popup.close();
     await page.reload();
-    await page.getByRole("button", { name: "Publisher", exact: true }).first().click();
+    if (process.env.MOBILE_FORMS_QA === "true") {
+      await navigateWorkspace("Connections");
+      const discordCard = page
+        .locator(".connection-platform-card")
+        .filter({ has: page.locator("strong").filter({ hasText: /^Discord$/ }) });
+      await discordCard.getByRole("button", { name: "Manage", exact: true }).click();
+      await checkMobileForm(page, "discord-connection", ".connections-panel");
+    }
+    await navigateWorkspace("Publisher");
+    await checkMobileForm(page, "publisher-content", ".publisher-release");
     await page.getByRole("button", { name: /Community release/ }).click();
     await page.getByRole("button", { name: /Choose destinations/ }).click();
+    await checkMobileForm(page, "publisher-destinations", ".publisher-release");
     await page.getByRole("checkbox", { name: /Telegram/ }).check();
     await page.getByRole("checkbox", { name: /Discord/ }).check();
     await page.getByRole("button", { name: /Customize destinations/ }).click();
+    await checkMobileForm(page, "publisher-customize", ".publisher-release");
+    if (process.env.MOBILE_FORMS_QA === "true") {
+      // Inspect every active provider's real form without granting a connection
+      // or submitting any of these additional destinations.
+      const providers = ["Facebook", "Instagram", "LinkedIn", "Reddit", "TikTok", "YouTube"];
+      await page.getByRole("button", { name: "Change destinations", exact: true }).click();
+      for (const name of providers)
+        await page.getByRole("checkbox", { name: new RegExp(name, "i") }).check();
+      await page.getByRole("button", { name: /Customize destinations/ }).click();
+      for (const name of providers) {
+        await page.getByRole("tab", { name, exact: true }).click();
+        await checkMobileForm(
+          page,
+          "publisher-" + name.toLowerCase(),
+          ".release-form-card:not([hidden])"
+        );
+      }
+      await page.getByRole("button", { name: "Change destinations", exact: true }).click();
+      for (const name of providers)
+        await page.getByRole("checkbox", { name: new RegExp(name, "i") }).uncheck();
+      await page.getByRole("button", { name: /Customize destinations/ }).click();
+    }
     for (const [name, platform, label] of [
       ["Telegram", "telegram", "Creator subscribers"],
       ["Discord", "discord", "Creator announcements"],
@@ -482,6 +571,7 @@ async function main() {
       await select.selectOption({
         label: await select.locator("option").filter({ hasText: label }).textContent(),
       });
+      await checkMobileForm(page, "publisher-" + platform, ".release-form-card:not([hidden])");
     }
     await page.screenshot({
       path: path.join(directory, "publisher-community-desktop.png"),
@@ -489,9 +579,11 @@ async function main() {
     });
     await page.getByRole("button", { name: /Continue to Delivery/ }).click();
     await page.getByRole("radio", { name: /^Schedule/ }).check();
+    await checkMobileForm(page, "publisher-delivery", ".publisher-release");
     await page.getByLabel("Date", { exact: true }).fill("2030-11-04");
     await page.getByLabel("Time", { exact: true }).fill("16:00");
     await page.getByRole("button", { name: /Review release/ }).click();
+    await checkMobileForm(page, "publisher-review", ".publisher-release");
     await page.screenshot({
       path: path.join(directory, "publisher-community-review.png"),
       fullPage: true,
@@ -546,7 +638,7 @@ async function main() {
       assert.equal(row.status, "completed");
       assert(row.publicationOutcome?.messageId);
     }
-    await page.getByRole("button", { name: "Queue", exact: true }).first().click();
+    await navigateWorkspace("Queue");
     await page.getByRole("combobox", { name: "Queue period" }).selectOption("all");
     await page.getByText("Community release", { exact: true }).first().waitFor();
     await page.getByText("Published", { exact: true }).first().waitFor();

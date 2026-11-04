@@ -1,0 +1,57 @@
+{
+  "baseline": "4c76206e3ea3b27ea951f584861ff1433c92cd92",
+  "files": [
+    {
+      "path": "firestore.rules",
+      "unchanged": true,
+      "sha256": "a6f2ddfe1a3d4f48d15b91d7e112736cb45e235bdd68dc01259d451682823deb"
+    },
+    {
+      "path": "storage.rules",
+      "unchanged": true,
+      "sha256": "b362e56ed1980cc781b051299e57838c61e66923083809fc844625c2ea6c52a3"
+    },
+    {
+      "path": "src/authMiddleware.js",
+      "unchanged": true,
+      "sha256": "1be59fd6288f26f93dc079c1f964ff2e443d2cef7aefdaf4ef783e9fe3590ea0"
+    },
+    {
+      "path": "src/config/trustedAdminPolicy.json",
+      "unchanged": true,
+      "sha256": "64701a5ea95f7fbf69ddd5e442751e84f9e19448624673ddcdbfab46b0ade4ac"
+    },
+    {
+      "path": "src/services/communityPublishing.js",
+      "unchanged": true,
+      "sha256": "3809368d53367933300fcda3741405ecf0362d4110c4860176d3091c39ff2b0f"
+    },
+    {
+      "path": "src/services/communityDelivery.js",
+      "unchanged": true,
+      "sha256": "ca4ae3412017a2f443c7a10d2d06062b0e7991bd93ca6adcbf166ab9a0fbc0d5"
+    },
+    {
+      "path": "src/services/billingService.js",
+      "unchanged": true,
+      "sha256": "39c041750c5c1f6805ade61ab224a71490086932c33342132316207d084d631a"
+    },
+    {
+      "path": "src/config/subscriptionPlans.js",
+      "unchanged": true,
+      "sha256": "e28ba549914b462e7ee6c1e34f541841b9f15309b434aaca623fdc7d7d316921"
+    },
+    {
+      "path": "src/contentRoutes.js",
+      "unchanged": true,
+      "sha256": "bcf6d50049de22ff82908d13d55a157ff23a2addf3c8ac537a018f7c1993b23a"
+    },
+    {
+      "path": "src/services/promotionTaskQueue.js",
+      "unchanged": true,
+      "sha256": "6b371a403f061c078aff5f88e3cd61e5b9cb255b86b5e8cdbb30a3857e4cafb9"
+    }
+  ],
+  "productionDataChanged": false,
+  "liveMessagesSent": false
+}
