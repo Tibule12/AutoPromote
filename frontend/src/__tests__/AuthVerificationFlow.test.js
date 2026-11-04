@@ -2,6 +2,7 @@ import React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import LoginForm from "../LoginForm";
 import RegisterForm from "../RegisterForm";
+import EmailVerificationScreen from "../components/EmailVerificationScreen";
 
 describe("email verification onboarding", () => {
   test("moves from the redesigned registration form to sign in", () => {
@@ -50,10 +51,25 @@ describe("email verification onboarding", () => {
 
     expect(await screen.findByRole("heading", { name: "Verify your email" })).toBeInTheDocument();
     expect(screen.getByText(/tester@example.com/i)).toBeInTheDocument();
-    expect(screen.getByText(/will not open the dashboard/i)).toBeInTheDocument();
+    expect(screen.getByText(/workspace stays locked/i)).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /I verified|go to sign in/i })
+    ).not.toBeInTheDocument();
+    expect(screen.getByText(/sign you in automatically/i)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /resend verification email/i }));
     await waitFor(() => expect(onResendVerification).toHaveBeenCalledWith("tester@example.com"));
+  });
+
+  test("throttled resends display a cooldown and cannot be clicked repeatedly", async () => {
+    const onResend = jest.fn().mockRejectedValue({ code: "auth/too-many-requests" });
+    render(<EmailVerificationScreen email="owner@example.test" onResend={onResend} />);
+    fireEvent.click(screen.getByRole("button", { name: /resend verification email/i }));
+    const waiting = await screen.findByRole("button", { name: /Resend available in 120s/i });
+    expect(waiting).toBeDisabled();
+    fireEvent.click(waiting);
+    expect(onResend).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText(/Firebase: Error/i)).not.toBeInTheDocument();
   });
 
   test("offers resend when login is blocked by an unverified email", async () => {

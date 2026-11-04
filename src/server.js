@@ -1096,7 +1096,7 @@ try {
       } catch (e) {}
       // Quick override: allow all origins when explicitly requested via env.
       // Use only for development/testing. Setting this in production is dangerous.
-      if (process.env.CORS_ALLOW_ALL === "true") {
+      if (process.env.CORS_ALLOW_ALL === "true" && !require("./utils/authAuthority").isHostedRuntime()) {
         try {
           logger.warn("[cors] CORS_ALLOW_ALL=true — allowing all origins (override)");
         } catch (e) {}

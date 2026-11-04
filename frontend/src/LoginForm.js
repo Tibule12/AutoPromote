@@ -2,6 +2,7 @@ import React, { useState, useCallback } from "react";
 import "./Auth.css";
 import AutoPromoteLogo from './components/AutoPromoteLogo';
 import { PUBLIC_SITE_URL } from "./config";
+import EmailVerificationScreen from "./components/EmailVerificationScreen";
 
 const loginHighlights = [
   {
@@ -27,8 +28,6 @@ const LoginForm = ({ onLogin, onClose, onResendVerification }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [needsVerification, setNeedsVerification] = useState(false);
-  const [isResending, setIsResending] = useState(false);
-  const [resendMessage, setResendMessage] = useState("");
 
   const handleChange = useCallback(
     event => {
@@ -36,7 +35,6 @@ const LoginForm = ({ onLogin, onClose, onResendVerification }) => {
       setFormData(prev => ({ ...prev, [name]: value }));
       if (error) setError("");
       setNeedsVerification(false);
-      setResendMessage("");
     },
     [error]
   );
@@ -106,19 +104,9 @@ const LoginForm = ({ onLogin, onClose, onResendVerification }) => {
     }
   };
 
-  const handleResendVerification = async () => {
-    if (!onResendVerification || !formData.email) return;
-    setIsResending(true);
-    setResendMessage("");
-    try {
-      await onResendVerification(formData.email);
-      setResendMessage("Verification email sent. Check Inbox and Spam.");
-    } catch (resendError) {
-      setResendMessage(resendError.message || "Could not resend the verification email.");
-    } finally {
-      setIsResending(false);
-    }
-  };
+  if (needsVerification) {
+    return <EmailVerificationScreen email={formData.email} onResend={onResendVerification} />;
+  }
 
   return (
     <div className="auth-container auth-container--login">
@@ -184,19 +172,7 @@ const LoginForm = ({ onLogin, onClose, onResendVerification }) => {
             <p className="auth-subtitle">Enter your details to open the creator workspace.</p>
           </div>
           {error && <div className="error-message">{error}</div>}
-          {needsVerification && (
-            <div className="verification-resend-panel">
-              <button
-                type="button"
-                className="auth-home-button"
-                onClick={handleResendVerification}
-                disabled={isResending || !formData.email}
-              >
-                {isResending ? "Sending..." : "Resend verification email"}
-              </button>
-              {resendMessage && <p className="helper-message">{resendMessage}</p>}
-            </div>
-          )}
+
 
           <div className="auth-form__fields">
             <div className="form-group">

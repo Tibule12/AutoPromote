@@ -210,6 +210,10 @@ const authMiddleware = async (req, res, next) => {
       return res.status(401).json({ error: "Invalid token" });
     }
 
+    // A valid login token alone does not unlock an unverified account. Check the
+    // signed claim before any profile lookup or protected route is reached.
+    if (!require("./utils/emailVerification").requireVerifiedEmail(decodedToken, res)) return;
+
     // Optional audience / issuer enforcement
     const expectedAud = process.env.JWT_AUDIENCE;
     const expectedIss = process.env.JWT_ISSUER;
