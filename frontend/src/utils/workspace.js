@@ -1,4 +1,5 @@
 const ACTIVE_WORKSPACE_KEY = "autopromote.activeWorkspaceId";
+const ACTIVE_WORKSPACE_NAME_KEY = "autopromote.activeWorkspaceName";
 const ACTIVE_WORKSPACE_ROLE_KEY = "autopromote.activeWorkspaceRole";
 
 export function getActiveWorkspaceId() {
@@ -15,7 +16,10 @@ export function setActiveWorkspaceId(workspaceId) {
     if (workspaceId) window.localStorage?.setItem(ACTIVE_WORKSPACE_KEY, workspaceId);
     else window.localStorage?.removeItem(ACTIVE_WORKSPACE_KEY);
     const next = workspaceId || "";
-    if (previous !== next) window.localStorage?.removeItem(ACTIVE_WORKSPACE_ROLE_KEY);
+    if (previous !== next) {
+      window.localStorage?.removeItem(ACTIVE_WORKSPACE_ROLE_KEY);
+      window.localStorage?.removeItem(ACTIVE_WORKSPACE_NAME_KEY);
+    }
     if (previous !== next) {
       window.dispatchEvent(new CustomEvent("autopromote:workspace-change", { detail: { workspaceId: next } }));
     }
@@ -48,21 +52,14 @@ export function withWorkspaceHeaders(headers = {}, workspaceId = getActiveWorksp
 export async function ensureActiveWorkspace(endpoint, token) {
   const existing = getActiveWorkspaceId();
   if (existing) return existing;
-  if (!endpoint || !token) return "";
+  // Team activation is explicit. Loading the personal dashboard must never
+  // silently switch the owner into a shared namespace.
+  return "";
+}
 
-  try {
-    const response = await fetch(endpoint, {
-      headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
-    });
-    if (!response.ok) return "";
-    const data = await response.json();
-    const workspaceId = data?.workspace?.id || "";
-    if (workspaceId) {
-      setActiveWorkspaceId(workspaceId);
-      setActiveWorkspaceRole(data?.membership?.role || "");
-    }
-    return workspaceId;
-  } catch {
-    return "";
-  }
+export function setActiveWorkspaceName(name) {
+  try { if (name) window.localStorage?.setItem(ACTIVE_WORKSPACE_NAME_KEY, name); else window.localStorage?.removeItem(ACTIVE_WORKSPACE_NAME_KEY); } catch (_) {}
+}
+export function getActiveWorkspaceName() {
+  try { return window.localStorage?.getItem(ACTIVE_WORKSPACE_NAME_KEY) || "Team workspace"; } catch (_) { return "Team workspace"; }
 }

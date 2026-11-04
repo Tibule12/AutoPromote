@@ -1,0 +1,82 @@
+{
+  "productionWrites": false,
+  "pushed": false,
+  "merged": false,
+  "deployed": false,
+  "build": {
+    "actualApp": "passed",
+    "sourceBuild": "/tmp/autopromote-community-browser-9TgzUn/build",
+    "isolatedOutput": true,
+    "sourceRevision": "local uncommitted Team candidate on 81f6b128; source hashes in source-manifest.json"
+  },
+  "tests": {
+    "teamFirestoreEmulator": {
+      "passed": 30,
+      "failed": 0,
+      "includes": "source generation, create-only rewrite contract, approvals, replay, member removal, concurrent allowance, project checkout and archive copy"
+    },
+    "security": {
+      "passed": 99,
+      "failed": 0
+    },
+    "existingBackend": {
+      "passed": 15,
+      "failed": 0
+    },
+    "communityPublishing": {
+      "passed": 42,
+      "failed": 0
+    },
+    "frontendDistinct": {
+      "passed": 43,
+      "failed": 0,
+      "note": "38 existing cases plus 5 Team review tests; final targeted reruns pass"
+    },
+    "distinctTotal": 229
+  },
+  "billing": {
+    "textChecks": 780,
+    "widths": [
+      320,
+      360,
+      390,
+      430,
+      768,
+      1280
+    ],
+    "minimumRatio": 5.49,
+    "failed": 0
+  },
+  "browser": {
+    "teamPublishing": true,
+    "normalIndependentVerifiedLogins": true,
+    "revisionApprovalInvalidation": true,
+    "approvedReviewedCaptionDelivered": true,
+    "personalQueueIsolated": true,
+    "nativeProjectShareAndStudioColdReopen": true,
+    "providerBoundary": "controlled Telegram/Discord and Storage; no live post or paid workload",
+    "renderExportQualified": false,
+    "reviewFirstDeliveryCopy": true
+  },
+  "static": {
+    "lint": "passed",
+    "syntax": "passed",
+    "diffCheck": "passed",
+    "studioContractRecords": "passed, readiness counts unchanged"
+  },
+  "limitations": [
+    "Shared paid rendering/Find Viral Clips owner delegation remains unimplemented.",
+    "No live Storage signing/copy/IAM or retention qualification.",
+    "No actual paid render/export, simultaneous editing, client project-level portal or production approval."
+  ],
+  "privateLogs": [
+    "/tmp/autopromote-team-tests-final-20261104.log",
+    "/tmp/autopromote-team-security-20261104-r2.log",
+    "/tmp/autopromote-team-server-final-20261104.log",
+    "/tmp/autopromote-team-community-final-20261104.log",
+    "/tmp/autopromote-team-frontend-tests-20261104.log",
+    "/tmp/autopromote-team-ui-final-20261104.log",
+    "/tmp/autopromote-team-ui-release-final-20261104.log",
+    "/tmp/autopromote-team-browser-20261104-final.log"
+  ]
+}

@@ -16,9 +16,10 @@ router.use("/:platform", (req, res, next) =>
 );
 router.get("/:platform", async (req, res) => {
   try {
+    if (req.workspaceId && req.workspaceRole !== "owner" && !(req.workspace.sharedPlatforms || []).includes(req.params.platform)) return res.json({ destinations: [] });
     res
       .set("Cache-Control", "no-store")
-      .json({ destinations: await service.listDestinations(req.user.uid, req.params.platform) });
+      .json({ destinations: await service.listDestinations(require("../middlewares/workspaceScope").resourceUserId(req), req.params.platform) });
   } catch (_) {
     res.status(503).json({ error: "Destinations could not be loaded. Try again." });
   }

@@ -274,7 +274,7 @@ router.get(
     const { getCache, setCache } = require("../utils/simpleCache");
     const { dedupe } = require("../utils/inFlight");
     const { instrument } = require("../utils/queryMetrics");
-    const uid = req.userId || req.user?.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
     const cacheKey = `youtube_status_${uid}`;
     const cached = getCache(cacheKey);
     if (cached) return res.json({ ...cached, _cached: true });
@@ -304,7 +304,7 @@ router.get(
 // Fetch live stats for one video (requires contentId or explicit videoId)
 router.get("/stats", authMiddleware, workspaceScope, ytPublicLimiter, async (req, res) => {
   try {
-    const uid = req.userId || req.user?.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
     const { contentId, videoId } = req.query;
     let vId = videoId;
     let contentDoc = null;
@@ -326,7 +326,7 @@ router.get("/stats", authMiddleware, workspaceScope, ytPublicLimiter, async (req
 // Batch poll (manual trigger) for stale stats & velocity update
 router.post("/stats/poll", authMiddleware, workspaceScope, ytWriteLimiter, async (req, res) => {
   try {
-    const uid = req.userId || req.user?.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
     const { velocityThreshold, batchSize } = req.body || {};
     const { pollYouTubeStatsBatch } = require("../services/youtubeStatsPoller");
     const result = await pollYouTubeStatsBatch({
@@ -417,7 +417,7 @@ router.post("/upload", authMiddleware, workspaceScope, ytWriteLimiter, upload.si
         .status(400)
         .json({ error: "title and video file (file/contentId/url) are required" });
 
-    const uid = req.userId || req.user?.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
 
     let tags = [];
     if (contentId) {

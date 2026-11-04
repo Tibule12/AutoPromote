@@ -1,0 +1,75 @@
+{
+  "team-browser-summary": {
+    "actualApp": true,
+    "independentNormalVerifiedLogins": true,
+    "ownerCreatesAndInvites": true,
+    "editorCannotApprove": true,
+    "submittedWithoutDispatch": true,
+    "revisionClearsApproval": true,
+    "approvedNativeWorkerDelivery": true,
+    "duplicateSend": false,
+    "personalQueueIsolated": true,
+    "nativeProjectShareCheckoutPrivateCopy": true,
+    "actualStudioImportEditSaveColdReopen": true,
+    "paidRenderAttempted": false,
+    "livePosts": 0,
+    "storageBoundary": "owned metadata and private archive fixture; not live GCS qualification"
+  },
+  "community-browser-summary": {
+    "actualApp": true,
+    "authEmulator": true,
+    "firestoreEmulator": true,
+    "providerBoundary": "controlled Discord consent/API and Telegram API fixtures; no live posts",
+    "telegramChannelVerifiedInUI": true,
+    "discordWebhookConsent": true,
+    "actualPublisherReviewAndSchedule": true,
+    "schedules": [
+      {
+        "id": "yNkKI8xx9LPFTqBEl42v",
+        "platform": "discord",
+        "destinationId": "c2ab7bdeee1e3c72b28fb1187d197e8000c71eacedc51bb304e87ef1141cb3bf"
+      },
+      {
+        "id": "zuxgHYFf2oAzWuSwpO1x",
+        "platform": "telegram",
+        "destinationId": "b5c5e952b0012566a1fd0c0d9a8245023c3d3c114f54632fffce0009a56dc0cf"
+      }
+    ],
+    "queueWorkerSucceeded": true,
+    "queueHistoryVisible": true,
+    "freePlanMultiDestinationRejectionPreserved": true,
+    "singleDestinationReleases": 2,
+    "providerDeliveries": [
+      {
+        "platform": "discord",
+        "multipart": true
+      },
+      {
+        "platform": "telegram",
+        "multipart": false
+      }
+    ],
+    "duplicateWorkerSend": false,
+    "productionTraffic": false
+  },
+  "browser-summary": {
+    "project": "demo-autopromote-credits",
+    "productionTraffic": false,
+    "externalRequestsBlocked": [
+      "https://autopromote.org"
+    ],
+    "actualAppBuild": true,
+    "registration201": true,
+    "reloadRemainsLockedBeforeVerification": true,
+    "unverifiedBackend403": true,
+    "emailActionAppliedThroughEmulatorLink": true,
+    "automaticSessionAfterReturn": true,
+    "verifiedSessionSurvivesReload": true,
+    "manualVerifiedButtonAbsent": true,
+    "storedFinancialAndAuthorityFieldsUnchanged": true,
+    "viewportScreenshots": [
+      "1280x900",
+      "390x844"
+    ]
+  }
+}

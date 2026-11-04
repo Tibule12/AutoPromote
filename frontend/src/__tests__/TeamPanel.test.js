@@ -1,5 +1,7 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
+jest.mock("../UserDashboardTabs/TeamContent", () => () => null);
+
 import TeamPanel from "../UserDashboardTabs/TeamPanel";
 
 const workspacePayload = {

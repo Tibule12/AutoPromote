@@ -32,13 +32,13 @@ describe("workspaceScope", () => {
     });
   });
 
-  test("scopes an editor request to the workspace owner while preserving the actor", async () => {
+  test("preserves the authenticated actor and selects the owner only as resource context", async () => {
     mockMemberGet.mockResolvedValue({
       exists: true,
       data: () => ({ uid: "editor-1", role: "editor", status: "active" }),
     });
     const req = {
-      method: "POST",
+      method: "GET",
       headers: { "x-workspace-id": "workspace-1" },
       query: {},
       userId: "editor-1",
@@ -51,7 +51,9 @@ describe("workspaceScope", () => {
 
     expect(next).toHaveBeenCalledTimes(1);
     expect(req.actorUserId).toBe("editor-1");
-    expect(req.userId).toBe("owner-1");
+    expect(req.userId).toBe("editor-1");
+    expect(req.user.uid).toBe("editor-1");
+    expect(workspaceScope.resourceUserId(req)).toBe("owner-1");
     expect(req.workspaceRole).toBe("editor");
   });
 

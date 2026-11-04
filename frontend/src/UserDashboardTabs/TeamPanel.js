@@ -6,9 +6,11 @@ import {
   getActiveWorkspaceId,
   setActiveWorkspaceId,
   setActiveWorkspaceRole,
+  setActiveWorkspaceName,
   withWorkspaceHeaders,
 } from "../utils/workspace";
 import "./TeamPanel.css";
+import TeamContent from "./TeamContent";
 
 const ROLE_OPTIONS = ["admin", "editor", "viewer"];
 
@@ -77,8 +79,8 @@ function TeamPanel({ onWorkspaceChanged, onNavigate }) {
   const [latestInviteUrl, setLatestInviteUrl] = useState("");
   const [busyKey, setBusyKey] = useState("");
 
-  const loadWorkspace = useCallback(async () => {
-    setLoading(true);
+  const loadWorkspace = useCallback(async (quiet = false) => {
+    if (!quiet) setLoading(true);
     try {
       let activeWorkspaceId = getActiveWorkspaceId();
       let data;
@@ -100,6 +102,7 @@ function TeamPanel({ onWorkspaceChanged, onNavigate }) {
       if (data.workspace?.id) {
         setActiveWorkspaceId(data.workspace.id);
         setActiveWorkspaceRole(data.membership?.role || "");
+        setActiveWorkspaceName(data.workspace.name);
       }
       return data;
     } catch (error) {
@@ -113,7 +116,7 @@ function TeamPanel({ onWorkspaceChanged, onNavigate }) {
       toast.error(friendlyError(error));
       return null;
     } finally {
-      setLoading(false);
+      if (!quiet) setLoading(false);
     }
   }, []);
 
@@ -340,6 +343,10 @@ function TeamPanel({ onWorkspaceChanged, onNavigate }) {
           </p>
         </div>
         <div className="team-hero-actions">
+          <button type="button" className="team-secondary" onClick={async () => {
+            setActiveWorkspaceId(null); setActiveWorkspaceRole(null);
+            await onWorkspaceChanged?.(null); onNavigate?.("viral_clip_studio");
+          }}>Switch to personal workspace</button>
           <div className="team-seat-summary">
             <strong>
               {occupiedSeats} / {workspace.seatLimit}
@@ -378,6 +385,7 @@ function TeamPanel({ onWorkspaceChanged, onNavigate }) {
         </label>
       ) : null}
 
+      <TeamContent key={workspace.id} workspace={workspace} members={members} onNavigate={onNavigate} onRefreshDetails={() => loadWorkspace(true)} />
       <div className="team-seat-track" aria-label={`${seatPercent}% of seats occupied`}>
         <span style={{ width: `${seatPercent}%` }} />
       </div>
@@ -550,9 +558,9 @@ function TeamPanel({ onWorkspaceChanged, onNavigate }) {
           <h3>Roles and permissions</h3>
           {[
             ["Owner", "Full workspace, billing, security, and publishing access."],
-            ["Admin", "Manage members, content, queues, and connections."],
-            ["Editor", "Create, edit, review, and publish content."],
-            ["Viewer", "View content, queues, and delivery status without editing."],
+            ["Admin", "Manage members, review content, approve releases, and manage queues."],
+            ["Editor", "Create and edit content, then submit releases for approval."],
+            ["Viewer", "View this workspace and leave review comments without editing or publishing."],
           ].map(([role, copy], index) => (
             <article key={role}>
               <span>{index + 1}</span>

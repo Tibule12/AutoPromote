@@ -382,7 +382,7 @@ router.get(
     const cfg = activeConfig();
     if (ensureTikTokEnv(res, cfg, { requireSecret: true })) return;
     try {
-      const uid = req.userId || req.user?.uid;
+      const uid = require("../middlewares/workspaceScope").resourceUserId(req);
       if (!uid) return res.status(401).json({ error: "Unauthorized" });
       const crypto = require("crypto");
       const nonce = crypto.randomBytes(16).toString("hex"); // Use cryptographically secure random
@@ -869,7 +869,7 @@ router.get(
     try {
       const cfg = activeConfig();
       if (ensureTikTokEnv(res, cfg, { requireSecret: false })) return;
-      const uid = req.userId || req.user?.uid;
+      const uid = require("../middlewares/workspaceScope").resourceUserId(req);
       if (!uid) return res.status(401).json({ connected: false, error: "Unauthorized" });
       const { getCache, setCache } = require("../utils/simpleCache");
       const { dedupe } = require("../utils/inFlight");
@@ -950,7 +950,7 @@ router.get(
 router.get("/debug/state", authMiddleware, ttPublicLimiter, async (req, res) => {
   if (!DEBUG_TIKTOK_OAUTH) return res.status(404).json({ error: "debug_disabled" });
   try {
-    const uid = req.userId || req.user?.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
     if (!uid) return res.status(401).json({ error: "Unauthorized" });
     const doc = await db.collection("users").doc(uid).collection("oauth_state").doc("tiktok").get();
     if (!doc.exists) return res.json({ exists: false });
@@ -982,7 +982,7 @@ router.post(
     const DEMO_MODE = process.env.TIKTOK_DEMO_MODE === "true";
 
     try {
-      const uid = req.userId || req.user?.uid;
+      const uid = require("../middlewares/workspaceScope").resourceUserId(req);
       if (!uid) return res.status(401).json({ error: "Unauthorized" });
 
       // Accept payload fields used by frontend: url (storage URL), title, meta, platform_options
@@ -1632,7 +1632,7 @@ router.post(
 // Get user's TikTok video list (approved scope: video.list)
 router.get("/videos", authMiddleware, ttPublicLimiter, async (req, res) => {
   try {
-    const uid = req.userId || req.user?.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
     if (!uid) return res.status(401).json({ error: "Unauthorized" });
 
     const userRef = db.collection("users").doc(uid);
@@ -1776,7 +1776,7 @@ module.exports = router;
 // the frontend to render the required UX before publishing to TikTok.
 router.get("/creator_info", authMiddleware, workspaceScope, ttPublicLimiter, async (req, res) => {
   try {
-    const uid = req.userId || req.user?.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
     if (!uid) return res.status(401).json({ error: "Unauthorized" });
 
     const DEMO_MODE =

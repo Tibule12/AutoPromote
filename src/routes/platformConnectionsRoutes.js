@@ -184,16 +184,23 @@ function normalizeConnectionMap(connectionDocs, userData) {
   return connections;
 }
 
+function workspaceConnections(req, payload) {
+  if (!req.workspaceId || req.workspaceRole === "owner") return payload;
+  const allowed = req.workspace?.sharedPlatforms || [];
+  return { ...payload, summary: Object.fromEntries(Object.entries(payload.summary || {}).map(([key, value]) => [key, allowed.includes(key) ? value : { connected: false }])),
+    raw: Object.fromEntries(Object.entries(payload.raw || {}).map(([key, value]) => [key, allowed.includes(key) ? value : { connected: false }])) };
+}
+
 router.get(
   "/status",
   authMiddleware,
   platformConnectionsPublicLimiter,
   require("../statusInstrument")("platformConnectionsStatus", async (req, res) => {
     const { getCache, setCache } = require("../utils/simpleCache");
-    const uid = req.userId || req.user?.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
     const cacheKey = `platform_connections_status_${uid}`;
     const cached = getCache(cacheKey);
-    if (cached) return res.json({ ...cached, _cached: true });
+    if (cached) return res.json(workspaceConnections(req, { ...cached, _cached: true }));
     const userRef = db.collection("users").doc(uid);
     const [connectionsSnap, userSnap] = await Promise.all([
       userRef.collection("connections").get(),
@@ -331,7 +338,7 @@ router.get(
       },
     };
     setCache(cacheKey, payload, 7000);
-    res.json(payload);
+    res.json(workspaceConnections(req, payload));
   })
 );
 
@@ -348,7 +355,7 @@ router.post(
       ) {
         return res.status(403).json({ error: "workspace_connection_owner_required" });
       }
-      const uid = req.userId || req.user?.uid;
+      const uid = require("../middlewares/workspaceScope").resourceUserId(req);
       const { platform } = req.params || {};
       const allowed = [
         "twitter",

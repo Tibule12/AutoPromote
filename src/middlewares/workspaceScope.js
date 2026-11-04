@@ -27,9 +27,7 @@ async function workspaceScope(req, res, next) {
     const isOwner = workspace.ownerUid === actorUid;
     const membership = isOwner
       ? { uid: actorUid, role: "owner", status: "active" }
-      : (
-          await workspaceRef.collection("members").doc(actorUid).get()
-        ).data();
+      : (await workspaceRef.collection("members").doc(actorUid).get()).data();
 
     if (!membership || membership.status !== "active") {
       return res.status(403).json({ ok: false, error: "not_a_workspace_member" });
@@ -52,14 +50,41 @@ async function workspaceScope(req, res, next) {
     req.workspaceMembership = { ...membership, role };
     req.workspaceRole = role;
     req.billingUserId = ownerUid;
-    req.userId = ownerUid;
-    req.user = {
-      ...(req.user || {}),
-      uid: ownerUid,
-      actorUid,
-      workspaceId,
-      workspaceRole: role,
-    };
+    // Authentication remains the human actor. Resource ownership and billing
+    // are explicit context, never an impersonated Firebase identity.
+    if (String(req.baseUrl || "").endsWith("/analytics"))
+      return res.status(403).json({ ok: false, error: "personal_resource" });
+    req.workspaceOwnerId = ownerUid;
+    req.userId = actorUid;
+    if (!["owner", "admin", "editor", "viewer"].includes(role))
+      return res.status(403).json({ ok: false, error: "invalid_workspace_role" });
+    const provider = String(req.baseUrl || "").match(
+      /\/(youtube|tiktok|instagram|facebook|telegram|spotify)$/
+    )?.[1];
+    if (provider && role !== "owner" && !(workspace.sharedPlatforms || []).includes(provider))
+      return res.status(403).json({ ok: false, error: "destination_not_shared" });
+    if (!READ_METHODS.has(req.method)) {
+      const content = String(req.baseUrl || "").endsWith("/content");
+      const safeContent =
+        content &&
+        (/^\/upload\/readiness$/.test(req.path) ||
+          (/^[/]promotion-schedules[/][A-Za-z0-9_-]+[/]pause$/.test(req.path) &&
+            ["owner", "admin"].includes(role)));
+      const connection =
+        /\/(platform|destinations|youtube|tiktok|instagram|facebook|telegram)$/.test(
+          req.baseUrl || ""
+        );
+      const safeConnection =
+        (connection || /\/auth\/prepare$/.test(req.path)) &&
+        role === "owner" &&
+        !/\/(upload|test-message|publish)(?:\/|$)/.test(req.path);
+      if (!safeContent && !safeConnection)
+        return res.status(403).json({
+          ok: false,
+          error: "team_review_required",
+          message: "Submit this release through Team review before publishing.",
+        });
+    }
 
     return next();
   } catch (error) {
@@ -70,3 +95,5 @@ async function workspaceScope(req, res, next) {
 
 module.exports = workspaceScope;
 module.exports.getWorkspaceId = getWorkspaceId;
+
+module.exports.resourceUserId = req => req.workspaceOwnerId || req.userId || req.user?.uid;

@@ -4122,3 +4122,6 @@ body.dashboard-mode {
   transform: translate(-50%, -50%) !important;
   aspect-ratio: var(--frame-ratio, 0.5625) !important;
 }
+
+.dashboard-workspace-context { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 14px; margin-bottom: 12px; border: 1px solid #45506b; border-radius: 12px; overflow-wrap: anywhere; }
+.dashboard-workspace-context button { min-height: 44px; margin-left: auto; padding: 8px 14px; border-radius: 8px; }

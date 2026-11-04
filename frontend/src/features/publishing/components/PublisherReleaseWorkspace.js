@@ -34,7 +34,7 @@ export default function PublisherReleaseWorkspace({
   visited, forms, copyMaster, mode, setMode, deliveryFields, setDeliveryFields,
   timezone, setTimezone, timezones, delivery, deliveryError, frequency, setFrequency,
   customSchedule, setCustomSchedule, customFields, setCustomFields,
-  reviewOptions, getData, nextReason, submit, submitting, feedback, onNavigate,
+  reviewOptions, getData, nextReason, submit, submitting, feedback, onNavigate, teamReview = false,
 }) {
   const [assetQuery, setAssetQuery] = useState("");
   const [showAllAssets, setShowAllAssets] = useState(false);
@@ -52,6 +52,7 @@ export default function PublisherReleaseWorkspace({
   const forwardReason = nextReason(step + 1);
   return (
     <div className={`unified-publisher-container publisher-release${embedded ? " is-embedded" : ""}`}>
+      {teamReview && <p className="release-card" role="status">Team workspace · Your personal source media is shared only when you submit it. Submit the exact media and destination copy for review. An Owner or Admin must approve and schedule it.</p>}
       {!embedded && <header className="release-page-heading"><h1>Publisher</h1><p>Prepare one release. Complete every destination.</p></header>}
       <div className="release-workflow-heading">
         <ol className="release-stepper" aria-label="Publishing workflow">
@@ -121,24 +122,24 @@ export default function PublisherReleaseWorkspace({
             </section>)}
           </section>
           {step === 3 && <section className="release-card release-delivery" aria-label="Delivery settings"><h3>Delivery</h3><p>Choose when the completed posts are sent.</p>
-            <div className="release-delivery-modes">{[["now", "Publish now", "Send to selected destinations now."], ["schedule", "Schedule", "Choose date, time and timezone."]].map(([id, name, help]) => <label key={id} className={mode === id ? "selected" : ""}><input type="radio" name="release-delivery" checked={mode === id} onChange={() => setMode(id)} /><strong>{name}</strong><span>{help}</span></label>)}</div>
-            {mode === "now" ? <p>Submission queues delivery immediately. Each destination confirms delivery separately.</p> : <>
+            <div className="release-delivery-modes">{[["now", teamReview ? "After approval" : "Publish now", teamReview ? "An Owner or Admin approves and schedules delivery." : "Send to selected destinations now."], ["schedule", "Schedule", "Choose date, time and timezone."]].map(([id, name, help]) => <label key={id} className={mode === id ? "selected" : ""}><input type="radio" name="release-delivery" checked={mode === id} onChange={() => setMode(id)} /><strong>{name}</strong><span>{help}</span></label>)}</div>
+            {mode === "now" ? <p>{teamReview ? "Submitting only requests review. Delivery starts after an Owner or Admin approves and schedules the release." : "Submission queues delivery immediately. Each destination confirms delivery separately."}</p> : <>
               <div className="release-date-time"><label>Date<input type="date" value={deliveryFields.date} onChange={event => setDeliveryFields({ ...deliveryFields, date: event.target.value })} /></label><label>Time<input type="time" value={deliveryFields.time} onChange={event => setDeliveryFields({ ...deliveryFields, time: event.target.value })} /></label></div>
               <label>Timezone<select value={timezone} onChange={event => setTimezone(event.target.value)}>{timezones.map(zone => <option key={zone} value={zone}>{zone}</option>)}</select></label>
               {delivery?.scheduledTime && <p className="release-exact-time">{formatScheduleTime(delivery.scheduledTime, timezone)} · {timezoneLabel(timezone, delivery.scheduledTime)}<small>{delivery.scheduledTime} (UTC)</small></p>}
-              <label>Repeat<select value={frequency} onChange={event => setFrequency(event.target.value)}>{["once", "daily", "weekly", "monthly"].map(value => <option key={value} value={value}>{value === "once" ? "Once" : value[0].toUpperCase() + value.slice(1)}</option>)}</select></label>
-              <label className="release-check"><input type="checkbox" checked={customSchedule} onChange={event => setCustomSchedule(event.target.checked)} />Use a different time for each destination</label>
-              {customSchedule && selected.map(platform => <fieldset key={platform} className="release-custom-time"><legend>{getPlatformName(platform)}</legend><label>Date<input type="date" value={customFields[platform]?.date || deliveryFields.date} onChange={event => setCustomFields(platform, { ...customFields[platform], date: event.target.value })} /></label><label>Time<input type="time" value={customFields[platform]?.time || deliveryFields.time} onChange={event => setCustomFields(platform, { ...customFields[platform], time: event.target.value })} /></label></fieldset>)}
+              <label>Repeat<select value={frequency} onChange={event => setFrequency(event.target.value)}>{(teamReview ? ["once"] : ["once", "daily", "weekly", "monthly"]).map(value => <option key={value} value={value}>{value === "once" ? "Once" : value[0].toUpperCase() + value.slice(1)}</option>)}</select></label>
+              {teamReview ? <p>Team review uses one delivery time for all destinations and requires approval before scheduling.</p> : <label className="release-check"><input type="checkbox" checked={customSchedule} onChange={event => setCustomSchedule(event.target.checked)} />Use a different time for each destination</label>}
+              {!teamReview && customSchedule && selected.map(platform => <fieldset key={platform} className="release-custom-time"><legend>{getPlatformName(platform)}</legend><label>Date<input type="date" value={customFields[platform]?.date || deliveryFields.date} onChange={event => setCustomFields(platform, { ...customFields[platform], date: event.target.value })} /></label><label>Time<input type="time" value={customFields[platform]?.time || deliveryFields.time} onChange={event => setCustomFields(platform, { ...customFields[platform], time: event.target.value })} /></label></fieldset>)}
               {deliveryError && <p className="release-error" role="alert">{deliveryError}</p>}
             </>}
           </section>}
-          {step === 4 && <section className="release-card release-review" aria-label="Review release"><h3>Review your release</h3><p>{selected.length} destinations · {mode === "schedule" ? "Scheduled delivery" : "Publish now"}</p>
+          {step === 4 && <section className="release-card release-review" aria-label="Review release"><h3>Review your release</h3><p>{selected.length} destinations · {teamReview ? "Awaiting review before delivery" : mode === "schedule" ? "Scheduled delivery" : "Publish now"}</p>
             {mode === "schedule" && delivery?.scheduledTime && <p className="release-exact-time">{formatScheduleTime(delivery.scheduledTime, timezone)} · {timezoneLabel(timezone, delivery.scheduledTime)}<small>Repeat: {frequency}</small></p>}
             <p>Review the submitted copy, media and destination settings below. Providers may format captions, links or media.</p>
             {selected.map(platform => { const options = reviewOptions[platform]; const content = destinationCopy(platform, options, title, description); const instant = delivery?.platformTimes?.[platform] || delivery?.scheduledTime; return <details key={platform} open={focus === platform} className="release-review-destination"><summary><PublisherPlatformIcon platform={platform} /><strong>{getPlatformName(platform)}</strong><span>{issues[platform]?.length ? "Needs attention" : "Form complete"}</span></summary><div>
               <h4>{content.title || "No title"}</h4><p className="release-full-copy">{content.body || "No caption/body"}</p><ReleaseMedia file={getData(platform).file || file} preview={preview} poster={poster} label={`${getPlatformName(platform)} review media`} />
               <dl>{[["Destination", options.destinationLabel], ["Delivery format", ["telegram", "discord"].includes(platform) ? options.deliveryMode || "native" : ""], ["Page", options.pageName || options.pageId], ["Subreddit", options.subreddit], ["Post type", options.kind || options.postType], ["Link", options.url], ["Visibility", options.privacy || options.visibility], ["Company Page", options.companyId], ["Category", options.category], ["Tags", options.tags], ["Made for kids", typeof options.madeForKids === "boolean" ? options.madeForKids ? "Yes" : "No" : ""], ["Commercial disclosure", options.commercialContent ? "Enabled" : ""], ["Paid promotion", options.paidPromotion ? "Enabled" : ""]].filter(([, value]) => value !== undefined && value !== null && value !== "").map(([name, value]) => <div key={name}><dt>{name}</dt><dd>{Array.isArray(value) ? value.join(", ") : String(value)}</dd></div>)}</dl>
-              <p>{mode === "schedule" && instant ? `${formatScheduleTime(instant, timezone)} · ${timezoneLabel(timezone, instant)}` : "Send immediately after submission"}</p><button type="button" className="release-text-button" onClick={() => { activatePlatform(platform); moveToStep(2); }}>Edit {getPlatformName(platform)} settings</button>
+              <p>{mode === "schedule" && instant ? `${formatScheduleTime(instant, timezone)} · ${timezoneLabel(timezone, instant)}${teamReview ? " · Requires approval before scheduling" : ""}` : teamReview ? "Send after approval and scheduling" : "Send immediately after submission"}</p><button type="button" className="release-text-button" onClick={() => { activatePlatform(platform); moveToStep(2); }}>Edit {getPlatformName(platform)} settings</button>
             </div></details>; })}
           </section>}
         </main>
@@ -150,7 +151,7 @@ export default function PublisherReleaseWorkspace({
       </div>
       <footer className="release-footer"><div>{step > 0 && <button type="button" className="release-text-button" onClick={() => moveToStep(step - 1)}>← Back to {PUBLISHER_STEPS[step - 1]}</button>}</div><div className="release-footer-action">
         {(feedback || forwardReason) && <p className="release-error" role="status">{feedback || forwardReason}</p>}
-        {step < 4 ? <button type="button" className="release-primary" disabled={!!forwardReason || submitting} onClick={() => moveToStep(step + 1)}>{buttonLabels[step]} →</button> : <button type="button" className="release-primary" disabled={!!nextReason(4) || submitting} onClick={submit}>{submitting ? "Submitting…" : mode === "schedule" ? `Schedule ${selected.length} posts` : `Publish to ${selected.length} destinations`} →</button>}
+        {step < 4 ? <button type="button" className="release-primary" disabled={!!forwardReason || submitting} onClick={() => moveToStep(step + 1)}>{buttonLabels[step]} →</button> : <button type="button" className="release-primary" disabled={!!nextReason(4) || submitting} onClick={submit}>{submitting ? "Submitting…" : teamReview ? "Submit for Team review" : mode === "schedule" ? `Schedule ${selected.length} posts` : `Publish to ${selected.length} destinations`} →</button>}
       </div></footer>
     </div>
   );

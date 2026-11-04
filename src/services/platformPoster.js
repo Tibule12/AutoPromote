@@ -381,9 +381,15 @@ async function dispatchPlatformPost({
   console.log(
     `[PlatformPoster] 🚀 Dispatching post to ${platform} for content ${contentId}. Reason: ${reason}`
   );
+  // Approved Team releases keep the reviewed copy/settings. Automatic hashtag
+  // generation or client task payloads cannot rewrite an approved release.
+  const teamContent = contentId?.startsWith("team_")
+    ? await require("./teamWorkspaceRuntime").prepareTeamDispatch(contentId, platform, payload.scheduleId)
+    : null;
+  if (teamContent) payload = teamContent;
   // If no hashtagString provided and we have a contentId, generate platform
   // specific hashtags automatically so posting flows can include them.
-  if (!payload.hashtagString && !payload.hashtags && contentId) {
+  if (!teamContent && !payload.hashtagString && !payload.hashtags && contentId) {
     try {
       const contentSnap = await db.collection("content").doc(contentId).get();
       const content = contentSnap.exists ? contentSnap.data() : {};
