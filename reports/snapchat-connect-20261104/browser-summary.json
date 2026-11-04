@@ -1,0 +1,10 @@
+{
+  "actualAppBuild": true,
+  "realEmulatorSignIn": true,
+  "actualConnectionsButton": true,
+  "providerResponseFixtureOnly": true,
+  "snapchatWindowOpened": true,
+  "untrustedHostnameBlocked": true,
+  "providerAuthorizationOrTokenExchangePerformed": false,
+  "productionRecordsModified": false
+}

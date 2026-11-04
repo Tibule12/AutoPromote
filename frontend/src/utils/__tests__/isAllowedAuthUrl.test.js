@@ -33,6 +33,27 @@ describe("isAllowedAuthUrl helper", () => {
     expect(isAllowedAuthUrl("http://localhost/some/path")).toBe(true);
   });
 
+  it("allows the production API entry used by direct OAuth starts", () => {
+    expect(isAllowedAuthUrl("https://api.autopromote.org/api/tiktok/auth?id_token=fixture")).toBe(
+      true
+    );
+  });
+
+  it.each([
+    "https://accounts.snapchat.com.evil.example/oauth",
+    "https://evil-accounts.snapchat.com/oauth",
+    "https://evil.accounts.snapchat.com/oauth",
+    "https://accounts.snapchat.com@evil.example/oauth",
+    "https://user:password@accounts.snapchat.com/oauth",
+    "http://accounts.snapchat.com/oauth",
+    "https://accounts.snapchat.com:8443/oauth",
+    "javascript:alert(1)",
+    "data:text/html,test",
+    "//evil.example/oauth",
+  ])("rejects an unsafe OAuth destination: %s", url => {
+    expect(isAllowedAuthUrl(url)).toBe(false);
+  });
+
   it("rejects other origins", () => {
     expect(isAllowedAuthUrl("https://evil.com/redirect?target=https://www.youtube.com")).toBe(
       false

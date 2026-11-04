@@ -37,7 +37,7 @@ import { API_ENDPOINTS, API_BASE_URL, ENABLE_WOLF_HUNT } from "./config";
 import toast, { Toaster } from "react-hot-toast";
 import { cachedFetch, batchWithDelay, clearCache } from "./utils/requestCache";
 import { startVisiblePoller } from "./utils/visiblePoller";
-import { isSafeRedirectUrl } from "./utils/security";
+import { isAllowedAuthUrl } from "./utils/isAllowedAuthUrl";
 import {
   getActiveWorkspaceId,
   getActiveWorkspaceRole,
@@ -1268,26 +1268,26 @@ const UserDashboard = ({
             );
             return;
           }
-          toast.success("Opening authentication window...");
           if (isMobile && prepareData.appUrl) {
-            if (!isSafeRedirectUrl(prepareData.appUrl)) {
+            if (!isAllowedAuthUrl(prepareData.appUrl)) {
               toast.error("Untrusted redirect URL blocked.");
               return;
             }
             window.location.href = prepareData.appUrl;
           } else if (isMobile) {
-            if (!isSafeRedirectUrl(prepareData.authUrl)) {
+            if (!isAllowedAuthUrl(prepareData.authUrl)) {
               toast.error("Untrusted redirect URL blocked.");
               return;
             }
             window.location.href = prepareData.authUrl;
           } else {
-            if (!isSafeRedirectUrl(prepareData.authUrl)) {
+            if (!isAllowedAuthUrl(prepareData.authUrl)) {
               toast.error("Untrusted redirect URL blocked.");
               return;
             }
             window.open(prepareData.authUrl, "_blank");
           }
+          toast.success("Opening authentication window...");
           return;
         } catch (err) {
           console.warn("Prepare endpoint POST failed:", err.message);
@@ -1337,20 +1337,20 @@ const UserDashboard = ({
                 toast.error("Auth prepare failed: no authUrl returned");
                 return;
               }
-              toast.success("Opening authentication window...");
               if (isMobile) {
-                if (!isSafeRedirectUrl(prepareData.authUrl)) {
+                if (!isAllowedAuthUrl(prepareData.authUrl)) {
                   toast.error("Untrusted redirect URL blocked.");
                   return;
                 }
                 window.location.href = prepareData.authUrl;
               } else {
-                if (!isSafeRedirectUrl(prepareData.authUrl)) {
+                if (!isAllowedAuthUrl(prepareData.authUrl)) {
                   toast.error("Untrusted redirect URL blocked.");
                   return;
                 }
                 window.open(prepareData.authUrl, "_blank");
               }
+              toast.success("Opening authentication window...");
               return;
             }
           }
@@ -1366,20 +1366,20 @@ const UserDashboard = ({
       // Direct redirect flow: append token as query param and open
       const separator = endpointUrl.includes("?") ? "&" : "?";
       const authUrl = `${endpointUrl}${separator}id_token=${encodeURIComponent(token)}`;
-      toast.success("Opening authentication window...");
       if (isMobile) {
-        if (!isSafeRedirectUrl(authUrl)) {
+        if (!isAllowedAuthUrl(authUrl)) {
           toast.error("Untrusted redirect URL blocked.");
           return;
         }
         window.location.href = authUrl;
       } else {
-        if (!isSafeRedirectUrl(authUrl)) {
+        if (!isAllowedAuthUrl(authUrl)) {
           toast.error("Untrusted redirect URL blocked.");
           return;
         }
         window.open(authUrl, "_blank");
       }
+      toast.success("Opening authentication window...");
     } catch (e) {
       console.warn(e);
       toast.error(e.message || "Failed to start auth");

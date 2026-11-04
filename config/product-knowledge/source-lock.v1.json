@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Preserve pre-existing nonhuman service-account Rules authority while enforcing verified email for all user identities; no billing, prices or readiness changes.",
-  "reviewed_at": "2026-11-04T08:18:43.482Z",
+  "reason": "Dashboard OAuth navigation uses the existing exact provider allowlist; fixes Snapchat redirect blocking while preserving email verification, financial/security behavior and readiness.",
+  "reviewed_at": "2026-11-04T09:55:26.603Z",
   "catalog_sha256": "98c30d5b7319da7d57821fd52c9471d77ca3d116716f0013a044ba60ff56667b",
   "sources": [
     {
@@ -55,7 +55,7 @@
     },
     {
       "path": "frontend/src/UserDashboard_full.js",
-      "sha256": "6078fb75ea996da10e37983bfc68368fed1ffa02edb8da38a9e8dafadb9f11de"
+      "sha256": "cb433ec367f4d35b97175f72f10282a0ea418059ebd1955163f9b964e1ecd8f9"
     },
     {
       "path": "frontend/src/WelcomePage.js",

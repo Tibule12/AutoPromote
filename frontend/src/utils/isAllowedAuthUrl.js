@@ -1,4 +1,7 @@
 const ALLOWED_AUTH_HOSTS = new Set([
+  "autopromote.org",
+  "www.autopromote.org",
+  "api.autopromote.org",
   "sandbox.tiktok.com",
   "www.tiktok.com",
   "open.tiktokapis.com",
@@ -47,10 +50,12 @@ export function isAllowedAuthUrl(url) {
     if (!url || typeof url !== "string") return false;
     if (url.startsWith("tg://")) return isAllowedTelegramDeepLink(url);
     const u = new URL(url, window.location.origin);
+    if (u.username || u.password) return false;
     if (u.origin === window.location.origin) {
       return u.protocol === "http:" || u.protocol === "https:";
     }
     if (u.protocol !== "https:") return false;
+    if (u.port) return false;
     return ALLOWED_AUTH_HOSTS.has(normalizeHostname(u.hostname));
   } catch (_) {}
   return false;
