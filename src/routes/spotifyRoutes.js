@@ -16,7 +16,7 @@ const { createSpotifyCampaign } = require("../services/communityEngine");
 // GET /status - Check connection
 router.get("/status", authMiddleware, workspaceScope, async (req, res) => {
   try {
-    const uid = req.userId || req.user.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
     const userRef = db.collection("users").doc(uid);
     const snap = await userRef.collection("connections").doc("spotify").get();
 
@@ -41,7 +41,7 @@ router.get("/status", authMiddleware, workspaceScope, async (req, res) => {
 // GET /search?q=query
 router.get("/search", authMiddleware, workspaceScope, async (req, res) => {
   try {
-    const uid = req.userId || req.user.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
     const { q } = req.query;
     if (!q) return res.status(400).json({ ok: false, error: "Query required" });
 
@@ -77,7 +77,7 @@ router.get("/search", authMiddleware, workspaceScope, async (req, res) => {
 // POST /batch-metrics
 router.post("/batch-metrics", authMiddleware, workspaceScope, async (req, res) => {
   try {
-    const uid = req.userId || req.user.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
     const { trackIds } = req.body;
     if (!trackIds || !Array.isArray(trackIds)) {
       return res.status(400).json({ error: "trackIds array required" });
@@ -93,7 +93,7 @@ router.post("/batch-metrics", authMiddleware, workspaceScope, async (req, res) =
 // POST /campaigns
 router.post("/campaigns", authMiddleware, workspaceScope, async (req, res) => {
   try {
-    const uid = req.userId || req.user.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
     const { playlistId, brandName, rewardPerStream } = req.body;
 
     // In a real app, verify user is a Brand Account here
@@ -124,7 +124,7 @@ router.post("/campaigns", authMiddleware, workspaceScope, async (req, res) => {
 // POST /publish (Create Playlist or Add to one)
 router.post("/publish", authMiddleware, workspaceScope, async (req, res) => {
   try {
-    const uid = req.userId || req.user.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
     const { contentId, payload } = req.body;
 
     const result = await postToSpotify({

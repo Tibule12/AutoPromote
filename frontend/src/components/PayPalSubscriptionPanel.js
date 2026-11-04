@@ -9,6 +9,7 @@ import { parseJsonSafe } from "../utils/parseJsonSafe";
 import { API_BASE_URL, API_ENDPOINTS } from "../config";
 import toast from "react-hot-toast";
 import "./PayPalSubscriptionPanel.css";
+import "./BillingContrast.css";
 
 function resolveApi(path) {
   try {

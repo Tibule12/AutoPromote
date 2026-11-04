@@ -1,0 +1,193 @@
+{
+  "baseline": "8edaf4e2283cad19dba95fef9bdd4efefb72fb05",
+  "source": [
+    {
+      "path": "config/security/firestore.owner-scoped.rules",
+      "sha256": "8daebc8a0d4638bea8baecf4fd069ffbbf4d200e1651e935e9fb93d47c931a31"
+    },
+    {
+      "path": "firestore.indexes.json",
+      "sha256": "844215531dff92fc375ed45ef760824859c5894431921988016248bb7ead7b96"
+    },
+    {
+      "path": "firestore.rules",
+      "sha256": "8daebc8a0d4638bea8baecf4fd069ffbbf4d200e1651e935e9fb93d47c931a31"
+    },
+    {
+      "path": "frontend/src/DashboardRedesign.css",
+      "sha256": "0b7c4a624f1272c4dedbbc9061250044532ddaf1e2dfca6a1cf501e86bfce6c2"
+    },
+    {
+      "path": "frontend/src/UserDashboardTabs/TeamContent.js",
+      "sha256": "60d9517337ea80702c428d2a8f8de292576eb3fbfe0f71d333c98d2787e6764f"
+    },
+    {
+      "path": "frontend/src/UserDashboardTabs/TeamPanel.css",
+      "sha256": "05c8e01e5bd8b4fe21fb86ab61f94886c4e5c974622e5cc1dcfda0c39695e8c3"
+    },
+    {
+      "path": "frontend/src/UserDashboardTabs/TeamPanel.js",
+      "sha256": "c12173204dcf43a1277ac7ee02164cfbd1994d60b3ed0df6080365a6fea1994c"
+    },
+    {
+      "path": "frontend/src/UserDashboardTabs/TeamProjects.js",
+      "sha256": "2e62edff5266650cd107f65fb31a92d3ebedc043ebd191062674cf6af1d289e2"
+    },
+    {
+      "path": "frontend/src/UserDashboard_full.js",
+      "sha256": "cb5398cc790ab93e76767bb80c361ff05911620cd73c56fb6b75e514f35a8bad"
+    },
+    {
+      "path": "frontend/src/__tests__/TeamContent.test.js",
+      "sha256": "a85f0dbb0b0b0211de332760b3b249b6d9b7141b02d7b9630584b53c0f210a53"
+    },
+    {
+      "path": "frontend/src/__tests__/TeamPanel.test.js",
+      "sha256": "a72f7fc7374fa38618fcca0ce458b5b21bb84d5b77ad1b77cbe60748c4a6d548"
+    },
+    {
+      "path": "frontend/src/features/publishing/UnifiedPublisher.js",
+      "sha256": "ee52a76b780fee76bd54b4c893acc6fea2d1b20b0c57c3bd20ae3df735c40df8"
+    },
+    {
+      "path": "frontend/src/features/publishing/components/PublisherReleaseWorkspace.js",
+      "sha256": "b559e6e03f34c56dc0fc3e28ab285a0ab7bba102047406f6f9000afeafbacf74"
+    },
+    {
+      "path": "frontend/src/utils/workspace.js",
+      "sha256": "549b6a4c901fe938d653c84ca2c560a55057c8be2ae6eb74f9c3c5acea66983c"
+    },
+    {
+      "path": "frontend/src/utils/workspaceDestination.js",
+      "sha256": "2c1eae5415958230f09d00542d3272da101a08f3fbe0d221df7a1b71abf36dcc"
+    },
+    {
+      "path": "package.json",
+      "sha256": "4e3181c179f8005c748a66083642775269d3a64f89f40737c9030c23a1cb43c5"
+    },
+    {
+      "path": "scripts/qa/team-workspace-browser.cjs",
+      "sha256": "e6dc126a21c13686bc659996b263d6dc80e7b63ac6647c0fefc805cad37dde54"
+    },
+    {
+      "path": "scripts/test-community-publishing-browser.cjs",
+      "sha256": "aa818a8141979d683b13084c53eb07ebeb4df0d3722ee2b661051557c79d357b"
+    },
+    {
+      "path": "scripts/test-team-workspace.cjs",
+      "sha256": "4a1da2c3d44d4186e194f5045dc95fcb72e83edf514312ee82b61a2fcaad88c3"
+    },
+    {
+      "path": "src/contentRoutes.js",
+      "sha256": "48fb04a22cb8cdd4b69b2d48ec4f4e5fa4154f751b610a745ab43fec8093a35e"
+    },
+    {
+      "path": "src/middlewares/__tests__/workspaceScope.test.js",
+      "sha256": "a409885e2b259bc2cefb3eae6e23eb587fe2986eb5fb71e03c9787c41cdba079"
+    },
+    {
+      "path": "src/middlewares/teamContentBoundary.js",
+      "sha256": "bc077d273681afed4246e6451e905057d38946aeb3c90f2cc0fd5f179ceb7c1d"
+    },
+    {
+      "path": "src/middlewares/workspaceScope.js",
+      "sha256": "b510f9feb97b10680b600ceb68026d8f06c07ce57e2daaccc67ea13c0b35cabe"
+    },
+    {
+      "path": "src/promotionService.js",
+      "sha256": "20974df7dd3ed6d79c5391a49d0e4d8d226c69d661b4d4427bc28b2ca034c701"
+    },
+    {
+      "path": "src/routes/communityPublishingRoutes.js",
+      "sha256": "edffdb5c6cacc1b7ccae1b122e927eb8720bb9b976a8a2689c8a32e24d43f157"
+    },
+    {
+      "path": "src/routes/facebookRoutes.js",
+      "sha256": "a8513aae6237f59812124eb43d57d8c06858119feaa85588799e1134183faa11"
+    },
+    {
+      "path": "src/routes/instagramRoutes.js",
+      "sha256": "71f2ae41c876af6f31979780393c7f97af1468d518ad27ce7dc747cc4a1c686f"
+    },
+    {
+      "path": "src/routes/platformConnectionsRoutes.js",
+      "sha256": "a019ca2fa85add6ead5dddf267d610c99a76e622be88e404030e8ae732a1c4a8"
+    },
+    {
+      "path": "src/routes/spotifyRoutes.js",
+      "sha256": "736afe3146ac0dd8f28f00631a841c9ae4c2c714b7138a459d6843b4d803584c"
+    },
+    {
+      "path": "src/routes/teamWorkspaceRoutes.js",
+      "sha256": "3e18b55b3186a4b1e22fe1fd4bd8ac5f314ca1bb1aa3e6d55bc11c8616387aaf"
+    },
+    {
+      "path": "src/routes/telegramRoutes.js",
+      "sha256": "44ad6531826b46f81439991e7398b2f9e1b219d827b1bf3a7eeb1d4df9892e24"
+    },
+    {
+      "path": "src/routes/tiktokRoutes.js",
+      "sha256": "a5e2794779c7af259d0b47674ace327546a39951e2e4edfd4e31f2a827159c8f"
+    },
+    {
+      "path": "src/routes/workspaceRoutes.js",
+      "sha256": "2c7d211395b750952f35a3d2f4da8e01adb249416d4dba841ed437b6e16e0fbf"
+    },
+    {
+      "path": "src/routes/youtubeRoutes.js",
+      "sha256": "971dbae665e41159701b24236c341f0dca37b4498fd68cbb97030b5226d293ea"
+    },
+    {
+      "path": "src/services/communityDelivery.js",
+      "sha256": "fe438875fc4ba4cf31f261ec4d52dd546d1de32fc3c18bc020b703bedfb8cb18"
+    },
+    {
+      "path": "src/services/platformPoster.js",
+      "sha256": "242dfad260ade40a21edc519bfec8062f756f99a6a5a3816ddcf9429d5d22407"
+    },
+    {
+      "path": "src/services/publishingScheduleQuery.js",
+      "sha256": "6c406811c2108ac40a7f4a5eef4f7ea9c38ef8e04809c9c07b23bdfa7b0570e3"
+    },
+    {
+      "path": "src/services/teamProjects.js",
+      "sha256": "fdc7caff314d90fa9dfde8e14d04d7e89374237c1b105d1aabe08f7e343fec15"
+    },
+    {
+      "path": "src/services/teamProjectsRuntime.js",
+      "sha256": "0dcf59635af8b5060750cc5622d15746505ae0dd1edb635a1464414135083459"
+    },
+    {
+      "path": "src/services/teamStorageCopy.js",
+      "sha256": "695ae1028f69de9d75f2130e66e89a80bb455936ee1c1570211778040e0f40ab"
+    },
+    {
+      "path": "src/services/teamWorkspace.js",
+      "sha256": "c6d2d73b210c00c449c61ece99a2d98cff7d99e47ce6293bf4b66bd6cd34de4e"
+    },
+    {
+      "path": "src/services/teamWorkspaceRuntime.js",
+      "sha256": "b0669f380eab80a3032523b18999f018fab7a04bd25546961e02991750900bbf"
+    },
+    {
+      "path": "test/e2e/studio-capability-matrix.json",
+      "sha256": "1d487199c08229d5d22a297cdec1e340b9ad7449aace4aa7bc08c0b68cb1e378"
+    },
+    {
+      "path": "test/e2e/studio-combination-matrix.json",
+      "sha256": "e9fcf3dee86df6836f0a72feeb2930ac13fe852a7a67e37de4ca948b0b39b39d"
+    },
+    {
+      "path": "test/e2e/studio-preview-render-parity.json",
+      "sha256": "6ecfd3e399d152f935f4209abafd22be38fa66639e15732cb212f568c7ebf32a"
+    },
+    {
+      "path": "test/security/profile-security.test.cjs",
+      "sha256": "0a41ec6bcc15f2bc59947b676d444e606f2d295806d552cd4d15b669f5593536"
+    },
+    {
+      "path": "test/team-workspace.integration.test.cjs",
+      "sha256": "0966bb7642e8ac27a0dec17c1a16bc399d858d5289a0e86d4e5d461808cddac8"
+    }
+  ]
+}

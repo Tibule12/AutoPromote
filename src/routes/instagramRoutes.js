@@ -15,7 +15,7 @@ router.get(
   authMiddleware,
   workspaceScope,
   require("../statusInstrument")("instagramStatus", async (req, res) => {
-    const uid = req.userId || req.user?.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
     const fbSnap = await db
       .collection("users")
       .doc(uid)
@@ -44,7 +44,7 @@ router.post("/upload", authMiddleware, workspaceScope, async (req, res) => {
     const { pageId, mediaUrl, caption, mediaType } = req.body || {};
     if (!pageId || !mediaUrl)
       return res.status(400).json({ error: "pageId and mediaUrl are required" });
-    const uid = req.userId || req.user?.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
     const fbSnap = await db
       .collection("users")
       .doc(uid)

@@ -388,7 +388,7 @@ router.get(
     const { getCache, setCache } = require("../utils/simpleCache");
     const { dedupe } = require("../utils/inFlight");
     const { instrument } = require("../utils/queryMetrics");
-    const uid = req.userId || req.user?.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
     const cacheKey = `facebook_status_${uid}`;
     const cached = getCache(cacheKey);
     if (cached) return res.json({ ...cached, _cached: true });
@@ -545,7 +545,7 @@ router.post("/upload", authMiddleware, workspaceScope, async (req, res) => {
     const { pageId, content } = req.body || {};
     if (!pageId || !content)
       return res.status(400).json({ error: "pageId and content are required" });
-    const uid = req.userId || req.user?.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
     const snap = await db
       .collection("users")
       .doc(uid)

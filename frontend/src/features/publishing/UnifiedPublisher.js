@@ -4,7 +4,7 @@ import { creditFetch } from "../../utils/creditPilot";
 // The "Command Center" for cross-platform publishing.
 // Wraps existing platform forms and delegates upload to App.js
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import "./UnifiedPublisher.css";
 import "./PublisherRelease.css";
 // Ensure platform form styles are loaded
@@ -19,7 +19,7 @@ import toast from "react-hot-toast";
 import { usePublishingState } from "./hooks/usePublishingState";
 import { useMediaProcessor } from "./hooks/useMediaProcessor";
 import { sanitizeUrl } from "../../utils/security";
-import { withWorkspaceHeaders } from "../../utils/workspace";
+import { getActiveWorkspaceId, withWorkspaceHeaders } from "../../utils/workspace";
 import { STORAGE_UPLOAD_LIMIT_MB, uploadSourceFileViaBackend } from "../../utils/sourceUpload";
 
 // --- Components ---
@@ -81,6 +81,9 @@ const UnifiedPublisher = ({
   onNavigate,
   embedded = false,
 }) => {
+  const teamRequestRef = useRef(null);
+  const draftWorkspaceRef = useRef(getActiveWorkspaceId());
+  const teamWorkspaceId = getActiveWorkspaceId();
   const handedDestinations = useMemo(
     () =>
       Array.isArray(initialDestinations)
@@ -169,7 +172,7 @@ const UnifiedPublisher = ({
     return () => {
       active = false;
     };
-  }, []);
+  }, [teamWorkspaceId]);
 
   useEffect(() => {
     let active = true;
@@ -202,7 +205,7 @@ const UnifiedPublisher = ({
     return () => {
       active = false;
     };
-  }, []);
+  }, [teamWorkspaceId]);
 
   const activatePlatform = platform => {
     setFocusedPlatform(platform);
@@ -936,7 +939,7 @@ const UnifiedPublisher = ({
       }
 
       setFeedbackMessage("Checking plan limits...");
-      if (!reuseOwnedContent) await preflightUploadReadiness({
+      if (!teamWorkspaceId && !reuseOwnedContent) await preflightUploadReadiness({
         token,
         platforms,
         scheduledTime: scheduledTime ? new Date(scheduledTime).toISOString() : null,
@@ -1083,6 +1086,8 @@ const UnifiedPublisher = ({
         setGlobalTitle(resolvedTitle);
       }
 
+      if (draftWorkspaceRef.current !== getActiveWorkspaceId())
+        throw new Error("The active workspace changed. Reopen Publisher and review the destination workspace before submitting.");
       const uploadParams = {
         url: finalUrl,
         file: null,
@@ -1132,7 +1137,25 @@ const UnifiedPublisher = ({
         },
       };
 
-      if (reuseOwnedContent) {
+      if (teamWorkspaceId) {
+        if (frequency !== "once" || customPlatformSchedule)
+          throw new Error("Team review currently supports one-time releases with one reviewed delivery time.");
+        const release = { url: finalUrl, title: resolvedTitle, description: resolvedDescription,
+          platforms, platformOptions: platformOptionsMap, time: scheduledTime || null,
+          timezone: deliveryTimezone, frequency: "once",
+          ...(sourceAsset?.sourceContentId ? { sourceContentId: sourceAsset.sourceContentId } : {}) };
+        const key = JSON.stringify(release);
+        if (teamRequestRef.current?.key !== key)
+          teamRequestRef.current = { key, id: window.crypto.randomUUID() };
+        const response = await fetch(`${API_ENDPOINTS.MY_CONTENT.replace(/\/content\/my-content$/, "")}/workspaces/${encodeURIComponent(teamWorkspaceId)}/team/releases`, {
+          method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ release, requestId: teamRequestRef.current.id }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || result.error || "Team review submission failed.");
+        setFeedbackMessage("Submitted for Team review. Nothing has been published or scheduled.");
+        toast.success("Submitted for Team review");
+      } else if (reuseOwnedContent) {
         const response = await creditFetch(
           `${API_ENDPOINTS.MY_CONTENT.replace(/\/my-content$/, "")}/${encodeURIComponent(sourceAsset.sourceContentId)}/promotion-schedules`,
           {
@@ -1286,6 +1309,7 @@ const UnifiedPublisher = ({
         reviewOptions={reviewOptions}
         getData={getPlatformEffectiveData}
         nextReason={nextReason}
+        teamReview={!!teamWorkspaceId}
         submit={handlePublishAll}
         submitting={isPublishing}
         feedback={feedbackMessage}

@@ -1,0 +1,56 @@
+{
+  "baseline": "8edaf4e2283cad19dba95fef9bdd4efefb72fb05",
+  "productionWrites": false,
+  "files": [
+    {
+      "path": "src/authMiddleware.js",
+      "unchanged": true,
+      "sha256": "1be59fd6288f26f93dc079c1f964ff2e443d2cef7aefdaf4ef783e9fe3590ea0"
+    },
+    {
+      "path": "src/config/trustedAdminPolicy.json",
+      "unchanged": true,
+      "sha256": "64701a5ea95f7fbf69ddd5e442751e84f9e19448624673ddcdbfab46b0ade4ac"
+    },
+    {
+      "path": "src/creditSystem.js",
+      "unchanged": true,
+      "sha256": "f309a0938ed64a20c61c69b42070ea82a60e5ad0fa83e00b31848d159a330399"
+    },
+    {
+      "path": "src/services/billingService.js",
+      "unchanged": true,
+      "sha256": "39c041750c5c1f6805ade61ab224a71490086932c33342132316207d084d631a"
+    },
+    {
+      "path": "src/config/subscriptionPlans.js",
+      "unchanged": true,
+      "sha256": "e28ba549914b462e7ee6c1e34f541841b9f15309b434aaca623fdc7d7d316921"
+    },
+    {
+      "path": "src/routes/paypalSubscriptionRoutes.js",
+      "unchanged": true,
+      "sha256": "f253207cc0802cced206bb4375cbf48de3fcbd819064e372b0dc5e4c45b9109b"
+    },
+    {
+      "path": "storage.rules",
+      "unchanged": true,
+      "sha256": "b362e56ed1980cc781b051299e57838c61e66923083809fc844625c2ea6c52a3"
+    },
+    {
+      "path": "frontend/src/components/ViralClipStudio.js",
+      "unchanged": true,
+      "sha256": "be74f56fb945d9f60edb9f486c8e785a5a188795c6e18fd668f62ebed25b86b6"
+    },
+    {
+      "path": "frontend/src/components/studioProjectDocument.js",
+      "unchanged": true,
+      "sha256": "cd869e8d9c81ca33d7eed247dc20e87d584ec5d7c9677815e27f176d8879515c"
+    },
+    {
+      "path": "frontend/src/components/viralStudioProjectStore.js",
+      "unchanged": true,
+      "sha256": "c3ec88f7069dc17ece653ac995daa04fe2d3cae0865663e023206b3546c97ca0"
+    }
+  ]
+}

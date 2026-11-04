@@ -40,6 +40,8 @@ import { startVisiblePoller } from "./utils/visiblePoller";
 import { isAllowedAuthUrl } from "./utils/isAllowedAuthUrl";
 import {
   getActiveWorkspaceId,
+  getActiveWorkspaceName,
+  setActiveWorkspaceId,
   getActiveWorkspaceRole,
   withWorkspaceHeaders,
 } from "./utils/workspace";
@@ -1595,6 +1597,10 @@ const UserDashboard = ({
       )}
 
       <main className="dashboard-main">
+        <div className="dashboard-workspace-context" role="status">
+          <span>{getActiveWorkspaceId() ? getActiveWorkspaceName() : "Personal workspace"}</span>
+          {getActiveWorkspaceId() && <><small> · {getActiveWorkspaceRole() || "member"} · Team releases require approval</small><button type="button" onClick={async () => { setActiveWorkspaceId(null); await onWorkspaceChanged?.(null); }}>Switch to personal</button></>}
+        </div>
         {activeTab !== "live" && (
           <header className="dashboard-page-header">
             <div>

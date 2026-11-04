@@ -176,6 +176,8 @@ async function requireWorkspaceRole(req, res, next) {
   }
 }
 
+router.use("/:id/team", require("./teamWorkspaceRoutes"));
+
 // Create workspace for current user
 router.post("/", async (req, res) => {
   try {
@@ -373,7 +375,7 @@ router.get("/current", async (req, res) => {
         canManageMembers: canManage,
         canManageBilling: membership.role === WORKSPACE_ROLES.OWNER,
         canEdit: membership.role !== WORKSPACE_ROLES.VIEWER,
-        canPublish: membership.role !== WORKSPACE_ROLES.VIEWER,
+        canPublish: [WORKSPACE_ROLES.OWNER, WORKSPACE_ROLES.ADMIN].includes(membership.role),
       },
     });
   } catch (error) {

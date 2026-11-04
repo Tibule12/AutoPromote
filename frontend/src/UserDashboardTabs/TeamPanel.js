@@ -4,11 +4,14 @@ import { auth } from "../firebaseClient";
 import { WORKSPACE_ENDPOINTS } from "../config/workspaceApi";
 import {
   getActiveWorkspaceId,
+  isTeamCollaborationAvailable,
   setActiveWorkspaceId,
   setActiveWorkspaceRole,
+  setActiveWorkspaceName,
   withWorkspaceHeaders,
 } from "../utils/workspace";
 import "./TeamPanel.css";
+import TeamContent from "./TeamContent";
 
 const ROLE_OPTIONS = ["admin", "editor", "viewer"];
 
@@ -76,11 +79,12 @@ function TeamPanel({ onWorkspaceChanged, onNavigate }) {
   const [inviteRole, setInviteRole] = useState("editor");
   const [latestInviteUrl, setLatestInviteUrl] = useState("");
   const [busyKey, setBusyKey] = useState("");
+  const selectionRef = useRef(getActiveWorkspaceId());
 
-  const loadWorkspace = useCallback(async () => {
-    setLoading(true);
+  const loadWorkspace = useCallback(async (quiet = false, selectedId = selectionRef.current) => {
+    if (!quiet) setLoading(true);
     try {
-      let activeWorkspaceId = getActiveWorkspaceId();
+      let activeWorkspaceId = selectedId;
       let data;
       try {
         data = await workspaceFetch(WORKSPACE_ENDPOINTS.CURRENT, {
@@ -97,9 +101,11 @@ function TeamPanel({ onWorkspaceChanged, onNavigate }) {
       setAvailableWorkspaces(listData.workspaces || []);
       setWorkspaceName(data.workspace?.name || "");
       setWorkspaceMissing(!data.workspace);
+      selectionRef.current = data.workspace?.id || "";
       if (data.workspace?.id) {
         setActiveWorkspaceId(data.workspace.id);
         setActiveWorkspaceRole(data.membership?.role || "");
+        setActiveWorkspaceName(data.workspace.name);
       }
       return data;
     } catch (error) {
@@ -113,7 +119,7 @@ function TeamPanel({ onWorkspaceChanged, onNavigate }) {
       toast.error(friendlyError(error));
       return null;
     } finally {
-      setLoading(false);
+      if (!quiet) setLoading(false);
     }
   }, []);
 
@@ -136,7 +142,7 @@ function TeamPanel({ onWorkspaceChanged, onNavigate }) {
         ["workspace", "invite", "token"].forEach(key => url.searchParams.delete(key));
         window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
         toast.success("You joined the workspace.");
-        const data = await loadWorkspace();
+        const data = await loadWorkspace(false, invite.workspaceId);
         await onWorkspaceChangedRef.current?.(data?.workspace || null);
       } catch (error) {
         toast.error(friendlyError(error));
@@ -171,7 +177,7 @@ function TeamPanel({ onWorkspaceChanged, onNavigate }) {
         body: JSON.stringify({ name: workspaceName }),
       });
       setActiveWorkspaceId(created.workspaceId);
-      const data = await loadWorkspace();
+      const data = await loadWorkspace(false, created.workspaceId);
       await onWorkspaceChanged?.(data?.workspace || null);
       toast.success("Workspace created.");
     } catch (error) {
@@ -289,7 +295,7 @@ function TeamPanel({ onWorkspaceChanged, onNavigate }) {
 
   const switchWorkspace = async workspaceId => {
     setActiveWorkspaceId(workspaceId);
-    const data = await loadWorkspace();
+    const data = await loadWorkspace(false, workspaceId);
     await onWorkspaceChanged?.(data?.workspace || null);
   };
 
@@ -307,8 +313,9 @@ function TeamPanel({ onWorkspaceChanged, onNavigate }) {
           <span>Team workspace</span>
           <h2>Create a shared AutoPromote workspace</h2>
           <p>
-            Share content, publishing queues, delivery status, and connected destinations with role-based
-            access.
+            {isTeamCollaborationAvailable()
+              ? "Share content, publishing queues, delivery status, and connected destinations with role-based access."
+              : "Manage your team membership and seats. Shared publishing and project review are not available yet; personal creating and publishing remain available."}
           </p>
         </div>
         <form className="team-card team-create" onSubmit={createWorkspace}>
@@ -340,6 +347,10 @@ function TeamPanel({ onWorkspaceChanged, onNavigate }) {
           </p>
         </div>
         <div className="team-hero-actions">
+          <button type="button" className="team-secondary" onClick={async () => {
+            setActiveWorkspaceId(null); setActiveWorkspaceRole(null);
+            await onWorkspaceChanged?.(null); onNavigate?.("viral_clip_studio");
+          }}>Switch to personal workspace</button>
           <div className="team-seat-summary">
             <strong>
               {occupiedSeats} / {workspace.seatLimit}
@@ -378,6 +389,11 @@ function TeamPanel({ onWorkspaceChanged, onNavigate }) {
         </label>
       ) : null}
 
+      {isTeamCollaborationAvailable() ? (
+        <TeamContent key={workspace.id} workspace={workspace} members={members} onNavigate={onNavigate} onRefreshDetails={() => loadWorkspace(true)} />
+      ) : (
+        <p className="team-card" role="status">Shared publishing and project review are not available yet. Continue creating and publishing in your personal workspace.</p>
+      )}
       <div className="team-seat-track" aria-label={`${seatPercent}% of seats occupied`}>
         <span style={{ width: `${seatPercent}%` }} />
       </div>
@@ -550,9 +566,9 @@ function TeamPanel({ onWorkspaceChanged, onNavigate }) {
           <h3>Roles and permissions</h3>
           {[
             ["Owner", "Full workspace, billing, security, and publishing access."],
-            ["Admin", "Manage members, content, queues, and connections."],
-            ["Editor", "Create, edit, review, and publish content."],
-            ["Viewer", "View content, queues, and delivery status without editing."],
+            ["Admin", "Manage members, review content, approve releases, and manage queues."],
+            ["Editor", "Create and edit content, then submit releases for approval."],
+            ["Viewer", "View this workspace and leave review comments without editing or publishing."],
           ].map(([role, copy], index) => (
             <article key={role}>
               <span>{index + 1}</span>

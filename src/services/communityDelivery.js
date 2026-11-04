@@ -27,7 +27,24 @@ async function ownedMedia(uid, contentId, p) {
   ].filter(Boolean);
   const url = p.media_url || p.videoUrl || p.imageUrl || p.url || urls[0];
   if (!url) return null;
-  if (!urls.includes(url)) throw fail("Use the selected owned media.", "auth");
+  // Separate workers can refresh the same approved object's signed URL at
+  // different instants. Its bucket/path/generation remains the identity.
+  let pinnedTeamMedia = false;
+  if (c.teamReleaseId && c.source?.generation) {
+    try {
+      const parsed = new URL(url);
+      pinnedTeamMedia =
+        parsed.protocol === "https:" &&
+        !parsed.username &&
+        !parsed.password &&
+        parsed.hostname === "storage.googleapis.com" &&
+        decodeURIComponent(parsed.pathname) === `/${c.source.bucketName}/${c.source.storagePath}` &&
+        parsed.searchParams.get("generation") === String(c.source.generation);
+    } catch (_) {
+      /* Fall through to the ordinary owned-URL check. */
+    }
+  }
+  if (!urls.includes(url) && !pinnedTeamMedia) throw fail("Use the selected owned media.", "auth");
   const parsed = new URL(url);
   if (parsed.protocol !== "https:" || parsed.username || parsed.password)
     throw fail("Media needs a secure publishing URL.");

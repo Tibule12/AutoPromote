@@ -22,6 +22,7 @@ export function requestedWorkspace(search = "") {
   // Team invitation workspace IDs are not navigation intents.
   const active = [
     "profile",
+    "team",
     "schedules",
     "upload",
     "viral_clip_studio",

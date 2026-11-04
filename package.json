@@ -17,6 +17,7 @@
     "credits:sandbox": "node scripts/credits-sandbox.cjs",
     "credits:economics": "node scripts/credits-economics.cjs config/unified-credits.economics.example.json",
     "test:security:profile": "node scripts/test-profile-security.cjs",
+    "test:team:workspace": "node scripts/test-team-workspace.cjs",
     "test:community:publishing": "node scripts/test-community-publishing.cjs",
     "test:community:browser": "node scripts/test-community-publishing-browser.cjs",
     "test:mobile:forms": "cross-env MOBILE_FORMS_QA=true MOBILE_FORMS_ASSERT=true node scripts/test-community-publishing-browser.cjs",

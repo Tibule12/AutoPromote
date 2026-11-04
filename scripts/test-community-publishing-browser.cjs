@@ -121,6 +121,7 @@ async function main() {
       credential: { getAccessToken: async () => ({ access_token: "owner", expires_in: 3600 }) },
     });
     const realAdmin = admin;
+    const teamArchives = new Map(), teamObjectMetadata = new Map();
     const { Firestore, FieldValue, Timestamp } = require("firebase-admin/firestore");
     db = new Firestore({
       projectId: project,
@@ -131,16 +132,44 @@ async function main() {
       storage: () => ({
         bucket: () => ({
           name: project,
-          file: storagePath => process.env.STUDIO_AUDIO_QA === "true" ? {
-            name: storagePath, bucket: { name: project },
-            getMetadata: async () => [{ generation: "1", size: fs.statSync(path.join(directory, "source.mp4")).size,
-              contentType: "video/mp4", metadata: { ownerUid: storagePath?.match(/^uploads\/videos\/([^/]+)\//)?.[1], purpose: "studio_project" } }],
-            getSignedUrl: async () => [origin + "/qa-studio-audio-source.mp4"],
-          } : ({
-            getMetadata: async () => {
-              throw new Error("No Storage object in this read-only fixture");
-            },
-          }),
+          file: (storagePath, version) => {
+            if (process.env.STUDIO_AUDIO_QA === "true") return {
+              name: storagePath, bucket: { name: project },
+              getMetadata: async () => [{ generation: "1", size: fs.statSync(path.join(directory, "source.mp4")).size,
+                contentType: "video/mp4", metadata: { ownerUid: storagePath?.match(/^uploads\/videos\/([^/]+)\//)?.[1], purpose: "studio_project" } }],
+              getSignedUrl: async () => [origin + "/qa-studio-audio-source.mp4"],
+            };
+            if (process.env.TEAM_WORKSPACE_QA !== "true")
+              return {
+                getMetadata: async () => {
+                  throw new Error("No Storage object in this read-only fixture");
+                },
+              };
+            const ownerUid = storagePath?.match(
+              /^uploads\/(?:videos|images|audios)\/([^/]+)\//
+            )?.[1];
+            return {
+              name: storagePath,
+              bucket: { name: project },
+              request: (options, callback) => {
+                const destination = decodeURIComponent(options.uri.split("/o/")[1]);
+                teamObjectMetadata.set(destination, { generation: "2", size: 1000, contentType: options.json.contentType, metadata: options.json.metadata });
+                callback(null, { done: true });
+              },
+              getMetadata: async () => [teamObjectMetadata.get(storagePath) ||
+                { generation: "1", size: 1000, contentType: "video/mp4", metadata: { ownerUid } }],
+              getSignedUrl: async () => [
+                `https://storage.googleapis.com/${project}/${storagePath}?generation=${teamObjectMetadata.get(storagePath)?.generation || "1"}`,
+              ],
+              save: async bytes => {
+                teamArchives.set(storagePath, Buffer.from(bytes));
+              },
+              download: async () => [teamArchives.get(storagePath)],
+              copy: async (destination, options) => {
+                teamObjectMetadata.set(destination.name, { generation: "2", size: 1000, contentType: options.contentType, metadata: options.metadata });
+              },
+            };
+          },
         }),
       }),
       auth: () => realAdmin.auth(),
@@ -157,6 +186,7 @@ async function main() {
     const email = async () => ({ ok: true, provider: "isolated-email-capture" });
     cache("src/services/emailService.js", {
       sendVerificationEmail: email,
+      sendWorkspaceInvitation: email,
       sendPasswordResetEmail: email,
     });
     const realFetch = global.fetch;
@@ -235,7 +265,11 @@ async function main() {
           attachments: [{ id: "fixture-file", size: media.length }],
         });
       }
-      if (url === mediaUrl)
+      if (
+        url === mediaUrl ||
+        (process.env.TEAM_WORKSPACE_QA === "true" &&
+          url.startsWith(`https://storage.googleapis.com/${project}/uploads/`))
+      )
         return {
           ok: true,
           headers: new Map([
@@ -259,7 +293,7 @@ async function main() {
       rateLimit = require("express-rate-limit"),
       app = express();
     app.use(rateLimit({ windowMs: 60000, max: 2000, legacyHeaders: false, standardHeaders: true }));
-    app.use(express.json());
+    app.use(express.json({ limit: "21mb" }));
     if (process.env.STUDIO_AUDIO_QA === "true") {
       app.get("/qa-studio-audio-source.mp4", (_req, res) => res.sendFile(path.join(directory, "source.mp4")));
     }
@@ -275,12 +309,24 @@ async function main() {
     }
     app.use("/api/auth", require(path.join(root, "src/authRoutes")));
     app.use("/api/users", require(path.join(root, "src/userRoutes")));
-    if (process.env.STUDIO_AUDIO_QA === "true") app.use("/api/media",
+    app.use(
+      "/api/content",
+      require(path.join(root, "src/authMiddleware")),
+      require(path.join(root, "src/middlewares/workspaceScope")),
+      require(path.join(root, "src/contentRoutes"))
+    );
+    app.use("/api/workspaces", require(path.join(root, "src/routes/workspaceRoutes")));
+    if (process.env.TEAM_WORKSPACE_QA === "true" || process.env.STUDIO_AUDIO_QA === "true") app.use("/api/media",
       (req, res, next) => (req.method === "POST" && req.path === "/studio-assets/resolve") || (req.method === "GET" && req.path === "/credits") ? next() : res.sendStatus(404),
       require(path.join(root, "src/mediaRoutes")));
-    app.use("/api/content", require(path.join(root, "src/contentRoutes")));
+
     app.use("/api/telegram", require(path.join(root, "src/routes/telegramRoutes")));
-    app.use("/api/platform", require(path.join(root, "src/routes/platformConnectionsRoutes")));
+    app.use(
+      "/api/platform",
+      require(path.join(root, "src/authMiddleware")),
+      require(path.join(root, "src/middlewares/workspaceScope")),
+      require(path.join(root, "src/routes/platformConnectionsRoutes"))
+    );
     app.use(
       "/api/publishing-destinations",
       require(path.join(root, "src/routes/communityPublishingRoutes"))
@@ -311,6 +357,7 @@ async function main() {
       REACT_APP_FIREBASE_MEASUREMENT_ID: "",
       REACT_APP_CREDITS_PILOT: "false",
       REACT_APP_LOCAL_EMULATORS: "true",
+      REACT_APP_TEAM_COLLABORATION_LOCAL: process.env.TEAM_WORKSPACE_QA === "true" ? "true" : "false",
       REACT_APP_CREDITS_AUTH_EMULATOR: `http://127.0.0.1:${authPort}`,
       REACT_APP_CREDITS_FIRESTORE_EMULATOR: `http://127.0.0.1:${firestorePort}`,
       REACT_APP_CREDITS_STORAGE_EMULATOR: origin,
@@ -709,6 +756,20 @@ async function main() {
     for (const key of ["credits", "subscriptionTier", "subscriptionStatus", "role", "isAdmin"])
       assert.deepEqual(after[key], snapshot[key]);
     assert.equal((await admin.auth().getUser(identity.localId)).emailVerified, true);
+    if (process.env.TEAM_WORKSPACE_QA === "true")
+      await require("./qa/team-workspace-browser.cjs")({
+        page,
+        browser,
+        origin,
+        db,
+        admin,
+        directory,
+        identity,
+        authPort,
+        project,
+        providerDeliveries,
+        navigateWorkspace,
+      });
     fs.writeFileSync(
       path.join(directory, "browser-summary.json"),
       JSON.stringify(

@@ -327,21 +327,14 @@ describe("repaired user-profile rules", () => {
       await seed(collection, "server", { state: "trusted" });
     }
   });
-  it("preserves queued publishing schedule updates and owned content reads", async () => {
+  it("keeps schedule reads and personal content edits while scheduling remains server-owned", async () => {
     const client = owner();
-    await assertSucceeds(
-      setDoc(doc(client, "promotion_schedules/owned"), {
-        user_id: "alice",
-        status: "scheduled",
-        platform: "youtube",
-        scheduledTime: "2026-10-27T12:00:00Z",
-      })
-    );
-    await assertSucceeds(
-      updateDoc(doc(client, "promotion_schedules/owned"), {
-        scheduledTime: "2026-10-28T12:00:00Z",
-      })
-    );
+    await seed("promotion_schedules", "owned", {
+      user_id: "alice", status: "scheduled", platform: "youtube", scheduledTime: "2026-10-27T12:00:00Z",
+    });
+    await assertSucceeds(getDoc(doc(client, "promotion_schedules/owned")));
+    await assertFails(updateDoc(doc(client, "promotion_schedules/owned"), { scheduledTime: "2026-10-28T12:00:00Z" }));
+    await assertFails(setDoc(doc(client, "promotion_schedules/forged"), { user_id: "alice", platform: "youtube" }));
     await seed("content", "published", {
       user_id: "alice",
       title: "Published title",
@@ -351,16 +344,13 @@ describe("repaired user-profile rules", () => {
     await assertSucceeds(updateDoc(doc(client, "content/published"), { title: "Revised title" }));
     await assertFails(updateDoc(doc(client, "content/published"), { "metrics.views": 999 }));
   });
-  it("keeps workspace editor source creation and viewer reads working", async () => {
+  it("requires API-authorised team source sharing while retaining viewer reads", async () => {
     await seed("workspaces/team/members", "alice", { role: "editor", status: "active" });
     await seed("workspaces/team/members", "viewer", { role: "viewer", status: "active" });
-    await assertSucceeds(
-      setDoc(doc(owner(), "content/team-source"), {
-        workspace_id: "team",
-        user_id: "alice",
-        title: "Shared source",
-      })
-    );
+    await assertFails(setDoc(doc(owner(), "content/forged-team-source"), {
+      workspace_id: "team", user_id: "alice", title: "Unreviewed client sharing",
+    }));
+    await seed("content", "team-source", { workspace_id: "team", user_id: "alice", title: "Shared source" });
     const viewer = verifiedContext("viewer").firestore();
     await assertSucceeds(getDoc(doc(viewer, "content/team-source")));
     await assertFails(

@@ -249,7 +249,7 @@ router.get("/auth/start", authMiddleware, async (req, res) => {
  */
 router.post("/auth/prepare", authMiddleware, tgWriteLimiter, async (req, res) => {
   try {
-    const uid = req.userId || req.user?.uid || "anonymous";
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req) || "anonymous";
     if (!BOT_USERNAME)
       return res.status(500).json({ ok: false, error: "telegram_bot_not_configured" });
 
@@ -283,7 +283,7 @@ router.post("/auth/prepare", authMiddleware, tgWriteLimiter, async (req, res) =>
  */
 router.post("/auth/callback", authMiddleware, tgWriteLimiter, async (req, res) => {
   try {
-    const uid = req.user.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
     const { authData } = req.body;
 
     if (!authData || !authData.id || !authData.hash) {
@@ -322,7 +322,7 @@ router.post("/auth/callback", authMiddleware, tgWriteLimiter, async (req, res) =
  */
 router.get("/status", authMiddleware, workspaceScope, async (req, res) => {
   try {
-    const uid = req.user.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
     const connection = await telegramService.getUserTelegramConnection(uid);
 
     if (!connection) {
@@ -364,7 +364,7 @@ router.get("/status", authMiddleware, workspaceScope, async (req, res) => {
  */
 router.delete("/disconnect", authMiddleware, tgWriteLimiter, async (req, res) => {
   try {
-    const uid = req.user.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
 
     await db.collection("users").doc(uid).collection("connections").doc("telegram").delete();
 
@@ -412,7 +412,7 @@ router.post("/webhook", async (req, res) => {
  */
 router.post("/test-message", authMiddleware, workspaceScope, tgWriteLimiter, async (req, res) => {
   try {
-    const uid = req.user.uid;
+    const uid = require("../middlewares/workspaceScope").resourceUserId(req);
     const { message, destinationId } = req.body;
 
     const result = await telegramService.postToTelegram({

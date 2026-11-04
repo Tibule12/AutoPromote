@@ -29,6 +29,29 @@ class PromotionService {
     };
   }
 
+  // Shared canonical record for ordinary and approved Team releases.
+  buildScheduleRecord(contentId, data) {
+    const normalized = this.normalizeScheduleData(data);
+    return {
+        contentId,
+        platform: normalized.platform,
+        scheduleType: normalized.scheduleType,
+        startTime: normalized.startTime,
+        endTime: normalized.endTime,
+        frequency: normalized.frequency,
+        status: "pending",
+        isActive: normalized.isActive,
+        budget: normalized.budget || 0,
+        targetMetrics: normalized.targetMetrics || {},
+        platformSpecificSettings: normalized.platformSpecificSettings || {},
+        recurrencePattern: normalized.recurrencePattern,
+        maxOccurrences: normalized.maxOccurrences,
+        timezone: normalized.timezone || "UTC",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+  }
+
   // Schedule a promotion for content with advanced algorithms
   async schedulePromotion(contentId, _scheduleData) {
     try {
@@ -68,24 +91,7 @@ class PromotionService {
 
       // Create new promotion schedule in Firestore
       const scheduleRef = db.collection("promotion_schedules").doc();
-      const promotionScheduleData = {
-        contentId,
-        platform: normalized.platform,
-        scheduleType: normalized.scheduleType,
-        startTime: normalized.startTime,
-        endTime: normalized.endTime,
-        frequency: normalized.frequency,
-        status: "pending",
-        isActive: normalized.isActive,
-        budget: normalized.budget || 0,
-        targetMetrics: normalized.targetMetrics || {},
-        platformSpecificSettings: normalized.platformSpecificSettings || {},
-        recurrencePattern: normalized.recurrencePattern,
-        maxOccurrences: normalized.maxOccurrences,
-        timezone: normalized.timezone || "UTC",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
+      const promotionScheduleData = this.buildScheduleRecord(contentId, normalized);
 
       await require("./services/contentMediaDependency").writeMediaDependency(db, contentId, scheduleRef, promotionScheduleData);
       const newSchedule = { id: scheduleRef.id, ...promotionScheduleData };

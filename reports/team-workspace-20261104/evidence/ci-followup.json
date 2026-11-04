@@ -1,0 +1,25 @@
+{
+  "checkpoint": "2ff7eabd255fa737c255effc42dc5f1f8c435094",
+  "draftPullRequest": 520,
+  "productionRollout": false,
+  "codeqlAlert": 1226,
+  "teamEmulatorTestsPassed": 31,
+  "fakeRulesPublisherTestsPassed": 5,
+  "historicalApprovalManifestChanged": false,
+  "guardedPublisherChanged": false,
+  "files": [
+    {
+      "path": "src/services/teamWorkspace.js",
+      "sha256": "8574633b21ae10912d172698240527a99f0c3cdc271c4516f87a0b0f558b591e"
+    },
+    {
+      "path": "test/team-workspace.integration.test.cjs",
+      "sha256": "a373e47df7140b0c8ee2d146925dc7b0f0c774ce889b728870022a45499ecc28"
+    },
+    {
+      "path": "test/security/rules_publisher_test.py",
+      "sha256": "1e9d6701e9e23caabb1eaa2541eb3de978ffe1038d43db4336df5e3a5be512d1"
+    }
+  ],
+  "remoteVerification": "See subsequent PR check results; local results do not close a GitHub alert."
+}

@@ -1,5 +1,7 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
+jest.mock("../UserDashboardTabs/TeamContent", () => () => null);
+
 import TeamPanel from "../UserDashboardTabs/TeamPanel";
 
 const workspacePayload = {
@@ -23,6 +25,9 @@ const workspacePayload = {
 
 describe("TeamPanel", () => {
   beforeEach(() => {
+    process.env.REACT_APP_TEAM_COLLABORATION_LOCAL = "true";
+    process.env.REACT_APP_LOCAL_EMULATORS = "true";
+    process.env.REACT_APP_FIREBASE_PROJECT_ID = "demo-autopromote-credits";
     window.history.replaceState({}, "", "/");
     window.localStorage.clear();
     global.fetch = jest.fn().mockResolvedValue({
@@ -30,6 +35,21 @@ describe("TeamPanel", () => {
       status: 200,
       json: async () => workspacePayload,
     });
+  });
+
+  afterEach(() => {
+    delete process.env.REACT_APP_TEAM_COLLABORATION_LOCAL;
+    delete process.env.REACT_APP_LOCAL_EMULATORS;
+    delete process.env.REACT_APP_FIREBASE_PROJECT_ID;
+  });
+
+  test("production keeps membership management without activating shared publishing", async () => {
+    delete process.env.REACT_APP_TEAM_COLLABORATION_LOCAL;
+    const { getActiveWorkspaceId } = require("../utils/workspace");
+    render(<TeamPanel onWorkspaceChanged={() => {}} onNavigate={() => {}} />);
+    expect(await screen.findByText(/Shared publishing and project review are not available yet/)).toBeInTheDocument();
+    expect(getActiveWorkspaceId()).toBe("");
+    expect(screen.getByRole("button", { name: "Send Invitation" })).toBeEnabled();
   });
 
   test("shows workspace seats, members, and management controls", async () => {
