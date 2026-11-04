@@ -106,6 +106,14 @@ function sanitizeConnection(data) {
   delete safe.refresh_token;
   delete safe.client_secret;
   delete safe.secret;
+  delete safe.webhookUrl;
+  delete safe.encryptedWebhookToken;
+  if (safe.meta && typeof safe.meta === "object") {
+    safe.meta = { ...safe.meta };
+    delete safe.meta.webhookUrl;
+    delete safe.meta.encryptedWebhookToken;
+    delete safe.meta.tokens;
+  }
   return safe;
 }
 

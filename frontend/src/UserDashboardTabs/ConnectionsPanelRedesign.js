@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import CommunityDestinationPicker from "../components/CommunityDestinationPicker";
 import ExplainButton from "../components/ExplainButton";
 import MetaConnectionRequirementsNotice from "../components/MetaConnectionRequirementsNotice";
 import PlatformIcon from "../components/PlatformIcon";
@@ -92,6 +93,7 @@ const ConnectionsPanelRedesign = ({
   handleConnectFacebook,
   handleDisconnectPlatform,
 }) => {
+  const [managing, setManaging] = useState("");
   const statuses = {
     discord: discordStatus,
     spotify: spotifyStatus,
@@ -207,7 +209,7 @@ const ConnectionsPanelRedesign = ({
                 <div>
                   <strong>{platform.label}</strong>
                   <span className={connected ? "status-connected" : ""}>
-                    {getReadiness(platform.id)}
+                    {["telegram", "discord"].includes(platform.id) && connected ? "Account linked" : getReadiness(platform.id)}
                   </span>
                 </div>
                 <small>
@@ -216,11 +218,12 @@ const ConnectionsPanelRedesign = ({
                     : identity || platform.helper}
                 </small>
               </div>
+              {managing === platform.id && <CommunityDestinationPicker platform={platform.id} manage />}
               <div className="connection-platform-actions">
                 <button
                   type="button"
                   className={connected ? "btn-secondary" : "check-quality"}
-                  onClick={connectHandlers[platform.id]}
+                  onClick={connected && ["telegram", "discord"].includes(platform.id) ? () => setManaging(managing === platform.id ? "" : platform.id) : connectHandlers[platform.id]}
                 >
                   {connected ? "Manage" : `Connect ${platform.label}`}
                 </button>

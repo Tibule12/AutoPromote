@@ -160,3 +160,33 @@ test("an ambiguous accepted result is terminal and retains its receipt", async (
   expect(result).toMatchObject({ retrying: false, classification: "publication_unconfirmed" });
   expect(task.publicationReceipt).toBeDefined();
 });
+
+test.each(["telegram", "discord"])("%s holds an ambiguous delivery without an automatic resend", async platform => {
+  task.platform = platform;
+  dispatchPlatformPost.mockImplementationOnce(async args => {
+    await args.onSubmissionAccepted({ platform, binding: "fixture-intent" });
+    throw publishingError("Delivery outcome unknown", "publication_unconfirmed");
+  });
+  const result = await processNextPlatformTask();
+  expect(result).toMatchObject({ classification: "publication_unconfirmed", retrying: false });
+  expect(task.publicationReceipt).toEqual({ platform, binding: "fixture-intent" });
+  expect(await processNextPlatformTask()).toBeNull();
+  expect(dispatchPlatformPost).toHaveBeenCalledTimes(1);
+});
+
+test.each(["telegram", "discord"])("%s cannot publish when the durable lock is unavailable", async platform => {
+  task.platform = platform;
+  tryCreatePlatformPostLock.mockRejectedValueOnce(new Error("fixture database unavailable"));
+  const result = await processNextPlatformTask();
+  expect(result).toMatchObject({ classification: "transient", retrying: true });
+  expect(dispatchPlatformPost).not.toHaveBeenCalled();
+});
+
+test("destination identity and native/link format participate in community de-duplication", () => {
+  const { buildPlatformPostHash } = require("../promotionTaskQueue");
+  for (const platform of ["telegram", "discord"]) {
+    const base = { platform, contentId: "source", payload: { message: "Release", destinationId: "a", deliveryMode: "native" } };
+    expect(buildPlatformPostHash(base)).not.toBe(buildPlatformPostHash({ ...base, payload: { ...base.payload, destinationId: "b" } }));
+    expect(buildPlatformPostHash(base)).not.toBe(buildPlatformPostHash({ ...base, payload: { ...base.payload, deliveryMode: "link" } }));
+  }
+});

@@ -1,0 +1,43 @@
+{
+  "verifiedAt": "2026-11-04T13:11:06.871217+00:00",
+  "branch": "fix/community-publishing-20261104",
+  "tests": {
+    "integration": {
+      "passed": 28,
+      "failed": 0,
+      "logSha256": "cf657206474b15f4c0ffa32ad4877d5ded02cbf05c38b13ecd1395a4b5a2d272"
+    },
+    "frontend": {
+      "passed": 29,
+      "failed": 0,
+      "logSha256": "1d8bd791b3931983ccee05945f12f5cac28fdb48135c665113901a0d8d4e7a36"
+    },
+    "backendAndPayments": {
+      "passed": 32,
+      "failed": 0,
+      "logSha256": "902bc9836f0922d81dc4350ebe89cebb0216e4d46fec6a290e0f00e0f2693653"
+    },
+    "authorityAndRules": {
+      "passed": 99,
+      "failed": 0,
+      "logSha256": "b858998e9705bff1cffbd4c70f5fbc741dac085c22088be7dba102bcbe3dd504"
+    },
+    "dependencyAndWorkerGuards": {
+      "passed": 8,
+      "failed": 0,
+      "logSha256": "018dbba3e55ad1c70b16ea28c0be53f04b71f64a0e045174d36c19712d4e4098"
+    }
+  },
+  "optimizedAppBuild": true,
+  "browser": "actual signed-in App, Auth/Firestore emulators, controlled external providers; normal plan limit enforced",
+  "queueHistoryVisible": true,
+  "staticChecks": {
+    "targetedLint": true,
+    "syntax": true,
+    "studioContract": true,
+    "secrets": true
+  },
+  "productionChanges": false,
+  "livePosts": false,
+  "pushMergeDeploy": false
+}

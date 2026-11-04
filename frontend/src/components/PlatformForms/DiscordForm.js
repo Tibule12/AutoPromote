@@ -1,40 +1,40 @@
-import React, { useState, useEffect } from "react";
-// import "../../ContentUploadForm.css";
-
-const DiscordForm = ({ onChange, initialData = {} }) => {
-  const [channelId, setChannelId] = useState(initialData.channelId || "");
-
-  useEffect(() => {
-    onChange({ platform: "discord", channelId });
-  }, [channelId, onChange]);
-
+import React from "react";
+import CommunityDestinationPicker from "../CommunityDestinationPicker";
+export default function DiscordForm({ onChange, initialData = {}, globalDescription = "" }) {
   return (
     <div className="platform-form discord-form">
-      <h4 className="platform-form-header">
-        <span className="icon">💬</span> Discord Configuration
-      </h4>
-      <div
-        style={{
-          backgroundColor: "rgba(88, 101, 242, 0.1)",
-          padding: "8px",
-          borderRadius: "4px",
-          marginBottom: "8px",
-          fontSize: "12px",
-          color: "#5865F2",
-          border: "1px solid rgba(88, 101, 242, 0.2)",
-        }}
-      >
-        <strong>Link & Embed Mode:</strong> Shares content as a rich embed via Webhook. Attachments
-        are not uploaded directly to Discord.
-      </div>
-      <input
-        placeholder="Discord channel ID"
-        className="modern-input"
-        value={channelId}
-        onChange={e => setChannelId(e.target.value)}
+      <h4>Discord publishing</h4>
+      <CommunityDestinationPicker
+        platform="discord"
+        value={initialData.destinationId || ""}
+        onChange={d =>
+          onChange({
+            destinationId: d?.id || "",
+            destinationLabel: d?.label || "",
+            channelId: d?.targetId || "",
+          })
+        }
       />
+      <label>
+        Delivery format
+        <select
+          aria-label="Discord delivery format"
+          value={initialData.deliveryMode || "native"}
+          onChange={e => onChange({ deliveryMode: e.target.value })}
+        >
+          <option value="native">Upload media to Discord (up to 10 MiB)</option>
+          <option value="link">Share a media link (storage availability applies)</option>
+        </select>
+      </label>
+      <label>
+        Message
+        <textarea
+          aria-label="Discord message"
+          maxLength={2000}
+          value={initialData.message ?? globalDescription}
+          onChange={e => onChange({ message: e.target.value })}
+        />
+      </label>
     </div>
   );
-};
-
-export default DiscordForm;
+}

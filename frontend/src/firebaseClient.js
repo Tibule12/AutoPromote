@@ -23,12 +23,15 @@ export const db = getFirestore(app);
 export const storage = getStorage(app);
 
 // Explicit demo-only build. This branch cannot redirect the live website to emulators.
-if (process.env.REACT_APP_CREDITS_PILOT === "true") {
+if (
+  process.env.REACT_APP_CREDITS_PILOT === "true" ||
+  process.env.REACT_APP_LOCAL_EMULATORS === "true"
+) {
   if (
     window.location.hostname !== "127.0.0.1" ||
     firebaseConfig.projectId !== "demo-autopromote-credits"
   )
-    throw new Error("Credit pilot requires the local demo origin and project");
+    throw new Error("Local emulators require the loopback demo origin and project");
   const endpoint = name => {
     const value = new URL(process.env[name]);
     if (value.hostname !== "127.0.0.1" || value.protocol !== "http:")

@@ -7,6 +7,8 @@ import { withWorkspaceHeaders } from "../../../utils/workspace";
 
 
 export const PLATFORM_LABELS = {
+  telegram: "Telegram",
+  discord: "Discord",
   tiktok: "TikTok",
   youtube: "YouTube",
   instagram: "Instagram",

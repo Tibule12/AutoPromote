@@ -1,6 +1,8 @@
-export const PLATFORM_ORDER = ["facebook", "instagram", "linkedin", "reddit", "tiktok", "youtube"];
+export const PLATFORM_ORDER = ["facebook", "instagram", "linkedin", "reddit", "tiktok", "youtube", "telegram", "discord"];
 
 export const PLATFORM_NAMES = {
+  telegram: "Telegram",
+  discord: "Discord",
   facebook: "Facebook",
   instagram: "Instagram",
   linkedin: "LinkedIn",

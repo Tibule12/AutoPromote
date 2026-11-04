@@ -1,0 +1,61 @@
+{
+  "baseline": "bb4530f495544c949e013526d54be1681b2af932",
+  "productionReadOrWrite": false,
+  "files": [
+    {
+      "path": "firestore.rules",
+      "sha256": "a6f2ddfe1a3d4f48d15b91d7e112736cb45e235bdd68dc01259d451682823deb",
+      "matchesBaseline": true
+    },
+    {
+      "path": "storage.rules",
+      "sha256": "b362e56ed1980cc781b051299e57838c61e66923083809fc844625c2ea6c52a3",
+      "matchesBaseline": true
+    },
+    {
+      "path": "src/authMiddleware.js",
+      "sha256": "1be59fd6288f26f93dc079c1f964ff2e443d2cef7aefdaf4ef783e9fe3590ea0",
+      "matchesBaseline": true
+    },
+    {
+      "path": "src/utils/authAuthority.js",
+      "sha256": "a2e30a561463eb8923e9b353033ceea930869b9034d1ed04433932b79022b910",
+      "matchesBaseline": true
+    },
+    {
+      "path": "src/authRoutes.js",
+      "sha256": "5f647515bfa0bc7d11a89a6b537c3c26dcc22f90f3e2982460bf918876ed6523",
+      "matchesBaseline": true
+    },
+    {
+      "path": "src/services/billingService.js",
+      "sha256": "39c041750c5c1f6805ade61ab224a71490086932c33342132316207d084d631a",
+      "matchesBaseline": true
+    },
+    {
+      "path": "src/config/subscriptionPlans.js",
+      "sha256": "e28ba549914b462e7ee6c1e34f541841b9f15309b434aaca623fdc7d7d316921",
+      "matchesBaseline": true
+    },
+    {
+      "path": "src/services/unifiedCredits/wallet.js",
+      "sha256": "d5b3d85b935f77be23b39dd39676d7962c6caa635e0b8be4eeafafb1e79854b9",
+      "matchesBaseline": true
+    },
+    {
+      "path": "frontend/src/utils/creditPilot.js",
+      "sha256": "f7cc2c96f34bf9d803c550a0e72d5bacfd058772659dc01f1b96d56b459b9116",
+      "matchesBaseline": true
+    },
+    {
+      "path": "src/snapchatRoutes.js",
+      "sha256": "e866eb63da44ee37402d6c827757b8413ee773d92a1d8fed883fa8c1082774f7",
+      "matchesBaseline": true
+    },
+    {
+      "path": "src/services/snapchatOAuth.js",
+      "sha256": "4cf578074bded6e987f572176b4456748199e5173283692944834862acecb6a5",
+      "matchesBaseline": true
+    }
+  ]
+}
