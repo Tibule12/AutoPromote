@@ -103,9 +103,13 @@ function sanitizeConnectionForApi(doc) {
   delete clone.clientSecret;
   delete clone.private_key;
   delete clone.secret;
+  delete clone.webhookUrl;
+  delete clone.encryptedWebhookToken;
   if (clone.meta && typeof clone.meta === "object") {
     const metaClone = Object.assign({}, clone.meta);
     delete metaClone.tokens;
+    delete metaClone.webhookUrl;
+    delete metaClone.encryptedWebhookToken;
     delete metaClone.access_token;
     delete metaClone.refresh_token;
     clone.meta = metaClone;
@@ -603,6 +607,7 @@ router.get(
 
 // Helper: generate auth start/url (extracted to avoid SSRF when invoked server-side)
 async function generateAuthStart({ platform, uid = null, wantsPopup = false, host = null }) {
+  if (platform === "discord") return require("../services/communityPublishing").prepareDiscord(uid);
   const crypto = require("crypto");
   const baseState = crypto.randomBytes(18).toString("base64url");
   const state = wantsPopup ? `${baseState}:popup` : baseState;
@@ -634,13 +639,6 @@ async function generateAuthStart({ platform, uid = null, wantsPopup = false, hos
     return { ok: true, platform, authUrl: url, state, redirect: redirectUri };
   }
 
-  if (platform === "discord") {
-    const clientId = process.env.DISCORD_CLIENT_ID;
-    const redirectUri = process.env.DISCORD_REDIRECT_URI || `${baseHost}/api/discord/auth/callback`;
-    const scope = encodeURIComponent("identify guilds");
-    const url = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${encodeURIComponent(state)}`;
-    return { ok: true, platform, authUrl: url, state };
-  }
 
   if (platform === "pinterest") {
     const clientId = process.env.PINTEREST_CLIENT_ID;
@@ -700,6 +698,12 @@ async function generateAuthStart({ platform, uid = null, wantsPopup = false, hos
   const callbackUrl = `${baseHost}/api/${platform}/auth/callback`;
   return { ok: true, platform, authUrl: callbackUrl, state, note: "placeholder_auth_start" };
 }
+
+// Explicit error boundary: a failed publishing configuration must not hang an async Express 4 request.
+router.post("/discord/auth/prepare", authMiddleware, require("../middlewares/workspaceScope"), platformWriteLimiter, async (req, res) => {
+  try { return res.json(await require("../services/communityPublishing").prepareDiscord(req.userId || req.user?.uid)); }
+  catch (e) { return res.status(e.status >= 400 && e.status < 600 ? e.status : 503).json({ error: e.errorClass ? e.message : "Discord publishing could not be configured." }); }
+});
 
 // POST /api/:platform/auth/prepare
 // Auth required endpoint that returns an OAuth start URL (authUrl) for the frontend to open.
@@ -1016,274 +1020,14 @@ router.get("/reddit/auth/callback", platformPublicLimiter, async (req, res) => {
   }
 });
 
-// GET /api/discord/auth/callback
+// Discord publishing consent must use an owned, expiring, single-use state.
 router.get("/discord/auth/callback", platformPublicLimiter, async (req, res) => {
-  const platform = "discord";
-  const code = req.query.code;
-  const state = req.query.state;
-  if (!code) return sendPlain(res, 400, "Missing code");
   try {
-    if (!fetchFn) return sendPlain(res, 500, "Server missing fetch implementation");
-    const clientId = process.env.DISCORD_CLIENT_ID;
-    const clientSecret = process.env.DISCORD_CLIENT_SECRET;
-    const redirectUri =
-      process.env.DISCORD_REDIRECT_URI ||
-      `${req.protocol}://${req.get("host")}/api/discord/auth/callback`;
-    const tokenUrl = "https://discord.com/api/oauth2/token";
-    const body = new URLSearchParams({
-      grant_type: "authorization_code",
-      code,
-      redirect_uri: redirectUri,
-      client_id: clientId,
-      client_secret: clientSecret,
-    });
-    const tokenRes = await fetchFn(tokenUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body,
-    });
-    const tokenJson = await tokenRes.json();
-    // Fetch user identity to store helpful meta
-    let meta = {};
-    if (tokenJson.access_token) {
-      const identityRes = await fetchFn("https://discord.com/api/users/@me", {
-        headers: { Authorization: `Bearer ${tokenJson.access_token}` },
-      });
-      if (identityRes.ok) meta = await identityRes.json();
-    }
-    // Resolve user from stored state mapping (Firestore) where possible, fallback to legacy parsing
-    let uid = null;
-    try {
-      if (state) {
-        const sd = await db.collection("oauth_states").doc(state).get();
-        if (sd.exists) {
-          const s = sd.data();
-          if (!s.expiresAt || new Date(s.expiresAt) > new Date()) {
-            uid = s.uid || null;
-          }
-          try {
-            await db.collection("oauth_states").doc(state).delete();
-          } catch (_) {}
-        }
-      }
-    } catch (e) {
-      console.warn("[oauth][discord] state lookup failed", e && e.message);
-    }
-    // If state was stored with a :popup suffix, normalize it when doing legacy parsing
-    if (!uid && state && state.split && state.split(":")[0]) uid = state.split(":")[0];
-    if (uid && uid !== "anon") {
-      // Enforce connection limit
-      try {
-        await checkConnectionLimit(uid, platform);
-      } catch (limitErr) {
-        if (limitErr.code === "CONNECTION_LIMIT_EXCEEDED")
-          return sendPlain(res, 403, limitErr.message);
-        throw limitErr;
-      }
-      const userRef = db.collection("users").doc(uid);
-      const now = new Date().toISOString();
-      await userRef
-        .collection("connections")
-        .doc(platform)
-        .set(
-          {
-            connected: true,
-            tokens: encryptToken(JSON.stringify(tokenJson)),
-            hasEncryption: true,
-            meta,
-            updatedAt: now,
-          },
-          { merge: true }
-        );
-      // Persist extra metadata where possible (LinkedIn orgs)
-      try {
-        if (tokenJson.access_token) {
-          const aclUrl = `https://api.linkedin.com/v2/organizationAcls?q=roleAssignee&role=ADMINISTRATOR`;
-          const aclRes = await fetchFn(aclUrl, {
-            headers: {
-              Authorization: `Bearer ${tokenJson.access_token}`,
-              "X-Restli-Protocol-Version": "2.0.0",
-            },
-          });
-          if (aclRes.ok) {
-            const aclData = await aclRes.json();
-            const orgIds = (aclData.elements || [])
-              .map(el => el && el.organizationalTarget && el.organizationalTarget.split(":").pop())
-              .filter(Boolean);
-            const orgs = [];
-            for (const id of orgIds) {
-              try {
-                const orgReq = await fetchFn(
-                  `https://api.linkedin.com/v2/organizations/${id}?projection=(localizedName)`,
-                  {
-                    headers: {
-                      Authorization: `Bearer ${tokenJson.access_token}`,
-                      "X-Restli-Protocol-Version": "2.0.0",
-                    },
-                  }
-                );
-                if (orgReq.ok) {
-                  const orgData = await orgReq.json();
-                  orgs.push({ id, name: orgData.localizedName || orgData.name || "Organization" });
-                }
-              } catch (_) {
-                /* ignore */
-              }
-            }
-            if (orgs.length > 0) {
-              await userRef
-                .collection("connections")
-                .doc(platform)
-                .set({ meta: { ...(meta || {}), organizations: orgs } }, { merge: true });
-            }
-          }
-        }
-      } catch (e) {
-        /* best-effort */
-      }
-      // Persist extra metadata where possible (guilds for Discord)
-      try {
-        if (tokenJson.access_token) {
-          const guildUrl = "https://discord.com/api/users/@me/guilds";
-          const gRes = await fetchFn(guildUrl, {
-            headers: { Authorization: `Bearer ${tokenJson.access_token}` },
-          });
-          if (gRes.ok) {
-            const gData = await gRes.json();
-            const guilds = (gData || []).map(g => ({ id: g.id, name: g.name, owner: !!g.owner }));
-            await userRef
-              .collection("connections")
-              .doc(platform)
-              .set({ meta: { ...(meta || {}), guilds } }, { merge: true });
-          }
-        }
-      } catch (e) {
-        /* best-effort */
-      }
-      // Persist extra metadata where possible (e.g., playlists)
-      try {
-        if (tokenJson.access_token) {
-          // Fetch playlists and augment meta
-          const playlistsUrl = "https://api.spotify.com/v1/me/playlists?limit=50";
-          const pRes = await fetchFn(playlistsUrl, {
-            headers: { Authorization: `Bearer ${tokenJson.access_token}` },
-          });
-          if (pRes.ok) {
-            const pData = await pRes.json();
-            const playlists = (pData.items || []).map(p => ({
-              id: p.id,
-              name: p.name,
-              public: !!p.public,
-            }));
-            await userRef
-              .collection("connections")
-              .doc(platform)
-              .set({ meta: { ...(meta || {}), playlists } }, { merge: true });
-          }
-        }
-      } catch (e) {
-        /* best-effort */
-      }
-      // Post-connection hooks: create event, add recommendations
-      try {
-        await db
-          .collection("events")
-          .add({ type: "platform_connected", uid, platform, at: new Date().toISOString() });
-        try {
-          const rec = smartDistributionEngine.calculateOptimalPostingTime(platform, "UTC");
-          const captionExample = engagementBoostingService.generateViralCaption(
-            { title: "Welcome post", description: "" },
-            platform,
-            {}
-          );
-          await userRef
-            .collection("connections")
-            .doc(platform)
-            .set(
-              {
-                recommendations: { posting: rec, captionExample },
-                updatedAt: new Date().toISOString(),
-              },
-              { merge: true }
-            );
-        } catch (e) {
-          console.warn("[platform][discord] recommendation generation failed", e && e.message);
-        }
-        try {
-          if (
-            admin &&
-            admin.firestore &&
-            admin.firestore.FieldValue &&
-            admin.firestore.FieldValue.arrayUnion
-          ) {
-            await userRef.set(
-              { connectedPlatforms: admin.firestore.FieldValue.arrayUnion(platform) },
-              { merge: true }
-            );
-          } else {
-            const existing = (await userRef.get()).data() || {};
-            const arr = Array.isArray(existing.connectedPlatforms)
-              ? existing.connectedPlatforms
-              : [];
-            if (!arr.includes(platform)) arr.push(platform);
-            await userRef.set({ connectedPlatforms: arr }, { merge: true });
-          }
-        } catch (_) {}
-      } catch (e) {
-        console.warn("[platform][discord] post-connection hooks failed", e && e.message);
-      }
-    }
-
-    // If the state indicates a popup flow (state ends with ':popup'), return a small HTML
-    // page that notifies the opener via postMessage and then closes itself.
-    const isPopup = typeof state === "string" && state.endsWith(":popup");
-    if (isPopup) {
-      // The page posts a message to window.opener with platform/status to allow the parent window
-      // to know the flow completed without polling. Use FRONTEND_URL as the expected origin when possible.
-      const frontendOrigin = process.env.FRONTEND_URL
-        ? new URL(process.env.FRONTEND_URL).origin
-        : `${req.protocol}://${req.get("host").replace(/^api\./i, "")}`;
-      const html = `<!doctype html><html><head><meta charset="utf-8"><title>Discord Connect</title></head><body>
-<script>
-// Notify the opener (best-effort) and then close this popup. We try several
-// tactics because cross-origin restrictions may prevent some approaches in some browsers.
-try {
-  const payload = { platform: 'discord', status: 'success' };
-  // 1) Try targeted postMessage using the expected frontend origin
-  try { if (window.opener && !window.opener.closed) window.opener.postMessage(payload, '${frontendOrigin}'); } catch (e) {}
-  // 2) Fallback: permissive postMessage
-  try { if (window.opener && !window.opener.closed) window.opener.postMessage(payload, '*'); } catch (e) {}
-  // 3) Try to directly update the opener location (may throw cross-origin errors)
-  try { if (window.opener && !window.opener.closed) window.opener.location.href = '${frontendOrigin}/?oauth=discord&status=success'; } catch (e) {}
-} catch (e) {}
-// Give the parent a moment then close. If the browser blocks window.close for some reason
-// (shouldn't when opened by script), the user will still see the page text.
-setTimeout(() => { try { window.close(); } catch (e) { /* ignore */ } }, 400);
-</script>
-<p>Discord authorization complete. You can close this window.</p>
-</body></html>`;
-      res.setHeader("Content-Type", "text/html; charset=utf-8");
-      return res.status(200).send(html);
-    }
-
-    // Prefer redirecting back to the frontend app instead of showing a plain text page
-    // FRONTEND_URL should be set to your public frontend host (e.g. https://www.autopromote.org)
-    // Fallback: try to derive a frontend host by removing a leading "api." from the request host.
-    try {
-      const frontendBase =
-        process.env.FRONTEND_URL || `${req.protocol}://${req.get("host").replace(/^api\./i, "")}`;
-      const successUrl = `${frontendBase}/?oauth=discord&status=success`;
-      return res.redirect(successUrl);
-    } catch (e) {
-      // If redirect fails for any reason, fall back to the plain text response
-      return sendPlain(res, 200, "Discord OAuth callback received. You can close this window.");
-    }
-  } catch (e) {
-    return sendPlain(
-      res,
-      500,
-      "Discord callback error: " + (e && e.message ? e.message : "unknown error")
-    );
+    await require("../services/communityPublishing").completeDiscord(req.query);
+    platformStatusCache.clear();
+    return res.redirect("https://autopromote.org/?oauth=discord&status=success");
+  } catch (_) {
+    return sendPlain(res, 400, "Discord publishing authorisation failed or expired. Return to AutoPromote and connect again.");
   }
 });
 

@@ -1,7 +1,7 @@
 import { isValidTimezone, zonedFieldsToIso } from "../../../UserDashboardTabs/scheduleReleaseModel";
 import { buildTikTokCaption } from "./publishingUtils";
 
-export const PUBLISHER_PLATFORMS = ["facebook", "instagram", "linkedin", "reddit", "tiktok", "youtube"];
+export const PUBLISHER_PLATFORMS = ["facebook", "instagram", "linkedin", "reddit", "tiktok", "youtube", "telegram", "discord"];
 export const PUBLISHER_STEPS = ["Content", "Destinations", "Customize", "Delivery", "Review"];
 const text = value => String(value || "").trim();
 export const mediaUrl = file => typeof file === "string" ? file : file?.url || "";
@@ -97,6 +97,13 @@ export function platformIssues(platform, data, context = {}) {
   if (platform === "youtube" && text(data.title).length > 100) errors.push("Keep the YouTube title within 100 characters");
   if (platform === "facebook" && !text(data.pageId)) errors.push("Choose a Facebook Page");
   if (platform === "instagram" && !data.pageId && !context.instagramAccountId) errors.push("Choose an Instagram account");
+  if (["telegram", "discord"].includes(platform)) {
+    if (!text(data.destinationId)) errors.push("Choose an authorised publishing destination");
+    if (platform === "discord" && (data.deliveryMode || "native") === "native" && data.file?.size > 10 * 1024 * 1024)
+      errors.push("Discord native uploads are limited to 10 MiB. Choose Share link for larger media");
+    if (text(data.message ?? data.description).length > (platform === "telegram" ? 1024 : 2000))
+      errors.push("Shorten the destination caption/message");
+  }
   if (platform === "reddit") {
     if (!text(data.subreddit)) errors.push("Choose a subreddit");
     if (text(data.title).length > 300) errors.push("Keep the Reddit title within 300 characters");
@@ -122,7 +129,7 @@ export function masterCopyFor(platform, title, description) {
   const common = { title, description };
   if (platform === "tiktok") return { ...common, caption: buildTikTokCaption({ title, description }) };
   if (platform === "instagram") return { ...common, caption: [title, description].filter(Boolean).join("\n\n") };
-  if (platform === "facebook") return { ...common, message: description };
+  if (["facebook", "telegram", "discord"].includes(platform)) return { ...common, message: description };
   if (platform === "linkedin") return { ...common, commentary: description };
   if (platform === "reddit") return { ...common, text: description };
   return common;
@@ -149,6 +156,7 @@ export function destinationCopy(platform, options, masterTitle, masterDescriptio
       platform === "linkedin" ? options.commentary || options.description || masterDescription :
       platform === "reddit" ? options.text || masterDescription :
       platform === "instagram" || platform === "tiktok" ? options.caption || masterDescription :
+      ["telegram", "discord"].includes(platform) ? options.message ?? options.description ?? masterDescription :
       options.description || masterDescription),
   };
 }

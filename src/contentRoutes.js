@@ -814,6 +814,10 @@ router.post(
       const { determineContentIntent } = require('./services/publishingIntent');
 
       const detectedIntent = determineContentIntent(platform_options);
+      for (const platform of (target_platforms || []).filter(p => ["telegram", "discord"].includes(p))) {
+        try { await require("./services/communityPublishing").resolveDestination(userId, platform, platform_options?.[platform] || {}); }
+        catch (e) { return res.status(409).json({ error: e.errorClass ? e.message : "Verify the publishing destination." }); }
+      }
 
       if (!req.body.isDryRun) {
         if (!require("./services/unifiedCredits/application").getApplicationContext(userId) && !shouldBypassUploadReadinessForTest(req)) {
@@ -1485,7 +1489,7 @@ router.post("/:contentId/promotion-schedules", authMiddleware, require("./servic
 
     require("./services/contentMediaDependency").assertAvailable(content);
 
-    const allowedPlatforms = ["youtube", "tiktok", "instagram", "linkedin", "facebook", "reddit"];
+    const allowedPlatforms = ["youtube", "tiktok", "instagram", "linkedin", "facebook", "reddit", "telegram", "discord"];
     if (!Array.isArray(platforms) || !platforms.length ||
         new Set(platforms).size !== platforms.length || platforms.some(p => !allowedPlatforms.includes(p)))
       return res.status(400).json({ error: "Choose explicit supported destinations" });
@@ -1497,6 +1501,10 @@ router.post("/:contentId/promotion-schedules", authMiddleware, require("./servic
       const ownedUrls = [content.url, content.persistentMediaUrl, content.mediaUrl, content.media_url, content.downloadInfo?.url, content.processedUrl].filter(Boolean);
       if ([settings.media_url, settings.videoUrl].filter(Boolean).some(url => !ownedUrls.includes(url)))
         return res.status(400).json({ error: "Use the selected owned media when scheduling existing content" });
+    }
+    for (const platform of platforms.filter(p => ["telegram", "discord"].includes(p))) {
+      try { await require("./services/communityPublishing").resolveDestination(userId, platform, platformOptions[platform] || {}); }
+      catch (e) { return res.status(409).json({ error: e.errorClass ? e.message : "Verify the publishing destination." }); }
     }
     try { new Intl.DateTimeFormat("en", { timeZone: timezone }); }
     catch (_) { return res.status(400).json({ error: "Choose a valid timezone" }); }

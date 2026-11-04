@@ -130,6 +130,12 @@ function buildPlatformPostHash({ platform, contentId, payload = {} }) {
     media: payload.mediaUrl || payload.videoUrl || payload.imageUrl || "",
   };
 
+  if (["telegram", "discord"].includes(platform)) {
+    const options = payload.platformOptions?.[platform] || payload.platformOptions || payload;
+    canonical.destination = options.destinationId || options.chatId || options.channelId || "";
+    canonical.deliveryMode = options.deliveryMode || "native";
+    canonical.media = options.media_url || canonical.media;
+  }
   return crypto
     .createHash("sha256")
     .update(`${platform}|${contentId}|${JSON.stringify(canonical)}`, "utf8")
@@ -1089,7 +1095,11 @@ async function processNextPlatformTask() {
 
     // De-duplicate and acquire an atomic lock for this post (create-if-not-exists keyed by platform+postHash)
     try {
-      const postHash = task.postHash;
+      const postHash = task.postHash || (
+        ["telegram", "discord"].includes(task.platform)
+          ? buildPlatformPostHash({ platform: task.platform, contentId: task.contentId, payload: task.payload || {} })
+          : null
+      );
       const { tryCreatePlatformPostLock } = require("./platformPostsService");
       if (postHash) {
         const lock = await tryCreatePlatformPostLock({
@@ -1261,6 +1271,9 @@ async function processNextPlatformTask() {
         }
       }
     } catch (e) {
+      if (["telegram", "discord"].includes(task.platform)) {
+        throw require("./publishingTaskErrors").publishingError("Could not acquire the publication lock.", "transient");
+      }
       // Non-fatal; proceed without lock (best-effort)
       console.warn(
         "[platform_post][lock] acquisition failed, proceeding without atomic lock:",
@@ -1568,7 +1581,7 @@ async function processNextPlatformTask() {
       onSubmissionAccepted: async receipt => {
         taskData = await replaceSignedTask(selectedDoc.ref, taskData, {
           publicationReceipt: receipt,
-          publicationPending: true,
+          publicationPending: !!receipt,
           updatedAt: new Date().toISOString(),
         });
       },
@@ -1632,6 +1645,13 @@ async function processNextPlatformTask() {
       completedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
+    if (["telegram", "discord"].includes(task.platform)) {
+      try {
+        await require("./communityPublishing").recordScheduleOutcome(task, simulatedResult);
+      } catch (_) {
+        console.warn("[community] Schedule receipt update deferred; durable task receipt retained.");
+      }
+    }
     // Record persistent platform post (Phase 1) — use atomic lock doc if present
     try {
       if (lockId) {
@@ -1789,6 +1809,16 @@ async function processNextPlatformTask() {
     }
 
     const retryable = attempts < MAX_ATTEMPTS && canRetry(classification);
+    if (!retryable && ["telegram", "discord"].includes(task.platform)) {
+      try {
+        await require("./communityPublishing").recordScheduleOutcome(task, {
+          success: false, error: err.message, errorClass: classification,
+          publicationPending: !!taskData.publicationReceipt,
+        });
+      } catch (_) {
+        console.warn("[community] Schedule failure update deferred; task evidence retained.");
+      }
+    }
     const nextAttemptAt = retryable ? new Date(nextAttemptTimestamp).toISOString() : null;
 
     const failed = {

@@ -17,6 +17,8 @@
     "credits:sandbox": "node scripts/credits-sandbox.cjs",
     "credits:economics": "node scripts/credits-economics.cjs config/unified-credits.economics.example.json",
     "test:security:profile": "node scripts/test-profile-security.cjs",
+    "test:community:publishing": "node scripts/test-community-publishing.cjs",
+    "test:community:browser": "node scripts/test-community-publishing-browser.cjs",
     "test:snapchat:oauth": "node scripts/test-snapchat-oauth.cjs",
     "preflight": "node ./scripts/preflight-critical-files.js && node ./scripts/check-encryption-env.js && node ./autopromote-functions/validate-imports.js",
     "preflight:local": "node ./scripts/preflight-critical-files.js && node ./autopromote-functions/validate-imports.js",

@@ -1599,6 +1599,7 @@ try {
   } catch (e) {
     console.log("⚠️ Assistant routes mount failed:", e.message);
   }
+  app.use("/api/publishing-destinations", require("./routes/communityPublishingRoutes"));
   // Mount generic platform routes under /api so frontend placeholder endpoints like
   // /api/spotify/auth/start and /api/spotify/status are handled by the generic router.
   try {

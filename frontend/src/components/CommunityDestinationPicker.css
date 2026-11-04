@@ -1,0 +1,29 @@
+.community-destination-picker {
+  min-width: 0;
+  display: grid;
+  gap: 10px;
+  margin: 12px 0;
+}
+.community-destination-picker label {
+  display: grid;
+  gap: 6px;
+}
+.community-destination-picker select,
+.community-destination-picker input {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  color: inherit;
+  background: #10152a;
+  border: 1px solid #51416c;
+  border-radius: 8px;
+}
+.community-destination-picker [role="alert"] {
+  color: #ffb1b1;
+}
+.connection-platform-card > .community-destination-picker {
+  grid-column: 1 / -1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

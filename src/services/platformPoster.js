@@ -372,7 +372,7 @@ const handlers = {
 async function dispatchPlatformPost({
   platform,
   contentId,
-  payload,
+  payload = {},
   reason,
   uid,
   submissionReceipt,
@@ -500,7 +500,11 @@ async function dispatchPlatformPost({
   }
 
   // Execute handler with logging wrapper
-  if (platform === "reddit") {
+  if (["telegram", "discord"].includes(platform)) {
+    baseArgs.uid = uid;
+    baseArgs.contentId = contentId;
+  }
+  if (["reddit", "telegram", "discord"].includes(platform)) {
     baseArgs.submissionReceipt = submissionReceipt;
     baseArgs.onSubmissionAccepted = onSubmissionAccepted;
   }

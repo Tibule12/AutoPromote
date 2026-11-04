@@ -549,6 +549,7 @@ class PromotionService {
           ).trim();
           const payload = {
             ...platformSettings, // platform options like pageId, commentary, title, media preferences
+            ...(["telegram", "discord"].includes(schedule.platform) ? { scheduleId: schedule.id } : {}),
             ...(platformText ? { message: platformText, text: platformText } : {}),
             // Hashtags might be in optimization data
             hashtagString: schedule.viral_optimization?.hashtags?.join(" ") || "",
@@ -690,7 +691,7 @@ class PromotionService {
         contentId: schedule.contentId,
         platform: schedule.platform,
         executedAt: new Date().toISOString(),
-        status: "posted",
+        status: ["telegram", "discord"].includes(schedule.platform) ? "queued" : "posted",
       });
 
       // Enqueue real platform posting task
@@ -698,10 +699,10 @@ class PromotionService {
         const { enqueuePlatformPostTask } = require("./services/promotionTaskQueue");
         const result = await enqueuePlatformPostTask({
           contentId: schedule.contentId,
-          uid: schedule.user_id || schedule.uid || content.userId,
+          uid: schedule.user_id || schedule.uid || content.userId || content.user_id,
           platform: schedule.platform,
           reason: "scheduled_promotion_" + scheduleId,
-          payload: { scheduleId },
+          payload: { ...(["telegram", "discord"].includes(schedule.platform) ? schedule.platformSpecificSettings || {} : {}), scheduleId },
           skipIfDuplicate: true,
         });
         console.log(
@@ -714,7 +715,7 @@ class PromotionService {
       return {
         scheduleId,
         contentId: schedule.contentId,
-        status: "posted",
+        status: ["telegram", "discord"].includes(schedule.platform) ? "queued" : "posted",
         platform: schedule.platform,
       };
     } catch (error) {

@@ -28,6 +28,8 @@ import YouTubeForm from "../../components/PlatformForms/YouTubeForm";
 import InstagramForm from "../../components/PlatformForms/InstagramForm";
 import FacebookForm from "../../components/PlatformForms/FacebookForm";
 import LinkedInForm from "../../components/PlatformForms/LinkedInForm";
+import TelegramForm from "../../components/PlatformForms/TelegramForm";
+import DiscordForm from "../../components/PlatformForms/DiscordForm";
 import RedditForm from "../../components/PlatformForms/RedditForm";
 import VideoEditor from "../../components/VideoEditor";
 import ImageCropper from "../../components/ImageCropper";
@@ -85,7 +87,7 @@ const UnifiedPublisher = ({
         ? [
             ...new Set(
               initialDestinations.filter(platform =>
-                ["facebook", "instagram", "linkedin", "reddit", "tiktok", "youtube"].includes(
+                ["facebook", "instagram", "linkedin", "reddit", "tiktok", "youtube", "telegram", "discord"].includes(
                   platform
                 )
               )
@@ -717,7 +719,7 @@ const UnifiedPublisher = ({
     if (asset.suggestedDescription) setGlobalDescription(asset.suggestedDescription);
   };
   const connections = Object.fromEntries(
-    ["facebook", "instagram", "linkedin", "reddit", "tiktok", "youtube"].map(platform => [
+    ["facebook", "instagram", "linkedin", "reddit", "tiktok", "youtube", "telegram", "discord"].map(platform => [
       platform,
       connectionState(connectionSnapshot, platform, connectionsLoaded),
     ])
@@ -793,6 +795,8 @@ const UnifiedPublisher = ({
   const renderPlatformForm = platformId => {
     const data = getPlatformEffectiveData(platformId);
     const Form = {
+      telegram: TelegramForm,
+      discord: DiscordForm,
       facebook: FacebookForm,
       instagram: InstagramForm,
       linkedin: LinkedInForm,
