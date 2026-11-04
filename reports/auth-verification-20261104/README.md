@@ -12,13 +12,14 @@ The production Firebase Auth configuration was inspected through Google's API. I
 - Make login verification mandatory; remove the legacy environment and grandfather bypass. Require the signed `email_verified` claim for protected API access, including admin identity verification. Add the same requirement to private Firestore/Storage access while preserving owner restrictions, reviewed administrator UIDs and protected financial fields. Existing public assets remain public.
 - Ignore `CORS_ALLOW_ALL` on hosted/production runtimes; retain the canonical site and explicit origin allowlist.
 
-Automatic restoration requires the original browser's retained Firebase session. An email action link is not a login credential for another browser/device. Existing terms acceptance and MFA remain required. Previously unverified accounts, including administrators, must now verify; balances, historical projects and subscriptions are retained. Background publishing through Admin SDK/IAM remains independent of client Rules.
+Automatic restoration requires the original browser's retained Firebase session. An email action link is not a login credential for another browser/device. Existing terms acceptance and MFA remain required. Previously unverified accounts, including administrators, must now verify; balances, historical projects and subscriptions are retained. Background publishing through Admin SDK/IAM remains independent of client Rules. Existing signed service-account Rules permissions are preserved; nonhuman identities have no user email to verify.
 
 ## Verification
 
-- **98** real Firestore-emulator profile/authority/registration/packaging checks passed.
+- **99** real Firestore-emulator profile/authority/registration/packaging checks passed.
 - **11** coordinated Firestore/Storage checks passed, including denied unverified reads, writes and media deletion; verified owner access retained.
 - **53** existing payment/subscription/scheduling/upload/Studio billing checks passed; provider boundaries mocked.
+- The initial broad CI run caught seven failing cases across five service-account fixture suites. The original service-account predicate was restored while retaining all customer verification checks. All **8** affected emulator tests and an explicit service-account/customer separation test then passed; no assertions or production account checks were weakened.
 - **15** link/mandatory-claim unit checks, **3** CORS tests, **12** frontend flow tests and **4** guarded Rules-publisher tests passed.
 - Actual production-optimized React build and all **47** public entry pages built in separate scratch storage. A headless muted browser used real Auth/Firestore emulators and the real registration/login/profile/content routers: signup → locked screen → reload still locked → genuine emulator email action → automatic session → reload still signed in. Desktop 1280 and mobile 390 were captured. No session injection, fake completion flag, production requests, paid workloads or external emails. Delivery itself was captured locally, not tested against a customer's inbox.
 - Native rendering, production billing/payment configuration and trusted-admin policy are unchanged. Historical balance/session and seven-document incident follow-up remain open.

@@ -460,6 +460,18 @@ describe("repaired user-profile rules", () => {
 });
 
 describe("mandatory verification in direct Firestore access", () => {
+  it("preserves existing signed service-account writes without granting a customer bypass", async () => {
+    const service = environment.authenticatedContext("machine", {
+      firebase: { sign_in_provider: "service_account" },
+    }).firestore();
+    await assertSucceeds(setDoc(doc(service, "sounds/worker"), { title: "Existing provider import" }));
+    await assertFails(setDoc(doc(service, "studio_model_capability_jobs/forged"), { state: "complete" }));
+    const customer = environment.authenticatedContext("alice", {
+      email_verified: false, admin: true, role: "admin",
+      firebase: { sign_in_provider: "password" },
+    }).firestore();
+    await assertFails(setDoc(doc(customer, "sounds/customer"), { title: "Blocked" }));
+  });
   it("denies unverified owners even when their stored profile says verified", async () => {
     await seed("users", "alice", { ...financial, emailVerified: true });
     const client = environment.authenticatedContext("alice", { email_verified: false }).firestore();

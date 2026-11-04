@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Mandatory verified-email onboarding, canonical verification return URL and automatic session restoration; owner authority, pricing and product readiness remain unchanged.",
-  "reviewed_at": "2026-11-04T08:02:02.222Z",
+  "reason": "Preserve pre-existing nonhuman service-account Rules authority while enforcing verified email for all user identities; no billing, prices or readiness changes.",
+  "reviewed_at": "2026-11-04T08:18:43.482Z",
   "catalog_sha256": "98c30d5b7319da7d57821fd52c9471d77ca3d116716f0013a044ba60ff56667b",
   "sources": [
     {

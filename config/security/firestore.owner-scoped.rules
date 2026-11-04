@@ -28,7 +28,8 @@ service cloud.firestore {
     }
 
     function isServiceAccount() {
-      return isVerified() &&
+      // Existing nonhuman service identities have no user email to verify.
+      return request.auth != null &&
         request.auth.token.firebase != null &&
         request.auth.token.firebase.sign_in_provider == 'service_account';
     }
