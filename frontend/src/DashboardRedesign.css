@@ -2118,6 +2118,7 @@ body.dashboard-mode {
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .ap-dashboard-redesign .connection-platform-copy strong {
@@ -2157,6 +2158,112 @@ body.dashboard-mode {
   background: transparent;
   font-size: 0.72rem;
   cursor: pointer;
+}
+
+.ap-dashboard-redesign .security-panel form {
+  background: transparent;
+  box-shadow: none;
+  border: 0;
+}
+.ap-dashboard-redesign .security-panel .session-info {
+  background: rgba(4, 11, 22, 0.6);
+  border: 1px solid var(--ap-border);
+}
+.ap-dashboard-redesign .security-panel .session-row {
+  background: transparent;
+}
+.ap-dashboard-redesign .security-panel :is(.session-label, .session-value) {
+  color: var(--ap-text-soft);
+  overflow-wrap: anywhere;
+}
+
+/* Forms use the width of the phone rather than a clipped desktop canvas.
+   Keep this scoped to account/publishing surfaces; Studio owns its tool layout. */
+@media (max-width: 768px) {
+  .ap-dashboard-redesign
+    :is(
+      .connections-panel,
+      .security-panel,
+      .team-panel,
+      .profile-details,
+      .paypal-subscription-panel,
+      .publisher-release
+    ) {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .ap-dashboard-redesign :is(.security-panel, .team-panel, .profile-details) form {
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+  .ap-dashboard-redesign
+    :is(.security-panel, .team-panel, .profile-details, .paypal-subscription-panel)
+    :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea) {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 44px;
+    font-size: 16px;
+  }
+  .ap-dashboard-redesign
+    :is(
+      .connections-panel,
+      .security-panel,
+      .team-panel,
+      .profile-details,
+      .paypal-subscription-panel
+    )
+    button {
+    min-height: 44px;
+    min-width: 0;
+    white-space: normal;
+  }
+  .ap-dashboard-redesign .connection-platform-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px;
+  }
+  .ap-dashboard-redesign .connection-platform-actions :is(.check-quality, .btn-secondary) {
+    min-width: 0;
+    width: 100%;
+  }
+  .ap-dashboard-redesign .connection-platform-actions > :only-child {
+    grid-column: 1 / -1;
+  }
+  .ap-dashboard-redesign .connection-disconnect {
+    border: 1px solid rgba(251, 113, 133, 0.3);
+    border-radius: 10px;
+    font-size: 14px;
+  }
+  .ap-dashboard-redesign .connection-platform-copy small {
+    font-size: 14px;
+  }
+  .ap-dashboard-redesign .security-quick-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ap-dashboard-redesign .security-quick-grid article {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .ap-dashboard-redesign .security-quick-grid article > :is(button, .security-quick-status) {
+    grid-column: 2;
+    justify-self: start;
+  }
+  .ap-dashboard-redesign .team-workspace-switcher {
+    align-items: stretch;
+    flex-direction: column;
+    margin-inline: 0;
+  }
+  .ap-dashboard-redesign .team-hero-actions {
+    flex-wrap: wrap;
+  }
+  .ap-dashboard-redesign .team-card,
+  .ap-dashboard-redesign .security-card {
+    min-width: 0;
+    padding: 16px;
+  }
 }
 
 .ap-dashboard-redesign .connections-advanced {
@@ -3729,26 +3836,34 @@ body.dashboard-mode {
    ========================================================================== */
 
 /* After mode: Show ONLY the After frame */
-.viral-studio-overlay.ap-dashboard-redesign .preview-player-shell.comparison-after .before-preview-card,
+.viral-studio-overlay.ap-dashboard-redesign
+  .preview-player-shell.comparison-after
+  .before-preview-card,
 .ap-dashboard-redesign .preview-player-shell.comparison-after .before-preview-card,
 .preview-player-shell.comparison-after .before-preview-card {
   display: none !important;
 }
 
-.viral-studio-overlay.ap-dashboard-redesign .preview-player-shell.comparison-after [data-testid="hook-preview-frame"],
+.viral-studio-overlay.ap-dashboard-redesign
+  .preview-player-shell.comparison-after
+  [data-testid="hook-preview-frame"],
 .ap-dashboard-redesign .preview-player-shell.comparison-after [data-testid="hook-preview-frame"],
 .preview-player-shell.comparison-after [data-testid="hook-preview-frame"] {
   display: flex !important;
 }
 
 /* Before mode: Show ONLY the Before frame (Full 16:9 widescreen raw footage) */
-.viral-studio-overlay.ap-dashboard-redesign .preview-player-shell.comparison-before [data-testid="hook-preview-frame"],
+.viral-studio-overlay.ap-dashboard-redesign
+  .preview-player-shell.comparison-before
+  [data-testid="hook-preview-frame"],
 .ap-dashboard-redesign .preview-player-shell.comparison-before [data-testid="hook-preview-frame"],
 .preview-player-shell.comparison-before [data-testid="hook-preview-frame"] {
   display: none !important;
 }
 
-.viral-studio-overlay.ap-dashboard-redesign .preview-player-shell.comparison-before .before-preview-card,
+.viral-studio-overlay.ap-dashboard-redesign
+  .preview-player-shell.comparison-before
+  .before-preview-card,
 .ap-dashboard-redesign .preview-player-shell.comparison-before .before-preview-card,
 .preview-player-shell.comparison-before .before-preview-card {
   display: flex !important;
@@ -3772,7 +3887,9 @@ body.dashboard-mode {
   height: 100% !important;
 }
 
-.viral-studio-overlay.ap-dashboard-redesign .preview-player-shell.comparison-split .before-preview-card,
+.viral-studio-overlay.ap-dashboard-redesign
+  .preview-player-shell.comparison-split
+  .before-preview-card,
 .ap-dashboard-redesign .preview-player-shell.comparison-split .before-preview-card,
 .preview-player-shell.comparison-split .before-preview-card {
   display: flex !important;
@@ -3783,7 +3900,9 @@ body.dashboard-mode {
   aspect-ratio: 16 / 9 !important;
 }
 
-.viral-studio-overlay.ap-dashboard-redesign .preview-player-shell.comparison-split [data-testid="hook-preview-frame"],
+.viral-studio-overlay.ap-dashboard-redesign
+  .preview-player-shell.comparison-split
+  [data-testid="hook-preview-frame"],
 .ap-dashboard-redesign .preview-player-shell.comparison-split [data-testid="hook-preview-frame"],
 .preview-player-shell.comparison-split [data-testid="hook-preview-frame"] {
   display: flex !important;
@@ -3951,18 +4070,34 @@ body.dashboard-mode {
   overflow-x: auto !important;
 }
 
-.ap-dashboard-redesign .caption-preview-stack:not([data-caption-render-style]) .caption-preview-word-active {
+.ap-dashboard-redesign
+  .caption-preview-stack:not([data-caption-render-style])
+  .caption-preview-word-active {
   display: inline-block;
   color: #fff !important;
-  text-shadow: 0 0 20px var(--studio-accent-neon), 0 0 40px var(--studio-accent-neon) !important;
+  text-shadow:
+    0 0 20px var(--studio-accent-neon),
+    0 0 40px var(--studio-accent-neon) !important;
   animation: dopeKineticBounce 400ms cubic-bezier(0.175, 0.885, 0.32, 1.275) both !important;
   transform-origin: center bottom;
 }
 
 @keyframes dopeKineticBounce {
-  0% { opacity: 0; transform: translateY(15px) scale(0.5) rotate(-5deg); filter: blur(4px); }
-  50% { opacity: 1; transform: translateY(-5px) scale(1.15) rotate(2deg); filter: blur(0); }
-  100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); filter: blur(0); }
+  0% {
+    opacity: 0;
+    transform: translateY(15px) scale(0.5) rotate(-5deg);
+    filter: blur(4px);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-5px) scale(1.15) rotate(2deg);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0);
+    filter: blur(0);
+  }
 }
 
 /* The normal dashboard monitor is deliberately bounded. Expanded preview is

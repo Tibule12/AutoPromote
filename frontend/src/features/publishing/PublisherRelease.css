@@ -147,3 +147,138 @@
 @container (max-width: 900px) { .release-workspace { grid-template-columns: minmax(190px, .7fr) minmax(0, 1.3fr); } .release-inspector { grid-column: 2; } .release-workflow-heading { flex-direction: column; align-items: start; } }
 @container (max-width: 650px) { .release-workspace { display: flex; flex-direction: column; } .release-sidebar, .release-main, .release-inspector { width: 100%; } .release-inspector { order: 3; } }
 @media (max-width: 700px) { .release-workspace { display: flex; flex-direction: column; } .release-sidebar, .release-main, .release-inspector { width: 100%; } .release-sidebar { grid-template-columns: 1fr; } .release-inspector { order: 3; } .release-stepper { gap: 9px; } .release-stepper button { font-size: 10px; gap: 4px; } .release-stepper button > span { width: 22px; height: 22px; } .release-form-heading { flex-wrap: wrap; } .release-footer { align-items: start; } .release-footer-action { max-width: 70%; } .release-footer-action .release-primary { white-space: normal; } .release-date-time, .release-delivery-modes { grid-template-columns: 1fr; } }
+
+/* The form must fit its available card width, including the dashboard sidebar. */
+.publisher-release :is(.release-customize, .release-form-card, .release-form-card label, .form-group-modern, .form-group) {
+  min-width: 0;
+}
+.publisher-release :is(.telegram-form, .discord-form) > label {
+  display: grid;
+  gap: 6px;
+  margin: 14px 0;
+}
+.publisher-release .community-destination-picker button {
+  color: #e9ddff !important;
+  background: #211c38 !important;
+  border: 1px solid #6d5a92 !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+}
+.publisher-release .community-destination-picker .community-destination-primary {
+  background: #7331cd !important;
+  color: #fff !important;
+}
+.publisher-release .release-form-card :is(.telegram-form, .discord-form) :is(p, small, li, span, div) {
+  font-weight: 400 !important;
+  line-height: 1.6;
+}
+.publisher-release .release-form-card :is(.telegram-form, .discord-form) label {
+  font-weight: 600 !important;
+}
+.publisher-release .release-form-card .dark-theme-form :is(p, small, li, span, div) {
+  font-weight: 400 !important;
+}
+.publisher-release .release-form-card .dark-theme-form label {
+  font-weight: 600 !important;
+}
+.publisher-release .release-form-card .dark-theme-form :is(input, select, textarea) {
+  font-weight: 400 !important;
+}
+@container (max-width: 650px) {
+  .publisher-release .release-form-card .form-row-modern,
+  .publisher-release .release-custom-time {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 768px) {
+  .publisher-release .release-form-card .form-row-modern {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .publisher-release :is(.release-stage-2, .release-stage-3) .release-main {
+    order: -1;
+  }
+  .publisher-release :is(input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea) {
+    min-width: 0;
+    max-width: 100%;
+    min-height: 44px;
+    font-size: 16px !important;
+  }
+  .publisher-release textarea {
+    min-height: 112px;
+    resize: vertical;
+  }
+  .publisher-release button {
+    min-height: 44px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .publisher-release :is(.release-card, .release-customize > .release-master-copy) {
+    padding: 14px;
+  }
+  .publisher-release .release-workflow-heading {
+    min-width: 0;
+    padding: 12px 0;
+  }
+  .publisher-release .release-stepper {
+    width: 100%;
+    flex-wrap: nowrap;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    scroll-snap-type: x proximity;
+  }
+  .publisher-release .release-stepper li {
+    flex-shrink: 0;
+    scroll-snap-align: start;
+  }
+  .publisher-release .release-stepper button {
+    padding: 8px;
+    font-size: 13px;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .publisher-release .release-stepper button > span {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+  }
+  .publisher-release .release-platform-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .publisher-release :is(.release-platform-grid label, .release-check, .checkbox-modern, .checkbox-pill) {
+    min-height: 44px;
+  }
+  .publisher-release :is(.release-card > p, .release-form-heading p, .release-form-card .help-text, .release-form-card .char-count) {
+    font-size: 13px !important;
+    line-height: 1.5;
+  }
+  .publisher-release :is(.release-source-tabs, .release-platform-tabs) {
+    flex-wrap: wrap;
+  }
+  .publisher-release :is(.release-source-tabs button, .release-platform-tabs button) {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+  .publisher-release .release-footer {
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px 0 max(16px, env(safe-area-inset-bottom));
+  }
+  .publisher-release .release-footer-action {
+    width: 100%;
+    max-width: none;
+    align-items: stretch;
+  }
+  .publisher-release .release-footer-action button {
+    width: 100%;
+    font-size: 16px;
+  }
+  .publisher-release .release-review dl > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+    margin: 12px 0;
+  }
+}

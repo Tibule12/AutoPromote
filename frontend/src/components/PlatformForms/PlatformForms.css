@@ -741,11 +741,13 @@ input:checked + .toggle-slider:before {
   /* Force vertical stacking for form rows */
   .form-row-modern {
     flex-direction: column;
+    grid-template-columns: minmax(0, 1fr);
     gap: 12px;
   }
 
   .form-row-modern .form-group-modern {
     width: 100%;
+    min-width: 0;
     margin-bottom: 0px; /* Gap handles spacing */
   }
 

@@ -1,0 +1,1022 @@
+{
+  "checkedAt": "2026-11-04T15:39:13.953810+00:00",
+  "baselineRevision": "4c76206e3ea3b27ea951f584861ff1433c92cd92",
+  "viewports": [
+    320,
+    360,
+    390,
+    430,
+    768,
+    1280
+  ],
+  "screens": [
+    "billing",
+    "contact",
+    "discord-connection",
+    "login",
+    "password-recovery",
+    "publisher-content",
+    "publisher-customize",
+    "publisher-delivery",
+    "publisher-destinations",
+    "publisher-discord",
+    "publisher-facebook",
+    "publisher-instagram",
+    "publisher-linkedin",
+    "publisher-reddit",
+    "publisher-review",
+    "publisher-telegram",
+    "publisher-tiktok",
+    "publisher-youtube",
+    "registration",
+    "security",
+    "team",
+    "telegram-connection",
+    "verification"
+  ],
+  "layoutChecks": 138,
+  "layoutFailures": 0,
+  "valuesPreservedDuringResize": true,
+  "frontendUnitTests": {
+    "passed": 38,
+    "suites": 5
+  },
+  "backendRegressionTests": {
+    "passed": 11,
+    "suites": 2
+  },
+  "actualAppBuild": "passed",
+  "actualMobileWorkflow": "passed",
+  "providers": "controlled",
+  "livePostsSent": false,
+  "productionRecordsModifiedByTests": false,
+  "paymentCatalogue": "real read-only plan source; no checkout/status synchronisation",
+  "checks": [
+    {
+      "screen": "contact",
+      "width": 320,
+      "visibleControls": 4,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "contact",
+      "width": 360,
+      "visibleControls": 4,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "contact",
+      "width": 390,
+      "visibleControls": 4,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "contact",
+      "width": 430,
+      "visibleControls": 4,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "contact",
+      "width": 768,
+      "visibleControls": 4,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "contact",
+      "width": 1280,
+      "visibleControls": 4,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "login",
+      "width": 320,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "login",
+      "width": 360,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "login",
+      "width": 390,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "login",
+      "width": 430,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "login",
+      "width": 768,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "login",
+      "width": 1280,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "password-recovery",
+      "width": 320,
+      "visibleControls": 2,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "password-recovery",
+      "width": 360,
+      "visibleControls": 2,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "password-recovery",
+      "width": 390,
+      "visibleControls": 2,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "password-recovery",
+      "width": 430,
+      "visibleControls": 2,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "password-recovery",
+      "width": 768,
+      "visibleControls": 2,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "password-recovery",
+      "width": 1280,
+      "visibleControls": 2,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "registration",
+      "width": 320,
+      "visibleControls": 7,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "registration",
+      "width": 360,
+      "visibleControls": 7,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "registration",
+      "width": 390,
+      "visibleControls": 7,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "registration",
+      "width": 430,
+      "visibleControls": 7,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "registration",
+      "width": 768,
+      "visibleControls": 7,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "registration",
+      "width": 1280,
+      "visibleControls": 7,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "verification",
+      "width": 320,
+      "visibleControls": 1,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "verification",
+      "width": 360,
+      "visibleControls": 1,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "verification",
+      "width": 390,
+      "visibleControls": 1,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "verification",
+      "width": 430,
+      "visibleControls": 1,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "verification",
+      "width": 768,
+      "visibleControls": 1,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "verification",
+      "width": 1280,
+      "visibleControls": 1,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "security",
+      "width": 320,
+      "visibleControls": 10,
+      "issues": [],
+      "passwordLabelContrast": 18.830145125271223
+    },
+    {
+      "screen": "security",
+      "width": 360,
+      "visibleControls": 10,
+      "issues": [],
+      "passwordLabelContrast": 18.830145125271223
+    },
+    {
+      "screen": "security",
+      "width": 390,
+      "visibleControls": 10,
+      "issues": [],
+      "passwordLabelContrast": 18.830145125271223
+    },
+    {
+      "screen": "security",
+      "width": 430,
+      "visibleControls": 10,
+      "issues": [],
+      "passwordLabelContrast": 18.830145125271223
+    },
+    {
+      "screen": "security",
+      "width": 768,
+      "visibleControls": 10,
+      "issues": [],
+      "passwordLabelContrast": 18.830145125271223
+    },
+    {
+      "screen": "security",
+      "width": 1280,
+      "visibleControls": 10,
+      "issues": [],
+      "passwordLabelContrast": 18.830145125271223
+    },
+    {
+      "screen": "team",
+      "width": 320,
+      "visibleControls": 2,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "team",
+      "width": 360,
+      "visibleControls": 2,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "team",
+      "width": 390,
+      "visibleControls": 2,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "team",
+      "width": 430,
+      "visibleControls": 2,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "team",
+      "width": 768,
+      "visibleControls": 2,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "team",
+      "width": 1280,
+      "visibleControls": 2,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "billing",
+      "width": 320,
+      "visibleControls": 3,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "billing",
+      "width": 360,
+      "visibleControls": 3,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "billing",
+      "width": 390,
+      "visibleControls": 3,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "billing",
+      "width": 430,
+      "visibleControls": 3,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "billing",
+      "width": 768,
+      "visibleControls": 3,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "billing",
+      "width": 1280,
+      "visibleControls": 3,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "telegram-connection",
+      "width": 320,
+      "visibleControls": 17,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "telegram-connection",
+      "width": 360,
+      "visibleControls": 17,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "telegram-connection",
+      "width": 390,
+      "visibleControls": 17,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "telegram-connection",
+      "width": 430,
+      "visibleControls": 17,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "telegram-connection",
+      "width": 768,
+      "visibleControls": 17,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "telegram-connection",
+      "width": 1280,
+      "visibleControls": 17,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "discord-connection",
+      "width": 320,
+      "visibleControls": 17,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "discord-connection",
+      "width": 360,
+      "visibleControls": 17,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "discord-connection",
+      "width": 390,
+      "visibleControls": 17,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "discord-connection",
+      "width": 430,
+      "visibleControls": 17,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "discord-connection",
+      "width": 768,
+      "visibleControls": 17,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "discord-connection",
+      "width": 1280,
+      "visibleControls": 17,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-content",
+      "width": 320,
+      "visibleControls": 11,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-content",
+      "width": 360,
+      "visibleControls": 11,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-content",
+      "width": 390,
+      "visibleControls": 11,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-content",
+      "width": 430,
+      "visibleControls": 11,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-content",
+      "width": 768,
+      "visibleControls": 11,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-content",
+      "width": 1280,
+      "visibleControls": 11,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-destinations",
+      "width": 320,
+      "visibleControls": 9,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-destinations",
+      "width": 360,
+      "visibleControls": 9,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-destinations",
+      "width": 390,
+      "visibleControls": 9,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-destinations",
+      "width": 430,
+      "visibleControls": 9,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-destinations",
+      "width": 768,
+      "visibleControls": 9,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-destinations",
+      "width": 1280,
+      "visibleControls": 9,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-customize",
+      "width": 320,
+      "visibleControls": 21,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-customize",
+      "width": 360,
+      "visibleControls": 21,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-customize",
+      "width": 390,
+      "visibleControls": 21,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-customize",
+      "width": 430,
+      "visibleControls": 21,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-customize",
+      "width": 768,
+      "visibleControls": 21,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-customize",
+      "width": 1280,
+      "visibleControls": 21,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-facebook",
+      "width": 320,
+      "visibleControls": 3,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-facebook",
+      "width": 360,
+      "visibleControls": 3,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-facebook",
+      "width": 390,
+      "visibleControls": 3,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-facebook",
+      "width": 430,
+      "visibleControls": 3,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-facebook",
+      "width": 768,
+      "visibleControls": 3,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-facebook",
+      "width": 1280,
+      "visibleControls": 3,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-instagram",
+      "width": 320,
+      "visibleControls": 7,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-instagram",
+      "width": 360,
+      "visibleControls": 7,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-instagram",
+      "width": 390,
+      "visibleControls": 7,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-instagram",
+      "width": 430,
+      "visibleControls": 7,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-instagram",
+      "width": 768,
+      "visibleControls": 7,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-instagram",
+      "width": 1280,
+      "visibleControls": 7,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-linkedin",
+      "width": 320,
+      "visibleControls": 7,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-linkedin",
+      "width": 360,
+      "visibleControls": 7,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-linkedin",
+      "width": 390,
+      "visibleControls": 7,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-linkedin",
+      "width": 430,
+      "visibleControls": 7,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-linkedin",
+      "width": 768,
+      "visibleControls": 7,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-linkedin",
+      "width": 1280,
+      "visibleControls": 7,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-reddit",
+      "width": 320,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-reddit",
+      "width": 360,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-reddit",
+      "width": 390,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-reddit",
+      "width": 430,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-reddit",
+      "width": 768,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-reddit",
+      "width": 1280,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-tiktok",
+      "width": 320,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-tiktok",
+      "width": 360,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-tiktok",
+      "width": 390,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-tiktok",
+      "width": 430,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-tiktok",
+      "width": 768,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-tiktok",
+      "width": 1280,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-youtube",
+      "width": 320,
+      "visibleControls": 8,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-youtube",
+      "width": 360,
+      "visibleControls": 8,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-youtube",
+      "width": 390,
+      "visibleControls": 8,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-youtube",
+      "width": 430,
+      "visibleControls": 8,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-youtube",
+      "width": 768,
+      "visibleControls": 8,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-youtube",
+      "width": 1280,
+      "visibleControls": 8,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-telegram",
+      "width": 320,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-telegram",
+      "width": 360,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-telegram",
+      "width": 390,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-telegram",
+      "width": 430,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-telegram",
+      "width": 768,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-telegram",
+      "width": 1280,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-discord",
+      "width": 320,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-discord",
+      "width": 360,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-discord",
+      "width": 390,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-discord",
+      "width": 430,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-discord",
+      "width": 768,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-discord",
+      "width": 1280,
+      "visibleControls": 6,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-delivery",
+      "width": 320,
+      "visibleControls": 15,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-delivery",
+      "width": 360,
+      "visibleControls": 15,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-delivery",
+      "width": 390,
+      "visibleControls": 15,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-delivery",
+      "width": 430,
+      "visibleControls": 15,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-delivery",
+      "width": 768,
+      "visibleControls": 15,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-delivery",
+      "width": 1280,
+      "visibleControls": 15,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-review",
+      "width": 320,
+      "visibleControls": 13,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-review",
+      "width": 360,
+      "visibleControls": 13,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-review",
+      "width": 390,
+      "visibleControls": 13,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-review",
+      "width": 430,
+      "visibleControls": 13,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-review",
+      "width": 768,
+      "visibleControls": 13,
+      "issues": [],
+      "passwordLabelContrast": null
+    },
+    {
+      "screen": "publisher-review",
+      "width": 1280,
+      "visibleControls": 13,
+      "issues": [],
+      "passwordLabelContrast": null
+    }
+  ]
+}

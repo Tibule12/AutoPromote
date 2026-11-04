@@ -18,6 +18,9 @@
   background: #101329;
   color: #f4f1ff;
   box-shadow: 0 20px 80px #0008;
+  box-sizing: border-box;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .telegram-connect-dialog h2 {
   margin: 0 28px 14px 0;
@@ -73,7 +76,16 @@
   outline-offset: 3px;
 }
 @media (max-width: 480px) {
+  .telegram-connect-backdrop {
+    padding: 12px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
   .telegram-connect-dialog {
+    max-height: calc(100dvh - 24px - env(safe-area-inset-bottom));
     padding: 26px 20px;
+  }
+  .telegram-connect-close {
+    min-width: 44px;
+    min-height: 44px;
   }
 }
