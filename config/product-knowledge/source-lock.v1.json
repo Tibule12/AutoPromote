@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Retain change-only Studio range seeks alongside native input without duplicate dispatch; all eight broad-suite seek regressions and the input/change contract pass",
-  "reviewed_at": "2026-11-05T10:31:16.088Z",
+  "reason": "Native Studio range input/change listeners prevent a trailing change from reversing a seek after clock paint; all 12 targeted tests and three browser workflows passed",
+  "reviewed_at": "2026-11-05T10:46:27.166Z",
   "catalog_sha256": "18cb1a6b60010f692ff4d4430ae91901c1cadbd9c9ff4079075694ce9e923d18",
   "sources": [
     {

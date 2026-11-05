@@ -153,5 +153,25 @@
     "includesAllEightFullSuiteFailures": true,
     "inputAndChangeSupported": true,
     "duplicateInputSeekRejected": true
+  },
+  "nativeRangeEventOrderingRepair": {
+    "focusedPassed": 12,
+    "browserCasesPassed": 3,
+    "pairedInputChangeRepaintRegression": true,
+    "legacyCompatibility": true,
+    "listenerCleanup": true,
+    "nativeBrowserRunPriorFailed": 6
+  },
+  "workerFirstRelease": {
+    "run": 42010620444,
+    "revision": "media-worker-v1-00125-sif",
+    "imageSource": "3fd196e5015fd8efcd8e050bbf04b54c6cfbfbf7",
+    "imageTestsPassed": 148,
+    "containerRenderPassed": true,
+    "cloudCandidateRenderAudioPassed": true,
+    "productionTrafficPercent": 100,
+    "environmentAndIamUnchanged": true,
+    "resourceLimitsUnchanged": true,
+    "frontendApiMerged": false
   }
 }
