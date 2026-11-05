@@ -27,7 +27,11 @@ class StudioMulticamFilterTests(unittest.TestCase):
         command = ["ffmpeg", "-v", "error", "-filter_complex_threads", "1"]
         for color in ["red", "blue", "green", "yellow"][:count]:
             command += ["-f", "lavfi", "-i", f"color=c={color}:s=160x120:r=4:d=1"]
-        command += ["-filter_complex", graph, "-map", "[vout]", "-frames:v", "4",
+        # Inspect the four actual filter frames at 0/.25/.5/.75 seconds.
+        # FFmpeg 7 drops inferred rate metadata after setpts; the raw muxer's
+        # implicit 25fps would duplicate early frames before reaching the cut.
+        # Production exports already set their explicit delivery rate.
+        command += ["-filter_complex", graph, "-map", "[vout]", "-fps_mode", "passthrough", "-frames:v", "4",
                     "-pix_fmt", "rgb24", "-f", "rawvideo", "pipe:1"]
         result = subprocess.run(command, capture_output=True, timeout=20)
         self.assertEqual(result.returncode, 0, result.stderr.decode())

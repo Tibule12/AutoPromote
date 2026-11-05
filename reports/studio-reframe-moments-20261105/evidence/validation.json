@@ -77,7 +77,7 @@
   },
   "anonymousWelcomeViewportComparisons": 8,
   "matchingWelcomeContent": true,
-  "remoteCIStarted": false,
+  "remoteCIStarted": true,
   "broadSuite": {
     "initialPassed": 174,
     "initialTotal": 176,
@@ -106,5 +106,21 @@
     "localPassed": 19,
     "logSha256": "aaffce018782d81d24ccc3ab4528acf905921e0ac6b47230796d95fd08119ab7",
     "includedInCanonicalWorkerRecordedCount": true
+  },
+  "pullRequest": 522,
+  "initialRemoteWorkerImage": {
+    "tests": 148,
+    "passed": 145,
+    "failed": 3,
+    "run": 41992252833,
+    "localHarnessRerunPassed": 19,
+    "fixedExactFrameAssertionsRetained": true
+  },
+  "initialRemoteBrowser": {
+    "passed": 23,
+    "failed": 7,
+    "skipped": 17,
+    "run": 41992253372,
+    "resolved": false
   }
 }

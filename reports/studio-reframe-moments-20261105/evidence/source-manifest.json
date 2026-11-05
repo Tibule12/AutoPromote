@@ -213,11 +213,11 @@
   },
   {
     "path": "python_media_worker/test_studio_multicam_filters.py",
-    "sha256": "934be2100c5dae6c9c947b858d498f08793eb3f26ce9bd4fae2a450f6e057255"
+    "sha256": "a95af8c1c83435884ddf40409bd9cb92f25d09dc5a437ff9113cfdda2d540a53"
   },
   {
     "path": "python_media_worker/test_studio_reframe_cuts.py",
-    "sha256": "e19d4cff6848a8c401944ad1aca89c0f5f75f57187540a57590c38580ac63281"
+    "sha256": "06cd1aba3ce1615ae9e3170c652733bead786657f8a1f6ae86c7641c33ad4a90"
   },
   {
     "path": "scripts/monetization/application-demo.cjs",

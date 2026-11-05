@@ -36,10 +36,9 @@ class SourceCutRenderTests(unittest.TestCase):
             # 5.25s. Keep that last covering frame; final delivery owns rounding.
             expected = math.ceil(duration * 24 - 1e-6)
             self.assertEqual(int(info["streams"][0]["nb_frames"]), expected)
-            old_output = folder / "old-shortest.mp4"
-            subprocess.run([*command[:-1], "-shortest", str(old_output)], check=True, capture_output=True, timeout=30)
-            old = json.loads(subprocess.check_output(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=nb_frames", "-of", "json", str(old_output)]))
-            self.assertLess(int(old["streams"][0]["nb_frames"]), expected, "The previous mux must reproduce the missing tail")
+            # The old -shortest truncation depends on FFmpeg's mux/interleave
+            # version. Require every expected frame from the fixed command;
+            # do not require newer FFmpeg to reproduce a historical defect.
 
     def test_real_timed_camera_programme_keeps_exact_cut_frames_and_original_audio(self):
         with tempfile.TemporaryDirectory() as folder:
