@@ -1,5 +1,4 @@
 import { getSafeMediaSource } from '../utils/security';
-import { watchStudioProgrammeFrames } from './studioSourcePreview';
 import { mapOutputTickToProgrammeTick, mapProgrammeTickToOutputTick,
   secondsToTicks, ticksToSeconds } from './studioTime';
 
@@ -58,7 +57,14 @@ export function createStudioPlaybackClock() {
         waiting = false; stopDisplay(); sync();
         // The lightweight UI follows the continuously advancing media clock at
         // display cadence. Canvas composition still uses decoded-picture events.
-        stopFrames = watchStudioProgrammeFrames(video, displayFrame, { decodedFrames: false });
+        let frame;
+        const tick = () => {
+          if (disposed || waiting || video.paused || video.ended) return;
+          displayFrame();
+          frame = window.requestAnimationFrame(tick);
+        };
+        if (!video?.paused && !video?.ended) frame = window.requestAnimationFrame(tick);
+        stopFrames = () => window.cancelAnimationFrame(frame);
       };
       const suspend = () => { waiting = true; stopDisplay(); };
       const paused = () => { stopDisplay(); waiting = false; sync(); };

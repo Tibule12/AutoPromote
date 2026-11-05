@@ -188,6 +188,25 @@ describe("ViralClipStudioPanel", () => {
     ]);
   });
 
+  test("retains the other source moments while focusing the selected range", async () => {
+    const first = { id: "first", start: 1, end: 4, score: 81 };
+    const selected = { id: "selected", start: 6, end: 10, score: 94 };
+    const source = { name: "source.mp4", url: "https://storage.example/source.mp4",
+      storagePath: "uploads/videos/user/source.mp4", duration: 12 };
+    const { container } = render(<ViralClipStudioPanel initialFile={source}
+      initialClip={selected} initialClips={[first, selected, { id: "bad", start: -1, end: 5 }]}
+      autoOpen />);
+    await waitFor(() => expect(container.querySelector("video")).not.toBeNull());
+    const video = container.querySelector("video");
+    Object.defineProperty(video, "duration", { configurable: true, value: 12 });
+    fireEvent.loadedMetadata(video);
+    await waitFor(() => expect(mockVideoEditor).toHaveBeenCalled());
+    expect(mockVideoEditor.mock.calls.at(-1)[0].file.clips).toEqual([
+      expect.objectContaining({ id: "selected", start: 6, end: 10, viralScore: 94 }),
+      expect.objectContaining({ id: "first", start: 1, end: 4, viralScore: 81 }),
+    ]);
+  });
+
   test("accepts a dropped video through the same authenticated upload flow", async () => {
     const source = new File(["video"], "dropped.mp4", { type: "video/mp4" });
     const { container } = render(<ViralClipStudioPanel />);

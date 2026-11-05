@@ -47,7 +47,7 @@ def local_render_cpu_ceiling(body, env):
     return int(value)
 
 
-is_analysis = record['expected']['endpoint'] == '/analyze-clips'
+is_analysis = record['expected']['endpoint'] in ('/analyze-clips', '/track-studio-faces')
 cpu_ceiling = cpu_seconds if long_review or is_analysis else local_render_cpu_ceiling(record.get('body', {}), os.environ)
 if is_analysis and (not isinstance(cpu_ceiling, int) or not 30 <= cpu_ceiling <= 300):
     raise RuntimeError('Invalid local analysis CPU ceiling')
@@ -169,6 +169,8 @@ async def run():
         return await worker.render_clip(worker.RenderClipRequest(**body))
     if endpoint == "/analyze-clips":
         return await worker.analyze_clips(body)
+    if endpoint == "/track-studio-faces":
+        return await worker.track_studio_faces(body)
     if endpoint == "/process":
         body["async_mode"] = False
         return await worker.run_pipeline_impl(worker.VideoProcessRequest(**body))
@@ -197,7 +199,7 @@ finally:
         "wallSeconds": time.monotonic() - started,
         "cpuSeconds": usage.ru_utime + usage.ru_stime + children.ru_utime + children.ru_stime,
         "peakRssKiB": max(usage.ru_maxrss, children.ru_maxrss),
-        "cpuCeilingSeconds": cpu_seconds,
-        "localFileCeilingBytes": file_limit,
+        "cpuCeilingSeconds": cpu_ceiling,
+        "localFileCeilingBytes": file_ceiling,
         "providerChargesStarted": False, "invoiceCostMicros": None,
     }))

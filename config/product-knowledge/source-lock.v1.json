@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Telegram connection uses an explicit browser/app choice preserving the bot-start parameter and bounded authenticated return checks; existing Snapchat, billing, security and product capabilities are preserved.",
-  "reviewed_at": "2026-11-04T11:54:45.556Z",
+  "reason": "Review current Studio transport, Moments handoff and preserved product routes before isolated real-analysis QA.",
+  "reviewed_at": "2026-11-05T02:58:03.216Z",
   "catalog_sha256": "98c30d5b7319da7d57821fd52c9471d77ca3d116716f0013a044ba60ff56667b",
   "sources": [
     {
@@ -43,7 +43,7 @@
     },
     {
       "path": "frontend/src/UserDashboardTabs/FindViralClipsPanel.js",
-      "sha256": "b22494d1a8694a777262b7a9363c5eacd01dcd788d8277d147a982ef8e6d4578"
+      "sha256": "ab6788a8dac4e62f715ac120c8e2517ba5510c1b08f701ac144633301d8ff828"
     },
     {
       "path": "frontend/src/UserDashboardTabs/SchedulesPanel.js",
@@ -51,11 +51,11 @@
     },
     {
       "path": "frontend/src/UserDashboardTabs/ViralClipStudioPanel.js",
-      "sha256": "9e8eb332e3abc071c8b5134ca823aa9ff3a029bea0d4a06367df72185713f90f"
+      "sha256": "cfe5fda802fe0d4133dd4129e867284f0d7831d69b03f76639b44ca2a7340e52"
     },
     {
       "path": "frontend/src/UserDashboard_full.js",
-      "sha256": "71dd5cb44736a81a19ef0d46121be91732ab8c8b6837ec8d832a8205de358fa3"
+      "sha256": "cb5398cc790ab93e76767bb80c361ff05911620cd73c56fb6b75e514f35a8bad"
     },
     {
       "path": "frontend/src/WelcomePage.js",
@@ -187,7 +187,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "be74f56fb945d9f60edb9f486c8e785a5a188795c6e18fd668f62ebed25b86b6"
+      "sha256": "ea6f04b5b7d22c65891ec1b23f8063e4846ca295b5b16356f25ae2c970cf83f1"
     },
     {
       "path": "frontend/src/components/landing/StudioWelcomePage.js",
@@ -371,11 +371,11 @@
     },
     {
       "path": "frontend/src/features/publishing/UnifiedPublisher.js",
-      "sha256": "980b5b5c0ec1539dfd97a84df3793bfb341a2ca22aba0add7d7881d53be7785d"
+      "sha256": "ee52a76b780fee76bd54b4c893acc6fea2d1b20b0c57c3bd20ae3df735c40df8"
     },
     {
       "path": "frontend/src/features/publishing/utils/publishingUtils.js",
-      "sha256": "1d019cc4dc1ac58470384a207b45fb0c04ed20e6dc18d63df4fbe46c2e174c1b"
+      "sha256": "6421651d6994bb4e5629f6c9b47d286ea3e682f363c342716c42b9f848888b7d"
     },
     {
       "path": "frontend/src/hooks/useCinematicEffects.js",
@@ -387,7 +387,7 @@
     },
     {
       "path": "package.json",
-      "sha256": "856cbc04ca71ee03aa2e8701c9b32904f51d757b8c7340cb36541c18a0de6566"
+      "sha256": "4e3181c179f8005c748a66083642775269d3a64f89f40737c9030c23a1cb43c5"
     },
     {
       "path": "python_media_worker/assets/studio-text-metrics.v1.json",
@@ -495,7 +495,7 @@
     },
     {
       "path": "src/contentRoutes.js",
-      "sha256": "5b72d35fed1f57a6e357209362318b4a9eed0bcfd30c5547760c81c6bd5b7d20"
+      "sha256": "48fb04a22cb8cdd4b69b2d48ec4f4e5fa4154f751b610a745ab43fec8093a35e"
     },
     {
       "path": "src/creativeTemplates/showcase.js",
@@ -535,11 +535,11 @@
     },
     {
       "path": "src/promotionService.js",
-      "sha256": "c43220b8a01cf2d097a0b9212029652c552ce159ccaee308440cb5554c0b9158"
+      "sha256": "20974df7dd3ed6d79c5391a49d0e4d8d226c69d661b4d4427bc28b2ca034c701"
     },
     {
       "path": "src/routes/platformRoutes.js",
-      "sha256": "d37132a8f9d6d3f3b0bab21af8b7a63d885ae75e7225dd74fd464635535c4ca1"
+      "sha256": "2f649a345a40f8f247031ec563ce2e293d5ccbb363f3b10b88ca51d488b7d44f"
     },
     {
       "path": "src/routes/productAssistanceRoutes.js",
@@ -547,7 +547,7 @@
     },
     {
       "path": "src/server.js",
-      "sha256": "1450b418610dc5c852a52feea3ec794780f5364bb553a4eabcc45e822c1d6c19"
+      "sha256": "f0adef18f6479c001a13a894972ab962f7f8d7ae6e2a2b71f2c90d7df4c5d477"
     },
     {
       "path": "src/services/__tests__/publishedVideoRetention.test.js",
@@ -575,11 +575,11 @@
     },
     {
       "path": "src/services/platformPoster.js",
-      "sha256": "155522661bc3831d06698840d9ffcef6ebf1925bf72afe53d42ba8c0c30cbafa"
+      "sha256": "242dfad260ade40a21edc519bfec8062f756f99a6a5a3816ddcf9429d5d22407"
     },
     {
       "path": "src/services/promotionTaskQueue.js",
-      "sha256": "7ec14333169bbcc30fd84499b7032c63c7f69c2f7b6171454ebfee8858d21cc9"
+      "sha256": "6b371a403f061c078aff5f88e3cd61e5b9cb255b86b5e8cdbb30a3857e4cafb9"
     },
     {
       "path": "src/services/publishedVideoRetention.js",
@@ -591,7 +591,7 @@
     },
     {
       "path": "src/services/publishingScheduleQuery.js",
-      "sha256": "c6c14d6f491a012a066372c101403547c0cb1dbe59d2bef68e29cb96b4cb2a93"
+      "sha256": "6c406811c2108ac40a7f4a5eef4f7ea9c38ef8e04809c9c07b23bdfa7b0570e3"
     },
     {
       "path": "src/services/redditPublication.js",
@@ -639,11 +639,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "99360046ce0fb278ba6ec3cb062b3f587ed4d76a82181f361cbb994f8aab9ac2"
+      "sha256": "6e9ceb58f144f72cdda1804fcb1d90a3453db07af8baec21faf39fd368d4d7b9"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "8546d8309a390f77bc60cef57565a10f50ff7c9d5a15d7660adf460edc82df0a"
+      "sha256": "469852c7c6fcf57f9959e4a1cb094f43121a5d3b3b5916891ff0cd407828f5de"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

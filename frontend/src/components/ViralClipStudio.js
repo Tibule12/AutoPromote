@@ -90,6 +90,8 @@ import { parseColorCube, buildAdvancedColorCube, applyColorCube, hasAdvancedGrad
 import { soloTrackingCoordinates, reprojectDetectedReframeKeys } from "./studioTrackingCoordinates";
 import { interpolateReframeKeyframes } from "./studioReframeInterpolation";
 import StudioProTimeline from "./StudioProTimeline";
+import { createStudioPlaybackClock } from "./studioPlaybackClock";
+import { StudioPlaybackRange, StudioPlaybackTime } from "./StudioPlaybackPosition";
 import {
   generateSmartZoomKeyframes,
   createSinglePunchKeyframes,
@@ -3015,7 +3017,7 @@ const ViralClipStudio = ({
   const [soundEffects, setSoundEffects] = useState([]);
   const [audioRemix, setAudioRemix] = useState(() => normalizeAudioRemix(DEFAULT_AUDIO_REMIX));
   const [audioRemixBypass, setAudioRemixBypass] = useState(false);
-  const [audioRemixPlaybackRequest, setAudioRemixPlaybackRequest] = useState(0);
+  const [studioPlaybackRequest, setStudioPlaybackRequest] = useState(0);
   const [audioRemixLiveError, setAudioRemixLiveError] = useState("");
   const remixPreviewMediaRef = useRef(new Set());
   const [audioRemixLoop, setAudioRemixLoop] = useState(null);
@@ -3160,6 +3162,8 @@ const ViralClipStudio = ({
   ]);
 
   const videoRef = useRef(null);
+  const studioPlaybackClockRef = useRef(null);
+  if (!studioPlaybackClockRef.current) studioPlaybackClockRef.current = createStudioPlaybackClock();
   const programmeVideoSlotsRef = useRef([null, null, null]);
   const afterCanvasRef = useRef(null);
   const [pausedSourceFrame, setPausedSourceFrame] = useState(null);
@@ -6211,8 +6215,42 @@ const ViralClipStudio = ({
   const focusClipInEditor = (clip, options = {}) => {
     if (!clip) return;
 
+    const source = clip.url || videoUrl;
+    const start = Math.max(0, Number(clip.start || 0));
+    const end = Number(clip.end || 0);
+    if (!source || !Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
+      setStudioActionMessage("This moment has no usable source range. The current edit is preserved.");
+      return;
+    }
+    if (trackStates.video?.locked) {
+      setStudioActionMessage("Unlock the video track before changing the selected moment.");
+      return;
+    }
+
+    pauseSynchronizedPreview();
+    setPreviewFinishedFile(false);
+    // Selecting a different suggestion must replace the primary source range,
+    // including any previous trim. Additional authored occurrences stay intact.
+    const primaryIndex = timeline.findIndex(item => item.id === "main");
+    const existingIndex = timeline.findIndex(item => item.sourceClipId === clip.id);
+    const targetIndex = primaryIndex >= 0 ? primaryIndex : existingIndex >= 0 ? existingIndex : timeline.length;
+    const identity = {
+      sourceClipId: clip.sourceClipId || clip.id,
+      url: source,
+      storagePath: clip.storagePath || clip.sourceStoragePath || sourceStoragePath || "",
+      sourceStoragePath: clip.sourceStoragePath || clip.storagePath || sourceStoragePath || "",
+      ...(clip.contentHash || sourceContentHash ? { contentHash: clip.contentHash || sourceContentHash } : {}),
+      startRequest: start, endRequest: end,
+      duration: Number(clip.sourceDuration || clip.source_duration || timeline[targetIndex]?.duration || end),
+    };
+    if (selectedClip?.id !== clip.id || options.replaceRange) {
+      setTimeline(current => targetIndex < current.length
+        ? current.map((item, index) => index === targetIndex ? { ...item, ...identity } : item)
+        : [...current, { id: createSecureId("moment"), name: clip.hookText || clip.reason || "Selected moment", ...identity }]);
+    }
+
     setSelectedClip(clip);
-    setActiveTimelineIndex(0);
+    setActiveTimelineIndex(targetIndex);
     setTrimPreviewLoop(false);
     setHookPreviewLoop(false);
 
@@ -6226,17 +6264,17 @@ const ViralClipStudio = ({
       }
     }
 
-    const boundaryTime =
-      options.boundary === "end" ? Number(clip.end || clip.start || 0) : Number(clip.start || 0);
+    const retainedWindow = selectedClip?.id === clip.id && !options.replaceRange && timeline[targetIndex]
+      ? getTimelineClipWindow(timeline[targetIndex]) : { start, end };
+    const boundaryTime = options.boundary === "end" ? retainedWindow.end : retainedWindow.start;
 
     const video = videoRef.current;
     if (video) {
-      if (!applySafeMediaSource(video, videoUrl)) return;
+      if (!applySafeMediaSource(video, source)) return;
       video.currentTime = boundaryTime;
       setVideoTime(boundaryTime);
       if (options.play) {
-        previewPlaybackIntentRef.current = true;
-        safePlayMediaElement(video);
+        setStudioPlaybackRequest(value => value + 1);
       }
     }
   };
@@ -8003,6 +8041,16 @@ const ViralClipStudio = ({
     videoRef.current = next;
     if (previous && previous !== next) { previous.pause(); previous.muted = true; }
   }, [activeProgrammeSlot]);
+  useLayoutEffect(() => studioPlaybackClockRef.current.bind(videoRef.current, {
+    url: renderedOutputUrl || currentTimelineClip?.url,
+    start: Number(currentTimelineWindow.start || 0),
+    end: Number(currentTimelineWindow.end || 0),
+    programmeStart: getTimelineOffsetForIndex(activeTimelineIndex),
+    timeMap: previewOutputTimeMap,
+    renderedOutput: Boolean(renderedOutputUrl),
+    fallbackSourceTime: Number(currentTimelineWindow.start || 0),
+  }), [projectId, activeProgrammeSlot, activeTimelineIndex, currentTimelineClip?.url,
+    currentTimelineWindow.start, currentTimelineWindow.end, renderedOutputUrl, previewOutputTimeMap, timeline]);
   const previewProgrammePosition = renderedOutputUrl
     ? "center center"
     : activeSideBySideOverlay
@@ -8065,6 +8113,8 @@ const ViralClipStudio = ({
         : "Donor track mixes with original audio";
 
   const getComparisonFocusSourceTime = preferredTool => {
+    if (preferredTool === "reframe" || preferredTool === "moments")
+      return resolveOutputTimelinePosition(previewTimelineTime);
     const timedBRoll =
       (activeOverlayIsVideoBRoll && activeOverlay) ||
       overlays.find(
@@ -8110,7 +8160,7 @@ const ViralClipStudio = ({
     } catch (error) {
       console.log("Comparison preview seek skipped", error);
     }
-    if (play) safePlayMediaElement(afterVideo);
+    if (play) setStudioPlaybackRequest(value => value + 1);
   };
 
   const toggleComparisonPlayback = async ({ resumeOnly = false } = {}) => {
@@ -8636,7 +8686,7 @@ const ViralClipStudio = ({
     setFaceTrackingStatus("idle");
     setFaceTrackingMessage("");
     return () => { faceTrackingGeneration.current += 1; };
-  }, [currentTimelineClip?.id, currentTimelineClip?.startRequest, currentTimelineClip?.endRequest,
+  }, [projectId, currentTimelineClip?.id, currentTimelineClip?.sourceStoragePath, currentTimelineClip?.startRequest, currentTimelineClip?.endRequest,
     selectedClip?.start, selectedClip?.end, effectiveSmartCropMode, reframeAspect, speakerTrackZoom]);
 
   const focusCaptionSegmentsForReview = segments => {
@@ -9810,6 +9860,7 @@ const ViralClipStudio = ({
     });
     if (
       [
+        "moments",
         "cut",
         "hook",
         "reframe",
@@ -9834,6 +9885,7 @@ const ViralClipStudio = ({
     // Opening an inspector is navigation. Caption generation/enabling is an
     // explicit control inside it, and must not create an invisible Undo step.
     if (toolId === "moments") {
+      setProjectRailTab("moments");
       setStudioActionMessage("Choose a story moment, then shape how it earns attention.");
     }
     if (toolId === "export") {
@@ -10639,6 +10691,7 @@ const ViralClipStudio = ({
     );
     const id = existing?.id || createSecureId("reframe-keyframe");
     const keyframe = {
+      ...existing,
       id,
       time: Number(time.toFixed(3)),
       x: clampNumber(currentPosition.x, 5, 95, 50),
@@ -10652,6 +10705,7 @@ const ViralClipStudio = ({
     setActiveReframeKeyframeId(id);
     setSmartCrop(true);
     setSmartCropMode("speaker_track");
+    recordReframeModeAtPlayhead("speaker_track");
     setStudioActionMessage(`Manual framing correction added at ${time.toFixed(2)}s.`);
   };
 
@@ -10912,6 +10966,7 @@ const ViralClipStudio = ({
       activeVideos.forEach(video => video.pause());
     };
   }, [
+    activeProgrammeSlot,
     activeSpeakerStackSlots,
     speakerStackIsReady,
     currentTimelineWindow.start,
@@ -11022,6 +11077,7 @@ const ViralClipStudio = ({
       alternateVideo.pause();
     };
   }, [
+    activeProgrammeSlot,
     activeTimelineIndex,
     currentTimelineClip,
     reframeModeCuts,
@@ -11054,7 +11110,7 @@ const ViralClipStudio = ({
       video.removeEventListener("timeupdate", syncAutomationRate);
       video.removeEventListener("seeking", syncAutomationRate);
     };
-  }, [activeTimelineIndex, currentTimelineClip, previewSpeed, previewOutputTimeMap, renderedOutputUrl]);
+  }, [activeProgrammeSlot, activeTimelineIndex, currentTimelineClip, previewSpeed, previewOutputTimeMap, renderedOutputUrl]);
 
   useEffect(() => {
     if (!addHook) {
@@ -11524,16 +11580,16 @@ const ViralClipStudio = ({
       setAudioRemixLiveError("");
     }
     return () => { current = false; video.removeEventListener("studio-remix-pitch-error", pitchFailure); };
-  }, [activeTimelineIndex, currentTimelineClip, previewSpeed, audioRemix, audioRemixBypass, renderedOutputUrl]);
+  }, [activeProgrammeSlot, activeTimelineIndex, currentTimelineClip, previewSpeed, audioRemix, audioRemixBypass, renderedOutputUrl]);
 
   useEffect(() => {
-    if (!audioRemixPlaybackRequest) return;
+    if (!studioPlaybackRequest) return;
     // Apply source/rate/ref changes first, then use the same preparation,
     // intention and transport as the ordinary Studio Play control.
     void toggleComparisonPlayback({ resumeOnly: true });
     // Each explicit Sound action is one request, not a restart on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [audioRemixPlaybackRequest]);
+  }, [studioPlaybackRequest]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -11549,7 +11605,7 @@ const ViralClipStudio = ({
     };
     video.addEventListener("timeupdate", keepLooping);
     return () => video.removeEventListener("timeupdate", keepLooping);
-  }, [audioRemixLoop, activeTimelineIndex, currentTimelineClip]);
+  }, [activeProgrammeSlot, audioRemixLoop, activeTimelineIndex, currentTimelineClip]);
 
   useEffect(() => {
     const exactPreview = exactAudioRemixPreviewRef.current;
@@ -13417,6 +13473,7 @@ const ViralClipStudio = ({
       video.removeEventListener("loadedmetadata", handleLoadedMetadata);
     };
   }, [
+    activeProgrammeSlot,
     addHook,
     activeTimelineIndex,
     hookEnd,
@@ -13566,7 +13623,7 @@ const ViralClipStudio = ({
       subject.removeEventListener("seeked", confirm);
       subject.pause();
     };
-  }, [subjectProgrammePreview, activeTimelineIndex, renderedOutputUrl]);
+  }, [activeProgrammeSlot, subjectProgrammePreview, activeTimelineIndex, renderedOutputUrl]);
 
   // Exact paused pictures on the shared continuous delivery clock. Source/audio
   // playback remains native; reviewed subject/composition decoders retain their
@@ -14225,6 +14282,7 @@ const ViralClipStudio = ({
       stopProgrammeFrames?.();
     };
   }, [
+    activeProgrammeSlot,
     pausedSourceFrame,
     pausedSourceGeneration,
     timeline,
@@ -14401,7 +14459,7 @@ const ViralClipStudio = ({
       if (beforeAnimationFrame) window.cancelAnimationFrame(beforeAnimationFrame);
       beforeVideo.pause();
     };
-  }, [activeTimelineIndex, currentTimelineClip, currentTimelineWindow.start, comparisonMode, renderedOutputUrl, previewOutputTimeMap]);
+  }, [activeProgrammeSlot, activeTimelineIndex, currentTimelineClip, currentTimelineWindow.start, comparisonMode, renderedOutputUrl, previewOutputTimeMap]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -14490,6 +14548,7 @@ const ViralClipStudio = ({
       audio.pause();
     };
   }, [
+    activeProgrammeSlot,
     extractedAudio,
     activeTimelineIndex,
     timeline,
@@ -14563,6 +14622,7 @@ const ViralClipStudio = ({
       applyAudio(!!baseMuted, baseMuted ? 0 : restoredBaseGain * originalAutomationGain);
     }
   }, [
+    activeProgrammeSlot,
     previewTimelineTime,
     overlays,
     previewMuted,
@@ -14696,6 +14756,7 @@ const ViralClipStudio = ({
       sourceVideo.removeEventListener("ratechange", syncOverlayMedia);
     };
   }, [
+    activeProgrammeSlot,
     activeTimelineIndex,
     isPreviewPaused,
     previewTimelineTime,
@@ -14821,6 +14882,7 @@ const ViralClipStudio = ({
       echoVideos.forEach(video => video.pause());
     };
   }, [
+    activeProgrammeSlot,
     activeLiveCreativeEffect?.start_time,
     temporalPreviewIsLive,
     motionSculpturePreviewIsLive,
@@ -14898,6 +14960,7 @@ const ViralClipStudio = ({
       freezeVideo?.pause();
     };
   }, [
+    activeProgrammeSlot,
     addHook,
     activeTimelineIndex,
     hookBlurBackground,
@@ -14953,7 +15016,7 @@ const ViralClipStudio = ({
       video.removeEventListener("ratechange", syncSmartCropPreview);
       foreground.pause();
     };
-  }, [smartCrop, activeTimelineIndex, timeline, currentTimelineClip]);
+  }, [activeProgrammeSlot, smartCrop, activeTimelineIndex, timeline, currentTimelineClip]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -14996,6 +15059,7 @@ const ViralClipStudio = ({
       video.removeEventListener("ended", returnToEditedMoment);
     };
   }, [
+    activeProgrammeSlot,
     activeTimelineIndex,
     timeline,
     comparisonMode,
@@ -15229,6 +15293,7 @@ const ViralClipStudio = ({
       music?.pause();
     };
   }, [
+    activeProgrammeSlot,
     addMusic,
     effectiveMusicPreviewUrl,
     musicSearchMode,
@@ -15432,6 +15497,7 @@ const ViralClipStudio = ({
       pauseTimelineEffects();
     };
   }, [
+    activeProgrammeSlot,
     soundEffects,
     outputTimelineDuration,
     previewMuted,
@@ -20105,7 +20171,8 @@ const ViralClipStudio = ({
                         >
                           {isPreviewPaused ? "▶" : "❚❚"}
                         </button>
-                        <input
+                        <StudioPlaybackRange
+                          clock={studioPlaybackClockRef.current}
                           className="preview-playhead-range"
                           type="range"
                           min={0}
@@ -20127,7 +20194,7 @@ const ViralClipStudio = ({
                           aria-label="Edited output position"
                         />
                         <span className="preview-timecode">
-                          {formatPreviewTimePrecise(previewPlaybackTime)} /{" "}
+                          <StudioPlaybackTime clock={studioPlaybackClockRef.current} fallback={previewPlaybackTime} format={formatPreviewTimePrecise} /> /{" "}
                           {formatPreviewTimePrecise(outputPlaybackDuration)}
                         </span>
                         <div className="preview-audio-controls" aria-label="Preview audio monitoring">
@@ -21874,6 +21941,30 @@ const ViralClipStudio = ({
                 }}
               />
 
+              {studioInspectorTab === "moments" ? (
+                <div className="clip-inspector-body" role="tabpanel" aria-label="Moment selection" data-testid="studio-moments-inspector">
+                  <div className="inspector-heading-row">
+                    <div><span className="panel-kicker">Moments</span><h4>Choose the source range to edit</h4></div>
+                    <span>{orderedClips.length} available</span>
+                  </div>
+                  <p>Choose a detected moment in the library. Its source range opens on the ordinary timeline; your other clips and layers stay in the project. Changes can be undone.</p>
+                  {selectedClip ? (
+                    <>
+                      <h5>{normalizePlainText(selectedClip.hookText || selectedClip.reason || "Selected moment")}</h5>
+                      <p>{Number(selectedClip.start || 0).toFixed(2)}s–{Number(selectedClip.end || 0).toFixed(2)}s · Source time</p>
+                      <div className="inspector-inline-actions">
+                        <button type="button" disabled={!!trackStates.video?.locked}
+                          onClick={() => focusClipInEditor(selectedClip, { boundary: "start", play: true })}>Preview selected moment</button>
+                        <button type="button" onClick={() => selectCreativeTool("cut")}>Trim this moment</button>
+                        <button type="button" disabled={!!trackStates.video?.locked}
+                          onClick={() => handleClipAction(selectedClip, { type: "apply-hook" })}>Apply suggested hook</button>
+                      </div>
+                      <small>Scores and story suggestions are estimates. Review the actual picture and sound before exporting.</small>
+                    </>
+                  ) : <p>No detected moments are saved in this project. Import a source or open a Find Viral Clips result; your existing timeline remains editable.</p>}
+                </div>
+              ) : null}
+
               {studioInspectorTab === "cut" ? (
                 <div className="clip-inspector-body cut-inspector-body" role="tabpanel">
                   <div className="inspector-heading-row">
@@ -23122,7 +23213,7 @@ const ViralClipStudio = ({
                         onClick={() => {
                           const time = Number(previewTimelineTime || 0);
                           const id = createSecureId("reframe-keyframe");
-                          const keyframe = { id, time, x: 28, y: 50 };
+                            const keyframe = { id, time, x: 28, y: 50, cut: true };
                           setReframeKeyframes(cur => [...cur.filter(k => Math.abs(k.time - time) >= 0.1), keyframe].sort((a,b) => a.time - b.time));
                           setActiveReframeKeyframeId(id);
                           setStudioActionMessage("Camera framed on Speaker 1 (Left, 28%).");
@@ -23136,7 +23227,7 @@ const ViralClipStudio = ({
                         onClick={() => {
                           const time = Number(previewTimelineTime || 0);
                           const id = createSecureId("reframe-keyframe");
-                          const keyframe = { id, time, x: 72, y: 50 };
+                            const keyframe = { id, time, x: 72, y: 50, cut: true };
                           setReframeKeyframes(cur => [...cur.filter(k => Math.abs(k.time - time) >= 0.1), keyframe].sort((a,b) => a.time - b.time));
                           setActiveReframeKeyframeId(id);
                           setStudioActionMessage("Camera framed on Speaker 2 (Right, 72%).");
@@ -23158,10 +23249,12 @@ const ViralClipStudio = ({
                               time: Number(t.toFixed(2)),
                               x: isLeft ? 28 : 72,
                               y: 50,
+                              cut: true,
                             });
                             isLeft = !isLeft;
                           }
                           setReframeKeyframes(cuts);
+                          setActiveReframeKeyframeId(cuts[0]?.id || null);
                           setStudioActionMessage(`Generated ${cuts.length} alternating speaker cuts across the conversation.`);
                         }}
                       >
@@ -23195,6 +23288,14 @@ const ViralClipStudio = ({
                     )}
                     {activeReframeKeyframe ? (
                       <div className="reframe-keyframe-editor">
+                        <label>
+                          <span>Transition into this point</span>
+                          <select aria-label="Framing point transition" value={activeReframeKeyframe.cut ? "cut" : "smooth"}
+                            onChange={event => updateActiveReframeKeyframe({ cut: event.target.value === "cut" })}>
+                            <option value="smooth">Smooth follow</option>
+                            <option value="cut">Camera cut</option>
+                          </select>
+                        </label>
                         <label>
                           <span>
                             Horizontal <b>{Math.round(activeReframeKeyframe.x)}%</b>
@@ -23241,7 +23342,11 @@ const ViralClipStudio = ({
                     type="button"
                     className="inspector-primary-action"
                     onClick={() => {
+                      const mode = effectiveSmartCropMode === "off" ? (smartCropMode === "off" ? "speaker_track" : smartCropMode) : effectiveSmartCropMode;
                       setSmartCrop(true);
+                      setSmartCropMode(mode);
+                      recordReframeModeAtPlayhead(mode);
+                      setPreviewFinishedFile(false);
                       setComparisonMode("after");
                       focusComparisonPreview("reframe", true);
                       setStudioActionMessage(
@@ -26233,7 +26338,7 @@ const ViralClipStudio = ({
                       if (video) {
                         unlockAudioRemixContext(video);
                       }
-                      setAudioRemixPlaybackRequest(request => request + 1);
+                      setStudioPlaybackRequest(request => request + 1);
                       setStudioActionMessage(
                         normalized.preset === "chipmunk"
                           ? "Chipmunk voice is playing at the original picture timing. Preview Remix compares the final mastering."
@@ -26246,7 +26351,7 @@ const ViralClipStudio = ({
                       backgroundSoundPreviewSuppressedRef.current = false;
                       setAudioRemixBypass(true);
                       setComparisonMode("after");
-                      setAudioRemixPlaybackRequest(request => request + 1);
+                      setStudioPlaybackRequest(request => request + 1);
                       setStudioActionMessage("Before is playing with the original audio tone.");
                     }}
                     onPreview={handleExactAudioRemixPreview}
@@ -26265,7 +26370,7 @@ const ViralClipStudio = ({
                       const end = Math.min(duration || start + 8, start + 8);
                       setAudioRemixLoop({ start, end: Math.max(start + 0.5, end) });
                       setAudioRemixBypass(false);
-                      setAudioRemixPlaybackRequest(request => request + 1);
+                      setStudioPlaybackRequest(request => request + 1);
                       setStudioActionMessage(
                         `Looping ${formatPreviewTimePrecise(start)}–${formatPreviewTimePrecise(
                           Math.max(start + 0.5, end)
@@ -30033,6 +30138,7 @@ const ViralClipStudio = ({
               />
             ) : (
             <StudioProTimeline
+              playbackClock={studioPlaybackClockRef.current}
               duration={liveTimelineDuration}
               playbackRate={previewSpeed}
               playhead={previewTimelineTime}

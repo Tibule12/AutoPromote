@@ -64,6 +64,15 @@ beforeEach(() => {
   });
 });
 test("destinations load with authenticated workspace scope and never auto-select", async () => {
+  // Shared publishing is intentionally available only in the owned demo.
+  // A production localStorage value must not enable workspace authority.
+  const previous = { ...process.env };
+  Object.assign(process.env, {
+    REACT_APP_TEAM_COLLABORATION_LOCAL: "true",
+    REACT_APP_LOCAL_EMULATORS: "true",
+    REACT_APP_FIREBASE_PROJECT_ID: "demo-autopromote-credits",
+  });
+  try {
   localStorage.setItem("autopromote.activeWorkspaceId", "workspace-fixture");
   const change = jest.fn();
   render(<CommunityDestinationPicker platform="telegram" onChange={change} />);
@@ -79,6 +88,12 @@ test("destinations load with authenticated workspace scope and never auto-select
   );
   fireEvent.change(select, { target: { value: destinations.telegram.id } });
   expect(change).toHaveBeenCalledWith(destinations.telegram);
+  } finally {
+    for (const key of ["REACT_APP_TEAM_COLLABORATION_LOCAL", "REACT_APP_LOCAL_EMULATORS", "REACT_APP_FIREBASE_PROJECT_ID"]) {
+      if (previous[key] === undefined) delete process.env[key];
+      else process.env[key] = previous[key];
+    }
+  }
 });
 test("Telegram destination registration is explicit and preserves backend permission errors", async () => {
   render(<CommunityDestinationPicker platform="telegram" />);

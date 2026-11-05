@@ -36,7 +36,8 @@ describe("FindViralClipsPanel Viral Clip Studio handoff", () => {
 
     expect(onOpenStudio).toHaveBeenCalledWith(
       source,
-      expect.objectContaining({ id: "clip-1", start: 4, end: 24, score: 91 })
+      expect.objectContaining({ id: "clip-1", start: 4, end: 24, score: 91 }),
+      [expect.objectContaining({ id: "clip-1", start: 4, end: 24 })]
     );
   });
 });

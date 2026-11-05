@@ -254,7 +254,7 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
                     <button
                       type="button"
                       className="check-quality"
-                      onClick={() => onOpenStudio?.(sourceFile, clip)}
+                      onClick={() => onOpenStudio?.(sourceFile, clip, suggestedClips)}
                     >
                       ✂ Create clip
                     </button>

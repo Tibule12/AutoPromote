@@ -280,8 +280,9 @@ describe("ViralClipStudio timeline sequencing", () => {
       exportSettings:{fps:'24'},overlays:[],motionKeyframes:[],
     }}});
     // Saved-project restore commits on its own animation frame. Wait for its
-    // 24fps transport before simulating media on the selected source slot.
-    await waitFor(()=>expect(Number(screen.getByLabelText('Edited output position').step)).toBeCloseTo(1/24,8));
+    // 24fps project before simulating media on the selected source slot. The
+    // display range is continuous; its arrow keys still nudge by a frame.
+    await waitFor(()=>expect(screen.getByRole('textbox',{name:'Project name',exact:true,includeHidden:true})).toHaveValue('Terminal source'));
     fireEvent.change(screen.getByLabelText('Edited output position'),{target:{value:count===1?'3':'7'}});
     const video=screen.getByTestId('studio-after-video');
     let paused=true;
@@ -298,7 +299,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     act(()=>{video.currentTime=end;video.dispatchEvent(new Event('timeupdate'));});
     await waitFor(()=>expect(screen.getByRole('button',{name:'Play comparison',exact:true})).toBeInTheDocument());
     expect(screen.getByTestId('studio-after-video')).toBe(video);
-    const frameStep=Number(screen.getByLabelText('Edited output position').step);
+    const frameStep=1/24;
     expect(video.currentTime).toBeCloseTo(end-frameStep,5);expect(video.paused).toBe(true);
     // A native ended event can already be queued when the precise trim
     // watcher pauses the element. It must not refocus an earlier cutaway.
@@ -1412,6 +1413,81 @@ describe("ViralClipStudio timeline sequencing", () => {
       screen.getByText(/Signature Lab is focused on transformation tuning/i)
     ).toBeInTheDocument();
   });
+
+  test("Moments selects a new source range after trimming, and preview preserves the chosen edit", async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+      clips={[{id:"moment-a",start:0,end:10,duration:10,sourceDuration:30},
+        {id:"moment-b",start:12,end:20,duration:8,sourceDuration:30}]}
+      onSave={onSave} onCancel={jest.fn()}/>);
+    let video = readyCutawaySource(30);
+    video.currentTime = 4; fireEvent.timeUpdate(video);
+    fireEvent.click(within(screen.getByRole("navigation",{name:"Creative tools"})).getByRole("button",{name:"Cut",exact:true}));
+    fireEvent.click(screen.getByTestId("inspector-cut-trim-start"));
+    fireEvent.click(within(screen.getByRole("navigation",{name:"Creative tools"})).getByRole("button",{name:"Moments",exact:true}));
+    expect(screen.getByTestId("studio-moments-inspector")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("clip-action-use-moment-b"));
+    video = readyCutawaySource(30);
+    expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:8.00");
+    fireEvent.click(screen.getByRole("button",{name:"Preview selected moment",exact:true}));
+    await waitFor(()=>expect(screen.getByRole("button",{name:"Pause comparison",exact:true})).toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button",{name:"Pause comparison",exact:true}));
+    await clickRenderFinalClip();
+    await waitFor(()=>expect(onSave).toHaveBeenCalled());
+    expect(onSave.mock.calls[0][0].id).toBe("moment-b");
+    expect(onSave.mock.calls[0][2].timelineSegments[0]).toMatchObject({start_time:12,end_time:20});
+  },60000);
+
+  test("native playback advances scrubber, visible clock and timeline without a React timeupdate", async () => {
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+      clips={[{id:"display-clock",start:0,end:12,duration:12}]}
+      onSave={jest.fn()} onCancel={jest.fn()}/>);
+    const video = readyCutawaySource(12);
+    Object.defineProperty(video,"paused",{configurable:true,writable:true,value:false});
+    fireEvent.playing(video);
+    video.currentTime = 2.25;
+    await waitFor(()=>expect(Number(screen.getByLabelText("Edited output position").value)).toBeCloseTo(2.25,2));
+    expect(document.querySelector(".preview-timecode").textContent).toContain("2.25");
+    expect(parseFloat(document.querySelector(".pro-playhead").style.left)).toBeCloseTo(18.75,1);
+    // No timeupdate fired: this is the existing native clock's lightweight
+    // readout, independent of the editor's authored-state render cycle.
+    video.paused=true; fireEvent.pause(video);
+  },60000);
+
+  test("Reframe preview uses transport and the current framing mark instead of a stale hook position", async () => {
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+      clips={[{id:"preview-reframe",start:0,end:12,duration:12}]}
+      onSave={jest.fn()} onCancel={jest.fn()}/>);
+    const video = readyCutawaySource(12);
+    video.currentTime = 5; fireEvent.timeUpdate(video);
+    fireEvent.click(screen.getByRole("tab",{name:/Reframe/i}));
+    fireEvent.click(screen.getByTestId("auto-reframe-toggle"));
+    fireEvent.click(screen.getByRole("button",{name:/Preview 9:16 Framing/}));
+    await waitFor(()=>expect(screen.getByRole("button",{name:"Pause comparison",exact:true})).toBeInTheDocument());
+    expect(screen.getByTestId("auto-reframe-toggle")).toBeChecked();
+    expect(video.currentTime).toBeCloseTo(5,1);
+    fireEvent.click(screen.getByRole("button",{name:"Pause comparison",exact:true}));
+  },60000);
+
+  test("Alternate Speakers exports real cuts and framing-point transitions remain editable", async () => {
+    const onSave = jest.fn(()=>Promise.resolve());
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+      clips={[{id:"cut-speakers",start:0,end:12,duration:12}]}
+      onSave={onSave} onCancel={jest.fn()}/>);
+    readyCutawaySource(12);
+    fireEvent.click(screen.getByRole("tab",{name:/Reframe/i}));
+    fireEvent.click(screen.getByRole("button",{name:/Alternate Speakers/}));
+    expect(screen.getByLabelText("Framing point transition")).toHaveValue("cut");
+    fireEvent.change(screen.getByLabelText("Framing point transition"),{target:{value:"smooth"}});
+    fireEvent.change(screen.getByLabelText("Manual frame horizontal position"),{target:{value:"35"}});
+    await clickRenderFinalClip();
+    await waitFor(()=>expect(onSave).toHaveBeenCalled());
+    const keys=onSave.mock.calls[0][2].finishPlan.reframe.keyframes;
+    expect(keys[0]).toMatchObject({time:0,x:35});
+    expect(keys[0].cut).toBeUndefined();
+    expect(keys.slice(1).length).toBeGreaterThan(1);
+    expect(keys.slice(1).every(key=>key.cut===true)).toBe(true);
+  },60000);
 
   test("exposes functional Auto Reframe controls in the editor inspector", async () => {
     const onSave = jest.fn(() => Promise.resolve());
