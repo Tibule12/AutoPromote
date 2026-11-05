@@ -1536,6 +1536,22 @@ describe("ViralClipStudio timeline sequencing", () => {
     video.paused=true; fireEvent.pause(video);
   },60000);
 
+  test("Reframe mode switches commit their native authoring frame before the next timeupdate", () => {
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+      clips={[{id:"native-reframe",start:0,end:12,duration:12}]}
+      onSave={jest.fn()} onCancel={jest.fn()}/>);
+    const video = readyCutawaySource(12);
+    fireEvent.click(screen.getByRole("tab",{name:/Reframe/i}));
+    const toggle = screen.getByTestId("auto-reframe-toggle");
+    expect(toggle).toBeChecked();
+    video.currentTime = 2.5; // No timeupdate: the paused/native clock is ahead.
+    fireEvent.click(toggle);
+    expect(toggle).not.toBeChecked();
+    video.currentTime = 3.5;
+    fireEvent.click(toggle);
+    expect(toggle).toBeChecked();
+  });
+
   test("Reframe preview uses transport and the current framing mark instead of a stale hook position", async () => {
     render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
       clips={[{id:"preview-reframe",start:0,end:12,duration:12}]}

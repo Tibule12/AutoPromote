@@ -134,5 +134,12 @@
     "run": 42007606389,
     "testsPassed": 148,
     "realContainerRenderPassed": true
+  },
+  "nativeFramingModeRepair": {
+    "focusedEditorPassed": 3,
+    "newRegressionTests": 1,
+    "targetedLintFiles": 2,
+    "errors": 0,
+    "warnings": 0
   }
 }

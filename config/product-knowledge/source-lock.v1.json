@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Verify native scrub input and canonical tick-boundary handling after lightweight clock paints; all exact camera-frame and seek assertions retained",
-  "reviewed_at": "2026-11-05T10:09:42.555Z",
+  "reason": "Commit native authoring timestamp together with timed Reframe mode so toggles respond immediately without timeupdate; three focused editor regressions passed",
+  "reviewed_at": "2026-11-05T10:20:28.135Z",
   "catalog_sha256": "18cb1a6b60010f692ff4d4430ae91901c1cadbd9c9ff4079075694ce9e923d18",
   "sources": [
     {
@@ -187,7 +187,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "5ab999a7f100d1ada3b1614e42ed7b4585761d082768bedcec9b06a80ab03245"
+      "sha256": "7ea48085a410e2ba2e8ef9e37827601309d2271c2e231d7d5cc1088008126e0f"
     },
     {
       "path": "frontend/src/components/landing/StudioWelcomePage.js",

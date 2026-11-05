@@ -8334,9 +8334,14 @@ const ViralClipStudio = ({
     studioPlaybackClockRef.current.read()?.programmeTime ?? previewTimelineTime;
 
   const recordReframeModeAtPlayhead = mode => {
+    const position = studioPlaybackClockRef.current.read();
+    // A paused/native frame can be newer than the last editor timeupdate.
+    // Commit the authoring frame with its mode so the inspector immediately
+    // evaluates the decision at that same time rather than before the cut.
+    if (position) setVideoTime(position.sourceTime);
     // A rounded-up millisecond is after a fractional paused source frame.
     // Start the decision on this frame, rather than waiting for playback.
-    const time = Math.floor(Math.max(0, getFramingAuthoringTime()) * 1000) / 1000;
+    const time = Math.floor(Math.max(0, position?.programmeTime ?? previewTimelineTime) * 1000) / 1000;
     setReframeModeCuts(current => {
       const normalized = normalizeReframeModeCuts(current);
       const baseline =

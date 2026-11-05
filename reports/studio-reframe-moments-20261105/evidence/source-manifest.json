@@ -197,11 +197,11 @@
   },
   {
     "path": "frontend/src/components/ViralClipStudio.js",
-    "sha256": "5ab999a7f100d1ada3b1614e42ed7b4585761d082768bedcec9b06a80ab03245"
+    "sha256": "7ea48085a410e2ba2e8ef9e37827601309d2271c2e231d7d5cc1088008126e0f"
   },
   {
     "path": "frontend/src/components/__tests__/ViralClipStudio.test.js",
-    "sha256": "3377182747ca96b3b9f2cab46da9a9673dc794c3db134ad54a88db1c150f32d4"
+    "sha256": "df23781b58e36e7045223e7df361996155fed0517bd51e7230f81873c0e91949"
   },
   {
     "path": "frontend/src/components/studioPlaybackClock.js",
