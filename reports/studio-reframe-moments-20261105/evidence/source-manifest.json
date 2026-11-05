@@ -205,7 +205,7 @@
   },
   {
     "path": "frontend/src/components/studioPlaybackClock.js",
-    "sha256": "43d5cae5da97d10c57cd8dfc3c8c17769e1ac02fd8a3c6407ec7270db4e54749"
+    "sha256": "27c724e379b892a651778a0e9a0b706f59feedb186cebb3d9974e0bbe4a2c873"
   },
   {
     "path": "python_media_worker/main_media_server.py",

@@ -38,8 +38,11 @@ export function createStudioPlaybackClock() {
       const read = () => {
         if (disposed || !video || !source || video.currentSrc !== source ||
             video.seeking || video.readyState < 2 || !Number.isFinite(video.currentTime) ||
-            (!renderedOutput && (video.currentTime < start || video.currentTime > end))) return null;
-        return position(video.currentTime);
+            (!renderedOutput && (secondsToTicks(Math.max(0, video.currentTime)) < secondsToTicks(start) ||
+              secondsToTicks(Math.max(0, video.currentTime)) > secondsToTicks(end)))) return null;
+        // Native decoders round to microseconds; an exact domain-tick trim can
+        // land fractionally outside its seconds representation after Home/End.
+        return position(renderedOutput ? video.currentTime : Math.max(start, Math.min(end, video.currentTime)));
       };
       readPosition = read;
       publish(read() || position(fallbackSourceTime));

@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Final review: show Moments range actions before creative suggestions; retain tested source clock, bookmarks, camera exports, help and readiness evidence.",
-  "reviewed_at": "2026-11-05T08:02:27.303Z",
+  "reason": "Verify native scrub input and canonical tick-boundary handling after lightweight clock paints; all exact camera-frame and seek assertions retained",
+  "reviewed_at": "2026-11-05T10:09:42.555Z",
   "catalog_sha256": "18cb1a6b60010f692ff4d4430ae91901c1cadbd9c9ff4079075694ce9e923d18",
   "sources": [
     {

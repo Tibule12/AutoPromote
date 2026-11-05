@@ -122,5 +122,17 @@
     "skipped": 17,
     "run": 41992253372,
     "resolved": false
+  },
+  "nativeSeekRepair": {
+    "focusedClockPositionPassed": 10,
+    "newRegressionTests": 2,
+    "targetedLintFiles": 4,
+    "errors": 0,
+    "warnings": 0
+  },
+  "remoteWorkerImage": {
+    "run": 42007606389,
+    "testsPassed": 148,
+    "realContainerRenderPassed": true
   }
 }

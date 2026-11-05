@@ -21,7 +21,14 @@ export function StudioPlaybackRange({ clock, value, ...props }) {
   const bounded = time => Math.max(Number(props.min || 0), Math.min(Number(props.max), time));
   useClockPaint(clock, () => { if (ref.current) ref.current.value = String(bounded(clock.getSnapshot().outputTime)); });
   return <input {...props} ref={ref} step={clock ? 'any' : props.step}
-    value={clock ? bounded(clock.getSnapshot().outputTime) : value}
+    value={clock ? undefined : value}
+    defaultValue={clock ? bounded(clock.getSnapshot().outputTime) : undefined}
+    // Clock paints deliberately write the native value. React's controlled
+    // range tracker can then suppress change events for pointer/native seeks.
+    // Listen to the actual input event and dispatch the seek once; React owns
+    // ordinary non-clock inputs through their existing onChange path.
+    onInput={clock ? event => { props.onInput?.(event); props.onChange?.(event); } : props.onInput}
+    onChange={clock ? undefined : props.onChange}
     onKeyDown={event => {
       props.onKeyDown?.(event);
       if (!clock || event.defaultPrevented || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
