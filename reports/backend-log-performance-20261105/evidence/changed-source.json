@@ -1,0 +1,66 @@
+[
+  {
+    "path": "frontend/src/App.js",
+    "sha256": "b6fb8de93998b3fb496de8535ecbc7e16a393b5dabefe8434d57488c60e5a2b8"
+  },
+  {
+    "path": "frontend/src/__tests__/ContentSummaryCompatibility.test.js",
+    "sha256": "ce7535aa33852193f3c8ddaaea78b259e6de4999546ab824ad43c4a3e65eced2"
+  },
+  {
+    "path": "src/authMiddleware.js",
+    "sha256": "a35e5d581db80fc7842f4882b3e635f0283feeb9478f2bf3efd22469e4551df5"
+  },
+  {
+    "path": "src/contentRoutes.js",
+    "sha256": "b73c44f6a0a247629eaf6be8e804b8c370943871072b989c7f16be52c5e131ba"
+  },
+  {
+    "path": "src/mediaRoutes.js",
+    "sha256": "5e24ea914076892dd8b6433d7faac30126916d1c62dabac629b28b2e7f9177bf"
+  },
+  {
+    "path": "src/middlewares/accessLog.js",
+    "sha256": "b930ea1d4650f3337b5b3052f0e24728ee92088b516297430df66b46abfbe985"
+  },
+  {
+    "path": "src/server.js",
+    "sha256": "1efd6f25d0f4a9443485ffd59d0c2bb7ddf997a30795e4a7c484e7b93335ddd7"
+  },
+  {
+    "path": "src/services/billingService.js",
+    "sha256": "08098c55f12bbfa44baf43dc648f63380f66b0d19b2f061425bf374e69c467e4"
+  },
+  {
+    "path": "src/services/videoEditingService.js",
+    "sha256": "1132c2c1f934149d40876814c4ddfefc3257e217ce27bb674fe47fedb0820cca"
+  },
+  {
+    "path": "src/utils/cleanupSource.js",
+    "sha256": "9531f957bad0ce186213acafae1ebd7421ba6b11dec32bf890b3cd9e1995fbb6"
+  },
+  {
+    "path": "src/utils/contentListSummary.js",
+    "sha256": "4fe0ef1a1318046d3937f2104cc01aa35451c1a5ddd93e7306cfe7f8daf6cad1"
+  },
+  {
+    "path": "src/utils/logSanitizer.js",
+    "sha256": "916772a238791616ab9e456407539d93533a02616e46fd3247389eccaba0734d"
+  },
+  {
+    "path": "src/utils/logger.js",
+    "sha256": "87b580ba8f8e5d1c9fd5dcd2ba10013a48d0166613569ee49c5abc17c93a15d5"
+  },
+  {
+    "path": "test/backendLogSafety.jest.test.js",
+    "sha256": "c97a277b924ff53692ac32e86ae3563dd183e8ed929c7d90e4ba4529b9593877"
+  },
+  {
+    "path": "test/contentListSummary.jest.test.js",
+    "sha256": "8344d1a5fa3596c641a4603a052b32517c751f2452389d9b05b79ce6b2d97d26"
+  },
+  {
+    "path": "test/videoEditingLogSafety.jest.test.js",
+    "sha256": "1bfd4083e3c178c6f8ab42b3827a4d54f0b04976a61b09eb762c715280f428f4"
+  }
+]

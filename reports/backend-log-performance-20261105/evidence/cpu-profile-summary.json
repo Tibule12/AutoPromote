@@ -1,0 +1,48 @@
+{
+  "kind": "Local V8 sampled CPU profile of recorded-payload serialization and logging; no cloud processing",
+  "sampleCount": 1568,
+  "durationMs": 1714.505,
+  "topFunctions": [
+    [
+      "priorList",
+      1011
+    ],
+    [
+      "nextList",
+      327
+    ],
+    [
+      "(garbage collector)",
+      62
+    ],
+    [
+      "priorRender",
+      60
+    ],
+    [
+      "formatRaw",
+      21
+    ],
+    [
+      "formatProperty",
+      21
+    ],
+    [
+      "formatValue",
+      9
+    ],
+    [
+      "(anonymous)",
+      8
+    ],
+    [
+      "utf8Slice",
+      7
+    ],
+    [
+      "contentListSummary",
+      6
+    ]
+  ],
+  "productionHistoricalStallAttributed": false
+}

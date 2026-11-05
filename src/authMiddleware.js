@@ -1,6 +1,6 @@
 const { admin, db } = require("./firebaseAdmin");
 const crypto = require("crypto");
-const { tokenInfo } = require("./utils/logSanitizer");
+const { tokenInfo, requestLogPath } = require("./utils/logSanitizer");
 const diag = require("./diagnostics");
 const { withCache } = require("./utils/simpleCache");
 const {
@@ -41,7 +41,7 @@ const authMiddleware = async (req, res, next) => {
         req.connection?.remoteAddress ||
         "unknown",
       origin: req.headers.origin || req.headers.referer || null,
-      path: req.originalUrl || req.url,
+      path: requestLogPath(req.originalUrl || req.url),
     };
 
     // Fast block: if IP is blocked, return 429 immediately to reduce load
@@ -72,7 +72,7 @@ const authMiddleware = async (req, res, next) => {
         role: "admin",
         test: true,
       };
-      if (process.env.DEBUG_AUTH === "true") {
+      if (!isHostedRuntime() && process.env.DEBUG_AUTH === "true") {
         console.log(
           "[auth][e2e-bypass] attached adminUser for x-playwright-e2e header ip=%s path=%s",
           requestContext.ip,
@@ -100,7 +100,7 @@ const authMiddleware = async (req, res, next) => {
         req.user.isAdmin = false;
         req.user.role = req.user.role || "user";
       }
-      if (process.env.DEBUG_AUTH === "true") {
+      if (!isHostedRuntime() && process.env.DEBUG_AUTH === "true") {
         console.log(
           "[auth][test-token] uid=%s ip=%s path=%s",
           uid,
@@ -110,7 +110,7 @@ const authMiddleware = async (req, res, next) => {
       }
       return next();
     }
-    const debugAuth = process.env.DEBUG_AUTH === "true";
+    const debugAuth = !isHostedRuntime() && process.env.DEBUG_AUTH === "true";
     if (debugAuth)
       console.log(
         "[auth] token provided:",
@@ -363,7 +363,7 @@ const authMiddleware = async (req, res, next) => {
     }
 
     const tookMs = Date.now() - startMs;
-    if (process.env.DEBUG_AUTH === "true" || tookMs > 500) {
+    if ((!isHostedRuntime() && process.env.DEBUG_AUTH === "true") || tookMs > 500) {
       console.log(
         "[auth] uid=%s took=%dms ip=%s",
         req.user && req.user.uid,

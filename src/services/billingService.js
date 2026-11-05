@@ -283,27 +283,6 @@ async function getEffectiveTierSnapshot(userId, providedBillingData, providedUse
   const tier = { ...selectedTier,
     monthly_upload_cap: effectiveUploadLimit(selectedTier.monthly_upload_cap, billingData) };
 
-  try {
-    const normalizedStatus = String(
-      (userData && userData.subscriptionStatus) || (billingData && billingData.status) || ""
-    )
-      .trim()
-      .toLowerCase();
-    const expiry =
-      (userData && (userData.subscriptionPeriodEnd || userData.subscriptionExpiresAt)) ||
-      (billingData && (billingData.expiresAt || billingData.nextBillingDate)) ||
-      "none";
-    const billingTier = normalizePlanId((billingData && billingData.tier) || "free");
-    const userTier = normalizePlanId(
-      (userData &&
-        (userData.subscriptionTier || (userData.subscription && userData.subscription.planId))) ||
-        "free"
-    );
-    console.debug(
-      `[entitlement] uid=${userId} status=${normalizedStatus || "none"} expiry=${expiry} billingTier=${billingTier} userTier=${userTier} effectiveTier=${tierId}`
-    );
-  } catch (_) {}
-
   return {
     tierId,
     tier,

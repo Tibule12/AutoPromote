@@ -1,4 +1,5 @@
 require("dotenv").config(); // Load environment variables from .env file
+const { requestLogPath } = require("./utils/logSanitizer");
 
 // Render environment values are strings and may acquire whitespace when copied
 // from the dashboard. Canonicalize the flag once so every health check and
@@ -390,7 +391,7 @@ function slowRequestLogger(req, res, next) {
     const dur = Date.now() - started;
     recordLatency(dur);
     if (dur >= SLOW_REQ_MS) {
-      logger.warn("[slow]", req.method, req.originalUrl, dur + "ms", "status=", res.statusCode);
+      logger.warn("[slow]", req.method, requestLogPath(req.originalUrl), dur + "ms", "status=", res.statusCode);
     }
   });
   next();
@@ -983,78 +984,22 @@ try {
   } catch (_) {
     /* optional */
   }
-  // Access log middleware - logs a single line per request with useful correlation fields
-  app.use((req, res, next) => {
-    try {
-      const start = Date.now();
-      const originalSend = res.send.bind(res);
-      let bytes = 0;
-      // wrap send to capture response size (best-effort)
-      res.send = function (body) {
-        try {
-          if (typeof body === "string") bytes = Buffer.byteLength(body, "utf8");
-          else if (Buffer.isBuffer(body)) bytes = body.length;
-          else bytes = Buffer.byteLength(JSON.stringify(body || ""), "utf8");
-        } catch (_) {
-          bytes = 0;
-        }
-        return originalSend(body);
+  // Keep console/file request records identical and free of query credentials.
+  const appendAccessLine = process.env.LOG_EVENTS_TO_FILE === "true"
+    ? (() => {
+      const fs = require("node:fs/promises");
+      const path = require("node:path");
+      const directory = path.join(__dirname, "../logs");
+      let ready;
+      return (line, timestamp) => {
+        ready ||= fs.mkdir(directory, { recursive: true }).catch(() => { ready = null; });
+        Promise.resolve(ready).then(() => fs.appendFile(
+          path.join(directory, `access-${timestamp.slice(0, 10)}.log`), line + "\n"
+        )).catch(() => {});
       };
-      res.once("finish", () => {
-        try {
-          const duration = Date.now() - start;
-          const ip =
-            req.headers["x-forwarded-for"] ||
-            req.ip ||
-            (req.connection && req.connection.remoteAddress) ||
-            "";
-          const ua = req.headers["user-agent"] || "";
-          const ts = new Date().toISOString();
-          const uaClean = ua.replace(/"/g, "");
-          const line =
-            "[ACCESS] ts=" +
-            ts +
-            " " +
-            req.method +
-            " " +
-            req.originalUrl +
-            " status=" +
-            res.statusCode +
-            ' requestID="' +
-            (req.requestId || "") +
-            '" clientIP="' +
-            ip +
-            '" responseTimeMS=' +
-            duration +
-            " responseBytes=" +
-            bytes +
-            ' userAgent="' +
-            uaClean +
-            '"';
-          logger.info(line);
-          // Optional: write access log line to a daily file for security evidence (enable with LOG_EVENTS_TO_FILE=true)
-          try {
-            if (process.env.LOG_EVENTS_TO_FILE === "true") {
-              const fs = require("fs");
-              const p = require("path");
-              const dir = p.join(__dirname, "../logs");
-              try {
-                fs.mkdirSync(dir, { recursive: true });
-              } catch (_) {
-                /* ignore */
-              }
-              const day = ts.slice(0, 10); // YYYY-MM-DD
-              const file = p.join(dir, `access-${day}.log`);
-              fs.appendFile(file, line + "\n", () => {});
-            }
-          } catch (_) {
-            /* ignore file logging errors */
-          }
-        } catch (_) {}
-      });
-    } catch (_) {}
-    next();
-  });
+    })()
+    : undefined;
+  app.use(require("./middlewares/accessLog")(logger, appendAccessLine));
 
   app.use(slowRequestLogger);
   // Lazy warmup trigger (will start warmup if not already and early request hits)
@@ -2247,13 +2192,26 @@ try {
   try {
     const { monitorEventLoopDelay } = require("perf_hooks");
     const eld = monitorEventLoopDelay({ resolution: 20 });
+    const { performance } = require("perf_hooks");
+    let previousCpu = process.cpuUsage();
+    let previousLoop = performance.eventLoopUtilization();
     eld.enable();
     setInterval(() => {
       const mean = Math.round(eld.mean / 1e6); // ms
       const max = Math.round(eld.max / 1e6);
+      const cpu = process.cpuUsage();
+      const loop = performance.eventLoopUtilization();
+      const utilization = performance.eventLoopUtilization(loop, previousLoop).utilization;
       if (mean > 50 || max > 200) {
-        console.warn("[perf][event-loop] mean=%dms max=%dms", mean, max);
+        console.warn("[perf][event-loop]", {
+          meanMs: mean, maxMs: max,
+          cpuMs: Math.round((cpu.user + cpu.system - previousCpu.user - previousCpu.system) / 1000),
+          utilizationPercent: Math.round(utilization * 100),
+          rssMiB: Math.round(process.memoryUsage().rss / 1048576),
+        });
       }
+      previousCpu = cpu;
+      previousLoop = loop;
       // reset stats to avoid unbounded memory
       eld.reset();
     }, 15_000);

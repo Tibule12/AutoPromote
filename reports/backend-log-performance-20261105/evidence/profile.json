@@ -1,0 +1,37 @@
+{
+  "observedRecords": 139,
+  "originalBytes": 796260,
+  "summaryBytes": 428739,
+  "loginProbeBytes": 41,
+  "oldLoginAndDashboardBytes": 1592520,
+  "newLoginAndDashboardBytes": 428780,
+  "profile": {
+    "fullResponseSerialization": {
+      "iterations": 200,
+      "totalMs": 1061.8972330000001,
+      "charactersPerIteration": 795537
+    },
+    "summaryResponseSerialization": {
+      "iterations": 200,
+      "totalMs": 354.80292299999996,
+      "charactersPerIteration": 428221
+    },
+    "priorRenderLogging": {
+      "iterations": 1000,
+      "totalMs": 147.33404500000006,
+      "charactersPerIteration": 16180
+    },
+    "summaryRenderLogging": {
+      "iterations": 1000,
+      "totalMs": 1.3190949999998338,
+      "charactersPerIteration": 140
+    }
+  },
+  "environment": {
+    "node": "v24.14.0",
+    "cpu": "Local workstation; excludes production database/network/stdout/GC scheduling"
+  },
+  "historical461msStallRootCause": "Not established by aggregate delay log; these measures do not reproduce or prove its cause.",
+  "summaryReductionPercent": 46.15590385050109,
+  "loginAndDashboardReductionPercent": 73.07537738929494
+}

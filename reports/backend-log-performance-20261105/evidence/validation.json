@@ -1,0 +1,30 @@
+{
+  "success": true,
+  "numPassedTests": 66,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numPassedTestSuites": 15,
+  "numFailedTestSuites": 0,
+  "securityEmulator": {
+    "passed": 99,
+    "failed": 0,
+    "skipped": 0,
+    "project": "demo-autopromote-security"
+  },
+  "projectionEmulator": {
+    "passed": 1,
+    "project": "demo-autopromote-log-performance"
+  },
+  "candidateBrowser": "Passed with recorded content fixture and GET-only live account APIs; not deployed",
+  "frontendBuildExit": 0,
+  "newCodeLint": "passed, no warnings",
+  "syntaxAndDiffCheck": "passed",
+  "productionWrites": false,
+  "paidExecutions": 0,
+  "earlierFailedAttempts": [
+    "Initial Publisher test lacked a Storage stub; corrected test passed.",
+    "First wider regression command named a nonexistent Queue test path; 46 executed cases passed, command failed. Corrected final 66-case run passes.",
+    "Initial browser candidate lacked the matching public Firebase build configuration; corrected build and signed-in run pass.",
+    "An initial Queue browser sample captured loading before results; final run waits for three releases and media."
+  ]
+}

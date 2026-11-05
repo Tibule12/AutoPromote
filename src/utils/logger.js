@@ -3,7 +3,14 @@ function shouldLog() {
   return process.env.DEBUG_TEST_LOGS === "1" || process.env.NODE_ENV !== "test";
 }
 function debug(...args) {
-  if (shouldLog()) console.log(...args);
+  if (
+    shouldLog() &&
+    process.env.NODE_ENV !== "production" &&
+    !process.env.RENDER &&
+    !process.env.K_SERVICE &&
+    !process.env.FUNCTION_TARGET
+  )
+    console.log(...args);
 }
 function info(...args) {
   if (shouldLog()) console.log(...args);

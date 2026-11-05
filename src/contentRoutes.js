@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { db, admin } = require("./firebaseAdmin");
 const logger = require("./utils/logger");
+const { CONTENT_LIST_FIELDS, contentListSummary } = require("./utils/contentListSummary");
 const { extractOwnedStoragePathFromUrl } = require("./utils/cleanupSource");
 const { contentSource, directContentSource } = require("./utils/contentSource");
 const { enrichPublisherAssets } = require("./utils/publisherAssetMetadata");
@@ -1193,28 +1194,12 @@ router.get("/my-content", authMiddleware, async (req, res) => {
   const startMs = Date.now();
   try {
     const userId = require("./middlewares/workspaceScope").resourceUserId(req);
-    const includeStats = parseBooleanQuery(req.query.includeStats, true);
+    const publisherAssets = parseBooleanQuery(req.query.publisherAssets, false);
+    const summaryOnly = !publisherAssets && parseBooleanQuery(req.query.summary, false);
+    const includeStats = !summaryOnly && parseBooleanQuery(req.query.includeStats, true);
     const statsLimit = includeStats
       ? parsePositiveInt(req.query.statsLimit, 12, { min: 0, max: 50 })
       : 0;
-    // Debugging aid: optionally log sanitized user info when diagnosing 403 issues
-    if (process.env.DEBUG_CONTENT === "true") {
-      try {
-        console.log("[DEBUG][/api/content/my-content] userId=", userId);
-        console.log(
-          "[DEBUG][/api/content/my-content] req.user=",
-          JSON.stringify({
-            uid: req.user?.uid,
-            email: req.user?.email,
-            role: req.user?.role,
-            isAdmin: req.user?.isAdmin,
-            fromCollection: req.user?.fromCollection,
-          })
-        );
-      } catch (e) {
-        /* ignore logging failures */
-      }
-    }
     if (!userId) {
       console.warn(
         "[GET /my-content][unauthorized] ip=%s path=%s",
@@ -1223,16 +1208,22 @@ router.get("/my-content", authMiddleware, async (req, res) => {
       );
       return res.status(401).json({ error: "Unauthorized" });
     }
-    const contentRef = db
+    // This route is already behind the same Auth, terms and workspace gates.
+    // A login access probe needs none of the user's content records.
+    if (parseBooleanQuery(req.query.accessCheck, false)) {
+      return res.json({ ok: true, meta: { accessChecked: true } });
+    }
+    let contentRef = db
       .collection("content")
       .where("user_id", "==", userId)
       .orderBy("created_at", "desc");
+    if (summaryOnly) contentRef = contentRef.select(...CONTENT_LIST_FIELDS);
     const snapshot = await contentRef.get();
     const docs = snapshot.docs.filter(doc => require("./middlewares/teamContentBoundary").inScope(req, doc.data()));
     // The Publisher's explicit source picker may show only this actor's own
     // personal files alongside shared files. Other team members never receive
     // those records until the actor submits a release for review.
-    if (req.workspaceId && parseBooleanQuery(req.query.publisherAssets, false)) {
+    if (req.workspaceId && publisherAssets) {
       const personal = await db.collection("content").where("user_id", "==", req.actorUserId).orderBy("created_at", "desc").limit(120).get();
       for (const doc of personal.docs) if (!doc.data().workspace_id && !docs.some(item => item.id === doc.id)) docs.push(doc);
     }
@@ -1251,7 +1242,7 @@ router.get("/my-content", authMiddleware, async (req, res) => {
     const contentWithStats = await Promise.all(
       docs.map(async doc => {
         const data = doc.data();
-        const item = { id: doc.id, ...data };
+        const item = { id: doc.id, ...(summaryOnly ? contentListSummary(data) : data) };
         const source = contentSource(data, recordsById);
         if (source) item.source = source;
 
@@ -1271,22 +1262,23 @@ router.get("/my-content", authMiddleware, async (req, res) => {
       })
     );
 
-    const contentForResponse = parseBooleanQuery(req.query.publisherAssets, false)
+    const contentForResponse = publisherAssets
       ? await enrichPublisherAssets(contentWithStats, admin.storage().bucket())
       : contentWithStats;
     const took = Date.now() - startMs;
     if (took > 500)
       console.warn(
-        "[GET /my-content][slow] userId=%s took=%dms ip=%s",
-        userId,
+        "[GET /my-content][slow] took=%dms count=%d summary=%s",
         took,
-        req.ip || req.headers["x-forwarded-for"] || "unknown"
+        contentForResponse.length,
+        summaryOnly
       );
     res.json({
       content: contentForResponse,
       meta: {
         statsIncluded: includeStats,
         statsLimit,
+        summary: summaryOnly,
       },
     });
   } catch (error) {

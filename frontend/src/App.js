@@ -430,7 +430,7 @@ function App() {
       // Its authenticated endpoint handles its own errors and authorization.
       void fetchMySchedules(token);
       const workspaceId = await ensureActiveWorkspace(WORKSPACE_ENDPOINTS.CURRENT, token);
-      const res = await fetch(`${API_ENDPOINTS.MY_CONTENT}?includeStats=0`, {
+      const res = await fetch(`${API_ENDPOINTS.MY_CONTENT}?includeStats=0&summary=1`, {
         method: "GET",
         headers: withWorkspaceHeaders(
           {
@@ -729,7 +729,7 @@ function App() {
   // Ensure terms are accepted; if not, show modal and defer login
   const ensureTermsAccepted = async (token, userData, source) => {
     try {
-      const res = await fetch(`${API_ENDPOINTS.MY_CONTENT}?includeStats=0`, {
+      const res = await fetch(`${API_ENDPOINTS.MY_CONTENT}?accessCheck=1`, {
         method: "GET",
         headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
       });

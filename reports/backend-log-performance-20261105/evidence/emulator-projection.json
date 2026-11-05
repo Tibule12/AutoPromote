@@ -1,0 +1,14 @@
+{
+  "project": "demo-autopromote-log-performance",
+  "loopback": true,
+  "realFirestoreEmulator": true,
+  "freshOwnedEmulator": true,
+  "queriesPreserveOwnerAndOrder": true,
+  "workspaceAndLegacyOwnershipFieldsRetained": true,
+  "nestedUiFieldsRetained": true,
+  "privateGraphsExcluded": true,
+  "fullDocumentBytes": 700218,
+  "projectedDocumentBytes": 161,
+  "responseBytes": 119,
+  "cloudCalls": false
+}

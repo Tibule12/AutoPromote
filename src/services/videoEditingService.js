@@ -7,6 +7,7 @@ const { captionTranscriptionOptions } = require("./captionTranscriptionOptions")
 const { admin, db } = require("../firebaseAdmin");
 const crypto = require("crypto");
 const fs = require("fs");
+const { mediaOperationSummary, errorSummary, safeLogText } = require("../utils/logSanitizer");
 const { encodeStudioJobOptions, decodeStudioJobOptions } = require('./studioJobOptions');
 const { isTransientWorkerOutput, persistWorkerOutput, persistWorkerBucketOutput } = require("./studioWorkerOutputService");
 const { queueAudioExtractionTask } = require("./mediaWorkerTaskQueue");
@@ -205,7 +206,7 @@ class VideoEditingService {
 
       return { jobId };
     } catch (error) {
-      console.error(`[VideoEditing] Failed to start audio extraction job ${jobId}:`, error.message);
+      console.error(`[VideoEditing] Failed to start audio extraction job ${jobId}:`, errorSummary(error));
 
       await db.collection("video_edits").doc(jobId).set(
         {
@@ -270,7 +271,7 @@ class VideoEditingService {
       if (localCreditContext) await localCreditContext.bindJob("video_edits", jobId);
       dispatched = true;
       this.processJobBackground(jobId, videoUrl, options, userId).catch(err => {
-        console.error(`[VideoEditing] Background Job ${jobId} Failed (uncaught):`, err);
+        console.error(`[VideoEditing] Background Job ${jobId} Failed (uncaught):`, errorSummary(err));
       });
 
       return { jobId, reused: false };
@@ -279,7 +280,7 @@ class VideoEditingService {
         const localContext = require('./unifiedCredits/application').getApplicationContext(userId);
         if (localContext) await localContext.confirmNoDispatch();
       }
-      console.error("Failed to start job:", error);
+      console.error("Failed to start job:", errorSummary(error));
       throw new Error("Failed to queue video processing job");
     }
   }
@@ -359,7 +360,7 @@ class VideoEditingService {
         );
       } else {
         this.processMulticamJobBackground(jobId, normalizedMulticamRequest, userId).catch(err => {
-          console.error(`[VideoEditing] Multicam Job ${jobId} Failed (uncaught):`, err);
+          console.error(`[VideoEditing] Multicam Job ${jobId} Failed (uncaught):`, errorSummary(err));
         });
       }
 
@@ -369,7 +370,7 @@ class VideoEditingService {
         ...checkpointContract,
       };
     } catch (error) {
-      console.error("Failed to start multicam render job:", error);
+      console.error("Failed to start multicam render job:", errorSummary(error));
       const creditReceipt = multicamRequest?.creditReceipt;
       let creditRefund = null;
       if (creditReceipt && !creditReceipt.skipped) {
@@ -400,7 +401,7 @@ class VideoEditingService {
         await releaseMulticamRenderCapacity(jobId, "dispatch_failed").catch(releaseError => {
           console.error(
             `[VideoEditing] Could not release multicam capacity for ${jobId}:`,
-            releaseError.message
+            errorSummary(releaseError)
           );
         });
       }
@@ -450,7 +451,7 @@ class VideoEditingService {
 
       console.log(`[VideoEditing] Job ${jobId} Completed Successfully.`);
     } catch (error) {
-      console.error(`[VideoEditing] Job ${jobId} Failed:`, error.message);
+      console.error(`[VideoEditing] Job ${jobId} Failed:`, errorSummary(error));
       let creditRefund = null;
       if (options?.renderViral === true) {
         try {
@@ -465,7 +466,7 @@ class VideoEditingService {
           }
         } catch (refundError) {
           creditRefund = { success: false, message: refundError.message };
-          console.error(`[VideoEditing] Job ${jobId} refund failed:`, refundError.message);
+          console.error(`[VideoEditing] Job ${jobId} refund failed:`, errorSummary(refundError));
         }
       }
       await docRef.update({
@@ -561,7 +562,7 @@ class VideoEditingService {
     } catch (error) {
       const workerDetail = getWorkerErrorDetail(error);
       const errorMessage = workerDetail || error.message;
-      console.error(`[VideoEditing] Multicam Job ${jobId} Failed:`, errorMessage);
+      console.error(`[VideoEditing] Multicam Job ${jobId} Failed:`, errorSummary(error));
       let creditRefund = null;
       let refundableReceipt = multicamRequest?.creditReceipt || null;
       if (!refundableReceipt) {
@@ -571,7 +572,7 @@ class VideoEditingService {
         } catch (receiptError) {
           console.error(
             `[VideoEditing] Multicam Job ${jobId} could not reload credit receipt for refund:`,
-            receiptError.message
+            errorSummary(receiptError)
           );
         }
       }
@@ -584,7 +585,7 @@ class VideoEditingService {
           });
         } catch (refundError) {
           creditRefund = { success: false, message: refundError.message };
-          console.error(`[VideoEditing] Multicam Job ${jobId} refund failed:`, refundError.message);
+          console.error(`[VideoEditing] Multicam Job ${jobId} refund failed:`, errorSummary(refundError));
         }
       }
       await docRef.update({
@@ -900,9 +901,7 @@ class VideoEditingService {
    * @returns {Promise<Object>} { success: true, url: string, ... }
    */
   async processVideo(videoUrl, options, userId, jobId = null) {
-    // Safe logging - pass user input as data arg, not template string
-    console.log("[VideoEditing] Processing video request", { userId, options, jobId });
-    console.log("[VideoEditing] Options detail:", JSON.stringify(options, null, 2));
+    console.log("[VideoEditing] Processing video request", mediaOperationSummary(options, jobId));
 
     // Track the resulting file path from Python
     let resultPath = null;
@@ -1232,7 +1231,7 @@ class VideoEditingService {
               thumbnailUrl = (await persistWorkerOutput({ url: thumbnailUrl, workerUrl: MEDIA_WORKER_URL,
                 userId, jobId, thumbnail: true })).url;
             } catch (error) {
-              console.warn("[VideoEditing] Optional export thumbnail transfer failed:", error.message);
+              console.warn("[VideoEditing] Optional export thumbnail transfer failed:", errorSummary(error));
               thumbnailUrl = null;
             }
           }
@@ -1315,7 +1314,7 @@ class VideoEditingService {
       try {
         fs.unlinkSync(resultPath);
       } catch (e) {
-        console.warn("[VideoEditing] Failed to delete temp file:", e.message);
+        console.warn("[VideoEditing] Failed to delete temp file:", errorSummary(e));
       }
 
       // 6. Cleanup Source File (If it was a temporary upload)
@@ -1327,9 +1326,9 @@ class VideoEditingService {
           // But we will Log it for a Lifecycle Policy to handle.
           // BETTER APPROACH: Return the 'temp' flag to the controller/frontend to trigger deletion?
           // OR: Just rely on Lifecycle Rules (Safest).
-          console.log("[VideoEditing] Note: Source file may need cleanup:", videoUrl);
+          console.log("[VideoEditing] Source cleanup delegated to retention policy", { jobId });
         } catch (e) {
-          console.warn("Cleanup source failed", e);
+          console.warn("Cleanup source failed", errorSummary(e));
         }
       }
 
@@ -1349,10 +1348,10 @@ class VideoEditingService {
         creativeTemplateInstance: result.creative_template_instance || null,
       };
     } catch (error) {
-      console.error("[VideoEditing] Error:", error.message);
+      console.error("[VideoEditing] Error:", errorSummary(error));
       let errorDetail = error.message;
       if (error.response && error.response.data) {
-        console.error("Worker Error:", error.response.data);
+        console.error("Worker Error:", errorSummary(error));
         // If the worker returned a 'detail' field (FastAPI default), include it.
         if (error.response.data.detail) {
           errorDetail += ` - Worker says: ${error.response.data.detail}`;
@@ -1401,7 +1400,7 @@ class VideoEditingService {
         )
           throw error;
         console.warn(
-          `[VideoAnalysis] Primary worker failed (${getWorkerErrorDetail(error)}). Retrying local worker.`
+          `[VideoAnalysis] Primary worker failed (${safeLogText(getWorkerErrorDetail(error))}). Retrying local worker.`
         );
         response = await axios.post(
           `${LOCAL_MEDIA_WORKER_URL}/analyze-clips`,
@@ -1418,7 +1417,7 @@ class VideoEditingService {
       return response.data.scenes || [];
     } catch (error) {
       const detail = getWorkerErrorDetail(error);
-      console.error("[VideoAnalysis] Error:", detail);
+      console.error("[VideoAnalysis] Error:", errorSummary(error));
       throw new Error(`Video analysis failed: ${detail}`);
     }
   }
@@ -1503,7 +1502,7 @@ class VideoEditingService {
 
       return { url: publicUrl, audioProof: response.data.audio_proof };
     } catch (error) {
-      console.error("[VideoRender] Error:", error.message);
+      console.error("[VideoRender] Error:", errorSummary(error));
       throw new Error("Clip rendering failed");
     }
   }
@@ -1535,7 +1534,7 @@ class VideoEditingService {
 
       // Start background task
       this.processTranscriptionBackground(jobId, videoUrl, { translateToEnglish, sourceLanguage }).catch(err => {
-        console.error(`[VideoTranscribe] Background Job ${jobId} Failed:`, err);
+        console.error(`[VideoTranscribe] Background Job ${jobId} Failed:`, errorSummary(err));
       });
 
       return { jobId };
@@ -1615,7 +1614,7 @@ class VideoEditingService {
         typeof workerDetail === "string"
           ? workerDetail.slice(0, 1000)
           : JSON.stringify(workerDetail || "Transcription failed").slice(0, 1000);
-      console.error(`[VideoTranscribe] Job ${jobId} Failed:`, safeWorkerDetail);
+      console.error(`[VideoTranscribe] Job ${jobId} Failed:`, errorSummary(error));
       await docRef.update({
         status: "failed",
         error: safeWorkerDetail,
@@ -1631,7 +1630,7 @@ class VideoEditingService {
    * @returns {Promise<Array>} segments
    */
   async transcribeVideo(videoUrl) {
-    console.log(`[VideoTranscription] Requesting transcription for: ${videoUrl}`);
+    console.log("[VideoTranscription] Requesting transcription", { hasSource: Boolean(videoUrl) });
     try {
       const response = await axios.post(
         `${MEDIA_WORKER_URL}/transcribe`,
@@ -1644,7 +1643,7 @@ class VideoEditingService {
       // Returns { status, segments: [...] }
       return response.data.segments || [];
     } catch (error) {
-      console.error("[VideoTranscription] Error:", error.message);
+      console.error("[VideoTranscription] Error:", errorSummary(error));
       // Fallback or rethrow
       throw new Error("Transcription failed");
     }

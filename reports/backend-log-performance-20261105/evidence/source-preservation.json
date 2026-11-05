@@ -1,0 +1,50 @@
+{
+  "base": "f369520746c1d7a312c901e0f604067958f99501",
+  "checks": [
+    {
+      "path": "firestore.rules",
+      "unchanged": true,
+      "sha256": "8daebc8a0d4638bea8baecf4fd069ffbbf4d200e1651e935e9fb93d47c931a31"
+    },
+    {
+      "path": "storage.rules",
+      "unchanged": true,
+      "sha256": "b362e56ed1980cc781b051299e57838c61e66923083809fc844625c2ea6c52a3"
+    },
+    {
+      "path": "config/security/firestore.owner-scoped.rules",
+      "unchanged": true,
+      "sha256": "8daebc8a0d4638bea8baecf4fd069ffbbf4d200e1651e935e9fb93d47c931a31"
+    },
+    {
+      "path": "src/creditSystem.js",
+      "unchanged": true,
+      "sha256": "f309a0938ed64a20c61c69b42070ea82a60e5ad0fa83e00b31848d159a330399"
+    },
+    {
+      "path": "src/config/subscriptionPlans.js",
+      "unchanged": true,
+      "sha256": "e28ba549914b462e7ee6c1e34f541841b9f15309b434aaca623fdc7d7d316921"
+    },
+    {
+      "path": "src/utils/authAuthority.js",
+      "unchanged": true,
+      "sha256": "a2e30a561463eb8923e9b353033ceea930869b9034d1ed04433932b79022b910"
+    },
+    {
+      "path": "frontend/public/index.html",
+      "unchanged": true,
+      "sha256": "23b679390b003ef069b67c9bb4fb3cb939b8c4c5f2685a442dac518d6d62cd46"
+    },
+    {
+      "path": "frontend/public/ads.txt",
+      "unchanged": true,
+      "sha256": "8e8c636480ed4827226a6295fad983b9f39d4e3112551d746ce3e716b9bf4489"
+    },
+    {
+      "path": "firebase.json",
+      "unchanged": true,
+      "sha256": "3eb9d1ff3a1d37c68d85867bd5fca277f2928ff3e23a8297526b10c9e9fe8b15"
+    }
+  ]
+}

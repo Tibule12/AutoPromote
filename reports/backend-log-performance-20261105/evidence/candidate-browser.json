@@ -1,0 +1,34 @@
+{
+  "actualCandidateBuild": true,
+  "headlessMuted": true,
+  "productionDeployment": false,
+  "ordinarySavedAuth": true,
+  "contentBackend": "Real candidate Express router with recorded owned read-only library fixture; Publisher metadata enrichment stubbed",
+  "otherAccountApi": "GET-only existing production APIs",
+  "productionWrites": false,
+  "renderJobs": 0,
+  "requests": [
+    {
+      "query": "?accessCheck=1",
+      "status": 200,
+      "bytes": 41,
+      "fixtureQueries": 0
+    },
+    {
+      "query": "?includeStats=0&summary=1",
+      "status": 200,
+      "bytes": 428739,
+      "fixtureQueries": 1
+    },
+    {
+      "query": "?includeStats=0&publisherAssets=1",
+      "status": 200,
+      "bytes": 796276,
+      "fixtureQueries": 1
+    }
+  ],
+  "queueReleaseCards": 3,
+  "queueMediaPresent": true,
+  "pageErrors": [],
+  "blockedWrites": []
+}

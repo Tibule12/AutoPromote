@@ -1,5 +1,6 @@
 const { captionTranscriptionOptions } = require("./services/captionTranscriptionOptions");
 const express = require("express");
+const { errorSummary } = require("./utils/logSanitizer");
 const router = express.Router();
 const crypto = require("crypto");
 const multer = require("multer");
@@ -422,7 +423,7 @@ const requireTesterEditingFeature = featureResolver => async (req, res, next) =>
       allowedWorkflows: snapshot.testerAccess.allowedWorkflows || TESTER_PROGRAM.allowedWorkflows,
     });
   } catch (error) {
-    console.error("[MediaRoute] Tester feature check failed:", error.message);
+    console.error("[MediaRoute] Tester feature check failed:", errorSummary(error));
     return res.status(500).json({
       success: false,
       code: "TESTER_FEATURE_CHECK_FAILED",
@@ -883,7 +884,7 @@ const refundViralRenderJobIfNeeded = async (userId, jobId, data, reason = "worke
     }
     return refundResult;
   } catch (error) {
-    console.error("[MediaRoute] Could not reconcile viral render refund", { jobId, error: error.message });
+    console.error("[MediaRoute] Could not reconcile viral render refund", { jobId, ...errorSummary(error) });
     return { success: false, message: error.message };
   }
 };
@@ -953,7 +954,7 @@ router.post("/internal/multicam-job-failed", async (req, res) => {
     await releaseMulticamRenderCapacity(jobId, "cloud_run_job_failed");
     return res.json({ success: true, refund });
   } catch (error) {
-    console.error("[MediaRoute] Multicam failure callback failed:", error.message);
+    console.error("[MediaRoute] Multicam failure callback failed:", errorSummary(error));
     return res.status(500).json({ success: false, message: "Refund reconciliation failed" });
   }
 });
@@ -1224,7 +1225,7 @@ router.post("/studio-assets/import-render", requireTesterEditingFeature("clipRen
       },
     });
   } catch (error) {
-    if (!error.statusCode) console.error("[MediaRoute] Studio master import failed:", error.message);
+    if (!error.statusCode) console.error("[MediaRoute] Studio master import failed:", errorSummary(error));
     return res.status(error.statusCode || 503).json({
       success: false,
       code: error.code || "STUDIO_MASTER_IMPORT_FAILED",
@@ -1279,7 +1280,7 @@ router.get("/credits", async (req, res) => {
       entitlements: getPlanCapabilities(breakdown.tier),
     });
   } catch (error) {
-    console.error("[MediaRoute] Credit balance error:", error.message);
+    console.error("[MediaRoute] Credit balance error:", errorSummary(error));
     res.status(500).json({ success: false, message: "Failed to fetch credit balance" });
   }
 });
@@ -1319,7 +1320,7 @@ router.get("/scan-preflight", async (req, res) => {
     const preflight = await getViralScanPreflight(req.user.uid);
     return res.json({ success: true, ...preflight });
   } catch (error) {
-    console.error("[MediaRoute] Viral scan preflight error:", error.message);
+    console.error("[MediaRoute] Viral scan preflight error:", errorSummary(error));
     return res.status(500).json({
       success: false,
       allowed: false,
@@ -1365,7 +1366,7 @@ router.post("/estimate", async (req, res) => {
       topUpPacks: canAfford ? undefined : CREDIT_TOP_UP_PACKS,
     });
   } catch (error) {
-    console.error("[MediaRoute] Estimate error:", error.message);
+    console.error("[MediaRoute] Estimate error:", errorSummary(error));
     res.status(500).json({ success: false, message: "Failed to estimate costs" });
   }
 });
@@ -1624,7 +1625,7 @@ router.post(
       if (error?.code === 404) {
         return res.status(404).json({ error: "The uploaded Studio source no longer exists" });
       }
-      console.error("[MediaRoute] Full-source transcription failed:", error.message);
+      console.error("[MediaRoute] Full-source transcription failed:", errorSummary(error));
       return res.status(500).json({ error: "Full-source transcription could not be started" });
     }
   }
@@ -1654,7 +1655,7 @@ router.post(
       });
 
       blobStream.on("error", err => {
-        console.error(err);
+        console.error(errorSummary(err));
         res.status(500).json({ error: "Upload to storage failed" });
       });
 
@@ -1682,7 +1683,7 @@ router.post(
 
       blobStream.end(req.file.buffer);
     } catch (e) {
-      console.error(e);
+      console.error(errorSummary(e));
       res.status(500).json({ error: e.message });
     }
   }
@@ -1725,7 +1726,7 @@ router.post("/story-visuals/plan", async (req, res) => {
     });
     return res.json({ success: true, ...result });
   } catch (error) {
-    console.error("[MediaRoute] Story visual planning failed:", error.message);
+    console.error("[MediaRoute] Story visual planning failed:", errorSummary(error));
     return res.status(502).json({ success: false, message: error.message });
   }
 });
@@ -1775,7 +1776,7 @@ router.post(
           });
         }
       } catch (error) {
-        console.error("[MediaRoute] Render retry lookup failed:", error.message);
+        console.error("[MediaRoute] Render retry lookup failed:", errorSummary(error));
         return res.status(503).json({ message: "Could not check the previous render attempt" });
       }
     }
@@ -1956,7 +1957,7 @@ router.post(
         reusedMulticamMaster: Boolean(resolvedSource.renderJobId),
       });
     } catch (error) {
-      console.error("[MediaRoute] Processing error:", error.message);
+      console.error("[MediaRoute] Processing error:", errorSummary(error));
       // Reserve a failed record before refunding. A concurrent submission can
       // then only observe that terminal record; it cannot dispatch a free job.
       if (viralJobRef && creditReceipt?.success) {
@@ -1999,7 +2000,7 @@ router.post(
             await viralJobRef.set({ creditsRefunded: true, creditRefund: refundResult }, { merge: true });
           }
         } catch (refundError) {
-          console.error("[MediaRoute] Render queue failure refund failed:", refundError.message);
+          console.error("[MediaRoute] Render queue failure refund failed:", errorSummary(refundError));
           refundResult = { success: false, message: refundError.message };
         }
       }
@@ -2033,7 +2034,7 @@ router.get("/viral-render-attempt/:requestId", async (req, res) => {
       creditsRefunded: Boolean(data.creditsRefunded || refundResult?.success),
     });
   } catch (error) {
-    console.error("[MediaRoute] Render attempt lookup failed:", error.message);
+    console.error("[MediaRoute] Render attempt lookup failed:", errorSummary(error));
     return res.status(500).json({ success: false, message: "Could not load render attempt" });
   }
 });
@@ -2055,7 +2056,7 @@ router.post("/extract-audio", requireTesterEditingFeature("audioExtract"), async
       message: "Audio extraction started",
     });
   } catch (error) {
-    console.error("[MediaRoute] Audio extraction error:", error.message);
+    console.error("[MediaRoute] Audio extraction error:", errorSummary(error));
     res.status(500).json({ message: "Audio extraction failed", details: error.message });
   }
 });
@@ -2076,7 +2077,7 @@ router.get("/multicam/worker-readiness", async (req, res) => {
     });
   } catch (error) {
     const detail = error.response?.data?.detail || error.response?.data?.message || error.message;
-    console.error("[MediaRoute] Cam Combiner worker readiness failed:", detail);
+    console.error("[MediaRoute] Cam Combiner worker readiness failed:", errorSummary(error));
     res.status(503).json({
       success: false,
       message: "Cam Combiner worker is not ready. Please retry later; no credits were charged.",
@@ -2135,7 +2136,7 @@ router.post("/multicam/uploads/start", async (req, res) => {
     res.status(201).json({ success: true, ...uploadSession });
   } catch (error) {
     const statusCode = Number(error.statusCode || 500);
-    console.error("[MediaRoute] Multicam upload start failed:", error.message);
+    console.error("[MediaRoute] Multicam upload start failed:", errorSummary(error));
     res.status(statusCode >= 400 && statusCode < 600 ? statusCode : 500).json({
       success: false,
       message: error.message || "Could not start multicam upload",
@@ -2154,7 +2155,7 @@ router.post("/multicam/uploads/complete", async (req, res) => {
     res.json({ success: true, ...result });
   } catch (error) {
     const statusCode = Number(error.statusCode || 500);
-    console.error("[MediaRoute] Multicam upload completion failed:", error.message);
+    console.error("[MediaRoute] Multicam upload completion failed:", errorSummary(error));
     res.status(statusCode >= 400 && statusCode < 600 ? statusCode : 500).json({
       success: false,
       message: error.message || "Could not verify multicam upload",
@@ -2171,7 +2172,7 @@ router.post("/multicam/uploads/abort", async (req, res) => {
     res.json({ success: true, ...result });
   } catch (error) {
     const statusCode = Number(error.statusCode || 500);
-    console.error("[MediaRoute] Multicam upload abort failed:", error.message);
+    console.error("[MediaRoute] Multicam upload abort failed:", errorSummary(error));
     res.status(statusCode >= 400 && statusCode < 600 ? statusCode : 500).json({
       success: false,
       message: error.message || "Could not abort multicam upload",
@@ -2330,7 +2331,7 @@ router.get("/multicam/recoverable-project", async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("[MediaRoute] Recoverable multicam project lookup failed:", error.message);
+    console.error("[MediaRoute] Recoverable multicam project lookup failed:", errorSummary(error));
     return res
       .status(500)
       .json({ success: false, message: "Could not recover uploaded originals" });
@@ -2406,7 +2407,7 @@ router.post("/multicam/preflight-sync", async (req, res) => {
       error.response?.data?.detail ||
       error.response?.data?.message ||
       error.message;
-    console.error("[MediaRoute] Multicam preflight sync error:", details);
+    console.error("[MediaRoute] Multicam preflight sync error:", errorSummary(error));
     res.status(safeStatus).json({
       message: "Preflight sync check failed",
       details,
@@ -2655,10 +2656,10 @@ router.post("/render-multicam", async (req, res) => {
       dispatchMode: job.dispatchMode,
     });
   } catch (error) {
-    console.error("[MediaRoute] Multicam render error:", error.message);
+    console.error("[MediaRoute] Multicam render error:", errorSummary(error));
     if (capacityReserved && durableJobId) {
       await releaseMulticamRenderCapacity(durableJobId, "request_failed").catch(releaseError => {
-        console.error("[MediaRoute] Multicam capacity release failed:", releaseError.message);
+        console.error("[MediaRoute] Multicam capacity release failed:", errorSummary(releaseError));
       });
     }
     const statusCode = [409, 429, 503].includes(Number(error.statusCode))
@@ -2758,13 +2759,13 @@ router.post("/multicam/clean-audio-sync", async (req, res) => {
       message: "External clean-audio sync queued",
     });
   } catch (error) {
-    console.error("[MediaRoute] Clean-audio sync error:", error.message);
+    console.error("[MediaRoute] Clean-audio sync error:", errorSummary(error));
     if (creditResult?.success && !creditResult.skipped) {
       const refundResult = await refundCredits(userId, creditResult, "clean-audio-sync-refund", {
         jobId,
         reason: "worker_start_failed",
       }).catch(refundError => {
-        console.error("[MediaRoute] Clean-audio sync refund failed:", refundError.message);
+        console.error("[MediaRoute] Clean-audio sync refund failed:", errorSummary(refundError));
         return null;
       });
 
@@ -2826,7 +2827,7 @@ router.post("/preview-silence", async (req, res) => {
     );
     res.json(response.data || {});
   } catch (error) {
-    console.error("[MediaRoute] Silence preview error:", error.message);
+    console.error("[MediaRoute] Silence preview error:", errorSummary(error));
     res.status(500).json({
       message: "Silence preview failed",
       details: error.response?.data?.detail || error.message,
@@ -2861,7 +2862,7 @@ router.post("/preview-audio-remix", async (req, res) => {
     );
     return res.json(response.data || {});
   } catch (error) {
-    console.error("[MediaRoute] Exact Remix Audio preview error:", error.message);
+    console.error("[MediaRoute] Exact Remix Audio preview error:", errorSummary(error));
     return res.status(error.response?.status || 500).json({
       message: "Exact Remix Audio preview failed",
       details: error.response?.data?.detail || error.message,
@@ -2891,7 +2892,7 @@ router.post("/preview-watermark-cleanup", async (req, res) => {
     );
     res.json(response.data || {});
   } catch (error) {
-    console.error("[MediaRoute] Watermark cleanup preview error:", error.message);
+    console.error("[MediaRoute] Watermark cleanup preview error:", errorSummary(error));
     res.status(500).json({
       message: "Watermark cleanup preview failed",
       details: error.response?.data?.detail || error.message,
@@ -2918,7 +2919,7 @@ router.post("/preview-music", async (req, res) => {
     );
     res.json(response.data || {});
   } catch (error) {
-    console.error("[MediaRoute] Music preview error:", error.message);
+    console.error("[MediaRoute] Music preview error:", errorSummary(error));
     res.status(500).json({
       message: "Music preview failed",
       details: error.response?.data?.detail || error.message,
@@ -2967,7 +2968,7 @@ router.get("/renders", async (req, res) => {
       retentionDays: parseInt(process.env.MULTICAM_MASTER_RETENTION_DAYS || "7", 10) || 7,
     });
   } catch (error) {
-    console.error("[MediaRoute] Failed to list renders:", error.message);
+    console.error("[MediaRoute] Failed to list renders:", errorSummary(error));
     res.status(500).json({ success: false, message: "Could not load recent renders" });
   }
 });
@@ -3053,7 +3054,7 @@ router.get("/render-jobs/:jobId/download-url", async (req, res) => {
       expiresAt: new Date(signedUrlExpiresAt).toISOString(),
     });
   } catch (error) {
-    console.error("[MediaRoute] Failed to create saved master download URL:", error.message);
+    console.error("[MediaRoute] Failed to create saved master download URL:", errorSummary(error));
     if (!res.headersSent) {
       return res.status(500).json({
         success: false,
@@ -3078,7 +3079,7 @@ router.get("/render-jobs/:jobId/download", async (req, res) => {
 
     const stream = resolved.file.createReadStream();
     stream.on("error", error => {
-      console.error("[MediaRoute] Saved master download stream failed:", error.message);
+      console.error("[MediaRoute] Saved master download stream failed:", errorSummary(error));
       if (!res.headersSent) {
         res.status(502).json({ success: false, message: "Master download failed" });
       } else {
@@ -3087,7 +3088,7 @@ router.get("/render-jobs/:jobId/download", async (req, res) => {
     });
     stream.pipe(res);
   } catch (error) {
-    console.error("[MediaRoute] Failed to download saved render:", error.message);
+    console.error("[MediaRoute] Failed to download saved render:", errorSummary(error));
     if (!res.headersSent) {
       return res.status(500).json({
         success: false,
@@ -3178,7 +3179,7 @@ router.delete("/render-jobs/:jobId", async (req, res) => {
 
     return res.json({ success: true, jobId, clearedAt, deletedStoragePaths });
   } catch (error) {
-    console.error("[MediaRoute] Failed to clear saved render:", error.message);
+    console.error("[MediaRoute] Failed to clear saved render:", errorSummary(error));
     return res.status(500).json({
       success: false,
       message: error.message || "Could not clear saved render",
@@ -3218,7 +3219,7 @@ router.post("/render-jobs/:jobId/approve", async (req, res) => {
       job: normalizeRenderJob(updatedDoc, updatedDoc.data() || {}),
     });
   } catch (error) {
-    console.error("[MediaRoute] Render approval failed:", error.message);
+    console.error("[MediaRoute] Render approval failed:", errorSummary(error));
     res.status(500).json({ success: false, message: error.message || "Render approval failed" });
   }
 });
@@ -3255,7 +3256,7 @@ router.post("/render-jobs/:jobId/reject", async (req, res) => {
       job: normalizeRenderJob(updatedDoc, updatedDoc.data() || {}),
     });
   } catch (error) {
-    console.error("[MediaRoute] Render rejection failed:", error.message);
+    console.error("[MediaRoute] Render rejection failed:", errorSummary(error));
     res.status(500).json({ success: false, message: error.message || "Render rejection failed" });
   }
 });
@@ -3423,7 +3424,7 @@ router.get("/status/:jobId", async (req, res) => {
       creditRefund: data.creditRefund || null,
     });
   } catch (e) {
-    console.error("Status check failed:", e);
+    console.error("Status check failed:", errorSummary(e));
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 });
@@ -3452,7 +3453,7 @@ router.post("/analyze", require("./services/unifiedCredits/application").applica
     preflight = await getViralScanPreflight(userId);
   } catch (error) {
     await deleteSubmittedTemporaryScan();
-    console.error("[MediaRoute] Viral scan access check failed:", error.message);
+    console.error("[MediaRoute] Viral scan access check failed:", errorSummary(error));
     return res.status(500).json({
       message: "We could not verify your Find Viral Clips access. No credits were charged.",
       code: "VIRAL_SCAN_PREFLIGHT_FAILED",
