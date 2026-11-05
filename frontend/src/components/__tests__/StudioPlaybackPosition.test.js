@@ -61,4 +61,6 @@ test('native pointer and Home/End range input still seeks after imperative clock
     fireEvent.change(input);
   }
   expect(changed.mock.results.map(result => result.value)).toEqual([2.5, 0, 8]);
+  fireEvent.change(input, { target: { value: '4' } });
+  expect(changed.mock.results.map(result => result.value)).toEqual([2.5, 0, 8, 4]);
 });

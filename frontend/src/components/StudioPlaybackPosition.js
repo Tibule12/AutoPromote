@@ -28,7 +28,11 @@ export function StudioPlaybackRange({ clock, value, ...props }) {
     // Listen to the actual input event and dispatch the seek once; React owns
     // ordinary non-clock inputs through their existing onChange path.
     onInput={clock ? event => { props.onInput?.(event); props.onChange?.(event); } : props.onInput}
-    onChange={clock ? undefined : props.onChange}
+    onChange={clock ? event => {
+      // React also synthesizes change from input. That seek was handled above;
+      // retain change-only callers without dispatching an input seek twice.
+      if (event.nativeEvent.type !== 'input') props.onChange?.(event);
+    } : props.onChange}
     onKeyDown={event => {
       props.onKeyDown?.(event);
       if (!clock || event.defaultPrevented || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;

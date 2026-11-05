@@ -141,5 +141,17 @@
     "targetedLintFiles": 2,
     "errors": 0,
     "warnings": 0
+  },
+  "remoteBrowserAfterNativeModeRepair": {
+    "run": 42009912263,
+    "passed": 30,
+    "skipped": 17,
+    "failed": 0
+  },
+  "legacyChangeCompatibility": {
+    "focusedPassed": 9,
+    "includesAllEightFullSuiteFailures": true,
+    "inputAndChangeSupported": true,
+    "duplicateInputSeekRejected": true
   }
 }
