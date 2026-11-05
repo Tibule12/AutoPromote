@@ -1,6 +1,16 @@
 const { db } = require("../firebaseAdmin");
-const inScope = (req, record) => (record?.workspace_id || null) === (req.workspaceId || null);
 const READS = new Set(["GET", "HEAD"]);
+const inScope = (req, record) => {
+  if ((record?.workspace_id || null) === (req.workspaceId || null)) return true;
+  // Older personal uploads were automatically stamped with an owned workspace
+  // while their schedules remained personal. Preserve the human owner's reads
+  // without activating Team scope or permitting legacy shared writes.
+  if (req.workspaceId || !READS.has(req.method) ||
+      record?.teamReleaseId || record?.teamApproval || record?.teamReleaseRevision) return false;
+  const actor = req.user?.uid || req.userId;
+  const owners = [record?.user_id, record?.userId, record?.uid].filter(Boolean);
+  return Boolean(actor && owners.length && owners.every(owner => owner === actor));
+};
 module.exports = async function teamContentBoundary(req, res, next) {
   try {
     const path = req.path;

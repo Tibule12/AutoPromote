@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   PLATFORM_NAMES,
   aggregateStatus,
@@ -118,7 +118,14 @@ const SchedulesPanel = ({
     selected.destinations.some(
       item => displayTimezone(item.schedule).storedValue !== timezoneInfo.storedValue
     );
-  const media = releaseMedia(selected?.content);
+  const baseMedia = releaseMedia(selected?.content);
+  const destinationMedia = selected?.destinations
+    .map(item => scheduleMedia(item.schedule, item.content, item.platform))
+    .find(item => item.url || item.poster);
+  const media = !baseMedia.expired && !baseMedia.url && destinationMedia
+    ? { ...destinationMedia, poster: baseMedia.poster || destinationMedia.poster }
+    : baseMedia;
+  useEffect(() => setMediaFailed(false), [selected?.id, media.url, media.poster]);
   const firstCopy = selected
     ? scheduleCopy(
         selected.destinations[0]?.schedule,
@@ -370,7 +377,7 @@ const SchedulesPanel = ({
                           <span aria-hidden="true">▣</span> {dateLabel(release.time, zone)}
                         </span>
                         <span className="schedule-release-kind">
-                          <strong>{release.variant || release.title}</strong>
+                          <strong>{release.variant || "View release"}</strong>
                           <small
                             className={`schedule-variant ${release.variant === "Timeline" ? "timeline" : "final"}`}
                           >
@@ -436,6 +443,8 @@ const SchedulesPanel = ({
                   <div className="schedule-media">
                     {media.url && media.kind === "video" && !mediaFailed ? (
                       <video
+                        key={media.url}
+                        crossOrigin="anonymous"
                         controls
                         preload="metadata"
                         poster={media.poster || undefined}
@@ -445,20 +454,25 @@ const SchedulesPanel = ({
                       />
                     ) : media.url && media.kind === "image" && !mediaFailed ? (
                       <img
+                        key={media.url}
+                        crossOrigin="anonymous"
                         src={media.url}
                         alt={`${selected.title} scheduled media`}
                         onError={() => setMediaFailed(true)}
                       />
                     ) : media.poster ? (
-                      <img src={media.poster} alt={`${selected.title} poster`} />
+                      <img crossOrigin="anonymous" src={media.poster} alt={`${selected.title} poster`} />
                     ) : (
                       <div className="schedule-media-empty">
                         {media.expired ? "Published video removed from storage" : "Media preview unavailable"}
                         <br />
                         <small>
-                          {media.expired ? "The 24-hour retention period has ended. Publication history is kept. Upload the video again to schedule a new post." : "The queue has no accessible poster or media URL for this release."}
+                          {media.expired ? "The 24-hour retention period has ended. Publication history is kept. Upload the video again to schedule a new post." : mediaFailed ? "The preview could not load. Retry the media connection; the saved schedule has not changed." : "Media details are unavailable for this release. Refresh Queue to try loading its source again."}
                         </small>
                       </div>
+                    )}
+                    {mediaFailed && media.url && !media.expired && (
+                      <button type="button" onClick={() => setMediaFailed(false)}>Retry media preview</button>
                     )}
                   </div>
                   <div className="schedule-overview">
@@ -543,6 +557,7 @@ const SchedulesPanel = ({
                                     <span>Media for this destination</span>
                                     {destinationMedia.kind === "image" || !destinationMedia.url ? (
                                       <img
+                                        crossOrigin="anonymous"
                                         src={
                                           destinationMedia.kind === "image"
                                             ? destinationMedia.url || destinationMedia.poster
@@ -552,6 +567,7 @@ const SchedulesPanel = ({
                                       />
                                     ) : (
                                       <video
+                                        crossOrigin="anonymous"
                                         src={destinationMedia.url}
                                         poster={destinationMedia.poster || undefined}
                                         controls
@@ -785,6 +801,7 @@ const SchedulesPanel = ({
             <h3>{selected.title}</h3>
             {media.url && media.kind === "video" && !mediaFailed ? (
               <video
+                crossOrigin="anonymous"
                 controls
                 preload="metadata"
                 poster={media.poster || undefined}
@@ -792,7 +809,7 @@ const SchedulesPanel = ({
                 onError={() => setMediaFailed(true)}
               />
             ) : (
-              <img src={media.poster || media.url} alt={`${selected.title} preview`} />
+              <img crossOrigin="anonymous" src={media.poster || media.url} alt={`${selected.title} preview`} />
             )}
           </div>
         </div>

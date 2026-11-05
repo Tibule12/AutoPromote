@@ -1,0 +1,18 @@
+{
+  "baseline": "4de4b213f3f6a5546c909de5d0cc41d5b13f92dc",
+  "identicalFiles": [
+    "firestore.rules",
+    "storage.rules",
+    "src/authMiddleware.js",
+    "src/utils/authAuthority.js",
+    "src/config/trustedAdminPolicy.json",
+    "src/services/billingService.js",
+    "src/config/subscriptionPlans.js",
+    "src/services/promotionTaskQueue.js",
+    "src/promotionService.js",
+    "frontend/src/components/ViralClipStudio.js"
+  ],
+  "productionDataChanged": false,
+  "schedulesPublishedOrChanged": false,
+  "secretsIncluded": false
+}

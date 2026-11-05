@@ -1,0 +1,76 @@
+{
+  "readOnly": true,
+  "records": [
+    {
+      "retention": {
+        "sourceRetentionDays": {
+          "integerValue": "14"
+        },
+        "sourceDeleteAfter": {
+          "stringValue": "2026-11-14T11:11:29.788Z"
+        },
+        "sourceRetentionStatus": {
+          "stringValue": "active"
+        },
+        "sourceRetentionUpdatedAt": {
+          "stringValue": "2026-10-31T11:11:29.788Z"
+        }
+      },
+      "storage": {
+        "exists": true,
+        "bytes": "7486721",
+        "ownerMetadataMatches": true,
+        "metadataKeys": [
+          "ownerUid",
+          "source",
+          "firebaseStorageDownloadTokens"
+        ],
+        "generation": "1793445084245103"
+      },
+      "existingUrl": {
+        "status": 206,
+        "contentType": "video/mp4",
+        "cors": "https://autopromote.org",
+        "corp": null,
+        "sampleBytes": 32
+      },
+      "contentReference": "ea614c7a56c9"
+    },
+    {
+      "retention": {
+        "sourceRetentionDays": {
+          "integerValue": "14"
+        },
+        "sourceDeleteAfter": {
+          "stringValue": "2026-11-14T11:08:26.577Z"
+        },
+        "sourceRetentionStatus": {
+          "stringValue": "active"
+        },
+        "sourceRetentionUpdatedAt": {
+          "stringValue": "2026-10-31T11:08:26.577Z"
+        }
+      },
+      "storage": {
+        "exists": true,
+        "bytes": "2581280",
+        "ownerMetadataMatches": true,
+        "metadataKeys": [
+          "ownerUid",
+          "source",
+          "firebaseStorageDownloadTokens"
+        ],
+        "generation": "1793444900730849"
+      },
+      "existingUrl": {
+        "status": 206,
+        "contentType": "video/mp4",
+        "cors": "https://autopromote.org",
+        "corp": null,
+        "sampleBytes": 32
+      },
+      "contentReference": "38cfe1a6647c"
+    }
+  ],
+  "conclusion": "Existing schedules are personal; referenced owned content has a historical workspace stamp. Media objects exist and remain active until 14 November. No production records or object metadata changed."
+}
