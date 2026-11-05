@@ -1,0 +1,51 @@
+{
+  "actualApp": true,
+  "normalVerifiedSignIn": true,
+  "isolatedDemo": true,
+  "productionTraffic": false,
+  "historicalOwnerMediaIncluded": true,
+  "otherUserAndReviewedTeamMediaExcluded": true,
+  "mediaMetadata": {
+    "width": 320,
+    "height": 180,
+    "duration": 1,
+    "crossOrigin": "anonymous"
+  },
+  "playbackTime": 0.108638,
+  "viewports": [
+    {
+      "width": 390,
+      "overflow": [
+        {
+          "scroll": 316,
+          "width": 316,
+          "titleScroll": 128,
+          "titleWidth": 128
+        }
+      ]
+    },
+    {
+      "width": 1280,
+      "overflow": [
+        {
+          "scroll": 264,
+          "width": 264,
+          "titleScroll": 104,
+          "titleWidth": 104
+        }
+      ]
+    },
+    {
+      "width": 1840,
+      "overflow": [
+        {
+          "scroll": 399,
+          "width": 399,
+          "titleScroll": 166,
+          "titleWidth": 166
+        }
+      ]
+    }
+  ],
+  "scheduleAndFinancialStateUnchanged": true
+}

@@ -545,6 +545,16 @@ test("API workspace scope retains the actor, rejects raw publishing and hides pe
     assert.equal(boundary.inScope({ workspaceId }, { workspace_id: "another-team" }), false);
     assert.equal(boundary.inScope({}, { workspace_id: workspaceId }), false);
     assert.equal(boundary.inScope({}, { user_id: "owner" }), true);
+    await db.collection("content").doc("legacy-owner-source").set({ user_id: "owner", workspace_id: workspaceId });
+    assert.equal((await request(app).get("/api/content/legacy-owner-source")
+      .set("x-fixture-actor", "owner")).status, 200);
+    assert.equal((await request(app).get("/api/content/legacy-owner-source")
+      .set("x-fixture-actor", "editor")).status, 404);
+    await db.collection("content").doc("reviewed-team-source").set({
+      user_id: "owner", workspace_id: workspaceId, teamReleaseId: "reviewed",
+    });
+    assert.equal((await request(app).get("/api/content/reviewed-team-source")
+      .set("x-fixture-actor", "owner")).status, 404);
   } finally {
     if (previous) require.cache[target] = previous;
     else delete require.cache[target];

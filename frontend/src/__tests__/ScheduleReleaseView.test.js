@@ -107,6 +107,34 @@ test("loading does not flash empty counts; missing media and long copy are handl
   expect(screen.getAllByText(/A long caption A long caption/).length).toBeGreaterThan(0);
 });
 
+test("scheduled destination media remains available while the content list is delayed", () => {
+  const item = {
+    id: "retained-media", contentId: "owned-media", title: "Existing scheduled movie",
+    platform: "youtube", status: "pending", startTime: "2026-10-14T09:00:00Z",
+    platformSpecificSettings: { media_url: "https://media.example.test/owned.mp4" },
+  };
+  render(<SchedulesPanel schedulesList={[item]} contentList={[]} currentTime={beforeFirstRelease} />);
+  const video = screen.getByLabelText("Existing scheduled movie video preview");
+  expect(video).toHaveAttribute("src", "https://media.example.test/owned.mp4");
+  expect(video).toHaveAttribute("crossorigin", "anonymous");
+  expect(screen.queryByText("Media preview unavailable")).not.toBeInTheDocument();
+});
+
+test("a failed earlier URL cannot hide a refreshed owned preview", () => {
+  const item = { id: "source", contentId: "movie", title: "Long title stays in its heading", platform: "youtube",
+    status: "pending", startTime: "2026-10-14T09:00:00Z" };
+  const content = { id: "movie", title: item.title, type: "video", url: "https://media.example.test/old.mp4" };
+  const view = render(<SchedulesPanel schedulesList={[item]} contentList={[content]} currentTime={beforeFirstRelease} />);
+  fireEvent.error(screen.getByLabelText(`${item.title} video preview`));
+  expect(screen.getByText("Media preview unavailable")).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Retry media preview", exact: true }));
+  expect(screen.getByLabelText(`${item.title} video preview`)).toHaveAttribute("src", content.url);
+  fireEvent.error(screen.getByLabelText(`${item.title} video preview`));
+  view.rerender(<SchedulesPanel schedulesList={[item]} contentList={[{ ...content, url: "https://media.example.test/fresh.mp4" }]} currentTime={beforeFirstRelease} />);
+  expect(screen.getByLabelText(`${item.title} video preview`)).toHaveAttribute("src", "https://media.example.test/fresh.mp4");
+  expect(screen.getByText("View release")).toBeInTheDocument();
+});
+
 test("upcoming view hides old history while keeping the six destinations together", () => {
   const old = {
     id: "old-post",
