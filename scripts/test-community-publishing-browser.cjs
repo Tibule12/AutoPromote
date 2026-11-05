@@ -294,6 +294,8 @@ async function main() {
       app = express();
     app.use(rateLimit({ windowMs: 60000, max: 2000, legacyHeaders: false, standardHeaders: true }));
     app.use(express.json({ limit: "21mb" }));
+    if (process.env.QUEUE_MEDIA_QA === "true")
+      app.get("/qa-queue-source.mp4", (_req, res) => res.sendFile(path.join(directory, "source.mp4")));
     if (process.env.STUDIO_AUDIO_QA === "true") {
       app.get("/qa-studio-audio-source.mp4", (_req, res) => res.sendFile(path.join(directory, "source.mp4")));
     }
@@ -518,6 +520,11 @@ async function main() {
       for (const key of ["credits", "subscriptionTier", "subscriptionStatus", "role", "isAdmin"])
         assert.deepEqual(after[key], studioBaseline[key]);
       console.log("PASS: actual Studio sound/pitch transport; production and financial state untouched");
+      return;
+    }
+    if (process.env.QUEUE_MEDIA_QA === "true") {
+      await require("./qa/queue-legacy-media-browser.cjs")({ page, context, origin, directory,
+        db, uid: identity.localId, navigateWorkspace, mediaUrl: origin + "/qa-queue-source.mp4" });
       return;
     }
     if (process.env.MOBILE_FORMS_QA === "true") {

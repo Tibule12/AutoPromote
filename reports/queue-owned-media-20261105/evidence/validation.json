@@ -1,0 +1,22 @@
+{
+  "distinctTestsPassed": 71,
+  "server": 18,
+  "frontendQueue": 18,
+  "realTeamEmulator": 31,
+  "communityPublishing": 4,
+  "appBrowser": "passed",
+  "viewports": [
+    390,
+    1280,
+    1840
+  ],
+  "finalProductionBuild": "passed",
+  "welcomeAssets": 19,
+  "publicEntryPages": 47,
+  "retryControlInBundle": true,
+  "mainBundleSha256": "493edbbac4af901e6d73330311f51c7d861b52124a1c0782c244053e38e89783",
+  "lintErrors": 0,
+  "lintWarnings": 0,
+  "remoteCIRerun": false,
+  "productionDeployment": false
+}

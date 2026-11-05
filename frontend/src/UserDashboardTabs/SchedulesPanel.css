@@ -881,7 +881,8 @@
 }
 .schedule-release-date > span { color: #97aad0; font-size: 1rem; margin-right: 2px; }
 .schedule-release-kind { display: grid; gap: 1px; min-width: 0; }
-.schedule-release-kind strong { font-size: .78rem; white-space: nowrap; }
+.schedule-release-kind strong { font-size: .78rem; white-space: normal; overflow-wrap: anywhere; }
+.schedule-subject h4 { overflow-wrap: anywhere; }
 .schedule-release-kind .schedule-variant { font-size: .52rem; letter-spacing: .06em; }
 .schedule-release-arrow { font-size: 1.4rem; color: #c1cde0; line-height: .7; }
 .schedule-release-list > .schedule-history-toggle {
