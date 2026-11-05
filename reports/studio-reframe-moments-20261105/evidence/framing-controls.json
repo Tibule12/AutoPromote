@@ -1,0 +1,12 @@
+{
+  "actualApp": true,
+  "headlessMuted": true,
+  "steps": [
+    "Left/Right speaker positions and editable smooth/cut transitions; Alternate Speakers creates actual cuts",
+    "Remove correction → Undo → Redo → Undo restores the reviewed timed marks",
+    "Show Everyone: independent panel positions/tracking points, timed speaker-order change and ordinary preview",
+    "Reviewed split framing → consent → canonical CPU export → private download and full decode"
+  ],
+  "external": [],
+  "errors": []
+}

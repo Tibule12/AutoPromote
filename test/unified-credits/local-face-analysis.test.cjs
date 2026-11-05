@@ -15,6 +15,6 @@ test("face transport rejects external sources and excessive ranges before any ne
     mode: "anchored", start: 0, end: 12 };
   for (const change of [{ video_url: "https://example.com/source" }, { end: 31 }, { start: -1 },
     { mode: "unexpected" }, { video_url: "http://127.0.0.1:8190/admin" }]) {
-    await assert.rejects(adapter({ data: { ...input, ...change } }), /LOCAL_FACE_ANALYSIS_INPUT_DENIED/);
+    await assert.rejects(adapter({ url: "http://127.0.0.1:8199/track-studio-faces", data: { ...input, ...change } }), /LOCAL_FACE_ANALYSIS_INPUT_DENIED/);
   }
 });

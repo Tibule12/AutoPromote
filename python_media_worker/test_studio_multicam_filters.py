@@ -10,6 +10,8 @@ import unittest
 source = Path(__file__).with_name("main_media_server.py")
 tree = ast.parse(source.read_text())
 namespace = {"math": math, "re": re, "clamp_float": lambda value, lo, hi: max(lo, min(hi, value))}
+from python_media_worker.viral_render_contract import build_studio_timeline_mux_args
+namespace["build_studio_timeline_mux_args"] = build_studio_timeline_mux_args
 functions = [node for node in tree.body if isinstance(node, ast.FunctionDef)
              and node.name in {"build_multicam_layout_filter", "build_studio_camera_timeline", "build_studio_multicam_command", "build_reviewed_reframe_filter", "reviewed_axis_expression", "build_safe_vertical_fit_filter", "build_reframe_segment_filter"}]
 exec(compile(ast.Module(body=functions, type_ignores=[]), str(source), "exec"), namespace)
@@ -121,7 +123,8 @@ class StudioMulticamFilterTests(unittest.TestCase):
                 "test-graph", 7.5, "output.mp4", "libx264", "fast")
             mappings = [command[i + 1] for i, arg in enumerate(command) if arg == "-map"]
             self.assertEqual(mappings, ["[vout]", f"{count}:a?"])
-            self.assertEqual(command[command.index("-t") + 1], "7.5")
+            self.assertEqual(float(command[command.index("-t") + 1]), 7.5)
+            self.assertNotIn("-shortest", command)
             self.assertEqual(command[command.index("-c:a") + 1], "copy")
 
     def test_timeline_filter_executes_after_a_removed_section(self):

@@ -9,7 +9,10 @@ async function main() {
   const directory = path.resolve(process.argv[2]);
   const config = JSON.parse(fs.readFileSync(path.join(directory, "browser-private.json")));
   assert.equal(new URL(config.origin).hostname, "127.0.0.1");
-  const file = name => path.join(directory, name);
+  const title = process.env.STUDIO_MOMENTS_QA_TITLE || "Moments and framing recovery";
+  const prefix = process.env.STUDIO_MOMENTS_QA_PREFIX || "";
+  assert(/^[a-z0-9-]*$/.test(prefix));
+  const file = name => path.join(directory, (name.startsWith("moments-") ? prefix : "") + name);
   const browser = await chromium.launch({ headless: true, args: ["--mute-audio"] });
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 },
     storageState: file("browser-state.json"), recordVideo: { dir: file("recordings") } });
@@ -22,35 +25,48 @@ async function main() {
   const page = await context.newPage();
   page.setDefaultTimeout(30000);
   page.on("pageerror", error => observations.errors.push(error.message));
-  page.on("dialog", dialog => dialog.accept());
+  page.on("response", response => {
+    const endpoint = new URL(response.url()).pathname;
+    if (response.status() >= 400 && endpoint.startsWith("/api/"))
+      console.log("HTTP", response.status(), response.request().method(), endpoint);
+  });
+  page.on("dialog", dialog => dialog.accept(dialog.type() === "prompt" ? "QA saved source range" : undefined));
   const record = value => { observations.steps.push(value); fs.writeFileSync(file("moments-analysis-observation.json"), JSON.stringify(observations, null, 2)); console.log("PASS:", value); };
   const pause = async () => { const b = page.getByRole("button", { name: "Pause comparison", exact: true }); if (await b.isVisible()) await b.click(); };
+  const slider = page.getByLabel("Edited output position", { exact: true });
   const tool = name => page.getByRole("navigation", { name: "Creative tools" }).getByRole("button", { name, exact: true }).click();
-  const backup = async name => {
-    const pending = page.waitForEvent("download");
-    await clickStudioControl(page, page.getByRole("button", { name: "Download project backup", exact: true, includeHidden: true }));
-    await (await pending).saveAs(file(name));
-    const document = JSON.parse(fs.readFileSync(file(name)));
-    return document.project || document;
-  };
-  const save = async () => {
+  const library = async () => {
+    await page.getByTestId("studio-after-video").waitFor({ state: "attached" });
     const show = page.getByRole("button", { name: "Show media", exact: true });
     if (await show.isVisible()) await show.click();
     const head = page.locator(".studio-project-rail__head");
     if (!await head.evaluate(node => node.open)) await head.locator(":scope > summary").click();
-    await page.getByRole("textbox", { name: "Project name", exact: true }).fill("Moments and framing recovery");
+  };
+  const backup = async name => {
+    await library();
+    const [download] = await Promise.all([page.waitForEvent("download"),
+      clickStudioControl(page, page.getByRole("button", { name: "Download project backup", exact: true }))]);
+    await download.saveAs(file(name));
+    const document = JSON.parse(fs.readFileSync(file(name)));
+    return document.project || document;
+  };
+  const save = async () => {
+    await library();
+    await page.getByRole("textbox", { name: "Project name", exact: true }).fill(title);
     await page.getByTestId("studio-save-project").click();
   };
   try {
     await page.goto(config.origin);
     await page.getByTestId("shared-credit-balance").waitFor();
-    if (process.argv.includes("--resume")) {
+    if (process.argv.includes("--resume") || process.argv.includes("--recovery-only")) {
       await page.getByRole("button", { name: "Viral Clip Studio", exact: true }).first().click();
-      await page.getByRole("button", { name: "Moments and framing recovery", exact: true }).click();
+      await page.getByRole("button", { name: title, exact: true }).click();
       await page.getByTestId("studio-after-video").waitFor({ state: "attached" });
     } else {
     await page.getByRole("button", { name: "Find Viral Clips", exact: true }).first().click();
-    await page.locator('input[type="file"][accept*="video"]').first().setInputFiles(file("source.mp4"));
+    const sourceName = process.env.STUDIO_MOMENTS_QA_SOURCE || "source.mp4";
+    assert(/^[a-z0-9-]+\.mp4$/.test(sourceName));
+    await page.locator('input[type="file"][accept*="video"]').first().setInputFiles(path.join(directory, sourceName));
     await page.getByRole("button", { name: /Analyse video/ }).click();
     const consent = page.getByRole("dialog", { name: "Find Viral Clips analysis", exact: true });
     await consent.waitFor(); await consent.getByRole("button", { name: /^Approve / }).click();
@@ -67,14 +83,28 @@ async function main() {
     assert(sourceTime > 1);
     record("Detected source range opens in Moments and previews on the normal transport");
     await inspector.getByRole("button", { name: "Trim this moment", exact: true }).click();
-    const slider = page.getByLabel("Edited output position", { exact: true });
     await slider.press("Home");
     for (let i = 0; i < 24; i++) await slider.press("ArrowRight");
     await page.getByTestId("inspector-cut-trim-start").click();
     await page.getByTestId("studio-undo-button").click();
     await page.getByTestId("studio-redo-button").click();
     record("Trim detected moment → Undo → Redo retains the ordinary edit history");
+    const moments = page.locator("#studio-library-panel-moments .studio-project-moment");
+    await tool("Moments");
+    const count = await moments.count();
+    if (count > 1) {
+      await moments.nth(1).click();
+      await save(); const other = await backup("moments-second-range.autopromote.json");
+      const chosen = other.snapshot.orderedClips.find(c => c.id === other.snapshot.selectedClipId);
+      assert.equal(other.snapshot.timeline[0].startRequest, chosen.start);
+      assert.equal(other.snapshot.timeline[0].endRequest, chosen.end);
+      await moments.first().click();
+      record(`${count} real suggestions retained; switching after a trim selects the exact new source range`);
+    } else if (process.env.STUDIO_MOMENTS_QA_REQUIRE_MULTIPLE === "true") {
+      throw Error("Representative source did not produce multiple real suggestions");
     }
+    }
+    if (!process.argv.includes("--recovery-only")) {
     await save();
     const beforeDetection = await backup("moments-before-detection.autopromote.json");
     await tool("Reframe");
@@ -106,16 +136,24 @@ async function main() {
       points: shotData.tracks.solo.keyframes.length, artifactsBound: true };
     record("Follow existing camera cuts → actual local model analysis → owned durable artifacts");
     await save();
-    const saved = await backup("moments-framing-before.autopromote.json");
+    await backup("moments-framing-before.autopromote.json");
     await page.screenshot({ path: file("moments-framing-before-reopen.png") });
     await context.storageState({ path: file("browser-state.json"), indexedDB: true });
+    }
+    const saved = JSON.parse(fs.readFileSync(file("moments-framing-before.autopromote.json")));
     await page.reload();
     await page.getByTestId("shared-credit-balance").waitFor();
     await page.getByRole("button", { name: "Viral Clip Studio", exact: true }).first().click();
-    await page.getByRole("button", { name: "Moments and framing recovery", exact: true }).click();
+    await page.getByRole("button", { name: title, exact: true }).click();
     const reopened = await backup("moments-framing-reopened.autopromote.json");
+    // Cold reopen renews private capabilities. Verify their same object path,
+    // plus every durable source/hash/range/framing field, without comparing or
+    // emitting the refreshed access query. Access renewal is not an edit.
+    const durable = value => JSON.parse(JSON.stringify(value, (_key, item) =>
+      typeof item === "string" && item.startsWith(`${config.origin}/api/credit-pilot/object/`)
+        ? new URL(item).origin + new URL(item).pathname : item));
     for (const key of ["timeline", "orderedClips", "reframeKeyframes", "reframeModeCuts", "speakerStackFraming"])
-      assert.deepEqual(reopened.snapshot[key], saved.snapshot[key], `Cold reopen changed ${key}`);
+      assert.deepEqual(durable(reopened.snapshot[key]), durable(saved.snapshot[key]), `Cold reopen changed ${key}`);
     record("Save → cold reopen → exact range, moment and framing state retained");
     await tool("Export");
     await page.getByLabel("Export resolution", { exact: true }).selectOption("720p");
@@ -133,6 +171,14 @@ async function main() {
     execFileSync("ffmpeg", ["-v", "error", "-i", output, "-f", "null", "-"], { timeout: 120000 });
     observations.export = { width: video.width, height: video.height, duration: Number(info.format.duration), fullDecode: true };
     record("Reopened trimmed moment and reviewed follow path → quote/consent → CPU export → verified private download");
+    await slider.press("Home");
+    const play = page.getByRole("button", { name: "Play comparison", exact: true });
+    if (await play.isVisible()) await play.click();
+    await page.waitForFunction(() => {
+      const video = document.querySelector('[data-testid="studio-after-video"]');
+      return video?.ended || (video?.duration > 0 && video.currentTime >= video.duration - .1);
+    }, null, { timeout: 30000 });
+    record("Complete finished-file playback in the ordinary Studio with its editable timeline");
     assert.equal(observations.external.length, 0); assert.equal(observations.errors.length, 0);
     record("No external network, live provider calls, browser errors or production changes");
   } catch (error) {
@@ -144,4 +190,4 @@ async function main() {
     await context.close(); await browser.close();
   }
 }
-main().catch(error => { console.error(error.stack); process.exitCode = 1; });
+main().catch(error => { console.error(String(error.stack).replace(/([?&]cap=)[^\s'"]+/g, "$1[PRIVATE]")); process.exitCode = 1; });

@@ -17,10 +17,13 @@ function localFaceAnalysis({ config, directory }) {
     if (running || attempts >= 8) throw Error("LOCAL_FACE_ANALYSIS_BUDGET_EXHAUSTED");
     const body = typeof request.data === "string" ? JSON.parse(request.data) : request.data;
     const source = new URL(body.video_url);
+    const endpoint = new URL(request.url).pathname;
+    const isFaces = endpoint === "/track-studio-faces";
     if (source.origin !== origin.origin || !source.pathname.startsWith("/api/credit-pilot/object/") ||
-        !Number.isFinite(body.start) || !Number.isFinite(body.end) || body.start < 0 ||
-        body.end <= body.start || body.end - body.start > 30 ||
-        !["anchored", "source_shots"].includes(body.mode)) throw Error("LOCAL_FACE_ANALYSIS_INPUT_DENIED");
+        !["/track-studio-faces", "/preview-silence"].includes(endpoint) ||
+        (isFaces && (!Number.isFinite(body.start) || !Number.isFinite(body.end) || body.start < 0 ||
+          body.end <= body.start || body.end - body.start > 30 ||
+          !["anchored", "source_shots"].includes(body.mode)))) throw Error("LOCAL_FACE_ANALYSIS_INPUT_DENIED");
     running = true; attempts++;
     const scratch = fs.mkdtempSync(path.join(directory, "face-analysis-"));
     fs.chmodSync(scratch, 0o700);
@@ -35,7 +38,7 @@ function localFaceAnalysis({ config, directory }) {
       }
       const bytes = Buffer.concat(chunks);
       const record = { body, directory: scratch, apiOrigin: origin.origin,
-        expected: { endpoint: "/track-studio-faces", sources: [{ gatewayPath: source.pathname,
+        expected: { endpoint, sources: [{ gatewayPath: source.pathname,
           size, contentHash: crypto.createHash("sha256").update(bytes).digest("hex") }] },
         localCpuSeconds: 60 };
       const filename = path.join(scratch, "request.json");
@@ -59,7 +62,9 @@ function localFaceAnalysis({ config, directory }) {
       fs.writeFileSync(path.join(scratch, "termination.json"), JSON.stringify(terminal), { mode: 0o600 });
       if (terminal.code !== 0 || terminal.signal) throw Error("LOCAL_FACE_ANALYSIS_PROCESS_FAILED");
       const data = JSON.parse(fs.readFileSync(path.join(scratch, "result.json")));
-      if (!data.tracks || !data.engine) throw Error("LOCAL_FACE_ANALYSIS_RESULT_INVALID");
+      if (isFaces ? !data.tracks || !data.engine
+        : !Array.isArray(data.silence_segments) || !Number.isFinite(data.duration) || data.duration > 30)
+        throw Error("LOCAL_FACE_ANALYSIS_RESULT_INVALID");
       return { data, status: 200, statusText: "OK", headers: {}, config: request };
     } finally { running = false; }
   };

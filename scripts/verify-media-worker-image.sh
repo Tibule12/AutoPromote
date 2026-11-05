@@ -16,6 +16,8 @@ docker run --rm \
   python_media_worker.test_viral_render_contract \
   python_media_worker.test_studio_delivery_timing \
   python_media_worker.test_studio_finish \
+  python_media_worker.test_studio_reframe_cuts \
+  python_media_worker.test_studio_multicam_filters \
   python_media_worker.test_caption_quality \
   python_media_worker.test_content_aware_reality \
   python_media_worker.test_motion_sculpture \

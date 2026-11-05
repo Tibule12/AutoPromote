@@ -1,0 +1,59 @@
+{
+  "actualApp": true,
+  "syntheticLayoutInputs": true,
+  "realShootSyncQualified": false,
+  "errors": [],
+  "external": [],
+  "layouts": [
+    {
+      "count": 2,
+      "layout": "stack_2",
+      "nativePreview": true
+    },
+    {
+      "count": 2,
+      "layout": "split_2",
+      "nativePreview": true
+    },
+    {
+      "count": 2,
+      "layout": "pip_2",
+      "nativePreview": true
+    },
+    {
+      "count": 2,
+      "layout": "active_2",
+      "nativePreview": true
+    },
+    {
+      "count": 2,
+      "layout": "spotlight_2",
+      "nativePreview": true,
+      "fullExportDecode": true
+    },
+    {
+      "count": 3,
+      "layout": "hero_3",
+      "nativePreview": true,
+      "fullExportDecode": true
+    },
+    {
+      "count": 4,
+      "layout": "grid_4",
+      "nativePreview": true,
+      "fullExportDecode": true
+    }
+  ],
+  "evidenceRuns": [
+    {
+      "logBasename": "autopromote-camera-layout-browser-20261105-r3.log",
+      "sha256": "c956b49ed0cd2457778988f4ced974bfb8be12417b0314fc8c14738d6d71d3b0",
+      "boundary": "Successful two-camera phase retained; later three-camera phase failed before repair."
+    },
+    {
+      "logBasename": "autopromote-camera-layout-browser-20261105-r6.log",
+      "sha256": "6d1ca7b91aa41ac55dab3b2affad3b2ed35b60d92c88c7c37aab9aa2bd69e957",
+      "boundary": "Corrected three/four-camera run exited zero."
+    }
+  ]
+}

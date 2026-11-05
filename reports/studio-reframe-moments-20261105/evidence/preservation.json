@@ -1,0 +1,244 @@
+{
+  "recordedAt": "2026-11-05T03:44:57.932227+00:00",
+  "base": "1bae70bbd5ab0a18bbad51536af0d5f2c17f5495",
+  "protectedFiles": [
+    {
+      "path": "autopromote-functions/_server/src/__tests__/billingService.entitlements.test.js",
+      "sha256": "1834ee5f8a355d41075a67b85bbeb0cfc8e1c6656affde2b6943ce13c095c67b",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "autopromote-functions/_server/src/config/billingRules.js",
+      "sha256": "b24facb316fd5dd9162aa2c106d2eefe53863c69aefa3faaf8b71173125cc5a7",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "autopromote-functions/_server/src/config/subscriptionPlans.js",
+      "sha256": "7c1df339087a63ae8f24db34f0e587f32073d6e269c522a164f8ef2bdcdc8c69",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "autopromote-functions/_server/src/paymentsRoutes.js",
+      "sha256": "189c123bc5c5ffce982375ef9183d7974f4c3862c2341f88cf5c0d85a63d5cd2",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "autopromote-functions/_server/src/routes/billingRoutes.js",
+      "sha256": "f7617fb00201e841c91dbfa550b9c77be2ec52d5855277f44c18c25252d6b042",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "autopromote-functions/_server/src/routes/paymentsExtendedRoutes.js",
+      "sha256": "04d0775a38512d6a64c4b61654fba7902e0a99ea1ad8b7bee4cd36af57103722",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "autopromote-functions/_server/src/routes/paymentsStatusRoutes.js",
+      "sha256": "d6d289bc3ccc9781e5581da7c1b9f7b30e465d11969f47dd5e35bb7fab1a6f9f",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "autopromote-functions/_server/src/routes/paypalSubscriptionRoutes.js",
+      "sha256": "0e2650ba86a335c8053e8bb7acdccb2512e2b44d8715e3feda563572fbae5e2e",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "autopromote-functions/_server/src/services/billingService.js",
+      "sha256": "8640b377f5e7d92ac13967cc3bd7e5f5da3f50ae7eef612c97da582729567761",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "autopromote-functions/_server/src/services/payments/balanceService.js",
+      "sha256": "b43e4d2e984332952b385be2b6cc08a8b62cebe7172133d039b335481922851d",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "autopromote-functions/_server/src/services/payments/fulfillmentService.js",
+      "sha256": "ad8b5b757093a66b688c1b74c35a8b84300fd03622d7949bef336a3c8b32318e",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "autopromote-functions/_server/src/services/payments/index.js",
+      "sha256": "52198669227cc50a8d518a1cb43a07a96a2f7c71035ec732fb97c40ec81ea810",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "autopromote-functions/_server/src/services/payments/manualProvider.js",
+      "sha256": "5afe3291b7875dcfdb04abfc3e0dcecb2ce8a7aa705d9f72e695063eb6bd3678",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "autopromote-functions/_server/src/services/payments/payfastProvider.js",
+      "sha256": "345c6b6404d0813023fc8c5c48cb1db923f35017cb090a0719a9a537c376b697",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "autopromote-functions/_server/src/services/payments/paygateProvider.js",
+      "sha256": "09c9cf4718ecea2ea11598075e2932a17e324baeb987d3d000992aa5de828d77",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "autopromote-functions/_server/src/services/payments/paypalProvider.js",
+      "sha256": "3473e9f28b8e455fe26f78254baf02d13359d6e8012328b87793e975c6a66f57",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "autopromote-functions/_server/src/services/payments/paypalService.js",
+      "sha256": "ce3cd4c99c9e195c51d3ca00f7703170a5e0ab607d9e5a96fd2fe0562ea4ccea",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "autopromote-functions/_server/src/services/payments/providerInterface.js",
+      "sha256": "c3f4df18944411bc2cfdcf2422416d7543514af577b9e2d285fbd4328b6d274e",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "autopromote-functions/_server/src/services/subscriptionSyncService.js",
+      "sha256": "ceba167507472a1d870569a24a9c6b0cbc6effdd5c63c21ffec8ffa88b3aad4d",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "firestore.rules",
+      "sha256": "8daebc8a0d4638bea8baecf4fd069ffbbf4d200e1651e935e9fb93d47c931a31",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "frontend/src/UserDashboardTabs/SchedulesPanel.css",
+      "sha256": "a28a33af6af0478530aabf1aaa97ab250c6c6f12fcc2f0de736dae5e28f01a3a",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "frontend/src/UserDashboardTabs/SchedulesPanel.js",
+      "sha256": "a2d68e5b8620733acf3e3ce527e670d81dd522dcbc8b70f8bd58862cf2334464",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "src/__tests__/billingService.entitlements.test.js",
+      "sha256": "bb8565e377f47b8fa8cb9ccdbfd44b0afc13807c139ebba9015b40f3531681da",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "src/__tests__/mediaRoutes.viralBilling.test.js",
+      "sha256": "ba9b94971e29f63984e81dfc80fb55eb1d958c31e547283a5ccabd481a6cb67f",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "src/authMiddleware.js",
+      "sha256": "1be59fd6288f26f93dc079c1f964ff2e443d2cef7aefdaf4ef783e9fe3590ea0",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "src/config/billingRules.js",
+      "sha256": "b24facb316fd5dd9162aa2c106d2eefe53863c69aefa3faaf8b71173125cc5a7",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "src/config/subscriptionPlans.js",
+      "sha256": "e28ba549914b462e7ee6c1e34f541841b9f15309b434aaca623fdc7d7d316921",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "src/middlewares/teamContentBoundary.js",
+      "sha256": "b74820cfc874ad92e7689a19c27c9fec1769b69b9ae818bb88372ca4031106c2",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "src/paymentsRoutes.js",
+      "sha256": "189c123bc5c5ffce982375ef9183d7974f4c3862c2341f88cf5c0d85a63d5cd2",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "src/routes/billingRoutes.js",
+      "sha256": "f7617fb00201e841c91dbfa550b9c77be2ec52d5855277f44c18c25252d6b042",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "src/routes/paymentsExtendedRoutes.js",
+      "sha256": "04d0775a38512d6a64c4b61654fba7902e0a99ea1ad8b7bee4cd36af57103722",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "src/routes/paymentsStatusRoutes.js",
+      "sha256": "d6d289bc3ccc9781e5581da7c1b9f7b30e465d11969f47dd5e35bb7fab1a6f9f",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "src/routes/paypalSubscriptionRoutes.js",
+      "sha256": "f253207cc0802cced206bb4375cbf48de3fcbd819064e372b0dc5e4c45b9109b",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "src/services/billingService.js",
+      "sha256": "39c041750c5c1f6805ade61ab224a71490086932c33342132316207d084d631a",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "src/services/payments/balanceService.js",
+      "sha256": "b43e4d2e984332952b385be2b6cc08a8b62cebe7172133d039b335481922851d",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "src/services/payments/fulfillmentService.js",
+      "sha256": "ad8b5b757093a66b688c1b74c35a8b84300fd03622d7949bef336a3c8b32318e",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "src/services/payments/index.js",
+      "sha256": "52198669227cc50a8d518a1cb43a07a96a2f7c71035ec732fb97c40ec81ea810",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "src/services/payments/manualProvider.js",
+      "sha256": "5afe3291b7875dcfdb04abfc3e0dcecb2ce8a7aa705d9f72e695063eb6bd3678",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "src/services/payments/payfastProvider.js",
+      "sha256": "345c6b6404d0813023fc8c5c48cb1db923f35017cb090a0719a9a537c376b697",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "src/services/payments/paygateProvider.js",
+      "sha256": "09c9cf4718ecea2ea11598075e2932a17e324baeb987d3d000992aa5de828d77",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "src/services/payments/paypalProvider.js",
+      "sha256": "3473e9f28b8e455fe26f78254baf02d13359d6e8012328b87793e975c6a66f57",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "src/services/payments/paypalService.js",
+      "sha256": "ce3cd4c99c9e195c51d3ca00f7703170a5e0ab607d9e5a96fd2fe0562ea4ccea",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "src/services/payments/providerInterface.js",
+      "sha256": "c3f4df18944411bc2cfdcf2422416d7543514af577b9e2d285fbd4328b6d274e",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "src/services/subscriptionSyncService.js",
+      "sha256": "ceba167507472a1d870569a24a9c6b0cbc6effdd5c63c21ffec8ffa88b3aad4d",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "src/services/unifiedCredits/wallet.js",
+      "sha256": "d5b3d85b935f77be23b39dd39676d7962c6caa635e0b8be4eeafafb1e79854b9",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "src/userRoutes.js",
+      "sha256": "78bf31a9458ab15c183565b235ce70ad5b0e765ed531af5d35194aa483c1be60",
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "storage.rules",
+      "sha256": "b362e56ed1980cc781b051299e57838c61e66923083809fc844625c2ea6c52a3",
+      "matchesCurrentMain": true
+    }
+  ],
+  "productionWrites": false,
+  "envReadOrModified": false,
+  "CamCombinerChanged": false
+}

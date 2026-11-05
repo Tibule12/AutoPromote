@@ -166,6 +166,21 @@ function createSourceGateway({
           seen.add(segment.sourceStoragePath);
         }
       }
+      // Studio camera panels use the same owned source authority as ordinary
+      // sequence clips. Bind every actual camera URL before dispatch; never
+      // accept a source ID or a client-provided hash as ownership evidence.
+      const cameras = studio?.finish_plan?.reframe?.group_stack?.cameras;
+      if (cameras !== undefined) {
+        if (!Array.isArray(cameras) || cameras.length < 2 || cameras.length > 4)
+          fail("INVALID_CAMERA_SOURCES");
+        for (const camera of cameras) {
+          const source = await ownedUrl(uid, camera.source_url);
+          if (!seen.has(source.storagePath)) {
+            sources.push(source);
+            seen.add(source.storagePath);
+          }
+        }
+      }
       const dir = await fs.mkdtemp(path.join(os.tmpdir(), "credit-source-probe-"));
       const longerRender = reviewBounds.longer && ['studio.render', 'clips.render'].includes(operation);
       let duration;

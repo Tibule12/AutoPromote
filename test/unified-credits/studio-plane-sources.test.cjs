@@ -20,5 +20,17 @@ test('the local signed source manifest includes an owned secondary video plane o
   assert(Buffer.byteLength(JSON.stringify(records[1]))<128*1024);
   await assert.rejects(gateway.prepare('owner',{operation:'studio.render',route:'/api/media/process',requestBody:body('studio/sources/foreign/secondary.mp4')}),error=>error.code==='SOURCE_FORBIDDEN');
   assert.equal(records.length,2);assert.equal(quotes,2);
+  const cameraBody=body('studio/sources/owner/secondary.mp4');
+  cameraBody.options.viralData.finish_plan={reframe:{group_stack:{cameras:[
+    {source_url:'http://127.0.0.1:2/v0/b/demo-autopromote-credits/o/studio%2Fsources%2Fowner%2Fcamera-a.mp4'},
+    {source_url:'http://127.0.0.1:2/v0/b/demo-autopromote-credits/o/studio%2Fsources%2Fowner%2Fcamera-b.mp4'},
+  ]}}};
+  await gateway.prepare('owner',{operation:'studio.render',route:'/api/media/process',requestBody:cameraBody});
+  assert.deepEqual(records[2].workflowInput.sources.map(s=>s.storagePath),[
+    'studio/sources/owner/base.mp4','studio/sources/owner/secondary.mp4',
+    'studio/sources/owner/camera-a.mp4','studio/sources/owner/camera-b.mp4']);
+  cameraBody.options.viralData.finish_plan.reframe.group_stack.cameras[1].source_url='http://127.0.0.1:2/v0/b/demo-autopromote-credits/o/studio%2Fsources%2Fforeign%2Fcamera.mp4';
+  await assert.rejects(gateway.prepare('owner',{operation:'studio.render',route:'/api/media/process',requestBody:cameraBody}),error=>error.code==='SOURCE_FORBIDDEN');
+  assert.equal(records.length,3);assert.equal(quotes,3);
  }finally{fs.rmSync(directory,{recursive:true,force:true});for(const key of Object.keys(process.env))if(!(key in previous))delete process.env[key];Object.assign(process.env,previous);}
 });

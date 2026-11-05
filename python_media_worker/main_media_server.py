@@ -8368,8 +8368,8 @@ def build_studio_multicam_command(camera_paths, programme_path, graph, duration,
     command.extend([
         "-i", programme_path, "-filter_complex", graph,
         "-map", "[vout]", "-map", f"{len(camera_paths)}:a?",
-        "-t", str(duration), "-c:v", encoder, "-preset", preset,
-        "-c:a", "copy", "-shortest", "-y", output_path,
+        *build_studio_timeline_mux_args(duration), "-c:v", encoder, "-preset", preset,
+        "-c:a", "copy", "-y", output_path,
     ])
     return command
 
@@ -9087,7 +9087,7 @@ def plan_reframe_timeline_segments(
     the renderer encode one bounded segment at a time without changing the
     editor's cut, framing, split-panel, or Director zoom decisions.
     """
-    allowed_modes = {"off", "speaker_track", "center"}
+    allowed_modes = {"off", "speaker_track", "center", "group_stack"}
     duration = max(0.04, float(duration or 0))
     normalized = {}
     zooms = {}
@@ -9271,7 +9271,10 @@ def build_reframe_segment_filter(
     director_zoom = float(segment.get("zoom") or 1)
     composed = "[segment_base]" if director_zoom > 1.001 else "[vout]"
     mode = segment.get("mode")
-    if mode == "center" and abs(target_width / target_height - 16 / 9) < .01:
+    if mode == "group_stack":
+        # Already composed by the canonical synchronized-camera renderer.
+        graph = f"[0:v]scale={target_width}:{target_height},setsar=1{composed}"
+    elif mode == "center" and abs(target_width / target_height - 16 / 9) < .01:
         graph = build_safe_vertical_fit_filter("[0:v]", composed, target_width, target_height)
     elif mode == "center":
         split_framing = segment.get("split_framing") or {}
@@ -9319,6 +9322,7 @@ async def render_reframe_timeline_sequential(
     programme_fps=None,
     reviewed_subject=False,
     delivery_fps=None,
+    multicam_programme_path=None,
 ):
     """Render bounded framing intervals on one source or delivery picture clock."""
     if programme_fps is not None and delivery_fps is not None:
@@ -9340,6 +9344,9 @@ async def render_reframe_timeline_sequential(
     concat_path = os.path.join(work_dir, f"{job_id}_reframe_concat.txt")
     try:
         for index, segment in enumerate(specs):
+            is_multicam = segment.get("mode") == "group_stack"
+            if is_multicam and not multicam_programme_path:
+                raise ValueError("Timed Multi-Camera needs its verified synchronized programme")
             segment_path = os.path.join(work_dir, f"{job_id}_reframe_{index:03d}.mp4")
             segment_paths.append(segment_path)
             split_framing = segment.get("split_framing") or {}
@@ -9353,7 +9360,8 @@ async def render_reframe_timeline_sequential(
             if len(active_offsets) > 1:
                 raise ValueError("A source split supports one alternate full-frame angle per segment")
             command = [
-                "ffmpeg", "-ss", f"{segment['start']:.9f}", "-i", source_path,
+                "ffmpeg", "-ss", f"{segment['start']:.9f}", "-i",
+                multicam_programme_path if is_multicam else source_path,
             ]
             if active_offsets:
                 command.extend([
@@ -32023,10 +32031,84 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 and str(reframe_timeline_cuts[0].get("mode") or "").lower() == "group_stack"
                 and float(reframe_timeline_cuts[0].get("time", 0)) <= 0.001
             )
+            async def render_multicam_programme(destination_path):
+                logger.info("Applying synchronized multi-camera composition...")
+                group_stack_plan = finish_reframe_plan.get("group_stack") or {}
+                camera_plans = list(group_stack_plan.get("cameras") or [])[:4]
+                if not camera_plans:
+                    camera_plans = [
+                        group_stack_plan.get("top") or {},
+                        group_stack_plan.get("bottom") or {},
+                    ]
+                camera_plans = [camera for camera in camera_plans if camera]
+                camera_urls = [
+                    str(camera.get("source_url") or "").strip()
+                    for camera in camera_plans
+                ]
+                if (
+                    len(camera_plans) < 2
+                    or len(camera_plans) > 4
+                    or any(not source_url for source_url in camera_urls)
+                    or len(set(camera_urls)) != len(camera_urls)
+                ):
+                    raise RuntimeError(
+                        "Multi-Camera requires two to four distinct clean camera source URLs"
+                    )
+                camera_paths = []
+                for camera_index, source_url in enumerate(camera_urls):
+                    if source_url != request.video_url:
+                        sequence_temp_paths.add(os.path.join(
+                            SHARED_TMP_DIR, f"{job_id}_multicam_{camera_index + 1}.mp4"))
+                    camera_paths.append(
+                        input_path
+                        if source_url == request.video_url
+                        else await materialize_video_input(
+                            source_url,
+                            os.path.join(
+                                SHARED_TMP_DIR,
+                                f"{job_id}_multicam_{camera_index + 1}.mp4",
+                            ),
+                            keep_audio=False,
+                        )
+                    )
+                source_dimensions = [
+                    get_video_dimensions(camera_path) for camera_path in camera_paths
+                ]
+                if any(segment.url != request.video_url for segment in normalized_segments):
+                    raise ValueError("Multi-Camera needs a single synchronized programme timeline; separate appended programmes need their own camera setup")
+                camera_ranges = (
+                    [(float(segment.start_time), float(segment.end_time)) for segment in normalized_segments]
+                    if normalized_segments else [(float(request.start_time), float(request.end_time))]
+                )
+                for camera, camera_path in zip(camera_plans, camera_paths):
+                    camera_end = max(end for _, end in camera_ranges) + float(camera.get("offset_seconds", 0)) - float(camera.get("time_origin_seconds", 0))
+                    if get_media_duration(camera_path) + 0.05 < camera_end:
+                        raise ValueError("A camera angle ends before the selected timeline. Shorten the edit or replace that angle; cameras are never looped to fabricate coverage.")
+                camera_transitions = [build_segment_transition_filters(
+                    float(segment.end_time) - float(segment.start_time),
+                    segment.transition_in, segment.transition_out,
+                    segment.transition_duration, has_audio=False,
+                )["video_filters"] for segment in normalized_segments]
+                timeline_filter, camera_labels, camera_duration = build_studio_camera_timeline(camera_plans, camera_ranges, camera_transitions)
+                group_stack_filter = timeline_filter + ";" + build_multicam_layout_filter(
+                    source_dimensions,
+                    reframe_target_width,
+                    reframe_target_height,
+                    {**group_stack_plan, "cameras": camera_plans},
+                    input_labels=camera_labels,
+                )
+                await run_subprocess_async(build_studio_multicam_command(
+                    camera_paths, trimmed_path, group_stack_filter, camera_duration,
+                    destination_path, GPU_VIDEO_ENCODER, GPU_PRESET,
+                ), check=True)
+
             try:
                 if reframe_timeline_cuts and not global_multicam_cut:
-                    if any(str(cut.get("mode") or "").lower() == "group_stack" for cut in reframe_timeline_cuts):
-                        raise ValueError("Timed Multi-Camera changes require one synchronized camera programme per framing segment")
+                    has_multicam = any(str(cut.get("mode") or "").lower() == "group_stack" for cut in reframe_timeline_cuts)
+                    multicam_programme_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_multicam_programme.mp4") if has_multicam else None
+                    if multicam_programme_path:
+                        sequence_temp_paths.add(multicam_programme_path)
+                        await render_multicam_programme(multicam_programme_path)
                     src_w, src_h = get_video_dimensions(reframe_source_path)
                     reframe_duration = get_media_duration(reframe_source_path)
                     programme_fps = None
@@ -32061,75 +32143,13 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         job_id=job_id,
                         programme_fps=programme_fps,
                         reviewed_subject=bool(request.subjectVfx),
+                        multicam_programme_path=multicam_programme_path,
                     )
+                    if multicam_programme_path:
+                        os.remove(multicam_programme_path)
                     working_path = cropped_path
                 elif crop_mode == "group_stack":
-                    logger.info("Applying synchronized multi-camera composition...")
-                    group_stack_plan = finish_reframe_plan.get("group_stack") or {}
-                    camera_plans = list(group_stack_plan.get("cameras") or [])[:4]
-                    if not camera_plans:
-                        camera_plans = [
-                            group_stack_plan.get("top") or {},
-                            group_stack_plan.get("bottom") or {},
-                        ]
-                    camera_plans = [camera for camera in camera_plans if camera]
-                    camera_urls = [
-                        str(camera.get("source_url") or "").strip()
-                        for camera in camera_plans
-                    ]
-                    if (
-                        len(camera_plans) < 2
-                        or len(camera_plans) > 4
-                        or any(not source_url for source_url in camera_urls)
-                        or len(set(camera_urls)) != len(camera_urls)
-                    ):
-                        raise RuntimeError(
-                            "Multi-Camera requires two to four distinct clean camera source URLs"
-                        )
-                    camera_paths = []
-                    for camera_index, source_url in enumerate(camera_urls):
-                        camera_paths.append(
-                            input_path
-                            if source_url == request.video_url
-                            else await materialize_video_input(
-                                source_url,
-                                os.path.join(
-                                    SHARED_TMP_DIR,
-                                    f"{job_id}_multicam_{camera_index + 1}.mp4",
-                                ),
-                                keep_audio=False,
-                            )
-                        )
-                    source_dimensions = [
-                        get_video_dimensions(camera_path) for camera_path in camera_paths
-                    ]
-                    if any(segment.url != request.video_url for segment in normalized_segments):
-                        raise ValueError("Multi-Camera needs a single synchronized programme timeline; separate appended programmes need their own camera setup")
-                    camera_ranges = (
-                        [(float(segment.start_time), float(segment.end_time)) for segment in normalized_segments]
-                        if normalized_segments else [(float(request.start_time), float(request.end_time))]
-                    )
-                    for camera, camera_path in zip(camera_plans, camera_paths):
-                        camera_end = max(end for _, end in camera_ranges) + float(camera.get("offset_seconds", 0)) - float(camera.get("time_origin_seconds", 0))
-                        if get_media_duration(camera_path) + 0.05 < camera_end:
-                            raise ValueError("A camera angle ends before the selected timeline. Shorten the edit or replace that angle; cameras are never looped to fabricate coverage.")
-                    camera_transitions = [build_segment_transition_filters(
-                        float(segment.end_time) - float(segment.start_time),
-                        segment.transition_in, segment.transition_out,
-                        segment.transition_duration, has_audio=False,
-                    )["video_filters"] for segment in normalized_segments]
-                    timeline_filter, camera_labels, camera_duration = build_studio_camera_timeline(camera_plans, camera_ranges, camera_transitions)
-                    group_stack_filter = timeline_filter + ";" + build_multicam_layout_filter(
-                        source_dimensions,
-                        reframe_target_width,
-                        reframe_target_height,
-                        {**group_stack_plan, "cameras": camera_plans},
-                        input_labels=camera_labels,
-                    )
-                    await run_subprocess_async(build_studio_multicam_command(
-                        camera_paths, trimmed_path, group_stack_filter, camera_duration,
-                        cropped_path, GPU_VIDEO_ENCODER, GPU_PRESET,
-                    ), check=True)
+                    await render_multicam_programme(cropped_path)
                     working_path = cropped_path
                 elif crop_mode == "center" and finish_reframe_plan.get("split_source"):
                     src_w, src_h = get_video_dimensions(reframe_source_path)

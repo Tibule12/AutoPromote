@@ -1,6 +1,6 @@
 # Replace a background
 
-Development documentation • product 1.2.0 • knowledge 1.0.52 • 2026-11-02
+Development documentation • product 1.2.0 • knowledge 1.0.53 • 2026-11-05
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 

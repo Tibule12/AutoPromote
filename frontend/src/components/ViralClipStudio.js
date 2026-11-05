@@ -1971,12 +1971,15 @@ const generateClientSideCaptionSegments = ({ text = "", duration = 30, sourceCli
   return segments;
 };
 
-const resolveInitialCaptionSegments = (clip, duration) => {
+const resolveInitialCaptionSegments = (clip, duration, sourceClipId = clip?.sourceClipId || clip?.id || null) => {
+  const bindSource = segments => segments.map(segment => ({ ...segment,
+    ...(!segment.sourceClipId || segment.sourceClipId === clip?.id ? { sourceClipId } : {}),
+  }));
   if (Array.isArray(clip?.segments) && clip.segments.length) {
-    return normalizeCaptionSegments(splitCaptionSegmentsForReadability(clip.segments));
+    return bindSource(normalizeCaptionSegments(splitCaptionSegmentsForReadability(clip.segments)));
   }
   if (Array.isArray(clip?.captions) && clip.captions.length) {
-    return normalizeCaptionSegments(splitCaptionSegmentsForReadability(clip.captions));
+    return bindSource(normalizeCaptionSegments(splitCaptionSegmentsForReadability(clip.captions)));
   }
   const text = normalizePlainText(
     clip?.transcript || clip?.text || clip?.hookText || ""
@@ -1988,8 +1991,11 @@ const resolveInitialCaptionSegments = (clip, duration) => {
   return generateClientSideCaptionSegments({
     text,
     duration: clipDuration,
-    sourceClipId: clip?.id || null,
-  });
+    sourceClipId,
+  }).map(segment => ({ ...segment,
+    start: segment.start + Math.max(0, Number(clip?.start || 0)),
+    end: segment.end + Math.max(0, Number(clip?.start || 0)),
+  }));
 };
 
 const getTimedCaptionPreviewState = ({ segments, sourceTime, clipStartTime = 0, styleName = "bold_pop", captionScale = 1 }) => {
@@ -2991,7 +2997,7 @@ const ViralClipStudio = ({
   const [captionDraftLanguage, setCaptionDraftLanguage] = useState("und");
   const [captionDraftSpeaker, setCaptionDraftSpeaker] = useState("choir");
   const [captionSegments, setRawCaptionSegments] = useState(() =>
-    ensureUniqueCaptionIds(resolveInitialCaptionSegments((clips || [])[0], (clips || [])[0]?.duration))
+    ensureUniqueCaptionIds(resolveInitialCaptionSegments((clips || [])[0], (clips || [])[0]?.duration, "main"))
   );
   const setCaptionSegments = useCallback(update => {
     setRawCaptionSegments(previous => ensureUniqueCaptionIds(
@@ -6254,8 +6260,8 @@ const ViralClipStudio = ({
     setTrimPreviewLoop(false);
     setHookPreviewLoop(false);
 
-    const initialForClip = resolveInitialCaptionSegments(clip, clip?.duration);
-    if (initialForClip.length > 0) {
+    const initialForClip = resolveInitialCaptionSegments(clip, clip?.duration, identity.sourceClipId);
+    if ((selectedClip?.id !== clip.id || options.replaceRange) && initialForClip.length > 0) {
       setCaptionSegments(initialForClip);
       if (clip.autoCaptions !== undefined) {
         setAutoCaptions(Boolean(clip.autoCaptions));
@@ -6277,6 +6283,36 @@ const ViralClipStudio = ({
         setStudioPlaybackRequest(value => value + 1);
       }
     }
+  };
+
+  const saveCurrentRangeAsMoment = () => {
+    if (trackStates.video?.locked || !currentTimelineClip) return;
+    const window = getTimelineClipWindow(currentTimelineClip);
+    if (!(window.end > window.start) || !currentTimelineClip.url) return;
+    const sourceId = currentTimelineClip.sourceClipId || currentTimelineClip.id;
+    const duplicate = orderedClips.some(clip =>
+      (clip.url || videoUrl) === currentTimelineClip.url &&
+      Math.abs(Number(clip.start) - window.start) < .001 && Math.abs(Number(clip.end) - window.end) < .001);
+    if (duplicate) {
+      setStudioActionMessage("This source range is already in Moments. Trim the range to save a different moment.");
+      return;
+    }
+    const name = normalizePlainText(globalThis.prompt("Name this moment", `Saved moment ${orderedClips.length + 1}`) || "");
+    if (!name) return;
+    const moment = {
+      id: createSecureId("saved-moment"), sourceClipId: sourceId,
+      name, reason: name, origin: "creator_range", start: window.start, end: window.end,
+      duration: window.end - window.start,
+      sourceDuration: Number(currentTimelineClip.duration || videoRef.current?.duration || window.end),
+      url: currentTimelineClip.url,
+      storagePath: currentTimelineClip.sourceStoragePath || currentTimelineClip.storagePath || sourceStoragePath || "",
+      contentHash: currentTimelineClip.contentHash || sourceContentHash || null,
+      captions: captionSegments.filter(segment => !segment.sourceClipId || segment.sourceClipId === sourceId),
+      autoCaptions,
+    };
+    setOrderedClips(current => [...current, moment]);
+    setProjectRailTab("moments");
+    setStudioActionMessage(`Saved “${name}” in Moments. The current edit and original source are unchanged; Undo removes this saved range.`);
   };
 
   const applyGuidedHookToClip = (clip, options = {}) => {
@@ -8294,10 +8330,13 @@ const ViralClipStudio = ({
     setStudioActionMessage("Fit full starts here on the framing track. The entire source stays visible in preview and export.");
   };
 
+  const getFramingAuthoringTime = () =>
+    studioPlaybackClockRef.current.read()?.programmeTime ?? previewTimelineTime;
+
   const recordReframeModeAtPlayhead = mode => {
     // A rounded-up millisecond is after a fractional paused source frame.
     // Start the decision on this frame, rather than waiting for playback.
-    const time = Math.floor(Math.max(0, previewTimelineTime) * 1000) / 1000;
+    const time = Math.floor(Math.max(0, getFramingAuthoringTime()) * 1000) / 1000;
     setReframeModeCuts(current => {
       const normalized = normalizeReframeModeCuts(current);
       const baseline =
@@ -8323,7 +8362,7 @@ const ViralClipStudio = ({
 
   const setPictureFillForCurrentShot = value => {
     const fill = clampNumber(value, 1, 1.5, 1);
-    const time = Number(Math.max(0, previewTimelineTime).toFixed(3));
+    const time = Number(Math.max(0, getFramingAuthoringTime()).toFixed(3));
     setReframeModeCuts(current => {
       const cuts = normalizeReframeModeCuts(current);
       const active = [...cuts].reverse().find(cut => cut.time <= time + 0.001);
@@ -8369,7 +8408,7 @@ const ViralClipStudio = ({
         ? interpolateReframeKeyframes(frame.keyframes, previewTimelineTime) : frame;
       const next = { ...frame, ...changes };
       if (tracking && (addMark || changes.x !== undefined || changes.y !== undefined)) {
-        const time = Number(previewTimelineTime.toFixed(3));
+        const time = Number(getFramingAuthoringTime().toFixed(3));
         const marks = frame.keyframes?.length ? frame.keyframes : [{ time: 0, x: frame.x, y: frame.y }];
         next.keyframes = [...marks.filter(mark => Math.abs(mark.time - time) > .05),
           { time, x: changes.x ?? position.x, y: changes.y ?? position.y }].sort((a, b) => a.time - b.time);
@@ -10684,7 +10723,7 @@ const ViralClipStudio = ({
   };
 
   const addReframeKeyframeAtPlayhead = () => {
-    const time = Number(previewTimelineTime || 0);
+    const time = Number(getFramingAuthoringTime() || 0);
     const currentPosition = interpolateReframeKeyframes(reframeKeyframes, time);
     const existing = reframeKeyframes.find(
       keyframe => Math.abs(Number(keyframe.time) - time) < 0.08
@@ -10752,7 +10791,7 @@ const ViralClipStudio = ({
 
   const addSpeakerFocusCutAtPlayhead = slot => {
     if (!["top", "bottom"].includes(slot)) return;
-    const time = Math.max(0, Number(previewTimelineTime || 0));
+    const time = Math.max(0, Number(getFramingAuthoringTime() || 0));
     const roundedTime = Number(time.toFixed(3));
     const existing = speakerFocusCuts.find(cut => Math.abs(Number(cut.time) - time) < 0.08);
     const nextCut = {
@@ -15924,7 +15963,13 @@ const ViralClipStudio = ({
   const addCleanSpeakerAngle = event => {
     const files = Array.from(event.target.files || []);
     if (!files.length) return;
-    const videoFiles = files.filter(file => file.type.startsWith("video/")).slice(0, 12);
+    const availableSlots = Math.max(0, MAX_STUDIO_ANGLES - speakerStackSources.length);
+    if (!availableSlots) {
+      setStudioActionMessage("The camera bank has twelve angles. Remove unused angles before adding another; original media and saved versions are retained.");
+      event.target.value = "";
+      return;
+    }
+    const videoFiles = files.filter(file => file.type.startsWith("video/")).slice(0, availableSlots);
     if (!videoFiles.length) {
       toast.error("Choose a real video source for the clean speaker angle.");
       event.target.value = "";
@@ -18251,7 +18296,7 @@ const ViralClipStudio = ({
               <div className="studio-project-list__heading">
                 <div>
                   <span>Discovery</span>
-                  <strong id="studio-moments-heading">Detected moments</strong>
+                  <strong id="studio-moments-heading">Project moments</strong>
                 </div>
                 <i>{orderedClips.length}</i>
               </div>
@@ -21718,6 +21763,32 @@ const ViralClipStudio = ({
               }`}
               data-testid="clip-studio-inspector"
             >
+              {studioInspectorTab === "moments" ? (
+                <div className="clip-inspector-body" role="tabpanel" aria-label="Moment selection" data-testid="studio-moments-inspector">
+                  <div className="inspector-heading-row">
+                    <div><span className="panel-kicker">Moments</span><h4>Choose the source range to edit</h4></div>
+                    <span>{orderedClips.length} available</span>
+                  </div>
+                  <p>Choose a discovered or saved moment in the library. Its source range opens on the ordinary timeline; your other clips and layers stay in the project. Changes can be undone.</p>
+                  <button type="button" disabled={!!trackStates.video?.locked || !currentTimelineClip}
+                    onClick={saveCurrentRangeAsMoment}>Save current range as moment</button>
+                  {selectedClip ? (
+                    <>
+                      <h5>{normalizePlainText(selectedClip.hookText || selectedClip.reason || "Selected moment")}</h5>
+                      <p>{Number(selectedClip.start || 0).toFixed(2)}s–{Number(selectedClip.end || 0).toFixed(2)}s · Source time</p>
+                      <div className="inspector-inline-actions">
+                        <button type="button" disabled={!!trackStates.video?.locked}
+                          onClick={() => focusClipInEditor(selectedClip, { boundary: "start", play: true })}>Preview selected moment</button>
+                        <button type="button" onClick={() => selectCreativeTool("cut")}>Trim this moment</button>
+                        <button type="button" disabled={!!trackStates.video?.locked}
+                          onClick={() => handleClipAction(selectedClip, { type: "apply-hook" })}>Apply suggested hook</button>
+                      </div>
+                      <small>Scores and story suggestions are estimates. Review the actual picture and sound before exporting.</small>
+                    </>
+                  ) : <p>No detected moments are saved in this project. Import a source or open a Find Viral Clips result; your existing timeline remains editable.</p>}
+                </div>
+              ) : null}
+
               <div
                 className={`creative-director-panel ${
                   activeCreativeTool === "moments" ? "is-expanded" : "is-compact"
@@ -21940,30 +22011,6 @@ const ViralClipStudio = ({
                   setActiveCreativeTool(tabId);
                 }}
               />
-
-              {studioInspectorTab === "moments" ? (
-                <div className="clip-inspector-body" role="tabpanel" aria-label="Moment selection" data-testid="studio-moments-inspector">
-                  <div className="inspector-heading-row">
-                    <div><span className="panel-kicker">Moments</span><h4>Choose the source range to edit</h4></div>
-                    <span>{orderedClips.length} available</span>
-                  </div>
-                  <p>Choose a detected moment in the library. Its source range opens on the ordinary timeline; your other clips and layers stay in the project. Changes can be undone.</p>
-                  {selectedClip ? (
-                    <>
-                      <h5>{normalizePlainText(selectedClip.hookText || selectedClip.reason || "Selected moment")}</h5>
-                      <p>{Number(selectedClip.start || 0).toFixed(2)}s–{Number(selectedClip.end || 0).toFixed(2)}s · Source time</p>
-                      <div className="inspector-inline-actions">
-                        <button type="button" disabled={!!trackStates.video?.locked}
-                          onClick={() => focusClipInEditor(selectedClip, { boundary: "start", play: true })}>Preview selected moment</button>
-                        <button type="button" onClick={() => selectCreativeTool("cut")}>Trim this moment</button>
-                        <button type="button" disabled={!!trackStates.video?.locked}
-                          onClick={() => handleClipAction(selectedClip, { type: "apply-hook" })}>Apply suggested hook</button>
-                      </div>
-                      <small>Scores and story suggestions are estimates. Review the actual picture and sound before exporting.</small>
-                    </>
-                  ) : <p>No detected moments are saved in this project. Import a source or open a Find Viral Clips result; your existing timeline remains editable.</p>}
-                </div>
-              ) : null}
 
               {studioInspectorTab === "cut" ? (
                 <div className="clip-inspector-body cut-inspector-body" role="tabpanel">
@@ -22640,9 +22687,17 @@ const ViralClipStudio = ({
                       <button
                         type="button"
                         data-testid="add-clean-speaker-angle"
+                        disabled={speakerStackSources.length >= MAX_STUDIO_ANGLES}
                         onClick={() => speakerStackSourceInputRef.current?.click()}
                       >
                         + Add angle
+                      </button>
+                      <button type="button" onClick={() => {
+                        const retained = new Set(Object.values(resolvedSpeakerStackSourceIds).filter(Boolean));
+                        setSpeakerStackSources(current => current.filter(source => retained.has(source.id)));
+                        setStudioActionMessage("Unused camera entries removed from this edit. Original media and saved versions are retained; Undo restores the entries.");
+                      }} disabled={!speakerStackSources.some(source => !Object.values(resolvedSpeakerStackSourceIds).includes(source.id))}>
+                        Remove unused angles
                       </button>
                     </div>
                     <input
@@ -23211,7 +23266,7 @@ const ViralClipStudio = ({
                         type="button"
                         className="mini-toggle-btn"
                         onClick={() => {
-                          const time = Number(previewTimelineTime || 0);
+                          const time = Number(getFramingAuthoringTime() || 0);
                           const id = createSecureId("reframe-keyframe");
                             const keyframe = { id, time, x: 28, y: 50, cut: true };
                           setReframeKeyframes(cur => [...cur.filter(k => Math.abs(k.time - time) >= 0.1), keyframe].sort((a,b) => a.time - b.time));
@@ -23225,7 +23280,7 @@ const ViralClipStudio = ({
                         type="button"
                         className="mini-toggle-btn"
                         onClick={() => {
-                          const time = Number(previewTimelineTime || 0);
+                          const time = Number(getFramingAuthoringTime() || 0);
                           const id = createSecureId("reframe-keyframe");
                             const keyframe = { id, time, x: 72, y: 50, cut: true };
                           setReframeKeyframes(cur => [...cur.filter(k => Math.abs(k.time - time) >= 0.1), keyframe].sort((a,b) => a.time - b.time));

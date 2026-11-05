@@ -1,0 +1,13 @@
+{
+  "actualApp": true,
+  "headlessMuted": true,
+  "steps": [
+    "Remove unused camera references → Undo/Redo; original media retained",
+    "Save current trimmed range as named moment → Undo/Redo; original ranges and current sequence preserved",
+    "Switch between real discovered and creator-saved moments; exact range and native playback follow selection",
+    "Native save → cold reopen retains all discovered/saved ranges and selected moment",
+    "Reopened creator-saved moment → quote/consent → canonical CPU export → private download/full decode"
+  ],
+  "external": [],
+  "errors": []
+}

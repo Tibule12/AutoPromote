@@ -1,0 +1,34 @@
+{
+  "actualApp": true,
+  "headlessMuted": true,
+  "external": [],
+  "errors": [],
+  "steps": [
+    "Owned source → quote/consent → actual CPU speech/scene analysis → visible suggestions",
+    "Detected source range opens in Moments and previews on the normal transport",
+    "Trim detected moment → Undo → Redo retains the ordinary edit history",
+    "Real low-coverage face detection is rejected without replacing framing",
+    "Follow existing camera cuts → actual local model analysis → owned durable artifacts",
+    "Save → cold reopen → exact range, moment and framing state retained",
+    "Reopened trimmed moment and reviewed follow path → quote/consent → CPU export → verified private download",
+    "Complete finished-file playback in the ordinary Studio with its editable timeline",
+    "No external network, live provider calls, browser errors or production changes"
+  ],
+  "faceAnalysis": {
+    "engine": "opencv-haar-face-follow",
+    "points": 3,
+    "coverage": 0.2727272727272727
+  },
+  "sourceShots": {
+    "engine": "opencv-yunet-source-shot-follow",
+    "sceneCuts": 0,
+    "points": 11,
+    "artifactsBound": true
+  },
+  "export": {
+    "width": 720,
+    "height": 1280,
+    "duration": 5.257,
+    "fullDecode": true
+  }
+}
