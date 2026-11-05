@@ -14,7 +14,7 @@ const resolveSourceUrl = source => {
   return source?.url ? sanitizeUrl(source.url) : "";
 };
 
-const createStudioSource = (sourceFile, clip, sourceDuration) => {
+const createStudioSource = (sourceFile, clip, sourceDuration, moments = null) => {
   const fallbackDuration = Math.max(1, Number(sourceDuration || sourceFile?.duration || 30));
   const start = Math.max(0, Number(clip?.start || 0));
   const end = Math.max(start + 0.1, Number(clip?.end || start + fallbackDuration));
@@ -27,6 +27,13 @@ const createStudioSource = (sourceFile, clip, sourceDuration) => {
     reason: clip?.reason || "Full source video loaded for manual editing",
     viralScore: clip?.score || clip?.viralScore || 0,
   };
+  // Keep the selected moment first for the ordinary editor's initial focus,
+  // while retaining the other detected ranges from this same source in Moments.
+  const studioClips = [studioClip, ...(clip && Array.isArray(moments) ? moments : [])
+    .filter(item => item && item.id !== clip?.id && Number.isFinite(item.start) &&
+      Number.isFinite(item.end) && item.start >= 0 && item.end > item.start)
+    .map(item => ({ ...item, duration: item.end - item.start,
+      viralScore: item.score || item.viralScore || 0 }))];
 
   if (sourceFile instanceof File || sourceFile instanceof Blob) {
     const studioFile =
@@ -39,7 +46,7 @@ const createStudioSource = (sourceFile, clip, sourceDuration) => {
             type: sourceFile.type || "video/mp4",
           });
     studioFile.openStudio = true;
-    studioFile.clips = [studioClip];
+    studioFile.clips = studioClips;
     return studioFile;
   }
 
@@ -48,7 +55,7 @@ const createStudioSource = (sourceFile, clip, sourceDuration) => {
       ...sourceFile,
       isRemote: Boolean(sourceFile.isRemote || sourceFile.url),
       openStudio: true,
-      clips: [studioClip],
+      clips: studioClips,
     };
   }
 
@@ -58,13 +65,14 @@ const createStudioSource = (sourceFile, clip, sourceDuration) => {
     url: typeof sourceFile === "string" ? sourceFile : "",
     isRemote: true,
     openStudio: true,
-    clips: [studioClip],
+    clips: studioClips,
   };
 };
 
 function ViralClipStudioPanel({
   initialFile = null,
   initialClip = null,
+  initialClips = null,
   autoOpen = false,
   onBack,
   onOpenPublisher,
@@ -274,8 +282,8 @@ function ViralClipStudioPanel({
 
   useEffect(() => {
     if (!autoOpen || sourceState !== "ready" || !sourceFile) return;
-    setStudioSource(createStudioSource(sourceFile, selectedClip, sourceDuration));
-  }, [autoOpen, selectedClip, sourceDuration, sourceFile, sourceState]);
+    setStudioSource(createStudioSource(sourceFile, selectedClip, sourceDuration, initialClips));
+  }, [autoOpen, selectedClip, sourceDuration, sourceFile, sourceState, initialClips]);
 
   const previewUrl = resolveSourceUrl(sourceFile);
   const sourceName = useMemo(
@@ -464,7 +472,7 @@ function ViralClipStudioPanel({
                     onUpgrade?.();
                     return;
                   }
-                  setStudioSource(createStudioSource(sourceFile, selectedClip, sourceDuration));
+                  setStudioSource(createStudioSource(sourceFile, selectedClip, sourceDuration, initialClips));
                 }}
               >
                 Open Creator Studio

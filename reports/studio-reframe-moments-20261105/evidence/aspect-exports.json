@@ -1,0 +1,38 @@
+[
+  {
+    "aspect": "4-5",
+    "horizontal": 31,
+    "width": 720,
+    "height": 900,
+    "duration": 12,
+    "bytes": 1451385,
+    "fullDecode": true
+  },
+  {
+    "aspect": "1-1",
+    "horizontal": 31,
+    "width": 720,
+    "height": 720,
+    "duration": 12,
+    "bytes": 1524478,
+    "fullDecode": true
+  },
+  {
+    "aspect": "16-9",
+    "horizontal": 31,
+    "width": 1280,
+    "height": 720,
+    "duration": 12,
+    "bytes": 2525792,
+    "fullDecode": true
+  },
+  {
+    "aspect": "9-16",
+    "horizontal": 31,
+    "width": 720,
+    "height": 1280,
+    "duration": 12,
+    "bytes": 1547954,
+    "fullDecode": true
+  }
+]

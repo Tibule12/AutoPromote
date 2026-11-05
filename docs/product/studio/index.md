@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.52 • 2026-11-02
+Development documentation • product 1.2.0 • knowledge 1.0.53 • 2026-11-05
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -31,6 +31,7 @@ Shows the real composition as separate front-to-back layer and group rows, with 
 7. Selecting a group focuses its property rows; select an ordinary child clip to edit that child’s keys. Graphics and child-track locks block group timing changes.
 8. Use the normal source editing controls, undo/redo, save/reopen and export. Inspect the exact movie beside the editable timeline. Group splitting/duplication and source-occurrence attachment remain unsupported.
 9. Download project backup saves the current editable project and available media. Select Include saved versions in backup when the saved-version history is also needed; this choice does not delete local versions. Owned media access is re-authorized when restoring.
+10. Open Moments to choose a discovered range, or trim the current source and choose Save current range as moment. Name the range, then switch between saved moments on the normal timeline. Undo/Redo and project save/reopen preserve the selections and original footage.
 
 **Preview:** Group In/Out uses a half-open programme-time visibility range around assembled child graphics. Group move shifts canonical child timing and keys, retaining source phase. The same derived group range clips linked motion cues for preview and export. Property focus and clip selection do not change the edit.
 
@@ -362,6 +363,10 @@ Reframes a source or crops an overlay using the shared time map and existing ren
 1. Open the relevant workspace with an owned source.
 2. Review the result and its limitations before saving or exporting.
 3. With 16:9 and Preserve frame, mixed footage is normalized directly into the wide sequence canvas. Portrait sources retain their proportions instead of shrinking all wide clips into the original upload shape.
+4. Choose the output aspect in Reframe. Solo Speaker uses reviewed crop points; choose Camera cut or Smooth follow for a point. Left/Right and Alternate Speakers are editable framing shortcuts.
+5. Show Everyone has separate top/bottom crops and reviewed tracking points. Multi-Camera needs two to four distinct, synchronized full-size sources and explicit timecode confirmation. Review timed changes in Preview and the actual export.
+6. The camera bank holds twelve angles across imports. Remove unused angles removes unused references from the current edit; Undo restores them, and original media and saved versions remain.
+7. Face detection is optional. Poor coverage leaves the current framing unchanged. Follow existing camera cuts proposes foreground crops for each shot; it does not identify who is speaking.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 

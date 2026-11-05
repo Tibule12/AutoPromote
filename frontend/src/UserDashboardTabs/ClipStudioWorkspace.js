@@ -12,6 +12,7 @@ function ClipStudioWorkspace({ initialFile = null, onOpenPublisher, onUpgrade })
         <ViralClipStudioPanel
           initialFile={editorRequest.file}
           initialClip={editorRequest.clip}
+          initialClips={editorRequest.clips}
           autoOpen={Boolean(editorRequest.clip)}
           onBack={() => setEditorRequest(null)}
           onUpgrade={onUpgrade}
@@ -21,7 +22,7 @@ function ClipStudioWorkspace({ initialFile = null, onOpenPublisher, onUpgrade })
         <FindViralClipsPanel
           initialFile={initialFile}
           onUpgrade={onUpgrade}
-          onOpenStudio={(file, clip) => setEditorRequest({ file, clip })}
+          onOpenStudio={(file, clip, clips) => setEditorRequest({ file, clip, clips })}
         />
       )}
     </section>

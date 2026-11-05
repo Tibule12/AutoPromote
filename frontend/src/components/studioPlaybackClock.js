@@ -1,5 +1,4 @@
 import { getSafeMediaSource } from '../utils/security';
-import { watchStudioProgrammeFrames } from './studioSourcePreview';
 import { mapOutputTickToProgrammeTick, mapProgrammeTickToOutputTick,
   secondsToTicks, ticksToSeconds } from './studioTime';
 
@@ -39,8 +38,11 @@ export function createStudioPlaybackClock() {
       const read = () => {
         if (disposed || !video || !source || video.currentSrc !== source ||
             video.seeking || video.readyState < 2 || !Number.isFinite(video.currentTime) ||
-            (!renderedOutput && (video.currentTime < start || video.currentTime > end))) return null;
-        return position(video.currentTime);
+            (!renderedOutput && (secondsToTicks(Math.max(0, video.currentTime)) < secondsToTicks(start) ||
+              secondsToTicks(Math.max(0, video.currentTime)) > secondsToTicks(end)))) return null;
+        // Native decoders round to microseconds; an exact domain-tick trim can
+        // land fractionally outside its seconds representation after Home/End.
+        return position(renderedOutput ? video.currentTime : Math.max(start, Math.min(end, video.currentTime)));
       };
       readPosition = read;
       publish(read() || position(fallbackSourceTime));
@@ -58,7 +60,14 @@ export function createStudioPlaybackClock() {
         waiting = false; stopDisplay(); sync();
         // The lightweight UI follows the continuously advancing media clock at
         // display cadence. Canvas composition still uses decoded-picture events.
-        stopFrames = watchStudioProgrammeFrames(video, displayFrame, { decodedFrames: false });
+        let frame;
+        const tick = () => {
+          if (disposed || waiting || video.paused || video.ended) return;
+          displayFrame();
+          frame = window.requestAnimationFrame(tick);
+        };
+        if (!video?.paused && !video?.ended) frame = window.requestAnimationFrame(tick);
+        stopFrames = () => window.cancelAnimationFrame(frame);
       };
       const suspend = () => { waiting = true; stopDisplay(); };
       const paused = () => { stopDisplay(); waiting = false; sync(); };

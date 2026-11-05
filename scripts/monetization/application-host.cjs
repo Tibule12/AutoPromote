@@ -97,6 +97,17 @@ const facade = {
 cache("firebase-admin", facade);
 cache("../../src/firebaseAdmin", { admin: facade, db, storage: facade.storage() });
 cache("../../firebaseAdmin", { admin: facade, db, storage: facade.storage() });
+if (config.env.CREDITS_LOCAL_FACE_ANALYSIS === "true") {
+  const original = require("../../src/utils/cloudRunAuth");
+  const adapter = require("./local-face-analysis.cjs").localFaceAnalysis({
+    config, directory: path.dirname(process.argv[2]),
+  });
+  cache("../../src/utils/cloudRunAuth", { ...original,
+    buildWorkerRequestConfig: async (target, options = {}) =>
+      ["/track-studio-faces", "/preview-silence"].some(endpoint => target === config.worker.origin + endpoint)
+        ? { ...options, adapter } : original.buildWorkerRequestConfig(target, options),
+  });
+}
 const { createWalletService } = require("../../src/services/unifiedCredits/wallet");
 const { createMockVerifier } = require("../../src/services/unifiedCredits/rewardProof");
 const { createAdmission } = require("../../src/services/unifiedCredits/admission");
@@ -367,6 +378,7 @@ app.use("/api", auth, (req, res, next) => {
   // Block every unpriced/provider/admin mutation; allow ordinary own profile and workspace saving.
   if (
     req.method !== "GET" &&
+    !(['/media/track-studio-faces', '/media/preview-silence'].includes(req.path) && config.env.CREDITS_LOCAL_FACE_ANALYSIS === 'true') &&
     !(req.path==='/media/studio-3d/preview' && require('../../src/services/studio3DLocal').configuration()) &&
     !(process.env.STUDIO_BACKGROUND_DEMO==='true' && (
       req.path==='/studio/director/projects/revisions' ||

@@ -1,0 +1,177 @@
+{
+  "recordedAt": "2026-11-05T08:04:03.389677+00:00",
+  "focusedPassingTestsAcrossRecordedRuns": 129,
+  "ffmpegSubtestsPassed": 11,
+  "checks": [
+    {
+      "check": "actual editor controls",
+      "passed": 7,
+      "logSha256": "ac551d6c3140cc6ddea13e8ee002cabb9ac6dc37612e5e5f5e382a399d6ed897",
+      "privateLogBasename": "autopromote-studio-final-editor-tests-20261105.log"
+    },
+    {
+      "check": "discovery handoff",
+      "passed": 13,
+      "logSha256": "4d469071b0947b9583187dbd1d1aba0a36e20c958e18f7627b5b3db64058ac57",
+      "privateLogBasename": "autopromote-reframe-handoff-tests-20261105.log"
+    },
+    {
+      "check": "clock/display/interpolation",
+      "passed": 11,
+      "logSha256": "a93c013ec64b0f51fb3fe7483936a81f99506ae1264ce7f3ae21a540c629f376",
+      "privateLogBasename": "autopromote-reframe-clock-tests-20261105.log"
+    },
+    {
+      "check": "server face/artifact",
+      "passed": 17,
+      "logSha256": "960b4ebce43c6e6075a3bb6c8e3413965df7ad78ea658fc8bbd6d9e756b54674",
+      "privateLogBasename": "autopromote-reframe-analysis-server-tests-20261105.log"
+    },
+    {
+      "check": "canonical framing/camera FFmpeg",
+      "passed": 28,
+      "logSha256": "6336504eb9d455ea3539d02f1971260a6e50a092ded1c4b56d028f584396d6a9",
+      "privateLogBasename": "autopromote-reframe-python-final-20261105-r4.log"
+    },
+    {
+      "check": "face tracking worker",
+      "passed": 12,
+      "logSha256": "5f4717f620178f8beaa5e6adfede1587572201562c3a87942d6b1cf928971edc",
+      "privateLogBasename": "autopromote-reframe-face-worker-tests-20261105.log"
+    },
+    {
+      "check": "wallet application real emulator",
+      "passed": 14,
+      "logSha256": "e8afa0702f69a84774d6f3e4e0a1448868ae969151fa96040a461730eaa60b9d",
+      "privateLogBasename": "autopromote-reframe-credits-application-tests-20261105.log"
+    },
+    {
+      "check": "source/receipt/transport contracts",
+      "passed": 10,
+      "logSha256": "fe7b551bc59d370beb1ff3b4afd8698070d7759988aa0f8ada4478e56133cfb3",
+      "privateLogBasename": "autopromote-reframe-local-boundaries-20261105.log"
+    },
+    {
+      "check": "product knowledge and generated help",
+      "passed": 17,
+      "logSha256": "7cd376f784e78864c1fc3c5036127f3621f25d21628db24322063c02d902fdb0",
+      "privateLogBasename": "autopromote-studio-knowledge-final-20261105-r2.log"
+    }
+  ],
+  "targetedLint": {
+    "files": 19,
+    "errors": 0,
+    "warnings": 0
+  },
+  "isolatedBuild": {
+    "status": 0,
+    "signal": null
+  },
+  "productionConfigurationBuild": {
+    "status": 0,
+    "signal": null,
+    "creditsPilot": false,
+    "localEmulators": false,
+    "apiOrigin": "https://api.autopromote.org",
+    "publicFirebaseProject": "autopromote-cc6d3"
+  },
+  "anonymousWelcomeViewportComparisons": 8,
+  "matchingWelcomeContent": true,
+  "remoteCIStarted": true,
+  "broadSuite": {
+    "initialPassed": 174,
+    "initialTotal": 176,
+    "initialFailures": "Two range-step assertions corrected; both terminal-hold targeted regressions passed.",
+    "laterBroadSelectionExit": 143,
+    "laterBroadSelectionCountedAsPassing": false
+  },
+  "productionChangesForStudio": false,
+  "paidCloudOrGpuStarted": false,
+  "generatedHelpFilesChecked": 43,
+  "finalMomentsVisibilityRegression": {
+    "passed": 1,
+    "includedInRecordedEditorCount": true,
+    "logSha256": "372fde49216fe9a0ad45fa3aa971cfc2bf8880da5e90939cfbd08d982609419c"
+  },
+  "finalMomentsBrowserVisibility": {
+    "actualApp": true,
+    "headlessMuted": true,
+    "expiredCapabilitiesRecovered": true,
+    "controlVisibleWithoutScrolling": true,
+    "sourceTime": 8.42328,
+    "browserErrors": [],
+    "productionTraffic": false
+  },
+  "workerImageGateAddedSuites": {
+    "localPassed": 19,
+    "logSha256": "aaffce018782d81d24ccc3ab4528acf905921e0ac6b47230796d95fd08119ab7",
+    "includedInCanonicalWorkerRecordedCount": true
+  },
+  "pullRequest": 522,
+  "initialRemoteWorkerImage": {
+    "tests": 148,
+    "passed": 145,
+    "failed": 3,
+    "run": 41992252833,
+    "localHarnessRerunPassed": 19,
+    "fixedExactFrameAssertionsRetained": true
+  },
+  "initialRemoteBrowser": {
+    "passed": 23,
+    "failed": 7,
+    "skipped": 17,
+    "run": 41992253372,
+    "resolved": false
+  },
+  "nativeSeekRepair": {
+    "focusedClockPositionPassed": 10,
+    "newRegressionTests": 2,
+    "targetedLintFiles": 4,
+    "errors": 0,
+    "warnings": 0
+  },
+  "remoteWorkerImage": {
+    "run": 42007606389,
+    "testsPassed": 148,
+    "realContainerRenderPassed": true
+  },
+  "nativeFramingModeRepair": {
+    "focusedEditorPassed": 3,
+    "newRegressionTests": 1,
+    "targetedLintFiles": 2,
+    "errors": 0,
+    "warnings": 0
+  },
+  "remoteBrowserAfterNativeModeRepair": {
+    "run": 42009912263,
+    "passed": 30,
+    "skipped": 17,
+    "failed": 0
+  },
+  "legacyChangeCompatibility": {
+    "focusedPassed": 9,
+    "includesAllEightFullSuiteFailures": true,
+    "inputAndChangeSupported": true,
+    "duplicateInputSeekRejected": true
+  },
+  "nativeRangeEventOrderingRepair": {
+    "focusedPassed": 12,
+    "browserCasesPassed": 3,
+    "pairedInputChangeRepaintRegression": true,
+    "legacyCompatibility": true,
+    "listenerCleanup": true,
+    "nativeBrowserRunPriorFailed": 6
+  },
+  "workerFirstRelease": {
+    "run": 42010620444,
+    "revision": "media-worker-v1-00125-sif",
+    "imageSource": "3fd196e5015fd8efcd8e050bbf04b54c6cfbfbf7",
+    "imageTestsPassed": 148,
+    "containerRenderPassed": true,
+    "cloudCandidateRenderAudioPassed": true,
+    "productionTrafficPercent": 100,
+    "environmentAndIamUnchanged": true,
+    "resourceLimitsUnchanged": true,
+    "frontendApiMerged": false
+  }
+}

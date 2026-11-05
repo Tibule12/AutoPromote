@@ -1,0 +1,666 @@
+{
+  "recordedAt": "2026-11-05T03:59:42.193Z",
+  "project": "demo-autopromote-credits",
+  "locality": "loopback-only",
+  "paidWorkloadsStarted": false,
+  "invoiceCostsAvailable": false,
+  "cloudPricingQualified": false,
+  "mediaBytesRetained": 75768254,
+  "wallets": [
+    {
+      "userId": "demo-pilot-empty",
+      "balance": 0,
+      "reserved": 0,
+      "totals": {
+        "opening": 0,
+        "granted": 0,
+        "earned": 0,
+        "purchased": 0,
+        "consumed": 0,
+        "refunded": 0,
+        "expired": 0
+      }
+    },
+    {
+      "userId": "demo-pilot-alice",
+      "balance": 166,
+      "reserved": 0,
+      "totals": {
+        "opening": 0,
+        "granted": 200,
+        "earned": 0,
+        "purchased": 0,
+        "consumed": 34,
+        "refunded": 10,
+        "expired": 0
+      }
+    }
+  ],
+  "operations": [
+    {
+      "operationId": "0b6264fd73c458fce049d3791c77e86377efbb31f1ae78cffe78e9500e2ee9f4",
+      "operation": "clips.analyze",
+      "state": "succeeded",
+      "credits": 2
+    },
+    {
+      "operationId": "0b9dd430eb9c758966ec7092a8fb58dc6a8fd3d0d2f609404d7f673ef1ced3da",
+      "operation": "studio.render",
+      "state": "failed",
+      "credits": 2
+    },
+    {
+      "operationId": "0dbdfe2e9fddfe33daef840fc0954b73cecc6776a5a5e9722d592d21f6a6fd2b",
+      "operation": "studio.render",
+      "state": "failed",
+      "credits": 2
+    },
+    {
+      "operationId": "2dfcc444ba2da3d3076d314e681b55c0cb149387411961b737070036e8ef64b9",
+      "operation": "studio.render",
+      "state": "succeeded",
+      "credits": 2
+    },
+    {
+      "operationId": "305dea1cfc3cdebe7df7541f9117189e898151e7152f1f52fceac13c17cfab3e",
+      "operation": "studio.render",
+      "state": "succeeded",
+      "credits": 2
+    },
+    {
+      "operationId": "5ef2936d3bba5a14dd52f209a7ce292e0c66faa0dbacefee2b542a7dac6761c5",
+      "operation": "clips.analyze",
+      "state": "succeeded",
+      "credits": 2
+    },
+    {
+      "operationId": "6a69aa0673268729bac151e5926853dd7c2c51ffb35078b12001ebd7693601e1",
+      "operation": "studio.render",
+      "state": "succeeded",
+      "credits": 2
+    },
+    {
+      "operationId": "7d6870cbe0fb6c940b94e0bf62adcaec6ea6b9e3c19f7b3af7ecc6ad3488f841",
+      "operation": "clips.analyze",
+      "state": "succeeded",
+      "credits": 2
+    },
+    {
+      "operationId": "8fdb1242b583b4532ece7910f56105df4cc2c52e6fd0291b1f31cdede56c62ba",
+      "operation": "studio.render",
+      "state": "succeeded",
+      "credits": 2
+    },
+    {
+      "operationId": "900bee55f09ba6523ebf047d807878710e729e4b3942e3ab11cb5a6c43fdefa3",
+      "operation": "studio.render",
+      "state": "failed",
+      "credits": 2
+    },
+    {
+      "operationId": "9067fdcd0b434b02bde18415457b95f74a43baa7c529cf9887863f5f3bb6fb6a",
+      "operation": "studio.render",
+      "state": "succeeded",
+      "credits": 2
+    },
+    {
+      "operationId": "906f1da36ce9c589c7f406263658036398278c1b68cb8023ad3e9ada04ae5b2a",
+      "operation": "clips.analyze",
+      "state": "succeeded",
+      "credits": 2
+    },
+    {
+      "operationId": "b5252f9b31a5a9b9ef239c49a39b0c9fa3c48ef36817a2df766c4699658fbac3",
+      "operation": "studio.render",
+      "state": "succeeded",
+      "credits": 2
+    },
+    {
+      "operationId": "b82c29d477afa0d8fd5b86a209dcebd4c4076352c9c0995f5d690fbeb894d541",
+      "operation": "studio.render",
+      "state": "succeeded",
+      "credits": 2
+    },
+    {
+      "operationId": "ca78a4a96a11bec046968f016302ed0998592e1c51f821b6d5332dcf6513ff0c",
+      "operation": "clips.analyze",
+      "state": "succeeded",
+      "credits": 2
+    },
+    {
+      "operationId": "d1c5e6a00b634830f7c0b655effc1863cf8cf542ecc1524aff748bac600ac8dc",
+      "operation": "studio.render",
+      "state": "succeeded",
+      "credits": 2
+    },
+    {
+      "operationId": "e2843713806f84c8db28fd601f7689d232e18a2adffa45f3d76843a607dd682a",
+      "operation": "studio.render",
+      "state": "failed",
+      "credits": 2
+    },
+    {
+      "operationId": "e2963dba66cd4b1dc651c0a099108a44b5b9c6fbe7e8eb11a6984789f7c342e5",
+      "operation": "studio.render",
+      "state": "failed",
+      "credits": 2
+    },
+    {
+      "operationId": "ec88a26498076f8d1adcaad63ff7695f108781ffce0454b9e6e49716ceb5e510",
+      "operation": "clips.analyze",
+      "state": "succeeded",
+      "credits": 2
+    },
+    {
+      "operationId": "ee4b84730bfa3c4fa3cf8f1795a893b61680eca3c7ac73c5cdcfc388b357650b",
+      "operation": "studio.render",
+      "state": "succeeded",
+      "credits": 2
+    },
+    {
+      "operationId": "f0c5071f22572f925f2d446d713f5ab242998781f0fa1373f2323e9a2e668bbc",
+      "operation": "studio.render",
+      "state": "succeeded",
+      "credits": 2
+    },
+    {
+      "operationId": "fe81403c95e9559b755cf4470842f314e7597a9c1c3af39cef90b85d2fa51393",
+      "operation": "studio.render",
+      "state": "succeeded",
+      "credits": 2
+    }
+  ],
+  "executions": [
+    {
+      "executionId": "01324413a51c498d2945fb4c38789314c5e54cde8961a8d65c66079b2f917572",
+      "operationId": "0b6264fd73c458fce049d3791c77e86377efbb31f1ae78cffe78e9500e2ee9f4",
+      "endpoint": "/analyze-clips",
+      "state": "succeeded",
+      "exitCode": 0,
+      "processTerminated": true,
+      "sourceHash": "716bf2ba4b50ed1ae9c8590121a9e5d899f3ab0abeddafb4a8247f00e73f446a",
+      "inputBytes": 2725886,
+      "outputBytes": 0,
+      "outputHash": null,
+      "resource": {
+        "wallSeconds": 90.23279699799605,
+        "cpuSeconds": 119.63110400000001,
+        "peakRssKiB": 2441584,
+        "cpuCeilingSeconds": 240,
+        "localFileCeilingBytes": 20971520,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      },
+      "finishedAt": "2026-11-05T03:00:29.794Z"
+    },
+    {
+      "executionId": "31fe149c8019e30f104a0824a720e6a48ca1fbbf42a406991c7580afe6235b46",
+      "operationId": "2dfcc444ba2da3d3076d314e681b55c0cb149387411961b737070036e8ef64b9",
+      "endpoint": "/render-viral-clip",
+      "state": "succeeded",
+      "exitCode": 0,
+      "processTerminated": true,
+      "sourceHash": "716bf2ba4b50ed1ae9c8590121a9e5d899f3ab0abeddafb4a8247f00e73f446a",
+      "inputBytes": 2725886,
+      "outputBytes": 1333533,
+      "outputHash": "19b4591fedca41bb5b1b7c84d02ddad3d4af609d63c8fe34f4f5fa31c2a8a26d",
+      "resource": {
+        "wallSeconds": 17.10540379496524,
+        "cpuSeconds": 29.668343999999998,
+        "peakRssKiB": 735284,
+        "cpuCeilingSeconds": 600,
+        "localFileCeilingBytes": 134217728,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      },
+      "finishedAt": "2026-11-05T03:53:49.903Z"
+    },
+    {
+      "executionId": "383b488b008b39fa2fe503bb2c90c2d22e95d5c02566adc4659d31993aaa3dfb",
+      "operationId": "ca78a4a96a11bec046968f016302ed0998592e1c51f821b6d5332dcf6513ff0c",
+      "endpoint": "/analyze-clips",
+      "state": "succeeded",
+      "exitCode": 0,
+      "processTerminated": true,
+      "sourceHash": "716bf2ba4b50ed1ae9c8590121a9e5d899f3ab0abeddafb4a8247f00e73f446a",
+      "inputBytes": 2725886,
+      "outputBytes": 0,
+      "outputHash": null,
+      "resource": {
+        "wallSeconds": 93.04985989397392,
+        "cpuSeconds": 122.80631999999999,
+        "peakRssKiB": 2405212,
+        "cpuCeilingSeconds": 240,
+        "localFileCeilingBytes": 20971520,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      },
+      "finishedAt": "2026-11-05T03:04:31.325Z"
+    },
+    {
+      "executionId": "4a755b806640b5521294e7506f2943162a615a2d8041becb57131b64ee71fc88",
+      "operationId": "f0c5071f22572f925f2d446d713f5ab242998781f0fa1373f2323e9a2e668bbc",
+      "endpoint": "/render-viral-clip",
+      "state": "succeeded",
+      "exitCode": 0,
+      "processTerminated": true,
+      "sourceHash": "716bf2ba4b50ed1ae9c8590121a9e5d899f3ab0abeddafb4a8247f00e73f446a",
+      "inputBytes": 7405989,
+      "outputBytes": 982005,
+      "outputHash": "0b75aac21512f1b70f4a1c6b5a0556d1a038cc376f7e5d2069dfafe5052de426",
+      "resource": {
+        "wallSeconds": 41.36496589699527,
+        "cpuSeconds": 95.180841,
+        "peakRssKiB": 735444,
+        "cpuCeilingSeconds": 600,
+        "localFileCeilingBytes": 134217728,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      },
+      "finishedAt": "2026-11-05T03:41:33.608Z"
+    },
+    {
+      "executionId": "559a1fe9465e44c553785f502fdc6b53d294af56179c913404d56c5b0b7be2c8",
+      "operationId": "d1c5e6a00b634830f7c0b655effc1863cf8cf542ecc1524aff748bac600ac8dc",
+      "endpoint": "/render-viral-clip",
+      "state": "succeeded",
+      "exitCode": 0,
+      "processTerminated": true,
+      "sourceHash": "716bf2ba4b50ed1ae9c8590121a9e5d899f3ab0abeddafb4a8247f00e73f446a",
+      "inputBytes": 2725886,
+      "outputBytes": 1547954,
+      "outputHash": "a0483ba9d71f8ffb45ea67ae852ab62a74a5c492b9305990d4956c48a4da5b00",
+      "resource": {
+        "wallSeconds": 17.937089702987578,
+        "cpuSeconds": 34.588435000000004,
+        "peakRssKiB": 740264,
+        "cpuCeilingSeconds": 120,
+        "localFileCeilingBytes": 134217728,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      },
+      "finishedAt": "2026-11-05T02:46:37.186Z"
+    },
+    {
+      "executionId": "57b40513630b506bb76dd3f373a3a9c4d3a77bf5cdcb006aa54bbdbb6a24d14b",
+      "operationId": "906f1da36ce9c589c7f406263658036398278c1b68cb8023ad3e9ada04ae5b2a",
+      "endpoint": "/analyze-clips",
+      "state": "succeeded",
+      "exitCode": 0,
+      "processTerminated": true,
+      "sourceHash": "716bf2ba4b50ed1ae9c8590121a9e5d899f3ab0abeddafb4a8247f00e73f446a",
+      "inputBytes": 2725886,
+      "outputBytes": 0,
+      "outputHash": null,
+      "resource": {
+        "wallSeconds": 82.86769343301421,
+        "cpuSeconds": 116.754719,
+        "peakRssKiB": 2434672,
+        "cpuCeilingSeconds": 240,
+        "localFileCeilingBytes": 20971520,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      },
+      "finishedAt": "2026-11-05T03:07:40.311Z"
+    },
+    {
+      "executionId": "612697bc50d18228f04e043c06dd1154ea44f3669ca06611e5c6b5e518fbbb9f",
+      "operationId": "900bee55f09ba6523ebf047d807878710e729e4b3942e3ab11cb5a6c43fdefa3",
+      "endpoint": "/render-viral-clip",
+      "state": "failed",
+      "exitCode": 1,
+      "processTerminated": true,
+      "sourceHash": "716bf2ba4b50ed1ae9c8590121a9e5d899f3ab0abeddafb4a8247f00e73f446a",
+      "inputBytes": 9606405,
+      "outputBytes": 0,
+      "outputHash": null,
+      "resource": {
+        "wallSeconds": 45.54711372597376,
+        "cpuSeconds": 76.322612,
+        "peakRssKiB": 734728,
+        "cpuCeilingSeconds": 600,
+        "localFileCeilingBytes": 134217728,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      },
+      "finishedAt": "2026-11-05T03:42:29.327Z"
+    },
+    {
+      "executionId": "657d42808407d816326a0c7885d5049d122e348041e3bd82d39f55b6ce2a690f",
+      "operationId": "7d6870cbe0fb6c940b94e0bf62adcaec6ea6b9e3c19f7b3af7ecc6ad3488f841",
+      "endpoint": "/analyze-clips",
+      "state": "succeeded",
+      "exitCode": 0,
+      "processTerminated": true,
+      "sourceHash": "8bf349ca233cee3ab476e91569573268d1ce85100bad97140d5754a29c93e693",
+      "inputBytes": 11216047,
+      "outputBytes": 0,
+      "outputHash": null,
+      "resource": {
+        "wallSeconds": 135.9328390310402,
+        "cpuSeconds": 196.17343200000002,
+        "peakRssKiB": 2435276,
+        "cpuCeilingSeconds": 240,
+        "localFileCeilingBytes": 20971520,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      },
+      "finishedAt": "2026-11-05T03:29:26.639Z"
+    },
+    {
+      "executionId": "7f433b05b783f039ae7d87a80f403fc8c4d92a03f4382092aafe40ff5d5da6ed",
+      "operationId": "e2963dba66cd4b1dc651c0a099108a44b5b9c6fbe7e8eb11a6984789f7c342e5",
+      "endpoint": "/render-viral-clip",
+      "state": "failed",
+      "exitCode": 1,
+      "processTerminated": true,
+      "sourceHash": "716bf2ba4b50ed1ae9c8590121a9e5d899f3ab0abeddafb4a8247f00e73f446a",
+      "inputBytes": 7405989,
+      "outputBytes": 0,
+      "outputHash": null,
+      "resource": {
+        "wallSeconds": 9.654255995992571,
+        "cpuSeconds": 9.566590999999999,
+        "peakRssKiB": 734548,
+        "cpuCeilingSeconds": 600,
+        "localFileCeilingBytes": 134217728,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      },
+      "finishedAt": "2026-11-05T03:34:23.720Z"
+    },
+    {
+      "executionId": "85fe29a9e476da6f8049c3958fe28ad17ee538fcd25007335de205287a4ff585",
+      "operationId": "0dbdfe2e9fddfe33daef840fc0954b73cecc6776a5a5e9722d592d21f6a6fd2b",
+      "endpoint": "/render-viral-clip",
+      "state": "failed",
+      "exitCode": 1,
+      "processTerminated": true,
+      "sourceHash": "716bf2ba4b50ed1ae9c8590121a9e5d899f3ab0abeddafb4a8247f00e73f446a",
+      "inputBytes": 2725886,
+      "outputBytes": 0,
+      "outputHash": null,
+      "resource": null,
+      "finishedAt": "2026-11-05T02:43:33.144Z"
+    },
+    {
+      "executionId": "9edec18adaf6526caf88a587dee9295c91e7ef8960e40275883ef674a3e43151",
+      "operationId": "b5252f9b31a5a9b9ef239c49a39b0c9fa3c48ef36817a2df766c4699658fbac3",
+      "endpoint": "/render-viral-clip",
+      "state": "succeeded",
+      "exitCode": 0,
+      "processTerminated": true,
+      "sourceHash": "716bf2ba4b50ed1ae9c8590121a9e5d899f3ab0abeddafb4a8247f00e73f446a",
+      "inputBytes": 2725886,
+      "outputBytes": 1473131,
+      "outputHash": "c64feaa6fe7f8b8db6d0d3c113b1a8b0f41881c9163629b0e6f0ec5e024e6f2a",
+      "resource": {
+        "wallSeconds": 24.276234427001327,
+        "cpuSeconds": 48.720884999999996,
+        "peakRssKiB": 735716,
+        "cpuCeilingSeconds": 600,
+        "localFileCeilingBytes": 134217728,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      },
+      "finishedAt": "2026-11-05T03:23:47.985Z"
+    },
+    {
+      "executionId": "aa2ce0cd24cceb2a409d1533cb9e26e880c0229462bfe1fa4a52fa7fbf76872f",
+      "operationId": "305dea1cfc3cdebe7df7541f9117189e898151e7152f1f52fceac13c17cfab3e",
+      "endpoint": "/render-viral-clip",
+      "state": "succeeded",
+      "exitCode": 0,
+      "processTerminated": true,
+      "sourceHash": "716bf2ba4b50ed1ae9c8590121a9e5d899f3ab0abeddafb4a8247f00e73f446a",
+      "inputBytes": 9606405,
+      "outputBytes": 1551715,
+      "outputHash": "9731ce0f773fc75b10c1ab7db357ac8d7e1739595760ec015bf92df224f3d9ce",
+      "resource": {
+        "wallSeconds": 27.74745725397952,
+        "cpuSeconds": 64.173497,
+        "peakRssKiB": 736748,
+        "cpuCeilingSeconds": 600,
+        "localFileCeilingBytes": 134217728,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      },
+      "finishedAt": "2026-11-05T03:47:33.087Z"
+    },
+    {
+      "executionId": "b42d6575be354a7c91546c5c04f9f41267ea7b871f2f3eaa6637c68895422eda",
+      "operationId": "8fdb1242b583b4532ece7910f56105df4cc2c52e6fd0291b1f31cdede56c62ba",
+      "endpoint": "/render-viral-clip",
+      "state": "succeeded",
+      "exitCode": 0,
+      "processTerminated": true,
+      "sourceHash": "716bf2ba4b50ed1ae9c8590121a9e5d899f3ab0abeddafb4a8247f00e73f446a",
+      "inputBytes": 2725886,
+      "outputBytes": 2525792,
+      "outputHash": "4f2ab1145ebbf70ecfb7f8a877b1f53383acf5223de83be9b5482ee33fd0ba97",
+      "resource": {
+        "wallSeconds": 18.90100087499013,
+        "cpuSeconds": 37.815851,
+        "peakRssKiB": 740540,
+        "cpuCeilingSeconds": 120,
+        "localFileCeilingBytes": 134217728,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      },
+      "finishedAt": "2026-11-05T02:46:14.058Z"
+    },
+    {
+      "executionId": "b7ee77bfb066b00d5771c9d0bc64f375978a1db70ed32894a0a82a8fd9154d30",
+      "operationId": "9067fdcd0b434b02bde18415457b95f74a43baa7c529cf9887863f5f3bb6fb6a",
+      "endpoint": "/render-viral-clip",
+      "state": "succeeded",
+      "exitCode": 0,
+      "processTerminated": true,
+      "sourceHash": "716bf2ba4b50ed1ae9c8590121a9e5d899f3ab0abeddafb4a8247f00e73f446a",
+      "inputBytes": 11812447,
+      "outputBytes": 1516763,
+      "outputHash": "8562898149e60a41e7b9f1215349ac79ba5e1c22be17e6b11d87df7a069484d4",
+      "resource": {
+        "wallSeconds": 27.5270966719836,
+        "cpuSeconds": 63.09884399999999,
+        "peakRssKiB": 736744,
+        "cpuCeilingSeconds": 600,
+        "localFileCeilingBytes": 134217728,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      },
+      "finishedAt": "2026-11-05T03:58:49.180Z"
+    },
+    {
+      "executionId": "bf090faff7bbfeca07d2f243a3e519ce6cb313650f021abdea2c62e5359404dc",
+      "operationId": "5ef2936d3bba5a14dd52f209a7ce292e0c66faa0dbacefee2b542a7dac6761c5",
+      "endpoint": "/analyze-clips",
+      "state": "succeeded",
+      "exitCode": 0,
+      "processTerminated": true,
+      "sourceHash": "716bf2ba4b50ed1ae9c8590121a9e5d899f3ab0abeddafb4a8247f00e73f446a",
+      "inputBytes": 2725886,
+      "outputBytes": 0,
+      "outputHash": null,
+      "resource": {
+        "wallSeconds": 85.69215340400115,
+        "cpuSeconds": 120.845778,
+        "peakRssKiB": 2439744,
+        "cpuCeilingSeconds": 240,
+        "localFileCeilingBytes": 20971520,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      },
+      "finishedAt": "2026-11-05T02:53:49.456Z"
+    },
+    {
+      "executionId": "bf280290cfe8486fcc79d142bfd9a3331fcf6c05ffc593b4a4fbba3b5c7eff95",
+      "operationId": "fe81403c95e9559b755cf4470842f314e7597a9c1c3af39cef90b85d2fa51393",
+      "endpoint": "/render-viral-clip",
+      "state": "succeeded",
+      "exitCode": 0,
+      "processTerminated": true,
+      "sourceHash": "716bf2ba4b50ed1ae9c8590121a9e5d899f3ab0abeddafb4a8247f00e73f446a",
+      "inputBytes": 2725886,
+      "outputBytes": 944406,
+      "outputHash": "3af64ff189022f36ddf7b8d44d337a83cdd486f924c71b3e66613819ba97ca55",
+      "resource": {
+        "wallSeconds": 49.252927436027676,
+        "cpuSeconds": 121.25903499999998,
+        "peakRssKiB": 734756,
+        "cpuCeilingSeconds": 600,
+        "localFileCeilingBytes": 134217728,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      },
+      "finishedAt": "2026-11-05T03:25:21.134Z"
+    },
+    {
+      "executionId": "bf7def89a9cb5d04a09872a731b747c1fab29a591c311ec2a263bfd054a7e8c0",
+      "operationId": "ee4b84730bfa3c4fa3cf8f1795a893b61680eca3c7ac73c5cdcfc388b357650b",
+      "endpoint": "/render-viral-clip",
+      "state": "succeeded",
+      "exitCode": 0,
+      "processTerminated": true,
+      "sourceHash": "716bf2ba4b50ed1ae9c8590121a9e5d899f3ab0abeddafb4a8247f00e73f446a",
+      "inputBytes": 2725886,
+      "outputBytes": 1524478,
+      "outputHash": "a990639d15b98b5a27dd869872affe22e12b8c4ddc0796cedf0e536f0b07f7d4",
+      "resource": {
+        "wallSeconds": 16.79914475104306,
+        "cpuSeconds": 29.155148,
+        "peakRssKiB": 740408,
+        "cpuCeilingSeconds": 120,
+        "localFileCeilingBytes": 134217728,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      },
+      "finishedAt": "2026-11-05T02:45:49.814Z"
+    },
+    {
+      "executionId": "c1dc2e1aff5327e0330460f7861893eeee183a1daec9ea1c97c8d6b047c165de",
+      "operationId": "b82c29d477afa0d8fd5b86a209dcebd4c4076352c9c0995f5d690fbeb894d541",
+      "endpoint": "/render-viral-clip",
+      "state": "succeeded",
+      "exitCode": 0,
+      "processTerminated": true,
+      "sourceHash": "716bf2ba4b50ed1ae9c8590121a9e5d899f3ab0abeddafb4a8247f00e73f446a",
+      "inputBytes": 2725886,
+      "outputBytes": 1451385,
+      "outputHash": "12430671b1d50abc9d945f9ca0aa204eb5f961d031943f18ba1b0ed42cd72e35",
+      "resource": {
+        "wallSeconds": 18.78082905197516,
+        "cpuSeconds": 32.390910999999996,
+        "peakRssKiB": 740336,
+        "cpuCeilingSeconds": 120,
+        "localFileCeilingBytes": 134217728,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      },
+      "finishedAt": "2026-11-05T02:45:26.210Z"
+    },
+    {
+      "executionId": "c4e41a4387dfba1e98fbdb7f288acb5622c87e57790da95531c5970a9787a1cf",
+      "operationId": "6a69aa0673268729bac151e5926853dd7c2c51ffb35078b12001ebd7693601e1",
+      "endpoint": "/render-viral-clip",
+      "state": "succeeded",
+      "exitCode": 0,
+      "processTerminated": true,
+      "sourceHash": "716bf2ba4b50ed1ae9c8590121a9e5d899f3ab0abeddafb4a8247f00e73f446a",
+      "inputBytes": 11812447,
+      "outputBytes": 1542354,
+      "outputHash": "2a3c663caf982c23ae49b30f03f441f35d8c08c9bfb2aa28259170594dd5769a",
+      "resource": {
+        "wallSeconds": 32.5950739569962,
+        "cpuSeconds": 69.33367199999999,
+        "peakRssKiB": 737288,
+        "cpuCeilingSeconds": 600,
+        "localFileCeilingBytes": 134217728,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      },
+      "finishedAt": "2026-11-05T03:48:13.011Z"
+    },
+    {
+      "executionId": "d27fa94de42151e3e52ba5c2d9b6e542e2d9eab16afef4c22d764177e3f79692",
+      "operationId": "0b9dd430eb9c758966ec7092a8fb58dc6a8fd3d0d2f609404d7f673ef1ced3da",
+      "endpoint": "/render-viral-clip",
+      "state": "failed",
+      "exitCode": 1,
+      "processTerminated": true,
+      "sourceHash": "716bf2ba4b50ed1ae9c8590121a9e5d899f3ab0abeddafb4a8247f00e73f446a",
+      "inputBytes": 7405989,
+      "outputBytes": 0,
+      "outputHash": null,
+      "resource": {
+        "wallSeconds": 6.8381954960059375,
+        "cpuSeconds": 8.379017,
+        "peakRssKiB": 734528,
+        "cpuCeilingSeconds": 600,
+        "localFileCeilingBytes": 134217728,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      },
+      "finishedAt": "2026-11-05T03:39:00.175Z"
+    },
+    {
+      "executionId": "e63e9228f3ec11a7894d756799b602bf597adbd2d0973032f7a8610d88bc1eb8",
+      "operationId": "e2843713806f84c8db28fd601f7689d232e18a2adffa45f3d76843a607dd682a",
+      "endpoint": "/render-viral-clip",
+      "state": "failed",
+      "exitCode": 1,
+      "processTerminated": true,
+      "sourceHash": "716bf2ba4b50ed1ae9c8590121a9e5d899f3ab0abeddafb4a8247f00e73f446a",
+      "inputBytes": 9606405,
+      "outputBytes": 0,
+      "outputHash": null,
+      "resource": {
+        "wallSeconds": 7.167241332004778,
+        "cpuSeconds": 8.813972,
+        "peakRssKiB": 735372,
+        "cpuCeilingSeconds": 600,
+        "localFileCeilingBytes": 134217728,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      },
+      "finishedAt": "2026-11-05T03:46:07.052Z"
+    },
+    {
+      "executionId": "ee1198ca887aefaed6ec38d427da8f0a969a9a85df5266ba3beaa959f4473048",
+      "operationId": "ec88a26498076f8d1adcaad63ff7695f108781ffce0454b9e6e49716ceb5e510",
+      "endpoint": "/analyze-clips",
+      "state": "succeeded",
+      "exitCode": 0,
+      "processTerminated": true,
+      "sourceHash": "716bf2ba4b50ed1ae9c8590121a9e5d899f3ab0abeddafb4a8247f00e73f446a",
+      "inputBytes": 2725886,
+      "outputBytes": 0,
+      "outputHash": null,
+      "resource": {
+        "wallSeconds": 105.21766050998122,
+        "cpuSeconds": 127.985647,
+        "peakRssKiB": 2435400,
+        "cpuCeilingSeconds": 240,
+        "localFileCeilingBytes": 20971520,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      },
+      "finishedAt": "2026-11-05T03:22:45.371Z"
+    }
+  ],
+  "legacyFinancialFields": [
+    {
+      "userId": "demo-pilot-alice",
+      "credits": 20,
+      "role": "user",
+      "tier": "free"
+    },
+    {
+      "userId": "demo-pilot-empty",
+      "credits": 20,
+      "role": "user",
+      "tier": "free"
+    }
+  ],
+  "legacyCreditUsageDocuments": 0
+}

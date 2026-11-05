@@ -18,10 +18,40 @@ export function StudioPlaybackTime({ clock, fallback = 0, format, ...props }) {
 
 export function StudioPlaybackRange({ clock, value, ...props }) {
   const ref = useRef(null);
+  const handlers = useRef(props);
+  handlers.current = props;
   const bounded = time => Math.max(Number(props.min || 0), Math.min(Number(props.max), time));
   useClockPaint(clock, () => { if (ref.current) ref.current.value = String(bounded(clock.getSnapshot().outputTime)); });
+  useLayoutEffect(() => {
+    const input = ref.current;
+    if (!clock || !input) return;
+    let receivedInput = false;
+    const seek = event => {
+      receivedInput = true;
+      handlers.current.onInput?.(event);
+      handlers.current.onChange?.(event);
+    };
+    const change = event => {
+      // A native range gesture emits input, then change. A clock paint while
+      // the decoder seeks can already have changed the DOM value by then;
+      // do not dispatch that trailing event as a second, different seek.
+      if (receivedInput) { receivedInput = false; return; }
+      handlers.current.onChange?.(event);
+    };
+    input.addEventListener('input', seek);
+    input.addEventListener('change', change);
+    return () => {
+      input.removeEventListener('input', seek);
+      input.removeEventListener('change', change);
+    };
+  }, [clock]);
   return <input {...props} ref={ref} step={clock ? 'any' : props.step}
-    value={clock ? bounded(clock.getSnapshot().outputTime) : value}
+    value={clock ? undefined : value}
+    defaultValue={clock ? bounded(clock.getSnapshot().outputTime) : undefined}
+    // Native listeners keep React's value tracker/restoration out of this
+    // clock-painted input. Non-clock inputs keep their normal React handlers.
+    onInput={clock ? undefined : props.onInput}
+    onChange={clock ? undefined : props.onChange}
     onKeyDown={event => {
       props.onKeyDown?.(event);
       if (!clock || event.defaultPrevented || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;

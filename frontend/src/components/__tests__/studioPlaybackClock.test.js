@@ -92,6 +92,18 @@ test('display sampling uses animation frames even when decoded callbacks are ava
   stop(); expect(f.callbacks.size).toBe(0);
 });
 
+test('native microsecond rounding at a trimmed boundary retains the domain-tick position', () => {
+  const f = fixture();
+  const stop = f.clock.bind(f.video, { ...f.config, start: 10.742844444, end: 14.257155556 });
+  f.video.paused = true;
+  f.video.currentTime = 10.742844;
+  f.video.dispatchEvent(new Event('seeked'));
+  expect(f.clock.getSnapshot().programmeTime).toBe(4);
+  f.video.currentTime = 10.74;
+  expect(f.clock.read()).toBeNull();
+  stop();
+});
+
 test('the end-of-frame refresh samples time advanced during painting and is cancelled on suspension', () => {
   jest.useFakeTimers();
   const f = fixture(); const stop = f.clock.bind(f.video, f.config);

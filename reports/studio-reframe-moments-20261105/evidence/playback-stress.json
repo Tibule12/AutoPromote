@@ -1,0 +1,135 @@
+{
+  "headlessMuted": true,
+  "actualApp": true,
+  "productionTraffic": false,
+  "external": [],
+  "errors": [],
+  "start": {
+    "sourceTime": 1.02458,
+    "outputTime": 0.981044444444445,
+    "text": "0:0.98 / 0:12.0",
+    "marker": 8.17536,
+    "paused": false,
+    "ready": 4,
+    "playbackRate": 1,
+    "at": 5179.5
+  },
+  "observations": [
+    {
+      "sourceTime": 1.364172,
+      "outputTime": 1.35546666666667,
+      "text": "0:1.36 / 0:12.0",
+      "marker": 11.2955,
+      "paused": false,
+      "ready": 4,
+      "playbackRate": 1,
+      "at": 5522.300000011921
+    },
+    {
+      "sourceTime": 1.631202,
+      "outputTime": 1.62248888888889,
+      "text": "0:1.62 / 0:12.0",
+      "marker": 13.5208,
+      "paused": false,
+      "ready": 4,
+      "playbackRate": 1,
+      "at": 5786.900000035763
+    },
+    {
+      "sourceTime": 1.927497,
+      "outputTime": 1.89537777777778,
+      "text": "0:1.90 / 0:12.0",
+      "marker": 15.7948,
+      "paused": false,
+      "ready": 4,
+      "playbackRate": 1,
+      "at": 6083.800000011921
+    },
+    {
+      "sourceTime": 2.208798,
+      "outputTime": 2.2088,
+      "text": "0:2.21 / 0:12.0",
+      "marker": 18.4066,
+      "paused": false,
+      "ready": 4,
+      "playbackRate": 1,
+      "at": 6367.300000011921
+    },
+    {
+      "sourceTime": 2.493374,
+      "outputTime": 2.48746666666667,
+      "text": "0:2.49 / 0:12.0",
+      "marker": 20.7289,
+      "paused": false,
+      "ready": 4,
+      "playbackRate": 1,
+      "at": 6646.100000023842
+    },
+    {
+      "sourceTime": 2.806712,
+      "outputTime": 2.7951,
+      "text": "0:2.80 / 0:12.0",
+      "marker": 23.2925,
+      "paused": false,
+      "ready": 4,
+      "playbackRate": 1,
+      "at": 6963.5
+    },
+    {
+      "sourceTime": 3.070297,
+      "outputTime": 3.06213333333333,
+      "text": "0:3.06 / 0:12.0",
+      "marker": 25.5178,
+      "paused": false,
+      "ready": 4,
+      "playbackRate": 1,
+      "at": 7224.600000023842
+    },
+    {
+      "sourceTime": 3.369796,
+      "outputTime": 3.3491,
+      "text": "0:3.35 / 0:12.0",
+      "marker": 27.9092,
+      "paused": false,
+      "ready": 4,
+      "playbackRate": 1,
+      "at": 7524.800000011921
+    },
+    {
+      "sourceTime": 3.628118,
+      "outputTime": 3.62812222222222,
+      "text": "0:3.63 / 0:12.0",
+      "marker": 30.2343,
+      "paused": false,
+      "ready": 4,
+      "playbackRate": 1,
+      "at": 7786.100000023842
+    },
+    {
+      "sourceTime": 3.96771,
+      "outputTime": 3.96717777777778,
+      "text": "0:3.97 / 0:12.0",
+      "marker": 33.0598,
+      "paused": false,
+      "ready": 4,
+      "playbackRate": 1,
+      "at": 8123.700000047684
+    }
+  ],
+  "pause": {
+    "sourceTime": 4.191036,
+    "outputTime": 4.18248888888889,
+    "text": "0:4.18 / 0:12.0",
+    "marker": 34.8541,
+    "paused": true,
+    "ready": 4,
+    "playbackRate": 1,
+    "at": 8357.400000035763
+  },
+  "chipmunkTransport": true,
+  "stress": {
+    "busyMilliseconds": 80,
+    "intervalMilliseconds": 300,
+    "boundedDurationMilliseconds": 4500
+  }
+}

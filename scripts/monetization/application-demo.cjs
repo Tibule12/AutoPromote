@@ -55,6 +55,7 @@ async function main() {
         "CREDITS_JAVA_BIN",
         "CREDITS_FIRESTORE_JAR",
         "CREDITS_PYTHON_BIN",
+        "CREDITS_LOCAL_FACE_ANALYSIS",
         "STUDIO_3D_LOCAL_CPU",
         "STUDIO_3D_BLENDER_BIN",
         "CREDITS_DEMO_EXECUTION_SECONDS",
@@ -261,6 +262,9 @@ async function main() {
       version: "actual-ui-local-test-v1",
       spendScope: "actual-ui-local-test",
       monthlyCredits: { free: localTestCredits, premium: 150, pro: 500, enterprise: 2000 },
+      // A fresh owned demo gets a finite test window. The dated commercial
+      // pilot draft and all production expiry/budget rules remain unchanged.
+      spendingEndsAt: Date.now() + 4 * 60 * 60 * 1000,
     };
     // Symbolic test prices only; not a recommendation from local CPU measurements.
     for (const item of Object.values(policy.operations)) {

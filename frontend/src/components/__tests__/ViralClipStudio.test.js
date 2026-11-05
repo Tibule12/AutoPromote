@@ -280,8 +280,9 @@ describe("ViralClipStudio timeline sequencing", () => {
       exportSettings:{fps:'24'},overlays:[],motionKeyframes:[],
     }}});
     // Saved-project restore commits on its own animation frame. Wait for its
-    // 24fps transport before simulating media on the selected source slot.
-    await waitFor(()=>expect(Number(screen.getByLabelText('Edited output position').step)).toBeCloseTo(1/24,8));
+    // 24fps project before simulating media on the selected source slot. The
+    // display range is continuous; its arrow keys still nudge by a frame.
+    await waitFor(()=>expect(screen.getByRole('textbox',{name:'Project name',exact:true,includeHidden:true})).toHaveValue('Terminal source'));
     fireEvent.change(screen.getByLabelText('Edited output position'),{target:{value:count===1?'3':'7'}});
     const video=screen.getByTestId('studio-after-video');
     let paused=true;
@@ -298,7 +299,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     act(()=>{video.currentTime=end;video.dispatchEvent(new Event('timeupdate'));});
     await waitFor(()=>expect(screen.getByRole('button',{name:'Play comparison',exact:true})).toBeInTheDocument());
     expect(screen.getByTestId('studio-after-video')).toBe(video);
-    const frameStep=Number(screen.getByLabelText('Edited output position').step);
+    const frameStep=1/24;
     expect(video.currentTime).toBeCloseTo(end-frameStep,5);expect(video.paused).toBe(true);
     // A native ended event can already be queued when the precise trim
     // watcher pauses the element. It must not refocus an earlier cutaway.
@@ -1412,6 +1413,179 @@ describe("ViralClipStudio timeline sequencing", () => {
       screen.getByText(/Signature Lab is focused on transformation tuning/i)
     ).toBeInTheDocument();
   });
+
+  test("Moments selects a new source range after trimming, and preview preserves the chosen edit", async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+      clips={[{id:"moment-a",start:0,end:10,duration:10,sourceDuration:30},
+        {id:"moment-b",start:12,end:20,duration:8,sourceDuration:30}]}
+      onSave={onSave} onCancel={jest.fn()}/>);
+    let video = readyCutawaySource(30);
+    video.currentTime = 4; fireEvent.timeUpdate(video);
+    fireEvent.click(within(screen.getByRole("navigation",{name:"Creative tools"})).getByRole("button",{name:"Cut",exact:true}));
+    fireEvent.click(screen.getByTestId("inspector-cut-trim-start"));
+    fireEvent.click(within(screen.getByRole("navigation",{name:"Creative tools"})).getByRole("button",{name:"Moments",exact:true}));
+    expect(screen.getByTestId("studio-moments-inspector")).toBeInTheDocument();
+    expect(screen.getByTestId("studio-moments-inspector").compareDocumentPosition(
+      document.querySelector(".creative-director-panel")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    fireEvent.click(screen.getByTestId("clip-action-use-moment-b"));
+    video = readyCutawaySource(30);
+    expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:8.00");
+    fireEvent.click(screen.getByRole("button",{name:"Preview selected moment",exact:true}));
+    await waitFor(()=>expect(screen.getByRole("button",{name:"Pause comparison",exact:true})).toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button",{name:"Pause comparison",exact:true}));
+    await clickRenderFinalClip();
+    await waitFor(()=>expect(onSave).toHaveBeenCalled());
+    expect(onSave.mock.calls[0][0].id).toBe("moment-b");
+    expect(onSave.mock.calls[0][2].timelineSegments[0]).toMatchObject({start_time:12,end_time:20});
+  },60000);
+
+  test("camera bank enforces its existing twelve-angle limit and prunes only unused references", async () => {
+    const save = jest.spyOn(studioProjectStore, "saveViralStudioProject").mockImplementation(async project => ({ ...project, updatedAt: Date.now() }));
+    try {
+      const cameras = Array.from({ length: 12 }, (_, i) => ({ id: `camera-${i}`, url: `https://example.com/camera-${i}.mp4`,
+        storagePath: `uploads/videos/test-user/camera-${i}.mp4`, duration: 12, status: "ready" }));
+      render(<ViralClipStudio videoUrl="https://example.com/source.mp4" clips={[{id:"range",start:0,end:12,duration:12}]}
+        initialSavedProject={{ id: "bank-limit", name: "Camera bank limit", snapshot: {
+          orderedClips: [{id:"range",start:0,end:12,duration:12}], selectedClipId: "range",
+          timeline: [{id:"main",url:"https://example.com/source.mp4",startRequest:0,endRequest:12,duration:12}],
+          speakerStackSources: cameras, speakerStackCameraCount: 4,
+          speakerStackSourceIds: {top:"camera-0",bottom:"camera-1",third:"camera-2",fourth:"camera-3"},
+        } }} onSave={jest.fn()} onCancel={jest.fn()} />);
+      await screen.findByDisplayValue("Camera bank limit"); readyCutawaySource(12);
+      fireEvent.click(screen.getByRole("tab", { name: /Reframe/i }));
+      expect(screen.getByTestId("add-clean-speaker-angle")).toBeDisabled();
+      fireEvent.click(screen.getByRole("button", { name: "Remove unused angles", exact: true }));
+      fireEvent.click(screen.getByTestId("studio-save-project"));
+      await waitFor(() => expect(save).toHaveBeenCalled());
+      expect(save.mock.calls.at(-1)[0].snapshot.speakerStackSources.map(c => c.id)).toEqual(["camera-0","camera-1","camera-2","camera-3"]);
+      expect(screen.getByTestId("add-clean-speaker-angle")).toBeEnabled();
+      fireEvent.click(screen.getByTestId("studio-undo-button"));
+      await waitFor(() => expect(screen.getByTestId("add-clean-speaker-angle")).toBeDisabled());
+    } finally { save.mockRestore(); }
+  });
+
+  test("Moments saves a trimmed range without losing the source and supports Undo/Redo", async () => {
+    const save = jest.spyOn(studioProjectStore, "saveViralStudioProject")
+      .mockImplementation(async project => ({ ...project, updatedAt: Date.now() }));
+    try {
+      window.prompt.mockReturnValue("Creator selected range");
+      render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "source-moment", start: 0, end: 12, duration: 12 }]}
+        onSave={jest.fn()} onCancel={jest.fn()} />);
+      const video = readyCutawaySource(12);
+      video.currentTime = 3; fireEvent.timeUpdate(video);
+      const tools = within(screen.getByRole("navigation", { name: "Creative tools" }));
+      fireEvent.click(tools.getByRole("button", { name: "Cut", exact: true }));
+      fireEvent.click(screen.getByTestId("inspector-cut-trim-start"));
+      fireEvent.click(tools.getByRole("button", { name: "Moments", exact: true }));
+      fireEvent.click(screen.getByRole("button", { name: "Save current range as moment", exact: true }));
+      expect(screen.getByTestId("studio-moments-inspector")).toHaveTextContent("2 available");
+      fireEvent.click(screen.getByTestId("studio-undo-button"));
+      await waitFor(() => expect(screen.getByTestId("studio-moments-inspector")).toHaveTextContent("1 available"));
+      fireEvent.click(screen.getByTestId("studio-redo-button"));
+      await waitFor(() => expect(screen.getByTestId("studio-moments-inspector")).toHaveTextContent("2 available"));
+      fireEvent.click(screen.getByTestId("studio-save-project"));
+      await waitFor(() => expect(save).toHaveBeenCalled());
+      const snapshot = save.mock.calls.at(-1)[0].snapshot;
+      expect(snapshot.orderedClips[1]).toMatchObject({ name: "Creator selected range", origin: "creator_range", start: 3, end: 12 });
+      expect(snapshot.timeline[0].startRequest).toBe(3);
+      expect(snapshot.orderedClips[0].start).toBe(0);
+    } finally { save.mockRestore(); }
+  });
+
+  test("discovered moment captions use source time and preview preserves reviewed words", async () => {
+    const save = jest.spyOn(studioProjectStore, "saveViralStudioProject")
+      .mockImplementation(async project => ({ ...project, updatedAt: Date.now() }));
+    try {
+      render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "discovered", start: 5.2, end: 12, duration: 6.8,
+          transcript: "These are the actual source words for the detected moment" }]}
+        onSave={jest.fn()} onCancel={jest.fn()} />);
+      readyCutawaySource(12);
+      const tools = within(screen.getByRole("navigation", { name: "Creative tools" }));
+      fireEvent.click(tools.getByRole("button", { name: "Captions", exact: true }));
+      const text = screen.getByLabelText("Caption 1 text");
+      fireEvent.change(text, { target: { value: "Reviewed opening words" } });
+      fireEvent.click(tools.getByRole("button", { name: "Moments", exact: true }));
+      fireEvent.click(screen.getByRole("button", { name: "Preview selected moment", exact: true }));
+      fireEvent.click(screen.getByTestId("studio-save-project"));
+      await waitFor(() => expect(save).toHaveBeenCalled());
+      const captions = save.mock.calls.at(-1)[0].snapshot.captionSegments;
+      expect(captions[0]).toMatchObject({ sourceClipId: "main", start: 5.2, text: "Reviewed opening words" });
+      expect(captions.at(-1).end).toBeCloseTo(12, 1);
+    } finally { save.mockRestore(); }
+  });
+
+  test("native playback advances scrubber, visible clock and timeline without a React timeupdate", async () => {
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+      clips={[{id:"display-clock",start:0,end:12,duration:12}]}
+      onSave={jest.fn()} onCancel={jest.fn()}/>);
+    const video = readyCutawaySource(12);
+    Object.defineProperty(video,"paused",{configurable:true,writable:true,value:false});
+    fireEvent.playing(video);
+    video.currentTime = 2.25;
+    await waitFor(()=>expect(Number(screen.getByLabelText("Edited output position").value)).toBeCloseTo(2.25,2));
+    expect(document.querySelector(".preview-timecode").textContent).toContain("2.25");
+    expect(parseFloat(document.querySelector(".pro-playhead").style.left)).toBeCloseTo(18.75,1);
+    fireEvent.click(within(screen.getByRole("navigation", { name: "Creative tools" })).getByRole("button", { name: "Reframe", exact: true }));
+    fireEvent.click(screen.getByTestId("add-reframe-keyframe"));
+    expect(screen.getByLabelText("Manual framing corrections").textContent).toContain("2.25s");
+    // No timeupdate fired: this is the existing native clock's lightweight
+    // readout, independent of the editor's authored-state render cycle.
+    video.paused=true; fireEvent.pause(video);
+  },60000);
+
+  test("Reframe mode switches commit their native authoring frame before the next timeupdate", () => {
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+      clips={[{id:"native-reframe",start:0,end:12,duration:12}]}
+      onSave={jest.fn()} onCancel={jest.fn()}/>);
+    const video = readyCutawaySource(12);
+    fireEvent.click(screen.getByRole("tab",{name:/Reframe/i}));
+    const toggle = screen.getByTestId("auto-reframe-toggle");
+    expect(toggle).toBeChecked();
+    video.currentTime = 2.5; // No timeupdate: the paused/native clock is ahead.
+    fireEvent.click(toggle);
+    expect(toggle).not.toBeChecked();
+    video.currentTime = 3.5;
+    fireEvent.click(toggle);
+    expect(toggle).toBeChecked();
+  });
+
+  test("Reframe preview uses transport and the current framing mark instead of a stale hook position", async () => {
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+      clips={[{id:"preview-reframe",start:0,end:12,duration:12}]}
+      onSave={jest.fn()} onCancel={jest.fn()}/>);
+    const video = readyCutawaySource(12);
+    video.currentTime = 5; fireEvent.timeUpdate(video);
+    fireEvent.click(screen.getByRole("tab",{name:/Reframe/i}));
+    fireEvent.click(screen.getByTestId("auto-reframe-toggle"));
+    fireEvent.click(screen.getByRole("button",{name:/Preview 9:16 Framing/}));
+    await waitFor(()=>expect(screen.getByRole("button",{name:"Pause comparison",exact:true})).toBeInTheDocument());
+    expect(screen.getByTestId("auto-reframe-toggle")).toBeChecked();
+    expect(video.currentTime).toBeCloseTo(5,1);
+    fireEvent.click(screen.getByRole("button",{name:"Pause comparison",exact:true}));
+  },60000);
+
+  test("Alternate Speakers exports real cuts and framing-point transitions remain editable", async () => {
+    const onSave = jest.fn(()=>Promise.resolve());
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+      clips={[{id:"cut-speakers",start:0,end:12,duration:12}]}
+      onSave={onSave} onCancel={jest.fn()}/>);
+    readyCutawaySource(12);
+    fireEvent.click(screen.getByRole("tab",{name:/Reframe/i}));
+    fireEvent.click(screen.getByRole("button",{name:/Alternate Speakers/}));
+    expect(screen.getByLabelText("Framing point transition")).toHaveValue("cut");
+    fireEvent.change(screen.getByLabelText("Framing point transition"),{target:{value:"smooth"}});
+    fireEvent.change(screen.getByLabelText("Manual frame horizontal position"),{target:{value:"35"}});
+    await clickRenderFinalClip();
+    await waitFor(()=>expect(onSave).toHaveBeenCalled());
+    const keys=onSave.mock.calls[0][2].finishPlan.reframe.keyframes;
+    expect(keys[0]).toMatchObject({time:0,x:35});
+    expect(keys[0].cut).toBeUndefined();
+    expect(keys.slice(1).length).toBeGreaterThan(1);
+    expect(keys.slice(1).every(key=>key.cut===true)).toBe(true);
+  },60000);
 
   test("exposes functional Auto Reframe controls in the editor inspector", async () => {
     const onSave = jest.fn(() => Promise.resolve());

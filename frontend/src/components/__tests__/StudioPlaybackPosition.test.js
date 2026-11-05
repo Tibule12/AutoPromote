@@ -42,3 +42,45 @@ test('the displayed output position stays continuous while arrow keys retain fra
   fireEvent.keyDown(input, { key: 'ArrowLeft' });
   expect(changed.mock.results[1].value).toBeCloseTo(position.outputTime, 10);
 });
+
+test('native pointer and Home/End range input still seeks after imperative clock paints', () => {
+  let position = { programmeTime: 1, outputTime: 1 };
+  const listeners = new Set();
+  const clock = { getSnapshot: () => position,
+    subscribe: cb => { listeners.add(cb); return () => listeners.delete(cb); } };
+  const changed = jest.fn(event => Number(event.currentTarget.value));
+  render(<StudioPlaybackRange clock={clock} aria-label="Seek position" type="range"
+    min={0} max={8} step={1/24} onChange={changed} />);
+  const input = screen.getByLabelText('Seek position');
+  act(() => { position = { programmeTime: 1.25, outputTime: 1.25 }; listeners.forEach(cb => cb()); });
+  // Browsers and Playwright's native range path set .value before input. That
+  // also updates React's tracker, so a synthetic onChange alone misses this.
+  for (const value of ['2.5', '0', '8']) {
+    input.value = value;
+    fireEvent.input(input);
+    fireEvent.change(input);
+  }
+  expect(changed.mock.results.map(result => result.value)).toEqual([2.5, 0, 8]);
+  fireEvent.change(input, { target: { value: '4' } });
+  expect(changed.mock.results.map(result => result.value)).toEqual([2.5, 0, 8, 4]);
+});
+
+test('a clock repaint between native input and change cannot seek back to the preceding frame', () => {
+  let position = { programmeTime: 1, outputTime: 1 };
+  const listeners = new Set();
+  const clock = { getSnapshot: () => position,
+    subscribe: cb => { listeners.add(cb); return () => listeners.delete(cb); } };
+  const changed = jest.fn(event => Number(event.currentTarget.value));
+  const view = render(<StudioPlaybackRange clock={clock} aria-label="Painted seek" type="range"
+    min={0} max={8} step={1/24} onChange={changed} />);
+  const input = screen.getByLabelText('Painted seek');
+  fireEvent.input(input, { target: { value: '2.5' } });
+  act(() => { position = { programmeTime: .75, outputTime: .75 }; listeners.forEach(cb => cb()); });
+  fireEvent.change(input);
+  expect(changed.mock.results.map(result => result.value)).toEqual([2.5]);
+  fireEvent.change(input, { target: { value: '4' } });
+  expect(changed.mock.results.map(result => result.value)).toEqual([2.5, 4]);
+  view.unmount();
+  fireEvent.input(input, { target: { value: '6' } });
+  expect(changed).toHaveBeenCalledTimes(2);
+});
