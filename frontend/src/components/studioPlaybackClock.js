@@ -22,7 +22,8 @@ export function createStudioPlaybackClock() {
     bind(video, { url, start = 0, end = 0, programmeStart = 0, timeMap,
       renderedOutput = false, fallbackSourceTime = start }) {
       const source = getSafeMediaSource(url);
-      let disposed = false, waiting = false, stopFrames = () => {}, afterFrame;
+      let disposed = false, waiting = false, waitingSourceTime = null,
+        stopFrames = () => {}, afterFrame;
       const position = sourceTime => {
         const bounded = Math.max(0, Number(sourceTime) || 0);
         const programmeEnd = timeMap?.at(-1)?.programmeRange.endTick || 0;
@@ -37,7 +38,7 @@ export function createStudioPlaybackClock() {
       };
       const read = () => {
         if (disposed || !video || !source || video.currentSrc !== source ||
-            video.seeking || video.readyState < 2 || !Number.isFinite(video.currentTime) ||
+            video.error || video.seeking || video.readyState < 2 || !Number.isFinite(video.currentTime) ||
             (!renderedOutput && (secondsToTicks(Math.max(0, video.currentTime)) < secondsToTicks(start) ||
               secondsToTicks(Math.max(0, video.currentTime)) > secondsToTicks(end)))) return null;
         // Native decoders round to microseconds; an exact domain-tick trim can
@@ -69,7 +70,9 @@ export function createStudioPlaybackClock() {
         if (!video?.paused && !video?.ended) frame = window.requestAnimationFrame(tick);
         stopFrames = () => window.cancelAnimationFrame(frame);
       };
-      const suspend = () => { waiting = true; stopDisplay(); };
+      const suspend = () => {
+        waiting = true; waitingSourceTime = video.currentTime; stopDisplay();
+      };
       const paused = () => { stopDisplay(); waiting = false; sync(); };
       const events = { play: restart, playing: restart, seeked: restart,
         loadeddata: restart, timeupdate: sync, pause: paused, ended: paused,
@@ -78,8 +81,22 @@ export function createStudioPlaybackClock() {
         for (const [event, listener] of Object.entries(events)) video.addEventListener(event, listener);
         restart();
       }
+      // A busy compositor can starve animation callbacks or emit waiting
+      // without a later playing event even while the native decoder advances.
+      // Read that same verified decoder, never an invented wall-time clock.
+      const watchdog = video && setInterval(() => {
+        if (disposed || video.paused || video.ended) return;
+        const next = read();
+        if (!next) return;
+        if (waiting) {
+          if (next.sourceTime <= waitingSourceTime + 2 / 90000) return;
+          restart();
+        } else {
+          publish(next);
+        }
+      }, 80);
       return () => {
-        disposed = true; stopDisplay();
+        disposed = true; stopDisplay(); clearInterval(watchdog);
         if (readPosition === read) { readPosition = () => null; syncPosition = () => {}; }
         if (video) for (const [event, listener] of Object.entries(events)) video.removeEventListener(event, listener);
       };

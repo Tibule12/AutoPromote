@@ -1,0 +1,70 @@
+{
+  "receipt": {
+    "version": 2,
+    "sampleRate": 48000,
+    "sampleCount": 576000,
+    "duration": 12.0,
+    "runtimeSeconds": 3.2729141839954536,
+    "device": "cpu",
+    "implementation": "studio-final-source-dialogue-v1"
+  },
+  "python": "3.13.5",
+  "numpy": "2.2.4",
+  "pillow": "11.1.0",
+  "ffmpeg": "ffmpeg version 7.1.5-0+deb13u1 Copyright (c) 2000-2026 the FFmpeg developers",
+  "uid": 1001,
+  "cloudNetwork": false,
+  "scope": "Isolated minimal API media-dependency image built from the exact Dockerfile base/apt command and five canonical helper sources; not a full application image or deployed Auth/ownership test",
+  "sampleComparison": {
+    "preparedLocal": {
+      "samples": 576000,
+      "correlation": [
+        1.0,
+        1.0
+      ],
+      "relativeRms": 0.0,
+      "levelDifferenceDb": 0.0
+    },
+    "finalAac": {
+      "samples": 576000,
+      "correlation": [
+        0.9983344571917236,
+        0.9988181350465575
+      ],
+      "relativeRms": 0.056226227432489395,
+      "levelDifferenceDb": 0.07268826011568308
+    },
+    "alignment": "Absolute programme zero, no fitted time shift"
+  },
+  "versionMismatchObservation": {
+    "preparedLocal": {
+      "samples": 576000,
+      "correlation": [
+        0.99319557660465,
+        0.9938080444045642
+      ],
+      "relativeRms": 0.11517544090747833,
+      "levelDifferenceDb": -0.005742888315580785
+    },
+    "finalAac": {
+      "samples": 576000,
+      "correlation": [
+        0.9917570810451349,
+        0.9928572541621389
+      ],
+      "relativeRms": 0.12675081193447113,
+      "levelDifferenceDb": 0.06694546900689602
+    },
+    "alignment": "Absolute programme zero, no fitted time shift"
+  },
+  "adoptedDockerRuntime": "node:22-trixie-slim API; python:3.11-slim-trixie worker; ffmpeg=7:7.1.5-0+deb13u1",
+  "nonRootContainerConstraints": {
+    "uid": 1001,
+    "network": "none",
+    "rootFilesystem": "read-only",
+    "cpuLimit": 2,
+    "memoryMiB": 512,
+    "pidLimit": 96
+  },
+  "existingVoiceDuckCompatibility": "Native FFmpeg7 regression found incomplete sidechain drain; one-second bounded causal tail plus exact sample trim preserves the authored interval. Existing service regressions now pass."
+}

@@ -47,9 +47,12 @@ export function studioSoloPictureProjection({
     top = -chroma((scaledHeight - height) * y);
   let drawWidth = scaledWidth,
     drawHeight = scaledHeight;
+  const sourceStage={width,height,x:left,y:top,drawWidth,drawHeight};
+  let directorCrop={x:0,y:0,width,height};
   if (directorZoom > 1.001) {
     const cropWidth = Math.floor(width / directorZoom / 2) * 2,
       cropHeight = Math.floor(height / directorZoom / 2) * 2;
+    directorCrop={x:chroma((width-cropWidth)/2),y:chroma((height-cropHeight)/2),width:cropWidth,height:cropHeight};
     left = ((left - chroma((width - cropWidth) / 2)) * width) / cropWidth;
     top = ((top - chroma((height - cropHeight) / 2)) * height) / cropHeight;
     drawWidth *= width / cropWidth;
@@ -77,5 +80,7 @@ export function studioSoloPictureProjection({
     y: (top * canvasHeight) / innerHeight,
     width: (drawWidth * canvasWidth) / innerWidth,
     height: (drawHeight * canvasHeight) / innerHeight,
+    sourceStage,
+    directorCrop,
   };
 }

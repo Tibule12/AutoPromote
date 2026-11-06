@@ -1,0 +1,57 @@
+{
+  "project": "demo-autopromote-studio-preview",
+  "allHostsLoopback": true,
+  "auth": "Real Firebase Auth emulator tokens, actual middleware, no bypass headers/test tokens",
+  "storage": "Real fresh Storage emulator object metadata and bytes",
+  "firestore": "Fresh Firestore emulator and repaired Rules sources; original source collections unchanged after requests",
+  "tests": [
+    {
+      "name": "missing authentication",
+      "status": 401
+    },
+    {
+      "name": "unverified email",
+      "status": 403
+    },
+    {
+      "name": "source dialogue remains disabled by default",
+      "status": 404
+    },
+    {
+      "name": "enabled flag alone cannot activate new CPU work",
+      "status": 404
+    },
+    {
+      "name": "different owner is rejected",
+      "status": 403
+    },
+    {
+      "name": "owner uses actual API Auth Storage and CPU helpers",
+      "status": 200
+    },
+    {
+      "name": "browser URL injection is rejected",
+      "status": 422
+    },
+    {
+      "name": "changed source digest is rejected",
+      "status": 409
+    },
+    {
+      "name": "owned fractional source frame uses actual API and Storage",
+      "status": 200
+    },
+    {
+      "name": "source generation substitution is rejected",
+      "status": 409
+    },
+    {
+      "name": "cached preview rechecks changed object ownership",
+      "status": 403
+    }
+  ],
+  "originalBalancesSubscriptionsUnchanged": true,
+  "productionWrites": false,
+  "cloudExecution": false,
+  "scope": "Actual media router and services, local HTTP with real emulator SDKs and canonical CPU helpers; not deployed Auth cryptography/IAM qualification"
+}

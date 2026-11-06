@@ -36,7 +36,8 @@ class StudioColourContractTests(unittest.TestCase):
             subprocess.run(['ffmpeg','-v','error','-f','rawvideo','-pix_fmt','rgb24','-s','320x180',
                 '-r','24','-i','pipe:0','-vf',f'scale=out_color_matrix=bt709:out_range={source_range},format=yuv420p,'
                 f'setparams=range={"full" if source_range=="pc" else "limited"}:colorspace=bt709',
-                '-frames:v','24','-c:v','libx264','-threads','1','-crf','12','-y',str(source)],
+                '-frames:v','24','-c:v','libx264','-threads','1','-crf','12',
+                '-color_primaries','smpte432','-color_trc','bt709','-y',str(source)],
                 input=pixels.tobytes()*24,check=True,capture_output=True)
 
             def replace(target,name,value):
@@ -58,12 +59,13 @@ class StudioColourContractTests(unittest.TestCase):
                 finish_plan={'enabled':precision,'color':{'precisionGrade':True,'sharpness':.12},
                     'main_frame':{'enabled':True,'inset_percent':5,
                     'border_radius_percent':10,'background':'studio_black'}},
-                output_settings={'resolution':'source','fps':24,'quality':'master'},brand_watermark=False)
+                output_settings={'resolution':'source','fps':24,'quality':'master','colorSpace':'rec709'},brand_watermark=False)
             result=asyncio.run(worker.render_viral_clip_impl(request,'range-'+source_range))
             self.assertEqual(result['status'],'completed')
             metadata=json.loads(subprocess.check_output(['ffprobe','-v','error','-select_streams','v',
-                '-show_entries','stream=color_range,color_space,width,height','-of','json',str(final)]))['streams'][0]
+                '-show_entries','stream=color_range,color_space,color_transfer,color_primaries,width,height','-of','json',str(final)]))['streams'][0]
             self.assertEqual(metadata['color_range'],'tv');self.assertEqual(metadata['color_space'],'bt709')
+            self.assertEqual(metadata['color_primaries'],'bt709');self.assertEqual(metadata['color_transfer'],'bt709')
             raw=subprocess.check_output(['ffmpeg','-v','error','-i',str(final),'-frames:v','1',
                 '-pix_fmt','rgb24','-f','rawvideo','pipe:1'])
             picture=np.frombuffer(raw,np.uint8).reshape(metadata['height'],metadata['width'],3)

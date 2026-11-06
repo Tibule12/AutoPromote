@@ -3,7 +3,16 @@ import math
 
 
 def sequence_audio_slice_command(source, output, window):
-    return ['ffmpeg', '-ss', str(window['source_start']), '-i', str(source),
+    # Decode audio on its own source clock before trimming. Input-side seeking
+    # can start AAC at different decoder state depending on whether the same
+    # packets are indexed in video or audio-only media. That made the prepared
+    # dialogue differ from its final slice after an otherwise identical cut.
+    seek=['-ss',str(window['source_start'])]
+    source_args=['-i',str(source)]
+    # Exact audition is bounded to the first 90s. Preserve fast random access
+    # for long sources rather than decoding hours to qualify a short preview.
+    inputs=source_args+seek if window['source_start']<=90 else seek+source_args
+    return ['ffmpeg', *inputs,
             '-t', str(window['duration']), '-map', '0:a:0', '-c:a', 'aac',
             '-b:a', '192k', '-y', str(output)]
 

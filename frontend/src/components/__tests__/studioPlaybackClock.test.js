@@ -117,3 +117,38 @@ test('the end-of-frame refresh samples time advanced during painting and is canc
     expect(f.clock.getSnapshot().sourceTime).toBe(11.1);
   } finally { stop(); jest.useRealTimers(); }
 });
+
+test('an advancing decoder recovers a lost playing event while a real stall stays held', () => {
+  jest.useFakeTimers();
+  const f = fixture(); const stop = f.clock.bind(f.video, f.config);
+  try {
+    f.frame(11); f.video.dispatchEvent(new Event('waiting'));
+    jest.advanceTimersByTime(240);
+    expect(f.clock.getSnapshot().sourceTime).toBe(11);
+    // No animation callback, timeupdate or playing event arrives under load.
+    f.video.currentTime = 11.4;
+    jest.advanceTimersByTime(80);
+    expect(f.clock.getSnapshot().sourceTime).toBe(11.4);
+    f.video.currentTime = 11.6; jest.advanceTimersByTime(80);
+    expect(f.clock.getSnapshot().programmeTime).toBe(5.6);
+    f.video.paused = true; f.video.dispatchEvent(new Event('pause'));
+    f.video.currentTime = 11.7; jest.advanceTimersByTime(160);
+    expect(f.clock.getSnapshot().sourceTime).toBe(11.6);
+  } finally { stop(); expect(jest.getTimerCount()).toBe(0); jest.useRealTimers(); }
+});
+
+test('the display watchdog rejects a replaced or errored decoder and stops on disposal', () => {
+  jest.useFakeTimers();
+  const f = fixture(); const stop = f.clock.bind(f.video, f.config);
+  try {
+    f.video.currentTime = 11; jest.advanceTimersByTime(80);
+    expect(f.clock.getSnapshot().sourceTime).toBe(11);
+    f.video.currentSrc = 'https://example.com/previous.mp4';
+    f.video.currentTime = 12; jest.advanceTimersByTime(160);
+    expect(f.clock.getSnapshot().sourceTime).toBe(11);
+    f.video.currentSrc = f.config.url;
+    Object.defineProperty(f.video, 'error', { configurable: true, value: { code: 3 } });
+    jest.advanceTimersByTime(160);
+    expect(f.clock.getSnapshot().sourceTime).toBe(11);
+  } finally { stop(); expect(jest.getTimerCount()).toBe(0); jest.useRealTimers(); }
+});

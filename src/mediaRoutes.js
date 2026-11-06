@@ -1139,7 +1139,9 @@ router.post("/studio-assets/source-frame", requireTesterEditingFeature("clipRend
 });
 
 router.post('/studio-assets/voice-bus-preview', requireTesterEditingFeature('clipRender'), async (req, res) => {
-  if (req.body?.version === 2 && process.env.STUDIO_SOURCE_DIALOGUE_PREVIEW_ENABLED !== 'true')
+  if (req.body?.version === 2 && !require('../frontend/src/components/studioSourceDialoguePolicy')
+    .sourceDialoguePreviewEnabled(req.user.uid, process.env.STUDIO_SOURCE_DIALOGUE_PREVIEW_ENABLED,
+      process.env.STUDIO_SOURCE_DIALOGUE_PREVIEW_UIDS))
     return res.status(404).json({code:'STUDIO_SOURCE_DIALOGUE_PREVIEW_DISABLED',message:'Source-dialogue preview is not enabled'});
   const controller = new AbortController();
   const cancel = () => { if (!res.writableEnded) controller.abort(); };

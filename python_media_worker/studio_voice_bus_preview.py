@@ -33,7 +33,9 @@ def project_source_dialogue(request, output, duration):
         source = output / f'source-{index}'
         key = (take['storagePath'], take['sourceContentHash'])
         if key not in ingested:
-            metadata = json.loads(run(['ffprobe', '-v', 'error', '-show_streams', '-show_format',
+            metadata = json.loads(run(['ffprobe', '-v', 'error',
+                                       '-protocol_whitelist','file,pipe','-format_whitelist','mov,matroska,avi,mpeg,mpegts',
+                                       '-show_streams', '-show_format',
                                        '-of', 'json', str(source)]).stdout)
             audible = any(s.get('codec_type') == 'audio' for s in metadata['streams'])
             source_duration = float(metadata['format']['duration'])
@@ -114,17 +116,22 @@ def project_voice_bus(request_file, folder):
         measured = output / 'duck-raw.f32'
         # A unity carrier exposes the exact renderer compressor's gain. This
         # uses the post-trim/fade/retime/automation bus; SFX never drive it.
+        # FFmpeg7 can end a two-input filter as soon as one demuxer reports
+        # EOF, before draining the other input's queued samples. Supply a
+        # bounded silent tail, then take the exact authored sample interval.
+        # The compressor is causal: future silence cannot change that interval.
         subprocess.run(['ffmpeg', '-v', 'error', '-nostdin', '-threads', '2', '-y',
-                        '-f', 'lavfi', '-i', f'aevalsrc=1|1:s=48000:d={duration}', '-i', str(voice),
+                        '-f', 'lavfi', '-i', f'aevalsrc=1|1:s=48000:d={duration+1}', '-i', str(voice),
                         '-filter_complex_threads', '1', '-filter_complex',
-                        '[0:a][1:a]sidechaincompress=threshold=0.025:'
+                        '[1:a]apad=pad_dur=1[sidechain];'
+                        '[0:a][sidechain]sidechaincompress=threshold=0.025:'
                         f'ratio={2+strength*14:.2f}:attack=18:release=280[duck];'
-                        '[duck]pan=mono|c0=0.5*c0+0.5*c1[out]',
+                        f'[duck]atrim=end_sample={count},pan=mono|c0=0.5*c0+0.5*c1[out]',
                         '-map', '[out]',
                         '-ar', '48000', '-f', 'f32le', str(measured)],
                        check=True, capture_output=True, timeout=15)
         samples = np.fromfile(measured, dtype='<f4')
-        if len(samples) < count-128 or not np.all(np.isfinite(samples)):
+        if len(samples) != count or not np.all(np.isfinite(samples)):
             raise ValueError('Incomplete compressor preview')
         gains[:min(count, len(samples))] = samples[:count]
     gains.tofile(output / 'duck.f32')

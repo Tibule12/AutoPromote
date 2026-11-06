@@ -6794,16 +6794,23 @@ def resolve_viral_export_profile(output_settings, source_width, source_height):
         "quality": quality,
         "crf": crf,
         "preset": "p4" if use_nvenc else preset_by_quality[quality],
+        "colorSpace": settings.get("colorSpace"),
     }
 
 
 def build_viral_export_encode_args(profile):
+    # The authored RGB finish/frame passes return BT.709 YUV. An explicit
+    # Rec.709 delivery must describe that surface instead of inheriting the
+    # original camera's primaries (for example P3) through those RGB passes.
+    colour_args = (["-color_primaries", "bt709", "-color_trc", "bt709",
+                    "-colorspace", "bt709", "-color_range", "tv"]
+                   if profile.get("colorSpace") == "rec709" else [])
     if profile["encoder"] == "h264_nvenc":
         # NVENC uses constant quality with VBR; CRF is an x264/x265 option.
         return [
             "-c:v", "h264_nvenc", "-preset", profile.get("preset", "p4"),
             "-rc", "vbr", "-cq", str(profile["crf"]), "-b:v", "0",
-            "-pix_fmt", "yuv420p",
+            "-pix_fmt", "yuv420p", *colour_args,
         ]
     args = [
         "-c:v",
@@ -6817,7 +6824,7 @@ def build_viral_export_encode_args(profile):
     ]
     if profile["codec"] == "h265":
         args.extend(["-tag:v", "hvc1"])
-    return args
+    return [*args, *colour_args]
 
 
 def remove_replaced_temp_media(previous_path, replacement_path, approved_tmp_dir):
@@ -8770,13 +8777,31 @@ def build_studio_sequence_video_filters(normalize_filter, fps, source_framing=Fa
     return clock + [normalize_filter] if source_framing else [normalize_filter] + clock
 
 
-def build_studio_sequence_encode_args(reviewed_subject=False, fps=None):
+def preserve_reviewed_video_samples(input_path, duration, reviewed):
+    """Use measured stream dimensions/rate for the bounded temporary profile."""
+    if not reviewed:
+        return False
+    try:
+        from .studio_sequence_video import preserve_reviewed_sequence_samples
+    except ImportError:
+        from studio_sequence_video import preserve_reviewed_sequence_samples
+    try:
+        picture = next(stream for stream in probe_media_stream_summary(input_path).get("streams", [])
+                       if stream.get("codec_type") == "video")
+        numerator, denominator = str(picture["avg_frame_rate"]).split("/")
+        return preserve_reviewed_sequence_samples(picture["width"], picture["height"],
+            float(numerator) / float(denominator), duration, reviewed)
+    except (KeyError, ValueError, TypeError, ZeroDivisionError, StopIteration):
+        return False
+
+
+def build_studio_sequence_encode_args(reviewed_subject=False, fps=None, preserve_samples=False):
     # A reviewed replacement is already encoded. The default x264 CRF 23
     # temporary cut visibly removes skin, cloth and thin equipment detail
     # before the selected delivery profile even runs. Preserve its YUV samples
     # during assembly; the ordinary final export still owns delivery quality.
     args = ["-c:v", "libx264", "-preset", "ultrafast"]
-    if reviewed_subject:
+    if reviewed_subject or preserve_samples:
         args.extend(["-crf", "0"])
     if fps is not None:
         # FFmpeg 7.1 can omit a short MP4's final packet duration. Even with
@@ -8787,7 +8812,8 @@ def build_studio_sequence_encode_args(reviewed_subject=False, fps=None):
     return args
 
 
-def build_reviewed_reframe_filter(keyframes, target_width, target_height, zoom=1, programme_offset=0):
+def build_reviewed_reframe_filter(keyframes, target_width, target_height, zoom=1, programme_offset=0,
+                                  scale_options=""):
     """Interpolate editor object-position marks without substituting face detection."""
     points = {}
     for keyframe in keyframes or []:
@@ -8813,7 +8839,7 @@ def build_reviewed_reframe_filter(keyframes, target_width, target_height, zoom=1
     scaled_width = math.ceil(target_width * zoom / 2) * 2
     scaled_height = math.ceil(target_height * zoom / 2) * 2
     return (
-        f"scale={scaled_width}:{scaled_height}:force_original_aspect_ratio=increase,"
+        f"scale={scaled_width}:{scaled_height}{scale_options}:force_original_aspect_ratio=increase,"
         f"crop={target_width}:{target_height}:x='(iw-ow)*({position(0)})':y='(ih-oh)*({position(1)})',setsar=1"
     )
 
@@ -9282,12 +9308,18 @@ def preflight_studio_podcast_timeline(finish_plan, duration, *, programme_durati
 
 def build_reframe_segment_filter(
     src_width, src_height, target_width, target_height, segment, solo_zoom=1,
-    alternate_input_label=None,
+    alternate_input_label=None, sampling_profile=None,
 ):
     """Build one bounded interval from a reviewed reframe timeline."""
     director_zoom = float(segment.get("zoom") or 1)
     composed = "[segment_base]" if director_zoom > 1.001 else "[vout]"
     mode = segment.get("mode")
+    # The bounded reviewed profile uses the same explicit resize families as
+    # the high-quality canvas stages. Defaults remain for other render paths.
+    sampled = sampling_profile == "reviewed-high-v1" and mode == "speaker_track"
+    upscale_options = ":flags=bicubic:param0=0.333333333333:param1=0.333333333333" if sampled else ""
+    source_scale_options = (upscale_options if max(target_width*solo_zoom/src_width,
+        target_height*solo_zoom/src_height) > 1 else ":flags=bilinear") if sampled else ""
     if mode == "group_stack":
         # Already composed by the canonical synchronized-camera renderer.
         graph = f"[0:v]scale={target_width}:{target_height},setsar=1{composed}"
@@ -9309,14 +9341,14 @@ def build_reframe_segment_filter(
     elif mode == "speaker_track":
         source_label = alternate_input_label or "[0:v]"
         graph = (
-            f"{source_label}{build_reviewed_reframe_filter(segment.get('solo_keyframes') or [], target_width, target_height, solo_zoom)}{composed}"
+            f"{source_label}{build_reviewed_reframe_filter(segment.get('solo_keyframes') or [], target_width, target_height, solo_zoom, scale_options=source_scale_options)}{composed}"
         )
     else:
         graph = build_safe_vertical_fit_filter("[0:v]", composed, target_width, target_height)
     if director_zoom > 1.001:
         graph += (
             f";{composed}crop=trunc(iw/{director_zoom:.6f}/2)*2:trunc(ih/{director_zoom:.6f}/2)*2:"
-            f"(iw-ow)/2:(ih-oh)/2,scale={target_width}:{target_height},setsar=1[vout]"
+            f"(iw-ow)/2:(ih-oh)/2,scale={target_width}:{target_height}{upscale_options},setsar=1[vout]"
         )
     return graph
 
@@ -9338,6 +9370,7 @@ async def render_reframe_timeline_sequential(
     job_id="reframe",
     programme_fps=None,
     reviewed_subject=False,
+    preserve_samples=False,
     delivery_fps=None,
     multicam_programme_path=None,
 ):
@@ -9387,6 +9420,7 @@ async def render_reframe_timeline_sequential(
             graph = build_reframe_segment_filter(
                 src_width, src_height, target_width, target_height, segment, solo_zoom,
                 alternate_input_label="[1:v]" if active_offsets else None,
+                sampling_profile="reviewed-high-v1" if preserve_samples else None,
             )
             if delivery_fps is not None:
                 # Raw sources may have a different rate. Compiled programmes
@@ -9401,8 +9435,8 @@ async def render_reframe_timeline_sequential(
                 "-t", f"{segment['end']-segment['start']:.9f}",
                 "-filter_complex", graph,
                 "-map", "[vout]", "-an",
-                *(build_studio_sequence_encode_args(reviewed_subject=True)
-                  if reviewed_subject else
+                *(build_studio_sequence_encode_args(reviewed_subject=reviewed_subject,preserve_samples=preserve_samples)
+                  if reviewed_subject or preserve_samples else
                   build_viral_export_encode_args(resolve_viral_export_profile({}, target_width, target_height))),
                 "-movflags", "+faststart", "-y", segment_path,
             ])
@@ -30973,6 +31007,7 @@ async def render_studio_finish_timeline_sequential(
     duration,
     job_id="finish",
     reviewed_subject=False,
+    preserve_samples=False,
 ):
     """Render timed Finish Rack intervals without retaining the full programme in RAM."""
     specs = plan_studio_adjustment_segments(layers, duration)
@@ -31011,8 +31046,8 @@ async def render_studio_finish_timeline_sequential(
                 # This is encoded again by the final caption/delivery graph.
                 # Veryfast keeps the intermediate compact enough for Cloud
                 # Run's memory-backed filesystem while preserving CRF 19.
-                *(build_studio_sequence_encode_args(reviewed_subject=True)
-                  if reviewed_subject else
+                *(build_studio_sequence_encode_args(reviewed_subject=reviewed_subject,preserve_samples=preserve_samples)
+                  if reviewed_subject or preserve_samples else
                   ["-c:v", "libx264", "-preset", "veryfast", "-crf", "19"]),
                 "-pix_fmt", "yuv420p", "-fps_mode", "passthrough",
                 "-bf", "0", *build_studio_cfr_packet_args(fps), "-y", segment_path,
@@ -31105,7 +31140,7 @@ async def detect_video_content_crop(input_path, width, height):
     }
 
 
-def build_main_video_frame_filter(finish_plan, width, height, content_crop=None):
+def build_main_video_frame_filter(finish_plan, width, height, content_crop=None, sampling_profile=None):
     """Inset and round the edited picture over the selected studio canvas."""
     frame = (finish_plan or {}).get("main_frame") or (finish_plan or {}).get("mainFrame") or {}
     if not bool(frame.get("enabled")):
@@ -31179,10 +31214,11 @@ def build_main_video_frame_filter(finish_plan, width, height, content_crop=None)
             "color=0x030509:t=fill[mainframe_bg];"
         )
 
+    frame_scale_options = ":flags=bilinear" if sampling_profile == "reviewed-high-v1" else ""
     return (
         source_prefix
         + background_filter
-        + f"[mainframe_fgsrc]{crop_filter}format=rgba,scale={inner_width}:{inner_height}:force_original_aspect_ratio=increase,"
+        + f"[mainframe_fgsrc]{crop_filter}format=rgba,scale={inner_width}:{inner_height}{frame_scale_options}:force_original_aspect_ratio=increase,"
         f"crop={inner_width}:{inner_height},format=rgba[mainframe_fg];"
         f"movie={escaped_mask_path},format=gray,loop=loop=-1:size=1:start=0,"
         "setpts=N/30/TB[mainframe_mask];"
@@ -31524,6 +31560,10 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
 
     try:
         # 1. Download/Prepare Main Video (Async)
+        try:
+            from .studio_sequence_video import preserve_reviewed_sequence_samples
+        except ImportError:
+            from studio_sequence_video import preserve_reviewed_sequence_samples
         sequence_reframe = (request.finish_plan or {}).get("reframe") or {}
         sequence_framing_keys = sequence_reframe.get("keyframes") or []
         source_framing = bool(request.timeline_segments and request.smart_crop
@@ -31667,9 +31707,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 video_filters = build_studio_sequence_video_filters(
                     normalize_vf, selected_timeline_fps, source_framing)
                 try:
-                    from .studio_sequence_video import sequence_picture_window
+                    from .studio_sequence_video import sequence_picture_window, preserve_reviewed_sequence_samples
                 except ImportError:
-                    from studio_sequence_video import sequence_picture_window
+                    from studio_sequence_video import sequence_picture_window, preserve_reviewed_sequence_samples
                 picture = next((stream for stream in probe_media_stream_summary(segment_picture_path).get("streams", [])
                                 if stream.get("codec_type") == "video"), {})
                 rate_n, rate_d = str(picture.get("avg_frame_rate") or "0/1").split("/")
@@ -31692,6 +31732,12 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     "-map", "0:v:0", "-an",
                     *build_studio_sequence_encode_args(
                         reviewed_subject=segment_picture_path != segment_source_path,
+                        # Preserve reviewed fine detail through short bounded
+                        # assemblies. The final delivery still owns quality.
+                        # Raw YUV bounds the extra scratch even for noisy media;
+                        # long/large sequences retain their existing profile.
+                        preserve_samples=preserve_reviewed_sequence_samples(timeline_canvas_width,
+                            timeline_canvas_height,selected_timeline_fps,programme_duration,sequence_framing_keys),
                         fps=selected_timeline_fps),
                     "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-y",
                     segment_video_path,
@@ -32157,6 +32203,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         job_id=job_id,
                         programme_fps=programme_fps,
                         reviewed_subject=bool(request.subjectVfx),
+                        preserve_samples=preserve_reviewed_sequence_samples(reframe_target_width,
+                            reframe_target_height,programme_fps or (request.output_settings or {}).get('fps',30),
+                            reframe_duration,manual_reframe_keyframes),
                         multicam_programme_path=multicam_programme_path,
                     )
                     if multicam_programme_path:
@@ -32344,6 +32393,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             sequence_temp_paths.add(finish_path)
             finish_has_audio = has_audio_stream(working_path)
             finish_source_path = working_path
+            preserve_finish_samples = preserve_reviewed_video_samples(
+                working_path, programme_duration, manual_reframe_keyframes)
             report_progress(49, "Applying creator color and finish")
             if adjustment_graph:
                 await render_studio_finish_timeline_sequential(
@@ -32354,12 +32405,14 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     get_media_duration(working_path),
                     job_id=job_id,
                     reviewed_subject=bool(request.subjectVfx),
+                    preserve_samples=preserve_finish_samples,
                 )
             else:
                 finish_cmd = [
                     "ffmpeg", "-i", working_path, "-vf", finish_filter,
-                    *(build_studio_sequence_encode_args(reviewed_subject=True)
-                      if request.subjectVfx else
+                    *(build_studio_sequence_encode_args(reviewed_subject=bool(request.subjectVfx),
+                        preserve_samples=preserve_finish_samples)
+                      if request.subjectVfx or preserve_finish_samples else
                       ["-c:v", "libx264", "-preset", "veryfast", "-crf", "19"]),
                     "-pix_fmt", "yuv420p",
                 ]
@@ -32773,11 +32826,14 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 "Removing embedded source border before rounding main picture: %s",
                 main_frame_content_crop,
             )
+        preserve_frame_samples = preserve_reviewed_video_samples(
+            working_path, rendered_timeline_duration, manual_reframe_keyframes)
         main_frame_filter = build_main_video_frame_filter(
             request.finish_plan,
             main_frame_width,
             main_frame_height,
             content_crop=main_frame_content_crop,
+            sampling_profile="reviewed-high-v1" if preserve_frame_samples else None,
         )
         if main_frame_filter:
             main_frame_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_main_frame.mp4")
@@ -32787,7 +32843,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     "ffmpeg", "-i", working_path,
                     "-filter_complex", main_frame_filter,
                     "-map", "[v_main_frame]", "-map", "0:a?",
-                    "-c:v", "libx264", "-preset", "veryfast", "-crf", "19",
+                    *(build_studio_sequence_encode_args(preserve_samples=True)
+                      if preserve_frame_samples else
+                      ["-c:v", "libx264", "-preset", "veryfast", "-crf", "19"]),
                     "-pix_fmt", "yuv420p", "-c:a", "copy",
                     "-movflags", "+faststart", "-y", main_frame_path,
                 ],
@@ -33911,6 +33969,10 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             base_height,
         )
         delivery_filters = []
+        if delivery_profile.get("colorSpace") == "rec709":
+            # Frame properties can override encoder flags during negotiation.
+            # Bind the selected SDR delivery on the actual filtered pictures.
+            delivery_filters.append("setparams=range=limited:color_primaries=bt709:color_trc=bt709:colorspace=bt709")
         if (
             delivery_profile["width"] != int(base_width)
             or delivery_profile["height"] != int(base_height)

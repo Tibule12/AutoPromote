@@ -22592,14 +22592,20 @@
     "workerLiveEvidence": "reports/studio-controls-director-20261105/evidence/deployed-20261106/worker-followup/verified-live-result.json"
   },
   "qualificationContinuation20261106": {
-    "status": "IN_PROGRESS_PICTURE_PARITY_FAILED",
+    "status": "BOUNDED_LOCAL_PICTURE_AUDIO_TRANSPORT_PASS_LIVE_RETEST_PENDING",
     "report": "reports/studio-qualification-20261106/README.md",
     "evidence": "reports/studio-qualification-20261106/evidence/checkpoint.json",
     "realTwoFaceTracking": "VERIFIED_24_KEYS_EACH_COVERAGE_1",
     "twoFaceEditingAndColdRecovery": "VERIFIED",
     "nativePreparedAudioSamples": "VERIFIED_576000_NO_GAPS_OR_DUPLICATES",
     "nativePauseResumeAndFractionalCutPlayback": "VERIFIED",
-    "fullPictureAudioParity": "NOT_QUALIFIED",
-    "readinessPromotion": false
+    "fullPictureAudioParity": "FULL_MOVING_PICTURE_MIX_AND_DEPLOYED_INTEGRATION_UNQUALIFIED",
+    "readinessPromotion": false,
+    "pausedNativePicturePairs": "12_OF_12_FIXED_COLOUR_AND_GEOMETRY_LIMITS_PASS",
+    "nativeCpuThrottling": "4X_LOCAL_PASS_53_DISTINCT_FINAL_BUILD_POSITIONS; SMOOTHNESS_LIMIT_611MS_OBSERVATION_GAP",
+    "realIsolatedPreviewApi": "11_PASS_AUTH_STORAGE_FIRESTORE_NO_AUTH_BYPASS",
+    "matchedApiWorkerRuntime": "576000_PREPARED_SAMPLES_IDENTICAL_NONROOT_OFFLINE_IMAGE",
+    "productionPackagingAndActivation": "PENDING",
+    "sourceDialogueActivation": "DEFAULT_OFF_EXPLICIT_ACCOUNT_COHORT_REQUIRED"
   }
 }

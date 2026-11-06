@@ -57,6 +57,7 @@ export default forwardRef(function StudioVoiceoverPreview({ takes, videoRef, get
     canFollowMusicClock: () => Boolean(preparedValue.current && preparedValue.current.requestKey === currentRequest.current),
     stage: plan => { requestedPreparedStart.current=plan||null;return stagePrepared.current?.(); },
     pause: () => {
+      requestedPreparedStart.current=null;
       stopPrepared();
       elements.current.forEach(audio => audio.pause());
       [...playing.current.keys()].forEach(stopPcm); pinned.current.clear();
@@ -112,6 +113,7 @@ export default forwardRef(function StudioVoiceoverPreview({ takes, videoRef, get
   }, []);
   useEffect(() => {
     const controller = new AbortController();
+    requestedPreparedStart.current=null;
     stopPrepared(); setPrepared(null); latest.current.onPreparedDucking?.(null);
     if (!requestKey) { pending.current = null; return undefined; }
     latest.current.onPreparation?.('loading');
@@ -142,6 +144,7 @@ export default forwardRef(function StudioVoiceoverPreview({ takes, videoRef, get
     const sync = event => {
       const activeVideo=videoRef.current,value=preparedValue.current;
       if(event?.currentTarget && event.currentTarget!==activeVideo) return;
+      if(latest.current.programmeAuthority && !latest.current.getPlaybackIntent?.()) {stopPrepared();return;}
       if(!value || value.requestKey!==currentRequest.current) {stopPrepared();return;}
       if(hasContinuousIntent()) {
         preparedPlaying.current.gain.gain.value=latest.current.muted?0:voiceoverGain(latest.current.volume);

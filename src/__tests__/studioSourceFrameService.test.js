@@ -1,9 +1,8 @@
 const fs = require('node:fs/promises');
-const os = require('node:os');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const { execFileSync } = require('node:child_process');
-const { validateFrameRequest, decodeSourceFrame } = require('../services/studioSourceFrameService');
+const { validateFrameRequest, decodeSourceFrame, prepareSequencePreviewSource } = require('../services/studioSourceFrameService');
 
 const request = { storagePath: 'studio/sources/owner/video.mp4', sourceContentHash: 'a'.repeat(64),
   start: .125, end: 1.125, fps: 24, frameIndex: 5 };
@@ -47,8 +46,36 @@ test('fractional programme sampling binds a bounded source and global concat win
 
 describe('actual FFmpeg sampling matches a separately decoded full sequence', () => {
   let folder;
-  beforeAll(async () => { folder = await fs.mkdtemp(path.join(os.tmpdir(), 'studio-frame-test-')); });
+  beforeAll(async () => {
+    // The real development materializer intentionally accepts only repo/tmp.
+    // Own one fresh directory there; never weaken that path boundary.
+    const temp=path.resolve(__dirname,'../../tmp');await fs.mkdir(temp,{recursive:true});
+    folder = await fs.mkdtemp(path.join(temp, 'studio-frame-test-'));
+  });
   afterAll(async () => { await fs.rm(folder, { recursive: true, force: true }); });
+  test('a playlist disguised as owned video cannot request another network resource',async()=>{
+    const source=path.join(folder,'untrusted.m3u8');
+    await fs.writeFile(source,'#EXTM3U\n#EXT-X-TARGETDURATION:1\n#EXTINF:1,\nhttp://127.0.0.1:1/private.ts\n#EXT-X-ENDLIST\n');
+    for(const task of [()=>decodeSourceFrame(source,request),
+      ()=>prepareSequencePreviewSource(source,path.join(folder,'untrusted-output.mp4'))]){
+      try {await task();throw new Error('Unsafe playlist was accepted');}
+      catch(error){expect(String(error.stderr)).toMatch(/not on whitelist/i);expect(String(error.stderr)).not.toMatch(/Connection refused/);}
+    }
+  });
+  test('sequence preparation matches the actual worker CFR ingest and rejects cancellation', async () => {
+    const source=path.join(folder,'ingest-source.mp4'),prepared=path.join(folder,'preview-ingest.mp4'),reference=path.join(folder,'worker-ingest.mp4');
+    execFileSync('ffmpeg',['-v','error','-f','lavfi','-i','testsrc2=size=160x90:rate=25:duration=2',
+      '-c:v','libx264','-threads','2','-pix_fmt','yuv420p','-y',source]);
+    const result=await prepareSequencePreviewSource(source,prepared);
+    expect(result.size).toBeGreaterThan(1000);expect(result.size).toBeLessThan(32*1024*1024);
+    execFileSync(process.env.STUDIO_AUDIO_PREVIEW_PYTHON||'python3',['-c',
+      'import asyncio,sys,socket; from unittest.mock import patch; from python_media_worker import main_media_server as w; deny=lambda *a,**k: (_ for _ in ()).throw(AssertionError("Network forbidden"));\nwith patch.object(socket.socket,"connect",deny): asyncio.run(w.materialize_video_input(sys.argv[1],sys.argv[2]))',
+      source,reference],{cwd:path.resolve(__dirname,'../..'),env:{...process.env,CUDA_VISIBLE_DEVICES:'',MEDIA_WORKER_STUDIO_FFMPEG_THREADS:'2'}});
+    const pixels=file=>execFileSync('ffmpeg',['-v','error','-i',file,'-map','0:v:0','-pix_fmt','rgb24','-f','rawvideo','pipe:1'],{maxBuffer:4*1024*1024});
+    expect(digest(pixels(prepared))).toBe(digest(pixels(reference)));
+    const abort=new AbortController();abort.abort();
+    await expect(prepareSequencePreviewSource(source,path.join(folder,'cancelled.mp4'),abort.signal)).rejects.toMatchObject({name:'AbortError'});
+  },30000);
   test.each(['24000/1001', '30', 'variable'])('%s source with fractional trim', async rate => {
     const source = path.join(folder, `${rate.replace('/', '-')}.mkv`);
     const filter = rate === 'variable' ?
@@ -86,7 +113,10 @@ describe('actual FFmpeg sampling matches a separately decoded full sequence', ()
       {cwd:path.resolve(__dirname,'../..'),encoding:'utf8'}));
     const frames=path.join(folder,`phase-ref-${rate.replace('/','-')}-%02d.png`);
     execFileSync('ffmpeg',['-v','error','-ss',window.seek.toFixed(6),'-i',ingest,
-      '-vf',window.clock.join(','),'-frames:v',String(window.frames),'-threads','2','-y',frames]);
+      '-vf',window.clock.join(','),'-frames:v',String(window.frames),
+      // Match the worker encoder: do not let the image muxer resample the
+      // canonical frame sequence to its inherited input rate on FFmpeg7.
+      '-fps_mode','passthrough','-threads','2','-y',frames]);
     for(const index of [0,1,10,window.frames-1]){
       const actual=await decodeSourceFrame(source,{...request,start:.53,end:2.23,fps:24,frameIndex:index,
         sampling:'studio-sequence-source-frame-v2',programmeStart:.7,programmeDuration:2.4});

@@ -7418,7 +7418,9 @@ describe("ViralClipStudio timeline sequencing", () => {
   });
   test('source-dialogue preview candidate can open the real editor without forward state references', () => {
     const previous=process.env.REACT_APP_STUDIO_SOURCE_DIALOGUE_PREVIEW;
+    const previousCohort=process.env.REACT_APP_STUDIO_SOURCE_DIALOGUE_PREVIEW_UIDS;
     process.env.REACT_APP_STUDIO_SOURCE_DIALOGUE_PREVIEW='true';
+    process.env.REACT_APP_STUDIO_SOURCE_DIALOGUE_PREVIEW_UIDS='test-user';
     try {
       const view=render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
         clips={[{id:'source-dialogue-open',start:0,end:12,duration:12}]} onSave={jest.fn()} onCancel={jest.fn()} />);
@@ -7429,6 +7431,8 @@ describe("ViralClipStudio timeline sequencing", () => {
     } finally {
       if(previous===undefined)delete process.env.REACT_APP_STUDIO_SOURCE_DIALOGUE_PREVIEW;
       else process.env.REACT_APP_STUDIO_SOURCE_DIALOGUE_PREVIEW=previous;
+      if(previousCohort===undefined)delete process.env.REACT_APP_STUDIO_SOURCE_DIALOGUE_PREVIEW_UIDS;
+      else process.env.REACT_APP_STUDIO_SOURCE_DIALOGUE_PREVIEW_UIDS=previousCohort;
     }
   });
 

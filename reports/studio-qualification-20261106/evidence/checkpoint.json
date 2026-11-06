@@ -389,13 +389,12 @@
     "welcomeAuthenticatedHelp": "pending",
     "candidateSourceClockAndPngMetadataFailuresRetained": true
   },
-  "qualification": "FAILED_PICTURE_AND_AUDIO_PARITY",
+  "qualification": "BOUNDED_LOCAL_PICTURE_AND_TRANSPORT_PASS_DEPLOYED_RETEST_PENDING",
   "noReadinessPromotion": true,
   "next": [
-    "real two-face export and paired comparison",
-    "colour/range and two-stage crop investigation",
-    "canonical source-restoration preview using existing final audio helpers",
-    "all affected lifecycle plus local and deployed requalification"
+    "Preserve exact tested local checkpoint/private bundle without remote CI",
+    "Complete release packaging review and precise owner-only activation/retest plan",
+    "Repeat live owner workflow before claiming full qualification or advancing Director"
   ],
   "liveExportFailure": {
     "status": "FAILED",
@@ -544,10 +543,10 @@
     "missingSamples": 0,
     "duplicateSamples": 0,
     "maximumSampleError": 2.7179718017578125e-05,
-    "relativeRms": 2.2815514967078343e-05,
+    "relativeRms": 2.2835383788333274e-05,
     "correlation": [
-      0.9999999999416206,
-      0.9999999999282999
+      0.9999999999413463,
+      0.9999999999282521
     ],
     "alignment": "Recorded AudioContext start and absolute AudioWorklet sample frames; no fitted shift or missing-sample interpolation"
   },
@@ -577,10 +576,10 @@
     ]
   },
   "exactRemaining": [
-    "Full native picture RGB comparison still exceeds retained threshold; no fitted image alignment is accepted",
-    "Audio matches prepared samples and programme clock; final AAC comparison and audible review remain separately assessed",
-    "Repeat affected whole project controls, cold recovery and live export after qualified local candidate release",
-    "Newest isolated build entry/help and final preservation checks before release"
+    "Review/build the complete frontend/API/worker release together; minimal dependency-image smoke is not a complete production build",
+    "Source-dialogue activation flags remain default-off; choose a bounded owner QA activation and verify actual deployed source authorization/resource behaviour",
+    "Repeat actual owner tracked export, settlement/recovery and complete playback after the release",
+    "Full moving-picture/mix, edge/gamut/diverse footage and human listening/creative approval remain separate"
   ],
   "validatedCurrentRuns": {
     "exactDeployedFfmpegRuntime": {
@@ -604,7 +603,393 @@
     "newTargetedEditor": {
       "testsPassed": 3
     },
-    "buildSourceStable": true
+    "buildSourceStable": true,
+    "current": {
+      "frontend": {
+        "passed": 94,
+        "suites": 9
+      },
+      "ownedFrameAndVoiceServices": {
+        "passed": 25,
+        "suites": 2
+      },
+      "exactRuntimeWorker": {
+        "passed": 54,
+        "subtestsPassed": 24
+      },
+      "anonymousWelcome": {
+        "passed": 8,
+        "errors": 0
+      },
+      "authenticatedHelpAndExactColdRecovery": {
+        "passed": 2
+      },
+      "nativePauseResumeAndFractionalCut": {
+        "passed": 2
+      },
+      "note": "Different scopes, not one combined end-to-end count. Local preview API responses execute real CPU preparation; they do not prove deployed ownership/runtime integration.",
+      "ownedPreviewRoutesBillingAndPayments": {
+        "passed": 68,
+        "suites": 6,
+        "runtime": "Actual FFmpeg7.1.5, Python3.12 local; replaces the earlier25-case subset"
+      },
+      "matchedApiNodeContainer": {
+        "passed": 43,
+        "suites": 4,
+        "scope": "Actual Node22 Debian image runtime; existing JS dependencies mounted read-only; mock provider boundaries. Subset of68, not additional distinct checks"
+      },
+      "realIsolatedPreviewHttp": {
+        "passed": 11,
+        "authBypass": false,
+        "project": "demo-autopromote-studio-preview",
+        "rulesSources": "current repaired Rules",
+        "productionWrites": false
+      },
+      "fullEditorTargeted": {
+        "passed": 3,
+        "skipped": 173,
+        "note": "Targeted full editor entry/transport regressions, not a whole-suite rerun"
+      }
+    }
   },
-  "newestWholePictureStatus": "FAILED; do not loosen retained thresholds or use fitted image/time alignment"
+  "newestWholePictureStatus": "12_OF_12_BOUNDED_PAUSED_COLOUR_AND_GEOMETRY_PAIRS_PASS",
+  "latestFullAudioAgainstAacExport": {
+    "samples": 576000,
+    "clockAlignment": "Absolute programme zero; no fitted shift",
+    "correlation": [
+      0.9983344571917236,
+      0.9988181350465575
+    ],
+    "relativeRms": 0.05622623488306999,
+    "dbDifference": 0.0726882591843605
+  },
+  "currentWelcomeEntry": {
+    "anonymousViewportChecks": 8,
+    "matchingWelcomeContent": true,
+    "browserErrors": 0
+  },
+  "latestNativeRecoveryAndHelp": {
+    "exactCanonicalColdReopen": true,
+    "exactFraming": true,
+    "productHelpOpenedAndClosed": true,
+    "questionSubmitted": false
+  },
+  "latestPictureCheckpoint": {
+    "runtime": "Exact deployed FFmpeg7.1.5 base/system files, actual canonical local renderer; no provider/cloud execution claim",
+    "profile": "reviewed-high-v1, bounded reviewed sample preservation",
+    "movieSha256": "f24689ed1800320a9fe518243d50ccfe60e86ec29c44dca8d6146431d05b2dd7",
+    "canonicalHash": "b72c64955d1e6d756c1ee8e8a03fe0ad429a9ea882cf107e697381df8e6209c8",
+    "sameCanonical": true,
+    "localRenderSeconds": 44.375829802003864,
+    "sourceChangedDuringRender": false,
+    "thresholds": {
+      "rgbRmse": 4,
+      "geometryP95CssPixels": 2
+    },
+    "colourPassed": 12,
+    "geometryPassed": 12,
+    "total": 12,
+    "rows": [
+      {
+        "frame": 0,
+        "nativeLiveOutputTime": 0,
+        "nativeFinalOutputTime": 0,
+        "sourceSampling": "accurate-paused",
+        "rgbRmse": 2.0963530138852504,
+        "geometryP95CssPixels": 0.4178920269012451,
+        "geometryMatches": 464,
+        "colourPass": true,
+        "geometryPass": true
+      },
+      {
+        "frame": 12,
+        "nativeLiveOutputTime": 0.5,
+        "nativeFinalOutputTime": 0.500011,
+        "sourceSampling": "accurate-paused",
+        "rgbRmse": 2.522038456659864,
+        "geometryP95CssPixels": 0.6117041587829586,
+        "geometryMatches": 506,
+        "colourPass": true,
+        "geometryPass": true
+      },
+      {
+        "frame": 24,
+        "nativeLiveOutputTime": 1,
+        "nativeFinalOutputTime": 1.000011,
+        "sourceSampling": "accurate-paused",
+        "rgbRmse": 2.4643721962225604,
+        "geometryP95CssPixels": 0.4998508602380752,
+        "geometryMatches": 494,
+        "colourPass": true,
+        "geometryPass": true
+      },
+      {
+        "frame": 111,
+        "nativeLiveOutputTime": 4.625,
+        "nativeFinalOutputTime": 4.625011,
+        "sourceSampling": "accurate-paused",
+        "rgbRmse": 2.4589862327120557,
+        "geometryP95CssPixels": 0.5952780008316032,
+        "geometryMatches": 523,
+        "colourPass": true,
+        "geometryPass": true
+      },
+      {
+        "frame": 112,
+        "nativeLiveOutputTime": 4.66666666666667,
+        "nativeFinalOutputTime": 4.666677,
+        "sourceSampling": "accurate-paused",
+        "rgbRmse": 2.438108914594587,
+        "geometryP95CssPixels": 0.5062766194343565,
+        "geometryMatches": 525,
+        "colourPass": true,
+        "geometryPass": true
+      },
+      {
+        "frame": 113,
+        "nativeLiveOutputTime": 4.70833333333333,
+        "nativeFinalOutputTime": 4.708344,
+        "sourceSampling": "accurate-paused",
+        "rgbRmse": 3.1245266511501573,
+        "geometryP95CssPixels": 0.3987022787332535,
+        "geometryMatches": 873,
+        "colourPass": true,
+        "geometryPass": true
+      },
+      {
+        "frame": 114,
+        "nativeLiveOutputTime": 4.75,
+        "nativeFinalOutputTime": 4.750011,
+        "sourceSampling": "accurate-paused",
+        "rgbRmse": 3.5978643182886767,
+        "geometryP95CssPixels": 0.6128890037536622,
+        "geometryMatches": 684,
+        "colourPass": true,
+        "geometryPass": true
+      },
+      {
+        "frame": 124,
+        "nativeLiveOutputTime": 5.16666666666667,
+        "nativeFinalOutputTime": 5.166677,
+        "sourceSampling": "accurate-paused",
+        "rgbRmse": 3.987283007854455,
+        "geometryP95CssPixels": 0.8174701929092407,
+        "geometryMatches": 724,
+        "colourPass": true,
+        "geometryPass": true
+      },
+      {
+        "frame": 125,
+        "nativeLiveOutputTime": 5.20833333333333,
+        "nativeFinalOutputTime": 5.208344,
+        "sourceSampling": "accurate-paused",
+        "rgbRmse": 2.654896425210071,
+        "geometryP95CssPixels": 0.5520567417144772,
+        "geometryMatches": 497,
+        "colourPass": true,
+        "geometryPass": true
+      },
+      {
+        "frame": 126,
+        "nativeLiveOutputTime": 5.25,
+        "nativeFinalOutputTime": 5.250011,
+        "sourceSampling": "accurate-paused",
+        "rgbRmse": 2.8297070565113898,
+        "geometryP95CssPixels": 0.7854401141405096,
+        "geometryMatches": 481,
+        "colourPass": true,
+        "geometryPass": true
+      },
+      {
+        "frame": 240,
+        "nativeLiveOutputTime": 10,
+        "nativeFinalOutputTime": 10.000011,
+        "sourceSampling": "accurate-paused",
+        "rgbRmse": 2.455934560096611,
+        "geometryP95CssPixels": 0.6668626457452772,
+        "geometryMatches": 482,
+        "colourPass": true,
+        "geometryPass": true
+      },
+      {
+        "frame": 287,
+        "nativeLiveOutputTime": 11.9583333333333,
+        "nativeFinalOutputTime": 11.958344,
+        "sourceSampling": "accurate-paused",
+        "rgbRmse": 2.4043283659570687,
+        "geometryP95CssPixels": 0.5335963368415833,
+        "geometryMatches": 485,
+        "colourPass": true,
+        "geometryPass": true
+      }
+    ],
+    "noFittedAlignment": true,
+    "scope": "Twelve paused native full-frame screenshots from one unchanged 12s project; not complete moving-pixel, edge, gamut or arbitrary-media qualification",
+    "ownerCohortFinalBuildSpotChecks": [
+      {
+        "frame": 113,
+        "nativeLiveOutputTime": 4.70833333333333,
+        "nativeFinalOutputTime": 4.708344,
+        "sourceSampling": "accurate-paused",
+        "rgbRmse": 3.1245266511501573,
+        "geometryP95CssPixels": 0.3987022787332535,
+        "geometryMatches": 873,
+        "colourPass": true,
+        "geometryPass": true
+      },
+      {
+        "frame": 124,
+        "nativeLiveOutputTime": 5.16666666666667,
+        "nativeFinalOutputTime": 5.166677,
+        "sourceSampling": "accurate-paused",
+        "rgbRmse": 3.987283007854455,
+        "geometryP95CssPixels": 0.8174701929092407,
+        "geometryMatches": 724,
+        "colourPass": true,
+        "geometryPass": true
+      },
+      {
+        "frame": 125,
+        "nativeLiveOutputTime": 5.20833333333333,
+        "nativeFinalOutputTime": 5.208344,
+        "sourceSampling": "accurate-paused",
+        "rgbRmse": 2.654896425210071,
+        "geometryP95CssPixels": 0.5520567417144772,
+        "geometryMatches": 497,
+        "colourPass": true,
+        "geometryPass": true
+      }
+    ],
+    "ownerCohortFinalBuildSpotCheckScope": "Three cut frames on the final account-gated build repeat identically; the earlier full12-frame passing raster/render evidence is preserved"
+  },
+  "latestSourceFrameBoundary": {
+    "maximumOriginalForSequenceBytes": 100663296,
+    "maximumNormalizedBytes": 33554432,
+    "maxProgrammeSeconds": 90,
+    "normalizationTimeoutSeconds": 30,
+    "ownershipAndOriginalGenerationRechecked": true
+  },
+  "latestCpuStress": {
+    "before": {
+      "status": "FAIL",
+      "cpuThrottle": 4,
+      "playingRows": 134,
+      "distinctControlPositions": 6,
+      "distinctTimelinePositions": 6,
+      "sourceVsControlMaximumSeconds": 6.50220522222222,
+      "stalls": [
+        {
+          "durationMs": 3297.2000000029802,
+          "sourceAdvance": 2.9333339999999994,
+          "output": 1.32168888888889
+        },
+        {
+          "durationMs": 6556.10000000149,
+          "sourceAdvance": 5.949117,
+          "output": 5.17557777777778
+        }
+      ]
+    },
+    "firstWatchdogOnlyCandidate": {
+      "status": "FAIL",
+      "realPlaybackHasWatchdog": true,
+      "playingRows": 89,
+      "unreadableDecoderRows": 80,
+      "seekingRows": 80,
+      "metadataOnlyRows": 80,
+      "causeUnderInvestigation": "Picture/audio catch-up seeks repeatedly interrupt decoder readiness; adding display sampling alone does not qualify playback"
+    },
+    "state": "CURRENT_LOCAL_CANDIDATE_PASS; earlier seek-storm and watchdog-only failures retained",
+    "audio": {
+      "sampleRate": 48000,
+      "programmeSamples": 576000,
+      "bufferStarts": 1,
+      "firstSourceOffset": 0,
+      "coveredExactlyOnce": 576000,
+      "missingSamples": 0,
+      "duplicateSamples": 0,
+      "maximumSampleError": 2.7179718017578125e-05,
+      "relativeRms": 2.2835383788333274e-05,
+      "correlation": [
+        0.9999999999413463,
+        0.9999999999282521
+      ],
+      "alignment": "Recorded AudioContext start and absolute AudioWorklet sample frames; no fitted shift or missing-sample interpolation"
+    },
+    "rateCorrectionAndPaintBudget": {
+      "cpuThrottle": 4,
+      "sampleRows": 88,
+      "playingRows": 74,
+      "firstOutput": 0.247355555555556,
+      "lastOutput": 11.9528777777778,
+      "distinctControlPositions": 74,
+      "distinctTimelineMarkerPositions": 74,
+      "maximumObservedPlayingControlHoldMs": 0,
+      "maximumObservedUiSamplingGapMs": 333.5,
+      "sourceVsControlMaximumSeconds": 0.13561677777780012,
+      "scope": "Passive DOM sampling during ordinary actual-App Play, Chrome CPU throttle4; existing media clock only; no fitted clock shift",
+      "passed": true
+    },
+    "productionBaseline": {
+      "cpuThrottle": 4,
+      "rows": 34,
+      "elapsedSeconds": 12.69940000000596,
+      "playingRows": 31,
+      "distinctControlPositions": 31,
+      "distinctMarkerPositions": 31,
+      "maximumSamplingGapMs": 846.5,
+      "maxSourceControlDifference": 0.13164444444440093,
+      "seekingRows": 0,
+      "notReadyRows": 0,
+      "lastOutput": 12,
+      "scope": "Actual production App and API, ordinary owner-project playback, no local response substitution or writes"
+    },
+    "ownerCohortFinalBuild": {
+      "cpuThrottle": 4,
+      "sampleRows": 81,
+      "playingRows": 53,
+      "firstOutput": 0.361688888888889,
+      "lastOutput": 11.9583333333333,
+      "distinctControlPositions": 53,
+      "distinctTimelineMarkerPositions": 53,
+      "maximumObservedPlayingControlHoldMs": 0,
+      "maximumObservedUiSamplingGapMs": 611.1999999955297,
+      "sourceVsControlMaximumSeconds": 0.1447223333333003,
+      "scope": "Passive DOM sampling during ordinary actual-App Play, Chrome CPU throttle4; existing media clock only; no fitted clock shift",
+      "passed": true
+    }
+  },
+  "latestTrackedLocalRender": {
+    "frames": 287,
+    "fps": 24,
+    "durationSeconds": 11.958333333333334,
+    "sameRequestAsFailedLiveExport": true,
+    "localRuntime": "FFmpeg7.1.5 CPU",
+    "localWallSeconds": 99.42491137899924,
+    "productionExecution": false,
+    "scope": "Actual canonical processing of licensed two-person source; the failed live export remains failed/refunded until deployed retest"
+  },
+  "matchedApiRuntime": {
+    "evidence": "reports/studio-qualification-20261106/evidence/runtime-validation.json",
+    "matchedPreviewSamples": 576000,
+    "maximumSampleError": 0,
+    "nonRoot": true,
+    "cloudNetwork": false,
+    "fullProductionImageBuild": false
+  },
+  "isolatedApiEvidence": "reports/studio-qualification-20261106/evidence/api-preview-boundary.json",
+  "ownerCohortGate": {
+    "sharedPolicy": "frontend/src/components/studioSourceDialoguePolicy.js",
+    "frontendFlags": [
+      "REACT_APP_STUDIO_SOURCE_DIALOGUE_PREVIEW",
+      "REACT_APP_STUDIO_SOURCE_DIALOGUE_PREVIEW_UIDS"
+    ],
+    "serverFlags": [
+      "STUDIO_SOURCE_DIALOGUE_PREVIEW_ENABLED",
+      "STUDIO_SOURCE_DIALOGUE_PREVIEW_UIDS"
+    ],
+    "default": "OFF unless both enabled and explicitly enrolled; wildcard rejected",
+    "serverIdentity": "Only verified req.user.uid; request-body identity is not trusted",
+    "productionActivation": false
+  }
 }

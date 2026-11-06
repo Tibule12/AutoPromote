@@ -224,6 +224,8 @@ test('prepared programme audio pins Play before decoder advance, survives a cut,
     act(() => ref.current.pause());
     expect(sources[0].stop).toHaveBeenCalledTimes(1);
     expect(clock).toHaveBeenLastCalledWith(null);
+    fireEvent.play(next); // A queued decoder event cannot undo user Pause.
+    expect(sources).toHaveLength(1);
     seekIdentity += 1; context.currentTime = 108;
     act(() => ref.current.stage({ offset: 6 }));
     intent = true; next.currentTime = 6.02; fireEvent.play(next);
