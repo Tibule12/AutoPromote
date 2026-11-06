@@ -1,0 +1,17 @@
+{
+  "checkedAt": "2026-11-06T13:12:02.462740+00:00",
+  "sourceRevision": "e78fe6b9e566aa7df175a15ecb5c0e755d9d3f73",
+  "workerRevision": "media-worker-v1-00129-ter",
+  "frontendRevision": "15c5c1d908d0af8d37118e077b1b33eeb3cf7fe4",
+  "nativeFinalFrameCount": 288,
+  "nativeFinalSeconds": 12,
+  "serverHashMatches": true,
+  "nativeCompletePlayback": true,
+  "successfulRenderLifecycles": 14,
+  "frameAccurateOutputs": 13,
+  "preservedEarlierFrameDefectOutputs": 1,
+  "normalCreditsUsed": 70,
+  "creditBalanceAfter": 304,
+  "allListedReleaseChecksPassed": true,
+  "universalStudioReadiness": false
+}

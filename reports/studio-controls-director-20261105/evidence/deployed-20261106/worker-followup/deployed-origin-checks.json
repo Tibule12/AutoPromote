@@ -1,0 +1,23 @@
+{
+  "checkedAt": "2026-11-06T13:07:42.102934+00:00",
+  "origins": {
+    "frontend": {
+      "commit": "15c5c1d908d0af8d37118e077b1b33eeb3cf7fe4",
+      "builtAt": "2026-11-06T03:22:50.954Z"
+    },
+    "api": {
+      "commit": "e78fe6b9e566aa7df175a15ecb5c0e755d9d3f73",
+      "securityPolicy": "security-owner-bootstrap-20261027"
+    },
+    "renderApi": {
+      "commit": "e78fe6b9e566aa7df175a15ecb5c0e755d9d3f73",
+      "securityPolicy": "security-owner-bootstrap-20261027"
+    }
+  },
+  "frontendSourceUnchangedByWorkerFix": true,
+  "adsTxtExact": true,
+  "originalSessionSha256": "00d48e87bd9b77ba9ead11c92bf93039f43fc3e7e6b322c3e379f6b4dac55254",
+  "workerRevision": "media-worker-v1-00129-ter",
+  "workerImageDigest": "sha256:9e7c1ff0fc425321d2651b62efead2c79feebc87072cf97f724e3dcaeead6b70",
+  "workerImageMatchesApprovedSource": true
+}

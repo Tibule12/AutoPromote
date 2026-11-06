@@ -22,6 +22,9 @@
     60
   ],
   "releaseImageGateIncludesRegression": true,
-  "deployedAfterRepair": false,
-  "remaining": "Release exact tested worker change through immutable-image gate, then repeat the same native live export and exact frame/decode/receipt checks."
+  "deployedAfterRepair": true,
+  "remaining": "Broader whole picture/audio/colour/edge parity, human listening, real two-person tracking and shared S02/S04/S03 remain separate.",
+  "deployedSource": "e78fe6b9e566aa7df175a15ecb5c0e755d9d3f73",
+  "deployedWorker": "media-worker-v1-00129-ter",
+  "liveVerification": "worker-followup/verified-live-result.json"
 }

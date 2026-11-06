@@ -1,0 +1,22 @@
+{
+  "authenticatedServerStatus": "completed",
+  "downloadSha256": "d1f5830b3364d44af517965bc438f8540b02025c28344163f5791e600ded25ab",
+  "authenticatedServerHashMatches": true,
+  "frames": 288,
+  "duration": 12,
+  "normalCreditCharge": 5,
+  "creditBalanceBefore": 309,
+  "creditBalanceAfter": 304,
+  "localCreditBypass": false,
+  "sourceRanges": [
+    [
+      0,
+      4.7
+    ],
+    [
+      4.7,
+      12
+    ]
+  ],
+  "fullyPlayedInNativeApp": true
+}

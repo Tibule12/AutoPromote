@@ -1,0 +1,48 @@
+{
+  "startedAt": "2026-11-06T13:07:56.843Z",
+  "wallSeconds": 84.583,
+  "width": 720,
+  "height": 1280,
+  "frames": 288,
+  "fps": "24/1",
+  "duration": 12,
+  "expected": 12,
+  "sha256": "d1f5830b3364d44af517965bc438f8540b02025c28344163f5791e600ded25ab",
+  "bytes": 3503651,
+  "audio": true,
+  "fullDecode": true,
+  "finishedPlayback": {
+    "a": {
+      "source": 0,
+      "output": 0,
+      "duration": 12,
+      "ready": 4,
+      "seeking": false,
+      "paused": true,
+      "playhead": "0%"
+    },
+    "mid": {
+      "source": 0.583163,
+      "output": 0.582677,
+      "duration": 12,
+      "ready": 4,
+      "seeking": false,
+      "paused": false,
+      "playhead": "4.85565%"
+    },
+    "final": {
+      "source": 12,
+      "output": 12,
+      "duration": 12,
+      "ready": 4,
+      "seeking": false,
+      "paused": true,
+      "playhead": "100%"
+    }
+  },
+  "creditBalanceAfter": 304,
+  "fullVideoAudioDecode": true,
+  "audioRms": 0.11882803282578046,
+  "audioPeak": 0.8183097243309021,
+  "audioCheckScope": "finite non-silent decoded audio, not human listening or full-mix parity"
+}
