@@ -194,7 +194,7 @@ import {
 import { describeStudioDirectorReview } from "./studioDirectorReviewDiff";
 import { postStudioDirectorReviewDecision } from "./studioDirectorReviewClient";
 import { registerStudioDirectorProjectRevision } from "./studioDirectorProjectRevisionClient";
-import { buildSourceShotDirectorSplitRequest } from "./studioDirectorEvidenceProposals";
+import { buildSourceShotDirectorSplitRequest, buildSourceShotDirectorSplitCandidates } from "./studioDirectorEvidenceProposals";
 import { secondsToTicks, ticksToSeconds, mapOutputTickToProgrammeTick, mapProgrammeTickToOutputTick } from "./studioTime";
 import { advanceStudioCueStartPlan, scheduleStudioCueGain, scheduleStudioCueRate, studioCueProgrammeTime, studioCueStartPlan } from "./studioCueGain";
 import { bindStudioAudioSource, bindStudioAudioSources, studioUploadedAudioBinding } from "./studioAudioSourceBindings";
@@ -477,8 +477,8 @@ const resolveSpeakerFocusSlot = (cuts, time, availableSlots = ["top", "bottom"])
   );
 };
 
-const normalizeReframeModeCuts = cuts =>
-  [...(Array.isArray(cuts) ? cuts : [])]
+const normalizeReframeModeCuts = (cuts, initialMode) => {
+  const normalized = [...(Array.isArray(cuts) ? cuts : [])]
     .filter(
       cut =>
         ["off", "speaker_track", "center", "group_stack"].includes(cut?.mode) &&
@@ -495,6 +495,14 @@ const normalizeReframeModeCuts = cuts =>
         : {}),
     }))
     .sort((left, right) => left.time - right.time);
+  // Historical projects may begin with a late first decision. Preview uses
+  // the base mode before it; include that same interval in the worker plan.
+  if (normalized.length && normalized[0].time > 0 &&
+      ["off", "speaker_track", "center", "group_stack"].includes(initialMode)) {
+    normalized.unshift({ id: "reframe-origin", time: 0, mode: initialMode });
+  }
+  return normalized;
+};
 
 const resolveReframeModeAtTime = (cuts, time, fallback) =>
   normalizeReframeModeCuts(cuts).reduce(
@@ -2791,6 +2799,7 @@ const ViralClipStudio = ({
   const [workspaceMode, setWorkspaceMode] = useState("creator");
   const [projectId, setProjectId] = useState(() => createSecureId("viral-project"));
   const [localDirectorProposal, setLocalDirectorProposal] = useState(null);
+  const directorCandidateSelectionRef = useRef(0);
   const incomingDirectorProposalRequest = directorProposalRequest ||
     (localDirectorProposal?.projectId === projectId ? localDirectorProposal.request : null);
   const [projectName, setProjectName] = useState("Untitled viral edit");
@@ -6201,6 +6210,11 @@ const ViralClipStudio = ({
     );
   };
 
+  const seekReviewedFramingPoint = outputTime => {
+    pauseSynchronizedPreview();
+    seekLiveEditTimelineItem(outputTime, "reframe");
+  };
+
   const selectLiveTimelineOverlay = overlayId => {
     const selectedOverlay = overlays.find(overlay => String(overlay.id) === String(overlayId));
     if (!selectedOverlay) return;
@@ -8341,7 +8355,8 @@ const ViralClipStudio = ({
     if (position) setVideoTime(position.sourceTime);
     // A rounded-up millisecond is after a fractional paused source frame.
     // Start the decision on this frame, rather than waiting for playback.
-    const time = Math.floor(Math.max(0, position?.programmeTime ?? previewTimelineTime) * 1000) / 1000;
+    const authoredTime = Math.floor(Math.max(0, position?.programmeTime ?? previewTimelineTime) * 1000) / 1000;
+    const time = authoredTime < 0.08 ? 0 : authoredTime;
     setReframeModeCuts(current => {
       const normalized = normalizeReframeModeCuts(current);
       const baseline =
@@ -8696,15 +8711,18 @@ const ViralClipStudio = ({
       if (mode === "source_shots" && !split) {
         try {
           const snapshot = getEditorSnapshot();
-          const request = snapshot.studioDocument && buildSourceShotDirectorSplitRequest({
+          const parameters = {
             document: snapshot.studioDocument,
             occurrenceId: String(clipId),
             analysis: result,
             preferredSourceTick: secondsToTicks(Number(videoTime || window.start || 0)),
             proposalId: createSecureId("source-shot-proposal"),
             idempotencyKey: createSecureId("source-shot-command"),
-          });
-          setLocalDirectorProposal(request ? { projectId, request } : null);
+          };
+          const request = snapshot.studioDocument && buildSourceShotDirectorSplitRequest(parameters);
+          const choices = request ? buildSourceShotDirectorSplitCandidates(parameters) : [];
+          setLocalDirectorProposal(request ? { projectId, request, choices,
+            occurrenceId: String(clipId) } : null);
         } catch (proposalError) {
           setLocalDirectorProposal(null);
           console.warn("Source-shot analysis had no reviewable clip boundary", proposalError);
@@ -9450,6 +9468,37 @@ const ViralClipStudio = ({
     setSpeakerFocusCuts(next.speakerFocusCuts);
     setSpeakerStackFraming(next.speakerStackFraming);
     setAudioKeyframes(next.audioKeyframes);
+  };
+
+  const selectDirectorSourceCut = async request => {
+    if (directorReviewState === "working" || localDirectorProposal?.projectId !== projectId ||
+        !localDirectorProposal.choices?.includes(request)) return;
+    const selection = ++directorCandidateSelectionRef.current;
+    setDirectorReview(null);
+    setDirectorReviewState("working");
+    setDirectorReviewError("");
+    try {
+      const snapshot = getEditorSnapshot();
+      // Reuse the existing evidence, revision and command validators. Choosing
+      // a boundary never grants approval, writes a server review or splits it.
+      await prepareStudioDirectorProposal(snapshot.studioDocument, request);
+      if (activeProjectIdRef.current !== projectId || selection !== directorCandidateSelectionRef.current) return;
+      const index = snapshot.timeline.findIndex(clip => String(clip.id) === request.operation.target.occurrenceId);
+      if (index < 0) throw new Error("This source range changed. Analyze its current range again.");
+      setLocalDirectorProposal(current => current?.projectId === projectId ? { ...current, request } : current);
+      setDirectorReview(null);
+      setDirectorReviewState("idle");
+      setDirectorReviewError("");
+      const window = getTimelineClipWindow(snapshot.timeline[index]);
+      const time = getTimelineOffsetForIndex(index) + ticksToSeconds(request.operation.at.ticks) - window.start;
+      seekReviewedFramingPoint(time);
+      setStudioActionMessage("Detected cut selected for preview. Review it before approving any timeline edit.");
+    } catch (error) {
+      if (activeProjectIdRef.current !== projectId || selection !== directorCandidateSelectionRef.current) return;
+      setDirectorReview(null);
+      setDirectorReviewState("error");
+      setDirectorReviewError(error.message || "This detected cut no longer matches the current project.");
+    }
   };
 
   const openDirectorReview = async () => {
@@ -12694,7 +12743,7 @@ const ViralClipStudio = ({
             mode: smartCropMode,
             zoom: speakerTrackZoom,
             ...(reframeModeCuts.length
-              ? { timeline_cuts: normalizeReframeModeCuts(reframeModeCuts).map(cut => ({
+              ? { timeline_cuts: normalizeReframeModeCuts(reframeModeCuts, smartCrop ? smartCropMode : "off").map(cut => ({
                   time: cut.time,
                   mode: cut.mode,
                   zoom: cut.zoom,
@@ -15970,7 +16019,7 @@ const ViralClipStudio = ({
     if (!files.length) return;
     const availableSlots = Math.max(0, MAX_STUDIO_ANGLES - speakerStackSources.length);
     if (!availableSlots) {
-      setStudioActionMessage("The camera bank has twelve angles. Remove unused angles before adding another; original media and saved versions are retained.");
+      setStudioActionMessage(`The camera bank has ${MAX_STUDIO_ANGLES} angles. Remove unused angles before adding another; original media and saved versions are retained.`);
       event.target.value = "";
       return;
     }
@@ -21661,6 +21710,24 @@ const ViralClipStudio = ({
                           </button>
                         ) : null}
                       </div>
+                      {!directorProposalRequest && localDirectorProposal?.projectId === projectId &&
+                      localDirectorProposal.choices?.length > 1 &&
+                      !["approved", "rejected"].includes(directorReviewState) ? (
+                        <div className="studio-director-cut-choices" role="group" aria-label="Detected camera cuts">
+                          <p>Choose a detected cut to preview. Review and approve one edit at a time.</p>
+                          <div>
+                            {localDirectorProposal.choices.map(choice => (
+                              <button key={choice.proposalId} type="button"
+                                disabled={directorReviewState === "working"}
+                                aria-pressed={incomingDirectorProposalRequest?.operation.at?.ticks === choice.operation.at.ticks}
+                                onClick={() => void selectDirectorSourceCut(choice)}>
+                                Preview cut at {formatPreviewTimePrecise(ticksToSeconds(choice.operation.at.ticks))}
+                              </button>
+                            ))}
+                          </div>
+                          {localDirectorProposal.choices.length === 64 ? <small>Showing up to 64 cut choices. Analyze a shorter source range to review others.</small> : null}
+                        </div>
+                      ) : null}
                       {directorReviewError ? (
                         <p className="studio-director-review__error" role="alert">
                           {directorReviewError}
@@ -22685,7 +22752,7 @@ const ViralClipStudio = ({
                       <div>
                         <strong>Clean camera sources</strong>
                         <small>
-                          Add 2–12 real full-size angles, then route any four into the live grid.
+                          Add 2–{MAX_STUDIO_ANGLES} real full-size angles, then route any four into the live grid.
                           Reaction insets are never treated as independent cameras.
                         </small>
                       </div>
@@ -22760,6 +22827,7 @@ const ViralClipStudio = ({
                               setSpeakerStackLayout(layout);
                               setSmartCrop(true);
                               setSmartCropMode("group_stack");
+                              recordReframeModeAtPlayhead("group_stack");
                               setComparisonMode("after");
                               setStudioActionMessage(`${label} camera composition is live in preview.`);
                             }}
@@ -22813,7 +22881,7 @@ const ViralClipStudio = ({
                               <div key={cut.id} className="speaker-focus-cut">
                                 <button
                                   type="button"
-                                  onClick={() => seekLiveEditTimelineItem(cut.time, { play: false })}
+                                  onClick={() => seekReviewedFramingPoint(cut.time)}
                                 >
                                   <strong>{MULTICAM_SLOT_LABELS[cut.slot]}</strong>
                                   <span>{cut.time.toFixed(2)}s</span>
@@ -23203,7 +23271,7 @@ const ViralClipStudio = ({
                               onClick={() => setSpeakerStackFraming(current => ({ ...current, [slot]: { ...current[slot], keyframes: [] } }))}>Clear points</button>
                             <div className="reframe-keyframe-list">
                               {(speakerStackFraming[slot].keyframes || []).map(mark => <button key={mark.time} type="button"
-                                onClick={() => seekLiveEditTimelineItem(mark.time, { play: false })}>{mark.time.toFixed(2)}s</button>)}
+                                onClick={() => seekReviewedFramingPoint(mark.time)}>{mark.time.toFixed(2)}s</button>)}
                             </div>
                           </> : null}
                           {[["x", "Horizontal", 0, 100, 1], ["y", "Vertical", 0, 100, 1], ["zoom", "Zoom", 1, 7, 0.05]].map(([key, label, min, max, step]) => (
@@ -23333,7 +23401,7 @@ const ViralClipStudio = ({
                             className={activeReframeKeyframeId === keyframe.id ? "is-active" : ""}
                             onClick={() => {
                               setActiveReframeKeyframeId(keyframe.id);
-                              seekLiveEditTimelineItem(keyframe.time, { play: false });
+                              seekReviewedFramingPoint(keyframe.time);
                             }}
                           >
                             <span>{index + 1}</span>

@@ -84,3 +84,23 @@ test('a clock repaint between native input and change cannot seek back to the pr
   fireEvent.input(input, { target: { value: '6' } });
   expect(changed).toHaveBeenCalledTimes(2);
 });
+
+
+test('rapid frame keys keep the latest user seek while stale decoder paints arrive', () => {
+  let position = { programmeTime: 0, outputTime: 0 };
+  const listeners = new Set();
+  const clock = { getSnapshot: () => position, subscribe: cb => { listeners.add(cb); return () => listeners.delete(cb); } };
+  const changed = jest.fn(event => Number(event.currentTarget.value));
+  render(<StudioPlaybackRange clock={clock} aria-label="Rapid steps" type="range" min={0} max={12} step={1/30} onChange={changed} />);
+  const input = screen.getByLabelText('Rapid steps');
+  for (let i = 0; i < 24; i++) {
+    fireEvent.keyDown(input, { key: 'ArrowRight' });
+    act(() => { position = { programmeTime: .01 * i, outputTime: .01 * i }; listeners.forEach(cb => cb()); });
+  }
+  expect(changed.mock.results.at(-1).value).toBeCloseTo(.8, 10);
+  act(() => { position = { programmeTime: .8, outputTime: .8 }; listeners.forEach(cb => cb()); });
+  expect(input).toHaveValue('0.8');
+  fireEvent.blur(input);
+  act(() => { position = { programmeTime: 2, outputTime: 2 }; listeners.forEach(cb => cb()); });
+  expect(input).toHaveValue('2');
+});

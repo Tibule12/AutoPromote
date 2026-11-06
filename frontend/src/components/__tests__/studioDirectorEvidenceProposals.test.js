@@ -1,6 +1,6 @@
 import { webcrypto } from "crypto";
 import { TextEncoder } from "util";
-import { buildSourceShotDirectorSplitRequest } from "../studioDirectorEvidenceProposals";
+import { buildSourceShotDirectorSplitRequest, buildSourceShotDirectorSplitCandidates } from "../studioDirectorEvidenceProposals";
 import {
   applyStudioDirectorProposal,
   createStudioDirectorReviewReceipt,
@@ -135,4 +135,39 @@ test("bad analysis and inconsistent evidence never produce an editable proposal"
   await expect(prepareStudioDirectorProposal(project, {
     ...suggested, evidence: { ...suggested.evidence, boundaryTick: secondsToTicks(8) },
   })).rejects.toMatchObject({ code: "INVALID_DIRECTOR_EVIDENCE" });
+});
+
+
+test("all eligible detected boundaries become distinct choices without changing the document", async () => {
+  const project = document(), before = JSON.stringify(project);
+  const choices = buildSourceShotDirectorSplitCandidates({ document: project, occurrenceId: "main", analysis: analysis(),
+    proposalId: "choice", idempotencyKey: "choice-command" });
+  expect(choices.map(row => row.operation.at.ticks)).toEqual([secondsToTicks(8), secondsToTicks(14)]);
+  expect(new Set(choices.map(row => row.proposalId)).size).toBe(2);
+  expect(new Set(choices.map(row => row.idempotencyKey)).size).toBe(2);
+  for (const choice of choices) {
+    const { preview } = await prepareStudioDirectorProposal(project, choice);
+    expect(preview.previewDocument.clipOccurrences).toHaveLength(2);
+    expect(choice.evidence.boundaryTick).toBe(choice.operation.at.ticks);
+  }
+  expect(JSON.stringify(project)).toBe(before);
+});
+
+test("candidate choices reject unbound or low coverage evidence and deduplicate source ticks", () => {
+  const options = { document: document(), occurrenceId: "main", analysis: analysis(), proposalId: "choice", idempotencyKey: "choice-command" };
+  expect(buildSourceShotDirectorSplitCandidates({ ...options, analysis: { ...analysis(), sourceShotArtifact: null } })).toEqual([]);
+  expect(buildSourceShotDirectorSplitCandidates({ ...options, analysis: { ...analysis(), tracks: { solo: { coverage: .3 } } } })).toEqual([]);
+  expect(buildSourceShotDirectorSplitCandidates({ ...options, analysis: { ...analysis(), sceneCuts: [8, 8, 8.000001, NaN, Infinity] } })).toHaveLength(1);
+  expect(() => buildSourceShotDirectorSplitCandidates({ ...options, proposalId: "x".repeat(131) })).toThrow(/suffix/);
+});
+
+
+test("candidate list is bounded and refuses analysis that no longer fits the source range", () => {
+  const options = { document: document(), occurrenceId: "main", analysis: analysis(), proposalId: "choice", idempotencyKey: "choice-command" };
+  expect(buildSourceShotDirectorSplitCandidates({ ...options, analysis: { ...analysis(), sceneCuts: Array.from({ length: 70 }, (_, i) => .3 + i * .25) } })).toHaveLength(64);
+  const shorter = adaptStudioSnapshotToDocument({ projectId: "evidence-project", snapshot: {
+    orderedClips: [{ id: "source", start: 0, end: 20 }], selectedClipId: "source",
+    timeline: [{ id: "main", sourceClipId: "source", startRequest: 0, endRequest: 10 }],
+  } });
+  expect(buildSourceShotDirectorSplitCandidates({ ...options, document: shorter })).toEqual([]);
 });

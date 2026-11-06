@@ -1,0 +1,16 @@
+{
+  "original": {
+    "passed": false,
+    "blockers": [
+      "The framing timeline needs a cut at 0 seconds"
+    ],
+    "warnings": [
+      "No reviewed face path is present; the crop will remain centered"
+    ]
+  },
+  "capturedFixed": {
+    "passed": true,
+    "blockers": [],
+    "warnings": []
+  }
+}

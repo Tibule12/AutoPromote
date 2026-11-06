@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-11-06T03:06:32.789996+00:00",
+  "frontend": {
+    "commit": "631afd850462c3d66b11eae09a62cc1e4fd3da56",
+    "builtAt": "2026-11-05T17:50:41.858Z",
+    "welcomeAssets": "2026-10-21"
+  },
+  "api": {
+    "ok": true,
+    "version": "1.2.0",
+    "commit": "631afd850462c3d66b11eae09a62cc1e4fd3da56",
+    "securityPolicy": "security-owner-bootstrap-20261027",
+    "generatedAt": "2026-11-06T03:06:33.851Z"
+  },
+  "adsTxtExact": true
+}

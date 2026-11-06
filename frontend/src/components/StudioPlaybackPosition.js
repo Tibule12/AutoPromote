@@ -18,16 +18,29 @@ export function StudioPlaybackTime({ clock, fallback = 0, format, ...props }) {
 
 export function StudioPlaybackRange({ clock, value, ...props }) {
   const ref = useRef(null);
+  const pendingSeek = useRef(null);
   const handlers = useRef(props);
   handlers.current = props;
   const bounded = time => Math.max(Number(props.min || 0), Math.min(Number(props.max), time));
-  useClockPaint(clock, () => { if (ref.current) ref.current.value = String(bounded(clock.getSnapshot().outputTime)); });
+  useLayoutEffect(() => { pendingSeek.current = null; }, [clock, props.min, props.max]);
+  useClockPaint(clock, () => {
+    if (!ref.current) return;
+    const actual = bounded(clock.getSnapshot().outputTime);
+    // Keep a user's seek target until the decoder acknowledges it. Rebinding
+    // the clock can publish an older frame between rapid keyboard gestures.
+    // It must not become the starting point of the next requested frame step.
+    if (pendingSeek.current !== null &&
+        Math.abs(actual - pendingSeek.current) > (Number(props.step) || .001) / 2 + .000001) return;
+    pendingSeek.current = null;
+    ref.current.value = String(actual);
+  });
   useLayoutEffect(() => {
     const input = ref.current;
     if (!clock || !input) return;
     let receivedInput = false;
     const seek = event => {
       receivedInput = true;
+      pendingSeek.current = Number(input.value);
       handlers.current.onInput?.(event);
       handlers.current.onChange?.(event);
     };
@@ -36,6 +49,7 @@ export function StudioPlaybackRange({ clock, value, ...props }) {
       // the decoder seeks can already have changed the DOM value by then;
       // do not dispatch that trailing event as a second, different seek.
       if (receivedInput) { receivedInput = false; return; }
+      pendingSeek.current = Number(input.value);
       handlers.current.onChange?.(event);
     };
     input.addEventListener('input', seek);
@@ -52,6 +66,11 @@ export function StudioPlaybackRange({ clock, value, ...props }) {
     // clock-painted input. Non-clock inputs keep their normal React handlers.
     onInput={clock ? undefined : props.onInput}
     onChange={clock ? undefined : props.onChange}
+    onBlur={event => {
+      pendingSeek.current = null;
+      if (clock && ref.current) ref.current.value = String(bounded(clock.getSnapshot().outputTime));
+      props.onBlur?.(event);
+    }}
     onKeyDown={event => {
       props.onKeyDown?.(event);
       if (!clock || event.defaultPrevented || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
@@ -59,7 +78,9 @@ export function StudioPlaybackRange({ clock, value, ...props }) {
       if (!(step > 0)) return;
       event.preventDefault();
       const direction = ['ArrowLeft', 'ArrowDown'].includes(event.key) ? -1 : 1;
-      event.currentTarget.value = String(bounded(Number(event.currentTarget.value) + direction * step));
+      const target = bounded((pendingSeek.current ?? Number(event.currentTarget.value)) + direction * step);
+      pendingSeek.current = target;
+      event.currentTarget.value = String(target);
       props.onChange?.(event);
     }} />;
 }

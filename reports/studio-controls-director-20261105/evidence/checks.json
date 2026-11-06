@@ -1,0 +1,68 @@
+{
+  "regressions-before": [
+    "       98 |     act(() => { position = { programmeTime: .01 * i, outputTime: .01 * i }; listeners.forEach(cb => cb()); });",
+    "      101 |   act(() => { position = { programmeTime: .8, outputTime: .8 }; listeners.forEach(cb => cb()); });",
+    "Test Suites: 2 failed, 2 total",
+    "Tests:       3 failed, 173 skipped, 176 total",
+    "Time:        32.225 s"
+  ],
+  "regressions-after": [
+    "Test Suites: 2 passed, 2 total",
+    "Tests:       170 skipped, 6 passed, 176 total",
+    "Time:        21.407 s, estimated 31 s"
+  ],
+  "additional-regressions": [
+    "Test Suites: 1 passed, 1 total",
+    "Tests:       170 skipped, 3 passed, 173 total",
+    "Time:        31.201 s"
+  ],
+  "composition-before": [
+    "Test Suites: 1 failed, 1 total",
+    "Tests:       1 failed, 173 skipped, 174 total",
+    "Time:        6.475 s, estimated 31 s"
+  ],
+  "final-targeted": [
+    "Test Suites: 1 passed, 1 total",
+    "Tests:       168 skipped, 6 passed, 174 total",
+    "Time:        63.662 s"
+  ],
+  "director-library-tests": [
+    "Test Suites: 6 passed, 6 total",
+    "Tests:       33 passed, 33 total",
+    "Time:        2.037 s"
+  ],
+  "director-backend-tests": [
+    "Test Suites: 3 passed, 3 total",
+    "Tests:       28 passed, 28 total",
+    "Time:        10.691 s"
+  ],
+  "playback-camera-tests": [
+    "Test Suites: 3 passed, 3 total",
+    "Tests:       14 passed, 14 total",
+    "Time:        2.013 s"
+  ],
+  "final-editor-checks": [
+    "Test Suites: 1 passed, 1 total",
+    "Tests:       163 skipped, 11 passed, 174 total",
+    "Time:        87.824 s"
+  ],
+  "worker-pytest": [
+    "16 passed, 2 warnings, 2 subtests passed in 15.24s"
+  ],
+  "fullEditorSuite": {
+    "result": "INTERRUPTED",
+    "reason": "Synchronous rendering in pre-existing SFX test stalled broad run for >18 minutes. That SFX case passed in isolation on baseline and candidate; full-suite success not claimed."
+  },
+  "build": {
+    "candidate": "passed",
+    "baseline": "passed",
+    "samePublicConfig": true,
+    "originalBuildUntouched": true
+  },
+  "lint": {
+    "smallModules": "passed",
+    "editorWithExistingHooksPlugin": "passed",
+    "defaultEditorConfig": "Missing existing react-hooks/exhaustive-deps rule definition; rerun explicitly loading installed plugin passed."
+  },
+  "contract": "passed"
+}

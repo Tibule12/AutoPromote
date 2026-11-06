@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-11-05T03:57:26.796333+00:00",
+  "updatedAt": "2026-11-06",
   "sourceOfTruth": "docs/STUDIO-COMPLETION-CONTRACT.md",
   "baseline": {
     "checkpoint": "docs/HANDOFF-studio-reliability-repair-20261008.md",
@@ -695,6 +695,10 @@
         {
           "path": "reports/studio-motion-flow-parity-20261031/README.md",
           "kind": "bounded_local_loopback_motion_flow_and_cpu_ffmpeg_parity"
+        },
+        {
+          "path": "reports/studio-controls-director-20261105/README.md",
+          "kind": "live_control_audit_and_local_repairs_with_explicit_limits"
         }
       ],
       "testExecution": {
@@ -1483,6 +1487,10 @@
         {
           "path": "reports/studio-canonical-visual-20261008/README.md",
           "kind": "canonical_visual_foundation_native_state_and_explicit_export_blockers"
+        },
+        {
+          "path": "reports/studio-controls-director-20261105/README.md",
+          "kind": "live_control_audit_and_local_repairs_with_explicit_limits"
         }
       ],
       "testExecution": {
@@ -5594,6 +5602,10 @@
         {
           "path": "reports/studio-canonical-visual-20261008/README.md",
           "kind": "canonical_visual_foundation_native_state_and_explicit_export_blockers"
+        },
+        {
+          "path": "reports/studio-controls-director-20261105/README.md",
+          "kind": "live_control_audit_and_local_repairs_with_explicit_limits"
         }
       ],
       "testExecution": {
@@ -6455,6 +6467,10 @@
         {
           "path": "reports/studio-motion-flow-parity-20261031/parity-receipt.json",
           "kind": "bounded_local_loopback_track_matte_and_node_flow_parity"
+        },
+        {
+          "path": "reports/studio-controls-director-20261105/README.md",
+          "kind": "live_control_audit_and_local_repairs_with_explicit_limits"
         }
       ],
       "testExecution": {
@@ -7966,6 +7982,10 @@
         {
           "path": "reports/studio-founder-workflow-20261008/README.md",
           "kind": "bounded_native_state_and_shared_renderer_regression"
+        },
+        {
+          "path": "reports/studio-controls-director-20261105/README.md",
+          "kind": "live_control_audit_and_local_repairs_with_explicit_limits"
         }
       ],
       "testExecution": {
@@ -7984,7 +8004,7 @@
         "S05",
         "S07"
       ],
-      "currentSessionEvidenceScope": "Mixed native project state/history/save/reopen plus separate CPU stereo renderer diagnostic; no new full twelve-gate qualification or creative approval."
+      "currentSessionEvidenceScope": "Mixed native project state/history/save/reopen plus separate CPU stereo renderer diagnostic; no new full twelve-gate qualification or creative approval. 6 November: source-bound cut-choice previews, invalidation of the prior review and unchanged one-operation approval protocol pass local controlled-response/browser and server/library tests. This is not general autonomous editing or a live provider/production approval qualification."
     }
   ],
   "commonQualificationRules": {
@@ -22527,5 +22547,32 @@
     "pushMergeDeploy": false,
     "readinessPromotion": false,
     "next": "Complete release review and explicitly approve coordinated frontend/API and canonical media-worker deployment; retain shared S02/S04/S03 backlog."
+  },
+  "studioControlsDirector20261106": {
+    "date": "2026-11-06",
+    "report": "reports/studio-controls-director-20261105/README.md",
+    "liveBase": "631afd850462c3d66b11eae09a62cc1e4fd3da56",
+    "status": "local repairs and bounded Director review choices; not deployed",
+    "scope": [
+      "Reframe timestamp selection and frame stepping",
+      "Zero-origin framing export compatibility",
+      "Timed camera-composition choices and shared eight-angle copy",
+      "Moments source ranges and cold recovery",
+      "Source-bound selectable Director cut previews with separate approval"
+    ],
+    "evidenceLimits": [
+      "First temporary live recordings lost at workstation restart; persistent follow-up evidence is distinguished.",
+      "Two live render attempts failed preflight and refunded; no passing repaired live export is claimed.",
+      "Twelve local canonical component renders are not a cloud API export or whole-preview pixel/audio parity qualification.",
+      "Director browser analysis was a controlled response; no production review approval or new AI/provider capability is claimed.",
+      "Full editor regression suite stalled in SFX; isolated SFX passed on baseline and candidate."
+    ],
+    "remaining": [
+      "Approve a named release before push/merge/deployment; then repeat native live render/download/full finished playback and review on exact released code.",
+      "Resolve full-suite order-sensitive stall; no passing full-suite CI claim.",
+      "Director choices are session-local and require new analysis after range/source changes or cold reopen.",
+      "S02 whole picture/audio/colour/edge/real-time parity, S04 depth and S03 ownership remain open."
+    ],
+    "nextTask": "Controlled release review, then exact live export/recovery verification; preserve S02/S04/S03 and existing security/financial incident follow-up."
   }
 }

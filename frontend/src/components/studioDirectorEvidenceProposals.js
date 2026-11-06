@@ -1,6 +1,6 @@
 import { MINIMUM_SPLIT_DISTANCE_TICKS } from "./studioCommands";
 import { validateStudioProjectDocument } from "./studioProjectDocument";
-import { secondsToTicks } from "./studioTime";
+import { secondsToTicks, TICKS_PER_SECOND } from "./studioTime";
 
 export const SOURCE_SHOT_DIRECTOR_ENGINE = "opencv-yunet-source-shot-follow";
 
@@ -102,4 +102,37 @@ export const buildSourceShotDirectorSplitRequest = ({
       decodeFailures: 0,
     },
   };
+};
+
+
+// Keep each choice inside the existing one-operation review protocol. A list
+// of detected boundaries is not permission to apply a batch or execute work.
+export const buildSourceShotDirectorSplitCandidates = options => {
+  if (typeof options?.proposalId !== "string" || options.proposalId.length > 130 ||
+      typeof options?.idempotencyKey !== "string" || options.idempotencyKey.length > 150) {
+    throw new Error("Director candidate IDs leave room for a unique cut suffix.");
+  }
+  const sourceCuts = options.analysis?.sceneCuts;
+  if (!Array.isArray(sourceCuts) || sourceCuts.length > 10000) return [];
+  if (!buildSourceShotDirectorSplitRequest(options)) return [];
+  const times = [...new Set(sourceCuts.filter(time => typeof time === "number" && Number.isFinite(time) &&
+    time >= 0 && Number.isSafeInteger(Math.round(time * TICKS_PER_SECOND))))]
+    .sort((a, b) => a - b);
+  const requests = [];
+  const seen = new Set();
+  for (const time of times) {
+    const tick = secondsToTicks(time);
+    const request = buildSourceShotDirectorSplitRequest({ ...options,
+      // Select a boundary actually present in this result; retain the exact
+      // artifact/source proof. Server settlement still verifies that artifact.
+      analysis: { ...options.analysis, sceneCuts: [time] },
+      preferredSourceTick: tick,
+      proposalId: `${options.proposalId}-${requests.length + 1}`,
+      idempotencyKey: `${options.idempotencyKey}-${requests.length + 1}`,
+    });
+    if (!request || request.operation.at.ticks !== tick || seen.has(tick)) continue;
+    seen.add(tick); requests.push(request);
+    if (requests.length === 64) break;
+  }
+  return requests;
 };

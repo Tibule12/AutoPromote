@@ -1,0 +1,745 @@
+{
+  "tests": [
+    {
+      "id": "bootstrap-setup",
+      "status": "FAIL",
+      "error": "ENOENT: no such file or directory, stat '/home/tibule12/.local/share/autopromote-qa/studio-controls-director-20261105/source.mp4'"
+    },
+    {
+      "phase": "exports",
+      "id": "export-solo-9-16",
+      "desc": "Live native CPU export, download, full decode and playback 9:16",
+      "status": "FAIL",
+      "error": "page.waitForResponse: Timeout 30000ms exceeded while waiting for event \"response\""
+    },
+    {
+      "phase": "finish-audit",
+      "id": "preflight-near-zero",
+      "desc": "Near-start mode selection produces worker-compatible initial cut",
+      "status": "FAIL",
+      "error": "Expected values to be strictly equal:\n\n0.033 !== 0\n"
+    },
+    {
+      "phase": "finish-audit",
+      "id": "timestamp-panel",
+      "desc": "Reviewed framing timestamp keeps inspector mounted",
+      "status": "FAIL",
+      "error": "The expression evaluated to a falsy value:\n\n  assert(await page.getByTestId('auto-reframe-inspector').isVisible())\n"
+    },
+    {
+      "phase": "finish-audit",
+      "id": "moments-eventual-preview",
+      "desc": "Saved moment switches exact source interval and starts after decoder readiness",
+      "status": "FAIL",
+      "error": "The expression evaluated to a falsy value:\n\n  assert(count>1)\n"
+    },
+    {
+      "phase": "finish-audit",
+      "id": "camera-live-bank-12",
+      "desc": "Owned diagnostic camera imports reach twelve ready entries and enforce limit",
+      "status": "FAIL",
+      "error": "Expected values to be strictly equal:\n\n8 !== 12\n"
+    },
+    {
+      "phase": "finish-audit",
+      "id": "all-layouts-live-controls",
+      "desc": "Every camera layout and exposed range reaches endpoints and persists changes",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layout": "stack_2",
+          "values": [
+            {
+              "label": "Stack split point",
+              "value": "64",
+              "min": 35,
+              "max": 65
+            },
+            {
+              "label": "Camera panel gap",
+              "value": "2.9",
+              "min": 0,
+              "max": 3
+            },
+            {
+              "label": "Top speaker horizontal position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Top speaker vertical position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Top speaker crop size",
+              "value": "6.95",
+              "min": 1,
+              "max": 7
+            },
+            {
+              "label": "Bottom speaker horizontal position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Bottom speaker vertical position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Bottom speaker crop size",
+              "value": "6.95",
+              "min": 1,
+              "max": 7
+            }
+          ]
+        },
+        {
+          "layout": "split_2",
+          "values": [
+            {
+              "label": "Camera panel gap",
+              "value": "2.9",
+              "min": 0,
+              "max": 3
+            },
+            {
+              "label": "Top speaker horizontal position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Top speaker vertical position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Top speaker crop size",
+              "value": "6.95",
+              "min": 1,
+              "max": 7
+            },
+            {
+              "label": "Bottom speaker horizontal position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Bottom speaker vertical position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Bottom speaker crop size",
+              "value": "6.95",
+              "min": 1,
+              "max": 7
+            }
+          ]
+        },
+        {
+          "layout": "pip_2",
+          "values": [
+            {
+              "label": "Camera panel gap",
+              "value": "2.9",
+              "min": 0,
+              "max": 3
+            },
+            {
+              "label": "Reaction frame size",
+              "value": "45",
+              "min": 20,
+              "max": 46
+            },
+            {
+              "label": "Top speaker horizontal position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Top speaker vertical position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Top speaker crop size",
+              "value": "6.95",
+              "min": 1,
+              "max": 7
+            },
+            {
+              "label": "Bottom speaker horizontal position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Bottom speaker vertical position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Bottom speaker crop size",
+              "value": "6.95",
+              "min": 1,
+              "max": 7
+            }
+          ]
+        },
+        {
+          "layout": "active_2",
+          "values": [
+            {
+              "label": "Camera panel gap",
+              "value": "2.9",
+              "min": 0,
+              "max": 3
+            },
+            {
+              "label": "Reaction frame size",
+              "value": "45",
+              "min": 20,
+              "max": 46
+            },
+            {
+              "label": "Top speaker horizontal position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Top speaker vertical position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Top speaker crop size",
+              "value": "6.95",
+              "min": 1,
+              "max": 7
+            },
+            {
+              "label": "Bottom speaker horizontal position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Bottom speaker vertical position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Bottom speaker crop size",
+              "value": "6.95",
+              "min": 1,
+              "max": 7
+            }
+          ]
+        },
+        {
+          "layout": "spotlight_2",
+          "values": [
+            {
+              "label": "Camera panel gap",
+              "value": "2.9",
+              "min": 0,
+              "max": 3
+            },
+            {
+              "label": "Top speaker horizontal position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Top speaker vertical position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Top speaker crop size",
+              "value": "6.95",
+              "min": 1,
+              "max": 7
+            },
+            {
+              "label": "Bottom speaker horizontal position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Bottom speaker vertical position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Bottom speaker crop size",
+              "value": "6.95",
+              "min": 1,
+              "max": 7
+            }
+          ]
+        },
+        {
+          "layout": "hero_3",
+          "values": [
+            {
+              "label": "Camera panel gap",
+              "value": "2.9",
+              "min": 0,
+              "max": 3
+            },
+            {
+              "label": "Top speaker horizontal position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Top speaker vertical position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Top speaker crop size",
+              "value": "6.95",
+              "min": 1,
+              "max": 7
+            },
+            {
+              "label": "Bottom speaker horizontal position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Bottom speaker vertical position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Bottom speaker crop size",
+              "value": "6.95",
+              "min": 1,
+              "max": 7
+            },
+            {
+              "label": "Camera 3 horizontal position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Camera 3 vertical position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Camera 3 crop size",
+              "value": "6.95",
+              "min": 1,
+              "max": 7
+            }
+          ]
+        },
+        {
+          "layout": "grid_4",
+          "values": [
+            {
+              "label": "Camera panel gap",
+              "value": "2.9",
+              "min": 0,
+              "max": 3
+            },
+            {
+              "label": "Top speaker horizontal position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Top speaker vertical position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Top speaker crop size",
+              "value": "6.95",
+              "min": 1,
+              "max": 7
+            },
+            {
+              "label": "Bottom speaker horizontal position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Bottom speaker vertical position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Bottom speaker crop size",
+              "value": "6.95",
+              "min": 1,
+              "max": 7
+            },
+            {
+              "label": "Camera 3 horizontal position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Camera 3 vertical position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Camera 3 crop size",
+              "value": "6.95",
+              "min": 1,
+              "max": 7
+            },
+            {
+              "label": "Camera 4 horizontal position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Camera 4 vertical position",
+              "value": "99",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "label": "Camera 4 crop size",
+              "value": "6.95",
+              "min": 1,
+              "max": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "phase": "finish-audit",
+      "id": "mobile-controls-390",
+      "desc": "Mobile Reframe and Moments controls remain reachable and within scrollable workspace",
+      "status": "FAIL",
+      "error": "locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('navigation', { name: 'Creative tools' }).getByRole('button', { name: 'Moments', exact: true })\u001b[22m\n"
+    },
+    {
+      "id": "finish-audit-setup",
+      "status": "FAIL",
+      "error": "locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.studio-project-rail__head').locator(':scope>summary')\u001b[22m\n\u001b[2m    - locator resolved to <summary title=\"QA controls after restart \u2014 5 Nov\">QA controls after restart \u2014 5 Nov</summary>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 \u00d7 waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 \u00d7 waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m  "
+    },
+    {
+      "phase": "moments-final-audit",
+      "id": "moments-switch-preview-recovery",
+      "desc": "Named trimmed moment, original range, exact return, preview and cold recovery",
+      "status": "PASS",
+      "evidence": {
+        "a": {
+          "source": 0.861636,
+          "output": 0.860833333333333,
+          "duration": 12,
+          "ready": 4,
+          "seeking": false,
+          "paused": false,
+          "playhead": "23.8051%"
+        },
+        "b": {
+          "source": 1.65286,
+          "output": 1.63205555555556,
+          "duration": 12,
+          "ready": 4,
+          "seeking": false,
+          "paused": false,
+          "playhead": "45.1321%"
+        },
+        "start": 0,
+        "end": 3.6161777777777777
+      }
+    },
+    {
+      "phase": "moments-final-audit",
+      "id": "rapid-stepping-correct-fps",
+      "desc": "Rapid arrow gestures retain all requested frame steps despite decoder paints",
+      "status": "FAIL",
+      "error": "{\"a\":{\"source\":0,\"output\":0,\"duration\":12,\"ready\":4,\"seeking\":false,\"paused\":true,\"playhead\":\"0%\"},\"b\":{\"source\":0.2,\"output\":0.2,\"duration\":12,\"ready\":4,\"seeking\":false,\"paused\":true,\"playhead\":\"5.5307%\"},\"expected\":0.8,\"fps\":30}"
+    },
+    {
+      "id": "local-fixes-setup",
+      "status": "FAIL",
+      "error": "locator.waitFor: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Viral Clip Studio', exact: true }).first() to be visible\u001b[22m\n"
+    },
+    {
+      "id": "local-fixes-setup",
+      "status": "FAIL",
+      "error": "locator.waitFor: Timeout 60000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'QA controls after restart \u2014 5 Nov', exact: true }) to be visible\u001b[22m\n"
+    },
+    {
+      "phase": "local-fixes",
+      "id": "local-rapid-steps",
+      "desc": "Actual local browser accumulates 24 frame steps while native decoder callbacks run",
+      "status": "PASS",
+      "evidence": {
+        "a": {
+          "source": 0,
+          "output": 0,
+          "duration": 12,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "0%"
+        },
+        "b": {
+          "source": 0.8,
+          "output": 0.8,
+          "duration": 12,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "22.1228%"
+        },
+        "expected": 0.8
+      }
+    },
+    {
+      "phase": "local-fixes",
+      "id": "local-timestamp-controls",
+      "desc": "Manual and split tracking timestamps keep inspector visible and paused",
+      "status": "FAIL",
+      "error": "locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('add-reframe-keyframe')\u001b[22m\n"
+    },
+    {
+      "phase": "local-fixes",
+      "id": "local-speaker-focus-controls",
+      "desc": "Reviewed multi-camera focus timestamp retains controls and seeks actual source",
+      "status": "FAIL",
+      "error": "The expression evaluated to a falsy value:\n\n  assert(await page.getByTestId('speaker-stack-editor').isVisible())\n"
+    },
+    {
+      "phase": "local-fixes",
+      "id": "local-initial-cut-export-capture",
+      "desc": "Near-zero new mode retains initial cut and captured native export has no missing zero interval",
+      "status": "FAIL",
+      "error": "Cannot read properties of undefined (reading 'reframe')"
+    },
+    {
+      "phase": "composition-followup",
+      "id": "composition-over-existing-cuts",
+      "desc": "Choosing a camera composition starts the promised live composition over an existing Solo framing track",
+      "status": "FAIL",
+      "error": "The expression evaluated to a falsy value:\n\n  assert(await page.getByTestId('speaker-stack-editor').isVisible())\n"
+    },
+    {
+      "phase": "local-fixes",
+      "id": "local-rapid-steps",
+      "desc": "Actual local browser accumulates 24 frame steps while native decoder callbacks run",
+      "status": "PASS",
+      "evidence": {
+        "a": {
+          "source": 0,
+          "output": 0,
+          "duration": 12,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "0%"
+        },
+        "b": {
+          "source": 0.8,
+          "output": 0.8,
+          "duration": 12,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "22.1228%"
+        },
+        "expected": 0.8
+      }
+    },
+    {
+      "phase": "local-fixes",
+      "id": "local-timestamp-controls",
+      "desc": "Manual and split tracking timestamps keep inspector visible and paused",
+      "status": "PASS",
+      "evidence": {
+        "manual": true,
+        "split": true
+      }
+    },
+    {
+      "phase": "local-fixes",
+      "id": "local-speaker-focus-controls",
+      "desc": "Reviewed multi-camera focus timestamp retains controls and seeks actual source",
+      "status": "PASS",
+      "evidence": null
+    },
+    {
+      "phase": "local-fixes",
+      "id": "local-initial-cut-export-capture",
+      "desc": "Near-zero new mode retains initial cut and captured native export has no missing zero interval",
+      "status": "PASS",
+      "evidence": {
+        "capturedOnly": true,
+        "noProductionDispatch": true,
+        "firstCut": {
+          "time": 0,
+          "mode": "speaker_track"
+        },
+        "segments": [
+          {
+            "start": 0,
+            "end": 3.6161777777777777
+          }
+        ]
+      }
+    },
+    {
+      "phase": "director-local",
+      "id": "director-preview-select-review",
+      "desc": "Actual native UI selects either detected cut and clears prior review without applying or writing production",
+      "status": "FAIL",
+      "error": "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('studio-director-review') to be visible\u001b[22m\n"
+    },
+    {
+      "phase": "director-local",
+      "id": "director-preview-select-review",
+      "desc": "Actual native UI selects either detected cut and clears prior review without applying or writing production",
+      "status": "PASS",
+      "evidence": {
+        "choices": [
+          4.7,
+          5.2
+        ],
+        "selected": 5.2,
+        "clock": {
+          "source": 5.2,
+          "output": 5.2,
+          "duration": 12,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "43.3333%"
+        },
+        "unchangedSourceRanges": true,
+        "approvalPerformed": false,
+        "analysis": "controlled response; not provider evidence"
+      }
+    },
+    {
+      "phase": "local-fixes",
+      "id": "local-rapid-steps",
+      "desc": "Actual local browser accumulates 24 frame steps while native decoder callbacks run",
+      "status": "PASS",
+      "evidence": {
+        "a": {
+          "source": 0,
+          "output": 0,
+          "duration": 12,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "0%"
+        },
+        "b": {
+          "source": 0.8,
+          "output": 0.8,
+          "duration": 12,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "22.1228%"
+        },
+        "expected": 0.8
+      }
+    },
+    {
+      "phase": "local-fixes",
+      "id": "local-timestamp-controls",
+      "desc": "Manual and split tracking timestamps keep inspector visible and paused",
+      "status": "PASS",
+      "evidence": {
+        "manual": true,
+        "split": true
+      }
+    },
+    {
+      "phase": "local-fixes",
+      "id": "local-speaker-focus-controls",
+      "desc": "Reviewed multi-camera focus timestamp retains controls and seeks actual source",
+      "status": "PASS",
+      "evidence": null
+    },
+    {
+      "phase": "local-fixes",
+      "id": "local-initial-cut-export-capture",
+      "desc": "Near-zero new mode retains initial cut and captured native export has no missing zero interval",
+      "status": "PASS",
+      "evidence": {
+        "capturedOnly": true,
+        "noProductionDispatch": true,
+        "firstCut": {
+          "time": 0,
+          "mode": "speaker_track"
+        },
+        "segments": [
+          {
+            "start": 0,
+            "end": 3.6161777777777777
+          }
+        ]
+      }
+    },
+    {
+      "phase": "help-local",
+      "id": "local-signed-in-help",
+      "desc": "Normal signed-in application help opens and closes without submitting a question",
+      "status": "PASS",
+      "evidence": {
+        "panelOnly": true,
+        "questionSent": false
+      }
+    }
+  ],
+  "spend": {
+    "initial": 374,
+    "final": 374,
+    "grant": 200,
+    "liveFailedAttempts": 2,
+    "refundsVerified": 2
+  },
+  "directorBrowserAnalysis": "controlled fixture, not provider evidence",
+  "productionDeployments": 0,
+  "temporaryEvidenceLostInRestart": true
+}

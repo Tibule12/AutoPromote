@@ -17314,3 +17314,15 @@ body.dashboard-mode.viral-studio-open {
 .studio-logo-master-export { display:grid; gap:10px; margin-top:18px; padding-top:14px; border-top:1px solid #354265; }
 .studio-logo-design .motion-position-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
 .studio-logo-design input:not([type=checkbox]), .studio-logo-design select { min-width:0; max-width:100%; width:100%; box-sizing:border-box; }
+
+
+.studio-director-cut-choices > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.studio-director-cut-choices button[aria-pressed="true"] {
+  border-color: #65dfba;
+  background: #163f39;
+}

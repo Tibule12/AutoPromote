@@ -1,0 +1,32 @@
+{
+  "baseRevision": "631afd850462c3d66b11eae09a62cc1e4fd3da56",
+  "files": [
+    {
+      "path": "firestore.rules",
+      "sha256": "8daebc8a0d4638bea8baecf4fd069ffbbf4d200e1651e935e9fb93d47c931a31",
+      "matchesBase": true
+    },
+    {
+      "path": "storage.rules",
+      "sha256": "b362e56ed1980cc781b051299e57838c61e66923083809fc844625c2ea6c52a3",
+      "matchesBase": true
+    },
+    {
+      "path": "src/authMiddleware.js",
+      "sha256": "a35e5d581db80fc7842f4882b3e635f0283feeb9478f2bf3efd22469e4551df5",
+      "matchesBase": true
+    },
+    {
+      "path": "src/mediaRoutes.js",
+      "sha256": "5e24ea914076892dd8b6433d7faac30126916d1c62dabac629b28b2e7f9177bf",
+      "matchesBase": true
+    },
+    {
+      "path": "python_media_worker/main_media_server.py",
+      "sha256": "0afacd9efed66dbb00a53c9fc1a2b461b0da5d3fe5dbc3cf6fe07910cb0b6f64",
+      "matchesBase": true
+    }
+  ],
+  "originalSessionSha256": "00d48e87bd9b77ba9ead11c92bf93039f43fc3e7e6b322c3e379f6b4dac55254",
+  "originalSessionUnchanged": true
+}

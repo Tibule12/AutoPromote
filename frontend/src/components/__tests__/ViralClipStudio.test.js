@@ -1414,6 +1414,79 @@ describe("ViralClipStudio timeline sequencing", () => {
     ).toBeInTheDocument();
   });
 
+  test("framing timestamp selection keeps the Reframe inspector and selected point editable", () => {
+    const { video } = mountNativePreview({ clips: [{ id: "range", start: 0, end: 12, duration: 12 }] });
+    fireEvent.click(within(screen.getByRole("navigation", { name: "Creative tools" })).getByRole("button", { name: "Reframe", exact: true }));
+    fireEvent.click(screen.getByTestId("add-reframe-keyframe"));
+    video.currentTime = 6; fireEvent.timeUpdate(video);
+    fireEvent.click(screen.getByTestId("add-reframe-keyframe"));
+    fireEvent.click(within(screen.getByLabelText("Manual framing corrections")).getAllByRole("button")[0]);
+    expect(screen.getByTestId("auto-reframe-inspector")).toBeInTheDocument();
+    expect(screen.getByLabelText("Manual frame horizontal position")).toBeEnabled();
+    expect(video.currentTime).toBeCloseTo(5, 3);
+  });
+
+  test("a near-zero framing mode change exports an explicit initial cut", async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    const { video } = mountNativePreview({ clips: [{ id: "range", start: 0, end: 12, duration: 12 }], onSave });
+    fireEvent.click(within(screen.getByRole("navigation", { name: "Creative tools" })).getByRole("button", { name: "Reframe", exact: true }));
+    video.currentTime = 1/30; fireEvent.seeked(video);
+    fireEvent.click(screen.getByTestId("reframe-preserve-frame"));
+    await clickRenderFinalClip();
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    expect(onSave.mock.calls[0][2].finishPlan.reframe.timeline_cuts[0]).toMatchObject({ time: 0, mode: "center" });
+  });
+
+  test("split tracking timestamps pause and retain both panel controls", () => {
+    const { video } = mountNativePreview({ clips: [{ id: "range", start: 0, end: 12, duration: 12 }] });
+    fireEvent.click(screen.getByTestId("preview-quick-both-cams"));
+    fireEvent.click(screen.getByLabelText("Track both speakers"));
+    fireEvent.click(screen.getByRole("button", { name: "Add top speaker tracking point", exact: true }));
+    video.currentTime = 6; fireEvent.timeUpdate(video);
+    fireEvent.click(screen.getByRole("button", { name: "Add top speaker tracking point", exact: true }));
+    const top = screen.getByRole("button", { name: "Add top speaker tracking point", exact: true }).closest("fieldset");
+    fireEvent.click(within(top).getByRole("button", { name: "5.00s", exact: true }));
+    expect(screen.getByTestId("source-split-editor")).toBeInTheDocument();
+    expect(screen.getByLabelText("bottom split horizontal")).toBeEnabled();
+    expect(video.paused).toBe(true);
+    expect(video.currentTime).toBeCloseTo(5, 3);
+  });
+
+  test("legacy late-first framing restores preview fallback at zero during export", async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+      clips={[{ id: "range", start: 0, end: 12, duration: 12 }]} onSave={onSave} onCancel={jest.fn()}
+      initialSavedProject={{ id: "legacy-first-cut", name: "Legacy framing", snapshot: {
+        orderedClips: [{ id: "range", start: 0, end: 12, duration: 12 }], selectedClipId: "range",
+        timeline: [{ id: "main", url: "https://example.com/source.mp4", startRequest: 0, endRequest: 12, duration: 12 }],
+        smartCrop: true, smartCropMode: "center", reframeAspect: "9:16",
+        reframeModeCuts: [{ id: "late", time: 1/30, mode: "speaker_track" }],
+      } }} />);
+    await screen.findByDisplayValue("Legacy framing"); readyCutawaySource(12);
+    await clickRenderFinalClip(); await waitFor(() => expect(onSave).toHaveBeenCalled());
+    expect(onSave.mock.calls[0][2].finishPlan.reframe.timeline_cuts).toMatchObject([
+      { time: 0, mode: "center" }, { time: 1/30, mode: "speaker_track" },
+    ]);
+  });
+
+  test("choosing a camera composition records its mode over an existing framing track", async () => {
+    const cameras = ["a", "b"].map(id => ({ id, url: `https://example.com/${id}.mp4`, storagePath: `uploads/videos/test-user/${id}.mp4`, duration: 12, status: "ready" }));
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4" clips={[{ id: "range", start: 0, end: 12, duration: 12 }]} onCancel={jest.fn()}
+      initialSavedProject={{ id: "composition-timed", name: "Timed cameras", snapshot: {
+        orderedClips: [{ id: "range", start: 0, end: 12, duration: 12 }], selectedClipId: "range",
+        timeline: [{ id: "main", url: "https://example.com/source.mp4", startRequest: 0, endRequest: 12, duration: 12 }],
+        speakerStackSources: cameras, speakerStackSourceIds: { top: "a", bottom: "b" },
+        speakerStackCameraCount: 2, speakerStackSyncConfirmed: true, smartCrop: true, smartCropMode: "speaker_track",
+        reframeModeCuts: [{ id: "solo", time: 0, mode: "speaker_track" }],
+      } }} />);
+    await screen.findByDisplayValue("Timed cameras"); const video = readyCutawaySource(12);
+    video.currentTime = 1; fireEvent.timeUpdate(video);
+    fireEvent.click(within(screen.getByRole("navigation", { name: "Creative tools" })).getByRole("button", { name: "Reframe", exact: true }));
+    fireEvent.click(screen.getByTestId("multicam-composition-active_2"));
+    expect(screen.getByTestId("speaker-stack-editor")).toBeInTheDocument();
+    expect(screen.getByTestId("reframe-speaker-stack")).toHaveAttribute("aria-pressed", "true");
+  });
+
   test("Moments selects a new source range after trimming, and preview preserves the chosen edit", async () => {
     const onSave = jest.fn(() => Promise.resolve());
     render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
@@ -1440,10 +1513,10 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(onSave.mock.calls[0][2].timelineSegments[0]).toMatchObject({start_time:12,end_time:20});
   },60000);
 
-  test("camera bank enforces its existing twelve-angle limit and prunes only unused references", async () => {
+  test("camera bank enforces its shared eight-angle limit and prunes only unused references", async () => {
     const save = jest.spyOn(studioProjectStore, "saveViralStudioProject").mockImplementation(async project => ({ ...project, updatedAt: Date.now() }));
     try {
-      const cameras = Array.from({ length: 12 }, (_, i) => ({ id: `camera-${i}`, url: `https://example.com/camera-${i}.mp4`,
+      const cameras = Array.from({ length: 8 }, (_, i) => ({ id: `camera-${i}`, url: `https://example.com/camera-${i}.mp4`,
         storagePath: `uploads/videos/test-user/camera-${i}.mp4`, duration: 12, status: "ready" }));
       render(<ViralClipStudio videoUrl="https://example.com/source.mp4" clips={[{id:"range",start:0,end:12,duration:12}]}
         initialSavedProject={{ id: "bank-limit", name: "Camera bank limit", snapshot: {
@@ -1455,6 +1528,7 @@ describe("ViralClipStudio timeline sequencing", () => {
       await screen.findByDisplayValue("Camera bank limit"); readyCutawaySource(12);
       fireEvent.click(screen.getByRole("tab", { name: /Reframe/i }));
       expect(screen.getByTestId("add-clean-speaker-angle")).toBeDisabled();
+      expect(screen.getByText(/Add 2–8 real full-size angles/)).toBeInTheDocument();
       fireEvent.click(screen.getByRole("button", { name: "Remove unused angles", exact: true }));
       fireEvent.click(screen.getByTestId("studio-save-project"));
       await waitFor(() => expect(save).toHaveBeenCalled());
@@ -7126,7 +7200,7 @@ describe("ViralClipStudio timeline sequencing", () => {
             mode: "source_shots",
             engine: "opencv-yunet-source-shot-follow",
             start: 0, end: 20,
-            sceneCuts: [8],
+            sceneCuts: [8, 14],
             reviewRequired: true,
             decodeFailures: [],
             tracks: { solo: { coverage: 0.9, keyframes: [
@@ -7183,6 +7257,17 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(evidence).toHaveTextContent("proposed split requiring review");
     expect(panel).toHaveTextContent("Clip main");
     expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:20.0");
+    const choices = within(panel).getByRole("group", { name: "Detected camera cuts", exact: true });
+    fireEvent.click(within(choices).getByRole("button", { name: "Preview cut at 0:14.0", exact: true }));
+    await waitFor(() => expect(within(choices).getByRole("button", { name: "Preview cut at 0:14.0", exact: true })).toHaveAttribute("aria-pressed", "true"));
+    await waitFor(() => expect(within(panel).getByTestId("studio-director-review-open")).toBeEnabled());
+    expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:20.0");
+    expect(onDirectorReview).not.toHaveBeenCalled();
+    expect(global.fetch.mock.calls.some(([url]) => String(url).endsWith("/api/studio/director/reviews"))).toBe(false);
+    fireEvent.click(within(panel).getByTestId("studio-director-review-open"));
+    await within(panel).findByTestId("studio-director-review-approve");
+    expect(within(panel).getByTestId("studio-director-review-evidence")).toHaveTextContent("1260000 ticks");
+    expect(within(choices).getByRole("button", { name: "Preview cut at 0:14.0", exact: true })).toHaveAttribute("aria-pressed", "true");
     requestSpy.mockRestore();
   });
 

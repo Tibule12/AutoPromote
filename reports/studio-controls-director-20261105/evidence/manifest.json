@@ -1,0 +1,51 @@
+{
+  "base": "631afd850462c3d66b11eae09a62cc1e4fd3da56",
+  "files": [
+    {
+      "path": "frontend/src/components/StudioPlaybackPosition.js",
+      "sha256": "354f03e33ec80b16b8d562800062a1454d6d71d5a06793089a0f8d059314fc21"
+    },
+    {
+      "path": "frontend/src/components/ViralClipStudio.js",
+      "sha256": "990adf950174229898825a4df5f7b083aaaa50c3b6967b56d0094275c12415d1"
+    },
+    {
+      "path": "frontend/src/components/ViralClipStudio.css",
+      "sha256": "d3d0883eae84f623ecf942933f94c4a5223eacec7bc2fd114a4d09580d9a17df"
+    },
+    {
+      "path": "frontend/src/components/studioDirectorEvidenceProposals.js",
+      "sha256": "a001527c25caa8f176b18011aa46091c943181c356f9abcc6af3ab260515d9d9"
+    },
+    {
+      "path": "frontend/src/components/__tests__/ViralClipStudio.test.js",
+      "sha256": "c247447c770ce4b76ad618bb65e1920389a45a80f7a33aaefb6b539c4a310d6c"
+    },
+    {
+      "path": "frontend/src/components/__tests__/StudioPlaybackPosition.test.js",
+      "sha256": "9b2abf948b153cddfc76911033fe5e4798ce7dc944bf1de6d6715402f0cacd35"
+    },
+    {
+      "path": "frontend/src/components/__tests__/studioDirectorEvidenceProposals.test.js",
+      "sha256": "c5d3695d12366aab5b8d38e683203fe2d1c9cd8bdb68562e9a9696a1666f1b6e"
+    }
+  ],
+  "contract": {
+    "valid": true,
+    "capabilities": 29,
+    "counts": {
+      "UNIMPLEMENTED": 2,
+      "BROKEN": 1,
+      "PARTIAL": 9,
+      "FUNCTIONAL": 17,
+      "PRO-READY": 0,
+      "PRODUCTION-READY": 0
+    },
+    "combinations": 13,
+    "parityChecks": 17,
+    "presentFixtures": 4,
+    "newCapabilityExecutions": 0,
+    "note": "Record validation only; no browser, provider or GPU execution."
+  },
+  "originalUserSessionUnchanged": true
+}
