@@ -554,6 +554,29 @@ describe("ViralClipStudio timeline sequencing", () => {
     );
   });
 
+  test("Play just before an interior cut continues from the selected picture instead of restarting the shot", () => {
+    mountNativePreview({ importedCameraMaster: {
+      id: 'cut-neighbour', name: 'Next source', duration: 4,
+      url: 'https://example.com/cut-neighbour.mp4', storagePath: 'studio/sources/cut-neighbour.mp4',
+    } });
+    fireEvent.click(screen.getByTestId('pro-video-clip-1'), { detail: 0 });
+    const video = screen.getByTestId('studio-after-video');
+    Object.defineProperties(video, {
+      readyState: { configurable: true, value: 4 },
+      currentSrc: { configurable: true, get: () => video.src },
+      currentTime: { configurable: true, writable: true, value: 8 - 1 / 24 },
+      paused: { configurable: true, value: true },
+      duration: { configurable: true, value: 12 },
+    });
+    video.play = jest.fn().mockResolvedValue();
+    video.pause = jest.fn();
+    const pause = screen.queryByRole('button', { name: 'Pause comparison', exact: true });
+    if (pause) fireEvent.click(pause);
+    fireEvent.click(screen.getByRole('button', { name: 'Play comparison', exact: true }));
+    expect(video.play).toHaveBeenCalled();
+    expect(video.currentTime).toBe(8 - 1 / 24);
+  });
+
   test("a native shot boundary promotes and starts the prepared decoder before the boundary event returns", () => {
     mountNativePreview({ importedCameraMaster: {
       id: 'prepared-next', name: 'Next source', duration: 4,
@@ -7393,4 +7416,20 @@ describe("ViralClipStudio timeline sequencing", () => {
       expect(within(flowSurface).getByText("Null Rig 1")).toBeInTheDocument();
     });
   });
+  test('source-dialogue preview candidate can open the real editor without forward state references', () => {
+    const previous=process.env.REACT_APP_STUDIO_SOURCE_DIALOGUE_PREVIEW;
+    process.env.REACT_APP_STUDIO_SOURCE_DIALOGUE_PREVIEW='true';
+    try {
+      const view=render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+        clips={[{id:'source-dialogue-open',start:0,end:12,duration:12}]} onSave={jest.fn()} onCancel={jest.fn()} />);
+      readyCutawaySource(12);
+      expect(screen.getByTestId('viral-studio-workspace')).toBeInTheDocument();
+      expect(screen.getByLabelText('Edited output position')).toBeInTheDocument();
+      view.unmount();
+    } finally {
+      if(previous===undefined)delete process.env.REACT_APP_STUDIO_SOURCE_DIALOGUE_PREVIEW;
+      else process.env.REACT_APP_STUDIO_SOURCE_DIALOGUE_PREVIEW=previous;
+    }
+  });
+
 });

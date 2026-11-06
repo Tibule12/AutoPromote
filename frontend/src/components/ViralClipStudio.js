@@ -44,10 +44,11 @@ import { buildStudioLogoMotion } from './studioLogoMotion';
 import { editStudioPositionPose, editStudioSpatialPath } from './studioMotionEditing';
 import StudioGroupPreview from "./StudioGroupPreview";
 import { hasSoftStudioMask, studioMaskPointProperty, parseStudioMaskPolygon, studioMaskPolygonPath, validateStudioMaskAnimation } from "./studioMaskGeometry";
-import { primeStudioSourceVideo, watchStudioProgrammeFrames, studioPresentedSourceTime, watchStudioClipBoundary, watchStudioAudioClock, studioJoinFade, mapStudioSourceAccess, isStudioSourceClockCurrent, pausedStudioMappedFrameRequest, pausedStudioFrameKey } from "./studioSourcePreview";
+import { primeStudioSourceVideo, watchStudioProgrammeFrames, studioPresentedSourceTime, watchStudioClipBoundary, watchStudioAudioClock, studioJoinFade, mapStudioSourceAccess, isStudioSourceClockCurrent, pausedStudioMappedFrameRequest, pausedStudioFrameKey, studioPausedSampleTime, studioFinishedFrameSeekTime } from "./studioSourcePreview";
 import { loadStudioSourceFrame } from "./studioSourceFrameClient";
 import { musicBufferNeedsResync, musicBufferPosition, prepareStudioMusicPlayback, studioMusicBufferIdentity } from "./studioMusicBufferClock";
-import { loadStudioVoiceBus, scheduleStudioPreparedDuck } from './studioPreparedVoiceBus';
+import { loadStudioVoiceBus, scheduleStudioPreparedDuck, studioDialogueBusRequest } from './studioPreparedVoiceBus';
+import { studioSoloPictureProjection, studioSoloPictureDimensions } from './studioSoloPictureProjection';
 import { studioCueSourceKey, createStudioCueBuffer, prepareStudioCuePlayback, prepareStudioBuiltInCue } from "./studioCueBuffer";
 import {
   MAX_STUDIO_ANGLES,
@@ -85,7 +86,7 @@ import { runStudioSourceShotJob } from "./studioAnalysisJobClient";
 import useCinematicEffects, { CINEMATIC_PRESETS, buildCinematicCssFilter } from "../hooks/useCinematicEffects";
 import StudioFinishLayers from "./StudioFinishLayers";
 import StudioFinishRack from "./StudioFinishRack";
-import { buildPrecisionGrade, applyPrecisionGrade } from "./studioPrecisionGrade";
+import { buildPrecisionGrade, applyPrecisionGrade, applyPrecisionVignette } from "./studioPrecisionGrade";
 import { parseColorCube, buildAdvancedColorCube, applyColorCube, hasAdvancedGrade } from "./studioColorCube";
 import { soloTrackingCoordinates, reprojectDetectedReframeKeys } from "./studioTrackingCoordinates";
 import { interpolateReframeKeyframes } from "./studioReframeInterpolation";
@@ -3181,6 +3182,7 @@ const ViralClipStudio = ({
   if (!studioPlaybackClockRef.current) studioPlaybackClockRef.current = createStudioPlaybackClock();
   const programmeVideoSlotsRef = useRef([null, null, null]);
   const afterCanvasRef = useRef(null);
+  const pausedProgrammeRasterRef = useRef(null);
   const [pausedSourceFrame, setPausedSourceFrame] = useState(null);
   const adjustmentScratchRef = useRef(null);
   const beforeVideoRef = useRef(null);
@@ -3220,6 +3222,8 @@ const ViralClipStudio = ({
   const musicPreviewGainNodeRef = useRef(null);
   const musicPreviewDuckGainNodeRef = useRef(null);
   const preparedVoiceBusRef = useRef(null);
+  const preparedDialogueBusRef = useRef(null);
+  const preparedDialogueClockRef = useRef(null);
   const preparedSpeechDuckRef = useRef(null);
   const preparedSpeechDuckClockRef = useRef('');
   const preparedSpeechDuckSourceRef = useRef(null);
@@ -5127,6 +5131,8 @@ const ViralClipStudio = ({
     previewPlaybackPreparingRef.current = null;
     preparedCutHandoffRef.current = null;
     previewPlaybackIntentRef.current = false;
+    preparedDialogueBusRef.current?.pause();
+    preparedVoiceBusRef.current?.pause();
     setIsPreviewPaused(true);
     videoRef.current?.pause();
     beforeVideoRef.current?.pause();
@@ -5155,6 +5161,8 @@ const ViralClipStudio = ({
       setIsBackgroundSoundPreviewing(false);
       previewPlaybackIntentRef.current = true;
       setIsPreviewPaused(false);
+      if(!renderedOutputUrl&&preparedDialogueIsActive)preparedDialogueBusRef.current?.stage({
+        offset:getPreviewMusicTime(getPreviewTimelineTime(video.currentTime||0))});
       safePlayMediaElement(video);
     } else {
       pauseSynchronizedPreview();
@@ -6141,8 +6149,9 @@ const ViralClipStudio = ({
       const programmeTick = Math.min(previewOutputTimeMap.at(-1)?.programmeRange.endTick || 0,
         secondsToTicks(Math.max(0, Number(outputTime || 0))));
       const time = ticksToSeconds(mapProgrammeTickToOutputTick(previewOutputTimeMap, programmeTick) || 0);
-      video.currentTime = time;
-      setVideoTime(time);
+      const seek=studioFinishedFrameSeekTime(time,Number(exportSettings.fps),video.duration);
+      video.currentTime = seek;
+      setVideoTime(seek);
       return;
     }
     const position = resolveOutputTimelinePosition(outputTime);
@@ -7279,6 +7288,31 @@ const ViralClipStudio = ({
   );
   const previewTimelineTime = getPreviewTimelineTime(videoTime);
   const originalAudioWindow = useMemo(() => buildAudioSplitSequence(timeline)[activeTimelineIndex], [timeline, activeTimelineIndex]);
+  const preparedDialogueInput = process.env.REACT_APP_STUDIO_SOURCE_DIALOGUE_PREVIEW === 'true' &&
+    !renderedOutputUrl && !addHook && !silenceRemoval && smartCropMode !== 'group_stack' &&
+    !reframeModeCuts.some(cut=>cut.mode==='group_stack') &&
+    !audioRemix.enabled && !extractedAudio?.url && !overlays.some(item=>item.muteMainAudio||item.audioDucking)
+      ? studioDialogueBusRequest({projectId,timeline,outputTimeMap:previewOutputTimeMap,
+        automation:audioKeyframes.originalAudio,restoration:audioRestoration}) : null;
+  const preparedDialogueIsActive = Boolean(preparedDialogueInput);
+  useEffect(()=>{
+    if(!preparedDialogueIsActive)return undefined;
+    let frame;
+    const follow=()=>{
+      const anchor=preparedDialogueClockRef.current,video=videoRef.current,clip=timeline[activeTimelineIndex];
+      if(anchor&&previewPlaybackIntentRef.current&&video?.readyState>=2&&!video.seeking&&clip){
+        const outputTime=musicBufferPosition(anchor,anchor.context.currentTime);
+        const programmeTime=ticksToSeconds(mapOutputTickToProgrammeTick(previewOutputTimeMap,
+          Math.min(previewOutputTimeMap.at(-1).outputRange.endTick,secondsToTicks(outputTime)))||0);
+        const offset=timeline.slice(0,activeTimelineIndex).reduce((n,c)=>n+getTimelineClipWindow(c).duration,0);
+        const window=getTimelineClipWindow(clip),target=window.start+programmeTime-offset;
+        if(target>=window.end)video.dispatchEvent(new CustomEvent('studio-programme-audio-boundary',{detail:{sourceTime:window.end}}));
+        else if(target>=window.start&&Math.abs(video.currentTime-target)>.08)video.currentTime=target;
+      }
+      frame=requestAnimationFrame(follow);
+    };
+    frame=requestAnimationFrame(follow);return()=>cancelAnimationFrame(frame);
+  },[preparedDialogueIsActive,timeline,activeTimelineIndex,previewOutputTimeMap]);
   const isPlayheadPunched = useMemo(
     () => isTimePunched(motionKeyframes, previewTimelineTime),
     [motionKeyframes, previewTimelineTime]
@@ -7298,7 +7332,7 @@ const ViralClipStudio = ({
     if (!video || !timeline.length) return;
 
     const syncSplitAudioPlayback = () => {
-      if (video.paused || renderedOutputUrl || previewMuted || muteOriginalAudio || !isStudioAudioTrackAudible(trackStates, 'originalAudio')) {
+      if (video.paused || preparedDialogueIsActive || renderedOutputUrl || previewMuted || muteOriginalAudio || !isStudioAudioTrackAudible(trackStates, 'originalAudio')) {
         timelineAudioPoolRef.current.forEach(audio => {
           if (!audio.paused) audio.pause();
         });
@@ -7352,7 +7386,7 @@ const ViralClipStudio = ({
         } catch (_) {}
       });
     };
-  }, [timeline, activeTimelineIndex, renderedOutputUrl, previewMuted, muteOriginalAudio, trackStates, previewVolume, audioKeyframes.originalAudio]);
+  }, [timeline, activeTimelineIndex, renderedOutputUrl, previewMuted, muteOriginalAudio, trackStates, previewVolume, audioKeyframes.originalAudio, preparedDialogueIsActive]);
   const effectiveSmartCropMode = resolveReframeModeAtTime(
     reframeModeCuts,
     previewTimelineTime,
@@ -8230,7 +8264,10 @@ const ViralClipStudio = ({
     if (resumeOnly || isPreviewPaused) {
       if (!renderedOutputUrl) {
         const expectedProject = activeProjectIdRef.current, expectedSeek = programmeSeekIntentRef.current.version;
-        try { const pendingVoice = preparedVoiceBusRef.current?.prepare(); if (pendingVoice) await pendingVoice; }
+        try {
+          const pendingVoice = preparedVoiceBusRef.current?.prepare(); if (pendingVoice) await pendingVoice;
+          const pendingDialogue = preparedDialogueBusRef.current?.prepare(); if (pendingDialogue) await pendingDialogue;
+        }
         catch (error) { if (playRequest === previewPlaybackStartRef.current) setStudioActionMessage(error.message); return; }
         if (playRequest !== previewPlaybackStartRef.current || video !== videoRef.current ||
             expectedProject !== activeProjectIdRef.current || expectedSeek !== programmeSeekIntentRef.current.version) return;
@@ -8254,7 +8291,11 @@ const ViralClipStudio = ({
             expectedProject !== activeProjectIdRef.current || expectedSeek !== programmeSeekIntentRef.current.version ||
             musicPreviewRef.current?.src !== expectedMusic) return;
       }
-      if (windowEnd > 0 && Number(video.currentTime || 0) >= windowEnd - 0.1) {
+      // A paused picture just before a source cut is still part of the
+      // programme. The former 100ms replay window restarted that shot (and
+      // prepared audio) instead of playing through the next occurrence.
+      if ((renderedOutputUrl || activeTimelineIndex === timeline.length - 1) &&
+          windowEnd > 0 && (video.ended || Number(video.currentTime || 0) >= windowEnd - 2 / 90000)) {
         focusComparisonPreview(studioInspectorTab, false);
       }
       if (!renderedOutputUrl && !previewMuted) {
@@ -8314,6 +8355,8 @@ const ViralClipStudio = ({
       setIsBackgroundSoundPreviewing(false);
       previewPlaybackIntentRef.current = true;
       setIsPreviewPaused(false);
+      if(!renderedOutputUrl&&preparedDialogueIsActive)preparedDialogueBusRef.current?.stage({
+        offset:getPreviewMusicTime(getPreviewTimelineTime(video.currentTime||0))});
       safePlayMediaElement(video);
     } else {
       pauseSynchronizedPreview();
@@ -13552,6 +13595,8 @@ const ViralClipStudio = ({
     video.addEventListener("play", handlePlay);
     video.addEventListener("timeupdate", handleTimeUpdate);
     video.addEventListener("ended", handleTimeUpdate);
+    const audioBoundary=event=>handleTimeUpdate({type:'frame-boundary',mediaTime:event.detail.sourceTime});
+    video.addEventListener('studio-programme-audio-boundary',audioBoundary);
     video.addEventListener("loadedmetadata", handleLoadedMetadata);
     const stopBoundaryWatch = watchStudioClipBoundary(video, {
       end: getTimelineClipWindow(timeline[activeTimelineIndex]).end,
@@ -13563,6 +13608,7 @@ const ViralClipStudio = ({
       video.removeEventListener("play", handlePlay);
       video.removeEventListener("timeupdate", handleTimeUpdate);
       video.removeEventListener("ended", handleTimeUpdate);
+      video.removeEventListener('studio-programme-audio-boundary',audioBoundary);
       video.removeEventListener("loadedmetadata", handleLoadedMetadata);
     };
   }, [
@@ -13724,11 +13770,15 @@ const ViralClipStudio = ({
   const pausedSourceGeneration = sourceAccessGenerations.projectId === projectId
     ? sourceAccessGenerations.byPath[currentTimelineClip?.sourceStoragePath || currentTimelineClip?.storagePath]
     : undefined;
+  // The original-byte solo framing profile skips the ordinary CFR30 ingest.
+  // Do not label its fractional source sampling as that different profile.
+  const pausedSourceUsesCfr30 = !(smartCrop && smartCropMode === "speaker_track" &&
+    reframeKeyframes.length && !reframeModeCuts.length && Number(speakerTrackZoom) === 1);
   const pausedFrameRequestKey = !renderedOutputUrl && isPreviewPaused && !projectSourcesRefreshing &&
     !subjectProgrammePreview && !activeSideBySideOverlay && !speakerStackPreviewIsLive &&
     (!smartCrop || ["center", "speaker_track"].includes(smartCropMode))
       ? pausedStudioFrameKey(pausedStudioMappedFrameRequest(currentTimelineClip, Number(videoTime),
-        exportSettings.fps, timeline, previewOutputTimeMap, pausedSourceGeneration))
+        exportSettings.fps, timeline, previewOutputTimeMap, pausedSourceGeneration, pausedSourceUsesCfr30))
       : "";
   useEffect(() => {
     if (!pausedFrameRequestKey) { setPausedSourceFrame(null); return undefined; }
@@ -13751,6 +13801,8 @@ const ViralClipStudio = ({
     return () => { disposed = true; clearTimeout(timer); clearTimeout(deadline); controller.abort(); };
   }, [pausedFrameRequestKey, projectId]);
 
+  const soloFinishRasterEnabled = smartCrop && smartCropMode === 'speaker_track' &&
+    !subjectProgrammePreview && !activeSideBySideOverlay && !speakerStackPreviewIsLive;
   useEffect(() => {
     const video = videoRef.current;
     const canvas = afterCanvasRef.current;
@@ -13773,21 +13825,36 @@ const ViralClipStudio = ({
       const rect = canvas.getBoundingClientRect();
       if (rect.width < 1 || rect.height < 1) return;
       const pixelRatio = Math.min(1.5, Math.max(1, window.devicePixelRatio || 1));
-      const canvasWidth = Math.max(2, Math.round(rect.width * pixelRatio));
-      const canvasHeight = Math.max(2, Math.round(rect.height * pixelRatio));
-      if (canvas.width !== canvasWidth) canvas.width = canvasWidth;
-      if (canvas.height !== canvasHeight) canvas.height = canvasHeight;
-      const context = canvas.getContext("2d", { alpha: false });
+      // A settled exact picture uses the worker's intermediate raster before
+      // the browser scales it to the monitor. Grading a tiny CSS-sized raster
+      // first changes fine edges and colour averages. Moving playback keeps
+      // its bounded display-sized canvas rather than adding per-frame work.
+      const pausedRaster = soloFinishRasterEnabled
+        ? studioSoloPictureDimensions({sourceWidth:programmeVideo.videoWidth,sourceHeight:programmeVideo.videoHeight,
+          aspect:reframeAspect,resolution:exportSettings.resolution,frame:mainFrame}) : null;
+      const rasterScale = pausedRaster ? programmeVideo.paused && !programmeVideo.seeking &&
+        pausedSourceFrame?.status === 'accurate' ? 1 : Math.min(1,rect.width * pixelRatio / pausedRaster.innerWidth) : 1;
+      const targetWidth = pausedRaster ? Math.max(2,Math.round(pausedRaster.innerWidth*rasterScale)) : Math.max(2, Math.round(rect.width * pixelRatio));
+      const targetHeight = pausedRaster ? Math.max(2,Math.round(pausedRaster.innerHeight*rasterScale)) : Math.max(2, Math.round(rect.height * pixelRatio));
+      if (canvas.width !== targetWidth) canvas.width = targetWidth;
+      if (canvas.height !== targetHeight) canvas.height = targetHeight;
+      const paintCanvas = pausedRaster
+        ? (pausedProgrammeRasterRef.current ||= document.createElement('canvas')) : canvas;
+      const canvasWidth = pausedRaster ? Math.max(2,Math.round(pausedRaster.width*rasterScale)) : targetWidth,
+        canvasHeight = pausedRaster ? Math.max(2,Math.round(pausedRaster.height*rasterScale)) : targetHeight;
+      if (paintCanvas.width !== canvasWidth) paintCanvas.width = canvasWidth;
+      if (paintCanvas.height !== canvasHeight) paintCanvas.height = canvasHeight;
+      const context = paintCanvas.getContext("2d", { alpha: false });
       if (!context) return;
       // Use the decoded programme's clock for its crop and Director cut. React
       // state can arrive a frame later than the video at a hard source edit.
       const pausedRequest = programmeVideo.paused && !programmeVideo.seeking && !renderedOutputUrl &&
         !subjectProgrammePreview && !activeSideBySideOverlay && !speakerStackPreviewIsLive && pausedSourceFrame?.image
         ? pausedStudioMappedFrameRequest(currentTimelineClip, Number(programmeVideo.currentTime),
-          exportSettings.fps, timeline, previewOutputTimeMap, pausedSourceGeneration) : null;
+          exportSettings.fps, timeline, previewOutputTimeMap, pausedSourceGeneration, pausedSourceUsesCfr30) : null;
       const pausedClockIsCurrent = pausedRequest && pausedSourceFrame.key === pausedStudioFrameKey(pausedRequest);
       const sampledSourceTime = pausedClockIsCurrent
-        ? pausedRequest.start + pausedRequest.frameIndex / pausedRequest.fps
+        ? studioPausedSampleTime(pausedRequest)
         : Number.isFinite(decodedSourceTime) ? decodedSourceTime : studioPresentedSourceTime(programmeVideo);
       // Crop/finish automation was applied to this input picture before final
       // retiming. Evaluate it on that picture's sampled clock, rather than
@@ -13832,7 +13899,7 @@ const ViralClipStudio = ({
         !reviewedSubject && !alternateIsCurrent && !cachedAlternateIsCurrent &&
         pausedSourceFrame?.image && pausedSourceFrame.key === pausedStudioFrameKey(
           pausedStudioMappedFrameRequest(currentTimelineClip, Number(programmeVideo.currentTime),
-            exportSettings.fps, timeline, previewOutputTimeMap, pausedSourceGeneration));
+            exportSettings.fps, timeline, previewOutputTimeMap, pausedSourceGeneration, pausedSourceUsesCfr30));
       canvas.dataset.sourceSampling = pausedFrameIsCurrent ? "accurate-paused" : "native";
       canvas.dataset.sourceContentHash = pausedFrameIsCurrent ? pausedSourceFrame.receipt.sourceContentHash : "";
       canvas.dataset.sourceFrameIndex = pausedFrameIsCurrent ? String(pausedSourceFrame.receipt.frameIndex) : "";
@@ -13893,9 +13960,14 @@ const ViralClipStudio = ({
       const directorZoom = renderedOutputUrl ? 1 : directorModeActive
         ? Number(currentDirectorAngle?.zoom || 1)
         : timelineDirectorZoom;
+      const soloProjection = frameCropMode === 'speaker_track' && !activeSideBySideOverlay && !reviewedSubject
+        ? studioSoloPictureProjection({sourceWidth:sourceFrameWidth,sourceHeight:sourceFrameHeight,
+          canvasWidth,canvasHeight,aspect:reframeAspect,resolution:exportSettings.resolution,
+          x:positionX,y:positionY,zoom:speakerTrackZoom,directorZoom,
+          frame:pausedRaster ? {enabled:false} : mainFrame}) : null;
       const programmeScale = (renderedOutputUrl || activeSideBySideOverlay
         ? 1
-        : hookVisualScale * smartCropBackgroundScale * finishZoom * frameMainMotion.scale) * directorZoom;
+        : hookVisualScale * smartCropBackgroundScale * finishZoom * frameMainMotion.scale) * (soloProjection ? 1 : directorZoom);
       const translateX = renderedOutputUrl || activeSideBySideOverlay
         ? 0
         : ((frameMainMotion.x - 50) / 100) * canvasWidth;
@@ -14192,8 +14264,9 @@ const ViralClipStudio = ({
           }
         }
       } else {
-        const drawX = (canvasWidth - drawWidth) * positionX;
-        const drawY = (canvasHeight - drawHeight) * positionY;
+        const drawX = soloProjection ? soloProjection.x : (canvasWidth - drawWidth) * positionX;
+        const drawY = soloProjection ? soloProjection.y : (canvasHeight - drawHeight) * positionY;
+        const pictureWidth=soloProjection?.width??drawWidth,pictureHeight=soloProjection?.height??drawHeight;
         const roundContainedFootage =
           mainFrame.enabled &&
           frameProgrammeFit === "contain" &&
@@ -14224,10 +14297,10 @@ const ViralClipStudio = ({
             context.closePath();
           }
           context.clip();
-          context.drawImage(sourceVideo, drawX, drawY, drawWidth, drawHeight);
+          context.drawImage(sourceVideo, drawX, drawY, pictureWidth, pictureHeight);
           context.restore();
         } else {
-          context.drawImage(sourceVideo, drawX, drawY, drawWidth, drawHeight);
+          context.drawImage(sourceVideo, drawX, drawY, pictureWidth, pictureHeight);
         }
       }
       context.restore();
@@ -14257,6 +14330,8 @@ const ViralClipStudio = ({
         const pixels = context.getImageData(0, 0, canvasWidth, canvasHeight);
         if (precisionPreviewGrade) applyPrecisionGrade(pixels.data, precisionPreviewGrade);
         if (finishPreviewIsLive && advancedColorCube) applyColorCube(pixels.data, advancedColorCube);
+        if (precisionPreviewGrade && pausedRaster)
+          applyPrecisionVignette(pixels.data,canvasWidth,canvasHeight,effectiveFinishFx.vignette);
         context.putImageData(pixels, 0, 0);
       }
       // Use this decoded picture's programme time at grade boundaries. React's
@@ -14293,6 +14368,15 @@ const ViralClipStudio = ({
           context.save(); context.globalCompositeOperation = 'screen';
           context.globalAlpha = adjustment.glow.intensity; context.drawImage(scratch, 0, 0); context.restore();
         }
+      }
+      if (pausedRaster) {
+        // Finish precedes the inset frame in the canonical worker. Preserve
+        // that order, including its even-pixel cover/crop, in an exact still.
+        const projection = studioSoloPictureProjection({sourceWidth:canvasWidth,sourceHeight:canvasHeight,
+          canvasWidth:targetWidth,canvasHeight:targetHeight,aspect:reframeAspect,
+          resolution:exportSettings.resolution,x:.5,y:.5,frame:mainFrame});
+        const visible = canvas.getContext('2d',{alpha:false});
+        visible.drawImage(paintCanvas,projection.x,projection.y,projection.width,projection.height);
       }
     };
     const startProgrammeLoop = () => {
@@ -14378,6 +14462,8 @@ const ViralClipStudio = ({
     activeProgrammeSlot,
     pausedSourceFrame,
     pausedSourceGeneration,
+    pausedSourceUsesCfr30,
+    exportSettings.resolution,
     timeline,
     previewOutputTimeMap,
     previewMotionKeyframes,
@@ -14393,6 +14479,8 @@ const ViralClipStudio = ({
     previewProgrammeFit,
     previewProgrammeFilter,
     precisionPreviewGrade,
+    effectiveFinishFx.vignette,
+    soloFinishRasterEnabled,
     compiledAdjustmentGrades,
     advancedColorCube,
     finishPreviewIsLive,
@@ -14684,6 +14772,7 @@ const ViralClipStudio = ({
     );
     const baseMuted =
       previewMuted ||
+      (!renderedOutputUrl && preparedDialogueIsActive) ||
       muteOriginalAudio ||
       (!renderedOutputUrl && (currentTimelineClip?.audioDetached || (originalAudioWindow &&
         (previewTimelineTime < originalAudioWindow.audioTimelineStart ||
@@ -14721,6 +14810,7 @@ const ViralClipStudio = ({
     previewMuted,
     previewVolume,
     muteOriginalAudio,
+    preparedDialogueIsActive,
     extractedAudio,
     audioKeyframes.originalAudio,
     trackStates,
@@ -17976,6 +18066,20 @@ const ViralClipStudio = ({
 
   return createPortal(
     <div className="viral-studio-overlay ap-dashboard-redesign">
+      {preparedDialogueInput ? <StudioVoiceoverPreview ref={preparedDialogueBusRef} takes={[]} preparedInput={preparedDialogueInput}
+        programmeAuthority getPlaybackIntent={()=>previewPlaybackIntentRef.current}
+        getSeekIdentity={()=>programmeSeekIntentRef.current.version}
+        onPreparedClock={clock=>{preparedDialogueClockRef.current=clock;}}
+        videoRef={videoRef} activeClip={activeTimelineIndex} projectId={projectId} outputTimeMap={previewOutputTimeMap}
+        getTimelineTime={getSoundEffectProgrammeTime} getAudioContext={ensureSoundEffectAudioContext}
+        isHandoffPending={media=>previewPlaybackIntentRef.current &&
+          (preparedCutHandoffRef.current?.from===media || preparedCutHandoffRef.current?.to===media)}
+        loadPreparedBus={(input,context,signal)=>loadStudioVoiceBus({input,context,signal,apiBase:API_BASE_URL,getToken:getMediaAuthToken})}
+        getOutputPlan={(context,programmeTime)=>({when:context.currentTime+.01,offset:getPreviewMusicTime(programmeTime)+.01})}
+        muted={previewMuted||muteOriginalAudio||!isStudioAudioTrackAudible(trackStates,'originalAudio')}
+        volume={previewVolume} renderedOutputUrl={renderedOutputUrl} onError={setStudioActionMessage}
+        onPreparation={status=>{if(status==='loading'&&previewPlaybackIntentRef.current)pauseSynchronizedPreview();}}
+      /> : null}
       <StudioVoiceoverPreview ref={preparedVoiceBusRef} takes={voiceovers} videoRef={videoRef}
         getTimelineTime={getSoundEffectProgrammeTime} activeClip={activeTimelineIndex}
         getAudioContext={ensureSoundEffectAudioContext}
@@ -19467,7 +19571,8 @@ const ViralClipStudio = ({
 
                     {finishPreviewIsLive ? (
                       <StudioFinishLayers
-                        fx={effectiveFinishFx}
+                        fx={precisionPreviewGrade && soloFinishRasterEnabled
+                          ? {...effectiveFinishFx,vignette:0} : effectiveFinishFx}
                         edgeBlurStyle={finishEdgeBlurStyle}
                         vignetteStyle={finishVignetteStyle}
                         overlayStyle={finishOverlayStyle}
@@ -19709,9 +19814,9 @@ const ViralClipStudio = ({
                             !isStudioSourceClockCurrent(video,{activeVideo:video,url:currentTimelineClip?.url,start:getTimelineClipWindow(currentTimelineClip).start,
                               end:getTimelineClipWindow(currentTimelineClip).end,hasNext:activeTimelineIndex<timeline.length-1}))return null;
                           const request=video.paused?pausedStudioMappedFrameRequest(currentTimelineClip,Number(video.currentTime),
-                            exportSettings.fps,timeline,previewOutputTimeMap,pausedSourceGeneration):null;
+                            exportSettings.fps,timeline,previewOutputTimeMap,pausedSourceGeneration,pausedSourceUsesCfr30):null;
                           const exact=request&&pausedSourceFrame?.image&&pausedSourceFrame.key===pausedStudioFrameKey(request);
-                          return {picture:exact?pausedSourceFrame.image:video,sourceTime:exact?request.start+request.frameIndex/request.fps:sourceTime,
+                          return {picture:exact?pausedSourceFrame.image:video,sourceTime:exact?studioPausedSampleTime(request):sourceTime,
                             storagePath:currentTimelineClip?.sourceStoragePath||currentTimelineClip?.storagePath,
                             contentHash:currentTimelineClip?.contentHash||currentTimelineClip?.sha256};
                         }}>

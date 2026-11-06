@@ -19,6 +19,8 @@ from python_media_worker import main_media_server as worker
 
 
 class SequencePacketClockTests(unittest.TestCase):
+    def test_cut_in_unrepresented_fractional_tail_does_not_reject_a_valid_edit(self):
+        self.render_sequence(24, duration=1.9666666666666666, tail_cut=1.966)
     def test_fractional_cuts_at_24fps(self):
         self.render_sequence(24)
 
@@ -28,7 +30,7 @@ class SequencePacketClockTests(unittest.TestCase):
     def test_fractional_cuts_at_60fps(self):
         self.render_sequence(60)
 
-    def render_sequence(self, fps):
+    def render_sequence(self, fps, duration=2, tail_cut=None):
         with tempfile.TemporaryDirectory(prefix="studio-packet-clock-") as folder, ExitStack() as patches:
             tmp_path = Path(folder)
 
@@ -93,17 +95,18 @@ class SequencePacketClockTests(unittest.TestCase):
 
             replace(worker, "run_subprocess_async", inspect_intermediates)
             request = worker.RenderViralRequest(
-                video_url="local-regression-source", start_time=0, end_time=2,
+                video_url="local-regression-source", start_time=0, end_time=duration,
                 timeline_segments=[
                     {"id": "left", "url": "local-regression-source", "start_time": 0, "end_time": .7},
-                    {"id": "right", "url": "local-regression-source", "start_time": .7, "end_time": 2},
+                    {"id": "right", "url": "local-regression-source", "start_time": .7, "end_time": duration},
                 ],
                 smart_crop=True, smart_crop_mode="speaker_track",
                 finish_plan={"enabled": True, "main_frame": {"enabled": False}, "reframe": {
                     "aspect": "9:16", "zoom": 1,
                     "keyframes": [{"time": 0, "x": 50, "y": 50}],
                     "timeline_cuts": [{"time": 0, "mode": "speaker_track"},
-                                      {"time": .7, "mode": "speaker_track"}],
+                                      {"time": .7, "mode": "speaker_track"}] +
+                                     ([{"time": tail_cut, "mode": "speaker_track"}] if tail_cut is not None else []),
                 }},
                 output_settings={"resolution": "720p", "fps": fps, "quality": "balanced"},
                 brand_watermark=False,
@@ -112,7 +115,7 @@ class SequencePacketClockTests(unittest.TestCase):
             assert result["status"] == "completed"
             assert len(checked_segments) == 3
             picture = next(s for s in probe(final) if s["codec_type"] == "video")
-            assert int(picture["nb_frames"]) == 2 * fps
-            assert abs(float(picture["duration"]) - 2) < 1e-6
+            assert int(picture["nb_frames"]) == round(duration * fps)
+            assert abs(float(picture["duration"]) - round(duration * fps)/fps) < 1e-6
             assert any(s["codec_type"] == "audio" for s in probe(final))
             run("-xerror", "-err_detect", "explode", "-i", final, "-f", "null", "-")

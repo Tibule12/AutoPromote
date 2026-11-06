@@ -10,23 +10,26 @@ import { studioVoiceBusRequest } from './studioPreparedVoiceBus';
 // Kept outside the inspector: changing tools must never unmount an audible take.
 export default forwardRef(function StudioVoiceoverPreview({ takes, videoRef, getTimelineTime, activeClip,
   muted, volume, automationKeyframes = [], renderedOutputUrl, onError, onAnalyser, getAudioContext,
-  projectId, outputTimeMap, loadPreparedBus, getOutputPlan, onPreparedDucking, onPreparation, preparedDucking, isHandoffPending }, ref) {
+  projectId, outputTimeMap, loadPreparedBus, getOutputPlan, onPreparedDucking, onPreparation, preparedDucking, isHandoffPending, preparedInput,
+  programmeAuthority = false, getPlaybackIntent, getSeekIdentity, onPreparedClock }, ref) {
   const elements = useRef(new Map());
   const latest = useRef();
   const bus = useRef(null);
   const routes = useRef(new WeakMap());
   const buffers = useRef(new Map()), playing = useRef(new Map()), pinned = useRef(new Map());
   const syncLatest = useRef(null);
-  const preparedInput = loadPreparedBus && studioVoiceBusRequest({ projectId, takes, outputTimeMap,
+  const busInput = preparedInput || loadPreparedBus && studioVoiceBusRequest({ projectId, takes, outputTimeMap,
     automation: automationKeyframes, ducking: preparedDucking });
-  const requestKey = preparedInput ? JSON.stringify(preparedInput) : '';
+  const requestKey = busInput ? JSON.stringify(busInput) : '';
   const [prepared, setPrepared] = useState(null);
   const pending = useRef(null), preparedPlaying = useRef(null), preparedSync = useRef(null);
+  const requestedPreparedStart = useRef(null);
   const retiringPrepared = useRef(new Set());
   const stagedPrepared = useRef(null), preparedValue = useRef(null), stagePrepared = useRef(null);
   preparedValue.current=prepared;
   const currentRequest = useRef(requestKey); currentRequest.current = requestKey;
-  latest.current = { getTimelineTime, onError, onAnalyser, getAudioContext, loadPreparedBus, getOutputPlan, onPreparedDucking, onPreparation, muted, volume, isHandoffPending };
+  latest.current = { getTimelineTime, onError, onAnalyser, getAudioContext, loadPreparedBus, getOutputPlan, onPreparedDucking, onPreparation, muted, volume, isHandoffPending,
+    programmeAuthority,getPlaybackIntent,getSeekIdentity,onPreparedClock };
   const releasePrepared = current => {
     if(current.released) return;
     current.released=true;current.source.disconnect();current.gain.disconnect();
@@ -44,6 +47,7 @@ export default forwardRef(function StudioVoiceoverPreview({ takes, videoRef, get
     const current = preparedPlaying.current;
     if (!current) return;
     preparedPlaying.current = null;
+    latest.current.onPreparedClock?.(null);
     try { current.source.stop(deferred ? stopAt : undefined); } catch (_) { /* Already stopped. */ }
     if(deferred && !current.ended) {
       retiringPrepared.current.add(current);
@@ -51,7 +55,7 @@ export default forwardRef(function StudioVoiceoverPreview({ takes, videoRef, get
   };
   useImperativeHandle(ref, () => ({ prepare: () => pending.current,
     canFollowMusicClock: () => Boolean(preparedValue.current && preparedValue.current.requestKey === currentRequest.current),
-    stage: () => stagePrepared.current?.(),
+    stage: plan => { requestedPreparedStart.current=plan||null;return stagePrepared.current?.(); },
     pause: () => {
       stopPrepared();
       elements.current.forEach(audio => audio.pause());
@@ -132,10 +136,17 @@ export default forwardRef(function StudioVoiceoverPreview({ takes, videoRef, get
       stopPrepared(); return undefined;
     }
     let buffering = video.readyState < 3,observedVideo=video;
+    const hasContinuousIntent = () => latest.current.programmeAuthority && preparedPlaying.current &&
+      latest.current.getPlaybackIntent?.() && !videoRef.current?.error &&
+      preparedPlaying.current.seekIdentity===latest.current.getSeekIdentity?.();
     const sync = event => {
       const activeVideo=videoRef.current,value=preparedValue.current;
       if(event?.currentTarget && event.currentTarget!==activeVideo) return;
       if(!value || value.requestKey!==currentRequest.current) {stopPrepared();return;}
+      if(hasContinuousIntent()) {
+        preparedPlaying.current.gain.gain.value=latest.current.muted?0:voiceoverGain(latest.current.volume);
+        return;
+      }
       if(activeVideo!==observedVideo) {observedVideo=activeVideo;buffering=activeVideo?.readyState<3;}
       if (latest.current.isHandoffPending?.(activeVideo)) {
         const gain = latest.current.muted ? 0 : voiceoverGain(latest.current.volume);
@@ -145,7 +156,9 @@ export default forwardRef(function StudioVoiceoverPreview({ takes, videoRef, get
       }
       if (!activeVideo || buffering || activeVideo.paused || activeVideo.seeking || activeVideo.readyState < 2) { stopPrepared(); return; }
       const context = ensureBus().context;
-      const plan = latest.current.getOutputPlan?.(context, latest.current.getTimelineTime(activeVideo.currentTime || 0));
+      const stagedPlan=requestedPreparedStart.current;
+      const plan = stagedPlan ? {when:context.currentTime+.01,offset:stagedPlan.offset}
+        : latest.current.getOutputPlan?.(context, latest.current.getTimelineTime(activeVideo.currentTime || 0));
       if (!plan || plan.offset >= value.buffer.duration) return;
       let current = preparedPlaying.current;
       if (current && (current.key !== value.key ||
@@ -155,20 +168,23 @@ export default forwardRef(function StudioVoiceoverPreview({ takes, videoRef, get
       if (!current) {
         if(stagedPrepared.current?.key!==value.key) stagePrepared.current();
         const {source,gain}=stagedPrepared.current;stagedPrepared.current=null;
-        current = { source, gain, key: value.key, when: plan.when, offset: plan.offset };
+        current = { source, gain, key: value.key, when: plan.when, offset: plan.offset,
+          seekIdentity:latest.current.getSeekIdentity?.() };
         const started=current;
         source.addEventListener?.('ended',()=>{
           started.ended=true;retiringPrepared.current.delete(started);releasePrepared(started);
         },{once:true});
         preparedPlaying.current = current;
+        requestedPreparedStart.current=null;
         gain.gain.value=latest.current.muted?0:voiceoverGain(latest.current.volume);
         source.start(plan.when, plan.offset);
+        latest.current.onPreparedClock?.({context,startedAt:plan.when,offset:plan.offset,playbackRate:1,key:value.key});
         context.resume()?.catch(() => {});
       }
       current.gain.gain.value = latest.current.muted ? 0 : voiceoverGain(latest.current.volume);
       for(const retired of retiringPrepared.current) retired.gain.gain.value=current.gain.gain.value;
     };
-    const waiting = () => { if(video!==videoRef.current || latest.current.isHandoffPending?.(video))return;buffering = true; stopPrepared(); };
+    const waiting = () => { if(video!==videoRef.current || hasContinuousIntent() || latest.current.isHandoffPending?.(video))return;buffering = true; stopPrepared(); };
     const ready = () => { if(video!==videoRef.current)return;buffering = false; sync(); };
     video.addEventListener('waiting', waiting); video.addEventListener('playing', ready); video.addEventListener('canplay', ready);
     const events = ['play', 'pause', 'seeking', 'seeked', 'timeupdate', 'studio-audio-clock-resync'];
@@ -178,7 +194,7 @@ export default forwardRef(function StudioVoiceoverPreview({ takes, videoRef, get
     return () => { stopClock(); events.forEach(event => video.removeEventListener(event, sync));
       video.removeEventListener('waiting', waiting); video.removeEventListener('playing', ready); video.removeEventListener('canplay', ready);
       preparedSync.current = null;
-      if ((!videoRef.current || videoRef.current.paused || videoRef.current.seeking) &&
+      if (!hasContinuousIntent() && (!videoRef.current || videoRef.current.paused || videoRef.current.seeking) &&
           !latest.current.isHandoffPending?.(videoRef.current)) stopPrepared(); };
   }, [prepared, requestKey, activeClip, muted, volume, renderedOutputUrl]);
   useEffect(() => {

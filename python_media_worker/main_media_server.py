@@ -9226,17 +9226,28 @@ def plan_reframe_timeline_segments(
     return specs
 
 
-def preflight_studio_podcast_timeline(finish_plan, duration):
+def preflight_studio_podcast_timeline(finish_plan, duration, *, programme_duration=None, programme_fps=None):
     """Reject Studio timelines that cannot match the reviewed podcast preview."""
     finish_plan = finish_plan or {}
     reframe = finish_plan.get("reframe") or {}
     cuts = reframe.get("timeline_cuts") or []
     blockers = []
     warnings = []
+    # An exact source trim can outlast its final CFR picture. Only the verified
+    # sequence budget can establish that a cut in this fractional tail has no
+    # picture to affect. Arbitrary out-of-range edits remain rejected.
+    source_duration = float(programme_duration) if programme_duration is not None else float(duration)
+    tail_is_verified = (programme_fps is not None and math.isfinite(float(programme_fps))
+        and 1 <= float(programme_fps) <= 120 and math.isfinite(source_duration)
+        and abs(float(duration) - round(source_duration*float(programme_fps))/float(programme_fps)) < .00002)
     if cuts and not any(float(cut.get("time", -1)) <= .001 for cut in cuts):
         blockers.append("The framing timeline needs a cut at 0 seconds")
     for cut in cuts:
         timestamp = float(cut.get("time", -1))
+        if (tail_is_verified and math.isfinite(timestamp) and float(duration) <= timestamp < source_duration
+                and math.ceil(timestamp*float(programme_fps)-1e-7) >= round(source_duration*float(programme_fps))):
+            warnings.append("A framing cut is retained in the project after the last output picture; it affects no rendered frame")
+            continue
         if not math.isfinite(timestamp) or timestamp < 0 or timestamp >= float(duration) + .001:
             blockers.append("A framing cut is outside the rendered timeline")
             break
@@ -30832,6 +30843,11 @@ def build_studio_finish_filter(finish_plan, color_cube_path=None):
         )
     if color_cube_path:
         filters.append(f"format=rgb24,lut3d=file='{escape_ffmpeg_filter_path(color_cube_path)}':interp=trilinear")
+    # Sharpness/texture negotiate a YUV input. Letting FFmpeg insert that RGB
+    # conversion implicitly can use a different matrix while retaining the
+    # programme's BT.709 metadata; even a neutral grade then changes colours.
+    filters.extend(["scale=out_color_matrix=bt709:out_range=tv", "format=yuv420p",
+                    "setparams=range=limited:colorspace=bt709"])
     if sharpness > 0.005:
         filters.append(f"unsharp=5:5:{sharpness * 0.65:.4f}:3:3:{sharpness * 0.18:.4f}")
     if vignette > 0.005:
@@ -30857,7 +30873,10 @@ def build_studio_finish_filter(finish_plan, color_cube_path=None):
             f"rh={light_leak * 0.12:.5f}:gh={light_leak * 0.035:.5f}:"
             f"bh={light_leak * -0.075:.5f}"
         )
-    filters.extend(["format=yuv420p", "setsar=1"])
+    # RGB finish stages explicitly return to the programme YUV matrix/range.
+    # Otherwise runtime negotiation can retain incompatible full-range tags.
+    filters.extend(["scale=out_color_matrix=bt709:out_range=tv", "format=yuv420p",
+                    "setparams=range=limited:colorspace=bt709", "setsar=1"])
     return ",".join(filters)
 
 
@@ -31151,25 +31170,26 @@ def build_main_video_frame_filter(finish_plan, width, height, content_crop=None)
         background_filter = (
             f"[mainframe_bgsrc]{crop_filter}scale={blur_width}:{blur_height},"
             f"boxblur={blur_radius}:2,scale={safe_width}:{safe_height},"
-            "eq=brightness=-0.36:saturation=0.58,format=yuv420p[mainframe_bg];"
+            "eq=brightness=-0.36:saturation=0.58,format=rgba[mainframe_bg];"
         )
     else:
         source_prefix = "[0:v]split=2[mainframe_bgsrc][mainframe_fgsrc];"
         background_filter = (
-            "[mainframe_bgsrc]drawbox=x=0:y=0:w=iw:h=ih:"
-            "color=0x030509:t=fill,format=yuv420p[mainframe_bg];"
+            "[mainframe_bgsrc]format=rgba,drawbox=x=0:y=0:w=iw:h=ih:"
+            "color=0x030509:t=fill[mainframe_bg];"
         )
 
     return (
         source_prefix
         + background_filter
-        + f"[mainframe_fgsrc]{crop_filter}scale={inner_width}:{inner_height}:force_original_aspect_ratio=increase,"
+        + f"[mainframe_fgsrc]{crop_filter}format=rgba,scale={inner_width}:{inner_height}:force_original_aspect_ratio=increase,"
         f"crop={inner_width}:{inner_height},format=rgba[mainframe_fg];"
         f"movie={escaped_mask_path},format=gray,loop=loop=-1:size=1:start=0,"
         "setpts=N/30/TB[mainframe_mask];"
         "[mainframe_fg][mainframe_mask]alphamerge[mainframe_round];"
-        f"[mainframe_bg][mainframe_round]overlay={inset}:{inset}:shortest=1,"
-        "format=yuv420p[v_main_frame]"
+        f"[mainframe_bg][mainframe_round]overlay={inset}:{inset}:shortest=1:format=rgb,"
+        "scale=out_color_matrix=bt709:out_range=tv,format=yuv420p,"
+        "setparams=range=limited:colorspace=bt709[v_main_frame]"
     )
 
 def build_studio_visualizer_filter(finish_plan, width, height):
@@ -31551,9 +31571,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
 
         if normalized_segments:
             try:
-                from .studio_sequence_audio import sequence_audio_window
+                from .studio_sequence_audio import sequence_audio_window, sequence_audio_slice_command, sequence_audio_mix_filter
             except ImportError:
-                from studio_sequence_audio import sequence_audio_window
+                from studio_sequence_audio import sequence_audio_window, sequence_audio_slice_command, sequence_audio_mix_filter
             segment_paths = []
             segment_audio_paths = []
             segment_audio_windows = []
@@ -31686,14 +31706,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     programme_duration, sequence_source_durations[segment_source_path])
                 segment_audio_windows.append(audio_window)
                 if has_audio_stream(segment_source_path) and audio_window["duration"] > .00001:
-                    audio_start = audio_window["source_start"]
-                    audio_dur = audio_window["duration"]
-                    segment_a_cmd = [
-                        "ffmpeg", "-ss", str(audio_start), "-i", segment_source_path,
-                        "-t", str(audio_dur), "-map", "0:a:0",
-                        "-c:a", "aac", "-b:a", "192k", "-y",
-                        segment_audio_path,
-                    ]
+                    segment_a_cmd = sequence_audio_slice_command(segment_source_path, segment_audio_path, audio_window)
                     await run_subprocess_async(segment_a_cmd, check=True)
                     segment_audio_paths.append(segment_audio_path)
                 else:
@@ -31713,22 +31726,15 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     
             # Build audio filter complex
             audio_inputs = []
-            audio_mix_parts = []
             current_output_time = 0.0
             total_video_dur = 0.0
             
-            audio_labels = []
             for index, (segment, rendered_audio_path) in enumerate(
                 zip(normalized_segments, segment_audio_paths)
             ):
                 if rendered_audio_path:
                     # +1 because index 0 in inputs is the concat demuxer for video
-                    input_idx = len(audio_labels) + 1
                     audio_inputs.extend(["-i", rendered_audio_path])
-                    
-                    delay_ms = round(segment_audio_windows[index]["programme_start"] * 1000)
-                    audio_mix_parts.append(f"[{input_idx}:a]adelay={delay_ms}|{delay_ms}[a{index}];")
-                    audio_labels.append(f"[a{index}]")
                 
                 current_output_time += (float(segment.end_time) - float(segment.start_time))
                 total_video_dur = current_output_time
@@ -31742,13 +31748,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             # delivery clock. Retain its last packet through the copy mux too.
             final_cmd.extend(build_studio_cfr_packet_args(selected_timeline_fps))
             
-            if audio_mix_parts:
-                filter_complex = "".join(audio_mix_parts)
-                mix_labels = "".join(audio_labels)
-                mix_count = len(audio_labels)
-                filter_complex += f"{mix_labels}amix=inputs={mix_count}:duration=longest:dropout_transition=2:normalize=0[a_mixed];"
-                # Pad to total duration
-                filter_complex += f"[a_mixed]apad=whole_dur={total_video_dur:.3f},atrim=0:{total_video_dur:.3f}[a_out]"
+            filter_complex = sequence_audio_mix_filter(segment_audio_windows,
+                [bool(file) for file in segment_audio_paths], total_video_dur)
+            if filter_complex:
                 
                 final_cmd.extend([
                     "-filter_complex", filter_complex,
@@ -32133,6 +32135,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                             "main_frame": (request.finish_plan or {}).get("main_frame") or {},
                         },
                         reframe_duration,
+                        programme_duration=programme_duration if request.timeline_segments else None,
+                        programme_fps=programme_fps,
                     )
                     if not podcast_preflight["passed"]:
                         raise ValueError("Podcast timeline preflight failed: " + "; ".join(podcast_preflight["blockers"]))

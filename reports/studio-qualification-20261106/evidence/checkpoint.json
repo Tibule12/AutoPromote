@@ -1,0 +1,610 @@
+{
+  "date": "2026-11-06",
+  "scope": "Reframe/Moments continuation, actual pre-final versus own export; development checkpoint, not qualification",
+  "deployedApiRevision": "e78fe6b9e566aa7df175a15ecb5c0e755d9d3f73",
+  "sourceIdentity": {
+    "canonicalHash": "b72c64955d1e6d756c1ee8e8a03fe0ad429a9ea882cf107e697381df8e6209c8",
+    "priorCanonicalHash": "b72c64955d1e6d756c1ee8e8a03fe0ad429a9ea882cf107e697381df8e6209c8",
+    "ranges": [
+      [
+        0,
+        4.7
+      ],
+      [
+        4.7,
+        12
+      ]
+    ],
+    "sameCanonical": true
+  },
+  "beforePicture": [
+    {
+      "frame": 0,
+      "nativeLiveOutputTime": 0,
+      "nativeFinalOutputTime": 0,
+      "sourceSampling": "native",
+      "rgbRmse": 19.87243482736128,
+      "geometryP95CssPixels": 3.311555767059326,
+      "geometryMatches": 411,
+      "colourPass": false,
+      "geometryPass": false
+    },
+    {
+      "frame": 12,
+      "nativeLiveOutputTime": 0.5,
+      "nativeFinalOutputTime": 0.5,
+      "sourceSampling": "native",
+      "rgbRmse": 21.373548803330287,
+      "geometryP95CssPixels": 3.2191657066345214,
+      "geometryMatches": 414,
+      "colourPass": false,
+      "geometryPass": false
+    },
+    {
+      "frame": 24,
+      "nativeLiveOutputTime": 1,
+      "nativeFinalOutputTime": 1,
+      "sourceSampling": "native",
+      "rgbRmse": 19.049916413238638,
+      "geometryP95CssPixels": 2.816403567790985,
+      "geometryMatches": 425,
+      "colourPass": false,
+      "geometryPass": false
+    },
+    {
+      "frame": 111,
+      "nativeLiveOutputTime": 4.625,
+      "nativeFinalOutputTime": 4.625,
+      "sourceSampling": "native",
+      "rgbRmse": 21.706052454978877,
+      "geometryP95CssPixels": 3.3546745777130127,
+      "geometryMatches": 403,
+      "colourPass": false,
+      "geometryPass": false
+    },
+    {
+      "frame": 112,
+      "nativeLiveOutputTime": 4.66666666666667,
+      "nativeFinalOutputTime": 4.666666,
+      "sourceSampling": "native",
+      "rgbRmse": 20.917304681784195,
+      "geometryP95CssPixels": 3.254766607284546,
+      "geometryMatches": 380,
+      "colourPass": false,
+      "geometryPass": false
+    },
+    {
+      "frame": 113,
+      "nativeLiveOutputTime": 4.70833333333333,
+      "nativeFinalOutputTime": 4.708333,
+      "sourceSampling": "native",
+      "rgbRmse": 37.83270749646262,
+      "geometryP95CssPixels": 3.1616432666778564,
+      "geometryMatches": 584,
+      "colourPass": false,
+      "geometryPass": false
+    },
+    {
+      "frame": 114,
+      "nativeLiveOutputTime": 4.74166666666667,
+      "nativeFinalOutputTime": 4.75,
+      "sourceSampling": "native",
+      "rgbRmse": 39.966045304616195,
+      "geometryP95CssPixels": 3.486040687561035,
+      "geometryMatches": 571,
+      "colourPass": false,
+      "geometryPass": false
+    },
+    {
+      "frame": 124,
+      "nativeLiveOutputTime": 5.15833333333333,
+      "nativeFinalOutputTime": 5.166666,
+      "sourceSampling": "native",
+      "rgbRmse": 49.07706600840552,
+      "geometryP95CssPixels": 6.6292711973190315,
+      "geometryMatches": 472,
+      "colourPass": false,
+      "geometryPass": false
+    },
+    {
+      "frame": 125,
+      "nativeLiveOutputTime": 5.2,
+      "nativeFinalOutputTime": 5.208333,
+      "sourceSampling": "native",
+      "rgbRmse": 77.90530269429152,
+      "geometryP95CssPixels": null,
+      "geometryMatches": 15,
+      "colourPass": false,
+      "geometryPass": false
+    },
+    {
+      "frame": 126,
+      "nativeLiveOutputTime": 5.24166666666667,
+      "nativeFinalOutputTime": 5.25,
+      "sourceSampling": "native",
+      "rgbRmse": 15.79905089596742,
+      "geometryP95CssPixels": 2.5409741640090937,
+      "geometryMatches": 368,
+      "colourPass": false,
+      "geometryPass": false
+    },
+    {
+      "frame": 240,
+      "nativeLiveOutputTime": 9.99166666666667,
+      "nativeFinalOutputTime": 10,
+      "sourceSampling": "native",
+      "rgbRmse": 17.750422673368597,
+      "geometryP95CssPixels": 2.8126230478286733,
+      "geometryMatches": 393,
+      "colourPass": false,
+      "geometryPass": false
+    },
+    {
+      "frame": 287,
+      "nativeLiveOutputTime": 11.95,
+      "nativeFinalOutputTime": 11.958333,
+      "sourceSampling": "native",
+      "rgbRmse": 18.706912325415818,
+      "geometryP95CssPixels": 2.4245924592018127,
+      "geometryMatches": 370,
+      "colourPass": false,
+      "geometryPass": false
+    }
+  ],
+  "localCandidatePicture": [
+    {
+      "frame": 0,
+      "nativeLiveOutputTime": 0,
+      "nativeFinalOutputTime": 0,
+      "sourceSampling": "accurate-paused",
+      "rgbRmse": 21.432423642693756,
+      "geometryP95CssPixels": 3.268557548522949,
+      "geometryMatches": 413,
+      "colourPass": false,
+      "geometryPass": false
+    },
+    {
+      "frame": 12,
+      "nativeLiveOutputTime": 0.5,
+      "nativeFinalOutputTime": 0.5,
+      "sourceSampling": "accurate-paused",
+      "rgbRmse": 22.750514357824056,
+      "geometryP95CssPixels": 3.3387762665748584,
+      "geometryMatches": 420,
+      "colourPass": false,
+      "geometryPass": false
+    },
+    {
+      "frame": 24,
+      "nativeLiveOutputTime": 1,
+      "nativeFinalOutputTime": 1,
+      "sourceSampling": "accurate-paused",
+      "rgbRmse": 20.85380376947728,
+      "geometryP95CssPixels": 2.802074193954467,
+      "geometryMatches": 409,
+      "colourPass": false,
+      "geometryPass": false
+    },
+    {
+      "frame": 111,
+      "nativeLiveOutputTime": 4.625,
+      "nativeFinalOutputTime": 4.625,
+      "sourceSampling": "accurate-paused",
+      "rgbRmse": 23.284528116047078,
+      "geometryP95CssPixels": 3.48698798418045,
+      "geometryMatches": 406,
+      "colourPass": false,
+      "geometryPass": false
+    },
+    {
+      "frame": 112,
+      "nativeLiveOutputTime": 4.66666666666667,
+      "nativeFinalOutputTime": 4.666666,
+      "sourceSampling": "accurate-paused",
+      "rgbRmse": 22.141549828529428,
+      "geometryP95CssPixels": 3.310380029678343,
+      "geometryMatches": 394,
+      "colourPass": false,
+      "geometryPass": false
+    },
+    {
+      "frame": 113,
+      "nativeLiveOutputTime": 4.70833333333333,
+      "nativeFinalOutputTime": 4.708333,
+      "sourceSampling": "accurate-paused",
+      "rgbRmse": 39.10199017598024,
+      "geometryP95CssPixels": 3.1590526580810545,
+      "geometryMatches": 596,
+      "colourPass": false,
+      "geometryPass": false
+    },
+    {
+      "frame": 114,
+      "nativeLiveOutputTime": 4.75,
+      "nativeFinalOutputTime": 4.75,
+      "sourceSampling": "accurate-paused",
+      "rgbRmse": 40.08564365655775,
+      "geometryP95CssPixels": 3.3529175519943237,
+      "geometryMatches": 560,
+      "colourPass": false,
+      "geometryPass": false
+    },
+    {
+      "frame": 124,
+      "nativeLiveOutputTime": 5.16666666666667,
+      "nativeFinalOutputTime": 5.166666,
+      "sourceSampling": "accurate-paused",
+      "rgbRmse": 56.8901891134074,
+      "geometryP95CssPixels": 10.636786651611327,
+      "geometryMatches": 442,
+      "colourPass": false,
+      "geometryPass": false
+    },
+    {
+      "frame": 125,
+      "nativeLiveOutputTime": 5.20833333333333,
+      "nativeFinalOutputTime": 5.208333,
+      "sourceSampling": "accurate-paused",
+      "rgbRmse": 81.35287457772289,
+      "geometryP95CssPixels": null,
+      "geometryMatches": 18,
+      "colourPass": false,
+      "geometryPass": false
+    },
+    {
+      "frame": 126,
+      "nativeLiveOutputTime": 5.25,
+      "nativeFinalOutputTime": 5.25,
+      "sourceSampling": "accurate-paused",
+      "rgbRmse": 17.55118126095358,
+      "geometryP95CssPixels": 2.337348699569702,
+      "geometryMatches": 377,
+      "colourPass": false,
+      "geometryPass": false
+    },
+    {
+      "frame": 240,
+      "nativeLiveOutputTime": 10,
+      "nativeFinalOutputTime": 10,
+      "sourceSampling": "accurate-paused",
+      "rgbRmse": 16.650955646128633,
+      "geometryP95CssPixels": 1.9836827516555786,
+      "geometryMatches": 426,
+      "colourPass": false,
+      "geometryPass": true
+    },
+    {
+      "frame": 287,
+      "nativeLiveOutputTime": 11.9583333333333,
+      "nativeFinalOutputTime": 11.958333,
+      "sourceSampling": "accurate-paused",
+      "rgbRmse": 20.45988150443445,
+      "geometryP95CssPixels": 2.1839034080505373,
+      "geometryMatches": 378,
+      "colourPass": false,
+      "geometryPass": false
+    }
+  ],
+  "candidateBoundary": "Actual locally built App; v2 source-frame API replaced only by locally executed real decoder of the hash-verified same source. Not a deployed API or independent ownership test. All cloud writes/render submissions blocked.",
+  "audioCapture": {
+    "calibration": {
+      "samples": 593408,
+      "clockOffset": 1664,
+      "diagnosticGlobalCorrelationLag": 3584,
+      "latencySamplesRelativeToPlayingClock": 1920,
+      "correlationDiagnostic": [
+        0.9974890558721042,
+        0.9986810501985967
+      ],
+      "relativeRmsDiagnostic": 0.06608714908361435,
+      "dbLevelDifference": -0.0077879190212115645,
+      "droppedQuanta": 0
+    },
+    "finished": {
+      "samples": 638976,
+      "clockOffset": 3381,
+      "diagnosticGlobalCorrelationLag": 4608,
+      "latencySamplesRelativeToPlayingClock": 1227,
+      "correlationDiagnostic": [
+        0.9963534659713781,
+        0.9954390578493969
+      ],
+      "relativeRmsDiagnostic": 0.08824266493320465,
+      "dbLevelDifference": -0.007748536881990731,
+      "droppedQuanta": 0
+    },
+    "live": {
+      "samples": 638336,
+      "clockOffset": 4448,
+      "diagnosticGlobalCorrelationLag": 0,
+      "latencySamplesRelativeToPlayingClock": -4448,
+      "correlationDiagnostic": [
+        -0.004387148917328059,
+        0.006742018672328813
+      ],
+      "relativeRmsDiagnostic": 1.07508385181427,
+      "dbLevelDifference": -8.107481598854065,
+      "droppedQuanta": 0
+    }
+  },
+  "audioBoundary": "Continuous actual element/WebAudio output via headless muted Chrome; no dropped quanta. Correlation lag is diagnostic only, not allowed fitted timing proof. getDisplayMedia calibration unsupported; failed attempt retained. Successful captureStream calibration independently decodes the same final MP4. Raw speech vs restored export differs; no audio parity pass.",
+  "twoFaceNativePasses": [
+    {
+      "phase": "two-face-live",
+      "id": "real-two-face-native-analysis",
+      "desc": "Ordinary owned upload, two selected source anchors and actual face analysis produce two reviewed paths",
+      "status": "PASS",
+      "evidence": {
+        "coverage": {
+          "top": 1,
+          "bottom": 1
+        },
+        "keys": {
+          "top": 24,
+          "bottom": 24
+        },
+        "engine": "opencv-haar-face-follow",
+        "identity": "anchor-proximity-not-voice-identification",
+        "realTwoPeople": true
+      }
+    },
+    {
+      "phase": "two-face-controls",
+      "id": "two-real-speakers-controls-undo-redo",
+      "desc": "Two real analysed paths remain editable and undoable in the ordinary Reframe inspector",
+      "status": "PASS",
+      "evidence": {
+        "topKeys": 24,
+        "bottomKeys": 24,
+        "trackingToggle": true,
+        "zoomAdjustment": true,
+        "orderSwap": true,
+        "undoRedo": true
+      }
+    },
+    {
+      "phase": "two-face-controls",
+      "id": "two-real-speakers-cold-recovery",
+      "desc": "Native save and cold reopen preserve both source paths and canonical decisions",
+      "status": "PASS",
+      "evidence": {
+        "canonicalHash": "09202e7519b40423e6fbe88a3f660402414e72c39fe0d39a71408370aaa79a87",
+        "exactFraming": true,
+        "exactCuts": true
+      }
+    }
+  ],
+  "twoFaceScope": "Licensed 1280-wide 12s derivative of cottonbro studio/Pexels7599936. Actual owned upload, native anchors, real production CPU detector. Original UHD browser interruption and subsequent observer/control failures retained privately.",
+  "localTests": {
+    "frontend": 60,
+    "serverRealDecoder": 14,
+    "failedIntermediatePhaseTestsRetained": 3,
+    "build": "passed isolated production build; welcome preservation recheck pending",
+    "voiceBusService": 9,
+    "voiceBusFrontend": 7,
+    "editorCandidateEntry": 1,
+    "actualCropMarkerProjection": 1,
+    "nativeCandidateInitialTdzFailureRetained": true,
+    "welcomeAnonymousViewports": 8,
+    "welcomeAuthenticatedHelp": "pending",
+    "candidateSourceClockAndPngMetadataFailuresRetained": true
+  },
+  "qualification": "FAILED_PICTURE_AND_AUDIO_PARITY",
+  "noReadinessPromotion": true,
+  "next": [
+    "real two-face export and paired comparison",
+    "colour/range and two-stage crop investigation",
+    "canonical source-restoration preview using existing final audio helpers",
+    "all affected lifecycle plus local and deployed requalification"
+  ],
+  "liveExportFailure": {
+    "status": "FAILED",
+    "reason": "Framing cut at11.966s lies beyond287/24 picture duration of11.958333s for11.9666666667s source trim",
+    "normalCharge": 5,
+    "normalRefund": 5,
+    "creditsBefore": 304,
+    "creditsAfterRefund": 304,
+    "noManualBalanceChange": true
+  },
+  "localTailRepair": {
+    "source": "python_media_worker/main_media_server.py",
+    "strictVerifiedFrameBudgetRequired": true,
+    "outOfRangeCutsStillRejected": true,
+    "originalTailCutRetainedInProject": true,
+    "sameCapturedTwoFaceRequestCanonicalCpuRender": "completed",
+    "liveRepairNotDeployed": true,
+    "actualRendererAndClockTests": 74,
+    "additionalIndependentPreflightTest": "62 contract cases plus21 subtests passed; overlaps earlier74; do not sum",
+    "localResult": {
+      "width": 720,
+      "height": 1280,
+      "frames": 287,
+      "duration": 11.958333,
+      "sha256": "dbd600f41c14780a39e2e6419f418b3313e2a8441a4b71167bc20042efcb704e"
+    }
+  },
+  "sourceDialogueCandidate": {
+    "enabledByDefault": false,
+    "frontendFlag": "REACT_APP_STUDIO_SOURCE_DIALOGUE_PREVIEW",
+    "serverFlag": "STUDIO_SOURCE_DIALOGUE_PREVIEW_ENABLED",
+    "sharedVoiceBus": true,
+    "sharedFinalSequenceAudioStages": true,
+    "realCpuDspAndOwnershipTests": 9,
+    "actualLocalAppPlaybackObserved": true,
+    "limits": "Identity speed, eight owned sources, first60s of each source,90s total,128MiB aggregate; no detached/JL/overlay-ducking/remix/multicam claim",
+    "status": "UNQUALIFIED_AUDIO_CONTINUITY",
+    "diagnosticCorrelationNotPassingTiming": true
+  },
+  "audioCandidateDiagnostics": {
+    "calibration": {
+      "samples": 593408,
+      "clockOffset": 1664,
+      "diagnosticGlobalCorrelationLag": 3584,
+      "latencySamplesRelativeToPlayingClock": 1920,
+      "correlationDiagnostic": [
+        0.9974890558721042,
+        0.9986810501985967
+      ],
+      "relativeRmsDiagnostic": 0.06608714908361435,
+      "dbLevelDifference": -0.0077879190212115645,
+      "droppedQuanta": 0
+    },
+    "finished": {
+      "samples": 638976,
+      "clockOffset": 3381,
+      "diagnosticGlobalCorrelationLag": 4608,
+      "latencySamplesRelativeToPlayingClock": 1227,
+      "correlationDiagnostic": [
+        0.9963534659713781,
+        0.9954390578493969
+      ],
+      "relativeRmsDiagnostic": 0.08824266493320465,
+      "dbLevelDifference": -0.007748536881990731,
+      "droppedQuanta": 0
+    },
+    "live": {
+      "samples": 638336,
+      "clockOffset": 4448,
+      "diagnosticGlobalCorrelationLag": 0,
+      "latencySamplesRelativeToPlayingClock": -4448,
+      "correlationDiagnostic": [
+        -0.004387148917328059,
+        0.006742018672328813
+      ],
+      "relativeRmsDiagnostic": 1.07508385181427,
+      "dbLevelDifference": -8.107481598854065,
+      "droppedQuanta": 0
+    },
+    "preparedCandidate": {
+      "samples": 644096,
+      "clockOffset": 4703,
+      "diagnosticGlobalCorrelationLag": 2946,
+      "latencySamplesRelativeToPlayingClock": -1757,
+      "correlationDiagnostic": [
+        0.48455596447587257,
+        0.2915877418813116
+      ],
+      "relativeRmsDiagnostic": 1.0859650373458862,
+      "dbLevelDifference": -0.1551372930407524,
+      "droppedQuanta": 0
+    }
+  },
+  "pictureProjectionDiagnostics": [
+    {
+      "frame": 0,
+      "nativeLiveOutputTime": 0,
+      "nativeFinalOutputTime": 0,
+      "sourceSampling": "accurate-paused",
+      "rgbRmse": 10.244816111004798,
+      "geometryP95CssPixels": 1.0022312283515928,
+      "geometryMatches": 412,
+      "colourPass": false,
+      "geometryPass": true
+    },
+    {
+      "frame": 24,
+      "nativeLiveOutputTime": 1,
+      "nativeFinalOutputTime": 1,
+      "sourceSampling": "accurate-paused",
+      "rgbRmse": 10.301907826572727,
+      "geometryP95CssPixels": 1.147768998146057,
+      "geometryMatches": 435,
+      "colourPass": false,
+      "geometryPass": true
+    },
+    {
+      "frame": 125,
+      "nativeLiveOutputTime": 5.20833333333333,
+      "nativeFinalOutputTime": 5.208333,
+      "sourceSampling": "accurate-paused",
+      "rgbRmse": 77.45865851786661,
+      "geometryP95CssPixels": null,
+      "geometryMatches": 19,
+      "colourPass": false,
+      "geometryPass": false
+    },
+    {
+      "frame": 240,
+      "nativeLiveOutputTime": 10,
+      "nativeFinalOutputTime": 10,
+      "sourceSampling": "accurate-paused",
+      "rgbRmse": 10.323762421226457,
+      "geometryP95CssPixels": 1.1636009812355042,
+      "geometryMatches": 450,
+      "colourPass": false,
+      "geometryPass": true
+    }
+  ],
+  "latestNativeAudioCapture": {
+    "sampleRate": 48000,
+    "programmeSamples": 576000,
+    "bufferStarts": 1,
+    "firstSourceOffset": 0,
+    "coveredExactlyOnce": 576000,
+    "missingSamples": 0,
+    "duplicateSamples": 0,
+    "maximumSampleError": 2.7179718017578125e-05,
+    "relativeRms": 2.2815514967078343e-05,
+    "correlation": [
+      0.9999999999416206,
+      0.9999999999282999
+    ],
+    "alignment": "Recorded AudioContext start and absolute AudioWorklet sample frames; no fitted shift or missing-sample interpolation"
+  },
+  "latestNativeTransport": {
+    "playPauseResume": "PASS",
+    "seekBeforeFractionalCutThenPlayAcrossCut": "PASS",
+    "unchangedCanonicalEdit": true,
+    "reference": "private headless/muted native recording and absolute sample clocks",
+    "priorFailure": "Play within 100ms of an interior cut incorrectly restarted the shot; fixed locally and regressed"
+  },
+  "colourRangeRepair": {
+    "before": "Neutral precision grade changed coloured footage by up to seven code values; two new full-render regressions failed",
+    "after": "All four full/limited-range tests pass on host FFmpeg; exact deployed-runtime rerun pending",
+    "fullNativePairStillFails": true,
+    "latestComparison": [
+      {
+        "frame": 24,
+        "nativeLiveOutputTime": 1,
+        "nativeFinalOutputTime": 1.000011,
+        "sourceSampling": "accurate-paused",
+        "rgbRmse": 8.851228974132493,
+        "geometryP95CssPixels": 1.1386991739273071,
+        "geometryMatches": 443,
+        "colourPass": false,
+        "geometryPass": true
+      }
+    ]
+  },
+  "exactRemaining": [
+    "Full native picture RGB comparison still exceeds retained threshold; no fitted image alignment is accepted",
+    "Audio matches prepared samples and programme clock; final AAC comparison and audible review remain separately assessed",
+    "Repeat affected whole project controls, cold recovery and live export after qualified local candidate release",
+    "Newest isolated build entry/help and final preservation checks before release"
+  ],
+  "validatedCurrentRuns": {
+    "exactDeployedFfmpegRuntime": {
+      "version": "7.1.5",
+      "testsPassed": 87,
+      "subtestsPassed": 27,
+      "scope": "Finish, preflight, packet clock, reframe, audio sequence, range/canvas colours; subsequent RGB-before-scale refinement has targeted validation"
+    },
+    "frontendHelpers": {
+      "testsPassed": 75,
+      "suitesPassed": 6
+    },
+    "latestColourAndPrecision": {
+      "testsPassed": 6,
+      "subtestsPassed": 3
+    },
+    "vignetteProjection": {
+      "testsPassed": 3,
+      "scope": "Isolated canonical YUV vignette versus browser RGB projection; whole-picture RGB remains failed"
+    },
+    "newTargetedEditor": {
+      "testsPassed": 3
+    },
+    "buildSourceStable": true
+  },
+  "newestWholePictureStatus": "FAILED; do not loosen retained thresholds or use fitted image/time alignment"
+}

@@ -2,6 +2,29 @@
 import math
 
 
+def sequence_audio_slice_command(source, output, window):
+    return ['ffmpeg', '-ss', str(window['source_start']), '-i', str(source),
+            '-t', str(window['duration']), '-map', '0:a:0', '-c:a', 'aac',
+            '-b:a', '192k', '-y', str(output)]
+
+
+def sequence_audio_mix_filter(windows, present, duration, input_offset=1):
+    if len(windows) != len(present):
+        raise ValueError('Sequence audio inputs must match their reviewed windows')
+    parts, labels = [], []
+    for index, (window, available) in enumerate(zip(windows, present)):
+        if not available:
+            continue
+        delay = round(window['programme_start'] * 1000)
+        parts.append(f'[{input_offset+len(labels)}:a]adelay={delay}|{delay}[a{index}];')
+        labels.append(f'[a{index}]')
+    if not labels:
+        return ''
+    return (''.join(parts) + ''.join(labels)
+            + f'amix=inputs={len(labels)}:duration=longest:dropout_transition=2:normalize=0[a_mixed];'
+            + f'[a_mixed]apad=whole_dur={duration:.3f},atrim=0:{duration:.3f}[a_out]')
+
+
 def sequence_audio_window(segment, programme_start, programme_duration, source_duration):
     def read(name, default=None):
         return segment.get(name, default) if isinstance(segment, dict) else getattr(segment, name, default)

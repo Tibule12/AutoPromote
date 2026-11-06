@@ -21,6 +21,28 @@ export function studioVoiceBusRequest({ projectId, takes, outputTimeMap, automat
     ducking: { enabled: Boolean(ducking?.enabled), strength: Math.max(.05, Math.min(.95, Number(ducking?.strength ?? .4))) } };
 }
 
+// Bounded original-dialogue projection over the same owned mixer. Unsupported
+// detached/speed/remix/overlay routes must not silently claim this profile.
+export function studioDialogueBusRequest({ projectId, timeline, outputTimeMap, automation = [], restoration }) {
+  if (!projectId || !Array.isArray(timeline) || !timeline.length || timeline.length>8 || !outputTimeMap?.length ||
+      outputTimeMap.some(row=>row.rateNumerator!==row.rateDenominator) || !restoration?.enabled || automation.length>64) return null;
+  let startTime=0;const voices=[];
+  for (const clip of timeline) {
+    const start=Number(clip.startRequest??clip.start??0),end=Number(clip.endRequest??clip.end);
+    const hash=clip.contentHash||clip.sha256;
+    if (!(clip.sourceStoragePath||clip.storagePath) || !/^[a-f0-9]{64}$/.test(hash||'') ||
+        ![start,end].every(Number.isFinite) || start<0 || end>60 || end-start<.05 ||
+        clip.audioDetached || Number(clip.audioTrimOffsetStart||0)!==0 || Number(clip.audioTrimOffsetEnd||0)!==0) return null;
+    voices.push({id:clip.id,storagePath:clip.sourceStoragePath||clip.storagePath,sourceContentHash:hash,
+      startTime,duration:end-start,trimStart:start,volume:1,fadeIn:0,fadeOut:0});startTime+=end-start;
+  }
+  if (startTime>90 || Math.abs(outputTimeMap.at(-1).programmeRange.endTick/90000-startTime)>1/90000) return null;
+  return {version:2,projectId,voices,restoration,
+    speedPlan:outputTimeMap.map(row=>({start_time:row.programmeRange.startTick/90000,end_time:row.programmeRange.endTick/90000,rate:1})),
+    automation:automation.map(key=>({property:'volume',time:Number(key.time),value:Number(key.value),easing:key.easing||'linear',curve:key.curve||null})),
+    ducking:{enabled:false,strength:.4}};
+}
+
 const canonical = value => JSON.stringify(value, (_key, item) => item && typeof item === 'object' && !Array.isArray(item)
   ? Object.fromEntries(Object.keys(item).sort().map(key => [key, item[key]])) : item);
 const sha = async bytes => [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))]
@@ -50,7 +72,7 @@ export async function loadStudioVoiceBus({ input, context, apiBase, getToken, si
     });
   }
   if (!response.ok) throw new Error(result.message || 'Recorded-speech preview is unavailable.');
-  if (result.version !== 1 || result.projectId !== input.projectId || result.sampleRate !== 48000 ||
+  if (result.version !== input.version || result.projectId !== input.projectId || result.sampleRate !== 48000 ||
       !/^[a-f0-9]{64}$/.test(result.runtimeHash || '') ||
       result.parametersHash !== await sha(new TextEncoder().encode(canonical(input))) ||
       !(Number.isSafeInteger(result.sampleCount) && result.sampleCount > 0 && result.sampleCount <= 90*48000) ||

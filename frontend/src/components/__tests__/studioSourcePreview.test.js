@@ -1,11 +1,22 @@
 import { primeStudioSourceVideo, watchStudioProgrammeFrames, studioPresentedSourceTime, watchStudioClipBoundary, watchStudioAudioClock, studioJoinFade, mapStudioSourceAccess, isStudioSourceClockCurrent, waitForStudioAudio, pausedStudioFrameRequest, pausedStudioFrameKey } from '../studioSourcePreview';
-import { studioPausedFrameHasIdentityClock, pausedStudioMappedFrameRequest, studioPausedFrameReceiptMatches } from '../studioSourcePreview';
+import { studioPausedFrameHasIdentityClock, pausedStudioMappedFrameRequest, studioPausedFrameReceiptMatches, studioPausedSampleTime, studioFinishedFrameSeekTime } from '../studioSourcePreview';
 import { createOutputTimeMap } from '../studioTime';
 const rampMap = () => createOutputTimeMap(270000, [
   {programmeRange:{space:'programme',startTick:0,endTick:90000},rateNumerator:1,rateDenominator:1},
   {programmeRange:{space:'programme',startTick:90000,endTick:180000},rateNumerator:2,rateDenominator:1},
   {programmeRange:{space:'programme',startTick:180000,endTick:270000},rateNumerator:1,rateDenominator:1},
 ]);
+
+test('finished frame seeks survive media-element microsecond truncation without crossing into another picture',()=>{
+  for(const fps of [24,25,30,50,60])for(const frame of [0,1,113,125,287]){
+    const target=frame/fps,seek=studioFinishedFrameSeekTime(target,fps,20);
+    const native=Math.floor(seek*1e6)/1e6;
+    expect(Math.floor(native*fps+1e-9)).toBe(frame);
+    expect(seek-target).toBeLessThanOrEqual(1/90000+1e-14);
+  }
+  expect(studioFinishedFrameSeekTime(12,24,12)).toBe(12);
+  expect(studioFinishedFrameSeekTime(5.2,24,12)).toBe(5.2);
+});
 
 test('paused ramps select actual CFR identities rather than nearest raw seek time', () => {
   const clip = { id:'whole',storagePath:'owned/video.mp4',contentHash:'a'.repeat(64),startRequest:0,endRequest:3 };
@@ -40,6 +51,27 @@ test('a later ramp preserves earlier exact sampling without qualifying retimed C
   expect(studioPausedFrameHasIdentityClock([plain,ramp,resumed],240)).toBe(false);
   expect(studioPausedFrameHasIdentityClock([plain],10)).toBe(true);
   expect(studioPausedFrameHasIdentityClock([],0)).toBe(false);
+});
+
+test('fractional Director cuts use one global frame grid and bind its phase in the receipt', () => {
+  const first={id:'a',storagePath:'owned/video',contentHash:'a'.repeat(64),startRequest:0,endRequest:4.7};
+  const second={...first,id:'b',startRequest:4.7,endRequest:12};
+  const map=createOutputTimeMap(12*90000);
+  for (const [clip, time, index] of [[first, 112/24, 112], [second,113/24,0], [second,125/24,12], [second,287/24,174]]) {
+    const request=pausedStudioMappedFrameRequest(clip,time,24,[first,second],map);
+    expect(request).toMatchObject({sampling:'studio-sequence-source-frame-v2',
+      programmeStart:clip===first?0:4.7,programmeDuration:12,frameIndex:index});
+    expect(studioPausedSampleTime(request)).toBeCloseTo(time,7);
+    const receipt={...request,sourceContentHash:first.contentHash,contentType:'image/png'};
+    expect(studioPausedFrameReceiptMatches(request,receipt)).toBe(true);
+    expect(studioPausedFrameReceiptMatches(request,{...receipt,programmeStart:1})).toBe(false);
+    expect(studioPausedFrameReceiptMatches(request,{...receipt,programmeDuration:11})).toBe(false);
+  }
+  // Neither an unavailable long source nor an empty subframe occurrence can
+  // silently borrow a neighbouring occurrence's picture.
+  const long={...second,startRequest:104.7,endRequest:112};
+  expect(pausedStudioMappedFrameRequest(long,105,24,[first,long],map)).toBeNull();
+  expect(pausedStudioMappedFrameRequest(second,125/24,24,[first,second],map,undefined,false)).toBeNull();
 });
 
 test('accurate paused frames preserve source/trim identity and do not alter the programme clock', () => {

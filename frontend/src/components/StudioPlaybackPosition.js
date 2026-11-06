@@ -30,7 +30,7 @@ export function StudioPlaybackRange({ clock, value, ...props }) {
     // the clock can publish an older frame between rapid keyboard gestures.
     // It must not become the starting point of the next requested frame step.
     if (pendingSeek.current !== null &&
-        Math.abs(actual - pendingSeek.current) > (Number(props.step) || .001) / 2 + .000001) return;
+        Math.abs(actual - pendingSeek.current) > 2 / 90000) return;
     pendingSeek.current = null;
     ref.current.value = String(actual);
   });
@@ -78,7 +78,13 @@ export function StudioPlaybackRange({ clock, value, ...props }) {
       if (!(step > 0)) return;
       event.preventDefault();
       const direction = ['ArrowLeft', 'ArrowDown'].includes(event.key) ? -1 : 1;
-      const target = bounded((pendingSeek.current ?? Number(event.currentTarget.value)) + direction * step);
+      // A source cut can sit between output frames. Step on the delivery grid,
+      // rather than carrying that cut's fractional phase into every later key.
+      // Decoder microsecond rounding must not repeat the current frame either.
+      const position = (pendingSeek.current ?? Number(event.currentTarget.value)) / step;
+      const tolerance=Math.max(.0001,2/90000/step);
+      const frame = direction > 0 ? Math.floor(position + tolerance) + 1 : Math.ceil(position - tolerance) - 1;
+      const target = bounded(frame * step);
       pendingSeek.current = target;
       event.currentTarget.value = String(target);
       props.onChange?.(event);

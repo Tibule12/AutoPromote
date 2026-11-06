@@ -40,6 +40,42 @@ test('rejects external URLs, non-contiguous clocks, duplicate takes, excessive w
     { voices: [{ ...input().voices[0], volume: 200 }] }, { ducking: { enabled: true, strength: NaN } }])
     expect(() => validateVoiceBusRequest({ ...input(), ...change })).toThrow('parameters');
 });
+
+const dialogue = () => ({...input(),version:2,voices:[{...input().voices[0],startTime:0,trimStart:0,duration:2,volume:1,fadeIn:0,fadeOut:0}],
+  ducking:{enabled:false,strength:.4},restoration:{enabled:true,preset:'natural',voiceIsolation:false,
+    denoise:22,deEsser:18,humFrequency:50,compressor:35,limiter:-1,loudness:-14,eq:{low:0,mid:0,high:0}}});
+
+test('original-source profile rejects unsupported DSP, gaps, detached intervals and oversize work',()=>{
+  const original=dialogue();expect(validateVoiceBusRequest(original)).toBe(original);
+  for(const change of [{restoration:{...original.restoration,denoise:101}},
+    {restoration:{...original.restoration,eq:{...original.restoration.eq,url:'bad'}}},
+    {restoration:{...original.restoration,unreviewedStage:true}},
+    {voices:[{...original.voices[0],startTime:.1}]},{voices:[{...original.voices[0],duration:1.9}]},
+    {voices:[{...original.voices[0],volume:.8}]},{voices:[{...original.voices[0],fadeIn:.1}]},
+    {ducking:{enabled:true,strength:.4}},{speedPlan:[{start_time:0,end_time:2,rate:2}]}])
+    expect(()=>validateVoiceBusRequest({...original,...change})).toThrow('parameters');
+});
+
+test('real source-dialogue CPU projection shares final restoration and rechecks video ownership',async()=>{
+  const video=path.join(folder,'dialogue-source.mp4');execFileSync('ffmpeg',['-v','error','-f','lavfi','-i','color=black:size=32x32:rate=24:duration=2',
+    '-i',path.join(folder,'source.wav'),'-c:v','libx264','-threads','1','-c:a','aac','-y',video]);
+  const videoBytes=await fs.readFile(video),request=dialogue();request.voices[0].storagePath='studio/sources/owner/source.mp4';request.voices[0].sourceContentHash=digest(videoBytes);
+  stores.resolveOwnedStudioMediaSource.mockImplementation(async({userId})=>{if(userId!=='owner')throw stores.sourceError(403,'FORBIDDEN','Different owner');return{storagePath:request.voices[0].storagePath,contentType:'video/mp4',size:videoBytes.length,generation:'7',kind:'durable_studio'};});
+  stores.getStudioSourceBucket.mockReturnValue({file:()=>({createReadStream:()=>Readable.from(videoBytes)})});
+  const result=await getOwnedVoiceBusPreview({ownerUid:'owner',input:request});expect(result.version).toBe(2);
+  expect(result.sampleCount).toBe(96000);expect(result.implementation).toBe('studio-final-source-dialogue-v1');
+  const actual=Buffer.from(result.voiceBase64,'base64');expect(digest(actual)).toBe(result.voiceHash);
+  const wav=path.join(folder,'dialogue-preview.wav');await fs.writeFile(wav,actual);
+  // Independently call the final DSP helper on the exact raw prepared bus.
+  const projection=path.join(folder,'dialogue-projection');await fs.mkdir(projection);await fs.writeFile(path.join(projection,'source-0'),videoBytes);
+  await renderVoiceBusPreview(projection,request);
+  const expected=path.join(folder,'dialogue-reference.wav');execFileSync(process.env.STUDIO_AUDIO_PREVIEW_PYTHON||'python3',['-c',
+    'import json,subprocess,sys; from python_media_worker.studio_audio import build_dialogue_filter; f=build_dialogue_filter(json.loads(sys.argv[1]))[0]; subprocess.run(["ffmpeg","-v","error","-i",sys.argv[2],"-af",f+",aresample=48000,asetpts=N/SR/TB,apad=whole_dur=2.000000000,atrim=0:2.000000000,asetpts=N/SR/TB","-ac","2","-ar","48000","-c:a","pcm_s16le","-y",sys.argv[3]],check=True)',
+    JSON.stringify(request.restoration),path.join(projection,'voice-raw.m4a'),expected],{cwd:path.resolve(__dirname,'../..')});
+  expect(digest(actual)).toBe(digest(await fs.readFile(expected)));
+  await expect(getOwnedVoiceBusPreview({ownerUid:'other',input:request})).rejects.toMatchObject({statusCode:403});
+  await expect(getOwnedVoiceBusPreview({ownerUid:'owner',input:{...request,voices:[{...request.voices[0],sourceContentHash:'b'.repeat(64)}]}})).rejects.toMatchObject({statusCode:409});
+},30000);
 test('real CPU samples and compressor gains are hash-bound; cached requests recheck ownership', async () => {
   const result = await getOwnedVoiceBusPreview({ ownerUid: 'owner', input: input() });
   expect(result.sampleCount).toBe(96000); expect(result.device).toBe('cpu');

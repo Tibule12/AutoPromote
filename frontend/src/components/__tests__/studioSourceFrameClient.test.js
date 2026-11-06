@@ -23,6 +23,16 @@ test('normal authenticated sampling returns only the requested source picture', 
   expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual(request);
 });
 
+test('a valid source hash cannot disguise another fractional programme phase', async () => {
+  const fractional={...request,sampling:'studio-sequence-source-frame-v2',programmeStart:.7,programmeDuration:2};
+  for (const patch of [{programmeStart:.71},{programmeDuration:3},{sampling:undefined},{sampler:receipt.sampler}]) {
+    fetch.mockResolvedValue(response({...receipt,...fractional,sampler:fractional.sampling,...patch}));
+    await expect(loadStudioSourceFrame(fractional,new AbortController().signal)).rejects.toThrow('receipt does not match');
+  }
+  fetch.mockResolvedValue(response({...receipt,...fractional,sampler:fractional.sampling}));
+  expect((await loadStudioSourceFrame(fractional,new AbortController().signal)).receipt.sampler).toBe(fractional.sampling);
+});
+
 test.each([{ sourceContentHash: 'b'.repeat(64) }, { frameIndex: 4 },
   { sampler: 'studio-3d-texture-frame-v1' }, { fps: 30 }])('a mismatched receipt cannot become a programme picture: %s', async patch => {
   fetch.mockResolvedValue(response({ ...receipt, ...patch }));

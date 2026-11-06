@@ -38,9 +38,46 @@ test('the displayed output position stays continuous while arrow keys retain fra
   expect(input).toHaveAttribute('step', 'any');
   expect(input).toHaveValue('1.126667');
   fireEvent.keyDown(input, { key: 'ArrowRight' });
-  expect(changed.mock.results[0].value).toBeCloseTo(position.outputTime + 1/24, 10);
+  expect(changed.mock.results[0].value).toBeCloseTo(28/24, 10);
   fireEvent.keyDown(input, { key: 'ArrowLeft' });
-  expect(changed.mock.results[1].value).toBeCloseTo(position.outputTime, 10);
+  expect(changed.mock.results[1].value).toBeCloseTo(27/24, 10);
+});
+
+test('frame steps after a fractional source cut retain the global delivery phase', () => {
+  const clock = { getSnapshot: () => ({ programmeTime: 4.7, outputTime: 4.7 }), subscribe: () => () => {} };
+  const changed = jest.fn(event => Number(event.currentTarget.value));
+  render(<StudioPlaybackRange clock={clock} aria-label="Fractional cut" type="range"
+    min={0} max={12} step={1/24} onChange={changed} />);
+  const input = screen.getByLabelText('Fractional cut');
+  for (let i = 0; i < 13; i++) fireEvent.keyDown(input, { key: 'ArrowRight' });
+  expect(changed.mock.results[0].value).toBeCloseTo(113/24, 10);
+  expect(changed.mock.results.at(-1).value).toBeCloseTo(125/24, 10);
+  fireEvent.keyDown(input, { key: 'ArrowLeft' });
+  expect(changed.mock.results.at(-1).value).toBeCloseTo(124/24, 10);
+});
+
+test('a fractional cut is not an acknowledgement of the next requested output frame', () => {
+  let position={programmeTime:4.7,outputTime:4.7};const listeners=new Set();
+  const clock={getSnapshot:()=>position,subscribe:fn=>{listeners.add(fn);return()=>listeners.delete(fn);}};
+  const changed=jest.fn(event=>Number(event.currentTarget.value));
+  render(<StudioPlaybackRange clock={clock} aria-label="Cut acknowledgement" type="range"
+    min={0} max={12} step={1/24} onChange={changed} />);
+  const input=screen.getByLabelText('Cut acknowledgement');
+  fireEvent.keyDown(input,{key:'ArrowRight'});
+  act(()=>{listeners.forEach(fn=>fn());});
+  expect(input).toHaveValue(String(113/24));
+  fireEvent.keyDown(input,{key:'ArrowRight'});
+  expect(changed.mock.results.at(-1).value).toBeCloseTo(114/24,10);
+  act(()=>{position={programmeTime:4.75,outputTime:4.75};listeners.forEach(fn=>fn());});
+  expect(input).toHaveValue('4.75');
+});
+
+test('stepping backwards from a finished-frame interior selects the preceding picture',()=>{
+  const clock={getSnapshot:()=>({programmeTime:125/24+1/90000,outputTime:125/24+1/90000}),subscribe:()=>()=>{}};
+  const changed=jest.fn(e=>Number(e.currentTarget.value));
+  render(<StudioPlaybackRange clock={clock} aria-label="Finished frame step" type="range" min={0} max={12} step={1/24} onChange={changed} />);
+  fireEvent.keyDown(screen.getByLabelText('Finished frame step'),{key:'ArrowLeft'});
+  expect(changed.mock.results.at(-1).value).toBeCloseTo(124/24,10);
 });
 
 test('native pointer and Home/End range input still seeks after imperative clock paints', () => {
