@@ -1,0 +1,19 @@
+{
+  "checkedAt": "2026-11-06T03:43:17.247813+00:00",
+  "origins": {
+    "frontend": {
+      "commit": "15c5c1d908d0af8d37118e077b1b33eeb3cf7fe4",
+      "builtAt": "2026-11-06T03:22:50.954Z"
+    },
+    "api": {
+      "commit": "15c5c1d908d0af8d37118e077b1b33eeb3cf7fe4",
+      "securityPolicy": "security-owner-bootstrap-20261027"
+    },
+    "renderApi": {
+      "commit": "15c5c1d908d0af8d37118e077b1b33eeb3cf7fe4",
+      "securityPolicy": "security-owner-bootstrap-20261027"
+    }
+  },
+  "adsTxtExact": true,
+  "originalSessionSha256": "00d48e87bd9b77ba9ead11c92bf93039f43fc3e7e6b322c3e379f6b4dac55254"
+}

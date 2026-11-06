@@ -1,0 +1,220 @@
+[
+  {
+    "file": "local-tail_input.mp4",
+    "programs": [],
+    "streams": [
+      {
+        "codec_type": "video",
+        "avg_frame_rate": "30/1",
+        "start_time": "0.000000",
+        "duration": "12.000000",
+        "nb_frames": "360"
+      },
+      {
+        "codec_type": "audio",
+        "avg_frame_rate": "0/0",
+        "start_time": "0.000000",
+        "duration": "12.003991",
+        "nb_frames": "518"
+      }
+    ],
+    "format": {
+      "duration": "12.003991"
+    }
+  },
+  {
+    "file": "local-tail_segment_v_0.mp4",
+    "programs": [],
+    "streams": [
+      {
+        "codec_type": "video",
+        "avg_frame_rate": "339/14",
+        "start_time": "0.000000",
+        "duration": "4.666667",
+        "nb_frames": "113"
+      }
+    ],
+    "format": {
+      "duration": "4.666667"
+    }
+  },
+  {
+    "file": "local-tail_segment_v_1.mp4",
+    "programs": [],
+    "streams": [
+      {
+        "codec_type": "video",
+        "avg_frame_rate": "700/29",
+        "start_time": "0.000000",
+        "duration": "7.250000",
+        "nb_frames": "175"
+      }
+    ],
+    "format": {
+      "duration": "7.250000"
+    }
+  },
+  {
+    "file": "local-tail_trimmed.mp4",
+    "programs": [],
+    "streams": [
+      {
+        "codec_type": "video",
+        "avg_frame_rate": "6912/287",
+        "start_time": "0.000000",
+        "duration": "11.958333",
+        "nb_frames": "288"
+      },
+      {
+        "codec_type": "audio",
+        "avg_frame_rate": "0/0",
+        "start_time": "0.000000",
+        "duration": "12.000000",
+        "nb_frames": "518"
+      }
+    ],
+    "format": {
+      "duration": "12.000000"
+    }
+  },
+  {
+    "file": "local-tail_reframe_000.mp4",
+    "programs": [],
+    "streams": [
+      {
+        "codec_type": "video",
+        "avg_frame_rate": "24/1",
+        "start_time": "0.000000",
+        "duration": "4.750000",
+        "nb_frames": "114"
+      }
+    ],
+    "format": {
+      "duration": "4.750000"
+    }
+  },
+  {
+    "file": "local-tail_reframe_001.mp4",
+    "programs": [],
+    "streams": [
+      {
+        "codec_type": "video",
+        "avg_frame_rate": "24/1",
+        "start_time": "0.000000",
+        "duration": "0.500000",
+        "nb_frames": "12"
+      }
+    ],
+    "format": {
+      "duration": "0.500000"
+    }
+  },
+  {
+    "file": "local-tail_reframe_002.mp4",
+    "programs": [],
+    "streams": [
+      {
+        "codec_type": "video",
+        "avg_frame_rate": "483/20",
+        "start_time": "0.000000",
+        "duration": "6.666667",
+        "nb_frames": "161"
+      }
+    ],
+    "format": {
+      "duration": "6.666667"
+    }
+  },
+  {
+    "file": "local-tail_cropped.mp4",
+    "programs": [],
+    "streams": [
+      {
+        "codec_type": "video",
+        "avg_frame_rate": "25830000/1072513",
+        "start_time": "0.000000",
+        "duration": "11.916811",
+        "nb_frames": "287"
+      },
+      {
+        "codec_type": "audio",
+        "avg_frame_rate": "0/0",
+        "start_time": "0.000000",
+        "duration": "12.000000",
+        "nb_frames": "518"
+      }
+    ],
+    "format": {
+      "duration": "12.000000"
+    }
+  },
+  {
+    "file": "local-tail_finish.mp4",
+    "programs": [],
+    "streams": [
+      {
+        "codec_type": "video",
+        "avg_frame_rate": "289/12",
+        "start_time": "0.000000",
+        "duration": "11.916955",
+        "nb_frames": "287"
+      },
+      {
+        "codec_type": "audio",
+        "avg_frame_rate": "0/0",
+        "start_time": "0.000000",
+        "duration": "12.000000",
+        "nb_frames": "518"
+      }
+    ],
+    "format": {
+      "duration": "12.000000"
+    }
+  },
+  {
+    "file": "local-tail_main_frame.mp4",
+    "programs": [],
+    "streams": [
+      {
+        "codec_type": "video",
+        "avg_frame_rate": "289/12",
+        "start_time": "0.000000",
+        "duration": "11.916955",
+        "nb_frames": "287"
+      },
+      {
+        "codec_type": "audio",
+        "avg_frame_rate": "0/0",
+        "start_time": "0.000000",
+        "duration": "12.000000",
+        "nb_frames": "518"
+      }
+    ],
+    "format": {
+      "duration": "12.000000"
+    }
+  },
+  {
+    "file": "local-tail_viral.mp4",
+    "programs": [],
+    "streams": [
+      {
+        "codec_type": "video",
+        "avg_frame_rate": "24/1",
+        "start_time": "0.000000",
+        "duration": "11.958333",
+        "nb_frames": "287"
+      },
+      {
+        "codec_type": "audio",
+        "avg_frame_rate": "0/0",
+        "start_time": "0.000000",
+        "duration": "12.000000",
+        "nb_frames": "564"
+      }
+    ],
+    "format": {
+      "duration": "12.000000"
+    }
+  }
+]

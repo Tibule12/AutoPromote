@@ -1,0 +1,607 @@
+{
+  "deployedRevision": "15c5c1d908d0af8d37118e077b1b33eeb3cf7fe4",
+  "exports": [
+    {
+      "width": 720,
+      "height": 1280,
+      "frames": 78,
+      "fps": "24/1",
+      "duration": 3.26,
+      "expected": 3.260411111111111,
+      "sha256": "7c9ceb14ebd2cc523fcb3d0dea37be4ec643aea7988debf5c24eedf7d3f25e73",
+      "bytes": 767779,
+      "audio": true,
+      "fullDecode": true,
+      "finishedPlayback": {
+        "a": {
+          "source": 0,
+          "output": 0,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "0%"
+        },
+        "mid": {
+          "source": 0.57158,
+          "output": 0.566326,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": false,
+          "playhead": "17.3697%"
+        },
+        "final": {
+          "source": 3.26,
+          "output": 3.26,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "99.9874%"
+        }
+      },
+      "creditBalanceAfter": 329,
+      "startedAt": "2026-11-06T03:39:03.099Z",
+      "wallSeconds": 23.164,
+      "scenario": "active_2",
+      "authenticatedServerHashMatches": true,
+      "expectedRoundedFrames": 78,
+      "exactFrameCount": true
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "frames": 78,
+      "fps": "24/1",
+      "duration": 3.26,
+      "expected": 3.260411111111111,
+      "sha256": "d7ada0c9a555774acc90a31c9f731863ae1a7d57c8c52085eded1508c290bd64",
+      "bytes": 882908,
+      "audio": true,
+      "fullDecode": true,
+      "finishedPlayback": {
+        "a": {
+          "source": 0,
+          "output": 0,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "0%"
+        },
+        "mid": {
+          "source": 0.565296,
+          "output": 0.561126,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": false,
+          "playhead": "17.2102%"
+        },
+        "final": {
+          "source": 3.26,
+          "output": 3.26,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "99.9874%"
+        }
+      },
+      "creditBalanceAfter": 314,
+      "startedAt": "2026-11-06T03:40:18.117Z",
+      "wallSeconds": 19.605,
+      "scenario": "grid_4",
+      "authenticatedServerHashMatches": true,
+      "expectedRoundedFrames": 78,
+      "exactFrameCount": true
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "frames": 78,
+      "fps": "24/1",
+      "duration": 3.26,
+      "expected": 3.260411111111111,
+      "sha256": "b1f41090db43f61d6ec88488df305322b7c44e9b933918403ce1d3bc54c573f8",
+      "bytes": 1196615,
+      "audio": true,
+      "fullDecode": true,
+      "finishedPlayback": {
+        "a": {
+          "source": 0,
+          "output": 0,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "0%"
+        },
+        "mid": {
+          "source": 0.543416,
+          "output": 0.542949,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": false,
+          "playhead": "16.6526%"
+        },
+        "final": {
+          "source": 3.26,
+          "output": 3.26,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "99.9874%"
+        }
+      },
+      "creditBalanceAfter": 319,
+      "startedAt": "2026-11-06T03:39:54.003Z",
+      "wallSeconds": 20.147,
+      "scenario": "hero_3",
+      "authenticatedServerHashMatches": true,
+      "expectedRoundedFrames": 78,
+      "exactFrameCount": true
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "frames": 78,
+      "fps": "24/1",
+      "duration": 3.26,
+      "expected": 3.260411111111111,
+      "sha256": "e9a9c3645c99ff9c32f482b15b443b96af93efdb931c48a870ab202f55ef065d",
+      "bytes": 760729,
+      "audio": true,
+      "fullDecode": true,
+      "finishedPlayback": {
+        "a": {
+          "source": 0,
+          "output": 0,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "0%"
+        },
+        "mid": {
+          "source": 0.56995,
+          "output": 0.562702,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": false,
+          "playhead": "17.2586%"
+        },
+        "final": {
+          "source": 3.26,
+          "output": 3.26,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "99.9874%"
+        }
+      },
+      "creditBalanceAfter": 334,
+      "startedAt": "2026-11-06T03:38:40.860Z",
+      "wallSeconds": 19.043,
+      "scenario": "pip_2",
+      "authenticatedServerHashMatches": true,
+      "expectedRoundedFrames": 78,
+      "exactFrameCount": true
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "frames": 78,
+      "fps": "24/1",
+      "duration": 3.26,
+      "expected": 3.260411111111111,
+      "sha256": "bd247b670f8c155288a2ef9a8a93c40b001839d0033935d699d7957a8555d1b0",
+      "bytes": 812214,
+      "audio": true,
+      "fullDecode": true,
+      "finishedPlayback": {
+        "a": {
+          "source": 0,
+          "output": 0,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "0%"
+        },
+        "mid": {
+          "source": 0.577274,
+          "output": 0.571671,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": false,
+          "playhead": "17.5336%"
+        },
+        "final": {
+          "source": 3.257224,
+          "output": 3.257224,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "99.9022%"
+        }
+      },
+      "creditBalanceAfter": 349,
+      "startedAt": "2026-11-06T03:32:52.094Z",
+      "wallSeconds": 25.785,
+      "scenario": "show-everyone",
+      "authenticatedServerHashMatches": true,
+      "expectedRoundedFrames": 78,
+      "exactFrameCount": true
+    },
+    {
+      "width": 720,
+      "height": 720,
+      "frames": 78,
+      "fps": "24/1",
+      "duration": 3.26,
+      "expected": 3.260411111111111,
+      "sha256": "6cc8685e3f45e065ede1bb51dad4f2080344842158adb3ef0f853f990816e6d8",
+      "bytes": 589510,
+      "audio": true,
+      "fullDecode": true,
+      "finishedPlayback": {
+        "a": {
+          "source": 0,
+          "output": 0,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "0%"
+        },
+        "mid": {
+          "source": 0.567433,
+          "output": 0.567102,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": false,
+          "playhead": "17.3935%"
+        },
+        "final": {
+          "source": 3.25593,
+          "output": 3.25593,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "99.8627%"
+        }
+      },
+      "creditBalanceAfter": 359,
+      "startedAt": "2026-11-06T03:32:11.289Z",
+      "wallSeconds": 18.729,
+      "scenario": "solo-1-1",
+      "authenticatedServerHashMatches": true,
+      "expectedRoundedFrames": 78,
+      "exactFrameCount": true
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "frames": 78,
+      "fps": "24/1",
+      "duration": 3.26,
+      "expected": 3.260411111111111,
+      "sha256": "01ec99fdbad15ec9bfd30c7f487f1d3ff009e16e8b316bee34ef624c358e9e55",
+      "bytes": 954141,
+      "audio": true,
+      "fullDecode": true,
+      "finishedPlayback": {
+        "a": {
+          "source": 0,
+          "output": 0,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "0%"
+        },
+        "mid": {
+          "source": 0.534328,
+          "output": 0.529349,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": false,
+          "playhead": "16.2355%"
+        },
+        "final": {
+          "source": 3.26,
+          "output": 3.26,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "99.9874%"
+        }
+      },
+      "creditBalanceAfter": 354,
+      "startedAt": "2026-11-06T03:32:32.403Z",
+      "wallSeconds": 17.347,
+      "scenario": "solo-16-9",
+      "authenticatedServerHashMatches": true,
+      "expectedRoundedFrames": 78,
+      "exactFrameCount": true
+    },
+    {
+      "width": 720,
+      "height": 900,
+      "frames": 78,
+      "fps": "24/1",
+      "duration": 3.26,
+      "expected": 3.260411111111111,
+      "sha256": "c8ada4d7d598296a0a515b972bce315562240b679180b4032275c3fba6705936",
+      "bytes": 655365,
+      "audio": true,
+      "fullDecode": true,
+      "finishedPlayback": {
+        "a": {
+          "source": 0,
+          "output": 0,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "0%"
+        },
+        "mid": {
+          "source": 0.570831,
+          "output": 0.558868,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": false,
+          "playhead": "17.141%"
+        },
+        "final": {
+          "source": 3.26,
+          "output": 3.26,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "99.9874%"
+        }
+      },
+      "creditBalanceAfter": 364,
+      "startedAt": "2026-11-06T03:31:51.465Z",
+      "wallSeconds": 17.527,
+      "scenario": "solo-4-5",
+      "authenticatedServerHashMatches": true,
+      "expectedRoundedFrames": 78,
+      "exactFrameCount": true
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "frames": 78,
+      "fps": "24/1",
+      "duration": 3.26,
+      "expected": 3.260411111111111,
+      "sha256": "8fd4dd097a7b21e1650634c2a180ca9c6a615c359378b6bc73b09bda465cc5a3",
+      "bytes": 812456,
+      "audio": true,
+      "fullDecode": true,
+      "finishedPlayback": {
+        "a": {
+          "source": 0,
+          "output": 0,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "0%"
+        },
+        "mid": {
+          "source": 0.56804,
+          "output": 0.560092,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": false,
+          "playhead": "17.1785%"
+        },
+        "final": {
+          "source": 3.251407,
+          "output": 3.251407,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "99.724%"
+        }
+      },
+      "creditBalanceAfter": 369,
+      "startedAt": "2026-11-06T03:31:06.630Z",
+      "wallSeconds": 42.341,
+      "scenario": "solo-9-16",
+      "authenticatedServerHashMatches": true,
+      "expectedRoundedFrames": 78,
+      "exactFrameCount": true
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "frames": 78,
+      "fps": "24/1",
+      "duration": 3.26,
+      "expected": 3.260411111111111,
+      "sha256": "afe2b0e8edcb00d125e51090eb4ec4589d7662d5e83f62ff6fe5591a1f316c1f",
+      "bytes": 452452,
+      "audio": true,
+      "fullDecode": true,
+      "finishedPlayback": {
+        "a": {
+          "source": 0,
+          "output": 0,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "0%"
+        },
+        "mid": {
+          "source": 0.576657,
+          "output": 0.571184,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": false,
+          "playhead": "17.5189%"
+        },
+        "final": {
+          "source": 3.26,
+          "output": 3.26,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "99.9874%"
+        }
+      },
+      "creditBalanceAfter": 339,
+      "startedAt": "2026-11-06T03:38:18.052Z",
+      "wallSeconds": 18.951,
+      "scenario": "split_2",
+      "authenticatedServerHashMatches": true,
+      "expectedRoundedFrames": 78,
+      "exactFrameCount": true
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "frames": 78,
+      "fps": "24/1",
+      "duration": 3.26,
+      "expected": 3.260411111111111,
+      "sha256": "27683157bfef898f1ab3697da37d0473b3a7b0806030cde41f6e8d54c646138c",
+      "bytes": 650074,
+      "audio": true,
+      "fullDecode": true,
+      "finishedPlayback": {
+        "a": {
+          "source": 0,
+          "output": 0,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "0%"
+        },
+        "mid": {
+          "source": 0.592386,
+          "output": 0.583258,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": false,
+          "playhead": "17.889%"
+        },
+        "final": {
+          "source": 3.26,
+          "output": 3.26,
+          "duration": 3.26,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "99.9874%"
+        }
+      },
+      "creditBalanceAfter": 324,
+      "startedAt": "2026-11-06T03:39:30.911Z",
+      "wallSeconds": 20.433,
+      "scenario": "spotlight_2",
+      "authenticatedServerHashMatches": true,
+      "expectedRoundedFrames": 78,
+      "exactFrameCount": true
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "frames": 287,
+      "fps": "24/1",
+      "duration": 12,
+      "expected": 12,
+      "sha256": "0a1410c35d6d53de7a65887f6d6573419c3fe44c5acf9d59fab1f70ad34ef777",
+      "bytes": 3525755,
+      "audio": true,
+      "fullDecode": true,
+      "finishedPlayback": {
+        "a": {
+          "source": 0,
+          "output": 0,
+          "duration": 12,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "0%"
+        },
+        "mid": {
+          "source": 0.591164,
+          "output": 0.586156,
+          "duration": 12,
+          "ready": 4,
+          "seeking": false,
+          "paused": false,
+          "playhead": "4.88463%"
+        },
+        "final": {
+          "source": 12,
+          "output": 12,
+          "duration": 12,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "100%"
+        }
+      },
+      "creditBalanceAfter": 309,
+      "startedAt": "2026-11-06T03:43:01.524Z",
+      "wallSeconds": 46.531,
+      "scenario": "director-approved",
+      "authenticatedServerHashMatches": true,
+      "expectedRoundedFrames": 288,
+      "exactFrameCount": false
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "frames": 78,
+      "fps": "24/1",
+      "duration": 3.26,
+      "expected": 3.260411111111111,
+      "sha256": "9700a33c333def0248eace437af4459d6d931cbb38518878bb16efb7aace8f99",
+      "bytes": 1297433,
+      "audio": true,
+      "fullDecode": true,
+      "finishedPlayback": {
+        "sameOutputColdRecovery": true,
+        "midPlayPauseStable": true,
+        "naturalEndHolds": true
+      },
+      "scenario": "stack_2",
+      "authenticatedServerHashMatches": true,
+      "expectedRoundedFrames": 78,
+      "exactFrameCount": true
+    }
+  ],
+  "lifecycleCompleted": 13,
+  "exactRoundedFrameCount": 12,
+  "normalCreditCharge": 65,
+  "balanceBefore": 374,
+  "balanceAfter": 309
+}

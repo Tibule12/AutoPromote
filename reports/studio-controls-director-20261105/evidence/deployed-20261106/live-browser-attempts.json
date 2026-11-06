@@ -1,0 +1,164 @@
+{
+  "revision": "15c5c1d908d0af8d37118e077b1b33eeb3cf7fe4",
+  "ordinaryNativeControls": true,
+  "headlessMuted": true,
+  "tests": [
+    {
+      "phase": "controls-live",
+      "id": "deployed-rapid-steps",
+      "desc": "Real deployed transport retains 24 rapid frame requests",
+      "status": "PASS"
+    },
+    {
+      "phase": "controls-live",
+      "id": "deployed-timestamp-controls",
+      "desc": "Manual corrections and both split tracking-point timestamps keep controls editable",
+      "status": "PASS"
+    },
+    {
+      "phase": "controls-live",
+      "id": "deployed-zero-origin",
+      "desc": "Near-zero mode selection retains the initial framing cut required by the worker",
+      "status": "PASS"
+    },
+    {
+      "phase": "controls-live",
+      "id": "deployed-moments-range-reopen",
+      "desc": "Native trimmed range is saved, selected, previewed and retained after cold reopen",
+      "status": "PASS"
+    },
+    {
+      "phase": "exports",
+      "id": "live-export-solo-9-16",
+      "desc": "Real deployed native CPU export and complete finished playback 9:16",
+      "status": "PASS"
+    },
+    {
+      "phase": "exports",
+      "id": "live-export-solo-4-5",
+      "desc": "Real deployed native CPU export and complete finished playback 4:5",
+      "status": "PASS"
+    },
+    {
+      "phase": "exports",
+      "id": "live-export-solo-1-1",
+      "desc": "Real deployed native CPU export and complete finished playback 1:1",
+      "status": "PASS"
+    },
+    {
+      "phase": "exports",
+      "id": "live-export-solo-16-9",
+      "desc": "Real deployed native CPU export and complete finished playback 16:9",
+      "status": "PASS"
+    },
+    {
+      "phase": "exports",
+      "id": "live-export-show-everyone",
+      "desc": "Saved Moments interval exports through split-source framing and finishes playback",
+      "status": "PASS"
+    },
+    {
+      "id": "exports-setup",
+      "status": "FAIL",
+      "error": "page.waitForEvent: Timeout 60000ms exceeded while waiting for event \"download\"\n=========================== logs ===========================\nwaiting for event \"download\"\n============================================================"
+    },
+    {
+      "phase": "exports",
+      "id": "live-export-stack_2",
+      "desc": "Live CPU stack_2 render with owned labelled moving diagnostic cameras",
+      "status": "FAIL",
+      "error": "The expression evaluated to a falsy value:\n\n  assert(final.paused)\n"
+    },
+    {
+      "phase": "stack-recovery",
+      "id": "camera-output-cold-recovery",
+      "desc": "Existing completed camera output reopens and downloads exact same bytes without a new job",
+      "status": "PASS"
+    },
+    {
+      "phase": "stack-recovery",
+      "id": "camera-finished-mid-pause",
+      "desc": "Real finished multicamera video pauses from the ordinary preview control",
+      "status": "PASS"
+    },
+    {
+      "phase": "stack-recovery",
+      "id": "camera-finished-natural-end",
+      "desc": "Finished camera playback reaches its end and holds without an extra toggle near the last frame",
+      "status": "PASS"
+    },
+    {
+      "phase": "exports",
+      "id": "live-export-split_2",
+      "desc": "Live CPU split_2 render with owned labelled moving diagnostic cameras",
+      "status": "PASS"
+    },
+    {
+      "phase": "exports",
+      "id": "live-export-pip_2",
+      "desc": "Live CPU pip_2 render with owned labelled moving diagnostic cameras",
+      "status": "PASS"
+    },
+    {
+      "phase": "exports",
+      "id": "live-export-active_2",
+      "desc": "Live CPU active_2 render with owned labelled moving diagnostic cameras",
+      "status": "PASS"
+    },
+    {
+      "phase": "exports",
+      "id": "live-export-spotlight_2",
+      "desc": "Live CPU spotlight_2 render with owned labelled moving diagnostic cameras",
+      "status": "PASS"
+    },
+    {
+      "phase": "exports",
+      "id": "live-export-hero_3",
+      "desc": "Live CPU hero_3 render with owned labelled moving diagnostic cameras",
+      "status": "PASS"
+    },
+    {
+      "phase": "exports",
+      "id": "live-export-grid_4",
+      "desc": "Live CPU grid_4 render with owned labelled moving diagnostic cameras",
+      "status": "PASS"
+    },
+    {
+      "phase": "director-live",
+      "id": "director-real-analysis-choices",
+      "desc": "Real owned CPU analysis supplies selectable source-bound Director proposals",
+      "status": "PASS"
+    },
+    {
+      "phase": "director-live",
+      "id": "director-live-reject",
+      "desc": "Authenticated server rejection records no timeline mutation",
+      "status": "FAIL",
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'reject'\n"
+    },
+    {
+      "phase": "director-live",
+      "id": "director-rejection-receipt",
+      "desc": "Recovered native rejection has a real server reference and unchanged source range",
+      "status": "PASS"
+    },
+    {
+      "phase": "director-live",
+      "id": "director-live-approve",
+      "desc": "A newly reviewed real cut applies exactly once with server identity and survives reopen",
+      "status": "PASS"
+    },
+    {
+      "phase": "exports",
+      "id": "director-approved-live-export",
+      "desc": "Real Director-approved split exports, settles once and plays through the complete finished output",
+      "status": "PASS"
+    }
+  ],
+  "harnessCorrections": [
+    "Camera upload backup observer timed out before uploads finished; later native reopen verified four ready cameras.",
+    "Initial stack finished-playback pause assertion toggled near the end; same exact output passed a native mid-play pause and natural-end hold without another render.",
+    "Initial Director rejection observer read the wrong journal nesting; recovered authenticated rejection passed with no split."
+  ],
+  "separateMediaFinding": "Director-approved output has 287 frames; expected round(12*24)=288. Lifecycle pass does not qualify exact picture-frame parity."
+}

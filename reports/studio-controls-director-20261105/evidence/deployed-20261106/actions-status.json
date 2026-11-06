@@ -1,0 +1,74 @@
+[
+  {
+    "conclusion": "success",
+    "name": "Auto Retry Playwright",
+    "status": "completed",
+    "url": "https://github.com/Tibule12/AutoPromote/actions/runs/42156907075"
+  },
+  {
+    "conclusion": "success",
+    "name": "Test Report",
+    "status": "completed",
+    "url": "https://github.com/Tibule12/AutoPromote/actions/runs/42156125878"
+  },
+  {
+    "conclusion": "success",
+    "name": "Emulator smoke test",
+    "status": "completed",
+    "url": "https://github.com/Tibule12/AutoPromote/actions/runs/42155945584"
+  },
+  {
+    "conclusion": "success",
+    "name": "Deploy to GitHub Pages",
+    "status": "completed",
+    "url": "https://github.com/Tibule12/AutoPromote/actions/runs/42155945484"
+  },
+  {
+    "conclusion": "success",
+    "name": "Semgrep",
+    "status": "completed",
+    "url": "https://github.com/Tibule12/AutoPromote/actions/runs/42155945502"
+  },
+  {
+    "conclusion": "success",
+    "name": "CI",
+    "status": "completed",
+    "url": "https://github.com/Tibule12/AutoPromote/actions/runs/42155945550"
+  },
+  {
+    "conclusion": "success",
+    "name": "Deploy AutoPromote Backend",
+    "status": "completed",
+    "url": "https://github.com/Tibule12/AutoPromote/actions/runs/42155945625"
+  },
+  {
+    "conclusion": "success",
+    "name": "Verify Frontend Build",
+    "status": "completed",
+    "url": "https://github.com/Tibule12/AutoPromote/actions/runs/42155945483"
+  },
+  {
+    "conclusion": "success",
+    "name": "Emulator Unit Tests",
+    "status": "completed",
+    "url": "https://github.com/Tibule12/AutoPromote/actions/runs/42155945583"
+  },
+  {
+    "conclusion": "success",
+    "name": "Playwright E2E",
+    "status": "completed",
+    "url": "https://github.com/Tibule12/AutoPromote/actions/runs/42155945527"
+  },
+  {
+    "conclusion": "success",
+    "name": "CodeQL",
+    "status": "completed",
+    "url": "https://github.com/Tibule12/AutoPromote/actions/runs/42155945486"
+  },
+  {
+    "conclusion": "success",
+    "name": "pages build and deployment",
+    "status": "completed",
+    "url": "https://github.com/Tibule12/AutoPromote/actions/runs/42155943697"
+  }
+]

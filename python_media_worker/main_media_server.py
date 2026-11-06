@@ -8770,7 +8770,7 @@ def build_studio_sequence_video_filters(normalize_filter, fps, source_framing=Fa
     return clock + [normalize_filter] if source_framing else [normalize_filter] + clock
 
 
-def build_studio_sequence_encode_args(reviewed_subject=False):
+def build_studio_sequence_encode_args(reviewed_subject=False, fps=None):
     # A reviewed replacement is already encoded. The default x264 CRF 23
     # temporary cut visibly removes skin, cloth and thin equipment detail
     # before the selected delivery profile even runs. Preserve its YUV samples
@@ -8778,6 +8778,12 @@ def build_studio_sequence_encode_args(reviewed_subject=False):
     args = ["-c:v", "libx264", "-preset", "ultrafast"]
     if reviewed_subject:
         args.extend(["-crf", "0"])
+    if fps is not None:
+        # FFmpeg 7.1 can omit a short MP4's final packet duration. Even with
+        # the right frame count, concat then starts the following clip early
+        # and reports a false programme frame rate to timed framing.
+        args.extend(["-bf", "0", "-fps_mode", "passthrough",
+                     *build_studio_cfr_packet_args(fps)])
     return args
 
 
@@ -31665,7 +31671,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     "-frames:v", str(picture_window["frames"]), "-vf", ",".join(video_filters),
                     "-map", "0:v:0", "-an",
                     *build_studio_sequence_encode_args(
-                        reviewed_subject=segment_picture_path != segment_source_path),
+                        reviewed_subject=segment_picture_path != segment_source_path,
+                        fps=selected_timeline_fps),
                     "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-y",
                     segment_video_path,
                 ]
@@ -31731,6 +31738,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 "-f", "concat", "-safe", "0", "-i", concat_list_path
             ]
             final_cmd.extend(audio_inputs)
+            # All sequence pictures above have one explicit, non-reordered
+            # delivery clock. Retain its last packet through the copy mux too.
+            final_cmd.extend(build_studio_cfr_packet_args(selected_timeline_fps))
             
             if audio_mix_parts:
                 filter_complex = "".join(audio_mix_parts)

@@ -1,0 +1,27 @@
+{
+  "scope": "Local canonical renderer, real owned source bytes and captured native edit; network, cloud writers and upload disabled. Exact deployed FFmpeg runtime base/system layers only; not the whole cloud service or a new cloud job.",
+  "deployedWorkerRevision": "media-worker-v1-00127-med",
+  "deployedWorkerImage": "gcr.io/autopromote-cc6d3/media-worker-v1@sha256:8221f425014e75f80c7409ecdd7c3cbd727ea826ea2972a27ab456cb3672210e",
+  "ffmpeg": "7.1.5-0+deb13u1",
+  "sourceSha256": "716bf2ba4b50ed1ae9c8590121a9e5d899f3ab0abeddafb4a8247f00e73f446a",
+  "sourceCuts": [
+    0,
+    4.7,
+    12
+  ],
+  "deliveryFps": 24,
+  "beforeFrames": 287,
+  "afterFrames": 288,
+  "afterVideoSeconds": 12,
+  "hostFocusedTestsPassed": 21,
+  "hostAdditionalSubtestsPassed": 2,
+  "exactRuntimeNewTestsPassed": 3,
+  "exactRuntimeTestFps": [
+    24,
+    25,
+    60
+  ],
+  "releaseImageGateIncludesRegression": true,
+  "deployedAfterRepair": false,
+  "remaining": "Release exact tested worker change through immutable-image gate, then repeat the same native live export and exact frame/decode/receipt checks."
+}
