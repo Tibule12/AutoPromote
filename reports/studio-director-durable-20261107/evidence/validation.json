@@ -132,7 +132,12 @@
   },
   "targetedLint": "PASS",
   "whitespace": "PASS",
-  "fullEditorRegression": "RUNNING; not a claimed pass",
+  "fullEditorRegression": {
+    "status": "INTERRUPTED",
+    "exitCode": 143,
+    "completedSuiteResult": false,
+    "countedAsPass": false
+  },
   "evidenceBoundary": "Local native App, recorded analysis, simulated review/completion boundaries and actual canonical CPU file. No new authenticated provider execution/settlement proof.",
   "failedAttemptsRetained": [
     "early DOM/restore timing failures",
@@ -146,5 +151,40 @@
     "passed": 50,
     "failed": 0,
     "skipped": 0
+  },
+  "affectedEditorWorkflows": {
+    "status": "PASS",
+    "passed": 12,
+    "failed": 0,
+    "skipped": 164,
+    "suites": 1,
+    "seconds": 134.085,
+    "scope": "Director source analysis/save/reopen/approve/Undo/Redo/export, queued/owned-source analysis, existing finished-output and Hook controls"
+  },
+  "codeCheckpoint": "41ad8217",
+  "reviewRaceAndAuthRegressions": {
+    "status": "PASS",
+    "passed": 3,
+    "failed": 0,
+    "skipped": 173,
+    "suites": 1,
+    "seconds": 31.436,
+    "scope": "sign-in changes after server decision, changed project during registration, unauthenticated/stale review"
+  },
+  "distinctTargetedTestsPassed": 93,
+  "finalLocalStatus": "READY_FOR_REVIEW_NOT_DEPLOYED",
+  "finalTestEvidence": {
+    "editorWorkflows": {
+      "sha256": "c87dac29f84100c3bc4c3c1212e7af07541aaa0290665ae48ce32080cdbd3f87"
+    },
+    "reviewRaces": {
+      "sha256": "f653a863f463f22ea32141ba7d0909ccbdfca938491f4bb50d75eb47783d7c96"
+    },
+    "directorModules": {
+      "sha256": "6af2e995ff5e57e21a5df0b1f323c40b07f283ce4feafb79b98590b5fca83cde"
+    },
+    "serverCompatibility": {
+      "sha256": "a0a305873efc181fa416e3a454e9d494b7730e41372cfcd0f072ab01b6ca89db"
+    }
   }
 }

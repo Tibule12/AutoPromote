@@ -1,6 +1,6 @@
 # Director suggestions — save and recovery
 
-7 November 2026 · `qa/studio-director-durable-suggestions-20261107` · based on `e6800b4f` (application source unchanged from deployed `ce82bb90`). **Local development only; no push, merge or deployment.**
+7 November 2026 · `qa/studio-director-durable-suggestions-20261107` · code checkpoint `41ad8217` · based on `e6800b4f` (application source unchanged from deployed `ce82bb90`). **Local development only; no push, merge or deployment.**
 
 Director's existing source-cut suggestions now survive normal Save, autosave, cold reopen and native backup/independent restore. The selected boundary and proposal/command identities remain stable. The implementation extends the existing project snapshot and command/review system; it creates no other editor or wallet.
 
@@ -14,7 +14,7 @@ Director's existing source-cut suggestions now survive normal Save, autosave, co
 
 ## Verification
 
-Detailed results and limitations are recorded in [validation](evidence/validation.json). The targeted editor test covers analysis → exact selected boundary → Save → cold remount → fresh review → approval → Undo/Redo → Save → export compilation. Existing server ownership/artifact/replay checks are retained.
+**93 targeted tests pass: 50 Director module tests, 28 server compatibility checks, 12 editor workflows and three review/authentication race cases.** The strict frontend build, lint, whitespace and continuity validator pass. The broader 176-case editor run was interrupted (exit143) without a completed result; it is not counted as passing. Detailed results and limitations are recorded in [validation](evidence/validation.json). The targeted editor test covers analysis → exact selected boundary → Save → cold remount → fresh review → approval → Undo/Redo → Save → export compilation. Existing server ownership/artifact/replay checks are retained.
 
 The actual built App ran headless and muted with the existing saved owner login in separate disposable contexts. Native controls verified Save/cold reopen, independent backup restore, project copying, rejection/recovery, malformed-draft recovery, one approved split, Undo/Redo and export compilation. Production writes and paid rendering were intercepted. Analysis replay and review responses in these browser runs were **fixtures**, not new authenticated provider evidence. No cloud execution or production review is qualified by these responses.
 

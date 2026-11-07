@@ -16044,6 +16044,8 @@
       "broader media/multi-user/manual layer/audio combinations",
       "shared S02/S04/S03 and creative/listening qualification"
     ],
-    "readinessPromoted": false
+    "readinessPromoted": false,
+    "targetedTestsPassed": 93,
+    "fullEditorSuite": "Interrupted without completed result; not counted as passing"
   }
 }
