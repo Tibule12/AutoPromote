@@ -14,7 +14,9 @@ concurrency:
 
 jobs:
   playwright-e2e:
-    runs-on: ubuntu-latest
+    # The locked Playwright browser/dependency bundle supports Ubuntu 24.04;
+    # the ubuntu-latest move to 26.04 fails before browser tests can start.
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
       FUNCTIONS_TOKEN_ENCRYPTION_KEY: ${{ secrets.FUNCTIONS_TOKEN_ENCRYPTION_KEY }}
