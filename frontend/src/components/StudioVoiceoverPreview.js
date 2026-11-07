@@ -18,8 +18,8 @@ export default forwardRef(function StudioVoiceoverPreview({ takes, videoRef, get
   const routes = useRef(new WeakMap());
   const buffers = useRef(new Map()), playing = useRef(new Map()), pinned = useRef(new Map());
   const syncLatest = useRef(null);
-  const busInput = preparedInput || loadPreparedBus && studioVoiceBusRequest({ projectId, takes, outputTimeMap,
-    automation: automationKeyframes, ducking: preparedDucking });
+  const busInput = preparedInput || (loadPreparedBus && studioVoiceBusRequest({ projectId, takes, outputTimeMap,
+    automation: automationKeyframes, ducking: preparedDucking }));
   const requestKey = busInput ? JSON.stringify(busInput) : '';
   const [prepared, setPrepared] = useState(null);
   const pending = useRef(null), preparedPlaying = useRef(null), preparedSync = useRef(null);

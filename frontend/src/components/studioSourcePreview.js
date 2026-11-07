@@ -32,8 +32,8 @@ export function studioPausedFrameReceiptMatches(request, result) {
       : result.sourceGeneration === request.sourceGeneration) &&
     result.frameIndex === request.frameIndex && result.start === request.start &&
     result.end === request.end && result.fps === request.fps && result.contentType === 'image/png' &&
-    (request.sampling !== SEQUENCE_SAMPLER || result.sampling === SEQUENCE_SAMPLER &&
-      result.programmeStart === request.programmeStart && result.programmeDuration === request.programmeDuration);
+    (request.sampling !== SEQUENCE_SAMPLER || (result.sampling === SEQUENCE_SAMPLER &&
+      result.programmeStart === request.programmeStart && result.programmeDuration === request.programmeDuration));
 }
 
 // The sequence worker first makes frame-aligned clips, maps their timestamps

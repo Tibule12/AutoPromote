@@ -1,5 +1,7 @@
 # Reframe and Moments qualification continuation
 
+7 November release preflight: the owner authorised deployment. [PR #524](https://github.com/Tibule12/AutoPromote/pull/524) carries the existing checkpoint. Its initial strict frontend build rejected two mixed-operator lint warnings; explicit parentheses preserve the same expression semantics. The corrected strict production build passes with lint enabled, and the relevant source-frame/voice-bus/voiceover regressions pass **55 cases in three suites**. Full image/remote release gates and actual deployed verification are tracked separately; this preflight is not evidence of deployment. Source dialogue remains default-off.
+
 6 November 2026 · `qa/studio-controls-director-20261105` · **Local qualification milestone passed; production activation/retest remains pending.**
 
 The unchanged Director-approved 12-second project now passes all twelve paused Live Edit/Finished Video picture comparisons at the original limits: RGB RMSE ≤4 and geometry p95 ≤2 CSS pixels. Worst measured values are **3.9873 RGB** and **0.8175 CSS pixels**. No fitted image/time alignment or tolerance change is used. The original failures remain retained. This qualifies these sampled paused frames, not every moving frame, edge, gamut, source or Studio combination.
