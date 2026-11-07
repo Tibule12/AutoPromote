@@ -22552,7 +22552,7 @@
     "date": "2026-11-06",
     "report": "reports/studio-controls-director-20261105/README.md",
     "liveBase": "631afd850462c3d66b11eae09a62cc1e4fd3da56",
-    "status": "Controls/Director deployed and live-tested at 15c5c1d9; additional shared packet-clock repair passes exact-runtime local regression, release verification pending",
+    "status": "Controls/Director live at 15c5c1d9; shared worker packet-clock fix live at e78fe6b9 with exact 288-frame native qualification",
     "scope": [
       "Reframe timestamp selection and frame stepping",
       "Zero-origin framing export compatibility",
@@ -22563,28 +22563,49 @@
     "evidenceLimits": [
       "First temporary live recordings lost at workstation restart; persistent follow-up and current deployed recordings/movies are distinguished.",
       "Two pre-release exports failed and refunded; thirteen subsequent live exports completed and match server hashes.",
-      "One 12-second Director-approved output contains 287 instead of 288 pictures. Exact deployed FFmpeg runtime reproduces it locally; packet-clock repair restores 288 locally but is not yet deployed.",
       "Generated labelled camera sources qualify routing/layout transport, not a synchronized real shoot or two-person identity tracking.",
       "Real Director analysis and authenticated server Reject/Approve now pass; no unrestricted directing, generation or local-journal cryptographic proof is claimed.",
-      "Released CI passes; the earlier stalled broad local SFX run remains an interrupted attempt."
+      "Released CI passes; the earlier stalled broad local SFX run remains an interrupted attempt.",
+      "Original Director movie remains 287 frames. Exact-runtime repair is now deployed and a new same-edit native export verifies 288 pictures, matching server hash and complete playback; this does not qualify full pixel/mix parity."
     ],
     "remaining": [
-      "Release the exact-runtime-tested packet-clock worker repair through the immutable-image gate; verify one same-edit 288-frame live export and matching receipt/playback.",
       "Director choices require new analysis after range/source changes or cold reopen.",
       "Real two-person anchored tracking, S02 whole picture/audio/colour/edge/real-time parity, S04 depth and S03 ownership remain open."
     ],
-    "nextTask": "Verify the additional canonical worker repair on its released image and exact native edit; preserve shared S02/S04/S03 and security/financial incident follow-up.",
+    "nextTask": "Retain qualified scoped controls/worker release and continue shared S02/S04/S03 precision/depth/ownership and representative two-person/source/creative qualification; preserve security/financial incident follow-up.",
     "deployedRevision": "15c5c1d908d0af8d37118e077b1b33eeb3cf7fe4",
     "liveEvidence": "reports/studio-controls-director-20261105/evidence/deployed-20261106/live-summary.json",
     "liveResults": {
       "controlGroupsPassed": 4,
-      "completedExportsAndServerHashes": 13,
-      "exactFrameCountPassed": 12,
+      "completedExportsAndServerHashes": 14,
+      "exactFrameCountPassed": 13,
       "directorAuthenticatedRejectApproveAndColdReopen": true,
-      "normalCreditsUsed": 65,
+      "normalCreditsUsed": 70,
       "allListedActionsPassed": true,
       "packetClockLocalExactRuntimeRepairPassed": true,
-      "repairedWorkerDeployed": false
-    }
+      "repairedWorkerDeployed": true,
+      "repairedNativeExportFrames": 288,
+      "repairedNativeExportSeconds": 12
+    },
+    "workerFixRevision": "e78fe6b9e566aa7df175a15ecb5c0e755d9d3f73",
+    "workerRevision": "media-worker-v1-00129-ter",
+    "workerLiveEvidence": "reports/studio-controls-director-20261105/evidence/deployed-20261106/worker-followup/verified-live-result.json"
+  },
+  "qualificationContinuation20261106": {
+    "status": "BOUNDED_LOCAL_PICTURE_AUDIO_TRANSPORT_PASS_LIVE_RETEST_PENDING",
+    "report": "reports/studio-qualification-20261106/README.md",
+    "evidence": "reports/studio-qualification-20261106/evidence/checkpoint.json",
+    "realTwoFaceTracking": "VERIFIED_24_KEYS_EACH_COVERAGE_1",
+    "twoFaceEditingAndColdRecovery": "VERIFIED",
+    "nativePreparedAudioSamples": "VERIFIED_576000_NO_GAPS_OR_DUPLICATES",
+    "nativePauseResumeAndFractionalCutPlayback": "VERIFIED",
+    "fullPictureAudioParity": "FULL_MOVING_PICTURE_MIX_AND_DEPLOYED_INTEGRATION_UNQUALIFIED",
+    "readinessPromotion": false,
+    "pausedNativePicturePairs": "12_OF_12_FIXED_COLOUR_AND_GEOMETRY_LIMITS_PASS",
+    "nativeCpuThrottling": "4X_LOCAL_PASS_53_DISTINCT_FINAL_BUILD_POSITIONS; SMOOTHNESS_LIMIT_611MS_OBSERVATION_GAP",
+    "realIsolatedPreviewApi": "11_PASS_AUTH_STORAGE_FIRESTORE_NO_AUTH_BYPASS",
+    "matchedApiWorkerRuntime": "576000_PREPARED_SAMPLES_IDENTICAL_NONROOT_OFFLINE_IMAGE",
+    "productionPackagingAndActivation": "PENDING",
+    "sourceDialogueActivation": "DEFAULT_OFF_EXPLICIT_ACCOUNT_COHORT_REQUIRED"
   }
 }

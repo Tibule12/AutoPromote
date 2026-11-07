@@ -2,6 +2,38 @@
 import math
 
 
+def sequence_audio_slice_command(source, output, window):
+    # Decode audio on its own source clock before trimming. Input-side seeking
+    # can start AAC at different decoder state depending on whether the same
+    # packets are indexed in video or audio-only media. That made the prepared
+    # dialogue differ from its final slice after an otherwise identical cut.
+    seek=['-ss',str(window['source_start'])]
+    source_args=['-i',str(source)]
+    # Exact audition is bounded to the first 90s. Preserve fast random access
+    # for long sources rather than decoding hours to qualify a short preview.
+    inputs=source_args+seek if window['source_start']<=90 else seek+source_args
+    return ['ffmpeg', *inputs,
+            '-t', str(window['duration']), '-map', '0:a:0', '-c:a', 'aac',
+            '-b:a', '192k', '-y', str(output)]
+
+
+def sequence_audio_mix_filter(windows, present, duration, input_offset=1):
+    if len(windows) != len(present):
+        raise ValueError('Sequence audio inputs must match their reviewed windows')
+    parts, labels = [], []
+    for index, (window, available) in enumerate(zip(windows, present)):
+        if not available:
+            continue
+        delay = round(window['programme_start'] * 1000)
+        parts.append(f'[{input_offset+len(labels)}:a]adelay={delay}|{delay}[a{index}];')
+        labels.append(f'[a{index}]')
+    if not labels:
+        return ''
+    return (''.join(parts) + ''.join(labels)
+            + f'amix=inputs={len(labels)}:duration=longest:dropout_transition=2:normalize=0[a_mixed];'
+            + f'[a_mixed]apad=whole_dur={duration:.3f},atrim=0:{duration:.3f}[a_out]')
+
+
 def sequence_audio_window(segment, programme_start, programme_duration, source_duration):
     def read(name, default=None):
         return segment.get(name, default) if isinstance(segment, dict) else getattr(segment, name, default)

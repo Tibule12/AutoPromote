@@ -1,8 +1,12 @@
 # Match the frontend's declared Node >=22.22.0 requirement as well as the API.
-FROM node:22-alpine
+FROM node:22-trixie-slim
 
-# Install system dependencies (FFmpeg for media processing)
-RUN apk add --no-cache ffmpeg
+# The owned speech-preview subprocess shares the canonical CPU audio helpers.
+# Keep its runtime available without installing GPU/model dependencies.
+ARG STUDIO_FFMPEG_VERSION=7:7.1.5-0+deb13u1
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg=${STUDIO_FFMPEG_VERSION} python3 python3-numpy python3-pil \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
@@ -28,8 +32,8 @@ COPY . .
 RUN npm --prefix frontend ci && npm --prefix frontend run build && rm -rf frontend/node_modules
 
 # Create non-root user
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S autopromote -u 1001 -G nodejs
+RUN groupadd --gid 1001 nodejs
+RUN useradd --uid 1001 --gid nodejs --create-home --shell /usr/sbin/nologin autopromote
 
 # Keep application dependencies read-only while granting the runtime user
 # ownership of the app root and the directories used for local uploads/logs.

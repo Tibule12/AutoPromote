@@ -59,6 +59,18 @@ from python_media_worker.main_media_server import (
 
 
 class ViralRenderContractTests(unittest.TestCase):
+    def test_subframe_tail_cut_requires_a_verified_sequence_budget(self):
+        plan={"main_frame":{"enabled":False},"reframe":{"aspect":"16:9",
+            "timeline_cuts":[{"time":0,"mode":"center"},{"time":11.966,"mode":"center"}]}}
+        duration=287/24
+        self.assertFalse(preflight_studio_podcast_timeline(plan,duration)["passed"])
+        receipt=preflight_studio_podcast_timeline(plan,duration,programme_duration=11.966666666666667,programme_fps=24)
+        self.assertTrue(receipt["passed"])
+        self.assertTrue(any("last output picture" in note for note in receipt["warnings"]))
+        for options in ({"programme_duration":11.966666666666667,"programme_fps":25},
+                        {"programme_duration":11.96,"programme_fps":24},
+                        {"programme_duration":12.1,"programme_fps":24}):
+            self.assertFalse(preflight_studio_podcast_timeline(plan,duration,**options)["passed"])
     def test_editor_can_disable_the_main_frame_without_changing_reviewed_framing(self):
         plan = {"main_frame": {"enabled": False},
                 "reframe": {"aspect": "16:9", "timeline_cuts": [{"time": 0, "mode": "center"}]}}

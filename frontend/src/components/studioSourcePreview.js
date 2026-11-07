@@ -1,5 +1,6 @@
 import { applySafeMediaSource, getSafeMediaSource } from '../utils/security';
 import { mapStudioContinuousSeconds } from './studioTime';
+import { SEQUENCE_SAMPLER, sequencePictureWindow } from './studioSequencePictureClock';
 
 // This transient identity does not change an edit, source trim or asset. Keep
 // it separate from the native audio clock and from persisted project data.
@@ -30,21 +31,23 @@ export function studioPausedFrameReceiptMatches(request, result) {
     (request.sourceContentHash ? result.sourceContentHash === request.sourceContentHash
       : result.sourceGeneration === request.sourceGeneration) &&
     result.frameIndex === request.frameIndex && result.start === request.start &&
-    result.end === request.end && result.fps === request.fps && result.contentType === 'image/png';
+    result.end === request.end && result.fps === request.fps && result.contentType === 'image/png' &&
+    (request.sampling !== SEQUENCE_SAMPLER || (result.sampling === SEQUENCE_SAMPLER &&
+      result.programmeStart === request.programmeStart && result.programmeDuration === request.programmeDuration));
 }
 
 // The sequence worker first makes frame-aligned clips, maps their timestamps
 // continuously and samples the output once. Select that same raw CFR picture
 // for a paused ramp instead of the browser's nearest arbitrary source time.
-// Fractional clip lengths and a frame that belongs to another occurrence stay
-// on the native fallback until their concat boundary semantics are qualified.
-export function pausedStudioMappedFrameRequest(clip, sourceTime, fps, timeline, timeMap, resolvedGeneration) {
+// A frame belonging to another occurrence must never borrow this clip's bytes.
+export function pausedStudioMappedFrameRequest(clip, sourceTime, fps, timeline, timeMap, resolvedGeneration, cfr30Ingest = true) {
   const request = pausedStudioFrameRequest(clip, sourceTime, fps, resolvedGeneration);
   if (!request || !Array.isArray(timeline) || !timeMap?.length) return null;
-  let offset = 0, total = 0, found = false;
+  let offset = 0, total = 0, found = false, fractional = false;
   for (const row of timeline) {
     const length = Number(row.endRequest ?? row.end) - Number(row.startRequest ?? row.start ?? 0);
-    if (!(length > 0) || Math.abs(length * request.fps - Math.round(length * request.fps)) > .00001) return null;
+    if (!(length > 0)) return null;
+    if (Math.abs(length * request.fps - Math.round(length * request.fps)) > .00001) fractional = true;
     if (row.id === clip.id) { offset = total; found = true; }
     total += length;
   }
@@ -64,9 +67,32 @@ export function pausedStudioMappedFrameRequest(clip, sourceTime, fps, timeline, 
     if (mapped <= outputFrame) { selected = middle; low = middle + 1; }
     else high = middle - 1;
   }
-  const frameIndex = selected - Math.round(offset * request.fps);
-  if (frameIndex < 0 || frameIndex >= Math.round((request.end-request.start)*request.fps)) return null;
+  const window = sequencePictureWindow(offset, request.end-request.start, total, request.start, 30, request.fps);
+  const frameIndex = selected - window.first;
+  if (frameIndex < 0 || frameIndex >= window.frames) return null;
+  // Ordinary sequence ingest is CFR30. V2 inspects that source clock before
+  // applying the worker's global fractional-cut phase. Keep legacy and texture
+  // profiles stable; long-source decoding stays outside this bounded profile.
+  if (fractional) return cfr30Ingest && request.end <= 90 ? { ...request, frameIndex,
+    sampling: SEQUENCE_SAMPLER, programmeStart: offset, programmeDuration: total } : null;
   return { ...request, frameIndex };
+}
+
+export function studioPausedSampleTime(request) {
+  if (request.sampling !== SEQUENCE_SAMPLER) return request.start + request.frameIndex / request.fps;
+  const window = sequencePictureWindow(request.programmeStart, request.end-request.start,
+    request.programmeDuration, request.start, 30, request.fps);
+  return window.sourceTime + request.frameIndex / request.fps;
+}
+
+// HTMLMediaElement stores seeks at microsecond precision. An exact fractional
+// CFR timestamp can truncate just before its picture's PTS (125/24, for
+// example). One existing programme tick chooses that same frame's interior;
+// it does not change the edit, frame number, audio rate or output duration.
+export function studioFinishedFrameSeekTime(time, fps, duration) {
+  if (![time,fps,duration].every(Number.isFinite) || fps<=0 || duration<=0) return time;
+  const boundary=Math.abs(time*fps-Math.round(time*fps))<.0001;
+  return Math.max(0,Math.min(duration,time+(boundary&&time>0?1/90000:0)));
 }
 
 // A later ramp must not disable exact sampling of earlier, unchanged frames.

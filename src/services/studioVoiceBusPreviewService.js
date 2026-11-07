@@ -18,7 +18,9 @@ const fields = (value, names, optional = []) => value && typeof value === 'objec
 
 function validateVoiceBusRequest(input) {
   const invalid = () => { throw sourceError(422, 'STUDIO_VOICE_PREVIEW_INVALID', 'Recorded-speech preview parameters are invalid'); };
-  if (!fields(input, ['version', 'projectId', 'voices', 'speedPlan', 'automation', 'ducking']) || input.version !== 1 ||
+  const dialogue = input?.version === 2;
+  if (!fields(input, ['version', 'projectId', 'voices', 'speedPlan', 'automation', 'ducking',
+      ...(dialogue ? ['restoration'] : [])]) || ![1,2].includes(input.version) ||
       typeof input.projectId !== 'string' || !input.projectId.length || input.projectId.length > 160 ||
       !Array.isArray(input.voices) || !input.voices.length || input.voices.length > 8 ||
       !Array.isArray(input.speedPlan) || !input.speedPlan.length || input.speedPlan.length > 256 ||
@@ -33,6 +35,16 @@ function validateVoiceBusRequest(input) {
     outputDuration += (row.end_time-row.start_time)/row.rate; end = row.end_time;
   }
   if (outputDuration > 90) invalid();
+  if (dialogue) {
+    const settings=input.restoration;
+    if (input.ducking.enabled || input.speedPlan.some(row=>row.rate!==1) ||
+        !fields(settings,['enabled','preset','voiceIsolation','denoise','deEsser','humFrequency','compressor','limiter','loudness','eq']) ||
+        typeof settings.enabled!=='boolean' || typeof settings.voiceIsolation!=='boolean' ||
+        !['natural','podcast','noisy_room','broadcast'].includes(settings.preset) ||
+        !['denoise','deEsser','compressor'].every(key=>number(settings[key],0,100)) ||
+        ![50,60].includes(settings.humFrequency) || !number(settings.limiter,-6,-.1) || !number(settings.loudness,-24,-9) ||
+        !fields(settings.eq,['low','mid','high']) || !Object.values(settings.eq).every(v=>number(v,-12,12))) invalid();
+  }
   const ids = new Set();
   for (const take of input.voices) {
     if (!fields(take, ['id', 'storagePath', 'sourceContentHash', 'startTime', 'duration', 'trimStart', 'volume', 'fadeIn', 'fadeOut'], ['fadeOffset', 'fadeDuration']) ||
@@ -45,6 +57,15 @@ function validateVoiceBusRequest(input) {
         (!number(take.fadeOffset, 0, 7200) || !number(take.fadeDuration, .05, 7200) ||
           take.fadeOffset + take.duration > take.fadeDuration + 1/90000)) invalid();
     ids.add(take.id);
+  }
+  if (dialogue) {
+    let next=0;
+    for (const take of input.voices) {
+      if (take.startTime!==next || take.fadeIn!==0 || take.fadeOut!==0 || take.volume!==1 ||
+          take.fadeOffset!==undefined || take.fadeDuration!==undefined) invalid();
+      next+=take.duration;
+    }
+    if (Math.abs(next-end)>1/90000) invalid();
   }
   for (const key of input.automation) {
     if (!fields(key, ['property', 'time', 'value', 'easing', 'curve']) || key.property !== 'volume' ||
@@ -92,11 +113,13 @@ async function getOwnedVoiceBusPreview({ ownerUid, input, signal }) {
   try {
     const owned = await Promise.all(input.voices.map(take => resolveOwnedStudioMediaSource({
       storagePath: take.storagePath, userId: ownerUid, signRead: false })));
-    if (owned.some(o => !o.generation || o.size > 8*1024*1024 || !o.contentType.startsWith('audio/')) ||
-        owned.reduce((sum, o) => sum+o.size, 0) > 32*1024*1024)
+    const dialogue=input.version===2;
+    if (owned.some(o => !o.generation || o.size > (dialogue?64:8)*1024*1024 ||
+          !(dialogue ? o.contentType.startsWith('video/') : o.contentType.startsWith('audio/'))) ||
+        owned.reduce((sum, o) => sum+o.size, 0) > (dialogue?128:32)*1024*1024)
       throw sourceError(422, 'STUDIO_VOICE_PREVIEW_LIMIT', 'Accurate speech preview supports bounded saved audio recordings');
     const parametersHash = digest(canonical(input));
-    const runtimeFiles = ['studio_voice_bus_preview.py', 'viral_motion_graphics.py', 'studio_audio.py', 'viral_render_contract.py'];
+    const runtimeFiles = ['studio_voice_bus_preview.py', 'viral_motion_graphics.py', 'studio_audio.py', 'viral_render_contract.py', 'studio_sequence_audio.py'];
     const runtimeHash = digest(Buffer.concat(await Promise.all(runtimeFiles.map(name =>
       fs.readFile(path.resolve(__dirname, '../../python_media_worker', name))))));
     const cacheKey = digest(canonical([ownerUid, parametersHash, runtimeHash, owned.map(o => [o.generation, o.size])]));

@@ -1,0 +1,92 @@
+{
+  "headSha": "e78fe6b9e566aa7df175a15ecb5c0e755d9d3f73",
+  "conclusion": "success",
+  "url": "https://github.com/Tibule12/AutoPromote/actions/runs/42160569894",
+  "steps": [
+    {
+      "name": "Set up job",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Checkout requested revision",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Install FFmpeg test dependency",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Validate Google Cloud identity configuration",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Authenticate with Workload Identity",
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "Authenticate with existing service account fallback",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Install Google Cloud CLI",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Verify deployment identity",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Build and render-test immutable worker image",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Deploy candidate with zero production traffic",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Verify candidate health and real render",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Promote verified revision to production",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Verify production service",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Roll back production traffic after a failed promotion check",
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "Post Authenticate with existing service account fallback",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Checkout requested revision",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Complete job",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ]
+}

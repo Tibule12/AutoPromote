@@ -554,6 +554,29 @@ describe("ViralClipStudio timeline sequencing", () => {
     );
   });
 
+  test("Play just before an interior cut continues from the selected picture instead of restarting the shot", () => {
+    mountNativePreview({ importedCameraMaster: {
+      id: 'cut-neighbour', name: 'Next source', duration: 4,
+      url: 'https://example.com/cut-neighbour.mp4', storagePath: 'studio/sources/cut-neighbour.mp4',
+    } });
+    fireEvent.click(screen.getByTestId('pro-video-clip-1'), { detail: 0 });
+    const video = screen.getByTestId('studio-after-video');
+    Object.defineProperties(video, {
+      readyState: { configurable: true, value: 4 },
+      currentSrc: { configurable: true, get: () => video.src },
+      currentTime: { configurable: true, writable: true, value: 8 - 1 / 24 },
+      paused: { configurable: true, value: true },
+      duration: { configurable: true, value: 12 },
+    });
+    video.play = jest.fn().mockResolvedValue();
+    video.pause = jest.fn();
+    const pause = screen.queryByRole('button', { name: 'Pause comparison', exact: true });
+    if (pause) fireEvent.click(pause);
+    fireEvent.click(screen.getByRole('button', { name: 'Play comparison', exact: true }));
+    expect(video.play).toHaveBeenCalled();
+    expect(video.currentTime).toBe(8 - 1 / 24);
+  });
+
   test("a native shot boundary promotes and starts the prepared decoder before the boundary event returns", () => {
     mountNativePreview({ importedCameraMaster: {
       id: 'prepared-next', name: 'Next source', duration: 4,
@@ -1023,7 +1046,10 @@ describe("ViralClipStudio timeline sequencing", () => {
     const slider = screen.getByRole('slider', { name: 'Edited output position' });
     expect(Number(slider.max)).toBe(3);
     fireEvent.change(slider, { target: { value: '1.5' } });
-    expect(video.currentTime).toBe(1.5);
+    // Seek one canonical tick inside the selected frame, avoiding a decoder's
+    // previous-picture boundary choice; the requested programme stays exact.
+    expect(Number(slider.value)).toBe(1.5);
+    expect(video.currentTime).toBe(1.5 + 1 / 90000);
   });
 
   test("source speed ramp uses the canonical delivery intervals and seek clock", () => {
@@ -2192,16 +2218,17 @@ describe("ViralClipStudio timeline sequencing", () => {
       "data-programme-filter",
       expect.stringContaining("brightness(1.050)")
     );
-    // Podcast Pro uses a 3%-of-output-width frame inset. A 9:16 preview must
-    // convert that same physical inset to 1.6875% vertically, just like the
-    // worker, rather than applying 3% of the much taller canvas.
+    // The shared solo raster paints its physical inset and black canvas in
+    // one surface. A second CSS inset would frame and shrink it twice. The
+    // actual FFmpeg/pixel references qualify geometry; retain the authored
+    // 3% frame in the export assertion below.
     expect(programmeCanvas).toHaveStyle({
-      left: "3%",
-      top: "1.6875%",
-      width: "calc(100% - 6%)",
-      height: "calc(100% - 3.375%)",
+      left: "0px",
+      top: "0px",
+      width: "100%",
+      height: "100%",
     });
-    expect(programmeCanvas.style.borderRadius).not.toBe("0px");
+    expect(programmeCanvas.style.borderRadius).toBe("0");
     expect(screen.getByTestId("studio-after-video")).toHaveClass("main-video-frame-preview");
     expect(screen.getByLabelText("Untouched source preview").style.filter).not.toContain(
       "brightness(1.050)"
@@ -6445,6 +6472,11 @@ describe("ViralClipStudio timeline sequencing", () => {
     video.currentTime=6;fireEvent.timeUpdate(video);
     expect(before.currentTime).toBeCloseTo(13);
     expect(before.playbackRate).toBe(.5);
+    // Paused final pictures use the same canvas presenter; moving finished
+    // video returns to the native decoder without reapplying source speed.
+    expect(video).toHaveStyle({display:'block',visibility:'hidden',opacity:'1'});
+    expect(screen.getByTestId('studio-program-canvas')).toHaveStyle({display:'block'});
+    fireEvent.click(screen.getByRole('button', { name: 'Play comparison', exact: true }));
     expect(video).toHaveStyle({display:'block',visibility:'visible',opacity:'1'});
     expect(screen.getByTestId('studio-program-canvas')).toHaveStyle({display:'none'});
     expect(before).toHaveStyle({display:'block'});
@@ -7393,4 +7425,24 @@ describe("ViralClipStudio timeline sequencing", () => {
       expect(within(flowSurface).getByText("Null Rig 1")).toBeInTheDocument();
     });
   });
+  test('source-dialogue preview candidate can open the real editor without forward state references', () => {
+    const previous=process.env.REACT_APP_STUDIO_SOURCE_DIALOGUE_PREVIEW;
+    const previousCohort=process.env.REACT_APP_STUDIO_SOURCE_DIALOGUE_PREVIEW_UIDS;
+    process.env.REACT_APP_STUDIO_SOURCE_DIALOGUE_PREVIEW='true';
+    process.env.REACT_APP_STUDIO_SOURCE_DIALOGUE_PREVIEW_UIDS='test-user';
+    try {
+      const view=render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+        clips={[{id:'source-dialogue-open',start:0,end:12,duration:12}]} onSave={jest.fn()} onCancel={jest.fn()} />);
+      readyCutawaySource(12);
+      expect(screen.getByTestId('viral-studio-workspace')).toBeInTheDocument();
+      expect(screen.getByLabelText('Edited output position')).toBeInTheDocument();
+      view.unmount();
+    } finally {
+      if(previous===undefined)delete process.env.REACT_APP_STUDIO_SOURCE_DIALOGUE_PREVIEW;
+      else process.env.REACT_APP_STUDIO_SOURCE_DIALOGUE_PREVIEW=previous;
+      if(previousCohort===undefined)delete process.env.REACT_APP_STUDIO_SOURCE_DIALOGUE_PREVIEW_UIDS;
+      else process.env.REACT_APP_STUDIO_SOURCE_DIALOGUE_PREVIEW_UIDS=previousCohort;
+    }
+  });
+
 });

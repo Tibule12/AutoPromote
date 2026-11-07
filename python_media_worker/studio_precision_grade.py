@@ -13,7 +13,10 @@ def build_precision_grade_filter(fx):
     channels = []
     for name, wb in zip("rgb", balance):
         scale = exposure * brightness * gain * wb
-        channels.append(f"{name}='clip((pow(max(0,val/255*{scale:.8f}+{lift:.8f}),{1/gamma:.8f})-0.5)*{contrast:.8f}+0.5,0,1)*255'")
+        # lutrgb otherwise truncates each channel before saturation. The
+        # editor's Uint8ClampedArray rounds at the pixel boundary; systematic
+        # truncation also makes a nominally neutral grade darken the image.
+        channels.append(f"{name}='floor(clip((pow(max(0,val/255*{scale:.8f}+{lift:.8f}),{1/gamma:.8f})-0.5)*{contrast:.8f}+0.5,0,1)*255+0.5)'")
     matrix = []
     for row, name in enumerate("rgb"):
         for col, weight in enumerate([.2126, .7152, .0722]):

@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, render, fireEvent, screen, waitFor } from "@testing-library/react";
 import StudioVoiceoverPreview from "../StudioVoiceoverPreview";
 import { uploadVoiceoversForRender, voiceoverTrackAudible, constantMusicDuckGain,
   voiceoverPcmEligible, voiceoverPcmKey, createVoiceoverPcmBuffer } from "../studioVoiceover";
@@ -174,6 +174,67 @@ test('prepared voice PCM schedules its real trim on the shared clock without a s
     Object.defineProperty(video,'paused',{configurable:true,value:true});fireEvent.pause(video);
     expect(stop).toHaveBeenCalledTimes(2);unmount();expect(close).not.toHaveBeenCalled();
   } finally {window.AudioContext=priorContext;global.fetch=priorFetch;play.mockRestore();pause.mockRestore();}
+});
+
+test('prepared programme audio pins Play before decoder advance, survives a cut, and obeys explicit Pause and seek', async () => {
+  const sources = [], connect = jest.fn(), disconnect = jest.fn();
+  const context = { currentTime: 100, sampleRate: 48000, destination: {},
+    resume: jest.fn().mockResolvedValue(),
+    createAnalyser: () => ({ connect, disconnect }),
+    createGain: () => ({ connect, disconnect, gain: { value: 0 } }),
+    createBufferSource: () => {
+      const source = { connect, disconnect, start: jest.fn(), stop: jest.fn(), addEventListener: jest.fn() };
+      sources.push(source); return source;
+    } };
+  const previousContext = window.AudioContext;
+  window.AudioContext = jest.fn(() => context);
+  const ref = React.createRef(), clock = jest.fn();
+  let intent = false, seekIdentity = 0, paused = true;
+  const video = document.createElement('video');
+  Object.defineProperties(video, { paused: { get: () => paused }, readyState: { value: 4 } });
+  const videoRef = { current: video };
+  const props = { takes: [], projectId: 'owned-project', videoRef, activeClip: 'first',
+    preparedInput: { version: 2, ducking: { enabled: false } },
+    loadPreparedBus: jest.fn().mockResolvedValue({ key: 'owned-digest', buffer: { duration: 12 } }),
+    getTimelineTime: t => t, getAudioContext: () => context,
+    getOutputPlan: (_context, offset) => ({ when: context.currentTime + .01, offset }),
+    programmeAuthority: true, getPlaybackIntent: () => intent,
+    getSeekIdentity: () => seekIdentity, onPreparedClock: clock, volume: 1 };
+  try {
+    const view = render(<StudioVoiceoverPreview ref={ref} {...props} />);
+    await waitFor(() => expect(ref.current.canFollowMusicClock()).toBe(true));
+    act(() => { ref.current.stage({ offset: 0 }); });
+    // The decoder can advance while the normal Play promise resolves. The
+    // requested programme start must remain zero instead of losing samples.
+    intent = true; paused = false; video.currentTime = .03;
+    fireEvent.play(video);
+    expect(sources).toHaveLength(1);
+    expect(sources[0].start).toHaveBeenCalledWith(100.01, 0);
+    expect(clock).toHaveBeenLastCalledWith(expect.objectContaining({ offset: 0 }));
+    context.currentTime = 104.71;
+    const next = document.createElement('video'); next.currentTime = 4.71;
+    Object.defineProperties(next, { paused: { value: false }, readyState: { value: 4 } });
+    videoRef.current = next;
+    fireEvent.pause(video);
+    view.rerender(<StudioVoiceoverPreview ref={ref} {...props} activeClip="second" />);
+    fireEvent.seeking(next); fireEvent.timeUpdate(next);
+    expect(sources).toHaveLength(1);
+    expect(sources[0].stop).not.toHaveBeenCalled();
+    intent = false;
+    act(() => ref.current.pause());
+    expect(sources[0].stop).toHaveBeenCalledTimes(1);
+    expect(clock).toHaveBeenLastCalledWith(null);
+    fireEvent.play(next); // A queued decoder event cannot undo user Pause.
+    expect(sources).toHaveLength(1);
+    seekIdentity += 1; context.currentTime = 108;
+    act(() => ref.current.stage({ offset: 6 }));
+    intent = true; next.currentTime = 6.02; fireEvent.play(next);
+    expect(sources).toHaveLength(2);
+    expect(sources[1].start).toHaveBeenCalledWith(108.01, 6);
+    view.unmount();
+    expect(sources[1].stop).toHaveBeenCalledTimes(1);
+    expect(props.loadPreparedBus).toHaveBeenCalledTimes(1);
+  } finally { window.AudioContext = previousContext; }
 });
 
 test.each([false,true])('voiceover 200%% automation uses one audible route and respects shared context ownership: %s', shared => {

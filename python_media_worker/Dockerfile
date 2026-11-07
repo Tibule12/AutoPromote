@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.11-slim-trixie
 
 # Prevent prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive \
@@ -12,9 +12,12 @@ ENV DEBIAN_FRONTEND=noninteractive \
     FASTER_WHISPER_STRICT=true \
     ALLOW_RUNTIME_DEPENDENCY_INSTALL=false
 
+# Keep the API audition and final worker on the measured FFmpeg family. A
+# runtime update needs their same-source picture/audio comparisons together.
+ARG STUDIO_FFMPEG_VERSION=7:7.1.5-0+deb13u1
 # Install system dependencies (For OpenCV + FFmpeg)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ffmpeg \
+    ffmpeg=${STUDIO_FFMPEG_VERSION} \
     fonts-dejavu-core \
     libegl1 \
     libgles2 \

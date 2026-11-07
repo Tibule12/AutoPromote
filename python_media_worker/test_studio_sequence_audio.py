@@ -9,12 +9,32 @@ from pathlib import Path
 import numpy as np
 
 try:
-    from python_media_worker.studio_sequence_audio import sequence_audio_window
+    from python_media_worker.studio_sequence_audio import sequence_audio_window, sequence_audio_slice_command
 except ImportError:
-    from studio_sequence_audio import sequence_audio_window
+    from studio_sequence_audio import sequence_audio_window, sequence_audio_slice_command
 
 
 class SequenceAudioTests(unittest.TestCase):
+    def test_long_source_slice_keeps_fast_input_seek(self):
+        args=sequence_audio_slice_command('source','output',{'source_start':3600,'duration':2})
+        self.assertLess(args.index('-ss'),args.index('-i'))
+
+    def test_aac_slice_is_identical_with_video_and_audio_only_packet_indexes(self):
+        with tempfile.TemporaryDirectory() as temp:
+            folder=Path(temp);video=folder/'source.mp4';audio=folder/'source.m4a'
+            subprocess.run(['ffmpeg','-v','error','-f','lavfi','-i','color=black:s=32x32:r=30:d=4',
+                '-f','lavfi','-i','sine=frequency=431:sample_rate=44100:duration=4',
+                '-c:v','libx264','-threads','1','-g','250','-c:a','aac','-y',str(video)],check=True)
+            subprocess.run(['ffmpeg','-v','error','-i',str(video),'-vn','-c:a','copy','-y',str(audio)],check=True)
+            window=sequence_audio_window({'start_time':2.7,'end_time':3.7},0,1,4)
+            decoded=[]
+            for index,source in enumerate([video,audio]):
+                output=folder/f'cut-{index}.m4a'
+                subprocess.run(sequence_audio_slice_command(source,output,window),check=True,capture_output=True)
+                decoded.append(subprocess.check_output(['ffmpeg','-v','error','-i',str(output),
+                    '-ar','48000','-ac','2','-f','f32le','pipe:1']))
+            self.assertEqual(decoded[0],decoded[1])
+
     def test_jcut_cannot_precede_programme_or_source(self):
         window = sequence_audio_window(dict(start_time=5, end_time=7, audioTrimOffsetStart=-.8), 0, 4, 10)
         self.assertEqual(window, dict(source_start=5, source_end=7, programme_start=0, duration=2))

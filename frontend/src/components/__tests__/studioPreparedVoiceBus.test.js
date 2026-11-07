@@ -1,4 +1,4 @@
-import { studioVoiceBusRequest, scheduleStudioPreparedDuck, loadStudioVoiceBus } from '../studioPreparedVoiceBus';
+import { studioVoiceBusRequest, studioDialogueBusRequest, scheduleStudioPreparedDuck, loadStudioVoiceBus } from '../studioPreparedVoiceBus';
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import StudioVoiceoverPreview from '../StudioVoiceoverPreview';
@@ -6,6 +6,21 @@ const take = { id: 'voice', ownerUid: 'owner', sourceStoragePath: 'owned/take.wa
   sourceDuration: 8, startTime: 1, trimStart: .25, duration: 2, volume: .7, fadeIn: .1, fadeOut: .2 };
 const map = [{ programmeRange: { startTick: 0, endTick: 360000 }, outputRange: { startTick: 0, endTick: 180000 },
   rateNumerator: 2, rateDenominator: 1 }];
+
+test('original dialogue binds all owned source cuts and rejects unqualified routing and speed clocks', () => {
+  const timeline=[{id:'first',sourceStoragePath:'owned/source.mp4',contentHash:'a'.repeat(64),startRequest:0,endRequest:4.7},
+    {id:'second',sourceStoragePath:'owned/source.mp4',contentHash:'a'.repeat(64),startRequest:4.7,endRequest:12}];
+  const timeMap=[{programmeRange:{startTick:0,endTick:12*90000},outputRange:{startTick:0,endTick:12*90000},rateNumerator:1,rateDenominator:1}];
+  const options={projectId:'source',timeline,outputTimeMap:timeMap,restoration:{enabled:true}};
+  const request=studioDialogueBusRequest(options);
+  expect(request.version).toBe(2);expect(request.voices.map(v=>[v.startTime,v.trimStart,v.duration])).toEqual([[0,0,4.7],[4.7,4.7,7.3]]);
+  expect(request.ducking.enabled).toBe(false);
+  expect(studioDialogueBusRequest({...options,timeline:timeline.map(c=>({...c,url:'changed-access-only'}))})).toEqual(request);
+  for(const patch of [{contentHash:''},{endRequest:61},{audioDetached:true},{audioTrimOffsetStart:-.1},{audioTrimOffsetEnd:.1}])
+    expect(studioDialogueBusRequest({...options,timeline:[{...timeline[0],...patch},timeline[1]]})).toBeNull();
+  expect(studioDialogueBusRequest({...options,outputTimeMap:map})).toBeNull();
+  expect(studioDialogueBusRequest({...options,restoration:{enabled:false}})).toBeNull();
+});
 
 test('rapid-edit busy retries are bounded and never repeat rate-limit failures', async () => {
   jest.useFakeTimers(); const before = global.fetch;

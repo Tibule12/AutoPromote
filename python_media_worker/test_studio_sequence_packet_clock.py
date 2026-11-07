@@ -16,9 +16,21 @@ import unittest
 from unittest import mock
 
 from python_media_worker import main_media_server as worker
+from python_media_worker.studio_sequence_video import preserve_reviewed_sequence_samples
 
 
 class SequencePacketClockTests(unittest.TestCase):
+    def test_lossless_reviewed_sequence_has_a_raw_scratch_budget(self):
+        self.assertTrue(preserve_reviewed_sequence_samples(1280,720,24,12,True))
+        for values in [(1280,720,24,12,False),(1280,720,24,90,True),
+                       (3840,2160,60,12,True),(1280,720,24,float('inf'),True),
+                       (1280,720,0,12,True),(1280,720,'source',12,True)]:
+            with self.subTest(values=values):
+                self.assertFalse(preserve_reviewed_sequence_samples(*values))
+        args=worker.build_studio_sequence_encode_args(preserve_samples=True,fps=24)
+        self.assertEqual(args[args.index('-crf')+1],'0')
+    def test_cut_in_unrepresented_fractional_tail_does_not_reject_a_valid_edit(self):
+        self.render_sequence(24, duration=1.9666666666666666, tail_cut=1.966)
     def test_fractional_cuts_at_24fps(self):
         self.render_sequence(24)
 
@@ -28,7 +40,10 @@ class SequencePacketClockTests(unittest.TestCase):
     def test_fractional_cuts_at_60fps(self):
         self.render_sequence(60)
 
-    def render_sequence(self, fps):
+    def test_short_reviewed_sequence_preserves_intermediates_but_keeps_delivery_quality(self):
+        self.render_sequence(24, framed=True)
+
+    def render_sequence(self, fps, duration=2, tail_cut=None, framed=False):
         with tempfile.TemporaryDirectory(prefix="studio-packet-clock-") as folder, ExitStack() as patches:
             tmp_path = Path(folder)
 
@@ -78,6 +93,7 @@ class SequencePacketClockTests(unittest.TestCase):
             replace(worker, "upload_file_to_firebase", retain_output)
             original_run = worker.run_subprocess_async
             checked_segments = []
+            checked_finish = []
 
             async def inspect_intermediates(command, **options):
                 result = await original_run(command, **options)
@@ -89,21 +105,27 @@ class SequencePacketClockTests(unittest.TestCase):
                     numerator, denominator = picture["avg_frame_rate"].split("/")
                     assert float(numerator) / float(denominator) == fps
                     checked_segments.append(output.name)
+                if framed and output.name.endswith(("_finish.mp4", "_main_frame.mp4", "_viral.mp4")):
+                    expected = "23" if output.name.endswith("_viral.mp4") else "0"
+                    self.assertEqual(command[command.index("-crf") + 1], expected)
+                    checked_finish.append(output.name)
                 return result
 
             replace(worker, "run_subprocess_async", inspect_intermediates)
             request = worker.RenderViralRequest(
-                video_url="local-regression-source", start_time=0, end_time=2,
+                video_url="local-regression-source", start_time=0, end_time=duration,
                 timeline_segments=[
                     {"id": "left", "url": "local-regression-source", "start_time": 0, "end_time": .7},
-                    {"id": "right", "url": "local-regression-source", "start_time": .7, "end_time": 2},
+                    {"id": "right", "url": "local-regression-source", "start_time": .7, "end_time": duration},
                 ],
                 smart_crop=True, smart_crop_mode="speaker_track",
-                finish_plan={"enabled": True, "main_frame": {"enabled": False}, "reframe": {
+                finish_plan={"enabled": True, "main_frame": {"enabled": framed,
+                    "border_radius_percent": 10, "inset_percent": 2.5, "background": "studio_black"}, "reframe": {
                     "aspect": "9:16", "zoom": 1,
                     "keyframes": [{"time": 0, "x": 50, "y": 50}],
                     "timeline_cuts": [{"time": 0, "mode": "speaker_track"},
-                                      {"time": .7, "mode": "speaker_track"}],
+                                      {"time": .7, "mode": "speaker_track"}] +
+                                     ([{"time": tail_cut, "mode": "speaker_track"}] if tail_cut is not None else []),
                 }},
                 output_settings={"resolution": "720p", "fps": fps, "quality": "balanced"},
                 brand_watermark=False,
@@ -111,8 +133,10 @@ class SequencePacketClockTests(unittest.TestCase):
             result = asyncio.run(worker.render_viral_clip_impl(request, f"packet-clock-{fps}"))
             assert result["status"] == "completed"
             assert len(checked_segments) == 3
+            if framed:
+                self.assertEqual(len(checked_finish), 3)
             picture = next(s for s in probe(final) if s["codec_type"] == "video")
-            assert int(picture["nb_frames"]) == 2 * fps
-            assert abs(float(picture["duration"]) - 2) < 1e-6
+            assert int(picture["nb_frames"]) == round(duration * fps)
+            assert abs(float(picture["duration"]) - round(duration * fps)/fps) < 1e-6
             assert any(s["codec_type"] == "audio" for s in probe(final))
             run("-xerror", "-err_detect", "explode", "-i", final, "-f", "null", "-")

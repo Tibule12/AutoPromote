@@ -28,3 +28,34 @@ export const applyPrecisionGrade = (pixels, grade) => {
   }
   return pixels;
 };
+
+const vignetteMaps = new Map();
+export const applyPrecisionVignette = (pixels, width, height, amount) => {
+  const strength = clamp(Number(amount) || 0, 0, .85);
+  if (strength <= .005) return pixels;
+  const angle = Math.PI / Number(Math.max(5.5, 17 - strength * 10).toFixed(3));
+  const key = `${width}:${height}:${angle}`;
+  let factors = vignetteMaps.get(key);
+  if (!factors) {
+    const distance = Math.hypot(width / 2, height / 2);
+    factors = new Float32Array(width * height);
+    for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+      const radius = Math.hypot(Math.trunc(x - width / 2), Math.trunc(y - height / 2)) / distance;
+      factors[y * width + x] = radius > 1 ? 0 : Math.cos(angle * radius) ** 4;
+    }
+    if (vignetteMaps.size >= 2) vignetteMaps.delete(vignetteMaps.keys().next().value);
+    vignetteMaps.set(key, factors);
+  }
+  // The canonical filter acts on limited-range BT.709 YUV: Y*f and
+  // (chroma-127)*f+127. Express that same operation in decoded RGB, including
+  // the limited-range black/chroma offsets, rather than a CSS dark gradient.
+  const offsets = [16 * 255 / 219 + 1.5748 * 255 / 224,
+    16 * 255 / 219 - (.187324 + .468124) * 255 / 224,
+    16 * 255 / 219 + 1.8556 * 255 / 224];
+  for (let p = 0, i = 0; p < factors.length; p++, i += 4) {
+    const factor = factors[p];
+    for (let channel = 0; channel < 3; channel++)
+      pixels[i + channel] = clamp(pixels[i + channel] * factor + (factor - 1) * offsets[channel], 0, 255);
+  }
+  return pixels;
+};

@@ -22,7 +22,10 @@ class SequencePictureTests(unittest.TestCase):
             for (start, duration, source_start), samples in zip(windows, expected):
                 window = sequence_picture_window(start, duration, 15.760333333333334, source_start, 24, 24)
                 output = subprocess.check_output(['ffmpeg', '-v', 'error', '-ss', f"{window['seek']:.6f}", '-i', source,
-                    '-vf', ','.join(window['clock']), '-frames:v', str(window['frames']), '-pix_fmt', 'rgb24', '-f', 'rawvideo', '-'])
+                    '-vf', ','.join(window['clock']), '-frames:v', str(window['frames']),
+                    # Match the real sequence encoder. FFmpeg 7 otherwise
+                    # resamples this rawvideo observer to its muxer rate.
+                    '-fps_mode', 'passthrough', '-pix_fmt', 'rgb24', '-f', 'rawvideo', '-'])
                 pictures = np.frombuffer(output, np.uint8).reshape(-1, 16, 16, 3)
                 self.assertEqual(len(pictures), len(samples))
                 np.testing.assert_allclose(pictures.mean(axis=(1, 2, 3))-10, samples, atol=1)
