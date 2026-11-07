@@ -197,6 +197,8 @@ import { describeStudioDirectorReview } from "./studioDirectorReviewDiff";
 import { postStudioDirectorReviewDecision } from "./studioDirectorReviewClient";
 import { registerStudioDirectorProjectRevision } from "./studioDirectorProjectRevisionClient";
 import { buildSourceShotDirectorSplitRequest, buildSourceShotDirectorSplitCandidates } from "./studioDirectorEvidenceProposals";
+import { createSourceShotDirectorDraft, restoreSourceShotDirectorDraft,
+  sourceShotDirectorDraftMatches } from "./studioDirectorSavedDraft";
 import { secondsToTicks, ticksToSeconds, mapOutputTickToProgrammeTick, mapProgrammeTickToOutputTick } from "./studioTime";
 import { advanceStudioCueStartPlan, scheduleStudioCueGain, scheduleStudioCueRate, studioCueProgrammeTime, studioCueStartPlan } from "./studioCueGain";
 import { bindStudioAudioSource, bindStudioAudioSources, studioUploadedAudioBinding } from "./studioAudioSourceBindings";
@@ -2801,7 +2803,10 @@ const ViralClipStudio = ({
   const [workspaceMode, setWorkspaceMode] = useState("creator");
   const [projectId, setProjectId] = useState(() => createSecureId("viral-project"));
   const [localDirectorProposal, setLocalDirectorProposal] = useState(null);
+  const [directorDraftRestore, setDirectorDraftRestore] = useState(null);
   const directorCandidateSelectionRef = useRef(0);
+  const directorDraftRestoreVersionRef = useRef(0);
+  const directorDraftSaveRef = useRef(null);
   const incomingDirectorProposalRequest = directorProposalRequest ||
     (localDirectorProposal?.projectId === projectId ? localDirectorProposal.request : null);
   const [projectName, setProjectName] = useState("Untitled viral edit");
@@ -3734,9 +3739,14 @@ const ViralClipStudio = ({
       if (error.code !== "INVALID_SOURCE_RANGE") throw error;
       snapshot.studioDocument = null;
     }
-    return snapshot.studioDocument
+    const projected = snapshot.studioDocument
       ? projectStudioEditableStateToSnapshot(snapshot.studioDocument, snapshot)
       : snapshot;
+    const savedDirectorDraft = localDirectorProposal?.savedDraft || directorDraftRestore?.saved;
+    projected.sourceShotDirectorDraft = !directorProposalRequest &&
+      sourceShotDirectorDraftMatches(snapshot.studioDocument, savedDirectorDraft)
+      ? savedDirectorDraft : null;
+    return projected;
   };
   latestEditorSnapshotRef.current = getEditorSnapshot;
 
@@ -3795,6 +3805,9 @@ const ViralClipStudio = ({
           snapshot: savedSnapshot,
           projectId: nextId,
         });
+        // Analysis ownership is bound to the original project. A copy keeps
+        // its edit/media but needs a new source-bound Director analysis.
+        savedSnapshot.sourceShotDirectorDraft = null;
       }
       const saved = await saveViralStudioProject({
         id: nextId,
@@ -4135,6 +4148,7 @@ const ViralClipStudio = ({
       audioAutomationSource: _audioAutomationSource,
       activeReframeKeyframeId: _activeReframeKeyframeId,
       activeAngleGroupId: _activeAngleGroupId,
+      sourceShotDirectorDraft: _sourceShotDirectorDraft,
       hookPreviewLoop: _hookPreviewLoop,
       proxySettings: _proxySettings,
       projectMedia: snapshotProjectMedia,
@@ -4209,6 +4223,19 @@ const ViralClipStudio = ({
     if (studioDocumentRef.current?.compatibility?.editableStateVersion === 1) {
       snapshot = projectStudioEditableStateToSnapshot(studioDocumentRef.current, snapshot);
     }
+    const directorRestoreVersion = ++directorDraftRestoreVersionRef.current;
+    ++directorCandidateSelectionRef.current;
+    ++faceTrackingGeneration.current;
+    setFaceTrackingStatus("idle");
+    setFaceTrackingMessage("");
+    setLocalDirectorProposal(null);
+    setDirectorReview(null);
+    setDirectorReviewState("idle");
+    setDirectorReviewError("");
+    setDirectorDraftRestore(snapshot.sourceShotDirectorDraft && studioDocumentRef.current ? {
+      version: directorRestoreVersion, projectId: studioDocumentRef.current.projectId,
+      saved: snapshot.sourceShotDirectorDraft,
+    } : null);
     const normalizedClips = snapshot.orderedClips || [];
     const normalizedOverlays = snapshot.overlays || [];
     setOrderedClips(normalizedClips);
@@ -8777,9 +8804,15 @@ const ViralClipStudio = ({
           };
           const request = snapshot.studioDocument && buildSourceShotDirectorSplitRequest(parameters);
           const choices = request ? buildSourceShotDirectorSplitCandidates(parameters) : [];
-          setLocalDirectorProposal(request ? { projectId, request, choices,
-            occurrenceId: String(clipId) } : null);
+          const draft = request ? await createSourceShotDirectorDraft(snapshot.studioDocument,
+            { request, choices, occurrenceId: String(clipId) }) : null;
+          if (generation !== faceTrackingGeneration.current) return;
+          if (activeProjectIdRef.current === projectId &&
+              (!draft || sourceShotDirectorDraftMatches(studioDocumentRef.current, draft.savedDraft))) {
+            setLocalDirectorProposal(draft);
+          }
         } catch (proposalError) {
+          if (generation !== faceTrackingGeneration.current) return;
           setLocalDirectorProposal(null);
           console.warn("Source-shot analysis had no reviewable clip boundary", proposalError);
         }
@@ -9541,7 +9574,10 @@ const ViralClipStudio = ({
       if (activeProjectIdRef.current !== projectId || selection !== directorCandidateSelectionRef.current) return;
       const index = snapshot.timeline.findIndex(clip => String(clip.id) === request.operation.target.occurrenceId);
       if (index < 0) throw new Error("This source range changed. Analyze its current range again.");
-      setLocalDirectorProposal(current => current?.projectId === projectId ? { ...current, request } : current);
+      setLocalDirectorProposal(current => current?.projectId === projectId ? {
+        ...current, request,
+        savedDraft: current.savedDraft ? { ...current.savedDraft, selectedProposalId: request.proposalId } : null,
+      } : current);
       setDirectorReview(null);
       setDirectorReviewState("idle");
       setDirectorReviewError("");
@@ -9559,6 +9595,8 @@ const ViralClipStudio = ({
 
   const openDirectorReview = async () => {
     if (!incomingDirectorProposalRequest || directorReviewState === "working") return;
+    const restoreVersion = directorDraftRestoreVersionRef.current;
+    const selectionVersion = directorCandidateSelectionRef.current;
     setDirectorReviewState("working");
     setDirectorReviewError("");
     try {
@@ -9570,6 +9608,10 @@ const ViralClipStudio = ({
         snapshot.studioDocument,
         incomingDirectorProposalRequest
       );
+      if (restoreVersion !== directorDraftRestoreVersionRef.current ||
+          selectionVersion !== directorCandidateSelectionRef.current ||
+          activeProjectIdRef.current !== projectId ||
+          serializeSnapshot(directorProposalRequestRef.current) !== serializeSnapshot(incomingDirectorProposalRequest)) return;
       const prepared = {
         requestSignature: serializeSnapshot(incomingDirectorProposalRequest),
         document: cloneSnapshot(snapshot.studioDocument),
@@ -9584,6 +9626,8 @@ const ViralClipStudio = ({
       setDirectorReview(prepared);
       setDirectorReviewState("ready");
     } catch (error) {
+      if (restoreVersion !== directorDraftRestoreVersionRef.current ||
+          selectionVersion !== directorCandidateSelectionRef.current || activeProjectIdRef.current !== projectId) return;
       setDirectorReview(null);
       setDirectorReviewState("error");
       setDirectorReviewError(error.message || "The incoming edit could not be reviewed.");
@@ -9595,6 +9639,7 @@ const ViralClipStudio = ({
     setDirectorReviewState("working");
     setDirectorReviewError("");
     let serverReview = null;
+    const reviewRestoreVersion = directorDraftRestoreVersionRef.current;
     try {
       const auth = getAuth();
       const reviewer = auth?.currentUser;
@@ -9606,7 +9651,7 @@ const ViralClipStudio = ({
         throw new Error("Your sign-in changed. Sign in again before reviewing this edit.");
       }
       const snapshot = getEditorSnapshot();
-      if (!snapshot.studioDocument ||
+      if (reviewRestoreVersion !== directorDraftRestoreVersionRef.current || !snapshot.studioDocument ||
           serializeSnapshot(snapshot.studioDocument) !== serializeSnapshot(directorReview.document)) {
         const stale = new Error("The project changed after this preview. Review the edit again.");
         stale.code = "STALE_REVIEW";
@@ -9622,7 +9667,7 @@ const ViralClipStudio = ({
         throw new Error("Your sign-in changed while saving the project version. No decision was recorded.");
       }
       const registeredSnapshot = latestEditorSnapshotRef.current?.();
-      if (activeProjectIdRef.current !== projectId ||
+      if (reviewRestoreVersion !== directorDraftRestoreVersionRef.current || activeProjectIdRef.current !== projectId ||
           serializeSnapshot(directorProposalRequestRef.current) !== directorReview.requestSignature ||
           lastSnapshotSignatureRef.current !== editorSignature ||
           !registeredSnapshot?.studioDocument ||
@@ -9641,7 +9686,7 @@ const ViralClipStudio = ({
         throw new Error("Your sign-in changed during review. No local edit was applied.");
       }
       const latestSnapshot = latestEditorSnapshotRef.current?.();
-      if (activeProjectIdRef.current !== projectId ||
+      if (reviewRestoreVersion !== directorDraftRestoreVersionRef.current || activeProjectIdRef.current !== projectId ||
           serializeSnapshot(directorProposalRequestRef.current) !== directorReview.requestSignature ||
           lastSnapshotSignatureRef.current !== editorSignature ||
           !latestSnapshot?.studioDocument ||
@@ -9668,7 +9713,7 @@ const ViralClipStudio = ({
             reviewReceipt, serverReview,
           });
       const beforeCommit = latestEditorSnapshotRef.current?.();
-      if (!beforeCommit?.studioDocument ||
+      if (reviewRestoreVersion !== directorDraftRestoreVersionRef.current || !beforeCommit?.studioDocument ||
           serializeSnapshot(beforeCommit.studioDocument) !== serializeSnapshot(latestSnapshot.studioDocument)) {
         throw new Error("The project changed while the server review was being applied locally.");
       }
@@ -13047,6 +13092,45 @@ const ViralClipStudio = ({
       void handleExportRender(pendingAction.destination);
     }
   }, [selectedClip]);
+
+  useEffect(() => {
+    if (!directorDraftRestore || directorDraftRestore.projectId !== projectId) return;
+    let cancelled = false;
+    const pending = directorDraftRestore;
+    // Run after the restored source/timeline state commits. Restoring inside
+    // applyEditorSnapshot can race the old render's document reconciliation.
+    const document = getEditorSnapshot().studioDocument;
+    void restoreSourceShotDirectorDraft(document, pending.saved).then(restored => {
+      if (cancelled || pending.version !== directorDraftRestoreVersionRef.current ||
+          activeProjectIdRef.current !== pending.projectId) return;
+      if (restored && sourceShotDirectorDraftMatches(studioDocumentRef.current, restored.savedDraft)) {
+        setLocalDirectorProposal(restored);
+      }
+      setDirectorDraftRestore(current => current?.version === pending.version ? null : current);
+    });
+    return () => { cancelled = true; };
+    // Current edits are checked again before restoring; approval stays fresh.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId, directorDraftRestore]);
+
+  useEffect(() => {
+    if (directorDraftRestore) return;
+    const snapshot = getEditorSnapshot();
+    const signature = serializeSnapshot(snapshot.sourceShotDirectorDraft);
+    const previous = directorDraftSaveRef.current;
+    directorDraftSaveRef.current = { projectId, signature };
+    if (!previous || previous.projectId !== projectId || previous.signature === signature) return;
+    // Selecting/receiving a suggestion is durable UI state, not an edit or an
+    // approval. Do not consume Undo or invalidate a completed movie for it.
+    if (lastSnapshotRef.current && lastSnapshotSignatureRef.current ===
+        serializeSnapshot(getHistoryRelevantSnapshot(snapshot))) {
+      lastSnapshotRef.current = { ...lastSnapshotRef.current,
+        sourceShotDirectorDraft: snapshot.sourceShotDirectorDraft };
+    }
+    scheduleProjectAutosave(snapshot);
+    // Editor changes keep their existing history/autosave effect below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId, localDirectorProposal, directorDraftRestore]);
 
   useEffect(() => {
     const snapshot = cloneSnapshot(getEditorSnapshot());

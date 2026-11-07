@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-11-06",
+  "updatedAt": "2026-11-07",
   "baseline": "reports/studio-stability-20261008/results.json",
   "readinessStates": [
     "UNIMPLEMENTED",
@@ -1183,7 +1183,8 @@
       },
       "evidenceRefs": [
         "reports/studio-stability-20261008/results.json",
-        "reports/studio-controls-director-20261105/README.md"
+        "reports/studio-controls-director-20261105/README.md",
+        "reports/studio-director-durable-20261107/README.md"
       ],
       "remainingBlockers": [
         "S02",
@@ -1192,7 +1193,8 @@
       ],
       "nextTaskIds": [
         "S07"
-      ]
+      ],
+      "latestBoundedScope": "Source-cut suggestion recovery, reviewed split/Undo/Redo and local CPU export/playback with fixture review transport. Full manual layer/audio combination remains open."
     },
     {
       "id": "mask_reframe_speed",
@@ -16018,5 +16020,30 @@
       "sourceDialogueActivated": false,
       "readinessPromotion": false
     }
+  },
+  "directorDurableSuggestions20261107": {
+    "date": "2026-11-07",
+    "report": "reports/studio-director-durable-20261107/README.md",
+    "status": "LOCAL_SUGGESTION_SAVE_RECOVERY_AND_CPU_EXPORT_VERIFIED_NOT_DEPLOYED",
+    "scope": "Existing source-cut Director; draft-only snapshot persistence with fresh authenticated review required. No new engine/wallet.",
+    "nativeBrowser": [
+      "save/cold reopen without new analysis or restored approval",
+      "independent exact backup restore",
+      "copy drops original analysis draft",
+      "malformed draft preserves edit",
+      "rejection recovery prunes consumed request",
+      "approved split/Undo/Redo/export compilation with simulated review boundary",
+      "actual CPU final download and complete finished playback"
+    ],
+    "evidenceBoundary": "Recorded analysis and simulated review/completion transports; actual local canonical CPU file. Not new live-provider execution or settlement proof.",
+    "movieSha256": "2f0b726ce6c003745c4a76ff86401e72dd71f1d9c2a635e98eab1589b834b712",
+    "productionChanged": false,
+    "remaining": [
+      "approved exact-revision production verification",
+      "whole-film planning and non-cut commands",
+      "broader media/multi-user/manual layer/audio combinations",
+      "shared S02/S04/S03 and creative/listening qualification"
+    ],
+    "readinessPromoted": false
   }
 }
