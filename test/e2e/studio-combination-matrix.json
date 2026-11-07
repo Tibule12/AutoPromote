@@ -15981,20 +15981,42 @@
     "workerLiveEvidence": "reports/studio-controls-director-20261105/evidence/deployed-20261106/worker-followup/verified-live-result.json"
   },
   "qualificationContinuation20261106": {
-    "status": "BOUNDED_LOCAL_PICTURE_AUDIO_TRANSPORT_PASS_LIVE_RETEST_PENDING",
+    "status": "BOUNDED_LIVE_CONTROLS_TRACKED_EXPORT_AND_RECOVERY_VERIFIED_FULL_PARITY_PENDING",
     "report": "reports/studio-qualification-20261106/README.md",
     "evidence": "reports/studio-qualification-20261106/evidence/checkpoint.json",
     "realTwoFaceTracking": "VERIFIED_24_KEYS_EACH_COVERAGE_1",
     "twoFaceEditingAndColdRecovery": "VERIFIED",
     "nativePreparedAudioSamples": "VERIFIED_576000_NO_GAPS_OR_DUPLICATES",
     "nativePauseResumeAndFractionalCutPlayback": "VERIFIED",
-    "fullPictureAudioParity": "FULL_MOVING_PICTURE_MIX_AND_DEPLOYED_INTEGRATION_UNQUALIFIED",
+    "fullPictureAudioParity": "FULL_MOVING_PICTURE_MIX_UNQUALIFIED; OWNED_FRAME_HTTP_AND_TRACKED_EXPORT_LIVE_VERIFIED",
     "readinessPromotion": false,
     "pausedNativePicturePairs": "12_OF_12_FIXED_COLOUR_AND_GEOMETRY_LIMITS_PASS",
     "nativeCpuThrottling": "4X_LOCAL_PASS_53_DISTINCT_FINAL_BUILD_POSITIONS; SMOOTHNESS_LIMIT_611MS_OBSERVATION_GAP",
     "realIsolatedPreviewApi": "11_PASS_AUTH_STORAGE_FIRESTORE_NO_AUTH_BYPASS",
     "matchedApiWorkerRuntime": "576000_PREPARED_SAMPLES_IDENTICAL_NONROOT_OFFLINE_IMAGE",
-    "productionPackagingAndActivation": "PENDING",
-    "sourceDialogueActivation": "DEFAULT_OFF_EXPLICIT_ACCOUNT_COHORT_REQUIRED"
+    "productionPackagingAndActivation": "FRONTEND_API_WORKER_RELEASED_SOURCE_DIALOGUE_COHORT_OFF",
+    "sourceDialogueActivation": "DEFAULT_OFF_EXPLICIT_ACCOUNT_COHORT_REQUIRED",
+    "release20261107": {
+      "sourceRevision": "ce82bb907c858896d84a368d2b497dae6c65e746",
+      "report": "reports/studio-qualification-20261106/RELEASE_20261107.md",
+      "evidence": "reports/studio-qualification-20261106/evidence/release-20261107.json",
+      "workerRevision": "media-worker-v1-00131-mab",
+      "mainTests": {
+        "passed": 2366,
+        "skipped": 5,
+        "failed": 0,
+        "passedSuites": 355,
+        "skippedSuites": 4
+      },
+      "mainBrowserTests": {
+        "passed": 30,
+        "skipped": 17,
+        "failed": 0
+      },
+      "normalQaCreditCharge": 5,
+      "newCreditGrants": 0,
+      "sourceDialogueActivated": false,
+      "readinessPromotion": false
+    }
   }
 }
