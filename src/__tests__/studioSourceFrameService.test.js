@@ -69,7 +69,7 @@ describe('actual FFmpeg sampling matches a separately decoded full sequence', ()
     const result=await prepareSequencePreviewSource(source,prepared);
     expect(result.size).toBeGreaterThan(1000);expect(result.size).toBeLessThan(32*1024*1024);
     execFileSync(process.env.STUDIO_AUDIO_PREVIEW_PYTHON||'python3',['-c',
-      'import asyncio,sys,socket; from unittest.mock import patch; from python_media_worker import main_media_server as w; deny=lambda *a,**k: (_ for _ in ()).throw(AssertionError("Network forbidden"));\nwith patch.object(socket.socket,"connect",deny): asyncio.run(w.materialize_video_input(sys.argv[1],sys.argv[2]))',
+      'import asyncio,sys,socket; from unittest.mock import patch; from python_media_worker.test_cpu_reference import load_worker_cpu_reference; w=load_worker_cpu_reference("materialize_video_input"); deny=lambda *a,**k: (_ for _ in ()).throw(AssertionError("Network forbidden"));\nwith patch.object(socket.socket,"connect",deny): asyncio.run(w["materialize_video_input"](sys.argv[1],sys.argv[2]))',
       source,reference],{cwd:path.resolve(__dirname,'../..'),env:{...process.env,CUDA_VISIBLE_DEVICES:'',MEDIA_WORKER_STUDIO_FFMPEG_THREADS:'2'}});
     const pixels=file=>execFileSync('ffmpeg',['-v','error','-i',file,'-map','0:v:0','-pix_fmt','rgb24','-f','rawvideo','pipe:1'],{maxBuffer:4*1024*1024});
     expect(digest(pixels(prepared))).toBe(digest(pixels(reference)));

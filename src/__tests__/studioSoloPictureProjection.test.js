@@ -15,7 +15,10 @@ import json,sys,subprocess,tempfile
 from pathlib import Path
 import numpy as np
 from PIL import Image
-from python_media_worker.main_media_server import build_reframe_segment_filter,build_main_video_frame_filter
+from python_media_worker.test_cpu_reference import load_worker_cpu_reference
+worker=load_worker_cpu_reference('build_reframe_segment_filter','build_main_video_frame_filter')
+build_reframe_segment_filter=worker['build_reframe_segment_filter']
+build_main_video_frame_filter=worker['build_main_video_frame_filter']
 out=[]
 with tempfile.TemporaryDirectory() as d:
  for item in json.loads(sys.argv[1]):

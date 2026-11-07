@@ -1674,8 +1674,10 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
   );
   await expect(page.getByTestId("studio-program-canvas")).toHaveCSS(
     "border-radius",
-    /^8% \/ [\d.]+%$/
+    "0px"
   );
+  // The shared raster already paints the rounded inset; a second CSS radius
+  // would clip it twice. Actual picture/geometry references remain separate.
   await expect(page.getByTestId("main-footage-frame-toggle")).toHaveAttribute(
     "aria-pressed",
     "true"

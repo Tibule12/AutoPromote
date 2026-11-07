@@ -1046,7 +1046,10 @@ describe("ViralClipStudio timeline sequencing", () => {
     const slider = screen.getByRole('slider', { name: 'Edited output position' });
     expect(Number(slider.max)).toBe(3);
     fireEvent.change(slider, { target: { value: '1.5' } });
-    expect(video.currentTime).toBe(1.5);
+    // Seek one canonical tick inside the selected frame, avoiding a decoder's
+    // previous-picture boundary choice; the requested programme stays exact.
+    expect(Number(slider.value)).toBe(1.5);
+    expect(video.currentTime).toBe(1.5 + 1 / 90000);
   });
 
   test("source speed ramp uses the canonical delivery intervals and seek clock", () => {
@@ -2215,16 +2218,17 @@ describe("ViralClipStudio timeline sequencing", () => {
       "data-programme-filter",
       expect.stringContaining("brightness(1.050)")
     );
-    // Podcast Pro uses a 3%-of-output-width frame inset. A 9:16 preview must
-    // convert that same physical inset to 1.6875% vertically, just like the
-    // worker, rather than applying 3% of the much taller canvas.
+    // The shared solo raster paints its physical inset and black canvas in
+    // one surface. A second CSS inset would frame and shrink it twice. The
+    // actual FFmpeg/pixel references qualify geometry; retain the authored
+    // 3% frame in the export assertion below.
     expect(programmeCanvas).toHaveStyle({
-      left: "3%",
-      top: "1.6875%",
-      width: "calc(100% - 6%)",
-      height: "calc(100% - 3.375%)",
+      left: "0px",
+      top: "0px",
+      width: "100%",
+      height: "100%",
     });
-    expect(programmeCanvas.style.borderRadius).not.toBe("0px");
+    expect(programmeCanvas.style.borderRadius).toBe("0");
     expect(screen.getByTestId("studio-after-video")).toHaveClass("main-video-frame-preview");
     expect(screen.getByLabelText("Untouched source preview").style.filter).not.toContain(
       "brightness(1.050)"
@@ -6468,6 +6472,11 @@ describe("ViralClipStudio timeline sequencing", () => {
     video.currentTime=6;fireEvent.timeUpdate(video);
     expect(before.currentTime).toBeCloseTo(13);
     expect(before.playbackRate).toBe(.5);
+    // Paused final pictures use the same canvas presenter; moving finished
+    // video returns to the native decoder without reapplying source speed.
+    expect(video).toHaveStyle({display:'block',visibility:'hidden',opacity:'1'});
+    expect(screen.getByTestId('studio-program-canvas')).toHaveStyle({display:'block'});
+    fireEvent.click(screen.getByRole('button', { name: 'Play comparison', exact: true }));
     expect(video).toHaveStyle({display:'block',visibility:'visible',opacity:'1'});
     expect(screen.getByTestId('studio-program-canvas')).toHaveStyle({display:'none'});
     expect(before).toHaveStyle({display:'block'});

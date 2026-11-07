@@ -6,7 +6,8 @@ test.each([.08, .4, .85])('precision vignette matches actual canonical YUV finis
   const width = 64, height = 96;
   const python = `
 import subprocess,sys,re
-from python_media_worker.main_media_server import build_studio_finish_filter
+from python_media_worker.test_cpu_reference import load_worker_cpu_reference
+build_studio_finish_filter=load_worker_cpu_reference('build_studio_finish_filter')['build_studio_finish_filter']
 w,h=64,96
 finish=build_studio_finish_filter({'enabled':True,'color':{'precisionGrade':True,'vignette':float(sys.argv[1])}})
 graph=re.search(r'vignette=angle=PI/[0-9.]+:eval=frame',finish).group(0)
