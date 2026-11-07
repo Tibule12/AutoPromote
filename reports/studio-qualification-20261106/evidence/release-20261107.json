@@ -364,5 +364,16 @@
     "failed": 0
   },
   "state": "DEPLOYED_AND_BOUNDED_LIVE_OWNER_WORKFLOW_VERIFIED",
-  "mainOpenCodeScanningAlerts": 1
+  "mainOpenCodeScanningAlerts": 1,
+  "preExistingOpenCodeScanningAlerts": [
+    {
+      "number": 1227,
+      "rule": "js/missing-rate-limiting",
+      "path": "test/contentListSummary.jest.test.js",
+      "createdAt": "2026-11-05T18:00:35Z",
+      "introducedByThisRelease": false,
+      "scope": "Supertest-only mocked-auth harness; file unchanged by PR524",
+      "url": "https://github.com/Tibule12/AutoPromote/security/code-scanning/1227"
+    }
+  ]
 }
