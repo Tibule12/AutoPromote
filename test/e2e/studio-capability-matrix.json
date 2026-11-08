@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-11-07",
+  "updatedAt": "2026-11-08",
   "sourceOfTruth": "docs/STUDIO-COMPLETION-CONTRACT.md",
   "baseline": {
     "checkpoint": "docs/HANDOFF-studio-reliability-repair-20261008.md",
@@ -22657,5 +22657,42 @@
     "readinessPromoted": false,
     "targetedTestsPassed": 93,
     "fullEditorSuite": "Interrupted without completed result; not counted as passing"
+  },
+  "directorReframeMoments20261108": {
+    "date": "2026-11-08",
+    "report": "reports/director-reframe-moments-20261108/README.md",
+    "status": "NATIVE_COMBINED_WORKFLOW_AND_LOCAL_CPU_DELIVERY_VERIFIED_NOT_DEPLOYED",
+    "scope": "Existing Director command/review/history/compiler; bounded source-shot Reframe and ranked existing-source two-edge Moments trim. No second editor.",
+    "nativeBrowser": [
+      "Reframe from Off with no unapproved mutation",
+      "saved draft and fresh review after cold reopen",
+      "tracked framing approval, exact Undo/Redo and cold recovery",
+      "native playback controls advance",
+      "owned native saved moment, reviewed two-edge trim, Undo/Redo and recovery",
+      "combined native export compilation",
+      "independent exact backup restore, identical download and complete actual CPU final playback"
+    ],
+    "evidenceBoundary": "Recorded actual detector result and simulated review/completion transports; local canonical CPU final. No new production review, cloud/provider execution or model-training claim.",
+    "targetedTestsPassed": 153,
+    "fullEditorSuite": "Only two selected editor cases run; other 176 skipped. No whole-suite claim.",
+    "movie": {
+      "sha256": "eee718b2ccd26c70528a0d57c4bd3d11925c9d48501b087be54a5b3915531401",
+      "width": 720,
+      "height": 1280,
+      "fps": 24,
+      "frames": 167,
+      "fullDecode": true
+    },
+    "productionChanged": false,
+    "trainingRunStarted": false,
+    "qaApprovalsAreHumanTrainingLabels": false,
+    "readinessPromoted": false,
+    "remaining": [
+      "approved exact candidate integration/release and fresh account-bound live provider verification",
+      "owner-labelled examples and held-out editorial evaluations; QA approvals excluded from training labels",
+      "whole-film semantic planning and broader layer/audio/effect/retiming commands",
+      "full moving pre-approval picture and continuous picture/sound/colour/edge parity",
+      "shared S02/S04/S03 and creative/listening qualification"
+    ]
   }
 }

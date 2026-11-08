@@ -1,4 +1,5 @@
 import { getStudioCapability, isStudioCapabilityDirectorAllowed } from "./studioCapabilities";
+import { applyStudioReframeOperation, validateStudioReframeOperation } from "./studioReframeCommand";
 import {
   applyStudioCommandInverse,
   createStudioCommandInverse,
@@ -10,6 +11,7 @@ import {
   buildStudioOutputTimeMap,
   projectStudioLinkedTimingToSnapshot,
   projectDocumentToLegacyTimeline,
+  projectStudioEditableStateToSnapshot,
   reconcileStudioDocument,
   validateStudioProjectDocument,
 } from "./studioProjectDocument";
@@ -121,6 +123,8 @@ export const validateStudioCommandBatch = batch => {
       expectKeys(operation.target, ["occurrenceId"], "target");
       checkId(operation.target.occurrenceId, "occurrenceId");
       validRange(operation.keep, "source");
+    } else if (operation.type === "reframe") {
+      validateStudioReframeOperation(operation);
     } else if (operation.type === "preserve_range") {
       expectKeys(
         operation,
@@ -264,6 +268,10 @@ const applyOne = (document, operation, idempotencyKey) => {
         ],
       },
     };
+  }
+  if (operation.type === "reframe") {
+    assertUnlocked(document.constraints.locks, occurrence.occurrenceId, occurrence.sourceRange);
+    return applyStudioReframeOperation(document, operation);
   }
   if (operation.type === "split_clip") {
     const point = sourcePoint(operation, occurrence, document);
@@ -414,9 +422,12 @@ export const resolveStudioCommandBatch = (document, batch) => {
     ),
   ];
   const readSet = readNodes.map(id => `occurrence:${id}`);
+  if (batch.operations.some(operation => operation.type === "reframe"))
+    readSet.push("programme:framing", "output:aspect");
   if (linkedEdits.length)
     readSet.push("programme:layers", "programme:linked_timing", "programme:speed_keys");
   const writeSet = [
+    ...(batch.operations.some(operation => operation.type === "reframe") ? ["programme:framing", "output:aspect"] : []),
     ...affected.map(id => `occurrence:${id}`),
     ...(batch.operations.some(operation => operation.type !== "preserve_range")
       ? ["programme:timeline", "time_maps"]
@@ -544,11 +555,13 @@ export const projectStudioCommandResultOnSnapshot = ({ snapshot, projectId, plan
       plan.batch.idempotencyKey
     );
   }
-  const nextSnapshot = {
+  let nextSnapshot = {
     ...linkedSnapshot,
     timeline: projectDocumentToLegacyTimeline(result.document, snapshot.timeline),
     studioDocument: result.document,
   };
+  if (plan.batch.operations.some(operation => operation.type === "reframe"))
+    nextSnapshot = projectStudioEditableStateToSnapshot(result.document, nextSnapshot);
   const reconciled = reconcileStudioDocument({
     snapshot: nextSnapshot,
     projectId,

@@ -199,6 +199,7 @@ import { registerStudioDirectorProjectRevision } from "./studioDirectorProjectRe
 import { buildSourceShotDirectorSplitRequest, buildSourceShotDirectorSplitCandidates } from "./studioDirectorEvidenceProposals";
 import { createSourceShotDirectorDraft, restoreSourceShotDirectorDraft,
   sourceShotDirectorDraftMatches } from "./studioDirectorSavedDraft";
+import { buildDirectorReframeRequest, buildDirectorMomentRequest } from "./studioDirectorWorkspaceProposals";
 import { secondsToTicks, ticksToSeconds, mapOutputTickToProgrammeTick, mapProgrammeTickToOutputTick } from "./studioTime";
 import { advanceStudioCueStartPlan, scheduleStudioCueGain, scheduleStudioCueRate, studioCueProgrammeTime, studioCueStartPlan } from "./studioCueGain";
 import { bindStudioAudioSource, bindStudioAudioSources, studioUploadedAudioBinding } from "./studioAudioSourceBindings";
@@ -3743,7 +3744,10 @@ const ViralClipStudio = ({
       ? projectStudioEditableStateToSnapshot(snapshot.studioDocument, snapshot)
       : snapshot;
     const savedDirectorDraft = localDirectorProposal?.savedDraft || directorDraftRestore?.saved;
+    const consumedDirectorDraft = savedDirectorDraft?.choiceProposalIds?.length === 0 &&
+      snapshot.studioDocument?.directorReviewJournal?.some(item => item.receipt?.proposalId === savedDirectorDraft.selectedProposalId);
     projected.sourceShotDirectorDraft = !directorProposalRequest &&
+      !consumedDirectorDraft &&
       sourceShotDirectorDraftMatches(snapshot.studioDocument, savedDirectorDraft)
       ? savedDirectorDraft : null;
     return projected;
@@ -8520,12 +8524,16 @@ const ViralClipStudio = ({
     });
   };
 
-  const analyzeSpeakerFaces = async (mode = "anchored") => {
+  const analyzeSpeakerFaces = async (mode = "anchored", { directorReviewOnly = false } = {}) => {
     if (faceTrackingStatus === "processing") return;
+    if (directorReviewOnly && trackStates.video?.locked) {
+      setFaceTrackingMessage("Unlock the video track before asking Director to reframe it.");
+      return;
+    }
     if (mode === "source_shots") setLocalDirectorProposal(null);
     const generation = ++faceTrackingGeneration.current;
     const clipId = currentTimelineClip?.id;
-    const split = effectiveSmartCropMode === "center" && reframeAspect !== "16:9";
+    const split = !directorReviewOnly && effectiveSmartCropMode === "center" && reframeAspect !== "16:9";
     const window = getTimelineClipWindow(currentTimelineClip);
     if (window.duration > 900) {
       setFaceTrackingMessage("Trim the analysis range to fifteen minutes or less.");
@@ -8545,6 +8553,11 @@ const ViralClipStudio = ({
         }
       }
       const source = getSafeMediaSource(currentTimelineClip?.url || videoUrl);
+      const directorSourceVideo = directorReviewOnly ? [beforeVideoRef.current,
+        !renderedOutputUrl ? videoRef.current : null].find(media => media && media.videoWidth > 0 && media.videoHeight > 0 &&
+          getSafeMediaSource(media.currentSrc || media.src) === source) : null;
+      if (directorReviewOnly && !directorSourceVideo)
+        throw new Error("Open the source in Live Edit and wait for its picture to load before asking Director to reframe it.");
       const durableStoragePath = currentTimelineClip?.sourceStoragePath ||
         currentTimelineClip?.storagePath ||
         (currentTimelineClip?.id === "main" ? sourceStoragePath : null);
@@ -8560,7 +8573,8 @@ const ViralClipStudio = ({
         blob = await response.blob();
       }
       const [aspectWidth, aspectHeight] = reframeAspect.split(":").map(Number);
-      const sourceAspect = (videoRef.current?.videoWidth || 1920)/(videoRef.current?.videoHeight || 1080);
+      const sourceAspect = directorSourceVideo ? directorSourceVideo.videoWidth / directorSourceVideo.videoHeight
+        : (videoRef.current?.videoWidth || 1920)/(videoRef.current?.videoHeight || 1080);
       const coordinates = soloTrackingCoordinates(activeReframePosition,
         sourceAspect,
         aspectWidth/aspectHeight, speakerTrackZoom);
@@ -8631,6 +8645,20 @@ const ViralClipStudio = ({
         if (!response.ok) throw new Error(result.error || result.detail || "Face analysis failed.");
       }
       if (generation !== faceTrackingGeneration.current) return;
+      if (directorReviewOnly) {
+        const snapshot = getEditorSnapshot();
+        const request = buildDirectorReframeRequest({ document: snapshot.studioDocument,
+          occurrenceId: String(clipId), analysis: result, aspect: reframeAspect,
+          zoom: speakerTrackZoom, sourceAspect,
+          proposalId: createSecureId("director-reframe"), idempotencyKey: createSecureId("director-follow-command") });
+        const draft = await createSourceShotDirectorDraft(snapshot.studioDocument, { request, occurrenceId: String(clipId) });
+        if (generation !== faceTrackingGeneration.current || activeProjectIdRef.current !== projectId) return;
+        if (!draft) throw new Error("Tracking no longer matches this edit. Request Director again.");
+        setLocalDirectorProposal(draft); setDirectorReview(null); setDirectorReviewState("idle"); setDirectorReviewError("");
+        setFaceTrackingStatus("ready");
+        setFaceTrackingMessage("Director framing is ready for review. Your current edit is unchanged; approve its exact path before applying it.");
+        return;
+      }
       const offset = getTimelineOffsetForIndex(activeTimelineIndex);
       const keys = slot => (result.tracks?.[slot]?.keyframes || []).map(mark => ({ ...(split ? mark : coordinates.toPosition(mark)),
         ...(!split ? { sourceFocus: { x: Number(mark.x), y: Number(mark.y), aspect: sourceAspect } } : {}),
@@ -9540,6 +9568,12 @@ const ViralClipStudio = ({
   const applyLinkedCommandSnapshot = result => {
     const next = result.snapshot;
     studioDocumentRef.current = result.document;
+    setReframeAspect(next.reframeAspect || reframeAspect);
+    setSpeakerTrackZoom(next.speakerTrackZoom || 1);
+    setSmartCrop(!!next.smartCrop);
+    setSmartCropMode(next.smartCropMode || smartCropMode);
+    setVideoFit(next.videoFit || videoFit);
+    setSafeFaceFraming(!!next.safeFaceFraming);
     setTimeline(next.timeline);
     setCompoundClips(next.compoundClips || []);
     setOverlays(next.overlays);
@@ -9557,6 +9591,35 @@ const ViralClipStudio = ({
     setSpeakerFocusCuts(next.speakerFocusCuts);
     setSpeakerStackFraming(next.speakerStackFraming);
     setAudioKeyframes(next.audioKeyframes);
+  };
+
+  const prepareDirectorMoment = async () => {
+    if (trackStates.video?.locked || directorReviewState === "working") return;
+    const selection = ++directorCandidateSelectionRef.current;
+    try {
+      const snapshot = getEditorSnapshot();
+      const current = snapshot.timeline[activeTimelineIndex];
+      if (!snapshot.studioDocument || !current) throw new Error("Open a source clip before requesting a moment.");
+      const path = current.sourceStoragePath || current.storagePath;
+      const candidates = rankedClipGuidance.map(entry => ({ ...entry, clip: { ...entry.clip,
+        ...(!entry.clip.sourceStoragePath && !entry.clip.storagePath && path &&
+          (entry.clip.url || videoUrl) === current.url ? { sourceStoragePath: path } : {}),
+      } }));
+      const request = buildDirectorMomentRequest({ document: snapshot.studioDocument,
+        occurrenceId: String(current.id), candidates,
+        proposalId: createSecureId("director-moment"), idempotencyKey: createSecureId("director-moment-command") });
+      if (!request) throw new Error("No scored moment fits this owned source range. Analyze a longer source in Find Viral Clips or keep editing this range.");
+      const draft = await createSourceShotDirectorDraft(snapshot.studioDocument,
+        { request, occurrenceId: String(current.id) });
+      if (selection !== directorCandidateSelectionRef.current || activeProjectIdRef.current !== projectId) return;
+      if (!draft || !sourceShotDirectorDraftMatches(getEditorSnapshot().studioDocument, draft.savedDraft))
+        throw new Error("The source range changed. Ask Director again for its current range.");
+      setLocalDirectorProposal(draft); setDirectorReview(null); setDirectorReviewState("idle"); setDirectorReviewError("");
+      setStudioActionMessage("Director selected a source-bound moment from the existing scores. Review both boundaries before applying it; your edit is unchanged.");
+    } catch (error) {
+      if (selection === directorCandidateSelectionRef.current && activeProjectIdRef.current === projectId)
+        setStudioActionMessage(error.message || "Director could not prepare a moment. Your edit is unchanged.");
+    }
   };
 
   const selectDirectorSourceCut = async request => {
@@ -21971,8 +22034,8 @@ const ViralClipStudio = ({
                       <div className="studio-director-review__heading">
                         <div>
                           <span className="panel-kicker">Incoming proposal</span>
-                          <h4>Review one suggested cut</h4>
-                          <p>The timeline stays unchanged until you approve this exact preview.</p>
+                          <h4>Review this Director edit</h4>
+                          <p>Your edit stays unchanged until you approve this exact proposal.</p>
                         </div>
                         {(!visibleDirectorReview || ["stale", "error"].includes(directorReviewState)) ? (
                           <button
@@ -22018,6 +22081,20 @@ const ViralClipStudio = ({
                             <span>Base revision {visibleDirectorReview.proposal.baseRevision}</span>
                             <span>{visibleDirectorReview.diff.operationLabel}</span>
                           </div>
+                          {visibleDirectorReview.diff.framing ? (
+                            <div className="studio-director-review__evidence" data-testid="studio-director-reframe-evidence">
+                              <strong>Follow the foreground face — framing proposal requiring review</strong>
+                              <span>Project output aspect {visibleDirectorReview.diff.framing.beforeAspect} → {visibleDirectorReview.diff.framing.afterAspect}</span>
+                              <span>Source tracking points {visibleDirectorReview.diff.framing.points.length}; zoom {visibleDirectorReview.diff.framing.zoom.toFixed(2)}×</span>
+                              <span>Analysis source SHA-256 {visibleDirectorReview.proposal.evidence.sourceSha256.slice(0, 12)}…</span>
+                              <p>This follows the detected foreground face. It does not identify the speaker. The server must verify the stored analysis before recording your decision.</p>
+                              <details><summary>Review source tracking coordinates</summary><ol>
+                                {visibleDirectorReview.diff.framing.points.map(point => <li key={point.sourceTick}>
+                                  {formatPreviewTimePrecise(ticksToSeconds(point.sourceTick))}: x {point.x.toFixed(1)}%, y {point.y.toFixed(1)}%{point.cut ? " · camera cut" : ""}
+                                </li>)}
+                              </ol></details>
+                            </div>
+                          ) : null}
                           {visibleDirectorReview.proposal.evidence?.type === "source_shot_boundary" ? (
                             <div className="studio-director-review__evidence"
                               data-testid="studio-director-review-evidence">
@@ -22141,6 +22218,9 @@ const ViralClipStudio = ({
                   activeCreativeTool === "moments" ? "is-expanded" : "is-compact"
                 }`}
               >
+                <button type="button" className="mini-toggle-btn" data-testid="director-propose-moment"
+                  disabled={trackStates.video?.locked || directorReviewState === "working"}
+                  onClick={() => void prepareDirectorMoment()}>Director: prepare strongest available moment</button>
                 <button
                   type="button"
                   className="creative-director-heading"
@@ -22897,6 +22977,12 @@ const ViralClipStudio = ({
                       {effectiveSmartCrop ? "Enabled" : "Off"}
                     </span>
                   </div>
+
+                  <button type="button" className="mini-toggle-btn" data-testid="director-propose-reframe"
+                    disabled={faceTrackingStatus === "processing" || trackStates.video?.locked || speakerTrackZoom > 1.5}
+                    onClick={() => analyzeSpeakerFaces("source_shots", { directorReviewOnly: true })}>Director: propose tracked framing</button>
+                  {speakerTrackZoom > 1.5 ? <small>Set Speaker zoom to 1.5× or less for a reviewed Director proposal.</small> : null}
+                  {faceTrackingMessage && effectiveSmartCropMode !== "speaker_track" ? <p role="status">{faceTrackingMessage}</p> : null}
 
                   <label className="inspector-toggle-row">
                     <span>

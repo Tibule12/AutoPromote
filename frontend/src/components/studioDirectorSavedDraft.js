@@ -51,13 +51,15 @@ export const restoreSourceShotDirectorDraft = async (document, saved) => {
     const draft = JSON.parse(json), byId = new Map(), commands = new Set();
     let evidenceSignature;
     for (const request of draft.requests) {
-      if (!exactKeys(request, ["proposalId", "idempotencyKey", "directorId", "operation", "evidence"]) ||
-          request.operation?.type !== "split_clip" ||
+      const requestKeys = ["proposalId", "idempotencyKey", "directorId", "operation",
+        ...(request.evidence !== undefined ? ["evidence"] : [])];
+      if (!exactKeys(request, requestKeys) ||
+          !["split_clip", "trim_clip", "reframe"].includes(request.operation?.type) ||
           request.operation.target?.occurrenceId !== draft.occurrenceId ||
-          request.evidence?.type !== "source_shot_boundary" ||
+          (draft.choiceProposalIds.length > 0 && (request.operation.type !== "split_clip" || request.evidence?.type !== "source_shot_boundary")) ||
           byId.has(request.proposalId) || commands.has(request.idempotencyKey)) return null;
       await prepareStudioDirectorProposal(document, request);
-      const { boundaryTick: _boundaryTick, ...evidence } = request.evidence;
+      const { boundaryTick: _boundaryTick, ...evidence } = request.evidence || {};
       const signature = canonical(evidence);
       if (evidenceSignature !== undefined && evidenceSignature !== signature) return null;
       evidenceSignature = signature;
