@@ -5,7 +5,12 @@ import { gainTestContext } from "../__tests__/fixtures/studioAudioGraph";
 describe("Studio native media bus gain", () => {
   const previousContext = window.AudioContext;
   const previousWorklet = window.AudioWorkletNode;
-  afterEach(() => { window.AudioContext = previousContext; window.AudioWorkletNode = previousWorklet; });
+  const previousFetch = global.fetch;
+  beforeEach(() => {
+    global.fetch = jest.fn(async () => ({ ok: true,
+      arrayBuffer: async () => new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0]).buffer }));
+  });
+  afterEach(() => { window.AudioContext = previousContext; window.AudioWorkletNode = previousWorklet; global.fetch = previousFetch; });
 
   test("Chipmunk uses one audio-thread pitch node and keeps the picture at 1x", async () => {
     const context = gainTestContext();
@@ -38,6 +43,41 @@ describe("Studio native media bus gain", () => {
     expect(await updateAudioRemixPreview(video, applyAudioRemixPreset("chipmunk"))).toBe(false);
     expect(video.__audioRemixGraph.source.disconnect).not.toHaveBeenCalled();
     expect(video.playbackRate).toBe(1);
+  });
+
+  test("a WASM initialization failure restores ordinary sound and reports the pitch fallback", async () => {
+    const context = gainTestContext();
+    context.audioWorklet = { addModule: jest.fn(() => Promise.resolve()) };
+    window.AudioContext = jest.fn(() => context);
+    const node = { connect: jest.fn(), disconnect: jest.fn(), port: {},
+      parameters: new Map([["semitones", { value: 0 }]]) };
+    window.AudioWorkletNode = jest.fn(() => node);
+    const video = document.createElement("video"), failed = jest.fn();
+    video.addEventListener("studio-remix-pitch-error", failed);
+    await updateAudioRemixPreview(video, applyAudioRemixPreset("chipmunk"));
+    const graph = video.__audioRemixGraph;
+    node.port.onmessage({ data: { type: "ready", latencySeconds: .096 } });
+    expect(graph.pitchLatencySeconds).toBe(.096);
+    node.port.onmessage({ data: { type: "error" } });
+    expect(graph.pitch).toBeNull();
+    expect(graph.source.connect).toHaveBeenLastCalledWith(graph.bass);
+    expect(failed).toHaveBeenCalledTimes(1);
+    node.onprocessorerror();
+    expect(failed).toHaveBeenCalledTimes(1);
+  });
+
+  test("a failed pitch binary is retried without disconnecting the dry source", async () => {
+    const context = gainTestContext();
+    context.audioWorklet = { addModule: jest.fn(() => Promise.resolve()) };
+    window.AudioContext = jest.fn(() => context);
+    window.AudioWorkletNode = jest.fn(() => ({ connect: jest.fn(), disconnect: jest.fn(),
+      parameters: new Map([["semitones", { value: 0 }]]) }));
+    global.fetch.mockResolvedValueOnce({ ok: false });
+    const video = document.createElement("video");
+    expect(await updateAudioRemixPreview(video, applyAudioRemixPreset("chipmunk"))).toBe(false);
+    expect(video.__audioRemixGraph.source.disconnect).not.toHaveBeenCalled();
+    expect(await updateAudioRemixPreview(video, applyAudioRemixPreset("chipmunk"))).toBe(true);
+    expect(global.fetch).toHaveBeenCalledTimes(2);
   });
 
   test("disposing a closed editor releases its audio context and rejects late pitch preparation", async () => {

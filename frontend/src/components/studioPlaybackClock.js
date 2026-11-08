@@ -9,6 +9,7 @@ export function createStudioPlaybackClock() {
   const listeners = new Set();
   let readPosition = () => null;
   let syncPosition = () => {};
+  let advancing = () => false;
   const publish = next => {
     if (!next || Object.keys(next).every(key => next[key] === snapshot[key])) return;
     snapshot = next;
@@ -19,6 +20,7 @@ export function createStudioPlaybackClock() {
     subscribe: listener => { listeners.add(listener); return () => listeners.delete(listener); },
     read: () => readPosition(),
     sync: () => syncPosition(),
+    isAdvancing: () => advancing(),
     bind(video, { url, start = 0, end = 0, programmeStart = 0, timeMap,
       renderedOutput = false, fallbackSourceTime = start }) {
       const source = getSafeMediaSource(url);
@@ -46,6 +48,8 @@ export function createStudioPlaybackClock() {
         return position(renderedOutput ? video.currentTime : Math.max(start, Math.min(end, video.currentTime)));
       };
       readPosition = read;
+      const isAdvancing = () => !video?.paused && !video?.ended && !!read();
+      advancing = isAdvancing;
       publish(read() || position(fallbackSourceTime));
       const sync = () => { if (!waiting) publish(read()); };
       syncPosition = sync;
@@ -97,7 +101,7 @@ export function createStudioPlaybackClock() {
       }, 80);
       return () => {
         disposed = true; stopDisplay(); clearInterval(watchdog);
-        if (readPosition === read) { readPosition = () => null; syncPosition = () => {}; }
+        if (readPosition === read) { readPosition = () => null; syncPosition = () => {}; advancing = () => false; }
         if (video) for (const [event, listener] of Object.entries(events)) video.removeEventListener(event, listener);
       };
     },

@@ -141,3 +141,20 @@ test('rapid frame keys keep the latest user seek while stale decoder paints arri
   act(() => { position = { programmeTime: 2, outputTime: 2 }; listeners.forEach(cb => cb()); });
   expect(input).toHaveValue('2');
 });
+
+test('a Home seek cannot freeze the thumb after verified playback passes its exact target', () => {
+  let position = { programmeTime: 4, outputTime: 4 }, advancing = false;
+  const listeners = new Set();
+  const clock = { getSnapshot: () => position, isAdvancing: () => advancing,
+    subscribe: listener => { listeners.add(listener); return () => listeners.delete(listener); } };
+  render(<StudioPlaybackRange clock={clock} aria-label="Resumed seek" type="range"
+    min={0} max={12} step={1/30} onChange={() => {}} />);
+  const input = screen.getByLabelText('Resumed seek');
+  fireEvent.input(input, { target: { value: '0' } });
+  act(() => { listeners.forEach(listener => listener()); });
+  expect(input).toHaveValue('0'); // Previous frame during the pending seek.
+  act(() => { advancing = true; position = { programmeTime: .08, outputTime: .08 }; listeners.forEach(listener => listener()); });
+  expect(input).toHaveValue('0.08');
+  act(() => { position = { programmeTime: 4.5, outputTime: 4.5 }; listeners.forEach(listener => listener()); });
+  expect(input).toHaveValue('4.5');
+});

@@ -1,5 +1,16 @@
 # Viral Studio Remix Audio
 
+8 November: Live Edit pitch now uses a pinned, locally served Signalsmith
+Stretch WASM processor instead of the original per-bin FFT remapper. The
+existing node, EQ/reverb graph, preset parameters and programme speed contract
+remain. The module compiles before audio-thread instantiation, fades into the
+prepared processor and clears old speech on seeks; failures retain dry sound.
+Its measured stereo latency is 96 ms at 48 kHz. Live EQ/reverb/dynamics remain
+an approximation of final Rubber Band mastering, not a sample-exact substitute.
+See [repair evidence](../reports/studio-remix-clarity-20261108/README.md).
+The vendored MIT source, extracted binary and derivation hashes are recorded in
+`frontend/public/vendor/signalsmith/provenance.json` and `LICENSE.txt`.
+
 30 October: **Chipmunk** joins the existing presets, raising the voice by one
 octave at unchanged picture timing. Use **Preview Remix** to hear the same
 independent pitch chain used in export; the immediate Web Audio monitor only

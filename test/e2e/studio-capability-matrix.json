@@ -22694,5 +22694,40 @@
       "full moving pre-approval picture and continuous picture/sound/colour/edge parity",
       "shared S02/S04/S03 and creative/listening qualification"
     ]
+  },
+  "studioAudioRemixClarity20261108": {
+    "date": "2026-11-08",
+    "report": "reports/studio-remix-clarity-20261108/README.md",
+    "status": "LOCAL_LIVE_REMIX_AND_NATIVE_RECOVERY_VERIFIED_NOT_DEPLOYED",
+    "scope": "Existing Live Edit Remix pitch graph and transport seek readout; local stereo Signalsmith WASM processing. Canonical Rubber Band renderer unchanged.",
+    "targetedTestsPassed": 83,
+    "nativeBrowser": [
+      "11 presets with finite, audible speech and no silent captured audio blocks",
+      "actual decoder and visible slider/timecode advance",
+      "Before and Keep Pitch bypass live pitch",
+      "exact saved document/settings cold reopen"
+    ],
+    "evidenceBoundary": "Actual local static frontend, authorised existing source/account reads through a private QA transport. No production writes, render/analysis/provider jobs or deployment.",
+    "diagnosticUnwantedEnergyReductionDb": {
+      "chipmunk": 58.05,
+      "slowedReverbPitch": 26.26,
+      "deepVoicePitch": 25.36
+    },
+    "audioThreadLoad": {
+      "silentBlocks": 0,
+      "nonfiniteSamples": 0,
+      "mainThreadBusyBurstMs": 40,
+      "totalBusyMs": 1680
+    },
+    "livePitchLatencySecondsAt48k": 0.096,
+    "productionChanged": false,
+    "readinessPromoted": false,
+    "remaining": [
+      "explicitly approved isolated audio release against current main; preceding local Director commits require separate scope review",
+      "human listening and fresh deployed source/device verification",
+      "96 ms live pitch latency; full predictive picture/sound and worker PCM parity not qualified",
+      "music/VO/SFX target-isolation and large graphs/browser diversity",
+      "shared S02/S04/S03 and creative/professional gates"
+    ]
   }
 }
