@@ -1,0 +1,70 @@
+{
+  "date": "2026-10-28",
+  "status": "FIRST_REPLACEMENT_DELIVERED_PRIVATE",
+  "story": "Stop rushing your text",
+  "nativeControlsOnly": true,
+  "graphInjection": false,
+  "assets": {
+    "movie": {
+      "path": "reports/video-revision-20261028/proof/reading-lesson/corrected-tutorial/final/final.mp4",
+      "sha256": "617ff5134918678f06e2fa25dadf3f0ba97d631467b97e479d2a33db6fe84180",
+      "bytes": 1805140
+    },
+    "editorMovie": {
+      "path": "reports/video-revision-20261028/proof/reading-lesson/corrected-tutorial/final/final.ide-preview.mp4",
+      "sha256": "9e3f11fb3e62b93a138cbf2c3ac852a828b143c229b19ddec3eedfef6cc1026c",
+      "bytes": 2265578
+    },
+    "thumbnail": {
+      "path": "reports/video-revision-20261028/proof/reading-lesson/corrected-tutorial/thumbnail.png",
+      "sha256": "5f443b9f4b3357ccf4721e8958ca46c540e85e007b271716e16d88249582431a",
+      "bytes": 157011
+    },
+    "matchingStudioRecording": {
+      "path": "reports/video-revision-20261028/proof/reading-lesson/corrected-tutorial/final/edited-in-studio.mp4",
+      "sha256": "147004209b524b9e285298f7945cbb0e428fc2737fd39382e2ff22975dd23165",
+      "bytes": 1954392
+    },
+    "editableFinishingProject": {
+      "path": "reports/video-revision-20261028/proof/reading-lesson/corrected-tutorial/FINAL-LESSON.autopromote.json",
+      "sha256": "7f401e7016e29492586e74f0bbf428ed2a0d14131960915262432e7e1ae1e766",
+      "bytes": 50063
+    }
+  },
+  "seconds": 60,
+  "frames": 1440,
+  "dimensions": [
+    720,
+    1280
+  ],
+  "fps": 24,
+  "fullMatchingStudioPlayback": true,
+  "voiceCorrelation": 0.9971426627539792,
+  "loudness": {
+    "input_i": "-14.46",
+    "input_tp": "-1.79",
+    "input_lra": "7.10",
+    "input_thresh": "-24.77",
+    "output_i": "-16.99",
+    "output_tp": "-3.72",
+    "output_lra": "6.20",
+    "output_thresh": "-27.30",
+    "normalization_type": "dynamic",
+    "target_offset": "-0.01"
+  },
+  "outputHashMatchesCompletedJob": true,
+  "sourceEditableProject": "reports/video-revision-20261028/proof/reading-lesson/tutorial/NARRATED-LESSON.autopromote.json",
+  "wholeEditingRecording": "reports/video-revision-20261028/proof/reading-lesson/editing-in-studio.mp4",
+  "newPublishing": false,
+  "originalBatchRemainingSchedulesPaused": 5,
+  "remainingRejectedConcepts": "NEEDS_REVISION",
+  "physicalIPhoneExternalVerification": false,
+  "readinessPromotion": false,
+  "independentExactBackupRestore": true,
+  "nativeRecoveredDownloadMatches": true,
+  "regressionChecks": {
+    "focusedFrontendPassed": 2,
+    "ownedSourceServerPassed": 20,
+    "whole135CaseFrontendAttemptCompleted": false
+  }
+}

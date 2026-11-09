@@ -1,0 +1,46 @@
+{
+  "relativeLinksExist": true,
+  "headlessMuted": true,
+  "results": [
+    {
+      "viewportWidth": 390,
+      "movies": [
+        {
+          "duration": 142.125,
+          "width": 720,
+          "height": 1280
+        },
+        {
+          "duration": 92.208333,
+          "width": 720,
+          "height": 1280
+        },
+        {
+          "duration": 175.125,
+          "width": 720,
+          "height": 1280
+        }
+      ]
+    },
+    {
+      "viewportWidth": 1440,
+      "movies": [
+        {
+          "duration": 142.125,
+          "width": 720,
+          "height": 1280
+        },
+        {
+          "duration": 92.208333,
+          "width": 720,
+          "height": 1280
+        },
+        {
+          "duration": 175.125,
+          "width": 720,
+          "height": 1280
+        }
+      ]
+    }
+  ]
+}

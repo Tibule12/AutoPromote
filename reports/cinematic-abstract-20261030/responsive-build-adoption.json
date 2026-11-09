@@ -1,0 +1,23 @@
+{
+  "origin": "http://127.0.0.1:44811",
+  "taskOwnedDemoOnly": true,
+  "apiOriginAndUiFlagsPreserved": true,
+  "priorBuild": "/dev/shm/autopromote-application-demo-rlq21z/build-before-responsive",
+  "candidate": "/dev/shm/autopromote-abstract-responsive-client",
+  "oldIndexSha256": "cc44bdc105acebfee4d8ccf25bd597f49d96bb6dc99817c80f333be857dd87b0",
+  "newIndexSha256": "bc7040c1b61381581501e0d7d1b4aea405bbe64f41fa226ef186d1e58415b050",
+  "oldHashedAssetsRetained": 3,
+  "checks": {
+    "realSavedAuth": true,
+    "fabricatedAuth": false,
+    "normalNativeRestore": true,
+    "sameCanvasAcrossEdits": true,
+    "actualPictureChanged": true,
+    "sceneDecisionsRestoredExactly": true,
+    "editAndPictureMs": 1170,
+    "submissions": 0,
+    "contextualHelpStatus": 200,
+    "sourceApiOriginPreserved": true
+  },
+  "productionDeployment": false
+}

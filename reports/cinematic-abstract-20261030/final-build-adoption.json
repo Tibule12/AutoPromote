@@ -1,0 +1,22 @@
+{
+  "taskOwnedDemoOnly": true,
+  "origin": "http://127.0.0.1:44811",
+  "previousBuild": "/dev/shm/autopromote-abstract-responsive-client",
+  "retainedEntry": "/dev/shm/autopromote-application-demo-rlq21z/build-before-tangents",
+  "candidate": "/dev/shm/autopromote-abstract-final-client",
+  "oldHashedAssetsRetained": 6,
+  "anonymousViewports": 8,
+  "ordinaryWorkspaceAndHelp": {
+    "realSavedAuth": true,
+    "fabricatedAuth": false,
+    "normalNativeRestore": true,
+    "sameCanvasAcrossEdits": true,
+    "actualPictureChanged": true,
+    "sceneDecisionsRestoredExactly": true,
+    "editAndPictureMs": 749,
+    "submissions": 0,
+    "contextualHelpStatus": 200,
+    "sourceApiOriginPreserved": true
+  },
+  "productionDeployment": false
+}

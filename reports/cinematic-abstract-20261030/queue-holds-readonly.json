@@ -1,0 +1,43 @@
+{
+  "observedAt": "2026-10-30T08:08:19.732Z",
+  "readOnly": true,
+  "schedules": [
+    {
+      "id": "DXojMkzP9V6CtIiQfcfH",
+      "platform": "reddit",
+      "status": "pending",
+      "holdFields": {},
+      "isActive": false
+    },
+    {
+      "id": "O0jBCmaGAkAiKEpGkkIK",
+      "platform": "youtube",
+      "status": "pending",
+      "holdFields": {},
+      "isActive": false
+    },
+    {
+      "id": "zA41mNnsZNnRrftBBgqw",
+      "platform": "tiktok",
+      "status": "pending",
+      "holdFields": {},
+      "isActive": false
+    },
+    {
+      "id": "4eEquTtUYXaySfrXDzZQ",
+      "platform": "facebook",
+      "status": "pending",
+      "holdFields": {},
+      "isActive": false
+    },
+    {
+      "id": "Abb930a4t4mC1y8DBmOv",
+      "platform": "instagram",
+      "status": "pending",
+      "holdFields": {},
+      "isActive": false
+    }
+  ],
+  "newScheduling": false,
+  "ownerApproved": false
+}

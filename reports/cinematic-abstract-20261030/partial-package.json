@@ -1,0 +1,20 @@
+{
+  "folder": "/home/tibule12/Videos/AutoPromote-Cinematic-Abstract-2026-10-30",
+  "films": [
+    {
+      "identity": "current",
+      "file": "01-CURRENT.mp4",
+      "durationSeconds": 24,
+      "sha256": "d83e2dfc6dfdf492520f2335a9eca0353317c2e688f93fc3d17e05ec6ee6f4e7",
+      "walkthroughDuration": 121.41666666666666,
+      "walkthroughSha256": "31370440dfa239f5fb8d41cc2ed193376bfc0a4afa5d7c4d6c41304443d694ca",
+      "thumbnailSha256": "5b83675208e2eea19261cbdd99970f1457c62487b3dc5c166812bf7c49abde23",
+      "nativeProjectHash": "c3afacd136f8998cb07812b2b86109b927e392e17a2cbaf6f07a5d95407245f6",
+      "completeMatchingPlayback": true,
+      "independentExactRestore": true,
+      "ownerApproved": false,
+      "scheduled": false
+    }
+  ],
+  "exactCopies": 22
+}

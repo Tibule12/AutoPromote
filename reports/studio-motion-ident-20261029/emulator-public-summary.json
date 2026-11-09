@@ -1,0 +1,84 @@
+{
+  "recordedAt": "2026-10-29T17:41:14.723Z",
+  "project": "demo-autopromote-credits",
+  "locality": "loopback-only",
+  "paidWorkloadsStarted": false,
+  "invoiceCostsAvailable": false,
+  "cloudPricingQualified": false,
+  "mediaBytesRetained": 11976673,
+  "wallets": [
+    {
+      "userId": "demo-pilot-empty",
+      "balance": 0,
+      "reserved": 0,
+      "totals": {
+        "opening": 0,
+        "granted": 0,
+        "earned": 0,
+        "purchased": 0,
+        "consumed": 0,
+        "refunded": 0,
+        "expired": 0
+      }
+    },
+    {
+      "userId": "demo-pilot-alice",
+      "balance": 13,
+      "reserved": 0,
+      "totals": {
+        "opening": 0,
+        "granted": 15,
+        "earned": 0,
+        "purchased": 0,
+        "consumed": 2,
+        "refunded": 0,
+        "expired": 0
+      }
+    }
+  ],
+  "operations": [
+    {
+      "operationId": "60f7efc27b43a64d97e28bdb13320f89d511776c97a18bfd42a1553c55683d69",
+      "operation": "studio.render",
+      "state": "succeeded",
+      "credits": 2
+    }
+  ],
+  "executions": [
+    {
+      "executionId": "6b82e7d81dd563de7e0a0328c80d692b0b7a43c97e3bfa24c8d35784c61a41af",
+      "operationId": "60f7efc27b43a64d97e28bdb13320f89d511776c97a18bfd42a1553c55683d69",
+      "endpoint": "/render-viral-clip",
+      "state": "succeeded",
+      "exitCode": 0,
+      "processTerminated": true,
+      "sourceHash": "adda67f7e44dcb866b581172a1bf48a93bbd24e99ca8412f6e6affba6d125794",
+      "inputBytes": 6585,
+      "outputBytes": 151386,
+      "outputHash": "12c1cad04b060531fda0aa95bd0a5ff740d833e7cfabff438ab87c181d85a870",
+      "resource": {
+        "wallSeconds": 16.528939787996933,
+        "cpuSeconds": 16.572704,
+        "peakRssKiB": 759016,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      },
+      "finishedAt": "2026-10-29T17:39:03.162Z"
+    }
+  ],
+  "legacyFinancialFields": [
+    {
+      "userId": "demo-pilot-alice",
+      "credits": 20,
+      "role": "user",
+      "tier": "free"
+    },
+    {
+      "userId": "demo-pilot-empty",
+      "credits": 20,
+      "role": "user",
+      "tier": "free"
+    }
+  ],
+  "legacyCreditUsageDocuments": 0
+}

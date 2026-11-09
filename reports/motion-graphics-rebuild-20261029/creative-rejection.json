@@ -1,0 +1,17 @@
+{
+  "status": "REJECTED_BY_AGENT_AFTER_OWNER_CHALLENGE",
+  "ownerApproved": false,
+  "scheduled": false,
+  "originalFilesPreserved": true,
+  "basis": "Owner challenged the delivered batch. Agent reinspection of the exact hash-matching delivered files finds that they do not meet the requested creative standard.",
+  "findings": [
+    "Large empty margins surround a narrow inspector recording for most of each lesson.",
+    "The finished motion result receives too little screen time relative to numeric control panels.",
+    "Actions are not consistently followed by a clearly visible before/after result.",
+    "Some headings overlap the captured interface, and numeric fields are cramped.",
+    "Fitted feed copies shrink an already small presentation instead of designing the lesson for that frame.",
+    "The artwork and simple transform reveals do not establish the impressive motion design requested."
+  ],
+  "technicalEvidenceRetained": "Successful decoding, waveform alignment and restore checks remain valid; they do not establish creative quality.",
+  "nextWork": "Rebuild one coherent motion demonstration around a stronger result and visible action-to-result teaching before making further variants. Keep the actual result prominent, remove idle holds, and use a layout designed for its frame. Preserve all native source projects and prior files. No automatic scheduling, paid generation, GPU allocation or deployment is authorized."
+}
