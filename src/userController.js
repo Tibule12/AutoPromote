@@ -6,7 +6,7 @@ const { auth, db } = require("./firebaseAdmin");
 // @route   POST /api/users/register
 // @access  Public
 const registerUser = async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password } = req.body;
   try {
     // Create user in Firebase Auth
     const userRecord = await auth.createUser({
@@ -19,25 +19,22 @@ const registerUser = async (req, res) => {
     const initialCredits = parseInt(process.env.INITIAL_FREE_CREDITS || "50", 10);
 
     // Store user profile in Firestore
-    await db
-      .collection("users")
-      .doc(userRecord.uid)
-      .set({
-        name,
-        email,
-        role: role || "creator",
-        credits: initialCredits,
-        // optional flag to easily recognize early testers
-        promoGranted: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      });
+    await db.collection("users").doc(userRecord.uid).set({
+      name,
+      email,
+      role: "creator",
+      credits: initialCredits,
+      // optional flag to easily recognize early testers
+      promoGranted: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
 
     res.status(201).json({
       id: userRecord.uid,
       name,
       email,
-      role: role || "creator",
+      role: "creator",
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -74,21 +71,12 @@ const getUserProfile = async (req, res) => {
 const updateUserProfile = async (req, res) => {
   try {
     const userRef = db.collection("users").doc(req.user.uid);
-    const currentSnap = await userRef.get();
-    const currentData = currentSnap.exists ? currentSnap.data() : {};
     let updateData = {
       name: req.body.name,
       email: req.body.email,
       updated_at: new Date().toISOString(),
       // ...rest of code...
     };
-    // Prevent downgrading admin role or isAdmin
-    if (currentData.role === "admin" || currentData.isAdmin === true) {
-      updateData.role = "admin";
-      updateData.isAdmin = true;
-    } else if (req.body.role) {
-      updateData.role = req.body.role;
-    }
     await userRef.update(updateData);
     res.json({ message: "Profile updated" });
   } catch (error) {

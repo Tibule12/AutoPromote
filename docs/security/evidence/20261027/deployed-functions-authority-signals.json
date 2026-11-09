@@ -1,0 +1,216 @@
+{
+  "index.js": [
+    {
+      "line": 20,
+      "signals": []
+    },
+    {
+      "line": 210,
+      "signals": [
+        "wrapperAuthority"
+      ]
+    },
+    {
+      "line": 213,
+      "signals": [
+        "wrapperAuthority"
+      ]
+    },
+    {
+      "line": 215,
+      "signals": []
+    }
+  ],
+  "_server/src/authMiddleware.js": [
+    {
+      "line": 173,
+      "signals": [
+        "verifyIdToken"
+      ]
+    },
+    {
+      "line": 259,
+      "signals": []
+    },
+    {
+      "line": 263,
+      "signals": []
+    },
+    {
+      "line": 299,
+      "signals": []
+    },
+    {
+      "line": 328,
+      "signals": []
+    },
+    {
+      "line": 342,
+      "signals": []
+    },
+    {
+      "line": 355,
+      "signals": [
+        "spreadProfile"
+      ]
+    },
+    {
+      "line": 436,
+      "signals": [
+        "exports"
+      ]
+    }
+  ],
+  "_server/src/authRoutes.js": [
+    {
+      "line": 9,
+      "signals": [
+        "wrapperAuthority"
+      ]
+    },
+    {
+      "line": 16,
+      "signals": [
+        "verifyIdToken"
+      ]
+    },
+    {
+      "line": 41,
+      "signals": []
+    },
+    {
+      "line": 199,
+      "signals": [
+        "verifyIdToken"
+      ]
+    },
+    {
+      "line": 210,
+      "signals": [
+        "mintCustomToken"
+      ]
+    },
+    {
+      "line": 238,
+      "signals": []
+    },
+    {
+      "line": 255,
+      "signals": []
+    },
+    {
+      "line": 376,
+      "signals": [
+        "mintCustomToken"
+      ]
+    },
+    {
+      "line": 436,
+      "signals": [
+        "verifyIdToken"
+      ]
+    },
+    {
+      "line": 462,
+      "signals": []
+    },
+    {
+      "line": 470,
+      "signals": []
+    },
+    {
+      "line": 491,
+      "signals": []
+    },
+    {
+      "line": 598,
+      "signals": [
+        "verifyIdToken"
+      ]
+    },
+    {
+      "line": 606,
+      "signals": []
+    },
+    {
+      "line": 644,
+      "signals": []
+    },
+    {
+      "line": 684,
+      "signals": [
+        "exports"
+      ]
+    }
+  ],
+  "_server/src/userRoutes.js": [
+    {
+      "line": 41,
+      "signals": []
+    },
+    {
+      "line": 81,
+      "signals": []
+    },
+    {
+      "line": 117,
+      "signals": []
+    },
+    {
+      "line": 122,
+      "signals": [
+        "spreadProfile"
+      ]
+    },
+    {
+      "line": 133,
+      "signals": []
+    },
+    {
+      "line": 145,
+      "signals": []
+    },
+    {
+      "line": 170,
+      "signals": []
+    },
+    {
+      "line": 227,
+      "signals": []
+    },
+    {
+      "line": 282,
+      "signals": []
+    },
+    {
+      "line": 331,
+      "signals": []
+    },
+    {
+      "line": 489,
+      "signals": []
+    },
+    {
+      "line": 537,
+      "signals": []
+    },
+    {
+      "line": 554,
+      "signals": []
+    },
+    {
+      "line": 578,
+      "signals": [
+        "exports"
+      ]
+    },
+    {
+      "line": 594,
+      "signals": []
+    },
+    {
+      "line": 612,
+      "signals": []
+    }
+  ]
+}

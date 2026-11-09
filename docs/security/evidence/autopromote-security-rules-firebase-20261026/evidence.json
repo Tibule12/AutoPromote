@@ -1,0 +1,54 @@
+{
+  "project": "autopromote-cc6d3",
+  "collectedAtUtc": "2026-10-26T21:17:47.839654+00:00",
+  "methods": [
+    "GET"
+  ],
+  "requests": [
+    {
+      "resource": "projects/autopromote-cc6d3/releases?pageSize=100",
+      "httpStatus": 200
+    },
+    {
+      "resource": "projects/autopromote-cc6d3/rulesets/e6af0088-be7a-4050-88ec-69af2b9d1066",
+      "httpStatus": 200
+    },
+    {
+      "resource": "projects/autopromote-cc6d3/releases/cloud.firestore",
+      "httpStatus": 200
+    },
+    {
+      "resource": "projects/autopromote-cc6d3/rulesets/80b0f755-37a3-488a-8466-f4a33eb59a5b",
+      "httpStatus": 200
+    },
+    {
+      "resource": "projects/autopromote-cc6d3/releases/firebase.storage/autopromote-cc6d3.firebasestorage.app",
+      "httpStatus": 200
+    }
+  ],
+  "comparisons": [
+    {
+      "release": "projects/autopromote-cc6d3/releases/cloud.firestore",
+      "ruleset": "projects/autopromote-cc6d3/rulesets/e6af0088-be7a-4050-88ec-69af2b9d1066",
+      "releaseUpdateTime": "2026-07-19T17:11:26.245030Z",
+      "releaseStableDuringCapture": true,
+      "sourceName": "firestore.rules",
+      "deployedSha256": "0e7ee93d839e2a23d5c218f1b44cff3808eecdcc191bc10334818332691f6513",
+      "matchesRepositoryBeforeExactly": true,
+      "matchesCandidateExactly": false,
+      "comparisonScope": "Exact source comparison; different text requires semantic review and emulator replay"
+    },
+    {
+      "release": "projects/autopromote-cc6d3/releases/firebase.storage/autopromote-cc6d3.firebasestorage.app",
+      "ruleset": "projects/autopromote-cc6d3/rulesets/80b0f755-37a3-488a-8466-f4a33eb59a5b",
+      "releaseUpdateTime": "2026-07-21T08:15:28.758877Z",
+      "releaseStableDuringCapture": true,
+      "sourceName": "storage.rules",
+      "deployedSha256": "028ade94e206a69cffabdb4a9b947dc981edcd5da91e8f0e88b9defd597512e1",
+      "matchesRepositoryBeforeExactly": true,
+      "matchesCandidateExactly": true,
+      "comparisonScope": "Exact source comparison; different text requires semantic review and emulator replay"
+    }
+  ],
+  "complete": true
+}

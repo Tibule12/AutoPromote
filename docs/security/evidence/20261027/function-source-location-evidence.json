@@ -1,0 +1,10 @@
+{
+  "buildId": "1b3deb35-b3e1-4413-a232-c7375840912c",
+  "sourceReferences": [
+    "gs://gcf-sources-341498038874-us-central1/helloWorld-54d15b23-5fed-4692-bafa-1721de4e04f1/version-39/function-source.zip"
+  ],
+  "sourceSubstitutionNames": [
+    "_GOOGLE_LABEL_SOURCE"
+  ],
+  "sourceTopLevelKeys": []
+}

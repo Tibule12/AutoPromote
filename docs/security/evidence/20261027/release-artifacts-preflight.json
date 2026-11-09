@@ -1,0 +1,24 @@
+{
+  "recordedAtUtc": "2026-10-27T11:53:24.348785+00:00",
+  "backendPr": 498,
+  "head": "946ac59899f8249a92a08699fd5eddf1b889dec8",
+  "securityOnly": true,
+  "adSenseIncluded": false,
+  "unifiedCreditsIncluded": false,
+  "normalRulesDeployed": true,
+  "rulesManifest": {
+    "project": "autopromote-cc6d3",
+    "scope": "Rules only; publish only after verified repaired backend",
+    "sources": {
+      "config/security/firestore.owner-scoped.rules": "25436b8888989a527e0d9138ce31cf53ef1f300c95618e89166377d1e15cc996",
+      "config/security/storage.owner-scoped.rules": "b3ebe33fd6a4ec15263b24040c4ff75cf7cfdfb9fb47eeaad19dcfbf208a0679"
+    },
+    "validation": "84 profile/authority/packaging tests and 10 coordinated Firestore/Storage emulator tests passed"
+  },
+  "expectedEmergencyRulesets": {
+    "firestore": "2115bff8-a189-4179-9ecc-516c895d132a",
+    "storage": "7d9cee7f-2189-492d-9d46-9bf7b0bf1200"
+  },
+  "finalRepositoryAndRuntimeCommit": "88bef8ff4c9f12c78abac88b644e3b60d4ffa428",
+  "finalRulesVerification": "owner-rules-independent-verification.json"
+}

@@ -1,0 +1,16 @@
+{
+  "mergedAtUtc": "2026-10-27T11:54:59.558223+00:00",
+  "pullRequest": "https://github.com/Tibule12/AutoPromote/pull/498",
+  "reviewedHead": "946ac59899f8249a92a08699fd5eddf1b889dec8",
+  "mergeCommit": "708c3e09d0ec1200146a6d76d6c8db9a5ffeeab1",
+  "authorization": "Subsequent user full autonomous security authorisation",
+  "basis": "92 isolated security tests; 52 selected workflow regressions; seven fixture regressions; successful prior full-suite run on e550cc with identical production API files; current scanners and targeted backend CI passed. Repeated broad current-head jobs continued.",
+  "rules": "E1 remains active until exact repaired runtime and owner rules verified",
+  "excluded": [
+    "AdSense ownership tag",
+    "unified credits",
+    "rewarded ads",
+    "balance correction",
+    "price changes"
+  ]
+}

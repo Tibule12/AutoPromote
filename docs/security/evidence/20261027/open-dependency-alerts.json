@@ -1,0 +1,52 @@
+[
+  {
+    "number": 751,
+    "manifest": "package-lock.json",
+    "package": "node-forge",
+    "severity": "high",
+    "summary": "node-forge RSA PKCS#1 v1.5 signature verification accepts extra nested DigestAlgorithm elements",
+    "ghsa": "GHSA-86w9-cpqp-85rv",
+    "range": "<= 1.4.0",
+    "fixed": null
+  },
+  {
+    "number": 729,
+    "manifest": "frontend/package-lock.json",
+    "package": "braces",
+    "severity": "high",
+    "summary": "Withdrawn Advisory: braces vulnerable to stack-exhaustion denial of service through deeply nested patterns",
+    "ghsa": "GHSA-vfj7-8cjw-p6xm",
+    "range": "<= 3.0.3",
+    "fixed": null
+  },
+  {
+    "number": 720,
+    "manifest": "autopromote-functions/package-lock.json",
+    "package": "node-forge",
+    "severity": "high",
+    "summary": "node-forge RSA PKCS#1 v1.5 signature verification accepts extra nested DigestAlgorithm elements",
+    "ghsa": "GHSA-86w9-cpqp-85rv",
+    "range": "<= 1.4.0",
+    "fixed": null
+  },
+  {
+    "number": 714,
+    "manifest": "TodoApp/package-lock.json",
+    "package": "braces",
+    "severity": "high",
+    "summary": "Withdrawn Advisory: braces vulnerable to stack-exhaustion denial of service through deeply nested patterns",
+    "ghsa": "GHSA-vfj7-8cjw-p6xm",
+    "range": "<= 3.0.3",
+    "fixed": null
+  },
+  {
+    "number": 713,
+    "manifest": "TodoApp/package-lock.json",
+    "package": "node-forge",
+    "severity": "high",
+    "summary": "node-forge RSA PKCS#1 v1.5 signature verification accepts extra nested DigestAlgorithm elements",
+    "ghsa": "GHSA-86w9-cpqp-85rv",
+    "range": "<= 1.4.0",
+    "fixed": null
+  }
+]

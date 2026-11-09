@@ -1,0 +1,28 @@
+{
+  "verifiedAtUtc": "2026-10-27T12:31:50.176735+00:00",
+  "requestedUrl": "https://autopromote.org/",
+  "finalUrl": "https://autopromote.org/",
+  "httpStatus": 200,
+  "authentication": "anonymous request, no cookies or credentials supplied",
+  "accountTagCountInEntireHtml": 1,
+  "accountTagCountInHead": 1,
+  "accountTag": "<meta name=\"google-adsense-account\" content=\"ca-pub-4802692424152812\">",
+  "releaseMeta": "593bbcdf86e7ca6e3acc16eac5b52b168f3a45ca",
+  "buildInfo": {
+    "commit": "593bbcdf86e7ca6e3acc16eac5b52b168f3a45ca",
+    "builtAt": "2026-10-27T12:29:19.885Z",
+    "welcomeAssets": "2026-10-21"
+  },
+  "adServingScriptCount": 0,
+  "htmlSha256": "ad2fb7be562bad27ca12c9ec7d1839b5c7f163c8cc0fcc4355e0232b4ff82c5d",
+  "headers": {
+    "Date": "Tue, 27 Oct 2026 12:31:50 GMT",
+    "Content-Type": "text/html; charset=utf-8",
+    "Cache-Control": "public, max-age=0, s-maxage=300",
+    "ETag": "W/\"bd6661c07606aaec07e48fd632161704\"",
+    "Last-Modified": "Tue, 27 Oct 2026 12:29:22 UTC",
+    "CF-Cache-Status": "HIT",
+    "Age": "76"
+  },
+  "pullRequest": "https://github.com/Tibule12/AutoPromote/pull/503"
+}

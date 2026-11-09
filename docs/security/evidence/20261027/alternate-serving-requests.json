@@ -1,0 +1,23 @@
+[
+  {
+    "url": "https://thulani-api-jddzncgt2a-uc.a.run.app/api/version",
+    "status": 200,
+    "sha256": "dea4ea55f783a536eb39f5204c6bbc41f6a09bb18390c5fee3cae4ea37349c14",
+    "contentType": "application/json; charset=utf-8",
+    "versionResponse": {
+      "version": "1.2.0",
+      "commit": null,
+      "ok": true
+    }
+  },
+  {
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/api/api/version",
+    "status": 403
+  },
+  {
+    "url": "https://autopromote.onrender.com/",
+    "status": 200,
+    "sha256": "2f21b68e7349866cf94712e44411ca0ff28530a85303bee2781d45ec4b66b3d4",
+    "contentType": "text/html; charset=utf-8"
+  }
+]

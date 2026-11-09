@@ -1,0 +1,27 @@
+{
+  "project": "autopromote-cc6d3",
+  "collectedAtUtc": "2026-10-26T21:17:43.283299+00:00",
+  "methods": [
+    "GET"
+  ],
+  "requests": [
+    {
+      "resource": "projects/autopromote-cc6d3/releases?pageSize=100",
+      "httpStatus": 403,
+      "status": "PERMISSION_DENIED",
+      "reasons": [
+        "SERVICE_DISABLED"
+      ]
+    },
+    {
+      "resource": "projects/autopromote-cc6d3/releases/cloud.firestore",
+      "httpStatus": 403,
+      "status": "PERMISSION_DENIED",
+      "reasons": [
+        "SERVICE_DISABLED"
+      ]
+    }
+  ],
+  "comparisons": [],
+  "complete": false
+}

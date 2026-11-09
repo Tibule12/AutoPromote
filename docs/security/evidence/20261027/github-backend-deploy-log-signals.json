@@ -1,0 +1,8 @@
+{
+  "jobId": 120014848316,
+  "available": true,
+  "deployIds": [],
+  "serviceIds": [],
+  "logSha256": "05d920c0b5367ba6f0cf9727b749f2b717e51b5048208cd3f48be452f7cc31bf",
+  "scope": "Historical workflow hook response; not proof that a deploy is live now"
+}

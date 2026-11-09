@@ -1,0 +1,7 @@
+{
+  "readSucceeded": true,
+  "scope": "400-day query, up to 100 Auth/Firestore authority-related method metadata records; not a complete forensic export",
+  "records": 100,
+  "privateEvidence": "/tmp/autopromote-security-private-20261027/authority-audit-log-metadata.json",
+  "absenceIsNotProof": true
+}

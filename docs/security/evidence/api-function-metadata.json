@@ -1,0 +1,12 @@
+{
+  "buildId": "1b3deb35-b3e1-4413-a232-c7375840912c",
+  "entryPoint": "api",
+  "httpsTrigger": {
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/api"
+  },
+  "name": "projects/autopromote-cc6d3/locations/us-central1/functions/api",
+  "runtime": "nodejs20",
+  "status": "ACTIVE",
+  "updateTime": "2026-02-12T16:53:31.021Z",
+  "versionId": "23"
+}

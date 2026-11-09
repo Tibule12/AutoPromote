@@ -1395,8 +1395,9 @@ try {
   } catch (e) {
     console.warn("aggregateStatusRoutes mount failed:", e.message);
   }
-  // Only mount admin test routes in non-production environments
-  if (process.env.NODE_ENV !== "production") {
+  // Cloud Run/Functions/Render must never expose local admin setup routes,
+  // even when NODE_ENV is accidentally unset or configured as development.
+  if (!require("./utils/authAuthority").isHostedRuntime()) {
     try {
       app.use("/api", adminTestRoutes);
     } catch (e) {

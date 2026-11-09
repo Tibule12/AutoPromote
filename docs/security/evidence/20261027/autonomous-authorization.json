@@ -1,0 +1,10 @@
+{
+  "userInstruction": "i am going to work now do what needs to be done don't wait for my approvals i gave you now full access",
+  "recordedAtUtc": "2026-10-27T04:21:26.805723+00:00",
+  "scope": "Urgent production security remediation including necessary isolated code publication/deployment and infrastructure containment; monetisation remains paused; preserve balances, pricing, subscriptions and legitimate user data",
+  "currentWorktree": "/home/tibule12/Projects/AutoPromte/AutoPromote-security-production-20261027",
+  "currentBranch": "security/production-9008721-20261027",
+  "verifiedOwnerUid": "bf04dPKELvVMivWoUyLsAVyw2sg2",
+  "authorityPolicy": "Only independently verified operator-email Auth identity; historical claim/admin/profile grants are not sources of authority; records retained unchanged",
+  "containment": "E1 Firestore/Storage restrictive rules retained until post-repair validation; alternate thulani-api public invocation removed"
+}

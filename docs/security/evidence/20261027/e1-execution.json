@@ -1,0 +1,115 @@
+{
+  "approval": "Explicit user approval: Approve E1 rules-only containment",
+  "project": "autopromote-cc6d3",
+  "startedAtUtc": "2026-10-27T03:39:18.541180+00:00",
+  "scope": "Ruleset creation and release-pointer updates only; no document/object/Auth/IAM/backend/billing changes",
+  "requests": [
+    {
+      "method": "GET",
+      "resource": "projects/autopromote-cc6d3/releases/cloud.firestore",
+      "status": 200,
+      "atUtc": "2026-10-27T03:39:20.445637+00:00"
+    },
+    {
+      "method": "GET",
+      "resource": "projects/autopromote-cc6d3/releases/firebase.storage/autopromote-cc6d3.firebasestorage.app",
+      "status": 200,
+      "atUtc": "2026-10-27T03:39:21.674363+00:00"
+    },
+    {
+      "method": "POST",
+      "resource": "projects/autopromote-cc6d3/rulesets",
+      "status": 200,
+      "atUtc": "2026-10-27T03:39:22.938276+00:00"
+    },
+    {
+      "method": "GET",
+      "resource": "projects/autopromote-cc6d3/releases/cloud.firestore",
+      "status": 200,
+      "atUtc": "2026-10-27T03:39:24.098603+00:00"
+    },
+    {
+      "method": "PATCH",
+      "resource": "projects/autopromote-cc6d3/releases/cloud.firestore",
+      "status": 200,
+      "atUtc": "2026-10-27T03:39:25.667944+00:00"
+    },
+    {
+      "method": "GET",
+      "resource": "projects/autopromote-cc6d3/releases/cloud.firestore",
+      "status": 200,
+      "atUtc": "2026-10-27T03:39:26.896684+00:00"
+    },
+    {
+      "method": "GET",
+      "resource": "projects/autopromote-cc6d3/rulesets/2115bff8-a189-4179-9ecc-516c895d132a",
+      "status": 200,
+      "atUtc": "2026-10-27T03:39:28.124161+00:00"
+    },
+    {
+      "method": "POST",
+      "resource": "projects/autopromote-cc6d3/rulesets",
+      "status": 200,
+      "atUtc": "2026-10-27T03:39:29.367819+00:00"
+    },
+    {
+      "method": "GET",
+      "resource": "projects/autopromote-cc6d3/releases/firebase.storage/autopromote-cc6d3.firebasestorage.app",
+      "status": 200,
+      "atUtc": "2026-10-27T03:39:30.583655+00:00"
+    },
+    {
+      "method": "PATCH",
+      "resource": "projects/autopromote-cc6d3/releases/firebase.storage/autopromote-cc6d3.firebasestorage.app",
+      "status": 200,
+      "atUtc": "2026-10-27T03:39:31.454798+00:00"
+    },
+    {
+      "method": "GET",
+      "resource": "projects/autopromote-cc6d3/releases/firebase.storage/autopromote-cc6d3.firebasestorage.app",
+      "status": 200,
+      "atUtc": "2026-10-27T03:39:33.081445+00:00"
+    },
+    {
+      "method": "GET",
+      "resource": "projects/autopromote-cc6d3/rulesets/7d9cee7f-2189-492d-9d46-9bf7b0bf1200",
+      "status": 200,
+      "atUtc": "2026-10-27T03:39:34.269426+00:00"
+    }
+  ],
+  "results": [
+    {
+      "service": "firestore",
+      "release": "projects/autopromote-cc6d3/releases/cloud.firestore",
+      "ruleset": "projects/autopromote-cc6d3/rulesets/2115bff8-a189-4179-9ecc-516c895d132a",
+      "sourceSha256": "a40841a288a5633812d6556c3909b7f0454d2553174328af48a337af4507c76c",
+      "releaseUpdatedAtUtc": "2026-10-27T03:39:25.343425Z",
+      "activePointerAndExactSourceVerified": true
+    },
+    {
+      "service": "storage",
+      "release": "projects/autopromote-cc6d3/releases/firebase.storage/autopromote-cc6d3.firebasestorage.app",
+      "ruleset": "projects/autopromote-cc6d3/rulesets/7d9cee7f-2189-492d-9d46-9bf7b0bf1200",
+      "sourceSha256": "f30382718b2890dbf988ed50c34f135cb62a99470cd68b12c9154b5c1add91c0",
+      "releaseUpdatedAtUtc": "2026-10-27T03:39:31.293390Z",
+      "activePointerAndExactSourceVerified": true
+    }
+  ],
+  "before": {
+    "firestore": {
+      "name": "projects/autopromote-cc6d3/releases/cloud.firestore",
+      "rulesetName": "projects/autopromote-cc6d3/rulesets/e6af0088-be7a-4050-88ec-69af2b9d1066",
+      "createTime": "2025-09-16T13:13:19.993875Z",
+      "updateTime": "2026-07-19T17:11:26.245030Z"
+    },
+    "storage": {
+      "name": "projects/autopromote-cc6d3/releases/firebase.storage/autopromote-cc6d3.firebasestorage.app",
+      "rulesetName": "projects/autopromote-cc6d3/rulesets/80b0f755-37a3-488a-8466-f4a33eb59a5b",
+      "createTime": "2025-09-16T12:07:12.213710Z",
+      "updateTime": "2026-07-21T08:15:28.758877Z"
+    }
+  },
+  "finishedAtUtc": "2026-10-27T03:39:34.270012+00:00",
+  "status": "E1_PUBLISHED_BOTH_SOURCES_VERIFIED",
+  "propagation": "Rules propagation and existing client connections may take additional time; no live user/exploit probe performed"
+}

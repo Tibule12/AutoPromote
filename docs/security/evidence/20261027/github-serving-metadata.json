@@ -1,0 +1,1208 @@
+{
+  "repo": "Tibule12/AutoPromote",
+  "mainSha": "900872157ee67aaedfc114a017299a769fced147",
+  "capturedAtUtc": "2026-10-27T03:15:59.734848+00:00",
+  "deployments": [
+    {
+      "id": 7260553939,
+      "sha": "900872157ee67aaedfc114a017299a769fced147",
+      "environment": "github-pages",
+      "createdAt": "2026-10-22T18:40:22Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7260511485,
+      "sha": "900872157ee67aaedfc114a017299a769fced147",
+      "environment": "github-pages",
+      "createdAt": "2026-10-22T18:38:35Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7258923188,
+      "sha": "4a5313aed5011baac3bb78748e509c38dfbc61b8",
+      "environment": "github-pages",
+      "createdAt": "2026-10-22T17:25:03Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7258890758,
+      "sha": "4a5313aed5011baac3bb78748e509c38dfbc61b8",
+      "environment": "github-pages",
+      "createdAt": "2026-10-22T17:23:36Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7257740771,
+      "sha": "0801a29dc9605cf8c7e2d45b773267e805c0bf9d",
+      "environment": "github-pages",
+      "createdAt": "2026-10-22T16:30:20Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7257700000,
+      "sha": "0801a29dc9605cf8c7e2d45b773267e805c0bf9d",
+      "environment": "github-pages",
+      "createdAt": "2026-10-22T16:28:24Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7243923209,
+      "sha": "165dbe328c7da65051a4b37f73797d8b919ec88f",
+      "environment": "github-pages",
+      "createdAt": "2026-10-22T04:41:29Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7243890836,
+      "sha": "165dbe328c7da65051a4b37f73797d8b919ec88f",
+      "environment": "github-pages",
+      "createdAt": "2026-10-22T04:39:02Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7243020987,
+      "sha": "2c8c666daefe1567005875328a76d9581330cd93",
+      "environment": "github-pages",
+      "createdAt": "2026-10-22T03:32:03Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7242976591,
+      "sha": "2c8c666daefe1567005875328a76d9581330cd93",
+      "environment": "github-pages",
+      "createdAt": "2026-10-22T03:29:53Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7242916819,
+      "sha": "e2eea6e1d895b490c1256955ea93aa5c7595ee92",
+      "environment": "github-pages",
+      "createdAt": "2026-10-22T03:25:41Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7242887696,
+      "sha": "e2eea6e1d895b490c1256955ea93aa5c7595ee92",
+      "environment": "github-pages",
+      "createdAt": "2026-10-22T03:23:27Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7242685834,
+      "sha": "de82363b12704396e66a828408fad97ba1ff61fd",
+      "environment": "github-pages",
+      "createdAt": "2026-10-22T03:08:27Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7242658881,
+      "sha": "de82363b12704396e66a828408fad97ba1ff61fd",
+      "environment": "github-pages",
+      "createdAt": "2026-10-22T03:06:16Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7046894744,
+      "sha": "858d538b51879c718d49f9b4a233a75daaf29348",
+      "environment": "github-pages",
+      "createdAt": "2026-10-13T18:35:33Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7046827371,
+      "sha": "858d538b51879c718d49f9b4a233a75daaf29348",
+      "environment": "github-pages",
+      "createdAt": "2026-10-13T18:33:24Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7046226101,
+      "sha": "d9eed6d479774ecd0afd072c405d73eec4cf3979",
+      "environment": "github-pages",
+      "createdAt": "2026-10-13T18:08:39Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7046177144,
+      "sha": "d9eed6d479774ecd0afd072c405d73eec4cf3979",
+      "environment": "github-pages",
+      "createdAt": "2026-10-13T18:06:17Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7038172335,
+      "sha": "3ed931f8894d9e48c051f583dd92041aaa5e7ba5",
+      "environment": "github-pages",
+      "createdAt": "2026-10-13T12:15:46Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7038135874,
+      "sha": "3ed931f8894d9e48c051f583dd92041aaa5e7ba5",
+      "environment": "github-pages",
+      "createdAt": "2026-10-13T12:13:58Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7037453085,
+      "sha": "e6c160ad550ece04fee269b6c533939f204a65e9",
+      "environment": "github-pages",
+      "createdAt": "2026-10-13T11:40:01Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7037415828,
+      "sha": "e6c160ad550ece04fee269b6c533939f204a65e9",
+      "environment": "github-pages",
+      "createdAt": "2026-10-13T11:38:05Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7035954833,
+      "sha": "9120c6575792e2b469a6f00d0c8e7606c0942507",
+      "environment": "github-pages",
+      "createdAt": "2026-10-13T10:22:39Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7035917245,
+      "sha": "9120c6575792e2b469a6f00d0c8e7606c0942507",
+      "environment": "github-pages",
+      "createdAt": "2026-10-13T10:20:40Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7032302212,
+      "sha": "e06f43d1b4b71c4b039c288706c38bf540976b12",
+      "environment": "github-pages",
+      "createdAt": "2026-10-13T07:07:04Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7032271530,
+      "sha": "e06f43d1b4b71c4b039c288706c38bf540976b12",
+      "environment": "github-pages",
+      "createdAt": "2026-10-13T07:05:09Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7032039931,
+      "sha": "a2d5806886325c56da7e2ef0c3b7d1978c9eb9cf",
+      "environment": "github-pages",
+      "createdAt": "2026-10-13T06:50:55Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7032018572,
+      "sha": "a2d5806886325c56da7e2ef0c3b7d1978c9eb9cf",
+      "environment": "github-pages",
+      "createdAt": "2026-10-13T06:49:36Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7031963433,
+      "sha": "40d02b5b24081a03102a70d1fb55a40d8754a865",
+      "environment": "github-pages",
+      "createdAt": "2026-10-13T06:46:10Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7031930779,
+      "sha": "40d02b5b24081a03102a70d1fb55a40d8754a865",
+      "environment": "github-pages",
+      "createdAt": "2026-10-13T06:44:09Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7031922529,
+      "sha": "6904640dbbba8fa5d2c6cc9404c4ce9ccef0218a",
+      "environment": "github-pages",
+      "createdAt": "2026-10-13T06:43:37Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7031898462,
+      "sha": "6904640dbbba8fa5d2c6cc9404c4ce9ccef0218a",
+      "environment": "github-pages",
+      "createdAt": "2026-10-13T06:42:06Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7031869680,
+      "sha": "a648ffdb02874c5560cf50f07fe3c7bc5898cd1c",
+      "environment": "github-pages",
+      "createdAt": "2026-10-13T06:40:21Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7031841645,
+      "sha": "a648ffdb02874c5560cf50f07fe3c7bc5898cd1c",
+      "environment": "github-pages",
+      "createdAt": "2026-10-13T06:38:37Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7031761746,
+      "sha": "aa3bda2c3c155a6d8d7d97fb4eb2a05dc3a50be4",
+      "environment": "github-pages",
+      "createdAt": "2026-10-13T06:33:20Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7031730100,
+      "sha": "aa3bda2c3c155a6d8d7d97fb4eb2a05dc3a50be4",
+      "environment": "github-pages",
+      "createdAt": "2026-10-13T06:31:16Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7031678970,
+      "sha": "7c2b5b8948ea36669f560e5a5a0176b6691336a9",
+      "environment": "github-pages",
+      "createdAt": "2026-10-13T06:27:55Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7031659274,
+      "sha": "7c2b5b8948ea36669f560e5a5a0176b6691336a9",
+      "environment": "github-pages",
+      "createdAt": "2026-10-13T06:26:44Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7031570720,
+      "sha": "d367a6e39dac963cf97847898fa57c27a6aab047",
+      "environment": "github-pages",
+      "createdAt": "2026-10-13T06:20:41Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 7031551353,
+      "sha": "d367a6e39dac963cf97847898fa57c27a6aab047",
+      "environment": "github-pages",
+      "createdAt": "2026-10-13T06:19:19Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6716398100,
+      "sha": "a8ae44b81969c3c8c3a30bcead3164c38764c91e",
+      "environment": "github-pages",
+      "createdAt": "2026-09-28T17:33:25Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6716366777,
+      "sha": "a8ae44b81969c3c8c3a30bcead3164c38764c91e",
+      "environment": "github-pages",
+      "createdAt": "2026-09-28T17:31:50Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6707587679,
+      "sha": "1c8a5c29b6af56f4a4314602c39877db49e995b7",
+      "environment": "github-pages",
+      "createdAt": "2026-09-28T10:21:01Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6707561909,
+      "sha": "1c8a5c29b6af56f4a4314602c39877db49e995b7",
+      "environment": "github-pages",
+      "createdAt": "2026-09-28T10:19:31Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6704707445,
+      "sha": "c723b1001481eb4201479745b04285e207805e1a",
+      "environment": "github-pages",
+      "createdAt": "2026-09-28T07:31:17Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6704683192,
+      "sha": "c723b1001481eb4201479745b04285e207805e1a",
+      "environment": "github-pages",
+      "createdAt": "2026-09-28T07:29:45Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6703552014,
+      "sha": "d27821caa7e69970616dfc4cf1f52025282109d9",
+      "environment": "github-pages",
+      "createdAt": "2026-09-28T06:09:02Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6703536948,
+      "sha": "d27821caa7e69970616dfc4cf1f52025282109d9",
+      "environment": "github-pages",
+      "createdAt": "2026-09-28T06:07:47Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6677109035,
+      "sha": "a18047e1aae7946aeffee5944d93106c08a6be3c",
+      "environment": "github-pages",
+      "createdAt": "2026-09-26T09:22:50Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6677094426,
+      "sha": "a18047e1aae7946aeffee5944d93106c08a6be3c",
+      "environment": "github-pages",
+      "createdAt": "2026-09-26T09:21:18Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6549657310,
+      "sha": "7498c20b598239f66a1811eca7296310430a9aeb",
+      "environment": "github-pages",
+      "createdAt": "2026-09-20T06:01:28Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6549644517,
+      "sha": "7498c20b598239f66a1811eca7296310430a9aeb",
+      "environment": "github-pages",
+      "createdAt": "2026-09-20T05:59:58Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6549273081,
+      "sha": "4d0edd4c00c46ad72d44ea8bf36b98af0b6efd64",
+      "environment": "github-pages",
+      "createdAt": "2026-09-20T05:05:55Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6549265089,
+      "sha": "4d0edd4c00c46ad72d44ea8bf36b98af0b6efd64",
+      "environment": "github-pages",
+      "createdAt": "2026-09-20T05:04:45Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6549016586,
+      "sha": "8111978e4681f6f2b83bdabb6f1b816732ff973e",
+      "environment": "github-pages",
+      "createdAt": "2026-09-20T04:27:49Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6549005955,
+      "sha": "8111978e4681f6f2b83bdabb6f1b816732ff973e",
+      "environment": "github-pages",
+      "createdAt": "2026-09-20T04:26:21Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6544405838,
+      "sha": "46a89bdc116ec33152f2f8e04f31a55be15e1499",
+      "environment": "github-pages",
+      "createdAt": "2026-09-19T18:44:07Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6544389002,
+      "sha": "46a89bdc116ec33152f2f8e04f31a55be15e1499",
+      "environment": "github-pages",
+      "createdAt": "2026-09-19T18:42:37Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6544335559,
+      "sha": "608cc8d659c1ad11bfed40e58d590d3cb1dfcc52",
+      "environment": "github-pages",
+      "createdAt": "2026-09-19T18:37:10Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6544318896,
+      "sha": "608cc8d659c1ad11bfed40e58d590d3cb1dfcc52",
+      "environment": "github-pages",
+      "createdAt": "2026-09-19T18:35:30Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6543862463,
+      "sha": "51ad8dd53a94625df8f48c7f3ea50f346bca4526",
+      "environment": "github-pages",
+      "createdAt": "2026-09-19T17:47:50Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6543848556,
+      "sha": "51ad8dd53a94625df8f48c7f3ea50f346bca4526",
+      "environment": "github-pages",
+      "createdAt": "2026-09-19T17:46:20Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6543466503,
+      "sha": "8cb8357af9518c3f9b51948d89d7232714095224",
+      "environment": "github-pages",
+      "createdAt": "2026-09-19T17:05:59Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6543457666,
+      "sha": "8cb8357af9518c3f9b51948d89d7232714095224",
+      "environment": "github-pages",
+      "createdAt": "2026-09-19T17:05:05Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6543141473,
+      "sha": "89f04b1cd150c7b2888fb0716d1fa28fbbbce0d3",
+      "environment": "github-pages",
+      "createdAt": "2026-09-19T16:31:50Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6543128904,
+      "sha": "89f04b1cd150c7b2888fb0716d1fa28fbbbce0d3",
+      "environment": "github-pages",
+      "createdAt": "2026-09-19T16:30:38Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6542984090,
+      "sha": "156706634aada546cd3851071a882256e70ea98d",
+      "environment": "github-pages",
+      "createdAt": "2026-09-19T16:15:57Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6542968507,
+      "sha": "156706634aada546cd3851071a882256e70ea98d",
+      "environment": "github-pages",
+      "createdAt": "2026-09-19T16:14:26Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6542756201,
+      "sha": "32b7391bfe4acdaa7a14973fbbf3b5cc4c742d5d",
+      "environment": "github-pages",
+      "createdAt": "2026-09-19T15:52:34Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6542745070,
+      "sha": "32b7391bfe4acdaa7a14973fbbf3b5cc4c742d5d",
+      "environment": "github-pages",
+      "createdAt": "2026-09-19T15:51:23Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6542577324,
+      "sha": "452ebf1328e46f8daf004a9e91e969e9590f2b6b",
+      "environment": "github-pages",
+      "createdAt": "2026-09-19T15:33:48Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6542562814,
+      "sha": "452ebf1328e46f8daf004a9e91e969e9590f2b6b",
+      "environment": "github-pages",
+      "createdAt": "2026-09-19T15:32:17Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6542415723,
+      "sha": "c33bc938061850b2051d4a35a0660e15e2666d8c",
+      "environment": "github-pages",
+      "createdAt": "2026-09-19T15:17:14Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6542400793,
+      "sha": "c33bc938061850b2051d4a35a0660e15e2666d8c",
+      "environment": "github-pages",
+      "createdAt": "2026-09-19T15:15:42Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6542328647,
+      "sha": "ff00e3924ab88a76e690ef86974a298a6c44c448",
+      "environment": "github-pages",
+      "createdAt": "2026-09-19T15:08:17Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6542314610,
+      "sha": "ff00e3924ab88a76e690ef86974a298a6c44c448",
+      "environment": "github-pages",
+      "createdAt": "2026-09-19T15:06:48Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6541735837,
+      "sha": "6404e1049a3d17855bbdb00409f3e1d87430d112",
+      "environment": "github-pages",
+      "createdAt": "2026-09-19T14:05:49Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6541720348,
+      "sha": "6404e1049a3d17855bbdb00409f3e1d87430d112",
+      "environment": "github-pages",
+      "createdAt": "2026-09-19T14:04:14Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6541708241,
+      "sha": "077b32695edd7e17e29963b4677fc4ef423ee6a4",
+      "environment": "github-pages",
+      "createdAt": "2026-09-19T14:02:57Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6541692499,
+      "sha": "077b32695edd7e17e29963b4677fc4ef423ee6a4",
+      "environment": "github-pages",
+      "createdAt": "2026-09-19T14:01:21Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6540085928,
+      "sha": "ef6a17e525dc16f9cea26641e92038fb250d0d17",
+      "environment": "github-pages",
+      "createdAt": "2026-09-19T10:56:34Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6540076331,
+      "sha": "ef6a17e525dc16f9cea26641e92038fb250d0d17",
+      "environment": "github-pages",
+      "createdAt": "2026-09-19T10:55:20Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6529956653,
+      "sha": "68976aaf9a298f2a7a32e85197e38008be97a061",
+      "environment": "github-pages",
+      "createdAt": "2026-09-18T17:54:03Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6529933595,
+      "sha": "68976aaf9a298f2a7a32e85197e38008be97a061",
+      "environment": "github-pages",
+      "createdAt": "2026-09-18T17:52:30Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6495404153,
+      "sha": "ea87f3ca34a1af1d47f3b4f096dc37f7d0910949",
+      "environment": "github-pages",
+      "createdAt": "2026-09-17T04:08:58Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6495386843,
+      "sha": "ea87f3ca34a1af1d47f3b4f096dc37f7d0910949",
+      "environment": "github-pages",
+      "createdAt": "2026-09-17T04:07:24Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6495060070,
+      "sha": "b6aac275c0c05ab89956d854d51256087a328349",
+      "environment": "github-pages",
+      "createdAt": "2026-09-17T03:36:03Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6495043593,
+      "sha": "b6aac275c0c05ab89956d854d51256087a328349",
+      "environment": "github-pages",
+      "createdAt": "2026-09-17T03:34:29Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6495000932,
+      "sha": "9e7bdb35ad41f26a2fdf30fca7fb0983dcea232c",
+      "environment": "github-pages",
+      "createdAt": "2026-09-17T03:30:24Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6494982737,
+      "sha": "9e7bdb35ad41f26a2fdf30fca7fb0983dcea232c",
+      "environment": "github-pages",
+      "createdAt": "2026-09-17T03:28:49Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6488825049,
+      "sha": "3dff28b2bd109ad7299d4e5788978cc6c190ce7c",
+      "environment": "github-pages",
+      "createdAt": "2026-09-16T19:31:08Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6488803001,
+      "sha": "3dff28b2bd109ad7299d4e5788978cc6c190ce7c",
+      "environment": "github-pages",
+      "createdAt": "2026-09-16T19:29:54Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6152830329,
+      "sha": "b4c427a3a852b762e4989c45847a5b78965fb92f",
+      "environment": "github-pages",
+      "createdAt": "2026-08-29T05:52:42Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6152822755,
+      "sha": "b4c427a3a852b762e4989c45847a5b78965fb92f",
+      "environment": "github-pages",
+      "createdAt": "2026-08-29T05:51:23Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6152784579,
+      "sha": "f70333f1d9ed94a93c842fc27e24d7e1bb4500cf",
+      "environment": "github-pages",
+      "createdAt": "2026-08-29T05:45:05Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6152777152,
+      "sha": "f70333f1d9ed94a93c842fc27e24d7e1bb4500cf",
+      "environment": "github-pages",
+      "createdAt": "2026-08-29T05:43:45Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6143885931,
+      "sha": "2e7a494e6bb55e73c2885379ccfa741487f1c7dc",
+      "environment": "github-pages",
+      "createdAt": "2026-08-28T15:30:04Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6143864396,
+      "sha": "2e7a494e6bb55e73c2885379ccfa741487f1c7dc",
+      "environment": "github-pages",
+      "createdAt": "2026-08-28T15:28:39Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6135179103,
+      "sha": "5365de82f3a6caeeaeb848c642bf4d8c41d3f00a",
+      "environment": "github-pages",
+      "createdAt": "2026-08-28T03:39:39Z",
+      "creator": "Tibule12"
+    },
+    {
+      "id": 6135167284,
+      "sha": "5365de82f3a6caeeaeb848c642bf4d8c41d3f00a",
+      "environment": "github-pages",
+      "createdAt": "2026-08-28T03:38:15Z",
+      "creator": "Tibule12"
+    }
+  ],
+  "mainStatuses": [],
+  "mainChecks": [
+    {
+      "name": "notify-on-failure",
+      "conclusion": "skipped",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40426018550/job/121932213549"
+    },
+    {
+      "name": "fetch-feeds",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40426018550/job/121931857746"
+    },
+    {
+      "name": "notify-on-failure",
+      "conclusion": "skipped",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40375914905/job/121759221942"
+    },
+    {
+      "name": "fetch-feeds",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40375914905/job/121758813458"
+    },
+    {
+      "name": "notify-on-failure",
+      "conclusion": "skipped",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40331977371/job/121603864952"
+    },
+    {
+      "name": "fetch-feeds",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40331977371/job/121603455112"
+    },
+    {
+      "name": "run-test",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40298486260/job/121490278508"
+    },
+    {
+      "name": "notify-on-failure",
+      "conclusion": "skipped",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40279157439/job/121428609787"
+    },
+    {
+      "name": "fetch-feeds",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40279157439/job/121428360743"
+    },
+    {
+      "name": "rerun-if-failed",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40273351272/job/121410774715"
+    },
+    {
+      "name": "playwright-e2e (22.22.0)",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40272087676/job/121408437162"
+    },
+    {
+      "name": "rerun-if-failed",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40272586160/job/121408410064"
+    },
+    {
+      "name": "process-payouts",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40263660410/job/121381210221"
+    },
+    {
+      "name": "notify-on-failure",
+      "conclusion": "skipped",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40249168066/job/121337253628"
+    },
+    {
+      "name": "fetch-feeds",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40249168066/job/121337071170"
+    },
+    {
+      "name": "notify-on-failure",
+      "conclusion": "skipped",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40219877699/job/121249116427"
+    },
+    {
+      "name": "fetch-feeds",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40219877699/job/121248929329"
+    },
+    {
+      "name": "notify-on-failure",
+      "conclusion": "skipped",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40192000818/job/121164932621"
+    },
+    {
+      "name": "fetch-feeds",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40192000818/job/121164768588"
+    },
+    {
+      "name": "notify-on-failure",
+      "conclusion": "skipped",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40168332285/job/121094006590"
+    },
+    {
+      "name": "fetch-feeds",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40168332285/job/121093850042"
+    },
+    {
+      "name": "rerun-if-failed",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40164493991/job/121082639757"
+    },
+    {
+      "name": "playwright-e2e (22.22.0)",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40163955887/job/121081075784"
+    },
+    {
+      "name": "process-payouts",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40157689837/job/121062476248"
+    },
+    {
+      "name": "Perform CodeQL Analysis",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40154239843/job/121052057054"
+    },
+    {
+      "name": "notify-on-failure",
+      "conclusion": "skipped",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40146603468/job/121029312927"
+    },
+    {
+      "name": "fetch-feeds",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40146603468/job/121029178096"
+    },
+    {
+      "name": "notify-on-failure",
+      "conclusion": "skipped",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40119383970/job/120947538583"
+    },
+    {
+      "name": "fetch-feeds",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40119383970/job/120947394324"
+    },
+    {
+      "name": "notify-on-failure",
+      "conclusion": "skipped",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40092859811/job/120869111571"
+    },
+    {
+      "name": "fetch-feeds",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40092859811/job/120868942231"
+    },
+    {
+      "name": "rerun-if-failed",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40077374776/job/120823548721"
+    },
+    {
+      "name": "report",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40076844193/job/120821910545"
+    },
+    {
+      "name": "notify-on-failure",
+      "conclusion": "skipped",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40069367019/job/120799441852"
+    },
+    {
+      "name": "fetch-feeds",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40069367019/job/120799274338"
+    },
+    {
+      "name": "rerun-if-failed",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40065057298/job/120786434553"
+    },
+    {
+      "name": "playwright-e2e (22.22.0)",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40064561935/job/120784976681"
+    },
+    {
+      "name": "process-payouts",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40057621965/job/120763987356"
+    },
+    {
+      "name": "notify-on-failure",
+      "conclusion": "skipped",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40044661872/job/120723713186"
+    },
+    {
+      "name": "fetch-feeds",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40044661872/job/120723503886"
+    },
+    {
+      "name": "report",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40029033103/job/120672365964"
+    },
+    {
+      "name": "notify-on-failure",
+      "conclusion": "skipped",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40001095315/job/120577471321"
+    },
+    {
+      "name": "fetch-feeds",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/40001095315/job/120577060969"
+    },
+    {
+      "name": "rerun-if-failed",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39983618735/job/120516998570"
+    },
+    {
+      "name": "rerun-if-failed",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39982341751/job/120512577485"
+    },
+    {
+      "name": "report",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39981515310/job/120509731051"
+    },
+    {
+      "name": "rerun-if-failed",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39981500349/job/120509677955"
+    },
+    {
+      "name": "rerun-if-failed",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39975341995/job/120488352081"
+    },
+    {
+      "name": "report",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39974250086/job/120484611570"
+    },
+    {
+      "name": "rerun-if-failed",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39973393321/job/120481644601"
+    },
+    {
+      "name": "report",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39972603417/job/120478908320"
+    },
+    {
+      "name": "notify-on-failure",
+      "conclusion": "skipped",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39951496957/job/120407089370"
+    },
+    {
+      "name": "fetch-feeds",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39951496957/job/120406791995"
+    },
+    {
+      "name": "notify-on-failure",
+      "conclusion": "skipped",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39910350189/job/120271913601"
+    },
+    {
+      "name": "fetch-feeds",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39910350189/job/120271658293"
+    },
+    {
+      "name": "rerun-if-failed",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39904724946/job/120253919759"
+    },
+    {
+      "name": "playwright-e2e (22.22.0)",
+      "conclusion": "failure",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39903379846/job/120252211934"
+    },
+    {
+      "name": "rerun-if-failed",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39904167797/job/120252176565"
+    },
+    {
+      "name": "rerun-if-failed",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39897297362/job/120230569622"
+    },
+    {
+      "name": "report",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39896808778/job/120229040802"
+    },
+    {
+      "name": "process-payouts",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39894221190/job/120220770205"
+    },
+    {
+      "name": "notify-on-failure",
+      "conclusion": "skipped",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39877829388/job/120167983750"
+    },
+    {
+      "name": "fetch-feeds",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39877829388/job/120167661155"
+    },
+    {
+      "name": "report",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39835142117/job/120021361561"
+    },
+    {
+      "name": "rerun-if-failed",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39834496520/job/120019100114"
+    },
+    {
+      "name": "deploy",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39833124471/job/120015332742"
+    },
+    {
+      "name": "report",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39833325587/job/120015021827"
+    },
+    {
+      "name": "sentry-release",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39833124386/job/120014848367"
+    },
+    {
+      "name": "deploy-backend",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39833124386/job/120014848316"
+    },
+    {
+      "name": "report-build-status",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39833123621/job/120014434483"
+    },
+    {
+      "name": "deploy",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39833123621/job/120014434318"
+    },
+    {
+      "name": "build",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39833123621/job/120014277070"
+    },
+    {
+      "name": "Firestore Emulator Unit Tests",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39833124168/job/120014273332"
+    },
+    {
+      "name": "test-backend",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39833124386/job/120014272807"
+    },
+    {
+      "name": "build-frontend",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39833124334/job/120014272343"
+    },
+    {
+      "name": "Perform CodeQL Analysis",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39833124521/job/120014271928"
+    },
+    {
+      "name": "semgrep",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39833124534/job/120014271918"
+    },
+    {
+      "name": "playwright-e2e (22.22.0)",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39833124347/job/120014271903"
+    },
+    {
+      "name": "Firestore Emulator smoke test",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39833124340/job/120014271574"
+    },
+    {
+      "name": "build",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39833124471/job/120014271550"
+    },
+    {
+      "name": "build-and-test",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39833124090/job/120014270634"
+    },
+    {
+      "name": "CI debug info",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39833124090/job/120014270578"
+    },
+    {
+      "name": "Lint codebase (non-blocking)",
+      "conclusion": "success",
+      "app": "github-actions",
+      "detailsUrl": "https://github.com/Tibule12/AutoPromote/actions/runs/39833124090/job/120014270194"
+    }
+  ]
+}

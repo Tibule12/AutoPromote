@@ -1,0 +1,106 @@
+{
+  "project": "autopromote-cc6d3",
+  "method": "GET",
+  "capturedAtUtc": "2026-10-27T11:44:54.930096+00:00",
+  "reason": "Investigate unintended existing Playwright CI cloud-seed step; no deletion or correction performed",
+  "documents": [
+    {
+      "path": "admins/adminUser123",
+      "httpStatus": 200,
+      "createTime": "2025-12-08T08:22:26.442946Z",
+      "updateTime": "2026-10-27T11:41:11.903254Z",
+      "fields": {
+        "createdAt": {
+          "stringValue": "2026-10-27T11:41:11.483Z"
+        },
+        "role": {
+          "stringValue": "admin"
+        }
+      }
+    },
+    {
+      "path": "users/adminUser123",
+      "httpStatus": 200,
+      "createTime": "2026-03-17T13:13:22.656552Z",
+      "updateTime": "2026-10-27T11:41:11.976893Z",
+      "fields": {
+        "isAdmin": {
+          "booleanValue": true
+        },
+        "createdAt": {
+          "stringValue": "2026-10-27T11:41:11.483Z"
+        },
+        "role": {
+          "stringValue": "admin"
+        }
+      }
+    },
+    {
+      "path": "users/testUser123",
+      "httpStatus": 200,
+      "createTime": "2026-03-18T05:29:03.987469Z",
+      "updateTime": "2026-10-27T11:41:12.034778Z",
+      "fields": {
+        "createdAt": {
+          "stringValue": "2026-10-27T11:41:11.483Z"
+        },
+        "role": {
+          "stringValue": "user"
+        }
+      }
+    },
+    {
+      "path": "user_subscriptions/testUser123",
+      "httpStatus": 200,
+      "createTime": "2025-12-09T11:22:53.230446Z",
+      "updateTime": "2026-10-27T11:41:12.093022Z",
+      "fields": {
+        "planId": {
+          "stringValue": "free"
+        },
+        "createdAt": {
+          "stringValue": "2026-10-27T11:41:11.483Z"
+        },
+        "status": {
+          "stringValue": "active"
+        }
+      }
+    },
+    {
+      "path": "content/test-content-1",
+      "httpStatus": 200,
+      "createTime": "2026-03-17T08:56:38.232127Z",
+      "updateTime": "2026-10-27T11:41:12.161151Z",
+      "fields": {
+        "createdAt": {
+          "stringValue": "2026-10-27T11:41:11.483Z"
+        }
+      }
+    },
+    {
+      "path": "ab_tests/test-autopilot-1",
+      "httpStatus": 200,
+      "createTime": "2026-03-17T08:56:38.338682Z",
+      "updateTime": "2026-10-27T11:41:12.224091Z",
+      "fields": {
+        "createdAt": {
+          "stringValue": "2026-10-27T11:41:11.483Z"
+        },
+        "status": {
+          "stringValue": "running"
+        }
+      }
+    },
+    {
+      "path": "ab_test_variant_metrics/test-autopilot-1",
+      "httpStatus": 200,
+      "createTime": "2026-03-17T08:56:38.557221Z",
+      "updateTime": "2026-10-27T11:41:12.293817Z",
+      "fields": {
+        "updatedAt": {
+          "stringValue": "2026-10-27T11:41:11.483Z"
+        }
+      }
+    }
+  ]
+}

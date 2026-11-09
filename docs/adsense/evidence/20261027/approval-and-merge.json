@@ -1,0 +1,28 @@
+{
+  "approvedAtUserTurn": "User explicitly approved the isolated AdSense ownership meta tag merge/deployment",
+  "recordedAtUtc": "2026-10-27T12:27:20.301754+00:00",
+  "scope": [
+    "one HTML head meta tag",
+    "normal production release",
+    "public HTML verification",
+    "read-only security preservation checks"
+  ],
+  "excluded": [
+    "ads",
+    "Auto Ads",
+    "rewarded credits",
+    "subscriptions",
+    "billing changes",
+    "Firestore or Storage policy deployment",
+    "production test-data correction"
+  ],
+  "pullRequest": 503,
+  "base": "88bef8ff4c9f12c78abac88b644e3b60d4ffa428",
+  "head": "bfe4f566538cc7027b025ecf0ae365b939563592",
+  "mergedCommit": "593bbcdf86e7ca6e3acc16eac5b52b168f3a45ca",
+  "mergedFiles": [
+    "frontend/public/index.html"
+  ],
+  "premergeChecks": "frontend build, targeted backend/security/Storage/publisher guards, CodeQL, Semgrep and emulator smoke passed; broader repeated CI still running",
+  "apiSecurityCodeChanged": false
+}

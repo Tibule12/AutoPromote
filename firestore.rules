@@ -3,8 +3,27 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function isAdmin() {
       return request.auth != null &&
-        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+        (request.auth.token.get('admin', false) == true ||
+         request.auth.token.get('isAdmin', false) == true ||
+         request.auth.token.get('role', '') == 'admin' ||
+         exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+    }
+
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function editableProfileFields() {
+      // Financial, identity, entitlement and authority fields are server managed.
+      // New fields are denied until explicitly reviewed; deleting a field is a change.
+      return ['name', 'displayName', 'photoURL', 'avatarUrl', 'thumbnailUrl', 'bio',
+              'timezone', 'notifications', 'schedulingDefaults', 'defaultPlatforms',
+              'defaultFrequency', 'autoRepostEnabled', 'paypalEmail', 'updatedAt'];
+    }
+
+    function serverManagedContentFields() {
+      // Reward inputs and redemption markers must not be supplied or reset by clients.
+      return ['views', 'metrics', 'revenue', 'claimedBonuses', 'earnings'];
     }
 
     function isServiceAccount() {
@@ -41,9 +60,16 @@ service cloud.firestore {
       }
     }
 
-    // Users can read/write their own user document
+    // Owners may edit profile preferences, never financial state or access controls.
     match /users/{userId} {
-      allow read, write: if isAdmin() || isServiceAccount() || request.auth.uid == userId;
+      allow read: if isAdmin() || isServiceAccount() || isOwner(userId);
+      allow create: if isOwner(userId) &&
+        request.resource.data.keys().hasOnly(editableProfileFields().concat(['createdAt'])) &&
+        (!request.resource.data.keys().hasAny(['createdAt']) || request.resource.data.createdAt == request.time);
+      allow update: if isOwner(userId) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(editableProfileFields());
+      // A profile delete would also delete protected financial and subscription fields.
+      allow delete: if isAdmin() || isServiceAccount();
     }
 
     // Users can read/write their own content
@@ -53,10 +79,20 @@ service cloud.firestore {
           (request.resource.data.keys().hasAny(['userId']) && request.resource.data.userId == request.auth.uid) ||
           (request.resource.data.keys().hasAny(['user_id']) && request.resource.data.user_id == request.auth.uid) ||
           (request.resource.data.keys().hasAny(['workspace_id']) && canEditWorkspace(request.resource.data.workspace_id))
-        ));
+        ) && !request.resource.data.keys().hasAny(serverManagedContentFields()) &&
+          (!request.resource.data.keys().hasAny(['userId']) || request.resource.data.userId == request.auth.uid) &&
+          (!request.resource.data.keys().hasAny(['user_id']) || request.resource.data.user_id == request.auth.uid));
 
-      allow update, delete, get, list: if isAdmin() || isServiceAccount() ||
+      allow get, list, delete: if isAdmin() || isServiceAccount() ||
         (request.auth != null && resource != null && (
+          (resource.data.keys().hasAny(['userId']) && resource.data.userId == request.auth.uid) ||
+          (resource.data.keys().hasAny(['user_id']) && resource.data.user_id == request.auth.uid) ||
+          (resource.data.keys().hasAny(['workspace_id']) && isActiveWorkspaceMember(resource.data.workspace_id))
+        ));
+      allow update: if isAdmin() || isServiceAccount() ||
+        (request.auth != null && resource != null &&
+         !request.resource.data.diff(resource.data).affectedKeys()
+           .hasAny(serverManagedContentFields().concat(['userId', 'user_id', 'workspace_id'])) && (
           (resource.data.keys().hasAny(['userId']) && resource.data.userId == request.auth.uid) ||
           (resource.data.keys().hasAny(['user_id']) && resource.data.user_id == request.auth.uid) ||
           (resource.data.keys().hasAny(['workspace_id']) && isActiveWorkspaceMember(resource.data.workspace_id))
@@ -136,21 +172,13 @@ service cloud.firestore {
         get(/databases/$(database)/documents/chat_conversations/$(resource.data.conversationId)).data.userId == request.auth.uid;
     }
 
-    // Ads - users can read/write their own ads, admins can read/write all
+    // Ad billing/approval state is written by the existing backend API, not clients.
     match /ads/{adId} {
       allow read: if request.auth != null && (
         resource.data.userId == request.auth.uid || 
         isAdmin()
       );
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      allow update: if request.auth != null && (
-        resource.data.userId == request.auth.uid || 
-        isAdmin()
-      );
-      allow delete: if request.auth != null && (
-        resource.data.userId == request.auth.uid || 
-        isAdmin()
-      );
+      allow write: if isAdmin() || isServiceAccount();
     }
 
     // Ad analytics - users can read their own, admins can read all
@@ -174,12 +202,10 @@ service cloud.firestore {
       allow read: if request.auth != null && resource.data.userId == request.auth.uid;
     }
 
-    // Paid Boosts (Missions) - users can read/write their own
+    // Paid boost state is written only after the existing backend/payment checks.
     match /paid_boosts/{boostId} {
       allow read: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin());
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      allow update: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin());
-      allow delete: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if isAdmin() || isServiceAccount();
     }
 
     // All other collections: only admins, service account, or backend

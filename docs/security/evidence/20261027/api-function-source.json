@@ -1,0 +1,30 @@
+{
+  "uri": "gs://gcf-sources-341498038874-us-central1/api-431a9e73-b2ed-4198-9e9c-67580316de9f/version-23/function-source.zip",
+  "available": true,
+  "archiveSha256": "341f2a05edf285b910b9f81d018323aa4a8f8072c855440521dfe0d7147445ae",
+  "bytes": 921743,
+  "selectedFiles": [
+    {
+      "path": "index.js",
+      "sha256": "12418e4319faceced698563968a77a0a734275132bd65437604f5422b37cb0d3"
+    },
+    {
+      "path": "_server/src/authMiddleware.js",
+      "sha256": "2eb4c3cc1389ecebc01a97a0e5b363e31cddc8ce460e0165dfb0468d36b51f49"
+    },
+    {
+      "path": "_server/src/authRoutes.js",
+      "sha256": "c68721eb4fa5b1240427f10a154fa5c79c6bd7dfe6d336677a38ef5e469857eb"
+    },
+    {
+      "path": "_server/src/server.js",
+      "sha256": "c9c0b767bfe7d2dff75fa71d3b6059989c085487e8ccd0d3afac48b54bc63ea3"
+    },
+    {
+      "path": "_server/src/userRoutes.js",
+      "sha256": "b4247d59206259fb176d3cc683c8a4f8b43817fc155db4ac50f6901033c95faf"
+    }
+  ],
+  "privateArchive": "/tmp/autopromote-security-private-20261027/api-function-v23.zip",
+  "fileCount": 373
+}

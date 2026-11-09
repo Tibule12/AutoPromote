@@ -1,0 +1,292 @@
+{
+  "available": true,
+  "capturedAtUtc": "2026-10-27T03:13:36.485147+00:00",
+  "data": [
+    {
+      "metadata": {
+        "labels": {
+          "cloud.googleapis.com/location": "us-central1"
+        },
+        "name": "cam-combiner-worker"
+      },
+      "status": {
+        "latestReadyRevisionName": "cam-combiner-worker-00082-bej",
+        "traffic": [
+          {
+            "percent": 100,
+            "revisionName": "cam-combiner-worker-00082-bej"
+          }
+        ],
+        "url": "https://cam-combiner-worker-jddzncgt2a-uc.a.run.app"
+      }
+    },
+    {
+      "metadata": {
+        "labels": {
+          "cloud.googleapis.com/location": "us-central1"
+        },
+        "name": "media-worker-v1"
+      },
+      "status": {
+        "latestReadyRevisionName": "media-worker-v1-00121-vup",
+        "traffic": [
+          {
+            "revisionName": "media-worker-v1-00037-cim",
+            "tag": "lean-costfix",
+            "url": "https://lean-costfix---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00042-qot",
+            "tag": "candidate-31699226273-2",
+            "url": "https://candidate-31699226273-2---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00044-xet",
+            "tag": "candidate-31740784286-1",
+            "url": "https://candidate-31740784286-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00046-wom",
+            "tag": "candidate-31787966999-1",
+            "url": "https://candidate-31787966999-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00048-qoz",
+            "tag": "candidate-31793643739-1",
+            "url": "https://candidate-31793643739-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00050-zex",
+            "tag": "candidate-31796266684-1",
+            "url": "https://candidate-31796266684-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00052-gub",
+            "tag": "candidate-32354209174-1",
+            "url": "https://candidate-32354209174-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00054-ziy",
+            "tag": "candidate-32461421493-1",
+            "url": "https://candidate-32461421493-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00056-noj",
+            "tag": "candidate-33090309703-1",
+            "url": "https://candidate-33090309703-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00057-nuv",
+            "tag": "candidate-33090996014-1",
+            "url": "https://candidate-33090996014-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00059-pux",
+            "tag": "candidate-33095659008-1",
+            "url": "https://candidate-33095659008-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00061-muj",
+            "tag": "candidate-33101188893-1",
+            "url": "https://candidate-33101188893-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00063-nuq",
+            "tag": "candidate-33139461230-1",
+            "url": "https://candidate-33139461230-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00065-kuc",
+            "tag": "candidate-33185304507-1",
+            "url": "https://candidate-33185304507-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00067-bet",
+            "tag": "candidate-33236820111-1",
+            "url": "https://candidate-33236820111-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00069-yef",
+            "tag": "candidate-33237109268-1",
+            "url": "https://candidate-33237109268-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00071-xas",
+            "tag": "candidate-35178664903-1",
+            "url": "https://candidate-35178664903-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00073-did",
+            "tag": "candidate-35376867396-1",
+            "url": "https://candidate-35376867396-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00078-xeq",
+            "tag": "candidate-35447454474-1",
+            "url": "https://candidate-35447454474-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00080-puj",
+            "tag": "candidate-35451245400-1",
+            "url": "https://candidate-35451245400-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00082-kab",
+            "tag": "candidate-35452106300-1",
+            "url": "https://candidate-35452106300-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00084-wex",
+            "tag": "candidate-35453095219-1",
+            "url": "https://candidate-35453095219-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00086-fid",
+            "tag": "candidate-35455173025-1",
+            "url": "https://candidate-35455173025-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00088-fey",
+            "tag": "candidate-35456953636-1",
+            "url": "https://candidate-35456953636-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00090-qir",
+            "tag": "candidate-35459100046-1",
+            "url": "https://candidate-35459100046-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00092-goj",
+            "tag": "candidate-35489132924-1",
+            "url": "https://candidate-35489132924-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00094-zif",
+            "tag": "candidate-35490747442-1",
+            "url": "https://candidate-35490747442-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00099-qel",
+            "tag": "candidate-35493062675-1",
+            "url": "https://candidate-35493062675-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00102-fid",
+            "tag": "candidate-36232506709-1",
+            "url": "https://candidate-36232506709-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00104-cop",
+            "tag": "candidate-36384914543-1",
+            "url": "https://candidate-36384914543-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00106-tim",
+            "tag": "candidate-36391923519-1",
+            "url": "https://candidate-36391923519-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00108-yes",
+            "tag": "candidate-36409005558-1",
+            "url": "https://candidate-36409005558-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00110-fox",
+            "tag": "candidate-36458734663-1",
+            "url": "https://candidate-36458734663-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00112-qes",
+            "tag": "candidate-38444001612-1",
+            "url": "https://candidate-38444001612-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00113-tan",
+            "tag": "candidate-39714971272-1",
+            "url": "https://candidate-39714971272-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00115-cus",
+            "tag": "candidate-39717028880-1",
+            "url": "https://candidate-39717028880-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00117-gac",
+            "tag": "candidate-39723513187-1",
+            "url": "https://candidate-39723513187-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "revisionName": "media-worker-v1-00119-cup",
+            "tag": "candidate-39814315776-1",
+            "url": "https://candidate-39814315776-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          },
+          {
+            "percent": 100,
+            "revisionName": "media-worker-v1-00121-vup",
+            "tag": "candidate-39822185917-1",
+            "url": "https://candidate-39822185917-1---media-worker-v1-jddzncgt2a-uc.a.run.app"
+          }
+        ],
+        "url": "https://media-worker-v1-jddzncgt2a-uc.a.run.app"
+      }
+    },
+    {
+      "metadata": {
+        "labels": {
+          "cloud.googleapis.com/location": "us-central1"
+        },
+        "name": "thulani-api"
+      },
+      "status": {
+        "latestReadyRevisionName": "thulani-api-00021-joc",
+        "traffic": [
+          {
+            "percent": 100,
+            "revisionName": "thulani-api-00021-joc",
+            "tag": "cam-api-canary",
+            "url": "https://cam-api-canary---thulani-api-jddzncgt2a-uc.a.run.app"
+          }
+        ],
+        "url": "https://thulani-api-jddzncgt2a-uc.a.run.app"
+      }
+    },
+    {
+      "metadata": {
+        "labels": {
+          "cloud.googleapis.com/location": "us-central1"
+        },
+        "name": "thulani-frontend"
+      },
+      "status": {
+        "latestReadyRevisionName": "thulani-frontend-00050-47p",
+        "traffic": [
+          {
+            "latestRevision": true,
+            "percent": 100,
+            "revisionName": "thulani-frontend-00050-47p"
+          }
+        ],
+        "url": "https://thulani-frontend-jddzncgt2a-uc.a.run.app"
+      }
+    },
+    {
+      "metadata": {
+        "labels": {
+          "cloud.googleapis.com/location": "us-central1"
+        },
+        "name": "thulani-worker"
+      },
+      "status": {
+        "latestReadyRevisionName": "thulani-worker-00049-rpf",
+        "traffic": [
+          {
+            "latestRevision": true,
+            "percent": 100,
+            "revisionName": "thulani-worker-00049-rpf"
+          }
+        ],
+        "url": "https://thulani-worker-jddzncgt2a-uc.a.run.app"
+      }
+    }
+  ]
+}
