@@ -1,0 +1,9 @@
+{
+  "firestore": { "rules": "config/security/firestore.restrictive-fallback.rules" },
+  "storage": [
+    {
+      "bucket": "autopromote-cc6d3.firebasestorage.app",
+      "rules": "config/security/storage.restrictive-fallback.rules"
+    }
+  ]
+}
