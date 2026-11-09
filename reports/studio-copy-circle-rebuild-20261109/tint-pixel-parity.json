@@ -1,0 +1,8 @@
+{
+  "actualNativeSvgVsCpu": true,
+  "greyLevels": 64,
+  "colours": 3,
+  "contrast": 2.4,
+  "maxChannelError": 1,
+  "wholeProgrammeParity": false
+}

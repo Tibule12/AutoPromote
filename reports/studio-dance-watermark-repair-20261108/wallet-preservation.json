@@ -1,0 +1,15 @@
+{
+  "unrelatedEarlierWalletsExact": true,
+  "earlierStrongReviewWalletExpectedNativeCharge": 2,
+  "earlierWalletReset": false,
+  "noDirectWalletWrites": true,
+  "repairedAccountBalance": 1,
+  "strokeAccountBalance": 9,
+  "allReservedZero": true,
+  "priorOperations": 19,
+  "newOperations": 7,
+  "totalOperations": 26,
+  "newTechnicalExecutionsAllSucceeded": true,
+  "creativeRejectionIsSeparate": true,
+  "noProductionChange": true
+}

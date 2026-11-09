@@ -1,3 +1,7 @@
+import {studioMatteSurfaceStyle} from './studioMatteSurface';
+import StudioDirectorCreativePanel from './StudioDirectorCreativePanel';
+import StudioSubjectEchoControls from './StudioSubjectEchoControls';
+import StudioWatermarkControls from './StudioWatermarkControls';
 import { bindStudioOverlayMedia, prepareStudioOverlayMedia } from './studioOverlayMedia';
 import StudioSceneActionsPanel from './StudioSceneActionsPanel';
 import { prepareStudioSceneActions } from './studioSceneActions';
@@ -28,6 +32,7 @@ import { uploadSourceFileViaBackend } from "../utils/sourceUpload";
 import StudioLaunchTemplatePanel from "./StudioLaunchTemplatePanel";
 import ProductHelpButton from "./ProductHelpButton";
 import StudioLayerMask from "./StudioLayerMask";
+import StudioMediaColorizeFilters from "./StudioMediaColorizeFilters";
 import { studioMediaEffectFilter } from "./studioMediaEffects";
 import { studioLayerEntries, moveStudioLayer, orderStudioCollection } from "./studioLayerOrder";
 import { studioGroupTree, createStudioGroup, moveStudioGroupNode, removeStudioGroup, removeStudioGroupMembers, studioGroupLocalPoint, studioGroupProgrammePoint, GROUP_TRANSFORM, evaluateStudioGroupTransform, validateStudioGroupKeyframes, pruneRemovedStudioGroupKeys } from "./studioGroups";
@@ -238,6 +243,7 @@ import {
 import "./audio/audioRemixTimeline.css";
 import "./ViralClipStudio.css";
 import "./StudioControls.css";
+import "./studioFeatureControls.css";
 import TimelineSourceFilmstrip from "./TimelineSourceFilmstrip";
 import StudioControlMenu from "./StudioControlMenu";
 
@@ -2333,6 +2339,7 @@ const VIRAL_STUDIO_WORKFLOW = [
 ];
 
 const CREATIVE_STUDIO_TOOLS = [
+  ...(process.env.REACT_APP_STUDIO_DIRECTOR_MOTION === "true" ? [{ id: "director", label: "Director", icon: "✦", helper: "Describe a motion edit. Review the Director’s selected shots and editable motion before applying." }] : []),
   { id: "moments", label: "Moments", icon: "✦", helper: "Choose a source range. Review Director suggestions before applying them to the timeline." },
   { id: "cut", label: "Cut", icon: "✂", helper: "Select a video clip for trim, split, delete and precision edits. Ripple edits move the following clips; slip edits change the source range." },
   { id: "hook", label: "Hook", icon: "⌁", helper: "Set opening text, style, focus and timing. This changes the opening of the clip, not the underlying source file." },
@@ -7119,9 +7126,12 @@ const ViralClipStudio = ({
     return Math.min(1, energy);
   };
 
-  // Broader frame-driven composition remains a local diagnostic candidate
-  // until native throughput and moving picture/sound qualification pass.
-  const presentedFramePreview = workspaceMode === 'fxflow' || process.env.REACT_APP_STUDIO_PRESENTED_FRAME_PREVIEW === 'true';
+  // Video mattes need decoded pixels in every workspace, including a cold
+  // Quick reopen. Their transparent initial SVG is replaced by this painter.
+  const hasVideoTrackMatte = useMemo(() => overlays.some(layer =>
+    layer.trackMatte?.mode && layer.trackMatte.mode !== 'none' && overlays.some(source =>
+      String(source.id) === String(layer.trackMatte.sourceLayerId) && ['image','video'].includes(source.type))), [overlays]);
+  const presentedFramePreview = hasVideoTrackMatte || workspaceMode === 'fxflow' || process.env.REACT_APP_STUDIO_PRESENTED_FRAME_PREVIEW === 'true';
   const currentTimelineClip = timeline[activeTimelineIndex] || null;
   const subjectProgrammePreview = useMemo(() => renderedOutputUrl ? null :
     resolveSubjectVfxProgrammePreview(subjectVfxScenes,
@@ -9452,6 +9462,27 @@ const ViralClipStudio = ({
     setAudioKeyframes(next.audioKeyframes);
   };
 
+  const applyReviewedScenePlan = async plan => {
+                    if (trackStates.graphics?.locked || trackStates.broll?.locked || trackStates.video?.locked)
+                      throw Error('Unlock the Video, Graphics and B-roll tracks to apply a complete scene.');
+                    const projectId = activeProjectIdRef.current, signature = lastSnapshotSignatureRef.current;
+                    const stage = phoneFrameRef.current;
+                    const result = await prepareStudioSceneActions(plan, getEditorSnapshot(), createSecureId, {
+                      aspect: (stage?.clientWidth || 1280) / (stage?.clientHeight || 720),
+                      isCurrent: () => activeProjectIdRef.current === projectId && lastSnapshotSignatureRef.current === signature,
+                    });
+                    const next = result.snapshot;
+                    result.urls.forEach(url => projectMediaObjectUrlsRef.current.add(url));
+                    pendingHistoryBaselineRef.current = cloneSnapshot(getEditorSnapshot());
+                    flushSync(() => {
+                      setOverlays(next.overlays); setMotionKeyframes(next.motionKeyframes);
+                      setAdjustmentLayers(next.adjustmentLayers); setCompositionOrder(next.compositionOrder);
+                      setCompoundClips(next.compoundClips || []);
+                      setComparisonMode('after'); setPreviewFinishedFile(false);
+                    });
+                    setStudioActionMessage('Reviewed cinematic scene applied as editable layers and motion keys.');
+  };
+
   const openDirectorReview = async () => {
     if (!incomingDirectorProposalRequest || directorReviewState === "working") return;
     setDirectorReviewState("working");
@@ -9904,6 +9935,7 @@ const ViralClipStudio = ({
     });
     if (
       [
+        "director",
         "moments",
         "cut",
         "hook",
@@ -12997,11 +13029,16 @@ const ViralClipStudio = ({
       redoStackRef.current = [];
       lastSnapshotRef.current = snapshot;
       lastSnapshotSignatureRef.current = serializedSnapshot;
-      if (cutHistoryTransactionRef.current) {
+      if (cutHistoryTransactionRef.current &&
+          serializeSnapshot(getHistoryRelevantSnapshot(cutHistoryTransactionRef.current.baseline)) === baselineSignature) {
         cutHistoryTransactionRef.current.appliedSignature = serializedSnapshot;
         cutHistoryTransactionRef.current.appliedTimelineSignature = serializeSnapshot(
           snapshot.timeline || []
         );
+      } else {
+        // A separate scene/graphics transaction must not inherit an earlier
+        // cut's baseline. Otherwise its Undo also removes later sound/settings.
+        cutHistoryTransactionRef.current = null;
       }
       syncHistoryAvailability();
       scheduleProjectAutosave(snapshot);
@@ -17927,6 +17964,7 @@ const ViralClipStudio = ({
 
   return createPortal(
     <div className="viral-studio-overlay ap-dashboard-redesign">
+      <StudioMediaColorizeFilters layers={overlays} />
       <StudioVoiceoverPreview ref={preparedVoiceBusRef} takes={voiceovers} videoRef={videoRef}
         getTimelineTime={getSoundEffectProgrammeTime} activeClip={activeTimelineIndex}
         getAudioContext={ensureSoundEffectAudioContext}
@@ -19710,7 +19748,7 @@ const ViralClipStudio = ({
                           if (o.enabled === false) return false;
                           // Hidden video mattes still need their ordinary source
                           // decoder and programme-clock transport, never a visible leaf.
-                          if (isHiddenTrackMatteSource(o, overlays) && o.type !== 'video') return false;
+                          if (isHiddenTrackMatteSource(o, overlays) && !['image','video'].includes(o.type)) return false;
                           if (o.isNullRig && (comparisonMode === "split" || activeOverlayId !== o.id)) return false;
                           const anySolo = overlays.some(cand => cand && !cand.isCaption && cand.solo);
                           if (anySolo && !o.isCaption && !o.solo) return false;
@@ -19801,7 +19839,7 @@ const ViralClipStudio = ({
                             <div
                               key={overlay.id}
                               data-studio-layer-id={overlay.id}
-                              data-studio-matte-source-only={isHiddenTrackMatteSource(overlay, overlays) && overlay.type === 'video' ? 'true' : undefined}
+                              data-studio-matte-source-only={isHiddenTrackMatteSource(overlay, overlays) && ['image','video'].includes(overlay.type) ? 'true' : undefined}
                               data-programme-time={compositionTime}
                               className={`draggable-overlay ${
                                 activeOverlayId === overlay.id && isPreviewPaused && !isPreviewFullscreen && comparisonMode !== "split"
@@ -19962,6 +20000,7 @@ const ViralClipStudio = ({
                                 )
                               ) : overlay.type === "image" && safeOverlaySrc ? (
                                 <img
+                                  crossOrigin="anonymous"
                                   ref={element => {
                                     applySafeMediaSource(element, safeOverlaySrc);
                                   }}
@@ -19985,7 +20024,7 @@ const ViralClipStudio = ({
                               ) : safeOverlaySrc ? (
                                 <><canvas data-studio-shared-video="true" aria-hidden="true"
                                   style={{display:'none',width:'100%',height:'100%',objectFit:overlay.perspective?.sourceRect||overlay.mediaFit==='stretch'?'fill':overlay.mediaFit||'contain',pointerEvents:'none'}} />
-                                <video data-studio-overlay-decoder="true"
+                                <video data-studio-overlay-decoder="true" preload="auto"
                                   data-testid={`broll-preview-${overlay.id}`}
                                   poster={overlay.poster || undefined}
                                   ref={element => {
@@ -20176,7 +20215,7 @@ const ViralClipStudio = ({
                             </div>
                           );
                           if (!trackMatteUri) return overlayElement;
-                          return (
+                          const matteElement = (
                             <div
                               key={overlay.id}
                               data-studio-matte-wrap={overlay.id}
@@ -20187,7 +20226,7 @@ const ViralClipStudio = ({
                                 inset: 0,
                                 pointerEvents: "none",
                                 zIndex: compositionRank.get(overlay.id) ?? 100 + index,
-                                mixBlendMode: overlay.blendMode || "normal",
+                                mixBlendMode: overlay.matteSurface?.enabled?"normal":overlay.blendMode || "normal",
                                 maskImage: trackMatteUri,
                                 WebkitMaskImage: trackMatteUri,
                                 maskSize: "100% 100%",
@@ -20199,6 +20238,7 @@ const ViralClipStudio = ({
                               {overlayElement}
                             </div>
                           );
+                          return overlay.matteSurface?.enabled ? <div data-studio-surface-wrap={overlay.id} key={overlay.id} style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:compositionRank.get(overlay.id) ?? 100+index,mixBlendMode:overlay.blendMode||"normal",...studioMatteSurfaceStyle(overlay.matteSurface,phoneFrameRef.current?.clientHeight||720)}}>{matteElement}</div> : matteElement;
                         })}
                       </StudioGroupPreview>
                         )}
@@ -21767,7 +21807,17 @@ const ViralClipStudio = ({
                 activeCreativeTool === "export" ? "is-export-hidden" : ""
               }`}
               data-testid="clip-studio-inspector"
+              aria-label="Studio feature controls"
+              data-active-tool={activeCreativeTool}
             >
+              {studioInspectorTab === "director" ? (
+                <div className="clip-inspector-body" role="tabpanel" data-testid="studio-director-inspector">
+                  <StudioDirectorCreativePanel getSnapshot={getEditorSnapshot} onApply={applyReviewedScenePlan}
+                    onOpenNodes={()=>{setWorkspaceMode('fxflow');selectCreativeTool('flow');}}
+                    locked={!!(trackStates.graphics?.locked || trackStates.broll?.locked || trackStates.video?.locked)} />
+                </div>
+              ) : null}
+
               {studioInspectorTab === "moments" ? (
                 <div className="clip-inspector-body" role="tabpanel" aria-label="Moment selection" data-testid="studio-moments-inspector">
                   <div className="inspector-heading-row">
@@ -23416,6 +23466,11 @@ const ViralClipStudio = ({
                   >
                     ▶ Preview {reframeAspect} Framing
                   </button>
+                  <StudioWatermarkControls enabled={removeWatermark} onEnabledChange={setRemoveWatermark}
+                    mode={watermarkMode} onModeChange={setWatermarkMode} regions={manualWatermarkRegions}
+                    activeId={activeWatermarkRegionId} onSelect={setActiveWatermarkRegionId}
+                    onAdd={addManualWatermarkRegion} onRemove={deleteManualWatermarkRegion}
+                    onRegionChange={updateManualWatermarkRegion} />
                 </div>
               ) : null}
 
@@ -25290,25 +25345,14 @@ const ViralClipStudio = ({
                   </div>
                   <StudioSceneActionsPanel getSnapshot={getEditorSnapshot} projectMedia={projectMedia} time={previewTimelineTime}
                     locked={!!(trackStates.graphics?.locked || trackStates.broll?.locked || trackStates.video?.locked)} onApply={async plan => {
-                    if (trackStates.graphics?.locked || trackStates.broll?.locked || trackStates.video?.locked)
-                      throw Error('Unlock the Video, Graphics and B-roll tracks to apply a complete scene.');
-                    const projectId = activeProjectIdRef.current, signature = lastSnapshotSignatureRef.current;
-                    const stage = phoneFrameRef.current;
-                    const result = await prepareStudioSceneActions(plan, getEditorSnapshot(), createSecureId, {
-                      aspect: (stage?.clientWidth || 1280) / (stage?.clientHeight || 720),
-                      isCurrent: () => activeProjectIdRef.current === projectId && lastSnapshotSignatureRef.current === signature,
-                    });
-                    const next = result.snapshot;
-                    result.urls.forEach(url => projectMediaObjectUrlsRef.current.add(url));
-                    pendingHistoryBaselineRef.current = cloneSnapshot(getEditorSnapshot());
-                    flushSync(() => {
-                      setOverlays(next.overlays); setMotionKeyframes(next.motionKeyframes);
-                      setAdjustmentLayers(next.adjustmentLayers); setCompositionOrder(next.compositionOrder);
-                      setCompoundClips(next.compoundClips || []);
-                      setComparisonMode('after'); setPreviewFinishedFile(false);
-                    });
-                    setStudioActionMessage('Reviewed cinematic scene applied as editable layers and motion keys.');
+                    await applyReviewedScenePlan(plan);
                   }} />
+                  <StudioSubjectEchoControls getSnapshot={getEditorSnapshot} projectMedia={projectMedia} time={previewTimelineTime}
+                    getSize={() => { const stage = phoneFrameRef.current;
+                      const aspect = (stage?.clientWidth || 1280) / (stage?.clientHeight || 720);
+                      return { width: Math.round(720 * aspect), height: 720 }; }}
+                    locked={!!(trackStates.graphics?.locked || trackStates.broll?.locked || trackStates.video?.locked)}
+                    onApply={applyReviewedScenePlan} />
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
                     <button
                       type="button"

@@ -1,0 +1,19 @@
+{
+  "nativeMovieSha256": "ca7a761fb1b93d33c7fcb8f6f7df527725c6f8e1241f8cd3ac5ca004b4b5a968",
+  "inspectedFrames": [
+    0,
+    0.5,
+    1.5,
+    3,
+    4.5,
+    6,
+    7.5,
+    7.958333333333333
+  ],
+  "visibleLogoRemnantInReviewedFrames": false,
+  "largeBlurredRectangleInReviewedFrames": false,
+  "closingShoeDamageInReviewedFrames": false,
+  "ownerApproval": false,
+  "fullStudioPlaybackComplete": true,
+  "next": "Apply same bounded native repair to one, three and four; review their source-specific corners separately."
+}

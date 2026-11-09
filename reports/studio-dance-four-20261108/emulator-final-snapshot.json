@@ -1,0 +1,9 @@
+{
+  "freshCohortExported": true,
+  "auth": true,
+  "firestore": true,
+  "storage": true,
+  "activeOperations": 0,
+  "priorLostSessionRecovered": false,
+  "privateDirectory": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105/reports/studio-dance-four-20261108/private/emulator-final-export"
+}

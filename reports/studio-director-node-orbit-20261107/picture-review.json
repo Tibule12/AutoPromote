@@ -1,0 +1,113 @@
+{
+  "fullDecode": true,
+  "frames": 144,
+  "seconds": 6,
+  "fps": 24,
+  "poseBoundaries": [
+    0,
+    3.0,
+    6
+  ],
+  "sampledFrameIndices": [
+    0,
+    1,
+    12,
+    24,
+    36,
+    48,
+    60,
+    71,
+    72,
+    73,
+    84,
+    96,
+    108,
+    120,
+    132,
+    143
+  ],
+  "pairedDiagnosticSamples": [
+    {
+      "programmeTime": 0,
+      "exportFrame": 0,
+      "diagnosticPsnrDb": 34.93049622359856,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 0.5,
+      "exportFrame": 12,
+      "diagnosticPsnrDb": 32.335702963631846,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 1,
+      "exportFrame": 24,
+      "diagnosticPsnrDb": 33.735091131077446,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 1.5,
+      "exportFrame": 36,
+      "diagnosticPsnrDb": 34.12552161256636,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 2,
+      "exportFrame": 48,
+      "diagnosticPsnrDb": 33.58961871052684,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 2.5,
+      "exportFrame": 60,
+      "diagnosticPsnrDb": 33.20813634843974,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 3,
+      "exportFrame": 72,
+      "diagnosticPsnrDb": 33.41355639175014,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 3.5,
+      "exportFrame": 84,
+      "diagnosticPsnrDb": 33.30575227513627,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 4,
+      "exportFrame": 96,
+      "diagnosticPsnrDb": 31.13368454075537,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 4.5,
+      "exportFrame": 108,
+      "diagnosticPsnrDb": 33.5810020395104,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 5,
+      "exportFrame": 120,
+      "diagnosticPsnrDb": 33.143437708286086,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 5.5,
+      "exportFrame": 132,
+      "diagnosticPsnrDb": 33.45723580114621,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 5.9583333333,
+      "exportFrame": 143,
+      "diagnosticPsnrDb": 29.508704941632942,
+      "strictPassClaimed": false
+    }
+  ],
+  "minimumDiagnosticPsnrDb": 29.508704941632942,
+  "wholePictureParityQualified": false,
+  "humanListeningQualified": false,
+  "creativeApproval": false
+}

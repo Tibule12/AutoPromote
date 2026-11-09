@@ -1,0 +1,12 @@
+{
+  "oldWorkerPid": 12800,
+  "newWorkerPid": 89659,
+  "modelHash": "1faef5301d78db7dda502fe59966957ec4b79dd64e16f03ed96913c7a4eb68d6",
+  "device": "CPUExecutionProvider",
+  "activeOperationsAtSwitch": 0,
+  "priorWallets": 4,
+  "priorOperations": 18,
+  "priorWalletsReset": false,
+  "onlyOwnedDemo": true,
+  "paidOrProductionOperation": false
+}

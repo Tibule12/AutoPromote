@@ -1,0 +1,30 @@
+{
+  "retainedEarlierInputs": true,
+  "newGeneration": false,
+  "sourceVideoStart": 2,
+  "matchingMatteStart": 0,
+  "mattePreparation": "Previously prepared source-bound person matte; no new segmentation this task.",
+  "score": "Eight-second excerpt of the previously authored sample-free Glass Current instrumental.",
+  "files": [
+    {
+      "name": "Instrumental.wav",
+      "sha256": "ddd442f26e6424890b7ac7dbeabecc9c74a6cda6d8e4e8733d9b40bc7aee4357",
+      "bytes": 1411278
+    },
+    {
+      "name": "Retained source provenance.json",
+      "sha256": "274b1698646263f0eeffb12aef5782b4e4d2ca82d07070dd9b88d26edeb57406",
+      "bytes": 1314
+    },
+    {
+      "name": "City.mp4",
+      "sha256": "09f2b8bfcf899d174ecf53f6a9c5358b9d19ca7b7d8ba0b1c508abfc2a2bf15d",
+      "bytes": 5306461
+    },
+    {
+      "name": "City - source-bound luma matte.mp4",
+      "sha256": "dd5eb646c37f88771d63fbbbacc4550717f4bd925aec6cd397d1fd34c8ed9571",
+      "bytes": 202075
+    }
+  ]
+}

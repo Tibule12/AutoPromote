@@ -1,0 +1,143 @@
+{
+  "deliveredAt": "2026-11-08T17:42:54.949700+00:00",
+  "delivery": "/home/tibule12/Videos/Studio - Grounded Dance Revision - 2026-11-08",
+  "movieSha256": "b047ad2171665b41242451ad8468b8fd0d4d031a37df099698726e72eb339966",
+  "nativeJobId": "viral_87018777759d0e861bf3fb87a616645d328309195f39bd8b879a4e4cd5eab28e",
+  "seconds": 6,
+  "frames": 144,
+  "fps": 24,
+  "size": [
+    576,
+    1024
+  ],
+  "sourceInterval": [
+    8,
+    14
+  ],
+  "ordinaryLayers": 10,
+  "motionKeys": 246,
+  "photographicCopies": 2,
+  "copyOpacity": 1,
+  "tint": {
+    "strength": 0.52,
+    "gamma": 0.45,
+    "lift": 0
+  },
+  "preparedMatteSize": [
+    576,
+    1024
+  ],
+  "matteModelSha256": "072adec3c75a1af773ec35d8b595612f8e3472b7a4b8a210684432b493376852",
+  "modelDevice": "CPU",
+  "modelIsPreparedPrivateInputNotAutomaticProductIntegration": true,
+  "sourceForegroundUsesRecoveredMatteModelFgr": true,
+  "authoredContactCues": 4,
+  "contactCuesAreMeasuredFootDrivenEllipsesNotPhysicalLighting": true,
+  "nativeApplyUndoRedoAndIndependentRestore": true,
+  "exactBackupCompilerRequestWorkerDownloadBinding": true,
+  "fullLiveAndFinishedNativeStudioRecordings": true,
+  "priorBatchCreativeVerdict": "Owner rejected: not clean and real.",
+  "ownerAccepted": false,
+  "photorealReferenceMatched": false,
+  "strictPredictivePixelAudioParityQualified": false,
+  "music": {
+    "source": "original video soundtrack",
+    "durationSeconds": 6.0,
+    "bestLagSamplesAt16k": 0,
+    "bestLagMilliseconds": 0.0,
+    "waveformCorrelation": 0.9954259686223772,
+    "fittedGain": 0.8932796268429615,
+    "humanListeningQualified": false,
+    "musicReplacement": false,
+    "speedChange": false
+  },
+  "watermarkCleanup": {
+    "enabled": true,
+    "status": "applied",
+    "mode": "manual",
+    "timebase": "output_picture_after_native_layers",
+    "manual_regions": [
+      {
+        "left": 77,
+        "top": 75,
+        "width": 22,
+        "height": 11,
+        "track": false,
+        "seed_time": 0
+      }
+    ],
+    "method": "local_lama_masked",
+    "dimensions": [
+      576,
+      1024
+    ],
+    "pixelReconstructionPerfect": false,
+    "audioUnaffected": true,
+    "frames": 144,
+    "fps": 24,
+    "regionAppliedFrames": [
+      144
+    ],
+    "reconstructedKeyframes": [
+      12
+    ],
+    "modelSha256": "1faef5301d78db7dda502fe59966957ec4b79dd64e16f03ed96913c7a4eb68d6",
+    "device": "CPUExecutionProvider",
+    "audioPacketsCopied": true,
+    "placementBoxBlurred": false,
+    "presenceGated": true,
+    "temporalInterpolation": "backward optical flow between reconstructed keys; not temporal-model quality qualification"
+  },
+  "sourcePlateDraftRejectedBeforeExport": true,
+  "registrationDiagnosticRejected": true,
+  "sourceCodeChangedForThisRevision": false,
+  "nativeCpuExecutions": 1,
+  "newPaidProviderOrGpuExecutions": 0,
+  "productionWriteOrDeployment": false,
+  "publishingScheduling": false,
+  "protectedEarlierFiles": 872,
+  "capture": {
+    "Native dance authoring and history": {
+      "seconds": 2.00600004196167,
+      "capturedUpdates": 26,
+      "observedUpdatesPerSecond": 12.961116378928171,
+      "audio": "muted native Studio capture"
+    },
+    "Native cleanup box controls": {
+      "seconds": 2.3329999446868896,
+      "capturedUpdates": 21,
+      "observedUpdatesPerSecond": 9.00128611139697,
+      "audio": "muted native Studio capture"
+    },
+    "Complete live Studio playback": {
+      "seconds": 6.052999973297119,
+      "capturedUpdates": 64,
+      "observedUpdatesPerSecond": 10.573269499807823,
+      "audio": "muted native Studio capture",
+      "playbackWallMs": 6179
+    },
+    "Complete finished playback in Studio": {
+      "seconds": 6.0929999351501465,
+      "capturedUpdates": 155,
+      "observedUpdatesPerSecond": 25.439028663994304,
+      "audio": "muted native Studio capture",
+      "playbackWallMs": 6188
+    }
+  },
+  "resource": {
+    "wallSeconds": 129.0802230879999,
+    "cpuSeconds": 268.58732899999995,
+    "peakRssKiB": 1259088,
+    "cpuCeilingSeconds": 1200,
+    "localFileCeilingBytes": 402653184,
+    "providerChargesStarted": false,
+    "invoiceCostMicros": null
+  },
+  "remaining": [
+    "The compressed576\u00d71024 source and source-dependent fine boundaries remain visible; this is not reference-quality photoreal integration.",
+    "The contact cues are authored soft shadows, not solved geometry/lighting.",
+    "Existing masked badge reconstruction can still show temporal/texture differences; entire pixel/edge/sound parity and display smoothness are unqualified.",
+    "RVM ResNet50 supplied foreground/alpha is private source preparation, not automatic Studio subject isolation.",
+    "Owner creative approval and shared S02/S04/S03 remain open."
+  ]
+}

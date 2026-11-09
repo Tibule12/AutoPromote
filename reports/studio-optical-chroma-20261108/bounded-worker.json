@@ -1,0 +1,12 @@
+{
+  "pid": 103855,
+  "cwd": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105",
+  "origin": "http://127.0.0.1:34269",
+  "perFileMiB": 384,
+  "cpuSeconds": 1200,
+  "wallSeconds": 1200,
+  "artifactMiB": 128,
+  "productionChange": false,
+  "activeOperationsAtSwitch": 0,
+  "noWalletReset": true
+}

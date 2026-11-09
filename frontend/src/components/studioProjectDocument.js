@@ -84,7 +84,7 @@ const LAYER_PARAMETER_FIELDS = [
   "hold", "intensity", "audioReactiveIntensity", "cameraMotion", "focalLength",
   "lightDirection", "lightColor", "lightIntensity", "shadows", "reflections",
   "bloom", "background",
-  "bg", "anchorX", "anchorY", "blendMode", "glow", "layerShadow", "motionBlur",
+  "bg", "anchorX", "anchorY", "blendMode", "matteSurface", "colorize", "glow", "layerShadow", "motionBlur",
   "cropX", "cropY", "blur", "sourceDuration", "aspectRatio",
   "perspective", "perspectiveProgress",
   "isCaption",

@@ -1,0 +1,28 @@
+{
+  "earlierWalletExact": true,
+  "allEarlierWalletsExact": true,
+  "priorWalletCount": 2,
+  "earlierBalance": 1,
+  "earlierReserved": 0,
+  "newFixtureBalance": 1,
+  "newFixtureReserved": 0,
+  "newNativeOperations": 1,
+  "newOperationsAllSucceeded": true,
+  "noDirectWalletWrites": true,
+  "noProductionChange": true,
+  "verifiedPriorWallets": [
+    {
+      "userId": "demo-pilot-alice",
+      "balance": 1,
+      "reserved": 0
+    },
+    {
+      "userId": "demo-pilot-echo-20261108",
+      "balance": 1,
+      "reserved": 0
+    }
+  ],
+  "activeReviewAccount": "demo-pilot-clean-dance-20261108",
+  "reviewBalanceBefore": 3,
+  "reviewBalanceAfter": 1
+}

@@ -2,8 +2,12 @@
 // Geometry uses the same world pose as every other layer; no saved state or
 // second animation clock lives here. The CPU compositor already consumes these
 // video pixels. Unsupported source effects are refused by shared validation.
-export function studioVideoMatteUri({ video, layer, pose, time, aspect, canvas }) {
-  if (!video || video.readyState < 2 || video.seeking || !(video.videoWidth > 0) || !(video.videoHeight > 0)) return null;
+export function studioVideoMatteUri({ video, picture, layer, pose, time, aspect, canvas }) {
+  const pixels = picture || video;
+  const sourceWidth = pixels?.videoWidth || pixels?.naturalWidth || pixels?.width;
+  const sourceHeight = pixels?.videoHeight || pixels?.naturalHeight || pixels?.height;
+  if (!picture && (!video || video.readyState < 2 || video.seeking)) return null;
+  if (!(sourceWidth > 0) || !(sourceHeight > 0)) return null;
   if (!canvas || !Number.isFinite(aspect) || aspect <= 0) return null;
   const width = Math.max(1, Math.round(aspect >= 1 ? 640 : 640 * aspect));
   const height = Math.max(1, Math.round(aspect >= 1 ? 640 / aspect : 640));
@@ -17,10 +21,10 @@ export function studioVideoMatteUri({ video, layer, pose, time, aspect, canvas }
   const boxWidth = width * Number(layer.width || 35) / 100 * Number(pose.scale ?? 1);
   const boxHeight = height * Number(layer.height || 35) / 100 * Number(pose.scale ?? 1);
   const fit = layer.mediaFit || 'contain';
-  const ratio = fit === 'cover' ? Math.max(boxWidth / video.videoWidth, boxHeight / video.videoHeight)
-    : Math.min(boxWidth / video.videoWidth, boxHeight / video.videoHeight);
-  const drawWidth = fit === 'stretch' ? boxWidth : video.videoWidth * ratio;
-  const drawHeight = fit === 'stretch' ? boxHeight : video.videoHeight * ratio;
+  const ratio = fit === 'cover' ? Math.max(boxWidth / sourceWidth, boxHeight / sourceHeight)
+    : Math.min(boxWidth / sourceWidth, boxHeight / sourceHeight);
+  const drawWidth = fit === 'stretch' ? boxWidth : sourceWidth * ratio;
+  const drawHeight = fit === 'stretch' ? boxHeight : sourceHeight * ratio;
   const x = -boxWidth * Number(layer.anchorX ?? 50) / 100, y = -boxHeight * Number(layer.anchorY ?? 50) / 100;
   ctx.save();
   ctx.globalAlpha = opacity;
@@ -40,7 +44,7 @@ export function studioVideoMatteUri({ video, layer, pose, time, aspect, canvas }
     ctx.rect(x + boxWidth * cropX, y + boxHeight * cropY, boxWidth * (1 - 2 * cropX), boxHeight * (1 - 2 * cropY));
     ctx.clip();
   }
-  ctx.drawImage(video, x + (boxWidth - drawWidth) / 2, y + (boxHeight - drawHeight) / 2, drawWidth, drawHeight);
+  ctx.drawImage(pixels, x + (boxWidth - drawWidth) / 2, y + (boxHeight - drawHeight) / 2, drawWidth, drawHeight);
   ctx.restore();
   return canvas;
 }

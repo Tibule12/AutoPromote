@@ -1,3 +1,4 @@
+import { mediaColorizeId } from './studioMediaColorize';
 // Image effects share the mask/title programme coordinates. The native layer
 // transform scales this filtered group after these pixel values are resolved.
 export function studioMediaEffectFilter(overlay) {
@@ -8,6 +9,7 @@ export function studioMediaEffectFilter(overlay) {
   };
   const color = (value, opacity) => `color-mix(in srgb, ${value} ${Math.round(Number(opacity) * 100)}%, transparent)`;
   return [
+    overlay.colorize?.enabled ? `url(#${mediaColorizeId(overlay.id)})` : '',
     overlay.layerShadow?.enabled
       ? `drop-shadow(${pixels(overlay.layerShadow.x ?? 0)} ${pixels(overlay.layerShadow.y ?? 10)} ${pixels(overlay.layerShadow.blur ?? 18)} ${color(overlay.layerShadow.color || '#000000', overlay.layerShadow.opacity ?? .55)})` : '',
     overlay.glow?.enabled

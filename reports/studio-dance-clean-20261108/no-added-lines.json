@@ -1,0 +1,58 @@
+{
+  "actualSavedNativeProjects": true,
+  "movies": [
+    {
+      "word": "one",
+      "nativeOverlayCount": 10,
+      "nativeKeyCount": 204,
+      "addedLineLayers": 0,
+      "strokeKeys": 0,
+      "originalMusicUnmuted": true,
+      "sourceRange": [
+        5,
+        13
+      ],
+      "mainFramingOff": true
+    },
+    {
+      "word": "two",
+      "nativeOverlayCount": 6,
+      "nativeKeyCount": 120,
+      "addedLineLayers": 0,
+      "strokeKeys": 0,
+      "originalMusicUnmuted": true,
+      "sourceRange": [
+        8,
+        16
+      ],
+      "mainFramingOff": true
+    },
+    {
+      "word": "three",
+      "nativeOverlayCount": 6,
+      "nativeKeyCount": 120,
+      "addedLineLayers": 0,
+      "strokeKeys": 0,
+      "originalMusicUnmuted": true,
+      "sourceRange": [
+        0,
+        8
+      ],
+      "mainFramingOff": true
+    },
+    {
+      "word": "four",
+      "nativeOverlayCount": 8,
+      "nativeKeyCount": 153,
+      "addedLineLayers": 0,
+      "strokeKeys": 0,
+      "originalMusicUnmuted": true,
+      "sourceRange": [
+        12,
+        20
+      ],
+      "mainFramingOff": true
+    }
+  ],
+  "sourceSceneMarkingsRetained": true
+}

@@ -1,0 +1,52 @@
+{
+  "pid": 123678,
+  "firestorePid": 123685,
+  "checkedAt": "2026-11-08T01:50:27.534Z",
+  "demoProject": "demo-autopromote-credits",
+  "portsWereUnbound": true,
+  "originalRuntimePreserved": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105/reports/studio-director-composition-20261107/private/runtime/autopromote-application-demo-6YGcoz",
+  "inputs": [
+    {
+      "storagePath": "studio/sources/demo-pilot-alice/4569b519ac0b2db2ee220423_Footsteps.mp4",
+      "sha256": "459c13e384b1819b2e3d0bc8eae287d10e58c96d266a0b4bbf1553c98969bbac",
+      "bytes": 3862122,
+      "newGeneration": "1794102627274"
+    },
+    {
+      "storagePath": "studio/sources/demo-pilot-alice/a924b66ba8b93d9c57e14638_City.mp4",
+      "sha256": "09f2b8bfcf899d174ecf53f6a9c5358b9d19ca7b7d8ba0b1c508abfc2a2bf15d",
+      "bytes": 5306461,
+      "newGeneration": "1794102627315"
+    },
+    {
+      "storagePath": "studio/sources/demo-pilot-alice/2dc939ed7e27f2c5d308c8f5_Autumn.mp4",
+      "sha256": "01258817091b10d7639169d3fc9885229ea5fbad787ee1ac674b72c25f9ef468",
+      "bytes": 5354075,
+      "newGeneration": "1794102627358"
+    },
+    {
+      "storagePath": "studio/sources/demo-pilot-alice/c4b4ec52d705a685f668df25_Open_trail.mp4",
+      "sha256": "b5406236fe04617468a712d3353b37845149a16a25afb6b1b9f38e72801acc96",
+      "bytes": 4666850,
+      "newGeneration": "1794102627403"
+    },
+    {
+      "storagePath": "studio/sources/demo-pilot-alice/66561ed03273d7cd7d38f289_Summit.mp4",
+      "sha256": "96056be98b025809b72e38baebc1ea0827fbc30d9a02cfd8844c35a371a3fe00",
+      "bytes": 4988927,
+      "newGeneration": "1794102627442"
+    },
+    {
+      "storagePath": "studio/sources/demo-pilot-alice/4c16f9a3130650c78c52b9b3_Coast.mp4",
+      "sha256": "dd6037bc87dc9c93b84fb506b04355fe12d1f4bda0e942aec8da7e83d3c3e86c",
+      "bytes": 6646172,
+      "newGeneration": "1794102627488"
+    }
+  ],
+  "freshIndependentTestCohort": true,
+  "sameLocalUidForOwnedInputPaths": true,
+  "priorWalletHistoryRecovered": false,
+  "priorJobHistoryRecovered": false,
+  "symbolicFixtureAllowance": 11,
+  "productionChange": false
+}

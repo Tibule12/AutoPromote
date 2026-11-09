@@ -1,0 +1,84 @@
+{
+  "pid": 133690,
+  "authImportedFromActualExport": true,
+  "firestoreAndWalletUnchanged": true,
+  "activeOperations": 0,
+  "restoredObjects": [
+    {
+      "storagePath": "studio/sources/demo-pilot-alice/4569b519ac0b2db2ee220423_Footsteps.mp4",
+      "sha256": "459c13e384b1819b2e3d0bc8eae287d10e58c96d266a0b4bbf1553c98969bbac",
+      "generation": "1794102627274",
+      "bytes": 3862122
+    },
+    {
+      "storagePath": "studio/sources/demo-pilot-alice/a924b66ba8b93d9c57e14638_City.mp4",
+      "sha256": "09f2b8bfcf899d174ecf53f6a9c5358b9d19ca7b7d8ba0b1c508abfc2a2bf15d",
+      "generation": "1794102627315",
+      "bytes": 5306461
+    },
+    {
+      "storagePath": "studio/sources/demo-pilot-alice/2dc939ed7e27f2c5d308c8f5_Autumn.mp4",
+      "sha256": "01258817091b10d7639169d3fc9885229ea5fbad787ee1ac674b72c25f9ef468",
+      "generation": "1794102627358",
+      "bytes": 5354075
+    },
+    {
+      "storagePath": "studio/sources/demo-pilot-alice/c4b4ec52d705a685f668df25_Open_trail.mp4",
+      "sha256": "b5406236fe04617468a712d3353b37845149a16a25afb6b1b9f38e72801acc96",
+      "generation": "1794102627403",
+      "bytes": 4666850
+    },
+    {
+      "storagePath": "studio/sources/demo-pilot-alice/66561ed03273d7cd7d38f289_Summit.mp4",
+      "sha256": "96056be98b025809b72e38baebc1ea0827fbc30d9a02cfd8844c35a371a3fe00",
+      "generation": "1794102627442",
+      "bytes": 4988927
+    },
+    {
+      "storagePath": "studio/sources/demo-pilot-alice/4c16f9a3130650c78c52b9b3_Coast.mp4",
+      "sha256": "dd6037bc87dc9c93b84fb506b04355fe12d1f4bda0e942aec8da7e83d3c3e86c",
+      "generation": "1794102627488",
+      "bytes": 6646172
+    },
+    {
+      "storagePath": "uploads/images/demo-pilot-alice/1794102770694_overlay-5209e47f-d98b-4e6d-8eac-b458d8e5513d.png",
+      "sha256": "609d8bc38f41e1b7adee685990d879ef7c1f73727803c5d617b03b99d8eb9942",
+      "generation": "1794102770758",
+      "bytes": 136649
+    },
+    {
+      "storagePath": "uploads/images/demo-pilot-alice/1794102770696_overlay-6ad1096a-9d4a-4a4e-b418-8aa46523ef9e.png",
+      "sha256": "ffb276354b6929ef8371a71ff96c77c1336b598d00e4b07434a2dc1dc688bce0",
+      "generation": "1794102770753",
+      "bytes": 20916
+    },
+    {
+      "storagePath": "uploads/images/demo-pilot-alice/1794102770696_overlay-8cf048a1-b2b5-41fb-b698-20e444079c7d.png",
+      "sha256": "a5015ad5b2b60d2383d9d45eb106f9e1adfcb104622a4c3c11151becc8ed51d7",
+      "generation": "1794102770761",
+      "bytes": 20861
+    },
+    {
+      "storagePath": "uploads/images/demo-pilot-alice/1794102770696_overlay-3c8ea5e6-c106-4402-9f3e-af624533d46a.png",
+      "sha256": "a5015ad5b2b60d2383d9d45eb106f9e1adfcb104622a4c3c11151becc8ed51d7",
+      "generation": "1794102770762",
+      "bytes": 20861
+    },
+    {
+      "storagePath": "uploads/audios/demo-pilot-alice/1794102771755_music-e1dc7b8f-cf1f-4b44-a221-90c90c6ec3d2.wav",
+      "sha256": "8ae43a4a8fdbd079a4fb8ecb886f4667113de30124cb1c84e6d450253d0afd32",
+      "generation": "1794102772268",
+      "bytes": 4233644
+    },
+    {
+      "storagePath": "studio/exports/demo-pilot-alice/viral_29e1a80439edc0d61900befd8e3853a90eabcf466da48609c1869f203f406083/render.mp4",
+      "sha256": "6bff3506f0da87db0c9f3eba3644e15454830ea14fe17f911dbd15a8e96b7b05",
+      "generation": "1794102850396",
+      "bytes": 9074583
+    }
+  ],
+  "signedVideoCapabilitiesAndAllHashesVerified": true,
+  "staticAssetReplacementGenerations": [],
+  "reason": "Verification storage export destination was absent; corrected before retry.",
+  "productionChange": false
+}

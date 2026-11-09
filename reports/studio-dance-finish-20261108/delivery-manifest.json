@@ -1,0 +1,33 @@
+{
+  "directory": "/home/tibule12/Videos/Studio - Grounded Dance Revision - 2026-11-08/Corrected",
+  "movieSha256": "4d4ac1f433aadd9b422b2acd3cd5e858e8fc775b750e19a397f34fc0c1f282e5",
+  "files": {
+    "verification.json": "8d1ea730a75fa1547cbb791facdf26319118a3f9f87d99549a3c26a344d3d5bd",
+    "Complete finished playback in Studio.mp4": "1cf87b2c09eb02746539569bb21c7182e4be9ce18fc9283a3e8736b45ddab671",
+    "Grounded doubles - corrected.mp4": "4d4ac1f433aadd9b422b2acd3cd5e858e8fc775b750e19a397f34fc0c1f282e5",
+    "Corner correction comparison.jpg": "29eb378dabb2f426bd4bdea16feb0a3a487e5d609576378ed7395a7a6b146402",
+    "Native finishing corrections.mp4": "166b901e3bd2ff054d531ba6256f196390c276d39f3a08a622b7220d49a68f00",
+    "Editable Project.autopromote.json": "fc6188fcbf904a65c0bd8d1bb49f5d603fe08636ab26604bebf9a16367dc9f26",
+    "Before and corrected.jpg": "1ae8f5a4b3f08fee41701987b26f6a0cc05cb7e8f4d4b99e6178e0bc6be6ba47",
+    "README.md": "d129c61e12be0624086ea0d5136e6ca3b477f9f9944c2562d10f924a0ca2627d",
+    "Complete live Studio playback.mp4": "d4f2476746ca0541969b24acf7a1c16efc41021b07d33af715b949e84b424bc2",
+    "Sources/Two - recovered foreground.mp4": "ccfb06e02ee901715927ec68d41744f99a0a92c46f4987962186ab5494264cfd",
+    "Sources/Source-frame clean plate.mp4": "3bc48c3564ab5049d79163d8baa4860008bac8a8adce53734cdd76e9a11c4c58",
+    "Sources/number two - subject matte.mp4": "09170b74e16cb912c86ad8af3b542312516aebb5247348aeab41282e01ee1a16",
+    "Sources/Two - firmer detailed matte.mp4": "4c23b029b08a8626d387960b8506c77b1d414e72665716fb2e1945f82e769e09",
+    "Sources/number two dance.mp4": "1bafd62ad3883958a9e58c0c0691ed1d06bf6b31155fb5135e966000ca107fac",
+    "Technical/emulator-final-snapshot.json": "cf4457a2d2af1de2e0b346518ac33c7a798edd7ebc0fe9957a2e53612a4f5d99",
+    "Technical/native-corrections.json": "e4fbdd15c0f77fac83b01de588dfec1c1e498784924c1755efe7e786f05d8ca7",
+    "Technical/matte-refinement.json": "536c3862361e10121fcf5fc6c056cef3fb5ebadab4dddabc1f14f127cd7dafe1",
+    "Technical/Native finishing corrections capture.json": "da1dbb255e432300012b3ca51910b1b7fc68288a45860d389c83e341a07339e3",
+    "Technical/correction-authoring.json": "ee9837122f865d704edc1330da1ba9b27ee23a07040ba97b87742b3a0c8f1858",
+    "Technical/selected-local-build.json": "fe5d0ce0a4f27e6de9625dc7530fc63acdeb1d52e55437e03fef05a51db2663a",
+    "Technical/native-source-preflight.json": "e78b66c64f42c1e7187d46f2818c91ba60cef2881cf745474c75ff1464b8cd79",
+    "Technical/Complete finished playback in Studio capture.json": "c36927d0815f8ae64aed18fd2b011993660120041eaaebef485f2c1aaf979020",
+    "Technical/Complete live Studio playback capture.json": "28f4283a0723bef36e85cadefe8ccea5f941da590b11b4207dc2b64316bcc12d",
+    "Technical/independent-restore.json": "21f1f0f1051ce0c5994ff97906c7740447414e3beaf4d4d05f75a538ea0013f1",
+    "Technical/verified-assets.json": "780ac923691ae29171c5075078b45da9a26793112593cdf129907c05e3839fec",
+    "Technical/wallet-preservation.json": "b7cac53dfcb0ac2722d6b14b572e7e0fd7361039ddc7e4ff1404843e514d8250",
+    "Technical/exact-native-binding.json": "02f0b12fe1f7b4683bc63789f22693d0564ec1b4203fd6416229f9151af32823"
+  }
+}

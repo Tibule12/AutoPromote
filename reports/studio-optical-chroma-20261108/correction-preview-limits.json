@@ -1,0 +1,8 @@
+{
+  "recordedAt": "2026-11-08T09:35:07.951979+00:00",
+  "strictCorrectedPausedPreviewQualified": false,
+  "reason": "Accurate source-frame endpoint returned429 STUDIO_FRAME_BUSY; final partial observation stopped, no pass claimed. Initial22 paired observations and complete live playback are retained separately.",
+  "nativeRevealCorrectionSaved": true,
+  "finalWholePictureParityQualified": false,
+  "continueWith": "Native export and direct final-frame inspection; recover full actual finished playback, independently reopen and bind exact graph."
+}

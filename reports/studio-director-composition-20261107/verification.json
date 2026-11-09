@@ -1,0 +1,343 @@
+{
+  "recordedAt": "2026-11-07T11:59:38.516740+00:00",
+  "state": "NATIVE_ART_DIRECTED_REPLACEMENT_DELIVERED_DIRECTOR_PLANNING_UNFINISHED",
+  "actualStudioFrontend": true,
+  "normalEmulatorSignIn": true,
+  "productionWrites": false,
+  "paidProviderCalls": 0,
+  "cloudGpuExecutions": 0,
+  "pushMergeDeployment": false,
+  "creativeApproval": false,
+  "deliveredMovie": "/home/tibule12/Videos/Studio - City into Sea - 2026-11-07/City into Sea.mp4",
+  "movieSha256": "8145b97d60b44d771e4876bf4778976ea706ce8ca9eea05c5b586b588ae4061c",
+  "seconds": 8,
+  "fps": 24,
+  "frames": 192,
+  "width": 1280,
+  "height": 720,
+  "layers": 10,
+  "motionKeys": 543,
+  "nativeRenderExecutions": 1,
+  "nativeOutputRerenderedAfterRuntimeLoss": false,
+  "binding": {
+    "nativeBackupMatchesRenderedDocument": true,
+    "actualNativeDownload": true,
+    "movieSha256": "8145b97d60b44d771e4876bf4778976ea706ce8ca9eea05c5b586b588ae4061c",
+    "projectHash": "65888e8878e8d31e1dcd9cd68d54fae84cbc8e4963f7d99ee1c4bf4d0cad4eb6",
+    "requestBytesSha256": "5ca8f7f49a917f5260f795af75a294d21f3bfea370d06e33babbe7602dda73c6",
+    "nativeJobId": "viral_143ebe3f383a5bb46f09db29082715f1a4828d0cc1f9e9327299cbcf5c991db4",
+    "ordinaryOverlays": 10,
+    "motionKeys": 543,
+    "ephemeralWorkerRequestNowUnavailable": true,
+    "originalSourceChecks": "worker-source-preflight.json",
+    "recoveryInputs": "source-recovery-hashes.json"
+  },
+  "creativeDirection": "Explicit assistant-authored scene data, reviewed/imported/applied through existing native scene actions; not a successful autonomous model edit.",
+  "creativeDecisions": [
+    "Source-continuous City walk becomes an actual source-bound luma cutout.",
+    "The same normal-speed ocean fills the walker and grows through a 64-point animated clip, with a vermilion offset echo.",
+    "A shared 2D null camera frames seven related layers; no fake 3D or external effects compositor.",
+    "Two native whooshes and a retained original score; sound was manually selected."
+  ],
+  "nativeUndoRedo": true,
+  "independentRestoreBeforeRuntimeLoss": {
+    "exactDecisions": true,
+    "normalSignIn": true
+  },
+  "manualCameraContinuation": {
+    "generatedLayerId": "scene-e72a0e6d-83c5-426a-9d50-3f78a144af50",
+    "originalValue": 1,
+    "editedValue": 0.8,
+    "meaningfulManualKeyChange": true,
+    "undoRedoRestoreExact": true,
+    "normalSignedInUi": true
+  },
+  "coldPreviewFixes": [
+    "Decoded video-matte painting now activates in Quick as well as FX Flow.",
+    "A shared matte uses the validated shared source canvas rather than an idle clone decoder."
+  ],
+  "coldReopenPairedFrames": 9,
+  "actualSourceTimestampSamples": 36,
+  "maximumEffectiveSourceTimestampDelta": 0,
+  "pendingLayersAtSamples": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "pictureReview": {
+    "fullDecode": true,
+    "frames": 192,
+    "seconds": 8,
+    "fps": 24,
+    "cutAndPoseBoundaries": [
+      0,
+      1.5,
+      2,
+      2.15,
+      2.3,
+      2.4,
+      2.7,
+      2.95,
+      3.3,
+      4.1,
+      4.2,
+      4.85,
+      5.1,
+      5.3,
+      5.5,
+      5.6,
+      7.5,
+      8
+    ],
+    "sampledFrameIndices": [
+      0,
+      1,
+      12,
+      35,
+      36,
+      37,
+      47,
+      48,
+      49,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      64,
+      65,
+      66,
+      70,
+      71,
+      72,
+      78,
+      79,
+      80,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      114,
+      115,
+      116,
+      117,
+      121,
+      122,
+      123,
+      126,
+      127,
+      128,
+      131,
+      132,
+      133,
+      134,
+      135,
+      156,
+      179,
+      180,
+      181,
+      186,
+      191
+    ],
+    "pairedDiagnosticSamples": [
+      {
+        "programmeTime": 0.5,
+        "exportFrame": 12,
+        "diagnosticPsnrDb": 29.07137690570785,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 1.5,
+        "exportFrame": 36,
+        "diagnosticPsnrDb": 29.531629405448776,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 2.5,
+        "exportFrame": 60,
+        "diagnosticPsnrDb": 35.424635504697314,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 3.25,
+        "exportFrame": 78,
+        "diagnosticPsnrDb": 39.828249332233725,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 4.25,
+        "exportFrame": 102,
+        "diagnosticPsnrDb": 41.82478287355715,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 4.75,
+        "exportFrame": 114,
+        "diagnosticPsnrDb": 39.95111738537237,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 5.5,
+        "exportFrame": 132,
+        "diagnosticPsnrDb": 27.27540709283108,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 6.5,
+        "exportFrame": 156,
+        "diagnosticPsnrDb": 27.56892896125086,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 7.75,
+        "exportFrame": 186,
+        "diagnosticPsnrDb": 28.5677270779715,
+        "strictPassClaimed": false
+      }
+    ],
+    "minimumDiagnosticPsnrDb": 27.27540709283108,
+    "wholePictureParityQualified": false,
+    "humanListeningQualified": false,
+    "creativeApproval": false
+  },
+  "capture": {
+    "Native composition authoring": {
+      "seconds": 0.2519998550415039,
+      "frames": 6,
+      "rawBytes": 743400,
+      "nativeControlsOnly": true,
+      "setupExcluded": true,
+      "audio": "Silent native editing capture",
+      "observedCaptureFps": 23.80953750553472
+    },
+    "Live Studio playback after Quick repair": {
+      "seconds": 7.98799991607666,
+      "frames": 114,
+      "rawBytes": 15116633,
+      "nativeControlsOnly": true,
+      "setupExcluded": true,
+      "audio": "Silent native editing capture",
+      "observedCaptureFps": 14.271407260603926
+    },
+    "Finished movie in Studio": {
+      "seconds": 9.828999996185303,
+      "frames": 139,
+      "rawBytes": 18194358,
+      "nativeControlsOnly": true,
+      "setupExcluded": true,
+      "audio": "Silent native editing capture",
+      "observedCaptureFps": 14.141825216598512
+    },
+    "Manual continuation in Studio": {
+      "seconds": 5.183000087738037,
+      "frames": 52,
+      "rawBytes": 6200929,
+      "nativeControlsOnly": true,
+      "setupExcluded": true,
+      "audio": "Silent native editing capture",
+      "observedCaptureFps": 10.032799367112073
+    }
+  },
+  "currentTests": {
+    "focusedFrontend": 45,
+    "focusedBackend": 35,
+    "selectedFullEditor": 4,
+    "distinctTotal": 84,
+    "fullEditorSuiteRun": false
+  },
+  "regressionFailedBeforePassedAfter": true,
+  "finalBrowser": {
+    "headless": true,
+    "muted": true,
+    "anonymousViewports": [
+      {
+        "width": 1440,
+        "scroll": 1440,
+        "bodyText": 2953
+      },
+      {
+        "width": 1280,
+        "scroll": 1280,
+        "bodyText": 2953
+      },
+      {
+        "width": 768,
+        "scroll": 768,
+        "bodyText": 2614
+      },
+      {
+        "width": 390,
+        "scroll": 390,
+        "bodyText": 2584
+      }
+    ],
+    "normalSignIn": true,
+    "actualHelpRequest": true,
+    "helpStatus": 200,
+    "browserErrors": [],
+    "nonLoopbackRequestsContinued": false,
+    "mainAsset": "/static/js/main.e641e25e.js",
+    "mainSha256": "9150fdbb6f8ccad440680e88ffebdce938dfc1aca160a6ceea44b50e02ecd160",
+    "build": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105/reports/studio-director-composition-20261107/private/runtime/autopromote-application-demo-6YGcoz/build",
+    "oldParallelWelcomeBuildLostWithRuntime": true,
+    "earlierPairedWelcomeChecksRetained": 16
+  },
+  "runtimeRecovery": {
+    "originalTemporaryRuntimeGone": true,
+    "originalJobWalletHistoryRestored": false,
+    "exactRetainedInputObjectsRestored": 8,
+    "threeArtworkRastersRecoveredWithMatchingHashes": true,
+    "normalBackupRestoreInFreshDemo": true,
+    "finalMovieReusedWithIdenticalSha256": true
+  },
+  "protectedDeliveries": [
+    {
+      "directory": "/home/tibule12/Videos/Studio - Director Creates the Edit - 2026-11-07",
+      "filesUnchanged": 47
+    },
+    {
+      "directory": "/home/tibule12/Videos/Studio - Phase Shift - 2026-11-06",
+      "filesUnchanged": 49
+    },
+    {
+      "directory": "/home/tibule12/Videos/Studio Template Collection - 2026-11-04",
+      "filesUnchanged": 154
+    }
+  ],
+  "wholePictureAudioParityQualified": false,
+  "realtimeSmoothnessQualified": false,
+  "humanListeningQualified": false,
+  "readinessPromotion": false,
+  "director": {
+    "genericGraphIntegrationImplemented": true,
+    "currentModelCreativeReliabilityQualified": false,
+    "localPlanningRequests": 8,
+    "separatePlainLanguageProbe": 1,
+    "timingSourceMatteAndCreativeFailuresRetained": true,
+    "staticRedProposalAppliedButRejectedWithoutExport": true,
+    "automaticRecipeFallback": false,
+    "currentRecoveryRuntimeModelServerDisabled": true
+  },
+  "limits": [
+    "The final movie is explicitly art directed; the installed local models failed to author it reliably.",
+    "Client colour/frame-difference measurements are not subject recognition, transcript, beat or scene understanding.",
+    "Nine paused samples and exact source clocks do not qualify every live colour/edge/audio combination.",
+    "The strongest still mismatch outside the matte scene remains around 27.28dB diagnostic PSNR; whole pixel equality is not claimed.",
+    "The original ephemeral worker request/resource files and emulator history disappeared; retained render receipt, checked source records, original backup/download hashes and recordings remain. No job/wallet replay is asserted.",
+    "Full-speed captures report decoder drops and finite capture rate. Human listening and owner creative approval remain open."
+  ],
+  "nextTask": "Director must validate composition intent and source/matte relationships, use real scene/audio evidence, and pass a fresh normally signed-in brief-to-native-edit without prepared direction. Continue S02 source/frame/edge/audio throughput and shared S04/S03."
+}

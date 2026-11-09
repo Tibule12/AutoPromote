@@ -1,0 +1,19 @@
+{
+  "recordedAt": "2026-11-08T09:57:27.822515+00:00",
+  "contractRecordValidation": true,
+  "formalCountsUnchanged": true,
+  "diffWhitespace": true,
+  "reportJavaScriptSyntax": true,
+  "reportPythonSyntax": true,
+  "nativeBackupCompilerWorkerDownloadBinding": true,
+  "productKnowledgeReviewedAndChecked": true,
+  "testCountClaim": null,
+  "newProductEngineChanges": false,
+  "initialKnowledgeCheckSetup": "Without NODE_PATH the command could not load ajv. Retried with existing shared dependencies; no install or fixture change.",
+  "initialPostprocessExit143": "Finished playback, exact cold restore, binding and frame review completed. Snapshot and final live playback completed separately after the coordinator stopped.",
+  "finalNativeWorkerWallSeconds": 963.4311487310042,
+  "finalNativeWorkerAggregateCpuSeconds": 1302.112952,
+  "wholePredictiveParityQualified": false,
+  "captureRealtimeQualified": false,
+  "humanListeningQualified": false
+}

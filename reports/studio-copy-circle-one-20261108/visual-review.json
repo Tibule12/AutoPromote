@@ -1,0 +1,29 @@
+{
+  "reviewedDecodedFrames": 192,
+  "allFullFrameContactSheetsInspected": true,
+  "selectedEnlargedEdgeAndCornerSheetsInspected": true,
+  "nativeAndLivePairsInspectedAtSeconds": [
+    1.5,
+    4,
+    7.5
+  ],
+  "cornerBadgeVisibleInFinalFraming": false,
+  "naturalLeadAndEightStaggeredMovingCopies": true,
+  "floorRingAppearsBeneathSubjects": true,
+  "originalFootworkReadable": true,
+  "reconstructionOrInpaintUsed": false,
+  "referenceHeadingsAndInterfaceAdded": false,
+  "sameCameraViewCopies": true,
+  "observations": [
+    "Blue/cyan copies read on the left; warmer yellow/orange copies on the right; pink/purple rear copies are partly occluded by the lead.",
+    "Copies unfold and return through semi-transparent poses; a faint ring/colour residue remains during the last fade frame.",
+    "Compressed subject contours, especially hands and shoes, remain soft.",
+    "Rear copies cluster closely; this is not the spacious photographic crowd or physical lighting of the reference."
+  ],
+  "remainingLimits": [
+    "Not reference-level photorealism or newly inferred 360-degree camera views.",
+    "Source preparation is separate CPU analysis, not autonomous Director isolation.",
+    "Live realtime smoothness, full predictive picture/audio parity, human listening and owner creative approval remain unqualified."
+  ],
+  "verdict": "Private stylised circle-effect candidate, technically verified; exact-reference creative quality remains unmet."
+}

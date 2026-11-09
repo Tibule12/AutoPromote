@@ -1,0 +1,22 @@
+{
+  "movieSha256": "b047ad2171665b41242451ad8468b8fd0d4d031a37df099698726e72eb339966",
+  "nativeFramesInspected": [
+    0,
+    0.5,
+    1.5,
+    3,
+    4.5,
+    5.5,
+    5.875,
+    5.958333333333333
+  ],
+  "observations": [
+    "Hair/shoe outline and original clothing detail improve over the low-resolution flat-looking copies.",
+    "The restrained two-copy fan is less crowded; measured contact cues reduce some floating appearance.",
+    "The tint still reads as a designed effect, not three independently lit physical people.",
+    "The existing source compression and source-dependent boundaries remain visible.",
+    "The prior pasted-frame corner draft was rejected; the native masked cleanup remains imperfectly qualified."
+  ],
+  "creativeVerdict": "One revised comparison candidate. Not a claim of matching the reference realism or owner acceptance.",
+  "ownerAccepted": false
+}

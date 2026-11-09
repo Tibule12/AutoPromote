@@ -1,0 +1,13 @@
+{
+  "nativeBackupMatchesRenderedDocument": true,
+  "actualNativeDownload": true,
+  "movieSha256": "8145b97d60b44d771e4876bf4778976ea706ce8ca9eea05c5b586b588ae4061c",
+  "projectHash": "65888e8878e8d31e1dcd9cd68d54fae84cbc8e4963f7d99ee1c4bf4d0cad4eb6",
+  "requestBytesSha256": "5ca8f7f49a917f5260f795af75a294d21f3bfea370d06e33babbe7602dda73c6",
+  "nativeJobId": "viral_143ebe3f383a5bb46f09db29082715f1a4828d0cc1f9e9327299cbcf5c991db4",
+  "ordinaryOverlays": 10,
+  "motionKeys": 543,
+  "ephemeralWorkerRequestNowUnavailable": true,
+  "originalSourceChecks": "worker-source-preflight.json",
+  "recoveryInputs": "source-recovery-hashes.json"
+}

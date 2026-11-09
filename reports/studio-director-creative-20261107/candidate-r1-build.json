@@ -1,0 +1,24 @@
+{
+  "build": "/dev/shm/autopromote-director-creative-20261107-build",
+  "origin": "http://127.0.0.1:45109",
+  "demoProject": "demo-autopromote-credits",
+  "welcomeFlag": "true",
+  "mainAsset": "/static/js/main.06f7927b.js",
+  "mainSha256": "7e1a486bdb40183464dec58af2e2b443ddbbb35a8fcbbb82a203c1763fcbb046",
+  "sources": {
+    "frontend/src/components/ViralClipStudio.js": "af38f425fdf76b1ba0cfa7d17515cb4fd47cc92f77d55b80c9aa55db190b6d8e",
+    "frontend/src/components/ViralClipStudio.css": "0e40cfd977bd4b3a04dcb03155ec6c19c32a76d53dde528972b362fcb77261c2",
+    "frontend/src/components/studioFeatureControls.css": "bf69a3b2f62f3e4067fcddf0ff0d5cb47a679a78c393433c1a50ec4b7078f39b",
+    "frontend/src/components/StudioProgrammeFrame.js": "134e4695b2b0d9c2ee2db2be594303bdf6a5e1eb945cc1c0b35f7b154f0f3115",
+    "frontend/src/components/StudioDirectorCreativePanel.js": "d90e80ea984cd50da1f71a525c6b567435182ae9225cb4c8e838705d0faab41e",
+    "frontend/src/components/studioDirectorCreativePlan.js": "39185c824947e55e41aa3d4442e4356504b5b6506904effdc82e2868ef6e1dc8",
+    "frontend/src/components/studioDirectorCreativeClient.js": "229621d386e9ce2a526a494427f667b1ae069055001067e8ce31e2712ae8a5b6",
+    "src/services/studioDirectorCreativePlanner.js": "3dbc5fae6cd763d1f1ae4dd1242d397838c4f7932643f3e6453bc2ec6b2d7537",
+    "src/routes/studioDirectorCreativeRoutes.js": "569797930cb373c72e3b6395990e06cc513e28fd815dc585cc7e601beb4362f1",
+    "src/server.js": "ef20adf22d7093c208640787a5a5d0e344d99adfaa916f3a953b8ab78a19e1c9",
+    "scripts/monetization/application-host.cjs": "26feebedb7226ea284dd77c319e9f1321110576c51a035be3e61e030f0cb0e4d",
+    "frontend/src/components/studioSceneActions.js": "633a6317f8b0a5f3069c810d53ebd145ae5aa114f4812aaba9b486ac625ff4c1",
+    "src/generated/studioDirectorReplayKernel.cjs": "2c89c123c59b7297fff4bf1fd7373860aeeec4138d7b8c105fdf46407fc61c08",
+    "python_media_worker/main_media_server.py": "0afacd9efed66dbb00a53c9fc1a2b461b0da5d3fe5dbc3cf6fe07910cb0b6f64"
+  }
+}

@@ -1,0 +1,743 @@
+{
+  "samples": [
+    {
+      "programmeTime": 0,
+      "layerId": "scene-e63b298c-8ced-4e04-8840-7bb3d4d6bf05",
+      "expected": 0,
+      "effective": 0,
+      "delta": 0
+    },
+    {
+      "programmeTime": 0,
+      "layerId": "scene-4647d422-edec-49d1-9dc8-259d7b5bda84",
+      "expected": 0,
+      "effective": 0,
+      "delta": 0
+    },
+    {
+      "programmeTime": 0,
+      "layerId": "scene-2d17c019-9ca7-4330-bf98-104d2cba833e",
+      "expected": 0,
+      "effective": 0,
+      "delta": 0
+    },
+    {
+      "programmeTime": 0,
+      "layerId": "scene-80b4ee8c-8be8-4f62-ab7f-84dd09abec5f",
+      "expected": 0,
+      "effective": 0,
+      "delta": 0
+    },
+    {
+      "programmeTime": 0,
+      "layerId": "scene-a7e9da25-0462-4c26-8fc8-11d2a14228c2",
+      "expected": 0,
+      "effective": 0,
+      "delta": 0
+    },
+    {
+      "programmeTime": 0.5,
+      "layerId": "scene-e63b298c-8ced-4e04-8840-7bb3d4d6bf05",
+      "expected": 0.5,
+      "effective": 0.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 0.5,
+      "layerId": "scene-4647d422-edec-49d1-9dc8-259d7b5bda84",
+      "expected": 0.5,
+      "effective": 0.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 0.5,
+      "layerId": "scene-2d17c019-9ca7-4330-bf98-104d2cba833e",
+      "expected": 0.5,
+      "effective": 0.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 0.5,
+      "layerId": "scene-80b4ee8c-8be8-4f62-ab7f-84dd09abec5f",
+      "expected": 0.5,
+      "effective": 0.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 0.5,
+      "layerId": "scene-a7e9da25-0462-4c26-8fc8-11d2a14228c2",
+      "expected": 0.5,
+      "effective": 0.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 1,
+      "layerId": "scene-e63b298c-8ced-4e04-8840-7bb3d4d6bf05",
+      "expected": 1,
+      "effective": 1,
+      "delta": 0
+    },
+    {
+      "programmeTime": 1,
+      "layerId": "scene-4647d422-edec-49d1-9dc8-259d7b5bda84",
+      "expected": 1,
+      "effective": 1,
+      "delta": 0
+    },
+    {
+      "programmeTime": 1,
+      "layerId": "scene-2d17c019-9ca7-4330-bf98-104d2cba833e",
+      "expected": 1,
+      "effective": 1,
+      "delta": 0
+    },
+    {
+      "programmeTime": 1,
+      "layerId": "scene-80b4ee8c-8be8-4f62-ab7f-84dd09abec5f",
+      "expected": 1,
+      "effective": 1,
+      "delta": 0
+    },
+    {
+      "programmeTime": 1,
+      "layerId": "scene-a7e9da25-0462-4c26-8fc8-11d2a14228c2",
+      "expected": 1,
+      "effective": 1,
+      "delta": 0
+    },
+    {
+      "programmeTime": 1.5,
+      "layerId": "scene-e63b298c-8ced-4e04-8840-7bb3d4d6bf05",
+      "expected": 1.5,
+      "effective": 1.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 1.5,
+      "layerId": "scene-4647d422-edec-49d1-9dc8-259d7b5bda84",
+      "expected": 1.5,
+      "effective": 1.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 1.5,
+      "layerId": "scene-2d17c019-9ca7-4330-bf98-104d2cba833e",
+      "expected": 1.5,
+      "effective": 1.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 1.5,
+      "layerId": "scene-80b4ee8c-8be8-4f62-ab7f-84dd09abec5f",
+      "expected": 1.5,
+      "effective": 1.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 1.5,
+      "layerId": "scene-a7e9da25-0462-4c26-8fc8-11d2a14228c2",
+      "expected": 1.5,
+      "effective": 1.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 2,
+      "layerId": "scene-e63b298c-8ced-4e04-8840-7bb3d4d6bf05",
+      "expected": 2,
+      "effective": 2,
+      "delta": 0
+    },
+    {
+      "programmeTime": 2,
+      "layerId": "scene-4647d422-edec-49d1-9dc8-259d7b5bda84",
+      "expected": 2,
+      "effective": 2,
+      "delta": 0
+    },
+    {
+      "programmeTime": 2,
+      "layerId": "scene-2d17c019-9ca7-4330-bf98-104d2cba833e",
+      "expected": 2,
+      "effective": 2,
+      "delta": 0
+    },
+    {
+      "programmeTime": 2,
+      "layerId": "scene-80b4ee8c-8be8-4f62-ab7f-84dd09abec5f",
+      "expected": 2,
+      "effective": 2,
+      "delta": 0
+    },
+    {
+      "programmeTime": 2,
+      "layerId": "scene-a7e9da25-0462-4c26-8fc8-11d2a14228c2",
+      "expected": 2,
+      "effective": 2,
+      "delta": 0
+    },
+    {
+      "programmeTime": 2.5,
+      "layerId": "scene-e63b298c-8ced-4e04-8840-7bb3d4d6bf05",
+      "expected": 2.5,
+      "effective": 2.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 2.5,
+      "layerId": "scene-4647d422-edec-49d1-9dc8-259d7b5bda84",
+      "expected": 2.5,
+      "effective": 2.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 2.5,
+      "layerId": "scene-2d17c019-9ca7-4330-bf98-104d2cba833e",
+      "expected": 2.5,
+      "effective": 2.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 2.5,
+      "layerId": "scene-80b4ee8c-8be8-4f62-ab7f-84dd09abec5f",
+      "expected": 2.5,
+      "effective": 2.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 2.5,
+      "layerId": "scene-a7e9da25-0462-4c26-8fc8-11d2a14228c2",
+      "expected": 2.5,
+      "effective": 2.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 3,
+      "layerId": "scene-e63b298c-8ced-4e04-8840-7bb3d4d6bf05",
+      "expected": 3,
+      "effective": 3,
+      "delta": 0
+    },
+    {
+      "programmeTime": 3,
+      "layerId": "scene-4647d422-edec-49d1-9dc8-259d7b5bda84",
+      "expected": 3,
+      "effective": 3,
+      "delta": 0
+    },
+    {
+      "programmeTime": 3,
+      "layerId": "scene-2d17c019-9ca7-4330-bf98-104d2cba833e",
+      "expected": 3,
+      "effective": 3,
+      "delta": 0
+    },
+    {
+      "programmeTime": 3,
+      "layerId": "scene-80b4ee8c-8be8-4f62-ab7f-84dd09abec5f",
+      "expected": 3,
+      "effective": 3,
+      "delta": 0
+    },
+    {
+      "programmeTime": 3,
+      "layerId": "scene-a7e9da25-0462-4c26-8fc8-11d2a14228c2",
+      "expected": 3,
+      "effective": 3,
+      "delta": 0
+    },
+    {
+      "programmeTime": 3.5,
+      "layerId": "scene-e63b298c-8ced-4e04-8840-7bb3d4d6bf05",
+      "expected": 3.5,
+      "effective": 3.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 3.5,
+      "layerId": "scene-4647d422-edec-49d1-9dc8-259d7b5bda84",
+      "expected": 3.5,
+      "effective": 3.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 3.5,
+      "layerId": "scene-2d17c019-9ca7-4330-bf98-104d2cba833e",
+      "expected": 3.5,
+      "effective": 3.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 3.5,
+      "layerId": "scene-80b4ee8c-8be8-4f62-ab7f-84dd09abec5f",
+      "expected": 3.5,
+      "effective": 3.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 3.5,
+      "layerId": "scene-a7e9da25-0462-4c26-8fc8-11d2a14228c2",
+      "expected": 3.5,
+      "effective": 3.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 4,
+      "layerId": "scene-e63b298c-8ced-4e04-8840-7bb3d4d6bf05",
+      "expected": 4,
+      "effective": 4,
+      "delta": 0
+    },
+    {
+      "programmeTime": 4,
+      "layerId": "scene-4647d422-edec-49d1-9dc8-259d7b5bda84",
+      "expected": 4,
+      "effective": 4,
+      "delta": 0
+    },
+    {
+      "programmeTime": 4,
+      "layerId": "scene-2d17c019-9ca7-4330-bf98-104d2cba833e",
+      "expected": 4,
+      "effective": 4,
+      "delta": 0
+    },
+    {
+      "programmeTime": 4,
+      "layerId": "scene-80b4ee8c-8be8-4f62-ab7f-84dd09abec5f",
+      "expected": 4,
+      "effective": 4,
+      "delta": 0
+    },
+    {
+      "programmeTime": 4,
+      "layerId": "scene-a7e9da25-0462-4c26-8fc8-11d2a14228c2",
+      "expected": 4,
+      "effective": 4,
+      "delta": 0
+    },
+    {
+      "programmeTime": 4,
+      "layerId": "scene-3dd2a30c-6af0-4038-8fee-2e3eacf511fd",
+      "expected": 0.2999999999999998,
+      "effective": 0.299999,
+      "delta": -9.99999999806711e-07
+    },
+    {
+      "programmeTime": 4,
+      "layerId": "scene-61aca174-fc57-4d44-b957-6f69bded4666",
+      "expected": 0.2999999999999998,
+      "effective": 0.299999,
+      "delta": -9.99999999806711e-07
+    },
+    {
+      "programmeTime": 4,
+      "layerId": "scene-81d3aa1c-f40c-43d2-919e-8b7c92b0aa20",
+      "expected": 0.2999999999999998,
+      "effective": 0.299999,
+      "delta": -9.99999999806711e-07
+    },
+    {
+      "programmeTime": 4,
+      "layerId": "scene-d8eab633-d96e-460b-91fd-ef8da804ef11",
+      "expected": 0.2999999999999998,
+      "effective": 0.299999,
+      "delta": -9.99999999806711e-07
+    },
+    {
+      "programmeTime": 4,
+      "layerId": "scene-45a2b8c9-cb3a-44e3-add0-ecbbf46bb52e",
+      "expected": 0.2999999999999998,
+      "effective": 0.299999,
+      "delta": -9.99999999806711e-07
+    },
+    {
+      "programmeTime": 4.5,
+      "layerId": "scene-e63b298c-8ced-4e04-8840-7bb3d4d6bf05",
+      "expected": 4.5,
+      "effective": 4.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 4.5,
+      "layerId": "scene-4647d422-edec-49d1-9dc8-259d7b5bda84",
+      "expected": 4.5,
+      "effective": 4.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 4.5,
+      "layerId": "scene-2d17c019-9ca7-4330-bf98-104d2cba833e",
+      "expected": 4.5,
+      "effective": 4.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 4.5,
+      "layerId": "scene-80b4ee8c-8be8-4f62-ab7f-84dd09abec5f",
+      "expected": 4.5,
+      "effective": 4.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 4.5,
+      "layerId": "scene-a7e9da25-0462-4c26-8fc8-11d2a14228c2",
+      "expected": 4.5,
+      "effective": 4.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 4.5,
+      "layerId": "scene-3dd2a30c-6af0-4038-8fee-2e3eacf511fd",
+      "expected": 0.7999999999999998,
+      "effective": 0.799999,
+      "delta": -9.99999999806711e-07
+    },
+    {
+      "programmeTime": 4.5,
+      "layerId": "scene-61aca174-fc57-4d44-b957-6f69bded4666",
+      "expected": 0.7999999999999998,
+      "effective": 0.799999,
+      "delta": -9.99999999806711e-07
+    },
+    {
+      "programmeTime": 4.5,
+      "layerId": "scene-81d3aa1c-f40c-43d2-919e-8b7c92b0aa20",
+      "expected": 0.7999999999999998,
+      "effective": 0.799999,
+      "delta": -9.99999999806711e-07
+    },
+    {
+      "programmeTime": 4.5,
+      "layerId": "scene-d8eab633-d96e-460b-91fd-ef8da804ef11",
+      "expected": 0.7999999999999998,
+      "effective": 0.799999,
+      "delta": -9.99999999806711e-07
+    },
+    {
+      "programmeTime": 4.5,
+      "layerId": "scene-45a2b8c9-cb3a-44e3-add0-ecbbf46bb52e",
+      "expected": 0.7999999999999998,
+      "effective": 0.799999,
+      "delta": -9.99999999806711e-07
+    },
+    {
+      "programmeTime": 5,
+      "layerId": "scene-e63b298c-8ced-4e04-8840-7bb3d4d6bf05",
+      "expected": 5,
+      "effective": 5,
+      "delta": 0
+    },
+    {
+      "programmeTime": 5,
+      "layerId": "scene-4647d422-edec-49d1-9dc8-259d7b5bda84",
+      "expected": 5,
+      "effective": 5,
+      "delta": 0
+    },
+    {
+      "programmeTime": 5,
+      "layerId": "scene-2d17c019-9ca7-4330-bf98-104d2cba833e",
+      "expected": 5,
+      "effective": 5,
+      "delta": 0
+    },
+    {
+      "programmeTime": 5,
+      "layerId": "scene-80b4ee8c-8be8-4f62-ab7f-84dd09abec5f",
+      "expected": 5,
+      "effective": 5,
+      "delta": 0
+    },
+    {
+      "programmeTime": 5,
+      "layerId": "scene-a7e9da25-0462-4c26-8fc8-11d2a14228c2",
+      "expected": 5,
+      "effective": 5,
+      "delta": 0
+    },
+    {
+      "programmeTime": 5,
+      "layerId": "scene-3dd2a30c-6af0-4038-8fee-2e3eacf511fd",
+      "expected": 1.2999999999999998,
+      "effective": 1.299999,
+      "delta": -9.999999999177334e-07
+    },
+    {
+      "programmeTime": 5,
+      "layerId": "scene-61aca174-fc57-4d44-b957-6f69bded4666",
+      "expected": 1.2999999999999998,
+      "effective": 1.299999,
+      "delta": -9.999999999177334e-07
+    },
+    {
+      "programmeTime": 5,
+      "layerId": "scene-81d3aa1c-f40c-43d2-919e-8b7c92b0aa20",
+      "expected": 1.2999999999999998,
+      "effective": 1.299999,
+      "delta": -9.999999999177334e-07
+    },
+    {
+      "programmeTime": 5,
+      "layerId": "scene-d8eab633-d96e-460b-91fd-ef8da804ef11",
+      "expected": 1.2999999999999998,
+      "effective": 1.299999,
+      "delta": -9.999999999177334e-07
+    },
+    {
+      "programmeTime": 5,
+      "layerId": "scene-45a2b8c9-cb3a-44e3-add0-ecbbf46bb52e",
+      "expected": 1.2999999999999998,
+      "effective": 1.299999,
+      "delta": -9.999999999177334e-07
+    },
+    {
+      "programmeTime": 5.5,
+      "layerId": "scene-e63b298c-8ced-4e04-8840-7bb3d4d6bf05",
+      "expected": 5.5,
+      "effective": 5.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 5.5,
+      "layerId": "scene-4647d422-edec-49d1-9dc8-259d7b5bda84",
+      "expected": 5.5,
+      "effective": 5.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 5.5,
+      "layerId": "scene-2d17c019-9ca7-4330-bf98-104d2cba833e",
+      "expected": 5.5,
+      "effective": 5.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 5.5,
+      "layerId": "scene-80b4ee8c-8be8-4f62-ab7f-84dd09abec5f",
+      "expected": 5.5,
+      "effective": 5.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 5.5,
+      "layerId": "scene-a7e9da25-0462-4c26-8fc8-11d2a14228c2",
+      "expected": 5.5,
+      "effective": 5.5,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 5.5,
+      "layerId": "scene-3dd2a30c-6af0-4038-8fee-2e3eacf511fd",
+      "expected": 1.7999999999999998,
+      "effective": 1.799999,
+      "delta": -9.999999999177334e-07
+    },
+    {
+      "programmeTime": 5.5,
+      "layerId": "scene-61aca174-fc57-4d44-b957-6f69bded4666",
+      "expected": 1.7999999999999998,
+      "effective": 1.799999,
+      "delta": -9.999999999177334e-07
+    },
+    {
+      "programmeTime": 5.5,
+      "layerId": "scene-81d3aa1c-f40c-43d2-919e-8b7c92b0aa20",
+      "expected": 1.7999999999999998,
+      "effective": 1.799999,
+      "delta": -9.999999999177334e-07
+    },
+    {
+      "programmeTime": 5.5,
+      "layerId": "scene-d8eab633-d96e-460b-91fd-ef8da804ef11",
+      "expected": 1.7999999999999998,
+      "effective": 1.799999,
+      "delta": -9.999999999177334e-07
+    },
+    {
+      "programmeTime": 5.5,
+      "layerId": "scene-45a2b8c9-cb3a-44e3-add0-ecbbf46bb52e",
+      "expected": 1.7999999999999998,
+      "effective": 1.799999,
+      "delta": -9.999999999177334e-07
+    },
+    {
+      "programmeTime": 6,
+      "layerId": "scene-3dd2a30c-6af0-4038-8fee-2e3eacf511fd",
+      "expected": 2.3,
+      "effective": 2.3,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 6,
+      "layerId": "scene-61aca174-fc57-4d44-b957-6f69bded4666",
+      "expected": 2.3,
+      "effective": 2.3,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 6,
+      "layerId": "scene-81d3aa1c-f40c-43d2-919e-8b7c92b0aa20",
+      "expected": 2.3,
+      "effective": 2.3,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 6,
+      "layerId": "scene-d8eab633-d96e-460b-91fd-ef8da804ef11",
+      "expected": 2.3,
+      "effective": 2.3,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 6,
+      "layerId": "scene-45a2b8c9-cb3a-44e3-add0-ecbbf46bb52e",
+      "expected": 2.3,
+      "effective": 2.3,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 6.5,
+      "layerId": "scene-3dd2a30c-6af0-4038-8fee-2e3eacf511fd",
+      "expected": 2.8,
+      "effective": 2.8,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 6.5,
+      "layerId": "scene-61aca174-fc57-4d44-b957-6f69bded4666",
+      "expected": 2.8,
+      "effective": 2.8,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 6.5,
+      "layerId": "scene-81d3aa1c-f40c-43d2-919e-8b7c92b0aa20",
+      "expected": 2.8,
+      "effective": 2.8,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 6.5,
+      "layerId": "scene-d8eab633-d96e-460b-91fd-ef8da804ef11",
+      "expected": 2.8,
+      "effective": 2.8,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 6.5,
+      "layerId": "scene-45a2b8c9-cb3a-44e3-add0-ecbbf46bb52e",
+      "expected": 2.8,
+      "effective": 2.8,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 7,
+      "layerId": "scene-3dd2a30c-6af0-4038-8fee-2e3eacf511fd",
+      "expected": 3.3,
+      "effective": 3.3,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 7,
+      "layerId": "scene-61aca174-fc57-4d44-b957-6f69bded4666",
+      "expected": 3.3,
+      "effective": 3.3,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 7,
+      "layerId": "scene-81d3aa1c-f40c-43d2-919e-8b7c92b0aa20",
+      "expected": 3.3,
+      "effective": 3.3,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 7,
+      "layerId": "scene-d8eab633-d96e-460b-91fd-ef8da804ef11",
+      "expected": 3.3,
+      "effective": 3.3,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 7,
+      "layerId": "scene-45a2b8c9-cb3a-44e3-add0-ecbbf46bb52e",
+      "expected": 3.3,
+      "effective": 3.3,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 7.5,
+      "layerId": "scene-3dd2a30c-6af0-4038-8fee-2e3eacf511fd",
+      "expected": 3.8,
+      "effective": 3.8,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 7.5,
+      "layerId": "scene-61aca174-fc57-4d44-b957-6f69bded4666",
+      "expected": 3.8,
+      "effective": 3.8,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 7.5,
+      "layerId": "scene-81d3aa1c-f40c-43d2-919e-8b7c92b0aa20",
+      "expected": 3.8,
+      "effective": 3.8,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 7.5,
+      "layerId": "scene-d8eab633-d96e-460b-91fd-ef8da804ef11",
+      "expected": 3.8,
+      "effective": 3.8,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 7.5,
+      "layerId": "scene-45a2b8c9-cb3a-44e3-add0-ecbbf46bb52e",
+      "expected": 3.8,
+      "effective": 3.8,
+      "delta": 0.0
+    },
+    {
+      "programmeTime": 7.9583333333,
+      "layerId": "scene-3dd2a30c-6af0-4038-8fee-2e3eacf511fd",
+      "expected": 4.2583333332999995,
+      "effective": 4.258333,
+      "delta": -3.332999991556562e-07
+    },
+    {
+      "programmeTime": 7.9583333333,
+      "layerId": "scene-61aca174-fc57-4d44-b957-6f69bded4666",
+      "expected": 4.2583333332999995,
+      "effective": 4.258333,
+      "delta": -3.332999991556562e-07
+    },
+    {
+      "programmeTime": 7.9583333333,
+      "layerId": "scene-81d3aa1c-f40c-43d2-919e-8b7c92b0aa20",
+      "expected": 4.2583333332999995,
+      "effective": 4.258333,
+      "delta": -3.332999991556562e-07
+    },
+    {
+      "programmeTime": 7.9583333333,
+      "layerId": "scene-d8eab633-d96e-460b-91fd-ef8da804ef11",
+      "expected": 4.2583333332999995,
+      "effective": 4.258333,
+      "delta": -3.332999991556562e-07
+    },
+    {
+      "programmeTime": 7.9583333333,
+      "layerId": "scene-45a2b8c9-cb3a-44e3-add0-ecbbf46bb52e",
+      "expected": 4.2583333332999995,
+      "effective": 4.258333,
+      "delta": -3.332999991556562e-07
+    }
+  ],
+  "count": 105,
+  "maximumDelta": 9.999999999177334e-07,
+  "maximumReadyMs": 2248,
+  "minimumReadyMs": 1252
+}

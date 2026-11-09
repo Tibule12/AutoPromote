@@ -1,0 +1,12 @@
+{
+  "uid": "demo-pilot-echo-20261108",
+  "normalSeededDemoFixture": true,
+  "productionAccount": false,
+  "existingWalletUnchanged": true,
+  "noDirectWalletWrite": true,
+  "pricesAndPolicyUnchanged": true,
+  "api": {
+    "pid": 160737,
+    "origin": "http://127.0.0.1:34899"
+  }
+}

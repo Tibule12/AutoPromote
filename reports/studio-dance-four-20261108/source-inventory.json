@@ -1,0 +1,158 @@
+[
+  {
+    "name": "number one dance.mp4",
+    "path": "/home/tibule12/Videos/number one dance.mp4",
+    "bytes": 4339621,
+    "sha256": "0cb27b29f57bb16acd5980278a58d98b2380cd6c486672606a67d13161af8fda",
+    "duration": "28.123741",
+    "streams": [
+      {
+        "codec_type": "video",
+        "codec_name": "h264",
+        "width": 576,
+        "height": 1024,
+        "r_frame_rate": "30000/1001",
+        "avg_frame_rate": "168400/5619",
+        "sample_rate": null,
+        "channels": null,
+        "duration": "28.095000",
+        "tags": {
+          "language": "und",
+          "vendor_id": "[0][0][0][0]"
+        }
+      },
+      {
+        "codec_type": "audio",
+        "codec_name": "aac",
+        "width": null,
+        "height": null,
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "0/0",
+        "sample_rate": "44100",
+        "channels": 2,
+        "duration": "28.123741",
+        "tags": {
+          "language": "und",
+          "vendor_id": "[0][0][0][0]"
+        }
+      }
+    ]
+  },
+  {
+    "name": "number two dance.mp4",
+    "path": "/home/tibule12/Videos/number two dance.mp4",
+    "bytes": 6196687,
+    "sha256": "23c1471a631c832965411eb7564c4518633f80aef89b67481493ffa85566342d",
+    "duration": "53.500000",
+    "streams": [
+      {
+        "codec_type": "video",
+        "codec_name": "h264",
+        "width": 576,
+        "height": 1024,
+        "r_frame_rate": "30/1",
+        "avg_frame_rate": "30/1",
+        "sample_rate": null,
+        "channels": null,
+        "duration": "53.500000",
+        "tags": {
+          "language": "und",
+          "vendor_id": "[0][0][0][0]"
+        }
+      },
+      {
+        "codec_type": "audio",
+        "codec_name": "aac",
+        "width": null,
+        "height": null,
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "0/0",
+        "sample_rate": "44100",
+        "channels": 2,
+        "duration": "53.497007",
+        "tags": {
+          "language": "und",
+          "vendor_id": "[0][0][0][0]"
+        }
+      }
+    ]
+  },
+  {
+    "name": "number three dance.mp4",
+    "path": "/home/tibule12/Videos/number three dance.mp4",
+    "bytes": 4418827,
+    "sha256": "91a13d80bffb518c438cf3baf99f6ba37ff3f3f6343cfddfb2127b0fea699725",
+    "duration": "28.528333",
+    "streams": [
+      {
+        "codec_type": "video",
+        "codec_name": "h264",
+        "width": 576,
+        "height": 1024,
+        "r_frame_rate": "30000/1001",
+        "avg_frame_rate": "513000/17117",
+        "sample_rate": null,
+        "channels": null,
+        "duration": "28.528333",
+        "tags": {
+          "language": "und",
+          "vendor_id": "[0][0][0][0]"
+        }
+      },
+      {
+        "codec_type": "audio",
+        "codec_name": "aac",
+        "width": null,
+        "height": null,
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "0/0",
+        "sample_rate": "44100",
+        "channels": 2,
+        "duration": "28.490884",
+        "tags": {
+          "language": "und",
+          "vendor_id": "[0][0][0][0]"
+        }
+      }
+    ]
+  },
+  {
+    "name": "number four dance.mp4",
+    "path": "/home/tibule12/Videos/number four dance.mp4",
+    "bytes": 5863122,
+    "sha256": "b8226c899502fc8e257e38b4480cd933ba92e148022ff7aa4446cdfe77cbc884",
+    "duration": "50.200000",
+    "streams": [
+      {
+        "codec_type": "video",
+        "codec_name": "h264",
+        "width": 576,
+        "height": 1024,
+        "r_frame_rate": "30/1",
+        "avg_frame_rate": "7520/251",
+        "sample_rate": null,
+        "channels": null,
+        "duration": "50.200000",
+        "tags": {
+          "language": "und",
+          "vendor_id": "[0][0][0][0]"
+        }
+      },
+      {
+        "codec_type": "audio",
+        "codec_name": "aac",
+        "width": null,
+        "height": null,
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "0/0",
+        "sample_rate": "44100",
+        "channels": 2,
+        "duration": "50.200000",
+        "tags": {
+          "language": "und",
+          "vendor_id": "[0][0][0][0]"
+        }
+      }
+    ]
+  }
+]

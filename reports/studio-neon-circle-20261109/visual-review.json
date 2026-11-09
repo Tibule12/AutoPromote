@@ -1,0 +1,32 @@
+{
+  "all192DecodedFramesInspectedAsFullFrameContactSheets": true,
+  "enlargedRevealAndFinalFadeEdgesInspected": true,
+  "sameTimeLiveAndNativePairsInspectedAtSeconds": [
+    1.5,
+    4,
+    7.5
+  ],
+  "sixMovingColouredCopiesPlusNeutralLead": true,
+  "postMaskRimVisibleInNativeExport": true,
+  "movingFloorReflectionsVisibleInNativeExport": true,
+  "allSevenSilhouettesStayInsideFrame": true,
+  "copiesAndRingClearBySeconds": 7.75,
+  "leadReflectionRetainedAtEndByDesign": true,
+  "observedImprovements": [
+    "Cyan, blue, purple, pink, orange and yellow figures now have rim light outside their isolated contours.",
+    "The floor contains actual moving, fading mirrored subject pixels rather than a static coloured spot.",
+    "Six coloured copies around a neutral lead provide more separation than the earlier eight-copy scene.",
+    "A low elliptical ring and broad colour pools share the floor region with the reflections.",
+    "Wide reveal poses stay inside the frame; the ending returns to the unobstructed lead."
+  ],
+  "remainingLimits": [
+    "The compressed source and prepared segmentation retain soft contours at hands, hat/headphone edges and shoes.",
+    "The reflection is a fixed-plane vertical mirror and fade; it does not reconstruct a physically lit wet floor or inferred new camera views.",
+    "Foot positioning and contact cues are authored; physical contact and lighting are not qualified.",
+    "The haze is deliberately subtle; the reference's complex illuminated smoke, airborne trails, facial and fabric detail are not reproduced.",
+    "Actual browser/CPU rim and low-alpha edge pixels differ; whole predictive picture/audio parity and smooth live playback remain unqualified.",
+    "Human listening and owner creative approval remain pending."
+  ],
+  "verdict": "Stronger native neon circle with editable post-isolation rim and moving reflection, delivered as a private review candidate. Reference-level photorealism and perfection are not claimed.",
+  "perfectClaimed": false
+}

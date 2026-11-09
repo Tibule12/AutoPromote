@@ -379,9 +379,11 @@ app.use("/api", auth, (req, res, next) => {
   if (
     req.method !== "GET" &&
     !(['/media/track-studio-faces', '/media/preview-silence'].includes(req.path) && config.env.CREDITS_LOCAL_FACE_ANALYSIS === 'true') &&
+    !(req.path==='/studio/director/creative-plan' && process.env.STUDIO_DIRECTOR_LOCAL_PLANNER==='true') &&
     !(req.path==='/media/studio-3d/preview' && require('../../src/services/studio3DLocal').configuration()) &&
     !(process.env.STUDIO_BACKGROUND_DEMO==='true' && (
       req.path==='/studio/director/projects/revisions' ||
+      (req.path==='/studio/director/creative-plan' && process.env.STUDIO_DIRECTOR_LOCAL_PLANNER==='true') ||
       /^\/media\/studio-subject-masks\/(?:requests$|jobs\/[a-f0-9]{64}\/(?:cancel|subject(?:\/reuse)?)$)/.test(req.path) ||
       /^\/media\/studio-subject-vfx(?:$|\/[A-Za-z0-9_-]{8,128}(?:\/refresh)?$)/.test(req.path))) &&
     !/^\/(?:credit-pilot\/|media\/(?:process|analyze|render-clip|studio-assets\/(?:resolve|source-frame)|multicam\/uploads\/(?:start|complete|abort))$|content\/(?:upload(?:\/(?:source-file|readiness))?$|[^/]+\/promotion-schedules$|promotion-schedules\/[^/]+\/(?:resume|reschedule|pause)$)|users\/me\/accept-terms$|workspaces(?:\/|$))/.test(
@@ -425,6 +427,7 @@ app.get("/api/media/scan-preflight", async (req, res) => {
     message: "Exact cost requires the uploaded source quote.",
   });
 });
+if(process.env.STUDIO_DIRECTOR_LOCAL_PLANNER==='true')app.use("/api/studio/director/creative-plan",require("../../src/routes/studioDirectorCreativeRoutes"));
 app.use("/api/users", require("../../src/userRoutes"));
 app.use("/api/workspaces", require("../../src/routes/workspaceRoutes"));
 if(process.env.STUDIO_BACKGROUND_DEMO==='true')app.use("/api/studio/director/projects/revisions",require("../../src/routes/studioProjectRevisionRoutes"));

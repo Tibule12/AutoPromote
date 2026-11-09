@@ -4,6 +4,7 @@ import { act, fireEvent, render, screen, waitFor, within } from "@testing-librar
 import { getAuth } from "firebase/auth";
 import ViralClipStudio from "../ViralClipStudio";
 import { uploadSourceFileViaBackend } from "../../utils/sourceUpload";
+import * as studioVideoMatte from '../studioVideoMatte';
 import * as studioCommands from "../studioCommands";
 import * as studioProjectDocument from "../studioProjectDocument";
 import * as studioDirectorProposals from "../studioDirectorProposals";
@@ -6680,6 +6681,79 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(
       consoleErrorSpy.mock.calls.some(([message]) => String(message).includes("same key"))
     ).toBe(false);
+  });
+
+  test("Quick cold reopen paints a video track matte when its decoder settles", async () => {
+    const uri=jest.spyOn(studioVideoMatte,'studioVideoMatteUri').mockImplementation(({video})=>video?.readyState>=2?{}:null);
+    const alpha=jest.spyOn(studioVideoMatte,'studioVideoMatteAlpha').mockReturnValue('url("data:image/png;base64,cold")');
+    const source={id:'range',url:'https://example.com/source.mp4',start:0,end:8,duration:8};
+    try {
+      const {video,container}=mountNativePreview({clips:[source],initialSavedProject:{id:'cold-matte',name:'Cold matte',snapshot:{
+        orderedClips:[source],selectedClipId:'range',timeline:[{id:'main',sourceClipId:'range',url:source.url,startRequest:0,endRequest:8}],
+        addHook:false,overlays:[{id:'matte',type:'video',src:'https://example.com/matte.mp4',sourceDuration:8,sourceStartTime:0,startTime:0,duration:8,
+          x:50,y:50,width:70,height:70,scale:1,opacity:1,frameShape:'edge',layerShadow:{enabled:false},muted:true},
+          {id:'fill',type:'image',url:'https://example.com/fill.png',src:'https://example.com/fill.png',startTime:0,duration:8,x:50,y:50,width:70,height:70,
+            scale:1,opacity:1,trackMatte:{mode:'luma',sourceLayerId:'matte'}}],motionKeyframes:[],
+      }}});
+      await waitFor(()=>expect(screen.getByRole('textbox',{name:'Project name',exact:true,includeHidden:true})).toHaveValue('Cold matte'));
+      const matte=await screen.findByTestId('broll-preview-matte');
+      for(const [key,value]of Object.entries({readyState:4,seeking:false,paused:true,currentTime:5,videoWidth:1280,videoHeight:720}))Object.defineProperty(matte,key,{value,configurable:true});
+      const currentMain=screen.getByTestId('studio-after-video');for(const [key,value]of Object.entries({readyState:4,seeking:false,paused:true,currentTime:5,duration:8}))Object.defineProperty(currentMain,key,{value,configurable:true});Object.defineProperty(currentMain,'currentSrc',{get:()=>currentMain.src,configurable:true});fireEvent.loadedMetadata(currentMain);fireEvent.loadedData(currentMain);currentMain.currentTime=5;fireEvent.seeked(currentMain);fireEvent.loadedData(matte);
+      await waitFor(()=>expect(document.querySelector('[data-studio-matte-wrap="fill"]').style.maskImage).toContain('base64,cold'));
+      expect(uri).toHaveBeenCalledWith(expect.objectContaining({video:matte,layer:expect.objectContaining({id:'matte'}),time:5}));
+    } finally {uri.mockRestore();alpha.mockRestore();}
+  });
+
+  test("Quick cold reopen paints a bitmap alpha matte when its image loads", async () => {
+    const uri=jest.spyOn(studioVideoMatte,'studioVideoMatteUri').mockImplementation(({picture})=>picture?.naturalWidth>0?{}:null);
+    const alpha=jest.spyOn(studioVideoMatte,'studioVideoMatteAlpha').mockReturnValue('url("data:image/png;base64,cold")');
+    const source={id:'range',url:'https://example.com/source.mp4',start:0,end:8,duration:8};
+    try {
+      const {video,container}=mountNativePreview({clips:[source],initialSavedProject:{id:'cold-matte',name:'Cold matte',snapshot:{
+        orderedClips:[source],selectedClipId:'range',timeline:[{id:'main',sourceClipId:'range',url:source.url,startRequest:0,endRequest:8}],
+        addHook:false,overlays:[{id:'matte',type:'image',src:'https://example.com/matte.png',sourceDuration:8,sourceStartTime:0,startTime:0,duration:8,
+          x:50,y:50,width:70,height:70,scale:1,opacity:1,frameShape:'edge',layerShadow:{enabled:false},muted:true},
+          {id:'fill',type:'image',url:'https://example.com/fill.png',src:'https://example.com/fill.png',startTime:0,duration:8,x:50,y:50,width:70,height:70,
+            scale:1,opacity:1,trackMatte:{mode:'luma',sourceLayerId:'matte'}}],motionKeyframes:[],
+      }}});
+      await waitFor(()=>expect(screen.getByRole('textbox',{name:'Project name',exact:true,includeHidden:true})).toHaveValue('Cold matte'));
+      const matte=await waitFor(()=>{const img=document.querySelector('[data-studio-layer-id="matte"] img');expect(img).not.toBeNull();return img;});
+      expect(matte.crossOrigin).toBe('anonymous');
+      for(const [key,value]of Object.entries({complete:true,naturalWidth:1280,naturalHeight:720}))Object.defineProperty(matte,key,{value,configurable:true});
+      const currentMain=screen.getByTestId('studio-after-video');for(const [key,value]of Object.entries({readyState:4,seeking:false,paused:true,currentTime:5,duration:8}))Object.defineProperty(currentMain,key,{value,configurable:true});Object.defineProperty(currentMain,'currentSrc',{get:()=>currentMain.src,configurable:true});fireEvent.loadedMetadata(currentMain);fireEvent.loadedData(currentMain);currentMain.currentTime=5;fireEvent.seeked(currentMain);fireEvent.load(matte);
+      await waitFor(()=>expect(document.querySelector('[data-studio-matte-wrap="fill"]').style.maskImage).toContain('base64,cold'));
+      expect(uri).toHaveBeenCalledWith(expect.objectContaining({picture:matte,layer:expect.objectContaining({id:'matte'}),time:5}));
+    } finally {uri.mockRestore();alpha.mockRestore();}
+  });
+
+  test("Undo of a reviewed scene preserves the earlier Director trim transaction", async () => {
+    const reviewed = jest.fn();
+    mockDirectorReviewServer();
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+      clips={[{ id: "scene-history", start: 0, end: 20, duration: 20 }]}
+      directorProposalRequest={{ proposalId: "history-trim", idempotencyKey: "history-trim", directorId: "director",
+        operation: { type: "trim_clip", target: { occurrenceId: "main" },
+          keep: { space: "source", startTick: 0, endTick: secondsToTicks(15) } } }}
+      onDirectorReview={reviewed} onSave={jest.fn()} onCancel={jest.fn()} />);
+    fireEvent.click(screen.getByTestId("studio-director-review-open"));
+    const approval = await within(screen.getByTestId("studio-director-review")).findByTestId("studio-director-review-approve");
+    await act(async () => fireEvent.click(approval));
+    await waitFor(() => expect(reviewed).toHaveBeenCalledTimes(1));
+    expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:15.0");
+    const document = reviewed.mock.calls[0][0].document;
+    fireEvent.click(within(screen.getByRole("navigation", {name:"Creative tools"})).getByRole("button",{name:"Node Flow",exact:true}));
+    const panel=screen.getByTestId("studio-scene-actions");
+    fireEvent.click(within(panel).getByText("Cinematic Scene · editable actions"));
+    const plan={format:"autopromote-scene-actions",version:1,projectId:document.projectId,baseRevision:document.revision,
+      name:"Scene after trim",actions:[{type:"title",id:"after-trim",name:"After trim",text:"AFTER",startTime:0,duration:4}]};
+    fireEvent.change(within(panel).getByLabelText("Scene action plan",{exact:true}),{target:{files:[{size:300,text:async()=>JSON.stringify(plan)}]}});
+    await within(panel).findByText("Review this plan before applying.");
+    fireEvent.click(within(panel).getByRole("button",{name:"Apply reviewed scene actions",exact:true}));
+    await within(panel).findByText("Scene actions applied. Undo restores the previous edit.");
+    fireEvent.click(screen.getByTestId("studio-undo-button"));
+    expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:15.0");
+    fireEvent.click(screen.getByTestId("studio-redo-button"));
+    expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:15.0");
   });
 
   test("reviews exact Director trim timing and applies only after signed-in approval", async () => {

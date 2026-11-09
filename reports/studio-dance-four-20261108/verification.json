@@ -1,0 +1,328 @@
+{
+  "deliveredAt": "2026-11-08T13:58:24.863111+00:00",
+  "delivery": "/home/tibule12/Videos/Studio - Your Dance Videos - 2026-11-08",
+  "movies": [
+    {
+      "word": "one",
+      "movie": "/home/tibule12/Videos/Studio - Your Dance Videos - 2026-11-08/One - Silver afterbeats.mp4",
+      "movieSha256": "4544fecfc15fa75dbb751d03cf228576da26fd5926d0f12b2557afe6d849d858",
+      "nativeJobId": "viral_6bf8c906864dad36d460ab0e49a3bb399f44004edb1c3649b9e3ad4e9e28329e",
+      "sourceName": "number one dance.mp4",
+      "sourceRange": [
+        5,
+        13
+      ],
+      "seconds": 8,
+      "frames": 192,
+      "fps": 24,
+      "size": [
+        576,
+        1024
+      ],
+      "layers": 14,
+      "keys": 344,
+      "originalMusic": true,
+      "audio": {
+        "source": "original video soundtrack",
+        "durationSeconds": 8.0,
+        "bestLagSamplesAt16k": 0,
+        "bestLagMilliseconds": 0.0,
+        "waveformCorrelation": 0.9988345026152202,
+        "fittedGain": 0.9922363578239141,
+        "humanListeningQualified": false,
+        "musicReplacement": false,
+        "speedChange": false
+      },
+      "nativeSourceAndCompilerBinding": true,
+      "normalNativeUndoRedoAndRestore": true,
+      "preparedExternalMatte": true,
+      "nativeAutomaticSegmentation": false,
+      "automaticFootTracking": false,
+      "manuallyArtDirected": true,
+      "autonomousDirectorOutput": false,
+      "minimumDiagnosticPsnrDb": 26.627371300936016,
+      "strictPredictiveParityQualified": false,
+      "capture": {
+        "Studio authoring and history": {
+          "captureSeconds": 5.703000068664551,
+          "capturedUpdates": 26,
+          "observedCaptureUpdatesPerSecond": 4.559003978074354,
+          "audio": "muted native UI capture"
+        },
+        "Studio live playback": {
+          "captureSeconds": 8.257000207901001,
+          "capturedUpdates": 56,
+          "observedCaptureUpdatesPerSecond": 6.782124087439701,
+          "audio": "muted native UI capture",
+          "programmeSeconds": 8,
+          "playbackWallMs": 8305
+        },
+        "Studio finished playback": {
+          "captureSeconds": 8.08400011062622,
+          "capturedUpdates": 168,
+          "observedCaptureUpdatesPerSecond": 20.781790908088695,
+          "audio": "muted native UI capture",
+          "programmeSeconds": 8,
+          "playbackWallMs": 8176
+        }
+      },
+      "workerResource": {
+        "wallSeconds": 237.26900959399995,
+        "cpuSeconds": 369.64771900000005,
+        "peakRssKiB": 961468,
+        "cpuCeilingSeconds": 1200,
+        "localFileCeilingBytes": 402653184,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      },
+      "humanListeningQualified": false,
+      "ownerCreativeApproval": false
+    },
+    {
+      "word": "two",
+      "movie": "/home/tibule12/Videos/Studio - Your Dance Videos - 2026-11-08/Two - Red double-take.mp4",
+      "movieSha256": "47ff1eeb906f48e6bdf42bccc6ddd5bcc8151224e810c2ea4dd5f3c3a3e1347a",
+      "nativeJobId": "viral_8f416123e0168d40ec1b8f79b83a19e24c4f2bf23de00db8149e675a329d779f",
+      "sourceName": "number two dance.mp4",
+      "sourceRange": [
+        8,
+        16
+      ],
+      "seconds": 8,
+      "frames": 192,
+      "fps": 24,
+      "size": [
+        576,
+        1024
+      ],
+      "layers": 12,
+      "keys": 328,
+      "originalMusic": true,
+      "audio": {
+        "source": "original video soundtrack",
+        "durationSeconds": 8.0,
+        "bestLagSamplesAt16k": 0,
+        "bestLagMilliseconds": 0.0,
+        "waveformCorrelation": 0.9953254961520749,
+        "fittedGain": 0.8876621149989447,
+        "humanListeningQualified": false,
+        "musicReplacement": false,
+        "speedChange": false
+      },
+      "nativeSourceAndCompilerBinding": true,
+      "normalNativeUndoRedoAndRestore": true,
+      "preparedExternalMatte": true,
+      "nativeAutomaticSegmentation": false,
+      "automaticFootTracking": false,
+      "manuallyArtDirected": true,
+      "autonomousDirectorOutput": false,
+      "minimumDiagnosticPsnrDb": 28.862653407499433,
+      "strictPredictiveParityQualified": false,
+      "capture": {
+        "Studio authoring and history": {
+          "captureSeconds": 2.625,
+          "capturedUpdates": 27,
+          "observedCaptureUpdatesPerSecond": 10.285714285714286,
+          "audio": "muted native UI capture"
+        },
+        "Studio live playback": {
+          "captureSeconds": 9.996999979019165,
+          "capturedUpdates": 33,
+          "observedCaptureUpdatesPerSecond": 3.3009903040169584,
+          "audio": "muted native UI capture",
+          "programmeSeconds": 8,
+          "playbackWallMs": 9411
+        },
+        "Studio finished playback": {
+          "captureSeconds": 8.051000118255615,
+          "capturedUpdates": 139,
+          "observedCaptureUpdatesPerSecond": 17.26493577919816,
+          "audio": "muted native UI capture",
+          "programmeSeconds": 8,
+          "playbackWallMs": 8196
+        }
+      },
+      "workerResource": {
+        "wallSeconds": 225.06925621300002,
+        "cpuSeconds": 345.672733,
+        "peakRssKiB": 877484,
+        "cpuCeilingSeconds": 1200,
+        "localFileCeilingBytes": 402653184,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      },
+      "humanListeningQualified": false,
+      "ownerCreativeApproval": false
+    },
+    {
+      "word": "three",
+      "movie": "/home/tibule12/Videos/Studio - Your Dance Videos - 2026-11-08/Three - Group timeprint.mp4",
+      "movieSha256": "845c27497034691fcef37470c8e0bd50bf14d09d0580164f456c94d1f8b4dc64",
+      "nativeJobId": "viral_7f3e855422f0c125a60be661b9dc63b2b1ddaa04641204c59742d88a1754d133",
+      "sourceName": "number three dance.mp4",
+      "sourceRange": [
+        0,
+        8
+      ],
+      "seconds": 8,
+      "frames": 192,
+      "fps": 24,
+      "size": [
+        576,
+        1024
+      ],
+      "layers": 12,
+      "keys": 322,
+      "originalMusic": true,
+      "audio": {
+        "source": "original video soundtrack",
+        "durationSeconds": 8.0,
+        "bestLagSamplesAt16k": 0,
+        "bestLagMilliseconds": 0.0,
+        "waveformCorrelation": 0.9988126518531109,
+        "fittedGain": 0.9908272026258615,
+        "humanListeningQualified": false,
+        "musicReplacement": false,
+        "speedChange": false
+      },
+      "nativeSourceAndCompilerBinding": true,
+      "normalNativeUndoRedoAndRestore": true,
+      "preparedExternalMatte": true,
+      "nativeAutomaticSegmentation": false,
+      "automaticFootTracking": false,
+      "manuallyArtDirected": true,
+      "autonomousDirectorOutput": false,
+      "minimumDiagnosticPsnrDb": 22.87856892627312,
+      "strictPredictiveParityQualified": false,
+      "capture": {
+        "Studio authoring and history": {
+          "captureSeconds": 5.424000024795532,
+          "capturedUpdates": 23,
+          "observedCaptureUpdatesPerSecond": 4.240412959966206,
+          "audio": "muted native UI capture"
+        },
+        "Studio live playback": {
+          "captureSeconds": 8.108999967575073,
+          "capturedUpdates": 43,
+          "observedCaptureUpdatesPerSecond": 5.302750052033701,
+          "audio": "muted native UI capture",
+          "programmeSeconds": 8,
+          "playbackWallMs": 8198
+        },
+        "Studio finished playback": {
+          "captureSeconds": 8.082000017166138,
+          "capturedUpdates": 158,
+          "observedCaptureUpdatesPerSecond": 19.549616390053032,
+          "audio": "muted native UI capture",
+          "programmeSeconds": 8,
+          "playbackWallMs": 8181
+        }
+      },
+      "workerResource": {
+        "wallSeconds": 212.386941255,
+        "cpuSeconds": 328.679108,
+        "peakRssKiB": 864824,
+        "cpuCeilingSeconds": 1200,
+        "localFileCeilingBytes": 402653184,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      },
+      "humanListeningQualified": false,
+      "ownerCreativeApproval": false
+    },
+    {
+      "word": "four",
+      "movie": "/home/tibule12/Videos/Studio - Your Dance Videos - 2026-11-08/Four - Electric footwork.mp4",
+      "movieSha256": "1ed01c6f39b87223dcb51350457e02a04d6ea212e55778ebd6b12a9e1d0be9e6",
+      "nativeJobId": "viral_0900ed599c0308e5c3a07667f9af46e5db025ff762727af5bd0a5900cf7e27a2",
+      "sourceName": "number four dance.mp4",
+      "sourceRange": [
+        12,
+        20
+      ],
+      "seconds": 8,
+      "frames": 192,
+      "fps": 24,
+      "size": [
+        576,
+        1024
+      ],
+      "layers": 14,
+      "keys": 357,
+      "originalMusic": true,
+      "audio": {
+        "source": "original video soundtrack",
+        "durationSeconds": 8.0,
+        "bestLagSamplesAt16k": 0,
+        "bestLagMilliseconds": 0.0,
+        "waveformCorrelation": 0.9991576256358959,
+        "fittedGain": 0.9922566072238387,
+        "humanListeningQualified": false,
+        "musicReplacement": false,
+        "speedChange": false
+      },
+      "nativeSourceAndCompilerBinding": true,
+      "normalNativeUndoRedoAndRestore": true,
+      "preparedExternalMatte": true,
+      "nativeAutomaticSegmentation": false,
+      "automaticFootTracking": false,
+      "manuallyArtDirected": true,
+      "autonomousDirectorOutput": false,
+      "minimumDiagnosticPsnrDb": 29.342904154962394,
+      "strictPredictiveParityQualified": false,
+      "capture": {
+        "Studio authoring and history": {
+          "captureSeconds": 3.993000030517578,
+          "capturedUpdates": 31,
+          "observedCaptureUpdatesPerSecond": 7.7635862166476715,
+          "audio": "muted native UI capture"
+        },
+        "Studio live playback": {
+          "captureSeconds": 8.125999927520752,
+          "capturedUpdates": 39,
+          "observedCaptureUpdatesPerSecond": 4.799409346278314,
+          "audio": "muted native UI capture",
+          "programmeSeconds": 8,
+          "playbackWallMs": 8183
+        },
+        "Studio finished playback": {
+          "captureSeconds": 8.067999839782715,
+          "capturedUpdates": 154,
+          "observedCaptureUpdatesPerSecond": 19.087754469284604,
+          "audio": "muted native UI capture",
+          "programmeSeconds": 8,
+          "playbackWallMs": 8147
+        }
+      },
+      "workerResource": {
+        "wallSeconds": 216.3632797570001,
+        "cpuSeconds": 348.295838,
+        "peakRssKiB": 958820,
+        "cpuCeilingSeconds": 1200,
+        "localFileCeilingBytes": 402653184,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      },
+      "humanListeningQualified": false,
+      "ownerCreativeApproval": false
+    }
+  ],
+  "preservation": {
+    "priorFilesPreserved": 486,
+    "fullOriginalNumberedVideosUnchanged": true
+  },
+  "nativeCpuExecutions": 4,
+  "paidOrProductionExecutions": 0,
+  "readinessPromotion": false,
+  "sameNativeStudioSceneActionsCompilerCpu": true,
+  "allOriginalMusicPreserved": true,
+  "referenceStillsExactlyRecreated": false,
+  "remaining": [
+    "Subject masks are externally prepared local CPU analysis inputs; these films do not prove automatic in-product segmentation.",
+    "Coloured copies are silhouettes, not relit or textured duplicates. Light arcs are manually placed vector paths, not foot tracking, 3D particles or physical scene lighting.",
+    "Paused picture diagnostics and music correlation do not establish full predictive/live audio, smoothness or pixel/edge/colour parity.",
+    "Manual art direction supplied these four native plans; no autonomous Director claim.",
+    "Eight-second studies use selected excerpts, not four full-length edits.",
+    "Shared S02/S04/S03 and typography13/16 remain open."
+  ]
+}

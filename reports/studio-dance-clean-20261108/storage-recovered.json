@@ -1,0 +1,7 @@
+{
+  "status": 403,
+  "elapsedMs": 152,
+  "normalUserStorageRecovered": false,
+  "rulesResponseReturnedPromptly": true,
+  "note": "Source namespace direct request returned403, retaining access restrictions. Responsiveness recovered; this is not successful read authorization."
+}

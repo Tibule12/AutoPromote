@@ -1,0 +1,15 @@
+{
+  "completePriorExportRestored": true,
+  "source": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105/reports/studio-cinematic-afterimage-20261108/private/emulator-final-export",
+  "oldestLostOctoberHistoryRecovered": false,
+  "priorFreshCohortBalancePreserved": 5,
+  "reserved": 0,
+  "operations": 3,
+  "activeOperations": 0,
+  "auth": true,
+  "firestore": true,
+  "storage": true,
+  "pid": 103723,
+  "firestorePid": 103733,
+  "productionChange": false
+}

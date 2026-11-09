@@ -1,0 +1,17 @@
+{
+  "candidateEvidenceCopiedTo": "reports/studio-director-creative-20261107/private/welcome",
+  "wrongEnvironmentVariableUsed": "PREVIEW_PROOF_DIR instead of STUDIO_QA_PROOF_DIR",
+  "trackedCleanBaselineFilesRestoredFromHead": [
+    "reports/welcome-preview-restoration-20261021/browser/verification.json"
+  ],
+  "untrackedExistingLocationsNotDeleted": [
+    "reports/welcome-preview-restoration-20261021/browser/baseline-1440.png",
+    "reports/welcome-preview-restoration-20261021/browser/candidate-1440.png",
+    "reports/welcome-preview-restoration-20261021/browser/baseline-390.png",
+    "reports/welcome-preview-restoration-20261021/browser/candidate-390.png",
+    "reports/welcome-preview-restoration-20261021/browser/baseline-360.png",
+    "reports/welcome-preview-restoration-20261021/browser/candidate-360.png",
+    "reports/welcome-preview-restoration-20261021/browser/baseline-1200.png",
+    "reports/welcome-preview-restoration-20261021/browser/candidate-1200.png"
+  ]
+}

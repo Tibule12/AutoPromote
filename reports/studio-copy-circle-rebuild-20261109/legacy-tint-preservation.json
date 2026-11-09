@@ -1,0 +1,30 @@
+{
+  "randomRgbaPixelsPerSetting": 8192,
+  "settings": [
+    {
+      "gamma": 0.35,
+      "lift": 0.08,
+      "strength": 0.95,
+      "maxByteDifferenceFromPreviousFormula": 0
+    },
+    {
+      "gamma": 0.65,
+      "lift": 0.045,
+      "strength": 1,
+      "maxByteDifferenceFromPreviousFormula": 0
+    },
+    {
+      "gamma": 1,
+      "lift": 0,
+      "strength": 1,
+      "maxByteDifferenceFromPreviousFormula": 0
+    },
+    {
+      "gamma": 2,
+      "lift": 0.25,
+      "strength": 0.3,
+      "maxByteDifferenceFromPreviousFormula": 0
+    }
+  ],
+  "allDefaultContrastLegacyPixelsExact": true
+}

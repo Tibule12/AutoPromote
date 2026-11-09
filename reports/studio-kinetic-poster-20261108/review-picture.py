@@ -1,0 +1,27 @@
+from pathlib import Path
+from PIL import Image,ImageDraw,ImageStat,ImageChops
+import json,subprocess,math
+r=Path(__file__).resolve().parent;p=r/'private/native';movie=p/'native-motion-flow/final.mp4';frames=p/'Decoded frames';frames.mkdir(exist_ok=True)
+def run(a):return subprocess.run(a,check=True,capture_output=True,text=True).stdout
+run(['ffmpeg','-v','error','-threads','2','-i',str(movie),'-f','null','-'])
+# Review every applied native layer/key boundary, neighbouring frame, half-second and final.
+backup=json.loads((p/'Editable Project.autopromote.json').read_text());events={0,10}
+for layer in backup['snapshot']['overlays']:
+ events.update([layer.get('startTime',0),layer.get('startTime',0)+layer.get('duration',10)])
+for key in backup['snapshot']['motionKeyframes']:events.add(key['time'])
+times=[x['time']for x in json.loads((p/'paused-preview.json').read_text())];indices=sorted(set(max(0,min(239,round(t*24)))for t in [*times,*[s for t in events for s in [t-1/24,t,t+1/24]]]))
+run(['ffmpeg','-v','error','-threads','2','-i',str(movie),'-vsync','0','-threads','2','-start_number','0','-y',str(frames/'%04d.png')])
+assert len(list(frames.glob('*.png')))==240
+board=Image.new('RGB',(1280,math.ceil(len(indices)/4)*207),'#10131b');draw=ImageDraw.Draw(board)
+for i,f in enumerate(indices):
+ dest=frames/f'{f:04d}.png';im=Image.open(dest);im.thumbnail((316,178));x=i%4*320;y=i//4*207;board.paste(im,(x,y));draw.text((x+6,y+181),f'Frame {f:03d} / {f/24:.3f}s',fill='white')
+board.save(p/'Film contact.jpg',quality=90)
+pairs=[];comparison=Image.new('RGB',(1280,math.ceil(len(times)/2)*207),'#10131b');draw=ImageDraw.Draw(comparison)
+for i,t in enumerate(times):
+ live=Image.open(p/f'live-{t:.2f}.png').convert('RGB');export=Image.open(frames/f'{round(t*24):04d}.png').convert('RGB').resize(live.size,Image.Resampling.LANCZOS);mse=sum(ImageStat.Stat(ImageChops.difference(live,export)).sum2)/(live.width*live.height*3);psnr=10*math.log10(255**2/mse)if mse else 100;pairs.append({'programmeTime':t,'exportFrame':round(t*24),'diagnosticPsnrDb':psnr,'strictPassClaimed':False})
+ for j,im in enumerate([live,export]):
+  im.thumbnail((316,178));x=i%2*640+j*320;y=i//2*207;comparison.paste(im,(x,y));draw.text((x+6,y+181),f'{t:.2f}s '+('LIVE'if j==0 else'EXPORT'),fill='white')
+comparison.save(p/'Live vs export.jpg',quality=90)
+audio=run(['ffmpeg','-hide_banner','-i',str(movie),'-af','volumedetect','-vn','-sn','-dn','-f','null','-']) if False else subprocess.run(['ffmpeg','-hide_banner','-i',str(movie),'-af','volumedetect','-vn','-sn','-dn','-f','null','-'],capture_output=True,text=True,check=True).stderr
+(p/'audio-levels.txt').write_text(audio)
+findings={'fullDecode':True,'frames':240,'seconds':10,'fps':24,'poseBoundaries':sorted(events),'sampledFrameIndices':indices,'pairedDiagnosticSamples':pairs,'minimumDiagnosticPsnrDb':min(x['diagnosticPsnrDb']for x in pairs),'wholePictureParityQualified':False,'humanListeningQualified':False,'creativeApproval':False};(r/'picture-review.json').write_text(json.dumps(findings,indent=2));print(json.dumps({'decoded':True,'sampledFrames':len(indices),'pairs':len(pairs),'minimumPsnrDb':findings['minimumDiagnosticPsnrDb']}))

@@ -15,6 +15,7 @@ import {
 import "./StudioMotionFlow.css";
 import StudioAdjustmentControls from "./StudioAdjustmentControls";
 import StudioSourceGradeViewer from './StudioSourceGradeViewer';
+import StudioNodeDriverControls from './StudioNodeDriverControls';
 
 const NODE_WIDTH = 158;
 const NODE_BASE_HEIGHT = 76;
@@ -315,6 +316,10 @@ export default function StudioNodeFlow({
         </div>
 
         <div className="ap-mfx-toolbar-group">
+          <label className="ap-comp-field"><span>Inspect node</span><select className="ap-comp-select" aria-label="Inspect node" value={selectedNode?.id||''} onChange={event=>{
+            const node=nodesById.get(event.target.value);if(!node)return;handleSelectNode(node);
+            const canvas=canvasRef.current,scale=.95;setZoom(scale);setPan({x:(canvas?.clientWidth||800)/2-(node.x+NODE_WIDTH/2)*scale,y:(canvas?.clientHeight||400)/2-(node.y+NODE_BASE_HEIGHT/2)*scale});
+          }}>{graph.nodes.map(node=><option key={node.id} value={node.id}>{node.label} · {node.kind}</option>)}</select></label>
           <select
             className="ap-comp-select"
             style={{ width: 196 }}
@@ -347,13 +352,21 @@ export default function StudioNodeFlow({
           >
             Auto-Layout
           </button>
-          <button type="button" className="ap-mfx-btn" onClick={() => setZoom(z => Math.max(0.55, +(z - 0.1).toFixed(2)))}>
+          <button type="button" className="ap-mfx-btn" onClick={()=>{
+            const canvas=canvasRef.current;if(!canvas||!graph.nodes.length)return;
+            const left=Math.min(...graph.nodes.map(n=>n.x)),top=Math.min(...graph.nodes.map(n=>n.y));
+            const right=Math.max(...graph.nodes.map(n=>n.x+NODE_WIDTH)),bottom=Math.max(...graph.nodes.map(n=>n.y+NODE_BASE_HEIGHT+(n.inputs?.length||0)*16));
+            const width=canvas.clientWidth||800,height=canvas.clientHeight||400;
+            const fit=Math.max(.08,Math.min(1.2,(width-48)/(right-left),(height-48)/(bottom-top)));
+            setZoom(fit);setPan({x:(width-(right-left)*fit)/2-left*fit,y:(height-(bottom-top)*fit)/2-top*fit});
+          }}>Fit graph</button>
+          <button type="button" className="ap-mfx-btn" aria-label="Zoom node graph out" onClick={() => setZoom(z => Math.max(0.08, +(z - 0.1).toFixed(2)))}>
             &minus;
           </button>
           <span style={{ fontSize: 11, color: "#94a3b8", minWidth: 38, textAlign: "center" }}>
             {Math.round(zoom * 100)}%
           </span>
-          <button type="button" className="ap-mfx-btn" onClick={() => setZoom(z => Math.min(1.5, +(z + 0.1).toFixed(2)))}>
+          <button type="button" className="ap-mfx-btn" aria-label="Zoom node graph in" onClick={() => setZoom(z => Math.min(1.5, +(z + 0.1).toFixed(2)))}>
             +
           </button>
         </div>
@@ -742,6 +755,7 @@ export default function StudioNodeFlow({
                   })()}
                 </>
               ) : null}
+              {(selectedNode.kind==='Transform'||selectedNode.kind==='NullRig')&&selectedOverlay?<StudioNodeDriverControls layer={selectedOverlay} onChange={next=>updateSelectedOverlay({motionDrivers:next.motionDrivers})}/>:null}
 
               {selectedNode.kind === 'Adjustment' ? (() => {
                 const index = adjustmentLayers.findIndex(layer => String(layer.id) === String(selectedNode.targetId));

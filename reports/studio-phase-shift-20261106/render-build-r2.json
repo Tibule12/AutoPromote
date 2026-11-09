@@ -1,0 +1,16 @@
+{
+  "build": "/dev/shm/autopromote-phase-shift-controls-20261106-r2-build",
+  "origin": "http://127.0.0.1:45109",
+  "demoProject": "demo-autopromote-credits",
+  "welcomeFlag": "true",
+  "mainAsset": "/static/js/main.cc753e58.js",
+  "mainSha256": "d225e96fb3d6baa016849ed4f6997c74ff1e43556f3db4682967549aab13d27a",
+  "sources": {
+    "frontend/src/components/ViralClipStudio.js": "eb0435b5b29cb53c92ce01dd94631414e16229ae954f86f27878f6ad11b0d16a",
+    "frontend/src/components/ViralClipStudio.css": "0e40cfd977bd4b3a04dcb03155ec6c19c32a76d53dde528972b362fcb77261c2",
+    "frontend/src/components/studioFeatureControls.css": "8367d8f15fc62a6fa781f41d75a2b70291b49b0b126f3118379edb6f7912a791",
+    "frontend/src/components/studioSceneActions.js": "633a6317f8b0a5f3069c810d53ebd145ae5aa114f4812aaba9b486ac625ff4c1",
+    "src/generated/studioDirectorReplayKernel.cjs": "2c89c123c59b7297fff4bf1fd7373860aeeec4138d7b8c105fdf46407fc61c08",
+    "python_media_worker/main_media_server.py": "0afacd9efed66dbb00a53c9fc1a2b461b0da5d3fe5dbc3cf6fe07910cb0b6f64"
+  }
+}

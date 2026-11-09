@@ -1,0 +1,6876 @@
+{
+  "name": "CITY INTO SEA / explicit native art direction",
+  "actions": [
+    {
+      "type": "null",
+      "id": "world-rig",
+      "name": "00 / Shared cinematic camera",
+      "startTime": 0,
+      "duration": 8,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1,
+        "rotation": 0,
+        "opacity": 1
+      }
+    },
+    {
+      "type": "media_plane",
+      "id": "city",
+      "name": "02 / Real city, continuous source",
+      "sourceMediaId": "CITY",
+      "sourceStart": 2.5,
+      "startTime": 0,
+      "duration": 7.5,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "rotation": 0,
+        "opacity": 1
+      },
+      "mask": {
+        "enabled": false,
+        "shape": "rectangle",
+        "feather": 0,
+        "inverted": false
+      }
+    },
+    {
+      "type": "keys",
+      "targetId": "city",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 2.0,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 2.7,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 7.5,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "media_plane",
+      "id": "iris",
+      "name": "04 / Ocean iris, source stays still",
+      "sourceMediaId": "COAST",
+      "sourceStart": 0,
+      "startTime": 1.5,
+      "duration": 6.5,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "rotation": 0,
+        "opacity": 1
+      },
+      "mask": {
+        "enabled": true,
+        "shape": "polygon",
+        "path": "polygon(50.02812500% 50.00000000%,50.02798957% 50.00490086%,50.02758459% 50.00975452%,50.02691395% 50.01451423%,50.02598411% 50.01913417%,50.02480404% 50.02356984%,50.02338508% 50.02777851%,50.02174092% 50.03171966%,50.01988738% 50.03535534%,50.01784231% 50.03865052%,50.01562541% 50.04157348%,50.01325803% 50.04409606%,50.01076297% 50.04619398%,50.00816426% 50.04784702%,50.00548692% 50.04903926%,50.00275673% 50.04975924%,50.00000000% 50.05000000%,49.99724327% 50.04975924%,49.99451308% 50.04903926%,49.99183574% 50.04784702%,49.98923703% 50.04619398%,49.98674197% 50.04409606%,49.98437459% 50.04157348%,49.98215769% 50.03865052%,49.98011262% 50.03535534%,49.97825908% 50.03171966%,49.97661492% 50.02777851%,49.97519596% 50.02356984%,49.97401589% 50.01913417%,49.97308605% 50.01451423%,49.97241541% 50.00975452%,49.97201043% 50.00490086%,49.97187500% 50.00000000%,49.97201043% 49.99509914%,49.97241541% 49.99024548%,49.97308605% 49.98548577%,49.97401589% 49.98086583%,49.97519596% 49.97643016%,49.97661492% 49.97222149%,49.97825908% 49.96828034%,49.98011262% 49.96464466%,49.98215769% 49.96134948%,49.98437459% 49.95842652%,49.98674197% 49.95590394%,49.98923703% 49.95380602%,49.99183574% 49.95215298%,49.99451308% 49.95096074%,49.99724327% 49.95024076%,50.00000000% 49.95000000%,50.00275673% 49.95024076%,50.00548692% 49.95096074%,50.00816426% 49.95215298%,50.01076297% 49.95380602%,50.01325803% 49.95590394%,50.01562541% 49.95842652%,50.01784231% 49.96134948%,50.01988738% 49.96464466%,50.02174092% 49.96828034%,50.02338508% 49.97222149%,50.02480404% 49.97643016%,50.02598411% 49.98086583%,50.02691395% 49.98548577%,50.02758459% 49.99024548%,50.02798957% 49.99509914%)",
+        "feather": 0,
+        "inverted": false
+      }
+    },
+    {
+      "type": "keys",
+      "targetId": "iris",
+      "keys": [
+        {
+          "property": "maskPoint0X",
+          "time": 1.5,
+          "value": 50.028125,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint0X",
+          "time": 4.2,
+          "value": 50.028125,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint0X",
+          "time": 4.85,
+          "value": 71.375,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint0X",
+          "time": 5.5,
+          "value": 114.6875,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint0Y",
+          "time": 1.5,
+          "value": 50.0,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint0Y",
+          "time": 4.2,
+          "value": 50.0,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint0Y",
+          "time": 4.85,
+          "value": 50.0,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint0Y",
+          "time": 5.5,
+          "value": 50.0,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint1X",
+          "time": 1.5,
+          "value": 50.027989570437654,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint1X",
+          "time": 4.2,
+          "value": 50.027989570437654,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint1X",
+          "time": 4.85,
+          "value": 71.27207353261821,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint1X",
+          "time": 5.5,
+          "value": 114.37601200660774,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint1Y",
+          "time": 1.5,
+          "value": 50.00490085701648,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint1Y",
+          "time": 4.2,
+          "value": 50.00490085701648,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint1Y",
+          "time": 4.85,
+          "value": 53.7246513325233,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint1Y",
+          "time": 5.5,
+          "value": 61.27197113789947,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint2X",
+          "time": 1.5,
+          "value": 50.02758458601134,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint2X",
+          "time": 4.2,
+          "value": 50.02758458601134,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint2X",
+          "time": 4.85,
+          "value": 70.96428536861904,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint2X",
+          "time": 5.5,
+          "value": 113.44454782608398,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint2Y",
+          "time": 1.5,
+          "value": 50.009754516100806,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint2Y",
+          "time": 4.2,
+          "value": 50.009754516100806,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint2Y",
+          "time": 4.85,
+          "value": 57.41343223661288,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint2Y",
+          "time": 5.5,
+          "value": 72.43538703185475,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint3X",
+          "time": 1.5,
+          "value": 50.02691394694247,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint3X",
+          "time": 4.2,
+          "value": 50.02691394694247,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint3X",
+          "time": 4.85,
+          "value": 70.45459967627596,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint3X",
+          "time": 5.5,
+          "value": 111.90207796767726,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint3Y",
+          "time": 1.5,
+          "value": 50.01451423386273,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint3Y",
+          "time": 4.2,
+          "value": 50.01451423386273,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint3Y",
+          "time": 4.85,
+          "value": 61.03081773566957,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint3Y",
+          "time": 5.5,
+          "value": 83.38273788426316,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint4X",
+          "time": 1.5,
+          "value": 50.025984111851876,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint4X",
+          "time": 4.2,
+          "value": 50.025984111851876,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint4X",
+          "time": 4.85,
+          "value": 69.74792500742876,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint4X",
+          "time": 5.5,
+          "value": 109.76345725932387,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint4Y",
+          "time": 1.5,
+          "value": 50.019134171618255,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint4Y",
+          "time": 4.2,
+          "value": 50.019134171618255,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint4Y",
+          "time": 4.85,
+          "value": 64.54197042987342,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint4Y",
+          "time": 5.5,
+          "value": 94.00859472198533,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint5X",
+          "time": 1.5,
+          "value": 50.0248040355598,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint5X",
+          "time": 4.2,
+          "value": 50.0248040355598,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint5X",
+          "time": 4.85,
+          "value": 68.85106702544608,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint5X",
+          "time": 5.5,
+          "value": 107.04928178753423,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint5Y",
+          "time": 1.5,
+          "value": 50.0235698368413,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint5Y",
+          "time": 4.2,
+          "value": 50.0235698368413,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint5Y",
+          "time": 4.85,
+          "value": 67.91307599938791,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint5Y",
+          "time": 5.5,
+          "value": 104.21062473498972,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint6X",
+          "time": 1.5,
+          "value": 50.02338508284601,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint6X",
+          "time": 4.2,
+          "value": 50.02338508284601,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint6X",
+          "time": 4.85,
+          "value": 67.7726629629669,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint6X",
+          "time": 5.5,
+          "value": 103.7856905458209,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint6Y",
+          "time": 1.5,
+          "value": 50.02777851165098,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint6Y",
+          "time": 4.2,
+          "value": 50.02777851165098,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint6Y",
+          "time": 4.85,
+          "value": 71.11166885474489,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint6Y",
+          "time": 5.5,
+          "value": 113.89057679725425,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint7X",
+          "time": 1.5,
+          "value": 50.02174091900083,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint7X",
+          "time": 4.2,
+          "value": 50.02174091900083,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint7X",
+          "time": 4.85,
+          "value": 66.5230984406285,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint7X",
+          "time": 5.5,
+          "value": 100.00411370190204,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint7Y",
+          "time": 1.5,
+          "value": 50.03171966420818,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint7Y",
+          "time": 4.2,
+          "value": 50.03171966420818,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint7Y",
+          "time": 4.85,
+          "value": 74.10694479821854,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint7Y",
+          "time": 5.5,
+          "value": 122.95522767881923,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint8X",
+          "time": 1.5,
+          "value": 50.01988737822087,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint8X",
+          "time": 4.2,
+          "value": 50.01988737822087,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint8X",
+          "time": 4.85,
+          "value": 65.11440744786245,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint8X",
+          "time": 5.5,
+          "value": 95.74096990800479,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint8Y",
+          "time": 1.5,
+          "value": 50.03535533905933,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint8Y",
+          "time": 4.2,
+          "value": 50.03535533905933,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint8Y",
+          "time": 4.85,
+          "value": 76.8700576850888,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint8Y",
+          "time": 5.5,
+          "value": 131.31727983645294,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint9X",
+          "time": 1.5,
+          "value": 50.0178423111171,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint9X",
+          "time": 4.2,
+          "value": 50.0178423111171,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint9X",
+          "time": 4.85,
+          "value": 63.56015644899792,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint9X",
+          "time": 5.5,
+          "value": 91.03731556933582,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint9Y",
+          "time": 1.5,
+          "value": 50.038650522668135,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint9Y",
+          "time": 4.2,
+          "value": 50.038650522668135,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint9Y",
+          "time": 4.85,
+          "value": 79.374397227784,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint9Y",
+          "time": 5.5,
+          "value": 138.89620213671475,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint10X",
+          "time": 1.5,
+          "value": 50.01562541280368,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint10X",
+          "time": 4.2,
+          "value": 50.01562541280368,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint10X",
+          "time": 4.85,
+          "value": 61.875313730794,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint10X",
+          "time": 5.5,
+          "value": 85.93844944845551,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint10Y",
+          "time": 1.5,
+          "value": 50.04157348061513,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint10Y",
+          "time": 4.2,
+          "value": 50.04157348061513,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint10Y",
+          "time": 4.85,
+          "value": 81.59584526749671,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint10Y",
+          "time": 5.5,
+          "value": 145.6190054147927,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint11X",
+          "time": 1.5,
+          "value": 50.01325803322323,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint11X",
+          "time": 4.2,
+          "value": 50.01325803322323,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint11X",
+          "time": 4.85,
+          "value": 60.076105249655704,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint11X",
+          "time": 5.5,
+          "value": 80.49347641343174,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint11Y",
+          "time": 1.5,
+          "value": 50.04409606321742,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint11Y",
+          "time": 4.2,
+          "value": 50.04409606321742,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint11Y",
+          "time": 4.85,
+          "value": 83.51300804523748,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint11Y",
+          "time": 5.5,
+          "value": 151.42094540006082,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint12X",
+          "time": 1.5,
+          "value": 50.01076297153527,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint12X",
+          "time": 4.2,
+          "value": 50.01076297153527,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint12X",
+          "time": 4.85,
+          "value": 58.1798583668038,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint12X",
+          "time": 5.5,
+          "value": 74.75483453111676,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint12Y",
+          "time": 1.5,
+          "value": 50.04619397662557,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint12Y",
+          "time": 4.2,
+          "value": 50.04619397662557,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint12Y",
+          "time": 4.85,
+          "value": 85.1074222354289,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint12Y",
+          "time": 5.5,
+          "value": 156.24614623879796,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint13X",
+          "time": 1.5,
+          "value": 50.00816425654778,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint13X",
+          "time": 4.2,
+          "value": 50.00816425654778,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint13X",
+          "time": 4.85,
+          "value": 56.20483497631413,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint13X",
+          "time": 5.5,
+          "value": 68.77779005989802,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint13Y",
+          "time": 1.5,
+          "value": 50.04784701678661,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint13Y",
+          "time": 4.2,
+          "value": 50.04784701678661,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint13Y",
+          "time": 4.85,
+          "value": 86.36373275782394,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint13Y",
+          "time": 5.5,
+          "value": 160.04813860920405,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint14X",
+          "time": 1.5,
+          "value": 50.005486915306705,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint14X",
+          "time": 4.2,
+          "value": 50.005486915306705,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint14X",
+          "time": 4.85,
+          "value": 54.17005563309474,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint14X",
+          "time": 5.5,
+          "value": 62.619905205418306,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint14Y",
+          "time": 1.5,
+          "value": 50.04903926402016,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint14Y",
+          "time": 4.2,
+          "value": 50.04903926402016,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint14Y",
+          "time": 4.85,
+          "value": 87.26984065532275,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint14Y",
+          "time": 5.5,
+          "value": 162.7903072463715,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint15X",
+          "time": 1.5,
+          "value": 50.00275673207177,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint15X",
+          "time": 4.2,
+          "value": 50.00275673207177,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint15X",
+          "time": 4.85,
+          "value": 52.09511637454436,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint15X",
+          "time": 5.5,
+          "value": 56.34048376506846,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint15Y",
+          "time": 1.5,
+          "value": 50.04975923633361,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint15Y",
+          "time": 4.2,
+          "value": 50.04975923633361,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint15Y",
+          "time": 4.85,
+          "value": 87.81701961354348,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint15Y",
+          "time": 5.5,
+          "value": 164.44624356730264,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "iris",
+      "keys": [
+        {
+          "property": "maskPoint16X",
+          "time": 1.5,
+          "value": 50.0,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint16X",
+          "time": 4.2,
+          "value": 50.0,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint16X",
+          "time": 4.85,
+          "value": 50.0,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint16X",
+          "time": 5.5,
+          "value": 50.00000000000001,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint16Y",
+          "time": 1.5,
+          "value": 50.05,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint16Y",
+          "time": 4.2,
+          "value": 50.05,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint16Y",
+          "time": 4.85,
+          "value": 88.0,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint16Y",
+          "time": 5.5,
+          "value": 165.0,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint17X",
+          "time": 1.5,
+          "value": 49.99724326792823,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint17X",
+          "time": 4.2,
+          "value": 49.99724326792823,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint17X",
+          "time": 4.85,
+          "value": 47.90488362545564,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint17X",
+          "time": 5.5,
+          "value": 43.659516234931544,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint17Y",
+          "time": 1.5,
+          "value": 50.04975923633361,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint17Y",
+          "time": 4.2,
+          "value": 50.04975923633361,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint17Y",
+          "time": 4.85,
+          "value": 87.8170196135435,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint17Y",
+          "time": 5.5,
+          "value": 164.44624356730264,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint18X",
+          "time": 1.5,
+          "value": 49.994513084693295,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint18X",
+          "time": 4.2,
+          "value": 49.994513084693295,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint18X",
+          "time": 4.85,
+          "value": 45.82994436690526,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint18X",
+          "time": 5.5,
+          "value": 37.38009479458171,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint18Y",
+          "time": 1.5,
+          "value": 50.04903926402016,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint18Y",
+          "time": 4.2,
+          "value": 50.04903926402016,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint18Y",
+          "time": 4.85,
+          "value": 87.26984065532275,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint18Y",
+          "time": 5.5,
+          "value": 162.7903072463715,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint19X",
+          "time": 1.5,
+          "value": 49.99183574345222,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint19X",
+          "time": 4.2,
+          "value": 49.99183574345222,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint19X",
+          "time": 4.85,
+          "value": 43.79516502368587,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint19X",
+          "time": 5.5,
+          "value": 31.22220994010198,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint19Y",
+          "time": 1.5,
+          "value": 50.04784701678661,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint19Y",
+          "time": 4.2,
+          "value": 50.04784701678661,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint19Y",
+          "time": 4.85,
+          "value": 86.36373275782394,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint19Y",
+          "time": 5.5,
+          "value": 160.04813860920405,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint20X",
+          "time": 1.5,
+          "value": 49.98923702846473,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint20X",
+          "time": 4.2,
+          "value": 49.98923702846473,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint20X",
+          "time": 4.85,
+          "value": 41.82014163319621,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint20X",
+          "time": 5.5,
+          "value": 25.245165468883258,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint20Y",
+          "time": 1.5,
+          "value": 50.04619397662557,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint20Y",
+          "time": 4.2,
+          "value": 50.04619397662557,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint20Y",
+          "time": 4.85,
+          "value": 85.1074222354289,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint20Y",
+          "time": 5.5,
+          "value": 156.24614623879796,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint21X",
+          "time": 1.5,
+          "value": 49.98674196677677,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint21X",
+          "time": 4.2,
+          "value": 49.98674196677677,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint21X",
+          "time": 4.85,
+          "value": 39.9238947503443,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint21X",
+          "time": 5.5,
+          "value": 19.506523586568274,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint21Y",
+          "time": 1.5,
+          "value": 50.04409606321742,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint21Y",
+          "time": 4.2,
+          "value": 50.04409606321742,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint21Y",
+          "time": 4.85,
+          "value": 83.51300804523748,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint21Y",
+          "time": 5.5,
+          "value": 151.42094540006082,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint22X",
+          "time": 1.5,
+          "value": 49.98437458719632,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint22X",
+          "time": 4.2,
+          "value": 49.98437458719632,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint22X",
+          "time": 4.85,
+          "value": 38.12468626920601,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint22X",
+          "time": 5.5,
+          "value": 14.0615505515445,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint22Y",
+          "time": 1.5,
+          "value": 50.04157348061513,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint22Y",
+          "time": 4.2,
+          "value": 50.04157348061513,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint22Y",
+          "time": 4.85,
+          "value": 81.59584526749673,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint22Y",
+          "time": 5.5,
+          "value": 145.61900541479272,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint23X",
+          "time": 1.5,
+          "value": 49.9821576888829,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint23X",
+          "time": 4.2,
+          "value": 49.9821576888829,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint23X",
+          "time": 4.85,
+          "value": 36.43984355100208,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint23X",
+          "time": 5.5,
+          "value": 8.96268443066419,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint23Y",
+          "time": 1.5,
+          "value": 50.038650522668135,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint23Y",
+          "time": 4.2,
+          "value": 50.038650522668135,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint23Y",
+          "time": 4.85,
+          "value": 79.37439722778402,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint23Y",
+          "time": 5.5,
+          "value": 138.89620213671475,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint24X",
+          "time": 1.5,
+          "value": 49.98011262177913,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint24X",
+          "time": 4.2,
+          "value": 49.98011262177913,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint24X",
+          "time": 4.85,
+          "value": 34.885592552137545,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint24X",
+          "time": 5.5,
+          "value": 4.259030091995214,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint24Y",
+          "time": 1.5,
+          "value": 50.03535533905933,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint24Y",
+          "time": 4.2,
+          "value": 50.03535533905933,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint24Y",
+          "time": 4.85,
+          "value": 76.87005768508881,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint24Y",
+          "time": 5.5,
+          "value": 131.31727983645297,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint25X",
+          "time": 1.5,
+          "value": 49.97825908099917,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint25X",
+          "time": 4.2,
+          "value": 49.97825908099917,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint25X",
+          "time": 4.85,
+          "value": 33.4769015593715,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint25X",
+          "time": 5.5,
+          "value": -0.004113701902049627,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint25Y",
+          "time": 1.5,
+          "value": 50.03171966420818,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint25Y",
+          "time": 4.2,
+          "value": 50.03171966420818,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint25Y",
+          "time": 4.85,
+          "value": 74.10694479821854,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint25Y",
+          "time": 5.5,
+          "value": 122.95522767881923,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint26X",
+          "time": 1.5,
+          "value": 49.97661491715399,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint26X",
+          "time": 4.2,
+          "value": 49.97661491715399,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint26X",
+          "time": 4.85,
+          "value": 32.227337037033095,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint26X",
+          "time": 5.5,
+          "value": -3.7856905458209056,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint26Y",
+          "time": 1.5,
+          "value": 50.02777851165098,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint26Y",
+          "time": 4.2,
+          "value": 50.02777851165098,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint26Y",
+          "time": 4.85,
+          "value": 71.11166885474489,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint26Y",
+          "time": 5.5,
+          "value": 113.89057679725425,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint27X",
+          "time": 1.5,
+          "value": 49.9751959644402,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint27X",
+          "time": 4.2,
+          "value": 49.9751959644402,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint27X",
+          "time": 4.85,
+          "value": 31.14893297455391,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint27X",
+          "time": 5.5,
+          "value": -7.049281787534213,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint27Y",
+          "time": 1.5,
+          "value": 50.0235698368413,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint27Y",
+          "time": 4.2,
+          "value": 50.0235698368413,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint27Y",
+          "time": 4.85,
+          "value": 67.91307599938791,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint27Y",
+          "time": 5.5,
+          "value": 104.21062473498975,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint28X",
+          "time": 1.5,
+          "value": 49.974015888148124,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint28X",
+          "time": 4.2,
+          "value": 49.974015888148124,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint28X",
+          "time": 4.85,
+          "value": 30.252074992571245,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint28X",
+          "time": 5.5,
+          "value": -9.763457259323864,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint28Y",
+          "time": 1.5,
+          "value": 50.019134171618255,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint28Y",
+          "time": 4.2,
+          "value": 50.019134171618255,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint28Y",
+          "time": 4.85,
+          "value": 64.54197042987342,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint28Y",
+          "time": 5.5,
+          "value": 94.00859472198533,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint29X",
+          "time": 1.5,
+          "value": 49.97308605305753,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint29X",
+          "time": 4.2,
+          "value": 49.97308605305753,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint29X",
+          "time": 4.85,
+          "value": 29.545400323724035,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint29X",
+          "time": 5.5,
+          "value": -11.902077967677258,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint29Y",
+          "time": 1.5,
+          "value": 50.01451423386273,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint29Y",
+          "time": 4.2,
+          "value": 50.01451423386273,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint29Y",
+          "time": 4.85,
+          "value": 61.03081773566957,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint29Y",
+          "time": 5.5,
+          "value": 83.38273788426318,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint30X",
+          "time": 1.5,
+          "value": 49.97241541398866,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint30X",
+          "time": 4.2,
+          "value": 49.97241541398866,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint30X",
+          "time": 4.85,
+          "value": 29.035714631380948,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint30X",
+          "time": 5.5,
+          "value": -13.44454782608397,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint30Y",
+          "time": 1.5,
+          "value": 50.009754516100806,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint30Y",
+          "time": 4.2,
+          "value": 50.009754516100806,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint30Y",
+          "time": 4.85,
+          "value": 57.413432236612884,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint30Y",
+          "time": 5.5,
+          "value": 72.43538703185479,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint31X",
+          "time": 1.5,
+          "value": 49.972010429562346,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint31X",
+          "time": 4.2,
+          "value": 49.972010429562346,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint31X",
+          "time": 4.85,
+          "value": 28.727926467381792,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint31X",
+          "time": 5.5,
+          "value": -14.376012006607738,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint31Y",
+          "time": 1.5,
+          "value": 50.00490085701648,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint31Y",
+          "time": 4.2,
+          "value": 50.00490085701648,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint31Y",
+          "time": 4.85,
+          "value": 53.72465133252331,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint31Y",
+          "time": 5.5,
+          "value": 61.2719711378995,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "iris",
+      "keys": [
+        {
+          "property": "maskPoint32X",
+          "time": 1.5,
+          "value": 49.971875,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint32X",
+          "time": 4.2,
+          "value": 49.971875,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint32X",
+          "time": 4.85,
+          "value": 28.625,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint32X",
+          "time": 5.5,
+          "value": -14.6875,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint32Y",
+          "time": 1.5,
+          "value": 50.0,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint32Y",
+          "time": 4.2,
+          "value": 50.0,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint32Y",
+          "time": 4.85,
+          "value": 50.00000000000001,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint32Y",
+          "time": 5.5,
+          "value": 50.000000000000014,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint33X",
+          "time": 1.5,
+          "value": 49.972010429562346,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint33X",
+          "time": 4.2,
+          "value": 49.972010429562346,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint33X",
+          "time": 4.85,
+          "value": 28.727926467381792,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint33X",
+          "time": 5.5,
+          "value": -14.376012006607738,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint33Y",
+          "time": 1.5,
+          "value": 49.99509914298352,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint33Y",
+          "time": 4.2,
+          "value": 49.99509914298352,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint33Y",
+          "time": 4.85,
+          "value": 46.2753486674767,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint33Y",
+          "time": 5.5,
+          "value": 38.72802886210053,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint34X",
+          "time": 1.5,
+          "value": 49.97241541398866,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint34X",
+          "time": 4.2,
+          "value": 49.97241541398866,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint34X",
+          "time": 4.85,
+          "value": 29.035714631380948,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint34X",
+          "time": 5.5,
+          "value": -13.44454782608397,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint34Y",
+          "time": 1.5,
+          "value": 49.990245483899194,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint34Y",
+          "time": 4.2,
+          "value": 49.990245483899194,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint34Y",
+          "time": 4.85,
+          "value": 42.58656776338712,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint34Y",
+          "time": 5.5,
+          "value": 27.564612968145237,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint35X",
+          "time": 1.5,
+          "value": 49.97308605305753,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint35X",
+          "time": 4.2,
+          "value": 49.97308605305753,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint35X",
+          "time": 4.85,
+          "value": 29.545400323724035,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint35X",
+          "time": 5.5,
+          "value": -11.902077967677265,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint35Y",
+          "time": 1.5,
+          "value": 49.98548576613727,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint35Y",
+          "time": 4.2,
+          "value": 49.98548576613727,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint35Y",
+          "time": 4.85,
+          "value": 38.96918226433044,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint35Y",
+          "time": 5.5,
+          "value": 16.617262115736857,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint36X",
+          "time": 1.5,
+          "value": 49.974015888148124,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint36X",
+          "time": 4.2,
+          "value": 49.974015888148124,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint36X",
+          "time": 4.85,
+          "value": 30.252074992571245,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint36X",
+          "time": 5.5,
+          "value": -9.763457259323872,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint36Y",
+          "time": 1.5,
+          "value": 49.980865828381745,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint36Y",
+          "time": 4.2,
+          "value": 49.980865828381745,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint36Y",
+          "time": 4.85,
+          "value": 35.45802957012659,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint36Y",
+          "time": 5.5,
+          "value": 5.991405278014689,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint37X",
+          "time": 1.5,
+          "value": 49.9751959644402,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint37X",
+          "time": 4.2,
+          "value": 49.9751959644402,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint37X",
+          "time": 4.85,
+          "value": 31.14893297455391,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint37X",
+          "time": 5.5,
+          "value": -7.04928178753422,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint37Y",
+          "time": 1.5,
+          "value": 49.9764301631587,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint37Y",
+          "time": 4.2,
+          "value": 49.9764301631587,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint37Y",
+          "time": 4.85,
+          "value": 32.086924000612086,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint37Y",
+          "time": 5.5,
+          "value": -4.210624734989729,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint38X",
+          "time": 1.5,
+          "value": 49.97661491715399,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint38X",
+          "time": 4.2,
+          "value": 49.97661491715399,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint38X",
+          "time": 4.85,
+          "value": 32.227337037033095,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint38X",
+          "time": 5.5,
+          "value": -3.7856905458209127,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint38Y",
+          "time": 1.5,
+          "value": 49.97222148834902,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint38Y",
+          "time": 4.2,
+          "value": 49.97222148834902,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint38Y",
+          "time": 4.85,
+          "value": 28.888331145255126,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint38Y",
+          "time": 5.5,
+          "value": -13.890576797254226,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint39X",
+          "time": 1.5,
+          "value": 49.97825908099917,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint39X",
+          "time": 4.2,
+          "value": 49.97825908099917,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint39X",
+          "time": 4.85,
+          "value": 33.4769015593715,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint39X",
+          "time": 5.5,
+          "value": -0.004113701902056732,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint39Y",
+          "time": 1.5,
+          "value": 49.96828033579182,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint39Y",
+          "time": 4.2,
+          "value": 49.96828033579182,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint39Y",
+          "time": 4.85,
+          "value": 25.89305520178148,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint39Y",
+          "time": 5.5,
+          "value": -22.9552276788192,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint40X",
+          "time": 1.5,
+          "value": 49.98011262177913,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint40X",
+          "time": 4.2,
+          "value": 49.98011262177913,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint40X",
+          "time": 4.85,
+          "value": 34.885592552137545,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint40X",
+          "time": 5.5,
+          "value": 4.2590300919952,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint40Y",
+          "time": 1.5,
+          "value": 49.96464466094067,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint40Y",
+          "time": 4.2,
+          "value": 49.96464466094067,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint40Y",
+          "time": 4.85,
+          "value": 23.129942314911197,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint40Y",
+          "time": 5.5,
+          "value": -31.317279836452954,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint41X",
+          "time": 1.5,
+          "value": 49.9821576888829,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint41X",
+          "time": 4.2,
+          "value": 49.9821576888829,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint41X",
+          "time": 4.85,
+          "value": 36.43984355100207,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint41X",
+          "time": 5.5,
+          "value": 8.962684430664154,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint41Y",
+          "time": 1.5,
+          "value": 49.961349477331865,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint41Y",
+          "time": 4.2,
+          "value": 49.961349477331865,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint41Y",
+          "time": 4.85,
+          "value": 20.625602772216006,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint41Y",
+          "time": 5.5,
+          "value": -38.89620213671472,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint42X",
+          "time": 1.5,
+          "value": 49.98437458719632,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint42X",
+          "time": 4.2,
+          "value": 49.98437458719632,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint42X",
+          "time": 4.85,
+          "value": 38.124686269206,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint42X",
+          "time": 5.5,
+          "value": 14.061550551544485,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint42Y",
+          "time": 1.5,
+          "value": 49.95842651938487,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint42Y",
+          "time": 4.2,
+          "value": 49.95842651938487,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint42Y",
+          "time": 4.85,
+          "value": 18.40415473250328,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint42Y",
+          "time": 5.5,
+          "value": -45.619005414792696,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint43X",
+          "time": 1.5,
+          "value": 49.98674196677677,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint43X",
+          "time": 4.2,
+          "value": 49.98674196677677,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint43X",
+          "time": 4.85,
+          "value": 39.923894750344296,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint43X",
+          "time": 5.5,
+          "value": 19.506523586568264,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint43Y",
+          "time": 1.5,
+          "value": 49.95590393678258,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint43Y",
+          "time": 4.2,
+          "value": 49.95590393678258,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint43Y",
+          "time": 4.85,
+          "value": 16.486991954762516,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint43Y",
+          "time": 5.5,
+          "value": -51.420945400060816,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint44X",
+          "time": 1.5,
+          "value": 49.98923702846473,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint44X",
+          "time": 4.2,
+          "value": 49.98923702846473,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint44X",
+          "time": 4.85,
+          "value": 41.820141633196194,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint44X",
+          "time": 5.5,
+          "value": 25.24516546888322,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint44Y",
+          "time": 1.5,
+          "value": 49.95380602337443,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint44Y",
+          "time": 4.2,
+          "value": 49.95380602337443,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint44Y",
+          "time": 4.85,
+          "value": 14.892577764571115,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint44Y",
+          "time": 5.5,
+          "value": -56.24614623879795,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint45X",
+          "time": 1.5,
+          "value": 49.99183574345222,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint45X",
+          "time": 4.2,
+          "value": 49.99183574345222,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint45X",
+          "time": 4.85,
+          "value": 43.79516502368587,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint45X",
+          "time": 5.5,
+          "value": 31.222209940101962,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint45Y",
+          "time": 1.5,
+          "value": 49.95215298321339,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint45Y",
+          "time": 4.2,
+          "value": 49.95215298321339,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint45Y",
+          "time": 4.85,
+          "value": 13.636267242176068,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint45Y",
+          "time": 5.5,
+          "value": -60.04813860920402,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint46X",
+          "time": 1.5,
+          "value": 49.994513084693295,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint46X",
+          "time": 4.2,
+          "value": 49.994513084693295,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint46X",
+          "time": 4.85,
+          "value": 45.82994436690525,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint46X",
+          "time": 5.5,
+          "value": 37.38009479458168,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint46Y",
+          "time": 1.5,
+          "value": 49.95096073597984,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint46Y",
+          "time": 4.2,
+          "value": 49.95096073597984,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint46Y",
+          "time": 4.85,
+          "value": 12.730159344677247,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint46Y",
+          "time": 5.5,
+          "value": -62.79030724637148,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint47X",
+          "time": 1.5,
+          "value": 49.99724326792823,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint47X",
+          "time": 4.2,
+          "value": 49.99724326792823,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint47X",
+          "time": 4.85,
+          "value": 47.904883625455646,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint47X",
+          "time": 5.5,
+          "value": 43.65951623493156,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint47Y",
+          "time": 1.5,
+          "value": 49.95024076366639,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint47Y",
+          "time": 4.2,
+          "value": 49.95024076366639,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint47Y",
+          "time": 4.85,
+          "value": 12.182980386456514,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint47Y",
+          "time": 5.5,
+          "value": -64.44624356730264,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "iris",
+      "keys": [
+        {
+          "property": "maskPoint48X",
+          "time": 1.5,
+          "value": 50.0,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint48X",
+          "time": 4.2,
+          "value": 50.0,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint48X",
+          "time": 4.85,
+          "value": 49.99999999999999,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint48X",
+          "time": 5.5,
+          "value": 49.999999999999986,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint48Y",
+          "time": 1.5,
+          "value": 49.95,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint48Y",
+          "time": 4.2,
+          "value": 49.95,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint48Y",
+          "time": 4.85,
+          "value": 12.0,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint48Y",
+          "time": 5.5,
+          "value": -65.0,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint49X",
+          "time": 1.5,
+          "value": 50.00275673207177,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint49X",
+          "time": 4.2,
+          "value": 50.00275673207177,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint49X",
+          "time": 4.85,
+          "value": 52.09511637454435,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint49X",
+          "time": 5.5,
+          "value": 56.34048376506842,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint49Y",
+          "time": 1.5,
+          "value": 49.95024076366639,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint49Y",
+          "time": 4.2,
+          "value": 49.95024076366639,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint49Y",
+          "time": 4.85,
+          "value": 12.182980386456514,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint49Y",
+          "time": 5.5,
+          "value": -64.44624356730264,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint50X",
+          "time": 1.5,
+          "value": 50.005486915306705,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint50X",
+          "time": 4.2,
+          "value": 50.005486915306705,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint50X",
+          "time": 4.85,
+          "value": 54.17005563309474,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint50X",
+          "time": 5.5,
+          "value": 62.6199052054183,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint50Y",
+          "time": 1.5,
+          "value": 49.95096073597984,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint50Y",
+          "time": 4.2,
+          "value": 49.95096073597984,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint50Y",
+          "time": 4.85,
+          "value": 12.730159344677247,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint50Y",
+          "time": 5.5,
+          "value": -62.7903072463715,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint51X",
+          "time": 1.5,
+          "value": 50.00816425654778,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint51X",
+          "time": 4.2,
+          "value": 50.00816425654778,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint51X",
+          "time": 4.85,
+          "value": 56.204834976314125,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint51X",
+          "time": 5.5,
+          "value": 68.77779005989801,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint51Y",
+          "time": 1.5,
+          "value": 49.95215298321339,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint51Y",
+          "time": 4.2,
+          "value": 49.95215298321339,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint51Y",
+          "time": 4.85,
+          "value": 13.63626724217606,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint51Y",
+          "time": 5.5,
+          "value": -60.04813860920403,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint52X",
+          "time": 1.5,
+          "value": 50.01076297153527,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint52X",
+          "time": 4.2,
+          "value": 50.01076297153527,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint52X",
+          "time": 4.85,
+          "value": 58.1798583668038,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint52X",
+          "time": 5.5,
+          "value": 74.75483453111676,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint52Y",
+          "time": 1.5,
+          "value": 49.95380602337443,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint52Y",
+          "time": 4.2,
+          "value": 49.95380602337443,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint52Y",
+          "time": 4.85,
+          "value": 14.892577764571108,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint52Y",
+          "time": 5.5,
+          "value": -56.24614623879796,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint53X",
+          "time": 1.5,
+          "value": 50.01325803322323,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint53X",
+          "time": 4.2,
+          "value": 50.01325803322323,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint53X",
+          "time": 4.85,
+          "value": 60.0761052496557,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint53X",
+          "time": 5.5,
+          "value": 80.49347641343172,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint53Y",
+          "time": 1.5,
+          "value": 49.95590393678258,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint53Y",
+          "time": 4.2,
+          "value": 49.95590393678258,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint53Y",
+          "time": 4.85,
+          "value": 16.48699195476251,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint53Y",
+          "time": 5.5,
+          "value": -51.42094540006083,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint54X",
+          "time": 1.5,
+          "value": 50.01562541280368,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint54X",
+          "time": 4.2,
+          "value": 50.01562541280368,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint54X",
+          "time": 4.85,
+          "value": 61.87531373079399,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint54X",
+          "time": 5.5,
+          "value": 85.93844944845549,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint54Y",
+          "time": 1.5,
+          "value": 49.95842651938487,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint54Y",
+          "time": 4.2,
+          "value": 49.95842651938487,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint54Y",
+          "time": 4.85,
+          "value": 18.404154732503272,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint54Y",
+          "time": 5.5,
+          "value": -45.619005414792724,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint55X",
+          "time": 1.5,
+          "value": 50.0178423111171,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint55X",
+          "time": 4.2,
+          "value": 50.0178423111171,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint55X",
+          "time": 4.85,
+          "value": 63.56015644899792,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint55X",
+          "time": 5.5,
+          "value": 91.03731556933582,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint55Y",
+          "time": 1.5,
+          "value": 49.961349477331865,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint55Y",
+          "time": 4.2,
+          "value": 49.961349477331865,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint55Y",
+          "time": 4.85,
+          "value": 20.625602772216,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint55Y",
+          "time": 5.5,
+          "value": -38.89620213671475,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint56X",
+          "time": 1.5,
+          "value": 50.01988737822087,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint56X",
+          "time": 4.2,
+          "value": 50.01988737822087,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint56X",
+          "time": 4.85,
+          "value": 65.11440744786245,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint56X",
+          "time": 5.5,
+          "value": 95.74096990800479,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint56Y",
+          "time": 1.5,
+          "value": 49.96464466094067,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint56Y",
+          "time": 4.2,
+          "value": 49.96464466094067,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint56Y",
+          "time": 4.85,
+          "value": 23.129942314911187,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint56Y",
+          "time": 5.5,
+          "value": -31.317279836452983,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint57X",
+          "time": 1.5,
+          "value": 50.02174091900083,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint57X",
+          "time": 4.2,
+          "value": 50.02174091900083,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint57X",
+          "time": 4.85,
+          "value": 66.5230984406285,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint57X",
+          "time": 5.5,
+          "value": 100.00411370190203,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint57Y",
+          "time": 1.5,
+          "value": 49.96828033579182,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint57Y",
+          "time": 4.2,
+          "value": 49.96828033579182,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint57Y",
+          "time": 4.85,
+          "value": 25.893055201781454,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint57Y",
+          "time": 5.5,
+          "value": -22.955227678819284,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint58X",
+          "time": 1.5,
+          "value": 50.02338508284601,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint58X",
+          "time": 4.2,
+          "value": 50.02338508284601,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint58X",
+          "time": 4.85,
+          "value": 67.7726629629669,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint58X",
+          "time": 5.5,
+          "value": 103.7856905458209,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint58Y",
+          "time": 1.5,
+          "value": 49.97222148834902,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint58Y",
+          "time": 4.2,
+          "value": 49.97222148834902,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint58Y",
+          "time": 4.85,
+          "value": 28.888331145255115,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint58Y",
+          "time": 5.5,
+          "value": -13.890576797254248,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint59X",
+          "time": 1.5,
+          "value": 50.0248040355598,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint59X",
+          "time": 4.2,
+          "value": 50.0248040355598,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint59X",
+          "time": 4.85,
+          "value": 68.85106702544608,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint59X",
+          "time": 5.5,
+          "value": 107.0492817875342,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint59Y",
+          "time": 1.5,
+          "value": 49.9764301631587,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint59Y",
+          "time": 4.2,
+          "value": 49.9764301631587,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint59Y",
+          "time": 4.85,
+          "value": 32.08692400061208,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint59Y",
+          "time": 5.5,
+          "value": -4.210624734989764,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint60X",
+          "time": 1.5,
+          "value": 50.025984111851876,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint60X",
+          "time": 4.2,
+          "value": 50.025984111851876,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint60X",
+          "time": 4.85,
+          "value": 69.74792500742875,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint60X",
+          "time": 5.5,
+          "value": 109.76345725932384,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint60Y",
+          "time": 1.5,
+          "value": 49.980865828381745,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint60Y",
+          "time": 4.2,
+          "value": 49.980865828381745,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint60Y",
+          "time": 4.85,
+          "value": 35.45802957012656,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint60Y",
+          "time": 5.5,
+          "value": 5.991405278014604,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint61X",
+          "time": 1.5,
+          "value": 50.02691394694247,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint61X",
+          "time": 4.2,
+          "value": 50.02691394694247,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint61X",
+          "time": 4.85,
+          "value": 70.45459967627596,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint61X",
+          "time": 5.5,
+          "value": 111.90207796767726,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint61Y",
+          "time": 1.5,
+          "value": 49.98548576613727,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint61Y",
+          "time": 4.2,
+          "value": 49.98548576613727,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint61Y",
+          "time": 4.85,
+          "value": 38.96918226433043,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint61Y",
+          "time": 5.5,
+          "value": 16.617262115736814,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint62X",
+          "time": 1.5,
+          "value": 50.02758458601134,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint62X",
+          "time": 4.2,
+          "value": 50.02758458601134,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint62X",
+          "time": 4.85,
+          "value": 70.96428536861904,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint62X",
+          "time": 5.5,
+          "value": 113.44454782608396,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint62Y",
+          "time": 1.5,
+          "value": 49.990245483899194,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint62Y",
+          "time": 4.2,
+          "value": 49.990245483899194,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint62Y",
+          "time": 4.85,
+          "value": 42.58656776338711,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint62Y",
+          "time": 5.5,
+          "value": 27.564612968145198,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint63X",
+          "time": 1.5,
+          "value": 50.027989570437654,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint63X",
+          "time": 4.2,
+          "value": 50.027989570437654,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint63X",
+          "time": 4.85,
+          "value": 71.27207353261821,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint63X",
+          "time": 5.5,
+          "value": 114.37601200660774,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint63Y",
+          "time": 1.5,
+          "value": 49.99509914298352,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint63Y",
+          "time": 4.2,
+          "value": 49.99509914298352,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint63Y",
+          "time": 4.85,
+          "value": 46.2753486674767,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "maskPoint63Y",
+          "time": 5.5,
+          "value": 38.728028862100544,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "media_plane",
+      "id": "echo-matte",
+      "name": "05 / Echo source matte",
+      "sourceMediaId": "MATTE",
+      "sourceStart": 0,
+      "startTime": 1.5,
+      "duration": 4.0,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "rotation": 0,
+        "opacity": 1
+      },
+      "mask": {
+        "enabled": false,
+        "shape": "rectangle",
+        "feather": 0,
+        "inverted": false
+      }
+    },
+    {
+      "type": "keys",
+      "targetId": "echo-matte",
+      "keys": [
+        {
+          "property": "x",
+          "time": 1.5,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 2.3,
+          "value": 58,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 3.3,
+          "value": 54,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.1,
+          "value": 51.5,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.5,
+          "value": 51.5,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "matte",
+      "targetId": "red",
+      "matteSourceId": "echo-matte",
+      "mode": "luma"
+    },
+    {
+      "type": "media_plane",
+      "id": "person-matte",
+      "name": "07 / Source-bound walking silhouette",
+      "sourceMediaId": "MATTE",
+      "sourceStart": 0,
+      "startTime": 1.5,
+      "duration": 4.0,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "rotation": 0,
+        "opacity": 1
+      },
+      "mask": {
+        "enabled": false,
+        "shape": "rectangle",
+        "feather": 0,
+        "inverted": false
+      }
+    },
+    {
+      "type": "media_plane",
+      "id": "person",
+      "name": "08 / Recognisable foreground becomes water",
+      "sourceMediaId": "CITY",
+      "sourceStart": 4,
+      "startTime": 1.5,
+      "duration": 4.0,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "rotation": 0,
+        "opacity": 1
+      },
+      "mask": {
+        "enabled": false,
+        "shape": "rectangle",
+        "feather": 0,
+        "inverted": false
+      }
+    },
+    {
+      "type": "matte",
+      "targetId": "person",
+      "matteSourceId": "person-matte",
+      "mode": "luma"
+    },
+    {
+      "type": "keys",
+      "targetId": "person",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 1.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 2.4,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 2.95,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 5.5,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "media_plane",
+      "id": "body-sea",
+      "name": "09 / The same ocean inside the figure",
+      "sourceMediaId": "COAST",
+      "sourceStart": 0,
+      "startTime": 1.5,
+      "duration": 4.0,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "rotation": 0,
+        "opacity": 1
+      },
+      "mask": {
+        "enabled": false,
+        "shape": "rectangle",
+        "feather": 0,
+        "inverted": false
+      }
+    },
+    {
+      "type": "matte",
+      "targetId": "body-sea",
+      "matteSourceId": "person-matte",
+      "mode": "luma"
+    },
+    {
+      "type": "keys",
+      "targetId": "body-sea",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 1.5,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 2.4,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 2.95,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 5.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "move_layer",
+      "targetId": "person",
+      "beforeId": "body-sea"
+    },
+    {
+      "type": "move_layer",
+      "targetId": "person-matte",
+      "beforeId": "person"
+    },
+    {
+      "type": "move_layer",
+      "targetId": "red",
+      "beforeId": "person-matte"
+    },
+    {
+      "type": "move_layer",
+      "targetId": "echo-matte",
+      "beforeId": "red"
+    },
+    {
+      "type": "move_layer",
+      "targetId": "iris",
+      "beforeId": "echo-matte"
+    },
+    {
+      "type": "move_layer",
+      "targetId": "blue",
+      "beforeId": "iris"
+    },
+    {
+      "type": "move_layer",
+      "targetId": "city",
+      "beforeId": "blue"
+    },
+    {
+      "type": "move_layer",
+      "targetId": "paper",
+      "beforeId": "city"
+    },
+    {
+      "type": "keys",
+      "targetId": "world-rig",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 0,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 1.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 2.7,
+          "value": 1.25,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 4.2,
+          "value": 1.25,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 5.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 8,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.65,
+            0,
+            0.35,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "parent",
+      "targetId": "city",
+      "parentId": "world-rig"
+    },
+    {
+      "type": "parent",
+      "targetId": "iris",
+      "parentId": "world-rig"
+    },
+    {
+      "type": "parent",
+      "targetId": "echo-matte",
+      "parentId": "world-rig"
+    },
+    {
+      "type": "parent",
+      "targetId": "red",
+      "parentId": "world-rig"
+    },
+    {
+      "type": "parent",
+      "targetId": "person-matte",
+      "parentId": "world-rig"
+    },
+    {
+      "type": "parent",
+      "targetId": "person",
+      "parentId": "world-rig"
+    },
+    {
+      "type": "parent",
+      "targetId": "body-sea",
+      "parentId": "world-rig"
+    }
+  ],
+  "graphics": {
+    "format": "autopromote-graphics",
+    "version": 1,
+    "name": "City into sea",
+    "width": 1280,
+    "height": 720,
+    "duration": 8,
+    "layers": [
+      {
+        "id": "paper",
+        "name": "01 / Warm paper",
+        "type": "artwork",
+        "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\"><rect width=\"1280\" height=\"720\" fill=\"#eee8da\"/></svg>",
+        "startTime": 0,
+        "duration": 8,
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "height": 100,
+        "scale": 1,
+        "rotation": 0,
+        "opacity": 1,
+        "keys": []
+      },
+      {
+        "id": "blue",
+        "name": "03 / Cobalt world opens",
+        "type": "artwork",
+        "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\"><circle cx=\"640\" cy=\"360\" r=\"360\" fill=\"#224de5\"/></svg>",
+        "startTime": 1.5,
+        "duration": 4.1,
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "height": 100,
+        "scale": 1,
+        "rotation": 0,
+        "opacity": 1,
+        "keys": [
+          {
+            "property": "scale",
+            "time": 1.5,
+            "value": 0.1,
+            "easing": "bezier",
+            "curve": [
+              0.65,
+              0,
+              0.35,
+              1
+            ]
+          },
+          {
+            "property": "scale",
+            "time": 2.7,
+            "value": 2.2,
+            "easing": "bezier",
+            "curve": [
+              0.65,
+              0,
+              0.35,
+              1
+            ]
+          },
+          {
+            "property": "scale",
+            "time": 5.6,
+            "value": 2.2,
+            "easing": "bezier",
+            "curve": [
+              0.65,
+              0,
+              0.35,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "id": "red",
+        "name": "06 / Vermilion print echo",
+        "type": "artwork",
+        "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\"><rect width=\"1280\" height=\"720\" fill=\"#f44b35\"/></svg>",
+        "startTime": 1.5,
+        "duration": 4.0,
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "height": 100,
+        "scale": 1,
+        "rotation": 0,
+        "opacity": 1,
+        "keys": [
+          {
+            "property": "opacity",
+            "time": 1.5,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.65,
+              0,
+              0.35,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 2.15,
+            "value": 0.9,
+            "easing": "bezier",
+            "curve": [
+              0.65,
+              0,
+              0.35,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 4.1,
+            "value": 0.9,
+            "easing": "bezier",
+            "curve": [
+              0.65,
+              0,
+              0.35,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 5.3,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.65,
+              0,
+              0.35,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 5.5,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.65,
+              0,
+              0.35,
+              1
+            ]
+          }
+        ]
+      }
+    ],
+    "groups": []
+  }
+}

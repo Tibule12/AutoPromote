@@ -1,0 +1,300 @@
+{
+  "checkedAt": "2026-11-08T23:46:24.663Z",
+  "build": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105/reports/studio-copy-circle-rebuild-20261109/private/candidate-r2-build",
+  "origin": "http://127.0.0.1:34899",
+  "assetManifestSha256": "1420f848f9be7f3b5322f6dddda73415a95f58570e618a7a277f156f081b9a7a",
+  "assets": [
+    {
+      "asset": "/index.html",
+      "bytes": 1975,
+      "sha256": "e2b2c17de673c00cb1f385fd8d2ee560935e205a543fd1bbbc4bb107bbecb701"
+    },
+    {
+      "asset": "/static/css/200.06ff7cc6.chunk.css",
+      "bytes": 21663,
+      "sha256": "ac284d710edf506f14b413dbdfe6b5a8ffc4ca599d7a37caeaed3b7ca49d21b2"
+    },
+    {
+      "asset": "/static/css/533.38024f67.chunk.css",
+      "bytes": 3678,
+      "sha256": "7b58eccb21dfc84542bad0bdd2433c22a1d33865357e26bd8ca998a67d2ca57f"
+    },
+    {
+      "asset": "/static/css/54.324ffe7d.chunk.css",
+      "bytes": 1667,
+      "sha256": "0ef1a350545bb9fd19a6a7da5009130cafcaa5b69c48e2b80415d3020ec0df04"
+    },
+    {
+      "asset": "/static/css/753.3ad99012.chunk.css",
+      "bytes": 303,
+      "sha256": "3dad5354be03777339a4f5add4820e9f8f5a427232a899f8372f0f3443f1b33b"
+    },
+    {
+      "asset": "/static/css/785.0a6c6cfa.chunk.css",
+      "bytes": 3576,
+      "sha256": "fc3646e4648e5f3ab654e6244b678bb9c31db05097ea4605062845c2eff4fd9c"
+    },
+    {
+      "asset": "/static/css/940.0a6c6cfa.chunk.css",
+      "bytes": 3576,
+      "sha256": "fc3646e4648e5f3ab654e6244b678bb9c31db05097ea4605062845c2eff4fd9c"
+    },
+    {
+      "asset": "/static/css/main.69ca5020.css",
+      "bytes": 873949,
+      "sha256": "fa8a217be9846cdcfa0f1aea80df42c149127dfe80611e3a7855c5a658a2d6e4"
+    },
+    {
+      "asset": "/static/js/121.fa04f6c5.chunk.js",
+      "bytes": 624671,
+      "sha256": "2f1190fb07b695096eb6f8801bfa8af0b576a782c682178b14eb185984e6753a"
+    },
+    {
+      "asset": "/static/js/134.c0a69557.chunk.js",
+      "bytes": 17831,
+      "sha256": "7f51bd4e8b9cebe4127ad1176b3f5a1301876e46e7f2861f4a0d8e0878a523a3"
+    },
+    {
+      "asset": "/static/js/200.90e6cfbf.chunk.js",
+      "bytes": 20261,
+      "sha256": "ce766e1c9d0a9d3d47752db5da327e3889203565f36673a06e8175fdf36ba513"
+    },
+    {
+      "asset": "/static/js/260.fe11b702.chunk.js",
+      "bytes": 1930,
+      "sha256": "204004aa5ffb48383b8d4b3ce7baed2a8b9cd9950bff4e734d9b4b59bd338dfa"
+    },
+    {
+      "asset": "/static/js/262.8369d177.chunk.js",
+      "bytes": 7850,
+      "sha256": "d721b855847faa7e1032064aa85341a6bc7ed542c93c3c715569cb5cdb447fa1"
+    },
+    {
+      "asset": "/static/js/337.928c4c74.chunk.js",
+      "bytes": 81217,
+      "sha256": "3dd3b531887f219c8111ad39ca875be76b0a6e682b539133965907ef6f50b603"
+    },
+    {
+      "asset": "/static/js/350.07aff60e.chunk.js",
+      "bytes": 17831,
+      "sha256": "89e5762fa9d90a8d60f7cb0d95b5ef44c11c16541e3a9c57d1ae6e15cab6fcd2"
+    },
+    {
+      "asset": "/static/js/369.3abdc8c1.chunk.js",
+      "bytes": 8097,
+      "sha256": "46961be6399c02223f84e32a28a4cd2901afb38f2f1636ca65c347c346930f38"
+    },
+    {
+      "asset": "/static/js/409.584fbec0.chunk.js",
+      "bytes": 17837,
+      "sha256": "5c91a8b498d7e7520600dd92ab9e1c66747cdd911a7110a937310ba31b8e9aa5"
+    },
+    {
+      "asset": "/static/js/482.5964a3b6.chunk.js",
+      "bytes": 17831,
+      "sha256": "a34e257632080c25ef8e9f76de7dae63d6b59c27188a871b441836eeb0a07aea"
+    },
+    {
+      "asset": "/static/js/495.5d7a4ef2.chunk.js",
+      "bytes": 6330,
+      "sha256": "3521d4a629bb0f34579b97d1be81edc1ef84ff024f7c2303b2ec3d434337fcdd"
+    },
+    {
+      "asset": "/static/js/522.924a015a.chunk.js",
+      "bytes": 17836,
+      "sha256": "814b3b37e584442bb92b63a46480ec98ab349714b1e09b5206ec9fa68807e933"
+    },
+    {
+      "asset": "/static/js/533.3527d141.chunk.js",
+      "bytes": 9434,
+      "sha256": "9fe247a1c8cc9ee2aed9238808e35a7a808ca0f99950c689b118564e764eb4aa"
+    },
+    {
+      "asset": "/static/js/54.12cf01b3.chunk.js",
+      "bytes": 5179,
+      "sha256": "6baf8107dac99dcbd2931abb74fa5b8052ffbe4780921a19c2cad5070508fbf6"
+    },
+    {
+      "asset": "/static/js/656.e9eb39a1.chunk.js",
+      "bytes": 8371,
+      "sha256": "e923e1c6839f8b945f7474313e936e16fde7f10d7ae8491a653218ade93696ff"
+    },
+    {
+      "asset": "/static/js/718.5ceb491d.chunk.js",
+      "bytes": 43111,
+      "sha256": "9565c8bbb9e65696826dd20d6935b3619b97b1a0486e3519867e9bb3f2d05fbd"
+    },
+    {
+      "asset": "/static/js/726.f527e170.chunk.js",
+      "bytes": 116841,
+      "sha256": "d34915bf1051b7624589bacbf37c3ed0cb404a51cca856a09b4b6c75dbd31bfe"
+    },
+    {
+      "asset": "/static/js/753.be1ec8c8.chunk.js",
+      "bytes": 103091,
+      "sha256": "27d402a2e3bbf78624572fbdc8d8b0122907ca304d55640f82702ba9c82a3e22"
+    },
+    {
+      "asset": "/static/js/774.308ec925.chunk.js",
+      "bytes": 10442,
+      "sha256": "a0e9399b5711ceba497cfd4be17dfa638aeb667ed17450f70871e3265305b416"
+    },
+    {
+      "asset": "/static/js/785.9eb89b61.chunk.js",
+      "bytes": 6518,
+      "sha256": "56e11815509add57ba59c330662cf933fe33ce5f62eddabcf35f1e057a6e1420"
+    },
+    {
+      "asset": "/static/js/846.08617d94.chunk.js",
+      "bytes": 17827,
+      "sha256": "10b40dabb66b28ebf3570ba10471d006524ba84f5229275a890beaa26996e576"
+    },
+    {
+      "asset": "/static/js/860.55af207d.chunk.js",
+      "bytes": 11950,
+      "sha256": "eb58b5a86b4f8dc760d01b29a7570597a38a0cd7adf07972d83d51c1ef99b0d5"
+    },
+    {
+      "asset": "/static/js/87.fa67bb75.chunk.js",
+      "bytes": 4302,
+      "sha256": "4e9a6106129072a40195a33f7d2a061ed844e90dd6a2476bfcdaccd91660ccf3"
+    },
+    {
+      "asset": "/static/js/890.6826ea9e.chunk.js",
+      "bytes": 383841,
+      "sha256": "d6063058b4980f8d82f0f5e07404aa3d52496d3c6b58c84b5f331e77f9c50883"
+    },
+    {
+      "asset": "/static/js/914.4948d8c8.chunk.js",
+      "bytes": 7009,
+      "sha256": "e789555e4fe5b003c3fb55675d0e225bbe22572c57dc788666b72e43902f963f"
+    },
+    {
+      "asset": "/static/js/940.636673e9.chunk.js",
+      "bytes": 5498,
+      "sha256": "1ee570e97cb95798552d4bdcce9ecd56639810b3f0e1b4c04b84abd15e43fd5b"
+    },
+    {
+      "asset": "/static/js/967.035ae23f.chunk.js",
+      "bytes": 17832,
+      "sha256": "de95c64372f59f6322c1067071030246cf224a4103490c90e18070c1012437c0"
+    },
+    {
+      "asset": "/static/js/983.fdf2fa10.chunk.js",
+      "bytes": 5195,
+      "sha256": "b6746ce2736e0b90198af6f741b1ae9df56d33cefaa479a45c236afcfee5b1a8"
+    },
+    {
+      "asset": "/static/js/986.2c6bdbc7.chunk.js",
+      "bytes": 17832,
+      "sha256": "3f8225d69d477aea773cf93e986158ee5f86fe6050e20f7518cc1a6491fd0579"
+    },
+    {
+      "asset": "/static/js/main.72d35026.js",
+      "bytes": 4701123,
+      "sha256": "ca7a8103cfc664e94f802cd1f082bfdbdcf12de6c3613b3a5930217f8a7b4f4f"
+    },
+    {
+      "asset": "/static/media/DejaVuSans-Bold.263039d2364a6d1ae687.ttf",
+      "bytes": 708920,
+      "sha256": "5c1247acef7f2b8522a31742c76d6adcb5569bacc0be7ceaa4dc39dd252ce895"
+    },
+    {
+      "asset": "/static/media/DejaVuSans.00c5a849fed00223aad6.ttf",
+      "bytes": 759720,
+      "sha256": "ae7b7855e115a5966d8b1b3f80f254ccc117ec86f9965e202ee2940453837280"
+    },
+    {
+      "asset": "/static/media/discord.235378ecf6e3c4bfa664763a937c8294.svg",
+      "bytes": 1585,
+      "sha256": "5411e43669f6fd0613413ec9f4e605fde9331d112d168da6a228994df25a066d"
+    },
+    {
+      "asset": "/static/media/facebook.a459a3644771f8594d8a953990ec9611.svg",
+      "bytes": 456,
+      "sha256": "916cd0bd434ad188a40db799d4a4b58f7478df99fb67470bbe6720fabed17ce4"
+    },
+    {
+      "asset": "/static/media/instagram.a1e33e17aa5f89bcc416226cb9f0e307.svg",
+      "bytes": 1213,
+      "sha256": "ed4cc22a7d9483ea8a651b095644f4bbdd4851d832daaea516f752ab6835ad16"
+    },
+    {
+      "asset": "/static/media/Inter-Black.9f338602a2c79d04ff1c.ttf",
+      "bytes": 419968,
+      "sha256": "6342d3ea6dc088b43867f615e807d898adf100c93edb978b8e52c5eb71a264da"
+    },
+    {
+      "asset": "/static/media/Inter-ExtraBold.58d3a8bccabac2ee22a5.ttf",
+      "bytes": 421796,
+      "sha256": "e6756ad5690b77606aa62249a7b420d9902d45cae4b0048a24911fd4324b0a22"
+    },
+    {
+      "asset": "/static/media/Inter-Regular.b3b207f0f59cc178c8da.ttf",
+      "bytes": 411640,
+      "sha256": "40d692fce188e4471e2b3cba937be967878f631ad3ebbbdcd587687c7ebe0c82"
+    },
+    {
+      "asset": "/static/media/Inter-SemiBold.f12f49972afe1369d72b.ttf",
+      "bytes": 419744,
+      "sha256": "78a843fade9d4612a5567302fb595b56976eb5fcebf4fea5a5912d638bafcde3"
+    },
+    {
+      "asset": "/static/media/linkedin.a2fe42c81b3aa0169d3bb3ed68313e1d.svg",
+      "bytes": 591,
+      "sha256": "b7ed1758bd2a389278a4a692229f173e937454332015b86df9546d1f91e2c31e"
+    },
+    {
+      "asset": "/static/media/NotoSansSymbols2-Regular.553b5b4e197ce627f01a.ttf",
+      "bytes": 656852,
+      "sha256": "876598db5f1e3bef2bc77c4d94c5b0d5d2c1620be4878a06f18fb5434e331688"
+    },
+    {
+      "asset": "/static/media/pinterest.895f180c673091730fef301538c94348.svg",
+      "bytes": 786,
+      "sha256": "eed5e60e2c4f8695a883b3dd9030113d23a0cba2ff28f1feb02c71a9515ed5e5"
+    },
+    {
+      "asset": "/static/media/reddit.c8fb479616fbae5b292d00079ebb676c.svg",
+      "bytes": 1102,
+      "sha256": "b723c8f1ecfc793254dbe5e4f2031d20e8b635c5af107ed4f36dcc6aeb34b834"
+    },
+    {
+      "asset": "/static/media/snapchat.26aa09e1e933cbceffb4c79bd1205c3c.svg",
+      "bytes": 3417,
+      "sha256": "f45c4cac4be541ff799ccbe902dc6a31b02bd9a3935ecdeaa9ae79af54f6e9c5"
+    },
+    {
+      "asset": "/static/media/spotify.c3f20aa1d5612599231d00276e1263f5.svg",
+      "bytes": 1080,
+      "sha256": "0c4310dd1d7689cf53d7663cd0359d696d3b87627ca5b1c9eb3ca9c28b36458f"
+    },
+    {
+      "asset": "/static/media/StudioMotion-Bold.263039d2364a6d1ae687.ttf",
+      "bytes": 708920,
+      "sha256": "5c1247acef7f2b8522a31742c76d6adcb5569bacc0be7ceaa4dc39dd252ce895"
+    },
+    {
+      "asset": "/static/media/telegram.ff273329f68a7b41cee3b927fac5c39d.svg",
+      "bytes": 993,
+      "sha256": "0aff9f342e7451a572fc88cb8716b13e03a2d29e9e97787a1d597f24acb323f9"
+    },
+    {
+      "asset": "/static/media/tiktok.da01a4bbc154c3c9597e99adce41d965.svg",
+      "bytes": 510,
+      "sha256": "338c740fd3a36a7dd32e2c98f30246d8510fbe0dd6a28602418c072751df155f"
+    },
+    {
+      "asset": "/static/media/twitter.c94a758d965addb0152d49b57144dd83.svg",
+      "bytes": 447,
+      "sha256": "d8cc9e7c9a70573422297556bd03c6d7e349cb84696fc50b042d0c2c342f52c4"
+    },
+    {
+      "asset": "/static/media/youtube.a972e595695f5ce1735de316aded5055.svg",
+      "bytes": 761,
+      "sha256": "652f1ec4169ebe810803fba8e8a22e993255794e68d8d9cca3bc61d34eec26ab"
+    }
+  ],
+  "servedBytesMatchSelectedBuild": true,
+  "mainMatchesPinnedSourceBuild": true
+}

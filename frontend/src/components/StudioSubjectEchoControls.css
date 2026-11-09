@@ -1,0 +1,8 @@
+.studio-subject-echo fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.studio-subject-echo__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 14px 0; }
+.studio-subject-echo__grid label { display: flex; flex-direction: column; gap: 6px; min-width: 0; font-size: 12px; color: #cbd5e1; }
+.studio-subject-echo__grid input, .studio-subject-echo__grid select { box-sizing: border-box; width: 100%; min-width: 0; min-height: 36px; padding: 7px 9px; border: 1px solid #384153; border-radius: 7px; color: #f1f5f9; background: #141924; }
+.studio-subject-echo__grid input:focus-visible, .studio-subject-echo__grid select:focus-visible { outline: 2px solid #b7a1ff; outline-offset: 2px; }
+.studio-subject-echo__toggle { display: flex; align-items: center; gap: 8px; }
+.studio-subject-echo p { font-size: 12px; line-height: 1.6; color: #aab6c8; }
+@media (max-width: 480px) { .studio-subject-echo__grid { grid-template-columns: 1fr; } }

@@ -1,0 +1,7 @@
+{
+  "sameRulesReload": true,
+  "securityRulesChanged": false,
+  "storageObjectsDeleted": false,
+  "productionChange": false,
+  "result": "{\"oldPid\":106257,\"newPid\":118402,\"ruleSha256\":\"b362e56ed1980cc781b051299e57838c61e66923083809fc844625c2ea6c52a3\",\"unchanged\":true}"
+}

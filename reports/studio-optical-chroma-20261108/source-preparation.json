@@ -1,0 +1,9 @@
+{
+  "reason": "The original33.992s clip exceeds the local30s admission ceiling. Retain a20s copy; move MP4 metadata to the front. No creative effect, resize, rate change or recompression.",
+  "streamCopy": true,
+  "originalRetained": true,
+  "reviewedFirstNineSecondsFrames": 216,
+  "allDecodedFrameMd5Identical": true,
+  "preparedSha256": "d70b0a60880cb5ecc214dbb28b0ff3a7c06da3de58544bd853c5e2d51051f224",
+  "originalSha256": "02396287bf2e372f7ed1dd8d93e57b31e535905dd9140e21abcdd804541bf676"
+}

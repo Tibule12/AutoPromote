@@ -1,0 +1,48 @@
+{
+  "ownerClarification": "Neon Circle + Grounded Doubles (different dances)",
+  "date": "2026-11-09",
+  "timezone": "Africa/Johannesburg",
+  "frequency": "once",
+  "excluded": "Copy Circle Rebuilt, Studio recordings, raw footage and rejected candidates",
+  "movies": [
+    {
+      "key": "neon",
+      "media": "/home/tibule12/Videos/Studio - Neon Circle - 2026-11-09/Neon circle.mp4",
+      "sha256": "00e7cdc19104f267e619868247c26ffa6d5015fedb36be3b00c0cd61f08a5d42",
+      "bytes": 2939273,
+      "finalResultsOnly": true
+    },
+    {
+      "key": "grounded",
+      "media": "/home/tibule12/Videos/Studio - Grounded Dance Revision - 2026-11-08/Corrected/Grounded doubles - corrected.mp4",
+      "sha256": "4d4ac1f433aadd9b422b2acd3cd5e858e8fc775b750e19a397f34fc0c1f282e5",
+      "bytes": 1499394,
+      "finalResultsOnly": true
+    }
+  ],
+  "ownerSchedulingInstruction": "schedule both for today only schedule the final results now",
+  "explicitFinalSelection": true,
+  "productionPublisherAuthorized": true,
+  "platforms": [
+    "youtube",
+    "tiktok",
+    "instagram",
+    "linkedin",
+    "facebook",
+    "reddit"
+  ],
+  "schedule": [
+    {
+      "movie": "neon",
+      "localTime": "18:00",
+      "utc": "2026-11-09T16:00:00.000Z"
+    },
+    {
+      "movie": "grounded",
+      "localTime": "20:00",
+      "utc": "2026-11-09T18:00:00.000Z"
+    }
+  ],
+  "noNewMovieOrThumbnail": true,
+  "earlierHoldsPreserved": true
+}

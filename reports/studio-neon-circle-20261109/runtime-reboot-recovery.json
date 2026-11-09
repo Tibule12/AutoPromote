@@ -1,0 +1,17 @@
+{
+  "completePriorExportRestored": true,
+  "source": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105/reports/studio-copy-circle-rebuild-20261109/private/emulator-final-export",
+  "oldestLostOctoberHistoryRecovered": false,
+  "priorFreshCohortBalancePreserved": 7,
+  "reserved": 0,
+  "operations": 33,
+  "activeOperations": 0,
+  "auth": true,
+  "firestore": true,
+  "storage": true,
+  "newVideoObjects": 3,
+  "newVideoSignedGenerationsPreserved": true,
+  "pid": 224543,
+  "firestorePid": 224550,
+  "productionChange": false
+}

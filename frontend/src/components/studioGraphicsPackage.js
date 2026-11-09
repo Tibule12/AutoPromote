@@ -20,7 +20,7 @@ const color = value => {
   if (!/^#[a-f\d]{6}$/i.test(value || '')) throw Error('Use six-digit graphic colors.');
   return value;
 };
-const bounds = { x: [0, 100], y: [0, 100], scale: [.1, 5], rotation: [-270, 270], opacity: [0, 1] };
+const bounds = { x: [-100, 200], y: [-100, 200], scale: [.1, 5], rotation: [-270, 270], opacity: [0, 1] };
 const easings = ['linear', 'hold', 'ease_in', 'ease_out', 'ease_in_out', 'bezier'];
 const tick = time => Math.round(time * 90000) / 90000;
 const only = (object, fields, label) => {
