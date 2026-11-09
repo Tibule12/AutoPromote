@@ -204,6 +204,11 @@ class CachedSubjectMatte:
             if row["index"] != index or abs(row["time"] - index / geometry["fps"]) > 1e-8 or row["file"] != f"matte_{index:04d}.png":
                 raise ValueError("Invalid matte frame index, path or timestamp")
             self.frame(index)
+        try:
+            from .studio_source_background import load_evidence
+        except ImportError:
+            from studio_source_background import load_evidence
+        self.observed_background = load_evidence(self.directory, data)
 
     @property
     def artifact_sha256(self):

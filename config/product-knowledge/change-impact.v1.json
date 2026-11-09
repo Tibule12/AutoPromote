@@ -1210,6 +1210,29 @@
         "reports/background-replacement-20261101/four-minute-continuation.md"
       ],
       "reason": "Four-minute actual-footage review exposes remaining boom/couch/plant/head defects; local weak person trimap leakage and redundant foreground preparation repaired. Private hybrid model proof and flattened native import do not qualify native editable long-form masks. No public feature/readiness promotion; default production transports and limits preserved."
+    },
+    {
+      "feature_id": "studio.masks",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS",
+        "TASKS",
+        "DEPENDENCIES",
+        "READINESS"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "model_workers/adapters/source_edge_alpha.py",
+        "model_workers/adapters/cpu_matting.py",
+        "frontend/src/components/StudioSubjectMaskControls.js",
+        "frontend/src/components/studioProjectDocument.js",
+        "contracts/model-capabilities-v1.json",
+        "src/modelRuntime/contract.js",
+        "test/e2e/studio-capability-matrix.json",
+        "reports/background-replacement-20261101/fine-props-repair.md"
+      ],
+      "reason": "Knowledge 1.0.53 records opt-in selected fixed-object colour refinement, actual native short-shot save/reopen/export and inspected frames. Broad object correction and a late framing export were rejected and preserved. Fine boundaries and full four-minute visual quality remain unqualified; no readiness promotion."
     }
   ]
 }

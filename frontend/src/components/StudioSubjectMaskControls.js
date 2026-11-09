@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createModelArtifactReference } from "./studioModelArtifactReference";
 import { stable, validateSubjectVfxScene } from "./studioSubjectVfxContract";
-import { savedSubjectBox } from "./studioSubjectCorrections";
+import { savedSubjectBox, savedSubjectRefinement } from "./studioSubjectCorrections";
 
 // Capability requests contain source/selection contracts only. Model choice,
 // checkpoint, device and worker routing belong to the server runtime.
@@ -14,13 +14,16 @@ export default function StudioSubjectMaskControls({ item, onChange, getDocument,
   const [point,setPoint]=useState([.5,.5]);
   const [keepPoint,setKeepPoint]=useState(true);
   const [fixedComponent,setFixedComponent]=useState(false);
-  const [refinementRadius,setRefinementRadius]=useState(10);
+  const savedRefinement = savedSubjectRefinement(item);
+  const savedRadius = savedRefinement.maskRefinementRadius ?? 10;
+  const [refinementRadius,setRefinementRadius]=useState(savedRadius);
+  useEffect(() => { setRefinementRadius(savedRadius); }, [item.scene.id, savedRadius]);
   const savedSelection = item.maskJob ? JSON.parse(item.maskJob.selectionJson) : null;
   // Older saved documents omitted mode/finished. The dependency identity still
   // identifies an unfinished refinement without losing or replacing that job.
   const pendingRefinement = !!savedSelection?.refinement && !item.maskJob.finished &&
     item.modelArtifactRef?.artifactHash === savedSelection.refinement.maskArtifactHash;
-  const colourComponentIds=item.maskColourComponentIds || savedSelection?.refinement?.colourComponentIds || [];
+  const colourComponentIds=savedRefinement.maskColourComponentIds || [];
   const componentSelection=value=>{
     const components=value.maskComponents || (value.maskJob ? JSON.parse(value.maskJob.selectionJson).components : null);
     return components?.length?{components}:{};
@@ -63,7 +66,7 @@ export default function StudioSubjectMaskControls({ item, onChange, getDocument,
           throw new Error("The saved project version does not match this edit.");
         saved = { requestId: createId("subject-mask"), selectionJson, projectRevision: document.revision, projectId: document.projectId,
           ...(refinement?{mode:'refinement'}:{}) };
-        onChange({ ...current.current, maskBox: [...box], maskJob: saved });
+        onChange({ ...current.current, ...savedSubjectRefinement(current.current), maskBox: [...box], maskJob: saved });
       }
       const input = { schemaVersion: 1, requestId: saved.requestId, projectId: saved.projectId, projectRevision: saved.projectRevision,
         sourceAssetId: scene.sourceId, sourceSha256: asset.contentHash, sourceStoragePath: asset.storagePath,
@@ -112,7 +115,7 @@ export default function StudioSubjectMaskControls({ item, onChange, getDocument,
       createModelArtifactReference(result.modelArtifactRef);
       if (result.scene.id !== scene.id || result.scene.sourceId !== scene.sourceId ||
           result.modelArtifactRef.sourceContentHash !== asset.contentHash) throw new Error("The returned mask targets another source.");
-      onChange({ ...result, maskBox: [...box], maskJob: {...saved,finished:true}, ...(item.maskComponents?.length?{maskComponents:item.maskComponents}:{}) });
+      onChange({ ...result, ...savedSubjectRefinement(current.current), maskBox: [...box], maskJob: {...saved,finished:true}, ...(item.maskComponents?.length?{maskComponents:item.maskComponents}:{}) });
       setMessage("Subject mask saved. Adjust the background and render a preview; changing effects reuses this mask.");
     } catch (error) { if (mounted.current) setMessage(error.message); }
     finally { running.current = false; if (mounted.current) setBusy(false); }
@@ -127,7 +130,7 @@ export default function StudioSubjectMaskControls({ item, onChange, getDocument,
         result=await request(`/api/media/studio-subject-masks/jobs/${item.maskJob.jobId}`);
       }
       setMessage(`Mask request ${result.status}.`);
-      if (["cancelled", "failed"].includes(result.status)) onChange({ ...current.current, maskJob: undefined });
+      if (["cancelled", "failed"].includes(result.status)) onChange({ ...current.current, ...savedSubjectRefinement(current.current), maskJob: undefined });
     } catch (error) { setMessage(error.message); }
   };
   const reuse = async () => {
@@ -146,7 +149,7 @@ export default function StudioSubjectMaskControls({ item, onChange, getDocument,
         result.scene.sourceId!==scene.sourceId||result.modelArtifactRef.sourceContentHash!==document.assets.find(asset=>asset.sourceId===scene.sourceId)?.contentHash)
         throw new Error('The source selection changed. The mask remains saved but has not been applied.');
       if(!mounted.current)return;
-      onChange({...result,maskJob:{...saved,finished:true,reusedAtRevision:document.revision},
+      onChange({...result,...savedSubjectRefinement(current.current),maskJob:{...saved,finished:true,reusedAtRevision:document.revision},
         ...(item.maskComponents?.length?{maskComponents:item.maskComponents}:{})});
       setStaleJob(false);setMessage('Subject mask saved. Adjust the background and render a preview; changing effects reuses this mask.');
     }catch(error){if(mounted.current)setMessage(error.message);}
@@ -206,15 +209,19 @@ export default function StudioSubjectMaskControls({ item, onChange, getDocument,
       {!!(item.maskComponents||[]).some(component=>component.propagate===false) &&
         <p>For a selected fixed object, use its foreground and background points to clean remaining background colour. Check the moving result before exporting.</p>}
       <label>Edge refinement radius<input type="number" min="2" max="24" step="1" disabled={busy}
-        value={refinementRadius} onChange={event=>setRefinementRadius(Number(event.target.value))}/></label>
-      <button type="button" disabled={busy||pendingRefinement} onClick={()=>{
+        value={refinementRadius} onChange={event=>{
+          const value=Number(event.target.value);setRefinementRadius(value);
+          if(Number.isInteger(value)&&value>=2&&value<=24)
+            onChange({...current.current,...savedSubjectRefinement(current.current),maskRefinementRadius:value});
+        }} onBlur={()=>{if(!Number.isInteger(refinementRadius)||refinementRadius<2||refinementRadius>24)setRefinementRadius(savedRadius);}}/></label>
+      <button type="button" disabled={busy||pendingRefinement||!Number.isInteger(refinementRadius)||refinementRadius<2||refinementRadius>24} onClick={()=>{
         mask({maskArtifactHash:item.modelArtifactRef.artifactHash,radius:refinementRadius,
           ...(colourComponentIds.length?{colourComponentIds}:{}),
           holdouts:item.scene.effects.filter(effect=>effect.type==='foreground_holdout').map(effect=>effect.corners)});
       }}>Refine saved mask edges</button>
     </>}
     {item.modelArtifactRef && <button type="button" disabled={busy||pendingRefinement} onClick={()=>{
-      onChange({...current.current,maskBox:[...box],modelArtifactRef:undefined,maskJob:undefined,preview:undefined});
+      onChange({...current.current,...savedSubjectRefinement(current.current),maskBox:[...box],modelArtifactRef:undefined,maskJob:undefined,preview:undefined});
       setMessage("Choose a new foreground selection. The previous mask remains in saved project history.");
     }}>Refine foreground selection</button>}
     {item.maskJob?.jobId && <button type="button" onClick={cancel}>Cancel mask request</button>}

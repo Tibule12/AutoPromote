@@ -1,0 +1,15 @@
+"""Assemble verified actual frame intervals and original continuous soundtrack."""
+from pathlib import Path
+import argparse,subprocess,json,hashlib,time
+p=argparse.ArgumentParser();p.add_argument('ram');p.add_argument('destination');a=p.parse_args();ram=Path(a.ram).resolve();out=Path(a.destination).resolve();out.mkdir(exist_ok=False,parents=True);parts=[ram/(f'delivery-{i}' if (ram/f'delivery-{i}/receipt.json').exists() else f'finished-{i}') for i in [0,60,120,180]]
+for i,part in enumerate(parts):
+ receipt=json.load(open(part/'receipt.json'));assert receipt['startSeconds']==i*60 and receipt['frames']==1440 and receipt.get('fullCurvedMicrophoneRepair') is True and receipt.get('revealedSleeveBackgroundRepair') is True
+
+def md5(file):
+ result=subprocess.check_output(['ffmpeg','-nostdin','-v','error','-threads','1','-i',str(file),'-map','0:v','-f','framemd5','-']).decode();return [s.split(',')[-1].strip() for s in result.splitlines() if s and not s.startswith('#')]
+def assemble(name,target):
+ files=out/(name+'.ffconcat');files.write_text('ffconcat version 1.0\n'+''.join(f"file '{part/name}'\n" for part in parts));subprocess.run(['ffmpeg','-nostdin','-v','error','-safe','0','-f','concat','-i',str(files),'-map','0:v','-an','-c:v','copy',str(target)],check=True)
+ expected=sum((md5(part/name) for part in parts),[]);actual=md5(target);assert len(actual)==5760 and expected==actual,('Decoded frame order mismatch',name);return hashlib.sha256('\n'.join(actual).encode()).hexdigest()
+picture=out/'assembled-picture.mp4';pict_hash=assemble('picture.mp4',picture);alpha=out/'Full alpha matte - lossless.mkv';alpha_hash=assemble('alpha.mkv',alpha);final=out/'Four-minute repaired preview.mp4';master=Path('/home/tibule12/Videos/cam-combiner-5050c706-a6cb-48bc-ac43-8fa54f21bc1a.mp4');subprocess.run(['ffmpeg','-nostdin','-v','error','-i',str(picture),'-i',str(master),'-map','0:v:0','-map','1:a:0','-c:v','copy','-c:a','aac','-b:a','192k','-t','240','-movflags','+faststart',str(final)],check=True);assert md5(final)==md5(picture)
+streams=json.loads(subprocess.check_output(['ffprobe','-v','error','-count_frames','-show_streams','-of','json',str(final)]))['streams'];v=next(s for s in streams if s['codec_type']=='video');sound=next(s for s in streams if s['codec_type']=='audio');assert v['nb_read_frames']=='5760' and float(v['duration'])==240 and float(sound['duration'])>=239.99
+receipt={'seconds':240,'frames':5760,'fps':24,'dimensions':[1430,1000],'continuousOriginalAudioRangeSeconds':[0,240],'sourceSha256':'93ce466b525041df305e839154645bd8fb5b9ec9b621c64d4c2afd5d9badff8a','pictureFrameOrderExact':True,'alphaFrameOrderExact':True,'pictureDecodedSequenceSha256':pict_hash,'alphaDecodedSequenceSha256':alpha_hash,'previewSha256':hashlib.file_digest(final.open('rb'),'sha256').hexdigest(),'fullDecodePassed':True,'visualGate':False,'nativeEditableLongFormModelQualified':False,'paidCloud':False};(out/'assembly-verification.json').write_text(json.dumps(receipt,indent=2));picture.unlink();print('ACTUAL_FOUR_MINUTES_ASSEMBLED',receipt['previewSha256'],flush=True)

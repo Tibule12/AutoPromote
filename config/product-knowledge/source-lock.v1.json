@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Reviewed actual continuous four-minute failed visual proof, separate 48-frame repaired short interval, flattened native import/export/playback and unchanged readiness. Bounded weak trimap evidence and exact compositor preparation repairs do not qualify native editable long-form masks or professional visual quality.",
-  "reviewed_at": "2026-11-02T03:31:34.648Z",
-  "catalog_sha256": "fc732b34595d7dfa532b571e7280ed3dcb8f5fafd6153f72423557ac53351eed",
+  "reason": "Selected fixed-object alpha repair; inspected actual native short-shot frames and preserved failed visual attempts without readiness promotion.",
+  "reviewed_at": "2026-11-02T17:22:55.021Z",
+  "catalog_sha256": "7432335296f92de30fa3e2c85f2d2428c14a31fca5a0ad4350eeadc4b8b34a01",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -11,11 +11,11 @@
     },
     {
       "path": "config/model-runtime/registry.v1.json",
-      "sha256": "9cc7c4d8b1e67116a76652b142b566ce53fb70c9015913ddf773c2ee895b290e"
+      "sha256": "c3142ed0bae6f5eaa90280ce99715d2aa906cfd6d5b8fee88b7309dabd8cd2fd"
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
-      "sha256": "6e8508961feff487afe0bc011b989137971a8b12ee12f2cf361147047104c88f"
+      "sha256": "22b7f17c83fbd5d935b0a0d9f67132aa210de4ab64c9f3579613689d2f6e1239"
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
@@ -23,7 +23,7 @@
     },
     {
       "path": "contracts/model-capabilities-v1.json",
-      "sha256": "adfd2088426d286098e0169238ba0294ca718fc5305d7c033adacc393bd30ecd"
+      "sha256": "2e477ba0ddf4f25bf35402cef721394e0dfc17eee88a8b9967ffc9acae1116fd"
     },
     {
       "path": "contracts/product-knowledge-impact-v1.schema.json",
@@ -170,6 +170,10 @@
       "sha256": "8f16962ce834009ed85fac864fd128a5c3b9cde8b066b0d0c54c038a50c29a8a"
     },
     {
+      "path": "frontend/src/components/StudioSubjectMaskControls.js",
+      "sha256": "3574cdfc69aef51e04f48b7a98b905f32d0822d9341829c6b93f9de320efc23a"
+    },
+    {
       "path": "frontend/src/components/StudioSubjectVfxPanel.js",
       "sha256": "9451e137e0f2b4b3029fade310f329759ce281489fc1323c3ec19e4e2dbea639"
     },
@@ -307,7 +311,7 @@
     },
     {
       "path": "frontend/src/components/studioProjectDocument.js",
-      "sha256": "8c46831dbfdc84d27f4dda3f6e1b943a4407d48d09eddc37cf14af91d6e9dc6a"
+      "sha256": "99099031787d46ffc50647484bac194803924d716afe615f715dcdf77d83f5f2"
     },
     {
       "path": "frontend/src/components/studioRenderCompiler.js",
@@ -372,6 +376,10 @@
     {
       "path": "frontend/src/publicPageContent.js",
       "sha256": "69937449512ca95ef7ec00b3c492cd8155b4160ec55af1f99adef2a3b2be6632"
+    },
+    {
+      "path": "model_workers/adapters/source_edge_alpha.py",
+      "sha256": "374881f118cb6a290cd612bb2bb5110a54a0e9aecc706e35148917b3c8644e5a"
     },
     {
       "path": "package.json",
@@ -623,11 +631,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "1f8c893d67401bd8525c3c89529622fd97e495dabd85a3d9bcb83dde434eae94"
+      "sha256": "00c2eebc93a7346ee2ddd57a287c6cd84560d378ce617cdb82ff05c418502c70"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "41b88d433f406e08ae14eebc7abdc35108a3d556b9a9dbc5b3c4d743ed4d48ff"
+      "sha256": "ad439645039ce4a4690895e9e63ceac1c13691bf805aecf2eb49947678494a66"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

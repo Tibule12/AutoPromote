@@ -50,12 +50,19 @@ const snapshot = () => ({
 
 test('selected and explicitly disabled object colour corrections survive canonical layer projection',()=>{
  for(const ids of [['prop-a'],[]]){
-  const item={scene:{id:'scene-a'},enabled:true,maskColourComponentIds:ids};
+  const item={scene:{id:'scene-a'},enabled:true,maskColourComponentIds:ids,maskRefinementRadius:15};
   const layers=buildStudioLayersFromSnapshot({subjectVfxScenes:[item]});
   expect(layers[0].parameters.maskColourComponentIds).toEqual(ids);
   const projected=projectStudioLinkedTimingToSnapshot({layers});
   expect(projected.subjectVfxScenes[0].maskColourComponentIds).toEqual(ids);
+  expect(projected.subjectVfxScenes[0].maskRefinementRadius).toBe(15);
  }
+});
+
+test('old subject layers do not acquire a default refinement radius during an unchanged projection',()=>{
+ const layers=buildStudioLayersFromSnapshot({subjectVfxScenes:[{scene:{id:'scene-a'},enabled:true}]});
+ expect(layers[0].parameters).not.toHaveProperty('maskRefinementRadius');
+ expect(projectStudioLinkedTimingToSnapshot({layers}).subjectVfxScenes[0]).not.toHaveProperty('maskRefinementRadius');
 });
 
 test('opening an unchanged legacy occurrence preserves source-duration parameters and export identity', () => {

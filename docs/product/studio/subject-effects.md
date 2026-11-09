@@ -1,6 +1,6 @@
 # Mask-backed subject effects and browser proxies
 
-Development documentation • product 1.2.0 • knowledge 1.0.52 • 2026-11-02
+Development documentation • product 1.2.0 • knowledge 1.0.53 • 2026-11-02T17:22:54.227435+00:00
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -24,7 +24,8 @@ Uses reviewed owned subject-mask results in a bounded scene and deterministic fi
 2. Choose the person and separate foreground objects to retain, including the microphone and supports.
 3. Choose Correction target and a source frame; add foreground or background points where a track needs correction. Finish or cancel a pending mask request before changing it.
 4. Create the subject mask, refine saved mask edges, choose or upload the background and render the subject preview.
-5. Inspect movement and overlap frames, then save, reopen and inspect the final export. The reviewed checkbox records inspection, not professional quality approval.
+5. For a fixed foreground object with keep/remove colour examples, optionally enable Clean fine edges of foreground object N before refining. Leave it off for other objects; inspect every affected movement frame.
+6. Inspect movement and overlap frames, then save, reopen and inspect the final export. The reviewed checkbox records inspection, not professional quality approval.
 
 **Preview:** A source-bound model mask and replacement scene produce a reviewed short-shot preview. Correcting the selection detaches stale results; effect-only changes can reuse the mask.
 
@@ -39,6 +40,7 @@ Uses reviewed owned subject-mask results in a bounded scene and deterministic fi
 - The local temporal revision gates opacity consensus on unchanged source RGB and scopes corrective resets to the affected object. This reduces a specific motion-related background defect; it does not qualify clean fine foliage, all hair or arbitrary motion.
 - The latest local continuation preserves fractional model alpha instead of thresholding it again, and retains the person box when a correction detaches a completed request. These bounded repairs do not qualify arbitrary motion, hair, physical relighting or production latency.
 - The original-frame comparison found unintended lossy intermediate encodes after the subject preview. Reviewed-subject sequence, reframe and finish intermediates now preserve decoded samples before the ordinary selected final encode. This does not recover missing fine foreground detail or qualify visual cleanliness.
+- Selected fixed-object colour refinement is opt-in and source-bound. Similar-colour subpixel twigs/TV graphics, cropped furniture alpha, physical integration and four-minute clean-edge qualification remain unresolved after the latest native two-second repair.
 
 **Common errors**
 

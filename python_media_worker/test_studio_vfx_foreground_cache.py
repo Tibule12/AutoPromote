@@ -50,5 +50,15 @@ class ForegroundCacheTests(unittest.TestCase):
             cache=ForegroundFrameCache('v1');source=Image.new('RGB',(2,2));alpha=Image.new('L',(2,2),255)
             self.assertEqual(cache.prepare(source,alpha,[],lambda:(source,alpha)),(source,alpha))
 
+    def test_different_photographed_evidence_cannot_reuse_foreground(self):
+        with tempfile.TemporaryDirectory() as folder,patch.dict(os.environ,{'STUDIO_VFX_FOREGROUND_CACHE_DIR':folder}):
+            cache=ForegroundFrameCache('v1');source=Image.new('RGB',(2,2));alpha=Image.new('L',(2,2),128)
+            calls=[]
+            def compute():calls.append(1);return source,alpha
+            for identity in ['source-photo-a','source-photo-a','source-photo-b']:
+                cache.prepare(source,alpha,[],compute,evidence_identity=identity)
+            self.assertEqual(len(calls),2)
+            self.assertEqual(cache.hits,1)
+
 
 if __name__=='__main__':unittest.main()

@@ -96,6 +96,19 @@ async function createStudioModelRuntime() {
     models=structuredClone(require('../modelRuntime/contract').registry);
     models.defaults.segment_subject='sam21-multiobject-cpu-v2';
     models.refinementDefaults.segment_subject='vitmatte-small-temporal-cpu-v2';
+    if(process.env.STUDIO_BACKGROUND_DEMO_LOCAL_CUDA==='true'){
+      const {localCudaProfile}=require('../modelRuntime/localCudaEvaluation');
+      const cuda=await localCudaProfile(process.env.STUDIO_MODEL_LOCAL_CUDA_DIR);
+      workers['segmentation-tracking:cuda']=await EmulatorCpuWorker.create({bucket,artifacts,
+        directory:process.env.STUDIO_MODEL_LOCAL_CPU_ROOT,python:process.env.CREDITS_PYTHON_BIN,
+        modelDirectory:process.env.STUDIO_MODEL_LOCAL_CPU_MODEL_DIR,
+        refinementModelDirectory:process.env.STUDIO_MODEL_LOCAL_CPU_REFINEMENT_MODEL_DIR,
+        dependenciesDirectory:process.env.STUDIO_MODEL_LOCAL_CPU_DEPS_DIR,
+        cudaProfile:cuda.profile,cudaLibraries:cuda.libraries});
+      models.models.push(...structuredClone(require('../../config/model-runtime/local-cuda-evaluation.v1.json').models));
+      models.defaults.segment_subject='sam21-multiobject-local-cuda-v2';
+      models.refinementDefaults.segment_subject='vitmatte-small-temporal-local-cuda-v2';
+    }
   }
   const authorize=async ({ownerUid,request:r,requireCurrentRevision})=>{
     const binding=await getOwnedStudioSourceBinding({uid:ownerUid,projectId:r.projectId,sourceAssetId:r.sourceAssetId,firestore:db});
