@@ -1,0 +1,27 @@
+# Editorial V3 — delivered for review, full milestone unfinished
+
+31 October 2026. The new **16-second native edit** is at [Watch the movie](</home/tibule12/Videos/The Video I Never Recorded - Editorial V3.mp4>). The review folder contains raw source, a synchronized comparison, original takes, the editable native project, actual authoring footage, the complete matching Studio playback and stills. No new source generation, paid GPU job, production data write, merge or deployment occurred.
+
+The composition now starts clean, moves the actual recording into a perspective plane, gives “NEVER / SAID.” readable space, and builds FACE / VOICE / ROOM at their spoken cues. Amber evidence rules and character choreography use ordinary native keys. The graphics clear for the return to the face. All evaluated picture motion and effects originate in AutoPromote's actual updated Studio/compiler/CPU renderer. The side-by-side comparison is utility packaging of the raw and already-rendered files.
+
+The exact native output is H.264, 1280×720, 24 fps, 384 pictures, 16 seconds; SHA-256 `964b3ee47b0c5c22f27513df739f5556f57081161c924919b3f28668c2c335c6`. The source originals remain 1080p and retain their original hashes. This edit has 24 native layers and 164 motion keys. Its final backup matches the native export-linked project hash `81a86488c6078b3999998e62cda84b899c0d32f1963c396b1227d6c7b3e67e17`. The backup still references isolated owned-media paths; raw media is supplied beside it, but standalone/offline restore and import into a different account are **not qualified**.
+
+Candid creative verdict:
+
+1. The opening premise creates curiosity, and the cleaner hierarchy gives the denial more emphasis. That is an editorial judgment, not audience testing.
+2. Frontal gaze is improved. Take 2 still has a visible sharpening/skin-texture change; voice identity, acting and perceptual lip sync are not approved.
+3. The recording has real perspective-correct video motion and an alpha-aware shadow. This is a bounded planar compositor, not a full 3D scene or an implementation of all After Effects/Fusion capabilities.
+4. There is no clock cue in these two takes. No clock was introduced before dialogue supports it. The 02:17 / 11:06 revelation and its explanatory hold are **absent**.
+5. The audience therefore cannot yet evaluate the clock inconsistency or the complete story payoff.
+6. The exported movie completes normal playback. Studio's finished-file test drops zero frames; its recorded playback captures about 23.42 screen frames/sec. The live edit still drops 84 of 381 decoded/display-accounted frames in the final run. **Live smoothness remains inadequate**, despite improving from 186 drops in the preceding run. No claim of whole preview/export pixel parity is made. Ten paired paused views are retained; fractional seeks differ from their nearest exported frame and typography geometry still differs in some pairs.
+7. The result is a stronger, more legible editorial treatment than the raw two-take assembly. It remains an excerpt with a simple evidence layout, not the requested completed cinematic minute or proof of broad AE/Fusion-level quality.
+
+Audio is not zero-offset identical. The initial zero-offset correlation check failed and is retained. Measured decoded speech lag is 12 ms; after measuring that lag, correlation is 0.998600, gain 0.990185. This is below one 24 fps frame, but correlation does not approve perceived lip sync. The second B-roll source control rounded its intended 8.25 s start to 8.30 s; that 50 ms authored source offset is another remaining timing limitation, not hidden by the graphics.
+
+The first exports failed before completion: the QA session snapshot lost local File/Blob bytes, and early worker runs hit their local execution ceiling. The proper native backup retained the artwork. The bounded uploader fallback is tested, but the successful flow uses a fresh normal backup restore, not a fabricated session. Authoring automation also wrote 0.01° while an integer field displayed zero; the final eight rotation keys are explicitly verified at exactly zero. A bounded projected-shadow allocation now matches the original renderer's RGBA pixels in five cases, including edge anchors/offsets. Current validation: 169 worker cases, 40 focused preview cases, four selected editor regressions and two artwork-export cases pass. Two separate welcome-build comparisons each pass eight viewports; signed-in Help opens normally, with no question-answering qualification implied.
+
+The final canonical CPU job takes about 221 seconds locally; no provider charge is started. Local defaults stay bounded; the separately owned diagnostic worker used a 300-second ceiling. Prior failures, the first failed zero-offset audio check, native receipts and build/source hashes are retained. The original ten-minute script and story assets were not rewritten.
+
+**Remaining work:** live preview throughput, exact video-plane/source timing and typography parity; stronger full-story motion design; complete narrated source and clock reveal. Only the earlier two paid source tests were approved. This delivery does not authorize further generation or qualify the full minute. The broader presented-frame preview remains off by default while its live performance is inadequate.
+
+The owned QA services are now stopped. Unrelated local application services remain untouched.
