@@ -1,0 +1,25 @@
+{
+  "rejectedProgrammeInterval": [
+    4,
+    7
+  ],
+  "originalSourceInterval": [
+    22.458333333333332,
+    25.458333333333332
+  ],
+  "frames": 72,
+  "fps": 24,
+  "crop": [
+    170,
+    40,
+    1110,
+    1000
+  ],
+  "alphaSize": [
+    800,
+    720
+  ],
+  "method": "Existing private RVM CPU prior plus source-specific chair/hardware selections",
+  "modelSha256": "88d4531297118f595bf2fd60f6f566aec2e559393802d1f436c380f0cbbd2828",
+  "sourceSha256": "7a16b8ba2eba836eac74bcfb1f830313907ac0e19f314e636d4b7f833643578c"
+}

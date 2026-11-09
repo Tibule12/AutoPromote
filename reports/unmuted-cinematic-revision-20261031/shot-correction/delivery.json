@@ -1,0 +1,57 @@
+{
+  "delivery": "/home/tibule12/Videos/Unmuted - Shot Correction - 20261031",
+  "duration": 3,
+  "fps": 24,
+  "frames": 72,
+  "beforeIntervalInRejectedMovie": [
+    4,
+    7
+  ],
+  "sourceInterval": [
+    22.458333333333332,
+    25.458333333333332
+  ],
+  "sourceClockUnchanged": true,
+  "sound": "Existing rejected programme soundtrack, same 4\u20137s interval; no new sound generation",
+  "files": {
+    "README.txt": {
+      "bytes": 944,
+      "sha256": "99f86f5120417562069e1125ccc89491441388168197158f2739626894c7ee29"
+    },
+    "Studio Shot Playback with Sound.mp4": {
+      "bytes": 759659,
+      "sha256": "1b1bbf44bfae935037de40f0b7ece067b4c7acfa82342c3c9e70fca0a0c4c58a"
+    },
+    "Before - actual frame.png": {
+      "bytes": 640387,
+      "sha256": "bf6f30c41e649822698e6c40063734e9289e371dac53ec10bec3f4e7bb7c7dca"
+    },
+    "Corrected Shot - 3 seconds.mp4": {
+      "bytes": 966525,
+      "sha256": "27e4c65304bb552c9f8846a9758b65c1d49e94ff332bcba6fe10edcc477714b5"
+    },
+    "After - actual frame.png": {
+      "bytes": 555657,
+      "sha256": "b3169fd459f5af0d70ff0edabec3028e1091538f4ae39fc8bacab02f9f559239"
+    },
+    "Before - same 3 seconds.mp4": {
+      "bytes": 1460587,
+      "sha256": "2ab6fbf2bb391edc7714d49a6f878eb771682d2032af845f225b798776b79b62"
+    },
+    "Before and After - actual frames.png": {
+      "bytes": 1518248,
+      "sha256": "0e4e35accaba1f444252e4c1899a16174c2156144645fd812f83bdb380e58b91"
+    }
+  },
+  "technicalDecodePassed": true,
+  "creativePass": false,
+  "professionalQualification": false,
+  "note": "Visual judgment is recorded separately; successful encoding is not creative acceptance.",
+  "visualJudgment": "VISUAL_GATE_FAILED",
+  "remaining": [
+    "Soft/uneven moving ear and earring matte; thin jewellery and edge colour recovery are incomplete",
+    "Baked magenta source rim not coherently motivated by set lighting",
+    "Alpha/emission person plane has no normals/geometry for physical relighting, body shadows or genuine orbital views",
+    "Underlying person softness versus 3D set and simple repetitive set/type remain visually apparent"
+  ]
+}

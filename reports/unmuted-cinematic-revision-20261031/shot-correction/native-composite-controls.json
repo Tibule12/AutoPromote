@@ -1,0 +1,16 @@
+{
+  "controlsPresent": true,
+  "sourceInterval": [
+    22.458333333333332,
+    25.458333333333332
+  ],
+  "sourceSelected": true,
+  "backgroundChoiceVisible": true,
+  "personPointAuthored": true,
+  "renderStarted": false,
+  "blocker": "Isolated engineering build has no owned Studio uploader/storage binding and disables Firebase authentication. Native render guard stops before dispatch.",
+  "noAuthBypass": true,
+  "cloudJobs": 0,
+  "external": [],
+  "errors": []
+}

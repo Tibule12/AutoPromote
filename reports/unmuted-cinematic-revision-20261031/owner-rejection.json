@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-31",
+  "status": "OWNER_REJECTED_CREATIVE_QUALITY",
+  "movieSha256": "4d2c8d510c0e36d4d2b3e2ad7c9aa461ccf6f3a50ba21e5aba04f608add6eb4f",
+  "ownerFeedback": "The delivered cinematic podcast revision is unacceptable; the assistant should have identified its visible defects before presenting it.",
+  "observedDefects": [
+    "Presenter reads as a pasted flat cutout with mismatched light/contact",
+    "Microphone is visibly truncated and shoulder boundaries are imperfect",
+    "New desk is disconnected from the original seated pose and equipment",
+    "Oversized repetitive architectural background dominates the presenter",
+    "Camera drift and floating title rails are decorative rather than a developed cinematic treatment"
+  ],
+  "assistantJudgmentFailure": "Visible creative/compositing defects were observed but the movie was delivered anyway as a review cut. It should have been rejected before delivery.",
+  "technicalChecksRetained": true,
+  "professionalCreativeQualification": false,
+  "creativeApproval": false,
+  "readinessPromoted": false,
+  "originalsAndRejectedOutputsPreserved": true,
+  "newRender": false,
+  "productionAccess": false,
+  "requiredBeforeAnotherDelivery": [
+    "Resolve coherent scale, camera perspective, lighting, contact and complete equipment in the actual composite",
+    "Choose camera and graphic actions that serve the spoken passage",
+    "Review the actual moving output against those requirements; reject visible failures before presenting it"
+  ]
+}

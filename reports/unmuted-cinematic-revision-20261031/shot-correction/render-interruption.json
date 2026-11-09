@@ -1,0 +1,11 @@
+{
+  "initialWrapperExit": 143,
+  "completedFramesBeforeInterruption": 70,
+  "cause": "SIGTERM/external interruption; originating cause not established",
+  "resumeOnlyFrames": [
+    71,
+    72
+  ],
+  "sameSavedBlend": true,
+  "pid": 209570
+}
