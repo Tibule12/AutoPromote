@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkautopromote_frontend=globalThis.webpackChunkautopromote_frontend||[]).push([[482],{482(t,e,o){o.r(e),o.d(e,{default:()=>n});o(8230);var r=o(1583),a=o(614);function n(){return(0,a.jsx)(r.A,{page:"partners"})}}}]);

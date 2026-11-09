@@ -1,0 +1,18 @@
+"use strict";
+(globalThis["webpackChunkautopromote_frontend"] = globalThis["webpackChunkautopromote_frontend"] || []).push([[260],{
+
+/***/ 1260
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ LiveLanding)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(8230);
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(999);
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(614);
+function useQuery(){if(typeof window==="undefined")return new URLSearchParams("");return new URLSearchParams(window.location.search);}function LiveLanding(){const[loading,setLoading]=(0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);const[message,setMessage]=(0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);const query=useQuery();const token=query.get("token")||null;const path=typeof window!=="undefined"?window.location.pathname:"";const liveId=(path||"").split("/").filter(Boolean)[1]||null;(0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(()=>setMessage(null),[token]);const handleAccess=async()=>{if(!token){setMessage("Missing access token in link.");return;}setLoading(true);try{const res=await fetch(`${_config__WEBPACK_IMPORTED_MODULE_1__/* .API_BASE_URL */ .JR}/api/live/redeem`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token})});const body=await res.json().catch(()=>({}));if(!res.ok){setMessage(body.error||body.reason||"Could not redeem token");setLoading(false);return;}const usedToken=body.token||token;const target=`/live/watch?token=${encodeURIComponent(usedToken)}`;if(typeof window!=="undefined")window.location.href=target;}catch(e){setMessage("Network error while redeeming token");}finally{setLoading(false);}};return/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div",{style:{padding:20,maxWidth:760,margin:"0 auto"},children:[/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("h2",{children:"Live stream landing"}),/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("p",{children:["Stream: ",liveId||"Unknown"]}),/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div",{style:{marginTop:24},children:/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div",{style:{padding:20,borderRadius:10,background:"#fff",boxShadow:"0 6px 18px rgba(0,0,0,0.08)"},children:[/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("h3",{children:"Access"}),/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("p",{children:"This stream is available to authorized viewers. Use the token in the link to access."}),/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div",{style:{marginTop:12},children:/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("button",{onClick:handleAccess,disabled:loading,style:{padding:"10px 14px",borderRadius:8,cursor:"pointer"},children:loading?"Processing…":"Access stream"})}),message&&/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("p",{style:{marginTop:12},children:message}),!token&&/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("p",{style:{marginTop:12,color:"#666"},children:"This private stream requires a token in the link. Ask the streamer to resend the link."})]})})]});}
+
+/***/ }
+
+}]);
