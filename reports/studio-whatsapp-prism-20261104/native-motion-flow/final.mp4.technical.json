@@ -1,0 +1,32 @@
+{
+  "passed": true,
+  "sha256": "1c241e106ebeeec48cf80c445f7a20effca99cf0a6a12b2ed3a8eea54569a67c",
+  "bytes": 6600781,
+  "seconds": 24,
+  "video": {
+    "width": 1280,
+    "height": 720,
+    "codec": "h264",
+    "fps": "24/1",
+    "duration": "24.000000",
+    "frameCount": 576,
+    "pixelFormat": "yuv420p",
+    "encoder": "Lavc60.31.102 libx264"
+  },
+  "audio": {
+    "codec": "aac",
+    "channels": 2,
+    "sampleRate": "48000",
+    "duration": "24.000000"
+  },
+  "independentFullDecode": true,
+  "decodedAudio": {
+    "samples": 1152000,
+    "sampleRate": 48000,
+    "seconds": 24,
+    "toleranceSeconds": 0.04466666666666667,
+    "passed": true
+  },
+  "contactSheet": "reports/studio-whatsapp-prism-20261104/native-motion-flow/final.mp4.frames.jpg",
+  "scope": "Technical only. Pixel and listening review are separate required evidence."
+}

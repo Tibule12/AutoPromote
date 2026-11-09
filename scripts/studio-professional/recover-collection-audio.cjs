@@ -1,0 +1,34 @@
+// One explicit recovery after the second verified terminal failure/refund.
+const fs = require('fs'), path = require('path'), assert = require('assert/strict');
+const { spawn } = require('child_process');
+const { hash } = require('../../src/creativeTemplates/contract');
+const root = path.resolve(__dirname, '../..'), p = path.join(root, 'reports/studio-template-collection-20261104');
+const rt = '/tmp/autopromote-application-demo-5izIlF', d = path.join(p, 'living_infinity_v1');
+const load = f => JSON.parse(fs.readFileSync(f));
+(async () => {
+  assert(!fs.existsSync(path.join(p, 'type-audio-renewal-observer.json')), 'Recovery already started; observe rather than resubmit');
+  const prior = load(path.join(d, 'active-execution.json')), execution = prior.directory;
+  assert.equal(load(path.join(execution, 'termination.json')).code, 1);
+  assert.equal(load(path.join(execution, 'resource.json')).providerChargesStarted, false);
+  assert(!fs.existsSync(`/proc/${prior.process.pid}`));
+  const config = load(path.join(rt, 'config.json'));Object.assign(process.env, config.env);
+  const db = require('../../src/services/unifiedCredits/runtime').createSandboxDatabase(config.env);
+  assert.equal((await db.doc('credits_v2_control/global').get()).data().activeOperations, 0);
+  const verifier = require('../../src/services/unifiedCredits/rewardProof').createMockVerifier(require('crypto').randomBytes(32).toString('hex'));
+  const wallet = await require('../../src/services/unifiedCredits/wallet').createWalletService({db,policy:config.policy,verifier}).getAccount('demo-pilot-alice');
+  assert(wallet.balance >= 2, 'Verified refund required');
+  const archive = path.join(d, 'Failed expired music reference');fs.mkdirSync(archive);
+  for (const name of ['request.json','worker.log','termination.json','resource.json','process.json']) fs.copyFileSync(path.join(execution,name),path.join(archive,name));
+  for (const name of ['native-motion-flow','live-playback','live-playback.json','render.log']) if(fs.existsSync(path.join(d,name)))fs.renameSync(path.join(d,name),path.join(archive,name));
+  const manifest = load(path.join(p, 'preflight-before-type-recovery.json'));
+  for (const [f,h] of Object.entries({...manifest.sources,...manifest.sourceHashes}))assert.equal(hash(fs.readFileSync(path.join(root,f))),h,f);
+  const localHarnessSourceHashes = Object.fromEntries(['src/services/unifiedCredits/sourceGateway.js','src/services/unifiedCredits/localStorageRead.js','scripts/monetization/application-host.cjs'].map(f=>[f,hash(fs.readFileSync(path.join(root,f)))]));
+  const api = await require('../monetization/restart-demo-api.cjs').restartDemoApi(rt);
+  assert.equal(hash(Buffer.from(await(await fetch(config.origin+manifest.mainAsset)).arrayBuffer())),manifest.mainSha256);
+  fs.writeFileSync(path.join(p,'preflight-before-audio-renewal.json'),JSON.stringify({...manifest,api,localHarnessSourceHashes,priorExecutionTerminalCode:1,priorExecutionId:prior.executionId,activeOperations:0,availableCredits:wallet.balance,newGrant:false,refundReused:true,reason:'Renew owned admitted audio immediately before verified worker dispatch; unchanged content/generation and 30-minute TTL.'},null,2));
+  await db.terminate();
+  const fd=fs.openSync(path.join(d,'render.log'),'a',0o600);
+  const child=spawn(process.execPath,['scripts/studio-professional/template-collection-proof.cjs',rt,'render','living_infinity_v1'],{cwd:root,env:{...process.env,NODE_PATH:'/home/tibule12/Projects/AutoPromte/AutoPromote/node_modules',TMPDIR:'/dev/shm'},stdio:['ignore',fd,fd],detached:true});fs.closeSync(fd);child.unref();
+  fs.writeFileSync(path.join(p,'type-audio-renewal-observer.json'),JSON.stringify({pid:child.pid,previousExecutionId:prior.executionId,previousCode:1,refundReused:true,newGrant:false},null,2));
+  console.log('Native recovery observer started after owned-audio renewal repair:',child.pid);
+})().catch(e=>{console.error(e.stack);process.exitCode=1});

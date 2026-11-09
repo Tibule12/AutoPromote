@@ -1,0 +1,11 @@
+{
+  "priorClaimCorrected": "Music capability had not expired at worker failure. Current original capability HTTP200 and 4,608,044 bytes.",
+  "reproductionExit": 0,
+  "reproductionStderr": "",
+  "jobCode": 1,
+  "noNewRenderSubmitted": true,
+  "actualFailure": "HTTP5XX from local owned-media gateway; API log confirms Storage emulator socket hang up.",
+  "capabilityExpiredAtFailure": false,
+  "originalCapabilityHttp200AfterFailure": true,
+  "repair": "One additional read only for connection-reset/pipe/refused errors; denials/missing/generation errors are not retried. No admission or job retry in this helper."
+}

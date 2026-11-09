@@ -1,0 +1,15 @@
+{
+  "format": "autopromote-scene-actions",
+  "version": 1,
+  "projectId": "viral-project-fa5921d4-7d4c-44bb-955d-dc65ef0c1360",
+  "baseRevision": 75,
+  "name": "11 - Smooth source-bound matte",
+  "actions": [
+    {
+      "type": "matte",
+      "targetId": "scene-db1c8afb-3bb2-45f9-8239-44cf0365a419",
+      "matteSourceId": "scene-710100e7-471e-451c-b417-d87e48e25afa",
+      "mode": "luma"
+    }
+  ]
+}

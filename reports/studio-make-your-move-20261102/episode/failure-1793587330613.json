@@ -1,0 +1,6 @@
+{
+  "phase": "final-layout",
+  "error": "cdpSession.send: Target page, context or browser has been closed\n    at /home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/scripts/studio-professional/kinetic-type-proof.js:41:19\n    at playback (/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/scripts/studio-professional/make-your-move-proof.cjs:62:641)\n    at async /home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/scripts/studio-professional/make-your-move-proof.cjs:65:1289",
+  "errors": [],
+  "body": "Unavailable"
+}

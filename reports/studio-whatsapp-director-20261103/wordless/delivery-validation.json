@@ -1,0 +1,17 @@
+{
+  "newDeliveryFilesVerified": 42,
+  "earlierDeliveryFilesUnchanged": {
+    "WhatsApp Director - 2026-11-03": 48,
+    "Revision 2 - Cut through": 45
+  },
+  "originalsUnchanged": 4,
+  "nativeMovieMatchesJob": true,
+  "nativeBackupMatchesSelectedExport": true,
+  "fullDecode": true,
+  "nativeFrames": 576,
+  "addedTextLayers": 0,
+  "sourceSpeechMuted": true,
+  "freeBytes": 10096328704,
+  "freeGiB": 9.403,
+  "readinessPromotion": false
+}

@@ -1376,6 +1376,12 @@ try {
     require("./routes/studioProjectIntelligenceRoutes")
   );
   app.use(
+    "/api/studio/director/creative-plan",
+    routeLimiter({ windowHint: "studio_director_creative_plan" }),
+    codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (_req, _res, next) => next(),
+    require("./routes/studioDirectorCreativeRoutes")
+  );
+  app.use(
     "/api/studio/director/analysis-artifacts",
     routeLimiter({ windowHint: "studio_analysis_artifacts" }),
     require("./routes/studioAnalysisArtifactRoutes")

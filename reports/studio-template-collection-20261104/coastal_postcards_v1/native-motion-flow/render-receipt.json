@@ -1,0 +1,444 @@
+{
+  "startedAt": "2026-11-04T07:31:48.243Z",
+  "finishedAt": "2026-11-04T07:34:32.828Z",
+  "projectId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58",
+  "projectHash": "b1cdffdab5cea352a3acd5a2ed977ceed60f48a509d20a4cfa717330cf913875",
+  "templateRef": {
+    "templateId": "coastal_postcards_v1",
+    "version": "1.0.0",
+    "definitionHash": "27260c19a11d56aab1eb14d3654654660b94109b5aea28dc86393355d7340985"
+  },
+  "submittedJobId": "viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+  "outputSha256": "145c23a171e9f11f8933263f9eddf2a42d7218ad55ba5866fd3f78b469e76859",
+  "serverOutputSha256": "145c23a171e9f11f8933263f9eddf2a42d7218ad55ba5866fd3f78b469e76859",
+  "requestBytesSha256": "931d6d26248464550d4977471650067b2302761a657cf46aa45ce8c5e44cf941",
+  "events": [
+    {
+      "path": "/api/media/process",
+      "status": 200
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "status": 200,
+      "jobStatus": "completed"
+    }
+  ],
+  "technical": {
+    "passed": true,
+    "sha256": "145c23a171e9f11f8933263f9eddf2a42d7218ad55ba5866fd3f78b469e76859",
+    "bytes": 3134576,
+    "seconds": 8,
+    "video": {
+      "width": 1280,
+      "height": 720,
+      "codec": "h264",
+      "fps": "24/1",
+      "duration": "8.000000",
+      "frameCount": 192,
+      "pixelFormat": "yuv420p",
+      "encoder": "Lavc60.31.102 libx264"
+    },
+    "audio": {
+      "codec": "aac",
+      "channels": 2,
+      "sampleRate": "48000",
+      "duration": "8.000000"
+    },
+    "independentFullDecode": true,
+    "decodedAudio": {
+      "samples": 384000,
+      "sampleRate": 48000,
+      "seconds": 8,
+      "toleranceSeconds": 0.04466666666666667,
+      "passed": true
+    },
+    "contactSheet": "reports/studio-template-collection-20261104/coastal_postcards_v1/native-motion-flow/final.mp4.frames.jpg",
+    "scope": "Technical only. Pixel and listening review are separate required evidence."
+  },
+  "projectHashBeforeMediaUpload": "8307e2c45460cab02e9fb6ecc67f939d481320bd494815aa86bbb1307f22040c",
+  "actualNativeDownload": true,
+  "noMocks": true,
+  "authBypass": false,
+  "gpuJobs": 0,
+  "creativeReview": "pending actual moving/sound review and founder approval"
+}

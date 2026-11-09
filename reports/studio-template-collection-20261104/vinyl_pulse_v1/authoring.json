@@ -1,0 +1,30 @@
+{
+  "projectId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060",
+  "templateRef": {
+    "templateId": "vinyl_pulse_v1",
+    "version": "1.0.0",
+    "definitionHash": "ff1bdcbe6c98477a92bb1d8d75853c0a12b44b655d5d5c5459b3962a6fca9214"
+  },
+  "decisions": "f29b8a30ef573d5bbdca6d27238630874ab87b5a34719cddcbcbbc48514c39d2",
+  "layers": 6,
+  "keys": 69,
+  "seconds": 8,
+  "source": {
+    "name": "music",
+    "title": "Young woman dances and moves slowly underneath neon lights",
+    "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/reports/studio-template-collection-20261104/sources/music.mp4",
+    "sha256": "db78c0e58e101addc8e50cf2e4131de3650dd5ca5619c69d4dd8d5e85a598145",
+    "page": "https://mixkit.co/free-stock-video/young-woman-dances-and-moves-slowly-underneath-neon-lights-50440/",
+    "downloadUrl": "https://assets.mixkit.co/videos/50440/50440-720.mp4",
+    "license": "https://mixkit.co/license/modal/videoFree/",
+    "sourceHtmlSha256": "ab81c1d7f05e5e3942f0ef3eb940d54cc4ea400fc310a16efbebc795a48d6d3f",
+    "bytes": 4611917,
+    "seconds": 11.636625,
+    "width": 720,
+    "height": 1280,
+    "fps": "24000/1001",
+    "fullDecode": true
+  },
+  "normalFrontend": true,
+  "paidCalls": 0
+}

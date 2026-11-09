@@ -1,0 +1,10 @@
+{
+  "stoppedOwnIdleCandidateServers": [
+    436046,
+    454775,
+    463453,
+    469651
+  ],
+  "actualAppPreserved": "http://127.0.0.1:43927",
+  "workerPreserved": "http://127.0.0.1:43931"
+}

@@ -1,0 +1,190 @@
+{
+  "movie": "reports/studio-make-your-move-20261102/episode/native-motion-flow/final.mp4",
+  "fps": 24,
+  "comparison": "Exact measured live programme time to decoded CFR frame; export resized once to live monitor size.",
+  "assessment": "Diagnostic measurements, not a calibrated whole-scene passing threshold or creative approval.",
+  "samples": [
+    {
+      "time": 0.5,
+      "exportFrame": 12,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "12",
+      "mae": 1.9502375305100872,
+      "psnr": 30.426066455929277,
+      "ssim": 0.9807682537952899,
+      "size": [
+        1016,
+        571
+      ]
+    },
+    {
+      "time": 1.5,
+      "exportFrame": 36,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "36",
+      "mae": 1.9115609673134115,
+      "psnr": 30.036889009161776,
+      "ssim": 0.9800025263066052,
+      "size": [
+        1016,
+        571
+      ]
+    },
+    {
+      "time": 2.5,
+      "exportFrame": 60,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "60",
+      "mae": 1.9347785117053014,
+      "psnr": 29.83310771201246,
+      "ssim": 0.9802085016850697,
+      "size": [
+        1016,
+        571
+      ]
+    },
+    {
+      "time": 3.5,
+      "exportFrame": 84,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "84",
+      "mae": 10.690596687673235,
+      "psnr": 19.96878235607051,
+      "ssim": 0.8578377182639767,
+      "size": [
+        1016,
+        571
+      ]
+    },
+    {
+      "time": 4.5,
+      "exportFrame": 108,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "108",
+      "mae": 2.3851154441946947,
+      "psnr": 32.86235761160406,
+      "ssim": 0.9761018214647333,
+      "size": [
+        1016,
+        571
+      ]
+    },
+    {
+      "time": 5.5,
+      "exportFrame": 132,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "132",
+      "mae": 2.3057760019489684,
+      "psnr": 32.87089309454379,
+      "ssim": 0.9760982364575731,
+      "size": [
+        1016,
+        571
+      ]
+    },
+    {
+      "time": 6.75,
+      "exportFrame": 162,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "162",
+      "mae": 2.3440888573254086,
+      "psnr": 32.67123485341842,
+      "ssim": 0.9738145810566237,
+      "size": [
+        1016,
+        571
+      ]
+    },
+    {
+      "time": 7.75,
+      "exportFrame": 186,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "186",
+      "mae": 1.7781135228061467,
+      "psnr": 36.52158155428292,
+      "ssim": 0.9813248942946076,
+      "size": [
+        1016,
+        571
+      ]
+    },
+    {
+      "time": 9.0,
+      "exportFrame": 216,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "24",
+      "mae": 5.761220932103277,
+      "psnr": 25.875250840303682,
+      "ssim": 0.9009144893457706,
+      "size": [
+        1016,
+        571
+      ]
+    },
+    {
+      "time": 15.0,
+      "exportFrame": 360,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "24",
+      "mae": 3.516979926545959,
+      "psnr": 33.1909104872571,
+      "ssim": 0.9031926121449685,
+      "size": [
+        1016,
+        571
+      ]
+    },
+    {
+      "time": 17.791666666666668,
+      "exportFrame": 427,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "91",
+      "mae": 4.134600622382798,
+      "psnr": 29.208975849390598,
+      "ssim": 0.8820388717815992,
+      "size": [
+        1016,
+        571
+      ]
+    },
+    {
+      "time": 22.0,
+      "exportFrame": 528,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "48",
+      "mae": 6.597641472574247,
+      "psnr": 28.728622701148325,
+      "ssim": 0.8946483315520731,
+      "size": [
+        1016,
+        571
+      ]
+    },
+    {
+      "time": 27.5,
+      "exportFrame": 660,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "180",
+      "mae": 2.8273358890558997,
+      "psnr": 25.2063311061831,
+      "ssim": 0.9651512224700215,
+      "size": [
+        1016,
+        571
+      ]
+    },
+    {
+      "time": 29.791666666666664,
+      "exportFrame": 715,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "235",
+      "mae": 2.996430721991625,
+      "psnr": 24.6901351823451,
+      "ssim": 0.9601791984474392,
+      "size": [
+        1016,
+        571
+      ]
+    }
+  ]
+}

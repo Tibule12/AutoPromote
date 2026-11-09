@@ -1,0 +1,18 @@
+{
+  "executionId": "93167696f0f7a89f79924eed73fe318df5ca6c1c6b30c264aa0aa28811d09086",
+  "termination": {
+    "code": 1,
+    "signal": null,
+    "startedAt": "2026-11-04T07:43:57.978Z",
+    "finishedAt": "2026-11-04T07:54:08.648Z"
+  },
+  "resource": {
+    "wallSeconds": 608.6593009459903,
+    "cpuSeconds": 662.979519,
+    "peakRssKiB": 1555700,
+    "providerChargesStarted": false,
+    "invoiceCostMicros": null
+  },
+  "cause": "Local Storage emulator socket reset produced gateway HTTP5XX, despite unexpired music capability.",
+  "failedAttemptRetained": true
+}

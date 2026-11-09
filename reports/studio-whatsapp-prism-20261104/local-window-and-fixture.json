@@ -1,0 +1,15 @@
+{
+  "demoProject": "demo-autopromote-credits",
+  "before": 1793707200000,
+  "after": 1793765417483,
+  "windowMs": 7200000,
+  "availableBefore": 0,
+  "grant": {
+    "alreadyProcessed": false,
+    "balance": 2
+  },
+  "availableAfter": 2,
+  "localFixtureOnly": true,
+  "realPurchase": false,
+  "apiPid": 842264
+}

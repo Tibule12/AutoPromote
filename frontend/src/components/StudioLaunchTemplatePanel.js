@@ -12,6 +12,7 @@ export default function StudioLaunchTemplatePanel({ projectId, media, instance, 
   const [templateId, setTemplateId] = useState(`${STUDIO_CREATIVE_TEMPLATES[0].templateId}@${STUDIO_CREATIVE_TEMPLATES[0].version}`);
   const [aspect, setAspect] = useState('16:9');
   const template = STUDIO_CREATIVE_TEMPLATES.find(item => `${item.templateId}@${item.version}` === templateId);
+  const isMotionStyle = !!template.executionDefinition.ordinaryMotion;
   const [status, setStatus] = useState('');
   const [busy, setBusy] = useState(false);
   const [proposal, setProposal] = useState(null);
@@ -80,17 +81,19 @@ export default function StudioLaunchTemplatePanel({ projectId, media, instance, 
       }
       const result = await instantiateStudioCreativeTemplate(options);
       onApply(result.snapshot);
-      setStatus('Launch template applied. Clips, titles, keys and sound remain editable.');
+      setStatus(isMotionStyle ? 'Motion style applied. Footage, artwork, motion and sound remain editable.' : 'Launch template applied. Clips, titles, keys and sound remain editable.');
     } catch (error) { setStatus(error.message); } finally { setBusy(false); }
   };
   return <details className="studio-template-library" data-testid="launch-template-panel">
-    <summary>{template.label} · 20 seconds</summary>
+    <summary>{template.label} · {template.durationTicks / 90000} seconds</summary>
     <ProductHelpButton featureId="studio.templates" label="Templates" workspaceType="STUDIO" />
-    <small>Private draft. Bind your footage, logo and soundtrack, then edit the resulting project.</small>
+    <small>Choose a style, bind its media, then edit the resulting layers, motion and sound.</small>
     <label style={{ display: 'block', marginTop: 8 }}>Template
       <select aria-label="Creative template" value={templateId} onChange={e => {
         const next = STUDIO_CREATIVE_TEMPLATES.find(item => `${item.templateId}@${item.version}` === e.target.value);
         setTemplateId(e.target.value); setAspect(next.executionDefinition.defaultAspect || '16:9'); setProposal(null);
+        if (next.executionDefinition.defaultCopy) setCopy(current => ({ ...current, ...next.executionDefinition.defaultCopy }));
+        setSlots({});
       }}>{STUDIO_CREATIVE_TEMPLATES.map(item => <option key={`${item.templateId}@${item.version}`} value={`${item.templateId}@${item.version}`}>{item.label} · {item.version}</option>)}</select>
     </label>
     <label style={{ display: 'block', marginTop: 8 }}>Aspect ratio
@@ -98,7 +101,7 @@ export default function StudioLaunchTemplatePanel({ projectId, media, instance, 
         {template.supportedAspects.map(value => <option key={value} value={value}>{value}</option>)}
       </select>
     </label>
-    {Object.entries(copy).map(([key, value]) => <label key={key} style={{ display: 'block', marginTop: 8 }}>
+    {Object.entries(copy).filter(([key]) => template.inputSlots.some(input => input.id === key)).map(([key, value]) => <label key={key} style={{ display: 'block', marginTop: 8 }}>
       {({ headline: 'Launch headline', featureOne: 'Feature one', featureTwo: 'Feature two',
         callToAction: 'Launch CTA', brandColour: 'Launch colour' })[key]}
       {key === 'brandColour' ? <input aria-label="Launch colour" type="color" value={value}
@@ -128,8 +131,8 @@ export default function StudioLaunchTemplatePanel({ projectId, media, instance, 
       {slots[slot] && <small>{slots[slot].name}</small>}
     </label>;
     })}
-    <button type="button" disabled={busy} onClick={() => apply('manual')}>Apply launch template</button>
-    <button type="button" disabled={busy} onClick={() => apply('director')}>Director: select launch edit</button>
+    <button type="button" disabled={busy} onClick={() => apply('manual')}>{isMotionStyle ? 'Apply motion style' : 'Apply launch template'}</button>
+    <button type="button" disabled={busy} onClick={() => apply('director')}>{isMotionStyle ? 'Director: select motion style' : 'Director: select launch edit'}</button>
     {proposal && <div role="region" aria-label="Director launch selection">
       <strong>{proposal.templateRef.templateId} · {proposal.templateRef.version}</strong>
       <p>{proposal.selectionReason}</p>

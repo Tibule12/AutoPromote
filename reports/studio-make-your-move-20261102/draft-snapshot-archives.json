@@ -1,0 +1,37 @@
+[
+  {
+    "original": "polished-project.private.json",
+    "archive": "polished-project.private.json.gz",
+    "bytes": 11763771,
+    "compressed": 1235956,
+    "sha256": "8fddf3e5740d1597d6ec18e04db88784ef7490dd7cf3beea48a6c8aa90c7e526"
+  },
+  {
+    "original": "composed-project.private.json",
+    "archive": "composed-project.private.json.gz",
+    "bytes": 11473813,
+    "compressed": 1210616,
+    "sha256": "bb34a212cdd12f87739e6b995ef83e294cf52f09086c7fefd3b1cd72077aad81"
+  },
+  {
+    "original": "raw-project.private.json",
+    "archive": "raw-project.private.json.gz",
+    "bytes": 127678,
+    "compressed": 71655,
+    "sha256": "6206970cbe716feea18e9d3043e4fdeb393a2b80f713470b398ad232bc95927b"
+  },
+  {
+    "original": "authored-project.private.json",
+    "archive": "authored-project.private.json.gz",
+    "bytes": 11482082,
+    "compressed": 1211936,
+    "sha256": "fe8a7456cf41354f7c3ab21923836e31e15993c5830a8c0eec42c19a5b32c39c"
+  },
+  {
+    "original": "interrupted-project.private.json",
+    "archive": "interrupted-project.private.json.gz",
+    "bytes": 6775871,
+    "compressed": 771296,
+    "sha256": "31faba4bd523b7fa2dba15f5716794932bde228a0a23b0d987c1db20a554276f"
+  }
+]

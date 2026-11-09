@@ -1,0 +1,60 @@
+{
+  "projectId": "viral-project-d5df376b-ad19-48e6-bb01-21d2b3b4e1fb",
+  "projectHash": "779aae7d9c5c3c4de8c7e67bafaf560883c099d565d3fa8bf7133e02e69031a4",
+  "submittedJobId": "viral_e65af1651b570b5e99e5fef63aefce2bddf3e73dc4f9f3356bb781310fa9409d",
+  "renderRequestId": "8ec93d6b-dc9f-4da1-975d-389dc5e74c68",
+  "executionId": "4504e27e19a7002bc878d09a38e79335489b875b900f80124ebacd50aea5ced8",
+  "backupCompilesToExactSubmittedComposition": true,
+  "requestBytesSha256": "728ec25a2951624cadd083f892b1d0730f4b0d0178ef7ce57b17af7c427cc509",
+  "receiptPendingOwnedCompletedJob": false,
+  "resubmissionAllowed": false,
+  "outputSha256": "9c735e8dc05befeadedbd33355eacc01d4948eb85fbdd098182f801a15468cd1",
+  "startedAt": "2026-11-04T02:11:55.930Z",
+  "finishedAt": "2026-11-04T02:28:34.592Z",
+  "templateRef": {
+    "templateId": "creator_identity_v1",
+    "version": "1.0.0",
+    "definitionHash": "1148bf8324bfed65b5cf0a75db14d73ccb7f4923f4c5c391807da4fcfaa6acdd"
+  },
+  "identityRecoveredFromOwnedWorkerArtifact": true,
+  "actualNativeDownload": true,
+  "noResubmission": true,
+  "noMocks": true,
+  "authBypass": false,
+  "gpuJobs": 0,
+  "events": [],
+  "recoveredThroughNativeReceipt": true,
+  "technical": {
+    "passed": true,
+    "sha256": "9c735e8dc05befeadedbd33355eacc01d4948eb85fbdd098182f801a15468cd1",
+    "bytes": 6263555,
+    "seconds": 24,
+    "video": {
+      "width": 1280,
+      "height": 720,
+      "codec": "h264",
+      "fps": "24/1",
+      "duration": "24.000000",
+      "frameCount": 576,
+      "pixelFormat": "yuv420p",
+      "encoder": "Lavc60.31.102 libx264"
+    },
+    "audio": {
+      "codec": "aac",
+      "channels": 2,
+      "sampleRate": "48000",
+      "duration": "24.000000"
+    },
+    "independentFullDecode": true,
+    "decodedAudio": {
+      "samples": 1152000,
+      "sampleRate": 48000,
+      "seconds": 24,
+      "toleranceSeconds": 0.04466666666666667,
+      "passed": true
+    },
+    "contactSheet": "reports/studio-whatsapp-prism-20261104/native-motion-flow/final.mp4.frames.jpg",
+    "scope": "Technical only. Pixel and listening review are separate required evidence."
+  },
+  "ownedCompletedJobValidatedInNativeUi": true
+}

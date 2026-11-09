@@ -1,0 +1,47 @@
+{
+  "at": 1793578987.7567966,
+  "availableBeforeBytes": 12196556800,
+  "availableAfterBytes": 12383916032,
+  "measuredAvailableIncreaseBytes": 187359232,
+  "removedAllocatedBytes": 187379712,
+  "removed": [
+    {
+      "path": "/home/tibule12/.config/Code/CachedExtensionVSIXs",
+      "state": "already_absent_not_attributed_to_this_run"
+    },
+    {
+      "path": "/home/tibule12/.config/Code/CachedData",
+      "allocatedBytesBefore": 46542848,
+      "state": "removed_by_this_run"
+    },
+    {
+      "path": "/home/tibule12/.cache/pip/http-v2",
+      "state": "already_absent_not_attributed_to_this_run"
+    },
+    {
+      "path": "/home/tibule12/.npm/_cacache",
+      "allocatedBytesBefore": 39571456,
+      "state": "removed_by_this_run"
+    },
+    {
+      "path": "/home/tibule12/.cache/thumbnails",
+      "allocatedBytesBefore": 20787200,
+      "state": "removed_by_this_run"
+    },
+    {
+      "path": "/home/tibule12/Projects/AutoPromte/AutoPromote/frontend/node_modules/.cache/babel-loader",
+      "state": "already_absent_not_attributed_to_this_run"
+    },
+    {
+      "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-dependabot-20261028/frontend/node_modules/.cache/babel-loader",
+      "state": "already_absent_not_attributed_to_this_run"
+    },
+    {
+      "path": "/tmp/autopromote-application-demo-5izIlF/build-corner-index-20261102",
+      "allocatedBytesBefore": 80478208,
+      "state": "removed_by_this_run"
+    }
+  ],
+  "concurrentCleanupObserved": true,
+  "scope": "Disposable caches and this task failed partial build only. No model/media/project/session files removed. Global available-space changes cannot be exclusively attributed to this run."
+}

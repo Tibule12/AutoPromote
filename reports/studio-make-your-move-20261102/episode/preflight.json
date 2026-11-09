@@ -1,0 +1,91 @@
+{
+  "apiPid": 471765,
+  "workerPid": 454290,
+  "origin": "http://127.0.0.1:43927",
+  "demoProject": "demo-autopromote-credits",
+  "build": "/tmp/autopromote-application-demo-5izIlF/build-video-matte-crop-20261102",
+  "mainAsset": "/static/js/main.4ac283b8.js",
+  "mainSha256": "4fab0f67b5ab51ef59eca54ae18fa01c7219a76a5cc29e28575c418f58b33b0a",
+  "sources": [
+    {
+      "file": "frontend/src/components/ViralClipStudio.js",
+      "sha256": "49b56500d563e70ad8c55037a2a3198f6e7ffda447747f6613e62f55b0380596"
+    },
+    {
+      "file": "frontend/src/components/StudioProgrammeFrame.js",
+      "sha256": "a84524646519401dca2186dd0f0e5d60dc862db7c1877c00745cf5c187b2c3c9"
+    },
+    {
+      "file": "frontend/src/components/studioCompRigging.js",
+      "sha256": "fee827c06422c937113ccbbda8d5c40544095e46a74f99bae9d71074b90ca023"
+    },
+    {
+      "file": "frontend/src/components/studioVideoMatte.js",
+      "sha256": "e9297f003f7ca5bf8796492a4eca82a9ea69b7bfcd50f15fcb3a45fdfb4950c5"
+    },
+    {
+      "file": "src/generated/studioDirectorReplayKernel.cjs",
+      "sha256": "3cf9b00974895cde9c0f7f6d172755ada199d23ff33acd6ee30c78ef562a18b4"
+    },
+    {
+      "file": "python_media_worker/main_media_server.py",
+      "sha256": "ad85d61e3ece96bc798b1f0f5f7c619a427e9b9abb275f67de5aaa4f8a538574"
+    },
+    {
+      "file": "python_media_worker/studio_composition.py",
+      "sha256": "b474b171c6227fecbf9f27cf8b277d3adc31304dde42de0d5476bda54e98527e"
+    },
+    {
+      "file": "python_media_worker/studio_layer_motion.py",
+      "sha256": "c41f1612342c2ad71c592de5fd0293448d0254355f49d3ad78a6dc4023b12258"
+    },
+    {
+      "file": "scripts/monetization/local-worker-execution.py",
+      "sha256": "8f83cf85405fe849d7220fa4cbfee7de6a5a4d50514493d01e90f2aea0092918"
+    },
+    {
+      "file": "scripts/monetization/application-host.cjs",
+      "sha256": "90b92b27be0580f280726068eb5062d4e132da463ee66fcbd65fe6a2de2afd1f"
+    },
+    {
+      "file": "python_media_worker/studio_layer_cache.py",
+      "sha256": "55b76352894db0a31948ed35644c792581924727c9baafdcba896281aebe2c07"
+    }
+  ],
+  "welcomeChecks": 8,
+  "nativeCandidateSignInRestoreAndGuard": true,
+  "exactCandidateOnlyCorsCheck": [
+    204,
+    403,
+    403
+  ],
+  "candidateOriginRemovedAfterQualification": true,
+  "localCpuSeconds": 1200,
+  "localWallSeconds": 1800,
+  "paidCalls": 0,
+  "productionWrites": false,
+  "candidate": {
+    "anonymousChecks": 8,
+    "nativeSignInRestoreGuard": true,
+    "exactProjectPreserved": true
+  },
+  "workerGeometryDiagnostic": {
+    "scope": "Actual shared CPU rasterizer, exact source frame132/matte36 at programme5.5; diagnostic geometry only, not a native export or whole-picture pass.",
+    "rows": [
+      {
+        "name": "02 / moving foreground",
+        "maximumChannelError": 0.0,
+        "fullCanvas": true,
+        "canonicalAdmission": true
+      },
+      {
+        "name": "02 / smooth matte",
+        "maximumChannelError": 0.0,
+        "fullCanvas": true,
+        "canonicalAdmission": true
+      }
+    ]
+  },
+  "latestExecutionId": "c95568a30aa12cc820c04a196e04f8db55d69801974447162a1e6b2ba90b851f",
+  "completedNativeExecution": "c95568a30aa12cc820c04a196e04f8db55d69801974447162a1e6b2ba90b851f"
+}

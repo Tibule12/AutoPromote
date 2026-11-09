@@ -1,0 +1,4 @@
+{
+  "error": "page.waitForFunction: Timeout 45000ms exceeded.\n    at inspect (/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/scripts/studio-professional/folded-space-proof.cjs:83:29)\n    at async /home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/scripts/studio-professional/folded-space-proof.cjs:102:370",
+  "body": ""
+}

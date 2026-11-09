@@ -1,0 +1,418 @@
+{
+  "seconds": 30,
+  "frames": 720,
+  "width": 1280,
+  "height": 720,
+  "fps": 24,
+  "videoCodec": "h264",
+  "audioCodec": "aac",
+  "sha256": "fa98445c6188a96f55efc46deba2cb55a65afcf031991769cd5dd13c600eb555",
+  "fullyDecodes": true,
+  "inspectionFrames": [
+    {
+      "frame": 0,
+      "time": 0.0,
+      "file": "Export inspection/frame-001.jpg"
+    },
+    {
+      "frame": 1,
+      "time": 0.041666666666666664,
+      "file": "Export inspection/frame-002.jpg"
+    },
+    {
+      "frame": 12,
+      "time": 0.5,
+      "file": "Export inspection/frame-003.jpg"
+    },
+    {
+      "frame": 23,
+      "time": 0.9583333333333334,
+      "file": "Export inspection/frame-004.jpg"
+    },
+    {
+      "frame": 24,
+      "time": 1.0,
+      "file": "Export inspection/frame-005.jpg"
+    },
+    {
+      "frame": 36,
+      "time": 1.5,
+      "file": "Export inspection/frame-006.jpg"
+    },
+    {
+      "frame": 48,
+      "time": 2.0,
+      "file": "Export inspection/frame-007.jpg"
+    },
+    {
+      "frame": 60,
+      "time": 2.5,
+      "file": "Export inspection/frame-008.jpg"
+    },
+    {
+      "frame": 72,
+      "time": 3.0,
+      "file": "Export inspection/frame-009.jpg"
+    },
+    {
+      "frame": 84,
+      "time": 3.5,
+      "file": "Export inspection/frame-010.jpg"
+    },
+    {
+      "frame": 95,
+      "time": 3.9583333333333335,
+      "file": "Export inspection/frame-011.jpg"
+    },
+    {
+      "frame": 96,
+      "time": 4.0,
+      "file": "Export inspection/frame-012.jpg"
+    },
+    {
+      "frame": 97,
+      "time": 4.041666666666667,
+      "file": "Export inspection/frame-013.jpg"
+    },
+    {
+      "frame": 108,
+      "time": 4.5,
+      "file": "Export inspection/frame-014.jpg"
+    },
+    {
+      "frame": 120,
+      "time": 5.0,
+      "file": "Export inspection/frame-015.jpg"
+    },
+    {
+      "frame": 132,
+      "time": 5.5,
+      "file": "Export inspection/frame-016.jpg"
+    },
+    {
+      "frame": 144,
+      "time": 6.0,
+      "file": "Export inspection/frame-017.jpg"
+    },
+    {
+      "frame": 156,
+      "time": 6.5,
+      "file": "Export inspection/frame-018.jpg"
+    },
+    {
+      "frame": 168,
+      "time": 7.0,
+      "file": "Export inspection/frame-019.jpg"
+    },
+    {
+      "frame": 180,
+      "time": 7.5,
+      "file": "Export inspection/frame-020.jpg"
+    },
+    {
+      "frame": 189,
+      "time": 7.875,
+      "file": "Export inspection/frame-021.jpg"
+    },
+    {
+      "frame": 190,
+      "time": 7.916666666666667,
+      "file": "Export inspection/frame-022.jpg"
+    },
+    {
+      "frame": 191,
+      "time": 7.958333333333333,
+      "file": "Export inspection/frame-023.jpg"
+    },
+    {
+      "frame": 192,
+      "time": 8.0,
+      "file": "Export inspection/frame-024.jpg"
+    },
+    {
+      "frame": 193,
+      "time": 8.041666666666666,
+      "file": "Export inspection/frame-025.jpg"
+    },
+    {
+      "frame": 204,
+      "time": 8.5,
+      "file": "Export inspection/frame-026.jpg"
+    },
+    {
+      "frame": 216,
+      "time": 9.0,
+      "file": "Export inspection/frame-027.jpg"
+    },
+    {
+      "frame": 228,
+      "time": 9.5,
+      "file": "Export inspection/frame-028.jpg"
+    },
+    {
+      "frame": 240,
+      "time": 10.0,
+      "file": "Export inspection/frame-029.jpg"
+    },
+    {
+      "frame": 252,
+      "time": 10.5,
+      "file": "Export inspection/frame-030.jpg"
+    },
+    {
+      "frame": 264,
+      "time": 11.0,
+      "file": "Export inspection/frame-031.jpg"
+    },
+    {
+      "frame": 276,
+      "time": 11.5,
+      "file": "Export inspection/frame-032.jpg"
+    },
+    {
+      "frame": 288,
+      "time": 12.0,
+      "file": "Export inspection/frame-033.jpg"
+    },
+    {
+      "frame": 300,
+      "time": 12.5,
+      "file": "Export inspection/frame-034.jpg"
+    },
+    {
+      "frame": 312,
+      "time": 13.0,
+      "file": "Export inspection/frame-035.jpg"
+    },
+    {
+      "frame": 324,
+      "time": 13.5,
+      "file": "Export inspection/frame-036.jpg"
+    },
+    {
+      "frame": 335,
+      "time": 13.958333333333334,
+      "file": "Export inspection/frame-037.jpg"
+    },
+    {
+      "frame": 336,
+      "time": 14.0,
+      "file": "Export inspection/frame-038.jpg"
+    },
+    {
+      "frame": 337,
+      "time": 14.041666666666666,
+      "file": "Export inspection/frame-039.jpg"
+    },
+    {
+      "frame": 348,
+      "time": 14.5,
+      "file": "Export inspection/frame-040.jpg"
+    },
+    {
+      "frame": 360,
+      "time": 15.0,
+      "file": "Export inspection/frame-041.jpg"
+    },
+    {
+      "frame": 372,
+      "time": 15.5,
+      "file": "Export inspection/frame-042.jpg"
+    },
+    {
+      "frame": 383,
+      "time": 15.958333333333334,
+      "file": "Export inspection/frame-043.jpg"
+    },
+    {
+      "frame": 384,
+      "time": 16.0,
+      "file": "Export inspection/frame-044.jpg"
+    },
+    {
+      "frame": 385,
+      "time": 16.041666666666668,
+      "file": "Export inspection/frame-045.jpg"
+    },
+    {
+      "frame": 396,
+      "time": 16.5,
+      "file": "Export inspection/frame-046.jpg"
+    },
+    {
+      "frame": 399,
+      "time": 16.625,
+      "file": "Export inspection/frame-047.jpg"
+    },
+    {
+      "frame": 400,
+      "time": 16.666666666666668,
+      "file": "Export inspection/frame-048.jpg"
+    },
+    {
+      "frame": 401,
+      "time": 16.708333333333332,
+      "file": "Export inspection/frame-049.jpg"
+    },
+    {
+      "frame": 408,
+      "time": 17.0,
+      "file": "Export inspection/frame-050.jpg"
+    },
+    {
+      "frame": 420,
+      "time": 17.5,
+      "file": "Export inspection/frame-051.jpg"
+    },
+    {
+      "frame": 432,
+      "time": 18.0,
+      "file": "Export inspection/frame-052.jpg"
+    },
+    {
+      "frame": 444,
+      "time": 18.5,
+      "file": "Export inspection/frame-053.jpg"
+    },
+    {
+      "frame": 456,
+      "time": 19.0,
+      "file": "Export inspection/frame-054.jpg"
+    },
+    {
+      "frame": 468,
+      "time": 19.5,
+      "file": "Export inspection/frame-055.jpg"
+    },
+    {
+      "frame": 479,
+      "time": 19.958333333333332,
+      "file": "Export inspection/frame-056.jpg"
+    },
+    {
+      "frame": 480,
+      "time": 20.0,
+      "file": "Export inspection/frame-057.jpg"
+    },
+    {
+      "frame": 481,
+      "time": 20.041666666666668,
+      "file": "Export inspection/frame-058.jpg"
+    },
+    {
+      "frame": 492,
+      "time": 20.5,
+      "file": "Export inspection/frame-059.jpg"
+    },
+    {
+      "frame": 504,
+      "time": 21.0,
+      "file": "Export inspection/frame-060.jpg"
+    },
+    {
+      "frame": 516,
+      "time": 21.5,
+      "file": "Export inspection/frame-061.jpg"
+    },
+    {
+      "frame": 528,
+      "time": 22.0,
+      "file": "Export inspection/frame-062.jpg"
+    },
+    {
+      "frame": 540,
+      "time": 22.5,
+      "file": "Export inspection/frame-063.jpg"
+    },
+    {
+      "frame": 552,
+      "time": 23.0,
+      "file": "Export inspection/frame-064.jpg"
+    },
+    {
+      "frame": 564,
+      "time": 23.5,
+      "file": "Export inspection/frame-065.jpg"
+    },
+    {
+      "frame": 575,
+      "time": 23.958333333333332,
+      "file": "Export inspection/frame-066.jpg"
+    },
+    {
+      "frame": 576,
+      "time": 24.0,
+      "file": "Export inspection/frame-067.jpg"
+    },
+    {
+      "frame": 577,
+      "time": 24.041666666666668,
+      "file": "Export inspection/frame-068.jpg"
+    },
+    {
+      "frame": 588,
+      "time": 24.5,
+      "file": "Export inspection/frame-069.jpg"
+    },
+    {
+      "frame": 600,
+      "time": 25.0,
+      "file": "Export inspection/frame-070.jpg"
+    },
+    {
+      "frame": 612,
+      "time": 25.5,
+      "file": "Export inspection/frame-071.jpg"
+    },
+    {
+      "frame": 624,
+      "time": 26.0,
+      "file": "Export inspection/frame-072.jpg"
+    },
+    {
+      "frame": 636,
+      "time": 26.5,
+      "file": "Export inspection/frame-073.jpg"
+    },
+    {
+      "frame": 648,
+      "time": 27.0,
+      "file": "Export inspection/frame-074.jpg"
+    },
+    {
+      "frame": 660,
+      "time": 27.5,
+      "file": "Export inspection/frame-075.jpg"
+    },
+    {
+      "frame": 672,
+      "time": 28.0,
+      "file": "Export inspection/frame-076.jpg"
+    },
+    {
+      "frame": 684,
+      "time": 28.5,
+      "file": "Export inspection/frame-077.jpg"
+    },
+    {
+      "frame": 696,
+      "time": 29.0,
+      "file": "Export inspection/frame-078.jpg"
+    },
+    {
+      "frame": 708,
+      "time": 29.5,
+      "file": "Export inspection/frame-079.jpg"
+    },
+    {
+      "frame": 718,
+      "time": 29.916666666666668,
+      "file": "Export inspection/frame-080.jpg"
+    },
+    {
+      "frame": 719,
+      "time": 29.958333333333332,
+      "file": "Export inspection/frame-081.jpg"
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "worktree": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031",
+  "branch": "feat/studio-motion-flow-20261031",
+  "head": "ff8470075f3f4235e433d9d5a10d8e378b98083a",
+  "apiPid": 364198,
+  "workerPid": 288261,
+  "demoProject": "demo-autopromote-credits",
+  "origin": "http://127.0.0.1:43927",
+  "build": "/tmp/autopromote-application-demo-5izIlF/build-plane-guard-20261102",
+  "mainAsset": "/static/js/main.3c773246.js",
+  "mainSha256": "b75ac91e92ec81efb3e0dc3739a280b296410ff54a6d8e0c28c16302239316b3",
+  "welcomeChecks": 8,
+  "paidCalls": 0,
+  "productionWrites": false,
+  "sources": [
+    {
+      "file": "frontend/src/components/ViralClipStudio.js",
+      "sha256": "c003f1d79ee081960d2834da892b9c3e49d8351432f243854924c7084e676a4c"
+    },
+    {
+      "file": "frontend/src/components/StudioPerspectiveSurface.js",
+      "sha256": "a426cbb6beb7e583c2da95330e0a6eb17c967acf45f19f235a43170c0ceb50bf"
+    },
+    {
+      "file": "frontend/src/components/studioPerspective.js",
+      "sha256": "dba2a3ed414283b6f312568486c907327014531c1a413409be1ad69a1843dac3"
+    },
+    {
+      "file": "frontend/src/components/studioAutomation.js",
+      "sha256": "80fff1c245c7d04ab502de2e48600a6605f4875dbaf0ee5b6e73e9ff13c2a7ae"
+    },
+    {
+      "file": "frontend/src/components/StudioProgrammeFrame.js",
+      "sha256": "6fb1445a7e4777bc6915274130baa94fcb3518bfb33f0e247b71765b1fc9cb76"
+    },
+    {
+      "file": "frontend/src/components/StudioAdvancedInspectors.js",
+      "sha256": "ac4b4f2f1a72574c3300a0c952258c4f0fc63b8b546bbea2b4ebd31fd0c09591"
+    },
+    {
+      "file": "frontend/src/components/StudioPerspectiveInspector.js",
+      "sha256": "9f2a9eb31bce8f080966f897ca9b34e58616cf220798f4714af44ac78b7b3870"
+    },
+    {
+      "file": "frontend/src/components/studioMotionProperties.js",
+      "sha256": "c3c726f4f0e4c4a21fe4e30d971856cc95cb5248bccd23ffc4a43924e3513145"
+    },
+    {
+      "file": "frontend/src/components/StudioKeyframeCurveEditor.js",
+      "sha256": "041b1e80ffd73ef34edfdadea6a25acf6655a674e7d40c69d01e5b30beeb9217"
+    },
+    {
+      "file": "python_media_worker/studio_layer_motion.py",
+      "sha256": "c41f1612342c2ad71c592de5fd0293448d0254355f49d3ad78a6dc4023b12258"
+    },
+    {
+      "file": "python_media_worker/studio_perspective.py",
+      "sha256": "e997bee217274abadb545f90cf8698bb4eddbdbb9df48b9d6444abbd003270e2"
+    },
+    {
+      "file": "src/generated/studioDirectorReplayKernel.cjs",
+      "sha256": "6ad61920ed8460dfdaf38773dee877276778d130ef3ca6a52d318c948cb2553f"
+    },
+    {
+      "file": "frontend/src/components/studioSharedOverlayFrame.js",
+      "sha256": "581c7ed0459eeee9838d9108aeca5e646ce53f8069807ae161cafb4bf73c45fe"
+    },
+    {
+      "file": "src/services/studioJobOptions.js",
+      "sha256": "83e71891a56dfe24515cad0e83b1e9ab0d995d58c447e9edf50209116c709b4d"
+    }
+  ],
+  "at": "2026-11-01T22:34:44.778983+00:00",
+  "nativeRenderBuild": {
+    "build": "/tmp/autopromote-application-demo-5izIlF/build-secondary-clock-20261102",
+    "mainSha256": "c3eb6c7b4faa4f67cc5c734a1bec488cf2ee2d335542b561f1e0c78cd29af2a2",
+    "sourceManifest": "Native render and first paired preview preflight.json"
+  },
+  "validationOnlyFollowup": "Combined animated-corner and changing-progress trajectories now reject before mutation. The supported episode compiles identically; no new export."
+}

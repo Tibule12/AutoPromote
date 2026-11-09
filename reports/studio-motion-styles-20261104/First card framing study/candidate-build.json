@@ -1,0 +1,16 @@
+{
+  "build": "/dev/shm/autopromote-motion-styles-20261104-build",
+  "origin": "http://127.0.0.1:43927",
+  "demoProject": "demo-autopromote-credits",
+  "welcomeFlag": "true",
+  "mainAsset": "/static/js/main.c3dbdebe.js",
+  "mainSha256": "59fcd4e13b17fa7228a5bf2ff9568a57aad0b5996f969431383070c1a69045c4",
+  "sources": {
+    "frontend/src/components/studioCreativeTemplate.js": "6cb5f7b3bea4a998da79a2a0f1713b5513fac92e9e540a6f7d43f4912f1e9875",
+    "frontend/src/components/studioMotionRecipe.js": "210f7e37b7101079f53f5076c160eb3983bff1f9c6a8cf957dcd5f0a807c1d65",
+    "frontend/src/components/StudioLaunchTemplatePanel.js": "5ac5865b575a1989f99cfaed8acc7eb724727919fd9a9d4cbde271829b8a8597",
+    "frontend/src/templates/prism_cuts_v1.json": "7372917c1895a43ece372f1e0f3a73ee17fea13869ed55275a270a479dda4214",
+    "frontend/src/templates/momentum_v1.json": "46da001af46e77aff60720228c0020e287f1f4f22e4fd60256483eb5f9ad9881",
+    "src/generated/studioDirectorReplayKernel.cjs": "2d7697ac0a29b627cb7f6171dd332f7f264073fdccea90530156b333ad051044"
+  }
+}

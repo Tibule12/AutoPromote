@@ -2,7 +2,25 @@ export const FINISH_KEYFRAME_FIELDS = [
   "brightness",
   "contrast",
   "saturation",
+  "exposureStops",
+  "lift",
+  "gamma",
+  "gain",
+  "temperature",
+  "tint",
+  "vignette",
 ];
+
+const UNITY_FINISH_FIELDS = new Set([
+  "brightness",
+  "contrast",
+  "saturation",
+  "gamma",
+  "gain",
+  "zoom",
+]);
+
+const defaultFinishFieldValue = field => (UNITY_FINISH_FIELDS.has(field) ? 1 : 0);
 
 const finite = (value, fallback = 0) => {
   const number = Number(value);
@@ -25,7 +43,7 @@ export const normalizeFinishKeyframes = keyframes =>
 
 export const captureFinishValues = fx =>
   FINISH_KEYFRAME_FIELDS.reduce((values, field) => {
-    values[field] = finite(fx?.[field], field === "brightness" || field === "contrast" || field === "saturation" || field === "zoom" ? 1 : 0);
+    values[field] = finite(fx?.[field], defaultFinishFieldValue(field));
     return values;
   }, {});
 
@@ -61,12 +79,62 @@ export const interpolateFinishKeyframes = (baseFx, keyframes, time) => {
   const progress = Math.min(1, Math.max(0, (safeTime - left.time) / (right.time - left.time)));
   const values = {};
   FINISH_KEYFRAME_FIELDS.forEach(field => {
-    const fallback = finite(baseFx?.[field], 0);
+    const hasField =
+      left.values?.[field] !== undefined ||
+      right.values?.[field] !== undefined ||
+      baseFx?.[field] !== undefined ||
+      field === "brightness" ||
+      field === "contrast" ||
+      field === "saturation";
+    if (!hasField) return;
+    const fallback = finite(baseFx?.[field], defaultFinishFieldValue(field));
     const from = finite(left.values?.[field], fallback);
     const to = finite(right.values?.[field], from);
     values[field] = from + (to - from) * progress;
   });
   return { ...(baseFx || {}), ...values };
+};
+
+export const buildBeatSyncedGradePulses = (baseFx = {}, beats = [], options = {}) => {
+  const baseline = captureFinishValues(baseFx);
+  const rawBeats = (Array.isArray(beats) && beats.length ? beats : [0.6, 1.4, 2.2, 3.0])
+    .map(beat => {
+      if (typeof beat === "number") return { time: beat, strength: 1 };
+      return {
+        time: Number(beat?.time ?? beat?.timestamp ?? NaN),
+        strength: finite(beat?.strength ?? beat?.energy ?? 1, 1),
+      };
+    })
+    .filter(item => Number.isFinite(item.time) && item.time >= 0)
+    .sort((a, b) => a.time - b.time)
+    .slice(0, Math.max(1, Number(options.maxBeats) || 8));
+
+  const preRoll = Math.max(0.04, finite(options.preRoll, 0.1));
+  const release = Math.max(0.08, finite(options.release, 0.2));
+  const intensity = Math.max(0.1, Math.min(2, finite(options.intensity, 1)));
+
+  let keyframes = normalizeFinishKeyframes(options.existingKeyframes || []);
+  rawBeats.forEach((beat, index) => {
+    const boost = Math.max(0.35, Math.min(1.5, beat.strength)) * intensity;
+    const preTime = Math.max(0, Number((beat.time - preRoll).toFixed(3)));
+    const peakTime = Number(beat.time.toFixed(3));
+    const postTime = Number((beat.time + release).toFixed(3));
+    const peakValues = {
+      ...baseline,
+      brightness: Number((baseline.brightness + 0.08 * boost).toFixed(4)),
+      contrast: Number((baseline.contrast + 0.14 * boost).toFixed(4)),
+      saturation: Number((baseline.saturation + 0.16 * boost).toFixed(4)),
+      exposureStops: Number((baseline.exposureStops + 0.22 * boost).toFixed(4)),
+      gain: Number((baseline.gain + 0.08 * boost).toFixed(4)),
+    };
+    keyframes = upsertFinishKeyframe(keyframes, preTime, baseline, 0.03);
+    keyframes = upsertFinishKeyframe(keyframes, peakTime, peakValues, 0.03);
+    keyframes = upsertFinishKeyframe(keyframes, postTime, baseline, 0.03);
+    if (index === 0 && preTime > 0.05) {
+      keyframes = upsertFinishKeyframe(keyframes, 0, baseline, 0.03);
+    }
+  });
+  return normalizeFinishKeyframes(keyframes);
 };
 
 export const snapTimeToBeat = (time, beats, threshold = 0.18) => {

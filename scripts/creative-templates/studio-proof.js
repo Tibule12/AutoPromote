@@ -46,6 +46,7 @@ async function rail(page) {
   if (!await head.evaluate(e => e.open)) await head.locator(':scope > summary').click();
 }
 async function save(page, name) {
+  require('./proof-storage').requireProofSpace(folder);
   await rail(page); await page.getByTestId('studio-save-project').click();
   await page.waitForFunction(() => document.querySelector('.studio-project-save-state')?.textContent.includes('Saved locally'));
   const title = await page.getByLabel('Project name', { exact: true }).inputValue();
@@ -131,7 +132,9 @@ async function render(page, name) {
   await q.tool(page, 'Export');
   await page.getByLabel('Export resolution', { exact: true }).selectOption(process.env.STUDIO_QA_EXPORT_RESOLUTION || '720p');
   await page.getByLabel('Export frame rate', { exact: true }).selectOption(process.env.STUDIO_QA_EXPORT_FPS || '24');
-  page.once('dialog', dialog => dialog.accept());
+  // Reuse a caller's normal confirmation handler instead of racing two
+  // acceptors on the same dialog (notably when cancelling preparation).
+  if (!page.listenerCount('dialog')) page.once('dialog', dialog => dialog.accept());
   await page.getByRole('button', { name: /^Render (Final Clip|Again)$/ }).click();
   const acknowledgedUntil = Date.now() + uploadBudget;
   while (!submittedJobId && Date.now() < acknowledgedUntil) {

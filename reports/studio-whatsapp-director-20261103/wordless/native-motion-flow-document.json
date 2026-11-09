@@ -1,0 +1,6039 @@
+{
+  "schemaVersion": 1,
+  "projectId": "viral-project-b3c8d7e9-cdff-4bdd-87dd-23b2297b83a6",
+  "revision": 80,
+  "clock": {
+    "ticksPerSecond": 90000,
+    "interval": "half_open"
+  },
+  "output": {
+    "aspectRatio": "16:9",
+    "requestedResolution": "720p",
+    "frameRate": {
+      "numerator": 24,
+      "denominator": 1
+    },
+    "codec": "h264",
+    "audioCodec": "aac",
+    "audioSampleRate": null,
+    "audioSampleRatePolicy": "worker_selected"
+  },
+  "assets": [
+    {
+      "assetId": "source:launch-5217554acdae6f4623c8d9bb:sha256:5217554acdae6f4623c8d9bbb1c7070c2918eea81975e2cf255a1f59afa14315",
+      "sourceId": "launch-5217554acdae6f4623c8d9bb",
+      "storagePath": "studio/sources/demo-pilot-alice/1df75703fe54389a79c2fff8_WhatsApp_Video_2026-11-03_at_04.58.10_1_.mp4",
+      "contentHash": "5217554acdae6f4623c8d9bbb1c7070c2918eea81975e2cf255a1f59afa14315",
+      "identityState": "hash_verified"
+    },
+    {
+      "assetId": "source:launch-83b6bbc4008603d9dbccddcc:sha256:83b6bbc4008603d9dbccddcc870005fe1536d765d7cc2f1333b430b36066c32d",
+      "sourceId": "launch-83b6bbc4008603d9dbccddcc",
+      "storagePath": "studio/sources/demo-pilot-alice/5c36cc48c7939adb7f60cbd9_WhatsApp_Video_2026-11-03_at_04.58.10_2_.mp4",
+      "contentHash": "83b6bbc4008603d9dbccddcc870005fe1536d765d7cc2f1333b430b36066c32d",
+      "identityState": "hash_verified"
+    },
+    {
+      "assetId": "source:launch-72d89720ee9db0d593c6120c:sha256:72d89720ee9db0d593c6120c3dd00ddfbbe893ad6c5626b6e9fe0973db6513a5",
+      "sourceId": "launch-72d89720ee9db0d593c6120c",
+      "storagePath": "studio/sources/demo-pilot-alice/087039661abf89331ff2205c_WhatsApp_Video_2026-11-03_at_04.58.11.mp4",
+      "contentHash": "72d89720ee9db0d593c6120c3dd00ddfbbe893ad6c5626b6e9fe0973db6513a5",
+      "identityState": "hash_verified"
+    },
+    {
+      "assetId": "source:launch-f845b91a06ef40d16ae43d84:sha256:f845b91a06ef40d16ae43d846bb888337fc7f11814acec9e508a33f188ea6ca7",
+      "sourceId": "launch-f845b91a06ef40d16ae43d84",
+      "storagePath": "studio/sources/demo-pilot-alice/9d15d9a8cbe6a14126d72423_WhatsApp_Video_2026-11-03_at_04.58.10.mp4",
+      "contentHash": "f845b91a06ef40d16ae43d846bb888337fc7f11814acec9e508a33f188ea6ca7",
+      "identityState": "hash_verified"
+    }
+  ],
+  "clipOccurrences": [
+    {
+      "occurrenceId": "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:1",
+      "assetId": "source:launch-5217554acdae6f4623c8d9bb:sha256:5217554acdae6f4623c8d9bbb1c7070c2918eea81975e2cf255a1f59afa14315",
+      "sourceRange": {
+        "space": "source",
+        "startTick": 22500,
+        "endTick": 292500
+      },
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 270000
+      },
+      "timeMapId": "map:viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:1",
+      "parameterSchemaVersion": 1,
+      "parameters": {
+        "name": "WhatsApp Video 2026-11-03 at 04.58.10 (1).mp4",
+        "duration": 3,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      "playback": {
+        "direction": "forward",
+        "freeze": false,
+        "rate": {
+          "numerator": 1,
+          "denominator": 1
+        }
+      }
+    },
+    {
+      "occurrenceId": "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:2",
+      "assetId": "source:launch-83b6bbc4008603d9dbccddcc:sha256:83b6bbc4008603d9dbccddcc870005fe1536d765d7cc2f1333b430b36066c32d",
+      "sourceRange": {
+        "space": "source",
+        "startTick": 0,
+        "endTick": 540000
+      },
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 270000,
+        "endTick": 810000
+      },
+      "timeMapId": "map:viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:2",
+      "parameterSchemaVersion": 1,
+      "parameters": {
+        "name": "WhatsApp Video 2026-11-03 at 04.58.10 (2).mp4",
+        "duration": 6,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      "playback": {
+        "direction": "forward",
+        "freeze": false,
+        "rate": {
+          "numerator": 1,
+          "denominator": 1
+        }
+      }
+    },
+    {
+      "occurrenceId": "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:3",
+      "assetId": "source:launch-72d89720ee9db0d593c6120c:sha256:72d89720ee9db0d593c6120c3dd00ddfbbe893ad6c5626b6e9fe0973db6513a5",
+      "sourceRange": {
+        "space": "source",
+        "startTick": 180000,
+        "endTick": 630000
+      },
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 810000,
+        "endTick": 1260000
+      },
+      "timeMapId": "map:viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:3",
+      "parameterSchemaVersion": 1,
+      "parameters": {
+        "name": "WhatsApp Video 2026-11-03 at 04.58.11.mp4",
+        "duration": 5,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      "playback": {
+        "direction": "forward",
+        "freeze": false,
+        "rate": {
+          "numerator": 1,
+          "denominator": 1
+        }
+      }
+    },
+    {
+      "occurrenceId": "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:4",
+      "assetId": "source:launch-f845b91a06ef40d16ae43d84:sha256:f845b91a06ef40d16ae43d846bb888337fc7f11814acec9e508a33f188ea6ca7",
+      "sourceRange": {
+        "space": "source",
+        "startTick": 630000,
+        "endTick": 1260000
+      },
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 1260000,
+        "endTick": 1890000
+      },
+      "timeMapId": "map:viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:4",
+      "parameterSchemaVersion": 1,
+      "parameters": {
+        "name": "WhatsApp Video 2026-11-03 at 04.58.10.mp4",
+        "duration": 7,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      "playback": {
+        "direction": "forward",
+        "freeze": false,
+        "rate": {
+          "numerator": 1,
+          "denominator": 1
+        }
+      }
+    },
+    {
+      "occurrenceId": "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:5",
+      "assetId": "source:launch-5217554acdae6f4623c8d9bb:sha256:5217554acdae6f4623c8d9bbb1c7070c2918eea81975e2cf255a1f59afa14315",
+      "sourceRange": {
+        "space": "source",
+        "startTick": 22500,
+        "endTick": 292500
+      },
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 1890000,
+        "endTick": 2160000
+      },
+      "timeMapId": "map:viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:5",
+      "parameterSchemaVersion": 1,
+      "parameters": {
+        "name": "WhatsApp Video 2026-11-03 at 04.58.10 (1).mp4",
+        "duration": 3,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      "playback": {
+        "direction": "forward",
+        "freeze": false,
+        "rate": {
+          "numerator": 1,
+          "denominator": 1
+        }
+      }
+    }
+  ],
+  "timeMaps": [
+    {
+      "timeMapId": "map:viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:1",
+      "occurrenceId": "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:1",
+      "segments": [
+        {
+          "sourceRange": {
+            "space": "source",
+            "startTick": 22500,
+            "endTick": 292500
+          },
+          "clipLocalRange": {
+            "space": "clip_local",
+            "startTick": 0,
+            "endTick": 270000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 0,
+            "endTick": 270000
+          },
+          "rate": {
+            "numerator": 1,
+            "denominator": 1
+          },
+          "direction": "forward",
+          "freeze": false
+        }
+      ]
+    },
+    {
+      "timeMapId": "map:viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:2",
+      "occurrenceId": "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:2",
+      "segments": [
+        {
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 540000
+          },
+          "clipLocalRange": {
+            "space": "clip_local",
+            "startTick": 0,
+            "endTick": 540000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 270000,
+            "endTick": 810000
+          },
+          "rate": {
+            "numerator": 1,
+            "denominator": 1
+          },
+          "direction": "forward",
+          "freeze": false
+        }
+      ]
+    },
+    {
+      "timeMapId": "map:viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:3",
+      "occurrenceId": "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:3",
+      "segments": [
+        {
+          "sourceRange": {
+            "space": "source",
+            "startTick": 180000,
+            "endTick": 630000
+          },
+          "clipLocalRange": {
+            "space": "clip_local",
+            "startTick": 0,
+            "endTick": 450000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 810000,
+            "endTick": 1260000
+          },
+          "rate": {
+            "numerator": 1,
+            "denominator": 1
+          },
+          "direction": "forward",
+          "freeze": false
+        }
+      ]
+    },
+    {
+      "timeMapId": "map:viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:4",
+      "occurrenceId": "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:4",
+      "segments": [
+        {
+          "sourceRange": {
+            "space": "source",
+            "startTick": 630000,
+            "endTick": 1260000
+          },
+          "clipLocalRange": {
+            "space": "clip_local",
+            "startTick": 0,
+            "endTick": 630000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 1260000,
+            "endTick": 1890000
+          },
+          "rate": {
+            "numerator": 1,
+            "denominator": 1
+          },
+          "direction": "forward",
+          "freeze": false
+        }
+      ]
+    },
+    {
+      "timeMapId": "map:viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:5",
+      "occurrenceId": "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:5",
+      "segments": [
+        {
+          "sourceRange": {
+            "space": "source",
+            "startTick": 22500,
+            "endTick": 292500
+          },
+          "clipLocalRange": {
+            "space": "clip_local",
+            "startTick": 0,
+            "endTick": 270000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 1890000,
+            "endTick": 2160000
+          },
+          "rate": {
+            "numerator": 1,
+            "denominator": 1
+          },
+          "direction": "forward",
+          "freeze": false
+        }
+      ]
+    }
+  ],
+  "layers": [
+    {
+      "layerId": "graphic-30386552-fdfc-4bec-9862-c9636823b0ba",
+      "type": "b_roll",
+      "legacyType": "image",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 2160000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "W / night",
+        "sourceStoragePath": "uploads/images/demo-pilot-alice/ec5da00a-714f-4bbc-aa0d-a0563383ec72_overlay-3458de12-2108-47ab-912f-29729ec87feb.png",
+        "contentHash": "808fd97a204f7e58b2f126a3f3ae84b98204dd7173654c61883b0ca9c9540da9",
+        "bg": "transparent",
+        "anchorX": 50,
+        "anchorY": 50,
+        "glow": {
+          "enabled": false
+        },
+        "layerShadow": {
+          "enabled": false
+        },
+        "motionBlur": {
+          "enabled": false
+        },
+        "shadow": "none",
+        "strokeWidth": 0,
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "contain",
+        "fontFamily": "Inter",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "height": 100,
+        "rotation": 0,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 24,
+        "bRollMode": "pip",
+        "animation": {
+          "enter": "none",
+          "exit": "none",
+          "enterDuration": 0,
+          "exitDuration": 0
+        }
+      }
+    },
+    {
+      "layerId": "scene-b7ded7c6-a3b1-4076-aaf1-aba88f7a00bb",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 270000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "W / opening alpha",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/82b3f6b34b38f409c71c262a_Portrait_mask.mp4",
+        "contentHash": "f77fe8cedbd074c359c3990cef471bc4a9cfa972b4c24d059b48654af4cc402e",
+        "anchorX": 50,
+        "anchorY": 50,
+        "blendMode": "normal",
+        "layerShadow": {
+          "enabled": false,
+          "color": "#000000",
+          "opacity": 0.35,
+          "blur": 12,
+          "x": 0,
+          "y": 16
+        },
+        "sourceDuration": 3,
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "contain",
+        "opacity": 1,
+        "x": 50,
+        "y": 56,
+        "width": 70,
+        "height": 70,
+        "rotation": 0,
+        "scale": 1.9,
+        "startTime": 0,
+        "duration": 3,
+        "sourceStartTime": 0,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "project-media-4e17cc46-2e48-427d-9525-4ebf51204f71"
+      }
+    },
+    {
+      "layerId": "scene-dc2440a9-b547-4d85-8b7d-6bb9b341beaa",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 270000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "W / opening colour",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/1df75703fe54389a79c2fff8_WhatsApp_Video_2026-11-03_at_04.58.10_1_.mp4",
+        "contentHash": "5217554acdae6f4623c8d9bbb1c7070c2918eea81975e2cf255a1f59afa14315",
+        "anchorX": 50,
+        "anchorY": 50,
+        "blendMode": "normal",
+        "layerShadow": {
+          "enabled": false,
+          "color": "#000000",
+          "opacity": 0.35,
+          "blur": 12,
+          "x": 0,
+          "y": 16
+        },
+        "sourceDuration": 4.633333,
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "contain",
+        "opacity": 1,
+        "x": 50,
+        "y": 56,
+        "width": 70,
+        "height": 70,
+        "rotation": 0,
+        "scale": 1.9,
+        "startTime": 0,
+        "duration": 3,
+        "sourceStartTime": 0.25,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "launch-5217554acdae6f4623c8d9bb",
+        "trackMatte": {
+          "mode": "luma",
+          "sourceLayerId": "scene-b7ded7c6-a3b1-4076-aaf1-aba88f7a00bb"
+        }
+      }
+    },
+    {
+      "layerId": "scene-8efc6db9-1ad6-4aee-8972-66bd7d036f35",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 270000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "W / opening code",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/087039661abf89331ff2205c_WhatsApp_Video_2026-11-03_at_04.58.11.mp4",
+        "contentHash": "72d89720ee9db0d593c6120c3dd00ddfbbe893ad6c5626b6e9fe0973db6513a5",
+        "anchorX": 50,
+        "anchorY": 50,
+        "blendMode": "normal",
+        "layerShadow": {
+          "enabled": false,
+          "color": "#000000",
+          "opacity": 0.35,
+          "blur": 12,
+          "x": 0,
+          "y": 16
+        },
+        "sourceDuration": 13.408333,
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "cover",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 70,
+        "height": 70,
+        "rotation": 0,
+        "scale": 1.43,
+        "startTime": 0,
+        "duration": 3,
+        "sourceStartTime": 2,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "launch-72d89720ee9db0d593c6120c",
+        "trackMatte": {
+          "mode": "luma",
+          "sourceLayerId": "scene-b7ded7c6-a3b1-4076-aaf1-aba88f7a00bb"
+        }
+      }
+    },
+    {
+      "layerId": "scene-931b5bac-8a91-4bb6-8d9b-497cd4017a50",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 1890000,
+        "endTick": 2160000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "W / return alpha",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/82b3f6b34b38f409c71c262a_Portrait_mask.mp4",
+        "contentHash": "f77fe8cedbd074c359c3990cef471bc4a9cfa972b4c24d059b48654af4cc402e",
+        "anchorX": 50,
+        "anchorY": 50,
+        "blendMode": "normal",
+        "layerShadow": {
+          "enabled": false,
+          "color": "#000000",
+          "opacity": 0.35,
+          "blur": 12,
+          "x": 0,
+          "y": 16
+        },
+        "sourceDuration": 3,
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "contain",
+        "opacity": 1,
+        "x": 50,
+        "y": 56,
+        "width": 70,
+        "height": 70,
+        "rotation": 0,
+        "scale": 1.9,
+        "startTime": 21,
+        "duration": 3,
+        "sourceStartTime": 0,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "project-media-4e17cc46-2e48-427d-9525-4ebf51204f71"
+      }
+    },
+    {
+      "layerId": "scene-6a46d393-8487-4e5e-9eeb-aa058223346e",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 1890000,
+        "endTick": 2160000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "W / return colour",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/1df75703fe54389a79c2fff8_WhatsApp_Video_2026-11-03_at_04.58.10_1_.mp4",
+        "contentHash": "5217554acdae6f4623c8d9bbb1c7070c2918eea81975e2cf255a1f59afa14315",
+        "anchorX": 50,
+        "anchorY": 50,
+        "blendMode": "normal",
+        "layerShadow": {
+          "enabled": false,
+          "color": "#000000",
+          "opacity": 0.35,
+          "blur": 12,
+          "x": 0,
+          "y": 16
+        },
+        "sourceDuration": 4.633333,
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "contain",
+        "opacity": 1,
+        "x": 50,
+        "y": 56,
+        "width": 70,
+        "height": 70,
+        "rotation": 0,
+        "scale": 1.9,
+        "startTime": 21,
+        "duration": 3,
+        "sourceStartTime": 0.25,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "launch-5217554acdae6f4623c8d9bb",
+        "trackMatte": {
+          "mode": "luma",
+          "sourceLayerId": "scene-931b5bac-8a91-4bb6-8d9b-497cd4017a50"
+        }
+      }
+    },
+    {
+      "layerId": "scene-089ee0be-4a8d-4505-8c7d-0da3bf20fff6",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 1890000,
+        "endTick": 2160000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "W / return code",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/087039661abf89331ff2205c_WhatsApp_Video_2026-11-03_at_04.58.11.mp4",
+        "contentHash": "72d89720ee9db0d593c6120c3dd00ddfbbe893ad6c5626b6e9fe0973db6513a5",
+        "anchorX": 50,
+        "anchorY": 50,
+        "blendMode": "normal",
+        "layerShadow": {
+          "enabled": false,
+          "color": "#000000",
+          "opacity": 0.35,
+          "blur": 12,
+          "x": 0,
+          "y": 16
+        },
+        "sourceDuration": 13.408333,
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "cover",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 70,
+        "height": 70,
+        "rotation": 0,
+        "scale": 1.43,
+        "startTime": 21,
+        "duration": 3,
+        "sourceStartTime": 7,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "launch-72d89720ee9db0d593c6120c",
+        "trackMatte": {
+          "mode": "luma",
+          "sourceLayerId": "scene-931b5bac-8a91-4bb6-8d9b-497cd4017a50"
+        }
+      }
+    },
+    {
+      "layerId": "scene-56ea38ae-8ebe-4dc9-a7fe-fa23273e113b",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 270000,
+        "endTick": 810000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "W / tunnel base",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/5c36cc48c7939adb7f60cbd9_WhatsApp_Video_2026-11-03_at_04.58.10_2_.mp4",
+        "contentHash": "83b6bbc4008603d9dbccddcc870005fe1536d765d7cc2f1333b430b36066c32d",
+        "anchorX": 50,
+        "anchorY": 50,
+        "blendMode": "normal",
+        "layerShadow": {
+          "enabled": false,
+          "color": "#000000",
+          "opacity": 0.35,
+          "blur": 12,
+          "x": 0,
+          "y": 16
+        },
+        "sourceDuration": 19.635,
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "cover",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 70,
+        "height": 70,
+        "rotation": 0,
+        "scale": 1.43,
+        "startTime": 3,
+        "duration": 6,
+        "sourceStartTime": 0,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "launch-83b6bbc4008603d9dbccddcc"
+      }
+    },
+    {
+      "layerId": "scene-4799e077-7b80-42f8-9d12-8a56b64ab807",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 270000,
+        "endTick": 810000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "W / temporal window 0",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/5c36cc48c7939adb7f60cbd9_WhatsApp_Video_2026-11-03_at_04.58.10_2_.mp4",
+        "contentHash": "83b6bbc4008603d9dbccddcc870005fe1536d765d7cc2f1333b430b36066c32d",
+        "anchorX": 50,
+        "anchorY": 50,
+        "blendMode": "normal",
+        "layerShadow": {
+          "enabled": false,
+          "color": "#000000",
+          "opacity": 0.35,
+          "blur": 12,
+          "x": 0,
+          "y": 16
+        },
+        "sourceDuration": 19.635,
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "cover",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 70,
+        "height": 70,
+        "rotation": 0,
+        "scale": 0.87,
+        "startTime": 3,
+        "duration": 6,
+        "sourceStartTime": 0.4,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "launch-83b6bbc4008603d9dbccddcc"
+      }
+    },
+    {
+      "layerId": "scene-f54171a1-b6b8-4be5-ab1f-6b70c4a14b76",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 270000,
+        "endTick": 810000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "W / temporal window 1",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/5c36cc48c7939adb7f60cbd9_WhatsApp_Video_2026-11-03_at_04.58.10_2_.mp4",
+        "contentHash": "83b6bbc4008603d9dbccddcc870005fe1536d765d7cc2f1333b430b36066c32d",
+        "anchorX": 50,
+        "anchorY": 50,
+        "blendMode": "normal",
+        "layerShadow": {
+          "enabled": false,
+          "color": "#000000",
+          "opacity": 0.35,
+          "blur": 12,
+          "x": 0,
+          "y": 16
+        },
+        "sourceDuration": 19.635,
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "cover",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 70,
+        "height": 70,
+        "rotation": 0,
+        "scale": 0.69,
+        "startTime": 3,
+        "duration": 6,
+        "sourceStartTime": 0.8,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "launch-83b6bbc4008603d9dbccddcc"
+      }
+    },
+    {
+      "layerId": "scene-6ade22be-0c7a-43dd-98cf-97b8d7ee0014",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 270000,
+        "endTick": 810000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "W / temporal window 2",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/5c36cc48c7939adb7f60cbd9_WhatsApp_Video_2026-11-03_at_04.58.10_2_.mp4",
+        "contentHash": "83b6bbc4008603d9dbccddcc870005fe1536d765d7cc2f1333b430b36066c32d",
+        "anchorX": 50,
+        "anchorY": 50,
+        "blendMode": "normal",
+        "layerShadow": {
+          "enabled": false,
+          "color": "#000000",
+          "opacity": 0.35,
+          "blur": 12,
+          "x": 0,
+          "y": 16
+        },
+        "sourceDuration": 19.635,
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "cover",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 70,
+        "height": 70,
+        "rotation": 0,
+        "scale": 0.51,
+        "startTime": 3,
+        "duration": 6,
+        "sourceStartTime": 1.2000000000000002,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "launch-83b6bbc4008603d9dbccddcc"
+      }
+    },
+    {
+      "layerId": "scene-b7a0a7c9-48c0-4000-aee3-e205c83654a4",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 810000,
+        "endTick": 1260000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "W / physical screen",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/087039661abf89331ff2205c_WhatsApp_Video_2026-11-03_at_04.58.11.mp4",
+        "contentHash": "72d89720ee9db0d593c6120c3dd00ddfbbe893ad6c5626b6e9fe0973db6513a5",
+        "anchorX": 50,
+        "anchorY": 50,
+        "blendMode": "normal",
+        "layerShadow": {
+          "enabled": false,
+          "color": "#000000",
+          "opacity": 0.35,
+          "blur": 12,
+          "x": 0,
+          "y": 16
+        },
+        "sourceDuration": 13.408333,
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "cover",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 70,
+        "height": 70,
+        "rotation": 0,
+        "scale": 1.43,
+        "startTime": 9,
+        "duration": 5,
+        "sourceStartTime": 2,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "launch-72d89720ee9db0d593c6120c"
+      }
+    },
+    {
+      "layerId": "scene-3226214f-8d62-4f6c-9031-f5ad53caad05",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 1318500,
+        "endTick": 1890000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "W / echo 0 alpha",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/11f87ff136914d28c9928145_Seated_mask.mp4",
+        "contentHash": "78823cd24b096479fdb6b5de333226702041235e365c750f4b756eec187b939d",
+        "anchorX": 50,
+        "anchorY": 50,
+        "blendMode": "normal",
+        "layerShadow": {
+          "enabled": false,
+          "color": "#000000",
+          "opacity": 0.35,
+          "blur": 12,
+          "x": 0,
+          "y": 16
+        },
+        "sourceDuration": 7,
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "contain",
+        "opacity": 1,
+        "x": 24,
+        "y": 61,
+        "width": 70,
+        "height": 70,
+        "rotation": 0,
+        "scale": 1.12,
+        "startTime": 14.65,
+        "duration": 6.35,
+        "sourceStartTime": 0,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "project-media-1cb500b6-41fb-48ef-93e4-cfde7be7b06c"
+      }
+    },
+    {
+      "layerId": "graphic-e1796059-bf31-4bac-bce1-a25570cbf1bd",
+      "type": "b_roll",
+      "legacyType": "image",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 1260000,
+        "endTick": 1890000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "W / orbit 0",
+        "sourceStoragePath": "uploads/images/demo-pilot-alice/90c720de-b4fd-4bbc-9f20-5e40dbb3f6a8_overlay-e1b08cc6-1c3e-421c-b80a-929ae86f6ae2.png",
+        "contentHash": "d25ae93d1a0e1ba568bccd49dca41d01a085211499fd9ad48a9b85a27b221abd",
+        "bg": "transparent",
+        "anchorX": 50,
+        "anchorY": 50,
+        "glow": {
+          "enabled": false
+        },
+        "layerShadow": {
+          "enabled": false
+        },
+        "motionBlur": {
+          "enabled": false
+        },
+        "shadow": "none",
+        "strokeWidth": 0,
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "contain",
+        "fontFamily": "Inter",
+        "opacity": 0.8,
+        "x": 50,
+        "y": 54,
+        "width": 87,
+        "height": 92,
+        "rotation": 0,
+        "scale": 1,
+        "startTime": 14,
+        "duration": 7,
+        "bRollMode": "pip",
+        "animation": {
+          "enter": "none",
+          "exit": "none",
+          "enterDuration": 0,
+          "exitDuration": 0
+        },
+        "vectorShape": {
+          "version": 1,
+          "closed": false,
+          "nodes": [
+            {
+              "x": 7,
+              "y": 70,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                -75
+              ]
+            },
+            {
+              "x": 52,
+              "y": 8,
+              "in": [
+                -42,
+                0
+              ],
+              "out": [
+                42,
+                0
+              ]
+            },
+            {
+              "x": 93,
+              "y": 70,
+              "in": [
+                0,
+                -75
+              ],
+              "out": [
+                0,
+                0
+              ]
+            }
+          ],
+          "fill": {
+            "kind": "none",
+            "color": "#48f7e2",
+            "endColor": "#48f7e2",
+            "start": [
+              0,
+              0
+            ],
+            "end": [
+              100,
+              100
+            ]
+          },
+          "stroke": {
+            "color": "#48f7e2",
+            "width": 0.8
+          }
+        }
+      }
+    },
+    {
+      "layerId": "graphic-64b6f858-89b0-4eed-8a7d-3e68fa26923f",
+      "type": "b_roll",
+      "legacyType": "image",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 1260000,
+        "endTick": 1890000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "W / orbit 1",
+        "sourceStoragePath": "uploads/images/demo-pilot-alice/3e3e49d5-dea0-4ffa-824f-1dbe029c85be_overlay-7e6f7dd7-7041-4fd3-aa91-ac9ff9e9fdcd.png",
+        "contentHash": "c4de57348db17ef2faea38c7bd2e281088f584d23e475d2e78682083ecccc9e2",
+        "bg": "transparent",
+        "anchorX": 50,
+        "anchorY": 50,
+        "glow": {
+          "enabled": false
+        },
+        "layerShadow": {
+          "enabled": false
+        },
+        "motionBlur": {
+          "enabled": false
+        },
+        "shadow": "none",
+        "strokeWidth": 0,
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "contain",
+        "fontFamily": "Inter",
+        "opacity": 0.8,
+        "x": 50,
+        "y": 54,
+        "width": 87,
+        "height": 92,
+        "rotation": 160,
+        "scale": 0.88,
+        "startTime": 14,
+        "duration": 7,
+        "bRollMode": "pip",
+        "animation": {
+          "enter": "none",
+          "exit": "none",
+          "enterDuration": 0,
+          "exitDuration": 0
+        },
+        "vectorShape": {
+          "version": 1,
+          "closed": false,
+          "nodes": [
+            {
+              "x": 7,
+              "y": 70,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                -75
+              ]
+            },
+            {
+              "x": 52,
+              "y": 8,
+              "in": [
+                -42,
+                0
+              ],
+              "out": [
+                42,
+                0
+              ]
+            },
+            {
+              "x": 93,
+              "y": 70,
+              "in": [
+                0,
+                -75
+              ],
+              "out": [
+                0,
+                0
+              ]
+            }
+          ],
+          "fill": {
+            "kind": "none",
+            "color": "#ff5f61",
+            "endColor": "#ff5f61",
+            "start": [
+              0,
+              0
+            ],
+            "end": [
+              100,
+              100
+            ]
+          },
+          "stroke": {
+            "color": "#ff5f61",
+            "width": 0.8
+          }
+        }
+      }
+    },
+    {
+      "layerId": "scene-3bd49188-4ccb-43e7-be2b-5eb25b456b64",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 1318500,
+        "endTick": 1890000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "W / echo 0 colour",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/9d15d9a8cbe6a14126d72423_WhatsApp_Video_2026-11-03_at_04.58.10.mp4",
+        "contentHash": "f845b91a06ef40d16ae43d846bb888337fc7f11814acec9e508a33f188ea6ca7",
+        "anchorX": 50,
+        "anchorY": 50,
+        "blendMode": "normal",
+        "layerShadow": {
+          "enabled": false,
+          "color": "#000000",
+          "opacity": 0.35,
+          "blur": 12,
+          "x": 0,
+          "y": 16
+        },
+        "sourceDuration": 19.166667,
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "contain",
+        "opacity": 1,
+        "x": 24,
+        "y": 61,
+        "width": 70,
+        "height": 70,
+        "rotation": 0,
+        "scale": 1.12,
+        "startTime": 14.65,
+        "duration": 6.35,
+        "sourceStartTime": 7,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "launch-f845b91a06ef40d16ae43d84",
+        "trackMatte": {
+          "mode": "luma",
+          "sourceLayerId": "scene-3226214f-8d62-4f6c-9031-f5ad53caad05"
+        }
+      }
+    },
+    {
+      "layerId": "scene-cbe08ba3-50c4-41a9-996c-6aa7a25bcc4d",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 1287000,
+        "endTick": 1890000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "W / echo 1 alpha",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/11f87ff136914d28c9928145_Seated_mask.mp4",
+        "contentHash": "78823cd24b096479fdb6b5de333226702041235e365c750f4b756eec187b939d",
+        "anchorX": 50,
+        "anchorY": 50,
+        "blendMode": "normal",
+        "layerShadow": {
+          "enabled": false,
+          "color": "#000000",
+          "opacity": 0.35,
+          "blur": 12,
+          "x": 0,
+          "y": 16
+        },
+        "sourceDuration": 7,
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "contain",
+        "opacity": 1,
+        "x": 76,
+        "y": 61,
+        "width": 70,
+        "height": 70,
+        "rotation": 0,
+        "scale": 1.2,
+        "startTime": 14.3,
+        "duration": 6.699999999999999,
+        "sourceStartTime": 0,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "project-media-1cb500b6-41fb-48ef-93e4-cfde7be7b06c"
+      }
+    },
+    {
+      "layerId": "scene-d090e060-d9f3-4aae-aac4-35c7328e1026",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 1287000,
+        "endTick": 1890000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "W / echo 1 colour",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/9d15d9a8cbe6a14126d72423_WhatsApp_Video_2026-11-03_at_04.58.10.mp4",
+        "contentHash": "f845b91a06ef40d16ae43d846bb888337fc7f11814acec9e508a33f188ea6ca7",
+        "anchorX": 50,
+        "anchorY": 50,
+        "blendMode": "normal",
+        "layerShadow": {
+          "enabled": false,
+          "color": "#000000",
+          "opacity": 0.35,
+          "blur": 12,
+          "x": 0,
+          "y": 16
+        },
+        "sourceDuration": 19.166667,
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "contain",
+        "opacity": 1,
+        "x": 76,
+        "y": 61,
+        "width": 70,
+        "height": 70,
+        "rotation": 0,
+        "scale": 1.2,
+        "startTime": 14.3,
+        "duration": 6.699999999999999,
+        "sourceStartTime": 7,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "launch-f845b91a06ef40d16ae43d84",
+        "trackMatte": {
+          "mode": "luma",
+          "sourceLayerId": "scene-cbe08ba3-50c4-41a9-996c-6aa7a25bcc4d"
+        }
+      }
+    },
+    {
+      "layerId": "scene-49ce57f9-b392-4be2-a6d3-0474bc83eb49",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 1260000,
+        "endTick": 1890000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "W / echo 2 alpha",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/11f87ff136914d28c9928145_Seated_mask.mp4",
+        "contentHash": "78823cd24b096479fdb6b5de333226702041235e365c750f4b756eec187b939d",
+        "anchorX": 50,
+        "anchorY": 50,
+        "blendMode": "normal",
+        "layerShadow": {
+          "enabled": false,
+          "color": "#000000",
+          "opacity": 0.35,
+          "blur": 12,
+          "x": 0,
+          "y": 16
+        },
+        "sourceDuration": 7,
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "contain",
+        "opacity": 1,
+        "x": 50,
+        "y": 61,
+        "width": 70,
+        "height": 70,
+        "rotation": 0,
+        "scale": 1.82,
+        "startTime": 14,
+        "duration": 7,
+        "sourceStartTime": 0,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "project-media-1cb500b6-41fb-48ef-93e4-cfde7be7b06c"
+      }
+    },
+    {
+      "layerId": "scene-a7bb4a13-73a3-439e-a717-1868be0ff71f",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 1260000,
+        "endTick": 1890000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "W / echo 2 colour",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/9d15d9a8cbe6a14126d72423_WhatsApp_Video_2026-11-03_at_04.58.10.mp4",
+        "contentHash": "f845b91a06ef40d16ae43d846bb888337fc7f11814acec9e508a33f188ea6ca7",
+        "anchorX": 50,
+        "anchorY": 50,
+        "blendMode": "normal",
+        "layerShadow": {
+          "enabled": false,
+          "color": "#000000",
+          "opacity": 0.35,
+          "blur": 12,
+          "x": 0,
+          "y": 16
+        },
+        "sourceDuration": 19.166667,
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "contain",
+        "opacity": 1,
+        "x": 50,
+        "y": 61,
+        "width": 70,
+        "height": 70,
+        "rotation": 0,
+        "scale": 1.82,
+        "startTime": 14,
+        "duration": 7,
+        "sourceStartTime": 7,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "launch-f845b91a06ef40d16ae43d84",
+        "trackMatte": {
+          "mode": "luma",
+          "sourceLayerId": "scene-49ce57f9-b392-4be2-a6d3-0474bc83eb49"
+        }
+      }
+    },
+    {
+      "layerId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af",
+      "type": "b_roll",
+      "legacyType": "image",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 873000,
+        "endTick": 1260000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "W / screen black",
+        "sourceStoragePath": "uploads/images/demo-pilot-alice/8c788876-c1e9-4be6-9102-df2665756e79_overlay-eeb4f815-0e48-4205-a958-a4372bfdb06e.png",
+        "contentHash": "808fd97a204f7e58b2f126a3f3ae84b98204dd7173654c61883b0ca9c9540da9",
+        "bg": "transparent",
+        "anchorX": 50,
+        "anchorY": 50,
+        "glow": {
+          "enabled": false
+        },
+        "layerShadow": {
+          "enabled": false
+        },
+        "motionBlur": {
+          "enabled": false
+        },
+        "perspective": {
+          "version": 1,
+          "corners": [
+            [
+              12,
+              5
+            ],
+            [
+              96,
+              10
+            ],
+            [
+              94,
+              96
+            ],
+            [
+              10,
+              92
+            ]
+          ]
+        },
+        "shadow": "none",
+        "strokeWidth": 0,
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "contain",
+        "fontFamily": "Inter",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "height": 100,
+        "rotation": 0,
+        "scale": 1.001,
+        "startTime": 9.7,
+        "duration": 4.3,
+        "bRollMode": "pip",
+        "animation": {
+          "enter": "none",
+          "exit": "none",
+          "enterDuration": 0,
+          "exitDuration": 0
+        }
+      }
+    },
+    {
+      "layerId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 873000,
+        "endTick": 1260000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "W / screen world",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/9d15d9a8cbe6a14126d72423_WhatsApp_Video_2026-11-03_at_04.58.10.mp4",
+        "contentHash": "f845b91a06ef40d16ae43d846bb888337fc7f11814acec9e508a33f188ea6ca7",
+        "anchorX": 50,
+        "anchorY": 50,
+        "blendMode": "normal",
+        "layerShadow": {
+          "enabled": false,
+          "color": "#000000",
+          "opacity": 0.35,
+          "blur": 12,
+          "x": 0,
+          "y": 16
+        },
+        "sourceDuration": 19.166667,
+        "perspective": {
+          "version": 1,
+          "corners": [
+            [
+              12,
+              5
+            ],
+            [
+              96,
+              10
+            ],
+            [
+              94,
+              96
+            ],
+            [
+              10,
+              92
+            ]
+          ]
+        },
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "contain",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 70,
+        "height": 70,
+        "rotation": 0,
+        "scale": 1.43,
+        "startTime": 9.7,
+        "duration": 4.300000000000001,
+        "sourceStartTime": 2.7,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "launch-f845b91a06ef40d16ae43d84"
+      }
+    }
+  ],
+  "linkedTiming": {
+    "cues": {
+      "soundEffects": [
+        {
+          "cueId": "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:sound:0",
+          "type": null,
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "enabled": true,
+            "builtIn": true,
+            "kind": "sfx",
+            "tone": "airy_whoosh",
+            "name": "airy_whoosh",
+            "volume": 0.13,
+            "fadeIn": 0.01,
+            "fadeOut": 0.04
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 252000,
+            "endTick": 288000
+          }
+        },
+        {
+          "cueId": "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:sound:1",
+          "type": null,
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "enabled": true,
+            "builtIn": true,
+            "kind": "sfx",
+            "tone": "airy_whoosh",
+            "name": "airy_whoosh",
+            "volume": 0.13,
+            "fadeIn": 0.01,
+            "fadeOut": 0.04
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 792000,
+            "endTick": 828000
+          }
+        },
+        {
+          "cueId": "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:sound:2",
+          "type": null,
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "enabled": true,
+            "builtIn": true,
+            "kind": "sfx",
+            "tone": "airy_whoosh",
+            "name": "airy_whoosh",
+            "volume": 0.13,
+            "fadeIn": 0.01,
+            "fadeOut": 0.04
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 1242000,
+            "endTick": 1278000
+          }
+        },
+        {
+          "cueId": "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:sound:3",
+          "type": null,
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "enabled": true,
+            "builtIn": true,
+            "kind": "sfx",
+            "tone": "airy_whoosh",
+            "name": "airy_whoosh",
+            "volume": 0.13,
+            "fadeIn": 0.01,
+            "fadeOut": 0.04
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 1872000,
+            "endTick": 1908000
+          }
+        }
+      ],
+      "voiceovers": [],
+      "adjustmentLayers": []
+    },
+    "keys": {
+      "motionKeyframes": [
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "property": "opacity",
+            "value": 0,
+            "easing": "hold",
+            "id": "scene-key-776e68c1-8a23-4097-89c1-2e78eabaf717",
+            "targetId": "main-video"
+          }
+        },
+        {
+          "atProgrammeTick": 2160000,
+          "parameters": {
+            "property": "opacity",
+            "value": 0,
+            "easing": "hold",
+            "id": "scene-key-4af1ff92-8e48-411c-9e56-43cc08c1c1b5",
+            "targetId": "main-video"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "property": "scale",
+            "value": 1.76,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-c229fbd6-2f15-4768-be32-7c6ef68819e5",
+            "targetId": "scene-b7ded7c6-a3b1-4076-aaf1-aba88f7a00bb"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "property": "scale",
+            "value": 2.02,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-55b1c89c-3006-46c1-a9d3-d1a1afacb014",
+            "targetId": "scene-b7ded7c6-a3b1-4076-aaf1-aba88f7a00bb"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "property": "scale",
+            "value": 1.76,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-5de25bf9-b719-4e96-9800-916e928ba6cf",
+            "targetId": "scene-dc2440a9-b547-4d85-8b7d-6bb9b341beaa"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "property": "scale",
+            "value": 2.02,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-f5366e09-2e0e-4a28-8b67-a7fe9e6e122f",
+            "targetId": "scene-dc2440a9-b547-4d85-8b7d-6bb9b341beaa"
+          }
+        },
+        {
+          "atProgrammeTick": 1890000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.76,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-faf97fa6-e0b9-4617-97a0-81c402df6dcf",
+            "targetId": "scene-931b5bac-8a91-4bb6-8d9b-497cd4017a50"
+          }
+        },
+        {
+          "atProgrammeTick": 2160000,
+          "parameters": {
+            "property": "scale",
+            "value": 2.02,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-b1cc032f-21c0-4461-82a6-e546936fe7ba",
+            "targetId": "scene-931b5bac-8a91-4bb6-8d9b-497cd4017a50"
+          }
+        },
+        {
+          "atProgrammeTick": 1890000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.76,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-f99c0c57-26e3-4682-ab4d-44287432223e",
+            "targetId": "scene-6a46d393-8487-4e5e-9eeb-aa058223346e"
+          }
+        },
+        {
+          "atProgrammeTick": 2160000,
+          "parameters": {
+            "property": "scale",
+            "value": 2.02,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-09f07f38-829c-4f5c-b8cb-85da529338f2",
+            "targetId": "scene-6a46d393-8487-4e5e-9eeb-aa058223346e"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-fc9bc057-7e20-42c5-ac19-5d2cfc15c65f",
+            "targetId": "scene-56ea38ae-8ebe-4dc9-a7fe-fa23273e113b"
+          }
+        },
+        {
+          "atProgrammeTick": 297000,
+          "parameters": {
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-cfb3108b-ddd2-44dd-b993-46dc33313da3",
+            "targetId": "scene-56ea38ae-8ebe-4dc9-a7fe-fa23273e113b"
+          }
+        },
+        {
+          "atProgrammeTick": 787500,
+          "parameters": {
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-1bbed0da-475e-4c44-bf0d-32b13445ba75",
+            "targetId": "scene-56ea38ae-8ebe-4dc9-a7fe-fa23273e113b"
+          }
+        },
+        {
+          "atProgrammeTick": 810000,
+          "parameters": {
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-0c02d3dd-dbd4-4d45-8b27-84b53a4839e0",
+            "targetId": "scene-56ea38ae-8ebe-4dc9-a7fe-fa23273e113b"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "property": "scale",
+            "value": 0.02,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-6d18f687-0bc4-4278-840f-dc3961816107",
+            "targetId": "scene-4799e077-7b80-42f8-9d12-8a56b64ab807"
+          }
+        },
+        {
+          "atProgrammeTick": 342000,
+          "parameters": {
+            "property": "scale",
+            "value": 0.87,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-a10f7ded-8475-4cc1-965f-ab739209bb77",
+            "targetId": "scene-4799e077-7b80-42f8-9d12-8a56b64ab807"
+          }
+        },
+        {
+          "atProgrammeTick": 472500,
+          "parameters": {
+            "property": "scale",
+            "value": 0.87,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-257e94b7-a9d3-43e4-9ab3-0c25ed279197",
+            "targetId": "scene-4799e077-7b80-42f8-9d12-8a56b64ab807"
+          }
+        },
+        {
+          "atProgrammeTick": 585000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.15,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-ff08a45d-c979-47aa-8141-79eab82f3ea2",
+            "targetId": "scene-4799e077-7b80-42f8-9d12-8a56b64ab807"
+          }
+        },
+        {
+          "atProgrammeTick": 675000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.15,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-c54686f2-6de1-40c0-b406-0acaeddf5552",
+            "targetId": "scene-4799e077-7b80-42f8-9d12-8a56b64ab807"
+          }
+        },
+        {
+          "atProgrammeTick": 801000,
+          "parameters": {
+            "property": "scale",
+            "value": 2.7,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-d09068ff-5e6b-4ce1-88fe-e8922fa0199d",
+            "targetId": "scene-4799e077-7b80-42f8-9d12-8a56b64ab807"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "property": "rotation",
+            "value": 25,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-82a97fd1-222f-4d63-b2d2-d2ac13e4e26b",
+            "targetId": "scene-4799e077-7b80-42f8-9d12-8a56b64ab807"
+          }
+        },
+        {
+          "atProgrammeTick": 378000,
+          "parameters": {
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-6998efe6-1171-4a84-aca0-8018c9776657",
+            "targetId": "scene-4799e077-7b80-42f8-9d12-8a56b64ab807"
+          }
+        },
+        {
+          "atProgrammeTick": 567000,
+          "parameters": {
+            "property": "rotation",
+            "value": 7,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-49f29892-813d-4b20-a24e-7c35b8fb040b",
+            "targetId": "scene-4799e077-7b80-42f8-9d12-8a56b64ab807"
+          }
+        },
+        {
+          "atProgrammeTick": 792000,
+          "parameters": {
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-5c2d7ad4-dffd-4eb0-a527-23f6cfab2654",
+            "targetId": "scene-4799e077-7b80-42f8-9d12-8a56b64ab807"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-62a420b7-082e-423d-ac20-d0d15d401f0e",
+            "targetId": "scene-4799e077-7b80-42f8-9d12-8a56b64ab807"
+          }
+        },
+        {
+          "atProgrammeTick": 315000,
+          "parameters": {
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-36aba7d6-3a18-4df1-9440-92a59c1d0ce2",
+            "targetId": "scene-4799e077-7b80-42f8-9d12-8a56b64ab807"
+          }
+        },
+        {
+          "atProgrammeTick": 760500,
+          "parameters": {
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-baccfe66-083a-4754-ba01-a34c98089cb4",
+            "targetId": "scene-4799e077-7b80-42f8-9d12-8a56b64ab807"
+          }
+        },
+        {
+          "atProgrammeTick": 805500,
+          "parameters": {
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-af728c9b-defa-4ae0-b44f-12c205d371d6",
+            "targetId": "scene-4799e077-7b80-42f8-9d12-8a56b64ab807"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-c471fab9-4bbf-4006-9fee-ba3d80515200",
+            "targetId": "scene-4799e077-7b80-42f8-9d12-8a56b64ab807"
+          }
+        },
+        {
+          "atProgrammeTick": 472500,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-49e17ae8-c1ba-402d-93b6-c2b93b8dbd12",
+            "targetId": "scene-4799e077-7b80-42f8-9d12-8a56b64ab807"
+          }
+        },
+        {
+          "atProgrammeTick": 558000,
+          "parameters": {
+            "property": "x",
+            "value": 59,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-46d6269f-c16f-4572-a388-6a0d40b2676e",
+            "targetId": "scene-4799e077-7b80-42f8-9d12-8a56b64ab807"
+          }
+        },
+        {
+          "atProgrammeTick": 639000,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-fd89592b-7bbd-45d8-b460-496655421bf4",
+            "targetId": "scene-4799e077-7b80-42f8-9d12-8a56b64ab807"
+          }
+        },
+        {
+          "atProgrammeTick": 810000,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-646c8122-bd62-4bad-acb9-d13a36a9061c",
+            "targetId": "scene-4799e077-7b80-42f8-9d12-8a56b64ab807"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "property": "scale",
+            "value": 0.02,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-8847583a-7eba-429a-bace-364fe9ea5eeb",
+            "targetId": "scene-f54171a1-b6b8-4be5-ab1f-6b70c4a14b76"
+          }
+        },
+        {
+          "atProgrammeTick": 356400,
+          "parameters": {
+            "property": "scale",
+            "value": 0.69,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-73c6d978-1b1e-44ff-8ebc-c8ff50b80c5d",
+            "targetId": "scene-f54171a1-b6b8-4be5-ab1f-6b70c4a14b76"
+          }
+        },
+        {
+          "atProgrammeTick": 472500,
+          "parameters": {
+            "property": "scale",
+            "value": 0.69,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-445fb178-bf45-49eb-bce7-7b376c486a62",
+            "targetId": "scene-f54171a1-b6b8-4be5-ab1f-6b70c4a14b76"
+          }
+        },
+        {
+          "atProgrammeTick": 585000,
+          "parameters": {
+            "property": "scale",
+            "value": 0.9299999999999999,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-ac0376fa-f72c-4e51-9f13-f33b26b31c8c",
+            "targetId": "scene-f54171a1-b6b8-4be5-ab1f-6b70c4a14b76"
+          }
+        },
+        {
+          "atProgrammeTick": 675000,
+          "parameters": {
+            "property": "scale",
+            "value": 0.9299999999999999,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-c90860b8-a9a8-4f0a-8ef0-d7d2c06c0fc3",
+            "targetId": "scene-f54171a1-b6b8-4be5-ab1f-6b70c4a14b76"
+          }
+        },
+        {
+          "atProgrammeTick": 801000,
+          "parameters": {
+            "property": "scale",
+            "value": 2.3000000000000003,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-222618d3-032f-47c8-b548-e901c696c09e",
+            "targetId": "scene-f54171a1-b6b8-4be5-ab1f-6b70c4a14b76"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "property": "rotation",
+            "value": -25,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-833e0f03-0863-4609-bd1e-80a2a7885df2",
+            "targetId": "scene-f54171a1-b6b8-4be5-ab1f-6b70c4a14b76"
+          }
+        },
+        {
+          "atProgrammeTick": 378000,
+          "parameters": {
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-6490b3ee-87ce-4cdb-921d-c934b76dc985",
+            "targetId": "scene-f54171a1-b6b8-4be5-ab1f-6b70c4a14b76"
+          }
+        },
+        {
+          "atProgrammeTick": 567000,
+          "parameters": {
+            "property": "rotation",
+            "value": -7,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-3aad0b39-42ee-4cc1-a508-3e4e1d14622f",
+            "targetId": "scene-f54171a1-b6b8-4be5-ab1f-6b70c4a14b76"
+          }
+        },
+        {
+          "atProgrammeTick": 792000,
+          "parameters": {
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-62d266b1-0081-4447-b675-e474b26945a6",
+            "targetId": "scene-f54171a1-b6b8-4be5-ab1f-6b70c4a14b76"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-74b29921-314d-4420-978b-326c52eb70d3",
+            "targetId": "scene-f54171a1-b6b8-4be5-ab1f-6b70c4a14b76"
+          }
+        },
+        {
+          "atProgrammeTick": 331200,
+          "parameters": {
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-7008c2ec-da1e-45c1-8cae-0eeffb69f15c",
+            "targetId": "scene-f54171a1-b6b8-4be5-ab1f-6b70c4a14b76"
+          }
+        },
+        {
+          "atProgrammeTick": 760500,
+          "parameters": {
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-f974e650-aade-4d41-b979-e42ede39dbb7",
+            "targetId": "scene-f54171a1-b6b8-4be5-ab1f-6b70c4a14b76"
+          }
+        },
+        {
+          "atProgrammeTick": 805500,
+          "parameters": {
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-44ae62e2-46d1-4fe0-ac5a-bbdedad8911a",
+            "targetId": "scene-f54171a1-b6b8-4be5-ab1f-6b70c4a14b76"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-db963581-77d5-4732-a581-9270f8939de0",
+            "targetId": "scene-f54171a1-b6b8-4be5-ab1f-6b70c4a14b76"
+          }
+        },
+        {
+          "atProgrammeTick": 472500,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-b7a0ed30-bc53-4156-b0ce-e8f0ac550b9e",
+            "targetId": "scene-f54171a1-b6b8-4be5-ab1f-6b70c4a14b76"
+          }
+        },
+        {
+          "atProgrammeTick": 558000,
+          "parameters": {
+            "property": "x",
+            "value": 41,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-c123d3b8-7667-4a6f-a891-8cf7e12c6ad2",
+            "targetId": "scene-f54171a1-b6b8-4be5-ab1f-6b70c4a14b76"
+          }
+        },
+        {
+          "atProgrammeTick": 639000,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-83f5aed8-fb17-4351-ac3c-f353612984c2",
+            "targetId": "scene-f54171a1-b6b8-4be5-ab1f-6b70c4a14b76"
+          }
+        },
+        {
+          "atProgrammeTick": 810000,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-ff9cfaf5-dc6e-4a55-a928-3f87d385cbd4",
+            "targetId": "scene-f54171a1-b6b8-4be5-ab1f-6b70c4a14b76"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "property": "scale",
+            "value": 0.02,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-f2822986-0ffa-4754-ad9e-3263bf0caf1b",
+            "targetId": "scene-6ade22be-0c7a-43dd-98cf-97b8d7ee0014"
+          }
+        },
+        {
+          "atProgrammeTick": 370800,
+          "parameters": {
+            "property": "scale",
+            "value": 0.51,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-064a7fc0-0ed7-4e8e-ad1c-8218050a5166",
+            "targetId": "scene-6ade22be-0c7a-43dd-98cf-97b8d7ee0014"
+          }
+        },
+        {
+          "atProgrammeTick": 472500,
+          "parameters": {
+            "property": "scale",
+            "value": 0.51,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-43ca5514-0c0b-44d4-9c9e-dfa53f6c2cc9",
+            "targetId": "scene-6ade22be-0c7a-43dd-98cf-97b8d7ee0014"
+          }
+        },
+        {
+          "atProgrammeTick": 585000,
+          "parameters": {
+            "property": "scale",
+            "value": 0.71,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-0d3595cb-86e4-48ff-82eb-05d41dd1bceb",
+            "targetId": "scene-6ade22be-0c7a-43dd-98cf-97b8d7ee0014"
+          }
+        },
+        {
+          "atProgrammeTick": 675000,
+          "parameters": {
+            "property": "scale",
+            "value": 0.71,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-6edca287-c71d-41fd-b28b-f3abd9d49e22",
+            "targetId": "scene-6ade22be-0c7a-43dd-98cf-97b8d7ee0014"
+          }
+        },
+        {
+          "atProgrammeTick": 801000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.9000000000000001,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-d3fb4d1d-f771-4ccf-8774-ad552c2b7f70",
+            "targetId": "scene-6ade22be-0c7a-43dd-98cf-97b8d7ee0014"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "property": "rotation",
+            "value": 25,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-c1c58276-54db-4554-bbf8-90dbfc147002",
+            "targetId": "scene-6ade22be-0c7a-43dd-98cf-97b8d7ee0014"
+          }
+        },
+        {
+          "atProgrammeTick": 378000,
+          "parameters": {
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-60681128-1810-4930-aeac-a3804eb9d657",
+            "targetId": "scene-6ade22be-0c7a-43dd-98cf-97b8d7ee0014"
+          }
+        },
+        {
+          "atProgrammeTick": 567000,
+          "parameters": {
+            "property": "rotation",
+            "value": 7,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-cbb24635-1d84-4945-aeb5-c1b926303e21",
+            "targetId": "scene-6ade22be-0c7a-43dd-98cf-97b8d7ee0014"
+          }
+        },
+        {
+          "atProgrammeTick": 792000,
+          "parameters": {
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-7a05f482-c6f9-4c94-be16-28dd593e756a",
+            "targetId": "scene-6ade22be-0c7a-43dd-98cf-97b8d7ee0014"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-c197fb9c-aa44-4bc2-a898-953bf994fe88",
+            "targetId": "scene-6ade22be-0c7a-43dd-98cf-97b8d7ee0014"
+          }
+        },
+        {
+          "atProgrammeTick": 347400,
+          "parameters": {
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-e0e29abc-17e7-40d9-9b04-cfccf29de9df",
+            "targetId": "scene-6ade22be-0c7a-43dd-98cf-97b8d7ee0014"
+          }
+        },
+        {
+          "atProgrammeTick": 760500,
+          "parameters": {
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-ac6b9206-19bd-4732-bc97-d647d2127007",
+            "targetId": "scene-6ade22be-0c7a-43dd-98cf-97b8d7ee0014"
+          }
+        },
+        {
+          "atProgrammeTick": 805500,
+          "parameters": {
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-b98ec05b-df9a-4168-8853-7ab2c6eadb3c",
+            "targetId": "scene-6ade22be-0c7a-43dd-98cf-97b8d7ee0014"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-99ea1b1e-1158-4f4d-b210-3c487a5b75a0",
+            "targetId": "scene-6ade22be-0c7a-43dd-98cf-97b8d7ee0014"
+          }
+        },
+        {
+          "atProgrammeTick": 472500,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-6a08a22e-c3b0-4498-bf4e-730c318d99dd",
+            "targetId": "scene-6ade22be-0c7a-43dd-98cf-97b8d7ee0014"
+          }
+        },
+        {
+          "atProgrammeTick": 558000,
+          "parameters": {
+            "property": "x",
+            "value": 59,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-e359c8ee-59ad-44c8-9821-fcba2376e00d",
+            "targetId": "scene-6ade22be-0c7a-43dd-98cf-97b8d7ee0014"
+          }
+        },
+        {
+          "atProgrammeTick": 639000,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-387df5dc-e567-417a-8e8c-bf9e902053c5",
+            "targetId": "scene-6ade22be-0c7a-43dd-98cf-97b8d7ee0014"
+          }
+        },
+        {
+          "atProgrammeTick": 810000,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-1b91fe61-0f9e-41f3-a7a9-dd3df58bb46d",
+            "targetId": "scene-6ade22be-0c7a-43dd-98cf-97b8d7ee0014"
+          }
+        },
+        {
+          "atProgrammeTick": 810000,
+          "parameters": {
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-d56e025c-163b-42ba-aeff-f07257ccee70",
+            "targetId": "scene-b7a0a7c9-48c0-4000-aee3-e205c83654a4"
+          }
+        },
+        {
+          "atProgrammeTick": 990000,
+          "parameters": {
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-e8b44b37-fc78-4590-a58a-3e1e389a1342",
+            "targetId": "scene-b7a0a7c9-48c0-4000-aee3-e205c83654a4"
+          }
+        },
+        {
+          "atProgrammeTick": 1116000,
+          "parameters": {
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-0ff92741-f68e-4e15-aa7c-c2f9723012a5",
+            "targetId": "scene-b7a0a7c9-48c0-4000-aee3-e205c83654a4"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-27462413-5d78-463e-9951-2dd69fd6b7c5",
+            "targetId": "scene-b7a0a7c9-48c0-4000-aee3-e205c83654a4"
+          }
+        },
+        {
+          "atProgrammeTick": 1318500,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-94e897df-ed44-4081-800f-3da0dadd7cd2",
+            "targetId": "scene-3226214f-8d62-4f6c-9031-f5ad53caad05"
+          }
+        },
+        {
+          "atProgrammeTick": 1431000,
+          "parameters": {
+            "property": "x",
+            "value": 24,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-7a23e8bc-5aaa-473a-8059-dcf362ae927f",
+            "targetId": "scene-3226214f-8d62-4f6c-9031-f5ad53caad05"
+          }
+        },
+        {
+          "atProgrammeTick": 1566000,
+          "parameters": {
+            "property": "x",
+            "value": 24,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-b5eaa4e9-bdb6-4871-8bc7-222dea80c00e",
+            "targetId": "scene-3226214f-8d62-4f6c-9031-f5ad53caad05"
+          }
+        },
+        {
+          "atProgrammeTick": 1728000,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-f1bf6bbf-e25d-402b-b4e9-172abd691912",
+            "targetId": "scene-3226214f-8d62-4f6c-9031-f5ad53caad05"
+          }
+        },
+        {
+          "atProgrammeTick": 1890000,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-34f639b8-f99b-4c5b-9073-e2f99b359dbe",
+            "targetId": "scene-3226214f-8d62-4f6c-9031-f5ad53caad05"
+          }
+        },
+        {
+          "atProgrammeTick": 1318500,
+          "parameters": {
+            "property": "scale",
+            "value": 1.82,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-e73ddf23-ee96-4e0f-9e33-df5b57b8de68",
+            "targetId": "scene-3226214f-8d62-4f6c-9031-f5ad53caad05"
+          }
+        },
+        {
+          "atProgrammeTick": 1431000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.12,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-7346e68c-c504-401a-973b-9df2c092b573",
+            "targetId": "scene-3226214f-8d62-4f6c-9031-f5ad53caad05"
+          }
+        },
+        {
+          "atProgrammeTick": 1566000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.12,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-6dae622b-6351-4401-b6a0-8460dd0c552c",
+            "targetId": "scene-3226214f-8d62-4f6c-9031-f5ad53caad05"
+          }
+        },
+        {
+          "atProgrammeTick": 1728000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.82,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-00dd4476-d674-459a-b9a9-35fe3d9a9270",
+            "targetId": "scene-3226214f-8d62-4f6c-9031-f5ad53caad05"
+          }
+        },
+        {
+          "atProgrammeTick": 1890000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.9,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-47978b80-e8b1-4a20-90f2-e4aecfe96c83",
+            "targetId": "scene-3226214f-8d62-4f6c-9031-f5ad53caad05"
+          }
+        },
+        {
+          "atProgrammeTick": 1318500,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-ba45c5b7-68dc-4ab3-8850-7cb615336aeb",
+            "targetId": "scene-3bd49188-4ccb-43e7-be2b-5eb25b456b64"
+          }
+        },
+        {
+          "atProgrammeTick": 1431000,
+          "parameters": {
+            "property": "x",
+            "value": 24,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-46971218-d99a-402f-8357-143f21a33c2b",
+            "targetId": "scene-3bd49188-4ccb-43e7-be2b-5eb25b456b64"
+          }
+        },
+        {
+          "atProgrammeTick": 1566000,
+          "parameters": {
+            "property": "x",
+            "value": 24,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-76958abc-bcdf-42a7-8183-8bbfd10683e8",
+            "targetId": "scene-3bd49188-4ccb-43e7-be2b-5eb25b456b64"
+          }
+        },
+        {
+          "atProgrammeTick": 1728000,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-e6725654-3ec4-462a-b9f8-c68cf101090c",
+            "targetId": "scene-3bd49188-4ccb-43e7-be2b-5eb25b456b64"
+          }
+        },
+        {
+          "atProgrammeTick": 1890000,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-4759cde1-b153-4b8b-81d2-006ccca2b40f",
+            "targetId": "scene-3bd49188-4ccb-43e7-be2b-5eb25b456b64"
+          }
+        },
+        {
+          "atProgrammeTick": 1318500,
+          "parameters": {
+            "property": "scale",
+            "value": 1.82,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-8dc3c3a6-58c4-45c9-8e46-b3b1f496d172",
+            "targetId": "scene-3bd49188-4ccb-43e7-be2b-5eb25b456b64"
+          }
+        },
+        {
+          "atProgrammeTick": 1431000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.12,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-89609d1d-d9b5-4634-a4d0-88a3dd7c5280",
+            "targetId": "scene-3bd49188-4ccb-43e7-be2b-5eb25b456b64"
+          }
+        },
+        {
+          "atProgrammeTick": 1566000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.12,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-3519c9df-6323-4741-afd4-7dfd34c50157",
+            "targetId": "scene-3bd49188-4ccb-43e7-be2b-5eb25b456b64"
+          }
+        },
+        {
+          "atProgrammeTick": 1728000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.82,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-d0638fb2-f7c4-4799-8379-9dc1f755b8f4",
+            "targetId": "scene-3bd49188-4ccb-43e7-be2b-5eb25b456b64"
+          }
+        },
+        {
+          "atProgrammeTick": 1890000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.9,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-eb76cf17-f6ea-441e-911a-27a8f1d6a66a",
+            "targetId": "scene-3bd49188-4ccb-43e7-be2b-5eb25b456b64"
+          }
+        },
+        {
+          "atProgrammeTick": 1318500,
+          "parameters": {
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-0ae6f2d9-3239-4d0b-80ec-e1835d8eadb8",
+            "targetId": "scene-3bd49188-4ccb-43e7-be2b-5eb25b456b64"
+          }
+        },
+        {
+          "atProgrammeTick": 1435500,
+          "parameters": {
+            "property": "opacity",
+            "value": 0.5,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-2e138bd0-e12d-423e-85d7-594976c41d98",
+            "targetId": "scene-3bd49188-4ccb-43e7-be2b-5eb25b456b64"
+          }
+        },
+        {
+          "atProgrammeTick": 1566000,
+          "parameters": {
+            "property": "opacity",
+            "value": 0.5,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-a94802d4-023a-4228-8504-ad27905b89ac",
+            "targetId": "scene-3bd49188-4ccb-43e7-be2b-5eb25b456b64"
+          }
+        },
+        {
+          "atProgrammeTick": 1746000,
+          "parameters": {
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-77a27067-fcc5-450b-8fac-b8a4ffb1240e",
+            "targetId": "scene-3bd49188-4ccb-43e7-be2b-5eb25b456b64"
+          }
+        },
+        {
+          "atProgrammeTick": 1890000,
+          "parameters": {
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-90b91390-567f-417f-b0df-f8b5333b8e5e",
+            "targetId": "scene-3bd49188-4ccb-43e7-be2b-5eb25b456b64"
+          }
+        },
+        {
+          "atProgrammeTick": 1287000,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-0cbcb8a1-356f-4e6e-9efc-5e274a57026c",
+            "targetId": "scene-cbe08ba3-50c4-41a9-996c-6aa7a25bcc4d"
+          }
+        },
+        {
+          "atProgrammeTick": 1399500,
+          "parameters": {
+            "property": "x",
+            "value": 76,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-594b20cd-244e-4e12-acf2-3bde4a77a0a1",
+            "targetId": "scene-cbe08ba3-50c4-41a9-996c-6aa7a25bcc4d"
+          }
+        },
+        {
+          "atProgrammeTick": 1566000,
+          "parameters": {
+            "property": "x",
+            "value": 76,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-6d5dd74e-f32f-4952-8edb-5822f8256f8e",
+            "targetId": "scene-cbe08ba3-50c4-41a9-996c-6aa7a25bcc4d"
+          }
+        },
+        {
+          "atProgrammeTick": 1728000,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-f4e21511-7b16-48e7-8333-e7012d7cbc16",
+            "targetId": "scene-cbe08ba3-50c4-41a9-996c-6aa7a25bcc4d"
+          }
+        },
+        {
+          "atProgrammeTick": 1890000,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-f4ad41a0-505f-4c90-9e6e-a30c80b46db7",
+            "targetId": "scene-cbe08ba3-50c4-41a9-996c-6aa7a25bcc4d"
+          }
+        },
+        {
+          "atProgrammeTick": 1287000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.82,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-a5b92e8f-9c2b-4e03-9259-4e64f893fa22",
+            "targetId": "scene-cbe08ba3-50c4-41a9-996c-6aa7a25bcc4d"
+          }
+        },
+        {
+          "atProgrammeTick": 1399500,
+          "parameters": {
+            "property": "scale",
+            "value": 1.2,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-e3bbb15b-63da-49e3-acda-160c4f0ce9d6",
+            "targetId": "scene-cbe08ba3-50c4-41a9-996c-6aa7a25bcc4d"
+          }
+        },
+        {
+          "atProgrammeTick": 1566000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.2,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-ee678d80-5ac1-4821-af1a-cbc6ceb1045e",
+            "targetId": "scene-cbe08ba3-50c4-41a9-996c-6aa7a25bcc4d"
+          }
+        },
+        {
+          "atProgrammeTick": 1728000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.82,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-701a56e6-46b3-473e-89cf-312b7fa72171",
+            "targetId": "scene-cbe08ba3-50c4-41a9-996c-6aa7a25bcc4d"
+          }
+        },
+        {
+          "atProgrammeTick": 1890000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.9,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-cf345e32-5d8f-40c6-b1d9-928cdd6ec0d9",
+            "targetId": "scene-cbe08ba3-50c4-41a9-996c-6aa7a25bcc4d"
+          }
+        },
+        {
+          "atProgrammeTick": 1287000,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-a913a5e6-ab64-4a08-aacf-db2290da0208",
+            "targetId": "scene-d090e060-d9f3-4aae-aac4-35c7328e1026"
+          }
+        },
+        {
+          "atProgrammeTick": 1399500,
+          "parameters": {
+            "property": "x",
+            "value": 76,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-a9e29ea9-2b99-4ce3-a139-14b540e0a704",
+            "targetId": "scene-d090e060-d9f3-4aae-aac4-35c7328e1026"
+          }
+        },
+        {
+          "atProgrammeTick": 1566000,
+          "parameters": {
+            "property": "x",
+            "value": 76,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-27fac9be-0ab6-4a0b-a9aa-385858910a9c",
+            "targetId": "scene-d090e060-d9f3-4aae-aac4-35c7328e1026"
+          }
+        },
+        {
+          "atProgrammeTick": 1728000,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-d517d37b-0cc3-4470-8d56-0ed337984915",
+            "targetId": "scene-d090e060-d9f3-4aae-aac4-35c7328e1026"
+          }
+        },
+        {
+          "atProgrammeTick": 1890000,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-6c12c64d-8fea-4a4f-9e8b-6a2054e97e28",
+            "targetId": "scene-d090e060-d9f3-4aae-aac4-35c7328e1026"
+          }
+        },
+        {
+          "atProgrammeTick": 1287000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.82,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-b97ba8a1-8ce9-4d95-9851-26641e2ac504",
+            "targetId": "scene-d090e060-d9f3-4aae-aac4-35c7328e1026"
+          }
+        },
+        {
+          "atProgrammeTick": 1399500,
+          "parameters": {
+            "property": "scale",
+            "value": 1.2,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-34a4d63d-61dd-4451-9dcb-611fbae5c761",
+            "targetId": "scene-d090e060-d9f3-4aae-aac4-35c7328e1026"
+          }
+        },
+        {
+          "atProgrammeTick": 1566000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.2,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-106b3b28-09c2-43ab-b43f-7e8db70d3e53",
+            "targetId": "scene-d090e060-d9f3-4aae-aac4-35c7328e1026"
+          }
+        },
+        {
+          "atProgrammeTick": 1728000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.82,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-bd200c31-f38a-4687-96f1-f5e138ae6009",
+            "targetId": "scene-d090e060-d9f3-4aae-aac4-35c7328e1026"
+          }
+        },
+        {
+          "atProgrammeTick": 1890000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.9,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-1c8ea71e-21a8-4a98-95a2-4bc8457f5aac",
+            "targetId": "scene-d090e060-d9f3-4aae-aac4-35c7328e1026"
+          }
+        },
+        {
+          "atProgrammeTick": 1287000,
+          "parameters": {
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-9594f538-16b8-4797-9b42-8c040b0c04bd",
+            "targetId": "scene-d090e060-d9f3-4aae-aac4-35c7328e1026"
+          }
+        },
+        {
+          "atProgrammeTick": 1404000,
+          "parameters": {
+            "property": "opacity",
+            "value": 0.7,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-f8f781f8-f932-44fe-92ce-377c28748a22",
+            "targetId": "scene-d090e060-d9f3-4aae-aac4-35c7328e1026"
+          }
+        },
+        {
+          "atProgrammeTick": 1566000,
+          "parameters": {
+            "property": "opacity",
+            "value": 0.7,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-03caa17c-da11-4d68-b125-3322e4402c5d",
+            "targetId": "scene-d090e060-d9f3-4aae-aac4-35c7328e1026"
+          }
+        },
+        {
+          "atProgrammeTick": 1746000,
+          "parameters": {
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-7b708686-fba7-4f3b-9d6e-3a64085d3486",
+            "targetId": "scene-d090e060-d9f3-4aae-aac4-35c7328e1026"
+          }
+        },
+        {
+          "atProgrammeTick": 1890000,
+          "parameters": {
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-5d559cc0-f5e4-4c0d-9d6a-b904e404d497",
+            "targetId": "scene-d090e060-d9f3-4aae-aac4-35c7328e1026"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-361f892f-dee7-4025-8918-0a8a5cf7223e",
+            "targetId": "scene-49ce57f9-b392-4be2-a6d3-0474bc83eb49"
+          }
+        },
+        {
+          "atProgrammeTick": 1372500,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-0ed53107-1fef-4d2c-a723-6049747452b8",
+            "targetId": "scene-49ce57f9-b392-4be2-a6d3-0474bc83eb49"
+          }
+        },
+        {
+          "atProgrammeTick": 1566000,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-04d56693-75a2-43aa-97f0-3e2a2838f1cf",
+            "targetId": "scene-49ce57f9-b392-4be2-a6d3-0474bc83eb49"
+          }
+        },
+        {
+          "atProgrammeTick": 1728000,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-cd37b4db-d1c2-47e0-8b30-c487fc3ad5b8",
+            "targetId": "scene-49ce57f9-b392-4be2-a6d3-0474bc83eb49"
+          }
+        },
+        {
+          "atProgrammeTick": 1890000,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-e56d9eb0-810b-46ff-b5ac-63c3a68edfe6",
+            "targetId": "scene-49ce57f9-b392-4be2-a6d3-0474bc83eb49"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.82,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-5a1e9ef2-038c-4e6c-9ea6-7e5072774d8e",
+            "targetId": "scene-49ce57f9-b392-4be2-a6d3-0474bc83eb49"
+          }
+        },
+        {
+          "atProgrammeTick": 1372500,
+          "parameters": {
+            "property": "scale",
+            "value": 1.82,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-b83e24c0-943b-42fd-aecd-3074e8d36e20",
+            "targetId": "scene-49ce57f9-b392-4be2-a6d3-0474bc83eb49"
+          }
+        },
+        {
+          "atProgrammeTick": 1566000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.82,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-03f4035b-a750-45f6-b807-8a8e063cfd46",
+            "targetId": "scene-49ce57f9-b392-4be2-a6d3-0474bc83eb49"
+          }
+        },
+        {
+          "atProgrammeTick": 1728000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.82,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-4a35598a-949d-4e61-ae73-19e146c0c8d8",
+            "targetId": "scene-49ce57f9-b392-4be2-a6d3-0474bc83eb49"
+          }
+        },
+        {
+          "atProgrammeTick": 1890000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.9,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-0a548d98-4908-4193-941b-53eb1766af6d",
+            "targetId": "scene-49ce57f9-b392-4be2-a6d3-0474bc83eb49"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-24dbe84d-0e6e-41bd-bd38-435449e4d7fe",
+            "targetId": "scene-a7bb4a13-73a3-439e-a717-1868be0ff71f"
+          }
+        },
+        {
+          "atProgrammeTick": 1372500,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-56acbc47-347a-4442-a789-b2961a6a62c5",
+            "targetId": "scene-a7bb4a13-73a3-439e-a717-1868be0ff71f"
+          }
+        },
+        {
+          "atProgrammeTick": 1566000,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-7cfd7306-09e8-436d-8b5e-c5146eb82add",
+            "targetId": "scene-a7bb4a13-73a3-439e-a717-1868be0ff71f"
+          }
+        },
+        {
+          "atProgrammeTick": 1728000,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-a98da3c3-6b9b-4a06-a9e1-1161d3a2db02",
+            "targetId": "scene-a7bb4a13-73a3-439e-a717-1868be0ff71f"
+          }
+        },
+        {
+          "atProgrammeTick": 1890000,
+          "parameters": {
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-5d0e18a6-087d-4b48-8dea-aba4bfe8e32a",
+            "targetId": "scene-a7bb4a13-73a3-439e-a717-1868be0ff71f"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.82,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-a542b5c1-dd76-40ce-89dd-97c3e0a7a85a",
+            "targetId": "scene-a7bb4a13-73a3-439e-a717-1868be0ff71f"
+          }
+        },
+        {
+          "atProgrammeTick": 1372500,
+          "parameters": {
+            "property": "scale",
+            "value": 1.82,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-94fa7328-fd61-4dd8-b22c-be9281bf717c",
+            "targetId": "scene-a7bb4a13-73a3-439e-a717-1868be0ff71f"
+          }
+        },
+        {
+          "atProgrammeTick": 1566000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.82,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-c743728c-2786-4c02-9a7c-7218bfe19d22",
+            "targetId": "scene-a7bb4a13-73a3-439e-a717-1868be0ff71f"
+          }
+        },
+        {
+          "atProgrammeTick": 1728000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.82,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-e733c294-c711-49e6-877c-c0f94d78583e",
+            "targetId": "scene-a7bb4a13-73a3-439e-a717-1868be0ff71f"
+          }
+        },
+        {
+          "atProgrammeTick": 1890000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.9,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-6e62f487-8627-49f8-8ea0-6d2d11ade80d",
+            "targetId": "scene-a7bb4a13-73a3-439e-a717-1868be0ff71f"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-3211755d-276f-4bf5-8b5b-c5152e1b095e",
+            "targetId": "scene-a7bb4a13-73a3-439e-a717-1868be0ff71f"
+          }
+        },
+        {
+          "atProgrammeTick": 1377000,
+          "parameters": {
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-4670047c-543d-4528-99fd-085628749b77",
+            "targetId": "scene-a7bb4a13-73a3-439e-a717-1868be0ff71f"
+          }
+        },
+        {
+          "atProgrammeTick": 1566000,
+          "parameters": {
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-9c68ccf1-b239-4fab-aed1-6b9647dd1cc7",
+            "targetId": "scene-a7bb4a13-73a3-439e-a717-1868be0ff71f"
+          }
+        },
+        {
+          "atProgrammeTick": 1746000,
+          "parameters": {
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-9a00eee0-a28a-49dd-97be-842bb5861040",
+            "targetId": "scene-a7bb4a13-73a3-439e-a717-1868be0ff71f"
+          }
+        },
+        {
+          "atProgrammeTick": 1890000,
+          "parameters": {
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-9a304bd6-3f1e-44d2-9768-df0c6bfe83f0",
+            "targetId": "scene-a7bb4a13-73a3-439e-a717-1868be0ff71f"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "rotation",
+            "value": -50,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "graphic-key-e5e7735b-9a42-46d4-8439-26dc80981f33",
+            "targetId": "graphic-e1796059-bf31-4bac-bce1-a25570cbf1bd"
+          }
+        },
+        {
+          "atProgrammeTick": 1890000,
+          "parameters": {
+            "property": "rotation",
+            "value": 75,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "graphic-key-51fa6378-8bc5-41e5-b4cf-0fa83d731d19",
+            "targetId": "graphic-e1796059-bf31-4bac-bce1-a25570cbf1bd"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "rotation",
+            "value": 110,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "graphic-key-38c65cd9-8333-4524-9897-d9c1d01706ee",
+            "targetId": "graphic-64b6f858-89b0-4eed-8a7d-3e68fa26923f"
+          }
+        },
+        {
+          "atProgrammeTick": 1890000,
+          "parameters": {
+            "property": "rotation",
+            "value": 235,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "graphic-key-6f5aa336-e512-47f4-b902-8c4c56cd877e",
+            "targetId": "graphic-64b6f858-89b0-4eed-8a7d-3e68fa26923f"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "strokeEnd",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-6b575781-de5f-42ed-9b47-9d3e513b6c20",
+            "targetId": "graphic-e1796059-bf31-4bac-bce1-a25570cbf1bd"
+          }
+        },
+        {
+          "atProgrammeTick": 1377000,
+          "parameters": {
+            "property": "strokeEnd",
+            "value": 100,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-4295fbec-de62-49ff-b8ba-eaa750f5dbda",
+            "targetId": "graphic-e1796059-bf31-4bac-bce1-a25570cbf1bd"
+          }
+        },
+        {
+          "atProgrammeTick": 1773000,
+          "parameters": {
+            "property": "strokeEnd",
+            "value": 100,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-bfbd4de6-68ff-4b57-9f8c-9c1b01eb9634",
+            "targetId": "graphic-e1796059-bf31-4bac-bce1-a25570cbf1bd"
+          }
+        },
+        {
+          "atProgrammeTick": 1890000,
+          "parameters": {
+            "property": "strokeEnd",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-19df515d-b331-42b8-8782-672ef76aa984",
+            "targetId": "graphic-e1796059-bf31-4bac-bce1-a25570cbf1bd"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "strokeOffset",
+            "value": 0,
+            "easing": "linear",
+            "id": "scene-key-ca1209b1-147d-48e0-987f-c82d1788b88c",
+            "targetId": "graphic-e1796059-bf31-4bac-bce1-a25570cbf1bd"
+          }
+        },
+        {
+          "atProgrammeTick": 1890000,
+          "parameters": {
+            "property": "strokeOffset",
+            "value": 45,
+            "easing": "linear",
+            "id": "scene-key-e847171b-17b5-4fde-a4c3-2d701f3476de",
+            "targetId": "graphic-e1796059-bf31-4bac-bce1-a25570cbf1bd"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "strokeEnd",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-c6eec6aa-a67a-4fa0-be7c-145d1e6fcfed",
+            "targetId": "graphic-64b6f858-89b0-4eed-8a7d-3e68fa26923f"
+          }
+        },
+        {
+          "atProgrammeTick": 1404000,
+          "parameters": {
+            "property": "strokeEnd",
+            "value": 100,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-6880e998-da74-4c9a-853f-71702286c9b3",
+            "targetId": "graphic-64b6f858-89b0-4eed-8a7d-3e68fa26923f"
+          }
+        },
+        {
+          "atProgrammeTick": 1773000,
+          "parameters": {
+            "property": "strokeEnd",
+            "value": 100,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-a4983acc-9713-412f-a7ea-f78f46e7efb7",
+            "targetId": "graphic-64b6f858-89b0-4eed-8a7d-3e68fa26923f"
+          }
+        },
+        {
+          "atProgrammeTick": 1890000,
+          "parameters": {
+            "property": "strokeEnd",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-8a416f7a-63b6-4789-9404-00a7a45ddbfd",
+            "targetId": "graphic-64b6f858-89b0-4eed-8a7d-3e68fa26923f"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "strokeOffset",
+            "value": 0,
+            "easing": "linear",
+            "id": "scene-key-aab88e8e-682b-4935-9455-1781aa0306ab",
+            "targetId": "graphic-64b6f858-89b0-4eed-8a7d-3e68fa26923f"
+          }
+        },
+        {
+          "atProgrammeTick": 1890000,
+          "parameters": {
+            "property": "strokeOffset",
+            "value": 45,
+            "easing": "linear",
+            "id": "scene-key-6c2aad49-f0c1-4413-94da-bd644b25d0fa",
+            "targetId": "graphic-64b6f858-89b0-4eed-8a7d-3e68fa26923f"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "property": "opacity",
+            "value": 0.85,
+            "easing": "linear",
+            "id": "scene-key-60806af8-c626-47a2-92ea-8a3c1de2b538",
+            "targetId": "scene-dc2440a9-b547-4d85-8b7d-6bb9b341beaa"
+          }
+        },
+        {
+          "atProgrammeTick": 31500,
+          "parameters": {
+            "property": "opacity",
+            "value": 1,
+            "easing": "linear",
+            "id": "scene-key-3b16683e-f909-4dbb-b997-bb8027200cd4",
+            "targetId": "scene-dc2440a9-b547-4d85-8b7d-6bb9b341beaa"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "property": "opacity",
+            "value": 1,
+            "easing": "linear",
+            "id": "scene-key-f87200a6-2c67-4750-8f83-7cbcf02c8e66",
+            "targetId": "scene-dc2440a9-b547-4d85-8b7d-6bb9b341beaa"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "property": "opacity",
+            "value": 0.45,
+            "easing": "linear",
+            "id": "scene-key-31b71aed-8e7d-4311-892f-d2a92ab2843b",
+            "targetId": "scene-8efc6db9-1ad6-4aee-8972-66bd7d036f35"
+          }
+        },
+        {
+          "atProgrammeTick": 63000,
+          "parameters": {
+            "property": "opacity",
+            "value": 0.34,
+            "easing": "linear",
+            "id": "scene-key-06518641-c25a-4a18-b078-50d917eb1ed6",
+            "targetId": "scene-8efc6db9-1ad6-4aee-8972-66bd7d036f35"
+          }
+        },
+        {
+          "atProgrammeTick": 135000,
+          "parameters": {
+            "property": "opacity",
+            "value": 0.5,
+            "easing": "linear",
+            "id": "scene-key-d1128ac9-96b2-4d54-ad39-f50e35519b26",
+            "targetId": "scene-8efc6db9-1ad6-4aee-8972-66bd7d036f35"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "property": "opacity",
+            "value": 0.05,
+            "easing": "linear",
+            "id": "scene-key-5a75469d-c354-4569-9368-9e48f2612149",
+            "targetId": "scene-8efc6db9-1ad6-4aee-8972-66bd7d036f35"
+          }
+        },
+        {
+          "atProgrammeTick": 1890000,
+          "parameters": {
+            "property": "opacity",
+            "value": 1,
+            "easing": "linear",
+            "id": "scene-key-eb478fae-a955-429c-9218-0ef9c426aff1",
+            "targetId": "scene-6a46d393-8487-4e5e-9eeb-aa058223346e"
+          }
+        },
+        {
+          "atProgrammeTick": 2106000,
+          "parameters": {
+            "property": "opacity",
+            "value": 1,
+            "easing": "linear",
+            "id": "scene-key-ec243e6d-d7aa-4a0a-8621-c6e2374590af",
+            "targetId": "scene-6a46d393-8487-4e5e-9eeb-aa058223346e"
+          }
+        },
+        {
+          "atProgrammeTick": 2160000,
+          "parameters": {
+            "property": "opacity",
+            "value": 0,
+            "easing": "linear",
+            "id": "scene-key-7deba29e-7f42-496e-a908-e33f9b42bca1",
+            "targetId": "scene-6a46d393-8487-4e5e-9eeb-aa058223346e"
+          }
+        },
+        {
+          "atProgrammeTick": 1890000,
+          "parameters": {
+            "property": "opacity",
+            "value": 0.3,
+            "easing": "linear",
+            "id": "scene-key-9e212e3d-1d29-41d7-a751-098a3d4b14da",
+            "targetId": "scene-089ee0be-4a8d-4505-8c7d-0da3bf20fff6"
+          }
+        },
+        {
+          "atProgrammeTick": 1953000,
+          "parameters": {
+            "property": "opacity",
+            "value": 0.45,
+            "easing": "linear",
+            "id": "scene-key-a64a19c6-ca71-43c8-a3a2-f3e268566a00",
+            "targetId": "scene-089ee0be-4a8d-4505-8c7d-0da3bf20fff6"
+          }
+        },
+        {
+          "atProgrammeTick": 2025000,
+          "parameters": {
+            "property": "opacity",
+            "value": 0.38,
+            "easing": "linear",
+            "id": "scene-key-50bd335e-84c4-4634-b4ce-d5eb4629662f",
+            "targetId": "scene-089ee0be-4a8d-4505-8c7d-0da3bf20fff6"
+          }
+        },
+        {
+          "atProgrammeTick": 2106000,
+          "parameters": {
+            "property": "opacity",
+            "value": 0.5,
+            "easing": "linear",
+            "id": "scene-key-b59796ea-992c-4a49-b1ce-fdd8dff38a39",
+            "targetId": "scene-089ee0be-4a8d-4505-8c7d-0da3bf20fff6"
+          }
+        },
+        {
+          "atProgrammeTick": 2160000,
+          "parameters": {
+            "property": "opacity",
+            "value": 0,
+            "easing": "linear",
+            "id": "scene-key-b341c795-8f8d-45e5-8355-b0f72d14448f",
+            "targetId": "scene-089ee0be-4a8d-4505-8c7d-0da3bf20fff6"
+          }
+        },
+        {
+          "atProgrammeTick": 873000,
+          "parameters": {
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-9d010bb2-9455-4b52-a770-406da8f9c3b0",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 922500,
+          "parameters": {
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-8b7dbad9-26c3-4fb6-b5cd-898ce4acf816",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-731534b2-6096-45a9-a497-c46941569d01",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 873000,
+          "parameters": {
+            "property": "planeCorner0X",
+            "value": 12,
+            "easing": "linear",
+            "id": "scene-key-0cd69801-a332-40c5-9e8b-cb55a2ae46a7",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 972000,
+          "parameters": {
+            "property": "planeCorner0X",
+            "value": 12,
+            "easing": "linear",
+            "id": "scene-key-91ddac79-ca77-4244-92af-2d1ede090fbc",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 1116000,
+          "parameters": {
+            "property": "planeCorner0X",
+            "value": 0,
+            "easing": "linear",
+            "id": "scene-key-0a3c551f-3cfd-49f5-908a-22934a034318",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "planeCorner0X",
+            "value": 0,
+            "easing": "linear",
+            "id": "scene-key-179bd0ab-037f-4532-b882-0a2dcb6788cd",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 873000,
+          "parameters": {
+            "property": "planeCorner0Y",
+            "value": 5,
+            "easing": "linear",
+            "id": "scene-key-b049ba31-de86-4858-b5a1-1cd628190ee8",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 972000,
+          "parameters": {
+            "property": "planeCorner0Y",
+            "value": 5,
+            "easing": "linear",
+            "id": "scene-key-5fb14895-d6af-4ee5-ac07-cdd1f5a82103",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 1116000,
+          "parameters": {
+            "property": "planeCorner0Y",
+            "value": 0,
+            "easing": "linear",
+            "id": "scene-key-d928590d-1790-4c21-a988-27d197dc6926",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "planeCorner0Y",
+            "value": 0,
+            "easing": "linear",
+            "id": "scene-key-cbd048b2-7c3d-4636-9ebe-6707fda87a8b",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 873000,
+          "parameters": {
+            "property": "planeCorner1X",
+            "value": 96,
+            "easing": "linear",
+            "id": "scene-key-78f707a2-2fc0-4cf9-81b6-fa9c19770187",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 972000,
+          "parameters": {
+            "property": "planeCorner1X",
+            "value": 96,
+            "easing": "linear",
+            "id": "scene-key-f66ed307-7ec5-4056-9256-84be567a0a5e",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 1116000,
+          "parameters": {
+            "property": "planeCorner1X",
+            "value": 100,
+            "easing": "linear",
+            "id": "scene-key-a939a631-2b7a-4d9b-96fe-85a598d50d38",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "planeCorner1X",
+            "value": 100,
+            "easing": "linear",
+            "id": "scene-key-0c9277ed-27b4-4f89-a1f5-e1b873f527cc",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 873000,
+          "parameters": {
+            "property": "planeCorner1Y",
+            "value": 10,
+            "easing": "linear",
+            "id": "scene-key-14936ecf-4e63-40e4-9838-6bc0d7a2d5ac",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 972000,
+          "parameters": {
+            "property": "planeCorner1Y",
+            "value": 10,
+            "easing": "linear",
+            "id": "scene-key-1ab4f903-d978-49d4-9946-6019cad67143",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 1116000,
+          "parameters": {
+            "property": "planeCorner1Y",
+            "value": 0,
+            "easing": "linear",
+            "id": "scene-key-c71262c0-4d59-4c78-9324-f2f698a74438",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "planeCorner1Y",
+            "value": 0,
+            "easing": "linear",
+            "id": "scene-key-a2f40024-4db8-43ca-8c95-250213b26b2b",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 873000,
+          "parameters": {
+            "property": "planeCorner2X",
+            "value": 94,
+            "easing": "linear",
+            "id": "scene-key-e4e35dcb-a95b-4a91-aafb-c0f52c7e5e2b",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 972000,
+          "parameters": {
+            "property": "planeCorner2X",
+            "value": 94,
+            "easing": "linear",
+            "id": "scene-key-b3de78dc-2515-47d2-b81f-969cf8c8a596",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 1116000,
+          "parameters": {
+            "property": "planeCorner2X",
+            "value": 100,
+            "easing": "linear",
+            "id": "scene-key-70a0613a-4925-40d2-bdac-b254bd0bec99",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "planeCorner2X",
+            "value": 100,
+            "easing": "linear",
+            "id": "scene-key-ad13243f-652c-4595-bae1-6339a3268270",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 873000,
+          "parameters": {
+            "property": "planeCorner2Y",
+            "value": 96,
+            "easing": "linear",
+            "id": "scene-key-3e2d3435-5f48-4992-9af4-4b8a89f0d6d8",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 972000,
+          "parameters": {
+            "property": "planeCorner2Y",
+            "value": 96,
+            "easing": "linear",
+            "id": "scene-key-c283b4b0-be9f-4c86-80a5-534c5368b37d",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 1116000,
+          "parameters": {
+            "property": "planeCorner2Y",
+            "value": 100,
+            "easing": "linear",
+            "id": "scene-key-9b74323c-f4d5-46ff-afbd-6629efbfecdb",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "planeCorner2Y",
+            "value": 100,
+            "easing": "linear",
+            "id": "scene-key-984b4139-72fd-44fc-92b4-3a8e62a9fd6a",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 873000,
+          "parameters": {
+            "property": "planeCorner3X",
+            "value": 10,
+            "easing": "linear",
+            "id": "scene-key-faf4f22b-6f64-4bad-9199-93d951fcb333",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 972000,
+          "parameters": {
+            "property": "planeCorner3X",
+            "value": 10,
+            "easing": "linear",
+            "id": "scene-key-7eddbd8b-5c63-48ed-a8ed-bfd8f0b6e5a7",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 1116000,
+          "parameters": {
+            "property": "planeCorner3X",
+            "value": 0,
+            "easing": "linear",
+            "id": "scene-key-17f41a13-7d5d-48cd-90ad-370ccf6499b5",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "planeCorner3X",
+            "value": 0,
+            "easing": "linear",
+            "id": "scene-key-d811e006-e6f6-4378-b8f9-ff2d4ddfa6bd",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 873000,
+          "parameters": {
+            "property": "planeCorner3Y",
+            "value": 92,
+            "easing": "linear",
+            "id": "scene-key-c7cf601b-832c-4e31-a9db-fb4c94b97e90",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 972000,
+          "parameters": {
+            "property": "planeCorner3Y",
+            "value": 92,
+            "easing": "linear",
+            "id": "scene-key-a2bad6f7-f5b4-411d-a491-93eb94e7318a",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 1116000,
+          "parameters": {
+            "property": "planeCorner3Y",
+            "value": 100,
+            "easing": "linear",
+            "id": "scene-key-c81fe2dd-eea7-4ccd-9882-f42497e2cafe",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "planeCorner3Y",
+            "value": 100,
+            "easing": "linear",
+            "id": "scene-key-04124ef9-c923-4b65-90c4-903502df1553",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 873000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.43,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-d55c1e0f-b0eb-4e5b-b082-4304e88bb1e3",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 1116000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.43,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-468b6e06-0257-4450-86e6-0512fd08f17e",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 1228500,
+          "parameters": {
+            "property": "scale",
+            "value": 1.7,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-8a6ba0ee-b94f-41e5-8fc2-1259179e8177",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.82,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-0c14babe-8214-4d9e-9b63-5cc7d36c9137",
+            "targetId": "scene-4abeecf6-b946-4c45-9ac6-be819f662e0c"
+          }
+        },
+        {
+          "atProgrammeTick": 873000,
+          "parameters": {
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-fab26763-fb34-4e0e-9162-4f04bbffe3f7",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 922500,
+          "parameters": {
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-313d7a54-e51a-4221-bf29-804e01fd8d5e",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-0b6545c4-c200-4d79-b6fd-db9c594c4353",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 873000,
+          "parameters": {
+            "property": "planeCorner0X",
+            "value": 12,
+            "easing": "linear",
+            "id": "scene-key-2c0dabb9-2d37-4ccc-be49-47115fc68787",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 972000,
+          "parameters": {
+            "property": "planeCorner0X",
+            "value": 12,
+            "easing": "linear",
+            "id": "scene-key-303c0761-dde0-4757-a53a-fb2952d5b1bd",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 1116000,
+          "parameters": {
+            "property": "planeCorner0X",
+            "value": 0,
+            "easing": "linear",
+            "id": "scene-key-d26f4af6-97dd-4843-8151-895eac08f979",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "planeCorner0X",
+            "value": 0,
+            "easing": "linear",
+            "id": "scene-key-a6d82693-dca7-4c53-81bd-50361399f48e",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 873000,
+          "parameters": {
+            "property": "planeCorner0Y",
+            "value": 5,
+            "easing": "linear",
+            "id": "scene-key-6e1e0cb8-071a-4628-808c-86ff4519fe67",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 972000,
+          "parameters": {
+            "property": "planeCorner0Y",
+            "value": 5,
+            "easing": "linear",
+            "id": "scene-key-129ccbb7-17c1-4e7f-8045-90a250049806",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 1116000,
+          "parameters": {
+            "property": "planeCorner0Y",
+            "value": 0,
+            "easing": "linear",
+            "id": "scene-key-cab99fd0-95ff-4446-bdd5-0ea169809157",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "planeCorner0Y",
+            "value": 0,
+            "easing": "linear",
+            "id": "scene-key-f110f90a-8ded-4429-a7eb-6ec3b8ba5b42",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 873000,
+          "parameters": {
+            "property": "planeCorner1X",
+            "value": 96,
+            "easing": "linear",
+            "id": "scene-key-320bd47e-42db-40c4-97bb-e548803f20bf",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 972000,
+          "parameters": {
+            "property": "planeCorner1X",
+            "value": 96,
+            "easing": "linear",
+            "id": "scene-key-5c1c8589-06dc-4ac3-8c7d-2a054bbee2d1",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 1116000,
+          "parameters": {
+            "property": "planeCorner1X",
+            "value": 100,
+            "easing": "linear",
+            "id": "scene-key-df3ee0ff-6949-4589-873b-4a232d94cf3c",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "planeCorner1X",
+            "value": 100,
+            "easing": "linear",
+            "id": "scene-key-c49bc66f-243b-4334-9764-a04810cf7fcb",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 873000,
+          "parameters": {
+            "property": "planeCorner1Y",
+            "value": 10,
+            "easing": "linear",
+            "id": "scene-key-82bdb448-14de-491b-b697-e093aaf9db40",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 972000,
+          "parameters": {
+            "property": "planeCorner1Y",
+            "value": 10,
+            "easing": "linear",
+            "id": "scene-key-21fe1a63-a1fa-4a15-8a78-bf24977f5449",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 1116000,
+          "parameters": {
+            "property": "planeCorner1Y",
+            "value": 0,
+            "easing": "linear",
+            "id": "scene-key-cac54722-bf0d-4b96-ab50-070cca8860fc",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "planeCorner1Y",
+            "value": 0,
+            "easing": "linear",
+            "id": "scene-key-6d6108f4-f2cb-4c67-bdaa-690010282675",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 873000,
+          "parameters": {
+            "property": "planeCorner2X",
+            "value": 94,
+            "easing": "linear",
+            "id": "scene-key-d88c562c-0971-4230-9bdd-acdb2c5bd229",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 972000,
+          "parameters": {
+            "property": "planeCorner2X",
+            "value": 94,
+            "easing": "linear",
+            "id": "scene-key-6014e608-3cc0-4145-b371-c2ffe84a25fb",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 1116000,
+          "parameters": {
+            "property": "planeCorner2X",
+            "value": 100,
+            "easing": "linear",
+            "id": "scene-key-774fd586-dfa0-4aa5-adb5-814ce2b64b87",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "planeCorner2X",
+            "value": 100,
+            "easing": "linear",
+            "id": "scene-key-344b93aa-018e-4571-b5fe-3b948b332253",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 873000,
+          "parameters": {
+            "property": "planeCorner2Y",
+            "value": 96,
+            "easing": "linear",
+            "id": "scene-key-51b32ee6-d3db-4c10-b2c8-dee4c3d2c4f5",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 972000,
+          "parameters": {
+            "property": "planeCorner2Y",
+            "value": 96,
+            "easing": "linear",
+            "id": "scene-key-67c722c6-6e0d-4dac-823f-8e7e91255947",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 1116000,
+          "parameters": {
+            "property": "planeCorner2Y",
+            "value": 100,
+            "easing": "linear",
+            "id": "scene-key-253ff3d1-3e88-40db-be42-9c8b494a894f",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "planeCorner2Y",
+            "value": 100,
+            "easing": "linear",
+            "id": "scene-key-1817802b-b30c-431f-bb93-98fbd426747b",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 873000,
+          "parameters": {
+            "property": "planeCorner3X",
+            "value": 10,
+            "easing": "linear",
+            "id": "scene-key-9d4476b7-8965-42a8-8f14-67c32914273c",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 972000,
+          "parameters": {
+            "property": "planeCorner3X",
+            "value": 10,
+            "easing": "linear",
+            "id": "scene-key-e1e82009-61f7-4fd0-86e0-d730b1652153",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 1116000,
+          "parameters": {
+            "property": "planeCorner3X",
+            "value": 0,
+            "easing": "linear",
+            "id": "scene-key-d2a0b85b-2bfc-4b11-9c3a-0b2efb06a5ae",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "planeCorner3X",
+            "value": 0,
+            "easing": "linear",
+            "id": "scene-key-a9bfac39-03df-433d-8c79-da9ef67d624c",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 873000,
+          "parameters": {
+            "property": "planeCorner3Y",
+            "value": 92,
+            "easing": "linear",
+            "id": "scene-key-fb95287c-eb0b-4239-afd8-e37a7a1ed68f",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 972000,
+          "parameters": {
+            "property": "planeCorner3Y",
+            "value": 92,
+            "easing": "linear",
+            "id": "scene-key-5128c0eb-af05-4b6c-8b29-9d45c575c871",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 1116000,
+          "parameters": {
+            "property": "planeCorner3Y",
+            "value": 100,
+            "easing": "linear",
+            "id": "scene-key-427625db-cfee-4e56-a508-ef49a5f2529c",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "planeCorner3Y",
+            "value": 100,
+            "easing": "linear",
+            "id": "scene-key-6f438214-c8f0-4174-8f99-e6d30f4103f2",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 873000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.001,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-61b85184-32d8-4ca8-807d-b9814611ee3a",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 1116000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.001,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-1c58fc16-51eb-461e-a1e2-72fd80bd24e6",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 1228500,
+          "parameters": {
+            "property": "scale",
+            "value": 1.19,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-a4a1d212-7143-42a5-97ed-4e4e8c0f35e5",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        },
+        {
+          "atProgrammeTick": 1260000,
+          "parameters": {
+            "property": "scale",
+            "value": 1.274,
+            "easing": "bezier",
+            "curve": [
+              0.2,
+              0.9,
+              0.25,
+              1
+            ],
+            "id": "scene-key-e45a9152-e61b-48e0-8b3d-0a60f8b59a1a",
+            "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af"
+          }
+        }
+      ],
+      "finishKeyframes": [],
+      "reframeKeyframes": [],
+      "reframeModeCuts": [],
+      "speakerFocusCuts": [],
+      "audioKeyframes.originalAudio": [],
+      "audioKeyframes.masterPodcast": [],
+      "audioKeyframes.voiceover": [],
+      "audioKeyframes.music": [],
+      "audioKeyframes.broll": [],
+      "audioKeyframes.sfx": []
+    }
+  },
+  "audioGraph": {
+    "legacySnapshotRef": "audioRemix",
+    "parameterSchemaVersion": 1,
+    "settings": {
+      "addMusic": true,
+      "musicSelection": "custom",
+      "musicSearchMode": false,
+      "safeSearch": true,
+      "musicVolume": 0.6,
+      "musicDucking": false,
+      "musicDuckingStrength": 0,
+      "muteOriginalAudio": true,
+      "audioRemix": {
+        "version": 1,
+        "enabled": false,
+        "preset": "slowed_reverb",
+        "speed": 0.82,
+        "pitch": -3,
+        "bass": 8,
+        "clarity": 2,
+        "air": 1,
+        "reverb": 68,
+        "intensity": 75,
+        "keepPitch": false,
+        "contentType": "auto",
+        "target": "master",
+        "outputGain": 0,
+        "levelMatch": true,
+        "quality": "studio"
+      },
+      "audioRestoration": {
+        "preset": "natural",
+        "voiceIsolation": false,
+        "denoise": 22,
+        "deEsser": 18,
+        "humFrequency": 50,
+        "compressor": 35,
+        "limiter": -1,
+        "loudness": -14,
+        "eq": {
+          "low": 0,
+          "mid": 0,
+          "high": 0
+        },
+        "enabled": false
+      },
+      "audioAutomationSource": "originalAudio"
+    },
+    "music": {
+      "name": "Make your move - original score",
+      "sourceStoragePath": "uploads/audios/demo-pilot-alice/a6ad1579-ce5b-4a1d-a73c-e27f9d9b2ef1_music-1a1fb957-3f72-4b78-9db5-17c4ecffabf4.wav",
+      "storagePath": "uploads/audios/demo-pilot-alice/a6ad1579-ce5b-4a1d-a73c-e27f9d9b2ef1_music-1a1fb957-3f72-4b78-9db5-17c4ecffabf4.wav",
+      "contentHash": "f3cade09fcb727c24508179fa1c0e7914cfe162c9fee098a8eabe6c6d3ea44a6",
+      "volume": 0.6,
+      "fadeIn": 0.1,
+      "fadeOut": 0.8,
+      "loop": true,
+      "trimStart": 0
+    },
+    "routes": [
+      {
+        "trackId": "video",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "adjustment",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "graphics",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "broll",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "captions",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "originalAudio",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "voiceover",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "music",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "sfx",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      }
+    ],
+    "routing": {
+      "muteOriginalAudio": true,
+      "musicDucking": false,
+      "musicDuckingStrength": 0,
+      "musicTrackId": null
+    }
+  },
+  "visualGraph": {
+    "parameterSchemaVersion": 1,
+    "settings": {
+      "mainTransform": {
+        "id": "main-video",
+        "name": "Main video",
+        "type": "video",
+        "x": 50,
+        "y": 50,
+        "scale": 1,
+        "rotation": 0,
+        "opacity": 1,
+        "cropX": 0,
+        "cropY": 0
+      },
+      "finishFx": {
+        "precisionGrade": false,
+        "exposureStops": 0,
+        "lift": 0,
+        "gamma": 1,
+        "gain": 1,
+        "tint": 0,
+        "preset": null,
+        "brightness": 1,
+        "contrast": 1,
+        "saturation": 1,
+        "temperature": 0,
+        "sharpness": 0,
+        "vignette": 0,
+        "blur": 0,
+        "blurMode": "edge",
+        "blurStart": -1,
+        "blurEnd": -1,
+        "zoom": 1,
+        "zoomAnchor": "center",
+        "overlayType": "",
+        "overlayOpacity": 0.4,
+        "overlayColor": "#000000",
+        "filmGrain": 0,
+        "chromaticAberration": 0,
+        "vhsTracking": 0,
+        "lightLeak": 0,
+        "letterbox": 0,
+        "fadeIn": 0,
+        "fadeOut": 0
+      },
+      "mainFrame": {
+        "insetPercent": 3,
+        "radiusPercent": 8,
+        "background": "studio_black",
+        "enabled": false
+      },
+      "advancedColor": {
+        "lutName": "",
+        "lutFile": null,
+        "lutIntensity": 100,
+        "curve": {
+          "shadows": 0,
+          "midtones": 0,
+          "highlights": 0
+        },
+        "hsl": {
+          "hue": 0,
+          "saturation": 0,
+          "luminance": 0
+        }
+      },
+      "podcastVisualizer": {
+        "enabled": false,
+        "mode": "wave",
+        "color": "#72f7ff",
+        "intensity": 0.75,
+        "position": "bottom"
+      },
+      "videoFit": "contain",
+      "safeFaceFraming": false,
+      "faceAnchorPreset": "center",
+      "autoCaptions": false,
+      "captionStyle": "bold_pop",
+      "captionPosition": "bottom_center",
+      "captionScale": 1,
+      "captionTextOverride": "",
+      "translateCaptionsToEnglish": false,
+      "smartCrop": true,
+      "smartCropMode": "off",
+      "reframeAspect": "16:9",
+      "speakerTrackZoom": 1,
+      "speakerStackFraming": {
+        "dividerPercent": 50,
+        "gapPercent": 1.2,
+        "cardGapPercent": 2.5,
+        "roundedCards": true,
+        "cardInsetPercent": 2.5,
+        "cardRadiusPercent": 8,
+        "secondaryXPercent": 80,
+        "secondaryYPercent": 20,
+        "secondarySizePercent": 30,
+        "top": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        },
+        "bottom": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        },
+        "third": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        },
+        "fourth": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        }
+      },
+      "speakerStackSourceIds": {
+        "top": null,
+        "bottom": null,
+        "third": null,
+        "fourth": null
+      },
+      "speakerStackOffsets": {
+        "top": 0,
+        "bottom": 0,
+        "third": 0,
+        "fourth": 0
+      },
+      "speakerStackCameraCount": 2,
+      "speakerStackLayout": "stack_2",
+      "speakerStackSyncConfirmed": false,
+      "exportSettings": {
+        "resolution": "720p",
+        "fps": "24",
+        "codec": "h264",
+        "quality": "high",
+        "videoBitrate": "auto",
+        "targetFileSizeMb": "",
+        "audioCodec": "aac",
+        "audioBitrate": "256",
+        "colorSpace": "rec709"
+      },
+      "stabilization": {
+        "enabled": false,
+        "strength": 35,
+        "crop": "adaptive",
+        "rollingShutter": false
+      },
+      "enhanceQuality": false,
+      "beatSnapEnabled": true,
+      "creativeIntent": "energy",
+      "creativeEffectsEnabled": false,
+      "creativePreset": "auto_story",
+      "creativeIntensity": "bold",
+      "pacingLevel": "balanced",
+      "nodeFlow": {
+        "version": 1,
+        "viewerA": "MediaOut",
+        "viewerB": null,
+        "splitPosition": 50,
+        "positions": {},
+        "bypassed": {}
+      },
+      "hideShyLayers": false
+    },
+    "cameraSources": []
+  },
+  "editGraph": {
+    "parameterSchemaVersion": 1,
+    "settings": {
+      "creativeTemplateInstance": {
+        "schemaVersion": 1,
+        "templateRef": {
+          "templateId": "creator_identity_v1",
+          "version": "1.0.0",
+          "definitionHash": "1148bf8324bfed65b5cf0a75db14d73ccb7f4923f4c5c391807da4fcfaa6acdd"
+        },
+        "ownerUid": "demo-pilot-alice",
+        "instantiatedBy": "director",
+        "bindings": {
+          "brandColour": "#d7ff43",
+          "headline": "OFF\nSCRIPT",
+          "featureOne": "THREE TAKES.\nONE MIND.",
+          "featureTwo": "BUILD\nYOUR WORLD.",
+          "callToAction": "MAKE IT YOURS",
+          "hookFootage": {
+            "assetId": "launch-5217554acdae6f4623c8d9bb",
+            "contentHash": "5217554acdae6f4623c8d9bbb1c7070c2918eea81975e2cf255a1f59afa14315",
+            "storagePath": "studio/sources/demo-pilot-alice/1df75703fe54389a79c2fff8_WhatsApp_Video_2026-11-03_at_04.58.10_1_.mp4",
+            "trimStart": 0
+          },
+          "productFootage": {
+            "assetId": "launch-f845b91a06ef40d16ae43d84",
+            "contentHash": "f845b91a06ef40d16ae43d846bb888337fc7f11814acec9e508a33f188ea6ca7",
+            "storagePath": "studio/sources/demo-pilot-alice/9d15d9a8cbe6a14126d72423_WhatsApp_Video_2026-11-03_at_04.58.10.mp4",
+            "trimStart": 0
+          },
+          "detailFootage": {
+            "assetId": "launch-83b6bbc4008603d9dbccddcc",
+            "contentHash": "83b6bbc4008603d9dbccddcc870005fe1536d765d7cc2f1333b430b36066c32d",
+            "storagePath": "studio/sources/demo-pilot-alice/5c36cc48c7939adb7f60cbd9_WhatsApp_Video_2026-11-03_at_04.58.10_2_.mp4",
+            "trimStart": 0
+          },
+          "screenFootage": {
+            "assetId": "launch-72d89720ee9db0d593c6120c",
+            "contentHash": "72d89720ee9db0d593c6120c3dd00ddfbbe893ad6c5626b6e9fe0973db6513a5",
+            "storagePath": "studio/sources/demo-pilot-alice/087039661abf89331ff2205c_WhatsApp_Video_2026-11-03_at_04.58.11.mp4",
+            "trimStart": 0
+          }
+        },
+        "intensity": 1,
+        "aspect": "16:9",
+        "qualified": false
+      },
+      "captionCoverageMode": "full",
+      "contentProfile": "auto",
+      "joinTransition": "auto",
+      "joinTransitionDuration": 0.18,
+      "silenceRemoval": false,
+      "silenceThreshold": -35,
+      "minSilenceDuration": 0.75,
+      "silencePreview": null,
+      "removeWatermark": false,
+      "watermarkMode": "adaptive",
+      "brandWatermark": false,
+      "manualWatermarkRegions": [],
+      "addHook": false,
+      "hookText": "THIS CHANGES FAST",
+      "hookTemplate": "blur_reveal",
+      "hookIntroSeconds": 3,
+      "hookStartTime": 0.8,
+      "hookEndTime": 3.8,
+      "hookBlurBackground": true,
+      "hookDarkOverlay": true,
+      "hookFreezeFrame": false,
+      "hookZoomScale": 1.08,
+      "hookTextAnimation": "slide-up",
+      "hookFocusPoint": {
+        "x": 50,
+        "y": 42
+      },
+      "bRollCadence": "balanced",
+      "bRollGenerationJobId": "",
+      "compoundClips": [],
+      "creatorPreview": {
+        "enabled": true,
+        "section": "reactions",
+        "activeDemo": "",
+        "intensity": 62,
+        "duration": 0.8,
+        "zoom": 1.34,
+        "x": 78,
+        "y": 68,
+        "color": "#ffcb67",
+        "accent": "#7457ff",
+        "text": "THIS CHANGED EVERYTHING",
+        "name": "",
+        "role": "",
+        "entity": "",
+        "emoji": "🤯",
+        "rank": 3,
+        "tracking": false,
+        "maskShape": "person",
+        "transition": "whip",
+        "introStyle": "cinematic",
+        "reactionMode": "instant",
+        "comparisonLeft": "",
+        "comparisonRight": ""
+      },
+      "splitExportEnabled": false,
+      "splitExportHooks": [],
+      "proxySettings": {
+        "enabled": true,
+        "resolution": "720p",
+        "codec": "h264",
+        "status": "source_ready"
+      }
+    },
+    "media": [
+      {
+        "id": "launch-5217554acdae6f4623c8d9bb",
+        "name": "WhatsApp Video 2026-11-03 at 04.58.10 (1).mp4",
+        "duration": 4.633333,
+        "storagePath": "studio/sources/demo-pilot-alice/1df75703fe54389a79c2fff8_WhatsApp_Video_2026-11-03_at_04.58.10_1_.mp4",
+        "contentHash": "5217554acdae6f4623c8d9bbb1c7070c2918eea81975e2cf255a1f59afa14315",
+        "mediaType": "video"
+      },
+      {
+        "id": "launch-f845b91a06ef40d16ae43d84",
+        "name": "WhatsApp Video 2026-11-03 at 04.58.10.mp4",
+        "duration": 19.166667,
+        "storagePath": "studio/sources/demo-pilot-alice/9d15d9a8cbe6a14126d72423_WhatsApp_Video_2026-11-03_at_04.58.10.mp4",
+        "contentHash": "f845b91a06ef40d16ae43d846bb888337fc7f11814acec9e508a33f188ea6ca7",
+        "mediaType": "video"
+      },
+      {
+        "id": "launch-83b6bbc4008603d9dbccddcc",
+        "name": "WhatsApp Video 2026-11-03 at 04.58.10 (2).mp4",
+        "duration": 19.635,
+        "storagePath": "studio/sources/demo-pilot-alice/5c36cc48c7939adb7f60cbd9_WhatsApp_Video_2026-11-03_at_04.58.10_2_.mp4",
+        "contentHash": "83b6bbc4008603d9dbccddcc870005fe1536d765d7cc2f1333b430b36066c32d",
+        "mediaType": "video"
+      },
+      {
+        "id": "launch-72d89720ee9db0d593c6120c",
+        "name": "WhatsApp Video 2026-11-03 at 04.58.11.mp4",
+        "duration": 13.408333,
+        "storagePath": "studio/sources/demo-pilot-alice/087039661abf89331ff2205c_WhatsApp_Video_2026-11-03_at_04.58.11.mp4",
+        "contentHash": "72d89720ee9db0d593c6120c3dd00ddfbbe893ad6c5626b6e9fe0973db6513a5",
+        "mediaType": "video"
+      },
+      {
+        "id": "project-media-4e17cc46-2e48-427d-9525-4ebf51204f71",
+        "name": "Portrait mask.mp4",
+        "duration": 3,
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/82b3f6b34b38f409c71c262a_Portrait_mask.mp4",
+        "storagePath": "studio/sources/demo-pilot-alice/82b3f6b34b38f409c71c262a_Portrait_mask.mp4",
+        "contentHash": "f77fe8cedbd074c359c3990cef471bc4a9cfa972b4c24d059b48654af4cc402e"
+      },
+      {
+        "id": "project-media-1cb500b6-41fb-48ef-93e4-cfde7be7b06c",
+        "name": "Seated mask.mp4",
+        "duration": 7,
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/11f87ff136914d28c9928145_Seated_mask.mp4",
+        "storagePath": "studio/sources/demo-pilot-alice/11f87ff136914d28c9928145_Seated_mask.mp4",
+        "contentHash": "78823cd24b096479fdb6b5de333226702041235e365c750f4b756eec187b939d"
+      }
+    ],
+    "sources": [
+      {
+        "id": "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:1",
+        "name": "WhatsApp Video 2026-11-03 at 04.58.10 (1).mp4",
+        "duration": 3,
+        "sourceClipId": "launch-5217554acdae6f4623c8d9bb",
+        "storagePath": "studio/sources/demo-pilot-alice/1df75703fe54389a79c2fff8_WhatsApp_Video_2026-11-03_at_04.58.10_1_.mp4",
+        "contentHash": "5217554acdae6f4623c8d9bbb1c7070c2918eea81975e2cf255a1f59afa14315"
+      },
+      {
+        "id": "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:2",
+        "name": "WhatsApp Video 2026-11-03 at 04.58.10 (2).mp4",
+        "duration": 6,
+        "sourceClipId": "launch-83b6bbc4008603d9dbccddcc",
+        "storagePath": "studio/sources/demo-pilot-alice/5c36cc48c7939adb7f60cbd9_WhatsApp_Video_2026-11-03_at_04.58.10_2_.mp4",
+        "contentHash": "83b6bbc4008603d9dbccddcc870005fe1536d765d7cc2f1333b430b36066c32d"
+      },
+      {
+        "id": "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:3",
+        "name": "WhatsApp Video 2026-11-03 at 04.58.11.mp4",
+        "duration": 5,
+        "sourceClipId": "launch-72d89720ee9db0d593c6120c",
+        "storagePath": "studio/sources/demo-pilot-alice/087039661abf89331ff2205c_WhatsApp_Video_2026-11-03_at_04.58.11.mp4",
+        "contentHash": "72d89720ee9db0d593c6120c3dd00ddfbbe893ad6c5626b6e9fe0973db6513a5"
+      },
+      {
+        "id": "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:4",
+        "name": "WhatsApp Video 2026-11-03 at 04.58.10.mp4",
+        "duration": 7,
+        "sourceClipId": "launch-f845b91a06ef40d16ae43d84",
+        "storagePath": "studio/sources/demo-pilot-alice/9d15d9a8cbe6a14126d72423_WhatsApp_Video_2026-11-03_at_04.58.10.mp4",
+        "contentHash": "f845b91a06ef40d16ae43d846bb888337fc7f11814acec9e508a33f188ea6ca7"
+      },
+      {
+        "id": "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:5",
+        "name": "WhatsApp Video 2026-11-03 at 04.58.10 (1).mp4",
+        "duration": 3,
+        "sourceClipId": "launch-5217554acdae6f4623c8d9bb",
+        "storagePath": "studio/sources/demo-pilot-alice/1df75703fe54389a79c2fff8_WhatsApp_Video_2026-11-03_at_04.58.10_1_.mp4",
+        "contentHash": "5217554acdae6f4623c8d9bbb1c7070c2918eea81975e2cf255a1f59afa14315"
+      }
+    ],
+    "musicMix": {
+      "ducking": true,
+      "duckingStrength": 0.4,
+      "duckingMode": "speech"
+    },
+    "hookBinding": null,
+    "angleGroups": [],
+    "extractedAudio": null
+  },
+  "constraints": {
+    "locks": []
+  },
+  "styleRef": null,
+  "analysisRefs": [],
+  "projectIntelligenceRefs": [],
+  "programmeSpeedKeys": [],
+  "fallbackSpeed": 1,
+  "outputTimeMap": [
+    {
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 2160000
+      },
+      "outputRange": {
+        "space": "output",
+        "startTick": 0,
+        "endTick": 2160000
+      },
+      "rateNumerator": 1000000,
+      "rateDenominator": 1000000
+    }
+  ],
+  "journal": [
+    {
+      "journalId": "revision:74",
+      "baseRevision": 73,
+      "newRevision": 74,
+      "actor": {
+        "type": "human",
+        "id": "viral-studio-history"
+      },
+      "operations": [
+        {
+          "type": "history_restore"
+        }
+      ],
+      "affectedNodes": [
+        "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:1",
+        "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:2",
+        "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:3",
+        "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:4",
+        "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:5"
+      ],
+      "inverse": null
+    },
+    {
+      "journalId": "revision:75",
+      "baseRevision": 74,
+      "newRevision": 75,
+      "actor": {
+        "type": "human",
+        "id": "viral-studio-history"
+      },
+      "operations": [
+        {
+          "type": "history_restore"
+        }
+      ],
+      "affectedNodes": [
+        "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:1",
+        "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:2",
+        "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:3",
+        "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:4",
+        "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:5"
+      ],
+      "inverse": null
+    },
+    {
+      "journalId": "revision:76",
+      "baseRevision": 75,
+      "newRevision": 76,
+      "actor": {
+        "type": "human",
+        "id": "viral-studio-history"
+      },
+      "operations": [
+        {
+          "type": "history_restore"
+        }
+      ],
+      "affectedNodes": [
+        "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:1",
+        "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:2",
+        "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:3",
+        "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:4",
+        "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14:shot:5"
+      ],
+      "inverse": null
+    }
+  ],
+  "idempotency": {},
+  "directorReviewJournal": [],
+  "compatibility": {
+    "legacySnapshotVersion": 1,
+    "projection": "clip_occurrences_canonical_other_fields_legacy",
+    "editableStateVersion": 1,
+    "visualStateVersion": 1,
+    "editStateVersion": 1,
+    "layerComposition": "ordered_flat_layers"
+  }
+}

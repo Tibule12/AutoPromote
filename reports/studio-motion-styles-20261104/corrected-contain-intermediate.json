@@ -1,0 +1,9 @@
+{
+  "width": 1280,
+  "height": 720,
+  "frames": 144,
+  "leftBarAlphaMax": 0,
+  "rightBarAlphaMax": 0,
+  "portraitCentreAlphaMin": 255,
+  "actualCorrectedWorkerIntermediate": true
+}

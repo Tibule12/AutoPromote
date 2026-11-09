@@ -1,0 +1,35 @@
+{
+  "date": "2026-11-02",
+  "report": "reports/studio-preview-throughput-20261102/README.md",
+  "status": "LOCAL_VALIDATOR_REPAIR_NATIVE_RETEST_UNFINISHED_DISK_CLEANUP_REQUESTED",
+  "geometryChecksPreserved": true,
+  "equivalenceCases": 39,
+  "equivalenceAccepted": 25,
+  "equivalenceRejected": 14,
+  "scopedFrontendTests": 38,
+  "memoryBuildPassed": true,
+  "servedBuildUnchanged": "/tmp/autopromote-application-demo-5izIlF/build-plane-guard-20261102",
+  "nativeRetestComplete": false,
+  "newNativeExports": 0,
+  "liveRealtimeQualified": false,
+  "wholePictureParityPassed": false,
+  "creativeQualityQualified": false,
+  "readinessPromotion": false,
+  "paidCalls": 0,
+  "productionWrites": false,
+  "cleanupRemovedAllocatedBytes": 187379712,
+  "availableAfterCleanupBytes": 12383916032,
+  "concurrentCleanupObserved": true,
+  "remainingBlockers": [
+    "Exact native live retest of indexed corner validation",
+    "Live source-pool handoff/pause/end behavior and real-time throughput",
+    "Whole picture, colour/edge and source-frame parity",
+    "Visible surface joins and professional creative target",
+    "Human listening and owner creative approval"
+  ],
+  "nextSharedTasks": [
+    "S02",
+    "S04",
+    "S03"
+  ]
+}

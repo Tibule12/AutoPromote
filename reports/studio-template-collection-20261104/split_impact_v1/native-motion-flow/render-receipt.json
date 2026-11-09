@@ -1,0 +1,379 @@
+{
+  "startedAt": "2026-11-04T07:28:44.678Z",
+  "finishedAt": "2026-11-04T07:31:02.067Z",
+  "projectId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f",
+  "projectHash": "d8eba717a6781938c522881bc9d084c815028aa641d2e1e89625c004a4405ed2",
+  "templateRef": {
+    "templateId": "split_impact_v1",
+    "version": "1.0.0",
+    "definitionHash": "f0faa9813d876fa52abcf0aecd7249a0b7b52b9c45356cf1759b13c254d1437b"
+  },
+  "submittedJobId": "viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+  "outputSha256": "26aac4622e8341cf66ae2a72558987ba39bbed6ea3a4d8bcbd206f253d575b37",
+  "serverOutputSha256": "26aac4622e8341cf66ae2a72558987ba39bbed6ea3a4d8bcbd206f253d575b37",
+  "requestBytesSha256": "56858fc75ffe1f8b52f8bcbb5c256f56245a0c03703f9dad29784bd0bdfbc188",
+  "events": [
+    {
+      "path": "/api/media/process",
+      "status": 200
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "status": 200,
+      "jobStatus": "completed"
+    }
+  ],
+  "technical": {
+    "passed": true,
+    "sha256": "26aac4622e8341cf66ae2a72558987ba39bbed6ea3a4d8bcbd206f253d575b37",
+    "bytes": 2718723,
+    "seconds": 8,
+    "video": {
+      "width": 1280,
+      "height": 720,
+      "codec": "h264",
+      "fps": "24/1",
+      "duration": "8.000000",
+      "frameCount": 192,
+      "pixelFormat": "yuv420p",
+      "encoder": "Lavc60.31.102 libx264"
+    },
+    "audio": {
+      "codec": "aac",
+      "channels": 2,
+      "sampleRate": "48000",
+      "duration": "8.000000"
+    },
+    "independentFullDecode": true,
+    "decodedAudio": {
+      "samples": 384000,
+      "sampleRate": 48000,
+      "seconds": 8,
+      "toleranceSeconds": 0.04466666666666667,
+      "passed": true
+    },
+    "contactSheet": "reports/studio-template-collection-20261104/split_impact_v1/native-motion-flow/final.mp4.frames.jpg",
+    "scope": "Technical only. Pixel and listening review are separate required evidence."
+  },
+  "projectHashBeforeMediaUpload": "f3e8a526cb8ce7c0a289d02197f88e908cacb906720ddd25fe546a03ecb65ad0",
+  "actualNativeDownload": true,
+  "noMocks": true,
+  "authBypass": false,
+  "gpuJobs": 0,
+  "creativeReview": "pending actual moving/sound review and founder approval"
+}

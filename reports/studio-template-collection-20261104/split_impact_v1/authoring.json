@@ -1,0 +1,30 @@
+{
+  "projectId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f",
+  "templateRef": {
+    "templateId": "split_impact_v1",
+    "version": "1.0.0",
+    "definitionHash": "f0faa9813d876fa52abcf0aecd7249a0b7b52b9c45356cf1759b13c254d1437b"
+  },
+  "decisions": "d117bab16834d95bc7e4f65c7d1aaa42ae8ea8591cdae04d65bda0a9dff21675",
+  "layers": 6,
+  "keys": 63,
+  "seconds": 8,
+  "source": {
+    "name": "sports",
+    "title": "Boxers hitting in a fight",
+    "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/reports/studio-template-collection-20261104/sources/sports.mp4",
+    "sha256": "3380242bd668ab74a46adb4e3acbd85a1774fbb40fce1ad91e814e9bcadbfaba",
+    "page": "https://mixkit.co/free-stock-video/boxers-hitting-in-a-fight-40967/",
+    "downloadUrl": "https://assets.mixkit.co/videos/40967/40967-720.mp4",
+    "license": "https://mixkit.co/license/modal/videoFree/",
+    "sourceHtmlSha256": "8b6a3132e8f986041d143d302a4bc7aa42ea86e90d009e17b334d5cc604dd13d",
+    "bytes": 4751692,
+    "seconds": 13.013,
+    "width": 1280,
+    "height": 720,
+    "fps": "24000/1001",
+    "fullDecode": true
+  },
+  "normalFrontend": true,
+  "paidCalls": 0
+}

@@ -1,0 +1,1 @@
+{"name":"06 - Source-bound depth","actions":[{"type":"matte","targetId":"R2 / intro silhouette","matteSourceId":"R2 / intro source mask","mode":"luma"},{"type":"matte","targetId":"R2 / seated silhouette","matteSourceId":"R2 / seated source mask","mode":"luma"},{"type":"matte","targetId":"R2 / closing silhouette","matteSourceId":"R2 / closing source mask","mode":"luma"}]}

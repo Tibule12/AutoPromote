@@ -1,0 +1,817 @@
+[
+  {
+    "file": "Compositions/1 - Outside the frame/Editable Project.autopromote.json",
+    "sha256": "1a68d122622cb54d59530d6e7ca9fde6823aaf3a2877ff337b601fa66a3b6c66",
+    "bytes": 2030819
+  },
+  {
+    "file": "Compositions/1 - Outside the frame/Final.mp4",
+    "sha256": "0d1be70e1c287699e64caab4b80f5dea9cad9fa8997263e1426da69334ce6055",
+    "bytes": 2658823
+  },
+  {
+    "file": "Compositions/1 - Outside the frame/Live vs export.jpg",
+    "sha256": "765e6eaf33cfd99140a500bc2b4f06008176ecd229d75cc64019db2a6a1b2534",
+    "bytes": 351849
+  },
+  {
+    "file": "Compositions/1 - Outside the frame/Studio finished playback.mp4",
+    "sha256": "4a46e15468459a771e6b24c9d0de60e7e20a3e5238ab38eb37a53cdb0be8353f",
+    "bytes": 903542
+  },
+  {
+    "file": "Compositions/1 - Outside the frame/Studio live playback.mp4",
+    "sha256": "b9d746201018dd3cb7e92080532ec30551ea96735cedda9f00cfbdddb54eee5a",
+    "bytes": 912790
+  },
+  {
+    "file": "Compositions/2 - Life in motion/Editable Project.autopromote.json",
+    "sha256": "07517296a2c71b620875f60d9d5475c499467a7636ce636e65f4495e7763240f",
+    "bytes": 108539
+  },
+  {
+    "file": "Compositions/2 - Life in motion/Final.mp4",
+    "sha256": "e3a30e5c4da101461d3766e91f96ac7723e0cca51d217c3d7ad08d66c1347fb3",
+    "bytes": 3364574
+  },
+  {
+    "file": "Compositions/2 - Life in motion/Live vs export.jpg",
+    "sha256": "a492c87e97dac253275358d102797b845dd468bc954029ada9e98d8cbbca998a",
+    "bytes": 430343
+  },
+  {
+    "file": "Compositions/2 - Life in motion/Studio finished playback.mp4",
+    "sha256": "33be5b1ff8caeeefc5f447538006a680ec994f93f1444c617e69f185f2b5306a",
+    "bytes": 767600
+  },
+  {
+    "file": "Compositions/2 - Life in motion/Studio live playback.mp4",
+    "sha256": "730bfd6f60eeab64d5c13fefe1bbc53593461319249557b802930a3c530c134a",
+    "bytes": 1135555
+  },
+  {
+    "file": "Compositions/3 - Make something impossible/Editable Project.autopromote.json",
+    "sha256": "8e4e23bc149059ba39bb2ceca1601201a09a80f7fa2bcfb029a8e87e392ad72b",
+    "bytes": 230616
+  },
+  {
+    "file": "Compositions/3 - Make something impossible/Final.mp4",
+    "sha256": "272753495d672464c5ecb1a6d43943d54d17625468b290fac59496ee9e373f2e",
+    "bytes": 2976609
+  },
+  {
+    "file": "Compositions/3 - Make something impossible/Live vs export.jpg",
+    "sha256": "8bcf7f6f0f243abce688a2e43536435f75cafe3790aaf30d56d3941775eac25c",
+    "bytes": 566900
+  },
+  {
+    "file": "Compositions/3 - Make something impossible/Studio finished playback.mp4",
+    "sha256": "030fa0aef6efc1c246aa759b4708dcaea02218e0c8469a1f04ab94697b7cda81",
+    "bytes": 1180346
+  },
+  {
+    "file": "Compositions/3 - Make something impossible/Studio live playback.mp4",
+    "sha256": "0cb17df9a74d59c7d018b8284ded7d096454e2cd6b28b469a121732579c712fe",
+    "bytes": 775110
+  },
+  {
+    "file": "Earlier revisions/Before frame timing repair - 1793532597096871692/Compositions/1 - Outside the frame/Studio finished playback.mp4",
+    "sha256": "91c6d02c31ecdcbd9a5bd437c080fb4788d92d6d665834947265ccafc9f79ba1",
+    "bytes": 1036629
+  },
+  {
+    "file": "Earlier revisions/Before frame timing repair - 1793532597096871692/Compositions/2 - Life in motion/Studio finished playback.mp4",
+    "sha256": "be1f6b259e91760bbf7534e69bb54b8c78a899129337d84ec793317ba58eb3d9",
+    "bytes": 1309125
+  },
+  {
+    "file": "Earlier revisions/Before frame timing repair - 1793532597096871692/Compositions/3 - Make something impossible/Studio finished playback.mp4",
+    "sha256": "6904d4e047273dca528bae7eb9ca29bdfd37117a3d1fdd995a876c5d580351e3",
+    "bytes": 1179170
+  },
+  {
+    "file": "Earlier revisions/Before frame timing repair - 1793532597096871692/Editable Project.autopromote.json",
+    "sha256": "b56df2cbc446bfbe010c37a8509d1208cacb2029f8c437c9efbe6c277db30119",
+    "bytes": 2586988
+  },
+  {
+    "file": "Earlier revisions/Before frame timing repair - 1793532597096871692/Episode/Live vs export.jpg",
+    "sha256": "10c9f337b2d75aac772057f3a48c160b1f0edbdf1b4d2699e70ed9ca3e5a2f20",
+    "bytes": 846353
+  },
+  {
+    "file": "Earlier revisions/Before frame timing repair - 1793532597096871692/Episode/Studio finished playback.mp4",
+    "sha256": "6e86281059969ca56e9410111935ca139c16515c8da00ed7af1ec0bb36b4fd8d",
+    "bytes": 4926954
+  },
+  {
+    "file": "Earlier revisions/Before frame timing repair - 1793532597096871692/Every frame, intentional.mp4",
+    "sha256": "a4f53cfd39f3054f55fea601157d9c858f6fa6058b11c38dc8d56cc5c80ce898",
+    "bytes": 12101947
+  },
+  {
+    "file": "Earlier revisions/Before frame timing repair - 1793532597096871692/Raw Project.autopromote.json",
+    "sha256": "0d46e0427998cda8010a40cd296f606b44082e15c0cb70a15bae6d1247c4438d",
+    "bytes": 341095
+  },
+  {
+    "file": "Earlier revisions/Before frame timing repair - 1793532597096871692/Raw assembly.mp4",
+    "sha256": "359055cebc36520a40d0d4446c23408d1c04b5149d3b4121356463d45ac2022c",
+    "bytes": 15476940
+  },
+  {
+    "file": "Earlier revisions/Before frame timing repair - 1793532597096871692/Raw vs AutoPromote.mp4",
+    "sha256": "0fb7d6766e13b0565084709b35575210e2bacf75dbdd89c0819bfa5f91622a51",
+    "bytes": 9200935
+  },
+  {
+    "file": "Earlier revisions/Before frame timing repair - 1793532597096871692/Technical/Source and build hashes.json",
+    "sha256": "1f594af7ab8e6ebdfb69a2df822b4c756b9fc4517efe42f62fc3cd36e7a2b194",
+    "bytes": 6880
+  },
+  {
+    "file": "Earlier revisions/Feedback before CFR repair.md",
+    "sha256": "5b736b660b86beed6b074050742aa35398d99ef89fd70e3897e6da22e6976904",
+    "bytes": 2998
+  },
+  {
+    "file": "Editable Project.autopromote.json",
+    "sha256": "eb1a8ecaa11b9ed130477810218cd9f9251aaa97a4acb7f198b8289e9816cfd4",
+    "bytes": 2586988
+  },
+  {
+    "file": "Episode/CFR frame repair.jpg",
+    "sha256": "0e8adc52a15b49711460b999a2eadb4eee1104a84c8116894ac72d1ad61a2f91",
+    "bytes": 230029
+  },
+  {
+    "file": "Episode/Live vs export.jpg",
+    "sha256": "f31c60daecbab92cd70789a656445a265ae61ea0bffc418265bafe7ce3b2b018",
+    "bytes": 846979
+  },
+  {
+    "file": "Episode/Studio finished playback.mp4",
+    "sha256": "70ab2baeb7935b6eeafacfd8f3f36a2082b9f3afa62955ca3e5ed053e015e35c",
+    "bytes": 4601003
+  },
+  {
+    "file": "Episode/Studio live playback.mp4",
+    "sha256": "4137d5d3e10433dedd73803425aad632d4ed01a4ea7dc7bd235b21cde618d4f6",
+    "bytes": 4799471
+  },
+  {
+    "file": "Every frame, intentional.mp4",
+    "sha256": "1ba7f0ce06544d09484b3ecc82fd1094b4c4f44e2f2f374bfd4ba2136ee22f43",
+    "bytes": 12150105
+  },
+  {
+    "file": "Feedback.md",
+    "sha256": "2cf323ddd1e78c06696b6b01b704a693e96e1a11fa5e043b220090cd4b47316c",
+    "bytes": 4131
+  },
+  {
+    "file": "Playback repair - 2026-11-01/Capture measurements.json",
+    "sha256": "76f65a6b4dbf7fde456698b1a839cb122b50f86c838b452f629c8681e4049eb1",
+    "bytes": 175
+  },
+  {
+    "file": "Playback repair - 2026-11-01/Earlier feedback.md",
+    "sha256": "6d2033e922d2d6eb095a57780ac7b504f7e503978362ec97a5a6cc5625fcfea4",
+    "bytes": 3641
+  },
+  {
+    "file": "Playback repair - 2026-11-01/Playback measurements.json",
+    "sha256": "82367e52effe2dce9f694cf7b31e238ca078763dc45c9c6f21ef9f5b1720c825",
+    "bytes": 178855
+  },
+  {
+    "file": "Playback repair - 2026-11-01/Previous delivery hashes.json",
+    "sha256": "af3766dd2ff1d1a78844be474a764e72297d2fc46efd071f235b0d8a9548ca73",
+    "bytes": 15546
+  },
+  {
+    "file": "Playback repair - 2026-11-01/README.md",
+    "sha256": "d6d0fcd1a58cd5ee573dc04e03d60a1f1197df8099274b0094af31e3be7b381a",
+    "bytes": 1491
+  },
+  {
+    "file": "Playback repair - 2026-11-01/Studio finished playback.mp4",
+    "sha256": "24f356b5d9b7ee31deff7311e4626d999c148bd1487d65e4e2b0fb93e75b3e03",
+    "bytes": 4955754
+  },
+  {
+    "file": "Playback repair - 2026-11-01/Verified repair.json",
+    "sha256": "dda4e798febb4eb87b042ed8e10ad6962411807f974fceaa443644aed15ab327",
+    "bytes": 2348
+  },
+  {
+    "file": "README.md",
+    "sha256": "f0e6e5e7798f73fe92aa7f1263c5e8712e5f9032c0bd0e3f5b156d8683dd7e3a",
+    "bytes": 1677
+  },
+  {
+    "file": "Raw Project.autopromote.json",
+    "sha256": "5f4fac1095a659fc848ce71311c3585059132206e8776ab829dd69c60180df33",
+    "bytes": 341095
+  },
+  {
+    "file": "Raw assembly.mp4",
+    "sha256": "9a1723cd4d921292f156009491008ceac086d2cccbcb83264a7ecf086e65569b",
+    "bytes": 15478580
+  },
+  {
+    "file": "Raw vs AutoPromote.mp4",
+    "sha256": "ce46191a8fdb755c7b18c6ee51ff049eb6ef615b121538de6731d92b08eb8d6c",
+    "bytes": 9221567
+  },
+  {
+    "file": "Sources/Autumn.mp4",
+    "sha256": "01258817091b10d7639169d3fc9885229ea5fbad787ee1ac674b72c25f9ef468",
+    "bytes": 5354075
+  },
+  {
+    "file": "Sources/City.mp4",
+    "sha256": "09f2b8bfcf899d174ecf53f6a9c5358b9d19ca7b7d8ba0b1c508abfc2a2bf15d",
+    "bytes": 5306461
+  },
+  {
+    "file": "Sources/Coast.mp4",
+    "sha256": "dd6037bc87dc9c93b84fb506b04355fe12d1f4bda0e942aec8da7e83d3c3e86c",
+    "bytes": 6646172
+  },
+  {
+    "file": "Sources/Footsteps.mp4",
+    "sha256": "459c13e384b1819b2e3d0bc8eae287d10e58c96d266a0b4bbf1553c98969bbac",
+    "bytes": 3862122
+  },
+  {
+    "file": "Sources/Open trail.mp4",
+    "sha256": "b5406236fe04617468a712d3353b37845149a16a25afb6b1b9f38e72801acc96",
+    "bytes": 4666850
+  },
+  {
+    "file": "Sources/Original score.wav",
+    "sha256": "31a5a947f16e1e186548de6e65c174bb11e69760df9bcc8f90c83c3ad474ab6c",
+    "bytes": 6912044
+  },
+  {
+    "file": "Sources/Original stock/Autumn.mp4",
+    "sha256": "929e75d4f6ae4c1eb18ff4cc5dde495c5acfbb95bb9777f37f2fefb5788fadbb",
+    "bytes": 5509416
+  },
+  {
+    "file": "Sources/Original stock/City.mp4",
+    "sha256": "9cd010dbf88c86c9d22412edc8450e7dcd712d3bb0c8c6c365b86d79ad0085d3",
+    "bytes": 33839305
+  },
+  {
+    "file": "Sources/Original stock/Coast.mp4",
+    "sha256": "30b3b86c61b4f13f97c39107130061c63aff87d372368f39d274c9929da8d236",
+    "bytes": 5828340
+  },
+  {
+    "file": "Sources/Original stock/Footsteps.mp4",
+    "sha256": "0cf8694b6b719a69eb00696f6f9d96e065ddca4287023ce96c32b436c14b4cb8",
+    "bytes": 10803697
+  },
+  {
+    "file": "Sources/Original stock/Open trail.mp4",
+    "sha256": "749d388a387e649943c70273b28b42ffb587908e05176e4a8ea49324aaf8fa66",
+    "bytes": 3043820
+  },
+  {
+    "file": "Sources/Original stock/Summit.mp4",
+    "sha256": "edb0732bd18a1f2a749ca19b7fa707c34d301eb48057b92ac7e43bb541fd2291",
+    "bytes": 8797143
+  },
+  {
+    "file": "Sources/Source provenance.json",
+    "sha256": "ffe7294f6560db16dd876b6a01ae0cbb5b5fdd18e9b63f891b5b9c177dd09d79",
+    "bytes": 2792
+  },
+  {
+    "file": "Sources/Summit.mp4",
+    "sha256": "96056be98b025809b72e38baebc1ea0827fbc30d9a02cfd8844c35a371a3fe00",
+    "bytes": 4988927
+  },
+  {
+    "file": "Stills/preview-0.25.png",
+    "sha256": "3ad06ab7b1738b9443e8d5e6288ad08ea922101b263c15fbc90dc58b0791f869",
+    "bytes": 40763
+  },
+  {
+    "file": "Stills/preview-0.75.png",
+    "sha256": "63348c4225c57d23341e9d84b5abe92cff8aa7c02d358a9be0c0d0fc95adf5d9",
+    "bytes": 43646
+  },
+  {
+    "file": "Stills/preview-1.50.png",
+    "sha256": "6cc12160b4b415d60fb6367f43a268771b92106447dcf77a4e2cb9ec47ae7146",
+    "bytes": 44833
+  },
+  {
+    "file": "Stills/preview-11.50.png",
+    "sha256": "b14a71dc56046042f5f45f4d78a5aae12f7cfcf5892d79f2c7e8c4741ba3a202",
+    "bytes": 442536
+  },
+  {
+    "file": "Stills/preview-14.00.png",
+    "sha256": "545655ed6eaa9b65afef6acfaba1a6ceb047c7b9cbe22b460c4e4c773d8a8012",
+    "bytes": 401408
+  },
+  {
+    "file": "Stills/preview-16.40.png",
+    "sha256": "d08b1ae22dafca7d92d107526b41335f36356efe0bcdf7451917026f8d2f7c27",
+    "bytes": 415800
+  },
+  {
+    "file": "Stills/preview-16.50.png",
+    "sha256": "9fb7a6067c40da72961bc84bc30caf60280bab3a402311d8d0b6eb7f3c2dc8bb",
+    "bytes": 265419
+  },
+  {
+    "file": "Stills/preview-17.00.png",
+    "sha256": "bdb8093b3a76db98518f8d157e01a223ee894b9eae0eaa09c6b36f97d1deb3ce",
+    "bytes": 421561
+  },
+  {
+    "file": "Stills/preview-17.70.png",
+    "sha256": "0d093c6ef1b0e9c5f2195f2ac4ad497ae05e83373115d4e166915ac042cfa032",
+    "bytes": 424332
+  },
+  {
+    "file": "Stills/preview-18.60.png",
+    "sha256": "e1509c70f8a5ef780470ccfd60e3f73af57c45b43017ff5074e386a7d2896dee",
+    "bytes": 428362
+  },
+  {
+    "file": "Stills/preview-19.40.png",
+    "sha256": "dba4dd58e565587d253fc0f93964e3b42fcb0ca9019e80cb33f48528b173c3d6",
+    "bytes": 436436
+  },
+  {
+    "file": "Stills/preview-19.50.png",
+    "sha256": "438ebe369d81a2536fc454db590c115e62d8662f878bf03735616996dea93cb9",
+    "bytes": 318726
+  },
+  {
+    "file": "Stills/preview-2.60.png",
+    "sha256": "f0fb99d0dde91a88814fd4ffdd86a0a69b55fc6114bd4efd43f0664f5f945a9e",
+    "bytes": 647783
+  },
+  {
+    "file": "Stills/preview-21.50.png",
+    "sha256": "e2c80ee8720d8a74735415b8f11b3037625b28d72d365614837ef2a396e87ded",
+    "bytes": 930586
+  },
+  {
+    "file": "Stills/preview-23.00.png",
+    "sha256": "1f3da744b6447bbfdeb2696713afe3df6bea267ac95c01f8348eaea9985110b1",
+    "bytes": 943162
+  },
+  {
+    "file": "Stills/preview-25.00.png",
+    "sha256": "9ae3dd60ff55d6e419a3e2fceb4d77f83963b416bf24b84ee31faf227b6c1489",
+    "bytes": 428050
+  },
+  {
+    "file": "Stills/preview-27.00.png",
+    "sha256": "b669012fedb49400066a61d3736565ba8180c425426b462f804a02e2f35be272",
+    "bytes": 432129
+  },
+  {
+    "file": "Stills/preview-29.30.png",
+    "sha256": "8c3969759652e21487cbb0291916d35c4421606dcd239f931c0e7f9d3e3c443c",
+    "bytes": 34113
+  },
+  {
+    "file": "Stills/preview-3.40.png",
+    "sha256": "51773cf82d2b21cf9ee5cf10e3676a8a7748cc6673629b3bdb14cf0a73052a76",
+    "bytes": 692755
+  },
+  {
+    "file": "Stills/preview-31.50.png",
+    "sha256": "07d51b6c5acd4111ea33041211ceeee4836f8800830488ee19df87f66b3400f1",
+    "bytes": 42770
+  },
+  {
+    "file": "Stills/preview-34.50.png",
+    "sha256": "69c48ed2f8e4844a55245cb4522126e671a36c8fcfc4a901f5cb3a5919b2975d",
+    "bytes": 42756
+  },
+  {
+    "file": "Stills/preview-35.90.png",
+    "sha256": "bdc57f5d1784a67bc0edc86ee1c88ddf0631c298868d56f065465c0d7b2a0b22",
+    "bytes": 42778
+  },
+  {
+    "file": "Stills/preview-4.80.png",
+    "sha256": "47980e626ae9d1e4e40ba42b65d33064bef7a674271e139e8e7fb51fc624a1a8",
+    "bytes": 561730
+  },
+  {
+    "file": "Stills/preview-6.90.png",
+    "sha256": "e93af0bbfdcc2b54ae142edcc5d6b8d3ad6ed1e1541a17f812adc177af501f5a",
+    "bytes": 435359
+  },
+  {
+    "file": "Stills/preview-8.00.png",
+    "sha256": "aa035c4a34e23e8286b98a03c429ffb960c019fd10df4cef199223b967f47ec2",
+    "bytes": 460889
+  },
+  {
+    "file": "Stills/preview-9.70.png",
+    "sha256": "e636b71c5fabcba7d0ccdf76959be569caa25565dda61c7a80b8366c8af6b03f",
+    "bytes": 630869
+  },
+  {
+    "file": "Technical/Engineering report.md",
+    "sha256": "080141740d7c7f37a42f6eced451ce3bfd866ca602dd1b090ec017c6297a934a",
+    "bytes": 15283
+  },
+  {
+    "file": "Technical/Native receipts and playback.json",
+    "sha256": "6b96cd3221df28740e23b51688b994f181867d2a2874f481bd7a066d391b23b7",
+    "bytes": 10038
+  },
+  {
+    "file": "Technical/Source and build hashes.json",
+    "sha256": "007fc3df67b8266b5a3191715a998585920ec6c4d20cdb4c40c8961f8470c58f",
+    "bytes": 7037
+  },
+  {
+    "file": "Technical/Upload recovery.json",
+    "sha256": "43892b93421a5a8782cb55dd9bc934fdaefbcacba0d83c5c3c9666bb68ef54c4",
+    "bytes": 362
+  },
+  {
+    "file": "Technical/composite finished movie identity.json",
+    "sha256": "ac84ce3ea35b55c8b4747691432a9a7e2ef2b5d2dd51bbc2785d9fd6a919f6ba",
+    "bytes": 112
+  },
+  {
+    "file": "Technical/delivery.json",
+    "sha256": "cd12d535631beaad19582dac5fadae61065bbbe74176e29b37e2ed3308d241ff",
+    "bytes": 24691
+  },
+  {
+    "file": "Technical/episode finished movie identity.json",
+    "sha256": "e92eaf3818cc8791c32eba8257e4dffa5fd7a7f3b81dc684a516da5e0465c40e",
+    "bytes": 112
+  },
+  {
+    "file": "Technical/exact-native-backups.json",
+    "sha256": "2045f0fe51c96cd99a89ab98daa625f15b99cefa048d821c648de59819af4d31",
+    "bytes": 1493
+  },
+  {
+    "file": "Technical/one-local-fixture-credit.json",
+    "sha256": "fbfcd9413e645ccd26501ef16a337e5b80eb1a6ace758895b8cff0d959795837",
+    "bytes": 376
+  },
+  {
+    "file": "Technical/paired-measurements.json",
+    "sha256": "da8848a39f6f601591a4d76d1cabd788ebdb8b9e68a8d7b591ece796b20caf02",
+    "bytes": 5452
+  },
+  {
+    "file": "Technical/reframe-clock-diagnosis.json",
+    "sha256": "8ab3734869e060e78767e677494ebb97678e25d940c24926a7efd449719a340b",
+    "bytes": 316
+  },
+  {
+    "file": "Technical/tracked finished movie identity.json",
+    "sha256": "0876558fd12a1bcea647415d009bd4dba36d20b85d01104b95dc86426c008079",
+    "bytes": 112
+  },
+  {
+    "file": "Technical/typography finished movie identity.json",
+    "sha256": "a2d42414ca39b5c1cc0dcaad5b2cfa5f07709be743ddef7d2a7e2c805bb20c4e",
+    "bytes": 112
+  },
+  {
+    "file": "Technical/validation.json",
+    "sha256": "b319e8ce79e90d2bbf118e39240124819be9e87a9b631d0a42d5c3d4f6218065",
+    "bytes": 2304
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Authoring/native-composition-correction.mp4",
+    "sha256": "550f35a44e4e790b63d762a963d7af7fcfcee2e926c26d7459dddfd7b63db8f2",
+    "bytes": 963526
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Authoring/native-creative-authoring.mp4",
+    "sha256": "691116d7e8f3cef7ebe46f69f978b592a424f6914b9c14033df61f7e9b7eea04",
+    "bytes": 2559888
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Authoring/native-edge-correction.mp4",
+    "sha256": "8ef06a5629dfd5ea46aa2de06dfe0dd3fd5ebd82954d8459813c6682dfe58080",
+    "bytes": 1127213
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Beyond the frame.mp4",
+    "sha256": "63d89bb692531b5ef7c6f80293cdce027158c3a886755fef578ccdf6e0e948fd",
+    "bytes": 15057926
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Creative revision overview.jpg",
+    "sha256": "2524ad5e159e2869a1abbd5b5a2796e454a98b32a48dc7d422eb9501da8c50bf",
+    "bytes": 183845
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Editable Project.autopromote.json",
+    "sha256": "6f6eb2379bb98e300f1ac54ee30f954c7f417d5fb25c3a0e42caa6184a889ae6",
+    "bytes": 5430765
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Feedback.md",
+    "sha256": "6a36d37439b884f27b6e707278c37ddf4287a167d9f00e663db1073b73d2070f",
+    "bytes": 3031
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Live vs export.jpg",
+    "sha256": "d663cbda72c13fed2fb4ecfd0a90acba2b7d2db3950e157544a70c9450eb2e03",
+    "bytes": 1753450
+  },
+  {
+    "file": "Creative revision - 2026-11-01/README.md",
+    "sha256": "4ecb1c0f6ab5bc8cd8ea16f727f0ff9ab413b5c289b71d06d64a464e08e28d73",
+    "bytes": 8424
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Raw vs creative revision.mp4",
+    "sha256": "d1143527d333725776af4bd0dcabd4487b7b5a1852ac5da976daf369fdb6fa33",
+    "bytes": 10090051
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Reviewed subject contour.jpg",
+    "sha256": "457a8913b53296c6c47b3567534b37f6bdaa55c438a489c2069e03a1cda56a94",
+    "bytes": 165199
+  },
+  {
+    "file": "Creative revision - 2026-11-01/SHA256.json",
+    "sha256": "2e8715dee250204bdb00d145fb998bb1ae5c25499f405a505110dd7e553ebec3",
+    "bytes": 9634
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-0.25.png",
+    "sha256": "3ad06ab7b1738b9443e8d5e6288ad08ea922101b263c15fbc90dc58b0791f869",
+    "bytes": 40763
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-0.75.png",
+    "sha256": "63348c4225c57d23341e9d84b5abe92cff8aa7c02d358a9be0c0d0fc95adf5d9",
+    "bytes": 43646
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-1.50.png",
+    "sha256": "6cc12160b4b415d60fb6367f43a268771b92106447dcf77a4e2cb9ec47ae7146",
+    "bytes": 44833
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-10.50.png",
+    "sha256": "ac4a49f3c1821ddb4866bbbac7c8feb662147db7d9f92ffe4c4f0c1998891a81",
+    "bytes": 679508
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-11.50.png",
+    "sha256": "5bd0f70c2f9d1369a1c88c52fa76f558edf5801c162acc0d362830d347d2922c",
+    "bytes": 686822
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-13.50.png",
+    "sha256": "5aa69efec0a2715374f08fc0cea7d80ac2394af36f6d2db3d53c85b6ff421da3",
+    "bytes": 649757
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-15.50.png",
+    "sha256": "d9798e8970988f129d6b3ac77df300ba809aa96a2f9d98f2b63efdb5b10a0ede",
+    "bytes": 549876
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-16.40.png",
+    "sha256": "d08b1ae22dafca7d92d107526b41335f36356efe0bcdf7451917026f8d2f7c27",
+    "bytes": 415800
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-17.70.png",
+    "sha256": "0d093c6ef1b0e9c5f2195f2ac4ad497ae05e83373115d4e166915ac042cfa032",
+    "bytes": 424332
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-19.40.png",
+    "sha256": "dba4dd58e565587d253fc0f93964e3b42fcb0ca9019e80cb33f48528b173c3d6",
+    "bytes": 436436
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-2.60.png",
+    "sha256": "f0fb99d0dde91a88814fd4ffdd86a0a69b55fc6114bd4efd43f0664f5f945a9e",
+    "bytes": 647783
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-20.50.png",
+    "sha256": "320afe88d36cf6f4e258dd756ce753a183946cbd503b9fda62f0324cc1e9d1c7",
+    "bytes": 968390
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-21.50.png",
+    "sha256": "61012ca3a579624eb4975410233401a147aedb1bd805a79cb79814af2b3107dd",
+    "bytes": 873706
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-22.50.png",
+    "sha256": "5ce8863660b5c7db7d4abfee2f2fc22382a9e5aaecafcc7368adedef8275ad64",
+    "bytes": 462303
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-23.50.png",
+    "sha256": "3ef85376033d331671dda5bfe90a514a2c26e9ee4d62485fb430b2c8ebecd31e",
+    "bytes": 572759
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-24.50.png",
+    "sha256": "d0e82bf2147017610c3b72daa0e4bc1587822c9e356bde2e40411e536533e2a2",
+    "bytes": 697845
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-25.50.png",
+    "sha256": "18b9d7a80939253e56da43f31a74162b91be84e875b15501e4b69874cd562d23",
+    "bytes": 681142
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-26.50.png",
+    "sha256": "c3cfdbc0444a273c8f11bc7ae89e728ed47734a0748124493ecd6be7ebac7b02",
+    "bytes": 680675
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-27.50.png",
+    "sha256": "47c151a08bad796242d4f9082c1a5b599e533d5eae367917cf35db85a8d0d87a",
+    "bytes": 718641
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-28.50.png",
+    "sha256": "7670523be4e6e89adda82e2ec933c48189b07fd38c523a8bc68113ed9bdf1571",
+    "bytes": 626349
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-3.40.png",
+    "sha256": "51773cf82d2b21cf9ee5cf10e3676a8a7748cc6673629b3bdb14cf0a73052a76",
+    "bytes": 692755
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-30.00.png",
+    "sha256": "c61d14665b4917e98a3b7a0416dcb32b327fa795f2b8790f92c91f352850fd1d",
+    "bytes": 633501
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-31.50.png",
+    "sha256": "210c51e5a74aed7e6312439fa1c8f6737cf7caa3ff32fe5b3c92e65c5610b891",
+    "bytes": 18301
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-32.50.png",
+    "sha256": "d11354f57302f2c20e3e50473d6ac011f6a85a4bcce56c2776856c8a686225d3",
+    "bytes": 44634
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-34.50.png",
+    "sha256": "69c48ed2f8e4844a55245cb4522126e671a36c8fcfc4a901f5cb3a5919b2975d",
+    "bytes": 42756
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-35.90.png",
+    "sha256": "bdc57f5d1784a67bc0edc86ee1c88ddf0631c298868d56f065465c0d7b2a0b22",
+    "bytes": 42778
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-4.80.png",
+    "sha256": "81b6b57eaa6d681ba9a389fc7b2a0632289e522502e8b1bb5f5e6ba4caa771eb",
+    "bytes": 557151
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-6.25.png",
+    "sha256": "638eff725af6f0ca58e8456f1196d0a649b743964caa2f0b2f9d83b04295cff8",
+    "bytes": 490215
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-6.90.png",
+    "sha256": "862b8c265f37b439b3aa76a9bb8dbf85d5bb560728cf46580c8abda77abf9e85",
+    "bytes": 485012
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-7.50.png",
+    "sha256": "e8c915cc2b98cf61ab674950b7ff97aad1596a181232f000850ec8d433479254",
+    "bytes": 495640
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-8.00.png",
+    "sha256": "9dc9b9c3fb1692550995b7781c99c40d850c940aef14e7c7bfd6dac676053905",
+    "bytes": 490561
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Stills/preview-9.60.png",
+    "sha256": "d8fa7317a460f2b1e6772f0eb3ddbdfe4289f1602589f4a1310f48e5f1fbaaf9",
+    "bytes": 476749
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Studio finished playback.mp4",
+    "sha256": "f04e629751958a7dbc239e9072859149eda14dfed5188d8d14b4b7e866dc5a61",
+    "bytes": 6152928
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Studio live playback.mp4",
+    "sha256": "71db698f12681020863c9ce733eb47611d10a8fc36587e5ccdea301be468fb5c",
+    "bytes": 3268075
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Technical/Native receipt.json",
+    "sha256": "3b1a0bcfc8acf701e8a77c8a97b8f8fe1e7a8f54a86ff0a2d6018f2c05266e4e",
+    "bytes": 541
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Technical/actual-job-archive.json",
+    "sha256": "f821c96e7ced2d58939834e0b7df21a4c9c91df33de1eb946bbc50c66c64726c",
+    "bytes": 597
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Technical/composition-correction.json",
+    "sha256": "15f1c8ca69d1a3dfdb455e9401b76d985c76c4d665cebca9acfed08e884abcf8",
+    "bytes": 257
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Technical/creative-authoring.json",
+    "sha256": "91b428d1cdc941cdc50f5f8ee0cf020f92979231055fae790d99f64224c8aa79",
+    "bytes": 635
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Technical/creative-progress.json",
+    "sha256": "252609322960ff6c40971ff47d84b9b27292239c83c2b12c18d1158ba8e4c13a",
+    "bytes": 1835
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Technical/creative-review-exit.json",
+    "sha256": "789ea66117801b9632d458e9022ebcb4304c6434873c686a908c95dc2075237c",
+    "bytes": 51
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Technical/final-preflight.json",
+    "sha256": "6873a78bd52f633ea70176e0d29e7721a03f65ba51f9c27449caf22a5bd28576",
+    "bytes": 3378
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Technical/finished capture.json",
+    "sha256": "778be011575bd522aa7d42d888a0db19109f74ae640990495c4df3660dcef077",
+    "bytes": 175
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Technical/finished playback.json",
+    "sha256": "34c1d8d1366c3cad6b0cf8c4ed168fefadd7c8eef8a17206a7369834d4b4d58d",
+    "bytes": 16959
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Technical/finished-file-identity.json",
+    "sha256": "38841fe007461466c1f4358245548d457f41b268f751501b1e67aabc513d46f1",
+    "bytes": 112
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Technical/live capture.json",
+    "sha256": "086b145befe8117f7a721aa0194396494d93b7e8d2a742ab286cd8f754675682",
+    "bytes": 174
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Technical/live playback.json",
+    "sha256": "ce5059f7029489ce668183e9bb734a4305548a8c56b0710ff61f6a89f9508167",
+    "bytes": 16773
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Technical/local-fixture-credits.json",
+    "sha256": "9d8910f90730a33c0a5eefaf719b3c5b8f343a768790586c5e00365a6a4f9c9b",
+    "bytes": 360
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Technical/local-native-envelope.json",
+    "sha256": "72667f09fcc102fb442837f062c96d82da9cc6ceb737513d9769166830ec7730",
+    "bytes": 409
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Technical/paired-measurements.json",
+    "sha256": "aaea13823833bb57303ffac89167487e44b86c51c297166a99544388eebcc02d",
+    "bytes": 9343
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Technical/proven-no-dispatch.json",
+    "sha256": "4bd9a091d247573005ab34ec7bb801d2b59b5e6d9f415a2dd144393fa606a956",
+    "bytes": 590
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Technical/reopen-edit.json",
+    "sha256": "5e6ee08536253c19954d344963b8370acded82b2af665ba7e4c5df022adb1a19",
+    "bytes": 106
+  },
+  {
+    "file": "Creative revision - 2026-11-01/Technical/validation.json",
+    "sha256": "9c2ce34ee73b584ba148ac262895bb8b809a294d488f9cfa420c8a1af2f1313d",
+    "bytes": 1059
+  }
+]

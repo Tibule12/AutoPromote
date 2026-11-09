@@ -1,0 +1,19 @@
+{
+  "date": "2026-11-03",
+  "root": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031",
+  "demoProject": "demo-autopromote-credits",
+  "origin": "http://127.0.0.1:43927",
+  "build": "/tmp/autopromote-application-demo-5izIlF/build-whatsapp-director-20261103",
+  "mainAsset": "/static/js/main.08b72e5c.js",
+  "mainSha256": "825d193fe2628354a3e7815efc7fe9b30da9eb8680bbcc85613536ac410ae5c2",
+  "workerPid": 454290,
+  "workerCwd": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031",
+  "workerSourceHashes": {
+    "python_media_worker/main_media_server.py": "ad85d61e3ece96bc798b1f0f5f7c619a427e9b9abb275f67de5aaa4f8a538574",
+    "python_media_worker/studio_layer_cache.py": "55b76352894db0a31948ed35644c792581924727c9baafdcba896281aebe2c07"
+  },
+  "freeBytesBeforeAuthoring": 10367496192,
+  "allFourOriginalsUnchanged": true,
+  "preservedVersionOneMovieSha256": "0ae41fc5ab9b5b994b554b08c44156e0405752205845ace1bf5c6ba30dde5afc",
+  "paidCalls": 0
+}

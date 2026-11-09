@@ -4,6 +4,7 @@ import { buildPrecisionGrade, applyPrecisionGrade } from './studioPrecisionGrade
 import { applyColorCube, buildAdvancedColorCube } from './studioColorCube';
 import { compileStudioAdjustmentStack } from './studioAdjustmentGrade';
 import { buildCinematicCssFilter, DEFAULT_CINEMATIC_FX } from '../hooks/useCinematicEffects';
+import { computeColorScopesFromRgba } from './studioColorScopes';
 
 // Source-picture inspection uses the same colour operations and source clock
 // as the programme monitor. It deliberately excludes graphics/branch merges.
@@ -34,7 +35,7 @@ export default function StudioSourceGradeViewer({ nodeId, videoRef, mapTime, tim
         }
         const cube = state.cube;
         if (cube) { const pixels = ctx.getImageData(0, 0, out.width, out.height); applyColorCube(pixels.data, cube); ctx.putImageData(pixels, 0, 0); }
-        if (state.nodeId.startsWith('Adjustment:')) {
+        if (state.nodeId?.startsWith('Adjustment:')) {
           const at = state.mapTime ? state.mapTime(sourceTime) : state.time;
           for (const layer of state.stack) {
             if (at >= layer.startTime && at < layer.startTime + layer.duration) {
@@ -53,6 +54,14 @@ export default function StudioSourceGradeViewer({ nodeId, videoRef, mapTime, tim
             if (`Adjustment:${layer.id}` === state.nodeId) break;
           }
         }
+      }
+      try {
+        const sample = ctx.getImageData(0, 0, out.width, out.height);
+        const scopes = computeColorScopesFromRgba(sample.data, out.width, out.height, { columns: 16, lumaBins: 12, vectorBins: 11 });
+        out.dataset.lumaAvg = String(scopes.lumaStats.avgLuma);
+        out.dataset.skinCompliance = String(scopes.vectorscope.skinToneCompliancePct);
+      } catch (_err) {
+        // Ignore cross-origin canvas read errors in synthetic environments
       }
       out.dataset.sourceTime = String(sourceTime);
     };

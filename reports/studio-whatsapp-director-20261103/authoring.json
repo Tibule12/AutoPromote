@@ -1,0 +1,16 @@
+{
+  "projectId": "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14",
+  "decisions": "6613906ab441ce36f934c0d5e1e0a2aeda0abf4bf56aff0346ba184cde58f7a8",
+  "layers": 16,
+  "keys": 153,
+  "sourceShots": 5,
+  "template": {
+    "templateId": "creator_identity_v1",
+    "version": "1.0.0",
+    "definitionHash": "1148bf8324bfed65b5cf0a75db14d73ccb7f4923f4c5c391807da4fcfaa6acdd"
+  },
+  "nativeFrontend": true,
+  "normalSignIn": true,
+  "manualOrderCorrection": true,
+  "paidCalls": 0
+}

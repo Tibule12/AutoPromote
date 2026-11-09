@@ -1,0 +1,206 @@
+{
+  "complete": true,
+  "programmeSeconds": 36,
+  "terminal": {
+    "programmeTime": 36,
+    "mediaTime": 0
+  },
+  "elapsedMs": 128490,
+  "events": [
+    {
+      "type": "waiting",
+      "time": 0
+    },
+    {
+      "type": "waiting",
+      "time": 4
+    },
+    {
+      "type": "waiting",
+      "time": 0
+    },
+    {
+      "type": "waiting",
+      "time": 0
+    },
+    {
+      "type": "waiting",
+      "time": 0
+    },
+    {
+      "type": "stalled",
+      "time": 4
+    },
+    {
+      "type": "waiting",
+      "time": 4
+    },
+    {
+      "type": "waiting",
+      "time": 4
+    },
+    {
+      "type": "waiting",
+      "time": 8.01225
+    },
+    {
+      "type": "waiting",
+      "time": 11.64217
+    },
+    {
+      "type": "waiting",
+      "time": 0
+    }
+  ],
+  "frames": [
+    {
+      "ms": 146083.5,
+      "sourceTime": 3.208333,
+      "presented": 35
+    },
+    {
+      "ms": 147366.9,
+      "sourceTime": 4.625,
+      "presented": 58
+    },
+    {
+      "ms": 152816.6,
+      "sourceTime": 4,
+      "presented": 58
+    },
+    {
+      "ms": 166366.1,
+      "sourceTime": 7.208333,
+      "presented": 55
+    },
+    {
+      "ms": 168782.6,
+      "sourceTime": 9.625,
+      "presented": 87
+    },
+    {
+      "ms": 177965.6,
+      "sourceTime": 5.083333,
+      "presented": 82
+    },
+    {
+      "ms": 180432.2,
+      "sourceTime": 6.083333,
+      "presented": 106
+    },
+    {
+      "ms": 189981.8,
+      "sourceTime": 0,
+      "presented": 59
+    },
+    {
+      "ms": 192681.7,
+      "sourceTime": 2.708333,
+      "presented": 92
+    },
+    {
+      "ms": 193831.7,
+      "sourceTime": 3.708333,
+      "presented": 116
+    },
+    {
+      "ms": 193898.2,
+      "sourceTime": 3.875,
+      "presented": 118
+    },
+    {
+      "ms": 205281.2,
+      "sourceTime": 2.375,
+      "presented": 51
+    },
+    {
+      "ms": 206731.1,
+      "sourceTime": 4.958333,
+      "presented": 87
+    },
+    {
+      "ms": 220830.5,
+      "sourceTime": 8.541667,
+      "presented": 62
+    },
+    {
+      "ms": 234813.3,
+      "sourceTime": 4.958333,
+      "presented": 61
+    },
+    {
+      "ms": 235579.9,
+      "sourceTime": 4,
+      "presented": 62
+    },
+    {
+      "ms": 238363.2,
+      "sourceTime": 6.458333,
+      "presented": 94
+    },
+    {
+      "ms": 238379.8,
+      "sourceTime": 7.791667,
+      "presented": 119
+    },
+    {
+      "ms": 239546.5,
+      "sourceTime": 7.958333,
+      "presented": 121
+    },
+    {
+      "ms": 239596.4,
+      "sourceTime": 8,
+      "presented": 122
+    },
+    {
+      "ms": 240729.8,
+      "sourceTime": 9,
+      "presented": 146
+    },
+    {
+      "ms": 240763.1,
+      "sourceTime": 9.125,
+      "presented": 147
+    },
+    {
+      "ms": 241963,
+      "sourceTime": 10.166667,
+      "presented": 172
+    },
+    {
+      "ms": 242013,
+      "sourceTime": 10.416667,
+      "presented": 174
+    },
+    {
+      "ms": 243246.3,
+      "sourceTime": 11.625,
+      "presented": 199
+    },
+    {
+      "ms": 244429.6,
+      "sourceTime": 11.958333,
+      "presented": 207
+    },
+    {
+      "ms": 250312.7,
+      "sourceTime": 3.333333,
+      "presented": 41
+    },
+    {
+      "ms": 262862.2,
+      "sourceTime": 0,
+      "presented": 1
+    },
+    {
+      "ms": 266828.7,
+      "sourceTime": 0,
+      "presented": 2
+    }
+  ],
+  "quality": {
+    "decoded": 0,
+    "dropped": 0
+  }
+}

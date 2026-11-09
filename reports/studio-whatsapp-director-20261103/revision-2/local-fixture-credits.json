@@ -1,0 +1,58 @@
+{
+  "demoProject": "demo-autopromote-credits",
+  "uid": "demo-pilot-alice",
+  "localFixtureOnly": true,
+  "before": {
+    "sandbox": true,
+    "balance": 0,
+    "reserved": 0,
+    "tier": "free",
+    "cycle": "2026-11",
+    "renewsAt": "2026-12-01T00:00:00.000Z",
+    "monthlyAllowance": 15,
+    "maxBalance": 10000,
+    "totals": {
+      "opening": 0,
+      "granted": 30,
+      "earned": 0,
+      "purchased": 11,
+      "consumed": 28,
+      "refunded": 18,
+      "expired": 13
+    },
+    "rewardCredits": 1,
+    "adsRemaining": 20,
+    "activeReward": null,
+    "adFree": false,
+    "pricingRevision": "975594d94929a0b6497ffe3533629b0900f210698259b7616fb6b99fd9e416ea"
+  },
+  "grant": {
+    "alreadyProcessed": false,
+    "balance": 2
+  },
+  "after": {
+    "sandbox": true,
+    "balance": 2,
+    "reserved": 0,
+    "tier": "free",
+    "cycle": "2026-11",
+    "renewsAt": "2026-12-01T00:00:00.000Z",
+    "monthlyAllowance": 15,
+    "maxBalance": 10000,
+    "totals": {
+      "opening": 0,
+      "granted": 30,
+      "earned": 0,
+      "purchased": 13,
+      "consumed": 28,
+      "refunded": 18,
+      "expired": 13
+    },
+    "rewardCredits": 1,
+    "adsRemaining": 20,
+    "activeReward": null,
+    "adFree": false,
+    "pricingRevision": "975594d94929a0b6497ffe3533629b0900f210698259b7616fb6b99fd9e416ea"
+  },
+  "realPurchase": false
+}

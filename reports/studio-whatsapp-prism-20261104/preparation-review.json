@@ -1,0 +1,14 @@
+{
+  "addedTextLayers": 0,
+  "captionSegments": 0,
+  "sourceSpeechMuted": true,
+  "watermark": false,
+  "ordinaryLayers": 25,
+  "graphicGroups": 1,
+  "sourceVideoPlanes": 23,
+  "modelCalls": 0,
+  "externalEffectsComposites": 0,
+  "rejectedProjectedMatteStudy": "Before prism correction.autopromote.json",
+  "retainedDeletionFailure": "Deleting a bound matte source first caused a dangling-source page error. QA now removes all consumers before sources; ordinary product deletion remains a follow-up.",
+  "priorNativeBackupsPreserved": true
+}

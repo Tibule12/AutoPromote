@@ -1,0 +1,10 @@
+{
+  "projectId": "viral-project-31c01231-cb38-475e-b2fc-cd6a4d9b1a14",
+  "projectHash": "a171035fe819528c5c96e3108ea96d2ea7a338aabf1b60ccbddb8c9c134a0635",
+  "outputSha256": "0ae41fc5ab9b5b994b554b08c44156e0405752205845ace1bf5c6ba30dde5afc",
+  "backupMatchesCompletedJob": true,
+  "compositionMatchesSubmittedNativeRequest": true,
+  "layerCount": 16,
+  "keyCount": 153,
+  "paidCalls": 0
+}

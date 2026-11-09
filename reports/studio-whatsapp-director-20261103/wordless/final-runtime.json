@@ -1,0 +1,26 @@
+{
+  "date": "2026-11-03",
+  "origin": "http://127.0.0.1:43927",
+  "demoProject": "demo-autopromote-credits",
+  "build": "/tmp/autopromote-application-demo-5izIlF/build-whatsapp-revision-20261103",
+  "mainAsset": "/static/js/main.89cfe7c5.js",
+  "mainSha256": "37fb3a88bfb6190ce604941e71d8c0771ade0833f3ab1f0a05aa4c7e69434617",
+  "sourceHashes": {
+    "python_media_worker/main_media_server.py": "ad85d61e3ece96bc798b1f0f5f7c619a427e9b9abb275f67de5aaa4f8a538574",
+    "python_media_worker/studio_layer_cache.py": "55b76352894db0a31948ed35644c792581924727c9baafdcba896281aebe2c07",
+    "frontend/src/utils/sourceUpload.js": "d24ac3b0fe303fbee8d2b3110f84ef14330df606b7a23e6a379e809efdac8b57",
+    "frontend/src/components/ViralClipStudio.js": "8637a26d592ee495afa032620940c2a0a19013363ee54a4dfe4d185b6e5cba48"
+  },
+  "workerPid": 454290,
+  "workerCwd": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031",
+  "allFourOriginalsVerified": true,
+  "freeBytes": 10109657088,
+  "paidCalls": 0,
+  "apiPid": 945783,
+  "apiCwd": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031",
+  "originalLocalWindowRestored": 1793707200000,
+  "activeOperations": 0,
+  "gpuEnabled": false,
+  "externalAiEnabled": false,
+  "normalLocalAppRetained": true
+}

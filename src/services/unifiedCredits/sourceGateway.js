@@ -8,7 +8,17 @@ const { assertSandbox } = require("./runtime");
 const { fail } = require("./policy");
 const { digest, canonical } = require("./workerVerification");
 const { compactWorkflowDescriptor } = require('./workflowDescriptor');
+const { localStorageRead } = require('./localStorageRead');
 const execute = promisify(execFile);
+
+function audioReferences(studio) {
+  if (!studio) return [];
+  return [
+    ...(studio.add_music && studio.music_url ? [[studio, 'music_url']] : []),
+    ...(studio.sound_effects || []).filter(cue => !cue.builtIn && cue.enabled !== false && cue.url)
+      .map(cue => [cue, 'url']),
+  ];
+}
 
 // Actual emulator objects, owner checks and byte hashes. No production bucket
 // or arbitrary caller URL is accepted. Read capabilities are not worker proofs.
@@ -62,10 +72,10 @@ function createSourceGateway({
     )
       fail("SOURCE_FORBIDDEN", 403);
     const file = bucket.file(storagePath);
-    const [metadata] = await file.getMetadata();
+    const [metadata] = await localStorageRead(() => file.getMetadata());
     if (owner(storagePath, metadata) !== uid || Number(metadata.size) > 50 * 1024 * 1024)
       fail("SOURCE_FORBIDDEN", 403);
-    const [bytes] = await file.download();
+    const [bytes] = await localStorageRead(() => file.download());
     // Use the standard SHA-256 of the actual bytes, independent of metadata claims.
     const sha256 = crypto.createHash("sha256").update(bytes).digest("hex");
     const generation = String(metadata.generation);
@@ -117,6 +127,19 @@ function createSourceGateway({
     async signedUrl(uid, name) {
       return capability(await describe(uid, name));
     },
+    async refreshWorkerAudio(uid, body, declaredSources) {
+      // Renew credentials, not source identity. The admission manifest remains
+      // authoritative, and the worker proof binds the resulting request.
+      const renewed = await Promise.all(audioReferences(body).map(async ([object, key]) => {
+        const actual = await ownedUrl(uid, object[key]);
+        const declared = declaredSources.find(source => source.storagePath === actual.storagePath);
+        if (!declared || declared.userId !== uid || declared.contentHash !== actual.contentHash ||
+            declared.objectGeneration !== actual.objectGeneration)
+          fail('SOURCE_GENERATION_CONFLICT', 409);
+        return [object, key, capability(actual)];
+      }));
+      for (const [object, key, url] of renewed) object[key] = url;
+    },
     async prepare(uid, { operation, route, requestBody }) {
       assertSandbox(process.env, db);
       const expected =
@@ -159,10 +182,17 @@ function createSourceGateway({
           seen.add(segment.sourceStoragePath);
         }
       }
+      for (const [object, key] of audioReferences(studio)) {
+        const audio = await ownedUrl(uid, object[key]);
+        if (!seen.has(audio.storagePath)) {
+          sources.push(audio);
+          seen.add(audio.storagePath);
+        }
+      }
       const dir = await fs.mkdtemp(path.join(os.tmpdir(), "credit-source-probe-"));
       let duration;
       try {
-        const [bytes] = await bucket.file(primary.storagePath).download();
+        const [bytes] = await localStorageRead(() => bucket.file(primary.storagePath).download());
         await fs.writeFile(path.join(dir, "source"), bytes);
         const result = await execute(
           "ffprobe",
@@ -239,7 +269,7 @@ function createSourceGateway({
         actual.gatewayPath !== req.path
       )
         return res.sendStatus(409);
-      const [bytes] = await bucket.file(data.storagePath).download();
+      const [bytes] = await localStorageRead(() => bucket.file(data.storagePath).download());
       res.set({
         "Content-Type": actual.contentType,
         "Accept-Ranges": "bytes",

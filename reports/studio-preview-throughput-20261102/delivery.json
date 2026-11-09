@@ -1,0 +1,66 @@
+{
+  "directory": "/home/tibule12/Videos/AutoPromote Motion and Flow - 2026-11-01/Cinematic Episode/Studio preview repair - 2026-11-02",
+  "files": [
+    {
+      "file": "Build identity.json",
+      "sha256": "1985d42c6566433f1d99992738d8dda062d4150c73e31cb01f7a0183e0d29ea1",
+      "bytes": 1587
+    },
+    {
+      "file": "Checks.json",
+      "sha256": "75172bbdc11c1a72384cfd77a88629d7a0322e932b1aa35f57b2c1d130cc2ce5",
+      "bytes": 1973
+    },
+    {
+      "file": "Dissolve at 24.25s.png",
+      "sha256": "1ab2ceb4a359e7ea2a47534dbe3b4c666c58bf08a7c12e5ae5740e54f2e88fd0",
+      "bytes": 452594
+    },
+    {
+      "file": "Editable project.autopromote.json",
+      "sha256": "cab2224b603f9e1e390a088000c15ee4d4716895be145978022e97e08e0f7f4e",
+      "bytes": 7674499
+    },
+    {
+      "file": "Final held frame.png",
+      "sha256": "957b4acba751dd2d6a813b0f644c79b02d2cf86b9b8d2491f587ab3f6c57cbb5",
+      "bytes": 42757
+    },
+    {
+      "file": "Finished video playback.mp4",
+      "sha256": "59e34f9369dc0d21e928434066fa8b29c60dc7550faa1e5fd67b0ee9a7e6c065",
+      "bytes": 6059127
+    },
+    {
+      "file": "Live Studio playback.mp4",
+      "sha256": "22bba429f1128fc14a476f570b3bfa4997a83a16ac39917984a6c9eac17c1692",
+      "bytes": 5004972
+    },
+    {
+      "file": "Native controls.mp4",
+      "sha256": "c318e0683b24ddb0fe67a157819c39916f1c312f88b05fc535c47fa111ceb95a",
+      "bytes": 725923
+    },
+    {
+      "file": "Native controls.png",
+      "sha256": "f59cd7a0800ffcaa080ade5476438917b7f2929c9f35dee18d4cafe076a56898",
+      "bytes": 756053
+    },
+    {
+      "file": "Preview vs export.jpg",
+      "sha256": "709775727b292d7c7b9d0df3926b3ef4515d9f38d0bff80aa2600fd720bc98d1",
+      "bytes": 1068748
+    },
+    {
+      "file": "README.md",
+      "sha256": "62e66006e571f71e286e8cde71dc5bac8e58774234e19746df4c0f73be02d26a",
+      "bytes": 3783
+    },
+    {
+      "file": "Surface at 22.5s.png",
+      "sha256": "778e952447eb42d87cda7c8790a9e5c8adb772b843acd7c086d9904e73b743ce",
+      "bytes": 421589
+    }
+  ],
+  "priorFilesVerifiedUnchanged": 214
+}

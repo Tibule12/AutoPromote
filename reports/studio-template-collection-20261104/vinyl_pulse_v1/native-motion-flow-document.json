@@ -1,0 +1,2241 @@
+{
+  "schemaVersion": 1,
+  "projectId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060",
+  "revision": 11,
+  "clock": {
+    "ticksPerSecond": 90000,
+    "interval": "half_open"
+  },
+  "output": {
+    "aspectRatio": "16:9",
+    "requestedResolution": "720p",
+    "frameRate": {
+      "numerator": 24,
+      "denominator": 1
+    },
+    "codec": "h264",
+    "audioCodec": "aac",
+    "audioSampleRate": null,
+    "audioSampleRatePolicy": "worker_selected"
+  },
+  "assets": [
+    {
+      "assetId": "source:launch-db78c0e58e101addc8e50cf2:sha256:db78c0e58e101addc8e50cf2e4131de3650dd5ca5619c69d4dd8d5e85a598145",
+      "sourceId": "launch-db78c0e58e101addc8e50cf2",
+      "storagePath": "studio/sources/demo-pilot-alice/c602cdf911831489ebd8e3a7_music.mp4",
+      "contentHash": "db78c0e58e101addc8e50cf2e4131de3650dd5ca5619c69d4dd8d5e85a598145",
+      "identityState": "hash_verified"
+    }
+  ],
+  "clipOccurrences": [
+    {
+      "occurrenceId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:shot:1",
+      "assetId": "source:launch-db78c0e58e101addc8e50cf2:sha256:db78c0e58e101addc8e50cf2e4131de3650dd5ca5619c69d4dd8d5e85a598145",
+      "sourceRange": {
+        "space": "source",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "timeMapId": "map:viral-project-95972437-4782-4932-a3de-1b5d2def5060:shot:1",
+      "parameterSchemaVersion": 1,
+      "parameters": {
+        "name": "music.mp4",
+        "duration": 8,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      "playback": {
+        "direction": "forward",
+        "freeze": false,
+        "rate": {
+          "numerator": 1,
+          "denominator": 1
+        }
+      }
+    }
+  ],
+  "timeMaps": [
+    {
+      "timeMapId": "map:viral-project-95972437-4782-4932-a3de-1b5d2def5060:shot:1",
+      "occurrenceId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:shot:1",
+      "segments": [
+        {
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 720000
+          },
+          "clipLocalRange": {
+            "space": "clip_local",
+            "startTick": 0,
+            "endTick": 720000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 0,
+            "endTick": 720000
+          },
+          "rate": {
+            "numerator": 1,
+            "denominator": 1
+          },
+          "direction": "forward",
+          "freeze": false
+        }
+      ]
+    }
+  ],
+  "layers": [
+    {
+      "layerId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Backdrop",
+      "type": "b_roll",
+      "legacyType": "image",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Backdrop",
+        "sourceStoragePath": "uploads/images/demo-pilot-alice/0d9b4a3c-128e-4b50-a2bd-4ab2b3172578_overlay-ca61fe82-f84d-45c7-8b1b-714f45da4ff7.png",
+        "contentHash": "61dcad3e221e6225e60a742f2da424dfcf68474be989998fb92ed37bef039f01",
+        "anchorX": 50,
+        "anchorY": 50,
+        "layerShadow": {
+          "enabled": false
+        },
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "stretch",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "height": 100,
+        "rotation": 0,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 8,
+        "bRollMode": "pip",
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "vectorShape": {
+          "version": 1,
+          "closed": true,
+          "nodes": [
+            {
+              "x": 0,
+              "y": 0,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            },
+            {
+              "x": 100,
+              "y": 0,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            },
+            {
+              "x": 100,
+              "y": 100,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            },
+            {
+              "x": 0,
+              "y": 100,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            }
+          ],
+          "fill": {
+            "kind": "solid",
+            "color": "#060514",
+            "endColor": "#060514",
+            "start": [
+              0,
+              0
+            ],
+            "end": [
+              100,
+              100
+            ]
+          },
+          "stroke": {
+            "color": "#060514",
+            "width": 0
+          }
+        }
+      }
+    },
+    {
+      "layerId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Concert haze",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Concert haze",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/c602cdf911831489ebd8e3a7_music.mp4",
+        "contentHash": "db78c0e58e101addc8e50cf2e4131de3650dd5ca5619c69d4dd8d5e85a598145",
+        "anchorX": 50,
+        "anchorY": 50,
+        "layerShadow": {
+          "enabled": false
+        },
+        "sourceDuration": 11.636625,
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "cover",
+        "opacity": 0.32,
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "height": 100,
+        "rotation": 0,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 8,
+        "sourceStartTime": 0,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "launch-db78c0e58e101addc8e50cf2"
+      }
+    },
+    {
+      "layerId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Live disc",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Live disc",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/c602cdf911831489ebd8e3a7_music.mp4",
+        "contentHash": "db78c0e58e101addc8e50cf2e4131de3650dd5ca5619c69d4dd8d5e85a598145",
+        "anchorX": 50,
+        "anchorY": 50,
+        "layerShadow": {
+          "enabled": false
+        },
+        "sourceDuration": 11.636625,
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "cover",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 43,
+        "height": 76.4444,
+        "rotation": 0,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 8,
+        "sourceStartTime": 0,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "mask": {
+          "enabled": true,
+          "shape": "ellipse",
+          "feather": 0,
+          "inverted": false
+        },
+        "sourceMediaId": "launch-db78c0e58e101addc8e50cf2"
+      }
+    },
+    {
+      "layerId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 0",
+      "type": "b_roll",
+      "legacyType": "image",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Sound orbit 0",
+        "sourceStoragePath": "uploads/images/demo-pilot-alice/c14812f8-9e27-400f-9421-ebee74ec01b1_overlay-ce44c296-b825-4a48-a237-e6d5ad6b892f.png",
+        "contentHash": "6c9ebad4f6c61fc50eded59fbfe37dbbb26262178b176379f73367fcd7ae72f2",
+        "anchorX": 50,
+        "anchorY": 50,
+        "layerShadow": {
+          "enabled": false
+        },
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "stretch",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 48,
+        "height": 85.33333333333333,
+        "rotation": 0,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 8,
+        "bRollMode": "pip",
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "vectorShape": {
+          "version": 1,
+          "closed": true,
+          "nodes": [
+            {
+              "x": 50,
+              "y": 1,
+              "in": [
+                -27,
+                0
+              ],
+              "out": [
+                27,
+                0
+              ]
+            },
+            {
+              "x": 99,
+              "y": 50,
+              "in": [
+                0,
+                -27
+              ],
+              "out": [
+                0,
+                27
+              ]
+            },
+            {
+              "x": 50,
+              "y": 99,
+              "in": [
+                27,
+                0
+              ],
+              "out": [
+                -27,
+                0
+              ]
+            },
+            {
+              "x": 1,
+              "y": 50,
+              "in": [
+                0,
+                27
+              ],
+              "out": [
+                0,
+                -27
+              ]
+            }
+          ],
+          "fill": {
+            "kind": "none",
+            "color": "#b6ff33",
+            "endColor": "#b6ff33",
+            "start": [
+              0,
+              0
+            ],
+            "end": [
+              100,
+              100
+            ]
+          },
+          "stroke": {
+            "color": "#b6ff33",
+            "width": 0.6
+          }
+        }
+      }
+    },
+    {
+      "layerId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 1",
+      "type": "b_roll",
+      "legacyType": "image",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Sound orbit 1",
+        "sourceStoragePath": "uploads/images/demo-pilot-alice/985fcc86-74f4-4d5d-a492-5cbf93a73600_overlay-cc24e274-d856-4088-ac69-597bb7481fee.png",
+        "contentHash": "9c2fb0ac0efe4a1b7ad3173ba86fa55c5e22d50c3f87850405dec8c908c5058d",
+        "anchorX": 50,
+        "anchorY": 50,
+        "layerShadow": {
+          "enabled": false
+        },
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "stretch",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 56,
+        "height": 99.55555555555556,
+        "rotation": 0,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 8,
+        "bRollMode": "pip",
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "vectorShape": {
+          "version": 1,
+          "closed": true,
+          "nodes": [
+            {
+              "x": 50,
+              "y": 1,
+              "in": [
+                -27,
+                0
+              ],
+              "out": [
+                27,
+                0
+              ]
+            },
+            {
+              "x": 99,
+              "y": 50,
+              "in": [
+                0,
+                -27
+              ],
+              "out": [
+                0,
+                27
+              ]
+            },
+            {
+              "x": 50,
+              "y": 99,
+              "in": [
+                27,
+                0
+              ],
+              "out": [
+                -27,
+                0
+              ]
+            },
+            {
+              "x": 1,
+              "y": 50,
+              "in": [
+                0,
+                27
+              ],
+              "out": [
+                0,
+                -27
+              ]
+            }
+          ],
+          "fill": {
+            "kind": "none",
+            "color": "#7c38ef",
+            "endColor": "#7c38ef",
+            "start": [
+              0,
+              0
+            ],
+            "end": [
+              100,
+              100
+            ]
+          },
+          "stroke": {
+            "color": "#7c38ef",
+            "width": 0.6
+          }
+        }
+      }
+    },
+    {
+      "layerId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 2",
+      "type": "b_roll",
+      "legacyType": "image",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Sound orbit 2",
+        "sourceStoragePath": "uploads/images/demo-pilot-alice/5d2fa2e2-c2a4-48c8-bc5b-c27b6cb24469_overlay-ceac2783-3e11-47fd-8b28-956bc30ea63a.png",
+        "contentHash": "0d11d132c4921ff5987fc86372e4871fd1bcd8e265b684511f1eeac782b13220",
+        "anchorX": 50,
+        "anchorY": 50,
+        "layerShadow": {
+          "enabled": false
+        },
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "stretch",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 64,
+        "height": 113.77777777777777,
+        "rotation": 0,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 8,
+        "bRollMode": "pip",
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "vectorShape": {
+          "version": 1,
+          "closed": true,
+          "nodes": [
+            {
+              "x": 50,
+              "y": 1,
+              "in": [
+                -27,
+                0
+              ],
+              "out": [
+                27,
+                0
+              ]
+            },
+            {
+              "x": 99,
+              "y": 50,
+              "in": [
+                0,
+                -27
+              ],
+              "out": [
+                0,
+                27
+              ]
+            },
+            {
+              "x": 50,
+              "y": 99,
+              "in": [
+                27,
+                0
+              ],
+              "out": [
+                -27,
+                0
+              ]
+            },
+            {
+              "x": 1,
+              "y": 50,
+              "in": [
+                0,
+                27
+              ],
+              "out": [
+                0,
+                -27
+              ]
+            }
+          ],
+          "fill": {
+            "kind": "none",
+            "color": "#ff53a2",
+            "endColor": "#ff53a2",
+            "start": [
+              0,
+              0
+            ],
+            "end": [
+              100,
+              100
+            ]
+          },
+          "stroke": {
+            "color": "#ff53a2",
+            "width": 0.6
+          }
+        }
+      }
+    }
+  ],
+  "linkedTiming": {
+    "cues": {
+      "soundEffects": [
+        {
+          "cueId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:sound:0",
+          "type": null,
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "enabled": true,
+            "builtIn": true,
+            "kind": "sfx",
+            "tone": "airy_whoosh",
+            "name": "airy_whoosh",
+            "volume": 0.2,
+            "fadeIn": 0.01,
+            "fadeOut": 0.04
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 0,
+            "endTick": 54000
+          }
+        },
+        {
+          "cueId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:sound:1",
+          "type": null,
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "enabled": true,
+            "builtIn": true,
+            "kind": "sfx",
+            "tone": "airy_whoosh",
+            "name": "airy_whoosh",
+            "volume": 0.16,
+            "fadeIn": 0.01,
+            "fadeOut": 0.04
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 297000,
+            "endTick": 342000
+          }
+        },
+        {
+          "cueId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:sound:2",
+          "type": null,
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "enabled": true,
+            "builtIn": true,
+            "kind": "sfx",
+            "tone": "airy_whoosh",
+            "name": "airy_whoosh",
+            "volume": 0.18,
+            "fadeIn": 0.01,
+            "fadeOut": 0.04
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 576000,
+            "endTick": 630000
+          }
+        }
+      ],
+      "voiceovers": [],
+      "adjustmentLayers": []
+    },
+    "keys": {
+      "motionKeyframes": [
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Live disc",
+            "property": "scale",
+            "value": 0.05,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:0"
+          }
+        },
+        {
+          "atProgrammeTick": 81000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Live disc",
+            "property": "scale",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:1"
+          }
+        },
+        {
+          "atProgrammeTick": 216000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Live disc",
+            "property": "scale",
+            "value": 1.12,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:2"
+          }
+        },
+        {
+          "atProgrammeTick": 306000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Live disc",
+            "property": "scale",
+            "value": 0.9,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:3"
+          }
+        },
+        {
+          "atProgrammeTick": 396000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Live disc",
+            "property": "scale",
+            "value": 1.15,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:4"
+          }
+        },
+        {
+          "atProgrammeTick": 495000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Live disc",
+            "property": "scale",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:5"
+          }
+        },
+        {
+          "atProgrammeTick": 639000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Live disc",
+            "property": "scale",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:6"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Live disc",
+            "property": "scale",
+            "value": 0.05,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:7"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Live disc",
+            "property": "rotation",
+            "value": -15,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:8"
+          }
+        },
+        {
+          "atProgrammeTick": 315000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Live disc",
+            "property": "rotation",
+            "value": 14,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:9"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Live disc",
+            "property": "rotation",
+            "value": -12,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:10"
+          }
+        },
+        {
+          "atProgrammeTick": 648000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Live disc",
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:11"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Live disc",
+            "property": "rotation",
+            "value": 45,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:12"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 0",
+            "property": "scale",
+            "value": 0.2,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:13"
+          }
+        },
+        {
+          "atProgrammeTick": 72000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 0",
+            "property": "scale",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:14"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 0",
+            "property": "scale",
+            "value": 1.06,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:15"
+          }
+        },
+        {
+          "atProgrammeTick": 360000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 0",
+            "property": "scale",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:16"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 0",
+            "property": "scale",
+            "value": 1.08,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:17"
+          }
+        },
+        {
+          "atProgrammeTick": 540000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 0",
+            "property": "scale",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:18"
+          }
+        },
+        {
+          "atProgrammeTick": 657000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 0",
+            "property": "scale",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:19"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 0",
+            "property": "scale",
+            "value": 0.1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:20"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 0",
+            "property": "strokeStart",
+            "value": 0,
+            "easing": "linear",
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:21"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 0",
+            "property": "strokeStart",
+            "value": 25,
+            "easing": "linear",
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:22"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 0",
+            "property": "strokeEnd",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:23"
+          }
+        },
+        {
+          "atProgrammeTick": 108000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 0",
+            "property": "strokeEnd",
+            "value": 80,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:24"
+          }
+        },
+        {
+          "atProgrammeTick": 612000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 0",
+            "property": "strokeEnd",
+            "value": 80,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:25"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 0",
+            "property": "strokeEnd",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:26"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 0",
+            "property": "strokeOffset",
+            "value": 0,
+            "easing": "linear",
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:27"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 0",
+            "property": "strokeOffset",
+            "value": 180,
+            "easing": "linear",
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:28"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 0",
+            "property": "rotation",
+            "value": 0,
+            "easing": "linear",
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:29"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 0",
+            "property": "rotation",
+            "value": 120,
+            "easing": "linear",
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:30"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 1",
+            "property": "scale",
+            "value": 0.2,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:31"
+          }
+        },
+        {
+          "atProgrammeTick": 84600,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 1",
+            "property": "scale",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:32"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 1",
+            "property": "scale",
+            "value": 1.06,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:33"
+          }
+        },
+        {
+          "atProgrammeTick": 360000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 1",
+            "property": "scale",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:34"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 1",
+            "property": "scale",
+            "value": 1.08,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:35"
+          }
+        },
+        {
+          "atProgrammeTick": 540000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 1",
+            "property": "scale",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:36"
+          }
+        },
+        {
+          "atProgrammeTick": 657000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 1",
+            "property": "scale",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:37"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 1",
+            "property": "scale",
+            "value": 0.1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:38"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 1",
+            "property": "strokeStart",
+            "value": 0,
+            "easing": "linear",
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:39"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 1",
+            "property": "strokeStart",
+            "value": 40,
+            "easing": "linear",
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:40"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 1",
+            "property": "strokeEnd",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:41"
+          }
+        },
+        {
+          "atProgrammeTick": 108000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 1",
+            "property": "strokeEnd",
+            "value": 70,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:42"
+          }
+        },
+        {
+          "atProgrammeTick": 612000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 1",
+            "property": "strokeEnd",
+            "value": 70,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:43"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 1",
+            "property": "strokeEnd",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:44"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 1",
+            "property": "strokeOffset",
+            "value": 25,
+            "easing": "linear",
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:45"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 1",
+            "property": "strokeOffset",
+            "value": 205,
+            "easing": "linear",
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:46"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 1",
+            "property": "rotation",
+            "value": 60,
+            "easing": "linear",
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:47"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 1",
+            "property": "rotation",
+            "value": 180,
+            "easing": "linear",
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:48"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 2",
+            "property": "scale",
+            "value": 0.2,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:49"
+          }
+        },
+        {
+          "atProgrammeTick": 97200,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 2",
+            "property": "scale",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:50"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 2",
+            "property": "scale",
+            "value": 1.06,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:51"
+          }
+        },
+        {
+          "atProgrammeTick": 360000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 2",
+            "property": "scale",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:52"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 2",
+            "property": "scale",
+            "value": 1.08,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:53"
+          }
+        },
+        {
+          "atProgrammeTick": 540000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 2",
+            "property": "scale",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:54"
+          }
+        },
+        {
+          "atProgrammeTick": 657000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 2",
+            "property": "scale",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:55"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 2",
+            "property": "scale",
+            "value": 0.1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:56"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 2",
+            "property": "strokeStart",
+            "value": 0,
+            "easing": "linear",
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:57"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 2",
+            "property": "strokeStart",
+            "value": 55,
+            "easing": "linear",
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:58"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 2",
+            "property": "strokeEnd",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:59"
+          }
+        },
+        {
+          "atProgrammeTick": 108000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 2",
+            "property": "strokeEnd",
+            "value": 60,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:60"
+          }
+        },
+        {
+          "atProgrammeTick": 612000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 2",
+            "property": "strokeEnd",
+            "value": 60,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:61"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 2",
+            "property": "strokeEnd",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:62"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 2",
+            "property": "strokeOffset",
+            "value": 50,
+            "easing": "linear",
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:63"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 2",
+            "property": "strokeOffset",
+            "value": 230,
+            "easing": "linear",
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:64"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 2",
+            "property": "rotation",
+            "value": 120,
+            "easing": "linear",
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:65"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:Sound orbit 2",
+            "property": "rotation",
+            "value": 240,
+            "easing": "linear",
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:66"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "main-video",
+            "property": "opacity",
+            "value": 0,
+            "easing": "hold",
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:67"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "main-video",
+            "property": "opacity",
+            "value": 0,
+            "easing": "hold",
+            "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:look:key:68"
+          }
+        }
+      ],
+      "finishKeyframes": [],
+      "reframeKeyframes": [],
+      "reframeModeCuts": [],
+      "speakerFocusCuts": [],
+      "audioKeyframes.originalAudio": [],
+      "audioKeyframes.masterPodcast": [],
+      "audioKeyframes.voiceover": [],
+      "audioKeyframes.music": [],
+      "audioKeyframes.broll": [],
+      "audioKeyframes.sfx": []
+    }
+  },
+  "audioGraph": {
+    "legacySnapshotRef": "audioRemix",
+    "parameterSchemaVersion": 1,
+    "settings": {
+      "addMusic": true,
+      "musicSelection": "upbeat_pop.mp3",
+      "musicSearchMode": false,
+      "safeSearch": true,
+      "musicVolume": 55,
+      "musicDucking": false,
+      "musicDuckingStrength": 0,
+      "muteOriginalAudio": true,
+      "audioRemix": {
+        "version": 1,
+        "enabled": false,
+        "preset": "slowed_reverb",
+        "speed": 0.82,
+        "pitch": -3,
+        "bass": 8,
+        "clarity": 2,
+        "air": 1,
+        "reverb": 68,
+        "intensity": 75,
+        "keepPitch": false,
+        "contentType": "auto",
+        "target": "master",
+        "outputGain": 0,
+        "levelMatch": true,
+        "quality": "studio"
+      },
+      "audioRestoration": {
+        "preset": "natural",
+        "voiceIsolation": false,
+        "denoise": 22,
+        "deEsser": 18,
+        "humFrequency": 50,
+        "compressor": 35,
+        "limiter": -1,
+        "loudness": -14,
+        "eq": {
+          "low": 0,
+          "mid": 0,
+          "high": 0
+        },
+        "enabled": false
+      },
+      "audioAutomationSource": "originalAudio"
+    },
+    "music": {
+      "id": "launch-f3cade09fcb727c24508179f",
+      "name": "Make your move - original score.wav",
+      "storagePath": "uploads/audios/demo-pilot-alice/70d5e03d-3d90-44ca-a6b8-9ef46f044599_Make your move - original score.wav",
+      "contentHash": "f3cade09fcb727c24508179fa1c0e7914cfe162c9fee098a8eabe6c6d3ea44a6",
+      "volume": 55,
+      "fadeIn": 0.1,
+      "fadeOut": 0.5,
+      "loop": false,
+      "duration": 24
+    },
+    "routes": [
+      {
+        "trackId": "video",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "adjustment",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "graphics",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "broll",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "captions",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "originalAudio",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "voiceover",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "music",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "sfx",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      }
+    ],
+    "routing": {
+      "muteOriginalAudio": true,
+      "musicDucking": false,
+      "musicDuckingStrength": 0,
+      "musicTrackId": "launch-f3cade09fcb727c24508179f"
+    }
+  },
+  "visualGraph": {
+    "parameterSchemaVersion": 1,
+    "settings": {
+      "mainTransform": {
+        "id": "main-video",
+        "name": "Main video",
+        "type": "video",
+        "x": 50,
+        "y": 50,
+        "scale": 1,
+        "rotation": 0,
+        "opacity": 1,
+        "cropX": 0,
+        "cropY": 0
+      },
+      "finishFx": {
+        "precisionGrade": false,
+        "exposureStops": 0,
+        "lift": 0,
+        "gamma": 1,
+        "gain": 1,
+        "tint": 0,
+        "preset": null,
+        "brightness": 1,
+        "contrast": 1,
+        "saturation": 1,
+        "temperature": 0,
+        "sharpness": 0,
+        "vignette": 0,
+        "blur": 0,
+        "blurMode": "edge",
+        "blurStart": -1,
+        "blurEnd": -1,
+        "zoom": 1,
+        "zoomAnchor": "center",
+        "overlayType": "",
+        "overlayOpacity": 0.4,
+        "overlayColor": "#000000",
+        "filmGrain": 0,
+        "chromaticAberration": 0,
+        "vhsTracking": 0,
+        "lightLeak": 0,
+        "letterbox": 0,
+        "fadeIn": 0,
+        "fadeOut": 0
+      },
+      "mainFrame": {
+        "insetPercent": 3,
+        "radiusPercent": 8,
+        "background": "studio_black",
+        "enabled": false
+      },
+      "advancedColor": {
+        "lutName": "",
+        "lutFile": null,
+        "lutIntensity": 100,
+        "curve": {
+          "shadows": 0,
+          "midtones": 0,
+          "highlights": 0
+        },
+        "hsl": {
+          "hue": 0,
+          "saturation": 0,
+          "luminance": 0
+        }
+      },
+      "podcastVisualizer": {
+        "enabled": false,
+        "mode": "wave",
+        "color": "#72f7ff",
+        "intensity": 0.75,
+        "position": "bottom"
+      },
+      "videoFit": "contain",
+      "safeFaceFraming": false,
+      "faceAnchorPreset": "center",
+      "autoCaptions": false,
+      "captionStyle": "bold_pop",
+      "captionPosition": "bottom_center",
+      "captionScale": 1,
+      "captionTextOverride": "",
+      "translateCaptionsToEnglish": false,
+      "smartCrop": true,
+      "smartCropMode": "off",
+      "reframeAspect": "16:9",
+      "speakerTrackZoom": 1,
+      "speakerStackFraming": {
+        "dividerPercent": 50,
+        "gapPercent": 1.2,
+        "cardGapPercent": 2.5,
+        "roundedCards": true,
+        "cardInsetPercent": 2.5,
+        "cardRadiusPercent": 8,
+        "secondaryXPercent": 80,
+        "secondaryYPercent": 20,
+        "secondarySizePercent": 30,
+        "top": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        },
+        "bottom": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        },
+        "third": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        },
+        "fourth": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        }
+      },
+      "speakerStackSourceIds": {
+        "top": null,
+        "bottom": null,
+        "third": null,
+        "fourth": null
+      },
+      "speakerStackOffsets": {
+        "top": 0,
+        "bottom": 0,
+        "third": 0,
+        "fourth": 0
+      },
+      "speakerStackCameraCount": 2,
+      "speakerStackLayout": "stack_2",
+      "speakerStackSyncConfirmed": false,
+      "exportSettings": {
+        "resolution": "720p",
+        "fps": "24",
+        "codec": "h264",
+        "quality": "high",
+        "videoBitrate": "auto",
+        "targetFileSizeMb": "",
+        "audioCodec": "aac",
+        "audioBitrate": "256",
+        "colorSpace": "rec709"
+      },
+      "stabilization": {
+        "enabled": false,
+        "strength": 35,
+        "crop": "adaptive",
+        "rollingShutter": false
+      },
+      "enhanceQuality": false,
+      "beatSnapEnabled": true,
+      "creativeIntent": "energy",
+      "creativeEffectsEnabled": false,
+      "creativePreset": "auto_story",
+      "creativeIntensity": "bold",
+      "pacingLevel": "balanced",
+      "nodeFlow": {
+        "version": 1,
+        "viewerA": "MediaOut",
+        "viewerB": null,
+        "splitPosition": 50,
+        "positions": {},
+        "bypassed": {}
+      },
+      "hideShyLayers": false
+    },
+    "cameraSources": []
+  },
+  "editGraph": {
+    "parameterSchemaVersion": 1,
+    "settings": {
+      "creativeTemplateInstance": {
+        "schemaVersion": 1,
+        "templateRef": {
+          "templateId": "vinyl_pulse_v1",
+          "version": "1.0.0",
+          "definitionHash": "ff1bdcbe6c98477a92bb1d8d75853c0a12b44b655d5d5c5459b3962a6fca9214"
+        },
+        "ownerUid": "demo-pilot-alice",
+        "instantiatedBy": "director",
+        "bindings": {
+          "footage": {
+            "assetId": "launch-db78c0e58e101addc8e50cf2",
+            "contentHash": "db78c0e58e101addc8e50cf2e4131de3650dd5ca5619c69d4dd8d5e85a598145",
+            "storagePath": "studio/sources/demo-pilot-alice/c602cdf911831489ebd8e3a7_music.mp4",
+            "trimStart": 0
+          },
+          "music": {
+            "assetId": "launch-f3cade09fcb727c24508179f",
+            "contentHash": "f3cade09fcb727c24508179fa1c0e7914cfe162c9fee098a8eabe6c6d3ea44a6",
+            "storagePath": "uploads/audios/demo-pilot-alice/70d5e03d-3d90-44ca-a6b8-9ef46f044599_Make your move - original score.wav",
+            "trimStart": 0
+          }
+        },
+        "intensity": 1,
+        "aspect": "16:9",
+        "qualified": false
+      },
+      "captionCoverageMode": "full",
+      "contentProfile": "auto",
+      "joinTransition": "auto",
+      "joinTransitionDuration": 0.18,
+      "silenceRemoval": false,
+      "silenceThreshold": -35,
+      "minSilenceDuration": 0.75,
+      "silencePreview": null,
+      "removeWatermark": false,
+      "watermarkMode": "adaptive",
+      "brandWatermark": false,
+      "manualWatermarkRegions": [],
+      "addHook": false,
+      "hookText": "THIS CHANGES FAST",
+      "hookTemplate": "blur_reveal",
+      "hookIntroSeconds": 3,
+      "hookStartTime": 0.8,
+      "hookEndTime": 3.8,
+      "hookBlurBackground": true,
+      "hookDarkOverlay": true,
+      "hookFreezeFrame": false,
+      "hookZoomScale": 1.08,
+      "hookTextAnimation": "slide-up",
+      "hookFocusPoint": {
+        "x": 50,
+        "y": 42
+      },
+      "bRollCadence": "balanced",
+      "bRollGenerationJobId": "",
+      "compoundClips": [],
+      "creatorPreview": {
+        "enabled": true,
+        "section": "reactions",
+        "activeDemo": "",
+        "intensity": 62,
+        "duration": 0.8,
+        "zoom": 1.34,
+        "x": 78,
+        "y": 68,
+        "color": "#ffcb67",
+        "accent": "#7457ff",
+        "text": "THIS CHANGED EVERYTHING",
+        "name": "",
+        "role": "",
+        "entity": "",
+        "emoji": "🤯",
+        "rank": 3,
+        "tracking": false,
+        "maskShape": "person",
+        "transition": "whip",
+        "introStyle": "cinematic",
+        "reactionMode": "instant",
+        "comparisonLeft": "",
+        "comparisonRight": ""
+      },
+      "splitExportEnabled": false,
+      "splitExportHooks": [],
+      "proxySettings": {
+        "enabled": true,
+        "resolution": "720p",
+        "codec": "h264",
+        "status": "source_ready"
+      }
+    },
+    "media": [
+      {
+        "id": "launch-db78c0e58e101addc8e50cf2",
+        "name": "music.mp4",
+        "duration": 11.636625,
+        "storagePath": "studio/sources/demo-pilot-alice/c602cdf911831489ebd8e3a7_music.mp4",
+        "contentHash": "db78c0e58e101addc8e50cf2e4131de3650dd5ca5619c69d4dd8d5e85a598145",
+        "mediaType": "video"
+      },
+      {
+        "id": "launch-f3cade09fcb727c24508179f",
+        "name": "Make your move - original score.wav",
+        "duration": 24,
+        "storagePath": "uploads/audios/demo-pilot-alice/70d5e03d-3d90-44ca-a6b8-9ef46f044599_Make your move - original score.wav",
+        "contentHash": "f3cade09fcb727c24508179fa1c0e7914cfe162c9fee098a8eabe6c6d3ea44a6",
+        "mediaType": "audio"
+      }
+    ],
+    "sources": [
+      {
+        "id": "viral-project-95972437-4782-4932-a3de-1b5d2def5060:shot:1",
+        "name": "music.mp4",
+        "duration": 8,
+        "sourceClipId": "launch-db78c0e58e101addc8e50cf2",
+        "storagePath": "studio/sources/demo-pilot-alice/c602cdf911831489ebd8e3a7_music.mp4",
+        "contentHash": "db78c0e58e101addc8e50cf2e4131de3650dd5ca5619c69d4dd8d5e85a598145"
+      }
+    ],
+    "musicMix": {},
+    "hookBinding": null,
+    "angleGroups": [],
+    "extractedAudio": null
+  },
+  "constraints": {
+    "locks": []
+  },
+  "styleRef": null,
+  "analysisRefs": [],
+  "projectIntelligenceRefs": [],
+  "programmeSpeedKeys": [],
+  "fallbackSpeed": 1,
+  "outputTimeMap": [
+    {
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "outputRange": {
+        "space": "output",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "rateNumerator": 1000000,
+      "rateDenominator": 1000000
+    }
+  ],
+  "journal": [
+    {
+      "journalId": "revision:5",
+      "baseRevision": 4,
+      "newRevision": 5,
+      "actor": {
+        "type": "human",
+        "id": "viral-studio-history"
+      },
+      "operations": [
+        {
+          "type": "history_restore"
+        }
+      ],
+      "affectedNodes": [
+        "viral-project-95972437-4782-4932-a3de-1b5d2def5060:shot:1"
+      ],
+      "inverse": null
+    },
+    {
+      "journalId": "revision:6",
+      "baseRevision": 5,
+      "newRevision": 6,
+      "actor": {
+        "type": "human",
+        "id": "viral-studio-history"
+      },
+      "operations": [
+        {
+          "type": "history_restore"
+        }
+      ],
+      "affectedNodes": [
+        "viral-project-95972437-4782-4932-a3de-1b5d2def5060:shot:1"
+      ],
+      "inverse": null
+    },
+    {
+      "journalId": "revision:7",
+      "baseRevision": 6,
+      "newRevision": 7,
+      "actor": {
+        "type": "human",
+        "id": "viral-studio-history"
+      },
+      "operations": [
+        {
+          "type": "history_restore"
+        }
+      ],
+      "affectedNodes": [
+        "viral-project-95972437-4782-4932-a3de-1b5d2def5060:shot:1"
+      ],
+      "inverse": null
+    }
+  ],
+  "idempotency": {},
+  "directorReviewJournal": [],
+  "compatibility": {
+    "legacySnapshotVersion": 1,
+    "projection": "clip_occurrences_canonical_other_fields_legacy",
+    "editableStateVersion": 1,
+    "visualStateVersion": 1,
+    "editStateVersion": 1,
+    "layerComposition": "ordered_flat_layers"
+  }
+}

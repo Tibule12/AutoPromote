@@ -1,0 +1,20 @@
+{
+  "beforeSourceHashes": {
+    "python_media_worker/main_media_server.py": "ad85d61e3ece96bc798b1f0f5f7c619a427e9b9abb275f67de5aaa4f8a538574",
+    "python_media_worker/studio_layer_cache.py": "5189246e5f40b32afc09e73a39a63e26d69732d9b6bff5b8d0e3a20004958c93",
+    "frontend/src/utils/sourceUpload.js": "d24ac3b0fe303fbee8d2b3110f84ef14330df606b7a23e6a379e809efdac8b57",
+    "frontend/src/components/ViralClipStudio.js": "8637a26d592ee495afa032620940c2a0a19013363ee54a4dfe4d185b6e5cba48"
+  },
+  "afterWorkerHashes": {
+    "python_media_worker/main_media_server.py": "ea92bbefa960c47621bb4a2d0cb7fe089f531b7745e5b6022ea7fb4ed1c71b07",
+    "python_media_worker/studio_layer_cache.py": "c01f6fb690f0e1e296743fff0fc30f32e518ea822fa01a2d35d6fdcb3361b76f"
+  },
+  "before": "Identity contain-fit ordinary video used opaque black letterboxes.",
+  "after": "Identity contain-fit PIP video uses the existing canonical transparent raster. Legacy/no-document and fullscreen paths retain their admission.",
+  "beforeRegression": "1 failed",
+  "afterRegression": "48 passed",
+  "firstRejectedMovieSha256": "707be227dcc8ce19ddfe8032eec841051a7405ab117998758ebc13571215d56b",
+  "firstMinimumPsnrDb": 2.5110751999495,
+  "frontendBuildUnchanged": true,
+  "projectParametersUnchanged": true
+}

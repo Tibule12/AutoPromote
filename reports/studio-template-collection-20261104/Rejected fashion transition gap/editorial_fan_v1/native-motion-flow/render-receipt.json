@@ -1,0 +1,644 @@
+{
+  "startedAt": "2026-11-04T07:23:41.901Z",
+  "finishedAt": "2026-11-04T07:28:06.930Z",
+  "projectId": "viral-project-d70567e2-62ce-405d-800b-19649c1bd6bf",
+  "projectHash": "ecc8d93a85b1197e778635abf0446d04d67fcb368794105ce422e725cd30fb84",
+  "templateRef": {
+    "templateId": "editorial_fan_v1",
+    "version": "1.0.0",
+    "definitionHash": "9e21a52ab68a5bdc107b68437f4f27bb085277346b3797237fa94e0d5c0882b5"
+  },
+  "submittedJobId": "viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+  "outputSha256": "5a2a8999c9de11ed48e67d4f62fd7038e46f5879b354fd9640797b21415f4ab1",
+  "serverOutputSha256": "5a2a8999c9de11ed48e67d4f62fd7038e46f5879b354fd9640797b21415f4ab1",
+  "requestBytesSha256": "5264846767fb6d6890b64f04909191a58ab50a98b2ce105bc40559bca1284977",
+  "events": [
+    {
+      "path": "/api/media/process",
+      "status": 200
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_21954010fedca9d2c6cbdc6187f14d0e72055daf15db1bb3192b7f7aad7bd1bc",
+      "status": 200,
+      "jobStatus": "completed"
+    }
+  ],
+  "technical": {
+    "passed": true,
+    "sha256": "5a2a8999c9de11ed48e67d4f62fd7038e46f5879b354fd9640797b21415f4ab1",
+    "bytes": 1768356,
+    "seconds": 8,
+    "video": {
+      "width": 1280,
+      "height": 720,
+      "codec": "h264",
+      "fps": "24/1",
+      "duration": "8.000000",
+      "frameCount": 192,
+      "pixelFormat": "yuv420p",
+      "encoder": "Lavc60.31.102 libx264"
+    },
+    "audio": {
+      "codec": "aac",
+      "channels": 2,
+      "sampleRate": "48000",
+      "duration": "8.000000"
+    },
+    "independentFullDecode": true,
+    "decodedAudio": {
+      "samples": 384000,
+      "sampleRate": 48000,
+      "seconds": 8,
+      "toleranceSeconds": 0.04466666666666667,
+      "passed": true
+    },
+    "contactSheet": "reports/studio-template-collection-20261104/editorial_fan_v1/native-motion-flow/final.mp4.frames.jpg",
+    "scope": "Technical only. Pixel and listening review are separate required evidence."
+  },
+  "projectHashBeforeMediaUpload": "cb13403303597651f00c00662a9879d06da760cc2d838a2c04ea4e4771b536d2",
+  "actualNativeDownload": true,
+  "noMocks": true,
+  "authBypass": false,
+  "gpuJobs": 0,
+  "creativeReview": "pending actual moving/sound review and founder approval"
+}

@@ -1,0 +1,48 @@
+{
+  "candidate": {
+    "pid": 2775633,
+    "origin": "http://127.0.0.1:34183",
+    "build": "/dev/shm/autopromote-whatsapp-director-20261103/build"
+  },
+  "api": "http://127.0.0.1:43927",
+  "demoProject": "demo-autopromote-credits",
+  "worker": "http://127.0.0.1:43931",
+  "root": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031",
+  "sourceHashes": {
+    "frontend/src/components/studioCreativeTemplate.js": "764f36ca7d84e9bba6e6f759e55eeda11f74655f55c88bac049e647c3a08e57c",
+    "frontend/src/components/StudioLaunchTemplatePanel.js": "8d5c5e4ca60406d02c47391ec1fce7cd4ad18734b584f04fd47622a6a9f6ba6e",
+    "frontend/src/templates/creator_identity_v1.json": "e2690eb583f63c513ff969a8006d2eea6b3b04140301ce3e116ca9e572825555",
+    "src/generated/studioDirectorReplayKernel.cjs": "cfb9012e499d05c3a2fe709031ca27225f18dc525bb231e609c120c6757af178",
+    "python_media_worker/main_media_server.py": "ad85d61e3ece96bc798b1f0f5f7c619a427e9b9abb275f67de5aaa4f8a538574",
+    "python_media_worker/studio_layer_cache.py": "55b76352894db0a31948ed35644c792581924727c9baafdcba896281aebe2c07",
+    "frontend/src/components/studioSceneActions.js": "c909c278ca11424219eb50e0e7c731b630d274c501de2612f5fa9b7cc55f1de2"
+  },
+  "mainAsset": "/static/js/main.08b72e5c.js",
+  "mainSha256": "825d193fe2628354a3e7815efc7fe9b30da9eb8680bbcc85613536ac410ae5c2",
+  "workerPid": 454290,
+  "workerCwd": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031",
+  "apiPid": 375694,
+  "sources": [
+    {
+      "path": "/home/tibule12/Videos/WhatsApp Video 2026-11-03 at 04.58.10 (1).mp4",
+      "bytes": 960297,
+      "sha256": "5217554acdae6f4623c8d9bbb1c7070c2918eea81975e2cf255a1f59afa14315"
+    },
+    {
+      "path": "/home/tibule12/Videos/WhatsApp Video 2026-11-03 at 04.58.10 (2).mp4",
+      "bytes": 4096597,
+      "sha256": "83b6bbc4008603d9dbccddcc870005fe1536d765d7cc2f1333b430b36066c32d"
+    },
+    {
+      "path": "/home/tibule12/Videos/WhatsApp Video 2026-11-03 at 04.58.10.mp4",
+      "bytes": 3308331,
+      "sha256": "f845b91a06ef40d16ae43d846bb888337fc7f11814acec9e508a33f188ea6ca7"
+    },
+    {
+      "path": "/home/tibule12/Videos/WhatsApp Video 2026-11-03 at 04.58.11.mp4",
+      "bytes": 2296265,
+      "sha256": "72d89720ee9db0d593c6120c3dd00ddfbbe893ad6c5626b6e9fe0973db6513a5"
+    }
+  ],
+  "paidCalls": 0
+}

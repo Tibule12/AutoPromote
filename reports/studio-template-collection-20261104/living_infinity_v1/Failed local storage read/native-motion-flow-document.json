@@ -1,0 +1,1380 @@
+{
+  "schemaVersion": 1,
+  "projectId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6",
+  "revision": 11,
+  "clock": {
+    "ticksPerSecond": 90000,
+    "interval": "half_open"
+  },
+  "output": {
+    "aspectRatio": "16:9",
+    "requestedResolution": "720p",
+    "frameRate": {
+      "numerator": 24,
+      "denominator": 1
+    },
+    "codec": "h264",
+    "audioCodec": "aac",
+    "audioSampleRate": null,
+    "audioSampleRatePolicy": "worker_selected"
+  },
+  "assets": [
+    {
+      "assetId": "source:launch-e8d2f87ddd67166c0bf5559d:sha256:e8d2f87ddd67166c0bf5559db74fed069911766337bf8889d6213d0126acbc6b",
+      "sourceId": "launch-e8d2f87ddd67166c0bf5559d",
+      "storagePath": "studio/sources/demo-pilot-alice/94f61de9dd1b8bde8c125000_cinema.mp4",
+      "contentHash": "e8d2f87ddd67166c0bf5559db74fed069911766337bf8889d6213d0126acbc6b",
+      "identityState": "hash_verified"
+    }
+  ],
+  "clipOccurrences": [
+    {
+      "occurrenceId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:shot:1",
+      "assetId": "source:launch-e8d2f87ddd67166c0bf5559d:sha256:e8d2f87ddd67166c0bf5559db74fed069911766337bf8889d6213d0126acbc6b",
+      "sourceRange": {
+        "space": "source",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "timeMapId": "map:viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:shot:1",
+      "parameterSchemaVersion": 1,
+      "parameters": {
+        "name": "cinema.mp4",
+        "duration": 8,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      "playback": {
+        "direction": "forward",
+        "freeze": false,
+        "rate": {
+          "numerator": 1,
+          "denominator": 1
+        }
+      }
+    }
+  ],
+  "timeMaps": [
+    {
+      "timeMapId": "map:viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:shot:1",
+      "occurrenceId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:shot:1",
+      "segments": [
+        {
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 720000
+          },
+          "clipLocalRange": {
+            "space": "clip_local",
+            "startTick": 0,
+            "endTick": 720000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 0,
+            "endTick": 720000
+          },
+          "rate": {
+            "numerator": 1,
+            "denominator": 1
+          },
+          "direction": "forward",
+          "freeze": false
+        }
+      ]
+    }
+  ],
+  "layers": [
+    {
+      "layerId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:Backdrop",
+      "type": "b_roll",
+      "legacyType": "image",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Backdrop",
+        "anchorX": 50,
+        "anchorY": 50,
+        "layerShadow": {
+          "enabled": false
+        },
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "stretch",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "height": 100,
+        "rotation": 0,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 8,
+        "bRollMode": "pip",
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "vectorShape": {
+          "version": 1,
+          "closed": true,
+          "nodes": [
+            {
+              "x": 0,
+              "y": 0,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            },
+            {
+              "x": 100,
+              "y": 0,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            },
+            {
+              "x": 100,
+              "y": 100,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            },
+            {
+              "x": 0,
+              "y": 100,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            }
+          ],
+          "fill": {
+            "kind": "solid",
+            "color": "#09090c",
+            "endColor": "#09090c",
+            "start": [
+              0,
+              0
+            ],
+            "end": [
+              100,
+              100
+            ]
+          },
+          "stroke": {
+            "color": "#09090c",
+            "width": 0
+          }
+        }
+      }
+    },
+    {
+      "layerId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:Scarlet atmosphere",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Scarlet atmosphere",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/94f61de9dd1b8bde8c125000_cinema.mp4",
+        "contentHash": "e8d2f87ddd67166c0bf5559db74fed069911766337bf8889d6213d0126acbc6b",
+        "anchorX": 50,
+        "anchorY": 50,
+        "layerShadow": {
+          "enabled": false
+        },
+        "sourceDuration": 16.641625,
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "cover",
+        "opacity": 0.18,
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "height": 100,
+        "rotation": 0,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 8,
+        "sourceStartTime": 0,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "launch-e8d2f87ddd67166c0bf5559d"
+      }
+    },
+    {
+      "layerId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:Infinity glyph",
+      "type": "title",
+      "legacyType": "text",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Cross glyph",
+        "textAlign": "center",
+        "bg": "transparent",
+        "anchorX": 50,
+        "anchorY": 50,
+        "shadow": "none",
+        "text": "X",
+        "fontFamily": "Inter",
+        "fontWeight": 900,
+        "color": "#ffffff",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 96,
+        "rotation": 0,
+        "scale": 8.2,
+        "startTime": 0,
+        "duration": 8,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        }
+      }
+    },
+    {
+      "layerId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:Living infinity",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Living infinity",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/94f61de9dd1b8bde8c125000_cinema.mp4",
+        "contentHash": "e8d2f87ddd67166c0bf5559db74fed069911766337bf8889d6213d0126acbc6b",
+        "anchorX": 50,
+        "anchorY": 50,
+        "layerShadow": {
+          "enabled": false
+        },
+        "sourceDuration": 16.641625,
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "cover",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "height": 100,
+        "rotation": 0,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 8,
+        "sourceStartTime": 0,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "launch-e8d2f87ddd67166c0bf5559d",
+        "trackMatte": {
+          "mode": "alpha",
+          "sourceLayerId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:Infinity glyph"
+        }
+      }
+    }
+  ],
+  "linkedTiming": {
+    "cues": {
+      "soundEffects": [
+        {
+          "cueId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:sound:0",
+          "type": null,
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "enabled": true,
+            "builtIn": true,
+            "kind": "sfx",
+            "tone": "airy_whoosh",
+            "name": "airy_whoosh",
+            "volume": 0.2,
+            "fadeIn": 0.01,
+            "fadeOut": 0.04
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 0,
+            "endTick": 54000
+          }
+        },
+        {
+          "cueId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:sound:1",
+          "type": null,
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "enabled": true,
+            "builtIn": true,
+            "kind": "sfx",
+            "tone": "airy_whoosh",
+            "name": "airy_whoosh",
+            "volume": 0.16,
+            "fadeIn": 0.01,
+            "fadeOut": 0.04
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 297000,
+            "endTick": 342000
+          }
+        },
+        {
+          "cueId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:sound:2",
+          "type": null,
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "enabled": true,
+            "builtIn": true,
+            "kind": "sfx",
+            "tone": "airy_whoosh",
+            "name": "airy_whoosh",
+            "volume": 0.18,
+            "fadeIn": 0.01,
+            "fadeOut": 0.04
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 576000,
+            "endTick": 630000
+          }
+        }
+      ],
+      "voiceovers": [],
+      "adjustmentLayers": []
+    },
+    "keys": {
+      "motionKeyframes": [
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:Infinity glyph",
+            "property": "rotation",
+            "value": -35,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:key:0"
+          }
+        },
+        {
+          "atProgrammeTick": 126000,
+          "parameters": {
+            "targetId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:Infinity glyph",
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:key:1"
+          }
+        },
+        {
+          "atProgrammeTick": 315000,
+          "parameters": {
+            "targetId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:Infinity glyph",
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:key:2"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:Infinity glyph",
+            "property": "rotation",
+            "value": 15,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:key:3"
+          }
+        },
+        {
+          "atProgrammeTick": 585000,
+          "parameters": {
+            "targetId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:Infinity glyph",
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:key:4"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:Infinity glyph",
+            "property": "rotation",
+            "value": -15,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:key:5"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:Living infinity",
+            "property": "rotation",
+            "value": -35,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:key:6"
+          }
+        },
+        {
+          "atProgrammeTick": 126000,
+          "parameters": {
+            "targetId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:Living infinity",
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:key:7"
+          }
+        },
+        {
+          "atProgrammeTick": 315000,
+          "parameters": {
+            "targetId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:Living infinity",
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:key:8"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:Living infinity",
+            "property": "rotation",
+            "value": 15,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:key:9"
+          }
+        },
+        {
+          "atProgrammeTick": 585000,
+          "parameters": {
+            "targetId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:Living infinity",
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:key:10"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:Living infinity",
+            "property": "rotation",
+            "value": -15,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:key:11"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:Infinity glyph",
+            "property": "scale",
+            "value": 1.8,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:key:12"
+          }
+        },
+        {
+          "atProgrammeTick": 108000,
+          "parameters": {
+            "targetId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:Infinity glyph",
+            "property": "scale",
+            "value": 8.2,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:key:13"
+          }
+        },
+        {
+          "atProgrammeTick": 342000,
+          "parameters": {
+            "targetId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:Infinity glyph",
+            "property": "scale",
+            "value": 8.2,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:key:14"
+          }
+        },
+        {
+          "atProgrammeTick": 495000,
+          "parameters": {
+            "targetId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:Infinity glyph",
+            "property": "scale",
+            "value": 13,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:key:15"
+          }
+        },
+        {
+          "atProgrammeTick": 630000,
+          "parameters": {
+            "targetId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:Infinity glyph",
+            "property": "scale",
+            "value": 20,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:key:16"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:Infinity glyph",
+            "property": "scale",
+            "value": 26,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:key:17"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:Living infinity",
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:key:18"
+          }
+        },
+        {
+          "atProgrammeTick": 40500,
+          "parameters": {
+            "targetId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:Living infinity",
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:key:19"
+          }
+        },
+        {
+          "atProgrammeTick": 657000,
+          "parameters": {
+            "targetId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:Living infinity",
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:key:20"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:Living infinity",
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:key:21"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "main-video",
+            "property": "opacity",
+            "value": 0,
+            "easing": "hold",
+            "id": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:key:22"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "main-video",
+            "property": "opacity",
+            "value": 0,
+            "easing": "hold",
+            "id": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:look:key:23"
+          }
+        }
+      ],
+      "finishKeyframes": [],
+      "reframeKeyframes": [],
+      "reframeModeCuts": [],
+      "speakerFocusCuts": [],
+      "audioKeyframes.originalAudio": [],
+      "audioKeyframes.masterPodcast": [],
+      "audioKeyframes.voiceover": [],
+      "audioKeyframes.music": [],
+      "audioKeyframes.broll": [],
+      "audioKeyframes.sfx": []
+    }
+  },
+  "audioGraph": {
+    "legacySnapshotRef": "audioRemix",
+    "parameterSchemaVersion": 1,
+    "settings": {
+      "addMusic": true,
+      "musicSelection": "upbeat_pop.mp3",
+      "musicSearchMode": false,
+      "safeSearch": true,
+      "musicVolume": 55,
+      "musicDucking": false,
+      "musicDuckingStrength": 0,
+      "muteOriginalAudio": true,
+      "audioRemix": {
+        "version": 1,
+        "enabled": false,
+        "preset": "slowed_reverb",
+        "speed": 0.82,
+        "pitch": -3,
+        "bass": 8,
+        "clarity": 2,
+        "air": 1,
+        "reverb": 68,
+        "intensity": 75,
+        "keepPitch": false,
+        "contentType": "auto",
+        "target": "master",
+        "outputGain": 0,
+        "levelMatch": true,
+        "quality": "studio"
+      },
+      "audioRestoration": {
+        "preset": "natural",
+        "voiceIsolation": false,
+        "denoise": 22,
+        "deEsser": 18,
+        "humFrequency": 50,
+        "compressor": 35,
+        "limiter": -1,
+        "loudness": -14,
+        "eq": {
+          "low": 0,
+          "mid": 0,
+          "high": 0
+        },
+        "enabled": false
+      },
+      "audioAutomationSource": "originalAudio"
+    },
+    "music": {
+      "id": "launch-f3cade09fcb727c24508179f",
+      "name": "Make your move - original score.wav",
+      "storagePath": "uploads/audios/demo-pilot-alice/90c0a688-efd6-487b-9edd-f83020f8566f_Make your move - original score.wav",
+      "contentHash": "f3cade09fcb727c24508179fa1c0e7914cfe162c9fee098a8eabe6c6d3ea44a6",
+      "volume": 55,
+      "fadeIn": 0.1,
+      "fadeOut": 0.5,
+      "loop": false,
+      "duration": 24
+    },
+    "routes": [
+      {
+        "trackId": "video",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "adjustment",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "graphics",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "broll",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "captions",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "originalAudio",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "voiceover",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "music",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "sfx",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      }
+    ],
+    "routing": {
+      "muteOriginalAudio": true,
+      "musicDucking": false,
+      "musicDuckingStrength": 0,
+      "musicTrackId": "launch-f3cade09fcb727c24508179f"
+    }
+  },
+  "visualGraph": {
+    "parameterSchemaVersion": 1,
+    "settings": {
+      "mainTransform": {
+        "id": "main-video",
+        "name": "Main video",
+        "type": "video",
+        "x": 50,
+        "y": 50,
+        "scale": 1,
+        "rotation": 0,
+        "opacity": 1,
+        "cropX": 0,
+        "cropY": 0
+      },
+      "finishFx": {
+        "precisionGrade": false,
+        "exposureStops": 0,
+        "lift": 0,
+        "gamma": 1,
+        "gain": 1,
+        "tint": 0,
+        "preset": null,
+        "brightness": 1,
+        "contrast": 1,
+        "saturation": 1,
+        "temperature": 0,
+        "sharpness": 0,
+        "vignette": 0,
+        "blur": 0,
+        "blurMode": "edge",
+        "blurStart": -1,
+        "blurEnd": -1,
+        "zoom": 1,
+        "zoomAnchor": "center",
+        "overlayType": "",
+        "overlayOpacity": 0.4,
+        "overlayColor": "#000000",
+        "filmGrain": 0,
+        "chromaticAberration": 0,
+        "vhsTracking": 0,
+        "lightLeak": 0,
+        "letterbox": 0,
+        "fadeIn": 0,
+        "fadeOut": 0
+      },
+      "mainFrame": {
+        "insetPercent": 3,
+        "radiusPercent": 8,
+        "background": "studio_black",
+        "enabled": false
+      },
+      "advancedColor": {
+        "lutName": "",
+        "lutFile": null,
+        "lutIntensity": 100,
+        "curve": {
+          "shadows": 0,
+          "midtones": 0,
+          "highlights": 0
+        },
+        "hsl": {
+          "hue": 0,
+          "saturation": 0,
+          "luminance": 0
+        }
+      },
+      "podcastVisualizer": {
+        "enabled": false,
+        "mode": "wave",
+        "color": "#72f7ff",
+        "intensity": 0.75,
+        "position": "bottom"
+      },
+      "videoFit": "contain",
+      "safeFaceFraming": false,
+      "faceAnchorPreset": "center",
+      "autoCaptions": false,
+      "captionStyle": "bold_pop",
+      "captionPosition": "bottom_center",
+      "captionScale": 1,
+      "captionTextOverride": "",
+      "translateCaptionsToEnglish": false,
+      "smartCrop": true,
+      "smartCropMode": "off",
+      "reframeAspect": "16:9",
+      "speakerTrackZoom": 1,
+      "speakerStackFraming": {
+        "dividerPercent": 50,
+        "gapPercent": 1.2,
+        "cardGapPercent": 2.5,
+        "roundedCards": true,
+        "cardInsetPercent": 2.5,
+        "cardRadiusPercent": 8,
+        "secondaryXPercent": 80,
+        "secondaryYPercent": 20,
+        "secondarySizePercent": 30,
+        "top": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        },
+        "bottom": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        },
+        "third": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        },
+        "fourth": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        }
+      },
+      "speakerStackSourceIds": {
+        "top": null,
+        "bottom": null,
+        "third": null,
+        "fourth": null
+      },
+      "speakerStackOffsets": {
+        "top": 0,
+        "bottom": 0,
+        "third": 0,
+        "fourth": 0
+      },
+      "speakerStackCameraCount": 2,
+      "speakerStackLayout": "stack_2",
+      "speakerStackSyncConfirmed": false,
+      "exportSettings": {
+        "resolution": "720p",
+        "fps": "24",
+        "codec": "h264",
+        "quality": "high",
+        "videoBitrate": "auto",
+        "targetFileSizeMb": "",
+        "audioCodec": "aac",
+        "audioBitrate": "256",
+        "colorSpace": "rec709"
+      },
+      "stabilization": {
+        "enabled": false,
+        "strength": 35,
+        "crop": "adaptive",
+        "rollingShutter": false
+      },
+      "enhanceQuality": false,
+      "beatSnapEnabled": true,
+      "creativeIntent": "energy",
+      "creativeEffectsEnabled": false,
+      "creativePreset": "auto_story",
+      "creativeIntensity": "bold",
+      "pacingLevel": "balanced",
+      "nodeFlow": {
+        "version": 1,
+        "viewerA": "MediaOut",
+        "viewerB": null,
+        "splitPosition": 50,
+        "positions": {},
+        "bypassed": {}
+      },
+      "hideShyLayers": false
+    },
+    "cameraSources": []
+  },
+  "editGraph": {
+    "parameterSchemaVersion": 1,
+    "settings": {
+      "creativeTemplateInstance": {
+        "schemaVersion": 1,
+        "templateRef": {
+          "templateId": "living_infinity_v1",
+          "version": "1.0.1",
+          "definitionHash": "6a41ada3809a2ec45a3b70756a7a86d9a64ac0eb1759a0be22f5fe67fd0ed966"
+        },
+        "ownerUid": "demo-pilot-alice",
+        "instantiatedBy": "director",
+        "bindings": {
+          "footage": {
+            "assetId": "launch-e8d2f87ddd67166c0bf5559d",
+            "contentHash": "e8d2f87ddd67166c0bf5559db74fed069911766337bf8889d6213d0126acbc6b",
+            "storagePath": "studio/sources/demo-pilot-alice/94f61de9dd1b8bde8c125000_cinema.mp4",
+            "trimStart": 0
+          },
+          "music": {
+            "assetId": "launch-f3cade09fcb727c24508179f",
+            "contentHash": "f3cade09fcb727c24508179fa1c0e7914cfe162c9fee098a8eabe6c6d3ea44a6",
+            "storagePath": "uploads/audios/demo-pilot-alice/90c0a688-efd6-487b-9edd-f83020f8566f_Make your move - original score.wav",
+            "trimStart": 0
+          }
+        },
+        "intensity": 1,
+        "aspect": "16:9",
+        "qualified": false
+      },
+      "captionCoverageMode": "full",
+      "contentProfile": "auto",
+      "joinTransition": "auto",
+      "joinTransitionDuration": 0.18,
+      "silenceRemoval": false,
+      "silenceThreshold": -35,
+      "minSilenceDuration": 0.75,
+      "silencePreview": null,
+      "removeWatermark": false,
+      "watermarkMode": "adaptive",
+      "brandWatermark": false,
+      "manualWatermarkRegions": [],
+      "addHook": false,
+      "hookText": "THIS CHANGES FAST",
+      "hookTemplate": "blur_reveal",
+      "hookIntroSeconds": 3,
+      "hookStartTime": 0.8,
+      "hookEndTime": 3.8,
+      "hookBlurBackground": true,
+      "hookDarkOverlay": true,
+      "hookFreezeFrame": false,
+      "hookZoomScale": 1.08,
+      "hookTextAnimation": "slide-up",
+      "hookFocusPoint": {
+        "x": 50,
+        "y": 42
+      },
+      "bRollCadence": "balanced",
+      "bRollGenerationJobId": "",
+      "compoundClips": [],
+      "creatorPreview": {
+        "enabled": true,
+        "section": "reactions",
+        "activeDemo": "",
+        "intensity": 62,
+        "duration": 0.8,
+        "zoom": 1.34,
+        "x": 78,
+        "y": 68,
+        "color": "#ffcb67",
+        "accent": "#7457ff",
+        "text": "THIS CHANGED EVERYTHING",
+        "name": "",
+        "role": "",
+        "entity": "",
+        "emoji": "🤯",
+        "rank": 3,
+        "tracking": false,
+        "maskShape": "person",
+        "transition": "whip",
+        "introStyle": "cinematic",
+        "reactionMode": "instant",
+        "comparisonLeft": "",
+        "comparisonRight": ""
+      },
+      "splitExportEnabled": false,
+      "splitExportHooks": [],
+      "proxySettings": {
+        "enabled": true,
+        "resolution": "720p",
+        "codec": "h264",
+        "status": "source_ready"
+      }
+    },
+    "media": [
+      {
+        "id": "launch-e8d2f87ddd67166c0bf5559d",
+        "name": "cinema.mp4",
+        "duration": 16.641625,
+        "storagePath": "studio/sources/demo-pilot-alice/94f61de9dd1b8bde8c125000_cinema.mp4",
+        "contentHash": "e8d2f87ddd67166c0bf5559db74fed069911766337bf8889d6213d0126acbc6b",
+        "mediaType": "video"
+      },
+      {
+        "id": "launch-f3cade09fcb727c24508179f",
+        "name": "Make your move - original score.wav",
+        "duration": 24,
+        "storagePath": "uploads/audios/demo-pilot-alice/90c0a688-efd6-487b-9edd-f83020f8566f_Make your move - original score.wav",
+        "contentHash": "f3cade09fcb727c24508179fa1c0e7914cfe162c9fee098a8eabe6c6d3ea44a6",
+        "mediaType": "audio"
+      }
+    ],
+    "sources": [
+      {
+        "id": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:shot:1",
+        "name": "cinema.mp4",
+        "duration": 8,
+        "sourceClipId": "launch-e8d2f87ddd67166c0bf5559d",
+        "storagePath": "studio/sources/demo-pilot-alice/94f61de9dd1b8bde8c125000_cinema.mp4",
+        "contentHash": "e8d2f87ddd67166c0bf5559db74fed069911766337bf8889d6213d0126acbc6b"
+      }
+    ],
+    "musicMix": {},
+    "hookBinding": null,
+    "angleGroups": [],
+    "extractedAudio": null
+  },
+  "constraints": {
+    "locks": []
+  },
+  "styleRef": null,
+  "analysisRefs": [],
+  "projectIntelligenceRefs": [],
+  "programmeSpeedKeys": [],
+  "fallbackSpeed": 1,
+  "outputTimeMap": [
+    {
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "outputRange": {
+        "space": "output",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "rateNumerator": 1000000,
+      "rateDenominator": 1000000
+    }
+  ],
+  "journal": [
+    {
+      "journalId": "revision:5",
+      "baseRevision": 4,
+      "newRevision": 5,
+      "actor": {
+        "type": "human",
+        "id": "viral-studio-history"
+      },
+      "operations": [
+        {
+          "type": "history_restore"
+        }
+      ],
+      "affectedNodes": [
+        "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:shot:1"
+      ],
+      "inverse": null
+    },
+    {
+      "journalId": "revision:6",
+      "baseRevision": 5,
+      "newRevision": 6,
+      "actor": {
+        "type": "human",
+        "id": "viral-studio-history"
+      },
+      "operations": [
+        {
+          "type": "history_restore"
+        }
+      ],
+      "affectedNodes": [
+        "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:shot:1"
+      ],
+      "inverse": null
+    },
+    {
+      "journalId": "revision:7",
+      "baseRevision": 6,
+      "newRevision": 7,
+      "actor": {
+        "type": "human",
+        "id": "viral-studio-history"
+      },
+      "operations": [
+        {
+          "type": "history_restore"
+        }
+      ],
+      "affectedNodes": [
+        "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:shot:1"
+      ],
+      "inverse": null
+    },
+    {
+      "journalId": "revision:9",
+      "baseRevision": 8,
+      "newRevision": 9,
+      "actor": {
+        "type": "human",
+        "id": "viral-studio-history"
+      },
+      "operations": [
+        {
+          "type": "history_restore"
+        }
+      ],
+      "affectedNodes": [
+        "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:shot:1"
+      ],
+      "inverse": null
+    },
+    {
+      "journalId": "revision:10",
+      "baseRevision": 9,
+      "newRevision": 10,
+      "actor": {
+        "type": "human",
+        "id": "viral-studio-history"
+      },
+      "operations": [
+        {
+          "type": "history_restore"
+        }
+      ],
+      "affectedNodes": [
+        "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:shot:1"
+      ],
+      "inverse": null
+    },
+    {
+      "journalId": "revision:11",
+      "baseRevision": 10,
+      "newRevision": 11,
+      "actor": {
+        "type": "human",
+        "id": "viral-studio-history"
+      },
+      "operations": [
+        {
+          "type": "history_restore"
+        }
+      ],
+      "affectedNodes": [
+        "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6:shot:1"
+      ],
+      "inverse": null
+    }
+  ],
+  "idempotency": {},
+  "directorReviewJournal": [],
+  "compatibility": {
+    "legacySnapshotVersion": 1,
+    "projection": "clip_occurrences_canonical_other_fields_legacy",
+    "editableStateVersion": 1,
+    "visualStateVersion": 1,
+    "editStateVersion": 1,
+    "layerComposition": "ordered_flat_layers"
+  }
+}

@@ -1,0 +1,589 @@
+{
+  "name": "Focus the prism",
+  "actions": [
+    {
+      "type": "remove_keys",
+      "targetId": "P / prism image 0",
+      "property": "rotation"
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 0",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 3,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 9,
+          "value": 0,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "P / prism image 0",
+      "property": "scale"
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 0",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 3,
+          "value": 1.4285714285714286,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 9,
+          "value": 1.4285714285714286,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "P / prism image 0",
+      "property": "x"
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 0",
+      "keys": [
+        {
+          "property": "x",
+          "time": 3,
+          "value": 50.0,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 9,
+          "value": 50.0,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "P / prism image 0",
+      "property": "y"
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 0",
+      "keys": [
+        {
+          "property": "y",
+          "time": 3,
+          "value": 30.0,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 9,
+          "value": 30.0,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 0",
+      "keys": [
+        {
+          "property": "maskPoint0Y",
+          "time": 3,
+          "value": 20,
+          "easing": "hold"
+        },
+        {
+          "property": "maskPoint0Y",
+          "time": 9,
+          "value": 20,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 0",
+      "keys": [
+        {
+          "property": "maskPoint1Y",
+          "time": 3,
+          "value": 20,
+          "easing": "hold"
+        },
+        {
+          "property": "maskPoint1Y",
+          "time": 9,
+          "value": 20,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 0",
+      "keys": [
+        {
+          "property": "maskPoint2Y",
+          "time": 3,
+          "value": 70,
+          "easing": "hold"
+        },
+        {
+          "property": "maskPoint2Y",
+          "time": 9,
+          "value": 70,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "P / prism image 1",
+      "property": "rotation"
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 1",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 3,
+          "value": 90,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 9,
+          "value": 90,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "P / prism image 1",
+      "property": "scale"
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 1",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 3,
+          "value": 1.4285714285714286,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 9,
+          "value": 1.4285714285714286,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "P / prism image 1",
+      "property": "x"
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 1",
+      "keys": [
+        {
+          "property": "x",
+          "time": 3,
+          "value": 61.25,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 9,
+          "value": 61.25,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "P / prism image 1",
+      "property": "y"
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 1",
+      "keys": [
+        {
+          "property": "y",
+          "time": 3,
+          "value": 50.0,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 9,
+          "value": 50.0,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 1",
+      "keys": [
+        {
+          "property": "maskPoint0Y",
+          "time": 3,
+          "value": 20,
+          "easing": "hold"
+        },
+        {
+          "property": "maskPoint0Y",
+          "time": 9,
+          "value": 20,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 1",
+      "keys": [
+        {
+          "property": "maskPoint1Y",
+          "time": 3,
+          "value": 20,
+          "easing": "hold"
+        },
+        {
+          "property": "maskPoint1Y",
+          "time": 9,
+          "value": 20,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 1",
+      "keys": [
+        {
+          "property": "maskPoint2Y",
+          "time": 3,
+          "value": 70,
+          "easing": "hold"
+        },
+        {
+          "property": "maskPoint2Y",
+          "time": 9,
+          "value": 70,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "P / prism image 2",
+      "property": "rotation"
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 2",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 3,
+          "value": 180,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 9,
+          "value": 180,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "P / prism image 2",
+      "property": "scale"
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 2",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 3,
+          "value": 1.4285714285714286,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 9,
+          "value": 1.4285714285714286,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "P / prism image 2",
+      "property": "x"
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 2",
+      "keys": [
+        {
+          "property": "x",
+          "time": 3,
+          "value": 50.0,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 9,
+          "value": 50.0,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "P / prism image 2",
+      "property": "y"
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 2",
+      "keys": [
+        {
+          "property": "y",
+          "time": 3,
+          "value": 70.0,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 9,
+          "value": 70.0,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 2",
+      "keys": [
+        {
+          "property": "maskPoint0Y",
+          "time": 3,
+          "value": 20,
+          "easing": "hold"
+        },
+        {
+          "property": "maskPoint0Y",
+          "time": 9,
+          "value": 20,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 2",
+      "keys": [
+        {
+          "property": "maskPoint1Y",
+          "time": 3,
+          "value": 20,
+          "easing": "hold"
+        },
+        {
+          "property": "maskPoint1Y",
+          "time": 9,
+          "value": 20,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 2",
+      "keys": [
+        {
+          "property": "maskPoint2Y",
+          "time": 3,
+          "value": 70,
+          "easing": "hold"
+        },
+        {
+          "property": "maskPoint2Y",
+          "time": 9,
+          "value": 70,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "P / prism image 3",
+      "property": "rotation"
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 3",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 3,
+          "value": 270,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 9,
+          "value": 270,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "P / prism image 3",
+      "property": "scale"
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 3",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 3,
+          "value": 1.4285714285714286,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 9,
+          "value": 1.4285714285714286,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "P / prism image 3",
+      "property": "x"
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 3",
+      "keys": [
+        {
+          "property": "x",
+          "time": 3,
+          "value": 38.75,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 9,
+          "value": 38.75,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "P / prism image 3",
+      "property": "y"
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 3",
+      "keys": [
+        {
+          "property": "y",
+          "time": 3,
+          "value": 50.00000000000001,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 9,
+          "value": 50.00000000000001,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 3",
+      "keys": [
+        {
+          "property": "maskPoint0Y",
+          "time": 3,
+          "value": 20,
+          "easing": "hold"
+        },
+        {
+          "property": "maskPoint0Y",
+          "time": 9,
+          "value": 20,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 3",
+      "keys": [
+        {
+          "property": "maskPoint1Y",
+          "time": 3,
+          "value": 20,
+          "easing": "hold"
+        },
+        {
+          "property": "maskPoint1Y",
+          "time": 9,
+          "value": 20,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 3",
+      "keys": [
+        {
+          "property": "maskPoint2Y",
+          "time": 3,
+          "value": 70,
+          "easing": "hold"
+        },
+        {
+          "property": "maskPoint2Y",
+          "time": 9,
+          "value": 70,
+          "easing": "hold"
+        }
+      ]
+    }
+  ]
+}

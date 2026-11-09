@@ -1,0 +1,18 @@
+{
+  "reviewText": "momentum_v1 · 1.0.0\n\nMomentum — orbit, slits & lenses: a wordless authored motion style using your four saved clips. All layers, masks, groups and motion stay editable. No model job.\n\nUses your saved inputs. No model job is started.Apply Director launchDismiss selection",
+  "selectableStyles": [
+    "Cinematic product launch · 1.0.0",
+    "Prism cuts — wordless · 1.0.0",
+    "Momentum — orbit, slits & lenses · 1.0.0",
+    "Creator identity — four-source motion · 1.0.0",
+    "Product launch — editorial rhythm · 1.1.2",
+    "Product launch — editorial rhythm · 1.1.1",
+    "Product launch — editorial rhythm · 1.1.0",
+    "Cycling rhythm · 1.0.2",
+    "Cycling rhythm · 1.0.1",
+    "Cycling rhythm · 1.0.0"
+  ],
+  "actualNativeUi": true,
+  "automaticVisualInference": false,
+  "modelCalls": 0
+}

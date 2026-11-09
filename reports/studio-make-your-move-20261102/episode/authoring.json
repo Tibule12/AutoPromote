@@ -1,0 +1,13 @@
+{
+  "projectId": "viral-project-fa5921d4-7d4c-44bb-955d-dc65ef0c1360",
+  "seconds": 30,
+  "layers": 83,
+  "keys": 8096,
+  "decisions": "6af69fff8ca416ab59ab0edadacaffa8102bde6bf2b5c0038d402c342e68c4fa",
+  "sourceShots": 4,
+  "importedSourceBoundLumaMatte": true,
+  "nativeFrontend": true,
+  "paidCalls": 0,
+  "materializedBackupMatchesSubmittedComposition": true,
+  "projectHash": "c380c07a00b9d4b17d48bcb777dc81d3acec8db9a0b8952ed28c172f413f01e8"
+}

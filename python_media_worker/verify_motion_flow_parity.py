@@ -20,6 +20,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import numpy as np
@@ -28,6 +29,132 @@ from PIL import Image
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
+if str(REPO_ROOT / "python_media_worker") not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT / "python_media_worker"))
+
+
+def verify_color_grade_pipeline_parity() -> dict:
+    """Verify paired Browser vs CPU FFmpeg pixel parity for 3-Way Wheels + 5-Knot Curve + HSL + 3D .cube LUT."""
+    from studio_color_cube import write_color_cube
+    from studio_precision_grade import build_precision_grade_filter
+
+    source = np.random.default_rng(20261031).integers(0, 256, (18, 32, 4), dtype=np.uint8)
+    source[:, :, 3] = 255
+    fx = {
+        "precisionGrade": True,
+        "exposureStops": 0.25,
+        "lift": -0.02,
+        "gamma": 1.06,
+        "gain": 0.96,
+        "temperature": 0.15,
+        "tint": -0.05,
+        "contrast": 1.08,
+        "saturation": 1.12,
+    }
+    prec_mod = REPO_ROOT / "frontend/src/components/studioPrecisionGrade.js"
+    cube_mod = REPO_ROOT / "frontend/src/components/studioColorCube.js"
+    js_code = """const fs=require('fs');(async()=>{
+      const prec=await import('data:text/javascript;base64,'+fs.readFileSync(process.argv[1]).toString('base64'));
+      const cubeMod=await import('data:text/javascript;base64,'+fs.readFileSync(process.argv[2]).toString('base64'));
+      const payload=JSON.parse(fs.readFileSync(0,'utf8'));
+      const precPixels=new Uint8ClampedArray(payload.pixels);
+      prec.applyPrecisionGrade(precPixels, prec.buildPrecisionGrade(payload.fx));
+      const lut=cubeMod.buildProceduralColorCube('kodak_2383', 17);
+      const cube=cubeMod.buildAdvancedColorCube({
+        curve:{shadows:-0.08,midtones:0.05,highlights:0.06},
+        hsl:{hue:6,saturation:1.06,luminance:0.02},
+        lut,
+        lutIntensity:0.8
+      });
+      const lutOnlyPixels=new Uint8ClampedArray(payload.pixels);
+      cubeMod.applyColorCube(lutOnlyPixels, cube);
+      const chainedPixels=new Uint8ClampedArray(precPixels);
+      cubeMod.applyColorCube(chainedPixels, cube);
+      process.stdout.write(JSON.stringify({
+        cube,
+        precPixels:[...precPixels],
+        lutOnlyPixels:[...lutOnlyPixels],
+        chainedPixels:[...chainedPixels]
+      }));
+    })();"""
+    browser_out = json.loads(
+        subprocess.run(
+            ["node", "-e", js_code, str(prec_mod), str(cube_mod)],
+            input=json.dumps({"fx": fx, "pixels": source.flatten().tolist()}).encode(),
+            capture_output=True,
+            check=True,
+        ).stdout
+    )
+    with tempfile.TemporaryDirectory(prefix="studio-grade-parity-") as tmp_dir:
+        cube_path = write_color_cube(browser_out["cube"], Path(tmp_dir) / "kodak_2383.cube")
+        prec_vf = build_precision_grade_filter(fx)
+        lut_vf = f"lut3d=file='{cube_path}':interp=trilinear"
+        chained_vf = f"{prec_vf},{lut_vf}"
+
+        def _run_vf(vf_expr: str) -> np.ndarray:
+            raw = subprocess.run(
+                [
+                    "ffmpeg",
+                    "-v",
+                    "error",
+                    "-f",
+                    "rawvideo",
+                    "-pixel_format",
+                    "rgba",
+                    "-video_size",
+                    "32x18",
+                    "-i",
+                    "pipe:0",
+                    "-vf",
+                    vf_expr,
+                    "-filter_threads",
+                    "1",
+                    "-frames:v",
+                    "1",
+                    "-f",
+                    "rawvideo",
+                    "-pix_fmt",
+                    "rgba",
+                    "pipe:1",
+                ],
+                input=source.tobytes(),
+                capture_output=True,
+                check=True,
+            ).stdout
+            return np.frombuffer(raw, dtype=np.uint8).astype(np.float64)
+
+        ff_prec = _run_vf(prec_vf)
+        ff_lut = _run_vf(lut_vf)
+        ff_chained = _run_vf(chained_vf)
+
+    prec_diff = np.abs(np.array(browser_out["precPixels"], dtype=np.float64) - ff_prec)
+    lut_diff = np.abs(np.array(browser_out["lutOnlyPixels"], dtype=np.float64) - ff_lut)
+    chained_arr = np.array(browser_out["chainedPixels"], dtype=np.float64)
+    chained_diff = np.abs(chained_arr - ff_chained)
+
+    prec_max_delta = int(prec_diff.max())
+    lut_max_delta = int(lut_diff.max())
+    max_delta = int(chained_diff.max())
+    mean_delta = round(float(chained_diff.mean()), 4)
+    mse = float(np.mean((chained_arr - ff_chained) ** 2))
+    psnr_db = round(float(10.0 * np.log10((255.0**2) / max(mse, 1e-9))), 2)
+    passed = bool(
+        prec_max_delta <= 3
+        and lut_max_delta <= 1
+        and max_delta <= 5
+        and mean_delta <= 1.1
+        and psnr_db >= 42.0
+    )
+    return {
+        "passed": passed,
+        "lut_preset": "kodak_2383",
+        "lut_size": int(browser_out["cube"]["size"]),
+        "precision_wheel_max_delta": prec_max_delta,
+        "lut3d_max_delta": lut_max_delta,
+        "max_channel_delta": max_delta,
+        "mean_channel_delta": mean_delta,
+        "psnr_db": psnr_db,
+    }
 
 
 def sha256_file(path: Path) -> str:
@@ -278,23 +405,33 @@ def main() -> int:
             }
         )
 
+    color_grade_parity = verify_color_grade_pipeline_parity()
+    if not color_grade_parity["passed"]:
+        all_passed = False
+
     receipt = {
         "passed": all_passed,
         "scope": (
             "Local loopback pre-final browser stage vs local CPU FFmpeg worker render parity "
             "for AutoPromote Comp & Rig (Null Rig parenting, loop/wiggle/spin Motion Drivers, Bezier "
-            "keyframe preset, Alpha Track Matte) + Signal Node Flow canonical compilation. "
+            "keyframe preset, Alpha Track Matte), Signal Node Flow canonical compilation, and "
+            "Cinema Color Grade (3-Way Wheels + 5-Knot Tone Curve + HSL + 3D .cube LUT) pixel parity. "
             "No cloud uploads, no GPU calls, and not a signed-in production export proof."
         ),
         "thresholds": {
             "min_iou": args.min_iou,
             "max_boundary_p95_px": args.max_p95_px,
+            "max_color_channel_delta": 3,
+            "min_color_psnr_db": 38.0,
         },
         "summary": {
             "min_measured_iou": min(r["iou"] for r in frame_results),
             "max_measured_boundary_p95_px": max(r["boundary_p95_px"] for r in frame_results),
             "frames_checked": len(frame_results),
+            "color_grade_psnr_db": color_grade_parity["psnr_db"],
+            "color_grade_max_delta": color_grade_parity["max_channel_delta"],
         },
+        "color_grade_parity": color_grade_parity,
         "media_probe": {
             "width": width,
             "height": height,

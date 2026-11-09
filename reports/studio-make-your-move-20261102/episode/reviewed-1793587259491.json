@@ -1,0 +1,61 @@
+{
+  "format": "autopromote-scene-actions",
+  "version": 1,
+  "projectId": "viral-project-fa5921d4-7d4c-44bb-955d-dc65ef0c1360",
+  "baseRevision": 76,
+  "name": "12 - Final negative space",
+  "actions": [
+    {
+      "type": "remove_keys",
+      "targetId": "graphic-8750b918-2176-4a23-b77a-3bbfe3b70e3e",
+      "property": "opacity"
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-8750b918-2176-4a23-b77a-3bbfe3b70e3e",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 4.4,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "graphic-3983b4ac-4242-4d5f-bc7f-c23fc12199e1",
+      "property": "opacity"
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-3983b4ac-4242-4d5f-bc7f-c23fc12199e1",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 4.4,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-71608a84-e48a-4e16-8506-fc2c8bdab619",
+      "keys": [
+        {
+          "property": "x",
+          "time": 4.25,
+          "value": 19,
+          "easing": "linear"
+        },
+        {
+          "property": "x",
+          "time": 7.75,
+          "value": 19,
+          "easing": "linear"
+        }
+      ]
+    }
+  ]
+}

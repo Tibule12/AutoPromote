@@ -1,0 +1,333 @@
+{
+  "directory": "/home/tibule12/Videos/AutoPromote Motion and Flow - 2026-11-02/Make your move",
+  "files": [
+    {
+      "file": "Earlier live Studio capture.mp4",
+      "bytes": 3164278,
+      "sha256": "5d71df141603fe3201e27527f37451f0b11c1639d7fd1009fd4c8a2d999241a9"
+    },
+    {
+      "file": "Editable Project.autopromote.json",
+      "bytes": 5854807,
+      "sha256": "6c0055556352a832e40789f9e19d35ff5d7408206f733266ada66705924e1879"
+    },
+    {
+      "file": "Finished video in Studio.mp4",
+      "bytes": 3500302,
+      "sha256": "1c0b19f051deea31ffcaa5ed5953ddd0e37f4b362ed9f2c02f999cd820af8718"
+    },
+    {
+      "file": "Inspection/Export contact 1.jpg",
+      "bytes": 96017,
+      "sha256": "02993ec471d09b8d6940e2d961e1e03899aad6d6e33d1bd0b62d9c22598a521f"
+    },
+    {
+      "file": "Inspection/Export contact 2.jpg",
+      "bytes": 78881,
+      "sha256": "9c849e9940c43bfec4a4a22492e3d47f3c0c0622299326ba66ed625b26b391ba"
+    },
+    {
+      "file": "Inspection/Export contact 3.jpg",
+      "bytes": 154954,
+      "sha256": "86319a4aec44793b99d8f5412cba5d6581f1aa3d4165c1c4647bf7b26fc39271"
+    },
+    {
+      "file": "Inspection/Export contact 4.jpg",
+      "bytes": 141601,
+      "sha256": "e616c3fcb6cb274280b9ff55ae7b1458f479d2adc1825f69f4a255873a9bbaa4"
+    },
+    {
+      "file": "Inspection/Export contact 5.jpg",
+      "bytes": 177278,
+      "sha256": "b9e3f3ab2ea587643c425c5c36c2cf40b13f07b93b3f18167dc95e7efc82d913"
+    },
+    {
+      "file": "Inspection/Export contact 6.jpg",
+      "bytes": 129707,
+      "sha256": "4dc8b6af8d01118c13135eb1dae65391203fc7da785ba97250072fc24b67f64d"
+    },
+    {
+      "file": "Inspection/Export contact 7.jpg",
+      "bytes": 107371,
+      "sha256": "1f2a6d84e7e053e204830651df0633854ca175f3cbd40f5f6b482afe435ec41c"
+    },
+    {
+      "file": "Live Studio playback.mp4",
+      "bytes": 3306510,
+      "sha256": "e5e714486cd54833632a60c1cde979971f6aadab6e6932d1d545ccb5d086b301"
+    },
+    {
+      "file": "Live vs export.jpg",
+      "bytes": 570107,
+      "sha256": "3dbe7281d5a6c67a2f9fdbda107da8acbe66bdce0b8553befaf4777e890cb814"
+    },
+    {
+      "file": "Make your move.mp4",
+      "bytes": 8310974,
+      "sha256": "fa98445c6188a96f55efc46deba2cb55a65afcf031991769cd5dd13c600eb555"
+    },
+    {
+      "file": "Native authoring - initial pass.mp4",
+      "bytes": 3236171,
+      "sha256": "ce5677fdd24bed742347562393fb4018f44e20c765b324de088364ceb6e79bae"
+    },
+    {
+      "file": "Native editing and recovery.mp4",
+      "bytes": 1040651,
+      "sha256": "bfa7902526ad143a088c006218e124c9357f7031fc59787bd361bc8b1af9b350"
+    },
+    {
+      "file": "Native source assets.zip",
+      "bytes": 199847,
+      "sha256": "de65a084bb9df1827f2fd7d3925d9a811cd56ff1e4b2dc93a7bd2df0b1991658"
+    },
+    {
+      "file": "Original sound/Score master.wav",
+      "bytes": 5760044,
+      "sha256": "8399341e3e44cb9148d0ae49ef43e4969bed954202ec6927ff2013aeb2dbcd4c"
+    },
+    {
+      "file": "Preview project - before export.autopromote.json",
+      "bytes": 14043085,
+      "sha256": "da75810045871533ec58deeba9bdb6e3dafd2b36aed3ee4eb03576fc78e6322c"
+    },
+    {
+      "file": "README.md",
+      "bytes": 5694,
+      "sha256": "0cbc30ed55048a4c0d78a27a031e80658ab1631aa6a7adc5f7f902e1938ebf73"
+    },
+    {
+      "file": "Raw source cuts.mp4",
+      "bytes": 16410589,
+      "sha256": "b5d1053e7c31c6c03043cfb8fe4266ddb8dcd2be5fb7de85d7a6e66d59059748"
+    },
+    {
+      "file": "Raw vs Studio.mp4",
+      "bytes": 7677982,
+      "sha256": "e5eaa1acc844e505fd64e35bc4abd39c81b9970b3f62d0d995c1163f2188860a"
+    },
+    {
+      "file": "Retained source clips/City.mp4",
+      "bytes": 5306461,
+      "sha256": "09f2b8bfcf899d174ecf53f6a9c5358b9d19ca7b7d8ba0b1c508abfc2a2bf15d"
+    },
+    {
+      "file": "Retained source clips/Coast.mp4",
+      "bytes": 6646172,
+      "sha256": "dd6037bc87dc9c93b84fb506b04355fe12d1f4bda0e942aec8da7e83d3c3e86c"
+    },
+    {
+      "file": "Retained source clips/Footsteps.mp4",
+      "bytes": 3862122,
+      "sha256": "459c13e384b1819b2e3d0bc8eae287d10e58c96d266a0b4bbf1553c98969bbac"
+    },
+    {
+      "file": "Retained source clips/Provenance.json",
+      "bytes": 2792,
+      "sha256": "ffe7294f6560db16dd876b6a01ae0cbb5b5fdd18e9b63f891b5b9c177dd09d79"
+    },
+    {
+      "file": "Retained source clips/Summit.mp4",
+      "bytes": 4988927,
+      "sha256": "96056be98b025809b72e38baebc1ea0827fbc30d9a02cfd8844c35a371a3fe00"
+    },
+    {
+      "file": "Source mattes/City.mp4",
+      "bytes": 202075,
+      "sha256": "dd5eb646c37f88771d63fbbbacc4550717f4bd925aec6cd397d1fd34c8ed9571"
+    },
+    {
+      "file": "Stills/preview-0.50.png",
+      "bytes": 57054,
+      "sha256": "176dcfa6fbbaef31a20c23918b5aed5a9438bb90637e0deaca18f9ab3d29b38a"
+    },
+    {
+      "file": "Stills/preview-1.50.png",
+      "bytes": 47777,
+      "sha256": "39130703c1e919d99dc30075014ae72866240e017065bcdc465f1ab2cf04c430"
+    },
+    {
+      "file": "Stills/preview-15.00.png",
+      "bytes": 627140,
+      "sha256": "5adbe55f5e09a0218710cf93001c17783df3151656f227d0e1a3bbddb2970e4d"
+    },
+    {
+      "file": "Stills/preview-17.80.png",
+      "bytes": 561721,
+      "sha256": "54313d9c5502fd50a2c7091ed3e011795927eed698f4b2bab3f3d6fa99783c15"
+    },
+    {
+      "file": "Stills/preview-2.50.png",
+      "bytes": 48430,
+      "sha256": "6838ffc2b83ccfed11db030cb18bb431f85404387869da9a93e9f54c1bf3abe2"
+    },
+    {
+      "file": "Stills/preview-22.00.png",
+      "bytes": 409173,
+      "sha256": "868908531020061f29253da5fd18c5f12de41007167c6063d9ce7935401397cb"
+    },
+    {
+      "file": "Stills/preview-27.50.png",
+      "bytes": 33821,
+      "sha256": "c6acaba65af7c4d5af3bb3ec8ac5285cb765d712331edd2e3b8a6122399442cd"
+    },
+    {
+      "file": "Stills/preview-29.80.png",
+      "bytes": 25639,
+      "sha256": "ded807d2b4aa2a7bef19fb993c3528110bd5fe6f4a3b9f23d19156bd5e1c8856"
+    },
+    {
+      "file": "Stills/preview-3.50.png",
+      "bytes": 712919,
+      "sha256": "f2ea6590def9215aead79270049e63f55c0b22549a16b428ce7889859feb003c"
+    },
+    {
+      "file": "Stills/preview-4.50.png",
+      "bytes": 126487,
+      "sha256": "db6536bebe80c8d1b7b192debaf7b7bb0fc426ddc36fac58b390c3d459ff3397"
+    },
+    {
+      "file": "Stills/preview-5.50.png",
+      "bytes": 115502,
+      "sha256": "4b2dd94722d903a66d0cd049bddca961a327fa6c881f0f54531594edd6af34da"
+    },
+    {
+      "file": "Stills/preview-6.75.png",
+      "bytes": 115177,
+      "sha256": "3abd8b4a7349d7eb6a5f277e58c71155f3ca27a4d4c5d2a8792f8275acb6a12e"
+    },
+    {
+      "file": "Stills/preview-7.75.png",
+      "bytes": 106000,
+      "sha256": "5385493e270c9e425c7a3fb1255724a302dac6ed1300ad870b14d27a79dd46c4"
+    },
+    {
+      "file": "Stills/preview-9.00.png",
+      "bytes": 486866,
+      "sha256": "2302d83eb553b74a2572330df847f439f16cc7b2db26437c1d08d0eb5470557d"
+    },
+    {
+      "file": "Technical/Native receipt.json",
+      "bytes": 423,
+      "sha256": "52e4ecfbcacd2518eb9bd84b1d043cf54be1c88947cf12d7f4965008996b65d5"
+    },
+    {
+      "file": "Technical/authoring.json",
+      "bytes": 449,
+      "sha256": "62216a9d30c578c79a4f96d58e8d8576f0fd153e5b3d729bac6e148f4f78c49b"
+    },
+    {
+      "file": "Technical/city-matte-provenance.json",
+      "bytes": 658,
+      "sha256": "f878de87468e9cd5e635c47de055f3fc734e66b6eac167a4b24cc1ce198d3455"
+    },
+    {
+      "file": "Technical/creative-verdict.json",
+      "bytes": 2027,
+      "sha256": "e3e9a65ba347ad3d9fa5bc8cd73da761ced8455036895c61cfcdba016b17ff0d"
+    },
+    {
+      "file": "Technical/exact-native-binding.json",
+      "bytes": 332,
+      "sha256": "78879cd1c5cd10e87569099e6ad5bf6fcd72b46e295ecb5d869220ccc50c07dd"
+    },
+    {
+      "file": "Technical/finished capture.json",
+      "bytes": 175,
+      "sha256": "33205abc35f045ee10cc1a5cf72031d7d7d00c0cd19287de0b6341bf6ba342cf"
+    },
+    {
+      "file": "Technical/finished-file-identity.json",
+      "bytes": 140,
+      "sha256": "30870c4b11fcd60a2be1bcae1a6943435faebfbf8f79b830508b8e861fdcab00"
+    },
+    {
+      "file": "Technical/finished-playback.json",
+      "bytes": 171,
+      "sha256": "ab5deead0572617a46b47589c949c4fd1afd707a801b5ddbe052906cbaa50345"
+    },
+    {
+      "file": "Technical/live capture.json",
+      "bytes": 173,
+      "sha256": "c257fc576c6f8aaa9bbcac9d7ba49df9a80d050574b8e38d1c31c6a82039a003"
+    },
+    {
+      "file": "Technical/live-playback.json",
+      "bytes": 171,
+      "sha256": "ad32f223c7ab0c81504586ce56a4a8faaafe49858afa44b534f17a04ce05823f"
+    },
+    {
+      "file": "Technical/local-resource-bounds.json",
+      "bytes": 297,
+      "sha256": "5ee1929849ad291a299d53b6a303282d0ef5c34a65b31b0322e6c09f71700f10"
+    },
+    {
+      "file": "Technical/matte-source-guard.json",
+      "bytes": 129,
+      "sha256": "37b9ca3d08b46876977e74a002b7a315603842809ca02ee2512ef9c10794a9a2"
+    },
+    {
+      "file": "Technical/native-worker-resource.json",
+      "bytes": 460,
+      "sha256": "1b90c46af210b1376b91b88958da10da914bd594eb56c15dc40986b5d1192986"
+    },
+    {
+      "file": "Technical/paired-measurements.json",
+      "bytes": 4253,
+      "sha256": "96ea8b214a647c6714ef3f8540c1fb9f21b289f42751498c6987a111935e5b07"
+    },
+    {
+      "file": "Technical/preflight.json",
+      "bytes": 3217,
+      "sha256": "ca1dfefef5d10565e20d47f4a59ad3575a3a2a79edeabc2075cb4c6a10ddc68f"
+    },
+    {
+      "file": "Technical/preservation.json",
+      "bytes": 1092,
+      "sha256": "6d01cafee5c34159d892f4a1fed509121e7a0722d87f1490cb57b9f46914e6f9"
+    },
+    {
+      "file": "Technical/raw-packaging.json",
+      "bytes": 608,
+      "sha256": "f97c209f0da99aad3b7d07c05a7aa7074addab08e6d6658c4d4237242b052177"
+    },
+    {
+      "file": "Technical/reopen-edit.json",
+      "bytes": 157,
+      "sha256": "41a2320fe44fa8f1589d0cd32eee14fa555aa8c6e1cf15514137889aac08839c"
+    },
+    {
+      "file": "Technical/source-asset-pack.json",
+      "bytes": 183,
+      "sha256": "f2927b75823208dab69e43d844211e620f3648c68666f5ac08a0bde4584a0050"
+    },
+    {
+      "file": "Technical/technical.json",
+      "bytes": 8675,
+      "sha256": "8fad7a4fe6014b753c81a2928da45d547edfd3cf069c23d5ba8344d7b1ff0a5d"
+    },
+    {
+      "file": "Technical/validation.json",
+      "bytes": 1466,
+      "sha256": "d400405057a027d530e258e5f53fe3d84c1813991f904a10503d1ef6030d247a"
+    },
+    {
+      "file": "Technical/video-matte-worker-geometry.json",
+      "bytes": 465,
+      "sha256": "e8db394e636905cbd4ff86e2917a809c649c229ea04a7dcaa9e16684a2f7a41b"
+    },
+    {
+      "file": "Video matte source guard.mp4",
+      "bytes": 183847,
+      "sha256": "319153f473d25c84998a9424a3a45ed010fc4826bd48f6dfebd577ac8ee1f7eb"
+    }
+  ],
+  "nativeReceipt": {
+    "projectId": "viral-project-fa5921d4-7d4c-44bb-955d-dc65ef0c1360",
+    "projectHash": "c380c07a00b9d4b17d48bcb777dc81d3acec8db9a0b8952ed28c172f413f01e8",
+    "submittedJobId": "viral_4d4beab855147fd61a1c207dcfd77e836838e1cc2816d953d6d038a9ac6c5e5c",
+    "outputSha256": "fa98445c6188a96f55efc46deba2cb55a65afcf031991769cd5dd13c600eb555",
+    "startedAt": "2026-11-02T03:40:42.153Z",
+    "finishedAt": "2026-11-02T03:54:13.134Z"
+  }
+}

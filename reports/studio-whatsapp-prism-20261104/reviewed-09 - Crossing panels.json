@@ -1,0 +1,117 @@
+{
+  "format": "autopromote-scene-actions",
+  "version": 1,
+  "projectId": "viral-project-d5df376b-ad19-48e6-bb01-21d2b3b4e1fb",
+  "baseRevision": 42,
+  "name": "Crossing panels",
+  "actions": [
+    {
+      "type": "keys",
+      "targetId": "scene-4d6c1e29-291c-48fa-9cd1-05399fb22fef",
+      "keys": [
+        {
+          "property": "x",
+          "time": 14,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 17,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 17.65,
+          "value": 98,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 21,
+          "value": 98,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "scene-841d7ac5-f2ad-45e8-85ff-0a9c54f4237d",
+      "keys": [
+        {
+          "property": "x",
+          "time": 14,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 17,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 17.65,
+          "value": 2,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 21,
+          "value": 2,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        }
+      ]
+    }
+  ]
+}

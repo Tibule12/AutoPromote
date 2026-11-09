@@ -1,0 +1,1263 @@
+{
+  "format": "autopromote-scene-actions",
+  "version": 1,
+  "projectId": "viral-project-fa5921d4-7d4c-44bb-955d-dc65ef0c1360",
+  "baseRevision": 31,
+  "name": "08 - Emerging from the letters",
+  "actions": [
+    {
+      "type": "move_layer",
+      "targetId": "02 / negative space",
+      "beforeId": "graphic-50ac8bb2-d03b-48ba-8dff-a7c7172e06e4"
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "graphic-50ac8bb2-d03b-48ba-8dff-a7c7172e06e4",
+      "property": "opacity"
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-50ac8bb2-d03b-48ba-8dff-a7c7172e06e4",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 4,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "graphic-6d2544e0-714a-4bd4-9e95-45b059be4bbc",
+      "property": "opacity"
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-6d2544e0-714a-4bd4-9e95-45b059be4bbc",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 4,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "media_plane",
+      "id": "02 / emergence picture 1",
+      "name": "02 / emergence picture 1",
+      "sourceMediaId": "primary-studio/sources/demo-pilot-alice/dfc532837d7bea6044dc63cf_City.mp4",
+      "sourceStart": 4,
+      "startTime": 4,
+      "duration": 4,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      }
+    },
+    {
+      "type": "matte",
+      "targetId": "02 / emergence picture 1",
+      "matteSourceId": "02 / matte letter 1 M",
+      "mode": "alpha"
+    },
+    {
+      "type": "move_layer",
+      "targetId": "02 / emergence picture 1",
+      "beforeId": "scene-db1c8afb-3bb2-45f9-8239-44cf0365a419"
+    },
+    {
+      "type": "media_plane",
+      "id": "02 / emergence picture 2",
+      "name": "02 / emergence picture 2",
+      "sourceMediaId": "primary-studio/sources/demo-pilot-alice/dfc532837d7bea6044dc63cf_City.mp4",
+      "sourceStart": 4,
+      "startTime": 4,
+      "duration": 4,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      }
+    },
+    {
+      "type": "matte",
+      "targetId": "02 / emergence picture 2",
+      "matteSourceId": "02 / matte letter 2 O",
+      "mode": "alpha"
+    },
+    {
+      "type": "move_layer",
+      "targetId": "02 / emergence picture 2",
+      "beforeId": "scene-db1c8afb-3bb2-45f9-8239-44cf0365a419"
+    },
+    {
+      "type": "media_plane",
+      "id": "02 / emergence picture 3",
+      "name": "02 / emergence picture 3",
+      "sourceMediaId": "primary-studio/sources/demo-pilot-alice/dfc532837d7bea6044dc63cf_City.mp4",
+      "sourceStart": 4,
+      "startTime": 4,
+      "duration": 4,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      }
+    },
+    {
+      "type": "matte",
+      "targetId": "02 / emergence picture 3",
+      "matteSourceId": "02 / matte letter 3 T",
+      "mode": "alpha"
+    },
+    {
+      "type": "move_layer",
+      "targetId": "02 / emergence picture 3",
+      "beforeId": "scene-db1c8afb-3bb2-45f9-8239-44cf0365a419"
+    },
+    {
+      "type": "media_plane",
+      "id": "02 / emergence picture 4",
+      "name": "02 / emergence picture 4",
+      "sourceMediaId": "primary-studio/sources/demo-pilot-alice/dfc532837d7bea6044dc63cf_City.mp4",
+      "sourceStart": 4,
+      "startTime": 4,
+      "duration": 4,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      }
+    },
+    {
+      "type": "matte",
+      "targetId": "02 / emergence picture 4",
+      "matteSourceId": "02 / matte letter 4 I",
+      "mode": "alpha"
+    },
+    {
+      "type": "move_layer",
+      "targetId": "02 / emergence picture 4",
+      "beforeId": "scene-db1c8afb-3bb2-45f9-8239-44cf0365a419"
+    },
+    {
+      "type": "media_plane",
+      "id": "02 / emergence picture 5",
+      "name": "02 / emergence picture 5",
+      "sourceMediaId": "primary-studio/sources/demo-pilot-alice/dfc532837d7bea6044dc63cf_City.mp4",
+      "sourceStart": 4,
+      "startTime": 4,
+      "duration": 4,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      }
+    },
+    {
+      "type": "matte",
+      "targetId": "02 / emergence picture 5",
+      "matteSourceId": "02 / matte letter 5 O",
+      "mode": "alpha"
+    },
+    {
+      "type": "move_layer",
+      "targetId": "02 / emergence picture 5",
+      "beforeId": "scene-db1c8afb-3bb2-45f9-8239-44cf0365a419"
+    },
+    {
+      "type": "media_plane",
+      "id": "02 / emergence picture 6",
+      "name": "02 / emergence picture 6",
+      "sourceMediaId": "primary-studio/sources/demo-pilot-alice/dfc532837d7bea6044dc63cf_City.mp4",
+      "sourceStart": 4,
+      "startTime": 4,
+      "duration": 4,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      }
+    },
+    {
+      "type": "matte",
+      "targetId": "02 / emergence picture 6",
+      "matteSourceId": "02 / matte letter 6 N",
+      "mode": "alpha"
+    },
+    {
+      "type": "move_layer",
+      "targetId": "02 / emergence picture 6",
+      "beforeId": "scene-db1c8afb-3bb2-45f9-8239-44cf0365a419"
+    }
+  ],
+  "graphics": {
+    "format": "autopromote-graphics",
+    "version": 1,
+    "name": "08 - Emerging from the letters",
+    "width": 1280,
+    "height": 720,
+    "duration": 30,
+    "layers": [
+      {
+        "id": "02 / negative space",
+        "name": "02 / negative space",
+        "type": "artwork",
+        "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\"><rect width=\"1280\" height=\"720\" fill=\"#101114\"/></svg>",
+        "startTime": 4,
+        "duration": 4,
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "height": 100,
+        "scale": 1,
+        "rotation": 0,
+        "opacity": 1,
+        "keys": []
+      },
+      {
+        "id": "02 / label",
+        "name": "02 / label",
+        "type": "text",
+        "text": "BREAK THE GRID",
+        "startTime": 4.25,
+        "duration": 3.5,
+        "x": 50,
+        "y": 14,
+        "width": 95,
+        "scale": 0.58,
+        "rotation": 0,
+        "opacity": 1,
+        "color": "#d7ff43",
+        "fontWeight": 900,
+        "textAlign": "center",
+        "keys": []
+      },
+      {
+        "id": "02 / matte letter 1 M",
+        "name": "02 / matte letter 1 M",
+        "type": "text",
+        "text": "M",
+        "startTime": 4,
+        "duration": 4,
+        "x": 18,
+        "y": 51,
+        "width": 95,
+        "scale": 5,
+        "rotation": 0,
+        "opacity": 1,
+        "color": "#f5f2e9",
+        "fontWeight": 900,
+        "textAlign": "center",
+        "keys": [
+          {
+            "property": "y",
+            "time": 4,
+            "value": 83,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "y",
+            "time": 4.55,
+            "value": 49,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "y",
+            "time": 4.75,
+            "value": 51,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "y",
+            "time": 7.5,
+            "value": 51,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "y",
+            "time": 8,
+            "value": 43,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "rotation",
+            "time": 4,
+            "value": 20,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "rotation",
+            "time": 4.65,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "rotation",
+            "time": 8,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 4,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 4.1,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 7.7,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 8,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "id": "02 / matte letter 2 O",
+        "name": "02 / matte letter 2 O",
+        "type": "text",
+        "text": "O",
+        "startTime": 4,
+        "duration": 4,
+        "x": 30.799999999999997,
+        "y": 51,
+        "width": 95,
+        "scale": 5,
+        "rotation": 0,
+        "opacity": 1,
+        "color": "#f5f2e9",
+        "fontWeight": 900,
+        "textAlign": "center",
+        "keys": [
+          {
+            "property": "y",
+            "time": 4,
+            "value": 83,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "y",
+            "time": 4.605,
+            "value": 49,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "y",
+            "time": 4.805,
+            "value": 51,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "y",
+            "time": 7.5,
+            "value": 51,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "y",
+            "time": 8,
+            "value": 43,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "rotation",
+            "time": 4,
+            "value": -20,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "rotation",
+            "time": 4.705,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "rotation",
+            "time": 8,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 4,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 4.155,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 7.7,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 8,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "id": "02 / matte letter 3 T",
+        "name": "02 / matte letter 3 T",
+        "type": "text",
+        "text": "T",
+        "startTime": 4,
+        "duration": 4,
+        "x": 43.6,
+        "y": 51,
+        "width": 95,
+        "scale": 5,
+        "rotation": 0,
+        "opacity": 1,
+        "color": "#f5f2e9",
+        "fontWeight": 900,
+        "textAlign": "center",
+        "keys": [
+          {
+            "property": "y",
+            "time": 4,
+            "value": 83,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "y",
+            "time": 4.66,
+            "value": 49,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "y",
+            "time": 4.86,
+            "value": 51,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "y",
+            "time": 7.5,
+            "value": 51,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "y",
+            "time": 8,
+            "value": 43,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "rotation",
+            "time": 4,
+            "value": 20,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "rotation",
+            "time": 4.76,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "rotation",
+            "time": 8,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 4,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 4.21,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 7.7,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 8,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "id": "02 / matte letter 4 I",
+        "name": "02 / matte letter 4 I",
+        "type": "text",
+        "text": "I",
+        "startTime": 4,
+        "duration": 4,
+        "x": 56.4,
+        "y": 51,
+        "width": 95,
+        "scale": 5,
+        "rotation": 0,
+        "opacity": 1,
+        "color": "#f5f2e9",
+        "fontWeight": 900,
+        "textAlign": "center",
+        "keys": [
+          {
+            "property": "y",
+            "time": 4,
+            "value": 83,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "y",
+            "time": 4.715,
+            "value": 49,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "y",
+            "time": 4.915,
+            "value": 51,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "y",
+            "time": 7.5,
+            "value": 51,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "y",
+            "time": 8,
+            "value": 43,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "rotation",
+            "time": 4,
+            "value": -20,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "rotation",
+            "time": 4.815,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "rotation",
+            "time": 8,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 4,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 4.265,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 7.7,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 8,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "id": "02 / matte letter 5 O",
+        "name": "02 / matte letter 5 O",
+        "type": "text",
+        "text": "O",
+        "startTime": 4,
+        "duration": 4,
+        "x": 69.2,
+        "y": 51,
+        "width": 95,
+        "scale": 5,
+        "rotation": 0,
+        "opacity": 1,
+        "color": "#f5f2e9",
+        "fontWeight": 900,
+        "textAlign": "center",
+        "keys": [
+          {
+            "property": "y",
+            "time": 4,
+            "value": 83,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "y",
+            "time": 4.77,
+            "value": 49,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "y",
+            "time": 4.97,
+            "value": 51,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "y",
+            "time": 7.5,
+            "value": 51,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "y",
+            "time": 8,
+            "value": 43,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "rotation",
+            "time": 4,
+            "value": 20,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "rotation",
+            "time": 4.87,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "rotation",
+            "time": 8,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 4,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 4.32,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 7.7,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 8,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "id": "02 / matte letter 6 N",
+        "name": "02 / matte letter 6 N",
+        "type": "text",
+        "text": "N",
+        "startTime": 4,
+        "duration": 4,
+        "x": 82,
+        "y": 51,
+        "width": 95,
+        "scale": 5,
+        "rotation": 0,
+        "opacity": 1,
+        "color": "#f5f2e9",
+        "fontWeight": 900,
+        "textAlign": "center",
+        "keys": [
+          {
+            "property": "y",
+            "time": 4,
+            "value": 83,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "y",
+            "time": 4.825,
+            "value": 49,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "y",
+            "time": 5.025,
+            "value": 51,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "y",
+            "time": 7.5,
+            "value": 51,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "y",
+            "time": 8,
+            "value": 43,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "rotation",
+            "time": 4,
+            "value": -20,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "rotation",
+            "time": 4.925,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "rotation",
+            "time": 8,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 4,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 4.375,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 7.7,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 8,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          }
+        ]
+      }
+    ],
+    "groups": []
+  }
+}

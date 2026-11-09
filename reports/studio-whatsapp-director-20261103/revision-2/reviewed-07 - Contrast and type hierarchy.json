@@ -1,0 +1,987 @@
+{
+  "format": "autopromote-scene-actions",
+  "version": 1,
+  "projectId": "viral-project-bafcf805-f86e-4ec4-a2f4-6530a5c653ff",
+  "baseRevision": 39,
+  "name": "07 - Contrast and type hierarchy",
+  "graphics": {
+    "format": "autopromote-graphics",
+    "version": 1,
+    "name": "Contrast and type hierarchy",
+    "width": 1280,
+    "height": 720,
+    "duration": 24,
+    "layers": [
+      {
+        "id": "R2 / code ink",
+        "name": "R2 / code ink",
+        "type": "artwork",
+        "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\"><rect width=\"1280\" height=\"720\" fill=\"#15191a\"/></svg>",
+        "startTime": 9,
+        "duration": 3.05,
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "height": 100,
+        "scale": 1,
+        "rotation": 0,
+        "opacity": 1,
+        "keys": []
+      },
+      {
+        "id": "R2 / code overline",
+        "name": "R2 / code overline",
+        "type": "text",
+        "text": "FROM THE FIRST LINE",
+        "startTime": 9,
+        "duration": 2.5,
+        "x": 50,
+        "y": 15,
+        "width": 90,
+        "scale": 0.65,
+        "rotation": 0,
+        "opacity": 1,
+        "color": "#ece8dc",
+        "fontWeight": 600,
+        "textAlign": "center",
+        "keys": []
+      },
+      {
+        "id": "R2 / ink orbit",
+        "name": "R2 / ink orbit",
+        "type": "artwork",
+        "vectorShape": {
+          "version": 1,
+          "closed": false,
+          "nodes": [
+            {
+              "x": 4,
+              "y": 88,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                -65
+              ]
+            },
+            {
+              "x": 48,
+              "y": 7,
+              "in": [
+                -30,
+                0
+              ],
+              "out": [
+                30,
+                0
+              ]
+            },
+            {
+              "x": 94,
+              "y": 85,
+              "in": [
+                0,
+                -65
+              ],
+              "out": [
+                0,
+                0
+              ]
+            }
+          ],
+          "fill": {
+            "kind": "none",
+            "color": "#d7ff43",
+            "endColor": "#d7ff43",
+            "start": [
+              0,
+              0
+            ],
+            "end": [
+              100,
+              100
+            ]
+          },
+          "stroke": {
+            "color": "#15191a",
+            "width": 0.38
+          }
+        },
+        "startTime": 14,
+        "duration": 7,
+        "x": 52,
+        "y": 58,
+        "width": 72,
+        "height": 100,
+        "scale": 1,
+        "rotation": -14,
+        "opacity": 1,
+        "keys": [
+          {
+            "property": "rotation",
+            "time": 14,
+            "value": -24,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "rotation",
+            "time": 21,
+            "value": 18,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          }
+        ]
+      }
+    ],
+    "groups": []
+  },
+  "actions": [
+    {
+      "type": "keys",
+      "targetId": "graphic-c04e48d3-be3c-4969-bff1-d2c488968397",
+      "keys": [
+        {
+          "property": "x",
+          "time": 0,
+          "value": 31,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 3,
+          "value": 31,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-c04e48d3-be3c-4969-bff1-d2c488968397",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 0,
+          "value": 6,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3,
+          "value": 6,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-5cb12a37-aa20-4b68-9cac-391b2efa25fb",
+      "keys": [
+        {
+          "property": "x",
+          "time": 0,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 3,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-5cb12a37-aa20-4b68-9cac-391b2efa25fb",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 0,
+          "value": 6,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3,
+          "value": 6,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-ffeff0e0-15be-4d48-8f88-5762a778ee3a",
+      "keys": [
+        {
+          "property": "x",
+          "time": 0,
+          "value": 69,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 3,
+          "value": 69,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-ffeff0e0-15be-4d48-8f88-5762a778ee3a",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 0,
+          "value": 6,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3,
+          "value": 6,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-4cf7c6cb-5cb3-45b0-9879-be4a23a09a73",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 0.28,
+          "value": 5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3,
+          "value": 5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-26249b9f-f06a-48a8-a6e1-96d425225cdb",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 21,
+          "value": 5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 24,
+          "value": 5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-5fc8002d-451c-4c2e-a52c-ae54b84f8f39",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 21,
+          "value": 4.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 24,
+          "value": 4.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-8d6a363c-96e8-4d44-9ccd-496ddeb43914",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 21,
+          "value": 0.7,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 24,
+          "value": 0.7,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "graphic-91c01f0f-e581-4536-81e5-cc57dffd6a8d",
+      "property": "x"
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-91c01f0f-e581-4536-81e5-cc57dffd6a8d",
+      "keys": [
+        {
+          "property": "x",
+          "time": 3,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 9,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-91c01f0f-e581-4536-81e5-cc57dffd6a8d",
+      "keys": [
+        {
+          "property": "y",
+          "time": 3,
+          "value": 18,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 9,
+          "value": 18,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-91c01f0f-e581-4536-81e5-cc57dffd6a8d",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 3,
+          "value": 4.7,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 9,
+          "value": 4.7,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "graphic-961b4f4c-8d02-423d-a14c-84d48d342900",
+      "property": "x"
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-961b4f4c-8d02-423d-a14c-84d48d342900",
+      "keys": [
+        {
+          "property": "x",
+          "time": 3,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 9,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-961b4f4c-8d02-423d-a14c-84d48d342900",
+      "keys": [
+        {
+          "property": "y",
+          "time": 3,
+          "value": 78,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 9,
+          "value": 78,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-961b4f4c-8d02-423d-a14c-84d48d342900",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 3,
+          "value": 0.9,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 9,
+          "value": 0.9,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "graphic-03a45079-747c-43b3-b0fd-bad164aedcc4",
+      "property": "x"
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-03a45079-747c-43b3-b0fd-bad164aedcc4",
+      "keys": [
+        {
+          "property": "x",
+          "time": 3,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 9,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-03a45079-747c-43b3-b0fd-bad164aedcc4",
+      "keys": [
+        {
+          "property": "y",
+          "time": 3,
+          "value": 91,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 9,
+          "value": 91,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-03a45079-747c-43b3-b0fd-bad164aedcc4",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 3,
+          "value": 2.4,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 9,
+          "value": 2.4,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "move_layer",
+      "targetId": "scene-62b52201-6f0e-46e9-8be8-8b517608a732",
+      "beforeId": "graphic-91c01f0f-e581-4536-81e5-cc57dffd6a8d"
+    },
+    {
+      "type": "move_layer",
+      "targetId": "scene-5eba0d10-e27c-4012-b4af-827ca2127408",
+      "beforeId": "graphic-91c01f0f-e581-4536-81e5-cc57dffd6a8d"
+    },
+    {
+      "type": "move_layer",
+      "targetId": "scene-fbc5351e-f474-4980-b73e-12cb2ef84b5b",
+      "beforeId": "graphic-91c01f0f-e581-4536-81e5-cc57dffd6a8d"
+    },
+    {
+      "type": "move_layer",
+      "targetId": "scene-361c5058-1640-4020-94c6-9b9fcb02f81c",
+      "beforeId": "graphic-91c01f0f-e581-4536-81e5-cc57dffd6a8d"
+    },
+    {
+      "type": "move_layer",
+      "targetId": "scene-571e8bf0-7b8f-46f9-8467-a48789532b40",
+      "beforeId": "graphic-91c01f0f-e581-4536-81e5-cc57dffd6a8d"
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-499bf8c3-4ba2-40fe-adb4-a1e6ce9e198f",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 14,
+          "value": 4.8,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 17.05,
+          "value": 4.8,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-c2195e5e-0713-45ca-be7e-211ae328cdb7",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 14,
+          "value": 5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 17.05,
+          "value": 5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-f24edda5-55c7-4875-9fcf-9b591b85e3be",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 17,
+          "value": 6,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 21,
+          "value": 6,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "graphic-c7cd0584-ca23-4628-aacf-bab636f74f90",
+      "property": "opacity"
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-c7cd0584-ca23-4628-aacf-bab636f74f90",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 14,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 21,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "graphic-ebdb1ce3-37cd-47c2-b326-cf0fae219ce6",
+      "property": "opacity"
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-ebdb1ce3-37cd-47c2-b326-cf0fae219ce6",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 9,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 12.1,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "move_layer",
+      "targetId": "R2 / code ink",
+      "beforeId": "scene-9ca86c0b-d47f-4839-a450-b8eff9700d58"
+    },
+    {
+      "type": "keys",
+      "targetId": "R2 / ink orbit",
+      "keys": [
+        {
+          "property": "strokeEnd",
+          "time": 14,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "strokeEnd",
+          "time": 15.5,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "strokeEnd",
+          "time": 20.5,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "strokeEnd",
+          "time": 21,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "move_layer",
+      "targetId": "R2 / ink orbit",
+      "beforeId": "scene-26ba7f02-0296-4d67-b05f-c551f355cd45"
+    }
+  ]
+}

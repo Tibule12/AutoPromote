@@ -1,0 +1,36 @@
+{
+  "startedAt": "2026-11-03T16:16:58Z",
+  "beforeAvailableBytes": 873476096,
+  "firstCacheRemovals": [
+    {
+      "path": "/tmp/jest_rs",
+      "allocatedBytesBefore": 174043136,
+      "kind": "rebuildable test/package/compiler cache"
+    },
+    {
+      "path": "/home/tibule12/.npm/_cacache",
+      "allocatedBytesBefore": 76288000,
+      "kind": "rebuildable test/package/compiler cache"
+    },
+    {
+      "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/frontend/node_modules/.cache",
+      "allocatedBytesBefore": 22364160,
+      "kind": "rebuildable test/package/compiler cache"
+    }
+  ],
+  "availableAfterFirstCaches": 1155969024,
+  "completedAt": "2026-11-03T16:23:12.445371+00:00",
+  "availableAfterBytes": 10755981312,
+  "observedAvailableIncreaseBytes": 9882505216,
+  "archivedFileCount": 1133,
+  "diagnosticSourceBytes": 8440319815,
+  "diagnosticSourceAllocatedBytes": 8443740160,
+  "archiveAllocatedBytes": 1650360320,
+  "knownOwnAllocatedReductionBytes": 7066075136,
+  "unattributedConcurrentDifferenceBytes": 2816430080,
+  "allArchivesVerifiedBeforeSourceRemoval": true,
+  "exact48DeliveryFilesVerifiedUnchanged": true,
+  "nativeBackupsMediaModelsSourceCodeDeleted": false,
+  "snapshotFreeSpaceReserveGiB": 5,
+  "actualSingleSnapshotRestorePassed": true
+}

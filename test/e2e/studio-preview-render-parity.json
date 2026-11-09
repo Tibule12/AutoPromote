@@ -317,7 +317,7 @@
   },
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-11-02T04:06:53.668996+00:00",
+  "updatedAt": "2026-11-04T08:25:53.603471+00:00",
   "assessment": "Retained October8 audit plus scoped October9 native NVIDIA podcast delivery/recovery evidence; no full conformance, production or creative promotion.",
   "readinessStates": [
     "UNIMPLEMENTED",
@@ -8923,5 +8923,1062 @@
       "Human listening and owner creative acceptance remain open."
     ],
     "nextTask": "Repair the 3.5s opening matte/typography preview discrepancy against exact native decoded frames, then remaining S02 performance/picture precision and shared S04/S03 depth. Retain the delivered creative candidate and all failures."
+  },
+  "studioWhatsAppDirector20261103": {
+    "evidence": "reports/studio-whatsapp-director-20261103/README.md",
+    "deliveryDirectory": "/home/tibule12/Videos/WhatsApp Director - 2026-11-03",
+    "result": "REJECTED_BY_OWNER",
+    "movieSha256": "0ae41fc5ab9b5b994b554b08c44156e0405752205845ace1bf5c6ba30dde5afc",
+    "nativeSeconds": 24,
+    "nativeFrames": 576,
+    "nativeLayers": 16,
+    "nativeMotionKeys": 153,
+    "nativeInputs": 4,
+    "testCount": 57,
+    "actualStudioUi": true,
+    "directorInference": false,
+    "manualLayerOrderCorrection": true,
+    "fullParityQualified": false,
+    "creativeApproval": false,
+    "readinessPromotion": false,
+    "paidCalls": 0,
+    "remaining": [
+      "Version native order corrections in reusable recipe",
+      "screen projection and independent source-frame mismatch",
+      "whole live picture/audio parity and throughput",
+      "sophisticated autonomous Director and shared S04/S03 depth"
+    ],
+    "ownerRejection": "The recipe montage does not meet the requested creative motion-graphics standard."
+  },
+  "studioWhatsAppRevision20261103": {
+    "evidence": "reports/studio-whatsapp-director-20261103/revision-2/README.md",
+    "deliveryDirectory": "/home/tibule12/Videos/WhatsApp Director - 2026-11-03/Revision 2 - Cut through",
+    "result": "NATIVE_REVISION_DELIVERED_REVIEW_PENDING",
+    "movieSha256": "8a9f58566415b8ea1120c9b474b173c827247e551e3aede4b92190a0e0e89e50",
+    "projectHash": "193d82fd1b42eab470617791111f7f95abd8a935bc5d63c0c61bdab1ee07adaf",
+    "nativeSeconds": 24,
+    "nativeFrames": 576,
+    "nativeLayers": 37,
+    "nativeMotionKeys": 311,
+    "nativeInputs": 4,
+    "actualStudioUi": true,
+    "manualContinuationOfDirector": true,
+    "directorInference": false,
+    "cachedCpuInputMatteAssistance": true,
+    "exactNativeBinding": true,
+    "independentRestoreEditUndoRedo": true,
+    "completeLiveAndFinishedPlayback": true,
+    "liveWallSeconds": 24.998,
+    "finishedWallSeconds": 24.0,
+    "liveCaptureFps": 10.258,
+    "finishedCaptureFps": 11.418,
+    "pausedPairs": 20,
+    "minimumPsnrDb": 23.09097635192611,
+    "focusedUploadTests": 12,
+    "templateRegressionTests": 7,
+    "fullParityQualified": false,
+    "creativeApproval": false,
+    "readinessPromotion": false,
+    "paidCalls": 0,
+    "remaining": [
+      "Coarse input-mask edges, partial chair retention and source-frame cropping",
+      "Independent source/video-matte sampling, alpha and colour/edge parity",
+      "Live preview real time and capture smoothness",
+      "Human listening and owner creative acceptance",
+      "Reusable autonomous Director planning and shared S04/S03 depth"
+    ],
+    "nextTask": "Continue S02 exact independent source/matte sampling and live drawing throughput, then reusable S04/S03 depth. Keep version one rejected and both native projects intact."
+  },
+  "studioWhatsAppWordless20261103": {
+    "evidence": "reports/studio-whatsapp-director-20261103/wordless/README.md",
+    "deliveryDirectory": "/home/tibule12/Videos/WhatsApp Director - 2026-11-03/Other ways - No titles",
+    "result": "NATIVE_WORDLESS_DELIVERED_REVIEW_PENDING",
+    "movieSha256": "424e817a3a922b157d30a842f10d3ca812155c4a77dd5b362379c4d6f18e0f60",
+    "projectHash": "db124eee858d86372145302ae561dc7fd3768d5bfe429e4e450871c25eca5d0e",
+    "nativeSeconds": 24,
+    "nativeFrames": 576,
+    "nativeLayers": 22,
+    "nativeMotionKeys": 259,
+    "originalSources": 4,
+    "addedTextLayers": 0,
+    "captionSegments": 0,
+    "sourceSpeechMuted": true,
+    "actualStudioFrontend": true,
+    "manualCreativeDirection": true,
+    "directorInference": false,
+    "reusedCachedInputMasks": true,
+    "exactNativeBinding": true,
+    "independentRestoreAndUndoRedo": true,
+    "fullLiveAndFinishedPlayback": true,
+    "pausedPairs": 22,
+    "minimumPsnrDb": 23.543923879741442,
+    "liveWallSeconds": 24.466,
+    "finishedWallSeconds": 24.065,
+    "liveCaptureFps": 13.408,
+    "finishedCaptureFps": 11.327,
+    "fullParityQualified": false,
+    "creativeApproval": false,
+    "readinessPromotion": false,
+    "paidCalls": 0,
+    "remaining": [
+      "Coarse inherited matte edges, partial chair retention and original source boundaries",
+      "Screen corners are manually authored; automatic tracking is not demonstrated",
+      "Whole source/matte timing, colour/alpha parity and live drawing throughput",
+      "Human listening and owner creative acceptance",
+      "Autonomous Director planning and shared S04/S03 depth"
+    ],
+    "nextTask": "Owner review of the wordless candidate; shared S02 sampling/alpha/colour/edges and live throughput, then S04/S03. Preserve earlier projects and movies."
+  },
+  "studioWhatsAppPrism20261104": {
+    "evidence": "reports/studio-whatsapp-prism-20261104/README.md",
+    "deliveryDirectory": "/home/tibule12/Videos/WhatsApp Studio - 2026-11-04 - Prism cuts",
+    "result": "NATIVE_PRISM_DELIVERED_REVIEW_PENDING",
+    "movieSha256": "1c241e106ebeeec48cf80c445f7a20effca99cf0a6a12b2ed3a8eea54569a67c",
+    "projectHash": "8068a921de193de77c1e562ffdad0f2121e3cfff2a07d1d699f56f7b809691fa",
+    "nativeSeconds": 24,
+    "nativeFrames": 576,
+    "nativeFps": 24,
+    "nativeLayers": 25,
+    "nativeMotionKeys": 447,
+    "graphicGroups": 1,
+    "originalSources": 4,
+    "addedTextLayers": 0,
+    "captionSegments": 0,
+    "sourceSpeechMuted": true,
+    "actualStudioFrontend": true,
+    "manualCreativeDirection": true,
+    "directorInference": false,
+    "newModelCalls": 0,
+    "exactNativeBinding": true,
+    "independentRestoreAndUndoRedo": true,
+    "fullLiveAndFinishedPlayback": true,
+    "pausedPairs": 22,
+    "minimumPsnrDb": 25.057868975143727,
+    "firstRejectedMinimumPsnrDb": 9.096299816420604,
+    "heldVideoGeometryRepair": true,
+    "focusedWorkerTests": 46,
+    "regressionBefore": "8 failed / 1 passed",
+    "regressionAfter": "46 passed",
+    "nativeExports": 2,
+    "firstExportRejected": "Static screen scale bypassed canonical raster; exact failed export retained.",
+    "firstObserverExternallyTerminated": true,
+    "firstObserverRecoveredWithoutResubmission": true,
+    "correctedObserverCompletedNormally": true,
+    "workerWallSeconds": 722.7745399010018,
+    "workerCpuSeconds": 1229.3906229999998,
+    "liveWallSeconds": 32.837,
+    "finishedWallSeconds": 27.004,
+    "liveCaptureFps": 17.98725642123429,
+    "finishedCaptureFps": 10.200296721472165,
+    "liveSelectedDecoderDrops": 72,
+    "finishedSelectedDecoderDrops": 0,
+    "priorDeliveryFilesUnchanged": 135,
+    "originalSpendingWindowRestored": true,
+    "fullParityQualified": false,
+    "creativeApproval": false,
+    "readinessPromotion": false,
+    "frontendBuildReplaced": false,
+    "paidCalls": 0,
+    "productionWrites": 0,
+    "remaining": [
+      "Exact independent source-frame, colour/alpha and mask-edge parity; paired metrics remain diagnostics",
+      "Live preview real time and capture throughput; 32.837 wall seconds for 24 programme seconds",
+      "Normal product deletion of a bound matte source must retain a valid graph; consumer-first QA deletion only avoids the failure",
+      "Projected video with an animated image-alpha source remains unqualified; final prism uses ordinary masked video wedges and a graphic group",
+      "Human listening and owner creative acceptance; autonomous Director planning and shared S04/S03 depth"
+    ],
+    "nextTask": "Owner review of the wordless visual treatment; continue S02 source/colour/alpha and live throughput, then S04/S03, including safe bound-matte-source deletion."
+  },
+  "studioSelectableMotionStyles20261104": {
+    "evidence": "reports/studio-motion-styles-20261104/README.md",
+    "deliveryDirectory": "/home/tibule12/Videos/WhatsApp Studio - 2026-11-04 - Momentum",
+    "result": "SELECTABLE_NATIVE_STYLES_AND_MOMENTUM_FILM_DELIVERED_REVIEW_PENDING",
+    "selectableStyles": [
+      {
+        "id": "prism_cuts_v1",
+        "version": "1.0.0",
+        "label": "Prism cuts \u2014 wordless",
+        "nativeLayers": 25,
+        "nativeMotionKeys": 447,
+        "graphicGroups": 1
+      },
+      {
+        "id": "momentum_v1",
+        "version": "1.0.1",
+        "label": "Momentum \u2014 orbit, slits & lenses",
+        "nativeLayers": 20,
+        "nativeMotionKeys": 289,
+        "graphicGroups": 0
+      }
+    ],
+    "olderMomentumVersionPreserved": "1.0.0",
+    "actualStudioFrontend": true,
+    "nativeTemplateSelection": true,
+    "prismManualSelectionApplied": true,
+    "momentumDirectorSelectionApplied": true,
+    "directorVisualInference": false,
+    "ordinaryProjectGraph": true,
+    "nativeMovieSha256": "a1cd420454fe8b07eb865a1f91194420ade63ed99bec4f2fdb048833eef2a457",
+    "projectHash": "ed00c29895f4bd278be50a8a9eaa3db30e1b9d3914ce22ffe14d4b05deb14d22",
+    "nativeSeconds": 24,
+    "nativeFrames": 576,
+    "nativeFps": 24,
+    "originalSources": 4,
+    "addedTextLayers": 0,
+    "captionSegments": 0,
+    "sourceSpeechMuted": true,
+    "independentRestoreEditUndoRedo": true,
+    "exactNativeBinding": true,
+    "nativeExports": 2,
+    "firstExportRejected": "Opaque black contain padding covered the native paper backdrop; exact failure retained.",
+    "correctiveCompositionIdentical": true,
+    "workerContainAlphaRepair": true,
+    "sharedManualAndDirectorTests": 23,
+    "templateRecoveryRegressionTests": 32,
+    "focusedWorkerTests": 48,
+    "automatedTests": 103,
+    "welcomeChecksPerBuild": 8,
+    "candidateBuilds": 2,
+    "normalSignInAndHelpPerBuild": true,
+    "fullLiveAndFinishedPlayback": true,
+    "pausedPairs": 19,
+    "firstMinimumPsnrDb": 2.5110751999495,
+    "minimumPsnrDb": 23.708287113034974,
+    "liveWallSeconds": 34.033,
+    "finishedWallSeconds": 24.065,
+    "liveCaptureFps": 13.144797707719622,
+    "finishedCaptureFps": 11.368334107479155,
+    "liveSelectedDecoderDrops": 99,
+    "finishedSelectedDecoderDrops": 0,
+    "workerWallSeconds": 537.047318797966,
+    "workerCpuSeconds": 930.296554,
+    "priorDeliveryFilesUnchanged": 182,
+    "firstSeekPrismWedgeIssueRetained": true,
+    "allPrismVideoGeometryAndKeysExact": true,
+    "originalDemoWindowRestored": true,
+    "activeOperationsAtHandoff": 0,
+    "fullParityQualified": false,
+    "creativeApproval": false,
+    "readinessPromotion": false,
+    "productionDeployment": false,
+    "paidCalls": 0,
+    "productionWrites": 0,
+    "remaining": [
+      "Exact independent source clocks and first-seek decoding: one prism wedge was initially absent despite ready state; native re-seek restores all four without a shared sampling repair",
+      "Whole colour/alpha/edge parity and real-time live drawing throughput remain unqualified",
+      "Normal bound-matte-source deletion still needs S03 graph preservation; earlier consumer-first QA guard is not a product repair",
+      "Human listening and owner creative acceptance; sophisticated autonomous visual inference/Director planning and shared S04/S03 depth",
+      "Local selectable draft styles are not deployed or public/showroom-qualified"
+    ],
+    "nextTask": "Owner review of the new selectable styles and Momentum movie; continue S02 first-seek/source clocks, colour/alpha/edges and live throughput, then S04/S03."
+  },
+  "studioTemplateCollection20261104": {
+    "verifiedAt": "2026-11-04T08:25:53.603471+00:00",
+    "result": "SIX_LOCAL_SELECTABLE_NATIVE_STYLES_DELIVERED_REVIEW_PENDING",
+    "evidence": "reports/studio-template-collection-20261104/README.md",
+    "deliveryDirectory": "/home/tibule12/Videos/Studio Template Collection - 2026-11-04",
+    "selectedStyles": [
+      {
+        "id": "aperture_product_v1",
+        "version": "1.0.0",
+        "label": "Aperture \u2014 mechanical product",
+        "source": "watch",
+        "layers": 5,
+        "keys": 33,
+        "seconds": 8,
+        "description": "A mechanical live-video aperture, calibrated vector traces and a full-frame macro payoff.",
+        "projectId": "viral-project-70f2a9ed-f8ad-4950-a14d-dbbbd8a16066",
+        "projectHash": "acb68fb95267388014409ae68f186f101977716893f5bf8c6fd171f4ce62720a",
+        "movieSha256": "8a18343dda06b931e48be36036f2902826067c83a3385a6afe0efe3eb856e47e",
+        "jobId": "viral_542cacbf8bc4dd2afcfc7ad6eb1c9a4dc279ae91f456790d4272cd0f7aef4476",
+        "executionId": "6f3affadb710f3994e4669f3d01c0abc563081fa49287ac1826c638d58aa547f",
+        "nativeBackupMatchesRenderedDocument": true,
+        "compiledCompositionMatchesSubmitted": true,
+        "workerArtifactMatchesNativeDownload": true,
+        "templateRef": {
+          "templateId": "aperture_product_v1",
+          "version": "1.0.0",
+          "definitionHash": "ded9e27d439d17058f80b5054f76a73ddf1f747bc15188d722bc41a2ca88adbc"
+        },
+        "actualNativeDownload": true,
+        "picture": {
+          "fullDecode": true,
+          "frames": 192,
+          "fps": 24,
+          "seconds": 8,
+          "width": 1280,
+          "height": 720,
+          "movieSha256": "8a18343dda06b931e48be36036f2902826067c83a3385a6afe0efe3eb856e47e",
+          "sampleTimes": [
+            0,
+            0.25,
+            1.5,
+            2.5,
+            3.5,
+            4.5,
+            5.5,
+            6.5,
+            7.958333
+          ],
+          "pairs": [
+            {
+              "requested": 0.25,
+              "measuredProgrammeTime": 0.25,
+              "exportFrameIndex": 6,
+              "psnrDb": 36.23723708193089,
+              "passClaimed": false
+            },
+            {
+              "requested": 1.5,
+              "measuredProgrammeTime": 1.5,
+              "exportFrameIndex": 36,
+              "psnrDb": 32.798495360066006,
+              "passClaimed": false
+            },
+            {
+              "requested": 3.5,
+              "measuredProgrammeTime": 3.5,
+              "exportFrameIndex": 84,
+              "psnrDb": 34.59109589363474,
+              "passClaimed": false
+            },
+            {
+              "requested": 5.5,
+              "measuredProgrammeTime": 5.5,
+              "exportFrameIndex": 132,
+              "psnrDb": 32.40552442413436,
+              "passClaimed": false
+            },
+            {
+              "requested": 7.5,
+              "measuredProgrammeTime": 7.5,
+              "exportFrameIndex": 180,
+              "psnrDb": 28.56631553892783,
+              "passClaimed": false
+            }
+          ],
+          "minimumPsnrDb": 28.56631553892783,
+          "wholeParityQualified": false
+        },
+        "playback": {
+          "live": {
+            "complete": true,
+            "programmeSeconds": 8,
+            "elapsedMs": 8308,
+            "mediaTime": 7.958333,
+            "total": 210,
+            "dropped": 55,
+            "corrupted": 0,
+            "captureSeconds": 8.010999917984009,
+            "captureFrames": 65,
+            "captureFps": 8.113843548304198
+          },
+          "finished": {
+            "complete": true,
+            "programmeSeconds": 8,
+            "elapsedMs": 8188,
+            "mediaTime": 8,
+            "total": 192,
+            "dropped": 29,
+            "corrupted": 0,
+            "captureSeconds": 8.050999879837036,
+            "captureFrames": 73,
+            "captureFps": 9.067196756867624
+          }
+        },
+        "resource": {
+          "executionId": "6f3affadb710f3994e4669f3d01c0abc563081fa49287ac1826c638d58aa547f",
+          "wallSeconds": 219.58229979802854,
+          "cpuSeconds": 325.90887999999995,
+          "peakRssKiB": 265788,
+          "providerChargesStarted": false,
+          "invoiceCostMicros": null,
+          "termination": {
+            "code": 0,
+            "signal": null,
+            "startedAt": "2026-11-04T07:17:55.497Z",
+            "finishedAt": "2026-11-04T07:21:36.572Z"
+          }
+        }
+      },
+      {
+        "id": "editorial_fan_v1",
+        "version": "1.0.1",
+        "label": "Editorial fan \u2014 fashion collage",
+        "source": "fashion-camaro",
+        "layers": 8,
+        "keys": 116,
+        "seconds": 8,
+        "description": "Three paper-mounted live portraits fan out, reform into an editorial grid and peel into the final shot.",
+        "projectId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f",
+        "projectHash": "73af29298fe68f48432c5278111daa2a1252d63c73c1ede52c3cc0a06c212cb4",
+        "movieSha256": "b415639d9d43b47fba0f6f4019728100653e9744c898da770e5cf87cd63af48f",
+        "jobId": "viral_c45f5982b3722585c3f4ae2792d68ac8f158d45e45fe48951c8f63788e7a743f",
+        "executionId": "481521160bf149e94b00e46d0d1b31043caaf93aacf6aa3457ecf613bac2c61a",
+        "nativeBackupMatchesRenderedDocument": true,
+        "compiledCompositionMatchesSubmitted": true,
+        "workerArtifactMatchesNativeDownload": true,
+        "templateRef": {
+          "templateId": "editorial_fan_v1",
+          "version": "1.0.1",
+          "definitionHash": "9db56864f45ec81d6217904ef1edac7ba5eccc5c8ff02e14a2efad47dfd735c5"
+        },
+        "actualNativeDownload": true,
+        "picture": {
+          "fullDecode": true,
+          "frames": 192,
+          "fps": 24,
+          "seconds": 8,
+          "width": 1280,
+          "height": 720,
+          "movieSha256": "b415639d9d43b47fba0f6f4019728100653e9744c898da770e5cf87cd63af48f",
+          "sampleTimes": [
+            0,
+            0.25,
+            1.5,
+            2.5,
+            3.5,
+            4.5,
+            5.5,
+            6.5,
+            7.958333
+          ],
+          "pairs": [
+            {
+              "requested": 0.25,
+              "measuredProgrammeTime": 0.25,
+              "exportFrameIndex": 6,
+              "psnrDb": 26.617242956441423,
+              "passClaimed": false
+            },
+            {
+              "requested": 1.5,
+              "measuredProgrammeTime": 1.5,
+              "exportFrameIndex": 36,
+              "psnrDb": 26.72446238745148,
+              "passClaimed": false
+            },
+            {
+              "requested": 3.5,
+              "measuredProgrammeTime": 3.5,
+              "exportFrameIndex": 84,
+              "psnrDb": 25.98288662279632,
+              "passClaimed": false
+            },
+            {
+              "requested": 5.5,
+              "measuredProgrammeTime": 5.5,
+              "exportFrameIndex": 132,
+              "psnrDb": 29.294531929673546,
+              "passClaimed": false
+            },
+            {
+              "requested": 7.5,
+              "measuredProgrammeTime": 7.5,
+              "exportFrameIndex": 180,
+              "psnrDb": 31.211333377362607,
+              "passClaimed": false
+            }
+          ],
+          "minimumPsnrDb": 25.98288662279632,
+          "wholeParityQualified": false
+        },
+        "playback": {
+          "live": {
+            "complete": true,
+            "programmeSeconds": 8,
+            "elapsedMs": 8316,
+            "mediaTime": 7.958333,
+            "total": 247,
+            "dropped": 19,
+            "corrupted": 0,
+            "captureSeconds": 8.174999952316284,
+            "captureFrames": 112,
+            "captureFps": 13.700305890309663
+          },
+          "finished": {
+            "complete": true,
+            "programmeSeconds": 8,
+            "elapsedMs": 8060,
+            "mediaTime": 7.97368,
+            "total": 192,
+            "dropped": 0,
+            "corrupted": 0,
+            "captureSeconds": 7.985000133514404,
+            "captureFrames": 92,
+            "captureFps": 11.521602812986858
+          }
+        },
+        "resource": {
+          "executionId": "481521160bf149e94b00e46d0d1b31043caaf93aacf6aa3457ecf613bac2c61a",
+          "wallSeconds": 103.17630280798767,
+          "cpuSeconds": 247.13390500000003,
+          "peakRssKiB": 296380,
+          "providerChargesStarted": false,
+          "invoiceCostMicros": null,
+          "termination": {
+            "code": 0,
+            "signal": null,
+            "startedAt": "2026-11-04T07:39:16.952Z",
+            "finishedAt": "2026-11-04T07:41:00.397Z"
+          }
+        }
+      },
+      {
+        "id": "split_impact_v1",
+        "version": "1.0.0",
+        "label": "Split impact \u2014 sports motion",
+        "source": "sports",
+        "layers": 6,
+        "keys": 63,
+        "seconds": 8,
+        "description": "Two genuine action moments split across a travelling diagonal with timed vector strike trajectories.",
+        "projectId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f",
+        "projectHash": "d8eba717a6781938c522881bc9d084c815028aa641d2e1e89625c004a4405ed2",
+        "movieSha256": "26aac4622e8341cf66ae2a72558987ba39bbed6ea3a4d8bcbd206f253d575b37",
+        "jobId": "viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+        "executionId": "ea1566a1b7e5940b66ad901528bd4d376b6da7eddd832359909cea4671f549eb",
+        "nativeBackupMatchesRenderedDocument": true,
+        "compiledCompositionMatchesSubmitted": true,
+        "workerArtifactMatchesNativeDownload": true,
+        "templateRef": {
+          "templateId": "split_impact_v1",
+          "version": "1.0.0",
+          "definitionHash": "f0faa9813d876fa52abcf0aecd7249a0b7b52b9c45356cf1759b13c254d1437b"
+        },
+        "actualNativeDownload": true,
+        "picture": {
+          "fullDecode": true,
+          "frames": 192,
+          "fps": 24,
+          "seconds": 8,
+          "width": 1280,
+          "height": 720,
+          "movieSha256": "26aac4622e8341cf66ae2a72558987ba39bbed6ea3a4d8bcbd206f253d575b37",
+          "sampleTimes": [
+            0,
+            0.25,
+            1.5,
+            2.5,
+            3.5,
+            4.5,
+            5.5,
+            6.5,
+            7.958333
+          ],
+          "pairs": [
+            {
+              "requested": 0.25,
+              "measuredProgrammeTime": 0.25,
+              "exportFrameIndex": 6,
+              "psnrDb": 33.553395077388856,
+              "passClaimed": false
+            },
+            {
+              "requested": 1.5,
+              "measuredProgrammeTime": 1.5,
+              "exportFrameIndex": 36,
+              "psnrDb": 28.77260976542164,
+              "passClaimed": false
+            },
+            {
+              "requested": 3.5,
+              "measuredProgrammeTime": 3.5,
+              "exportFrameIndex": 84,
+              "psnrDb": 33.0063714647329,
+              "passClaimed": false
+            },
+            {
+              "requested": 5.5,
+              "measuredProgrammeTime": 5.5,
+              "exportFrameIndex": 132,
+              "psnrDb": 34.108465861297766,
+              "passClaimed": false
+            },
+            {
+              "requested": 7.5,
+              "measuredProgrammeTime": 7.5,
+              "exportFrameIndex": 180,
+              "psnrDb": 30.69762574421437,
+              "passClaimed": false
+            }
+          ],
+          "minimumPsnrDb": 28.77260976542164,
+          "wholeParityQualified": false
+        },
+        "playback": {
+          "live": {
+            "complete": true,
+            "programmeSeconds": 8,
+            "elapsedMs": 11845,
+            "mediaTime": 7.958333,
+            "total": 210,
+            "dropped": 70,
+            "corrupted": 0,
+            "captureSeconds": 11.76799988746643,
+            "captureFrames": 114,
+            "captureFps": 9.687287652119736
+          },
+          "finished": {
+            "complete": true,
+            "programmeSeconds": 8,
+            "elapsedMs": 8115,
+            "mediaTime": 7.99366,
+            "total": 192,
+            "dropped": 1,
+            "corrupted": 0,
+            "captureSeconds": 8.289999961853027,
+            "captureFrames": 92,
+            "captureFps": 11.097708133093361
+          }
+        },
+        "resource": {
+          "executionId": "ea1566a1b7e5940b66ad901528bd4d376b6da7eddd832359909cea4671f549eb",
+          "wallSeconds": 125.50104944797931,
+          "cpuSeconds": 253.15439800000001,
+          "peakRssKiB": 299048,
+          "providerChargesStarted": false,
+          "invoiceCostMicros": null,
+          "termination": {
+            "code": 0,
+            "signal": null,
+            "startedAt": "2026-11-04T07:28:50.700Z",
+            "finishedAt": "2026-11-04T07:30:57.456Z"
+          }
+        }
+      },
+      {
+        "id": "coastal_postcards_v1",
+        "version": "1.0.0",
+        "label": "Coastal postcards \u2014 travel",
+        "source": "coast",
+        "layers": 4,
+        "keys": 146,
+        "seconds": 8,
+        "description": "Live coastal postcards travel through shared perspective before one opens across the canvas.",
+        "projectId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58",
+        "projectHash": "b1cdffdab5cea352a3acd5a2ed977ceed60f48a509d20a4cfa717330cf913875",
+        "movieSha256": "145c23a171e9f11f8933263f9eddf2a42d7218ad55ba5866fd3f78b469e76859",
+        "jobId": "viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+        "executionId": "bf3d420df119f481992c2f8976b603b66721efd7d9c5f27e24767a6239bdd646",
+        "nativeBackupMatchesRenderedDocument": true,
+        "compiledCompositionMatchesSubmitted": true,
+        "workerArtifactMatchesNativeDownload": true,
+        "templateRef": {
+          "templateId": "coastal_postcards_v1",
+          "version": "1.0.0",
+          "definitionHash": "27260c19a11d56aab1eb14d3654654660b94109b5aea28dc86393355d7340985"
+        },
+        "actualNativeDownload": true,
+        "picture": {
+          "fullDecode": true,
+          "frames": 192,
+          "fps": 24,
+          "seconds": 8,
+          "width": 1280,
+          "height": 720,
+          "movieSha256": "145c23a171e9f11f8933263f9eddf2a42d7218ad55ba5866fd3f78b469e76859",
+          "sampleTimes": [
+            0,
+            0.25,
+            1.5,
+            2.5,
+            3.5,
+            4.5,
+            5.5,
+            6.5,
+            7.958333
+          ],
+          "pairs": [
+            {
+              "requested": 0.25,
+              "measuredProgrammeTime": 0.25,
+              "exportFrameIndex": 6,
+              "psnrDb": 29.01490146020837,
+              "passClaimed": false
+            },
+            {
+              "requested": 1.5,
+              "measuredProgrammeTime": 1.5,
+              "exportFrameIndex": 36,
+              "psnrDb": 28.521174786616115,
+              "passClaimed": false
+            },
+            {
+              "requested": 3.5,
+              "measuredProgrammeTime": 3.5,
+              "exportFrameIndex": 84,
+              "psnrDb": 29.272107627809234,
+              "passClaimed": false
+            },
+            {
+              "requested": 5.5,
+              "measuredProgrammeTime": 5.5,
+              "exportFrameIndex": 132,
+              "psnrDb": 32.62534128155454,
+              "passClaimed": false
+            },
+            {
+              "requested": 7.5,
+              "measuredProgrammeTime": 7.5,
+              "exportFrameIndex": 180,
+              "psnrDb": 32.20813291348853,
+              "passClaimed": false
+            }
+          ],
+          "minimumPsnrDb": 28.521174786616115,
+          "wholeParityQualified": false
+        },
+        "playback": {
+          "live": {
+            "complete": true,
+            "programmeSeconds": 8,
+            "elapsedMs": 21961,
+            "mediaTime": 7.958333,
+            "total": 246,
+            "dropped": 24,
+            "corrupted": 0,
+            "captureSeconds": 21.957000017166138,
+            "captureFrames": 333,
+            "captureFps": 15.166006273154723
+          },
+          "finished": {
+            "complete": true,
+            "programmeSeconds": 8,
+            "elapsedMs": 9968,
+            "mediaTime": 7.959925,
+            "total": 192,
+            "dropped": 0,
+            "corrupted": 0,
+            "captureSeconds": 9.914000034332275,
+            "captureFrames": 92,
+            "captureFps": 9.279806302340441
+          }
+        },
+        "resource": {
+          "executionId": "bf3d420df119f481992c2f8976b603b66721efd7d9c5f27e24767a6239bdd646",
+          "wallSeconds": 156.87210187799064,
+          "cpuSeconds": 260.01125199999996,
+          "peakRssKiB": 365336,
+          "providerChargesStarted": false,
+          "invoiceCostMicros": null,
+          "termination": {
+            "code": 0,
+            "signal": null,
+            "startedAt": "2026-11-04T07:31:51.750Z",
+            "finishedAt": "2026-11-04T07:34:28.882Z"
+          }
+        }
+      },
+      {
+        "id": "vinyl_pulse_v1",
+        "version": "1.0.0",
+        "label": "Vinyl pulse \u2014 music artwork",
+        "source": "music",
+        "layers": 6,
+        "keys": 69,
+        "seconds": 8,
+        "description": "Moving footage becomes a live vinyl disc, with independent coloured vector orbits and timed scale pulses.",
+        "projectId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060",
+        "projectHash": "6decc811351d6a88bc595482c71d717b123b3989bd8acd64af19e2d5a0e4952b",
+        "movieSha256": "7028e16cb01253bfe1d3c26856dbf44b16adb2ce090e14f6db0d1c97500f664f",
+        "jobId": "viral_a927fc95ed7b0c71d156cc5740a817187cad842314bdf82dbe78553e69279b5c",
+        "executionId": "ba8a500cafb4208d6bb3c576aa191914bcbf3a6bd52ee8a63841b3891a7fc09f",
+        "nativeBackupMatchesRenderedDocument": true,
+        "compiledCompositionMatchesSubmitted": true,
+        "workerArtifactMatchesNativeDownload": true,
+        "templateRef": {
+          "templateId": "vinyl_pulse_v1",
+          "version": "1.0.0",
+          "definitionHash": "ff1bdcbe6c98477a92bb1d8d75853c0a12b44b655d5d5c5459b3962a6fca9214"
+        },
+        "actualNativeDownload": true,
+        "picture": {
+          "fullDecode": true,
+          "frames": 192,
+          "fps": 24,
+          "seconds": 8,
+          "width": 1280,
+          "height": 720,
+          "movieSha256": "7028e16cb01253bfe1d3c26856dbf44b16adb2ce090e14f6db0d1c97500f664f",
+          "sampleTimes": [
+            0,
+            0.25,
+            1.5,
+            2.5,
+            3.5,
+            4.5,
+            5.5,
+            6.5,
+            7.958333
+          ],
+          "pairs": [
+            {
+              "requested": 0.25,
+              "measuredProgrammeTime": 0.25,
+              "exportFrameIndex": 6,
+              "psnrDb": 26.59174473092353,
+              "passClaimed": false
+            },
+            {
+              "requested": 1.5,
+              "measuredProgrammeTime": 1.5,
+              "exportFrameIndex": 36,
+              "psnrDb": 24.9411505306224,
+              "passClaimed": false
+            },
+            {
+              "requested": 3.5,
+              "measuredProgrammeTime": 3.5,
+              "exportFrameIndex": 84,
+              "psnrDb": 25.66674368659688,
+              "passClaimed": false
+            },
+            {
+              "requested": 5.5,
+              "measuredProgrammeTime": 5.5,
+              "exportFrameIndex": 132,
+              "psnrDb": 27.291528964162982,
+              "passClaimed": false
+            },
+            {
+              "requested": 7.5,
+              "measuredProgrammeTime": 7.5,
+              "exportFrameIndex": 180,
+              "psnrDb": 39.45146311526427,
+              "passClaimed": false
+            }
+          ],
+          "minimumPsnrDb": 24.9411505306224,
+          "wholeParityQualified": false
+        },
+        "playback": {
+          "live": {
+            "complete": true,
+            "programmeSeconds": 8,
+            "elapsedMs": 13441,
+            "mediaTime": 7.958333,
+            "total": 197,
+            "dropped": 29,
+            "corrupted": 0,
+            "captureSeconds": 13.421000003814697,
+            "captureFrames": 114,
+            "captureFps": 8.494150955040412
+          },
+          "finished": {
+            "complete": true,
+            "programmeSeconds": 8,
+            "elapsedMs": 8071,
+            "mediaTime": 7.973747,
+            "total": 194,
+            "dropped": 0,
+            "corrupted": 0,
+            "captureSeconds": 8.177000045776367,
+            "captureFrames": 95,
+            "captureFps": 11.617952729383921
+          }
+        },
+        "resource": {
+          "executionId": "ba8a500cafb4208d6bb3c576aa191914bcbf3a6bd52ee8a63841b3891a7fc09f",
+          "wallSeconds": 179.70647142000962,
+          "cpuSeconds": 311.414982,
+          "peakRssKiB": 296756,
+          "providerChargesStarted": false,
+          "invoiceCostMicros": null,
+          "termination": {
+            "code": 0,
+            "signal": null,
+            "startedAt": "2026-11-04T07:35:04.690Z",
+            "finishedAt": "2026-11-04T07:38:04.672Z"
+          }
+        }
+      },
+      {
+        "id": "living_infinity_v1",
+        "version": "1.0.1",
+        "label": "Living type \u2014 cinematic X",
+        "source": "cinema",
+        "layers": 4,
+        "keys": 24,
+        "seconds": 8,
+        "description": "A live dancer fills an editable X glyph; the glyph opens into a cinematic full-frame finish without added words.",
+        "projectId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6",
+        "projectHash": "905d11868d8497e2e21492737b21a0eea020becb669c5c264f67a7dc6e1632a0",
+        "movieSha256": "bb19c3c3db0b9eeee99260d2f0e2ecf0b16379acc35cc6c76b85245ecd7db602",
+        "jobId": "viral_c43aaf1920f6c508b1ef3c892a3cc1fbb2f6a41dbb4ae8c797b5589195c7863c",
+        "executionId": "92f037a4d9035ad8075e5444208a070473f8af827078db38b7b0d37a114b54fb",
+        "nativeBackupMatchesRenderedDocument": true,
+        "compiledCompositionMatchesSubmitted": true,
+        "workerArtifactMatchesNativeDownload": true,
+        "templateRef": {
+          "templateId": "living_infinity_v1",
+          "version": "1.0.1",
+          "definitionHash": "6a41ada3809a2ec45a3b70756a7a86d9a64ac0eb1759a0be22f5fe67fd0ed966"
+        },
+        "actualNativeDownload": true,
+        "picture": {
+          "fullDecode": true,
+          "frames": 192,
+          "fps": 24,
+          "seconds": 8,
+          "width": 1280,
+          "height": 720,
+          "movieSha256": "bb19c3c3db0b9eeee99260d2f0e2ecf0b16379acc35cc6c76b85245ecd7db602",
+          "sampleTimes": [
+            0,
+            0.25,
+            1.5,
+            2.5,
+            3.5,
+            4.5,
+            5.5,
+            6.5,
+            7.958333
+          ],
+          "pairs": [
+            {
+              "requested": 0.25,
+              "measuredProgrammeTime": 0.25,
+              "exportFrameIndex": 6,
+              "psnrDb": 46.14216191577387,
+              "passClaimed": false
+            },
+            {
+              "requested": 1.5,
+              "measuredProgrammeTime": 1.5,
+              "exportFrameIndex": 36,
+              "psnrDb": 44.957668220271344,
+              "passClaimed": false
+            },
+            {
+              "requested": 3.5,
+              "measuredProgrammeTime": 3.5,
+              "exportFrameIndex": 84,
+              "psnrDb": 44.71969935699693,
+              "passClaimed": false
+            },
+            {
+              "requested": 5.5,
+              "measuredProgrammeTime": 5.5,
+              "exportFrameIndex": 132,
+              "psnrDb": 42.26860017538405,
+              "passClaimed": false
+            },
+            {
+              "requested": 7.5,
+              "measuredProgrammeTime": 7.5,
+              "exportFrameIndex": 180,
+              "psnrDb": 43.981199770722704,
+              "passClaimed": false
+            }
+          ],
+          "minimumPsnrDb": 42.26860017538405,
+          "wholeParityQualified": false
+        },
+        "playback": {
+          "live": {
+            "complete": true,
+            "programmeSeconds": 8,
+            "elapsedMs": 18696,
+            "mediaTime": 7.958333,
+            "total": 245,
+            "dropped": 52,
+            "corrupted": 0,
+            "captureSeconds": 18.5239999294281,
+            "captureFrames": 264,
+            "captureFps": 14.25178152697988
+          },
+          "finished": {
+            "complete": true,
+            "programmeSeconds": 8,
+            "elapsedMs": 8034,
+            "mediaTime": 7.96343,
+            "total": 192,
+            "dropped": 0,
+            "corrupted": 0,
+            "captureSeconds": 7.983000040054321,
+            "captureFrames": 93,
+            "captureFps": 11.649755672476129
+          }
+        },
+        "resource": {
+          "executionId": "92f037a4d9035ad8075e5444208a070473f8af827078db38b7b0d37a114b54fb",
+          "wallSeconds": 573.9934847530094,
+          "cpuSeconds": 662.315394,
+          "peakRssKiB": 1569596,
+          "providerChargesStarted": false,
+          "invoiceCostMicros": null,
+          "termination": {
+            "code": 0,
+            "signal": null,
+            "startedAt": "2026-11-04T08:14:18.717Z",
+            "finishedAt": "2026-11-04T08:23:53.144Z"
+          }
+        }
+      }
+    ],
+    "nativeSecondsPerFilm": 8,
+    "nativeFramesPerFilm": 192,
+    "nativeFps": 24,
+    "selectedNativeFilms": 6,
+    "nativeExecutions": 9,
+    "selectedExecutions": 6,
+    "retainedRejectedFashionExports": 1,
+    "retainedFailedTypeExecutions": 2,
+    "local402BeforeAdmissionNotAnExecution": true,
+    "retainedUnicodeStudyNotExported": true,
+    "templateRegressionTests": 81,
+    "localStorageReadAndOwnedSourceTests": 5,
+    "workerProofTests": 5,
+    "automatedTests": 91,
+    "candidateBuilds": 3,
+    "welcomeChecksPerBuild": 8,
+    "normalSignInAndHelpPerBuild": true,
+    "actualStudioFrontend": true,
+    "sharedManualAndDirectorTemplateGraph": true,
+    "directorVisualInference": false,
+    "ordinaryNativeEditableProjects": true,
+    "exactBackupRequestWorkerDownloadBinding": true,
+    "independentRestoreEditUndoRedo": true,
+    "completeLiveAndFinishedTimelineRecordings": true,
+    "pausedPairs": 30,
+    "sampledExportFrames": 54,
+    "minimumPsnrDb": 24.9411505306224,
+    "originalStockSourcesPreserved": 7,
+    "selectedStockSources": 6,
+    "originalWhatsAppSourcesPreserved": 4,
+    "priorDeliveryFilesUnchanged": 240,
+    "priorDirectories": {
+      "/home/tibule12/Videos/WhatsApp Director - 2026-11-03": 48,
+      "/home/tibule12/Videos/WhatsApp Director - 2026-11-03/Revision 2 - Cut through": 45,
+      "/home/tibule12/Videos/WhatsApp Director - 2026-11-03/Other ways - No titles": 42,
+      "/home/tibule12/Videos/WhatsApp Studio - 2026-11-04 - Prism cuts": 47,
+      "/home/tibule12/Videos/WhatsApp Studio - 2026-11-04 - Momentum": 58
+    },
+    "originalDemoWindowRestored": true,
+    "activeOperationsAtHandoff": 0,
+    "localStorageReadRepair": "One extra read for connection-reset/pipe/refused failures only; denials/hash/generation errors and job execution are never retried by the helper.",
+    "failedTypeCauses": [
+      "Unexpired music source: Storage-emulator socket hang up surfaced as loopback HTTP5XX.",
+      "Second job reused the old saved music URL, expired before dispatch; canonical late audio read returned HTTP403."
+    ],
+    "ownedAudioRenewal": "Admission includes owned music/external cue sources; immediately before verified local worker dispatch, refresh credentials only after exact owner/content hash/generation checks. Existing 30-minute TTL and expired-link HTTP403 remain unchanged.",
+    "allFilmFramesFullyDecoded": true,
+    "fullParityQualified": false,
+    "creativeApproval": false,
+    "humanListeningQualified": false,
+    "readinessPromotion": false,
+    "productionDeployment": false,
+    "publicShowroomQualified": false,
+    "paidCalls": 0,
+    "productionWrites": 0,
+    "remaining": [
+      "S02 exact independent source clocks/first-seek decoding, whole colour/alpha/edge parity and real-time live throughput; pair metrics are diagnostic.",
+      "Human listening and owner creative acceptance of these six short authored samples.",
+      "S04 motion/glyph depth and autonomous Director visual inference remain incomplete; these are deterministic authored recipes.",
+      "S03 safe deletion of bound matte sources remains an existing product gap.",
+      "Local selectable drafts require normal review/release; they are not deployed or public/showroom-qualified."
+    ],
+    "nextTask": "Owner review of six reusable styles; continue S02 source clocks/first-seek, colour/alpha/edges and live throughput, then shared S04/S03."
   }
 }

@@ -7,6 +7,8 @@ import { buildStudioGraphicsPackage } from './studioGraphicsPackage';
 import { studioMotionPropertiesForTarget } from './studioMotionProperties';
 import { validateSpatialCurve } from './studioAutomation';
 import { validateStudioGroupComposite } from './studioGroups';
+import { buildProceduralColorCube } from './studioColorCube';
+import { buildBeatSyncedGradePulses, normalizeFinishKeyframes } from './studioFinishKeyframes';
 
 const only = (value, fields) => {
   if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).some(k => !fields.includes(k)))
@@ -50,8 +52,53 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
     return legacy[property] || [field.min, field.max];
   };
   for (const action of plan.actions) {
-    only(action, ['type', 'id', 'name', 'startTime', 'duration', 'transform', 'text', 'sourceMediaId', 'sourceStart', 'perspective', 'mask', 'targetId', 'parentId', 'matteSourceId', 'mode', 'keys', 'grade', 'beforeId', 'property']);
+    only(action, ['type', 'id', 'name', 'startTime', 'duration', 'transform', 'text', 'sourceMediaId', 'sourceStart', 'mediaFit', 'perspective', 'mask', 'targetId', 'parentId', 'matteSourceId', 'mode', 'keys', 'grade', 'beforeId', 'property']);
+    only(action, ['type', 'id', 'name', 'startTime', 'duration', 'transform', 'text', 'sourceMediaId', 'sourceStart', 'mediaFit', 'perspective', 'mask', 'motionDrivers', 'targetId', 'parentId', 'matteSourceId', 'mode', 'keys', 'grade', 'advancedColor', 'beatSyncPulses', 'beats', 'beforeId', 'property']);
     const type = action.type;
+    if (type === 'finish_grade') {
+      const grade = action.grade || {};
+      only(grade, ['preset', 'precisionGrade', 'exposureStops', 'brightness', 'contrast', 'saturation', 'lift', 'gamma', 'gain', 'temperature', 'tint', 'vignette', 'clarity']);
+      const nextFinishFx = {
+        ...(snapshot.finishFx || {}),
+        ...grade,
+        precisionGrade: grade.precisionGrade !== false,
+      };
+      let nextAdvancedColor = snapshot.advancedColor || null;
+      if (action.advancedColor && typeof action.advancedColor === 'object') {
+        const adv = action.advancedColor;
+        const lutPresetId = typeof adv.lutPresetId === 'string' ? adv.lutPresetId : '';
+        const lut = adv.lut || (lutPresetId ? buildProceduralColorCube(lutPresetId, 17) : null);
+        nextAdvancedColor = {
+          curve: {
+            shadows: finite(adv.curve?.shadows ?? 0, -0.45, 0.45),
+            midtones: finite(adv.curve?.midtones ?? 0, -0.45, 0.45),
+            highlights: finite(adv.curve?.highlights ?? 0, -0.45, 0.45),
+          },
+          hsl: {
+            hue: finite(adv.hsl?.hue ?? 0, -180, 180),
+            saturation: finite(adv.hsl?.saturation ?? 1, 0, 2),
+            luminance: finite(adv.hsl?.luminance ?? 0, -0.5, 0.5),
+          },
+          lut,
+          lutData: lut,
+          lutPresetId,
+          lutName: lutPresetId ? `${lutPresetId}.cube` : (adv.lutName || ''),
+          lutIntensity: finite(adv.lutIntensity ?? 0.85, 0, 1),
+        };
+        nextFinishFx.advancedColor = nextAdvancedColor;
+      }
+      snapshot = {
+        ...snapshot,
+        finishFx: nextFinishFx,
+        advancedColor: nextAdvancedColor,
+        finishKeyframes: action.beatSyncPulses
+          ? buildBeatSyncedGradePulses(nextFinishFx, Array.isArray(action.beats) ? action.beats : [], {
+              existingKeyframes: normalizeFinishKeyframes(snapshot.finishKeyframes || []),
+            })
+          : normalizeFinishKeyframes(snapshot.finishKeyframes || []),
+      };
+      continue;
+    }
     if (['null', 'title', 'media_plane', 'adjustment'].includes(type)) {
       string(action.id); string(action.name, 100);
       if (ids.has(action.id) || overlays.some(o => o.id === action.id)) throw Error('Duplicate scene layer identifier.');
@@ -61,16 +108,22 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
       if (type === 'adjustment') {
         only(action.grade || {}, ['exposureStops', 'brightness', 'contrast', 'saturation']);
         const limits = { exposureStops: [-2, 2], brightness: [.65, 1.4], contrast: [.65, 1.75], saturation: [0, 1.8] };
+        only(action.grade || {}, ['exposureStops', 'brightness', 'contrast', 'saturation', 'lift', 'gamma', 'gain', 'temperature', 'tint', 'vignette']);
+        const limits = { exposureStops: [-2, 2], brightness: [.65, 1.4], contrast: [.65, 1.75], saturation: [0, 1.8], lift: [-0.5, 0.5], gamma: [0.35, 2.2], gain: [0.4, 2.0], temperature: [-1, 1], tint: [-1, 1], vignette: [0, 0.85] };
         Object.entries(action.grade || {}).forEach(([key, value]) => finite(value, ...limits[key]));
         adjustmentLayers.push({ id, name: action.name, startTime, duration: length, enabled: true, intensity: 100, opacity: 1, finishFx: { ...action.grade } });
         continue;
       }
       const layer = { id, name: action.name, ...transform(action.transform), startTime, duration: length,
         anchorX: 50, anchorY: 50, shadow: 'none', blendMode: 'normal', animation: { enter: 'none', exit: 'none' } };
+        anchorX: 50, anchorY: 50, shadow: 'none', blendMode: 'normal', animation: { enter: 'none', exit: 'none' },
+        ...(action.motionDrivers && typeof action.motionDrivers === 'object' ? { motionDrivers: JSON.parse(JSON.stringify(action.motionDrivers)) } : {}) };
       if (type === 'null') Object.assign(layer, { type: 'text', text: '', isNullRig: true });
       if (type === 'title') Object.assign(layer, { type: 'text', text: string(action.text, 180), bg: 'transparent',
         color: '#f1ede4', fontFamily: 'Inter', fontWeight: 800, width: 60, textAlign: 'center' });
       if (type === 'media_plane') {
+        if (action.mediaFit !== undefined && !['contain', 'cover'].includes(action.mediaFit))
+          throw Error('Scene media fit must be contain or cover.');
         const media = (snapshot.projectMedia || []).find(item => item.id === action.sourceMediaId && item.status === 'ready' && item.storagePath && item.url);
         if (!media) throw Error('Choose an available saved project video for the scene.');
         const sourceStart = finite(action.sourceStart ?? 0, 0, Number(media.duration));
@@ -78,7 +131,7 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
         Object.assign(layer, { type: 'video', src: media.url, file: media.file, sourceMediaId: media.id,
           sourceDuration: Number(media.duration), contentHash: media.contentHash || null,
           sourceStoragePath: media.storagePath, sourceStartTime: sourceStart, width: 70, height: 70,
-          bRollMode: 'pip', mediaFit: 'contain', frameShape: 'edge', borderRadius: 0, volume: 0, muted: true,
+          bRollMode: 'pip', mediaFit: action.mediaFit || 'contain', frameShape: 'edge', borderRadius: 0, volume: 0, muted: true,
           layerShadow: {enabled: true, color: '#000000', opacity: .35, blur: 12, x: 0, y: 16},
           ...(action.perspective ? { perspective: action.perspective } : {}) });
         if (action.mask) {

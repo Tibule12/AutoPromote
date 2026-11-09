@@ -1,0 +1,255 @@
+{
+  "movie": "reports/studio-preview-throughput-20261102/final-native-review/native-motion-flow/final.mp4",
+  "fps": 24,
+  "comparison": "Exact measured live programme time to decoded CFR frame; export resized once to live monitor size.",
+  "assessment": "Diagnostic measurements, not a calibrated whole-scene passing threshold or creative approval.",
+  "samples": [
+    {
+      "time": 0.25,
+      "exportFrame": 6,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "6",
+      "mae": 1.4516208037369456,
+      "psnr": 36.428354734980424,
+      "ssim": 0.9904851702164771,
+      "size": [
+        1016,
+        572
+      ]
+    },
+    {
+      "time": 3.0,
+      "exportFrame": 72,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "72",
+      "mae": 9.10161828001395,
+      "psnr": 27.51214949218727,
+      "ssim": 0.9191670559910553,
+      "size": [
+        1016,
+        572
+      ]
+    },
+    {
+      "time": 6.0,
+      "exportFrame": 144,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "0",
+      "mae": 7.699014486169998,
+      "psnr": 29.414130635919335,
+      "ssim": 0.948883939792888,
+      "size": [
+        1016,
+        572
+      ]
+    },
+    {
+      "time": 11.5,
+      "exportFrame": 276,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "36",
+      "mae": 7.784352458565057,
+      "psnr": 27.18190134871029,
+      "ssim": 0.8415325413493816,
+      "size": [
+        1016,
+        572
+      ]
+    },
+    {
+      "time": 17.0,
+      "exportFrame": 408,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "24",
+      "mae": 6.090411802764165,
+      "psnr": 30.351098575165473,
+      "ssim": 0.9305259145327858,
+      "size": [
+        1016,
+        572
+      ]
+    },
+    {
+      "time": 20.25,
+      "exportFrame": 486,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "6",
+      "mae": 7.001370266872235,
+      "psnr": 28.705860214541342,
+      "ssim": 0.9414608129364406,
+      "size": [
+        1016,
+        572
+      ]
+    },
+    {
+      "time": 21.0,
+      "exportFrame": 504,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "24",
+      "mae": 7.1105057999743035,
+      "psnr": 27.761120779168596,
+      "ssim": 0.9118582716538037,
+      "size": [
+        1016,
+        572
+      ]
+    },
+    {
+      "time": 21.75,
+      "exportFrame": 522,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "42",
+      "mae": 4.491039636216802,
+      "psnr": 29.986782254659975,
+      "ssim": 0.9496128920087682,
+      "size": [
+        1016,
+        572
+      ]
+    },
+    {
+      "time": 22.5,
+      "exportFrame": 540,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "60",
+      "mae": 3.5138139419635483,
+      "psnr": 30.94478599722182,
+      "ssim": 0.958031108274016,
+      "size": [
+        1016,
+        572
+      ]
+    },
+    {
+      "time": 23.5,
+      "exportFrame": 564,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "84",
+      "mae": 3.481337642016776,
+      "psnr": 31.13000576502982,
+      "ssim": 0.9542533366603188,
+      "size": [
+        1016,
+        572
+      ]
+    },
+    {
+      "time": 24.25,
+      "exportFrame": 582,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "6",
+      "mae": 6.870274328689683,
+      "psnr": 20.882356226257706,
+      "ssim": 0.9075049333506766,
+      "size": [
+        1016,
+        572
+      ]
+    },
+    {
+      "time": 25.0,
+      "exportFrame": 600,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "24",
+      "mae": 2.2026652809133123,
+      "psnr": 35.48899731150584,
+      "ssim": 0.9684649005691144,
+      "size": [
+        1016,
+        572
+      ]
+    },
+    {
+      "time": 26.0,
+      "exportFrame": 624,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "48",
+      "mae": 2.3176128333608648,
+      "psnr": 35.43498633062907,
+      "ssim": 0.9652181080312888,
+      "size": [
+        1016,
+        572
+      ]
+    },
+    {
+      "time": 27.0,
+      "exportFrame": 648,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "72",
+      "mae": 3.354238936916102,
+      "psnr": 33.29590630343023,
+      "ssim": 0.9398716222679255,
+      "size": [
+        1016,
+        572
+      ]
+    },
+    {
+      "time": 27.916666666666664,
+      "exportFrame": 670,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "94",
+      "mae": 3.781278678670411,
+      "psnr": 33.42166339836544,
+      "ssim": 0.9204883296613041,
+      "size": [
+        1016,
+        572
+      ]
+    },
+    {
+      "time": 28.0,
+      "exportFrame": 672,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "0",
+      "mae": 4.182482953398308,
+      "psnr": 31.30604447578172,
+      "ssim": 0.8514073945726603,
+      "size": [
+        1016,
+        572
+      ]
+    },
+    {
+      "time": 28.083333333333332,
+      "exportFrame": 674,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "2",
+      "mae": 4.172206238643247,
+      "psnr": 31.34534405218115,
+      "ssim": 0.8497749900649918,
+      "size": [
+        1016,
+        572
+      ]
+    },
+    {
+      "time": 31.5,
+      "exportFrame": 756,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "84",
+      "mae": 1.3336132371565443,
+      "psnr": 44.843121112032264,
+      "ssim": 0.9993109540345747,
+      "size": [
+        1016,
+        572
+      ]
+    },
+    {
+      "time": 35.91666666666667,
+      "exportFrame": 862,
+      "liveSampling": "accurate-paused",
+      "sourceFrame": "190",
+      "mae": 1.9826712001908853,
+      "psnr": 31.845357508560017,
+      "ssim": 0.9858363341929889,
+      "size": [
+        1016,
+        572
+      ]
+    }
+  ]
+}

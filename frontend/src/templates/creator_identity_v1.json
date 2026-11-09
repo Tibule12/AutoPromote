@@ -1,0 +1,1159 @@
+{
+  "schemaVersion": 1,
+  "templateId": "creator_identity_v1",
+  "version": "1.0.0",
+  "label": "Creator identity \u2014 four-source motion",
+  "status": "draft",
+  "canonicalContractVersion": 1,
+  "compiler": "studioRenderCompiler",
+  "renderer": "render_viral_clip_impl",
+  "surfaces": [
+    "studio",
+    "director",
+    "welcome"
+  ],
+  "workflow": "studio",
+  "categoryIds": [
+    "motion_graphics"
+  ],
+  "inputSlots": [
+    {
+      "id": "logo",
+      "type": "image",
+      "required": false
+    },
+    {
+      "id": "brandColour",
+      "type": "colour",
+      "required": true
+    },
+    {
+      "id": "headline",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "featureOne",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "featureTwo",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "callToAction",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "hookFootage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "productFootage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "detailFootage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "screenFootage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "music",
+      "type": "audio",
+      "required": false
+    }
+  ],
+  "supportedAspects": [
+    "16:9"
+  ],
+  "durationTicks": 2160000,
+  "qualification": {
+    "studioLifecycle": "unverified",
+    "directorInstantiation": "unverified",
+    "creativeQuality": "unapproved",
+    "previewFinalParity": "unverified"
+  },
+  "executionDefinition": {
+    "clock": 90000,
+    "defaultAspect": "16:9",
+    "sequence": [
+      {
+        "slot": "hookFootage",
+        "offset": 0.25,
+        "duration": 3,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      {
+        "slot": "detailFootage",
+        "offset": 0,
+        "duration": 6,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      {
+        "slot": "screenFootage",
+        "offset": 2,
+        "duration": 5,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      {
+        "slot": "productFootage",
+        "offset": 7,
+        "duration": 7,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      {
+        "slot": "hookFootage",
+        "offset": 0.25,
+        "duration": 3,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      }
+    ],
+    "titles": [
+      {
+        "id": "off",
+        "start": 0.18,
+        "duration": 2.67,
+        "scale": 3.8,
+        "portraitScale": 1,
+        "x": 24,
+        "y": 32,
+        "width": 96,
+        "colour": "white",
+        "align": "center",
+        "weight": 900,
+        "shadow": "none",
+        "motion": {
+          "enterY": 8,
+          "enterX": 0,
+          "enterScale": 0.94,
+          "enterSeconds": 0.23,
+          "settleSeconds": 0.48,
+          "exitSeconds": 0.15,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "slot": "headline",
+        "line": 0
+      },
+      {
+        "id": "script",
+        "start": 0.4,
+        "duration": 2.45,
+        "scale": 2.6,
+        "portraitScale": 1,
+        "x": 76,
+        "y": 66,
+        "width": 96,
+        "colour": "brand",
+        "align": "center",
+        "weight": 900,
+        "shadow": "none",
+        "motion": {
+          "enterY": 8,
+          "enterX": 0,
+          "enterScale": 0.94,
+          "enterSeconds": 0.23,
+          "settleSeconds": 0.48,
+          "exitSeconds": 0.15,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "slot": "headline",
+        "line": 1
+      },
+      {
+        "id": "three",
+        "start": 3.35,
+        "duration": 5.25,
+        "scale": 0.7,
+        "portraitScale": 1,
+        "x": 50,
+        "y": 13,
+        "width": 96,
+        "colour": "white",
+        "align": "center",
+        "weight": 900,
+        "shadow": "none",
+        "motion": {
+          "enterY": 8,
+          "enterX": 0,
+          "enterScale": 0.94,
+          "enterSeconds": 0.23,
+          "settleSeconds": 0.48,
+          "exitSeconds": 0.15,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "slot": "featureOne",
+        "line": 0
+      },
+      {
+        "id": "one",
+        "start": 3.55,
+        "duration": 5.05,
+        "scale": 0.7,
+        "portraitScale": 1,
+        "x": 50,
+        "y": 88,
+        "width": 96,
+        "colour": "brand",
+        "align": "center",
+        "weight": 900,
+        "shadow": "none",
+        "motion": {
+          "enterY": 8,
+          "enterX": 0,
+          "enterScale": 0.94,
+          "enterSeconds": 0.23,
+          "settleSeconds": 0.48,
+          "exitSeconds": 0.15,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "slot": "featureOne",
+        "line": 1
+      },
+      {
+        "id": "build",
+        "start": 9.25,
+        "duration": 4.550000000000001,
+        "scale": 0.9,
+        "portraitScale": 1,
+        "x": 50,
+        "y": 15,
+        "width": 96,
+        "colour": "white",
+        "align": "center",
+        "weight": 900,
+        "shadow": "none",
+        "motion": {
+          "enterY": 8,
+          "enterX": 0,
+          "enterScale": 0.94,
+          "enterSeconds": 0.23,
+          "settleSeconds": 0.48,
+          "exitSeconds": 0.15,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "slot": "featureTwo",
+        "line": 0
+      },
+      {
+        "id": "in",
+        "start": 14.3,
+        "duration": 2.3000000000000007,
+        "scale": 4,
+        "portraitScale": 1,
+        "x": 20,
+        "y": 43,
+        "width": 96,
+        "colour": "brand",
+        "align": "center",
+        "weight": 900,
+        "shadow": "none",
+        "motion": {
+          "enterY": 8,
+          "enterX": 0,
+          "enterScale": 0.94,
+          "enterSeconds": 0.23,
+          "settleSeconds": 0.48,
+          "exitSeconds": 0.15,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "literal": "IN"
+      },
+      {
+        "id": "your",
+        "start": 16.6,
+        "duration": 2.1999999999999993,
+        "scale": 2.7,
+        "portraitScale": 1,
+        "x": 21,
+        "y": 51,
+        "width": 96,
+        "colour": "white",
+        "align": "center",
+        "weight": 900,
+        "shadow": "none",
+        "motion": {
+          "enterY": 8,
+          "enterX": 0,
+          "enterScale": 0.94,
+          "enterSeconds": 0.23,
+          "settleSeconds": 0.48,
+          "exitSeconds": 0.15,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "literal": "YOUR"
+      },
+      {
+        "id": "own",
+        "start": 18.8,
+        "duration": 2.0,
+        "scale": 2.9,
+        "portraitScale": 1,
+        "x": 79,
+        "y": 51,
+        "width": 96,
+        "colour": "brand",
+        "align": "center",
+        "weight": 900,
+        "shadow": "none",
+        "motion": {
+          "enterY": 8,
+          "enterX": 0,
+          "enterScale": 0.94,
+          "enterSeconds": 0.23,
+          "settleSeconds": 0.48,
+          "exitSeconds": 0.15,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "literal": "OWN"
+      },
+      {
+        "id": "you-matte",
+        "start": 21,
+        "duration": 3,
+        "scale": 6,
+        "portraitScale": 1,
+        "x": 50,
+        "y": 49,
+        "width": 96,
+        "colour": "white",
+        "align": "center",
+        "weight": 900,
+        "shadow": "none",
+        "motion": {
+          "enterY": 8,
+          "enterX": 0,
+          "enterScale": 0.94,
+          "enterSeconds": 0.23,
+          "settleSeconds": 0.48,
+          "exitSeconds": 0.15,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "literal": "YOU"
+      },
+      {
+        "id": "cta",
+        "start": 21.3,
+        "duration": 2.6999999999999993,
+        "scale": 0.7,
+        "portraitScale": 1,
+        "x": 50,
+        "y": 84,
+        "width": 96,
+        "colour": "brand",
+        "align": "center",
+        "weight": 900,
+        "shadow": "none",
+        "motion": {
+          "enterY": 8,
+          "enterX": 0,
+          "enterScale": 0.94,
+          "enterSeconds": 0.23,
+          "settleSeconds": 0.48,
+          "exitSeconds": 0.15,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "slot": "callToAction"
+      },
+      {
+        "id": "tag",
+        "start": 0.3,
+        "duration": 2.5500000000000003,
+        "scale": 0.35,
+        "portraitScale": 1,
+        "x": 50,
+        "y": 91,
+        "width": 96,
+        "colour": "brand",
+        "align": "center",
+        "weight": 900,
+        "shadow": "none",
+        "motion": {
+          "enterY": 8,
+          "enterX": 0,
+          "enterScale": 0.94,
+          "enterSeconds": 0.23,
+          "settleSeconds": 0.48,
+          "exitSeconds": 0.15,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "literal": "A CREATOR STUDY / 01"
+      }
+    ],
+    "logo": {
+      "x": 50,
+      "y": 94,
+      "width": 28,
+      "height": 7,
+      "scale": 1,
+      "opacity": 0.8,
+      "start": 21,
+      "duration": 3
+    },
+    "animation": {
+      "enterSeconds": 0.2,
+      "settleSeconds": 0.45,
+      "exitSeconds": 0.12,
+      "curve": [
+        0.16,
+        1,
+        0.3,
+        1
+      ]
+    },
+    "music": {
+      "volume": 0.6,
+      "fadeIn": 0.05,
+      "fadeOut": 1.2
+    },
+    "soundCues": [
+      {
+        "tone": "airy_whoosh",
+        "time": 2.8,
+        "duration": 0.4,
+        "volume": 0.13
+      },
+      {
+        "tone": "airy_whoosh",
+        "time": 8.8,
+        "duration": 0.4,
+        "volume": 0.13
+      },
+      {
+        "tone": "airy_whoosh",
+        "time": 13.8,
+        "duration": 0.4,
+        "volume": 0.13
+      },
+      {
+        "tone": "airy_whoosh",
+        "time": 20.8,
+        "duration": 0.4,
+        "volume": 0.13
+      }
+    ],
+    "sourceKeyframes": [
+      {
+        "property": "opacity",
+        "time": 0,
+        "value": 1,
+        "easing": "hold"
+      },
+      {
+        "property": "opacity",
+        "time": 3,
+        "value": 0.12,
+        "easing": "hold"
+      },
+      {
+        "property": "opacity",
+        "time": 9,
+        "value": 0.06,
+        "easing": "hold"
+      },
+      {
+        "property": "opacity",
+        "time": 14,
+        "value": 1,
+        "easing": "hold"
+      },
+      {
+        "property": "opacity",
+        "time": 21,
+        "value": 0,
+        "easing": "hold"
+      },
+      {
+        "property": "opacity",
+        "time": 24,
+        "value": 0,
+        "easing": "hold"
+      }
+    ],
+    "sceneActions": [
+      {
+        "type": "media_plane",
+        "id": "Offset portrait 1",
+        "name": "Offset portrait 1",
+        "sourceSlot": "detailFootage",
+        "sourceStart": 0.0,
+        "startTime": 3,
+        "duration": 6,
+        "transform": {
+          "x": 24,
+          "y": 50,
+          "scale": 1.35,
+          "opacity": 1
+        }
+      },
+      {
+        "type": "keys",
+        "targetId": "Offset portrait 1",
+        "keys": [
+          {
+            "property": "x",
+            "time": 3,
+            "value": -46,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "x",
+            "time": 3.35,
+            "value": 24,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "x",
+            "time": 8.6,
+            "value": 24,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "x",
+            "time": 9,
+            "value": -46,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "type": "keys",
+        "targetId": "Offset portrait 1",
+        "keys": [
+          {
+            "property": "opacity",
+            "time": 3,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 3.08,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 8.7,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 9,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "type": "media_plane",
+        "id": "Offset portrait 2",
+        "name": "Offset portrait 2",
+        "sourceSlot": "detailFootage",
+        "sourceStart": 0.65,
+        "startTime": 3,
+        "duration": 6,
+        "transform": {
+          "x": 50,
+          "y": 50,
+          "scale": 1.35,
+          "opacity": 1
+        }
+      },
+      {
+        "type": "keys",
+        "targetId": "Offset portrait 2",
+        "keys": [
+          {
+            "property": "x",
+            "time": 3,
+            "value": 120,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "x",
+            "time": 3.44,
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "x",
+            "time": 8.6,
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "x",
+            "time": 9,
+            "value": 120,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "type": "keys",
+        "targetId": "Offset portrait 2",
+        "keys": [
+          {
+            "property": "opacity",
+            "time": 3,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 3.16,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 8.7,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 9,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "type": "media_plane",
+        "id": "Offset portrait 3",
+        "name": "Offset portrait 3",
+        "sourceSlot": "detailFootage",
+        "sourceStart": 1.3,
+        "startTime": 3,
+        "duration": 6,
+        "transform": {
+          "x": 76,
+          "y": 50,
+          "scale": 1.35,
+          "opacity": 1
+        }
+      },
+      {
+        "type": "keys",
+        "targetId": "Offset portrait 3",
+        "keys": [
+          {
+            "property": "x",
+            "time": 3,
+            "value": 6,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "x",
+            "time": 3.5300000000000002,
+            "value": 76,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "x",
+            "time": 8.6,
+            "value": 76,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "x",
+            "time": 9,
+            "value": 6,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "type": "keys",
+        "targetId": "Offset portrait 3",
+        "keys": [
+          {
+            "property": "opacity",
+            "time": 3,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 3.24,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 8.7,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 9,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "type": "media_plane",
+        "id": "Moving screen",
+        "name": "Moving screen",
+        "sourceSlot": "screenFootage",
+        "sourceStart": 2,
+        "startTime": 9,
+        "duration": 5,
+        "transform": {
+          "x": 50,
+          "y": 50,
+          "scale": 1.22,
+          "opacity": 1
+        },
+        "perspective": {
+          "version": 1,
+          "corners": [
+            [
+              0,
+              8
+            ],
+            [
+              100,
+              0
+            ],
+            [
+              96,
+              100
+            ],
+            [
+              4,
+              91
+            ]
+          ]
+        }
+      },
+      {
+        "type": "keys",
+        "targetId": "Moving screen",
+        "keys": [
+          {
+            "property": "y",
+            "time": 9,
+            "value": 125,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "y",
+            "time": 9.7,
+            "value": 54,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "y",
+            "time": 13.4,
+            "value": 54,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "y",
+            "time": 14,
+            "value": -50,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "type": "keys",
+        "targetId": "Moving screen",
+        "keys": [
+          {
+            "property": "rotation",
+            "time": 9,
+            "value": -8,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "rotation",
+            "time": 9.7,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "rotation",
+            "time": 13.4,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "rotation",
+            "time": 14,
+            "value": 6,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "type": "keys",
+        "targetId": "Moving screen",
+        "keys": [
+          {
+            "property": "opacity",
+            "time": 9,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 9.08,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 13.8,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 14,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "type": "media_plane",
+        "id": "Live closing fill",
+        "name": "Live closing fill",
+        "sourceSlot": "hookFootage",
+        "sourceStart": 0.25,
+        "startTime": 21,
+        "duration": 3,
+        "transform": {
+          "x": 50,
+          "y": 50,
+          "scale": 1.4285714285714286,
+          "opacity": 1
+        },
+        "mediaFit": "cover"
+      },
+      {
+        "type": "matte",
+        "targetId": "Live closing fill",
+        "matteSourceId": "you-matte",
+        "mode": "alpha"
+      },
+      {
+        "type": "move_layer",
+        "targetId": "Live closing fill",
+        "beforeId": "cta"
+      }
+    ],
+    "directorDescription": "Reviewed four-source creator brief: a clean portrait hook, three offset moving portraits, a projected screen interlude and footage-filled closing type. Deterministic authored recipe; no visual understanding or model inference.",
+    "defaultCopy": {
+      "headline": "OFF\nSCRIPT",
+      "featureOne": "THREE TAKES.\nONE MIND.",
+      "featureTwo": "BUILD\nYOUR WORLD.",
+      "callToAction": "MAKE IT YOURS",
+      "brandColour": "#d7ff43"
+    },
+    "muteOriginalAudio": false,
+    "framing": {
+      "forceAspect": true,
+      "mode": "off",
+      "positions": []
+    },
+    "videoFit": "contain"
+  }
+}

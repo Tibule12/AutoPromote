@@ -1,0 +1,12 @@
+{
+  "reviewText": "creator_identity_v1 · 1.0.0\n\nReviewed four-source creator brief: a clean portrait hook, three offset moving portraits, a projected screen interlude and footage-filled closing type. Deterministic authored recipe; no visual understanding or model inference.\n\nUses your saved inputs. No model job is started.Apply Director launchDismiss selection",
+  "sourceBindings": {
+    "hookFootage": "/home/tibule12/Videos/WhatsApp Video 2026-11-03 at 04.58.10 (1).mp4",
+    "detailFootage": "/home/tibule12/Videos/WhatsApp Video 2026-11-03 at 04.58.10 (2).mp4",
+    "productFootage": "/home/tibule12/Videos/WhatsApp Video 2026-11-03 at 04.58.10.mp4",
+    "screenFootage": "/home/tibule12/Videos/WhatsApp Video 2026-11-03 at 04.58.11.mp4"
+  },
+  "automaticTemplateSelection": true,
+  "visualInference": false,
+  "paidCalls": 0
+}

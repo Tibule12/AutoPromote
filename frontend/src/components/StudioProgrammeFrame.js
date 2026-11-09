@@ -38,8 +38,14 @@ export default function StudioProgrammeFrame({ clockRef, mapTime, time, enabled 
     const samePose=current.lastPoseTime===programmeTime;
     const nodes=current.nodes ||= [...stage.querySelectorAll('[data-studio-layer-id]')];
     const owners=new Map();
-    for(const node of nodes){const layer=current.layers.get(node.dataset.studioLayerId),video=node.querySelector('[data-studio-overlay-decoder]'),key=studioOverlayDecodeKey(layer);
-      if(key&&video&&!owners.has(key))owners.set(key,{layer,video});}
+    for(const node of nodes){
+      const layer=current.layers.get(node.dataset.studioLayerId);
+      if(!layer)continue;
+      const start=Number(layer.startTime??layer.start_time),duration=Number(current.getDuration?.(layer)??layer.duration);
+      const active=layer.isNullRig||!Number.isFinite(start)||!Number.isFinite(duration)||(programmeTime>=start&&programmeTime<start+duration);
+      const video=node.querySelector('[data-studio-overlay-decoder]'),key=studioOverlayDecodeKey(layer);
+      if(active&&key&&video&&!owners.has(key))owners.set(key,{layer,video});
+    }
     for (const node of nodes) {
       const layer = current.layers.get(node.dataset.studioLayerId);
       if (!layer) continue;
@@ -183,11 +189,11 @@ export default function StudioProgrammeFrame({ clockRef, mapTime, time, enabled 
     if (video && !video.seeking && video.readyState >= 2) paintRef.current(studioPresentedSourceTime(video));
   });
   useLayoutEffect(()=>{
-    const stage=marker.current?.parentElement,wanted=new Set(),keys=new Set();
+    const stage=marker.current?.parentElement,wanted=new Set();
     const update=()=>{const main=clockRef?.current;if(main&&!main.seeking&&main.readyState>=2)paintRef.current(studioPresentedSourceTime(main));};
     if(enabled)for(const node of stage?.querySelectorAll('[data-studio-layer-id]')||[]){
-      const layer=latest.current.layers.get(node.dataset.studioLayerId),key=studioOverlayDecodeKey(layer),video=node.querySelector('[data-studio-overlay-decoder]');
-      if(!key||!video||keys.has(key))continue;keys.add(key);wanted.add(video);
+      const video=node.querySelector('[data-studio-overlay-decoder]');
+      if(!video)continue;wanted.add(video);
       if(!overlayBindings.current.has(video)){
         let stop,pausedFrame;
         const cancelPaused=()=>{if(pausedFrame!==undefined){video.cancelVideoFrameCallback?.(pausedFrame);pausedFrame=undefined;}};

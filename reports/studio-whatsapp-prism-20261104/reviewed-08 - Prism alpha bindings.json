@@ -1,0 +1,33 @@
+{
+  "format": "autopromote-scene-actions",
+  "version": 1,
+  "projectId": "viral-project-d5df376b-ad19-48e6-bb01-21d2b3b4e1fb",
+  "baseRevision": 41,
+  "name": "08 - Prism alpha bindings",
+  "actions": [
+    {
+      "type": "matte",
+      "targetId": "scene-5d52ff9e-3c15-4a6a-8a11-d9c5edcf5171",
+      "matteSourceId": "graphic-dfa7d997-8660-4ee3-be60-23f372456762",
+      "mode": "alpha"
+    },
+    {
+      "type": "matte",
+      "targetId": "scene-288e7709-f44c-4792-a86b-4e0f0bc5f86e",
+      "matteSourceId": "graphic-f4b40f6b-aede-41d5-888a-bc0680369fe4",
+      "mode": "alpha"
+    },
+    {
+      "type": "matte",
+      "targetId": "scene-359c4af0-31cc-47fb-8a14-e6f5ac3fae9b",
+      "matteSourceId": "graphic-73ecc236-fca9-41db-b294-ae23aff7e954",
+      "mode": "alpha"
+    },
+    {
+      "type": "matte",
+      "targetId": "scene-7dffb5f8-a2af-4ba3-9935-58580739c64b",
+      "matteSourceId": "graphic-ec802054-ae99-44d9-ae9e-39f277749913",
+      "mode": "alpha"
+    }
+  ]
+}

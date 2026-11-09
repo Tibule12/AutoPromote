@@ -1,0 +1,10 @@
+{
+  "origin": "http://127.0.0.1:43927",
+  "build": "/tmp/autopromote-application-demo-5izIlF/build-whatsapp-director-20261103",
+  "mainAsset": "/static/js/main.08b72e5c.js",
+  "mainSha256": "825d193fe2628354a3e7815efc7fe9b30da9eb8680bbcc85613536ac410ae5c2",
+  "workerCwd": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031",
+  "apiPid": 3074618,
+  "candidateStopped": 2775633,
+  "normalLocalAppRetained": true
+}

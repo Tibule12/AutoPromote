@@ -253,23 +253,26 @@ export async function uploadSourceFileViaBackend({
   }
 
   const normalizedMediaType = mediaType || inferUploadMediaType(file);
-  const audioOwnerUid = normalizedMediaType === 'audio' && !getRuntimeE2EToken()
+  const studioAssetUpload = purpose === 'studio_project' &&
+    ['image', 'audio'].includes(normalizedMediaType) && file.size <= 16 * 1024 * 1024;
+  const mediaOwnerUid = (normalizedMediaType === 'audio' || studioAssetUpload) && !getRuntimeE2EToken()
     ? auth.currentUser?.uid : null;
-  const assertAudioOwner = () => {
-    if (normalizedMediaType === 'audio' && !getRuntimeE2EToken() &&
-        (!audioOwnerUid || auth.currentUser?.uid !== audioOwnerUid)) {
-      throw new Error('Your sign-in changed during the audio upload. Sign in again and retry.');
+  const assertUploadOwner = () => {
+    if ((normalizedMediaType === 'audio' || studioAssetUpload) && !getRuntimeE2EToken() &&
+        (!mediaOwnerUid || auth.currentUser?.uid !== mediaOwnerUid)) {
+      throw new Error('Your sign-in changed during the media upload. Sign in again and retry.');
     }
   };
-  assertAudioOwner();
-  const contentHash = normalizedMediaType === 'audio' ? await hashStudioSourceBlob(file) : null;
-  assertAudioOwner();
-  const bindAudioSource = result => {
-    assertAudioOwner();
+  assertUploadOwner();
+  const contentHash = normalizedMediaType === 'audio' || studioAssetUpload
+    ? await hashStudioSourceBlob(file) : null;
+  assertUploadOwner();
+  const bindSourceIdentity = result => {
+    assertUploadOwner();
     if (!contentHash) return result;
     if (result.contentHash && result.contentHash !== contentHash)
       throw new Error('Uploaded audio does not match the selected source bytes.');
-    return { ...result, contentHash, ...(audioOwnerUid ? { ownerUid: audioOwnerUid } : {}) };
+    return { ...result, contentHash, ...(mediaOwnerUid ? { ownerUid: mediaOwnerUid } : {}) };
   };
   // Small Studio videos need the same durable owner/purpose identity as large
   // recordings. General Firebase uploads cannot satisfy model source binding.
@@ -284,8 +287,18 @@ export async function uploadSourceFileViaBackend({
     });
     return { ...uploaded, uploadMode: "studio_resumable" };
   }
+  // Small authored Studio assets already have a bounded authenticated upload
+  // endpoint. Avoid an SDK upload followed by an unbounded getDownloadURL
+  // lookup for each generated layer; keep other clients and large media on
+  // their existing path. The backend retains the signed-in owner's boundary.
+  if (studioAssetUpload) {
+    return bindSourceIdentity(await uploadSourceFileViaBackendRequest({
+      file, token: token || getRuntimeE2EToken(), mediaType: normalizedMediaType,
+      fileName, onProgress, timeoutMs,
+    }));
+  }
   if (getRuntimeE2EToken()) {
-    return bindAudioSource(await uploadSourceFileViaBackendRequest({
+    return bindSourceIdentity(await uploadSourceFileViaBackendRequest({
       file,
       token: token || getRuntimeE2EToken(),
       mediaType: normalizedMediaType,
@@ -295,7 +308,7 @@ export async function uploadSourceFileViaBackend({
     }));
   }
   try {
-    return bindAudioSource(await uploadSourceFileViaFirebase({
+    return bindSourceIdentity(await uploadSourceFileViaFirebase({
       file,
       mediaType: normalizedMediaType,
       fileName,
@@ -304,9 +317,9 @@ export async function uploadSourceFileViaBackend({
       contentHash,
     }));
   } catch (firebaseError) {
-    assertAudioOwner();
+    assertUploadOwner();
     console.warn("Firebase resumable upload failed, falling back to backend upload:", firebaseError);
-    return bindAudioSource(await uploadSourceFileViaBackendRequest({
+    return bindSourceIdentity(await uploadSourceFileViaBackendRequest({
       file,
       token,
       mediaType: normalizedMediaType,

@@ -1,0 +1,8 @@
+{
+  "phase": "finished",
+  "nativeFrontend": true,
+  "normalDemoAuth": true,
+  "headless": true,
+  "muted": true,
+  "errors": []
+}

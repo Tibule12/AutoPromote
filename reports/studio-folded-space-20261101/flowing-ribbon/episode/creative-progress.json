@@ -1,0 +1,36 @@
+{
+  "userRejectedMovieSha256": "63d89bb692531b5ef7c6f80293cdce027158c3a886755fef578ccdf6e0e948fd",
+  "userVerdict": "not impressed",
+  "preservedPreviousDelivery": true,
+  "firstFoldStudy": "Rejected internally: segmented construction still reads as panels",
+  "newNativeProjectId": "viral-project-93f04c77-7a41-4c69-b546-f19182f3749d",
+  "newEdit": "36-second episode; removes detached city cutout and landscape columns; introduces a joined flowing picture at 20\u201328 seconds",
+  "nativeOverlays": 49,
+  "compiledLayersIncludingProgramme": 50,
+  "nativeKeys": 10968,
+  "reusableChanges": [
+    "Source region before ordinary media-plane projection",
+    "Eight linear/hold corner-coordinate motion channels",
+    "Convexity and minimum-edge checks across complete key intervals",
+    "Native Motion and Composite controls, history and canonical save/reopen",
+    "Secondary decoded-source sharing with immutable owned-source and timing checks",
+    "Bounded dense native job archive of at most 768 KiB compressed/4 MiB expanded"
+  ],
+  "unqualified": [
+    "Creative professional standard",
+    "Whole live/export picture parity",
+    "Real-time Studio throughput",
+    "Human listening",
+    "General 3D camera or continuous deformable mesh editing",
+    "Production readiness"
+  ],
+  "paidCalls": 0,
+  "productionWrites": false,
+  "status": "NATIVE_REVIEW_DELIVERED_PROFESSIONAL_TARGET_UNMET",
+  "outputSha256": "b02b6605a7d843541a6bd6d209bdfc2143ff10a6c4e69ab1825f0549e0ef4734",
+  "canonicalProjectHash": "d404953b0028dd8d83ed2c101137e8f6ce7914c7a85b7cd704a187cc709c33a0",
+  "wholePictureParityQualified": false,
+  "liveRealtimeQualified": false,
+  "firstPartialLiveCaptureCorrected": true,
+  "fullLiveEnd": 36
+}

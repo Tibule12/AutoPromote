@@ -1,0 +1,780 @@
+{
+  "format": "autopromote-scene-actions",
+  "version": 1,
+  "projectId": "viral-project-d5df376b-ad19-48e6-bb01-21d2b3b4e1fb",
+  "baseRevision": 24,
+  "name": "03 - Live fragments row 1",
+  "actions": [
+    {
+      "type": "media_plane",
+      "id": "P / live fragment 0-0",
+      "name": "P / live fragment 0-0",
+      "sourceMediaId": "launch-5217554acdae6f4623c8d9bb",
+      "sourceStart": 0.25,
+      "startTime": 0,
+      "duration": 3,
+      "mediaFit": "contain",
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      },
+      "mask": {
+        "enabled": true,
+        "shape": "polygon",
+        "path": "polygon(34.17% -0.08%,44.83% -0.08%,44.83% 25.08%,34.17% 25.08%)",
+        "feather": 0,
+        "inverted": false
+      }
+    },
+    {
+      "type": "keys",
+      "targetId": "P / live fragment 0-0",
+      "keys": [
+        {
+          "property": "x",
+          "time": 0,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 0.22,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 0.7,
+          "value": 44.0582389,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 1.65,
+          "value": 44.0582389,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 2.65,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 3,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / live fragment 0-0",
+      "keys": [
+        {
+          "property": "y",
+          "time": 0,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 0.22,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 0.7,
+          "value": 23.310741,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 1.65,
+          "value": 23.310741,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 2.65,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 3,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / live fragment 0-0",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 0,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 0.22,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 0.7,
+          "value": -25.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 1.65,
+          "value": -25.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 2.65,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "media_plane",
+      "id": "P / live fragment 0-1",
+      "name": "P / live fragment 0-1",
+      "sourceMediaId": "launch-5217554acdae6f4623c8d9bb",
+      "sourceStart": 0.25,
+      "startTime": 0,
+      "duration": 3,
+      "mediaFit": "contain",
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      },
+      "mask": {
+        "enabled": true,
+        "shape": "polygon",
+        "path": "polygon(44.67% -0.08%,55.33% -0.08%,55.33% 25.08%,44.67% 25.08%)",
+        "feather": 0,
+        "inverted": false
+      }
+    },
+    {
+      "type": "keys",
+      "targetId": "P / live fragment 0-1",
+      "keys": [
+        {
+          "property": "x",
+          "time": 0,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 0.22,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 0.76,
+          "value": 56.8440306,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 1.65,
+          "value": 56.8440306,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 2.7,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 3,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / live fragment 0-1",
+      "keys": [
+        {
+          "property": "y",
+          "time": 0,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 0.22,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 0.76,
+          "value": 34.372059,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 1.65,
+          "value": 34.372059,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 2.7,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 3,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / live fragment 0-1",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 0,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 0.22,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 0.76,
+          "value": -10.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 1.65,
+          "value": -10.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 2.7,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "media_plane",
+      "id": "P / live fragment 0-2",
+      "name": "P / live fragment 0-2",
+      "sourceMediaId": "launch-5217554acdae6f4623c8d9bb",
+      "sourceStart": 0.25,
+      "startTime": 0,
+      "duration": 3,
+      "mediaFit": "contain",
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      },
+      "mask": {
+        "enabled": true,
+        "shape": "polygon",
+        "path": "polygon(55.17% -0.08%,65.83% -0.08%,65.83% 25.08%,55.17% 25.08%)",
+        "feather": 0,
+        "inverted": false
+      }
+    },
+    {
+      "type": "keys",
+      "targetId": "P / live fragment 0-2",
+      "keys": [
+        {
+          "property": "x",
+          "time": 0,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 0.22,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 0.82,
+          "value": 68.3773714,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 1.65,
+          "value": 68.3773714,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 2.75,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 3,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / live fragment 0-2",
+      "keys": [
+        {
+          "property": "y",
+          "time": 0,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 0.22,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 0.82,
+          "value": 33.4198302,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 1.65,
+          "value": 33.4198302,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 2.75,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 3,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / live fragment 0-2",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 0,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 0.22,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 0.82,
+          "value": 4.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 1.65,
+          "value": 4.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 2.75,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        }
+      ]
+    }
+  ]
+}

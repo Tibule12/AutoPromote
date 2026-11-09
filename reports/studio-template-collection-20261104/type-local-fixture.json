@@ -1,0 +1,12 @@
+{
+  "localFixtureOnly": true,
+  "realPurchase": false,
+  "previousAdmission": "402 before any accepted render request; no job to resubmit",
+  "activeOperationsBefore": 0,
+  "availableBefore": 0,
+  "grant": {
+    "alreadyProcessed": false,
+    "balance": 2
+  },
+  "reason": "The retained extra fashion export used the original six-export local fixture."
+}

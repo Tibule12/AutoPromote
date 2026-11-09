@@ -1,0 +1,13 @@
+{
+  "projectId": "viral-project-d5df376b-ad19-48e6-bb01-21d2b3b4e1fb",
+  "projectHash": "8068a921de193de77c1e562ffdad0f2121e3cfff2a07d1d699f56f7b809691fa",
+  "movieSha256": "1c241e106ebeeec48cf80c445f7a20effca99cf0a6a12b2ed3a8eea54569a67c",
+  "submittedJobId": "viral_152fdecfe2885aecb61335b8eb095b0e56b15ffeef42afc2d0ea1e01069e9835",
+  "executionId": "c5c1ae25fb211323467bca7232404e5c50a845a95f342dc1b9d090abf67b2d73",
+  "nativeBackupMatchesRenderedDocument": true,
+  "compiledCompositionMatchesSubmitted": true,
+  "workerArtifactMatchesDownload": true,
+  "actualNativeDownload": true,
+  "ownedCompletedJobValidatedInNativeUi": true,
+  "observerRecoveredWithoutResubmission": false
+}

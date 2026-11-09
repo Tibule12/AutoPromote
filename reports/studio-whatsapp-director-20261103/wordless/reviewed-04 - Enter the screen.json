@@ -1,0 +1,452 @@
+{
+  "format": "autopromote-scene-actions",
+  "version": 1,
+  "projectId": "viral-project-b3c8d7e9-cdff-4bdd-87dd-23b2297b83a6",
+  "baseRevision": 41,
+  "name": "04 - Enter the screen",
+  "actions": [
+    {
+      "type": "media_plane",
+      "id": "W / physical screen",
+      "name": "W / physical screen",
+      "sourceMediaId": "launch-72d89720ee9db0d593c6120c",
+      "sourceStart": 2,
+      "startTime": 9,
+      "duration": 5,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.43,
+        "opacity": 1
+      },
+      "mediaFit": "cover"
+    },
+    {
+      "type": "media_plane",
+      "id": "W / screen world",
+      "name": "W / screen world",
+      "sourceMediaId": "launch-f845b91a06ef40d16ae43d84",
+      "sourceStart": 2.7,
+      "startTime": 9.7,
+      "duration": 4.300000000000001,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.43,
+        "opacity": 1
+      },
+      "mediaFit": "cover",
+      "perspective": {
+        "version": 1,
+        "corners": [
+          [
+            12,
+            5
+          ],
+          [
+            96,
+            10
+          ],
+          [
+            94,
+            96
+          ],
+          [
+            10,
+            92
+          ]
+        ]
+      }
+    },
+    {
+      "type": "keys",
+      "targetId": "W / screen world",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 9.7,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 10.25,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / screen world",
+      "keys": [
+        {
+          "property": "planeCorner0X",
+          "time": 9.7,
+          "value": 12,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 10.8,
+          "value": 12,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 12.4,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 14,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / screen world",
+      "keys": [
+        {
+          "property": "planeCorner0Y",
+          "time": 9.7,
+          "value": 5,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 10.8,
+          "value": 5,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 12.4,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 14,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / screen world",
+      "keys": [
+        {
+          "property": "planeCorner1X",
+          "time": 9.7,
+          "value": 96,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 10.8,
+          "value": 96,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 12.4,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 14,
+          "value": 100,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / screen world",
+      "keys": [
+        {
+          "property": "planeCorner1Y",
+          "time": 9.7,
+          "value": 10,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 10.8,
+          "value": 10,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 12.4,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 14,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / screen world",
+      "keys": [
+        {
+          "property": "planeCorner2X",
+          "time": 9.7,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 10.8,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 12.4,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 14,
+          "value": 100,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / screen world",
+      "keys": [
+        {
+          "property": "planeCorner2Y",
+          "time": 9.7,
+          "value": 96,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 10.8,
+          "value": 96,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 12.4,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 14,
+          "value": 100,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / screen world",
+      "keys": [
+        {
+          "property": "planeCorner3X",
+          "time": 9.7,
+          "value": 10,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 10.8,
+          "value": 10,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 12.4,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 14,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / screen world",
+      "keys": [
+        {
+          "property": "planeCorner3Y",
+          "time": 9.7,
+          "value": 92,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 10.8,
+          "value": 92,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 12.4,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 14,
+          "value": 100,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / physical screen",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 9,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 11,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 12.4,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / screen world",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 9.7,
+          "value": 1.43,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 12.4,
+          "value": 1.43,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 13.65,
+          "value": 1.7,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 14,
+          "value": 1.82,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    }
+  ]
+}

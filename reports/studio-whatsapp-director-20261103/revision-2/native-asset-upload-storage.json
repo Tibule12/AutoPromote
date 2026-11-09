@@ -1,0 +1,35 @@
+{
+  "normalSignIn": true,
+  "actualBrowserImageAndAudioUploads": true,
+  "requestsReturned201": true,
+  "exactStoredBytesAndOwnerVerified": [
+    {
+      "storagePath": "uploads/audios/demo-pilot-alice/0c7230d7-fc15-4563-b677-2c5e481410d3_Make your move - original score.wav",
+      "ownerUid": "demo-pilot-alice",
+      "sha256": "f3cade09fcb727c24508179fa1c0e7914cfe162c9fee098a8eabe6c6d3ea44a6",
+      "bytes": 4608044
+    },
+    {
+      "storagePath": "uploads/audios/demo-pilot-alice/6a53e8a2-61ca-46e8-919c-57ae15bda7fb_Make your move - original score.wav",
+      "ownerUid": "demo-pilot-alice",
+      "sha256": "f3cade09fcb727c24508179fa1c0e7914cfe162c9fee098a8eabe6c6d3ea44a6",
+      "bytes": 4608044
+    },
+    {
+      "storagePath": "uploads/images/demo-pilot-alice/095f7a4c-b6f6-4060-b032-e03848233db1_preview-1.50.png",
+      "ownerUid": "demo-pilot-alice",
+      "sha256": "e94bb58b58b3bda8e45b6519ef9c46b72fd572fc5575ded8cc03c99148c454e5",
+      "bytes": 113704
+    },
+    {
+      "storagePath": "uploads/images/demo-pilot-alice/e7cc47c7-0356-4b9b-a3db-5b5542c4b8d9_preview-1.50.png",
+      "ownerUid": "demo-pilot-alice",
+      "sha256": "e94bb58b58b3bda8e45b6519ef9c46b72fd572fc5575ded8cc03c99148c454e5",
+      "bytes": 113704
+    }
+  ],
+  "exactCompositionPreserved": true,
+  "observerFailuresRetained": "Two QA response-body observers could not read storagePath. Independent real emulator object metadata and byte checks establish ownership/identity; the normal UI accepted both assets.",
+  "demoOnly": true,
+  "paidCalls": 0
+}

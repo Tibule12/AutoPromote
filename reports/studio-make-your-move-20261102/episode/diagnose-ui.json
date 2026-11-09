@@ -1,0 +1,8 @@
+{
+  "phase": "diagnose",
+  "nativeFrontend": true,
+  "normalDemoAuth": true,
+  "headless": true,
+  "muted": true,
+  "errors": []
+}
