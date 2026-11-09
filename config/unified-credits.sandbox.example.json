@@ -1,0 +1,41 @@
+{
+  "version": "sandbox-example-v1",
+  "microsPerCredit": 1000,
+  "maxBalance": 10000,
+  "maxJobMicros": 40000,
+  "monthlySpendMicros": 1000000,
+  "userMonthlySpendMicros": 500000,
+  "monthlyIssuanceMicros": 10000000,
+  "maxActiveGlobal": 4,
+  "maxActiveUser": 2,
+  "rewardCredits": 1,
+  "rewardMonthlyCap": 20,
+  "rewardTtlSeconds": 600,
+  "operations": {
+    "queue.dispatch": {
+      "unit": "destinations",
+      "baseMicros": 0,
+      "microsPerUnit": 1000,
+      "maxUnits": 6
+    },
+    "publisher.publish": {
+      "unit": "destinations",
+      "baseMicros": 1000,
+      "microsPerUnit": 1000,
+      "maxUnits": 6
+    },
+    "studio.render": {
+      "unit": "seconds",
+      "baseMicros": 1000,
+      "microsPerUnit": 106,
+      "maxUnits": 300
+    },
+    "clips.analyze": {
+      "unit": "seconds",
+      "baseMicros": 1000,
+      "microsPerUnit": 106,
+      "maxUnits": 300
+    },
+    "clips.render": { "unit": "seconds", "baseMicros": 1000, "microsPerUnit": 106, "maxUnits": 300 }
+  }
+}

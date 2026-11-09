@@ -1,0 +1,12 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /credits_v2_wallets/{walletId} {
+      allow get: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow list, create, update, delete: if false;
+    }
+    // Custom admin claims and user-writable role/tier fields grant no financial access.
+    // Only the backend Admin SDK may mutate the sandbox's financial documents.
+    match /{document=**} { allow read, write: if false; }
+  }
+}
