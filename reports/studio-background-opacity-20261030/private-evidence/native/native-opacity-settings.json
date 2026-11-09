@@ -1,0 +1,75 @@
+{
+  "projectId": "viral-project-22f0e2ba-14fd-4309-a097-f1adef3b0abd",
+  "settings": [
+    {
+      "camera": "a",
+      "alphaLevels": [
+        0.02,
+        0.8
+      ],
+      "detailPolygon": [
+        [
+          0,
+          0.34
+        ],
+        [
+          1,
+          0.34
+        ],
+        [
+          1,
+          0.995
+        ],
+        [
+          0,
+          0.995
+        ]
+      ],
+      "backgroundSha256": "89762d5255334961d6081d0d3f7ed0715af8ac1746d9ed013985315ab018eba8"
+    },
+    {
+      "camera": "b",
+      "alphaLevels": [
+        0.02,
+        0.68
+      ],
+      "detailPolygon": [
+        [
+          0.425,
+          0.4
+        ],
+        [
+          0.547,
+          0.4
+        ],
+        [
+          0.547,
+          0.431
+        ],
+        [
+          0.818,
+          0.431
+        ],
+        [
+          0.818,
+          0.39
+        ],
+        [
+          0.97,
+          0.39
+        ],
+        [
+          0.97,
+          0.7
+        ],
+        [
+          0.425,
+          0.7
+        ]
+      ],
+      "backgroundSha256": "5c1e1f0d5846d24cb01db21cb0659f9112020c0a45d042e49a983992984656fc"
+    }
+  ],
+  "sourceMasksUnchanged": true,
+  "gpuJobs": 0
+}

@@ -1,0 +1,89 @@
+{
+  "updatedAt": "2026-10-09T19:17:09.227761+00:00",
+  "status": "IMPLEMENTED_NATIVE_PRIVATE_OUTPUTS_CREATIVE_QUALIFICATION_PENDING",
+  "templateRef": {
+    "templateId": "product_launch_cinematic_v1",
+    "version": "1.0.0",
+    "definitionHash": "7dd1e31dbcb1fdf83b84baaa76b2e7902ada116646e1c3dab1946d9ed8e1d080"
+  },
+  "nativeOutputs": [
+    {
+      "name": "EMBER",
+      "projectId": "viral-project-3dbb7c83-f23c-44be-bcf3-c06c116a41c2",
+      "projectHash": "6da354cb5c4a554ed034ae4a3694198a6344c83e33fc836544ccebe52a881332",
+      "renderJobId": "viral_6b63efd0e650514f793008961ffa8df6212f308749dcccd7975d6ef800fd5800",
+      "final": {
+        "path": "ember/versions/7408894953308c57232779865db4e08f048795741de0d018290855eb75352563.mp4",
+        "sha256": "7408894953308c57232779865db4e08f048795741de0d018290855eb75352563"
+      }
+    },
+    {
+      "name": "VELO",
+      "projectId": "viral-project-af88eb87-27d9-464f-9c40-6de7ea1d7880",
+      "projectHash": "a597f521362c0b0cf8536c934a190e1c9e7179df4fb582a91e3a9ee36b2d7611",
+      "renderJobId": "viral_d0535fdfd060d864c1832607725987e1ac856d94b6138f79151b8b181afe6ee1",
+      "final": {
+        "path": "velo/versions/218b5b6214176142aad6ce20ce0167bbc12b40930b9c784b4ec344d512e36e5d.mp4",
+        "sha256": "218b5b6214176142aad6ce20ce0167bbc12b40930b9c784b4ec344d512e36e5d"
+      }
+    },
+    {
+      "name": "ONDA",
+      "projectId": "viral-project-942013f8-6051-4aca-9aba-391bca268a7e",
+      "projectHash": "54d125382de4db80856ccc1b1215046d6d6c02787e0c061217d158f9016ca8d8",
+      "renderJobId": "viral_6c113be3a5a1bdb19d0ade5bcb2ad88a9a7df345851ef137f1c7b6cb96ea3114",
+      "final": {
+        "path": "onda/versions/1de0b6b6cec59520b70e4bf0470c049e82d86a62da91a22ba8b3c0cc85513a74.mp4",
+        "sha256": "1de0b6b6cec59520b70e4bf0470c049e82d86a62da91a22ba8b3c0cc85513a74"
+      }
+    }
+  ],
+  "nativeLifecycle": {
+    "projectId": "viral-project-3dbb7c83-f23c-44be-bcf3-c06c116a41c2",
+    "applyEditReplaceTimingEasingUndoRedoSaveCloseReopenRenderDownload": "observed",
+    "sameDocumentOnColdReopen": true,
+    "livePreview": "decoded moving frames after slow media load",
+    "wholePreviewFinalParity": "UNQUALIFIED"
+  },
+  "director": {
+    "projectId": "viral-project-25bbf128-788b-4342-8267-574f88439048",
+    "selectedReviewedAppliedThroughSameAdapter": true,
+    "manualContinuation": true,
+    "selector": "deterministic explicit product-launch intent; no freeform AI perception"
+  },
+  "gpuJobsStarted": 0,
+  "modelsExecuted": [],
+  "paidGpuComputeCost": 0,
+  "billing": "existing local credit bypass active; charging unqualified; storage/egress and agent charges not measured",
+  "publicCandidatesCreated": 0,
+  "productionDeployment": false,
+  "mainMerge": false,
+  "creativeApproval": false,
+  "evidence": [
+    "reports/model-capability-runtime-v1-20261009/LAUNCH-TEMPLATE-DELIVERY.md",
+    "reports/model-capability-runtime-v1-20261009/proof/launch-template/private-review.json"
+  ],
+  "remainingBlockers": [
+    "Trusted full moving-film and soundtrack review and founder acceptance",
+    "Whole predictive preview/final pixel and audio parity",
+    "Production showroom stores/publisher and authenticated Make One Like This handoff remain incomplete",
+    "Ordinary-account model runtime lifecycle remains partial; shared S02 backlog preserved"
+  ],
+  "nextTask": "Review the actual three private films with sound, revise the rejected creative details in the same native template, and pair the relevant preview/final frames and audio before qualification.",
+  "nativeRendersCompleted": 4,
+  "creativeRevision": "ONDA hook/product bindings swapped and CTA shortened through unchanged template; earlier face-covering output preserved as a superseded private version.",
+  "tests": {
+    "creativeTemplateGuards": 26,
+    "ownedMediaAndWorkerProvenance": 14,
+    "realMotionAndSoundCpuTests": 11,
+    "localOptimizedAppBuild": "PASS",
+    "replayBundle": "PASS",
+    "readinessValidator": "PASS",
+    "nativeOutputs": "3 movies; each 20 seconds / 480 frames / 720p24 with stereo AAC"
+  },
+  "exportRuntimeSeconds": {
+    "velo": 254.602,
+    "onda": 159.857,
+    "ember": "Timing not retained after download harness recovery; exact job and output receipt retained."
+  }
+}

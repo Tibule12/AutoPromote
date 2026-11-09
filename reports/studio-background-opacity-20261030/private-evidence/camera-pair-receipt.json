@@ -1,0 +1,20 @@
+{
+  "blender": "4.5.9 LTS",
+  "device": "CPU",
+  "cameras": [
+    {
+      "camera": "a",
+      "cpuOnly": true,
+      "seconds": 392.29216347797774,
+      "file": "/dev/shm/autopromote-background-finish-20261030/podcast-acoustic-a-cpu-20261030.png"
+    },
+    {
+      "camera": "b",
+      "cpuOnly": true,
+      "seconds": 276.5404633900034,
+      "file": "/dev/shm/autopromote-background-finish-20261030/podcast-acoustic-b-cpu-20261030.png"
+    }
+  ],
+  "samePhysicalRoom": true,
+  "visualQualification": false
+}

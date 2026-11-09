@@ -1,0 +1,18 @@
+{
+  "savedProjectCount": 54,
+  "otherProjectRecordsExact": 53,
+  "cookiesExact": true,
+  "firebaseSignedInIdentityPreserved": true,
+  "authRefreshAndHeartbeatUpdatesRetained": true,
+  "localStorageChangesLimitedToNativeRenderAttempts": 2,
+  "maskReferencesAndMaskJobsExact": true,
+  "sourcePatchCountRetained": 15,
+  "nonRoomEffectsExactApartFromOptionalOpacityAndRemovedReedProtection": true,
+  "allFourHostRepairSourceTargetGeometriesExact": true,
+  "removedReedProtectionPathsAcrossTwoHostRepairs": 6,
+  "originalAppBuildFilesExact": 147,
+  "protectedSourceAndPriorFilesExact": 97,
+  "verifiedObsoletePreparedCacheEntriesReleased": 1608,
+  "verifiedObsoletePreparedCacheBytesReleased": 3407533121,
+  "sourceFilesDeleted": 0
+}

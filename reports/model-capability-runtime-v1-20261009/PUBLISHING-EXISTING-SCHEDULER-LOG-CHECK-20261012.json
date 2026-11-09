@@ -1,0 +1,27 @@
+{
+  "checkedAt": "2026-10-12T21:55:42.374Z",
+  "service": "thulani-api",
+  "schedulerLogEntriesFound": 3,
+  "events": [
+    {
+      "timestamp": "2026-10-12T21:55:06.264970Z",
+      "severity": null,
+      "containsProcessing": false,
+      "containsError": false
+    },
+    {
+      "timestamp": "2026-10-12T21:55:06.264967Z",
+      "severity": null,
+      "containsProcessing": false,
+      "containsError": false
+    },
+    {
+      "timestamp": "2026-10-12T21:53:54.782077Z",
+      "severity": null,
+      "containsProcessing": false,
+      "containsError": false
+    }
+  ],
+  "publicationForThisSeriesConfirmed": false,
+  "readOnly": true
+}

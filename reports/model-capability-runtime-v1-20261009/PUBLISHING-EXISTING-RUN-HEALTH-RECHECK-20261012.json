@@ -1,0 +1,13 @@
+{
+  "checkedAt": "2026-10-12T21:55:06.469Z",
+  "url": "https://thulani-api-jddzncgt2a-uc.a.run.app",
+  "healthHttpStatus": 200,
+  "healthy": true,
+  "reportedStatus": "OK",
+  "existingCpuPolicy": {
+    "autoscaling.knative.dev/maxScale": "20",
+    "run.googleapis.com/startup-cpu-boost": "true"
+  },
+  "noDeploy": true,
+  "noGpuJobs": true
+}

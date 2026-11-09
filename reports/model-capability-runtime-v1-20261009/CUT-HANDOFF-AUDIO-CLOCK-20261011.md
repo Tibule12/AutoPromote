@@ -1,0 +1,29 @@
+# Prepared cuts and shared preview audio clock — 11 October 2026
+
+The same editable cycling project and finished movie are preserved. This session repairs shared preview behavior; it does not complete Studio, qualify the public showroom or start the After Effects timeline. CPU/local only: zero new render, model or GPU jobs.
+
+Project `viral-project-1e5e9c20-64d3-4935-be19-9c1607e75c67`, canonical SHA256 `f81122e0ba2dc635bd174f17637a4236fa533a1be24bfbd6d31ab848dd574f2d`. The existing final remains SHA256 `08c850fc2475f2fad11b7f5bd0da0a31485975615ad12707385f7be8400e1c36`. Normal authenticated App runs verify unchanged canonical state before/after; no auth, route or render mocks. Private refreshable authentication is retained outside the repo/cache.
+
+## Repairs
+
+Prepared shot promotion now commits during the native boundary event. Source, rate and music/SFX attachment use the same commit. Three bounded native decoders prepare two cuts ahead; the hidden Before decoder is released during After-only review and recued when comparison returns. Complex camera/remix/speech-ducking paths retain their existing program element.
+
+Play prepares suspended audio contexts before advancing picture. Pause stays available and cancels pending work; canplay cannot start the picture during preparation. Ready hard cuts retain the running decoded music and overlapping cues rather than treating each cut as operator Pause. Unprepared sources, waiting/seeking and operator Pause still stop sound. Music fade ramps run on the audio thread using the running buffer clock. Decoded music and synthesized cues share one context; cue offsets use the same canonical audio clock within the existing bounded source-clock agreement. No alternate edit graph or marketing demo is created.
+
+## Actual playback and sound
+
+The final unrecorded source observation takes **20.304s**, with **zero buffering waits**, **458 frame callbacks**, **7.693s overall preparation** and **56ms actual click-to-playing**. This is one fresh headless After-only run, not a universal performance pass.
+
+The first shared-clock live mix reaches the real end in **20.235s**. All **17** cues match the retained source-clock diagnostic: **15** built-in callbacks and **2** imported callbacks, versus additional resumptions before the cut repair. Eight scoped music windows correlate **0.999765–0.999999** with the exact owned music's diagnostic trim/volume/fades. The whole exported-mix windows improve at 0.5s from **0.679** to **0.982** and at 14s from **0.843** to **0.940**, but the 14s level remains approximately **1.196×** the export. Two first callbacks exceed one 24fps frame. These failures are not passes.
+
+A later direct-context music recording reproduces an intermittent **44.384s** run: a real first-source waiting event occurs at source0.797s/readyState2 while buffered0–1.525s and networkState2. Music resumes roughly23.5s later. Root cause is not yet attributed to network, decoder or main-thread work. This run has complete AudioWorklet PCM with no missing samples, but its opening music correlation falls to **0.435** and the whole opening mix to **0.327**. Ten cue identities match exactly and seven callbacks remain unmatched by the retained diagnostic. The failed run and original PCM are preserved; successful unrecorded playback cannot erase it. Direct-context capture was unavailable in the earlier20.235s run; its independent music bus remains separate from SFX.
+
+[Machine summary and exact raw runs](proof/launch-template/cycling-recovery-20261011/shared-audio-clock/summary.json) include these limits. [Actual editable Studio and complete timeline](proof/launch-template/cycling-recovery-20261011/shared-audio-clock/live-audio/studio-live-mix.png), [timeline detail](proof/launch-template/cycling-recovery-20261011/shared-audio-clock/live-audio/timeline.png), and the retained [full finished-film playback beside its native timeline](proof/launch-template/cycling-recovery-20261011/retime-r4/cycling/edited-in-studio.mp4) are private engineering evidence. No full soundtrack human listening or new creative approval is claimed.
+
+The recorder now captures PCM through AudioWorklet, retains complete sample/context/wall clocks and isolates the music bus. Full-rate stereo comparison replaces unfiltered decimation and the false assumption that stereo SFX cancel in L–R. Direct music selection excludes known cue gains in the shared context. These are diagnostic repairs; no regenerated soundtrack substitutes for actual preview audio. Diagnostic music-reference WAV is expressly not a Studio export. Earlier failing receipts remain historical evidence.
+
+## Verification and remaining work
+
+**15 distinct focused component checks pass** on the final production changes, and the optimized ordinary App builds. The broad run has14 passes and one exact floating-point fixture assertion failure; that assertion is corrected and the cut/music/overlapping-cue test passes separately. The native-pause fixture also now dispatches pause only on a real state change. Failed logs are retained. The116-case component suite was not run;101 other cases were skipped by the broader final scope. JS/Python syntax and diff checks pass. Continuity validation passes with29 capability,13 combination and17 parity records; readiness counts are unchanged.
+
+Continue **S02**: intermittent initial source/decode wait and owned-link preparation; actual imported-cue gain/timing and full mix/VO/ducking/trim; retimed live frame delivery and text/matte/grade/staging. Then **S03** global composition and **S04** professional controls including the founder's After Effects timeline on this same graph. Those stages have not been falsely passed or replaced. Normal-account runtime/billing, trusted creative/public approval and whole predictive parity remain open. No readiness counts change, public release, frontend/Cam Combiner redesign, production deployment or main merge.

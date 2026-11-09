@@ -1,0 +1,51 @@
+{
+  "theme": "acoustic-clean",
+  "projectId": "viral-project-22f0e2ba-14fd-4309-a097-f1adef3b0abd",
+  "canonicalHash": "5ac7b7be4214970e79825fd2042053d383bce0b1b68dc7208bc62a0360a0eb18",
+  "movieSha256": "597c9dc99f249cc1494cedbec53dbd48f36fa952824ec08c646b7990151da9c2",
+  "timelineSha256": "6ff217acdf4b050e73111c6ac9686b64ff8e09b2fe29e3a3473e7be5e7e00240",
+  "rows": [
+    {
+      "id": "pro-track-row-video",
+      "top": 701,
+      "bottom": 781
+    },
+    {
+      "id": "pro-track-row-adjustment",
+      "top": 781,
+      "bottom": 835
+    },
+    {
+      "id": "pro-track-row-graphics",
+      "top": 835,
+      "bottom": 889
+    },
+    {
+      "id": "pro-track-row-motion",
+      "top": 889,
+      "bottom": 943
+    },
+    {
+      "id": "pro-track-row-originalAudio",
+      "top": 943,
+      "bottom": 997
+    },
+    {
+      "id": "pro-track-row-music",
+      "top": 997,
+      "bottom": 1051
+    },
+    {
+      "id": "pro-track-row-sfx",
+      "top": 1051,
+      "bottom": 1105
+    }
+  ],
+  "completeNativePlayback": true,
+  "headless": true,
+  "muted": true,
+  "paidGpu": false,
+  "ownerCreativeApproval": false,
+  "recoveredCompletedExport": true,
+  "noNewRenderSubmission": true
+}

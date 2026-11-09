@@ -1,0 +1,48 @@
+{
+  "createdAt": "2026-10-30T09:11:01.889Z",
+  "playback": {
+    "duration": 12.417,
+    "time": 12.417,
+    "ended": true,
+    "width": 1920,
+    "height": 1080,
+    "playbackRate": 1,
+    "decodedFrames": 309
+  },
+  "canonicalHash": "5ac7b7be4214970e79825fd2042053d383bce0b1b68dc7208bc62a0360a0eb18",
+  "nativeFinishedOutput": true,
+  "timelineVisible": true,
+  "audioTrackReveal": null,
+  "recording": "/dev/shm/autopromote-background-finish-20261030/native/acoustic-clean/edited-in-studio.mp4",
+  "screencastFrames": 409,
+  "recordingScratch": {
+    "releasedBytes": 73043968,
+    "retainedSamples": [
+      "000000.jpg",
+      "000204.jpg",
+      "000408.jpg"
+    ]
+  },
+  "recordingCapture": {
+    "captureSeconds": 12.568000078201294,
+    "screenFramesPerSecond": 32.46339890685234,
+    "movieFps": 24,
+    "encodedScreenRecordingFps": 24,
+    "sparseCapture": false,
+    "smoothPlaybackEvidence": false,
+    "limitation": "Screen capture cadence and encoding are separate from native movie playback; use playback-performance.js without screencasting to measure the latter"
+  },
+  "recordingAudio": "Soundtrack muxed from the exact hash-verified export at the observed native playback-start offset; QA browser muted",
+  "audioOffset": 0.03500008583068848,
+  "decodedFramesThisPlayback": 294,
+  "projectId": "viral-project-22f0e2ba-14fd-4309-a097-f1adef3b0abd",
+  "outputSha256": "597c9dc99f249cc1494cedbec53dbd48f36fa952824ec08c646b7990151da9c2",
+  "submittedJobId": "viral_1e59fb962cd5948808a4dd6c9d2733708d5cf29cbca60e4e8904533fecc44d53",
+  "templateRef": {
+    "templateId": "podcast_set_dialogue_v1",
+    "version": "1.2.0",
+    "definitionHash": "fb92757f2f7a47d1030e1bef74a880bcfbacd9bd80b7b5356b30603015fed1e5"
+  },
+  "listeningReview": "pending founder review",
+  "noMocks": true
+}

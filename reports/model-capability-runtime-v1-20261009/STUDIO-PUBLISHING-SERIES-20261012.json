@@ -1,0 +1,1440 @@
+{
+  "seriesId": "made-in-autopromote-20261013",
+  "createdAt": "2026-10-12T20:11:13.335086+00:00",
+  "userAuthorization": "Founder requested Studio timeline/final recordings and scheduling through the app; selected six targets and delegated creative scheduling choices.",
+  "timezone": "Africa/Johannesburg",
+  "cadence": "One distinct post each day at 18:00 SAST; Studio recording then matching final film, 13–18 October.",
+  "permissionScope": "External building-in-public posts. No public showroom/hero or product-readiness promotion.",
+  "licenseSources": [
+    "https://mixkit.co/license/modal/videoFree/",
+    "https://mixkit.co/license/modal/musicFree/",
+    "https://mixkit.co/license/modal/sfxFree/"
+  ],
+  "posts": [
+    {
+      "postId": "ember.studio_recording.main_targets",
+      "title": "Made in AutoPromote: Coffee — the timeline",
+      "description": "The timeline behind a 20-second coffee concept edit. See the footage, title animation, music and sound cues in the actual AutoPromote Studio, alongside the rendered result.\n\nBuilt with our development version of AutoPromote. EMBER is a demonstration concept, not a customer endorsement. Uses licensed stock footage and audio; this is editing/rendering, not AI-generated footage.\n\n#AutoPromote #VideoEditing #BuildInPublic",
+      "media": "reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/ember/edited-in-studio.mp4",
+      "mediaSha256": "79fb68e356a636b3a4eedd664142c01f177bb1d92930d205600e4ba986dafb59",
+      "scheduledAt": "2026-10-13T16:00:00.000Z",
+      "localTime": "2026-10-13 18:00 SAST",
+      "platforms": [
+        "tiktok",
+        "youtube",
+        "instagram",
+        "facebook",
+        "linkedin"
+      ],
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "contentId": "noDRwrmgCRoJFKq0NVtU",
+      "schedules": [
+        {
+          "id": "xjuGuCWemGYofFY8jw5o",
+          "contentId": "noDRwrmgCRoJFKq0NVtU",
+          "platform": "youtube",
+          "startTime": "2026-10-13T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "l57mmPoweFUxe5MR3sCy",
+          "contentId": "noDRwrmgCRoJFKq0NVtU",
+          "platform": "tiktok",
+          "startTime": "2026-10-13T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "UjqaQwVrnoGnTTSuJP3M",
+          "contentId": "noDRwrmgCRoJFKq0NVtU",
+          "platform": "instagram",
+          "startTime": "2026-10-13T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "9mEsm1mOSDSb2wszb8XK",
+          "contentId": "noDRwrmgCRoJFKq0NVtU",
+          "platform": "linkedin",
+          "startTime": "2026-10-13T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "2ZtvMouHIn9LKvQC5zNd",
+          "contentId": "noDRwrmgCRoJFKq0NVtU",
+          "platform": "facebook",
+          "startTime": "2026-10-13T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "redditDestination": "u_Tibule12",
+      "creativePostId": "ember.studio_recording",
+      "submittedAt": "2026-10-12T22:07:46.405Z",
+      "previousAttempts": [
+        {
+          "observations": [
+            {
+              "event": "request",
+              "path": "/api/content/upload/readiness",
+              "at": "2026-10-12T21:04:34.385Z"
+            },
+            {
+              "event": "readiness",
+              "httpStatus": 200,
+              "allowed": true,
+              "errorCode": null
+            },
+            {
+              "event": "request",
+              "path": "/api/content/upload/readiness",
+              "at": "2026-10-12T21:04:51.689Z"
+            },
+            {
+              "event": "request",
+              "path": "/api/content/upload",
+              "at": "2026-10-12T21:04:58.191Z"
+            },
+            {
+              "event": "readiness",
+              "httpStatus": 200,
+              "allowed": true,
+              "errorCode": null
+            },
+            {
+              "event": "content_upload",
+              "httpStatus": 400,
+              "contentId": null,
+              "scheduledAt": "2026-10-13T16:00:00.000Z",
+              "platforms": [
+                "tiktok",
+                "youtube",
+                "instagram",
+                "facebook",
+                "linkedin"
+              ],
+              "isDryRun": false
+            }
+          ],
+          "result": "Rejected with COMPLIANCE_VIOLATION before content persistence; own-brand intent classification repaired locally."
+        }
+      ],
+      "observations": [
+        {
+          "event": "request",
+          "path": "/api/content/upload/readiness",
+          "at": "2026-10-12T22:07:46.817Z"
+        },
+        {
+          "event": "readiness",
+          "httpStatus": 200,
+          "allowed": true,
+          "errorCode": null,
+          "message": null
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload/readiness",
+          "at": "2026-10-12T22:08:05.416Z"
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload",
+          "at": "2026-10-12T22:08:10.884Z"
+        },
+        {
+          "event": "readiness",
+          "httpStatus": 200,
+          "allowed": true,
+          "errorCode": null,
+          "message": null
+        },
+        {
+          "event": "content_upload",
+          "httpStatus": 201,
+          "contentId": "noDRwrmgCRoJFKq0NVtU",
+          "scheduledAt": "2026-10-13T16:00:00.000Z",
+          "platforms": [
+            "tiktok",
+            "youtube",
+            "instagram",
+            "facebook",
+            "linkedin"
+          ],
+          "isDryRun": false,
+          "error": null
+        }
+      ],
+      "verifiedAt": "2026-10-12T22:20:44.637Z",
+      "supersededSubmissions": [
+        {
+          "contentId": "Z5drF6ihPSATH6yJnhtN",
+          "mediaSha256": "e243376f5061e77bdc3195e5723241d7d9e767d43cfd83122a3a4fcea88857c6",
+          "schedules": [
+            {
+              "id": "ckWsc1QYVPxsLg7tqGop",
+              "contentId": "Z5drF6ihPSATH6yJnhtN",
+              "platform": "linkedin",
+              "startTime": "2026-10-13T16:00:00.000Z",
+              "status": "pending",
+              "isActive": true,
+              "frequency": "once"
+            },
+            {
+              "id": "OTVYubOr16BSEypJt2Td",
+              "contentId": "Z5drF6ihPSATH6yJnhtN",
+              "platform": "tiktok",
+              "startTime": "2026-10-13T16:00:00.000Z",
+              "status": "pending",
+              "isActive": true,
+              "frequency": "once"
+            },
+            {
+              "id": "FpJnyALrrBV9OO0JcZm0",
+              "contentId": "Z5drF6ihPSATH6yJnhtN",
+              "platform": "facebook",
+              "startTime": "2026-10-13T16:00:00.000Z",
+              "status": "pending",
+              "isActive": true,
+              "frequency": "once"
+            },
+            {
+              "id": "DjG3lyymL9qwAPIPxYMn",
+              "contentId": "Z5drF6ihPSATH6yJnhtN",
+              "platform": "youtube",
+              "startTime": "2026-10-13T16:00:00.000Z",
+              "status": "pending",
+              "isActive": true,
+              "frequency": "once"
+            },
+            {
+              "id": "6DFw2087GVNLpInePcBi",
+              "contentId": "Z5drF6ihPSATH6yJnhtN",
+              "platform": "instagram",
+              "startTime": "2026-10-13T16:00:00.000Z",
+              "status": "pending",
+              "isActive": true,
+              "frequency": "once"
+            }
+          ],
+          "observations": [
+            {
+              "event": "request",
+              "path": "/api/content/upload/readiness",
+              "at": "2026-10-12T21:11:52.373Z"
+            },
+            {
+              "event": "readiness",
+              "httpStatus": 200,
+              "allowed": true,
+              "errorCode": null,
+              "message": null
+            },
+            {
+              "event": "request",
+              "path": "/api/content/upload/readiness",
+              "at": "2026-10-12T21:12:09.974Z"
+            },
+            {
+              "event": "request",
+              "path": "/api/content/upload",
+              "at": "2026-10-12T21:12:16.482Z"
+            },
+            {
+              "event": "readiness",
+              "httpStatus": 200,
+              "allowed": true,
+              "errorCode": null,
+              "message": null
+            },
+            {
+              "event": "content_upload",
+              "httpStatus": 201,
+              "contentId": "Z5drF6ihPSATH6yJnhtN",
+              "scheduledAt": "2026-10-13T16:00:00.000Z",
+              "platforms": [
+                "tiktok",
+                "youtube",
+                "instagram",
+                "facebook",
+                "linkedin"
+              ],
+              "isDryRun": false,
+              "error": null
+            }
+          ],
+          "submittedAt": "2026-10-12T21:11:51.986Z",
+          "verifiedAt": "2026-10-12T21:15:43.307631+00:00",
+          "replacementReason": "Replace sparse 55-frame screen recording with the same complete native movie captured at normal cadence.",
+          "cancelledSchedules": [
+            {
+              "id": "ckWsc1QYVPxsLg7tqGop",
+              "platform": "linkedin",
+              "httpStatus": 200,
+              "cancelledAt": "2026-10-12T22:11:16.639Z"
+            },
+            {
+              "id": "OTVYubOr16BSEypJt2Td",
+              "platform": "tiktok",
+              "httpStatus": 200,
+              "cancelledAt": "2026-10-12T22:11:22.570Z"
+            },
+            {
+              "id": "FpJnyALrrBV9OO0JcZm0",
+              "platform": "facebook",
+              "httpStatus": 200,
+              "cancelledAt": "2026-10-12T22:11:29.024Z"
+            },
+            {
+              "id": "DjG3lyymL9qwAPIPxYMn",
+              "platform": "youtube",
+              "httpStatus": 200,
+              "cancelledAt": "2026-10-12T22:11:34.609Z"
+            },
+            {
+              "id": "6DFw2087GVNLpInePcBi",
+              "platform": "instagram",
+              "httpStatus": 200,
+              "cancelledAt": "2026-10-12T22:11:41.154Z"
+            }
+          ],
+          "status": "SUPERSEDED_PENDING_SCHEDULES_CANCELLED"
+        }
+      ]
+    },
+    {
+      "postId": "ember.studio_recording.reddit",
+      "title": "Made in AutoPromote: Coffee — the timeline",
+      "description": "The timeline behind a 20-second coffee concept edit. See the footage, title animation, music and sound cues in the actual AutoPromote Studio, alongside the rendered result.\n\nBuilt with our development version of AutoPromote. EMBER is a demonstration concept, not a customer endorsement. Uses licensed stock footage and audio; this is editing/rendering, not AI-generated footage.\n\n#AutoPromote #VideoEditing #BuildInPublic",
+      "media": "reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/ember/edited-in-studio.mp4",
+      "mediaSha256": "79fb68e356a636b3a4eedd664142c01f177bb1d92930d205600e4ba986dafb59",
+      "scheduledAt": "2026-10-13T16:00:00.000Z",
+      "localTime": "2026-10-13 18:00 SAST",
+      "platforms": [
+        "reddit"
+      ],
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "contentId": "flpNeZtt0ldeymkHj8kO",
+      "schedules": [
+        {
+          "id": "ww922edzEfRBBJYmFioU",
+          "contentId": "flpNeZtt0ldeymkHj8kO",
+          "platform": "reddit",
+          "startTime": "2026-10-13T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "redditDestination": "u_Tibule12",
+      "creativePostId": "ember.studio_recording",
+      "submittedAt": "2026-10-12T22:08:58.580Z",
+      "observations": [
+        {
+          "event": "reddit_profile",
+          "httpStatus": 200,
+          "identityVerified": true
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload/readiness",
+          "at": "2026-10-12T22:08:58.963Z"
+        },
+        {
+          "event": "readiness",
+          "httpStatus": 200,
+          "allowed": true,
+          "errorCode": null,
+          "message": null
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload/readiness",
+          "at": "2026-10-12T22:09:17.144Z"
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload",
+          "at": "2026-10-12T22:09:22.903Z"
+        },
+        {
+          "event": "readiness",
+          "httpStatus": 200,
+          "allowed": true,
+          "errorCode": null,
+          "message": null
+        },
+        {
+          "event": "content_upload",
+          "httpStatus": 201,
+          "contentId": "flpNeZtt0ldeymkHj8kO",
+          "scheduledAt": "2026-10-13T16:00:00.000Z",
+          "platforms": [
+            "reddit"
+          ],
+          "isDryRun": false,
+          "error": null
+        }
+      ],
+      "correctedExtraSchedules": [
+        {
+          "id": "hs9jAejqygUudHiXLZWk",
+          "platform": "youtube",
+          "httpStatus": 200
+        },
+        {
+          "id": "4KpSgPhFIsSC2VmyFrSU",
+          "platform": "tiktok",
+          "httpStatus": 200
+        }
+      ],
+      "supersededSubmissions": [
+        {
+          "contentId": "bd5plydRSIFGUyOBmV5g",
+          "mediaSha256": "e243376f5061e77bdc3195e5723241d7d9e767d43cfd83122a3a4fcea88857c6",
+          "schedules": [
+            {
+              "id": "HcZZ2wE6wH1I3fWkiWfe",
+              "contentId": "bd5plydRSIFGUyOBmV5g",
+              "platform": "reddit",
+              "startTime": "2026-10-13T16:00:00.000Z",
+              "status": "pending",
+              "isActive": true,
+              "frequency": "once"
+            }
+          ],
+          "observations": [
+            {
+              "event": "reddit_profile",
+              "httpStatus": 200,
+              "identityVerified": true
+            },
+            {
+              "event": "request",
+              "path": "/api/content/upload/readiness",
+              "at": "2026-10-12T21:18:58.172Z"
+            },
+            {
+              "event": "readiness",
+              "httpStatus": 200,
+              "allowed": true,
+              "errorCode": null,
+              "message": null
+            },
+            {
+              "event": "request",
+              "path": "/api/content/upload/readiness",
+              "at": "2026-10-12T21:19:18.661Z"
+            },
+            {
+              "event": "request",
+              "path": "/api/content/upload",
+              "at": "2026-10-12T21:19:21.828Z"
+            },
+            {
+              "event": "readiness",
+              "httpStatus": 200,
+              "allowed": true,
+              "errorCode": null,
+              "message": null
+            },
+            {
+              "event": "content_upload",
+              "httpStatus": 201,
+              "contentId": "bd5plydRSIFGUyOBmV5g",
+              "scheduledAt": "2026-10-13T16:00:00.000Z",
+              "platforms": [
+                "tiktok",
+                "youtube",
+                "reddit"
+              ],
+              "isDryRun": false,
+              "error": null
+            }
+          ],
+          "submittedAt": "2026-10-12T21:18:57.792Z",
+          "verifiedAt": null,
+          "replacementReason": "Replace sparse 55-frame screen recording with the same complete native movie captured at normal cadence.",
+          "cancelledSchedules": [
+            {
+              "id": "HcZZ2wE6wH1I3fWkiWfe",
+              "platform": "reddit",
+              "httpStatus": 200,
+              "cancelledAt": "2026-10-12T22:11:46.592Z"
+            }
+          ],
+          "status": "SUPERSEDED_PENDING_SCHEDULES_CANCELLED"
+        }
+      ],
+      "verifiedAt": "2026-10-12T22:20:44.637Z"
+    },
+    {
+      "postId": "ember.final_film.main_targets",
+      "title": "Made in AutoPromote: Coffee — the final edit",
+      "description": "From coffee clips to a 20-second concept promo: authored cuts, animated titles, a brand payoff, music and timed sound effects. The matching editable timeline is in our previous post.\n\nBuilt with our development version of AutoPromote. EMBER is a demonstration concept, not a customer endorsement. Uses licensed stock footage and audio; this is editing/rendering, not AI-generated footage.\n\n#AutoPromote #VideoEditing #BuildInPublic",
+      "media": "reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/ember/final.mp4",
+      "mediaSha256": "6232995e6640f2f77832c5b38c797c087f944370974524faa055f597ff7f4eea",
+      "scheduledAt": "2026-10-14T16:00:00.000Z",
+      "localTime": "2026-10-14 18:00 SAST",
+      "platforms": [
+        "tiktok",
+        "youtube",
+        "instagram",
+        "facebook",
+        "linkedin"
+      ],
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "contentId": "0pCXV0x9PBkQYEgMuBb8",
+      "schedules": [
+        {
+          "id": "vAGVBqk4IOkKXC7QCnQu",
+          "contentId": "0pCXV0x9PBkQYEgMuBb8",
+          "platform": "linkedin",
+          "startTime": "2026-10-14T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "hZuHRcplCz4Z8W3iGKEl",
+          "contentId": "0pCXV0x9PBkQYEgMuBb8",
+          "platform": "facebook",
+          "startTime": "2026-10-14T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "bVuKCzTBRZrKxkB3cNPB",
+          "contentId": "0pCXV0x9PBkQYEgMuBb8",
+          "platform": "tiktok",
+          "startTime": "2026-10-14T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "HsHgaNiBc60kvSNBSPH9",
+          "contentId": "0pCXV0x9PBkQYEgMuBb8",
+          "platform": "youtube",
+          "startTime": "2026-10-14T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "2AcKHe0sRVKQr2gK0DOC",
+          "contentId": "0pCXV0x9PBkQYEgMuBb8",
+          "platform": "instagram",
+          "startTime": "2026-10-14T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "creativePostId": "ember.final_film",
+      "submittedAt": "2026-10-12T21:23:45.734Z",
+      "observations": [
+        {
+          "event": "request",
+          "path": "/api/content/upload/readiness",
+          "at": "2026-10-12T21:23:46.173Z"
+        },
+        {
+          "event": "readiness",
+          "httpStatus": 200,
+          "allowed": true,
+          "errorCode": null,
+          "message": null
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload/readiness",
+          "at": "2026-10-12T21:24:10.838Z"
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload",
+          "at": "2026-10-12T21:24:16.251Z"
+        },
+        {
+          "event": "readiness",
+          "httpStatus": 200,
+          "allowed": true,
+          "errorCode": null,
+          "message": null
+        },
+        {
+          "event": "content_upload",
+          "httpStatus": 201,
+          "contentId": "0pCXV0x9PBkQYEgMuBb8",
+          "scheduledAt": "2026-10-14T16:00:00.000Z",
+          "platforms": [
+            "tiktok",
+            "youtube",
+            "instagram",
+            "facebook",
+            "linkedin"
+          ],
+          "isDryRun": false,
+          "error": null
+        }
+      ],
+      "verifiedAt": "2026-10-12T22:20:44.637Z"
+    },
+    {
+      "postId": "ember.final_film.reddit",
+      "title": "Made in AutoPromote: Coffee — the final edit",
+      "description": "From coffee clips to a 20-second concept promo: authored cuts, animated titles, a brand payoff, music and timed sound effects. The matching editable timeline is in our previous post.\n\nBuilt with our development version of AutoPromote. EMBER is a demonstration concept, not a customer endorsement. Uses licensed stock footage and audio; this is editing/rendering, not AI-generated footage.\n\n#AutoPromote #VideoEditing #BuildInPublic",
+      "media": "reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/ember/final.mp4",
+      "mediaSha256": "6232995e6640f2f77832c5b38c797c087f944370974524faa055f597ff7f4eea",
+      "scheduledAt": "2026-10-14T16:00:00.000Z",
+      "localTime": "2026-10-14 18:00 SAST",
+      "platforms": [
+        "reddit"
+      ],
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "contentId": "YudsFxPcep4CJZrQyVT6",
+      "schedules": [
+        {
+          "id": "BQXoxbttJA22v7QRqElb",
+          "contentId": "YudsFxPcep4CJZrQyVT6",
+          "platform": "reddit",
+          "startTime": "2026-10-14T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "creativePostId": "ember.final_film",
+      "redditDestination": "u_Tibule12",
+      "submittedAt": "2026-10-12T21:26:17.053Z",
+      "observations": [
+        {
+          "event": "reddit_profile",
+          "httpStatus": 200,
+          "identityVerified": true
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload/readiness",
+          "at": "2026-10-12T21:26:17.472Z"
+        },
+        {
+          "event": "readiness",
+          "httpStatus": 200,
+          "allowed": true,
+          "errorCode": null,
+          "message": null
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload/readiness",
+          "at": "2026-10-12T21:26:43.552Z"
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload",
+          "at": "2026-10-12T21:26:46.013Z"
+        },
+        {
+          "event": "readiness",
+          "httpStatus": 200,
+          "allowed": true,
+          "errorCode": null,
+          "message": null
+        },
+        {
+          "event": "content_upload",
+          "httpStatus": 201,
+          "contentId": "YudsFxPcep4CJZrQyVT6",
+          "scheduledAt": "2026-10-14T16:00:00.000Z",
+          "platforms": [
+            "reddit"
+          ],
+          "isDryRun": false,
+          "error": null
+        }
+      ],
+      "verifiedAt": "2026-10-12T22:20:44.637Z"
+    },
+    {
+      "postId": "velo.studio_recording.main_targets",
+      "title": "Made in AutoPromote: Cycling — the timeline",
+      "description": "The timeline behind a 20-second cycling concept edit. See the footage, title animation, music and sound cues in the actual AutoPromote Studio, alongside the rendered result.\n\nBuilt with our development version of AutoPromote. VELO is a demonstration concept, not a customer endorsement. Uses licensed stock footage and audio; this is editing/rendering, not AI-generated footage.\n\n#AutoPromote #VideoEditing #BuildInPublic",
+      "media": "reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/velo/edited-in-studio.mp4",
+      "mediaSha256": "f504b2eec1882f970e11c4c1f67f340b646482c42c4d144cbdeaf586cba9a4b6",
+      "scheduledAt": "2026-10-15T16:00:00.000Z",
+      "localTime": "2026-10-15 18:00 SAST",
+      "platforms": [
+        "tiktok",
+        "youtube",
+        "instagram",
+        "facebook",
+        "linkedin"
+      ],
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "contentId": "Idv8NQa3wmo1jr3XiKUy",
+      "schedules": [
+        {
+          "id": "tlUNbQzNXrKxaKBY7fay",
+          "contentId": "Idv8NQa3wmo1jr3XiKUy",
+          "platform": "tiktok",
+          "startTime": "2026-10-15T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "luc32JOZG41vhTtHNMj1",
+          "contentId": "Idv8NQa3wmo1jr3XiKUy",
+          "platform": "youtube",
+          "startTime": "2026-10-15T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "UUmvi1fKahqItL1I5CaX",
+          "contentId": "Idv8NQa3wmo1jr3XiKUy",
+          "platform": "instagram",
+          "startTime": "2026-10-15T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "CUw7ofJ8U1ZtWoZsUvjx",
+          "contentId": "Idv8NQa3wmo1jr3XiKUy",
+          "platform": "facebook",
+          "startTime": "2026-10-15T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "57y9reOkPpt58URHdPgc",
+          "contentId": "Idv8NQa3wmo1jr3XiKUy",
+          "platform": "linkedin",
+          "startTime": "2026-10-15T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "creativePostId": "velo.studio_recording",
+      "submittedAt": "2026-10-12T21:48:22.043Z",
+      "observations": [
+        {
+          "event": "request",
+          "path": "/api/content/upload/readiness",
+          "at": "2026-10-12T21:48:22.474Z"
+        },
+        {
+          "event": "readiness",
+          "httpStatus": 200,
+          "allowed": true,
+          "errorCode": null,
+          "message": null
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload/readiness",
+          "at": "2026-10-12T21:48:43.421Z"
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload",
+          "at": "2026-10-12T21:48:46.831Z"
+        },
+        {
+          "event": "readiness",
+          "httpStatus": 200,
+          "allowed": true,
+          "errorCode": null,
+          "message": null
+        },
+        {
+          "event": "content_upload",
+          "httpStatus": 201,
+          "contentId": "Idv8NQa3wmo1jr3XiKUy",
+          "scheduledAt": "2026-10-15T16:00:00.000Z",
+          "platforms": [
+            "tiktok",
+            "youtube",
+            "instagram",
+            "facebook",
+            "linkedin"
+          ],
+          "isDryRun": false,
+          "error": null
+        }
+      ],
+      "verifiedAt": "2026-10-12T22:20:44.637Z"
+    },
+    {
+      "postId": "velo.studio_recording.reddit",
+      "title": "Made in AutoPromote: Cycling — the timeline",
+      "description": "The timeline behind a 20-second cycling concept edit. See the footage, title animation, music and sound cues in the actual AutoPromote Studio, alongside the rendered result.\n\nBuilt with our development version of AutoPromote. VELO is a demonstration concept, not a customer endorsement. Uses licensed stock footage and audio; this is editing/rendering, not AI-generated footage.\n\n#AutoPromote #VideoEditing #BuildInPublic",
+      "media": "reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/velo/edited-in-studio.mp4",
+      "mediaSha256": "f504b2eec1882f970e11c4c1f67f340b646482c42c4d144cbdeaf586cba9a4b6",
+      "scheduledAt": "2026-10-15T16:00:00.000Z",
+      "localTime": "2026-10-15 18:00 SAST",
+      "platforms": [
+        "reddit"
+      ],
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "contentId": "BgGqkwe2wyMsAZehE4Re",
+      "schedules": [
+        {
+          "id": "ufaY8tyeucXTbSIxmbVc",
+          "contentId": "BgGqkwe2wyMsAZehE4Re",
+          "platform": "reddit",
+          "startTime": "2026-10-15T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "creativePostId": "velo.studio_recording",
+      "redditDestination": "u_Tibule12",
+      "submittedAt": "2026-10-12T21:50:00.385Z",
+      "observations": [
+        {
+          "event": "reddit_profile",
+          "httpStatus": 200,
+          "identityVerified": true
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload/readiness",
+          "at": "2026-10-12T21:50:00.785Z"
+        },
+        {
+          "event": "readiness",
+          "httpStatus": 200,
+          "allowed": true,
+          "errorCode": null,
+          "message": null
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload/readiness",
+          "at": "2026-10-12T21:50:18.877Z"
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload",
+          "at": "2026-10-12T21:50:22.232Z"
+        },
+        {
+          "event": "readiness",
+          "httpStatus": 200,
+          "allowed": true,
+          "errorCode": null,
+          "message": null
+        },
+        {
+          "event": "content_upload",
+          "httpStatus": 201,
+          "contentId": "BgGqkwe2wyMsAZehE4Re",
+          "scheduledAt": "2026-10-15T16:00:00.000Z",
+          "platforms": [
+            "reddit"
+          ],
+          "isDryRun": false,
+          "error": null
+        }
+      ],
+      "verifiedAt": "2026-10-12T22:20:44.637Z"
+    },
+    {
+      "postId": "velo.final_film.main_targets",
+      "title": "Made in AutoPromote: Cycling — the final edit",
+      "description": "From cycling footage to a 20-second concept promo: authored cuts, animated titles, a brand payoff, music and timed sound effects. The matching editable timeline is in our previous post.\n\nBuilt with our development version of AutoPromote. VELO is a demonstration concept, not a customer endorsement. Uses licensed stock footage and audio; this is editing/rendering, not AI-generated footage.\n\n#AutoPromote #VideoEditing #BuildInPublic",
+      "media": "reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/velo/final.mp4",
+      "mediaSha256": "f2635326113b932203f6e00c8477370165a3a1b6a9a05f5591f1579edcb6fc4d",
+      "scheduledAt": "2026-10-16T16:00:00.000Z",
+      "localTime": "2026-10-16 18:00 SAST",
+      "platforms": [
+        "tiktok",
+        "youtube",
+        "instagram",
+        "facebook",
+        "linkedin"
+      ],
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "contentId": "wdyiNn8PpzQQm8t0ykTO",
+      "schedules": [
+        {
+          "id": "hxMICyfy407A0VrB85Sk",
+          "contentId": "wdyiNn8PpzQQm8t0ykTO",
+          "platform": "tiktok",
+          "startTime": "2026-10-16T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "Z7uCnxRRmRJ5JJ0bSpG5",
+          "contentId": "wdyiNn8PpzQQm8t0ykTO",
+          "platform": "instagram",
+          "startTime": "2026-10-16T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "UahBPparDi49k1T9QyWN",
+          "contentId": "wdyiNn8PpzQQm8t0ykTO",
+          "platform": "youtube",
+          "startTime": "2026-10-16T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "HSMXtUG9XU7csw01q2gY",
+          "contentId": "wdyiNn8PpzQQm8t0ykTO",
+          "platform": "linkedin",
+          "startTime": "2026-10-16T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "01fDRarK7szZ6M92hcGI",
+          "contentId": "wdyiNn8PpzQQm8t0ykTO",
+          "platform": "facebook",
+          "startTime": "2026-10-16T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "creativePostId": "velo.final_film",
+      "submittedAt": "2026-10-12T21:51:10.274Z",
+      "observations": [
+        {
+          "event": "request",
+          "path": "/api/content/upload/readiness",
+          "at": "2026-10-12T21:51:10.680Z"
+        },
+        {
+          "event": "readiness",
+          "httpStatus": 200,
+          "allowed": true,
+          "errorCode": null,
+          "message": null
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload/readiness",
+          "at": "2026-10-12T21:51:44.475Z"
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload",
+          "at": "2026-10-12T21:51:46.559Z"
+        },
+        {
+          "event": "readiness",
+          "httpStatus": 200,
+          "allowed": true,
+          "errorCode": null,
+          "message": null
+        },
+        {
+          "event": "content_upload",
+          "httpStatus": 201,
+          "contentId": "wdyiNn8PpzQQm8t0ykTO",
+          "scheduledAt": "2026-10-16T16:00:00.000Z",
+          "platforms": [
+            "tiktok",
+            "youtube",
+            "instagram",
+            "facebook",
+            "linkedin"
+          ],
+          "isDryRun": false,
+          "error": null
+        }
+      ],
+      "verifiedAt": "2026-10-12T22:20:44.637Z"
+    },
+    {
+      "postId": "velo.final_film.reddit",
+      "title": "Made in AutoPromote: Cycling — the final edit",
+      "description": "From cycling footage to a 20-second concept promo: authored cuts, animated titles, a brand payoff, music and timed sound effects. The matching editable timeline is in our previous post.\n\nBuilt with our development version of AutoPromote. VELO is a demonstration concept, not a customer endorsement. Uses licensed stock footage and audio; this is editing/rendering, not AI-generated footage.\n\n#AutoPromote #VideoEditing #BuildInPublic",
+      "media": "reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/velo/final.mp4",
+      "mediaSha256": "f2635326113b932203f6e00c8477370165a3a1b6a9a05f5591f1579edcb6fc4d",
+      "scheduledAt": "2026-10-16T16:00:00.000Z",
+      "localTime": "2026-10-16 18:00 SAST",
+      "platforms": [
+        "reddit"
+      ],
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "contentId": "q9hyF4CWAhXh2RoIaXg7",
+      "schedules": [
+        {
+          "id": "KBKswldmGKBb8Fc21xxM",
+          "contentId": "q9hyF4CWAhXh2RoIaXg7",
+          "platform": "reddit",
+          "startTime": "2026-10-16T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "creativePostId": "velo.final_film",
+      "redditDestination": "u_Tibule12",
+      "submittedAt": "2026-10-12T21:52:34.554Z",
+      "observations": [
+        {
+          "event": "reddit_profile",
+          "httpStatus": 200,
+          "identityVerified": true
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload/readiness",
+          "at": "2026-10-12T21:52:34.973Z"
+        },
+        {
+          "event": "readiness",
+          "httpStatus": 200,
+          "allowed": true,
+          "errorCode": null,
+          "message": null
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload/readiness",
+          "at": "2026-10-12T21:53:17.914Z"
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload",
+          "at": "2026-10-12T21:53:22.606Z"
+        },
+        {
+          "event": "readiness",
+          "httpStatus": 200,
+          "allowed": true,
+          "errorCode": null,
+          "message": null
+        },
+        {
+          "event": "content_upload",
+          "httpStatus": 201,
+          "contentId": "q9hyF4CWAhXh2RoIaXg7",
+          "scheduledAt": "2026-10-16T16:00:00.000Z",
+          "platforms": [
+            "reddit"
+          ],
+          "isDryRun": false,
+          "error": null
+        }
+      ],
+      "verifiedAt": "2026-10-12T22:20:44.637Z"
+    },
+    {
+      "postId": "onda.studio_recording.main_targets",
+      "title": "Made in AutoPromote: Headphones — the timeline",
+      "description": "The timeline behind a 20-second headphones concept edit. See the footage, title animation, music and sound cues in the actual AutoPromote Studio, alongside the rendered result.\n\nBuilt with our development version of AutoPromote. ONDA is a demonstration concept, not a customer endorsement. Uses licensed stock footage and audio; this is editing/rendering, not AI-generated footage.\n\n#AutoPromote #VideoEditing #BuildInPublic",
+      "media": "reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/onda/edited-in-studio.mp4",
+      "mediaSha256": "e34acff54694d442f998e9616a1043d0ee81b66d26affe88355792668ceecc1d",
+      "scheduledAt": "2026-10-17T16:00:00.000Z",
+      "localTime": "2026-10-17 18:00 SAST",
+      "platforms": [
+        "tiktok",
+        "youtube",
+        "instagram",
+        "facebook",
+        "linkedin"
+      ],
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "contentId": "vG5AugeyquVTpZP45sdv",
+      "schedules": [
+        {
+          "id": "clOTO8PZ1v7UV5Fqlgc8",
+          "contentId": "vG5AugeyquVTpZP45sdv",
+          "platform": "linkedin",
+          "startTime": "2026-10-17T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "ckaxIofCGmqcw4cQTLMg",
+          "contentId": "vG5AugeyquVTpZP45sdv",
+          "platform": "youtube",
+          "startTime": "2026-10-17T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "SKFOB9Y79m6d6WcxdbJI",
+          "contentId": "vG5AugeyquVTpZP45sdv",
+          "platform": "facebook",
+          "startTime": "2026-10-17T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "I9bTI5rBmJRCNWVvhtLy",
+          "contentId": "vG5AugeyquVTpZP45sdv",
+          "platform": "tiktok",
+          "startTime": "2026-10-17T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "FfCKfvRYwY4AtoCPtt38",
+          "contentId": "vG5AugeyquVTpZP45sdv",
+          "platform": "instagram",
+          "startTime": "2026-10-17T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "creativePostId": "onda.studio_recording",
+      "previousMediaSha256": "863d096689e74cdac456f544a1c55b780da2e58fc89d803e4bfc08f529fba2d7",
+      "submittedAt": "2026-10-12T21:54:16.510Z",
+      "observations": [
+        {
+          "event": "request",
+          "path": "/api/content/upload/readiness",
+          "at": "2026-10-12T21:54:17.506Z"
+        },
+        {
+          "event": "readiness",
+          "httpStatus": 200,
+          "allowed": true,
+          "errorCode": null,
+          "message": null
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload/readiness",
+          "at": "2026-10-12T21:54:32.912Z"
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload",
+          "at": "2026-10-12T21:54:34.748Z"
+        },
+        {
+          "event": "readiness",
+          "httpStatus": 200,
+          "allowed": true,
+          "errorCode": null,
+          "message": null
+        },
+        {
+          "event": "content_upload",
+          "httpStatus": 201,
+          "contentId": "vG5AugeyquVTpZP45sdv",
+          "scheduledAt": "2026-10-17T16:00:00.000Z",
+          "platforms": [
+            "tiktok",
+            "youtube",
+            "instagram",
+            "facebook",
+            "linkedin"
+          ],
+          "isDryRun": false,
+          "error": null
+        }
+      ],
+      "verifiedAt": "2026-10-12T22:20:44.637Z"
+    },
+    {
+      "postId": "onda.studio_recording.reddit",
+      "title": "Made in AutoPromote: Headphones — the timeline",
+      "description": "The timeline behind a 20-second headphones concept edit. See the footage, title animation, music and sound cues in the actual AutoPromote Studio, alongside the rendered result.\n\nBuilt with our development version of AutoPromote. ONDA is a demonstration concept, not a customer endorsement. Uses licensed stock footage and audio; this is editing/rendering, not AI-generated footage.\n\n#AutoPromote #VideoEditing #BuildInPublic",
+      "media": "reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/onda/edited-in-studio.mp4",
+      "mediaSha256": "e34acff54694d442f998e9616a1043d0ee81b66d26affe88355792668ceecc1d",
+      "scheduledAt": "2026-10-17T16:00:00.000Z",
+      "localTime": "2026-10-17 18:00 SAST",
+      "platforms": [
+        "reddit"
+      ],
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "contentId": "ZGziuRwPgIcx35etQGf5",
+      "schedules": [
+        {
+          "id": "1qP0LfC0aA86kG0ZTfzC",
+          "contentId": "ZGziuRwPgIcx35etQGf5",
+          "platform": "reddit",
+          "startTime": "2026-10-17T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "creativePostId": "onda.studio_recording",
+      "previousMediaSha256": "863d096689e74cdac456f544a1c55b780da2e58fc89d803e4bfc08f529fba2d7",
+      "redditDestination": "u_Tibule12",
+      "submittedAt": "2026-10-12T21:55:23.799Z",
+      "observations": [
+        {
+          "event": "reddit_profile",
+          "httpStatus": 200,
+          "identityVerified": true
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload/readiness",
+          "at": "2026-10-12T21:55:24.224Z"
+        },
+        {
+          "event": "readiness",
+          "httpStatus": 200,
+          "allowed": true,
+          "errorCode": null,
+          "message": null
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload/readiness",
+          "at": "2026-10-12T21:55:37.846Z"
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload",
+          "at": "2026-10-12T21:55:40.705Z"
+        },
+        {
+          "event": "readiness",
+          "httpStatus": 200,
+          "allowed": true,
+          "errorCode": null,
+          "message": null
+        },
+        {
+          "event": "content_upload",
+          "httpStatus": 201,
+          "contentId": "ZGziuRwPgIcx35etQGf5",
+          "scheduledAt": "2026-10-17T16:00:00.000Z",
+          "platforms": [
+            "reddit"
+          ],
+          "isDryRun": false,
+          "error": null
+        }
+      ],
+      "verifiedAt": "2026-10-12T22:20:44.637Z"
+    },
+    {
+      "postId": "onda.final_film.main_targets",
+      "title": "Made in AutoPromote: Headphones — the final edit",
+      "description": "From headphone/lifestyle footage to a 20-second concept promo: authored cuts, animated titles, a brand payoff, music and timed sound effects. The matching editable timeline is in our previous post.\n\nBuilt with our development version of AutoPromote. ONDA is a demonstration concept, not a customer endorsement. Uses licensed stock footage and audio; this is editing/rendering, not AI-generated footage.\n\n#AutoPromote #VideoEditing #BuildInPublic",
+      "media": "reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/onda/final.mp4",
+      "mediaSha256": "6abb780af1dddab25348a3e7aef563ed422a0853ca22ce49036fd5ca77bf5231",
+      "scheduledAt": "2026-10-18T16:00:00.000Z",
+      "localTime": "2026-10-18 18:00 SAST",
+      "platforms": [
+        "tiktok",
+        "youtube",
+        "instagram",
+        "facebook",
+        "linkedin"
+      ],
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "contentId": "PsSkamVRll8GFhuypxcA",
+      "schedules": [
+        {
+          "id": "hpIB96nX58oKHYYoISgG",
+          "contentId": "PsSkamVRll8GFhuypxcA",
+          "platform": "facebook",
+          "startTime": "2026-10-18T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "K2rGMvc1qxb5lglaaSEI",
+          "contentId": "PsSkamVRll8GFhuypxcA",
+          "platform": "instagram",
+          "startTime": "2026-10-18T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "IkWRsO9cdCy5ZCHKSQ6K",
+          "contentId": "PsSkamVRll8GFhuypxcA",
+          "platform": "linkedin",
+          "startTime": "2026-10-18T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "D2VHPPuZK35h5sS8I6cg",
+          "contentId": "PsSkamVRll8GFhuypxcA",
+          "platform": "youtube",
+          "startTime": "2026-10-18T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "754gq8IM6fIISE0NSv3o",
+          "contentId": "PsSkamVRll8GFhuypxcA",
+          "platform": "tiktok",
+          "startTime": "2026-10-18T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "creativePostId": "onda.final_film",
+      "submittedAt": "2026-10-12T21:56:28.808Z",
+      "observations": [
+        {
+          "event": "request",
+          "path": "/api/content/upload/readiness",
+          "at": "2026-10-12T21:56:29.231Z"
+        },
+        {
+          "event": "readiness",
+          "httpStatus": 200,
+          "allowed": true,
+          "errorCode": null,
+          "message": null
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload/readiness",
+          "at": "2026-10-12T21:56:59.829Z"
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload",
+          "at": "2026-10-12T21:57:04.990Z"
+        },
+        {
+          "event": "readiness",
+          "httpStatus": 200,
+          "allowed": true,
+          "errorCode": null,
+          "message": null
+        },
+        {
+          "event": "content_upload",
+          "httpStatus": 201,
+          "contentId": "PsSkamVRll8GFhuypxcA",
+          "scheduledAt": "2026-10-18T16:00:00.000Z",
+          "platforms": [
+            "tiktok",
+            "youtube",
+            "instagram",
+            "facebook",
+            "linkedin"
+          ],
+          "isDryRun": false,
+          "error": null
+        }
+      ],
+      "verifiedAt": "2026-10-12T22:20:44.637Z"
+    },
+    {
+      "postId": "onda.final_film.reddit",
+      "title": "Made in AutoPromote: Headphones — the final edit",
+      "description": "From headphone/lifestyle footage to a 20-second concept promo: authored cuts, animated titles, a brand payoff, music and timed sound effects. The matching editable timeline is in our previous post.\n\nBuilt with our development version of AutoPromote. ONDA is a demonstration concept, not a customer endorsement. Uses licensed stock footage and audio; this is editing/rendering, not AI-generated footage.\n\n#AutoPromote #VideoEditing #BuildInPublic",
+      "media": "reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/onda/final.mp4",
+      "mediaSha256": "6abb780af1dddab25348a3e7aef563ed422a0853ca22ce49036fd5ca77bf5231",
+      "scheduledAt": "2026-10-18T16:00:00.000Z",
+      "localTime": "2026-10-18 18:00 SAST",
+      "platforms": [
+        "reddit"
+      ],
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "contentId": "ulIoKoHRMYQW24v1tgwv",
+      "schedules": [
+        {
+          "id": "G19pw4pWJd9rzYyuYRM1",
+          "contentId": "ulIoKoHRMYQW24v1tgwv",
+          "platform": "reddit",
+          "startTime": "2026-10-18T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "creativePostId": "onda.final_film",
+      "redditDestination": "u_Tibule12",
+      "submittedAt": "2026-10-12T21:57:52.381Z",
+      "observations": [
+        {
+          "event": "reddit_profile",
+          "httpStatus": 200,
+          "identityVerified": true
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload/readiness",
+          "at": "2026-10-12T21:57:52.841Z"
+        },
+        {
+          "event": "readiness",
+          "httpStatus": 200,
+          "allowed": true,
+          "errorCode": null,
+          "message": null
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload/readiness",
+          "at": "2026-10-12T21:58:32.817Z"
+        },
+        {
+          "event": "request",
+          "path": "/api/content/upload",
+          "at": "2026-10-12T21:58:39.066Z"
+        },
+        {
+          "event": "readiness",
+          "httpStatus": 200,
+          "allowed": true,
+          "errorCode": null,
+          "message": null
+        },
+        {
+          "event": "content_upload",
+          "httpStatus": 201,
+          "contentId": "ulIoKoHRMYQW24v1tgwv",
+          "scheduledAt": "2026-10-18T16:00:00.000Z",
+          "platforms": [
+            "reddit"
+          ],
+          "isDryRun": false,
+          "error": null
+        }
+      ],
+      "verifiedAt": "2026-10-12T22:20:44.637Z"
+    }
+  ],
+  "externalSchedulesVerified": 36,
+  "planHandling": {
+    "actualPlatformLimit": 5,
+    "uploadAllowanceRemainingBeforeBatch": 20,
+    "distributionAllowanceRemainingBeforeBatch": 150,
+    "strategy": "Six creative posts each submitted through normal Publisher as five-target submission plus Reddit-only submission; each passes ordinary account checks. No entitlement changes."
+  },
+  "failedSixTargetPreflight": "PUBLISHING-PLAN-CHECK-20261012.json",
+  "nativeQueueVerifiedAt": "2026-10-12T22:20:44.637Z"
+}
