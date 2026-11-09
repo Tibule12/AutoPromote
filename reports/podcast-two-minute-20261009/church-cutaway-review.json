@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-09T07:40:45.771248+00:00",
+  "asset": "reports/podcast-two-minute-20261009/generated-broll/a82eea947322015121934a6c6ced30cbdab8e15e/assets/br-a82eea94732201512193-shot-1/video.mp4",
+  "sha256": "bf381bed009d94bf93ea8d1e697df94bb45393034bb072ed5571ed9500e79ffd",
+  "fullDecode": "PASS",
+  "frames": 121,
+  "fps": 24,
+  "duration": 5.041666666666667,
+  "dimensions": [
+    1280,
+    704
+  ],
+  "visualReview": {
+    "passed": true,
+    "sampleTimes": [
+      0,
+      1.01,
+      2.02,
+      3.03,
+      4.03,
+      4.96
+    ],
+    "notes": "Coherent empty church interior, slow moving camera, readable stained-glass illumination and pew geometry in six sampled frames. Appropriate three-second generated illustration for the church-going childhood line. No people or readable text; no claim this depicts the guest\u2019s actual church.",
+    "humanCreativeApproval": false
+  }
+}

@@ -1,0 +1,39 @@
+[
+  {
+    "argv": [
+      "docker",
+      "build",
+      "-t",
+      "autopromote-l40s-media:20261006",
+      "/tmp/autopromote-l40s-film-20261006"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.1246,
+    "stdout": "",
+    "stderr": "#0 building with \"default\" instance using docker driver\n\n#1 [internal] load build definition from Dockerfile\n#1 transferring dockerfile: 199B done\n#1 DONE 0.0s\n\n#2 [internal] load metadata for docker.io/library/ubuntu:24.04\n#2 DONE 0.0s\n\n#3 [internal] load .dockerignore\n#3 transferring context: 2B done\n#3 DONE 0.0s\n\n#4 [1/2] FROM docker.io/library/ubuntu:24.04\n#4 DONE 0.0s\n\n#5 [2/2] RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends python3 ffmpeg && rm -rf /var/lib/apt/lists/*\n#5 CACHED\n\n#6 exporting to image\n#6 exporting layers done\n#6 writing image sha256:814eb1ef9c7e2453ff0716a420f7a71e3559d6989150844baa0cbc3e4d1f78b2 done\n#6 naming to docker.io/library/autopromote-l40s-media:20261006 done\n#6 DONE 0.0s\n"
+  },
+  {
+    "argv": [
+      "docker",
+      "run",
+      "--rm",
+      "--name",
+      "autopromote-l40s-film-20261006",
+      "--gpus",
+      "all",
+      "-e",
+      "NVIDIA_DRIVER_CAPABILITIES=compute,utility,video",
+      "-v",
+      "/tmp/autopromote-l40s-film-20261006:/film",
+      "autopromote-l40s-media:20261006",
+      "python3",
+      "/film/render-public-l40s-film.py",
+      "--work",
+      "/film"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 71.5585,
+    "stdout": "L40S master / uploads\nL40S portrait / uploads\nL40S master / studio\nL40S portrait / studio\nL40S master / schedule\nL40S portrait / schedule\nL40S master / analytics\nL40S portrait / analytics\n{\"status\": \"PASS\", \"elapsedSeconds\": 71.1316, \"error\": null}\n",
+    "stderr": ""
+  }
+]

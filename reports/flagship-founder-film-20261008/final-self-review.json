@@ -1,0 +1,100 @@
+{
+  "status": "REJECTED_FOR_PUBLIC_FLAGSHIP",
+  "privateReviewExportsReady": true,
+  "reviewedAt": "2026-10-08T08:06:56.517901+00:00",
+  "basis": [
+    "Actual sampled decoded final hero frames",
+    "Actual ident timing samples",
+    "Actual cutdown/teaser frames",
+    "Complete independent decode, black/duration gates and actual encoded audio audit",
+    "Chromium playback, seeking and exact-byte downloads"
+  ],
+  "humanListeningClaimed": false,
+  "founderAcceptanceClaimed": false,
+  "outputs": [
+    {
+      "id": "hero",
+      "artifact": "outputs/final-v2/one-edit-hero/final.mp4",
+      "sha256": "d6ae987aed7bed591ba9dcf685e86aedc4c855a3c632a6a249f89718b937b07a",
+      "duration": 53.833333,
+      "plannedDuration": 53.75,
+      "width": 1920,
+      "height": 1080,
+      "fps": 24,
+      "encodedAudioChannels": 1,
+      "technicalGate": "passed",
+      "creativeGate": "FAILED_FOR_PUBLIC_FLAGSHIP"
+    },
+    {
+      "id": "cutdown",
+      "artifact": "outputs/final-v2/one-edit-cutdown/final.mp4",
+      "sha256": "507fdc4a42642d5e47cf4c5c476a703158865781c4c301013142e52bde4ab364",
+      "duration": 27.0,
+      "plannedDuration": 27.0,
+      "width": 1920,
+      "height": 1080,
+      "fps": 24,
+      "encodedAudioChannels": 1,
+      "technicalGate": "passed",
+      "creativeGate": "FAILED_FOR_PUBLIC_FLAGSHIP"
+    },
+    {
+      "id": "teaser",
+      "artifact": "outputs/final-v2/one-edit-teaser/final.mp4",
+      "sha256": "5b9f84402e60c8e4b31c4db17d0314869928b52f1b23b5c452d00f3323dea97f",
+      "duration": 10.0,
+      "plannedDuration": 10.0,
+      "width": 1920,
+      "height": 1080,
+      "fps": 24,
+      "encodedAudioChannels": 1,
+      "technicalGate": "passed",
+      "creativeGate": "FAILED_FOR_PUBLIC_FLAGSHIP"
+    }
+  ],
+  "improvements": [
+    "Removed roughly 12 seconds of long holds from the rough",
+    "Kept all ten narration sections at their original speed",
+    "Replaced the old flat/glow ident with exact extruded logo contours, staggered layers and camera motion",
+    "Delayed wordmark illumination and widened the final lockup",
+    "Bound intentional ident darkness explicitly; accidental black elsewhere remains a failure"
+  ],
+  "remainingWeaknesses": [
+    {
+      "region": "0\u20133s hook / 39\u201343.75s return",
+      "problem": "The same generated yacht behind repeated rectangular gates does not create an impossible transformation; the scene looks like moving frames around a take.",
+      "nextCreativeDecision": "Make the edit line visibly reshape the source world, with a motivated occlusion/match-geometry transformation and a distinct revealed destination."
+    },
+    {
+      "region": "3\u201333s origin and escalation",
+      "problem": "Conversation stills and source cards repeat for long stretches. Generic render-failure summaries and quota labels explain engineering but do not make persistence feel personal.",
+      "nextCreativeDecision": "Use specific animated consequences of drift, missing sound and failed output; give each fix a changed environment. Keep only the factual zero/grant labels and remove paragraphs."
+    },
+    {
+      "region": "33\u201343.75s Director/payoff",
+      "problem": "Code cards and a reused yacht do not demonstrate the system understanding or creating a new scene.",
+      "nextCreativeDecision": "Show a visible creative choice change a grounded shot, sound and scene continuity. Validate that exact backend action before portraying it."
+    },
+    {
+      "region": "48.833\u201353.833s ident",
+      "problem": "It has genuine geometry and parallax, but the isolated glowing letters on black still lack sculpted material highlights, reflections, a physical environment and a distinctive reveal event.",
+      "nextCreativeDecision": "Design a reflection stage with grazing light, macro material detail and an occluding physical reveal before a clean lockup. Cycles already supports this; the current scene design is insufficient."
+    },
+    {
+      "region": "sound",
+      "problem": "Current final exports encode mono after the Studio audio materialization/SFX bus downmixes the stereo source stems. Objective non-silent/unclipped checks cannot establish a premium mix, intelligibility or emotional delivery.",
+      "nextCreativeDecision": "Preserve stereo music and effect buses with regression tests; listen to the complete mix and align the strongest impact to the actual geometry resolve."
+    }
+  ],
+  "limitations": [
+    "Bespoke assistant-directed production, not proof of autonomous arbitrary-brief script-to-film",
+    "Most new motion scenes are rendered at 1280\u00d7720 and delivered at 1920\u00d71080; only the final ident is rendered at 1920\u00d71080",
+    "Retained yacht generation is 832\u00d7480 and upscaled in this composition",
+    "Hero export is 53.833333 seconds versus a 53.75-second plan, a two-frame rounding difference",
+    "No public welcome-page replacement, deployment or publishing",
+    "Three logo directions and a creator-energy ident have not been produced or accepted in this run",
+    "Studio customer-readiness is tracked separately and remains not ready"
+  ],
+  "founderVerdict": "REJECTED",
+  "founderRejectedAt": "2026-10-08T08:20:32.080720+00:00"
+}

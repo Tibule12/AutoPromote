@@ -1,0 +1,199 @@
+{
+  "at": "2026-10-08T07:22:16.088Z",
+  "realAuth": true,
+  "noMocks": true,
+  "events": [
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T07:16:04.951Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T07:16:46.786Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T07:17:28.966Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T07:18:11.311Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T07:18:51.535Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T07:19:27.178Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T07:20:05.721Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 202,
+      "jobId": "4228a404-1c5c-4e38-9203-94881fe54b17",
+      "jobStatus": "queued",
+      "at": "2026-10-08T07:20:47.429Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/4228a404-1c5c-4e38-9203-94881fe54b17",
+      "status": 200,
+      "jobId": "4228a404-1c5c-4e38-9203-94881fe54b17",
+      "jobStatus": "queued",
+      "at": "2026-10-08T07:20:53.557Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/4228a404-1c5c-4e38-9203-94881fe54b17",
+      "status": 200,
+      "jobId": "4228a404-1c5c-4e38-9203-94881fe54b17",
+      "jobStatus": "queued",
+      "at": "2026-10-08T07:20:59.500Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/4228a404-1c5c-4e38-9203-94881fe54b17",
+      "status": 200,
+      "jobId": "4228a404-1c5c-4e38-9203-94881fe54b17",
+      "jobStatus": "queued",
+      "at": "2026-10-08T07:21:05.721Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/4228a404-1c5c-4e38-9203-94881fe54b17",
+      "status": 200,
+      "jobId": "4228a404-1c5c-4e38-9203-94881fe54b17",
+      "jobStatus": "queued",
+      "at": "2026-10-08T07:21:11.469Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/4228a404-1c5c-4e38-9203-94881fe54b17",
+      "status": 200,
+      "jobId": "4228a404-1c5c-4e38-9203-94881fe54b17",
+      "jobStatus": "queued",
+      "at": "2026-10-08T07:21:18.256Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/4228a404-1c5c-4e38-9203-94881fe54b17",
+      "status": 200,
+      "jobId": "4228a404-1c5c-4e38-9203-94881fe54b17",
+      "jobStatus": "rendering",
+      "at": "2026-10-08T07:21:23.470Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/4228a404-1c5c-4e38-9203-94881fe54b17",
+      "status": 200,
+      "jobId": "4228a404-1c5c-4e38-9203-94881fe54b17",
+      "jobStatus": "rendering",
+      "at": "2026-10-08T07:21:29.508Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/4228a404-1c5c-4e38-9203-94881fe54b17",
+      "status": 200,
+      "jobId": "4228a404-1c5c-4e38-9203-94881fe54b17",
+      "jobStatus": "rendering",
+      "at": "2026-10-08T07:21:35.520Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/4228a404-1c5c-4e38-9203-94881fe54b17",
+      "status": 200,
+      "jobId": "4228a404-1c5c-4e38-9203-94881fe54b17",
+      "jobStatus": "rendering",
+      "at": "2026-10-08T07:21:41.495Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/4228a404-1c5c-4e38-9203-94881fe54b17",
+      "status": 200,
+      "jobId": "4228a404-1c5c-4e38-9203-94881fe54b17",
+      "jobStatus": "rendering",
+      "at": "2026-10-08T07:21:47.524Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/4228a404-1c5c-4e38-9203-94881fe54b17",
+      "status": 200,
+      "jobId": "4228a404-1c5c-4e38-9203-94881fe54b17",
+      "jobStatus": "rendering",
+      "at": "2026-10-08T07:21:53.958Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/4228a404-1c5c-4e38-9203-94881fe54b17",
+      "status": 200,
+      "jobId": "4228a404-1c5c-4e38-9203-94881fe54b17",
+      "jobStatus": "rendering",
+      "at": "2026-10-08T07:21:59.908Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/4228a404-1c5c-4e38-9203-94881fe54b17",
+      "status": 200,
+      "jobId": "4228a404-1c5c-4e38-9203-94881fe54b17",
+      "jobStatus": "rendering",
+      "at": "2026-10-08T07:22:06.351Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/4228a404-1c5c-4e38-9203-94881fe54b17",
+      "status": 200,
+      "jobId": "4228a404-1c5c-4e38-9203-94881fe54b17",
+      "jobStatus": "completed",
+      "at": "2026-10-08T07:22:12.148Z"
+    }
+  ],
+  "jobId": "4228a404-1c5c-4e38-9203-94881fe54b17",
+  "hash": "fd35f15a24a6a6bac6d35f3f6210e7ae8e704eb0a6d36519efb11da4df3a449c",
+  "renderReceipt": {
+    "artifacts": {
+      "overlay.mov": {
+        "bytes": 4853950,
+        "sha256": "c5a23ec461d3b7e43b083e4dc38118675367b07f66e1d8cb6ec8506d1c2e3c3a"
+      },
+      "preview.mp4": {
+        "bytes": 52495,
+        "sha256": "a86dac7a549a37d0cde367b342e968345a100c772f1c64701f36c934c597eed8"
+      }
+    },
+    "device": {
+      "backend": "OPTIX",
+      "denoiser": "OPTIX",
+      "devices": [
+        "NVIDIA L40S"
+      ],
+      "engine": "CYCLES",
+      "event": "render_device",
+      "gpu_verified": true
+    },
+    "version": 1
+  },
+  "output": "reports/studio-stability-20261008/three_d/nvidia-preview/preview-4228a404-1c5c-4e38-9203-94881fe54b17.mp4",
+  "outputSha256": "a86dac7a549a37d0cde367b342e968345a100c772f1c64701f36c934c597eed8",
+  "technical": {
+    "passed": true,
+    "sha256": "a86dac7a549a37d0cde367b342e968345a100c772f1c64701f36c934c597eed8",
+    "bytes": 52495,
+    "seconds": 1,
+    "video": {
+      "width": 1280,
+      "height": 720,
+      "codec": "h264",
+      "fps": "30/1",
+      "duration": "1.000000",
+      "pixelFormat": "yuv420p"
+    },
+    "audio": null,
+    "independentFullDecode": true,
+    "contactSheet": "reports/studio-stability-20261008/three_d/nvidia-preview/preview-4228a404-1c5c-4e38-9203-94881fe54b17.mp4.frames.jpg",
+    "scope": "Technical only. Pixel and listening review are separate required evidence."
+  }
+}

@@ -1,0 +1,7 @@
+# Build the optional VFX runtime first; CPU worker dependencies stay unchanged.
+ARG VFX_IMAGE=autopromote-portable-vfx:20261006
+FROM ${VFX_IMAGE}
+RUN pip install --no-cache-dir transformers==4.57.1 lm-format-enforcer==0.11.3
+COPY scripts/run-nvidia-browser-planner.py /app/browser-planner.py
+ENV HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
+ENTRYPOINT ["python3", "/app/browser-planner.py"]

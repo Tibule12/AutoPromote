@@ -1,0 +1,85 @@
+{
+  "sourceSha256": "8e11ffd36c9b94c68cc6352030b437ede2841f3eb687f8619f7de0ab6b5901b8",
+  "frames": [
+    {
+      "path": "reports/content-factory-20261007/video-refinement-frames-v13/frame-01.png",
+      "timestamp": 0.0,
+      "sha256": "616fc14e6fea642cfd78004283961b805c174b63dbd2d934a6f350937dd26b76"
+    },
+    {
+      "path": "reports/content-factory-20261007/video-refinement-frames-v13/frame-02.png",
+      "timestamp": 0.33611113333333337,
+      "sha256": "30b2644b2a9b749aa814c7e186e74698d22ead6b904ca132c98f97900fbbe013"
+    },
+    {
+      "path": "reports/content-factory-20261007/video-refinement-frames-v13/frame-03.png",
+      "timestamp": 0.6722222666666667,
+      "sha256": "9dae7c524ceea989b0e952bcc84fbed4f84247178ef13c879fe3023f2206c7cb"
+    },
+    {
+      "path": "reports/content-factory-20261007/video-refinement-frames-v13/frame-04.png",
+      "timestamp": 1.0083334000000002,
+      "sha256": "fdc982907294548037e01a15d2fe9a06a7a38ef312d4279f29d77dce5da2a5d1"
+    },
+    {
+      "path": "reports/content-factory-20261007/video-refinement-frames-v13/frame-05.png",
+      "timestamp": 1.3444445333333335,
+      "sha256": "0b8d714986a5ec7ed75f698d10b19bcb2b5d02b3a8aa0bcb524484806551d2e9"
+    },
+    {
+      "path": "reports/content-factory-20261007/video-refinement-frames-v13/frame-06.png",
+      "timestamp": 1.6805556666666668,
+      "sha256": "dcf074e3fd4c992b32ccaa28021a8ac40ebd7466e28247c4d2dc9c21bc165dc1"
+    },
+    {
+      "path": "reports/content-factory-20261007/video-refinement-frames-v13/frame-07.png",
+      "timestamp": 2.0166668000000003,
+      "sha256": "4cbeedfd3e10f74122f3d66a963ac194306714fad0ea25f2ba5b5f4f49c0fa2c"
+    },
+    {
+      "path": "reports/content-factory-20261007/video-refinement-frames-v13/frame-08.png",
+      "timestamp": 2.3527779333333334,
+      "sha256": "ab9a87f5c231a323f31b17ed196b8ad3f4e3c87ccd013b7bbe9d9e35dfe7ddcf"
+    },
+    {
+      "path": "reports/content-factory-20261007/video-refinement-frames-v13/frame-09.png",
+      "timestamp": 2.688889066666667,
+      "sha256": "000756887340f023151fbc88661b1f7e039daabf8073ae716406a03bd137db3c"
+    },
+    {
+      "path": "reports/content-factory-20261007/video-refinement-frames-v13/frame-10.png",
+      "timestamp": 3.0250002000000005,
+      "sha256": "b6941ad59a271ed697e423b3f46319d99a3554317b70d8a0e60a393fc6ab2cb2"
+    },
+    {
+      "path": "reports/content-factory-20261007/video-refinement-frames-v13/frame-11.png",
+      "timestamp": 3.3611113333333336,
+      "sha256": "d17a3ff376648c4e3ffbe3a359836bf0916e54a982ec766559146ec102d11831"
+    },
+    {
+      "path": "reports/content-factory-20261007/video-refinement-frames-v13/frame-12.png",
+      "timestamp": 3.6972224666666667,
+      "sha256": "0c5ac9812e15f652813538917b2ab568c459f3a0b19021eadd09e9d3b283df4d"
+    },
+    {
+      "path": "reports/content-factory-20261007/video-refinement-frames-v13/frame-13.png",
+      "timestamp": 4.033333600000001,
+      "sha256": "1a7848d4dc2d9b8521dd368a3d35a882fe2a1fc1f6b044aa8e80d95d6f69b98b"
+    },
+    {
+      "path": "reports/content-factory-20261007/video-refinement-frames-v13/frame-14.png",
+      "timestamp": 4.369444733333334,
+      "sha256": "3bc2bfd2dd80005cc6ff665aeaa82730af8eac82d7865cccfb67ac8b6023de2e"
+    },
+    {
+      "path": "reports/content-factory-20261007/video-refinement-frames-v13/frame-15.png",
+      "timestamp": 4.705555866666667,
+      "sha256": "fb4d76b31da598681b9d1ebcb585667ea4ac14ab4fd4e8bf5d67b60b0eec5d04"
+    },
+    {
+      "path": "reports/content-factory-20261007/video-refinement-frames-v13/frame-16.png",
+      "timestamp": 4.961667,
+      "sha256": "3d0ebba1f0897553ece90a7515d0925ef8393d3a969dbf38efd035db86c12751"
+    }
+  ]
+}

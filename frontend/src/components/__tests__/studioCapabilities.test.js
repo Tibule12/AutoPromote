@@ -12,7 +12,7 @@ import { STUDIO_3D_FIELD_PARITY, getStudio3DFieldParity } from "../threeD/studio
 import poseFixture from "../threeD/fixtures/pose-parity-v1.json";
 
 test("registry has unique versioned entries with traceable execution evidence", () => {
-  expect(STUDIO_CAPABILITY_REGISTRY_VERSION).toBe(4);
+  expect(STUDIO_CAPABILITY_REGISTRY_VERSION).toBe(5);
   expect(new Set(STUDIO_CAPABILITIES.map(item => item.id)).size).toBe(STUDIO_CAPABILITIES.length);
   for (const item of STUDIO_CAPABILITIES) {
     expect(item).toMatchObject({
@@ -93,7 +93,8 @@ test("3D renderer cannot be advertised as a production GPU, native 1080p or univ
     gpuAccelerationProven: false,
   });
   expect(scene.unsupportedSceneFields).toContain("audioReactiveIntensity");
-  expect(scene.unsupportedSceneModes.exit).toContain("fade");
+  expect(scene.unsupportedSceneModes.exit).not.toContain("fade");
+  expect(scene.unsupportedSceneModes.exit).toContain("dolly");
   expect(scene.compatibility).toContain("3D layerOrder sorts only 3D scenes");
   expect(isStudioCapabilityExecutable("three_d_audio_reactivity")).toBe(false);
 });
@@ -116,11 +117,12 @@ test("every normalized 3D scene field has an explicit parity classification", ()
     "background",
     "shadows",
     "reflections",
-    "renderedOpacity",
   ]) {
     expect(getStudio3DFieldParity(field).status).toBe("unsupported");
   }
   expect(getStudio3DFieldParity("layerOrder").status).toBe("approximate");
+  expect(getStudio3DFieldParity("renderedOpacity").status).toBe("approximate");
+  expect(getStudio3DFieldParity("renderedOpacity").reason).toContain("conformance remains unverified");
   expect(getStudio3DFieldParity("unknown")).toBeNull();
 });
 

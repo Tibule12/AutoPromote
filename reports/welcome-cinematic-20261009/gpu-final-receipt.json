@@ -1,0 +1,418 @@
+{
+  "status": "SUCCEEDED",
+  "startedAt": "2026-10-09T09:08:17.654029+00:00",
+  "execution": "viral-studio-rtx-qualification-2hsx4",
+  "stages": [
+    {
+      "name": "native-optix",
+      "seconds": 769.1368391560001,
+      "log": "native-optix.log"
+    },
+    {
+      "name": "source-idea",
+      "seconds": 2.56430849100002,
+      "log": "source-idea.log"
+    },
+    {
+      "name": "source-structure",
+      "seconds": 2.1049707989999433,
+      "log": "source-structure.log"
+    },
+    {
+      "name": "source-motion",
+      "seconds": 2.539900657999965,
+      "log": "source-motion.log"
+    },
+    {
+      "name": "source-impact",
+      "seconds": 1.9538791410000158,
+      "log": "source-impact.log"
+    },
+    {
+      "name": "source-autopromote",
+      "seconds": 2.328073943999925,
+      "log": "source-autopromote.log"
+    },
+    {
+      "name": "existing-studio-final",
+      "seconds": 27.770796135999944
+    }
+  ],
+  "outputs": [
+    {
+      "path": "assets/final/idea.mp4",
+      "sha256": "b40141d690d989799d6234d208cdf5542bafa81329074b230e7a4ac3f9a9f965",
+      "bytes": 8210265
+    },
+    {
+      "path": "assets/final/structure.mp4",
+      "sha256": "761cc6ce270beccfa46667f4eb6a897b71b9ec80f77a35d88fe43aa9fc357cbc",
+      "bytes": 8202538
+    },
+    {
+      "path": "assets/final/motion.mp4",
+      "sha256": "0310c4309c28f1543dadb6714523fb76724091a22bcbd634bf31efc864646442",
+      "bytes": 18149162
+    },
+    {
+      "path": "assets/final/impact.mp4",
+      "sha256": "cbd39053cb51cd9da186338c74160f01ce53bba3c2778e9813c8c0e4251d1782",
+      "bytes": 9232413
+    },
+    {
+      "path": "assets/final/autopromote.mp4",
+      "sha256": "9a542562041287d25853996e853a3f7c0b9f99c72e00b81f2711474962c839c0",
+      "bytes": 2810515
+    },
+    {
+      "path": "assets/welcome-world.blend",
+      "sha256": "a48c7c7dee9390ec1e0af711566dc0e2d1b5d9e1ea507955b58f4beea7cac73a",
+      "bytes": 9647544
+    },
+    {
+      "path": "gpu-frames/receipt.json",
+      "sha256": "6349fbc980c1d61589e9d9484f780b0cd477303f70efcf08ffc26e39004e8738",
+      "bytes": 399
+    },
+    {
+      "path": "outputs/final/final.mp4",
+      "sha256": "63aaf80638ef93e2165924a6562026392bf1f0a10ef7c9826611aa14549ceea3",
+      "bytes": 37841803
+    },
+    {
+      "path": "outputs/final/poster.jpg",
+      "sha256": "173d48a8271541729aea95f24b0731a8136fb58fdd146975fd78d25556920336",
+      "bytes": 40022
+    },
+    {
+      "path": "outputs/final/render-receipt.json",
+      "sha256": "9809ad84daea5009c1b155284223aeb4a7f7e70c981d4048101f04e10aee0f4b",
+      "bytes": 8100
+    }
+  ],
+  "gpuCount": 1,
+  "prefix": "founder_films/welcome-cinematic-20261009/v5",
+  "gpuIdentity": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 97887 MiB",
+  "nativeRender": {
+    "device": {
+      "backend": "OPTIX",
+      "gpu_verified": true,
+      "denoiser": "OPENIMAGEDENOISE_CPU",
+      "denoisingQuality": "BALANCED",
+      "denoisingPrefilter": "FAST",
+      "persistentData": true,
+      "devices": [
+        "NVIDIA RTX PRO 6000 Blackwell Server Edition"
+      ]
+    },
+    "width": 1920,
+    "samples": 24,
+    "step": 1,
+    "duration": 38,
+    "frameCount": 912,
+    "seconds": 768.340886319
+  },
+  "studioRender": {
+    "status": "RENDERED_PENDING_CREATIVE_REVIEW",
+    "pipeline": "AutoPromote RenderViralRequest/render_viral_clip_impl",
+    "rendererSourceSha256": "5bdea4cae17459a2b9e746eba5a160e49980b5bcd21118ede5e31516a45bd8e2",
+    "requestSha256": "872ac07fb542a820ddda8a4ff236ceaeb89304212692ff067cf4a65d43cfc5af",
+    "transportSourceSha256": "e645fc3a6a03b0680bae3fa994cfeff985b218e76f5321b33ac1c231a46f698a",
+    "sha256": "63aaf80638ef93e2165924a6562026392bf1f0a10ef7c9826611aa14549ceea3",
+    "audioMeasurements": {
+      "sampleRate": 48000,
+      "channels": 2,
+      "peak": 0.6840224266052246,
+      "rms": 0.07698647677898407,
+      "clippedSamples": 0,
+      "duration": 38.016,
+      "limitation": "Objective decoded measurements; listening and speech comprehension require founder review."
+    },
+    "duration": 38.0,
+    "encoder": "h264_nvenc",
+    "encodersUsed": [
+      "libx264",
+      "libx264",
+      "libx264",
+      "libx264",
+      "libx264",
+      "libx264",
+      "libx264",
+      "libx264",
+      "libx264",
+      "libx264",
+      "libx264",
+      "h264_nvenc"
+    ],
+    "requestedEncoderPolicy": "nvenc",
+    "probe": {
+      "streams": [
+        {
+          "index": 0,
+          "codec_name": "h264",
+          "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+          "profile": "Main",
+          "codec_type": "video",
+          "codec_tag_string": "avc1",
+          "codec_tag": "0x31637661",
+          "width": 1920,
+          "height": 1080,
+          "coded_width": 1920,
+          "coded_height": 1080,
+          "closed_captions": 0,
+          "film_grain": 0,
+          "has_b_frames": 2,
+          "sample_aspect_ratio": "1:1",
+          "display_aspect_ratio": "16:9",
+          "pix_fmt": "yuv420p",
+          "level": 40,
+          "chroma_location": "left",
+          "field_order": "progressive",
+          "refs": 1,
+          "is_avc": "true",
+          "nal_length_size": "4",
+          "id": "0x1",
+          "r_frame_rate": "24/1",
+          "avg_frame_rate": "24/1",
+          "time_base": "1/12288",
+          "start_pts": 0,
+          "start_time": "0.000000",
+          "duration_ts": 466944,
+          "duration": "38.000000",
+          "bit_rate": "7800095",
+          "bits_per_raw_sample": "8",
+          "nb_frames": "912",
+          "extradata_size": 52,
+          "disposition": {
+            "default": 1,
+            "dub": 0,
+            "original": 0,
+            "comment": 0,
+            "lyrics": 0,
+            "karaoke": 0,
+            "forced": 0,
+            "hearing_impaired": 0,
+            "visual_impaired": 0,
+            "clean_effects": 0,
+            "attached_pic": 0,
+            "timed_thumbnails": 0,
+            "non_diegetic": 0,
+            "captions": 0,
+            "descriptions": 0,
+            "metadata": 0,
+            "dependent": 0,
+            "still_image": 0
+          },
+          "tags": {
+            "language": "und",
+            "handler_name": "VideoHandler",
+            "vendor_id": "[0][0][0][0]",
+            "encoder": "Lavc60.31.102 h264_nvenc"
+          }
+        },
+        {
+          "index": 1,
+          "codec_name": "aac",
+          "codec_long_name": "AAC (Advanced Audio Coding)",
+          "profile": "LC",
+          "codec_type": "audio",
+          "codec_tag_string": "mp4a",
+          "codec_tag": "0x6134706d",
+          "sample_fmt": "fltp",
+          "sample_rate": "48000",
+          "channels": 2,
+          "channel_layout": "stereo",
+          "bits_per_sample": 0,
+          "initial_padding": 0,
+          "id": "0x2",
+          "r_frame_rate": "0/0",
+          "avg_frame_rate": "0/0",
+          "time_base": "1/48000",
+          "start_pts": 0,
+          "start_time": "0.000000",
+          "duration_ts": 1824000,
+          "duration": "38.000000",
+          "bit_rate": "160650",
+          "nb_frames": "1783",
+          "extradata_size": 5,
+          "disposition": {
+            "default": 1,
+            "dub": 0,
+            "original": 0,
+            "comment": 0,
+            "lyrics": 0,
+            "karaoke": 0,
+            "forced": 0,
+            "hearing_impaired": 0,
+            "visual_impaired": 0,
+            "clean_effects": 0,
+            "attached_pic": 0,
+            "timed_thumbnails": 0,
+            "non_diegetic": 0,
+            "captions": 0,
+            "descriptions": 0,
+            "metadata": 0,
+            "dependent": 0,
+            "still_image": 0
+          },
+          "tags": {
+            "language": "und",
+            "handler_name": "SoundHandler",
+            "vendor_id": "[0][0][0][0]"
+          }
+        }
+      ],
+      "format": {
+        "filename": "/tmp/welcome-native/film/outputs/final/final.mp4",
+        "nb_streams": 2,
+        "nb_programs": 0,
+        "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+        "format_long_name": "QuickTime / MOV",
+        "start_time": "0.000000",
+        "duration": "38.000000",
+        "size": "37841803",
+        "bit_rate": "7966695",
+        "probe_score": 100,
+        "tags": {
+          "major_brand": "isom",
+          "minor_version": "512",
+          "compatible_brands": "isomiso2avc1mp41",
+          "encoder": "Lavf60.16.100"
+        }
+      }
+    },
+    "renderSeconds": 25.20255488800001,
+    "cloudCredentialsSupplied": false,
+    "result": {
+      "status": "completed",
+      "progress": 100,
+      "detail": "Render complete",
+      "job_id": "f8894094-2e83-486d-b505-252f3ba37ee7",
+      "output_path": "/tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_viral.mp4",
+      "output_url": "file:///tmp/welcome-native/film/outputs/final/final.mp4",
+      "thumbnail_url": null,
+      "cover_frame": null,
+      "thumbnail_frame": null,
+      "brand_watermark": false,
+      "caption_review_copy": false,
+      "brand_watermark_receipt": {
+        "enabled": false,
+        "status": "disabled_for_studio"
+      },
+      "caption_review_receipt": null,
+      "output_settings": {
+        "resolution": "1080p",
+        "width": 1920,
+        "height": 1080,
+        "fps": 24,
+        "codec": "h264",
+        "encoder": "h264_nvenc",
+        "quality": "high",
+        "crf": 19,
+        "preset": "p4"
+      },
+      "watermark_text": null,
+      "audio_proof": {
+        "expected": true,
+        "verified": true,
+        "codec": "aac",
+        "channels": 2,
+        "sample_rate": 48000,
+        "duration_seconds": 38.0
+      },
+      "media_validation": {
+        "duration": 38.0,
+        "size": 37841803,
+        "video": {
+          "index": 0,
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 1920,
+          "height": 1080,
+          "avg_frame_rate": "24/1"
+        },
+        "audio": {
+          "index": 1,
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "avg_frame_rate": "0/0"
+        }
+      },
+      "final_quality_gate": {
+        "status": "passed",
+        "media": {
+          "duration": 38.0,
+          "size": 37841803,
+          "video": {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_type": "video",
+            "width": 1920,
+            "height": 1080,
+            "avg_frame_rate": "24/1"
+          },
+          "audio": {
+            "index": 1,
+            "codec_name": "aac",
+            "codec_type": "audio",
+            "avg_frame_rate": "0/0"
+          }
+        },
+        "duration": {
+          "expected": 38.0,
+          "actual": 38.0,
+          "delta": 0.0,
+          "tolerance": 1.33
+        },
+        "audio_expected": true,
+        "picture_timing": {
+          "duration": 38.0,
+          "container_duration": 38.0,
+          "delta": 0.0,
+          "tolerance": 0.042
+        },
+        "black_ranges": [],
+        "planned_black_ranges": [
+          {
+            "start": 0,
+            "end": 1.8,
+            "reason": "Deliberate near-dark opening before the environment wakes."
+          }
+        ],
+        "browser_delivery": "h264_yuv420p_faststart"
+      },
+      "duration": 38.0,
+      "speed_plan": [
+        {
+          "start_time": 0.0,
+          "end_time": 38.0,
+          "rate": 1.0
+        }
+      ],
+      "creative_receipt": {
+        "status": "not_requested",
+        "fallback": "clean",
+        "effects": []
+      },
+      "professional_cleanup": {
+        "status": "disabled"
+      },
+      "audio_restoration": null,
+      "audio_automation": {},
+      "audio_track_states": {},
+      "audio_remix_receipt": {
+        "version": 1,
+        "enabled": false,
+        "status": "not_requested"
+      },
+      "studio_plan_validation": {
+        "valid": false,
+        "errors": [
+          "legacy_request_without_plan"
+        ]
+      }
+    }
+  },
+  "finishedAt": "2026-10-09T09:22:31.190013+00:00",
+  "workloadSeconds": 853.535984666
+}

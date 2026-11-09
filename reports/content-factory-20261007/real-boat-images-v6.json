@@ -1,0 +1,20 @@
+{
+  "deadlineEpoch": 1791374400.0,
+  "sourceBrief": "A real cinematic voyage begins as a folded paper boat. AutoPromote generates the raw material from an idea and uses its existing Director and render pipeline to make the film. The reveal is a full-size working boat at sea, not a paper boat surviving at sea.",
+  "images": [
+    {
+      "id": "real-sailboat-v6",
+      "seed": 20261007106,
+      "duration": 3,
+      "prompt": "Cinematic photograph of one full-size classic mahogany sailing yacht crossing deep blue ocean waves. Cream triangular canvas sails, real rigging, polished timber hull, brass rails, powerful white bow wake. Entire yacht visible, low water-level tracking angle, storm clouds opening to warm amber sunlight, photoreal marine cinematography.",
+      "negative_prompt": "paper boat, origami, miniature, toy, model, extra boats, impossible rigging, warped hull, bird, crane, text, logo, watermark, cartoon, plastic"
+    },
+    {
+      "id": "real-sailboat-wide-v6",
+      "seed": 20261007107,
+      "duration": 3,
+      "prompt": "Cinematic aerial photograph of one classic mahogany sailing yacht on a vast deep blue sea. Cream triangular canvas sails, coherent real rigging, timber hull, long white wake. Entire yacht small in frame, distant warm sunrise horizon, dramatic cloud opening, natural ocean texture, photoreal luxury marine cinematography.",
+      "negative_prompt": "paper boat, origami, miniature, toy, model, extra boats, impossible rigging, warped hull, bird, crane, text, logo, watermark, cartoon, plastic"
+    }
+  ]
+}

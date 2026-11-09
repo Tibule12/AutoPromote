@@ -1,0 +1,80 @@
+[
+  {
+    "status": "GENERATED_PENDING_REVIEW",
+    "artifact": {
+      "path": "reports/content-factory-20261007/audio/hero/score.wav",
+      "sha256": "03805b1629eae6ba73af7474f784830f1ba00845f7a2088c5a24203b6bdff237",
+      "duration": 24.0,
+      "fps": 24,
+      "container": "wav",
+      "codec": "pcm_s16le",
+      "sampleRate": 48000,
+      "channels": 2,
+      "peak": 0.1964057510804255,
+      "rms": 0.03833283899397365
+    },
+    "model": "original-procedural-composition",
+    "modelRevision": "paper-voyage-score-v1",
+    "tool": "AutoPromote Content Factory original audio",
+    "settings": {
+      "sampleRate": 48000,
+      "tempo": 96,
+      "duration": 24.0,
+      "motif": "minor tension to warm resolution",
+      "stereo": true
+    },
+    "seed": 2026100711
+  },
+  {
+    "status": "GENERATED_PENDING_REVIEW",
+    "artifact": {
+      "path": "reports/content-factory-20261007/audio/hero/paper.wav",
+      "sha256": "1e63b18681e9c5ae80a0367d618381ebc8022f67fae2de1abaa6f3ab686292d4",
+      "duration": 24.0,
+      "fps": 24,
+      "container": "wav",
+      "codec": "pcm_s16le",
+      "sampleRate": 48000,
+      "channels": 2,
+      "peak": 0.09899215729160209,
+      "rms": 0.0018013473088296682
+    },
+    "model": "original-procedural-composition",
+    "modelRevision": "paper-voyage-score-v1",
+    "tool": "AutoPromote Content Factory original audio",
+    "settings": {
+      "sampleRate": 48000,
+      "tempo": 96,
+      "duration": 24.0,
+      "motif": "minor tension to warm resolution",
+      "stereo": true
+    },
+    "seed": 2026100711
+  },
+  {
+    "status": "GENERATED_PENDING_REVIEW",
+    "artifact": {
+      "path": "reports/content-factory-20261007/audio/hero/ocean.wav",
+      "sha256": "40e94f8be3da3a1386850aa597b9c498637825dfded3f5ef74f50a423a7e39d7",
+      "duration": 24.0,
+      "fps": 24,
+      "container": "wav",
+      "codec": "pcm_s16le",
+      "sampleRate": 48000,
+      "channels": 2,
+      "peak": 0.04876345598916595,
+      "rms": 0.008043805682130024
+    },
+    "model": "original-procedural-composition",
+    "modelRevision": "paper-voyage-score-v1",
+    "tool": "AutoPromote Content Factory original audio",
+    "settings": {
+      "sampleRate": 48000,
+      "tempo": 96,
+      "duration": 24.0,
+      "motif": "minor tension to warm resolution",
+      "stereo": true
+    },
+    "seed": 2026100711
+  }
+]

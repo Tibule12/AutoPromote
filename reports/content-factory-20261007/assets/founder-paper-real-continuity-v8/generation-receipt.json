@@ -1,0 +1,55 @@
+{
+  "status": "GENERATED_PENDING_VISUAL_REVIEW",
+  "model": "Wan-AI/Wan2.2-I2V-A14B-Diffusers",
+  "modelRevision": "596658fd9ca6b7b71d5057529bbf319ecbc61d74",
+  "sourceBrief": "A real cinematic voyage begins as a folded paper boat. AutoPromote generates the raw material from an idea and uses its existing Director and render pipeline to make the film. The reveal is a full-size working boat at sea, not a paper boat surviving at sea.",
+  "shot": {
+    "name": "founder-paper-real-continuity-v8",
+    "seed": 20261007138,
+    "negative_prompt": "cut, hard cut, jump cut, editing, montage, scene change, dissolve between clips, crossfade, sudden replacement, second boat, two boats, duplicate hull, full paper boat at end, toy yacht, printed blue mat, plastic water, flat sheet of water, miniature on table at end, crane, bird, impossible rigging, melted hull, flicker, text, watermark, cartoon, stationary image",
+    "prompt": "Single uninterrupted cinematic shot, one camera, no editing. The small traditional folded paper boat points to the right. Its central triangular fold physically unfolds upward, stretches and becomes the matching cream canvas triangular mainsail. Simultaneously the two folded paper hull sides expand, thicken and turn into dark polished mahogany planking, maintaining the same right-pointing bow and three-quarter angle. A wooden mast and taut rigging grow along the existing fold creases. The paper material visibly develops wood grain and woven canvas texture through several intermediate states. Fine fibres lift into sunlit spray. Real liquid water swells around the hull, floods and overtakes the workbench; the wooden surface bends down into deep moving ocean waves, the distant workshop dissolves organically into open sky and horizon behind the growing sail. The camera continuously tracks beside the same right-pointing boat, gently rising as the tiny folded vessel gains full yacht scale. The hull stays in the centre of the frame throughout. Amber light and reflections travel continuously across paper, wood, canvas and water. By the final two seconds the paper is completely gone: the exact classic mahogany yacht from the ending image cuts a powerful white bow wake in a vast real sea. Continuous visible material and environmental metamorphosis, coherent boat geometry, graceful camera movement, photoreal texture and atmosphere.",
+    "reference_image": "/work/assets/founder-paper-real-continuity-v8/reference.png",
+    "referenceProvenance": {
+      "assetId": "paper-start",
+      "parentArtifactSha256": "0136956d2b6465fceb8af75a9f45c79c14f71fa568d3c1075df163ea185d6f66",
+      "sourceTime": 1.25,
+      "frameSha256": "511bb45ff5edb02cb28b33c1be6a55e76ab0f03a0d4e8fff061c937b02030b81"
+    },
+    "last_reference_image": "/work/assets/founder-paper-real-continuity-v8/last-reference.png",
+    "lastReferenceProvenance": {
+      "assetId": "real-vessel",
+      "parentArtifactSha256": "54e4102b5fa6df99491cee642dac927732fcd1860a119b213a3ffa97650e61bb",
+      "sourceTime": 0,
+      "frameSha256": "ec65d8f80b03608a8a638482d849d4cdc16c02d81f5d6af03fc7ce05388ae462"
+    }
+  },
+  "prompt": "Single uninterrupted cinematic shot, one camera, no editing. The small traditional folded paper boat points to the right. Its central triangular fold physically unfolds upward, stretches and becomes the matching cream canvas triangular mainsail. Simultaneously the two folded paper hull sides expand, thicken and turn into dark polished mahogany planking, maintaining the same right-pointing bow and three-quarter angle. A wooden mast and taut rigging grow along the existing fold creases. The paper material visibly develops wood grain and woven canvas texture through several intermediate states. Fine fibres lift into sunlit spray. Real liquid water swells around the hull, floods and overtakes the workbench; the wooden surface bends down into deep moving ocean waves, the distant workshop dissolves organically into open sky and horizon behind the growing sail. The camera continuously tracks beside the same right-pointing boat, gently rising as the tiny folded vessel gains full yacht scale. The hull stays in the centre of the frame throughout. Amber light and reflections travel continuously across paper, wood, canvas and water. By the final two seconds the paper is completely gone: the exact classic mahogany yacht from the ending image cuts a powerful white bow wake in a vast real sea. Continuous visible material and environmental metamorphosis, coherent boat geometry, graceful camera movement, photoreal texture and atmosphere.",
+  "seed": 20261007138,
+  "tool": "AutoPromote NVIDIA conditioned-video adapter",
+  "referenceImageSha256": "511bb45ff5edb02cb28b33c1be6a55e76ab0f03a0d4e8fff061c937b02030b81",
+  "lastReferenceImageSha256": "ec65d8f80b03608a8a638482d849d4cdc16c02d81f5d6af03fc7ce05388ae462",
+  "settings": {
+    "width": 832,
+    "height": 480,
+    "frames": 121,
+    "fps": 16,
+    "steps": 40,
+    "guidance": 3.5,
+    "dtype": "bfloat16; VAE float32",
+    "cpuOffload": true,
+    "conditioning": "first_and_last_frame"
+  },
+  "gpu": "NVIDIA L40S",
+  "torch": "2.7.1+cu126",
+  "diffusers": "0.36.0",
+  "seconds": 1731.6791805770008,
+  "peakCudaAllocatedBytes": 34899081216,
+  "peakCudaReservedBytes": 39220936704,
+  "artifact": {
+    "path": "/work/conditioned-video/founder-paper-real-continuity-v8/video.mp4",
+    "sha256": "418cb6b640f46609e77bc4928311ffe832fdf7ec50da91060d4f610045e72ca5",
+    "duration": 7.5625,
+    "bytes": 3665098
+  },
+  "completedAt": "2026-10-07T11:23:26.298854+00:00"
+}

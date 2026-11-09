@@ -1,0 +1,250 @@
+{
+  "status": "PASS",
+  "verified_at": "2026-10-06T03:09:44.937185+00:00",
+  "branch": "agent/director-analysis-staging-browser-v1",
+  "head": "7f7530ad746050c094bfc78d0921190da98d2098",
+  "protected_files": [
+    {
+      "file": "frontend/src/App.js",
+      "before_sha256": "e04f0d7ab205b37e68130f69a8b6e416ba2d27eec94c1bc0bb8eda5f45be22b2",
+      "after_sha256": "e04f0d7ab205b37e68130f69a8b6e416ba2d27eec94c1bc0bb8eda5f45be22b2",
+      "unchanged": true
+    },
+    {
+      "file": "frontend/src/App.css",
+      "before_sha256": "59bbfeb59a32a36b621cd6ea6cbbf207e99f5051c11da5a19901a32cf7fa70f9",
+      "after_sha256": "59bbfeb59a32a36b621cd6ea6cbbf207e99f5051c11da5a19901a32cf7fa70f9",
+      "unchanged": true
+    },
+    {
+      "file": "frontend/src/UserDashboard_full.js",
+      "before_sha256": "d686d982553faf2e0275b8470cb01ed93b2c42209ce855637d1710b72dec95ba",
+      "after_sha256": "d686d982553faf2e0275b8470cb01ed93b2c42209ce855637d1710b72dec95ba",
+      "unchanged": true
+    },
+    {
+      "file": "frontend/src/components/ViralClipStudio.js",
+      "before_sha256": "9c353f5084c86e8e75d1ae440af7c48a348fb8840bd5e1fcfeb779f5ba34cf16",
+      "after_sha256": "9c353f5084c86e8e75d1ae440af7c48a348fb8840bd5e1fcfeb779f5ba34cf16",
+      "unchanged": true
+    },
+    {
+      "file": "frontend/src/components/MultiCamCombiner.js",
+      "before_sha256": "9a28d50cd0402f9131fcf2bd1701633deb77bf863940654179a93d77fb9646f4",
+      "after_sha256": "9a28d50cd0402f9131fcf2bd1701633deb77bf863940654179a93d77fb9646f4",
+      "unchanged": true
+    },
+    {
+      "file": "frontend/src/LoginForm.js",
+      "before_sha256": "4544b6a2e2b8bad89e601615d20bde9aa51ec0a224ba584301515f738b91f33c",
+      "after_sha256": "4544b6a2e2b8bad89e601615d20bde9aa51ec0a224ba584301515f738b91f33c",
+      "unchanged": true
+    },
+    {
+      "file": "frontend/src/RegisterForm.js",
+      "before_sha256": "78d56512e58123e0fedf4b1bf4fc4610429a0d00a72339074210ddd56bad79f1",
+      "after_sha256": "78d56512e58123e0fedf4b1bf4fc4610429a0d00a72339074210ddd56bad79f1",
+      "unchanged": true
+    },
+    {
+      "file": "frontend/src/react-router-dom.js",
+      "before_sha256": "bd5c998a145b02adbc2a04ce427c68fde088eb898730b5b2579b7d94fd3cbeb5",
+      "after_sha256": "bd5c998a145b02adbc2a04ce427c68fde088eb898730b5b2579b7d94fd3cbeb5",
+      "unchanged": true
+    },
+    {
+      "file": "frontend/package-lock.json",
+      "before_sha256": "1f1548e071d6d22d39387088be634d5a64cdd38095bf5b38673377e818eab582",
+      "after_sha256": "1f1548e071d6d22d39387088be634d5a64cdd38095bf5b38673377e818eab582",
+      "unchanged": true
+    },
+    {
+      "file": "package.json",
+      "before_sha256": "d1b617f4ed11398f237ae79be7ab6823719d6b819d46c63964f0738c76cd3a8e",
+      "after_sha256": "d1b617f4ed11398f237ae79be7ab6823719d6b819d46c63964f0738c76cd3a8e",
+      "unchanged": true
+    },
+    {
+      "file": "package-lock.json",
+      "before_sha256": "0d2299a11f10b2d53e65d6311373bc2fa48fe701481cec5e78338637f616ef50",
+      "after_sha256": "0d2299a11f10b2d53e65d6311373bc2fa48fe701481cec5e78338637f616ef50",
+      "unchanged": true
+    }
+  ],
+  "source_files": [
+    {
+      "file": "frontend/package.json",
+      "sha256": "887fd30c585b342011551acc8e4c9fc4c59ba93d0f1a6925d58289b3e7cb03e6"
+    },
+    {
+      "file": "frontend/public/index.html",
+      "sha256": "25c2f0cd630b1131d860fe46f80e6edf6743b46aedf278b2f84021100f74da0c"
+    },
+    {
+      "file": "frontend/public/landing/README.md",
+      "sha256": "a9c00dda3118c2955f151841af143d1840a700a56f8cf29c8dfe4e6cbf4e1f35"
+    },
+    {
+      "file": "frontend/public/landing/podcast-conversation.mp4",
+      "sha256": "260f7e4abfa68e51cafd244c19ee51b8b455f068ea0858f1faafa2b8a5cfeb40"
+    },
+    {
+      "file": "frontend/public/landing/podcast-conversation.webp",
+      "sha256": "8295000dfedef60acc1d718a500ca79edbc0d20fa653944440e24b820d6e885e"
+    },
+    {
+      "file": "frontend/public/landing/podcast-guest.webp",
+      "sha256": "e973b141cd52d8e8a46b85885ced525b00bf8a9f172c44e1dc5d70fbaa71dbcd"
+    },
+    {
+      "file": "frontend/public/landing/podcast-host.webp",
+      "sha256": "b75e7bb0a08db4cc0c40d23a8518f36666e89f3fe0eaaa872414e5ef2b2f8fb4"
+    },
+    {
+      "file": "frontend/public/landing/podcast-motion.mp4",
+      "sha256": "f73a2b4ea4352d664cd38a8855daba4dacfc052554b01f8d591a422ebd8c8b2a"
+    },
+    {
+      "file": "frontend/public/landing/podcast-preview.webp",
+      "sha256": "ac31ec000b50a7ecb4b5fe7837a5a23964d2845046d6b1facd8303864998f03d"
+    },
+    {
+      "file": "frontend/public/landing/studio-conversation-v2.webp",
+      "sha256": "2b26ded05c530de847f0623419e4f2e489a639718ed9b9a3a36765854eb5303f"
+    },
+    {
+      "file": "frontend/scripts/preview-public-homepage.js",
+      "sha256": "22ea13dbf3ad277cccb348037f1671c5753594175432b1b57484d3997e27bb10"
+    },
+    {
+      "file": "frontend/src/WelcomePage.js",
+      "sha256": "b9b9e531881d1d2e41e9fd57dffd8c988986a35b9611c86226a104b1b02c54de"
+    },
+    {
+      "file": "frontend/src/__tests__/LandingMotionLifecycle.test.js",
+      "sha256": "30dd4f64abee6d7c9c871cb31e8f7111a22d9f82c1e1e0e99a0c6e820ce26b3c"
+    },
+    {
+      "file": "frontend/src/__tests__/LandingPageClaims.test.js",
+      "sha256": "4c713757d61a8e77ad7300fc6c6e36e8012592e0292b3807b2f6d4e2dba0ff25"
+    },
+    {
+      "file": "frontend/src/__tests__/MotionAssetLayer.test.js",
+      "sha256": "ef3cb650ae94845ab20bfc44af257d03d4c7ad2aed4aa93ef7ee45577871160c"
+    },
+    {
+      "file": "frontend/src/__tests__/PublicPages.copy.test.js",
+      "sha256": "bc53be66ac412e9eba28ef32e9dfca55a756ece559e8fb29269fcad4e6fceb5e"
+    },
+    {
+      "file": "frontend/src/components/landing/DirectorShowcase.js",
+      "sha256": "788a77c3fdf18549f13e616edc50fdff07cc144d0b8f88f627e65df38a252107"
+    },
+    {
+      "file": "frontend/src/components/landing/EditorHeroVisual.js",
+      "sha256": "9e183efa8f6fb8601c11ebe4863ebdff95d2ac761c357899c623bc31d2b9a259"
+    },
+    {
+      "file": "frontend/src/components/landing/HeroSection.js",
+      "sha256": "484bc9953ffbadf1ab25917abd73c8fbe90489358d86a2e8a88815c6d8703148"
+    },
+    {
+      "file": "frontend/src/components/landing/LandingCompositing.css",
+      "sha256": "5070da9d6ae5085728177b6e5e8001b1c814ad4b99c92d0597b4f3dddb28c460"
+    },
+    {
+      "file": "frontend/src/components/landing/LandingCreators.js",
+      "sha256": "caa5c2d85505723322d78e9573ba2c70e1a71aca714386fea23f392ffe2ee1d4"
+    },
+    {
+      "file": "frontend/src/components/landing/LandingDemo.js",
+      "sha256": "585cb0fd6ca613cd58ea3576d86dea72499f61c826c3e80cf0e5eef00e2ee244"
+    },
+    {
+      "file": "frontend/src/components/landing/LandingEditingStory.js",
+      "sha256": "6536b9e2242b9ed51738b9901b346b9d29f1edd12330717dcc951a1667e16e0f"
+    },
+    {
+      "file": "frontend/src/components/landing/LandingFeatures.js",
+      "sha256": "b2249acc6ea7924de8cd7ed6d2ed32c27086a914335409d2c55f0c12d35de48f"
+    },
+    {
+      "file": "frontend/src/components/landing/LandingFooter.js",
+      "sha256": "b8802c1bd09278ade5f729b4152c8ab458f43e4261ee811e3eb39dd5ed5dd3a4"
+    },
+    {
+      "file": "frontend/src/components/landing/LandingIcon.js",
+      "sha256": "4ec91a7ad0f7fc5da0aa940a5c8fd395e653f72c92ce976a92b1875eb23f24d5"
+    },
+    {
+      "file": "frontend/src/components/landing/LandingMotion.css",
+      "sha256": "8035f996fd4a9227308e621f380f28a2ce524973dce46095d7bc694e315e84d5"
+    },
+    {
+      "file": "frontend/src/components/landing/LandingNavbar.js",
+      "sha256": "e5426b76d1f8806c36353f08c1bf414d39bf03c71b7572727d121bf69b2e7983"
+    },
+    {
+      "file": "frontend/src/components/landing/LandingPage.css",
+      "sha256": "88380a1c2e536d53cb8e765cb838af1d1d5952ece8ebe8ef90a4becf5284fca0"
+    },
+    {
+      "file": "frontend/src/components/landing/LandingWorkflow.js",
+      "sha256": "ff10e1a6e0499d50224b937378cd82c67b9622d3922621e08dc72f6652f41cbc"
+    },
+    {
+      "file": "frontend/src/components/landing/MotionAssetLayer.js",
+      "sha256": "ba3a5a021cd73f5a5591137b7a7d06489ece18469f2a5f9ef4d5e60b1f685e3c"
+    },
+    {
+      "file": "frontend/src/components/landing/MotionEditingScene.js",
+      "sha256": "3cd61ace01f34db0c517e135696b517193bbbdd3765fbcc2af22348cab9e657b"
+    },
+    {
+      "file": "frontend/src/components/landing/MotionGraphicsLayer.js",
+      "sha256": "ceeb78a1b08c7501e4e4256f53c34d0a4418bfabc513cb0432f24455e2c6a4dd"
+    },
+    {
+      "file": "frontend/src/components/landing/ProductVisuals.js",
+      "sha256": "1eb1e59aa7d4ffe45492385acfa53f49ec925229dd0f38f751bd5caaf8a1b045"
+    },
+    {
+      "file": "frontend/src/components/landing/createEditingScene.js",
+      "sha256": "6d10b8237e3b24cf220abe76b5afc37b2af9fe7d50b16a29ebf1dad13883b79a"
+    },
+    {
+      "file": "frontend/src/components/landing/editingSequence.js",
+      "sha256": "597c879653d710a88ea0d56a98d5d62ae7e2e326df63266f2e82de0cea53f61d"
+    },
+    {
+      "file": "frontend/src/components/landing/motionAssetManifest.js",
+      "sha256": "0cf9aa974836eedbcac8fc1ac0a45e5d672c723db348946f5ca26017ba47885d"
+    },
+    {
+      "file": "frontend/src/components/landing/motionMaterials.js",
+      "sha256": "837023ecbba20ced089f9134e080c7b9dcd2adcb6e56374a9ae8d40ea9b8debe"
+    },
+    {
+      "file": "frontend/src/components/landing/sceneTextures.js",
+      "sha256": "bc6f13bdac6dd686f246a7fdb6e2e76e081cd08deec005fd8908cb0d82119732"
+    },
+    {
+      "file": "frontend/src/components/landing/useKineticTitle.js",
+      "sha256": "0544be8d4035ebef24794b3b0fca78b9bcdcc8fd6eaa19b3a3f812a2a61f2130"
+    },
+    {
+      "file": "test/e2e/playwright/run-public-homepage-headline.js",
+      "sha256": "035d0f75142d3e225221df0dfaf1103230d629f0e6abf5fe5295be07af32dea4"
+    },
+    {
+      "file": "test/e2e/playwright/run-public-homepage-media.js",
+      "sha256": "8c81b4c156a6c138bc54c72a27f1bb1089bc7cafbab2d29aa5124f797cfcac07"
+    },
+    {
+      "file": "test/e2e/playwright/run-public-homepage.js",
+      "sha256": "35373b79a9fa556c359e14c8c673aa70bade477cb8c2b7ce6648fd8a5cda9954"
+    }
+  ],
+  "scope": "Public homepage, local media, preview tooling and tests only",
+  "commit_push_merge_deployment": "None"
+}

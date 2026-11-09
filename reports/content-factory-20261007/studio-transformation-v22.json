@@ -1,0 +1,62 @@
+{
+  "status": "ACTUAL_STUDIO_GENERATED_PROTOTYPE_CONTROLS_VERIFIED",
+  "media": [
+    {
+      "src": "http://127.0.0.1:5009/factory-media/assets/founder-control-transform-v17/video.mp4",
+      "paused": true,
+      "currentTime": 1.575508,
+      "width": 832
+    },
+    {
+      "src": "http://127.0.0.1:5009/factory-media/assets/founder-control-transform-v17/video.mp4",
+      "paused": true,
+      "currentTime": 0,
+      "width": 832
+    },
+    {
+      "src": "http://127.0.0.1:5009/factory-media/assets/founder-control-transform-v17/video.mp4",
+      "paused": true,
+      "currentTime": 0,
+      "width": 832
+    },
+    {
+      "src": "",
+      "paused": true,
+      "currentTime": 0,
+      "width": 0
+    },
+    {
+      "src": "",
+      "paused": true,
+      "currentTime": 0,
+      "width": 0
+    },
+    {
+      "src": "http://127.0.0.1:5009/factory-media/assets/founder-control-transform-v17/video.mp4",
+      "paused": true,
+      "currentTime": 0,
+      "width": 832
+    },
+    {
+      "src": "http://127.0.0.1:5009/factory-media/assets/founder-control-transform-v17/video.mp4",
+      "paused": true,
+      "currentTime": 1.575508,
+      "width": 832
+    },
+    {
+      "src": "http://127.0.0.1:5009/factory-media/assets/founder-control-transform-v17/video.mp4",
+      "paused": true,
+      "currentTime": 0.8,
+      "width": 832
+    },
+    {
+      "src": "http://127.0.0.1:5009/factory-media/assets/founder-control-transform-v17/video.mp4",
+      "paused": true,
+      "currentTime": 1.575508,
+      "width": 832
+    }
+  ],
+  "verifiedActions": 3,
+  "reasoning": "Observed current play/pause labels before each manually reasoned semantic action; earlier guessed combined label did not exist.",
+  "scope": "Real generated source in existing Studio; prior source/trim/export qualification remains separately recorded."
+}

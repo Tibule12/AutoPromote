@@ -1,0 +1,203 @@
+{
+  "identity": "55c3b90110482de2da93462a325d47a55f2fe11417f615b4f15b8856e9c2c412",
+  "actions": [
+    {
+      "signature": "c9a906e126349f3f4180d51fc3e8cc76e70dd398250233476063593bbf81dfd7",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Show media"
+      },
+      "expect": [
+        {
+          "type": "visible",
+          "role": "button",
+          "name": "Hide media"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-07T10:07:48.416Z",
+      "reason": "Open the observed Show media control",
+      "planner": null,
+      "afterState": "22a33a79c0554d93277b76d52d1e46750ceef88aad6144e39ba4d6ea22b76851"
+    },
+    {
+      "signature": "10975673f6eb88f4bd51c8773e42d6d06c48fea8a2746e80e2ffe52d1fa4cb22",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Paper to real · generated source assembly"
+      },
+      "expect": [
+        {
+          "type": "state_changed",
+          "value": "ebfc7c6d0d93b19fbfa5d48cde77804d480a14acb9ed954051a75c2f5163ab40"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-07T10:08:17.317Z",
+      "reason": "Open the observed Paper to real · generated source assembly control",
+      "planner": null,
+      "afterState": "055717ceadc62ed40569f609c07034a979023b2e0663a7689de02a7c45bf021f"
+    },
+    {
+      "signature": "ebcd7dcd2c281c37d9741df5f749d6c9b9897189971d86ed24ee52664dd585f6",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Open saved project (2)"
+      },
+      "expect": [
+        {
+          "type": "state_changed",
+          "value": "972a948ba49810af1a06f3bd045452df1e1a5ffebacb374828e46e4e905b9865"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-07T10:08:46.840Z",
+      "reason": "Open the observed Open saved project control",
+      "planner": null,
+      "afterState": "23e36a1a0e0547b0c916ef74b34c6bd6b57f35a8f17e43ad0c69987dfda020e9"
+    },
+    {
+      "signature": "c5e55a6eb727d9f5dd7bc9578540cc309a1b7250cd547925001449977d92d5b8",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Paper to real · generated source assembly 10/7/2026, 12:07:29 PM"
+      },
+      "expect": [
+        {
+          "type": "text_visible",
+          "value": "Real yacht · generated keyframe"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-07T10:09:17.516Z",
+      "reason": "Open the original source assembly from the observed project library",
+      "planner": null,
+      "afterState": "5d75b9cc343866a3f00b3d629c1ecf2a5edd87b4c347c074575631de66ff793b"
+    },
+    {
+      "signature": "f78246a25fbde10e6f9ffe8ab5b77c8ba7581e83571b7b38107dd74e35f8ecae",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Hide media"
+      },
+      "expect": [
+        {
+          "type": "visible",
+          "role": "button",
+          "name": "Show media"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-07T10:09:42.011Z",
+      "reason": "Open the observed Hide media control",
+      "planner": null,
+      "afterState": "90b7038008b6b53ad1aedccc45dc79db21a5a4be5fe52817062da533f9fd719d"
+    },
+    {
+      "signature": "25e492bc217487835ab913c5d16d245e5eb184443eb41f43fbf9db001f809e61",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Pause edited preview"
+      },
+      "expect": [
+        {
+          "type": "visible",
+          "role": "button",
+          "name": "Play edited preview"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-07T10:10:12.219Z",
+      "reason": "Open the observed Pause edited preview control",
+      "planner": null,
+      "afterState": "e9714c3a21673d2aa47545971719fbdd8f81fe2db759e61711f6e814619f8833"
+    }
+  ],
+  "observations": [
+    {
+      "id": "observation-1",
+      "url": "http://127.0.0.1:5009/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T10:07:40.748Z"
+    },
+    {
+      "id": "observation-2",
+      "url": "http://127.0.0.1:5009/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T10:08:02.110Z"
+    },
+    {
+      "id": "observation-3",
+      "url": "http://127.0.0.1:5009/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T10:08:10.069Z"
+    },
+    {
+      "id": "observation-4",
+      "url": "http://127.0.0.1:5009/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T10:08:32.031Z"
+    },
+    {
+      "id": "observation-5",
+      "url": "http://127.0.0.1:5009/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T10:08:40.290Z"
+    },
+    {
+      "id": "observation-6",
+      "url": "http://127.0.0.1:5009/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T10:09:01.984Z"
+    },
+    {
+      "id": "observation-7",
+      "url": "http://127.0.0.1:5009/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T10:09:10.120Z"
+    },
+    {
+      "id": "observation-8",
+      "url": "http://127.0.0.1:5009/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T10:09:33.930Z"
+    },
+    {
+      "id": "observation-9",
+      "url": "http://127.0.0.1:5009/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T10:09:54.910Z"
+    },
+    {
+      "id": "observation-10",
+      "url": "http://127.0.0.1:5009/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T10:10:04.803Z"
+    },
+    {
+      "id": "observation-11",
+      "url": "http://127.0.0.1:5009/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T10:10:25.635Z"
+    },
+    {
+      "id": "observation-12",
+      "url": "http://127.0.0.1:5009/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T10:10:53.491Z"
+    }
+  ],
+  "status": "running"
+}

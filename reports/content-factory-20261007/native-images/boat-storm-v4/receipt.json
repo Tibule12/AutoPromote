@@ -1,0 +1,36 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+  "prompt": "Cinematic photograph. One ivory paper boat, pointed open hull, low central fold, floats before an immense curling dark blue ocean wave. Tiny boat below towering crest, amber rim light, storm clouds, low water-level camera, realistic paper and flowing water, entire boat visible.",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "modelRevision": "462165984030d82259a11f4367a4eed129e94a7b",
+  "tool": "AutoPromote NVIDIA image adapter",
+  "seed": 2026100785,
+  "settings": {
+    "steps": 35,
+    "guidance": 7,
+    "width": 1344,
+    "height": 768,
+    "dtype": "float16",
+    "encodedTokenCounts": [
+      57,
+      57
+    ],
+    "promptTruncated": false
+  },
+  "gpu": "NVIDIA L40S",
+  "origin": "native_generated_image",
+  "artifact": {
+    "path": "/work/native-images/boat-storm-v4/video.mp4",
+    "sha256": "d68096b4d341c6533b144a273a80fa3f4a208fb3ec50a509e93aa6cc3ded3ac7",
+    "duration": 3.0
+  },
+  "reusableArtifacts": [
+    {
+      "role": "native_image",
+      "path": "/work/native-images/boat-storm-v4/image.png",
+      "sha256": "5294d662ca6b1cbdef201986a2b7c969e49ad741c412f9b910148a94c1d3231f"
+    }
+  ],
+  "seconds": 5.217881541000679
+}

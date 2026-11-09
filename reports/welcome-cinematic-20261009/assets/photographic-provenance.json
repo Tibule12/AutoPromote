@@ -1,0 +1,36 @@
+{
+  "tool": "image_gen.imagegen",
+  "referenceInputs": "Four user-supplied inline AutoPromote concepts",
+  "assets": [
+    {
+      "path": "assets/founder-studio.png",
+      "sha256": "d535accaff029e6ded7a8ef45945e38ae4f350db4ba6d4d819e03d2fe8905581",
+      "prompt": "Fictional adult male founder in black hoodie, thoughtful three-quarter portrait on right third, premium creative studio with violet/magenta practical lighting, warm background points and dark negative space on left. Photoreal cinematic editorial still, no text or UI.",
+      "originalImagegenOutput": "exec-bd742e4b-17e6-4076-8ac4-b978f209ea06.png",
+      "role": "Reusable texture embedded into native animated media surface; not a full-scene slideshow frame"
+    },
+    {
+      "path": "assets/founder-story.png",
+      "sha256": "5c2e8bed70b5ee3075ed279e64b7fe6a6f663bb5c7876de6e12663973bb9aae9",
+      "prompt": "Same fictional adult founder and black hoodie, left-third three-quarter profile on a mountain overlook at golden sunrise, misty lake, natural expression, violet shadow palette and warm horizon. Photoreal cinematic editorial still, no text or UI.",
+      "originalImagegenOutput": "exec-b3ea63fb-45aa-4838-b1e9-0e7e411704a0.png",
+      "role": "Reusable texture embedded into native animated media surface; not a full-scene slideshow frame"
+    },
+    {
+      "path": "assets/founder-foreground.png",
+      "sha256": "f8017dcba506160feda90b81c3f45ee0c078918282684bbadd0d53572f09da06",
+      "prompt": "Preserve exact fictional seated founder, original canvas and pose. Remove background to transparent alpha, retain the close rocky ledge. Clean compositing cutout.",
+      "originalImagegenOutput": "exec-d2b9291b-cf83-432e-94af-b02aa392594e.png",
+      "reference": "assets/founder-story.png",
+      "role": "Independent native depth layer"
+    },
+    {
+      "path": "assets/story-landscape.png",
+      "sha256": "e86ee995cfafc1f76149024b1ff5c49095e4af2e61d86fd66255c20bb5d1860d",
+      "prompt": "Remove founder and close foreground ledge; reconstruct continuous background mountains and misty lake. Preserve golden sunrise and violet shadows, composition and camera.",
+      "originalImagegenOutput": "exec-64ff54c3-50df-468d-94e0-c9f9afe7168f.png",
+      "reference": "assets/founder-story.png",
+      "role": "Independent native depth layer"
+    }
+  ]
+}

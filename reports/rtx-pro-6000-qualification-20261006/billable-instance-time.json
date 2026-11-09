@@ -1,0 +1,45 @@
+{
+  "checkedAt": "2026-10-06T16:09:12.256480+00:00",
+  "httpStatus": 200,
+  "requestUrl": "https://monitoring.googleapis.com/v3/projects/autopromote-cc6d3/timeSeries?filter=metric.type%3D%22run.googleapis.com%2Fcontainer%2Fbillable_instance_time%22+AND+resource.type%3D%22cloud_run_job%22+AND+resource.labels.job_name%3D%22viral-studio-rtx-qualification%22+AND+resource.labels.location%3D%22us-central1%22&interval.startTime=2026-10-06T16%3A00%3A00Z&interval.endTime=2026-10-06T16%3A09%3A10.051027Z&view=FULL",
+  "data": {
+    "timeSeries": [
+      {
+        "metric": {
+          "type": "run.googleapis.com/container/billable_instance_time"
+        },
+        "resource": {
+          "type": "cloud_run_job",
+          "labels": {
+            "job_name": "viral-studio-rtx-qualification",
+            "project_id": "autopromote-cc6d3",
+            "location": "us-central1"
+          }
+        },
+        "metricKind": "DELTA",
+        "valueType": "DOUBLE",
+        "points": [
+          {
+            "interval": {
+              "startTime": "2026-10-06T16:07:00.001Z",
+              "endTime": "2026-10-06T16:08:00Z"
+            },
+            "value": {
+              "doubleValue": 41.546692324
+            }
+          },
+          {
+            "interval": {
+              "startTime": "2026-10-06T16:06:00.001Z",
+              "endTime": "2026-10-06T16:07:00Z"
+            },
+            "value": {
+              "doubleValue": 17.978668493903275
+            }
+          }
+        ]
+      }
+    ],
+    "unit": "s"
+  }
+}

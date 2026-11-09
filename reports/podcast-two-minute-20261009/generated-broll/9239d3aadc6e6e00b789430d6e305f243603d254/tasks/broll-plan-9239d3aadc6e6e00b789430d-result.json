@@ -1,0 +1,57 @@
+{
+  "fingerprint": "31715bc986b8ff19b0211fe6482d86a43362d6ab8c80a58828d4914c5b183e16",
+  "result": {
+    "id": "broll-plan-9239d3aadc6e6e00b789430d",
+    "value": {
+      "reason": "The content introduces a podcast return and features personal storytelling, requiring dynamic, physical-action B-roll tied to literal subjects mentioned. The church reference motivates a liturgical detail shot, while the singer’s identity justifies a microphone motion detail. Both shots avoid static imagery and align with emotional beats without replacing speakers or inventing scenes. Only two distinct beats are selected to maintain narrative rhythm and avoid redundancy, each with a clear, unobf",
+      "shots": [
+        {
+          "captionId": "transcript-caption-35-timeline-1",
+          "subjectQuote": "church-going child",
+          "title": "Church Window Light",
+          "prompt": "A close-up of sunlight filtering through stained glass in an empty church, casting shifting colored patterns on wooden pews as a gentle breeze moves the curtains slightly. Camera glides laterally with the light’s movement, keeping focus on the interplay of color and shadow on wood grain. No people, logos, or text visible. Natural light only. Duration: 3 seconds",
+          "duration": 3
+        },
+        {
+          "captionId": "transcript-caption-40-cue-1-timeline-1",
+          "subjectQuote": "You are a singer — a great one",
+          "title": "Swinging Microphone Detail",
+          "prompt": "Extreme close-up of a vintage microphone suspended by cable, gently swaying as stage lights shift behind it. The mic head catches warm spotlights, reflecting off metal while the cable drifts subtly with air currents. Camera remains steady but tracks the mic’s arc with a slow dolly. No performers or logos. Duration: 2 seconds",
+          "duration": 2
+        }
+      ]
+    },
+    "rawValue": {
+      "reason": "The content introduces a podcast return and features personal storytelling, requiring dynamic, physical-action B-roll tied to literal subjects mentioned. The church reference motivates a liturgical detail shot, while the singer’s identity justifies a microphone motion detail. Both shots avoid static imagery and align with emotional beats without replacing speakers or inventing scenes. Only two distinct beats are selected to maintain narrative rhythm and avoid redundancy, each with a clear, unobf",
+      "shots": [
+        {
+          "captionId": "transcript-caption-35-timeline-1",
+          "subjectQuote": "church-going child",
+          "title": "Church Window Light",
+          "prompt": "A close-up of sunlight filtering through stained glass in an empty church, casting shifting colored patterns on wooden pews as a gentle breeze moves the curtains slightly. Camera glides laterally with the light’s movement, keeping focus on the interplay of color and shadow on wood grain. No people, logos, or text visible. Natural light only. Duration: 3 seconds",
+          "duration": 3
+        },
+        {
+          "captionId": "transcript-caption-40-cue-1-timeline-1",
+          "subjectQuote": "You are a singer — a great one",
+          "title": "Swinging Microphone Detail",
+          "prompt": "Extreme close-up of a vintage microphone suspended by cable, gently swaying as stage lights shift behind it. The mic head catches warm spotlights, reflecting off metal while the cable drifts subtly with air currents. Camera remains steady but tracks the mic’s arc with a slow dolly. No performers or logos. Duration: 2 seconds",
+          "duration": 2
+        }
+      ]
+    },
+    "contractRepairs": [],
+    "model": "Qwen/Qwen3-VL-8B-Instruct",
+    "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+    "settings": {
+      "dtype": "bfloat16",
+      "attention": "sdpa",
+      "do_sample": false,
+      "max_tokens": 4500
+    },
+    "evidenceSha256": null,
+    "frameEvidence": [],
+    "seconds": 18.331362987999455,
+    "gpu": "NVIDIA L40S"
+  }
+}

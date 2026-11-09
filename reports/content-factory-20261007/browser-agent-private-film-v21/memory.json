@@ -1,0 +1,51 @@
+{
+  "identity": "c10580a78c538f02b52c12b8c12d08c13de5b76755ca0dae2a513d13f8512806",
+  "actions": [
+    {
+      "signature": "47d349c3a62a2ed812f6559252acfccf355357220bf52fc8a933643b076f1b99",
+      "operationKey": "operation:download-reviewed-film",
+      "type": "click",
+      "target": {
+        "role": "link",
+        "name": "Download the film"
+      },
+      "expect": [
+        {
+          "type": "download",
+          "value": "final.mp4"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-07T13:57:37.792Z",
+      "reason": "The observed page exposes the reviewed film as its download; retain the bytes and compare the source hash.",
+      "planner": null,
+      "afterState": "85f3eb12b02611f5b4e13bd0d03c232e3b1c7266d98b935371c97896fd773243"
+    }
+  ],
+  "observations": [
+    {
+      "id": "observation-1",
+      "url": "http://127.0.0.1:3096/review.html",
+      "pageId": "page-1",
+      "at": "2026-10-07T13:57:37.698Z"
+    },
+    {
+      "id": "observation-2",
+      "url": "http://127.0.0.1:3096/review.html",
+      "pageId": "page-1",
+      "at": "2026-10-07T13:58:22.359Z"
+    }
+  ],
+  "artifacts": [
+    {
+      "type": "download",
+      "page": "page-1",
+      "filename": "final.mp4",
+      "artifact": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/content-factory-20261007/browser-agent-private-film-v21/downloads/8b96ff5d-6247-42d5-8146-ba2122fcadc5-final.mp4",
+      "bytes": 9642871,
+      "sha256": "10b7a0377e61e73ce01cbf1299dbf597c617bca48e0dcd48fb25908803db46e3",
+      "at": "2026-10-07T13:57:37.939Z"
+    }
+  ],
+  "status": "completed"
+}

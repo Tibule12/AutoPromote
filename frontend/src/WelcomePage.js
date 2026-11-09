@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
-import TopNav from "./components/landing/TopNav";
-import FeatureShowcase from "./components/landing/FeatureShowcase";
-import HeroScreenshot from "./components/landing/HeroScreenshot";
-import SectionHeading from "./components/landing/SectionHeading";
-import PricingSection from "./components/landing/PricingSection";
-import FinalCta from "./components/landing/FinalCta";
-import Footer from "./components/Footer";
-import { pricingCards } from "./data/landingPageData";
+import LandingNavbar from "./components/landing/LandingNavbar";
+import HeroSection from "./components/landing/HeroSection";
+import LandingFeatures from "./components/landing/LandingFeatures";
+import LandingWorkflow from "./components/landing/LandingWorkflow";
+import LandingCreators from "./components/landing/LandingCreators";
+import LandingFooter, { LandingCTA } from "./components/landing/LandingFooter";
+import LandingDemo from "./components/landing/LandingDemo";
+import LandingProductShowcase from "./components/landing/LandingProductShowcase";
 import { WORKSPACE_ENDPOINTS } from "./config/workspaceApi";
-import "./WelcomePage.css";
+import "./components/landing/LandingPage.css";
+import "./components/landing/LandingMotion.css";
+import "./components/landing/LandingCompositing.css";
+import "./components/landing/LandingEditorial.css";
 
 function getWorkspaceInviteParams() {
   if (typeof window === "undefined") return null;
@@ -109,10 +112,10 @@ const WorkspaceInviteNotice = ({ onCreateAccount, onSignIn }) => {
         </ol>
       </div>
       <div className="ap-invite-card__actions">
-        <button className="ap-btn ap-btn-primary" onClick={onSignIn}>
+        <button className="lp-button lp-button-primary" onClick={onSignIn}>
           Sign In to Accept
         </button>
-        <button className="ap-btn ap-btn-outline" onClick={onCreateAccount}>
+        <button className="lp-button lp-button-secondary" onClick={onCreateAccount}>
           Create Account to Join
         </button>
       </div>
@@ -121,77 +124,42 @@ const WorkspaceInviteNotice = ({ onCreateAccount, onSignIn }) => {
 };
 
 const WelcomePage = ({ onGetStarted, onSignIn }) => {
-  const handleExploreScreens = () => {
-    document
-      .getElementById("product-tour")
-      ?.scrollIntoView({ behavior: "smooth", block: "center" });
-  };
+  const [demoOpen, setDemoOpen] = useState(false);
 
   return (
-    <div className="ap-landing-page">
-      <div className="ap-bg-glow ap-bg-glow-1" />
-      <div className="ap-bg-glow ap-bg-glow-2" />
-      <div className="ap-shell">
-        <TopNav onSignIn={onSignIn} />
-
+    <div className="lp-page lp-editorial">
+      <a
+        className="lp-skip-link"
+        href="#landing-main"
+        onClick={event => {
+          event.preventDefault();
+          document.getElementById("landing-main")?.focus();
+        }}
+      >
+        Skip to content
+      </a>
+      <div className="lp-shell">
+        <LandingNavbar onSignIn={onSignIn} onGetStarted={onGetStarted} />
         <WorkspaceInviteNotice onCreateAccount={onGetStarted} onSignIn={onSignIn} />
-
-        <section className="ap-hero" id="top">
-          <div className="ap-hero-copy">
-            <div className="ap-hero-copy__intro">
-              <div className="ap-hero-status">
-                <span className="ap-hero-status__dot" aria-hidden="true" />
-                <span>Real product preview</span>
-                <small>13 redesigned pages</small>
-              </div>
-              <h1>
-                See AutoPromote
-                <span> before you sign up.</span>
-              </h1>
-            </div>
-            <div className="ap-hero-copy__actions">
-              <p className="ap-hero-subtext">
-                Real screens. Short explanations. One connected creator workspace.
-              </p>
-              <div className="ap-hero-ctas">
-                <button className="ap-btn ap-btn-primary" onClick={onGetStarted}>
-                  Create free account
-                </button>
-                <button
-                  className="ap-btn ap-btn-outline"
-                  onClick={handleExploreScreens}
-                  aria-label="Explore product screens"
-                >
-                  Explore the screens
-                </button>
-              </div>
-            </div>
+        <main id="landing-main" tabIndex={-1}>
+          <HeroSection onGetStarted={onGetStarted} onWatchDemo={() => setDemoOpen(true)} />
+          <div className="lp-output-strip" aria-label="Create for social video">
+            <span>MAKE ROOM FOR YOUR NEXT RELEASE</span>
+            <span>TikTok</span>
+            <i />
+            <span>YouTube Shorts</span>
+            <i />
+            <span>Instagram Reels</span>
           </div>
-          <HeroScreenshot />
-        </section>
-
-        <section className="ap-section ap-screenshot-showcase" aria-label="Inside AutoPromote">
-          <SectionHeading
-            eyebrow="Inside AutoPromote"
-            title="Explore every workspace."
-            copy="Choose a page and see the real interface with a short explanation."
-          />
-          <FeatureShowcase />
-        </section>
-
-        <section className="ap-section" id="pricing">
-          <SectionHeading
-            eyebrow="Pricing"
-            title="Choose the workspace that fits."
-            copy="Start free. Upgrade when your output grows."
-          />
-          <PricingSection cards={pricingCards} onGetStarted={onGetStarted} />
-        </section>
-
-        <FinalCta onGetStarted={onGetStarted} />
-
-        <Footer />
+          <LandingProductShowcase onWatchDemo={() => setDemoOpen(true)} />
+          <LandingFeatures />
+          <LandingWorkflow />
+          <LandingCreators />
+          <LandingCTA onGetStarted={onGetStarted} />
+        </main>
+        <LandingFooter />
       </div>
+      {demoOpen && <LandingDemo onClose={() => setDemoOpen(false)} />}
     </div>
   );
 };

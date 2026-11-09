@@ -1,0 +1,7 @@
+{
+  "parentAssetId": "boat-storm-v5",
+  "parentSha256": "96362c0e985724e0ad79da43ce2bc4de4f714dbfa0e16d908e4e3b0dfdfb355c",
+  "sourceTime": 3.1,
+  "referenceSha256": "9b1d06aa690540e89c14cd3f9a68944e52eaa434865a9638aa18175c1b965829",
+  "operation": "CPU decode one actual source frame; no image alteration"
+}

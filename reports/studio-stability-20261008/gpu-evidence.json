@@ -1,0 +1,37 @@
+{
+  "at": "2026-10-08T06:45:46.902546+00:00",
+  "gpu": "NVIDIA L40S",
+  "jobs": 4,
+  "instanceStateAtEnd": "STOPPED",
+  "gpuWindow": "2026-10-08 ~06:11 UTC to ~06:36 UTC",
+  "maxSampledGpuPercent": 46,
+  "maxSampledMemoryMiB": 2701,
+  "transcriptionConfiguration": {
+    "engine": "faster-whisper",
+    "device": "auto resolves CUDA with CTranslate2 CUDA device present",
+    "computeType": "float16",
+    "strictNoCpuFallback": true,
+    "modelsOffline": true
+  },
+  "outputs": [
+    {
+      "path": "reports/studio-stability-20261008/subject/preview.mp4",
+      "sha256": "fa90d4e44ab9cffce3c5dd24cc42c2abf5ad2c8b4935435e3875d5edd7496ba0",
+      "encoder": "Lavc60.31.102 h264_nvenc",
+      "technicalReceipt": "reports/studio-stability-20261008/subject/preview.mp4.technical.json"
+    },
+    {
+      "path": "reports/studio-stability-20261008/vfx/download.mp4",
+      "sha256": "a4d0ebd4306b0c14120a7c3f3e20c50099b50787d5c5081f94d3fa84c47f10e9",
+      "encoder": "Lavc60.31.102 h264_nvenc",
+      "technicalReceipt": "reports/studio-stability-20261008/vfx/download.mp4.technical.json"
+    },
+    {
+      "path": "reports/studio-stability-20261008/captions/download.mp4",
+      "sha256": "d7723a0b27c85c17c2ff8b65c3f58d8f963490c62ccc256f9da371901b2f1778",
+      "encoder": "Lavc60.31.102 h264_nvenc",
+      "technicalReceipt": "reports/studio-stability-20261008/captions/download.mp4.technical.json"
+    }
+  ],
+  "limits": "Sampled utilization is not a saturation benchmark. Paid run includes startup, transport correction and browser wait; these short jobs do not prove long-job reliability or production serving."
+}

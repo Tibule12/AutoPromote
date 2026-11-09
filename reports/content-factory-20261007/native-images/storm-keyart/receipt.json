@@ -1,0 +1,31 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+  "prompt": "Low-angle cinematic photograph of one tiny ivory origami paper sailboat, folded triangular hull and one single tall triangular paper sail, dwarfed by an enormous curling blue ocean wave directly behind it. The curling crest towers over the complete boat, white sea spray held in the air, a sliver of warm amber light cuts through deep petrol-blue water. The boat is intact, clearly visible in the lower middle, less than 15 percent of the image. Actual massive steep water wall, not just storm clouds. Photoreal tactile paper and turbulent water, dramatic scale, 35mm commercial cinematography, no text.",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "modelRevision": "462165984030d82259a11f4367a4eed129e94a7b",
+  "tool": "AutoPromote NVIDIA image adapter",
+  "seed": 2026100730,
+  "settings": {
+    "steps": 35,
+    "guidance": 7,
+    "width": 1344,
+    "height": 768,
+    "dtype": "float16"
+  },
+  "gpu": "NVIDIA L40S",
+  "origin": "native_generated_image",
+  "artifact": {
+    "path": "/work/native-images/storm-keyart/video.mp4",
+    "sha256": "f2b94e0a4be29a86c31136650c3495fd375a534b04e8df4ab5749f9f8fdc1c7b",
+    "duration": 3.0
+  },
+  "reusableArtifacts": [
+    {
+      "role": "native_image",
+      "path": "/work/native-images/storm-keyart/image.png",
+      "sha256": "3cc743ca974bcd545efb5ec650ddb161f4f894756c89407815a1b213fcbd647f"
+    }
+  ],
+  "seconds": 5.990491786000348
+}

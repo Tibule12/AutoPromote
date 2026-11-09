@@ -1,0 +1,50 @@
+{
+  "origin": "reused_server_generated",
+  "parentArtifact": {
+    "path": "generated/paper-awakens.mp4",
+    "sha256": "7fd8e4a2b7ccef15a96d0a0d08b73117e56024cdaea9798028f78ad8703ad278",
+    "bytes": 1596307,
+    "duration": 5.041667,
+    "codec": "h264",
+    "container": "mp4",
+    "fps": 24,
+    "width": 1280,
+    "height": 704,
+    "hasAudio": false
+  },
+  "parentProvenance": {
+    "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+    "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+    "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+    "prompt": "Photoreal cinematic miniature world, tactile ivory origami paper boat with one crisp triangular sail and sharply folded hull, no writing on the paper. Warm amber practical light against deep petrol-blue shadows, natural film contrast, 35mm commercial cinematography. The same single small ivory paper boat is the only hero object. Extreme close-up at table level. A small ivory origami sailboat rests on a dark wooden desk beside one blank sheet of paper. A thin shimmering pool of water slowly spreads underneath the boat; the boat lifts gently and floats as the desk surface becomes a deep blue ocean. An impossible transformation shown with physically convincing water and crisp stable folds. Slow controlled camera push. Quiet amber light from the left. One uninterrupted five-second shot.",
+    "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+    "modelRevision": "b8fff7315c768468a5333511427288870b2e9635",
+    "settings": {
+      "steps": 50,
+      "referenceImageSha256": null
+    },
+    "seed": 2026100711,
+    "tool": "AutoPromote Wan adapter",
+    "origin": "server_generated",
+    "generationReceipt": "generated/paper-awakens-receipt.json"
+  },
+  "parentReview": {
+    "accepted": true,
+    "reviewer": "Codex visual inspection",
+    "modelRevision": "content-factory-selected-roles-20261007",
+    "evidenceSha256": "b6559a0ca74ec49808b6e3a8f528891a64fc8ed10e58b95d4402e4d070f8f08b",
+    "reason": "Use the final 2.5 seconds where water appears and the boat floats; omit the static lead-in.",
+    "criteria": [
+      {
+        "criterion": "Usable for the explicitly assigned story role",
+        "passed": true,
+        "observation": "Use the final 2.5 seconds where water appears and the boat floats; omit the static lead-in."
+      }
+    ],
+    "revisionInstructions": "",
+    "limitation": "Machine visual selection; final story review remains separate."
+  },
+  "sourceBrief": "Create one 18–21 second AutoPromote welcome film about an ordinary idea finding a world, surviving a threat and becoming a finished story. I provide no recorded footage. Use the private generated raw library, preserving generation provenance. Open with paper-awakens at source 2.5 for 2.5 seconds. Use ocean-environment ONLY source 0.4 duration 1.7 seconds; later footage is overexposed. Use storm-action for visibly breaking wave action, light-return source 2 for 3 seconds for the SAME boat in golden calm, then world-on-desk to reveal the miniature origin. End with actual Studio UI and identity. Withhold AutoPromote until the payoff. Use the original score and the available brief-no-footage narration as a voiceover cue near the Studio reveal, fitting its complete duration; do not cut off speech. At most eight asset requirements. Every reused asset must keep an exact libraryRef, match its type and have current story-specific acceptance criteria. The absence of a boat in the wave cutaway is intentional; do not claim it is physically inside that shot. Do not imply the private factory is public. Do not pad with random effects. Return only one 16:9 welcome_hero output.",
+  "intendedRole": "Paper-awakens: water rises, boat floats into frame\nRequired correction: Add dynamic water animation rising from the page, show boat floating with motion blur, include storm wave with boat submerged, then restore golden calm with expanding desk-world reveal, and finally show AutoPromote Studio UI with editable clips and live preview. Remove all static paper frames and ensure the libraryRef matches the new animated sequence",
+  "reusedAt": "2026-10-07T08:40:38.724Z"
+}

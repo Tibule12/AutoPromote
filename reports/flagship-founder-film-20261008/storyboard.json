@@ -1,0 +1,106 @@
+{
+  "version": 1,
+  "title": "ONE EDIT",
+  "duration": 66,
+  "fps": 24,
+  "scenes": [
+    {
+      "id": "cold-open",
+      "at": 0,
+      "duration": 4,
+      "vo": "I thought I was fixing one edit.",
+      "voAt": 0.35,
+      "shot": "Camera flies through suspended film gates into a moving generated ocean. The edit line becomes a physical illuminated route. The destination remains unexplained.",
+      "purpose": "Show a finished world immediately; ask how an editing problem became this."
+    },
+    {
+      "id": "origin",
+      "at": 4,
+      "duration": 6,
+      "vo": "Two cameras. One conversation. They refused to stay together.",
+      "voAt": 0.35,
+      "shot": "Two real conversation frames on separate glass film strips. Warm sound pulses disagree, then align. One line connects both.",
+      "purpose": "Make sync understandable to a stranger through one human conversation, not interface instructions."
+    },
+    {
+      "id": "cascade",
+      "at": 10,
+      "duration": 7,
+      "vo": "Fix the timing. Lose the sound. Fix the sound. Break the render.",
+      "voAt": 0.35,
+      "shot": "Camera follows the now-aligned line into a render gate. The gate fractures; the next frames peel away. Genuine historical render errors appear on the fragments.",
+      "purpose": "Each fix causes a consequence, building frustration."
+    },
+    {
+      "id": "problems",
+      "at": 17,
+      "duration": 6,
+      "vo": "Then captions. Clips. New formats. Every answer opened another problem.",
+      "voAt": 0.3,
+      "shot": "Same conversation branches into different frame sizes. Caption words occupy depth. Camera follows the central line as the structures multiply.",
+      "purpose": "The original problem grows larger than the founder expected."
+    },
+    {
+      "id": "failure",
+      "at": 23,
+      "duration": 6,
+      "vo": "Some days, the only thing that finished was the error log.",
+      "voAt": 0.5,
+      "shot": "A real error receipt becomes a large dark architectural panel. Failures stack in depth, crowding the route. Movement stops. Sound drops to a single unresolved pulse.",
+      "purpose": "Let a setback hurt; hold briefly rather than racing through a decorative code montage."
+    },
+    {
+      "id": "quota",
+      "at": 29,
+      "duration": 7,
+      "vo": "Even the machines said no. But I couldn't leave it there.",
+      "voAt": 0.3,
+      "shot": "Camera pushes past archived L4 denial into a monumental extruded zero. No invented emails or repeated RTX requests. Archive dates and GPU classes remain legible.",
+      "purpose": "External constraint becomes the lowest point; persistence is the emotional turn."
+    },
+    {
+      "id": "breakthrough",
+      "at": 36,
+      "duration": 6,
+      "vo": "Then one door opened. And the question changed.",
+      "voAt": 0.4,
+      "shot": "Zero dissolves into separated geometry, revealing 3000 milliGPU and the verified RTX PRO 6000 execution receipt. A narrow warm seam opens into a violet-lit space.",
+      "purpose": "A genuine quota grant and bounded execution earn the release of tension. 3000 milliGPU is capacity, not 3000 physical GPUs."
+    },
+    {
+      "id": "director",
+      "at": 42,
+      "duration": 7,
+      "vo": "What if the system could understand the story? Create the missing shot. Find the cut. Build the sound.",
+      "voAt": 0.3,
+      "shot": "Accepted takes rise from the route; story beats and timed audio assemble in spatial layers using the current film manifest. Real generated yacht footage runs within a dimensional gate.",
+      "purpose": "Move from repairs to creative decisions, with real sources and editorial data."
+    },
+    {
+      "id": "magic",
+      "at": 49,
+      "duration": 6,
+      "vo": "Bring it together. I didn't know I was building this.",
+      "voAt": 0.3,
+      "shot": "Return to the opening gate from the opposite side. Camera pulls back and reveals its source take, sound and the same coherent final edit line.",
+      "purpose": "Reinterpret the hook as a constructed film instead of an unrelated spectacle."
+    },
+    {
+      "id": "reveal",
+      "at": 55,
+      "duration": 6,
+      "vo": "The film you just watched was created by AutoPromote.",
+      "voAt": 0.55,
+      "shot": "Graphic reconstruction of this film\u2019s canonical sequence alongside a retained real Studio image. Clear final sentence, restrained camera movement and breathing space. This is not a live UI recording of this project.",
+      "purpose": "Land the promised self-referential payoff. Production receipts disclose assistant-directed story and source generation versus actual AutoPromote editing/rendering."
+    },
+    {
+      "id": "ident",
+      "at": 61,
+      "duration": 5,
+      "vo": null,
+      "shot": "Dark anticipation; original vector A/P components emerge in staggered extruded layers, grazing light and reflected material. Controlled camera resolves; outline-derived wordmark locks at impact and holds for 1.5 seconds.",
+      "purpose": "A dedicated editable brand sequence, not a flat logo fade."
+    }
+  ]
+}

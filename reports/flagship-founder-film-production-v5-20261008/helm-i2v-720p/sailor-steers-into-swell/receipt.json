@@ -1,0 +1,42 @@
+{
+  "status": "GENERATED_PENDING_VISUAL_REVIEW",
+  "model": "Wan-AI/Wan2.2-I2V-A14B-Diffusers",
+  "modelRevision": "596658fd9ca6b7b71d5057529bbf319ecbc61d74",
+  "sourceBrief": "Private AutoPromote flagship The Small Boat. A tiny paper boat becomes a full-size yacht through a continuous physical transformation. The human response is one sailor steering into the swell and committing to the horizon. This test explores real human movement using the existing NVIDIA Wan provider; no still or unreviewed take is final footage.",
+  "shot": {
+    "name": "sailor-steers-into-swell",
+    "reference_image": "/work/output/sailor-source/sailor-connected-sheet/image.png",
+    "seed": 20261008229,
+    "prompt": "One continuous cinematic shot of the same woman on the same real yacht. She turns her attention from the camera toward the open water, grips the wooden helm with both hands and makes one controlled steering adjustment. Her weight shifts naturally as a swell lifts the vessel. Keep her face, short natural hair, navy shirt and ivory sailing vest consistent. The camera gently tracks sideways while wind moves her hair and the blue water and wake move naturally behind her. Warm sunlight, photographic skin, credible anatomy, purposeful human effort. End with her looking ahead, steady at the helm.",
+    "negative_prompt": "extra people, extra fingers, merged hands, hands passing through wheel, changing face, changing clothing, glamour posing, smiling at camera, floating helm, body distortion, duplicate limbs, CGI, cartoon, frozen still, text, watermark"
+  },
+  "prompt": "One continuous cinematic shot of the same woman on the same real yacht. She turns her attention from the camera toward the open water, grips the wooden helm with both hands and makes one controlled steering adjustment. Her weight shifts naturally as a swell lifts the vessel. Keep her face, short natural hair, navy shirt and ivory sailing vest consistent. The camera gently tracks sideways while wind moves her hair and the blue water and wake move naturally behind her. Warm sunlight, photographic skin, credible anatomy, purposeful human effort. End with her looking ahead, steady at the helm.",
+  "seed": 20261008229,
+  "tool": "AutoPromote NVIDIA conditioned-video adapter",
+  "referenceImageSha256": "1939f862ac93505404cd7f3d9a2e505dd1cc019e48fa8fc9651e9f31c1afedf9",
+  "lastReferenceImageSha256": null,
+  "settings": {
+    "width": 1280,
+    "height": 720,
+    "frames": 49,
+    "fps": 16,
+    "steps": 30,
+    "guidance": 3.5,
+    "dtype": "bfloat16; VAE float32",
+    "cpuOffload": true,
+    "conditioning": "first_frame"
+  },
+  "gpu": "NVIDIA L40S",
+  "torch": "2.7.1+cu126",
+  "diffusers": "0.36.0",
+  "seconds": 1351.3339045700004,
+  "peakCudaAllocatedBytes": 34719316992,
+  "peakCudaReservedBytes": 38883295232,
+  "artifact": {
+    "path": "/work/output/helm-i2v-720p/sailor-steers-into-swell/video.mp4",
+    "sha256": "d58eb15cfc05d687b023b03b98b10dc40dbb7019165bd6d6c2275cef70508fdf",
+    "duration": 3.0625,
+    "bytes": 2352111
+  },
+  "completedAt": "2026-10-08T18:12:34.567885+00:00"
+}

@@ -1,0 +1,16 @@
+{
+  "instance": "autopromote-l40s-staging",
+  "existingInstanceId": "xgh6wcu74",
+  "provider": "Crusoe via NVIDIA Brev",
+  "cloudInstancesCreated": 0,
+  "googleCloudRequests": 0,
+  "productionRequests": 0,
+  "userRequestedKeepRunning": true,
+  "userWorkWindowHours": 3,
+  "workWindowStartedAt": "2026-10-06T17:02:25+00:00",
+  "workWindowDeadline": "2026-10-06T20:02:25+00:00",
+  "priorities": [
+    "Welcome-page film and playback verification",
+    "Viral Clip Studio editing, analysis, rendering and project state"
+  ]
+}

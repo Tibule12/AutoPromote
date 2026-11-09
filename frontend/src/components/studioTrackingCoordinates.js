@@ -10,3 +10,15 @@ export function soloTrackingCoordinates(position, sourceAspect, outputAspect, zo
     }),
   };
 }
+
+// Keep detector coordinates in source space so changing the delivery aspect
+// does not reuse a centered landscape object-position as a portrait face path.
+export function reprojectDetectedReframeKeys(keyframes, outputAspect, zoom = 1) {
+  return keyframes.map(mark => {
+    const focus = mark.sourceFocus;
+    if (!focus || ![focus.x, focus.y, focus.aspect].every(Number.isFinite) || focus.aspect <= 0) return mark;
+    const coordinates = soloTrackingCoordinates(mark, focus.aspect, outputAspect, zoom);
+    const position = coordinates.toPosition(focus);
+    return { ...mark, x: position.x, y: position.y };
+  });
+}

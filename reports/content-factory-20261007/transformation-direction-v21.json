@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "title": "One idea changes worlds: private transformation prototype",
+  "story": {
+    "about": "A paper idea becomes a real-looking vessel and a cinematic world.",
+    "whyCare": "A creator can turn an imagined impossible moment into moving footage without shooting it.",
+    "hook": "An ordinary folded paper boat rests on a timber desk.",
+    "beginning": "Water catches the folded hull.",
+    "development": "The folded form grows sails as the desk environment opens into ocean.",
+    "tension": "Can the fragile paper form become a full-size vessel without breaking the visual journey?",
+    "payoff": "A wooden sailing yacht crosses moving sea with a wake.",
+    "ending": "The AutoPromote studio ident resolves with a separate brand impact.",
+    "withheld": "The finished yacht silhouette until the transformation develops.",
+    "amplify": [
+      "Paper fold to canvas sail.",
+      "Expanding water and connected vessel growth.",
+      "Material impact at 2.35 seconds.",
+      "Moving yacht continuation and final brand resolution."
+    ],
+    "remove": [
+      "Studio UI interrupting the transformed world.",
+      "Feature lists.",
+      "Rejected flat CGI water-disc shots.",
+      "Unqualified public product claims."
+    ]
+  },
+  "script": [
+    {
+      "beatId": "hook",
+      "action": "Paper grows into a sailing vessel as water becomes ocean.",
+      "sound": "One idea. No footage. Folding transients, water rise and material impact."
+    },
+    {
+      "beatId": "reveal",
+      "action": "The transformed yacht continues across moving sea.",
+      "sound": "This started with a brief. No camera. No footage."
+    },
+    {
+      "beatId": "ending",
+      "action": "AutoPromote cinematic ident resolves.",
+      "sound": "Separate original timed brand impact."
+    }
+  ],
+  "limitation": "Authored private edit of generated assets; generation is real, creative polish and human listening remain pending."
+}

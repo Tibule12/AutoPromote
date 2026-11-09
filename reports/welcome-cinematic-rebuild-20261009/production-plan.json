@@ -1,0 +1,451 @@
+{
+  "schemaVersion": 1,
+  "status": "PLANNED_NOT_RENDERABLE",
+  "title": "AutoPromote \u2014 The idea escapes",
+  "canonicalClock": 90000,
+  "target": {
+    "durationSeconds": 42,
+    "width": 1920,
+    "height": 1080,
+    "fps": 24
+  },
+  "referenceInputs": [
+    {
+      "referenceId": "workspace",
+      "title": "Creative Studio workspace/editor",
+      "conversationOrder": 1,
+      "purpose": "creative_reference_not_timeline_picture",
+      "path": null,
+      "sha256": null,
+      "status": "ORIGINAL_BYTES_MISSING"
+    },
+    {
+      "referenceId": "three-d",
+      "title": "3D creative dashboard",
+      "conversationOrder": 2,
+      "purpose": "creative_reference_not_timeline_picture",
+      "path": null,
+      "sha256": null,
+      "status": "ORIGINAL_BYTES_MISSING"
+    },
+    {
+      "referenceId": "vfx",
+      "title": "Motion graphics/VFX library",
+      "conversationOrder": 3,
+      "purpose": "creative_reference_not_timeline_picture",
+      "path": null,
+      "sha256": null,
+      "status": "ORIGINAL_BYTES_MISSING"
+    },
+    {
+      "referenceId": "stories",
+      "title": "Stories That Move Brands",
+      "conversationOrder": 4,
+      "purpose": "creative_reference_not_timeline_picture",
+      "path": null,
+      "sha256": null,
+      "status": "ORIGINAL_BYTES_MISSING"
+    }
+  ],
+  "shots": [
+    {
+      "shotId": "S01",
+      "referenceId": "workspace",
+      "beat": "wake",
+      "programmeStartTick": 0,
+      "programmeDurationTick": 270000,
+      "durationSeconds": 3,
+      "creativeScene": {
+        "representation": "A room responds to a creator",
+        "before": "Room dark, door opens",
+        "during": "Creator walks across the room and reaches the desk",
+        "after": "Hand reaches the chair",
+        "actions": [
+          {
+            "id": "s01-creator",
+            "kind": "human",
+            "action": "Enter, walk with real foot contact, reach for the chair"
+          },
+          {
+            "id": "s01-lights",
+            "kind": "environment",
+            "action": "One practical light wakes after the reach"
+          }
+        ],
+        "camera": "Low lateral tracking shot",
+        "supportingShots": [
+          "Door/threshold detail"
+        ],
+        "vfx": [
+          "Practical light response"
+        ],
+        "sound": "Door, feet, cloth, room tone",
+        "transition": "Cut on chair action"
+      },
+      "sourceStatus": "NOT_GENERATED",
+      "acceptedArtifactSha256": null,
+      "native3d": false
+    },
+    {
+      "shotId": "S02",
+      "referenceId": "workspace",
+      "beat": "choose",
+      "programmeStartTick": 270000,
+      "programmeDurationTick": 360000,
+      "durationSeconds": 4,
+      "creativeScene": {
+        "representation": "A person initiates an edit",
+        "before": "Creator reaches the chair",
+        "during": "Sit, turn, type and drag the first clip",
+        "after": "Mouse releases and timeline line continues",
+        "actions": [
+          {
+            "id": "s02-creator",
+            "kind": "human",
+            "action": "Sit, turn, look at the idea, blink and type"
+          },
+          {
+            "id": "s02-screen",
+            "kind": "object",
+            "action": "Wake selectively and play moving footage"
+          }
+        ],
+        "camera": "Over-shoulder 35mm angle",
+        "supportingShots": [
+          "Hand and eyeline inserts"
+        ],
+        "vfx": [
+          "Planar screen replacement",
+          "Native editable UI"
+        ],
+        "sound": "Chair and keys; score motif begins",
+        "transition": "Match cut on hand/cursor motion"
+      },
+      "sourceStatus": "NOT_GENERATED",
+      "acceptedArtifactSha256": null,
+      "native3d": false
+    },
+    {
+      "shotId": "S03",
+      "referenceId": "stories",
+      "beat": "structure",
+      "programmeStartTick": 630000,
+      "programmeDurationTick": 360000,
+      "durationSeconds": 4,
+      "creativeScene": {
+        "representation": "Fragments become a purposeful story",
+        "before": "First clip lands on an unfinished sequence",
+        "during": "Creator trims the hook, places the payoff, starts playback",
+        "after": "Moving footage takes over the frame",
+        "actions": [
+          {
+            "id": "s03-hand",
+            "kind": "human",
+            "action": "Move mouse and type with visible finger action"
+          },
+          {
+            "id": "s03-playback",
+            "kind": "object",
+            "action": "Clip footage plays while the playhead advances"
+          }
+        ],
+        "camera": "Oblique screen/hand insert then controlled dolly",
+        "supportingShots": [
+          "Creator watches the edit"
+        ],
+        "vfx": [
+          "Native editable timeline and clip decisions"
+        ],
+        "sound": "Edit ticks develop a pulse",
+        "transition": "Match cut into the moving subject"
+      },
+      "sourceStatus": "NOT_GENERATED",
+      "acceptedArtifactSha256": null,
+      "native3d": false
+    },
+    {
+      "shotId": "S04",
+      "referenceId": "vfx",
+      "beat": "motion",
+      "programmeStartTick": 990000,
+      "programmeDurationTick": 360000,
+      "durationSeconds": 4,
+      "creativeScene": {
+        "representation": "Creative treatment follows a moving subject",
+        "before": "Runner approaches a low urban obstacle",
+        "during": "Runner crosses and leaps while callout tracks the bag and text passes behind torso",
+        "after": "Runner lands and carries motion towards the product scene",
+        "actions": [
+          {
+            "id": "s04-runner",
+            "kind": "human",
+            "action": "Run, leap, land with real weight and garment motion"
+          },
+          {
+            "id": "s04-bag",
+            "kind": "object",
+            "action": "Move with the runner and keep a corrected attached callout"
+          }
+        ],
+        "camera": "Lateral tracking with readable ground contact",
+        "supportingShots": [
+          "Bag detail",
+          "Clean plate if needed"
+        ],
+        "vfx": [
+          "Subject matte",
+          "Tracked callout",
+          "Occluded typography"
+        ],
+        "sound": "Footfalls, cloth, landing, typography pulse",
+        "transition": "Cut on landing rhythm to product turn"
+      },
+      "sourceStatus": "NOT_GENERATED",
+      "acceptedArtifactSha256": null,
+      "native3d": false
+    },
+    {
+      "shotId": "S05",
+      "referenceId": "vfx",
+      "beat": "transform-start",
+      "programmeStartTick": 1350000,
+      "programmeDurationTick": 360000,
+      "durationSeconds": 4,
+      "creativeScene": {
+        "representation": "Motion begins a physical transformation",
+        "before": "Product founder picks up the object",
+        "during": "Hand grips and rotates product; light stroke describes the action",
+        "after": "Stroke becomes the portal rim",
+        "actions": [
+          {
+            "id": "s05-founder",
+            "kind": "human",
+            "action": "Grip, lift and rotate product while looking at it"
+          },
+          {
+            "id": "s05-product",
+            "kind": "object",
+            "action": "Rotate in the hand without deforming or losing contact"
+          }
+        ],
+        "camera": "Close camera follows the hand then the portal edge",
+        "supportingShots": [
+          "Object detail",
+          "Founder reaction"
+        ],
+        "vfx": [
+          "Motion-bound light path",
+          "Editable rim formation"
+        ],
+        "sound": "Grip, material turn, filtered rise, brief reduction",
+        "transition": "Light stroke edge matches dimensional rim"
+      },
+      "sourceStatus": "NOT_GENERATED",
+      "acceptedArtifactSha256": null,
+      "native3d": false
+    },
+    {
+      "shotId": "S06",
+      "referenceId": "three-d",
+      "beat": "escape",
+      "programmeStartTick": 1710000,
+      "programmeDurationTick": 450000,
+      "durationSeconds": 5,
+      "creativeScene": {
+        "representation": "The edit leaves the screen",
+        "before": "Flat frame begins to acquire thickness",
+        "during": "Camera passes into depth as ribbon bends and metallic pieces begin assembling",
+        "after": "Pieces approach the connected AP form",
+        "actions": [
+          {
+            "id": "s06-ribbon",
+            "kind": "object",
+            "action": "Deform continuously into the AP construction"
+          },
+          {
+            "id": "s06-pieces",
+            "kind": "object",
+            "action": "Translate and rotate with coherent reflections"
+          }
+        ],
+        "camera": "Forward entry and short rising orbit",
+        "supportingShots": [
+          "Material/light close-up"
+        ],
+        "vfx": [
+          "Native connected geometry",
+          "Animated lights",
+          "Moving footage plane"
+        ],
+        "sound": "Ribbon energy, metallic motion, spatial riser",
+        "transition": "Continue the same native camera move into assembly completion"
+      },
+      "sourceStatus": "NOT_GENERATED",
+      "acceptedArtifactSha256": null,
+      "native3d": true
+    },
+    {
+      "shotId": "S07",
+      "referenceId": "three-d",
+      "beat": "experience",
+      "programmeStartTick": 2160000,
+      "programmeDurationTick": 450000,
+      "durationSeconds": 5,
+      "creativeScene": {
+        "representation": "Creative geometry leads to a living story",
+        "before": "Assembly is unfinished; film plane approaches",
+        "during": "Geometry connects and moving founder footage travels behind it and through the aperture",
+        "after": "Matched horizon leads into full-frame moving founder shot",
+        "actions": [
+          {
+            "id": "s07-geometry",
+            "kind": "object",
+            "action": "Complete connected assembly and settle"
+          },
+          {
+            "id": "s07-founder-footage",
+            "kind": "human",
+            "action": "Founder continues walking and turning inside the moving footage plane"
+          }
+        ],
+        "camera": "Forward passage through aperture",
+        "supportingShots": [
+          "Matched founder exit shot"
+        ],
+        "vfx": [
+          "Native foreground occlusion",
+          "Video source clock",
+          "Atmosphere tied to geometry"
+        ],
+        "sound": "Join impact and spatial tail; wind arrives before exit",
+        "transition": "Matched portal exit, horizon and light direction"
+      },
+      "sourceStatus": "NOT_GENERATED",
+      "acceptedArtifactSha256": null,
+      "native3d": true
+    },
+    {
+      "shotId": "S08",
+      "referenceId": "stories",
+      "beat": "impact-story",
+      "programmeStartTick": 2610000,
+      "programmeDurationTick": 360000,
+      "durationSeconds": 4,
+      "creativeScene": {
+        "representation": "The story has become a physical experience",
+        "before": "Founder enters ridge frame from portal exit",
+        "during": "Walk, turn toward the light, take another step",
+        "after": "Founder movement carries into the viewed film",
+        "actions": [
+          {
+            "id": "s08-founder",
+            "kind": "human",
+            "action": "Walk with stable feet, turn head/body, blink and take next step"
+          },
+          {
+            "id": "s08-landscape",
+            "kind": "environment",
+            "action": "Wind moves clothing and atmospheric layers coherently"
+          }
+        ],
+        "camera": "Eye-level follow and restrained side reveal",
+        "supportingShots": [
+          "Ridge wide",
+          "Face turn"
+        ],
+        "vfx": [
+          "Cinematic grade",
+          "Sparse editable title"
+        ],
+        "sound": "Footsteps, wind; harmony opens",
+        "transition": "Match the founder film frame onto the audience phone"
+      },
+      "sourceStatus": "NOT_GENERATED",
+      "acceptedArtifactSha256": null,
+      "native3d": false
+    },
+    {
+      "shotId": "S09",
+      "referenceId": "stories",
+      "beat": "remembered",
+      "programmeStartTick": 2970000,
+      "programmeDurationTick": 360000,
+      "durationSeconds": 4,
+      "creativeScene": {
+        "representation": "Someone responds to the story",
+        "before": "Viewer lifts phone in a real environment",
+        "during": "Viewer watches, looks up and responds; creator satisfaction in a separate supporting take",
+        "after": "Timeline completion line begins the ending",
+        "actions": [
+          {
+            "id": "s09-viewer",
+            "kind": "human",
+            "action": "Raise phone, follow footage with eyes, look up and visibly react"
+          },
+          {
+            "id": "s09-creator",
+            "kind": "human",
+            "action": "Visible satisfied response in a separate short supporting take"
+          }
+        ],
+        "camera": "Intimate eye-level audience shot then creator insert",
+        "supportingShots": [
+          "Creator response, independently generated and trimmed"
+        ],
+        "vfx": [
+          "Tracked moving phone screen",
+          "Completion line"
+        ],
+        "sound": "Viewer room and breath; brief intimate score space",
+        "transition": "Completion line becomes the physical brand stroke"
+      },
+      "sourceStatus": "NOT_GENERATED",
+      "acceptedArtifactSha256": null,
+      "native3d": false
+    },
+    {
+      "shotId": "S10",
+      "referenceId": "three-d",
+      "beat": "ending",
+      "programmeStartTick": 3330000,
+      "programmeDurationTick": 450000,
+      "durationSeconds": 5,
+      "creativeScene": {
+        "representation": "AutoPromote earns its final reveal",
+        "before": "Completion line is travelling through depth",
+        "during": "Line joins dimensional brand geometry and light settles",
+        "after": "Clean final hold after earned resolution",
+        "actions": [
+          {
+            "id": "s10-brand",
+            "kind": "object",
+            "action": "Join geometry and settle under a travelling material light sweep"
+          }
+        ],
+        "camera": "Controlled camera/light settle",
+        "supportingShots": [
+          "Native brand detail"
+        ],
+        "vfx": [
+          "Native assembly",
+          "Editable wordmark and lights"
+        ],
+        "sound": "One earned hit and decaying branded resolution",
+        "transition": "Clean end with a held settled state"
+      },
+      "sourceStatus": "NOT_GENERATED",
+      "acceptedArtifactSha256": null,
+      "native3d": true
+    }
+  ],
+  "audioStems": [
+    "room-and-environment",
+    "human-and-prop-foley",
+    "ui-rhythm",
+    "evolving-score",
+    "transitions-and-assembly",
+    "brand-resolution"
+  ],
+  "finalGpuReady": false,
+  "qualification": "Planned clocks and scene contracts only; no accepted sources or fabricated canonical project"
+}

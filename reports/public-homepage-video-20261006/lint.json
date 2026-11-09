@@ -1,0 +1,163 @@
+{
+  "files": 39,
+  "errorCount": 0,
+  "warningCount": 0,
+  "results": [
+    {
+      "file": "frontend/src/WelcomePage.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/DirectorShowcase.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/EditorHeroVisual.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/FeatureGrid.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/FeatureShowcase.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/FinalCta.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/HeroScreenshot.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/HeroSection.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/LandingCreators.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/LandingDemo.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/LandingEditingStory.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/LandingFeatures.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/LandingFooter.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/LandingIcon.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/LandingNavbar.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/LandingWorkflow.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/MotionAssetLayer.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/MotionEditingScene.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/MotionGraphicsLayer.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/PricingSection.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/ProductVisuals.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/ProofSection.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/SectionHeading.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/TopNav.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/WorkflowSection.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/createEditingScene.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/editingSequence.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/motionAssetManifest.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/motionMaterials.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/sceneTextures.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/landing/useKineticTitle.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/__tests__/LandingPageClaims.test.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/__tests__/PublicPages.copy.test.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/__tests__/LandingMotionLifecycle.test.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/src/__tests__/MotionAssetLayer.test.js",
+      "messages": []
+    },
+    {
+      "file": "frontend/scripts/preview-public-homepage.js",
+      "messages": []
+    },
+    {
+      "file": "test/e2e/playwright/run-public-homepage.js",
+      "messages": []
+    },
+    {
+      "file": "test/e2e/playwright/run-public-homepage-headline.js",
+      "messages": []
+    },
+    {
+      "file": "test/e2e/playwright/run-public-homepage-media.js",
+      "messages": []
+    }
+  ]
+}

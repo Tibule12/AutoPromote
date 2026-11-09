@@ -1,0 +1,125 @@
+{
+  "error": null,
+  "id": "observation-2",
+  "pageId": "page-1",
+  "url": "http://127.0.0.1:3096/review.html",
+  "pages": [
+    {
+      "id": "page-1",
+      "url": "http://127.0.0.1:3096/review.html"
+    }
+  ],
+  "dialog": null,
+  "frames": [
+    {
+      "index": 0,
+      "url": "http://127.0.0.1:3096/review.html",
+      "text": "AutoPromote · Private founder viewing room\nOne idea changes worlds.\n\nA generated paper-to-yacht transformation, moving ocean footage and an editable AutoPromote ident. This 11.6-second private prototype has narration, music, fold/water sound and a timed transformation impact.\n\nDownload the film · Sound is enabled when you press play.\n\nPrivate transformation prototype; further refinement is needed. The paper form grows sails and becomes a wooden yacht as its surroundings become ocean. The early mast join and rushed environment change still need work. This is not approved public marketing.\n\nGenerated footage in the actual Studio\n\nThe earlier editing proof remains available separately.\n\nThe generated source shot\nBrand identity directions\nCinematic\nAI / compute\nPremium minimal\nCreator energy\nTransformation development — below the creative bar\n\nPrivate review only. Final sound balance and creative effectiveness still need your viewing and listening. Nothing has been published.",
+      "headings": [
+        "One idea changes worlds.",
+        "Generated footage in the actual Studio",
+        "The generated source shot",
+        "Brand identity directions",
+        "Cinematic",
+        "AI / compute",
+        "Premium minimal",
+        "Creator energy"
+      ],
+      "alerts": [],
+      "busy": false,
+      "captcha": false,
+      "scroll": {
+        "x": 0,
+        "y": 0,
+        "height": 3392,
+        "viewportHeight": 720
+      },
+      "controls": [
+        {
+          "ref": "observation-2:f0:e0",
+          "role": "link",
+          "name": "Download the film",
+          "label": "",
+          "tag": "a",
+          "type": "",
+          "submitsForm": false,
+          "disabled": false,
+          "checked": null,
+          "expanded": null,
+          "selected": null,
+          "value": "",
+          "options": null,
+          "href": "http://127.0.0.1:3096/outputs/local-cpu/transformation-prototype/v21/final.mp4",
+          "inModal": false,
+          "context": "",
+          "modalName": "",
+          "box": {
+            "x": 80,
+            "y": 943.171875,
+            "width": 120.625,
+            "height": 19
+          },
+          "inViewport": false,
+          "occluded": true
+        },
+        {
+          "ref": "observation-2:f0:e1",
+          "role": "button",
+          "name": "Transformation development — below the creative bar",
+          "label": "",
+          "tag": "summary",
+          "type": "",
+          "submitsForm": false,
+          "disabled": false,
+          "checked": null,
+          "expanded": null,
+          "selected": null,
+          "value": "",
+          "options": null,
+          "href": null,
+          "inModal": false,
+          "context": "",
+          "modalName": "",
+          "box": {
+            "x": 80,
+            "y": 3260.40625,
+            "width": 1120,
+            "height": 23
+          },
+          "inViewport": false,
+          "occluded": true
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "type": "requestfailed",
+      "page": "page-1",
+      "url": "http://127.0.0.1:3096/outputs/local-cpu/transformation-prototype/v21/final.mp4",
+      "error": "net::ERR_ABORTED"
+    }
+  ],
+  "priorActions": [
+    {
+      "signature": "47d349c3a62a2ed812f6559252acfccf355357220bf52fc8a933643b076f1b99",
+      "operationKey": "operation:download-reviewed-film",
+      "type": "click",
+      "target": {
+        "role": "link",
+        "name": "Download the film"
+      },
+      "expect": [
+        {
+          "type": "download",
+          "value": "final.mp4"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-07T13:57:37.792Z",
+      "reason": "The observed page exposes the reviewed film as its download; retain the bytes and compare the source hash.",
+      "planner": null,
+      "afterState": "85f3eb12b02611f5b4e13bd0d03c232e3b1c7266d98b935371c97896fd773243"
+    }
+  ]
+}

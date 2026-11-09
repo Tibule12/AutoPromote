@@ -1,0 +1,85 @@
+{
+  "sourceSha256": "d58eb15cfc05d687b023b03b98b10dc40dbb7019165bd6d6c2275cef70508fdf",
+  "frames": [
+    {
+      "path": "reports/flagship-founder-film-production-v5-20261008/helm-i2v-review/frames/frame-01.png",
+      "timestamp": 0.0,
+      "sha256": "9a71708ef071a952d0f2569c8460e29399ca33739195b431f00e328b3a056ab6"
+    },
+    {
+      "path": "reports/flagship-founder-film-production-v5-20261008/helm-i2v-review/frames/frame-02.png",
+      "timestamp": 0.20416666666666666,
+      "sha256": "c93e3f3c5d4616387134b3bdf1e9ac79581567a59a69cab00c3256a2c0a60fa7"
+    },
+    {
+      "path": "reports/flagship-founder-film-production-v5-20261008/helm-i2v-review/frames/frame-03.png",
+      "timestamp": 0.4083333333333333,
+      "sha256": "3bcebc660b20eb743c1696c955163aa8cb393aaace21a726f070330c0adfd41d"
+    },
+    {
+      "path": "reports/flagship-founder-film-production-v5-20261008/helm-i2v-review/frames/frame-04.png",
+      "timestamp": 0.6125,
+      "sha256": "3847986e35928443d7ccdc911cfbd51c44f27579d7734ae959f7691f426ca043"
+    },
+    {
+      "path": "reports/flagship-founder-film-production-v5-20261008/helm-i2v-review/frames/frame-05.png",
+      "timestamp": 0.8166666666666667,
+      "sha256": "8c2c3ce2e8b6218cda349898571a6c3dc5f3e1ebafee43661d4bff0b60befb38"
+    },
+    {
+      "path": "reports/flagship-founder-film-production-v5-20261008/helm-i2v-review/frames/frame-06.png",
+      "timestamp": 1.0208333333333333,
+      "sha256": "117da9208f7c27a398fed95c679713785df1bb58e179fa5909e6ebd7e096f422"
+    },
+    {
+      "path": "reports/flagship-founder-film-production-v5-20261008/helm-i2v-review/frames/frame-07.png",
+      "timestamp": 1.225,
+      "sha256": "e9b5fa9135742e90aad6ea9778fff22a315f9239be37c2ffec8831b0da11707f"
+    },
+    {
+      "path": "reports/flagship-founder-film-production-v5-20261008/helm-i2v-review/frames/frame-08.png",
+      "timestamp": 1.4291666666666667,
+      "sha256": "be1b7364a63ebf0dc0410b7c1759ca1d6caa67b9513132cb9a4b5112525fcecc"
+    },
+    {
+      "path": "reports/flagship-founder-film-production-v5-20261008/helm-i2v-review/frames/frame-09.png",
+      "timestamp": 1.6333333333333333,
+      "sha256": "f21152a5ae7d577ca4bbee05da6b3957c0613f8768c6ae13078c2aba8c56c620"
+    },
+    {
+      "path": "reports/flagship-founder-film-production-v5-20261008/helm-i2v-review/frames/frame-10.png",
+      "timestamp": 1.8375,
+      "sha256": "65ba3beabd7992d2f024eb441651966e51d1fea35e2534cb219786d1aa241ea4"
+    },
+    {
+      "path": "reports/flagship-founder-film-production-v5-20261008/helm-i2v-review/frames/frame-11.png",
+      "timestamp": 2.0416666666666665,
+      "sha256": "580a8c60150ee82bb5c201f3eca85945be4792dcf6e884d096f8fb212ffb7d36"
+    },
+    {
+      "path": "reports/flagship-founder-film-production-v5-20261008/helm-i2v-review/frames/frame-12.png",
+      "timestamp": 2.245833333333333,
+      "sha256": "5e300a87694510de363b42a763aae26730534fb09793c4185920c42149137c59"
+    },
+    {
+      "path": "reports/flagship-founder-film-production-v5-20261008/helm-i2v-review/frames/frame-13.png",
+      "timestamp": 2.45,
+      "sha256": "fe8cae0b704e5b5c57314b12db4d4a4a0fa3150499c2c96b21ceb3962652876b"
+    },
+    {
+      "path": "reports/flagship-founder-film-production-v5-20261008/helm-i2v-review/frames/frame-14.png",
+      "timestamp": 2.654166666666667,
+      "sha256": "201bec00cf46a0ca9d7c680aed8c09c9b70b5cf9fecdec7d375ddb660c8331da"
+    },
+    {
+      "path": "reports/flagship-founder-film-production-v5-20261008/helm-i2v-review/frames/frame-15.png",
+      "timestamp": 2.8583333333333334,
+      "sha256": "76a2c07b5843d0d86c1ad21becbf7b994cdf36925b50a5d9682e563aa2f2e736"
+    },
+    {
+      "path": "reports/flagship-founder-film-production-v5-20261008/helm-i2v-review/frames/frame-16.png",
+      "timestamp": 2.9825,
+      "sha256": "c2c6d9dfefa663745f3a3c1368eeb3ee0baee50e2353e933264278725b17b0b9"
+    }
+  ]
+}

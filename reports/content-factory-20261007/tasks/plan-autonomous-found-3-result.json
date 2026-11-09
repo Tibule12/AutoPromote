@@ -1,0 +1,179 @@
+{
+  "fingerprint": "641b7f8847c3227d353770b454ef694c4076a66a28481a907f291a8a0818bc88",
+  "result": {
+    "id": "plan-autonomous-found-3",
+    "value": {
+      "schemaVersion": 1,
+      "title": "The Origami Ocean",
+      "story": {
+        "about": "A fragile ivory origami boat sails an ocean born from a blank desk, surviving a tidal wave to reveal AutoPromote’s power in transforming the mundane into the monumental",
+        "whyCare": "Founders need to see how their tools can turn small ideas into vast, scalable realities — visually, emotionally, and physically convincing",
+        "hook": "A paper boat on a desk becomes an ocean — and survives a tsunami",
+        "beginning": "An empty wooden desk under soft overhead light. A single folded ivory origami boat rests center-frame. The camera slowly pulls back as the surface beneath it begins to ripple like water, deepening to cobalt blue",
+        "development": "The boat drifts across the newly formed ocean. Camera glides low, tracking its movement. Suddenly, a towering wall of churning water curls toward it — the boat remains untouched, intact",
+        "tension": "The wave crashes inches from the boat. Water splashes violently around it, but the origami holds. The camera tilts upward as the wave recedes, revealing golden sunlight breaking through clouds",
+        "payoff": "The boat glides into calm, shimmering waters. The camera rises to a distant aerial view — the boat occupies less than 15% of the frame, dwarfed by the ocean. Then, the screen fades to black, followed by the AutoPromote logo",
+        "ending": "White text animates on a dark background: 'AutoPromote — Where Ideas Become Oceans'. Amber accents pulse gently around the letters",
+        "withheld": "The brand name is withheld until the final identity card",
+        "amplify": [
+          "Scale contrast between tiny boat and vast ocean",
+          "Physical danger of the tidal wave",
+          "Relief of golden calm after chaos",
+          "Aerial wide shot emphasizing isolation",
+          "Origami material reacting to water realistically",
+          "Camera movement mirroring boat’s journey",
+          "Light shift from cool to warm tones",
+          "Visual metaphor of transformation"
+        ],
+        "remove": [
+          "Static paper boat",
+          "Clouds without ocean context",
+          "Fictional product screenshots",
+          "Customer testimonials",
+          "Orchestral music",
+          "Voiceover narration",
+          "Text overlays during action",
+          "Non-essential camera pans"
+        ]
+      },
+      "script": [
+        {
+          "beatId": "intro-beat-01",
+          "action": "Camera pulls back from origami boat on desk as surface ripples into ocean",
+          "sound": "Original audio: subtle ambient swell begins"
+        },
+        {
+          "beatId": "wave-beat-02",
+          "action": "Boat drifts toward curling wall of water; camera tracks low",
+          "sound": "Original audio: rising tension motif intensifies"
+        },
+        {
+          "beatId": "calm-beat-03",
+          "action": "Wave recedes; boat enters golden calm; camera ascends to aerial wide",
+          "sound": "Original audio: resolution motif resolves"
+        }
+      ],
+      "assets": [
+        {
+          "assetId": "wan-origami-ocean",
+          "type": "video",
+          "beatId": "intro-beat-01",
+          "prompt": "Ivory origami boat on wooden desk. Surface ripples into deep cobalt ocean. Camera pulls back slowly. Soft overhead lighting. No text or sound. Realistic water texture. Frame fills with ocean as boat shrinks to center",
+          "reason": "Establishes the visual metaphor and scale contrast",
+          "duration": 5.04,
+          "provider": "wan",
+          "acceptanceCriteria": [
+            "Boat visible and centered",
+            "Ocean texture realistic",
+            "Camera pull-back smooth",
+            "No text or sound",
+            "Lighting consistent",
+            "Frame composition correct",
+            "Water transition seamless",
+            "Object material accurate"
+          ],
+          "seed": 42
+        },
+        {
+          "assetId": "wan-wave-survival",
+          "type": "video",
+          "beatId": "wave-beat-02",
+          "prompt": "Tiny ivory origami boat drifts near curling wall of churning ocean water. Wave crests high, threatens to engulf boat. Boat remains intact. Low-angle tracking shot. Sunlight glints off water. Camera follows boat’s path",
+          "reason": "Shows physical danger and survival",
+          "duration": 5.04,
+          "provider": "wan",
+          "acceptanceCriteria": [
+            "Wave curls realistically",
+            "Boat intact and centered",
+            "Low-angle tracking motion",
+            "Water texture detailed",
+            "Lighting dynamic",
+            "No text or sound",
+            "Camera movement fluid",
+            "Object material preserved"
+          ],
+          "seed": 101
+        },
+        {
+          "assetId": "motion-ending-card",
+          "type": "motion",
+          "beatId": "calm-beat-03",
+          "prompt": "AutoPromote",
+          "reason": "Final identity reveal with minimalism and brand clarity",
+          "duration": 1.5,
+          "provider": "motion",
+          "acceptanceCriteria": [
+            "Text appears centered",
+            "Amber accents pulse around letters",
+            "Background dark and non-distracting",
+            "No animation beyond text pulse",
+            "Font clean and modern",
+            "Duration exact",
+            "No extra elements",
+            "No boat or ocean shown"
+          ],
+          "seed": 77
+        },
+        {
+          "assetId": "original-audio-score",
+          "type": "audio",
+          "beatId": "intro-beat-01",
+          "prompt": "",
+          "reason": "Full 15-second instrumental score covering all beats",
+          "duration": 15,
+          "provider": "original_audio",
+          "acceptanceCriteria": [
+            "Stereo instrumental score",
+            "No clipped samples",
+            "Correct sample rate",
+            "Tension motif matches wave beat",
+            "Resolution motif matches calm beat",
+            "Duration exactly 15 seconds",
+            "No orchestral strings or brass",
+            "No voice or text"
+          ],
+          "seed": 0
+        }
+      ],
+      "outputs": [
+        {
+          "outputId": "promo-output-01",
+          "aspect": "16:9",
+          "purpose": "Private founder marketing review",
+          "musicAssetId": "original-audio-score",
+          "sequence": [
+            {
+              "assetId": "wan-origami-ocean",
+              "start": 0,
+              "duration": 5.04,
+              "reason": "Intro establishes metaphor and scale"
+            },
+            {
+              "assetId": "wan-wave-survival",
+              "start": 0,
+              "duration": 5.04,
+              "reason": "Danger and survival arc"
+            },
+            {
+              "assetId": "motion-ending-card",
+              "start": 10.04,
+              "duration": 1.5,
+              "reason": "Brand reveal at climax"
+            }
+          ]
+        }
+      ]
+    },
+    "model": "Qwen/Qwen3-VL-8B-Instruct",
+    "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+    "settings": {
+      "dtype": "bfloat16",
+      "attention": "sdpa",
+      "do_sample": false,
+      "max_tokens": 4500
+    },
+    "evidenceSha256": null,
+    "seconds": 83.12901407900017,
+    "gpu": "NVIDIA L40S"
+  }
+}

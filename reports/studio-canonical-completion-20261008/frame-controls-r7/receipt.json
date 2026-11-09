@@ -1,0 +1,13 @@
+{
+  "startedAt": "2026-10-08T16:01:47.903Z",
+  "realAuth": true,
+  "headless": true,
+  "muted": true,
+  "noMocks": true,
+  "gpuJobsStarted": 0,
+  "projectName": "Studio framing controls QA 20261008 r7",
+  "status": "FAIL",
+  "steps": [],
+  "error": "page.waitForFunction: Timeout 60000ms exceeded.",
+  "finishedAt": "2026-10-08T16:02:48.622Z"
+}

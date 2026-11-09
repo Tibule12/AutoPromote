@@ -1,0 +1,7 @@
+ARG STUDIO_CUDA_BASE=autopromote-studio-cuda:20261006
+FROM ${STUDIO_CUDA_BASE}
+ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cu126
+RUN pip3 install --no-cache-dir torch==2.7.1 --index-url ${TORCH_INDEX_URL}
+RUN pip3 install --no-cache-dir diffusers==0.36.0 transformers==4.56.2 accelerate==1.10.1 sentencepiece==0.2.1 imageio==2.37.0 imageio-ffmpeg==0.6.0 ftfy==6.3.1
+ENV HF_HOME=/work/models
+WORKDIR /work

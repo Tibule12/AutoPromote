@@ -1,0 +1,46 @@
+{
+  "at": "2026-10-08T17:59:39.688Z",
+  "project": "Studio Blender camera NVIDIA QA 20261008 r2",
+  "realAuth": true,
+  "noMocks": true,
+  "status": "BLOCKED_GPU_CAPACITY",
+  "events": [
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T17:56:21.354Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T17:57:04.037Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T17:57:45.258Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T17:58:26.697Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T17:59:02.461Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T17:59:39.136Z"
+    }
+  ],
+  "error": "HQ submission 429: 3D preview capacity is busy; retry shortly"
+}

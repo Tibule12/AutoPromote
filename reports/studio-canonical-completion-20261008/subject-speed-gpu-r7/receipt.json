@@ -1,0 +1,27 @@
+{
+  "startedAt": "2026-10-08T17:21:26.398Z",
+  "realAuth": true,
+  "noMocks": true,
+  "headless": true,
+  "muted": true,
+  "projectName": "Studio subject speed NVIDIA QA 20261008 r7",
+  "inferenceJobsStarted": 0,
+  "status": "FAIL",
+  "lastStep": "Programme 0.25s maps to decoded source 0.5s; paired preview captured before submission",
+  "coldRecovery": "PASS",
+  "reviewedProxySha256": "fa90d4e44ab9cffce3c5dd24cc42c2abf5ad2c8b4935435e3875d5edd7496ba0",
+  "reviewedSubjectInProgramme": "PASS",
+  "preFinalSourceTime": 0.5,
+  "error": "Studio did not acknowledge a render submission within 30 seconds; inspect the recorded UI validation and requests",
+  "finishedAt": "2026-10-08T17:24:30.221Z",
+  "subjectApiEvents": [
+    {
+      "route": "/api/media/studio-subject-vfx/b9de374e-cfd5-49d5-9dce-79351b1fe877",
+      "method": "GET"
+    },
+    {
+      "route": "/api/media/studio-subject-vfx/b9de374e-cfd5-49d5-9dce-79351b1fe877",
+      "method": "GET"
+    }
+  ]
+}

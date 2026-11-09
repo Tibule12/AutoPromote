@@ -1,0 +1,19 @@
+{
+  "status": "qualified_for_ordinary-paper-setup-and-water-opening",
+  "parentSha256": "20af57364aef3328e8cea1c433e1ea7a1ee7c1ab97290b9d5bf22d522f690d85",
+  "operation": "CPU trim of reviewed original take; no motion generation",
+  "sourceRange": {
+    "start": 0,
+    "end": 3.625
+  },
+  "artifact": {
+    "path": "generated/boat-launch-v4-qualified.mp4",
+    "sha256": "0136956d2b6465fceb8af75a9f45c79c14f71fa568d3c1075df163ea185d6f66",
+    "duration": 3.625
+  },
+  "review": {
+    "accepted": true,
+    "reviewer": "Codex visual inspection",
+    "reason": "Proper traditional paper boat remains intact through the setup and initial water action. The later flying and exit are excluded."
+  }
+}

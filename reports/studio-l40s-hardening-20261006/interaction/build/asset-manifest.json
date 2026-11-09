@@ -1,0 +1,11 @@
+{
+  "files": {
+    "main.js": "/static/js/bundle.js",
+    "static/js/src_components_threeD_Studio3DCanvas_js.chunk.js": "/static/js/src_components_threeD_Studio3DCanvas_js.chunk.js",
+    "static/js/vendors-AutoPromote_frontend_node_modules_three_build_three_module_js-AutoPromote_frontend_no-21c983.chunk.js": "/static/js/vendors-AutoPromote_frontend_node_modules_three_build_three_module_js-AutoPromote_frontend_no-21c983.chunk.js",
+    "static/media/StudioMotion-Bold.ttf": "/static/media/StudioMotion-Bold.263039d2364a6d1ae687.ttf"
+  },
+  "entrypoints": [
+    "static/js/bundle.js"
+  ]
+}

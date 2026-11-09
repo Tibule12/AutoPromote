@@ -1,0 +1,167 @@
+{
+  "startedAt": "2026-10-08T19:34:24.834Z",
+  "projectName": "Studio subject speed NVIDIA QA 20261008 r11",
+  "realAuth": true,
+  "noMocks": true,
+  "headless": true,
+  "muted": true,
+  "graphChanges": 0,
+  "inferenceJobsStarted": 0,
+  "status": "NATIVE_DELIVERY_PASS_VISUAL_PAIR_REVIEW_PENDING",
+  "events": [
+    {
+      "route": "/api/media/studio-subject-vfx/b9de374e-cfd5-49d5-9dce-79351b1fe877",
+      "method": "GET"
+    }
+  ],
+  "samples": [
+    {
+      "programmeTime": 0.25,
+      "sourceTime": 0.5,
+      "programmeSource": "subject-vfx"
+    },
+    {
+      "programmeTime": 0.45,
+      "sourceTime": 0.9,
+      "programmeSource": "subject-vfx"
+    },
+    {
+      "programmeTime": 0.75,
+      "sourceTime": 1.5,
+      "programmeSource": "subject-vfx"
+    },
+    {
+      "programmeTime": 1.45,
+      "sourceTime": 2.9,
+      "programmeSource": "subject-vfx"
+    },
+    {
+      "programmeTime": 1.55,
+      "sourceTime": 3.1,
+      "programmeSource": "source"
+    },
+    {
+      "programmeTime": 3.75,
+      "sourceTime": 7.5,
+      "programmeSource": "source"
+    }
+  ],
+  "lastStep": "Captured pre-final programme 3.75s at mapped source 7.5s",
+  "nativeSpeedRestore": "1x then 2x clears completed-file playback; final settings retained",
+  "reviewedProxySha256": "fa90d4e44ab9cffce3c5dd24cc42c2abf5ad2c8b4935435e3875d5edd7496ba0",
+  "output": {
+    "startedAt": "2026-10-08T19:35:33.897Z",
+    "finishedAt": "2026-10-08T19:37:07.535Z",
+    "projectName": "A\nAutoPromote\nVIRAL CLIP STUDIO\nStudio subject speed NVIDIA QA 20261008 r11",
+    "realApi": true,
+    "noMocks": true,
+    "submittedJobId": "viral_2db7e80acb56ba5345b995f14c7ddfcc66ece7a7440176aff01cb318a8974947",
+    "events": [
+      {
+        "path": "/api/media/process",
+        "status": 200,
+        "at": "2026-10-08T19:35:45.101Z"
+      },
+      {
+        "path": "/api/media/status/viral_2db7e80acb56ba5345b995f14c7ddfcc66ece7a7440176aff01cb318a8974947",
+        "status": 200,
+        "at": "2026-10-08T19:35:51.917Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_2db7e80acb56ba5345b995f14c7ddfcc66ece7a7440176aff01cb318a8974947",
+        "status": 200,
+        "at": "2026-10-08T19:35:57.977Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_2db7e80acb56ba5345b995f14c7ddfcc66ece7a7440176aff01cb318a8974947",
+        "status": 200,
+        "at": "2026-10-08T19:36:03.956Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_2db7e80acb56ba5345b995f14c7ddfcc66ece7a7440176aff01cb318a8974947",
+        "status": 200,
+        "at": "2026-10-08T19:36:13.195Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_2db7e80acb56ba5345b995f14c7ddfcc66ece7a7440176aff01cb318a8974947",
+        "status": 200,
+        "at": "2026-10-08T19:36:22.302Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_2db7e80acb56ba5345b995f14c7ddfcc66ece7a7440176aff01cb318a8974947",
+        "status": 200,
+        "at": "2026-10-08T19:36:27.974Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_2db7e80acb56ba5345b995f14c7ddfcc66ece7a7440176aff01cb318a8974947",
+        "status": 200,
+        "at": "2026-10-08T19:36:33.948Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_2db7e80acb56ba5345b995f14c7ddfcc66ece7a7440176aff01cb318a8974947",
+        "status": 200,
+        "at": "2026-10-08T19:36:39.962Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_2db7e80acb56ba5345b995f14c7ddfcc66ece7a7440176aff01cb318a8974947",
+        "status": 200,
+        "at": "2026-10-08T19:36:45.947Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_2db7e80acb56ba5345b995f14c7ddfcc66ece7a7440176aff01cb318a8974947",
+        "status": 200,
+        "at": "2026-10-08T19:36:51.969Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_2db7e80acb56ba5345b995f14c7ddfcc66ece7a7440176aff01cb318a8974947",
+        "status": 200,
+        "at": "2026-10-08T19:37:00.260Z",
+        "jobStatus": "completed"
+      }
+    ],
+    "errors": [],
+    "download": {
+      "suggestedName": "viral_clip_rendered.mp4",
+      "bytes": 1700369,
+      "nativeCompleted": true
+    },
+    "output": "reports/studio-canonical-completion-20261008/subject-programme-cpu-r7/vfx/download.mp4",
+    "outputSha256": "b85f9953ac69902783e11f331c33c5a662e1a4ece5679da34ad393df0b2f2b40",
+    "technical": {
+      "passed": true,
+      "sha256": "b85f9953ac69902783e11f331c33c5a662e1a4ece5679da34ad393df0b2f2b40",
+      "bytes": 1700369,
+      "seconds": 6,
+      "video": {
+        "width": 1280,
+        "height": 720,
+        "codec": "h264",
+        "fps": "60/1",
+        "duration": "6.000000",
+        "pixelFormat": "yuv420p",
+        "encoder": "Lavc60.31.102 libx264"
+      },
+      "audio": {
+        "codec": "aac",
+        "channels": 2,
+        "sampleRate": "96000",
+        "duration": "6.000000"
+      },
+      "independentFullDecode": true,
+      "contactSheet": "reports/studio-canonical-completion-20261008/subject-programme-cpu-r7/vfx/download.mp4.frames.jpg",
+      "scope": "Technical only. Pixel and listening review are separate required evidence."
+    }
+  },
+  "gpuEncoderUsed": false,
+  "finishedAt": "2026-10-08T19:37:08.857Z"
+}

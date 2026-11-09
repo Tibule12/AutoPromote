@@ -1,0 +1,11 @@
+{
+  "phase": "offline-render",
+  "at": "2026-10-07T21:50:47.205Z",
+  "realAuth": true,
+  "noMocks": true,
+  "gpuUsed": false,
+  "status": 503,
+  "code": "STUDIO_RENDER_WORKER_UNAVAILABLE",
+  "noJobAcknowledged": true,
+  "noRecoveryPanel": true
+}

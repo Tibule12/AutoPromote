@@ -1,0 +1,191 @@
+{
+  "outputId": "one-edit-hero",
+  "aspect": "16:9",
+  "purpose": "An ordinary editing problem grows through setbacks into a creative system; the physical transformation earns the opening image and the created-by reveal.",
+  "musicAssetId": "score",
+  "musicVolume": 0.75,
+  "sequence": [
+    {
+      "assetId": "vessel",
+      "start": 4,
+      "duration": 3,
+      "reason": "Open inside the payoff and create a question about how it was made."
+    },
+    {
+      "assetId": "origin",
+      "start": 0,
+      "duration": 5.25,
+      "reason": "Make sync understandable to a stranger through one human conversation, not interface instructions."
+    },
+    {
+      "assetId": "cascade",
+      "start": 0,
+      "duration": 5.5,
+      "reason": "Each fix causes a consequence, building frustration."
+    },
+    {
+      "assetId": "failure",
+      "start": 0,
+      "duration": 4.5,
+      "reason": "Let a setback hurt; hold briefly rather than racing through a decorative code montage."
+    },
+    {
+      "assetId": "quota",
+      "start": 0,
+      "duration": 4.75,
+      "reason": "External constraint becomes the lowest point; persistence is the emotional turn."
+    },
+    {
+      "assetId": "breakthrough",
+      "start": 0,
+      "duration": 4.25,
+      "reason": "A genuine quota grant and bounded execution earn the release of tension. 3000 milliGPU is capacity, not 3000 physical GPUs."
+    },
+    {
+      "assetId": "director",
+      "start": 0,
+      "duration": 6.75,
+      "reason": "Move from repairs to creative decisions, with real sources and editorial data."
+    },
+    {
+      "assetId": "vessel",
+      "start": 0,
+      "duration": 7,
+      "reason": "Complete the opening world through connected visible geometry, material and scale change."
+    },
+    {
+      "assetId": "reveal",
+      "start": 0,
+      "duration": 5,
+      "reason": "Land the promised self-referential payoff. Production receipts disclose assistant-directed story and source generation versus actual AutoPromote editing/rendering."
+    },
+    {
+      "assetId": "ident",
+      "start": 0,
+      "duration": 5,
+      "reason": "A dedicated editable brand sequence, not a flat logo fade."
+    }
+  ],
+  "audioCues": [
+    {
+      "assetId": "vo-cold-open",
+      "kind": "voiceover",
+      "startTime": 0.35,
+      "trimStart": 0,
+      "duration": 2.175,
+      "volume": 0.94
+    },
+    {
+      "assetId": "vo-origin",
+      "kind": "voiceover",
+      "startTime": 3.35,
+      "trimStart": 0,
+      "duration": 4.4,
+      "volume": 0.94
+    },
+    {
+      "assetId": "vo-cascade",
+      "kind": "voiceover",
+      "startTime": 8.6,
+      "trimStart": 0,
+      "duration": 4.55,
+      "volume": 0.94
+    },
+    {
+      "assetId": "vo-failure",
+      "kind": "voiceover",
+      "startTime": 14.25,
+      "trimStart": 0,
+      "duration": 3.675,
+      "volume": 0.94
+    },
+    {
+      "assetId": "vo-quota",
+      "kind": "voiceover",
+      "startTime": 18.55,
+      "trimStart": 0,
+      "duration": 3.325,
+      "volume": 0.94
+    },
+    {
+      "assetId": "vo-breakthrough",
+      "kind": "voiceover",
+      "startTime": 23.4,
+      "trimStart": 0,
+      "duration": 3.225,
+      "volume": 0.94
+    },
+    {
+      "assetId": "vo-director",
+      "kind": "voiceover",
+      "startTime": 27.55,
+      "trimStart": 0,
+      "duration": 6.1,
+      "volume": 0.94
+    },
+    {
+      "assetId": "vo-magic",
+      "kind": "voiceover",
+      "startTime": 34.3,
+      "trimStart": 0,
+      "duration": 3.075,
+      "volume": 0.94
+    },
+    {
+      "assetId": "vo-reveal",
+      "kind": "voiceover",
+      "startTime": 41.55,
+      "trimStart": 0,
+      "duration": 3.4,
+      "volume": 0.94
+    },
+    {
+      "assetId": "cues",
+      "kind": "sfx",
+      "startTime": 0,
+      "trimStart": 0,
+      "duration": 12,
+      "volume": 0.8
+    },
+    {
+      "assetId": "cues",
+      "kind": "sfx",
+      "startTime": 12,
+      "trimStart": 12,
+      "duration": 12,
+      "volume": 0.8
+    },
+    {
+      "assetId": "cues",
+      "kind": "sfx",
+      "startTime": 24,
+      "trimStart": 24,
+      "duration": 12,
+      "volume": 0.8
+    },
+    {
+      "assetId": "cues",
+      "kind": "sfx",
+      "startTime": 36,
+      "trimStart": 36,
+      "duration": 12,
+      "volume": 0.8
+    },
+    {
+      "assetId": "cues",
+      "kind": "sfx",
+      "startTime": 48,
+      "trimStart": 48,
+      "duration": 3,
+      "volume": 0.8
+    }
+  ],
+  "captionSegments": [],
+  "plannedBlackRanges": [
+    {
+      "start": 46,
+      "end": 46.55,
+      "reason": "Dedicated ident dark anticipation before the structural lighting reveal."
+    }
+  ]
+}

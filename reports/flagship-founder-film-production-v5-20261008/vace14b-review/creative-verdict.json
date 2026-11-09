@@ -1,0 +1,35 @@
+{
+  "accepted": false,
+  "reason": "Reject the transformation. The yacht appears as photographic texture inside tearing foreground shapes, while the paper boat remains behind on the workbench. The texture grows into the entire sea scene. This is an image-reveal wipe, not the same paper hull and sail becoming one real yacht.",
+  "reviewer": "Codex all-81-frame and native keyframe inspection",
+  "modelRevision": "private visual review 2026-10-08",
+  "evidenceSha256": "60160180e9a6f5cb3392ca8ff40803e5913a1f3f3d1105dcf40670af7fda5565",
+  "artifactSha256": "e9c6285ef9576edde93b9b36f1a4531aeed0efa654ef35a4127029a7b75ea14a",
+  "criteria": [
+    {
+      "criterion": "One connected vessel retains identity through material and scale change",
+      "passed": false,
+      "observation": "At about 2.36-3.04s, the original paper boat remains on the desk behind separate shapes carrying finished yacht/ocean imagery. Its hull does not grow into that photographic hull."
+    },
+    {
+      "criterion": "Folded sail deforms into attached canvas with visible continuity",
+      "passed": false,
+      "observation": "The cream sail appears as part of the finished yacht image inside foreground cutout shapes. No attached central paper fold visibly becomes its mast and sail."
+    },
+    {
+      "criterion": "Water and world deepen continuously around the same hull",
+      "passed": false,
+      "observation": "Ocean/wake enter as the expanding yacht image rather than water around the paper hull. The desk persists behind it then disappears around 3.38s."
+    },
+    {
+      "criterion": "The shot builds anticipation and earns a photographic sailing payoff",
+      "passed": false,
+      "observation": "More than the first two seconds mainly pull back from unchanged paper. The reveal lacks physical escalation; the photographic endpoint alone does not earn the event."
+    }
+  ],
+  "revisionInstructions": "Do not promote, upscale or assemble this take as a transformation. The next proof needs spatially aligned camera/endpoint geometry, separate persistent hull/sail region identities, explicit region deformation/material handoff and continuous water/depth interaction. Review representative middle frames against their region/geometry evidence before a complete expensive take. The current line guide is a hint rather than proof that generated pixels retained the geometry. Preserve every rejected take and its hashes.",
+  "wholeFilmCreativeApproval": false,
+  "publicApproved": false,
+  "limitations": "Decoded visual inspection only. This documents observed failures, not a confirmed internal neural-model cause or a finished replacement capability.",
+  "reviewedAt": "2026-10-08T19:50:38.426897+00:00"
+}

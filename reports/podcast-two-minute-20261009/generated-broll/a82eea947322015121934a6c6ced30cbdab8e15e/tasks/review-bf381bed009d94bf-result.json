@@ -1,0 +1,88 @@
+{
+  "fingerprint": "b5be608d138d40937637c749142044227a615f926443432a689ab990c3ae7a7d",
+  "result": {
+    "id": "review-bf381bed009d94bf",
+    "value": {
+      "accepted": false,
+      "reason": "Shot is static, not a slow dolly shot as required. No movement observed across frames, violating the requirement for restrained movement suitable for a podcast cutaway",
+      "revisionInstructions": "Animate the camera with a slow dolly forward or backward motion through the church interior to create believable movement",
+      "criteria": [
+        {
+          "criterion": "The moving shot depicts the concrete subject in the quoted transcript as an illustration",
+          "passed": true,
+          "observation": "Subject (church interior with stained glass windows) is correctly illustrated"
+        },
+        {
+          "criterion": "No visible distorted anatomy, broken objects, text, logos or distracting generation defects in sampled frames",
+          "passed": true,
+          "observation": "No distortions, text, logos or defects visible in frames"
+        },
+        {
+          "criterion": "The shot has stable framing and believable restrained movement suitable for a short podcast cutaway",
+          "passed": false,
+          "observation": "Shot is completely static with no camera movement across all frames, failing the movement requirement"
+        }
+      ]
+    },
+    "rawValue": {
+      "accepted": false,
+      "reason": "Shot is static, not a slow dolly shot as required. No movement observed across frames, violating the requirement for restrained movement suitable for a podcast cutaway",
+      "revisionInstructions": "Animate the camera with a slow dolly forward or backward motion through the church interior to create believable movement",
+      "criteria": [
+        {
+          "criterion": "The moving shot depicts the concrete subject in the quoted transcript as an illustration",
+          "passed": true,
+          "observation": "Subject (church interior with stained glass windows) is correctly illustrated"
+        },
+        {
+          "criterion": "No visible distorted anatomy, broken objects, text, logos or distracting generation defects in sampled frames",
+          "passed": true,
+          "observation": "No distortions, text, logos or defects visible in frames"
+        },
+        {
+          "criterion": "The shot has stable framing and believable restrained movement suitable for a short podcast cutaway",
+          "passed": false,
+          "observation": "Shot is completely static with no camera movement across all frames, failing the movement requirement"
+        }
+      ]
+    },
+    "contractRepairs": [],
+    "model": "Qwen/Qwen3-VL-8B-Instruct",
+    "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+    "settings": {
+      "dtype": "bfloat16",
+      "attention": "sdpa",
+      "do_sample": false,
+      "max_tokens": 2400
+    },
+    "evidenceSha256": "3e0af34c5f72d7ae38ed768a50923356d160c0e5dd359f554bec7d0fe7e4d60e",
+    "frameEvidence": [
+      {
+        "timestamp": 0,
+        "sha256": "855278358a98bdf53de49a304b7bb85af54958672127742398e2ad05979f7978"
+      },
+      {
+        "timestamp": 1.0083334000000002,
+        "sha256": "59dc69efde8936f016ccc488af74bd944db2e1f3f7255c50b29cbbe61d4dbb09"
+      },
+      {
+        "timestamp": 2.0166668000000003,
+        "sha256": "612e64ab0d610f66f5438d3c56c400808a9ce0d18d37203f6aa296a6edfc7efc"
+      },
+      {
+        "timestamp": 3.0250002,
+        "sha256": "773e70c50d59e57bd1bceb8894e4b2adca94612e0c32c4aa2b3c8d8b3155d1ca"
+      },
+      {
+        "timestamp": 4.033333600000001,
+        "sha256": "902eba040a064d560012c17ed8020716a23a00f939508f8462bc3c1db2a6a4e2"
+      },
+      {
+        "timestamp": 4.961667,
+        "sha256": "c085ed4563ce45a0641db865d6a1e4de5ba754a5e3927292ac059a52acdaba85"
+      }
+    ],
+    "seconds": 12.099620863999007,
+    "gpu": "NVIDIA L40S"
+  }
+}

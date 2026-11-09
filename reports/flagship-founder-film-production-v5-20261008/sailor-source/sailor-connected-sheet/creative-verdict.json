@@ -1,0 +1,25 @@
+{
+  "accepted": false,
+  "reason": "The frame is a photographic helm portrait, but it has no visible hauling action or connected mainsheet. It is still art, not action footage.",
+  "reviewer": "Codex visual inspection",
+  "modelRevision": "private visual review 2026-10-08",
+  "evidenceSha256": "1939f862ac93505404cd7f3d9a2e505dd1cc019e48fa8fc9651e9f31c1afedf9",
+  "criteria": [
+    {
+      "criterion": "One plausible person with photographic skin and consistent navy/cream outfit",
+      "passed": true,
+      "observation": "One woman on a realistic timber deck, blue sea and natural outdoor light; hands still require temporal review."
+    },
+    {
+      "criterion": "Both hands visibly haul a mainsheet connected to the boom",
+      "passed": false,
+      "observation": "Right hand is near the wheel and left rests on the rail; no mainsheet haul or boom linkage."
+    },
+    {
+      "criterion": "Motion is genuine generated action, not a timed still",
+      "passed": false,
+      "observation": "PNG source only; companion video.mp4 is a timed still."
+    }
+  ],
+  "revisionInstructions": "Change this asset purpose to a helm response shot only if the film direction calls for it, and generate/inspect actual wheel-steering movement. Do not keep rerunning rope prompts against a source that lacks rigging."
+}

@@ -1,0 +1,18 @@
+{
+  "status": "ACCEPTED_FOR_FULL_MOTION_TEST_ONLY",
+  "evidence": [
+    "contact-sheet.jpg",
+    "frame_0000.png",
+    "frame_0026.png",
+    "frame_0052.png",
+    "frame_0080.png",
+    "frame_0119.png"
+  ],
+  "findings": [
+    "The opening is clean black and the midpoint visibly exposes separate physical blades.",
+    "The new mark is an original folded A/aperture object with material depth rather than the old overlaid AP glyph.",
+    "The wordmark holds cleanly in the sampled final frame.",
+    "Still frames do not prove the motion, sound synchronization or premium quality."
+  ],
+  "nextGate": "Render 120 frames, encode with its timed impact, watch and listen to the complete 5-second ident before considering film use."
+}

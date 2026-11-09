@@ -1,0 +1,171 @@
+{
+  "at": "2026-10-08T07:34:15.937Z",
+  "realAuth": true,
+  "noMocks": true,
+  "events": [
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 202,
+      "jobId": "977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "jobStatus": "queued",
+      "at": "2026-10-08T07:32:29.071Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "status": 200,
+      "jobId": "977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "jobStatus": "queued",
+      "at": "2026-10-08T07:32:35.773Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "status": 200,
+      "jobId": "977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "jobStatus": "queued",
+      "at": "2026-10-08T07:32:42.105Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "status": 200,
+      "jobId": "977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "jobStatus": "queued",
+      "at": "2026-10-08T07:32:47.781Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "status": 200,
+      "jobId": "977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "jobStatus": "queued",
+      "at": "2026-10-08T07:32:53.722Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "status": 200,
+      "jobId": "977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "jobStatus": "queued",
+      "at": "2026-10-08T07:33:00.468Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "status": 200,
+      "jobId": "977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "jobStatus": "queued",
+      "at": "2026-10-08T07:33:05.803Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "status": 200,
+      "jobId": "977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "jobStatus": "rendering",
+      "at": "2026-10-08T07:33:11.713Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "status": 200,
+      "jobId": "977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "jobStatus": "rendering",
+      "at": "2026-10-08T07:33:18.611Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "status": 200,
+      "jobId": "977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "jobStatus": "rendering",
+      "at": "2026-10-08T07:33:23.722Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "status": 200,
+      "jobId": "977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "jobStatus": "rendering",
+      "at": "2026-10-08T07:33:30.014Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "status": 200,
+      "jobId": "977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "jobStatus": "rendering",
+      "at": "2026-10-08T07:33:35.744Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "status": 200,
+      "jobId": "977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "jobStatus": "rendering",
+      "at": "2026-10-08T07:33:41.741Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "status": 200,
+      "jobId": "977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "jobStatus": "rendering",
+      "at": "2026-10-08T07:33:47.800Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "status": 200,
+      "jobId": "977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "jobStatus": "rendering",
+      "at": "2026-10-08T07:33:54.139Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "status": 200,
+      "jobId": "977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "jobStatus": "rendering",
+      "at": "2026-10-08T07:34:00.533Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview/977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "status": 200,
+      "jobId": "977894ed-fec6-4aaf-916d-00b199bbed7b",
+      "jobStatus": "completed",
+      "at": "2026-10-08T07:34:05.773Z"
+    }
+  ],
+  "jobId": "977894ed-fec6-4aaf-916d-00b199bbed7b",
+  "hash": "fd35f15a24a6a6bac6d35f3f6210e7ae8e704eb0a6d36519efb11da4df3a449c",
+  "renderReceipt": {
+    "artifacts": {
+      "overlay.mov": {
+        "bytes": 4854005,
+        "sha256": "0ae58f9c07686389f13436ea6afb073b81abf52f4907cc86b4d1f0688f424244"
+      },
+      "preview.mp4": {
+        "bytes": 52474,
+        "sha256": "11ae448686136713fbf252a33f718e6c95aae373c79c5f21fc35b46dbe908c2e"
+      }
+    },
+    "device": {
+      "backend": "OPTIX",
+      "denoiser": "OPTIX",
+      "devices": [
+        "NVIDIA L40S"
+      ],
+      "engine": "CYCLES",
+      "event": "render_device",
+      "gpu_verified": true
+    },
+    "version": 1
+  },
+  "output": "reports/studio-stability-20261008/three_d/nvidia-preview/preview-977894ed-fec6-4aaf-916d-00b199bbed7b.mp4",
+  "outputSha256": "11ae448686136713fbf252a33f718e6c95aae373c79c5f21fc35b46dbe908c2e",
+  "technical": {
+    "passed": true,
+    "sha256": "11ae448686136713fbf252a33f718e6c95aae373c79c5f21fc35b46dbe908c2e",
+    "bytes": 52474,
+    "seconds": 1,
+    "video": {
+      "width": 1280,
+      "height": 720,
+      "codec": "h264",
+      "fps": "30/1",
+      "duration": "1.000000",
+      "pixelFormat": "yuv420p"
+    },
+    "audio": null,
+    "independentFullDecode": true,
+    "contactSheet": "reports/studio-stability-20261008/three_d/nvidia-preview/preview-977894ed-fec6-4aaf-916d-00b199bbed7b.mp4.frames.jpg",
+    "scope": "Technical only. Pixel and listening review are separate required evidence."
+  }
+}

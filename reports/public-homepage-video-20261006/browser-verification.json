@@ -1,0 +1,553 @@
+{
+  "status": "PASS",
+  "environment": "Local Chromium / software WebGL; no production login or deployment",
+  "video": "editing-film.webm",
+  "checks": [
+    {
+      "label": "Public root uses the actual App/router and a Three.js WebGL hero"
+    },
+    {
+      "label": "Kinetic headline runs real finite mask, blur, scale and gradient animations",
+      "animationCount": 4,
+      "matteCount": 3
+    },
+    {
+      "label": "Unconfigured After Effects asset slots fetch no authored media or Lottie runtime"
+    },
+    {
+      "label": "Opening sequence: 01-camera-entry",
+      "engine": "three.js r186",
+      "meshCount": "66",
+      "renderCount": "14",
+      "drawCalls": "13",
+      "time": "3.050",
+      "camera": "0.091,0.320,10.879",
+      "speaker": "host",
+      "videoTime": "2.142",
+      "videoFrames": "53",
+      "videoPaused": "true",
+      "videoDecoders": "1",
+      "videoSurfaces": "3",
+      "previewSource": "poster",
+      "cutCount": "0",
+      "captionLetters": "0",
+      "selected": "false",
+      "cropAspect": "hidden",
+      "matteCount": "1",
+      "verticalCount": "0",
+      "running": "false"
+    },
+    {
+      "label": "Opening sequence: 02-timeline-assembly",
+      "engine": "three.js r186",
+      "meshCount": "66",
+      "renderCount": "39",
+      "drawCalls": "29",
+      "time": "8.283",
+      "camera": "0.000,0.320,10.818",
+      "speaker": "host",
+      "videoTime": "8.066",
+      "videoFrames": "197",
+      "videoPaused": "true",
+      "videoDecoders": "1",
+      "videoSurfaces": "4",
+      "previewSource": "video",
+      "cutCount": "8",
+      "captionLetters": "0",
+      "selected": "false",
+      "cropAspect": "hidden",
+      "matteCount": "0",
+      "verticalCount": "0",
+      "running": "false"
+    },
+    {
+      "label": "Opening sequence: 03-speaker-and-sync",
+      "engine": "three.js r186",
+      "meshCount": "66",
+      "renderCount": "57",
+      "drawCalls": "33",
+      "time": "11.366",
+      "camera": "0.000,0.320,10.818",
+      "speaker": "guest",
+      "videoTime": "0.879",
+      "videoFrames": "267",
+      "videoPaused": "true",
+      "videoDecoders": "1",
+      "videoSurfaces": "1",
+      "previewSource": "video",
+      "cutCount": "8",
+      "captionLetters": "0",
+      "selected": "false",
+      "cropAspect": "hidden",
+      "matteCount": "0",
+      "verticalCount": "0",
+      "running": "false"
+    },
+    {
+      "label": "Opening sequence: 04-director-and-captions",
+      "engine": "three.js r186",
+      "meshCount": "66",
+      "renderCount": "81",
+      "drawCalls": "42",
+      "time": "15.133",
+      "camera": "0.000,0.320,10.818",
+      "speaker": "host",
+      "videoTime": "4.598",
+      "videoFrames": "361",
+      "videoPaused": "true",
+      "videoDecoders": "1",
+      "videoSurfaces": "1",
+      "previewSource": "video",
+      "cutCount": "8",
+      "captionLetters": "23",
+      "selected": "false",
+      "cropAspect": "hidden",
+      "matteCount": "0",
+      "verticalCount": "0",
+      "running": "false"
+    },
+    {
+      "label": "Opening sequence: 05-selected-range-lift",
+      "engine": "three.js r186",
+      "meshCount": "66",
+      "renderCount": "108",
+      "drawCalls": "54",
+      "time": "18.816",
+      "camera": "0.000,0.320,10.773",
+      "speaker": "host",
+      "videoTime": "8.284",
+      "videoFrames": "449",
+      "videoPaused": "true",
+      "videoDecoders": "1",
+      "videoSurfaces": "4",
+      "previewSource": "video",
+      "cutCount": "8",
+      "captionLetters": "23",
+      "selected": "true",
+      "cropAspect": "0.877",
+      "matteCount": "0",
+      "verticalCount": "0",
+      "running": "false"
+    },
+    {
+      "label": "Final creation CTA sits below the composition",
+      "canvasBottom": 425.640625,
+      "ctaTop": 467.640625
+    },
+    {
+      "label": "Opening sequence: 06-vertical-export",
+      "engine": "three.js r186",
+      "meshCount": "66",
+      "renderCount": "140",
+      "drawCalls": "52",
+      "time": "24.000",
+      "camera": "0.000,0.320,10.668",
+      "speaker": "host",
+      "videoTime": "3.439",
+      "videoFrames": "575",
+      "videoPaused": "true",
+      "videoDecoders": "1",
+      "videoSurfaces": "4",
+      "previewSource": "video",
+      "cutCount": "8",
+      "captionLetters": "23",
+      "selected": "true",
+      "cropAspect": "hidden",
+      "matteCount": "0",
+      "verticalCount": "3",
+      "running": "false"
+    },
+    {
+      "label": "Choreography holds at its final edit while real footage loops in all four output screens",
+      "held": {
+        "engine": "three.js r186",
+        "meshCount": "66",
+        "renderCount": "140",
+        "drawCalls": "52",
+        "time": "24.000",
+        "camera": "0.000,0.320,10.668",
+        "speaker": "host",
+        "videoTime": "3.439",
+        "videoFrames": "575",
+        "videoPaused": "true",
+        "videoDecoders": "1",
+        "videoSurfaces": "4",
+        "previewSource": "video",
+        "cutCount": "8",
+        "captionLetters": "23",
+        "selected": "true",
+        "cropAspect": "hidden",
+        "matteCount": "0",
+        "verticalCount": "3",
+        "running": "true"
+      },
+      "looping": {
+        "engine": "three.js r186",
+        "meshCount": "66",
+        "renderCount": "161",
+        "drawCalls": "52",
+        "time": "24.000",
+        "camera": "0.000,0.320,10.668",
+        "speaker": "host",
+        "videoTime": "4.336",
+        "videoFrames": "598",
+        "videoPaused": "false",
+        "videoDecoders": "1",
+        "videoSurfaces": "4",
+        "previewSource": "video",
+        "cutCount": "8",
+        "captionLetters": "23",
+        "selected": "true",
+        "cropAspect": "hidden",
+        "matteCount": "0",
+        "verticalCount": "3",
+        "running": "true"
+      }
+    },
+    {
+      "label": "Desktop 1440×900 has no horizontal overflow",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "overflow": []
+    },
+    {
+      "label": "Replay, pause and resume control the real animation clock"
+    },
+    {
+      "label": "Pinned scroll chapter 1",
+      "target": 2.8,
+      "top": 0
+    },
+    {
+      "label": "Pinned scroll chapter 2",
+      "target": 8.5,
+      "top": 0
+    },
+    {
+      "label": "Pinned scroll chapter 3",
+      "target": 10.8,
+      "top": 0
+    },
+    {
+      "label": "Pinned scroll chapter 4",
+      "target": 12.2,
+      "top": 0
+    },
+    {
+      "label": "Pinned scroll chapter 5",
+      "target": 15,
+      "top": 0
+    },
+    {
+      "label": "Pinned scroll chapter 6",
+      "target": 17,
+      "top": 0
+    },
+    {
+      "label": "Animated crop guide reaches 9:16 while the subject remains framed",
+      "ratio": 0.562
+    },
+    {
+      "label": "Pinned scroll chapter 7",
+      "target": 20,
+      "top": 0
+    },
+    {
+      "label": "Pinned scroll chapter 8",
+      "target": 24,
+      "top": -0.359375
+    },
+    {
+      "label": "Offscreen hero stops rendering while the visitor reads later sections"
+    },
+    {
+      "label": "Existing podcast demo plays; Escape releases its media and restores focus"
+    },
+    {
+      "label": "Sign In opens the existing form and releases homepage video sources and GPU resources"
+    },
+    {
+      "label": "Start Creating opens the existing registration flow"
+    },
+    {
+      "label": "desktop-1920 renders the animated product story without overflow",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "overflow": []
+    },
+    {
+      "label": "tablet-820 renders the animated product story without overflow",
+      "width": 820,
+      "scrollWidth": 820,
+      "overflow": []
+    },
+    {
+      "label": "tablet-820 mobile navigation scrolls without changing the HashRouter route"
+    },
+    {
+      "label": "mobile-390 renders the animated product story without overflow",
+      "width": 390,
+      "scrollWidth": 390,
+      "overflow": []
+    },
+    {
+      "label": "Mobile retains the pinned editing story and vertical transformation",
+      "width": 390,
+      "scrollWidth": 390,
+      "overflow": []
+    },
+    {
+      "label": "mobile-390 mobile navigation scrolls without changing the HashRouter route"
+    },
+    {
+      "label": "Reduced motion downloads no footage, loads no WebGL, runs no animations and retains all eight editing chapters",
+      "width": 390,
+      "scrollWidth": 390,
+      "overflow": []
+    },
+    {
+      "label": "A device without WebGL keeps the editor preview and working CTAs"
+    },
+    {
+      "label": "Existing authenticated dashboard renders with a local test user; homepage styles and WebGL are absent"
+    },
+    {
+      "label": "No uncaught page exceptions or browser console errors"
+    }
+  ],
+  "frames": [
+    {
+      "name": "01-camera-entry",
+      "sha256": "8a6f2f0b9e91e82a5b9885c8ca7de43c5cae5cfa8b392c15ce7a5b0118e83fdb",
+      "scene": {
+        "engine": "three.js r186",
+        "meshCount": "66",
+        "renderCount": "14",
+        "drawCalls": "13",
+        "time": "3.050",
+        "camera": "0.091,0.320,10.879",
+        "speaker": "host",
+        "videoTime": "2.142",
+        "videoFrames": "53",
+        "videoPaused": "true",
+        "videoDecoders": "1",
+        "videoSurfaces": "3",
+        "previewSource": "poster",
+        "cutCount": "0",
+        "captionLetters": "0",
+        "selected": "false",
+        "cropAspect": "hidden",
+        "matteCount": "1",
+        "verticalCount": "0",
+        "running": "false"
+      }
+    },
+    {
+      "name": "02-timeline-assembly",
+      "sha256": "f39a924a79abccae3f04857386b885f6a9811748e034f771f8cfc0e5c165efa8",
+      "scene": {
+        "engine": "three.js r186",
+        "meshCount": "66",
+        "renderCount": "39",
+        "drawCalls": "29",
+        "time": "8.283",
+        "camera": "0.000,0.320,10.818",
+        "speaker": "host",
+        "videoTime": "8.066",
+        "videoFrames": "197",
+        "videoPaused": "true",
+        "videoDecoders": "1",
+        "videoSurfaces": "4",
+        "previewSource": "video",
+        "cutCount": "8",
+        "captionLetters": "0",
+        "selected": "false",
+        "cropAspect": "hidden",
+        "matteCount": "0",
+        "verticalCount": "0",
+        "running": "false"
+      }
+    },
+    {
+      "name": "03-speaker-and-sync",
+      "sha256": "9dfad1c9a6e7b377921f0440e01e99227eaef7f515707370f53785fa88eb72cb",
+      "scene": {
+        "engine": "three.js r186",
+        "meshCount": "66",
+        "renderCount": "57",
+        "drawCalls": "33",
+        "time": "11.366",
+        "camera": "0.000,0.320,10.818",
+        "speaker": "guest",
+        "videoTime": "0.879",
+        "videoFrames": "267",
+        "videoPaused": "true",
+        "videoDecoders": "1",
+        "videoSurfaces": "1",
+        "previewSource": "video",
+        "cutCount": "8",
+        "captionLetters": "0",
+        "selected": "false",
+        "cropAspect": "hidden",
+        "matteCount": "0",
+        "verticalCount": "0",
+        "running": "false"
+      }
+    },
+    {
+      "name": "04-director-and-captions",
+      "sha256": "649d0e92b8fdb2932ab46adbc7b35083346821fdd9bca8b8f033269dc4bbd515",
+      "scene": {
+        "engine": "three.js r186",
+        "meshCount": "66",
+        "renderCount": "81",
+        "drawCalls": "42",
+        "time": "15.133",
+        "camera": "0.000,0.320,10.818",
+        "speaker": "host",
+        "videoTime": "4.598",
+        "videoFrames": "361",
+        "videoPaused": "true",
+        "videoDecoders": "1",
+        "videoSurfaces": "1",
+        "previewSource": "video",
+        "cutCount": "8",
+        "captionLetters": "23",
+        "selected": "false",
+        "cropAspect": "hidden",
+        "matteCount": "0",
+        "verticalCount": "0",
+        "running": "false"
+      }
+    },
+    {
+      "name": "05-selected-range-lift",
+      "sha256": "79c4f741e9867463dec0131b9be6f79a0e3b6880a84e72018917030616ad7dc2",
+      "scene": {
+        "engine": "three.js r186",
+        "meshCount": "66",
+        "renderCount": "108",
+        "drawCalls": "54",
+        "time": "18.816",
+        "camera": "0.000,0.320,10.773",
+        "speaker": "host",
+        "videoTime": "8.284",
+        "videoFrames": "449",
+        "videoPaused": "true",
+        "videoDecoders": "1",
+        "videoSurfaces": "4",
+        "previewSource": "video",
+        "cutCount": "8",
+        "captionLetters": "23",
+        "selected": "true",
+        "cropAspect": "0.877",
+        "matteCount": "0",
+        "verticalCount": "0",
+        "running": "false"
+      }
+    },
+    {
+      "name": "06-vertical-export",
+      "sha256": "0a462f89008c814e3ee91ece2f9b25947ee9aa1cb06f8371d35a2940fc96b1ea",
+      "scene": {
+        "engine": "three.js r186",
+        "meshCount": "66",
+        "renderCount": "140",
+        "drawCalls": "52",
+        "time": "24.000",
+        "camera": "0.000,0.320,10.668",
+        "speaker": "host",
+        "videoTime": "3.439",
+        "videoFrames": "575",
+        "videoPaused": "true",
+        "videoDecoders": "1",
+        "videoSurfaces": "4",
+        "previewSource": "video",
+        "cutCount": "8",
+        "captionLetters": "23",
+        "selected": "true",
+        "cropAspect": "hidden",
+        "matteCount": "0",
+        "verticalCount": "3",
+        "running": "false"
+      }
+    },
+    {
+      "name": "scroll-1",
+      "sha256": "0a5cdd56c7ea3f233ac0293f9ef536832f4fe9723442650941efac97273fcfbd"
+    },
+    {
+      "name": "scroll-2",
+      "sha256": "4ce07970e831ed648953f707b6e0fa8022bb6e3504d0dc3643e4ab6ad907fd50"
+    },
+    {
+      "name": "scroll-3",
+      "sha256": "d040b82ca8613b444e50cd7521c0a0f4e5d248b92f698670493291e21c138dad"
+    },
+    {
+      "name": "scroll-4",
+      "sha256": "e8c0f4bd4471e797b0668aa9b7ea152490adf4080e608dc15a86f630c41337fc"
+    },
+    {
+      "name": "scroll-5",
+      "sha256": "8e8d9227086c4c6e883dff67ce1eb1e9cd221ffcb9b6e2a371badf8930a1b8b2"
+    },
+    {
+      "name": "scroll-6",
+      "sha256": "8be45a2e5508fe3375468ce5c851a6b61971116a21a31a306e9cca00d8fe29f2"
+    },
+    {
+      "name": "scroll-7",
+      "sha256": "c620f8f972afa7aa2bd84d1f495035032aa4abc8c8e9ced51931cf8689053146"
+    },
+    {
+      "name": "scroll-8",
+      "sha256": "e86d709b7f9659e9c934e212038722bd9f3ddf1a8937851969bfeed56d85ba7d"
+    },
+    {
+      "name": "podcast-demo",
+      "sha256": "36306cc4785c0943f5e2f6fbe2207167314788137a378713de0ade4ebd363e46"
+    },
+    {
+      "name": "sign-in",
+      "sha256": "0f9c20fb1f1395f7be715d30d20bb256454a66df5973216ae17c2e5bef9fdea2"
+    },
+    {
+      "name": "registration",
+      "sha256": "2d6c749eef3966f5f8f16fb557f31c0b23a303fe36cce820a72be31950e1ce5f"
+    },
+    {
+      "name": "desktop-1920",
+      "sha256": "9a18f408c2bce4b0069b0f691773d01f884ddfafb0cf1674b3a9b10e86a755f5"
+    },
+    {
+      "name": "tablet-820",
+      "sha256": "a6b62594f6e9abb21a270689ef78840e5236296df826e04703054f20a3353fe1"
+    },
+    {
+      "name": "mobile-390",
+      "sha256": "2ea402244da148a5fb0bebdf4f82823e89f96a5220f797b011c92aac6cf91f8f"
+    },
+    {
+      "name": "mobile-editor",
+      "sha256": "488905c8c2459e8b64d1d7359f65fc34b06314938b355e3460b417b76cf0b347"
+    },
+    {
+      "name": "mobile-scroll-reframe",
+      "sha256": "987a1ade3366a8039ad4010a3352474475b8ad191b6219c05ca6f9b39543a63c"
+    },
+    {
+      "name": "reduced-motion",
+      "sha256": "a4b24033a2cbf808bd267ca7b51b69fafaf5f4de26e24a0cdb161862e01b81ea"
+    },
+    {
+      "name": "no-webgl-fallback",
+      "sha256": "4b840036406ee36f869764c2498e19276d5ada4f9d01352b73f097bc9712135e"
+    },
+    {
+      "name": "dashboard-local-fixture",
+      "sha256": "265d601f32e68016aac8e382be81dab0017c6154c4ec608aff0ad3e7c6d8d2dd"
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "checks": [
+    "Original generated backdrop loads and plays with the available editing scene",
+    "Hero Pause controls the decorative video",
+    "Hero Resume restarts the same source",
+    "Offscreen backdrop pauses",
+    "Returning to the hero resumes playback",
+    "Reduced motion uses a poster and releases the old video source",
+    "Motion can be restored after a live preference change",
+    "Mobile reduced motion stays within the viewport and uses its poster",
+    "Failed video retains the usable poster"
+  ],
+  "missing": [],
+  "errors": []
+}

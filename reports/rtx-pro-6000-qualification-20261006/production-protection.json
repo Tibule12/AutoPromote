@@ -1,0 +1,112 @@
+{
+  "checkedAt": "2026-10-06T16:06:14.551851+00:00",
+  "resourceChecks": [
+    {
+      "resource": "autopromote-cc6d3-jobs/cam-combiner-render-fast-job",
+      "beforeSha256": "4a8672645e2ce3be52de7a291f8f29d19b93dd2a76e05bdcb9edbff0d9514bda",
+      "afterSha256": "4a8672645e2ce3be52de7a291f8f29d19b93dd2a76e05bdcb9edbff0d9514bda",
+      "unchanged": true
+    },
+    {
+      "resource": "autopromote-cc6d3-jobs/cam-combiner-render-job",
+      "beforeSha256": "764d45c8fd7ec4f7ef7328ddf55c3e4b3d1ad554923690615e7d64207d98eb51",
+      "afterSha256": "764d45c8fd7ec4f7ef7328ddf55c3e4b3d1ad554923690615e7d64207d98eb51",
+      "unchanged": true
+    },
+    {
+      "resource": "autopromote-cc6d3-services/cam-combiner-worker",
+      "beforeSha256": "915d34502350f6a8d05222ee54123ba37aafea7d4171ff3af3e5041f6b05d73b",
+      "afterSha256": "915d34502350f6a8d05222ee54123ba37aafea7d4171ff3af3e5041f6b05d73b",
+      "unchanged": true
+    },
+    {
+      "resource": "autopromote-cc6d3-services/media-worker-v1",
+      "beforeSha256": "a6c00158738ece1174a1bff7b3518b4ca190ba3cb25d8b879b26c1dfa8b9c93c",
+      "afterSha256": "a6c00158738ece1174a1bff7b3518b4ca190ba3cb25d8b879b26c1dfa8b9c93c",
+      "unchanged": true
+    },
+    {
+      "resource": "autopromote-cc6d3-services/thulani-api",
+      "beforeSha256": "8b22079bcc03640a0c21a887bfaf9bb692ae3af36f9dd3a0fc882ba0d8e5ce15",
+      "afterSha256": "8b22079bcc03640a0c21a887bfaf9bb692ae3af36f9dd3a0fc882ba0d8e5ce15",
+      "unchanged": true
+    },
+    {
+      "resource": "autopromote-cc6d3-services/thulani-frontend",
+      "beforeSha256": "2a5f158eb91e280a319c63980143cf6e0f68161b2fe39bb17abedbcf7e3f4099",
+      "afterSha256": "2a5f158eb91e280a319c63980143cf6e0f68161b2fe39bb17abedbcf7e3f4099",
+      "unchanged": true
+    },
+    {
+      "resource": "autopromote-cc6d3-services/thulani-worker",
+      "beforeSha256": "903333b9bb370f8efc3ce53a6b92099052f335052a6545a7ec6ae0ba52cd78d2",
+      "afterSha256": "903333b9bb370f8efc3ce53a6b92099052f335052a6545a7ec6ae0ba52cd78d2",
+      "unchanged": true
+    },
+    {
+      "resource": "autopromote-staging-2026-jobs/studio-analysis-once",
+      "beforeSha256": "30bbcb81cf92352471511206d42e4487947cb18471be2fa3f33f23bd1bd6ceed",
+      "afterSha256": "30bbcb81cf92352471511206d42e4487947cb18471be2fa3f33f23bd1bd6ceed",
+      "unchanged": true
+    },
+    {
+      "resource": "autopromote-staging-2026-services/studio-face-analyzer",
+      "beforeSha256": "4cd518596da3d06fdd833fdb1c752223ab3e09744929447d79e4f816bce95f47",
+      "afterSha256": "4cd518596da3d06fdd833fdb1c752223ab3e09744929447d79e4f816bce95f47",
+      "unchanged": true
+    }
+  ],
+  "fileChecks": [
+    {
+      "path": "studio_3d_renderer/Dockerfile",
+      "beforeSha256": "8a7cf94d8af2f9d7e0d9bf3297a8b3abd15e0d0dc7f69a50493a0ffed8672916",
+      "afterSha256": "8a7cf94d8af2f9d7e0d9bf3297a8b3abd15e0d0dc7f69a50493a0ffed8672916",
+      "unchanged": true
+    },
+    {
+      "path": "studio_3d_renderer/render.py",
+      "beforeSha256": "2d0b9ee8aac87c71194475ab6bdba638a0df04cd01e280075f26a5e17a0ada49",
+      "afterSha256": "2d0b9ee8aac87c71194475ab6bdba638a0df04cd01e280075f26a5e17a0ada49",
+      "unchanged": true
+    },
+    {
+      "path": "studio_3d_renderer/spec.py",
+      "beforeSha256": "0ce80e8d1f61220ebd01b8610fc143daf66973cc0d7c6c63d403f67738c22b11",
+      "afterSha256": "0ce80e8d1f61220ebd01b8610fc143daf66973cc0d7c6c63d403f67738c22b11",
+      "unchanged": true
+    },
+    {
+      "path": "studio_3d_renderer/blender_scene.py",
+      "beforeSha256": "07b854f81fccc0ed184ab3cf4719ee84e69d89d757af4b6fa9962cdabec6a8aa",
+      "afterSha256": "07b854f81fccc0ed184ab3cf4719ee84e69d89d757af4b6fa9962cdabec6a8aa",
+      "unchanged": true
+    },
+    {
+      "path": "src/services/studio3DService.js",
+      "beforeSha256": "994c34485ad569a535b7e4dcf4dcc38f9e3296817a141704ffe93713cbdaba57",
+      "afterSha256": "994c34485ad569a535b7e4dcf4dcc38f9e3296817a141704ffe93713cbdaba57",
+      "unchanged": true
+    },
+    {
+      "path": ".github/workflows/deploy-media-worker.yml",
+      "beforeSha256": "b89cdeb8b205c0c5915a6d1ba0b8592517ccbfcb5ae39c086a8c987996d2db4c",
+      "afterSha256": "b89cdeb8b205c0c5915a6d1ba0b8592517ccbfcb5ae39c086a8c987996d2db4c",
+      "unchanged": true
+    },
+    {
+      "path": "Dockerfile.studio-analysis-worker",
+      "beforeSha256": "384c75a46e5e2717a40b52524c977f26b158524812886c267ef40203c82988cd",
+      "afterSha256": "384c75a46e5e2717a40b52524c977f26b158524812886c267ef40203c82988cd",
+      "unchanged": true
+    }
+  ],
+  "allProtectedResourcesUnchanged": true,
+  "allProtectedFilesUnchanged": true,
+  "scheduler": {
+    "exitCode": 0,
+    "jobs": []
+  },
+  "newResources": [
+    "viral-studio-rtx-qualification"
+  ]
+}

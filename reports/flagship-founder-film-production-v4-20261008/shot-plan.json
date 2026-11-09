@@ -1,0 +1,83 @@
+{
+  "title": "One Edit",
+  "status": "PREPARED_PENDING_NVIDIA_AND_CREATIVE_REVIEW",
+  "heroTargetSeconds": 51,
+  "cutdownTargetSeconds": 26.5,
+  "teaserTargetSeconds": 10,
+  "sourceStoryboard": "../flagship-founder-film-production-v3-20261008/storyboard-final.json",
+  "sourceScript": "../flagship-founder-film-production-v3-20261008/script.md",
+  "sourceBrief": "../flagship-founder-film-production-v3-20261008/source-brief.txt",
+  "beats": [
+    {
+      "id": "cold-open", "at": 0, "duration": 3,
+      "picture": "Three seconds of finished moving yacht world; do not reveal its paper origin.",
+      "source": "Retained real-voyage-v6 moving generated yacht, pending exact trim review",
+      "reason": "Promise a visual event worth waiting to explain.",
+      "gate": "Photographic scale and readable movement within first second"
+    },
+    {
+      "id": "origin", "at": 3, "duration": 5.25,
+      "picture": "One moving conversation and two audible/visible sound tracks drift out of sync.",
+      "source": "Retained v3 origin scene, pending whole-film re-review",
+      "reason": "Make the creator problem personal and legible.",
+      "gate": "One use of the interview picture; no stretched or duplicate people"
+    },
+    {
+      "id": "cascade", "at": 8.25, "duration": 5.5,
+      "picture": "Audio track and edit geometry separate into sync, sound and render consequences; a real retained render-failure phrase stops them.",
+      "source": "New editable NVIDIA 3D/motion take from documented failure evidence, no repeated interview",
+      "reason": "Every repair opens another problem.",
+      "gate": "Readable causal motion, no random code rain or fabricated error"
+    },
+    {
+      "id": "failure", "at": 13.75, "duration": 4.5,
+      "picture": "Retained real failure archive reconstructed in depth; hold on the consequence.",
+      "source": "Retained v3 failure scene or replacement if the archive remains unreadable",
+      "reason": "Give the setback emotional weight.",
+      "gate": "Viewer understands that a render failed without needing to read a paragraph"
+    },
+    {
+      "id": "capacity-turn", "at": 18.25, "duration": 9,
+      "picture": "One continuous visual event: quota 0 blocks the route, documented 3000 milliGPU capacity opens it, and motion returns.",
+      "source": "New editable NVIDIA 3D take grounded by retained quota evidence",
+      "reason": "The breakthrough earns the following creative expansion.",
+      "gate": "0 to 3000 milliGPU reads as quota/capacity, never 3000 machines; no two static title cards"
+    },
+    {
+      "id": "director", "at": 27.25, "duration": 6.75,
+      "picture": "Actual AutoPromote project decisions and selected generated sources, captured after v4 assets exist; concise, cinematic framing.",
+      "source": "New actual Studio browser capture plus editable NVIDIA comp only if needed",
+      "reason": "Show the system becoming a creative decision maker rather than another manual tool.",
+      "gate": "No repeated interview; no claim that UI alone proves arbitrary autonomous direction"
+    },
+    {
+      "id": "transformation", "at": 34, "duration": 7,
+      "picture": "Paper crease becomes connected mast/sail; hull visibly becomes timber; workbench becomes ocean; continue into yacht footage with checked seam.",
+      "source": "Pending v4 VACE inference and retained real-voyage-v6 continuation",
+      "reason": "Pay off the opening image with one coherent impossible change.",
+      "gate": "No premature mast, abrupt world cut, toy water, hidden hull or visible continuation jump"
+    },
+    {
+      "id": "created-by", "at": 41, "duration": 5,
+      "picture": "The film folds into its actual AutoPromote project/production evidence, then the sentence: The film you just watched was created by AutoPromote.",
+      "source": "New factual output/document capture, editorial assembly through Factory/Director/renderer",
+      "reason": "Reveal the maker and close the self-referential loop.",
+      "gate": "True attribution; assistant direction disclosed in production notes; legible sentence"
+    },
+    {
+      "id": "ident", "at": 46, "duration": 5,
+      "picture": "Macro physical layers of exact logo geometry catch grazing light, converge under moving camera, wordmark resolves with sound impact, holds cleanly.",
+      "source": "New editable NVIDIA Cycles ident take; compare cinematic, compute and minimal directions",
+      "reason": "The identity feels earned after the reveal.",
+      "gate": "Layer emergence and depth are visible before lockup; not a flat logo fade or glow"
+    }
+  ],
+  "reviewOrder": [
+    "Generate one bounded v4 transformation take and inspect decoded 0.25-second frames",
+    "If approved for rough use, check end-to-continuation seam at native pixels and in motion",
+    "Preview new cascade/capacity/director/reveal/ident takes; reject weak shots before full renders",
+    "Compile accepted assets using existing Factory/Director/document contracts",
+    "Render and watch complete hero with sound; revise creative decisions before cutdown and teaser",
+    "Render cutdown/teaser through the same shared renderer; browser/evidence review; no public deployment"
+  ]
+}

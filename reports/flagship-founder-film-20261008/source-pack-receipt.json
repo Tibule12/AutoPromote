@@ -1,0 +1,9 @@
+{
+  "status": "PASS_ARCHIVE_INTEGRITY",
+  "creativeVerdict": "FOUNDER_REJECTED",
+  "artifact": "autopromote-one-edit-private-source-pack.zip",
+  "bytes": 171690727,
+  "sha256": "cafdf52de9d26a766fffcdfcf1bd9dcfff1c169d192734f4fc941574fe0b9a0b",
+  "entries": 362,
+  "verification": "Complete ZIP CRC and every manifest SHA256 verified."
+}

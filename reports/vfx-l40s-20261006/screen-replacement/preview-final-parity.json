@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "compared_fields": [
+    "source_sha256",
+    "matte_sha256",
+    "plan_sha256",
+    "pixel_sha256",
+    "frames"
+  ],
+  "pixel_sha256": "fcf61f25c50c9b6c4ca13e7cc8b09912cc15c5313fcff50df61ed48f51d5e402",
+  "encoded_sha_equal": true,
+  "frames": 144,
+  "encoder": "h264_nvenc"
+}

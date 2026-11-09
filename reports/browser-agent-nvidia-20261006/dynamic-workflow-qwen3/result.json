@@ -1,0 +1,11 @@
+{
+  "status": "blocked",
+  "reason": {
+    "code": 1,
+    "message": "Command failed: ssh -T -o RequestTTY=no autopromote-l40s-staging for browser_planner_attempt in $(seq 1 55); do if test -f /tmp/autopromote-studio-l40s-20261006/browser-spool/d42520f0-c364-4242-a46b-cfde960f1180.response.json; then cat /tmp/autopromote-studio-l40s-20261006/browser-spool/d42520f0-c364-4242-a46b-cfde960f1180.response.json || exit 1; exit 0; fi; sleep 1; done; exit 1\n"
+  },
+  "steps": 4,
+  "evidence": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/browser-agent-nvidia-20261006/dynamic-workflow-qwen3",
+  "submissions": 0,
+  "scope": "Local dynamic regression fixture, actual offline L40S vision inference; no production requests"
+}

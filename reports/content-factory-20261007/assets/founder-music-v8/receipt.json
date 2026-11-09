@@ -1,0 +1,38 @@
+{
+  "status": "GENERATED_PENDING_LISTENING_REVIEW",
+  "model": "ACE-Step/ACE-Step-v1-3.5B",
+  "modelRevision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+  "implementationRevision": "1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+  "scriptSha256": "eef9cb86752198d8565a8a8c088ea15036947d650e0e1991182de4431b06ff26",
+  "license": "Apache-2.0",
+  "sourceBrief": "A real cinematic voyage begins as a folded paper boat. AutoPromote generates the raw material from an idea and uses its existing Director and render pipeline to make the film. The reveal is a full-size working boat at sea, not a paper boat surviving at sea.",
+  "prompt": "classical, orchestral, cinematic film score, strings, felt piano, orchestral percussion, brass, deep bass, 92 BPM, elegant, emotional, adventurous, wonder, mysterious opening, accelerating orchestral rise, warm harmonic reveal, cinematic impact, expansive resolved ending, high production quality, instrumental",
+  "seed": 20261007149,
+  "tool": "AutoPromote NVIDIA instrumental stem generation",
+  "gpu": "NVIDIA L40S",
+  "seconds": 35.138574666998466,
+  "peakCudaAllocatedBytes": 8291416064,
+  "settings": {
+    "duration": 24,
+    "inferStep": 60,
+    "guidanceScale": 15,
+    "scheduler": "euler",
+    "cfg": "apg",
+    "lyrics": "[instrumental]",
+    "useErgLyric": false,
+    "dtype": "bfloat16",
+    "sampleRate": 48000,
+    "channels": 2,
+    "normalization": "-20 LUFS, -2 dBTP"
+  },
+  "artifact": {
+    "path": "/work/assets/founder-music-v8/audio.wav",
+    "sha256": "0d06c67776806f51482698216b2ae3cd761761395072196464ffab0351ee4792",
+    "duration": 23.963
+  },
+  "nativeArtifact": {
+    "path": "/work/assets/founder-music-v8/native.wav",
+    "sha256": "a733cc47bbb3bbae1bdfc6e3fb2c4e5b058563648f2619654c7dfb7fc7fa1cb6"
+  },
+  "limitation": "Instrumental intent is prompted, not a guarantee. Listening review and final sound direction are required."
+}

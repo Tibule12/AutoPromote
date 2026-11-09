@@ -1,0 +1,116 @@
+{
+  "status": "PASS",
+  "checkedAt": "2026-10-06T17:08:32.645375+00:00",
+  "passed": 27,
+  "total": 27,
+  "checks": [
+    {
+      "name": "VM qualification completed",
+      "pass": true
+    },
+    {
+      "name": "Target instance and provider preserved",
+      "pass": true
+    },
+    {
+      "name": "One visible CUDA L40S device",
+      "pass": true
+    },
+    {
+      "name": "CUDA context and memory accessible",
+      "pass": true
+    },
+    {
+      "name": "Docker GPU workload exited successfully",
+      "pass": true
+    },
+    {
+      "name": "All qualification commands exited successfully",
+      "pass": true
+    },
+    {
+      "name": "Exact original fixture hash",
+      "pass": true
+    },
+    {
+      "name": "Original helper source reused without modification",
+      "pass": true
+    },
+    {
+      "name": "Returned output bytes and hash match receipt",
+      "pass": true
+    },
+    {
+      "name": "Independently probed H264 640x360 output",
+      "pass": true
+    },
+    {
+      "name": "Independently probed 48 frames at 24 fps",
+      "pass": true
+    },
+    {
+      "name": "Independently probed two-second output",
+      "pass": true
+    },
+    {
+      "name": "Explicit CUDA input decode and NVIDIA output encode",
+      "pass": true
+    },
+    {
+      "name": "Actual transcode read 48 frames with zero decode errors",
+      "pass": true
+    },
+    {
+      "name": "Produced artifact hardware decoded 48 frames with zero errors",
+      "pass": true
+    },
+    {
+      "name": "Container was removed after test",
+      "pass": true
+    },
+    {
+      "name": "No compute process remained after qualification",
+      "pass": true
+    },
+    {
+      "name": "Protected file unchanged: studio_3d_renderer/qualify_gpu.py",
+      "pass": true
+    },
+    {
+      "name": "Protected file unchanged: studio_3d_renderer/Dockerfile",
+      "pass": true
+    },
+    {
+      "name": "Protected file unchanged: studio_3d_renderer/render.py",
+      "pass": true
+    },
+    {
+      "name": "Protected file unchanged: src/services/studio3DService.js",
+      "pass": true
+    },
+    {
+      "name": "Protected file unchanged: Dockerfile.studio-analysis-worker",
+      "pass": true
+    },
+    {
+      "name": "Protected file unchanged: .github/workflows/deploy-media-worker.yml",
+      "pass": true
+    },
+    {
+      "name": "Protected file unchanged: frontend/src/WelcomePage.js",
+      "pass": true
+    },
+    {
+      "name": "Existing branch and HEAD retained",
+      "pass": true
+    },
+    {
+      "name": "Exactly one instance in the authenticated organization",
+      "pass": true
+    },
+    {
+      "name": "Only one organization visible in the account",
+      "pass": true
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "startedAt": "2026-10-09T07:06:05.512414+00:00",
+  "deadlineEpoch": 1791536400,
+  "stage": "existing Factory/Director/NVENC scene assembly",
+  "stages": [
+    {
+      "script": "existing render-transformation.js v30",
+      "exitCode": 1
+    }
+  ],
+  "preflight": {
+    "gpu": "NVIDIA L40S, 0 %, 0 %, 0 %, 1 MiB",
+    "cudaProcesses": "",
+    "containerNames": [
+      "autopromote-podcast-media-20261009"
+    ],
+    "idleServiceGracefulShutdownRequested": true
+  },
+  "restore": "Existing GPU owner retained; no duplicate API started",
+  "completedAt": "2026-10-09T07:07:44.809377+00:00"
+}

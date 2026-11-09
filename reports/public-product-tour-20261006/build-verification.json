@@ -1,0 +1,71 @@
+{
+  "status": "PASS",
+  "command": "CI=true npm run build",
+  "verifiedAt": "2026-10-06T03:58:39.089184+00:00",
+  "compiledSourceMapMatches": [
+    "frontend/src/WelcomePage.js",
+    "frontend/src/components/landing/DirectorShowcase.js",
+    "frontend/src/components/landing/EditorHeroVisual.js",
+    "frontend/src/components/landing/HeroSection.js",
+    "frontend/src/components/landing/LandingCreators.js",
+    "frontend/src/components/landing/LandingDemo.js",
+    "frontend/src/components/landing/LandingEditingStory.js",
+    "frontend/src/components/landing/LandingFeatures.js",
+    "frontend/src/components/landing/LandingFooter.js",
+    "frontend/src/components/landing/LandingIcon.js",
+    "frontend/src/components/landing/LandingNavbar.js",
+    "frontend/src/components/landing/LandingWorkflow.js",
+    "frontend/src/components/landing/MotionAssetLayer.js",
+    "frontend/src/components/landing/MotionEditingScene.js",
+    "frontend/src/components/landing/MotionGraphicsLayer.js",
+    "frontend/src/components/landing/ProductTourPlayer.js",
+    "frontend/src/components/landing/ProductVisuals.js",
+    "frontend/src/components/landing/createEditingScene.js",
+    "frontend/src/components/landing/editingSequence.js",
+    "frontend/src/components/landing/motionAssetManifest.js",
+    "frontend/src/components/landing/motionMaterials.js",
+    "frontend/src/components/landing/productTour.js",
+    "frontend/src/components/landing/sceneTextures.js",
+    "frontend/src/components/landing/useKineticTitle.js"
+  ],
+  "finalStaticAssets": [
+    {
+      "file": "frontend/public/landing/product-tour-analytics.webp",
+      "sha256": "af178093478ed9c63dadd9c18626b278ba2361ef061e48ba8b20ae9a1ea5b69f",
+      "bytes": 60016
+    },
+    {
+      "file": "frontend/public/landing/product-tour-studio.webp",
+      "sha256": "18e185310bdfea5ac8a4553fc7212a29589ed8bb820edd17e52656db6ed1e626",
+      "bytes": 102506
+    },
+    {
+      "file": "frontend/public/landing/product-tour-schedule.webp",
+      "sha256": "9a295dd8f14c0c93ae5d5f466a1effbf64b4336dddfa948d1da945d695f04071",
+      "bytes": 62694
+    },
+    {
+      "file": "frontend/public/landing/product-tour.mp4",
+      "sha256": "41ad0149b4e930dd2c28c276b36a91d6e7cccab7b5a422e610b03ac7869b2be7",
+      "bytes": 6561633
+    },
+    {
+      "file": "frontend/public/landing/product-tour.vtt",
+      "sha256": "ec78d4ecb7311f86da0929ff0a9e7a810805fc9f940a980fa437743cefebf3d5",
+      "bytes": 404
+    },
+    {
+      "file": "frontend/public/landing/product-tour-uploads.webp",
+      "sha256": "e87f912eb543d504e49c81b98b8a5d8dfd8ffb1b9dbadde1fcb840249a0b72a2",
+      "bytes": 46992
+    },
+    {
+      "file": "frontend/public/landing/product-tour.webp",
+      "sha256": "e87f912eb543d504e49c81b98b8a5d8dfd8ffb1b9dbadde1fcb840249a0b72a2",
+      "bytes": 46992
+    }
+  ],
+  "note": "The final edited tour and matching posters were copied to build/landing after the JS/CSS build; hashes match public/landing exactly.",
+  "dependenciesAdded": [],
+  "typecheck": "Not applicable: existing JavaScript/CRA project; no standalone TypeScript gate."
+}

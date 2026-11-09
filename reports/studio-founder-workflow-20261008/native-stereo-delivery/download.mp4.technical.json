@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "sha256": "19ca1ce213096e76ac407723dee3d87b2ed406dcd7d31cd2068a437dc4b0ad9f",
+  "bytes": 2134451,
+  "seconds": 12,
+  "video": {
+    "width": 1280,
+    "height": 720,
+    "codec": "h264",
+    "fps": "30/1",
+    "duration": "12.000000",
+    "pixelFormat": "yuv420p"
+  },
+  "audio": {
+    "codec": "aac",
+    "channels": 2,
+    "sampleRate": "48000",
+    "duration": "12.000000"
+  },
+  "independentFullDecode": true,
+  "contactSheet": "reports/studio-founder-workflow-20261008/native-stereo-delivery/download.mp4.frames.jpg",
+  "scope": "Technical only. Pixel and listening review are separate required evidence."
+}

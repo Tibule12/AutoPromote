@@ -1,0 +1,18 @@
+{
+  "assetId": "yacht-crosses-swell-native720",
+  "required": [
+    "One physically stable full-size yacht throughout: hull, deck, mast, booms and sail topology persist.",
+    "Every source crew member stays aboard; no disappearance, duplication, merging with rails or unsupported movement.",
+    "The immersed hull displaces water, coherent bow spray falls back, and the wake follows the stern.",
+    "Ocean foreground and distant swells move with coherent perspective, sunlight and reflections.",
+    "Boat roll, sail response, crew balance and the moving water are visually consistent.",
+    "Parallel camera keeps hull and crew readable, with no abrupt world replacement or hidden transition.",
+    "Native details and movement appear photographic at 1x; no toy/CGI appearance."
+  ],
+  "filmDependencies": [
+    "No claim that wide-shot crew match the separate sailor until comparison.",
+    "No approval of the rejected paper-to-yacht transformation.",
+    "Sound timing and listening remain separate.",
+    "The final welcome film must have the coherent transformation and earned human payoff."
+  ]
+}

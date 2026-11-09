@@ -1,0 +1,56 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "viewport": "desktop",
+      "status": "PASS",
+      "animations": [
+        "finished",
+        "finished",
+        "finished",
+        "finished"
+      ],
+      "opacity": [
+        1,
+        1,
+        1
+      ],
+      "viewportWidth": 1440,
+      "documentWidth": 1440
+    },
+    {
+      "viewport": "tablet",
+      "status": "PASS",
+      "animations": [
+        "finished",
+        "finished",
+        "finished",
+        "finished"
+      ],
+      "opacity": [
+        1,
+        1,
+        1
+      ],
+      "viewportWidth": 820,
+      "documentWidth": 820
+    },
+    {
+      "viewport": "mobile",
+      "status": "PASS",
+      "animations": [
+        "finished",
+        "finished",
+        "finished",
+        "finished"
+      ],
+      "opacity": [
+        1,
+        1,
+        1
+      ],
+      "viewportWidth": 390,
+      "documentWidth": 390
+    }
+  ]
+}

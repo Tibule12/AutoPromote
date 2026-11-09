@@ -1,0 +1,31 @@
+{
+  "at": "2026-10-08T11:58:17.573Z",
+  "events": [],
+  "technical": {
+    "passed": true,
+    "sha256": "fa90d4e44ab9cffce3c5dd24cc42c2abf5ad2c8b4935435e3875d5edd7496ba0",
+    "bytes": 2193812,
+    "seconds": 3,
+    "video": {
+      "width": 1280,
+      "height": 720,
+      "codec": "h264",
+      "fps": "24/1",
+      "duration": "3.000000",
+      "pixelFormat": "yuv420p"
+    },
+    "audio": {
+      "codec": "aac",
+      "channels": 2,
+      "sampleRate": "44100",
+      "duration": "3.000000"
+    },
+    "independentFullDecode": true,
+    "contactSheet": "reports/studio-canonical-completion-20261008/gpu/subject/preview.mp4.frames.jpg",
+    "scope": "Technical only. Pixel and listening review are separate required evidence."
+  },
+  "realAuth": true,
+  "noMocks": true,
+  "newGpuJobsStarted": 0,
+  "reviewed": false
+}

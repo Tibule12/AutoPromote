@@ -1,0 +1,31 @@
+{
+  "cutoffEpoch": 1791489600,
+  "checkedAtEpoch": 1791489600.0000968,
+  "startedVmHere": true,
+  "ownContainers": [
+    "autopromote-founder-v4-vace",
+    "autopromote-founder-v4-ident-preview",
+    "autopromote-founder-v4-cascade-preview",
+    "autopromote-founder-v4-capacity-turn-preview",
+    "autopromote-founder-v6-ident-preview",
+    "autopromote-founder-v6-ident-full",
+    "autopromote-founder-v5-crew-image",
+    "autopromote-founder-v5-crew-action",
+    "autopromote-founder-v5-crew-action-v2",
+    "autopromote-founder-v5-paper-origin",
+    "autopromote-founder-v5-i2v-transform",
+    "autopromote-founder-v5-i2v-sailor",
+    "autopromote-founder-v5-sailor-source",
+    "autopromote-founder-v5-flf-transform",
+    "autopromote-founder-flf-preparation"
+  ],
+  "stopErrors": [
+    "autopromote-founder-v4-ident-preview",
+    "autopromote-founder-v4-cascade-preview",
+    "autopromote-founder-v4-capacity-turn-preview"
+  ],
+  "stoppedOwnContainers": [],
+  "remoteProbeExitCode": 255,
+  "remoteBusy": null,
+  "status": "OWN_JOBS_STOPPED_VM_PRESERVED_FOREIGN_OR_UNCERTAIN"
+}

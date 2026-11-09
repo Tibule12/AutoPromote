@@ -1,0 +1,18 @@
+{
+  "startedAt": "2026-10-07T21:10:09+00:00",
+  "checkpointSavedAt": "2026-10-07T22:04:40.163690+00:00",
+  "authorizedStopAt": "2026-10-07T22:10:09+00:00",
+  "elapsedMinutes": 54.52,
+  "withinHour": true,
+  "gpuJobsThisHour": 0,
+  "distinctRealCpuExports": 2,
+  "browserLeftOn": "Studio QA hour captions; loaded original preview, first caption text focused",
+  "noNewCreativeOrLogoWork": true,
+  "readinessVerdict": "not ready",
+  "cumulativeCounts": {
+    "PASS": 19,
+    "FAIL": 2,
+    "BLOCKED": 8
+  },
+  "remainingWork": "See cumulative README top 10 blockers; no GPU restart authorized by checkpoint."
+}

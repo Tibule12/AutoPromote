@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "sha256": "ce8934854fc7564143006fa8b7f9ad76662d54c9fbad4a37711c879d1513b7d2",
+  "bytes": 4847941,
+  "seconds": 6,
+  "video": {
+    "width": 1280,
+    "height": 720,
+    "codec": "h264",
+    "fps": "60/1",
+    "duration": "6.000000",
+    "pixelFormat": "yuv420p",
+    "encoder": "Lavc60.31.102 h264_nvenc"
+  },
+  "audio": {
+    "codec": "aac",
+    "channels": 2,
+    "sampleRate": "96000",
+    "duration": "6.000000"
+  },
+  "independentFullDecode": true,
+  "contactSheet": "reports/studio-canonical-completion-20261008/subject-speed-gpu-r2/vfx/download.mp4.frames.jpg",
+  "scope": "Technical only. Pixel and listening review are separate required evidence."
+}

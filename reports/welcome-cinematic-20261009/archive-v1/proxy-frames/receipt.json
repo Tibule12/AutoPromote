@@ -1,0 +1,12 @@
+{
+  "device": {
+    "backend": "CPU",
+    "gpu_verified": false
+  },
+  "width": 480,
+  "samples": 1,
+  "step": 2,
+  "duration": 38,
+  "frameCount": 456,
+  "seconds": 495.2804237680002
+}

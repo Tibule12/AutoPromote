@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-08T06:51:21.310319+00:00",
+  "nvidiaInstance": "STOPPED",
+  "gpuWorkers": "stopped",
+  "cpuWorker": "stopped",
+  "headlessBrowser": "closed; private persistent signed-in profile retained",
+  "frontend5000": "closed",
+  "api5100": "closed",
+  "ports8008_8009_9229": "closed",
+  "originalUserBrowserIDEAndOtherProjects": "untouched",
+  "gpuStopWatchdog": "cancelled after confirmed shutdown",
+  "noCommitPushDeployment": true
+}

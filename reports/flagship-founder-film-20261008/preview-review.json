@@ -1,0 +1,33 @@
+{
+  "reviews": [
+    {
+      "version": "v1",
+      "accepted": false,
+      "evidenceSha256": "b82fce69e4a6f3b0b4af8ec7547a41a82405fc6a0a4b5515e0e434322e378827",
+      "observations": [
+        "Camera rolls through roughly 180 degrees, making footage and text unreadable.",
+        "Platinum wordmark too dark at the final hold."
+      ],
+      "fix": [
+        "Use an explicit world-up camera basis, positive quaternion hemisphere and baked native motion.",
+        "Add a timed front softbox and readable platinum material."
+      ]
+    },
+    {
+      "version": "v2",
+      "acceptedForAnimation": true,
+      "evidenceSha256": "dacf7e2bfb3274927760bb0dfe30b89293bffd7e8079ba5a2d4ca3c1ba63aecd",
+      "observations": [
+        "Upright sources and readable final original A/P lockup.",
+        "Cold-open geometry, conversation pulse and capacity route recur.",
+        "Most story passages use source carriers and graphic scenes; do not confuse this with a completed photoreal generated movie."
+      ],
+      "creativeFixBeforeAnimation": [
+        "Improve oblique camera movement for depth.",
+        "Carry the zero into the opening capacity door instead of cutting directly to a bright plate.",
+        "Lock the wordmark at 3.2 seconds to match the planned sound impact."
+      ]
+    }
+  ],
+  "status": "FULL_ANIMATION_PENDING_REVIEW"
+}

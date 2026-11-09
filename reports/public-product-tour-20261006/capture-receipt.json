@@ -1,0 +1,207 @@
+{
+  "status": "PASS",
+  "sampleWorkspace": true,
+  "captures": [
+    {
+      "name": "uploads-before",
+      "time": 1791258460987,
+      "selector": ".publisher-upload-dropzone",
+      "bounds": {
+        "x": 571,
+        "y": 479.40625,
+        "width": 722,
+        "height": 170
+      },
+      "elapsed": 2.25
+    },
+    {
+      "name": "uploads-ready",
+      "time": 1791258463510,
+      "selector": ".publisher-current-asset",
+      "bounds": {
+        "x": 335,
+        "y": 298.40625,
+        "width": 1194,
+        "height": 68
+      },
+      "elapsed": 4.773
+    },
+    {
+      "name": "uploads-destinations",
+      "time": 1791258464531,
+      "selector": ".platform-toggles",
+      "bounds": {
+        "x": 571,
+        "y": 469.40625,
+        "width": 722,
+        "height": 182
+      },
+      "elapsed": 5.794
+    },
+    {
+      "name": "uploads-customize",
+      "time": 1791258466311,
+      "selector": ".platform-workspace",
+      "bounds": {
+        "x": 335,
+        "y": 382.40625,
+        "width": 1194,
+        "height": 687.375
+      },
+      "elapsed": 7.574
+    },
+    {
+      "name": "studio-ready",
+      "time": 1791258472958,
+      "selector": ".studio-pro-timeline-dock",
+      "bounds": {
+        "x": 0,
+        "y": 620,
+        "width": 1600,
+        "height": 280
+      },
+      "elapsed": 14.221
+    },
+    {
+      "name": "studio-edit",
+      "time": 1791258480861,
+      "selector": ".studio-pro-timeline-dock",
+      "bounds": {
+        "x": 0,
+        "y": 620,
+        "width": 1600,
+        "height": 280
+      },
+      "elapsed": 22.124
+    },
+    {
+      "name": "schedule-list",
+      "time": 1791258482891,
+      "selector": ".queue-kpi-grid",
+      "bounds": {
+        "x": 335,
+        "y": 331.40625,
+        "width": 1194,
+        "height": 100
+      },
+      "elapsed": 24.154
+    },
+    {
+      "name": "schedule-calendar",
+      "time": 1791258484527,
+      "selector": ".schedules-panel",
+      "bounds": {
+        "x": 306,
+        "y": 209.40625,
+        "width": 1252,
+        "height": 993.796875
+      },
+      "elapsed": 25.79
+    },
+    {
+      "name": "analytics-week",
+      "time": 1791258487038,
+      "selector": ".analytics-performance-overview",
+      "bounds": {
+        "x": 306,
+        "y": 464.40625,
+        "width": 1252,
+        "height": 274.125
+      },
+      "elapsed": 28.301
+    },
+    {
+      "name": "analytics-month",
+      "time": 1791258489498,
+      "selector": ".analytics-performance-overview",
+      "bounds": {
+        "x": 306,
+        "y": 464.40625,
+        "width": 1252,
+        "height": 274.125
+      },
+      "elapsed": 30.761
+    }
+  ],
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/api/workspaces/current"
+    },
+    {
+      "method": "GET",
+      "path": "/api/health"
+    },
+    {
+      "method": "GET",
+      "path": "/api/users/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/content/my-content"
+    },
+    {
+      "method": "GET",
+      "path": "/api/content/my-promotion-schedules"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tiktok/creator_info"
+    },
+    {
+      "method": "GET",
+      "path": "/api/platform/status"
+    },
+    {
+      "method": "GET",
+      "path": "/api/youtube/status"
+    },
+    {
+      "method": "GET",
+      "path": "/api/platform/status"
+    },
+    {
+      "method": "POST",
+      "path": "/api/content/upload/source-file"
+    },
+    {
+      "method": "GET",
+      "path": "/api/media/credits"
+    },
+    {
+      "method": "GET",
+      "path": "/api/analytics/user"
+    },
+    {
+      "method": "GET",
+      "path": "/api/analytics/workflow-summary"
+    },
+    {
+      "method": "GET",
+      "path": "/api/analytics/user"
+    },
+    {
+      "method": "GET",
+      "path": "/api/analytics/workflow-summary"
+    },
+    {
+      "method": "GET",
+      "path": "/api/analytics/user"
+    },
+    {
+      "method": "GET",
+      "path": "/api/analytics/workflow-summary"
+    },
+    {
+      "method": "GET",
+      "path": "/api/analytics/user"
+    },
+    {
+      "method": "GET",
+      "path": "/api/analytics/workflow-summary"
+    }
+  ],
+  "errors": [],
+  "productionRequests": 0,
+  "publishingActions": 0
+}

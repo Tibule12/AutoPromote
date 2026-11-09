@@ -1,0 +1,188 @@
+{
+  "sourceSha256": "b6f8a878773ab2b55f6bb3100c85bbec811786fd46f02032111e1fd6352f940b",
+  "modelPath": "/models/studio-whisper",
+  "device": "cpu",
+  "computeType": "int8",
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 20.2,
+      "text": " an idea is in a film it needs a world a little courage and a way through this started with a brief no camera no footage auto promote",
+      "avgLogProbability": -0.2946206440528234,
+      "noSpeechProbability": 1.4929298075561093e-10,
+      "words": [
+        {
+          "word": " an",
+          "start": 0.0,
+          "end": 0.62,
+          "probability": 0.48951831459999084
+        },
+        {
+          "word": " idea",
+          "start": 0.62,
+          "end": 0.9,
+          "probability": 0.7242297530174255
+        },
+        {
+          "word": " is",
+          "start": 0.9,
+          "end": 1.2,
+          "probability": 0.755807101726532
+        },
+        {
+          "word": " in",
+          "start": 1.2,
+          "end": 1.3,
+          "probability": 0.6750193238258362
+        },
+        {
+          "word": " a",
+          "start": 1.3,
+          "end": 1.42,
+          "probability": 0.9904881119728088
+        },
+        {
+          "word": " film",
+          "start": 1.42,
+          "end": 1.64,
+          "probability": 0.9836020469665527
+        },
+        {
+          "word": " it",
+          "start": 1.64,
+          "end": 3.12,
+          "probability": 0.9821556210517883
+        },
+        {
+          "word": " needs",
+          "start": 3.12,
+          "end": 3.32,
+          "probability": 0.6091430187225342
+        },
+        {
+          "word": " a",
+          "start": 3.32,
+          "end": 3.48,
+          "probability": 0.9465910196304321
+        },
+        {
+          "word": " world",
+          "start": 3.48,
+          "end": 3.84,
+          "probability": 0.9967259168624878
+        },
+        {
+          "word": " a",
+          "start": 3.84,
+          "end": 6.14,
+          "probability": 0.9812085628509521
+        },
+        {
+          "word": " little",
+          "start": 6.14,
+          "end": 6.32,
+          "probability": 0.9736202359199524
+        },
+        {
+          "word": " courage",
+          "start": 6.32,
+          "end": 6.66,
+          "probability": 0.9913376569747925
+        },
+        {
+          "word": " and",
+          "start": 6.66,
+          "end": 9.68,
+          "probability": 0.9805980920791626
+        },
+        {
+          "word": " a",
+          "start": 9.68,
+          "end": 9.8,
+          "probability": 0.7525492906570435
+        },
+        {
+          "word": " way",
+          "start": 9.8,
+          "end": 9.94,
+          "probability": 0.99273282289505
+        },
+        {
+          "word": " through",
+          "start": 9.94,
+          "end": 10.24,
+          "probability": 0.8382261991500854
+        },
+        {
+          "word": " this",
+          "start": 10.24,
+          "end": 15.62,
+          "probability": 0.775431752204895
+        },
+        {
+          "word": " started",
+          "start": 15.62,
+          "end": 15.92,
+          "probability": 0.9369978308677673
+        },
+        {
+          "word": " with",
+          "start": 15.92,
+          "end": 16.1,
+          "probability": 0.9800648093223572
+        },
+        {
+          "word": " a",
+          "start": 16.1,
+          "end": 16.2,
+          "probability": 0.9976397752761841
+        },
+        {
+          "word": " brief",
+          "start": 16.2,
+          "end": 16.38,
+          "probability": 0.96291184425354
+        },
+        {
+          "word": " no",
+          "start": 16.38,
+          "end": 17.02,
+          "probability": 0.9863399267196655
+        },
+        {
+          "word": " camera",
+          "start": 17.02,
+          "end": 17.38,
+          "probability": 0.7871394157409668
+        },
+        {
+          "word": " no",
+          "start": 17.38,
+          "end": 17.86,
+          "probability": 0.9956746697425842
+        },
+        {
+          "word": " footage",
+          "start": 17.86,
+          "end": 18.2,
+          "probability": 0.9934843182563782
+        },
+        {
+          "word": " auto",
+          "start": 18.2,
+          "end": 19.88,
+          "probability": 0.58982253074646
+        },
+        {
+          "word": " promote",
+          "start": 19.88,
+          "end": 20.2,
+          "probability": 0.8695670366287231
+        }
+      ]
+    }
+  ],
+  "text": "an idea is in a film it needs a world a little courage and a way through this started with a brief no camera no footage auto promote",
+  "seconds": 16.63899444100025,
+  "limitation": "ASR verifies recoverable speech in actual audio; it is not a human listening or emotional-quality judgment."
+}

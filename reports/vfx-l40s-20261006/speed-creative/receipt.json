@@ -1,0 +1,204 @@
+{
+  "status": "PASS",
+  "gpu": "NVIDIA L40S, 565.57.01",
+  "validation": {
+    "status": "passed",
+    "media": {
+      "duration": 7.010998,
+      "size": 7526175,
+      "video": {
+        "index": 0,
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "avg_frame_rate": "30/1"
+      },
+      "audio": {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "avg_frame_rate": "0/0"
+      }
+    },
+    "duration": {
+      "expected": 7.0,
+      "actual": 7.011,
+      "delta": 0.011,
+      "tolerance": 0.45
+    },
+    "audio_expected": true,
+    "picture_timing": {
+      "duration": 7.0,
+      "container_duration": 7.011,
+      "delta": 0.011,
+      "tolerance": 0.1
+    },
+    "black_ranges": [],
+    "browser_delivery": "h264_yuv420p_faststart"
+  },
+  "result": {
+    "status": "completed",
+    "progress": 100,
+    "detail": "Render complete",
+    "job_id": "3e252492-90c9-4c06-bb4c-b1ebeb42b30c",
+    "output_path": "/work/tmp/3e252492-90c9-4c06-bb4c-b1ebeb42b30c_viral.mp4",
+    "output_url": "file:///work/speed-creative-proof/export.mp4",
+    "thumbnail_url": null,
+    "cover_frame": null,
+    "thumbnail_frame": null,
+    "brand_watermark": false,
+    "caption_review_copy": false,
+    "brand_watermark_receipt": null,
+    "output_settings": {
+      "resolution": "source",
+      "width": 1920,
+      "height": 1080,
+      "fps": 30,
+      "codec": "h264",
+      "encoder": "h264_nvenc",
+      "quality": "high",
+      "crf": 19,
+      "preset": "p4"
+    },
+    "watermark_text": null,
+    "audio_proof": {
+      "expected": true,
+      "verified": true,
+      "codec": "aac",
+      "channels": 2,
+      "sample_rate": 44100,
+      "duration_seconds": 7.011
+    },
+    "media_validation": {
+      "duration": 7.010998,
+      "size": 7526175,
+      "video": {
+        "index": 0,
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "avg_frame_rate": "30/1"
+      },
+      "audio": {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "avg_frame_rate": "0/0"
+      }
+    },
+    "final_quality_gate": {
+      "status": "passed",
+      "media": {
+        "duration": 7.010998,
+        "size": 7526175,
+        "video": {
+          "index": 0,
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 1920,
+          "height": 1080,
+          "avg_frame_rate": "30/1"
+        },
+        "audio": {
+          "index": 1,
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "avg_frame_rate": "0/0"
+        }
+      },
+      "duration": {
+        "expected": 7.011,
+        "actual": 7.011,
+        "delta": 0.0,
+        "tolerance": 0.45
+      },
+      "audio_expected": true,
+      "picture_timing": {
+        "duration": 7.0,
+        "container_duration": 7.011,
+        "delta": 0.011,
+        "tolerance": 0.1
+      },
+      "black_ranges": [],
+      "browser_delivery": "h264_yuv420p_faststart"
+    },
+    "duration": 7.010998,
+    "speed_plan": [
+      {
+        "start_time": 0.0,
+        "end_time": 2.0,
+        "rate": 0.5
+      },
+      {
+        "start_time": 2.0,
+        "end_time": 4.0,
+        "rate": 2.0
+      },
+      {
+        "start_time": 4.0,
+        "end_time": 6.010998,
+        "rate": 1.0
+      }
+    ],
+    "creative_receipt": {
+      "status": "applied",
+      "fallback": "clean",
+      "effects": [
+        {
+          "id": "motion-echo",
+          "preset": "beat_echo",
+          "intensity": "clean",
+          "start_time": 0.5,
+          "end_time": 3.0,
+          "studio_makeover": false
+        }
+      ],
+      "stages": [
+        {
+          "preset": "beat_echo",
+          "intensity": "clean",
+          "validation": {
+            "duration": 7.066667,
+            "size": 3348581,
+            "video": {
+              "index": 0,
+              "codec_name": "h264",
+              "codec_type": "video",
+              "width": 1920,
+              "height": 1080,
+              "avg_frame_rate": "30/1"
+            },
+            "audio": {
+              "index": 1,
+              "codec_name": "aac",
+              "codec_type": "audio",
+              "avg_frame_rate": "0/0"
+            }
+          }
+        }
+      ]
+    },
+    "professional_cleanup": {
+      "status": "disabled"
+    },
+    "audio_restoration": null,
+    "audio_automation": {},
+    "audio_track_states": {},
+    "audio_remix_receipt": {
+      "version": 1,
+      "enabled": false,
+      "status": "not_requested"
+    },
+    "studio_plan_validation": {
+      "valid": false,
+      "errors": [
+        "legacy_request_without_plan"
+      ]
+    }
+  },
+  "expected_seconds": 7.0,
+  "source_seconds": 6,
+  "scope": "Actual podcast, existing CPU editorial filters and NVIDIA final encoding/decoding; no cloud requests"
+}

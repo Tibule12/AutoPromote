@@ -1342,6 +1342,9 @@ try {
     app.use("/api/auth", codeqlLimiter.auth);
   }
   app.use("/api/users", userRoutes);
+  // Founder workflow is disabled by default and remains authenticated,
+  // explicitly admin-only and founder-allowlisted even when enabled.
+  app.use("/api/admin/content-factory", require("./routes/adminContentFactoryRoutes"));
   if (codeqlLimiter && codeqlLimiter.writes) {
     app.use("/api/users", codeqlLimiter.writes);
   }

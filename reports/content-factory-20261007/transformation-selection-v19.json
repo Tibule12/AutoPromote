@@ -1,0 +1,39 @@
+{
+  "studioProjectName": "Generated footage \u00b7 source assembly",
+  "assets": [
+    {
+      "assetId": "paper-start",
+      "type": "video",
+      "beatId": "hook",
+      "path": "generated/boat-launch-v4-qualified.mp4",
+      "receipt": "generated/boat-launch-v4-qualified-receipt.json",
+      "audioRole": null,
+      "review": "selected-reviews/paper-start.json"
+    },
+    {
+      "assetId": "real-vessel",
+      "type": "video",
+      "beatId": "voyage",
+      "path": "generated/real-voyage-v6.mp4",
+      "receipt": "generated/real-voyage-v6-receipt.json",
+      "audioRole": null,
+      "review": "selected-reviews/real-vessel.json"
+    }
+  ],
+  "output": {
+    "sequence": [
+      {
+        "assetId": "paper-start",
+        "start": 0,
+        "duration": 3.625,
+        "reason": "Reviewed ordinary paper-boat source."
+      },
+      {
+        "assetId": "real-vessel",
+        "start": 0,
+        "duration": 5.0625,
+        "reason": "Reviewed independently generated full-size vessel source."
+      }
+    ]
+  }
+}

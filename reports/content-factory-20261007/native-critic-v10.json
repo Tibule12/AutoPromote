@@ -1,0 +1,30 @@
+{
+  "accepted": false,
+  "reason": "The transformation does not maintain a single continuous vessel; the paper boat visibly deforms and reassembles into a yacht across frames, violating the requirement for one folded paper boat changing into one timber sailing vessel without a cut or fade-in. The mast and sail also briefly exit the frame during transition (frame 2.4s).",
+  "revisionInstructions": "Ensure the transformation occurs via morphing or gradual reshaping of the same physical object without disassembly or cut. Keep the mast and sail fully in frame throughout. Re-render with consistent continuity between all frames to avoid visual breaks during morphing phases. Confirm water surface evolves smoothly from pool to ocean waves without abrupt changes or artifacts in the transition zone (e.g., frame 3.6s).",
+  "criteria": [
+    {
+      "criterion": "One folded paper boat changes into one timber sailing vessel without a cut or a separate vessel fading in",
+      "passed": false,
+      "observation": "The paper boat visibly deforms and reassembles into a yacht across frames, indicating a break in continuity or a cut-like transition"
+    },
+    {
+      "criterion": "The whole mast and sail remain inside the frame throughout the take",
+      "passed": false,
+      "observation": "The mast and sail briefly exit the frame during the transition phase (frame 2.4s), violating the requirement"
+    },
+    {
+      "criterion": "Water changes from a pool into visible ocean waves",
+      "passed": true,
+      "observation": "Water surface evolves from a smooth pool to textured ocean waves, visible from frame 3.6s onward"
+    },
+    {
+      "criterion": "The ending clearly reads as a timber yacht with canvas sails and rigging",
+      "passed": true,
+      "observation": "Final frame (5.92s) shows a clear timber yacht with canvas sails and rigging, meeting the description"
+    }
+  ],
+  "reviewer": "Qwen/Qwen3-VL-8B-Instruct",
+  "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+  "evidenceSha256": "d8cd211c26a67fbca271b276e3308b0a918fa6781547eb1733237afade65f255"
+}

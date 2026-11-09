@@ -1,0 +1,47 @@
+#!/usr/bin/env node
+// Byte-reviewed raw assets -> existing private Factory intelligence/Director/renderer.
+const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),cp=require('node:child_process');
+const {compileFactoryEdit}=require('../../../src/services/contentFactoryStudioAdapter');
+const {buildFactoryIntelligence}=require('../../../src/services/contentFactoryIntelligenceAdapter');
+const {validateDirection,digest}=require('../../../src/services/contentFactoryContract');
+const root=path.resolve(process.argv[2]);const version=process.argv[3]||'rough-v1';
+if(!/^((rough|final)-v[1-9][0-9]?)$/.test(version))throw Error('Explicit private review version required');
+const read=p=>JSON.parse(fs.readFileSync(path.join(root,p)));const write=(p,v)=>{fs.mkdirSync(path.dirname(path.join(root,p)),{recursive:true});fs.writeFileSync(path.join(root,p),JSON.stringify(v,null,2));};
+const hash=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+const story=read(version.startsWith('final')?'storyboard-final.json':'storyboard.json'),sourceBriefHash=hash(path.join(root,'source-brief.txt')),review=read('asset-review.json');
+const assets=[];
+function add(id,file,beatId,type,role,receipt){
+ const local=path.join(root,file);if(!fs.existsSync(local))throw Error('Missing actual asset: '+id);
+ const info=JSON.parse(cp.execFileSync('ffprobe',['-v','error','-show_format','-show_streams','-of','json',local],{encoding:'utf8'}));
+ const picture=info.streams.find(s=>s.codec_type==='video'),audio=info.streams.find(s=>s.codec_type==='audio');
+ const artifact={path:file,sha256:hash(local),duration:Number(picture?.duration||info.format.duration),container:type==='audio'?'wav':'mp4',codec:(picture||audio).codec_name,fps:picture?24:undefined,hasAudio:!!audio,native: type!=='audio'?file.replace(/video\.mp4$/,'scene.blend'):undefined};
+ const selected=review.assets.find(a=>a.assetId===id);if(!selected?.accepted||selected.artifactSha256!==artifact.sha256)throw Error('Unreviewed or changed bytes: '+id);
+ const provenance={model:receipt.model||'Authored AutoPromote template / Blender Cycles',modelRevision:receipt.modelRevision||receipt.scriptSha256||'founder-film-20261008-v2',settings:receipt.settings||{},tool:receipt.tool||'AutoPromote narrative audio synthesis',sourceBrief:fs.readFileSync(path.join(root,'source-brief.txt'),'utf8'),sourceBriefHash,reviewHash:digest(selected),sourceLineage:{sourceSha256:hash(path.join(root,'evidence/source-index.json'))},generationReceipt:receipt,origin:type==='audio'?'generated_audio':'authored_3d_with_retained_generated_and_archival_sources'};
+ assets.push({assetId:id,beatId,type,audioRole:role,status:'accepted',artifact,provenance,review:{accepted:true,evidenceSha256:hash(path.join(root,'asset-review.json')),reason:selected.reason,reviewer:'Codex inspection of actual generated assets and objective audio timing',modelRevision:'founder-film-v2'}});
+ return artifact;
+}
+for(const s of story.scenes){const folder=s.id==='ident'&&version.startsWith('final')?'ident-final':s.id;add(s.id,`assets/${folder}/video.mp4`,s.id,'video',null,read(`assets/${folder}/render-receipt.json`));}
+for(const s of story.scenes.filter(s=>s.vo))add('vo-'+s.id,`assets/narration/${s.id}.wav`,s.id,'audio','voiceover',read(`assets/narration/${s.id}-receipt.json`));
+add('score','assets/sound/score.wav','cold-open','audio','music',read('assets/sound/sound-plan.json'));
+add('cues','assets/sound/cues.wav','cold-open','audio','sfx',read('assets/sound/sound-plan.json'));
+for(const name of ['cutdown','teaser'])for(const stem of ['score','cues'])add(stem+'-'+name,`assets/sound/${stem}-${name}.wav`,'cold-open','audio',stem==='score'?'music':'sfx',read(`assets/sound/${stem}-${name}-receipt.json`));
+if(version.startsWith('final'))for(const stem of ['score','cues'])add(stem+'-final',`assets/sound/${stem}-final.wav`,'cold-open','audio',stem==='score'?'music':'sfx',read(`assets/sound/${stem}-final-receipt.json`));
+const a=id=>assets.find(x=>x.assetId===id);const shot=(id,start,duration,reason)=>({assetId:id,start,duration,reason});
+function cues(start,length,offset=0,assetId="cues"){const out=[];for(let pos=0;pos<length;pos+=12)out.push({assetId,kind:'sfx',startTime:start+pos,trimStart:offset+pos,duration:Math.min(12,length-pos),volume:.8});return out;}
+const hero={outputId:'one-edit-hero',aspect:'16:9',purpose:'One editing problem grows through real failures into a creative system; the film reveals its own AutoPromote assembly.',musicAssetId:version.startsWith('final')?'score-final':'score',musicVolume:.75,sequence:story.scenes.map(s=>shot(s.id,s.sourceStart||0,s.duration,s.purpose)),audioCues:[...story.scenes.filter(s=>s.vo).map(s=>({assetId:'vo-'+s.id,kind:'voiceover',startTime:s.at+s.voAt,trimStart:0,duration:a('vo-'+s.id).artifact.duration,volume:.94})),...cues(0,story.duration,0,version.startsWith('final')?'cues-final':'cues')],captionSegments:[],plannedBlackRanges:[{start:story.scenes.at(-1).at,end:story.scenes.at(-1).at+1.5,reason:'Intentional dark anticipation in the dedicated five-second AutoPromote ident.'}]};
+// Short edits preserve the cause, breakthrough and payoff instead of random highlights.
+const cutdown={outputId:'one-edit-cutdown',aspect:'16:9',purpose:'27-second origin, constraint, breakthrough, creative question and self-reveal.',musicAssetId:'score-cutdown',musicVolume:.65,
+ sequence:[shot('cold-open',.3,3,'Impressive opening with the original small problem'),shot('quota',3,3.5,'A single zero-capacity obstacle'),shot('breakthrough',1,4,'Real verified capacity grant'),shot('director',.4,6.5,'Missing-shot generation becomes story assembly'),shot('reveal',.4,5,'Self-referential payoff'),shot('ident',0,5,'Complete reusable brand sequence')],
+ audioCues:[{assetId:'vo-cold-open',kind:'voiceover',startTime:.2,duration:a('vo-cold-open').artifact.duration,volume:.94},{assetId:'vo-quota',kind:'voiceover',startTime:3.1,duration:a('vo-quota').artifact.duration,volume:.94},{assetId:'vo-breakthrough',kind:'voiceover',startTime:6.65,duration:a('vo-breakthrough').artifact.duration,volume:.94},{assetId:'vo-director',kind:'voiceover',startTime:10.7,trimStart:0,duration:a('vo-director').artifact.duration,volume:.94},{assetId:'vo-reveal',kind:'voiceover',startTime:17.35,duration:a('vo-reveal').artifact.duration,volume:.94},...cues(0,27,0,"cues-cutdown")],captionSegments:[],plannedBlackRanges:[{start:22,end:23.5,reason:'Intentional dark anticipation in the complete brand ident.'}]};
+const teaser={outputId:'one-edit-teaser',aspect:'16:9',purpose:'10-second teaser connects the opening world directly to the created-by reveal and short brand lockup.',musicAssetId:'score-teaser',musicVolume:.6,sequence:[shot('cold-open',.7,3,'Open inside the finished world'),shot('reveal',1,4,'Answer where the film came from'),shot('ident',2,3,'Use resolving geometry and clean hold')],audioCues:[{assetId:'vo-reveal',kind:'voiceover',startTime:2.65,duration:a('vo-reveal').artifact.duration,volume:.94},...cues(0,10,0,"cues-teaser")],captionSegments:[]};
+const d={schemaVersion:1,title:'One Edit',story:{about:'One unsolved creator problem becomes a creative system.',whyCare:'The familiar cost of fixing one thing only to expose the next.',hook:'Enter the finished ocean world before learning how it was built.',beginning:'Two cameras refuse to stay with one conversation.',development:'Each fix opens a larger media workflow problem.',tension:'Failures and zero GPU capacity close the route.',payoff:'A verified breakthrough opens story-driven creation, followed by the origin of this very film.',ending:'An original vector-based dimensional AutoPromote ident.',withheld:'The full identity and construction of the hook until the final third.',amplify:['Failure silence','Capacity door opening','Return to the hook','Clean self-reveal'],remove:['Disconnected footage','Invented GPU emails','Unqualified public readiness claims']},script:story.scenes.map(s=>({beatId:s.id,action:s.shot,sound:s.vo||'Sound rise, synchronized lockup impact and clean hold.'})),assets:assets.map(x=>({assetId:x.assetId,type:x.type,beatId:x.beatId,duration:x.artifact.duration,prompt:x.review.reason,reason:x.review.reason,provider:'reuse',libraryRef:x.assetId,acceptanceCriteria:[x.review.reason.slice(0,490)],seed:20261008})),outputs:[hero,cutdown,teaser]};
+// Exact speech slices in cutdown require reviewed endings; fail closed if over budget.
+validateDirection(d);for(const x of assets)x.provenance.directionHash=digest(d);
+for(const out of d.outputs){
+ const compiled=compileFactoryEdit({jobId:'founder-one-edit-20261008-'+version,ownerUid:'founder-private',assets,output:out,urlFor:artifact=>'http://127.0.0.1:8765/'+artifact.path.split('/').map(encodeURIComponent).join('/')});
+ if(out.plannedBlackRanges)compiled.renderRequest.planned_black_ranges=out.plannedBlackRanges;
+ compiled.intelligence=buildFactoryIntelligence({projectId:compiled.projectId,ownerUid:'founder-private',assets,direction:d});
+ write(`outputs/${version}/${out.outputId}/project.json`,compiled);write(`outputs/${version}/${out.outputId}/render-request.json`,compiled.renderRequest);write(`outputs/${version}/${out.outputId}/edit-plan.json`,out);
+ console.log(JSON.stringify({output:out.outputId,duration:out.sequence.reduce((n,s)=>n+s.duration,0),projectId:compiled.projectId,documentHash:compiled.documentHash,directorOperations:compiled.directorBatch.operations.length}));
+}
+write('accepted-asset-library.json',assets);write('factory-direction.json',d);

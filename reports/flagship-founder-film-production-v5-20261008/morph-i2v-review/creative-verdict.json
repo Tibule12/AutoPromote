@@ -1,0 +1,38 @@
+{
+  "accepted": false,
+  "reason": "The complete 65-frame decoded take contains a hard scene replacement at frame 34, 2.1250s. The paper boat remains paper through the preceding frame; the yacht, horizon, camera and water scale appear together in the next frame. No transformation event exists.",
+  "reviewer": "Codex complete decoded-frame inspection",
+  "modelRevision": "private visual review 2026-10-08",
+  "evidenceSha256": "f0ed24844f16f1d9470eec922bbe29702c205667bf1a3ec64ec333c12481c75c",
+  "criteria": [
+    {
+      "criterion": "The paper fold continuously unfolds into a sail rooted in the same hull",
+      "passed": false,
+      "observation": "No continuous paper-to-canvas or folded-hull-to-timber change in the decoded frame sequence."
+    },
+    {
+      "criterion": "Boat, waterline and camera perspective change continuously without a cut",
+      "passed": false,
+      "observation": "Largest adjacent-frame image change occurs at frame 34; full scene replaces the paper macro with a yacht wide shot."
+    },
+    {
+      "criterion": "Water and yacht have photographic motion and texture",
+      "passed": true,
+      "observation": "The individual paper-water and yacht-water spans have moving photographic textures; this does not qualify their connection."
+    }
+  ],
+  "revisionInstructions": "Use a trained endpoint interpolation/control path and maintain one hull/sail trajectory. Do not patch this cut with particles, flashes, dissolves or sound, and do not seed-hunt the same unqualified task setup.",
+  "artifactSha256": "ebb0e7690d2a0901236ab22067d374b88787d1872faf0f68666307fec1a382f7",
+  "diagnostics": {
+    "frameCount": 65,
+    "fps": 16,
+    "hardCutFrame": 34,
+    "hardCutSeconds": 2.125,
+    "maxAdjacentFrameMae": 73.87688446044922,
+    "medianAdjacentFrameMae": 16.0721492767334,
+    "comparisonSize": [
+      208,
+      120
+    ]
+  }
+}

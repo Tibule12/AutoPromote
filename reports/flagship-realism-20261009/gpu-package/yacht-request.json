@@ -1,0 +1,21 @@
+{
+  "deadlineEpoch": 1791536400,
+  "sourceBrief": "Private AutoPromote The Small Boat: a folded paper vessel must visibly become one full-size working yacht; its human response is a sailor committing to the sea. This asset establishes the real-world payoff, not the still-unproven transformation. Preserve the navy hull, cream canvas, timber deck, crew positions and low warm light. Person, boat and sea must look like live-action footage and interact physically. A technically successful render is only raw material pending all-frame visual review.",
+  "settings": {
+    "width": 1280,
+    "height": 720,
+    "frames": 49,
+    "steps": 30,
+    "referenceResize": "aspect_fit"
+  },
+  "shots": [
+    {
+      "name": "yacht-crosses-swell-native720",
+      "seed": 20261009041,
+      "reference_image": "/work/assets/yacht-reference.png",
+      "reference_image_sha256": "2ee92584176de8e91500a8ce4ddef1217f09b063c5f633eed3578c8a6e49297b",
+      "prompt": "One continuous live-action marine tracking shot. The same full-size navy-hulled yacht sails steadily to the right across one rolling blue ocean swell. The low camera travels parallel at the same distance, keeping the complete hull and stern crew inside the frame. Preserve every visible crew member in the same position and outfit; their bodies balance with the deck and remain attached to their existing rail or helm. The bow rises gently over the swell, then settles into the water with white bow spray. That spray falls back into the moving sea; the displaced water flows down the hull into a continuous stern wake. The same cream sails remain filled by wind with small fabric ripples; mast, boom and connected rigging keep their shapes. Consistent warm side light, photographic skin, timber, sailcloth and water. Stable horizon and gentle boat roll. End still sailing toward the right, with all crew retained. No zoom or cut.",
+      "negative_prompt": "vanishing people, extra people, changing clothing, people merging into railing, frozen crew, camera orbit, zoom, distant boat, new yacht, cropped hull, disconnected mast, changing sail shape, changing hull shape, floating hull, frozen ocean, painted spray, miniature, model boat, CGI, cartoon, text, watermark, morph, transition"
+    }
+  ]
+}

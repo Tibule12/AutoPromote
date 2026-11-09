@@ -1,0 +1,128 @@
+{
+  "version": 2,
+  "title": "ONE EDIT",
+  "duration": 51,
+  "fps": 24,
+  "scenes": [
+    {
+      "id": "cold-open",
+      "at": 0,
+      "duration": 3.0,
+      "vo": "I thought I was fixing one edit.",
+      "voAt": 0.35,
+      "shot": "Enter the final three seconds of the same transformed vessel, withholding its paper origin.",
+      "purpose": "Open inside the payoff and create a question about how it was made.",
+      "originalAt": 0,
+      "originalDuration": 4,
+      "sourceStart": 4
+    },
+    {
+      "id": "origin",
+      "at": 3.0,
+      "duration": 5.25,
+      "vo": "Two cameras. One conversation. They refused to stay together.",
+      "voAt": 0.35,
+      "shot": "A retained moving conversation fills the frame. Two differently timed amber/violet waveform rows align below it.",
+      "purpose": "Make sync understandable to a stranger through one human conversation, not interface instructions.",
+      "originalAt": 4,
+      "originalDuration": 6,
+      "sourceStart": 0.65
+    },
+    {
+      "id": "cascade",
+      "at": 8.25,
+      "duration": 5.5,
+      "vo": "Fix the timing. Lose the sound. Fix the sound. Break the render.",
+      "voAt": 0.35,
+      "shot": "The moving conversation and SYNC / SOUND / RENDER labels are interrupted by a physical dark shutter and a red FAILED lockup.",
+      "purpose": "Each fix causes a consequence, building frustration.",
+      "originalAt": 10,
+      "originalDuration": 7,
+      "sourceStart": 1.45
+    },
+    {
+      "id": "failure",
+      "at": 13.75,
+      "duration": 4.5,
+      "vo": "Some days, the only thing that finished was the error log.",
+      "voAt": 0.5,
+      "shot": "An archived graphic reconstruction of render errors sits in depth beside the illuminated word AGAIN. This is not an unmodified error screenshot.",
+      "purpose": "Let a setback hurt; hold briefly rather than racing through a decorative code montage.",
+      "originalAt": 23,
+      "originalDuration": 6,
+      "sourceStart": 0.4
+    },
+    {
+      "id": "quota",
+      "at": 18.25,
+      "duration": 4.75,
+      "vo": "Even the machines said no. But I couldn't leave it there.",
+      "voAt": 0.3,
+      "shot": "A large extruded zero on a dark stage with NO CAPACITY. The narration carries the setback; no quota email, archive date or GPU class is shown in this shot.",
+      "purpose": "External constraint becomes the lowest point; persistence is the emotional turn.",
+      "originalAt": 29,
+      "originalDuration": 7,
+      "sourceStart": 1.5
+    },
+    {
+      "id": "breakthrough",
+      "at": 23.0,
+      "duration": 4.25,
+      "vo": "Then one door opened. And the question changed.",
+      "voAt": 0.4,
+      "shot": "The extruded zero and physical panels move aside to show retained generated yacht footage. 3000 milliGPU labels the historical capacity; this is not a new grant or 3000 physical GPUs.",
+      "purpose": "A genuine quota grant and bounded execution earn the release of tension. 3000 milliGPU is capacity, not 3000 physical GPUs.",
+      "originalAt": 36,
+      "originalDuration": 6,
+      "sourceStart": 1
+    },
+    {
+      "id": "director",
+      "at": 27.25,
+      "duration": 6.75,
+      "vo": "What if the system could understand the story? Create the missing shot. Find the cut. Build the sound.",
+      "voAt": 0.3,
+      "shot": "STORY / SHOT / CUT / SOUND labels resolve over the retained conversation, then the retained generated yacht becomes the chosen source. This is an authored concept visualization, not a recording of a live Director plan.",
+      "purpose": "Move from repairs to creative decisions, with real sources and editorial data.",
+      "originalAt": 42,
+      "originalDuration": 7,
+      "sourceStart": 0.2
+    },
+    {
+      "id": "magic",
+      "at": 34.0,
+      "duration": 7,
+      "vo": "Bring it together. I didn't know I was building this.",
+      "voAt": 0.3,
+      "shot": "One continuous folded-paper hull and sail become timber and canvas while the workbench sinks into a deep ocean; the camera follows the same vessel.",
+      "purpose": "Complete the opening world through connected visible geometry, material and scale change.",
+      "originalAt": 49,
+      "originalDuration": 6,
+      "sourceStart": 0
+    },
+    {
+      "id": "reveal",
+      "at": 41.0,
+      "duration": 5.0,
+      "vo": "The film you just watched was created by AutoPromote.",
+      "voAt": 0.55,
+      "shot": "The created-by sentence resolves on a dark dimensional field, with restrained camera movement. No live Studio UI/project recording is represented.",
+      "purpose": "Land the promised self-referential payoff. Production receipts disclose assistant-directed story and source generation versus actual AutoPromote editing/rendering.",
+      "originalAt": 55,
+      "originalDuration": 6,
+      "sourceStart": 0.5
+    },
+    {
+      "id": "ident",
+      "at": 46.0,
+      "duration": 5.0,
+      "vo": null,
+      "shot": "Original exact logo contours emerge as titanium, optical-black, anodized-violet and glass layers; grazing light and a macro-to-lockup camera resolve at 3.2s, followed by a clean static hold.",
+      "purpose": "A dedicated editable brand sequence, not a flat logo fade.",
+      "originalAt": 61,
+      "originalDuration": 5,
+      "sourceStart": 0
+    }
+  ],
+  "reviewFix": "Remove empty holds; select completed late action from long raw takes; preserve full narration and replace old letter-scale ident."
+}

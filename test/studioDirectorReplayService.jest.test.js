@@ -62,6 +62,27 @@ test("server replay matches browser split and both edge trims", () => {
     trimOperation(0, 16 * 90_000), "trim-end"));
 });
 
+test("server replay preserves the same owned 3D/audio decisions and speed identities as manual editing", () => {
+  const snapshot = { ...sourceSnapshot(),
+    threeDScenes: [{ id: "scene", startTime: 5, duration: 3, text: "QA state",
+      secondary: "Second line", focalLength: 65, rotationX: 24, material: "glass",
+      assetStoragePath: "owned/mesh.glb", hqPreviewJobId: "owned-job", hqPreviewRevision: "revision" }],
+    soundEffects: [{ id: "cue", startTime: 5, duration: 3, sourceStoragePath: "owned/speech.wav",
+      name: "Speech", builtIn: false, trimStart: 1, volume: 0, fadeIn: .2, fadeOut: .4 }],
+    speedKeyframes: [{ id: "speed-1", property: "speed", time: 5, value: 1, easing: "linear" }],
+  };
+  const document = adaptStudioSnapshotToDocument({ snapshot, projectId: "mixed-replay" });
+  const batch = commandBatch(document, trimOperation(2 * 90_000, 20 * 90_000));
+  expectBrowserParity(document, batch);
+  const preview = dryRunStudioCommandBatch(document, batch).previewDocument;
+  expect(preview.layers[0].parameters).toMatchObject({ focalLength: 65,
+    assetStoragePath: "owned/mesh.glb", hqPreviewJobId: "owned-job", rotationX: 24 });
+  expect(preview.linkedTiming.cues.soundEffects[0].parameters).toMatchObject({
+    sourceStoragePath: "owned/speech.wav", volume: 0, fadeIn: .2, fadeOut: .4,
+  });
+  expect(preview.programmeSpeedKeys[0].id).toBe("speed-1");
+});
+
 test("server replay matches browser linked timing ripple and fractional ticks", () => {
   const snapshot = {
     ...sourceSnapshot(),

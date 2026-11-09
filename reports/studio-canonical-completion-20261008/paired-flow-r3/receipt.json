@@ -1,0 +1,14 @@
+{
+  "startedAt": "2026-10-08T11:43:20.262Z",
+  "projectName": "Studio paired visual QA 20261008 r3",
+  "headless": true,
+  "muted": true,
+  "realAuth": true,
+  "noMocks": true,
+  "gpuUsed": false,
+  "gpuJobsStarted": 0,
+  "status": "FAIL",
+  "pairs": [],
+  "error": "locator.waitFor: Timeout 120000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('caption-coverage-result').filter({ hasText: /Possible uncovered audio/ }) to be visible\u001b[22m\n",
+  "finishedAt": "2026-10-08T11:45:47.549Z"
+}

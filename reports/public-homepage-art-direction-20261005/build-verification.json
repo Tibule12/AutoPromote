@@ -1,0 +1,184 @@
+{
+  "status": "PASS",
+  "command": "CI=true npm run build",
+  "recorded_at": "2026-10-05T18:54:33.432565+00:00",
+  "source_hashes": [
+    {
+      "file": "frontend/package.json",
+      "sha256": "887fd30c585b342011551acc8e4c9fc4c59ba93d0f1a6925d58289b3e7cb03e6"
+    },
+    {
+      "file": "frontend/public/index.html",
+      "sha256": "25c2f0cd630b1131d860fe46f80e6edf6743b46aedf278b2f84021100f74da0c"
+    },
+    {
+      "file": "frontend/public/landing/README.md",
+      "sha256": "40b39c121c7a61e83521ad80b24ac6fb54da180024d847609784bdc5710112ff"
+    },
+    {
+      "file": "frontend/public/landing/podcast-guest.webp",
+      "sha256": "e973b141cd52d8e8a46b85885ced525b00bf8a9f172c44e1dc5d70fbaa71dbcd"
+    },
+    {
+      "file": "frontend/public/landing/podcast-host.webp",
+      "sha256": "b75e7bb0a08db4cc0c40d23a8518f36666e89f3fe0eaaa872414e5ef2b2f8fb4"
+    },
+    {
+      "file": "frontend/public/landing/podcast-motion.mp4",
+      "sha256": "f73a2b4ea4352d664cd38a8855daba4dacfc052554b01f8d591a422ebd8c8b2a"
+    },
+    {
+      "file": "frontend/public/landing/podcast-preview.webp",
+      "sha256": "ac31ec000b50a7ecb4b5fe7837a5a23964d2845046d6b1facd8303864998f03d"
+    },
+    {
+      "file": "frontend/public/landing/studio-conversation-v2.webp",
+      "sha256": "2b26ded05c530de847f0623419e4f2e489a639718ed9b9a3a36765854eb5303f"
+    },
+    {
+      "file": "frontend/scripts/preview-public-homepage.js",
+      "sha256": "22ea13dbf3ad277cccb348037f1671c5753594175432b1b57484d3997e27bb10"
+    },
+    {
+      "file": "frontend/src/WelcomePage.js",
+      "sha256": "b9b9e531881d1d2e41e9fd57dffd8c988986a35b9611c86226a104b1b02c54de"
+    },
+    {
+      "file": "frontend/src/__tests__/LandingMotionLifecycle.test.js",
+      "sha256": "30dd4f64abee6d7c9c871cb31e8f7111a22d9f82c1e1e0e99a0c6e820ce26b3c"
+    },
+    {
+      "file": "frontend/src/__tests__/LandingPageClaims.test.js",
+      "sha256": "4c713757d61a8e77ad7300fc6c6e36e8012592e0292b3807b2f6d4e2dba0ff25"
+    },
+    {
+      "file": "frontend/src/__tests__/MotionAssetLayer.test.js",
+      "sha256": "ef3cb650ae94845ab20bfc44af257d03d4c7ad2aed4aa93ef7ee45577871160c"
+    },
+    {
+      "file": "frontend/src/__tests__/PublicPages.copy.test.js",
+      "sha256": "8f47c91fe35e8b25996711e34a15e28a414fb55b536d7ae18c6ea6db87165870"
+    },
+    {
+      "file": "frontend/src/components/landing/DirectorShowcase.js",
+      "sha256": "788a77c3fdf18549f13e616edc50fdff07cc144d0b8f88f627e65df38a252107"
+    },
+    {
+      "file": "frontend/src/components/landing/EditorHeroVisual.js",
+      "sha256": "dfd75b3bfab4598b0e1e3152c5e2b6a5099a30a076ea3725585cf1e13e87368c"
+    },
+    {
+      "file": "frontend/src/components/landing/HeroSection.js",
+      "sha256": "484bc9953ffbadf1ab25917abd73c8fbe90489358d86a2e8a88815c6d8703148"
+    },
+    {
+      "file": "frontend/src/components/landing/LandingCompositing.css",
+      "sha256": "5070da9d6ae5085728177b6e5e8001b1c814ad4b99c92d0597b4f3dddb28c460"
+    },
+    {
+      "file": "frontend/src/components/landing/LandingCreators.js",
+      "sha256": "caa5c2d85505723322d78e9573ba2c70e1a71aca714386fea23f392ffe2ee1d4"
+    },
+    {
+      "file": "frontend/src/components/landing/LandingDemo.js",
+      "sha256": "18caf70629bffe8177488a387b4115b21c1c05f107b40042115ac533f75c5fa4"
+    },
+    {
+      "file": "frontend/src/components/landing/LandingEditingStory.js",
+      "sha256": "6536b9e2242b9ed51738b9901b346b9d29f1edd12330717dcc951a1667e16e0f"
+    },
+    {
+      "file": "frontend/src/components/landing/LandingFeatures.js",
+      "sha256": "b2249acc6ea7924de8cd7ed6d2ed32c27086a914335409d2c55f0c12d35de48f"
+    },
+    {
+      "file": "frontend/src/components/landing/LandingFooter.js",
+      "sha256": "b8802c1bd09278ade5f729b4152c8ab458f43e4261ee811e3eb39dd5ed5dd3a4"
+    },
+    {
+      "file": "frontend/src/components/landing/LandingIcon.js",
+      "sha256": "4ec91a7ad0f7fc5da0aa940a5c8fd395e653f72c92ce976a92b1875eb23f24d5"
+    },
+    {
+      "file": "frontend/src/components/landing/LandingMotion.css",
+      "sha256": "8035f996fd4a9227308e621f380f28a2ce524973dce46095d7bc694e315e84d5"
+    },
+    {
+      "file": "frontend/src/components/landing/LandingNavbar.js",
+      "sha256": "e5426b76d1f8806c36353f08c1bf414d39bf03c71b7572727d121bf69b2e7983"
+    },
+    {
+      "file": "frontend/src/components/landing/LandingPage.css",
+      "sha256": "88380a1c2e536d53cb8e765cb838af1d1d5952ece8ebe8ef90a4becf5284fca0"
+    },
+    {
+      "file": "frontend/src/components/landing/LandingWorkflow.js",
+      "sha256": "ff10e1a6e0499d50224b937378cd82c67b9622d3922621e08dc72f6652f41cbc"
+    },
+    {
+      "file": "frontend/src/components/landing/MotionAssetLayer.js",
+      "sha256": "ba3a5a021cd73f5a5591137b7a7d06489ece18469f2a5f9ef4d5e60b1f685e3c"
+    },
+    {
+      "file": "frontend/src/components/landing/MotionEditingScene.js",
+      "sha256": "aed1dac60bd0cf56bf7ab63e6a99304a69ca604f0b59a0a97bda1f0241cdd943"
+    },
+    {
+      "file": "frontend/src/components/landing/MotionGraphicsLayer.js",
+      "sha256": "ceeb78a1b08c7501e4e4256f53c34d0a4418bfabc513cb0432f24455e2c6a4dd"
+    },
+    {
+      "file": "frontend/src/components/landing/ProductVisuals.js",
+      "sha256": "0e2aebfe26552c2e38a284e2b35104fce1f9b8d1df96acd686d6367f84e256a0"
+    },
+    {
+      "file": "frontend/src/components/landing/createEditingScene.js",
+      "sha256": "ab57ced7e1ddceeed36502190c5162647cca642f37bf19fdf4611ee3720a66e3"
+    },
+    {
+      "file": "frontend/src/components/landing/editingSequence.js",
+      "sha256": "597c879653d710a88ea0d56a98d5d62ae7e2e326df63266f2e82de0cea53f61d"
+    },
+    {
+      "file": "frontend/src/components/landing/motionAssetManifest.js",
+      "sha256": "d5e5a539ea75118068fb5d59138907782c5587224b860db6e77925846738d69b"
+    },
+    {
+      "file": "frontend/src/components/landing/motionMaterials.js",
+      "sha256": "c6ea3c7442c3c2003d185417d0155f5af5034f6a377076a28fefc5f74cb2f131"
+    },
+    {
+      "file": "frontend/src/components/landing/sceneTextures.js",
+      "sha256": "6f94fc94c575b93dcfa6fcd7abc1d797b9b1975e606038c0786856b39ddaaa1f"
+    },
+    {
+      "file": "frontend/src/components/landing/useKineticTitle.js",
+      "sha256": "0544be8d4035ebef24794b3b0fca78b9bcdcc8fd6eaa19b3a3f812a2a61f2130"
+    },
+    {
+      "file": "test/e2e/playwright/run-public-homepage-headline.js",
+      "sha256": "035d0f75142d3e225221df0dfaf1103230d629f0e6abf5fe5295be07af32dea4"
+    },
+    {
+      "file": "test/e2e/playwright/run-public-homepage.js",
+      "sha256": "a2c6e7d7695abec02ff3c965d9c8fd4757834028cdf0098d598ed5fd25ce9fda"
+    }
+  ],
+  "main_bundle_gzip": "919.73 kB",
+  "main_css_gzip": "146.1 kB",
+  "notes": [
+    "CRA bundle-size advisory",
+    "Node DEP0176 deprecation warning"
+  ],
+  "build_log_sha256": "c701debc914c47fa08ba5cd63452705a9a825566a12518956cf2b1d0adaa8fad",
+  "asset_manifest_sha256": "c1d20fe98fc0155094f63afa7c03bf8860aac50d04b6d90396980316367586eb",
+  "landing_assets_copied": [
+    "README.md",
+    "podcast-guest.webp",
+    "podcast-host.webp",
+    "podcast-motion.mp4",
+    "podcast-preview.webp",
+    "studio-conversation-v2.webp"
+  ],
+  "landing_assets_match_source": true
+}

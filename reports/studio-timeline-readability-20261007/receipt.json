@@ -1,0 +1,214 @@
+{
+  "status": "PASS",
+  "scope": "Actual production Studio on localhost with existing podcast source; no inference, production API, or GPU job",
+  "checks": [
+    {
+      "label": "Each filmstrip tile represents a different sampled source time; the label occupies a separate band"
+    },
+    {
+      "label": "1440px",
+      "layout": {
+        "left": 0,
+        "right": 1440,
+        "top": 46,
+        "bottom": 1000,
+        "width": 1440,
+        "height": 954
+      },
+      "dock": {
+        "left": 0,
+        "right": 1440,
+        "top": 640,
+        "bottom": 1000,
+        "width": 1440,
+        "height": 360
+      },
+      "timeline": {
+        "left": 0,
+        "right": 1440,
+        "top": 650,
+        "bottom": 1000,
+        "width": 1440,
+        "height": 350
+      },
+      "toolbar": {
+        "left": 1,
+        "right": 1439,
+        "top": 651,
+        "bottom": 707.65625,
+        "width": 1438,
+        "height": 56.65625
+      },
+      "scroll": {
+        "left": 1,
+        "right": 1439,
+        "top": 707.65625,
+        "bottom": 960.328125,
+        "width": 1438,
+        "height": 252.671875
+      },
+      "preview": {
+        "left": 72,
+        "right": 1120,
+        "top": 46,
+        "bottom": 640,
+        "width": 1048,
+        "height": 594
+      },
+      "tools": {
+        "left": 0,
+        "right": 72,
+        "top": 46,
+        "bottom": 640,
+        "width": 72,
+        "height": 594
+      },
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "label": "1280px",
+      "layout": {
+        "left": 0,
+        "right": 1280,
+        "top": 46,
+        "bottom": 800,
+        "width": 1280,
+        "height": 754
+      },
+      "dock": {
+        "left": 0,
+        "right": 1280,
+        "top": 440,
+        "bottom": 800,
+        "width": 1280,
+        "height": 360
+      },
+      "timeline": {
+        "left": 0,
+        "right": 1280,
+        "top": 450,
+        "bottom": 800,
+        "width": 1280,
+        "height": 350
+      },
+      "toolbar": {
+        "left": 1,
+        "right": 1279,
+        "top": 451,
+        "bottom": 532.328125,
+        "width": 1278,
+        "height": 81.328125
+      },
+      "scroll": {
+        "left": 1,
+        "right": 1279,
+        "top": 532.328125,
+        "bottom": 772.65625,
+        "width": 1278,
+        "height": 240.328125
+      },
+      "preview": {
+        "left": 72,
+        "right": 960,
+        "top": 46,
+        "bottom": 440,
+        "width": 888,
+        "height": 394
+      },
+      "tools": {
+        "left": 0,
+        "right": 72,
+        "top": 46,
+        "bottom": 440,
+        "width": 72,
+        "height": 394
+      },
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    },
+    {
+      "label": "1024px",
+      "layout": {
+        "left": 0,
+        "right": 1024,
+        "top": 46,
+        "bottom": 768,
+        "width": 1024,
+        "height": 722
+      },
+      "dock": {
+        "left": 0,
+        "right": 1024,
+        "top": 408,
+        "bottom": 768,
+        "width": 1024,
+        "height": 360
+      },
+      "timeline": {
+        "left": 0,
+        "right": 1024,
+        "top": 418,
+        "bottom": 768,
+        "width": 1024,
+        "height": 350
+      },
+      "toolbar": {
+        "left": 1,
+        "right": 1023,
+        "top": 419,
+        "bottom": 534,
+        "width": 1022,
+        "height": 115
+      },
+      "scroll": {
+        "left": 1,
+        "right": 1023,
+        "top": 534,
+        "bottom": 740,
+        "width": 1022,
+        "height": 206
+      },
+      "preview": {
+        "left": 72,
+        "right": 704,
+        "top": 46,
+        "bottom": 408,
+        "width": 632,
+        "height": 362
+      },
+      "tools": {
+        "left": 0,
+        "right": 72,
+        "top": 46,
+        "bottom": 408,
+        "width": 72,
+        "height": 362
+      },
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "label": "Pointer seek and split retain the 16.08-second source offset"
+    },
+    {
+      "label": "Undo and redo restore actual split timing"
+    },
+    {
+      "label": "Real-source subject authoring is accessible and unsaved sources cannot dispatch a render"
+    }
+  ],
+  "pageErrors": []
+}

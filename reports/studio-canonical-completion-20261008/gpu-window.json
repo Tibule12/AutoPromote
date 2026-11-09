@@ -1,0 +1,16 @@
+{
+  "deadlineEpoch": 1791461180,
+  "watchdogPid": 142627,
+  "authorizedMinutes": 30,
+  "instance": "autopromote-l40s-staging",
+  "scope": "Studio Blender alpha and mask/tracking preview-to-export",
+  "newJobsAfterDeadline": false,
+  "startedAt": "2026-10-08T11:36:20Z",
+  "stopRequestedAt": "2026-10-08T12:07:08.589573+00:00",
+  "verifiedGpuJobs": 2,
+  "scopeResult": "Blender OptiX/HQ and SAM2/NVENC previews produced; final delivery/parity still unqualified",
+  "stopVerification": "STOPPED",
+  "verifiedStoppedAt": "2026-10-08T12:08:44.498611+00:00",
+  "cloudStop": "First manual CLI request returned transient 401; automatic watchdog stop succeeded at deadline; fresh brev ls confirms STOPPED",
+  "newGpuJobsAfterDeadline": 0
+}

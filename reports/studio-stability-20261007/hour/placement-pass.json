@@ -1,0 +1,29 @@
+{
+  "enabled": true,
+  "status": "burned_in",
+  "asset": "autopromote_viral_clip_studio_lockup",
+  "placement": "adaptive_safe_path",
+  "style": "transparent_logo_lockup",
+  "variant": "studio",
+  "movement_schedule": [
+    {
+      "start_time": 0.0,
+      "end_time": 12.0,
+      "position": "custom",
+      "left": 88,
+      "top": 90
+    }
+  ],
+  "caption_review_copy": false,
+  "delivery": {
+    "resolution": "source",
+    "width": 1280,
+    "height": 720,
+    "fps": 30,
+    "codec": "h264",
+    "encoder": "libx264",
+    "quality": "high",
+    "crf": 19,
+    "preset": "veryfast"
+  }
+}

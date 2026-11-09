@@ -6,10 +6,11 @@ import { buildViralRenderData } from "../viralRenderPayload";
 
 test("uploads a full-length recording and preserves trim, zero gain and kind through the actual render builder", async () => {
   const file = new File(["recording"], "take.webm", { type: "audio/webm" });
-  const upload = jest.fn().mockResolvedValue({ url: "https://example.com/take.webm" });
+  const upload = jest.fn().mockResolvedValue({ url: "https://example.com/take.webm", storagePath: "owned/take.webm" });
   const cues = await uploadVoiceoversForRender([{ id: "voice", name: "Take 1", file, url: "blob:recording",
     startTime: 4, trimStart: 2, duration: 45, volume: 0 }], { upload, token: "test" });
   expect(upload).toHaveBeenCalledWith(expect.objectContaining({ file, mediaType: "audio", token: "test" }));
+  expect(cues[0].sourceStoragePath).toBe("owned/take.webm");
   const payload = buildViralRenderData({ selectedClip: { start: 0, end: 60 },
     finalVideoUrl: "https://example.com/source.mp4", extraOptions: { soundEffects: cues } });
   expect(payload.sound_effects).toEqual([expect.objectContaining({ kind: "voiceover", duration: 45,

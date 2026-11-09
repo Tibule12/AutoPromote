@@ -1,0 +1,40 @@
+{
+  "video_url": "http://127.0.0.1:8765/podcast-source-45s.mp4",
+  "start_time": 0,
+  "end_time": 20,
+  "auto_captions": true,
+  "caption_review_copy": true,
+  "caption_style": "bold_pop",
+  "caption_segments": [
+    {
+      "id": "1",
+      "start_time": 0.0,
+      "end_time": 16.08,
+      "text": " ifike kubona ibe bhaskathu abaphumi abaphumi abaphumi abaphumi abaphumi abaphumi abaphumi abaphumi abaphumi abaphumi abazi abazi abazi abazi abazi abazi abazi abazi abazi abazi abazi",
+      "text_review_required": true,
+      "text_reviewed": false
+    },
+    {
+      "id": "2",
+      "start_time": 16.08,
+      "end_time": 20,
+      "text": " utshwala ee yonke into yam utshwa eewe iwayini ya ya i drink i think so ya iwayini four streets ya i give akutshayiwa kuthiwa four streets and ke ngake apparently kuthiwa bebesephilile isixo uba ajongile ee uba yeyi iwayini bale eyi guys yekani iwayini yekani iwayini yekani iwayini iwayini iwayini ayiyo ndoba but i feel like",
+      "text_review_required": true,
+      "text_reviewed": false
+    }
+  ],
+  "output_settings": {
+    "resolution": "1080p",
+    "fps": 30
+  },
+  "brand_watermark": true,
+  "finish_plan": {
+    "version": 1,
+    "enabled": true,
+    "reframe": {
+      "enabled": true,
+      "aspect": "9:16",
+      "mode": "off"
+    }
+  }
+}

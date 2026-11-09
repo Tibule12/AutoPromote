@@ -1,0 +1,310 @@
+[
+  {
+    "id": "direction",
+    "value": {
+      "title": "The Boat That Found Its World",
+      "story": {
+        "about": "An ordinary idea awakens, survives a storm, and becomes a living story on a desk-sized world, revealed by AutoPromote\u2019s private studio engine",
+        "whyCare": "Every creator needs a tool that turns imagination into reality without compromise \u2014 even when the world seems too small to matter",
+        "hook": "A single sheet of paper holds a universe waiting to be born \u2014 and it\u2019s about to break the surface",
+        "beginning": "Water rises from the edge of a blank page, lifting a tiny boat into motion",
+        "development": "The ocean swells, threatening to swallow the fragile vessel \u2014 but the world holds its breath",
+        "tension": "A crashing wave looms \u2014 the boat vanishes, leaving only silence\u2026 until light returns",
+        "payoff": "Golden calm restores the scene \u2014 the miniature world expands, revealing its origin on a desk",
+        "ending": "AutoPromote Studio UI reveals the full creative engine \u2014 your story, fully realized, ready to scale",
+        "withheld": "AutoPromote\u2019s name appears only at the final reveal \u2014 the tool remains hidden until the moment it proves itself",
+        "amplify": [
+          "Paper-awakens (2.5s) \u2014 water emerges, boat floats",
+          "Ocean-environment (0.4s) \u2014 wide sea opens, boat visible",
+          "Storm-action \u2014 wave curls, no boat inside",
+          "Light-return (3s) \u2014 same boat, golden calm",
+          "World-on-desk \u2014 miniature pool expands, origin revealed",
+          "Studio-ui \u2014 editable clips, live preview",
+          "Identity \u2014 correct spelling, brief/no-footage statement",
+          "Score \u2014 original emotional tone, no cuts"
+        ],
+        "remove": [
+          "Overexposed ocean footage",
+          "Boat inside storm-action shot",
+          "Static paper lead-in",
+          "Desk lead-in before world expansion",
+          "Clipped audio samples",
+          "Random effects",
+          "Public factory implication",
+          "Padding narration"
+        ]
+      },
+      "script": [
+        {
+          "beatId": "001",
+          "action": "Paper-awakens: water rises, boat floats into frame",
+          "sound": "Score begins \u2014 soft, hopeful swell"
+        },
+        {
+          "beatId": "002",
+          "action": "Ocean-environment: wide sea opens, boat visible",
+          "sound": "Wave builds \u2014 tension rises, score intensifies"
+        },
+        {
+          "beatId": "003",
+          "action": "Storm-action: wave curls, boat vanishes \u2014 silence",
+          "sound": "Score cuts \u2014 sudden void, then pause"
+        },
+        {
+          "beatId": "004",
+          "action": "Light-return: golden calm, boat intact \u2014 world expands",
+          "sound": "Score returns \u2014 warm, triumphant swell"
+        },
+        {
+          "beatId": "005",
+          "action": "World-on-desk: miniature pool reveals origin",
+          "sound": "Voiceover begins \u2014 'Your story, fully realized\u2026' (brief-no-footage, full duration, no cut-off)"
+        },
+        {
+          "beatId": "006",
+          "action": "Studio-ui: editable clips, live preview \u2014 AutoPromote revealed",
+          "sound": "Identity appears \u2014 'AutoPromote' + 'brief/no-footage' statement"
+        }
+      ]
+    },
+    "model": "Qwen/Qwen3-VL-8B-Instruct",
+    "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+    "settings": {
+      "dtype": "bfloat16",
+      "attention": "sdpa",
+      "do_sample": false,
+      "max_tokens": 3200
+    },
+    "evidenceSha256": null,
+    "seconds": 42.36533588200109,
+    "gpu": "NVIDIA L40S"
+  },
+  {
+    "id": "assets",
+    "value": {
+      "assets": [
+        {
+          "assetId": "welcome_001",
+          "type": "video",
+          "beatId": "001",
+          "prompt": "Paper-awakens: water rises, boat floats into frame",
+          "reason": "Open with final 2.5s of source 2.5 \u2014 water appears, boat floats; omit static lead-in",
+          "duration": 2.5,
+          "provider": "reuse",
+          "acceptanceCriteria": [
+            "Water emerges from edge of blank page",
+            "Boat floats into frame",
+            "No static lead-in",
+            "Exact libraryRef: paper-awakens"
+          ],
+          "seed": 12345,
+          "libraryRef": "paper-awakens"
+        },
+        {
+          "assetId": "welcome_002",
+          "type": "video",
+          "beatId": "002",
+          "prompt": "Ocean-environment: wide sea opens, boat visible",
+          "reason": "Use only 0.4\u20132.1s: wide sea opens, boat visible; reject overexposed later footage",
+          "duration": 1.7,
+          "provider": "reuse",
+          "acceptanceCriteria": [
+            "Wide sea opens",
+            "Boat visible",
+            "No overexposure",
+            "Exact libraryRef: ocean-environment"
+          ],
+          "seed": 67890,
+          "libraryRef": "ocean-environment"
+        },
+        {
+          "assetId": "welcome_003",
+          "type": "video",
+          "beatId": "003",
+          "prompt": "Storm-action: wave curls, no boat inside",
+          "reason": "Environment threat cutaway \u2014 wave curls and collapses; no boat present",
+          "duration": 1.7,
+          "provider": "reuse",
+          "acceptanceCriteria": [
+            "Wave visibly curls and collapses",
+            "No boat inside shot",
+            "Exact libraryRef: storm-action"
+          ],
+          "seed": 112233,
+          "libraryRef": "storm-action"
+        },
+        {
+          "assetId": "welcome_004",
+          "type": "video",
+          "beatId": "004",
+          "prompt": "Light-return: golden calm, boat intact \u2014 world expands",
+          "reason": "Same boat, golden calm \u2014 use 2\u20135s; omit desk lead-in",
+          "duration": 3,
+          "provider": "reuse",
+          "acceptanceCriteria": [
+            "Same reference boat remains intact",
+            "Golden sea revealed",
+            "World expands",
+            "Exact libraryRef: light-return"
+          ],
+          "seed": 445566,
+          "libraryRef": "light-return"
+        },
+        {
+          "assetId": "welcome_005",
+          "type": "video",
+          "beatId": "005",
+          "prompt": "World-on-desk: miniature pool reveals origin",
+          "reason": "Expanding miniature pool and blank sheet reveal origin",
+          "duration": 5.041667,
+          "provider": "reuse",
+          "acceptanceCriteria": [
+            "Miniature pool expands",
+            "Blank sheet reveals origin",
+            "Exact libraryRef: world-on-desk"
+          ],
+          "seed": 778899,
+          "libraryRef": "world-on-desk"
+        },
+        {
+          "assetId": "welcome_006",
+          "type": "ui",
+          "beatId": "006",
+          "prompt": "Studio-ui: editable clips, live preview \u2014 AutoPromote revealed",
+          "reason": "Actual AutoPromote Studio shows generated boat footage, editable clips, live preview",
+          "duration": 3,
+          "provider": "reuse",
+          "acceptanceCriteria": [
+            "Editable source clips visible",
+            "Live preview active",
+            "Exact libraryRef: studio-ui"
+          ],
+          "seed": 101112,
+          "libraryRef": "studio-ui"
+        },
+        {
+          "assetId": "welcome_007",
+          "type": "motion",
+          "beatId": "006",
+          "prompt": "Identity: correct spelling, brief/no-footage statement",
+          "reason": "AutoPromote and brief/no-footage statement give clear ending",
+          "duration": 3,
+          "provider": "reuse",
+          "acceptanceCriteria": [
+            "Correctly spelled 'AutoPromote' displayed",
+            "Brief/no-footage statement visible",
+            "Exact libraryRef: identity"
+          ],
+          "seed": 131415,
+          "libraryRef": "identity"
+        },
+        {
+          "assetId": "welcome_008",
+          "type": "audio",
+          "beatId": "005",
+          "prompt": "Brief-no-footage narration: 'Your story, fully realized\u2026' \u2014 full duration, no cut-off",
+          "reason": "Voiceover cue fits full duration; no clipping or truncation",
+          "duration": 3.65,
+          "provider": "reuse",
+          "acceptanceCriteria": [
+            "Full 3.65s narration delivered",
+            "No cut-off",
+            "Stereo, 48000Hz, no clipped samples",
+            "Exact libraryRef: brief-no-footage"
+          ],
+          "seed": 161718,
+          "libraryRef": "brief-no-footage"
+        }
+      ]
+    },
+    "model": "Qwen/Qwen3-VL-8B-Instruct",
+    "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+    "settings": {
+      "dtype": "bfloat16",
+      "attention": "sdpa",
+      "do_sample": false,
+      "max_tokens": 4500
+    },
+    "evidenceSha256": null,
+    "seconds": 59.1461199080004,
+    "gpu": "NVIDIA L40S"
+  },
+  {
+    "id": "edits",
+    "value": {
+      "outputs": [
+        {
+          "outputId": "welcome_hero",
+          "aspect": "16:9",
+          "purpose": "AutoPromote welcome film: ordinary idea awakens, survives storm, becomes story on desk, revealed by Studio UI",
+          "musicAssetId": "welcome_008",
+          "audioCues": [
+            {
+              "assetId": "welcome_008",
+              "kind": "voiceover",
+              "startTime": 3.65,
+              "duration": 3.65,
+              "trimStart": 0,
+              "volume": 1
+            }
+          ],
+          "sequence": [
+            {
+              "assetId": "welcome_001",
+              "start": 0,
+              "duration": 2.5,
+              "reason": "Open with final 2.5s of paper-awakens \u2014 water appears, boat floats; omit static lead-in"
+            },
+            {
+              "assetId": "welcome_002",
+              "start": 0,
+              "duration": 1.7,
+              "reason": "Ocean-environment: wide sea opens, boat visible; reject overexposed later footage"
+            },
+            {
+              "assetId": "welcome_003",
+              "start": 0,
+              "duration": 1.7,
+              "reason": "Storm-action: wave curls, no boat inside \u2014 environment threat cutaway"
+            },
+            {
+              "assetId": "welcome_004",
+              "start": 0,
+              "duration": 3,
+              "reason": "Light-return: same boat, golden calm \u2014 world expands; omit desk lead-in"
+            },
+            {
+              "assetId": "welcome_005",
+              "start": 0,
+              "duration": 5.041667,
+              "reason": "World-on-desk: miniature pool expands, origin revealed"
+            },
+            {
+              "assetId": "welcome_006",
+              "start": 0,
+              "duration": 3,
+              "reason": "Studio-ui: editable clips, live preview \u2014 AutoPromote revealed"
+            },
+            {
+              "assetId": "welcome_007",
+              "start": 0,
+              "duration": 3,
+              "reason": "Identity: correctly spelled 'AutoPromote' + brief/no-footage statement"
+            }
+          ]
+        }
+      ]
+    },
+    "model": "Qwen/Qwen3-VL-8B-Instruct",
+    "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+    "settings": {
+      "dtype": "bfloat16",
+      "attention": "sdpa",
+      "do_sample": false,
+      "max_tokens": 2400
+    },
+    "evidenceSha256": null,
+    "seconds": 21.060518197999045,
+    "gpu": "NVIDIA L40S"
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "status": "REJECTED_FOR_FILM",
+  "reviewedBy": "Codex frame inspection",
+  "evidence": [
+    "decoded-review.png",
+    "seam-review.png",
+    "receipt.json"
+  ],
+  "artifactSha256": "467faeec501af2e2305b1b04317e1072992144e5bd15ff61897bd2e9578deb7a",
+  "findings": [
+    "Frames 0\u201316 hold a readable paper boat.",
+    "Around frame 24 a second, already formed yacht and sail appear behind the unchanged paper boat.",
+    "Frames 32\u201340 show both boats at once; no continuous hull-to-timber transformation occurs.",
+    "The final photographic yacht and continuation seam are closer numerically (MAE 10.306), but that does not rescue the failed story event."
+  ],
+  "decision": "Exclude from accepted assets and all public cuts. Do not rerun the same conditioning strategy."
+}

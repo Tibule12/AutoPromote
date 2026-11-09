@@ -1,0 +1,79 @@
+{
+  "identity": "8d1464e084e5a92eab5e81d402f722661a378d212ca8d03ccc24ba4e0de0a8c8",
+  "actions": [
+    {
+      "signature": "da5b819a6a2d80507d92331b69ca840db7a08dae5e95e3c8563971c4d8c6918f",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Show media"
+      },
+      "expect": [
+        {
+          "type": "visible",
+          "role": "button",
+          "name": "Hide media"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-07T06:56:10.465Z",
+      "reason": "Open the observed Show media control",
+      "planner": null,
+      "afterState": "74fb2c6c257e052755ccc3b044cf2605ef13c0b31e15db69c05b407f97417e9f"
+    },
+    {
+      "signature": "1a569c26d60b8850678364a1cd98e2ca28c20c43074e1227b68b0366bcab835b",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Paper voyage · generated source assembly"
+      },
+      "expect": [
+        {
+          "type": "state_changed",
+          "value": "0f0fcb01ec7c062c5ea9c480aba55b30008a1eb42b32473dd3449a854b732028"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-07T06:58:32.754Z",
+      "reason": "Open the observed Paper voyage · generated source assembly control",
+      "planner": null,
+      "afterState": "8afea5882bb317d4ee0b95b6c52a3970b8161d3ebc113d9acaf2a7c664f4e611"
+    }
+  ],
+  "observations": [
+    {
+      "id": "observation-1",
+      "url": "http://127.0.0.1:5008/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T06:56:03.489Z"
+    },
+    {
+      "id": "observation-2",
+      "url": "http://127.0.0.1:5008/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T06:57:21.292Z"
+    },
+    {
+      "id": "observation-3",
+      "url": "http://127.0.0.1:5008/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T06:58:26.783Z"
+    },
+    {
+      "id": "observation-4",
+      "url": "http://127.0.0.1:5008/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T06:59:43.567Z"
+    },
+    {
+      "id": "observation-5",
+      "url": "http://127.0.0.1:5008/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T07:00:20.389Z"
+    }
+  ],
+  "status": "running"
+}

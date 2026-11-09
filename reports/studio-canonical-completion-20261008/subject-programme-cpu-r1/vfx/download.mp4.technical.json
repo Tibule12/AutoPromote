@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "sha256": "bb31674ce3e35c9fcc429e88b300d9e4bb86b817066baecce4d5138b75a6a94d",
+  "bytes": 1694026,
+  "seconds": 6,
+  "video": {
+    "width": 1280,
+    "height": 720,
+    "codec": "h264",
+    "fps": "60/1",
+    "duration": "6.000000",
+    "pixelFormat": "yuv420p",
+    "encoder": "Lavc60.31.102 libx264"
+  },
+  "audio": {
+    "codec": "aac",
+    "channels": 2,
+    "sampleRate": "96000",
+    "duration": "6.000000"
+  },
+  "independentFullDecode": true,
+  "contactSheet": "reports/studio-canonical-completion-20261008/subject-programme-cpu-r1/vfx/download.mp4.frames.jpg",
+  "scope": "Technical only. Pixel and listening review are separate required evidence."
+}

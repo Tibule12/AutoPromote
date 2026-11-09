@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "muted": true,
+  "headless": true,
+  "scope": "Semantic operator observation/download and real media playback. No NVIDIA planner decision or audio listening approval.",
+  "playback": [
+    {
+      "label": "Full founder film",
+      "duration": 51.083333,
+      "width": 1920,
+      "height": 1080,
+      "error": null,
+      "seek": 35.5,
+      "seekVerified": true
+    },
+    {
+      "label": "Founder film short cut",
+      "duration": 26.5,
+      "width": 1920,
+      "height": 1080,
+      "error": null,
+      "seek": 11,
+      "seekVerified": true
+    },
+    {
+      "label": "Founder film teaser",
+      "duration": 10,
+      "width": 1920,
+      "height": 1080,
+      "error": null,
+      "seek": 8.2,
+      "seekVerified": true
+    }
+  ],
+  "download": {
+    "sha256": "3b22a99aead61be0e43e4ec58745a6137fc850d33187af6c1578da950eb9f76e",
+    "bytes": 23872749,
+    "duplicateActionSuppressed": true
+  },
+  "range": {
+    "status": 206,
+    "bytes": 1024
+  }
+}

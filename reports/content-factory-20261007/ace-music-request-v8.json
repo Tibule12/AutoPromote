@@ -1,0 +1,16 @@
+{
+  "sourceBrief": "A real cinematic voyage begins as a folded paper boat. AutoPromote generates the raw material from an idea and uses its existing Director and render pipeline to make the film. The reveal is a full-size working boat at sea, not a paper boat surviving at sea.",
+  "requirement": {
+    "assetId": "transformation-score",
+    "type": "audio",
+    "beatId": "transformation",
+    "provider": "ace_step",
+    "duration": 24,
+    "seed": 20261007149,
+    "prompt": "classical, orchestral, cinematic film score, strings, felt piano, orchestral percussion, brass, deep bass, 92 BPM, elegant, emotional, adventurous, wonder, mysterious opening, accelerating orchestral rise, warm harmonic reveal, cinematic impact, expansive resolved ending, high production quality, instrumental",
+    "reason": "One coherent rise and harmonic release supports the material and world transformation.",
+    "acceptanceCriteria": [
+      "Audible non-clipped instrumental stereo score; review musical direction in the final edit."
+    ]
+  }
+}

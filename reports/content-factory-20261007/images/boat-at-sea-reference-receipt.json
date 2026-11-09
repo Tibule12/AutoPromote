@@ -1,0 +1,7 @@
+{
+  "origin": "frame_extracted_from_server_generated_video",
+  "parentArtifact": "generated/golden-return-v2.mp4",
+  "parentSha256": "9043b7439f9cbbe7683ed68213a90fd75ac7cc300362a2d028da717b2b0df038",
+  "sourceTime": 3.2,
+  "sha256": "a597b88c7503974ff3ba32545cb9e5aeea526839bc7227eef42e0e478ee0d75f"
+}

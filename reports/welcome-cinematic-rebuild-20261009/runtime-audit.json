@@ -1,0 +1,53 @@
+{
+  "verifiedAt": "2026-10-09T10:36:12.261160+00:00",
+  "inspectionOnly": true,
+  "newGpuExecutionsSubmitted": 0,
+  "job": "projects/autopromote-cc6d3/locations/us-central1/jobs/viral-studio-rtx-qualification",
+  "image": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/viral-studio-3d-renderer@sha256:6b97198c6770c8f211caf8b018be7dc85290035ba5a3922580a4a324179ed522",
+  "resources": {
+    "limits": {
+      "cpu": "20",
+      "nvidia.com/gpu": "1",
+      "memory": "80Gi"
+    }
+  },
+  "taskCount": 1,
+  "maxRetries": 0,
+  "volumeMounts": [],
+  "cpuContainerInspection": {
+    "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+    "torchInstalled": false,
+    "diffusersInstalled": false
+  },
+  "models": [
+    {
+      "model": "Wan-AI/Wan2.2-I2V-A14B-Diffusers",
+      "revision": "596658fd9ca6b7b71d5057529bbf319ecbc61d74",
+      "officialRepository": "https://huggingface.co/Wan-AI/Wan2.2-I2V-A14B-Diffusers",
+      "selectedSnapshotBytes": 126202569662,
+      "gated": false,
+      "license": "apache-2.0",
+      "weightsPrepared": false
+    },
+    {
+      "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+      "revision": "b8fff7315c768468a5333511427288870b2e9635",
+      "officialRepository": "https://huggingface.co/Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+      "selectedSnapshotBytes": 34201436033,
+      "gated": false,
+      "license": "apache-2.0",
+      "weightsPrepared": false
+    }
+  ],
+  "allGpuJobs": [
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/jobs/viral-studio-rtx-qualification",
+      "activeExecutions": []
+    }
+  ],
+  "activeGpuExecutions": [],
+  "gpuServices": [],
+  "runtimeReadyForInference": false,
+  "humanPerformanceGenerated": false,
+  "productionTrafficChanged": false
+}

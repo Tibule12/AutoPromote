@@ -1,0 +1,20 @@
+{
+  "deadlineEpoch": 1791363059.6449072,
+  "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+  "images": [
+    {
+      "id": "storm-keyart-v2",
+      "prompt": "An enormous curling tsunami wave, a towering dark blue wall of water, dominates almost the entire picture. At its base one tiny intact white folded paper boat floats, less than five percent of the frame. Wide dramatic storm scene, steep giant wave above fragile paper, white sea spray, warm amber rim light, sharp realistic turbulent water, cinematic commercial photography.",
+      "negative_prompt": "big boat, large boat, closeup, sail mast, sailboat, calm sea, daylight, text, logos, cartoon, deformed boat",
+      "seed": 2026100751,
+      "duration": 3
+    },
+    {
+      "id": "ocean-keyart-v2",
+      "prompt": "Extreme distant aerial photograph of a vast deep blue ocean with large sweeping parallel waves. One very tiny white origami paper boat occupies less than three percent of the image, a small bright folded hull amid miles of ocean. Complete boat silhouette, huge visual scale, warm golden horizon at twilight, wide cinematic composition, realistic ocean texture, dark dramatic film contrast.",
+      "negative_prompt": "closeup, macro, big boat, large boat, sail mast, cropped boat, text, logos, cartoon",
+      "seed": 2026100752,
+      "duration": 3
+    }
+  ]
+}

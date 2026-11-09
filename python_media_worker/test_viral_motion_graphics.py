@@ -19,6 +19,7 @@ from viral_motion_graphics import (
     normalize_motion, probe, render_motion_and_sound, run, synthesize_effect, validate_design,
     generate_transparent_motion_overlay,
 )
+from studio_subject_vfx_export import validate_resolved_subject_vfx, match_subject_vfx
 
 
 class MotionContractTests(unittest.TestCase):
@@ -48,11 +49,14 @@ class MotionContractTests(unittest.TestCase):
             validate_design=validate_design,
             validate_resolved_overlays=lambda _overlays: None,
             normalize_audio_remix=lambda _remix: None,
+            validate_resolved_subject_vfx=validate_resolved_subject_vfx,
+            match_subject_vfx=match_subject_vfx,
             HTTPException=HttpError,
             render_viral_clip_impl=implementation,
         )
         exec(compile(ast.Module(body=[handler], type_ignores=[]), "render-handler", "exec"), namespace)
-        request = SimpleNamespace(motionGraphics={"version": 99}, sound_effects=[], async_mode=False)
+        request = SimpleNamespace(motionGraphics={"version": 99}, sound_effects=[],
+                                  timeline_segments=[], async_mode=False)
         with self.assertRaises(HttpError) as error:
             asyncio.run(namespace["render_viral_clip"](request))
         self.assertEqual(error.exception.status_code, 422)

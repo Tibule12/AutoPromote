@@ -1,0 +1,61 @@
+{
+  "fingerprint": "5f3e84063833b3497c89d14ea53e51780b04c106f24a592d64456a347b51e394",
+  "result": {
+    "id": "broll-plan-711b85e6f891fee477a9a2e3",
+    "value": {
+      "reason": "The content is a podcast introduction with personal storytelling elements. Only two meaningful B-roll shots are selected: one showing the host welcoming viewers (captions 0–4) and another illustrating the guest’s childhood background (captions 32–37). These shots align with the spoken content without fabrication or unnecessary cutaways. All emotional and personal moments are kept with the speaker visible. No additional shots are justified due to the minimal visual context provided in the script,",
+      "shots": [
+        {
+          "captionId": "transcript-caption-0-timeline-1",
+          "evidenceQuote": "Hello, my lovely viewers at home",
+          "title": "Host Welcomes Viewers",
+          "prompt": "A warm, smiling host sits in front of a softly lit studio backdrop, gesturing toward the camera as if addressing an audience. Natural light streams through a window behind them. A gentle breeze moves a curtain slightly. The host’s expression is inviting and genuine, eyes meeting the lens directly. No text or logos visible. Duration: 2 seconds starting at 1.22s",
+          "start": 1.22,
+          "duration": 2
+        },
+        {
+          "captionId": "transcript-caption-32-timeline-1",
+          "evidenceQuote": "I was born here in Cape Town",
+          "title": "Childhood Origins",
+          "prompt": "A young child walks barefoot on a sunlit street in a coastal town, holding hands with an adult figure. The child looks up curiously at the sky. Behind them, a colorful building and palm trees sway gently in the breeze. The scene feels nostalgic and peaceful. No text or logos. Duration: 3 seconds starting at 86.04s",
+          "start": 86.04,
+          "duration": 3
+        }
+      ]
+    },
+    "rawValue": {
+      "reason": "The content is a podcast introduction with personal storytelling elements. Only two meaningful B-roll shots are selected: one showing the host welcoming viewers (captions 0–4) and another illustrating the guest’s childhood background (captions 32–37). These shots align with the spoken content without fabrication or unnecessary cutaways. All emotional and personal moments are kept with the speaker visible. No additional shots are justified due to the minimal visual context provided in the script,",
+      "shots": [
+        {
+          "captionId": "transcript-caption-0-timeline-1",
+          "evidenceQuote": "Hello, my lovely viewers at home",
+          "title": "Host Welcomes Viewers",
+          "prompt": "A warm, smiling host sits in front of a softly lit studio backdrop, gesturing toward the camera as if addressing an audience. Natural light streams through a window behind them. A gentle breeze moves a curtain slightly. The host’s expression is inviting and genuine, eyes meeting the lens directly. No text or logos visible. Duration: 2 seconds starting at 1.22s",
+          "start": 1.22,
+          "duration": 2
+        },
+        {
+          "captionId": "transcript-caption-32-timeline-1",
+          "evidenceQuote": "I was born here in Cape Town",
+          "title": "Childhood Origins",
+          "prompt": "A young child walks barefoot on a sunlit street in a coastal town, holding hands with an adult figure. The child looks up curiously at the sky. Behind them, a colorful building and palm trees sway gently in the breeze. The scene feels nostalgic and peaceful. No text or logos. Duration: 3 seconds starting at 86.04s",
+          "start": 86.04,
+          "duration": 3
+        }
+      ]
+    },
+    "contractRepairs": [],
+    "model": "Qwen/Qwen3-VL-8B-Instruct",
+    "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+    "settings": {
+      "dtype": "bfloat16",
+      "attention": "sdpa",
+      "do_sample": false,
+      "max_tokens": 4500
+    },
+    "evidenceSha256": null,
+    "frameEvidence": [],
+    "seconds": 19.479751202001353,
+    "gpu": "NVIDIA L40S"
+  }
+}

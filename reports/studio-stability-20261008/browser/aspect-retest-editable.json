@@ -1,0 +1,1466 @@
+{
+  "url": "http://localhost:5000/",
+  "text": "CREATE\nViral Clip Studio\n🔈\nExplain This Tab\nThulani Mtshwelo\ntmtshwelo21@gmail.com\nAutoPromote\nCreator workspace\nOverview\n\nCREATE\n\nCam Combiner\nFind Viral Clips\nViral Clip Studio\nSmart Promo\nIdea-to-Video\n\nPUBLISH\n\nPublisher\nQueue\n\nMEASURE\n\nAnalytics\n\nSETTINGS\n\nConnections\nTeam\nBilling\nSecurity\nNeed help getting started?\nVisit the docs →\nSign out\nCREATE\nViral Clip Studio\n\nEdit detected moments on the full timeline, refine hooks, and render short clips.\n\nA\nAutoPromote\nVIRAL CLIP STUDIO\nStudio QA 20261008 aspect retest\nQuick\nCreator\nSignature\n● No render credits used\n↶ Undo\n↷ Redo\n×\n✦\nMoments\n✂\nCut\n⌁\nHook\n⌗\nReframe\nCC\nCaptions\nT\nGraphics\n◆\nMotion\n◫\nComposite\n✺\nCreator FX\n≋\nPacing\n▣\nB-roll\n◐\nColor\n♫\nSound\n⇧\nExport\nClose media ×\nStudio QA 20261008 aspect retest\nPROJECT\nProject name\nSave project\nDuplicate\nOpen saved project (4)\nStudio QA 20261008 aspect retest\n↶2\n×\nStudio QA 20261008 captions\n×\nStudio QA 20261008 Director copyStudio QA 20261008 clean portrait\n↶2\n×\nStudio QA 20261008 Director\n↶1\n×\nMedia\nSequence\nMoments\nMEDIA\nProject media\n1\n\nImport your videos here, then choose what belongs in the edit. Sequence adds to the end; B-roll starts at the playhead.\n\n＋ Import scenes\n▶\npodcast-12s.mp4\n12.0s · Original\nSaved · ready to edit\nIn sequence\nGroup camera angles\nItems already in this edit\nOptimized media / proxies\nReusable edit templates (0)\nLocal edit\n0 layers · Hook not set\nPreview\nBefore\nAfter\nCompare\nⅡ\nHide media\nHide timeline\nView options\n↻ Preview synced\n♪ Source audio on\n✦STUDIO QA CAPTION RETEST\n❚❚\n0:3.20 / 0:12.0\n🔊\n100%\nReframe controls\n\nSet aspect, framing mode, subject position and zoom. Review the whole clip for faces cut off by the crop.\n\nIncoming proposal\nReview one suggested cut\n\nThe timeline stays unchanged until you approve this exact preview.\n\nReview incoming edit\nAI CREATIVE DIRECTOR\nReturn to story direction\n☷\nAuto Reframe\nFrame the speaker or the complete conversation\nEnabled\nEnable Auto Reframe\nFollow a reviewed subject, preserve the full source, or compose synchronized cameras.\nOUTPUT FRAME\n9:16\nTikTok · Reels · Shorts\n4:5\nInstagram feed\n1:1\nSquare social\n16:9\nYouTube · landscape\nFRAMING BEHAVIOUR\nSolo Speaker\nShow Everyone\nMulti-Camera\nUse reviewed framing points to keep the speaker comfortably in view.\nMulti-Camera setup\nNeeds 2 synchronized angles\n⌗\nReviewed follow path controls the crop\nThe After canvas interpolates the reviewed framing points below, and export receives the same timed path.\nDetect & follow face\nFollow existing camera cuts\nFor an already-edited video: follow the foreground face in each shot. No separate camera files needed.\n\nPosition the crop over your speaker, then analyze real face movement.\n\nSPEAKER ZOOM 1.00×\nPICTURE FILL FOR THIS CAMERA SHOT 1.10×\nUse this to remove black bars inside the rounded frame. The value stays on the Director timeline until the next camera cut.\nFraming corrections\nAdd a crop point at the playhead or use multi-speaker shortcuts.\n+ Add here\n👤 Left Speaker\n👤 Right Speaker\n🔄 Alternate Speakers\n1\n0.00s\n2\n0.50s\n3\n1.00s\n4\n1.50s\n5\n2.00s\n6\n2.50s\n7\n3.00s\n8\n3.50s\n9\n4.00s\n10\n4.50s\n11\n4.70s\n12\n5.00s\n13\n5.20s\n14\n5.50s\n15\n6.00s\n16\n6.50s\n17\n7.00s\n18\n7.50s\n19\n8.00s\n20\n8.50s\n21\n9.00s\n22\n9.50s\n23\n10.00s\n24\n10.50s\n25\n11.00s\n26\n11.50s\n▶ Preview 9:16 Framing\n✓\n\nProject checkpoint saved. Earlier versions remain restorable.\n\nSplit\nTrim Start\nTrim End\nMore actions\nV\nSelect\nC\nRazor\nB\nRipple\nN\nRoll\nY\nSlip\nU\nSlide\nH\nHand\nShow empty tracks\n⌁ Snap\n⛓ Linked\n⇥ Ripple\n−\n+\nFit\n1×\n0:00\n0:02\n0:04\n0:06\n0:08\n0:10\n0:12\nV1\nSource video\n◉\n□\npodcast-12s.mp4\n12.0s\nRF\nFraming\n◉\n□\nCamera punch 1.10×\nCamera punch 1.10×\nCC\nCaptions\n◉\n□\nSTUDIO QA CAPTION RETEST · Review words\nCHECK SECOND CUE TIMING · Review words\nCHECK SAVE RELOAD EXPORT · Review words\nA2\nOriginal audio\n◉\n□\nM\nS\npodcast-12s.mp4 audio\nSelect Tool\nMagnetic Snapping\nAudio/Video Linked\n0:03 · Camera Punch 1.10× · 0:00–0:04",
+  "controls": [
+    {
+      "tag": "BUTTON",
+      "type": "submit",
+      "label": "Notifications",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Overview",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Cam Combiner",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Find Viral Clips",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Viral Clip Studio",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Smart Promo",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Idea-to-Video",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Publisher",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Queue",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Analytics",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Connections",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Team",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Billing",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Security",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "submit",
+      "label": null,
+      "text": "Sign out",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "submit",
+      "label": "Open Chat",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Quick Create",
+      "testId": "studio-mode-quick",
+      "text": "Quick",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Creator Studio",
+      "testId": "studio-mode-creator",
+      "text": "Creator",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Signature Lab",
+      "testId": "studio-mode-signature",
+      "text": "Signature",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "studio-undo-button",
+      "text": "↶ Undo",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "studio-redo-button",
+      "text": "↷ Redo",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Close Clip Studio",
+      "text": "×",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "✦\nMoments",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "✂\nCut",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "⌁\nHook",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "⌗\nReframe",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "CC\nCaptions",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "T\nGraphics",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "◆\nMotion",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "◫\nComposite",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "✺\nCreator FX",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "≋\nPacing",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "▣\nB-roll",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "◐\nColor",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "♫\nSound",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "⇧\nExport",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Close media ×",
+      "options": null
+    },
+    {
+      "tag": "INPUT",
+      "type": "text",
+      "label": "Project name",
+      "text": null,
+      "placeholder": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "studio-save-project",
+      "text": "Save project",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Duplicate",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Studio QA 20261008 aspect retest",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Restore previous version of Studio QA 20261008 aspect retest",
+      "text": "↶2",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Delete Studio QA 20261008 aspect retest",
+      "text": "×",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Studio QA 20261008 captions",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Delete Studio QA 20261008 captions",
+      "text": "×",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Studio QA 20261008 Director copyStudio QA 20261008 clean portrait",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Restore previous version of Studio QA 20261008 Director copyStudio QA 20261008 clean portrait",
+      "text": "↶2",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Delete Studio QA 20261008 Director copyStudio QA 20261008 clean portrait",
+      "text": "×",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Studio QA 20261008 Director",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Restore previous version of Studio QA 20261008 Director",
+      "text": "↶1",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Delete Studio QA 20261008 Director",
+      "text": "×",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Media",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Sequence",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Moments",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "＋ Import scenes",
+      "options": null
+    },
+    {
+      "tag": "INPUT",
+      "type": "search",
+      "label": "Search project media",
+      "text": null,
+      "placeholder": "Find a scene by filename…",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Preview podcast-12s.mp4",
+      "text": "▶",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "INPUT",
+      "type": "checkbox",
+      "label": null,
+      "text": null,
+      "placeholder": "",
+      "options": null
+    },
+    {
+      "tag": "SELECT",
+      "type": "select-one",
+      "label": "Proxy resolution",
+      "text": null,
+      "options": [
+        {
+          "value": "540p",
+          "text": "540p · fastest"
+        },
+        {
+          "value": "720p",
+          "text": "720p · balanced"
+        },
+        {
+          "value": "1080p",
+          "text": "1080p · detailed"
+        }
+      ]
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Before",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "After",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Compare",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Pause comparison",
+      "text": "Ⅱ",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "preview-media-toggle",
+      "text": "Hide media",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "preview-timeline-toggle",
+      "text": "Hide timeline",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "preview-quick-track-speaker",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "preview-dock-toggle-btn",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "preview-fit-full",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "preview-fill-canvas",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "preview-fullscreen-button",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "preview-safe-zones",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "preview-grid",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "preview-tools",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Pause edited preview",
+      "text": "❚❚",
+      "options": null
+    },
+    {
+      "tag": "INPUT",
+      "type": "range",
+      "label": "Edited output position",
+      "text": null,
+      "placeholder": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Mute preview audio",
+      "testId": "preview-audio-toggle",
+      "text": "🔊",
+      "options": null
+    },
+    {
+      "tag": "INPUT",
+      "type": "range",
+      "label": "Preview master volume",
+      "text": null,
+      "placeholder": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "studio-director-review-open",
+      "text": "Review incoming edit",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "AI CREATIVE DIRECTOR\nReturn to story direction\n☷",
+      "options": null
+    },
+    {
+      "tag": "INPUT",
+      "type": "checkbox",
+      "label": null,
+      "testId": "auto-reframe-toggle",
+      "text": null,
+      "placeholder": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "reframe-aspect-9-16",
+      "text": "9:16\nTikTok · Reels · Shorts",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "reframe-aspect-4-5",
+      "text": "4:5\nInstagram feed",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "reframe-aspect-1-1",
+      "text": "1:1\nSquare social",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "reframe-aspect-16-9",
+      "text": "16:9\nYouTube · landscape",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "reframe-follow-subject",
+      "text": "Solo Speaker",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "reframe-preserve-frame",
+      "text": "Show Everyone",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "reframe-speaker-stack",
+      "text": "Multi-Camera",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "add-clean-speaker-angle",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "multicam-layout-2",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "multicam-layout-3",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "multicam-layout-4",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "multicam-composition-stack_2",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "multicam-composition-split_2",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "multicam-composition-pip_2",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "multicam-composition-active_2",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "multicam-composition-spotlight_2",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "SELECT",
+      "type": "select-one",
+      "label": "Top speaker source",
+      "text": null,
+      "options": [
+        {
+          "value": "",
+          "text": "Choose a clean angle"
+        },
+        {
+          "value": "programme-source",
+          "text": "podcast-12s.mp4"
+        }
+      ]
+    },
+    {
+      "tag": "SELECT",
+      "type": "select-one",
+      "label": "Bottom speaker source",
+      "text": null,
+      "options": [
+        {
+          "value": "",
+          "text": "Choose a clean angle"
+        },
+        {
+          "value": "programme-source",
+          "text": "podcast-12s.mp4"
+        }
+      ]
+    },
+    {
+      "tag": "INPUT",
+      "type": "number",
+      "label": "Top angle start",
+      "text": null,
+      "placeholder": "",
+      "options": null
+    },
+    {
+      "tag": "INPUT",
+      "type": "number",
+      "label": "Bottom angle start",
+      "text": null,
+      "placeholder": "",
+      "options": null
+    },
+    {
+      "tag": "INPUT",
+      "type": "checkbox",
+      "label": "Angles share the same source timecode",
+      "text": null,
+      "placeholder": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "analyze-speaker-faces",
+      "text": "Detect & follow face",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "analyze-source-shots",
+      "text": "Follow existing camera cuts",
+      "options": null
+    },
+    {
+      "tag": "INPUT",
+      "type": "range",
+      "label": "Speaker zoom",
+      "text": null,
+      "placeholder": "",
+      "options": null
+    },
+    {
+      "tag": "INPUT",
+      "type": "range",
+      "label": "Picture fill for this camera shot",
+      "text": null,
+      "placeholder": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "add-reframe-keyframe",
+      "text": "+ Add here",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "👤 Left Speaker",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "👤 Right Speaker",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "🔄 Alternate Speakers",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "1\n0.00s",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "2\n0.50s",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "3\n1.00s",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "4\n1.50s",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "5\n2.00s",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "6\n2.50s",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "7\n3.00s",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "8\n3.50s",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "9\n4.00s",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "10\n4.50s",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "11\n4.70s",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "12\n5.00s",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "13\n5.20s",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "14\n5.50s",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "15\n6.00s",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "16\n6.50s",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "17\n7.00s",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "18\n7.50s",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "19\n8.00s",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "20\n8.50s",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "21\n9.00s",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "22\n9.50s",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "23\n10.00s",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "24\n10.50s",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "25\n11.00s",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "26\n11.50s",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "▶ Preview 9:16 Framing",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "pro-quick-split",
+      "text": "Split",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "pro-quick-trim-start",
+      "text": "Trim Start",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "pro-quick-trim-end",
+      "text": "Trim End",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "pro-quick-silence",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "pro-quick-ripple-silence",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "pro-quick-both-cams",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "pro-quick-reframe",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "pro-quick-punch",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "pro-quick-auto-punch",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "pro-quick-auto-motion",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "pro-quick-jcut",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "pro-quick-lcut",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "pro-quick-director",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "pro-quick-undo",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "testId": "pro-quick-redo",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Select tool",
+      "text": "V\nSelect",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Razor tool",
+      "text": "C\nRazor",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Ripple tool",
+      "text": "B\nRipple",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Roll tool",
+      "text": "N\nRoll",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Slip tool",
+      "text": "Y\nSlip",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Slide tool",
+      "text": "U\nSlide",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Hand tool",
+      "text": "H\nHand",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Show empty tracks",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "⌁ Snap",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "⛓ Linked",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "⇥ Ripple",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Zoom out timeline",
+      "text": "−",
+      "options": null
+    },
+    {
+      "tag": "INPUT",
+      "type": "range",
+      "label": "Timeline zoom",
+      "text": null,
+      "placeholder": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Zoom in timeline",
+      "text": "+",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Fit entire timeline",
+      "text": "Fit",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Dim timeline track",
+      "text": "◉",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Lock track",
+      "text": "□",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "podcast-12s.mp4 · 0.00s–12.00s",
+      "testId": "pro-video-clip-1",
+      "text": "podcast-12s.mp4\n12.0s",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Dim timeline track",
+      "text": "◉",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Lock track",
+      "text": "□",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Camera punch 1.10× · 0.00s–4.70s",
+      "testId": "pro-framing-clip-1",
+      "text": "Camera punch 1.10×",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Camera punch 1.10× · 4.70s–5.20s",
+      "testId": "pro-framing-clip-2",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Camera punch 1.10× · 5.20s–12.00s",
+      "testId": "pro-framing-clip-3",
+      "text": "Camera punch 1.10×",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Dim timeline track",
+      "text": "◉",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Lock track",
+      "text": "□",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "STUDIO QA CAPTION RETEST · Review words · 0.00s–4.00s",
+      "testId": "pro-captions-clip-1",
+      "text": "STUDIO QA CAPTION RETEST · Review words",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "CHECK SECOND CUE TIMING · Review words · 4.00s–8.00s",
+      "testId": "pro-captions-clip-2",
+      "text": "CHECK SECOND CUE TIMING · Review words",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "CHECK SAVE RELOAD EXPORT · Review words · 8.00s–12.00s",
+      "testId": "pro-captions-clip-3",
+      "text": "CHECK SAVE RELOAD EXPORT · Review words",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Dim timeline track",
+      "text": "◉",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Lock track",
+      "text": "□",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Mute track",
+      "text": "M",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": "Solo track",
+      "text": "S",
+      "options": null
+    }
+  ],
+  "media": [
+    {
+      "testId": "studio-after-video",
+      "readyState": 4,
+      "duration": 12,
+      "time": 5.458671,
+      "paused": false
+    },
+    {
+      "testId": "speaker-stack-top-video",
+      "readyState": 4,
+      "duration": 12,
+      "time": 0,
+      "paused": true
+    },
+    {
+      "testId": "speaker-stack-bottom-video",
+      "readyState": 4,
+      "duration": 12,
+      "time": 0,
+      "paused": true
+    },
+    {
+      "testId": "speaker-stack-third-video",
+      "readyState": 0,
+      "duration": null,
+      "time": 0,
+      "paused": true
+    },
+    {
+      "testId": "speaker-stack-fourth-video",
+      "readyState": 0,
+      "duration": null,
+      "time": 0,
+      "paused": true
+    },
+    {
+      "testId": "source-split-alternate-video",
+      "readyState": 4,
+      "duration": 12,
+      "time": 0,
+      "paused": true
+    },
+    {
+      "readyState": 4,
+      "duration": 12,
+      "time": 4.670652,
+      "paused": true
+    },
+    {
+      "readyState": 4,
+      "duration": 12,
+      "time": 0.8,
+      "paused": true
+    },
+    {
+      "readyState": 1,
+      "duration": 12,
+      "time": 5.45714,
+      "paused": false
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "sha256": "64c1c2108164bb65285e5b6141083480c5a979d1281293a076aa81bc773a8dc2",
+  "bytes": 13417574,
+  "seconds": 10,
+  "video": {
+    "width": 1920,
+    "height": 1080,
+    "codec": "h264",
+    "fps": "24/1",
+    "duration": "10.000000",
+    "frameCount": 240,
+    "pixelFormat": "yuv420p",
+    "encoder": "Lavc60.31.102 h264_nvenc"
+  },
+  "audio": {
+    "codec": "aac",
+    "channels": 2,
+    "sampleRate": "44100",
+    "duration": "10.000000"
+  },
+  "independentFullDecode": true,
+  "contactSheet": "reports/podcast-two-minute-20261009/background-previews/subject-vfx-907745e6-9bf7-47e5-a47f-281ea1713076.mp4.frames.jpg",
+  "scope": "Technical only. Pixel and listening review are separate required evidence."
+}

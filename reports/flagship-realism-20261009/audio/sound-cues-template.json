@@ -1,0 +1,44 @@
+{
+  "sourceBrief": "The Small Boat private real-world payoff, grounded in moving water, wind and boat weight. Not a final welcome film.",
+  "duration": 6.0,
+  "sampleRate": 48000,
+  "channels": 2,
+  "sourcesManifest": "sources/provenance.json",
+  "cues": [
+    {
+      "id": "sea-bed",
+      "source": "sources/sea-recording-preview.mp3",
+      "trimStart": 11,
+      "start": 0,
+      "duration": 6,
+      "gain": 0.7,
+      "fadeIn": 0.12,
+      "fadeOut": 0.3,
+      "reason": "Hold the same sea across the physical action."
+    },
+    {
+      "id": "hull-water",
+      "source": "sources/wave_03_cc0-11505__transitking__wavesound.flac",
+      "trimStart": 0,
+      "start": 1.1,
+      "duration": 2.3,
+      "gain": 0.3,
+      "fadeIn": 0.04,
+      "fadeOut": 0.3,
+      "reason": "Provisional bow contact: retime to the reviewed actual native frame."
+    },
+    {
+      "id": "deck-weight",
+      "source": "sources/dock-creak-preview.mp3",
+      "trimStart": 19,
+      "start": 3.1,
+      "duration": 2.3,
+      "gain": 0.12,
+      "fadeIn": 0.05,
+      "fadeOut": 0.2,
+      "reason": "Provisional deck balance: use only if the selected creak supports the observed motion."
+    }
+  ],
+  "status": "EDITABLE_PROVISIONAL_CUES_PENDING_PICTURE_TIMING_AND_LISTENING",
+  "publicApproved": false
+}

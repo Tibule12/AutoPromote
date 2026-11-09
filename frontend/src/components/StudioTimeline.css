@@ -1,0 +1,210 @@
+/* Read the edit as a sequence: source pictures, words, then original sound. */
+.viral-studio-overlay .studio-pro-timeline {
+  background: #10141e;
+  border-color: #343844;
+  border-radius: 8px 8px 0 0;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-timeline-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  background: #171b25;
+  border-bottom-color: #323641;
+  padding: 6px 10px;
+  gap: 8px;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-quick-actions,
+.viral-studio-overlay .studio-pro-timeline .pro-edit-tools,
+.viral-studio-overlay .studio-pro-timeline .pro-timeline-switches {
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-left: 0;
+  min-width: 0;
+  max-width: 100%;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-edit-tools button,
+.viral-studio-overlay .studio-pro-timeline .pro-timeline-switches > button {
+  min-height: 32px;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-edit-tools button,
+.viral-studio-overlay .studio-pro-timeline .pro-timeline-switches > button {
+  color: #a8aab5;
+  font-weight: 500;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-edit-tools button.is-active,
+.viral-studio-overlay .studio-pro-timeline .pro-timeline-switches > button.is-on {
+  background: #343047;
+  border-color: #665879;
+  color: #f0e8ff;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-time-ruler {
+  height: 32px;
+  background: #141821;
+  color: #a8acb6;
+  border-bottom-color: #333844;
+  font-variant-numeric: tabular-nums;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-time-ruler > i > span {
+  font-size: 11px;
+  top: 7px;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-track-row {
+  min-height: 46px;
+  border-bottom-color: #2a2f39;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-track-row.is-video {
+  min-height: 80px;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-track-header {
+  background: #191e29;
+  padding: 7px 10px;
+  gap: 4px 7px;
+  border-right-color: #353a45;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-track-header > strong {
+  color: #d2d3db;
+  font-size: 11px;
+  font-weight: 500;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-track-header > span {
+  color: #c7bddc;
+  background: #302c3b;
+  font-size: 10px;
+  font-weight: 500;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-track-row.is-focused .pro-track-header {
+  background: #292636;
+  box-shadow: inset 2px 0 #bd9ff2;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-track-controls button {
+  color: #9297a5;
+  background: #242b38;
+  font-size: 10px;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-track-lane {
+  background: #10151f;
+  box-shadow: inset 0 1px #ffffff03;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-track-clip {
+  top: 7px;
+  bottom: 7px;
+  border: 1px solid #6e647f;
+  background: #3b334b;
+  border-radius: 4px;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-track-clip > span {
+  font-size: 11px;
+  font-weight: 500;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-track-clip.is-at-playhead {
+  outline: 1px solid #c6afea;
+  outline-offset: -1px;
+}
+.viral-studio-overlay .studio-pro-timeline .is-video .pro-track-clip {
+  align-items: flex-start;
+  padding: 0;
+  background: transparent;
+  border-color: #727080;
+  border-radius: 5px;
+}
+.viral-studio-overlay .studio-pro-timeline .is-video .pro-track-clip.is-at-playhead {
+  border-color: #b49ad4;
+  outline: none;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-track-clip > .pro-video-clip-title {
+  width: 100%;
+  height: 23px;
+  box-sizing: border-box;
+  padding: 4px 48px 4px 9px;
+  line-height: 15px;
+  background: #322d40;
+  color: #ebe5f4;
+  border-bottom: 1px solid #534c61;
+  font-size: 11px;
+  font-weight: 500;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-video-clip-duration {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  z-index: 3;
+  color: #c3b9d2;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-source-filmstrip {
+  top: 31px;
+  bottom: 8px;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-source-frame {
+  box-sizing: border-box;
+  background: #1b202b;
+  border-right: 2px solid #171c26;
+  opacity: 1;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-source-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.viral-studio-overlay .studio-pro-timeline .is-audio .pro-track-clip,
+.viral-studio-overlay .studio-pro-timeline .is-music .pro-track-clip,
+.viral-studio-overlay .studio-pro-timeline .is-voice .pro-track-clip,
+.viral-studio-overlay .studio-pro-timeline .is-sfx .pro-track-clip {
+  background: #203a3f;
+  border-color: #48656a;
+  color: #c5dddd;
+}
+/* A decorative waveform falsely implies measured audio. Keep the honest clip
+   region until real source peaks are available. */
+.viral-studio-overlay .studio-pro-timeline .is-audio .pro-track-clip::after,
+.viral-studio-overlay .studio-pro-timeline .is-music .pro-track-clip::after,
+.viral-studio-overlay .studio-pro-timeline .is-voice .pro-track-clip::after,
+.viral-studio-overlay .studio-pro-timeline .is-sfx .pro-track-clip::after {
+  content: none;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-playhead {
+  width: 2px;
+  background: #f38c8e;
+}
+.viral-studio-overlay .studio-pro-timeline > footer {
+  background: #171b25;
+  color: #969daa;
+  border-top: 1px solid #303540;
+}
+.viral-studio-overlay .studio-pro-timeline button:focus-visible {
+  outline: 2px solid #d8bcff;
+  outline-offset: -2px;
+}
+/* Keep the words in view on laptop screens without overlapping edit tools. */
+@media (min-width: 1100px) {
+  .viral-studio-overlay .studio-pro-timeline .pro-timeline-toolbar {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: 20px;
+    row-gap: 6px;
+  }
+  .viral-studio-overlay .studio-pro-timeline .pro-timeline-switches {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 820px) {
+  .viral-studio-overlay .studio-pro-timeline .pro-track-row.is-video {
+    min-height: 92px;
+  }
+  .viral-studio-overlay .studio-pro-timeline .pro-track-header {
+    padding: 5px;
+  }
+}
+
+/* A laptop still needs a readable monitor above the timeline. Keep the three
+   basic lanes visible together; populated extra tracks remain scrollable. */
+@media (min-width: 821px) and (max-height: 800px) {
+  .viral-studio-overlay .studio-pro-timeline .pro-timeline-toolbar { padding: 4px 8px; gap: 4px; }
+  .viral-studio-overlay .studio-pro-timeline .pro-edit-tools button,
+  .viral-studio-overlay .studio-pro-timeline .pro-timeline-switches > button { min-height: 26px; }
+  .viral-studio-overlay .studio-pro-timeline .pro-time-ruler { height: 28px; }
+  .viral-studio-overlay .studio-pro-timeline .pro-track-row.is-video { min-height: 64px; }
+  .viral-studio-overlay .studio-pro-timeline .pro-track-row.is-audio { min-height: 42px; }
+}

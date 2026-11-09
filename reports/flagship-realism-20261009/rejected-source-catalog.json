@@ -1,0 +1,119 @@
+{
+  "status": "ALL_FOUR_REJECTED_BEFORE_VIDEO",
+  "assets": [
+    {
+      "assetId": "paper-broadside-a",
+      "status": "rejected",
+      "image": "source-images/paper-broadside-a/image.png",
+      "imageSha256": "ae53e0c7477b05aa0091cf33635ce23b5c20e31cb6c3546395e07a7db5bb7520",
+      "receipt": "source-images/paper-broadside-a/receipt.json",
+      "review": "source-images/paper-broadside-a/creative-verdict.json",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0",
+      "modelRevision": "462165984030d82259a11f4367a4eed129e94a7b",
+      "seed": 20261009071,
+      "settings": {
+        "steps": 35,
+        "guidance": 7,
+        "width": 1344,
+        "height": 768,
+        "dtype": "float16",
+        "encodedTokenCounts": [
+          59,
+          59
+        ],
+        "promptTruncated": false,
+        "conditioning": "image-to-image",
+        "strength": 0.82,
+        "referenceResize": "aspect-preserving centre crop"
+      },
+      "sourceBrief": "The Small Boat: correct the opening vessel orientation before a continuity-controlled transformation. One recognizable navy/ivory folded paper boat facing right in photographic open water, side view; maintain one hull. Stills must pass inspection before any video take. Previous near-front source and world-replacement takes remain rejected.",
+      "generationSeconds": 5.351417279998714,
+      "reason": "Readable photographic folded paper vessel, but still an approximately symmetric front/quarter view with its central crease pointing toward camera. It did not become the requested port-side profile/bow right or place a clear sea horizon behind it. It is not an aligned transformation source. Do not submit a video take using this failed endpoint.",
+      "videoTakeLaunched": false
+    },
+    {
+      "assetId": "paper-broadside-b",
+      "status": "rejected",
+      "image": "source-images/paper-broadside-b/image.png",
+      "imageSha256": "79bd5f16692fa2e73803c4695762369da329ffa9588beaa9cd06c96c232d3060",
+      "receipt": "source-images/paper-broadside-b/receipt.json",
+      "review": "source-images/paper-broadside-b/creative-verdict.json",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0",
+      "modelRevision": "462165984030d82259a11f4367a4eed129e94a7b",
+      "seed": 20261009072,
+      "settings": {
+        "steps": 35,
+        "guidance": 7,
+        "width": 1344,
+        "height": 768,
+        "dtype": "float16",
+        "encodedTokenCounts": [
+          59,
+          59
+        ],
+        "promptTruncated": false,
+        "conditioning": "image-to-image",
+        "strength": 0.86,
+        "referenceResize": "aspect-preserving centre crop"
+      },
+      "sourceBrief": "The Small Boat: correct the opening vessel orientation before a continuity-controlled transformation. One recognizable navy/ivory folded paper boat facing right in photographic open water, side view; maintain one hull. Stills must pass inspection before any video take. Previous near-front source and world-replacement takes remain rejected.",
+      "generationSeconds": 4.899408492001385,
+      "reason": "Readable photographic folded paper vessel, but still an approximately symmetric front/quarter view with its central crease pointing toward camera. It did not become the requested port-side profile/bow right or place a clear sea horizon behind it. It is not an aligned transformation source. Do not submit a video take using this failed endpoint.",
+      "videoTakeLaunched": false
+    },
+    {
+      "assetId": "paper-side-c",
+      "status": "rejected",
+      "image": "source-images-v2/paper-side-c/image.png",
+      "imageSha256": "fe17975cdf0a25b9dd67145241e2fbc1e627f8be42ffb6f5a880162de305bf0b",
+      "receipt": "source-images-v2/paper-side-c/receipt.json",
+      "review": "source-images-v2/paper-side-c/creative-verdict.json",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0",
+      "modelRevision": "462165984030d82259a11f4367a4eed129e94a7b",
+      "seed": 20261009073,
+      "settings": {
+        "steps": 35,
+        "guidance": 7,
+        "width": 1344,
+        "height": 768,
+        "dtype": "float16",
+        "encodedTokenCounts": [
+          69,
+          69
+        ],
+        "promptTruncated": false
+      },
+      "sourceBrief": "The Small Boat: replace the rejected front-facing conditioned source with a newly generated broadside paper schooner. One navy/ivory folded hull/sails faces right in photographic blue sea with warm side light. Must inspect direction, readable paper folds, connected hull and sea horizon before any moving transformation test.",
+      "generationSeconds": 5.684002861000408,
+      "reason": "Two cream paper vessels sit on a blue tabletop; no photographic sea, no one-vessel navy broadside source. Both object count and physical world violate the shot.",
+      "videoTakeLaunched": false
+    },
+    {
+      "assetId": "paper-side-d",
+      "status": "rejected",
+      "image": "source-images-v2/paper-side-d/image.png",
+      "imageSha256": "f12c87faca3925c6afc77865f879e50fb38112c9676b1ab66f1c25c43aed97e1",
+      "receipt": "source-images-v2/paper-side-d/receipt.json",
+      "review": "source-images-v2/paper-side-d/creative-verdict.json",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0",
+      "modelRevision": "462165984030d82259a11f4367a4eed129e94a7b",
+      "seed": 20261009074,
+      "settings": {
+        "steps": 35,
+        "guidance": 7,
+        "width": 1344,
+        "height": 768,
+        "dtype": "float16",
+        "encodedTokenCounts": [
+          69,
+          69
+        ],
+        "promptTruncated": false
+      },
+      "sourceBrief": "The Small Boat: replace the rejected front-facing conditioned source with a newly generated broadside paper schooner. One navy/ivory folded hull/sails faces right in photographic blue sea with warm side light. Must inspect direction, readable paper folds, connected hull and sea horizon before any moving transformation test.",
+      "generationSeconds": 5.19732719700005,
+      "reason": "A cream central folded shape sits on a blue textured cloth-like surface. No navy hull, connected side-profile schooner, or photographic sea horizon. It is not a usable aligned endpoint.",
+      "videoTakeLaunched": false
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "startedAt": "2026-10-09T07:23:26.676089+00:00",
+  "deadlineEpoch": 1791536400,
+  "stage": "matched-direction paper source images",
+  "stages": [
+    {
+      "script": "run-sources.sh",
+      "exitCode": 0
+    }
+  ],
+  "preflight": {
+    "gpu": "NVIDIA L40S, 0 %, 0 %, 0 %, 1 MiB",
+    "cudaProcesses": "",
+    "containerNames": [
+      "autopromote-podcast-media-20261009"
+    ],
+    "idleServiceGracefulShutdownRequested": true
+  },
+  "restoredMediaPid": 34607,
+  "completedAt": "2026-10-09T07:23:55.173349+00:00"
+}

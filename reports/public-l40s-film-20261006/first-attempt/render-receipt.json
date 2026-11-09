@@ -1,0 +1,124 @@
+{
+  "status": "FAIL",
+  "startedAt": "2026-10-06T17:06:12.643825+00:00",
+  "instance": "autopromote-l40s-staging",
+  "productionRequests": 0,
+  "createdInstances": 0,
+  "googleCloudRequests": 0,
+  "composition": "Authored CPU FFmpeg filters; CUDA decoding; NVIDIA NVENC encoding",
+  "generativeVideo": false,
+  "sampleWorkspaceAndMetrics": true,
+  "sourceSha256": "faa6100ec856ccfc7f9cb899d365db6cf9aec571b035f46d624f82c884178383",
+  "commands": [
+    {
+      "argv": [
+        "nvidia-smi",
+        "--query-gpu=name,driver_version,memory.total",
+        "--format=csv,noheader,nounits"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.0152,
+      "stdout": "NVIDIA L40S, 565.57.01, 46068\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "ffmpeg",
+        "-version"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.041,
+      "stdout": "ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers\nbuilt with gcc 13 (Ubuntu 13.2.0-23ubuntu3)\nconfiguration: --prefix=/usr --extra-version=3ubuntu5 --toolchain=hardened --libdir=/usr/lib/x86_64-linux-gnu --incdir=/usr/include/x86_64-linux-gnu --arch=amd64 --enable-gpl --disable-stripping --disable-omx --enable-gnutls --enable-libaom --enable-libass --enable-libbs2b --enable-libcaca --enable-libcdio --enable-libcodec2 --enable-libdav1d --enable-libflite --enable-libfontconfig --enable-libfreetype --enable-libfribidi --enable-libglslang --enable-libgme --enable-libgsm --enable-libharfbuzz --enable-libmp3lame --enable-libmysofa --enable-libopenjpeg --enable-libopenmpt --enable-libopus --enable-librubberband --enable-libshine --enable-libsnappy --enable-libsoxr --enable-libspeex --enable-libtheora --enable-libtwolame --enable-libvidstab --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx265 --enable-libxml2 --enable-libxvid --enable-libzimg --enable-openal --enable-opencl --enable-opengl --disable-sndio --enable-libvpl --disable-libmfx --enable-libdc1394 --enable-libdrm --enable-libiec61883 --enable-chromaprint --enable-frei0r --enable-ladspa --enable-libbluray --enable-libjack --enable-libpulse --enable-librabbitmq --enable-librist --enable-libsrt --enable-libssh --enable-libsvtav1 --enable-libx264 --enable-libzmq --enable-libzvbi --enable-lv2 --enable-sdl2 --enable-libplacebo --enable-librav1e --enable-pocketsphinx --enable-librsvg --enable-libjxl --enable-shared\nlibavutil      58. 29.100 / 58. 29.100\nlibavcodec     60. 31.102 / 60. 31.102\nlibavformat    60. 16.100 / 60. 16.100\nlibavdevice    60.  3.100 / 60.  3.100\nlibavfilter     9. 12.100 /  9. 12.100\nlibswscale      7.  5.100 /  7.  5.100\nlibswresample   4. 12.100 /  4. 12.100\nlibpostproc    57.  3.100 / 57.  3.100\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "ffmpeg",
+        "-nostdin",
+        "-y",
+        "-hide_banner",
+        "-loglevel",
+        "verbose",
+        "-filter_complex_threads",
+        "2",
+        "-hwaccel",
+        "cuda",
+        "-hwaccel_output_format",
+        "cuda",
+        "-c:v",
+        "vp8_cuvid",
+        "-ss",
+        "2.13",
+        "-i",
+        "/film/application-workflow.webm",
+        "-hwaccel",
+        "cuda",
+        "-hwaccel_output_format",
+        "cuda",
+        "-c:v",
+        "h264_cuvid",
+        "-i",
+        "/film/podcast-conversation.mp4",
+        "-filter_complex",
+        "[0:v]hwdownload,format=nv12,trim=duration=6.344000,setpts=(PTS-STARTPTS)*1.166456494,fps=30,split=2[wide][close];[wide]scale=1760:990:flags=lanczos,pad=1920:1080:80:44:color=0x080a12[context];[close]crop=1200:675:320:240,scale=1760:990:force_original_aspect_ratio=decrease:flags=lanczos,pad=1760:990:(ow-iw)/2:(oh-ih)/2:color=0x080a12,pad=1920:1080:80:44:color=0x080a12[detail];[context][detail]blend=all_expr='if(lt(T,3.7),A,if(lt(T,3.8400000000000003),A*(1-(T-3.7)/.14)+B*(T-3.7)/.14,B))'[cut];[cut]drawbox=x=80:y=43:w=1760:h=2:color=0xa18aff:t=fill,drawbox=x=0:y=930:w=1920:h=150:color=0x080a12:t=fill,drawtext=fontfile=/film/brand-bold.ttf:text='AutoPromote':x=80:y=11:fontsize=24:fontcolor=white,drawtext=fontfile=/film/brand-regular.ttf:text='01 / UPLOADS':x=1660:y=15:fontsize=16:fontcolor=0xa18aff,drawbox=x=1410:y=47:w=430:h=29:color=0x080a12@0.98:t=fill,drawtext=fontfile=/film/brand-regular.ttf:text='SAMPLE WORKSPACE / METRICS':x=1450:y=54:fontsize=16:fontcolor=0xc3bacf,drawbox=x=80:y=960:w=4:h=74:color=0xa18aff:t=fill,drawtext=fontfile=/film/brand-bold.ttf:textfile=/film/uploads-title.txt:x='110+90*pow(max(0,1-t/.5),3)':y=953:fontsize=39:fontcolor=white:alpha='min(1,t/.25)',drawtext=fontfile=/film/brand-regular.ttf:textfile=/film/uploads-subtitle.txt:x=112:y=1009:fontsize=21:fontcolor=0xbeb4cf,drawtext=fontfile=/film/brand-bold.ttf:text='/':x='80+1760*t/7.4':y=1052:fontsize=18:fontcolor=0xa18aff,format=yuv420p[programme];[1:v]hwdownload,format=nv12,trim=duration=2,setpts=PTS-STARTPTS,fps=30,scale=1920:1080:flags=lanczos,drawbox=x=0:y=0:w=1920:h=1080:color=black@0.52:t=fill,drawtext=fontfile=/film/brand-bold.ttf:text='AutoPromote':x=100:y=86:fontsize=38:fontcolor=white,drawtext=fontfile=/film/brand-bold.ttf:textfile=/film/opening-story.txt:x='100+180*pow(max(0,1-t/.6),3)':y=395:fontsize=104:fontcolor=white:alpha='min(1,t/.2)',drawtext=fontfile=/film/brand-bold.ttf:textfile=/film/opening-screens.txt:x='100+180*pow(max(0,1-(t-.15)/.65),3)':y=515:fontsize=104:fontcolor=0xa18aff:alpha='max(0,min(1,(t-.15)/.25))',fade=t=in:st=0:d=.18,format=yuv420p[opening];[opening][programme]xfade=transition=diagtl:duration=.4:offset=1.6[out]",
+        "-map",
+        "[out]",
+        "-an",
+        "-t",
+        "9",
+        "-c:v",
+        "h264_nvenc",
+        "-preset",
+        "p6",
+        "-rc",
+        "vbr",
+        "-cq",
+        "19",
+        "-b:v",
+        "0",
+        "-pix_fmt",
+        "yuv420p",
+        "-movflags",
+        "+faststart",
+        "/film/output/01-uploads.mp4"
+      ],
+      "exitCode": 234,
+      "elapsedSeconds": 0.0355,
+      "stdout": "",
+      "stderr": "[Parsed_fade_34 @ 0x557a8b588100] Unable to parse option value \".18\" as duration\nError applying option 'd' to filter 'fade': Invalid argument\n[Parsed_fps_28 @ 0x557a8b57b180] 0 frames in, 0 frames out; 0 frames dropped, 0 frames duplicated.\n[Parsed_fps_4 @ 0x557a8b57abc0] 0 frames in, 0 frames out; 0 frames dropped, 0 frames duplicated.\nFailed to set value '[0:v]hwdownload,format=nv12,trim=duration=6.344000,setpts=(PTS-STARTPTS)*1.166456494,fps=30,split=2[wide][close];[wide]scale=1760:990:flags=lanczos,pad=1920:1080:80:44:color=0x080a12[context];[close]crop=1200:675:320:240,scale=1760:990:force_original_aspect_ratio=decrease:flags=lanczos,pad=1760:990:(ow-iw)/2:(oh-ih)/2:color=0x080a12,pad=1920:1080:80:44:color=0x080a12[detail];[context][detail]blend=all_expr='if(lt(T,3.7),A,if(lt(T,3.8400000000000003),A*(1-(T-3.7)/.14)+B*(T-3.7)/.14,B))'[cut];[cut]drawbox=x=80:y=43:w=1760:h=2:color=0xa18aff:t=fill,drawbox=x=0:y=930:w=1920:h=150:color=0x080a12:t=fill,drawtext=fontfile=/film/brand-bold.ttf:text='AutoPromote':x=80:y=11:fontsize=24:fontcolor=white,drawtext=fontfile=/film/brand-regular.ttf:text='01 / UPLOADS':x=1660:y=15:fontsize=16:fontcolor=0xa18aff,drawbox=x=1410:y=47:w=430:h=29:color=0x080a12@0.98:t=fill,drawtext=fontfile=/film/brand-regular.ttf:text='SAMPLE WORKSPACE / METRICS':x=1450:y=54:fontsize=16:fontcolor=0xc3bacf,drawbox=x=80:y=960:w=4:h=74:color=0xa18aff:t=fill,drawtext=fontfile=/film/brand-bold.ttf:textfile=/film/uploads-title.txt:x='110+90*pow(max(0,1-t/.5),3)':y=953:fontsize=39:fontcolor=white:alpha='min(1,t/.25)',drawtext=fontfile=/film/brand-regular.ttf:textfile=/film/uploads-subtitle.txt:x=112:y=1009:fontsize=21:fontcolor=0xbeb4cf,drawtext=fontfile=/film/brand-bold.ttf:text='/':x='80+1760*t/7.4':y=1052:fontsize=18:fontcolor=0xa18aff,format=yuv420p[programme];[1:v]hwdownload,format=nv12,trim=duration=2,setpts=PTS-STARTPTS,fps=30,scale=1920:1080:flags=lanczos,drawbox=x=0:y=0:w=1920:h=1080:color=black@0.52:t=fill,drawtext=fontfile=/film/brand-bold.ttf:text='AutoPromote':x=100:y=86:fontsize=38:fontcolor=white,drawtext=fontfile=/film/brand-bold.ttf:textfile=/film/opening-story.txt:x='100+180*pow(max(0,1-t/.6),3)':y=395:fontsize=104:fontcolor=white:alpha='min(1,t/.2)',drawtext=fontfile=/film/brand-bold.ttf:textfile=/film/opening-screens.txt:x='100+180*pow(max(0,1-(t-.15)/.65),3)':y=515:fontsize=104:fontcolor=0xa18aff:alpha='max(0,min(1,(t-.15)/.25))',fade=t=in:st=0:d=.18,format=yuv420p[opening];[opening][programme]xfade=transition=diagtl:duration=.4:offset=1.6[out]' for option 'filter_complex': Invalid argument\nError parsing global options: Invalid argument\n"
+    }
+  ],
+  "chapters": [],
+  "inputs": [
+    {
+      "file": "application-workflow.webm",
+      "bytes": 3420371,
+      "sha256": "908e119a43005eafa221aa16f41fc4061b33121d0542ab743385dd3e99127f8d"
+    },
+    {
+      "file": "podcast-conversation.mp4",
+      "bytes": 1232922,
+      "sha256": "260f7e4abfa68e51cafd244c19ee51b8b455f068ea0858f1faafa2b8a5cfeb40"
+    },
+    {
+      "file": "brand-bold.ttf",
+      "bytes": 708920,
+      "sha256": "5c1247acef7f2b8522a31742c76d6adcb5569bacc0be7ceaa4dc39dd252ce895"
+    },
+    {
+      "file": "brand-regular.ttf",
+      "bytes": 1844796,
+      "sha256": "350badd6ab6a58e7fd7a0ea2ae0c10174941a08e1cd06b3c6010e10b3d5ae319"
+    },
+    {
+      "file": "capture-receipt.json",
+      "bytes": 4172,
+      "sha256": "cdb10b3b53646f915a35a0e264cf2457cb7ae8e33c2ad1908e9b00b6d90cf0dd"
+    }
+  ],
+  "gpu": "NVIDIA L40S, 565.57.01, 46068",
+  "ffmpegVersion": "ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers",
+  "error": "RuntimeError: [Parsed_fade_34 @ 0x557a8b588100] Unable to parse option value \".18\" as duration\nError applying option 'd' to filter 'fade': Invalid argument\n[Parsed_fps_28 @ 0x557a8b57b180] 0 frames in, 0 frames out; 0 frames dropped, 0 frames duplicated.\n[Parsed_fps_4 @ 0x557a8b57abc0] 0 frames in, 0 frames out; 0 frames dropped, 0 frames duplicated.\nFailed to set value '[0:v]hwdownload,format=nv12,trim=duration=6.344000,setpts=(PTS-STARTPTS)*1.166456494,fps=30,split=2[wide][close];[wide]scale=1760:990:flags=lanczos,pad=1920:1080:80:44:color=0x080a12[context];[close]crop=1200:675:320:240,scale=1760:990:force_original_aspect_ratio=decrease:flags=lanczos,pad=1760:990:(ow-iw)/2:(oh-ih)/2:color=0x080a12,pad=1920:1080:80:44:color=0x080a12[detail];[context][detail]blend=all_expr='if(lt(T,3.7),A,if(lt(T,3.8400000000000003),A*(1-(T-3.7)/.14)+B*(T-3.7)/.14,B))'[cut];[cut]drawbox=x=80:y=43:w=1760:h=2:color=0xa18aff:t=fill,drawbox=x=0:y=930:w=1920:h=150:color=0x080a12:t=fill,drawtext=fontfile=/film/brand-bold.ttf:text='AutoPromote':x=80:y=11:fontsize=24:fontcolor=white,drawtext=fontfile=/film/brand-regular.ttf:text='01 / UPLOADS':x=1660:y=15:fontsize=16:fontcolor=0xa18aff,drawbox=x=1410:y=47:w=430:h=29:color=0x080a12@0.98:t=fill,drawtext=fontfile=/film/brand-regular.ttf:text='SAMPLE WORKSPACE / METRICS':x=1450:y=54:fontsize=16:fontcolor=0xc3bacf,drawbox=x=80:y=960:w=4:h=74:color=0xa18aff:t=fill,drawtext=fontfile=/film/brand-bold.ttf:textfile=/film/uploads-title.txt:x='110+90*pow(max(0,1-t/.5),3)':y=953:fontsize=39:fontcolor=white:alpha='min(1,t/.25)',drawtext=fontfile=/film/brand-regular.ttf:textfile=/film/uploads-subtitle.txt:x=112:y=1009:fontsize=21:fontcolor=0xbeb4cf,drawtext=fontfile=/film/brand-bold.ttf:text='/':x='80+1760*t/7.4':y=1052:fontsize=18:fontcolor=0xa18aff,format=yuv420p[programme];[1:v]hwdownload,format=nv12,trim=duration=2,setpts=PTS-STARTPTS,fps=30,scale=1920:1080:flags=lanczos,drawbox=x=0:y=0:w=1920:h=1080:color=black@0.52:t=fill,drawtext=fontfile=/film/brand-bold.ttf:text='AutoPromote':x=100:y=86:fontsize=38:fontcolor=white,drawtext=fontfile=/film/brand-bold.ttf:textfile=/film/opening-story.txt:x='100+180*pow(max(0,1-t/.6),3)':y=395:fontsize=104:fontcolor=white:alpha='min(1,t/.2)',drawtext=fontfile=/film/brand-bold.ttf:textfile=/film/opening-screens.txt:x='100+180*pow(max(0,1-(t-.15)/.65),3)':y=515:fontsize=104:fontcolor=0xa18aff:alpha='max(0,min(1,(t-.15)/.25))',fade=t=in:st=0:d=.18,format=yuv420p[opening];[opening][programme]xfade=transition=diagtl:duration=.4:offset=1.6[out]' for option 'filter_complex': Invalid argument\nError parsing global options: Invalid argument\n",
+  "elapsedSeconds": 0.0984,
+  "finishedAt": "2026-10-06T17:06:12.742211+00:00"
+}

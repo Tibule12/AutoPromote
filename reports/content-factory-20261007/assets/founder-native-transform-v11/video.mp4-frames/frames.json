@@ -1,0 +1,35 @@
+{
+  "sourceSha256": "9a718fbd53755f6404b7fcc3d2f6f2d503810524fdade00c3053fdb1ab93e908",
+  "frames": [
+    {
+      "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/content-factory-20261007/assets/founder-native-transform-v11/video.mp4-frames/frame-01.png",
+      "timestamp": 0.0,
+      "sha256": "fc0f8fa84c949780197e2e3a1e16299f567fbdc997a2e6d5a3b8b07b1c849d0a"
+    },
+    {
+      "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/content-factory-20261007/assets/founder-native-transform-v11/video.mp4-frames/frame-02.png",
+      "timestamp": 1.2,
+      "sha256": "22f25a6c61144b703269067c21d42ad1eb55fb140bc357c0ee43224bf3f3b562"
+    },
+    {
+      "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/content-factory-20261007/assets/founder-native-transform-v11/video.mp4-frames/frame-03.png",
+      "timestamp": 2.4,
+      "sha256": "39015a562c1038127a38013619f681329e36977e4ae82982d4695568c201abaf"
+    },
+    {
+      "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/content-factory-20261007/assets/founder-native-transform-v11/video.mp4-frames/frame-04.png",
+      "timestamp": 3.6,
+      "sha256": "516fc15ada2bef1545e97cf8292d41bae8e970e98234164fe72f9cd26f7ff5db"
+    },
+    {
+      "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/content-factory-20261007/assets/founder-native-transform-v11/video.mp4-frames/frame-05.png",
+      "timestamp": 4.8,
+      "sha256": "c93970d5e3e81e3420c1db5c95c83e2845ec391b660bcdfc26ba44fd915596e6"
+    },
+    {
+      "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/content-factory-20261007/assets/founder-native-transform-v11/video.mp4-frames/frame-06.png",
+      "timestamp": 5.92,
+      "sha256": "5645735ddf14e5a16ebbe4337e8ae256fa3e6111f7f039f1080ce6c334ba8254"
+    }
+  ]
+}

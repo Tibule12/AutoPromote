@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-08T06:54:04.552397+00:00",
+  "verifiedOutputReferences": 38,
+  "unusableHistoricalReferences": [
+    {
+      "path": "reports/studio-stability-20261007/compositing/download.mp4",
+      "claimedSha256": "017d844bc689701ee244f65bfa6e869a072f8164cc1b7e4ead56ece18e5bfbdc",
+      "presentSha256": "ca884e269ce769ccb77f59fb5c732d1d39ff3ca3b21aa0c343ab680d91776682",
+      "fileLastModifiedUtc": "2026-10-07T18:41:36.669938+00:00",
+      "baselineCapturedUtc": "2026-10-08T05:16:31.970330+00:00",
+      "preexistingAtContinuationStart": true,
+      "usableToQualifyPass": false,
+      "reason": "Historical filename was reused before this continuation. Current Oct 8 compositing PASS relies on the fresh verified subject export."
+    }
+  ],
+  "currentOct8OutputReferencesAllMatch": true,
+  "harnessArchivesRerendersBySha": true
+}

@@ -1,0 +1,35 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "assetId": "cold-open",
+  "type": "audio",
+  "audioRole": "voiceover",
+  "sourceBrief": {
+    "path": "source-brief.txt",
+    "sha256": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c"
+  },
+  "prompt": "I thought I was fixing one edit.",
+  "model": "hexgrad/Kokoro-82M",
+  "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+  "tool": "AutoPromote NVIDIA narration adapter",
+  "origin": "synthetic_brand_narration",
+  "settings": {
+    "voice": "af_heart",
+    "speed": 1.04,
+    "sampleRate": 48000,
+    "loudnessTargetLUFS": -18
+  },
+  "artifact": {
+    "path": "/film/assets/narration/cold-open.wav",
+    "sha256": "b81f0a3ba05220b7e85c81b2eb596da37cb07b92eea4ad92c0df3b2853a47e80",
+    "duration": 2.175,
+    "container": "wav",
+    "codec": "pcm_s16le"
+  },
+  "device": "cpu",
+  "gpu": null,
+  "phonemes": [
+    "\u02ccI \u03b8\u02c8\u0254t \u02ccI w\u028cz f\u02c8\u026aks\u026a\u014b w\u02c8\u028cn \u02c8\u025bd\u0259t."
+  ],
+  "seconds": 1.597475208999981,
+  "disclosure": "Generated narration using a standard licensed model preset; no founder voice or real person's identity is represented."
+}

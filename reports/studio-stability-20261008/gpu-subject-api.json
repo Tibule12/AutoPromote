@@ -1,0 +1,34 @@
+{
+  "events": [
+    {
+      "path": "/api/media/studio-subject-vfx",
+      "status": 202,
+      "jobId": "c9d67083-4f75-4588-8f61-038b0493c6a1"
+    },
+    {
+      "path": "/api/media/studio-subject-vfx/c9d67083-4f75-4588-8f61-038b0493c6a1",
+      "status": 200,
+      "jobId": "c9d67083-4f75-4588-8f61-038b0493c6a1",
+      "statusText": "processing"
+    },
+    {
+      "path": "/api/media/studio-subject-vfx/c9d67083-4f75-4588-8f61-038b0493c6a1",
+      "status": 200,
+      "jobId": "c9d67083-4f75-4588-8f61-038b0493c6a1",
+      "statusText": "processing"
+    },
+    {
+      "path": "/api/media/studio-subject-vfx/c9d67083-4f75-4588-8f61-038b0493c6a1",
+      "status": 200,
+      "jobId": "c9d67083-4f75-4588-8f61-038b0493c6a1",
+      "statusText": "processing"
+    },
+    {
+      "path": "/api/media/studio-subject-vfx/c9d67083-4f75-4588-8f61-038b0493c6a1",
+      "status": 200,
+      "jobId": "c9d67083-4f75-4588-8f61-038b0493c6a1",
+      "statusText": "completed"
+    }
+  ],
+  "noMocks": true
+}

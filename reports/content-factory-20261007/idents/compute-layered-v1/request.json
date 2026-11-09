@@ -1,0 +1,28 @@
+{
+  "template": "autopromote_ident",
+  "identTemplate": "layered_logo_v1",
+  "style": "compute",
+  "duration": 5,
+  "fps": 24,
+  "width": 1280,
+  "height": 720,
+  "seed": 2026100701,
+  "sourceBrief": "Build a cinematic AutoPromote ident from the actual existing rocket and Auto-Promote logo asset. Dark opening, anticipation, separated geometry/material layers, controlled camera parallax, premium reflections, clean wordmark lockup, original rise and impact at 2.7 seconds, 1.7-second readable final hold. No replacement glyphs, opacity reveal, random transitions or decorative particles.",
+  "logoGeometry": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/studio_3d_renderer/assets/autopromote-logo-geometry.json",
+  "logoGeometrySha256": "3b2948e30841b2a94d01877dc8bef7420c7aa61e9b115f1071dd53158f9609a6",
+  "camera": {
+    "lens": 52,
+    "parallax": 0.7
+  },
+  "materials": {
+    "depth": 0.16,
+    "bevel": 0.008,
+    "roughness": 0.2
+  },
+  "lighting": {
+    "intensity": 1
+  },
+  "particles": {
+    "count": 18
+  }
+}

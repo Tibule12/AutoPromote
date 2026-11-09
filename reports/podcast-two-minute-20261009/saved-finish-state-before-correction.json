@@ -1,0 +1,74 @@
+{
+  "savedAt": 1791530280741,
+  "docRevision": 122,
+  "aspect": "9:16",
+  "smartCrop": true,
+  "frame": {
+    "insetPercent": 2.5,
+    "radiusPercent": 6,
+    "background": "studio_black",
+    "enabled": false
+  },
+  "colour": {
+    "lutName": "",
+    "lutFile": null,
+    "lutIntensity": 100,
+    "curve": {
+      "shadows": 0,
+      "midtones": 0,
+      "highlights": 0
+    },
+    "hsl": {
+      "hue": 0,
+      "saturation": 0,
+      "luminance": 0
+    }
+  },
+  "finish": {
+    "precisionGrade": false,
+    "exposureStops": 0,
+    "lift": 0,
+    "gamma": 1,
+    "gain": 1,
+    "tint": 0,
+    "preset": null,
+    "brightness": 1,
+    "contrast": 1,
+    "saturation": 1,
+    "temperature": 0,
+    "sharpness": 0,
+    "vignette": 0,
+    "blur": 0,
+    "blurMode": "edge",
+    "blurStart": -1,
+    "blurEnd": -1,
+    "zoom": 1,
+    "zoomAnchor": "center",
+    "overlayType": "",
+    "overlayOpacity": 0.4,
+    "overlayColor": "#000000",
+    "filmGrain": 0,
+    "chromaticAberration": 0,
+    "vhsTracking": 0,
+    "lightLeak": 0,
+    "letterbox": 0,
+    "fadeIn": 0,
+    "fadeOut": 0
+  },
+  "captionStyle": "bold_pop",
+  "captionScale": 1,
+  "transform": {
+    "id": "main-video",
+    "name": "Main video",
+    "type": "video",
+    "x": 50,
+    "y": 50,
+    "scale": 1,
+    "rotation": 0,
+    "opacity": 1,
+    "cropX": 0,
+    "cropY": 0
+  },
+  "keys": [],
+  "job": "a82eea947322015121934a6c6ced30cbdab8e15e"
+}

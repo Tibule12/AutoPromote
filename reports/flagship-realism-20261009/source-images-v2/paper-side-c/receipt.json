@@ -1,0 +1,36 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "sourceBrief": "The Small Boat: replace the rejected front-facing conditioned source with a newly generated broadside paper schooner. One navy/ivory folded hull/sails faces right in photographic blue sea with warm side light. Must inspect direction, readable paper folds, connected hull and sea horizon before any moving transformation test.",
+  "prompt": "A macro photograph of a miniature origami schooner floating in real deep blue sea. One long navy folded paper hull, two cream triangular folded paper sails. Broadside profile, bow right, stern left. Low camera; horizon behind the boat. Warm afternoon side light, creased paper fibres, realistic water, shallow optical depth.",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "modelRevision": "462165984030d82259a11f4367a4eed129e94a7b",
+  "tool": "AutoPromote NVIDIA image adapter",
+  "seed": 20261009073,
+  "settings": {
+    "steps": 35,
+    "guidance": 7,
+    "width": 1344,
+    "height": 768,
+    "dtype": "float16",
+    "encodedTokenCounts": [
+      69,
+      69
+    ],
+    "promptTruncated": false
+  },
+  "gpu": "NVIDIA L40S",
+  "origin": "native_generated_image",
+  "artifact": {
+    "path": "/work/source-images-v2/paper-side-c/video.mp4",
+    "sha256": "a6f00d837a813cfca5fb2fe678a6dd57a566e61d888fc0c62082613287d2fa3a",
+    "duration": 1.0
+  },
+  "reusableArtifacts": [
+    {
+      "role": "native_image",
+      "path": "/work/source-images-v2/paper-side-c/image.png",
+      "sha256": "fe17975cdf0a25b9dd67145241e2fbc1e627f8be42ffb6f5a880162de305bf0b"
+    }
+  ],
+  "seconds": 5.684002861000408
+}

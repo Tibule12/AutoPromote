@@ -1,0 +1,23 @@
+{
+  "startedAt": "2026-10-08T18:23:36.797Z",
+  "realAuth": true,
+  "noMocks": true,
+  "headless": true,
+  "muted": true,
+  "gpuJobsStarted": 0,
+  "renderJobsStarted": 0,
+  "samples": [
+    {
+      "programmeTime": 0.75,
+      "sourceTime": 1.5,
+      "titleVisible": true
+    },
+    {
+      "programmeTime": 1.55,
+      "sourceTime": 3.1,
+      "titleVisible": true
+    }
+  ],
+  "status": "NATIVE_SPLIT_TITLE_VISIBILITY_PASS_FULL_PARITY_UNQUALIFIED",
+  "finishedAt": "2026-10-08T18:24:05.004Z"
+}

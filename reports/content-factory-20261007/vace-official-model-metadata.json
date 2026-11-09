@@ -1,0 +1,369 @@
+[
+  {
+    "model": "Wan-AI/Wan2.1-VACE-1.3B-diffusers",
+    "revision": "ec4d2cb062b548996b179d493fdd05340de702a1",
+    "license": "apache-2.0",
+    "gated": false,
+    "transformerBytes": 7146182696,
+    "files": [
+      {
+        "file": ".gitattributes",
+        "bytes": 1998,
+        "sha256": null
+      },
+      {
+        "file": "README.md",
+        "bytes": 43987,
+        "sha256": null
+      },
+      {
+        "file": "assets/comp_effic.png",
+        "bytes": 1793594,
+        "sha256": "b0e225caffb4b31295ad150f95ee852e4c3dde4a00ac8f79a2ff500f2ce26b8d"
+      },
+      {
+        "file": "assets/data_for_diff_stage.jpg",
+        "bytes": 528268,
+        "sha256": "59aec08409f2d46b0e640e4e120dc7cca52c08c3de56d026602dbcff1ebf241a"
+      },
+      {
+        "file": "assets/i2v_res.png",
+        "bytes": 891681,
+        "sha256": "6823b3206d8d0cb18d3b5b949dec1217f1178109ba11f14e977b67e1f7b8a248"
+      },
+      {
+        "file": "assets/logo.png",
+        "bytes": 56322,
+        "sha256": null
+      },
+      {
+        "file": "assets/t2v_res.jpg",
+        "bytes": 301030,
+        "sha256": "91db579092446be2a834bc67721a8e4346936f38c4edb912f459ca3e10f8f439"
+      },
+      {
+        "file": "assets/vben_vs_sota.png",
+        "bytes": 1552119,
+        "sha256": "9a0e86ca85046d2675f97984b88b6e74df07bba8a62a31ab8a1aef50d4eda44e"
+      },
+      {
+        "file": "assets/video_dit_arch.jpg",
+        "bytes": 643369,
+        "sha256": "195dceec6570289d8b01cc51d2e28a7786216f19de55b23978a52610d1646a66"
+      },
+      {
+        "file": "assets/video_vae_res.jpg",
+        "bytes": 212586,
+        "sha256": "d8f9e7f7353848056a615c8ef35ab86ec22976bb46cb27405008b4089701945c"
+      },
+      {
+        "file": "model_index.json",
+        "bytes": 408,
+        "sha256": null
+      },
+      {
+        "file": "scheduler/scheduler_config.json",
+        "bytes": 751,
+        "sha256": null
+      },
+      {
+        "file": "text_encoder/config.json",
+        "bytes": 850,
+        "sha256": null
+      },
+      {
+        "file": "text_encoder/model-00001-of-00003.safetensors",
+        "bytes": 4935812536,
+        "sha256": "a8e861969c7433e707cc5a74065d795d36cca07ec96eb6763eb4083df7248f58"
+      },
+      {
+        "file": "text_encoder/model-00002-of-00003.safetensors",
+        "bytes": 4983103192,
+        "sha256": "d57d948ece4837d850b7a859a4415121d57cacf8b9ee1d4db200c67f592902d7"
+      },
+      {
+        "file": "text_encoder/model-00003-of-00003.safetensors",
+        "bytes": 1442935480,
+        "sha256": "0da9ee284e21d1406df708788db1d502d95d75f69faa25cd26151bf8829b7c5f"
+      },
+      {
+        "file": "text_encoder/model.safetensors.index.json",
+        "bytes": 22476,
+        "sha256": null
+      },
+      {
+        "file": "tokenizer/special_tokens_map.json",
+        "bytes": 7079,
+        "sha256": null
+      },
+      {
+        "file": "tokenizer/spiece.model",
+        "bytes": 4548313,
+        "sha256": "e3909a67b780650b35cf529ac782ad2b6b26e6d1f849d3fbb6a872905f452458"
+      },
+      {
+        "file": "tokenizer/tokenizer.json",
+        "bytes": 16837459,
+        "sha256": "20a46ac256746594ed7e1e3ef733b83fbc5a6f0922aa7480eda961743de080ef"
+      },
+      {
+        "file": "tokenizer/tokenizer_config.json",
+        "bytes": 61786,
+        "sha256": null
+      },
+      {
+        "file": "transformer/config.json",
+        "bytes": 662,
+        "sha256": null
+      },
+      {
+        "file": "transformer/diffusion_pytorch_model-00001-of-00002.safetensors",
+        "bytes": 4999964504,
+        "sha256": "192804a4e10b5bb0a13f5c224bc4ec9707b3b8cc0def8eea005dbce7c9d6752a"
+      },
+      {
+        "file": "transformer/diffusion_pytorch_model-00002-of-00002.safetensors",
+        "bytes": 2146103400,
+        "sha256": "dadaf1d5e9ccf826e2c497aa9fc2756a044f606d0aa919e5405a734a121bcf7e"
+      },
+      {
+        "file": "transformer/diffusion_pytorch_model.safetensors.index.json",
+        "bytes": 114130,
+        "sha256": null
+      },
+      {
+        "file": "vae/config.json",
+        "bytes": 724,
+        "sha256": null
+      },
+      {
+        "file": "vae/diffusion_pytorch_model.safetensors",
+        "bytes": 507591892,
+        "sha256": "d6e524b3fffede1787a74e81b30976dce5400c4439ba64222168e607ed19e793"
+      }
+    ],
+    "reusedTextEncoder": {
+      "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+      "revision": "b8fff7315c768468a5333511427288870b2e9635",
+      "checks": [
+        {
+          "file": "text_encoder/model-00001-of-00003.safetensors",
+          "expectedSha256": "a8e861969c7433e707cc5a74065d795d36cca07ec96eb6763eb4083df7248f58",
+          "sourceSha256": "a8e861969c7433e707cc5a74065d795d36cca07ec96eb6763eb4083df7248f58",
+          "equal": true
+        },
+        {
+          "file": "text_encoder/model-00002-of-00003.safetensors",
+          "expectedSha256": "d57d948ece4837d850b7a859a4415121d57cacf8b9ee1d4db200c67f592902d7",
+          "sourceSha256": "d57d948ece4837d850b7a859a4415121d57cacf8b9ee1d4db200c67f592902d7",
+          "equal": true
+        },
+        {
+          "file": "text_encoder/model-00003-of-00003.safetensors",
+          "expectedSha256": "0da9ee284e21d1406df708788db1d502d95d75f69faa25cd26151bf8829b7c5f",
+          "sourceSha256": "0da9ee284e21d1406df708788db1d502d95d75f69faa25cd26151bf8829b7c5f",
+          "equal": true
+        }
+      ]
+    }
+  },
+  {
+    "model": "Wan-AI/Wan2.1-VACE-14B-diffusers",
+    "revision": "db79b90c60bbb45ceec9e41b9d5a4df934538ac4",
+    "license": "apache-2.0",
+    "gated": false,
+    "transformerBytes": 63252425327,
+    "files": [
+      {
+        "file": ".gitattributes",
+        "bytes": 1998,
+        "sha256": null
+      },
+      {
+        "file": "README.md",
+        "bytes": 43986,
+        "sha256": null
+      },
+      {
+        "file": "assets/comp_effic.png",
+        "bytes": 1793594,
+        "sha256": "b0e225caffb4b31295ad150f95ee852e4c3dde4a00ac8f79a2ff500f2ce26b8d"
+      },
+      {
+        "file": "assets/data_for_diff_stage.jpg",
+        "bytes": 528268,
+        "sha256": "59aec08409f2d46b0e640e4e120dc7cca52c08c3de56d026602dbcff1ebf241a"
+      },
+      {
+        "file": "assets/i2v_res.png",
+        "bytes": 891681,
+        "sha256": "6823b3206d8d0cb18d3b5b949dec1217f1178109ba11f14e977b67e1f7b8a248"
+      },
+      {
+        "file": "assets/logo.png",
+        "bytes": 56322,
+        "sha256": null
+      },
+      {
+        "file": "assets/t2v_res.jpg",
+        "bytes": 301030,
+        "sha256": "91db579092446be2a834bc67721a8e4346936f38c4edb912f459ca3e10f8f439"
+      },
+      {
+        "file": "assets/vben_vs_sota.png",
+        "bytes": 1552119,
+        "sha256": "9a0e86ca85046d2675f97984b88b6e74df07bba8a62a31ab8a1aef50d4eda44e"
+      },
+      {
+        "file": "assets/video_dit_arch.jpg",
+        "bytes": 643369,
+        "sha256": "195dceec6570289d8b01cc51d2e28a7786216f19de55b23978a52610d1646a66"
+      },
+      {
+        "file": "assets/video_vae_res.jpg",
+        "bytes": 212586,
+        "sha256": "d8f9e7f7353848056a615c8ef35ab86ec22976bb46cb27405008b4089701945c"
+      },
+      {
+        "file": "model_index.json",
+        "bytes": 408,
+        "sha256": null
+      },
+      {
+        "file": "scheduler/scheduler_config.json",
+        "bytes": 751,
+        "sha256": null
+      },
+      {
+        "file": "text_encoder/config.json",
+        "bytes": 850,
+        "sha256": null
+      },
+      {
+        "file": "text_encoder/model-00001-of-00003.safetensors",
+        "bytes": 4935812536,
+        "sha256": "a8e861969c7433e707cc5a74065d795d36cca07ec96eb6763eb4083df7248f58"
+      },
+      {
+        "file": "text_encoder/model-00002-of-00003.safetensors",
+        "bytes": 4983103192,
+        "sha256": "d57d948ece4837d850b7a859a4415121d57cacf8b9ee1d4db200c67f592902d7"
+      },
+      {
+        "file": "text_encoder/model-00003-of-00003.safetensors",
+        "bytes": 1442935480,
+        "sha256": "0da9ee284e21d1406df708788db1d502d95d75f69faa25cd26151bf8829b7c5f"
+      },
+      {
+        "file": "text_encoder/model.safetensors.index.json",
+        "bytes": 22476,
+        "sha256": null
+      },
+      {
+        "file": "tokenizer/special_tokens_map.json",
+        "bytes": 7079,
+        "sha256": null
+      },
+      {
+        "file": "tokenizer/spiece.model",
+        "bytes": 4548313,
+        "sha256": "e3909a67b780650b35cf529ac782ad2b6b26e6d1f849d3fbb6a872905f452458"
+      },
+      {
+        "file": "tokenizer/tokenizer.json",
+        "bytes": 16837459,
+        "sha256": "20a46ac256746594ed7e1e3ef733b83fbc5a6f0922aa7480eda961743de080ef"
+      },
+      {
+        "file": "tokenizer/tokenizer_config.json",
+        "bytes": 61786,
+        "sha256": null
+      },
+      {
+        "file": "transformer/config.json",
+        "bytes": 610,
+        "sha256": null
+      },
+      {
+        "file": "transformer/diffusion_pytorch_model-00001-of-00013.safetensors",
+        "bytes": 4867114424,
+        "sha256": "bd8bbb8834a274525ab65cbb063f21aa58973a054bfd1638bfe395504c9d9b99"
+      },
+      {
+        "file": "transformer/diffusion_pytorch_model-00002-of-00013.safetensors",
+        "bytes": 4919594456,
+        "sha256": "8d24b40a5ea6bb21cdc0115128241ffeb44184b2419f4b1585af1573ed5c7839"
+      },
+      {
+        "file": "transformer/diffusion_pytorch_model-00003-of-00013.safetensors",
+        "bytes": 4919465128,
+        "sha256": "7f550f93b3c36c13015dd551109ff63528251864c9513acc2e0a502807b8a91c"
+      },
+      {
+        "file": "transformer/diffusion_pytorch_model-00004-of-00013.safetensors",
+        "bytes": 4919594536,
+        "sha256": "6a701d601e2cbe3da3515b24d59f56deb5ca2c973c778ff7911f579ec5b8ec11"
+      },
+      {
+        "file": "transformer/diffusion_pytorch_model-00005-of-00013.safetensors",
+        "bytes": 4919465224,
+        "sha256": "7eb65433e529b975f84897f6572af1ae148d82e7fd0ee7c5f4191158736b104f"
+      },
+      {
+        "file": "transformer/diffusion_pytorch_model-00006-of-00013.safetensors",
+        "bytes": 4919594552,
+        "sha256": "aae199dea0aeb96347e9af9e3cb90679c1c8c2f42c76ee3cead2ea240c909d07"
+      },
+      {
+        "file": "transformer/diffusion_pytorch_model-00007-of-00013.safetensors",
+        "bytes": 4919465224,
+        "sha256": "53c24e663dece6ff0737b03e5cc670118998231877ba7bad29824ff0500589d4"
+      },
+      {
+        "file": "transformer/diffusion_pytorch_model-00008-of-00013.safetensors",
+        "bytes": 4919594552,
+        "sha256": "333eaca9dce56bf3083bbab4630aa081b7c403a27ba94894a7756d631529fd9a"
+      },
+      {
+        "file": "transformer/diffusion_pytorch_model-00009-of-00013.safetensors",
+        "bytes": 4919465224,
+        "sha256": "8af811e7ed2ab64a3f6d07827d1b975a9804b78d63c2b3989024bc1b67ac6e5d"
+      },
+      {
+        "file": "transformer/diffusion_pytorch_model-00010-of-00013.safetensors",
+        "bytes": 4919594552,
+        "sha256": "e8b631e38f0ad21a63c631069658d4be4b55e0cb15e8f5848567482b5862ba63"
+      },
+      {
+        "file": "transformer/diffusion_pytorch_model-00011-of-00013.safetensors",
+        "bytes": 4919465224,
+        "sha256": "21032fe150df6f3ac26780fb8ca38d05c4a9585a1b774ceadb5d42bc96ff1b27"
+      },
+      {
+        "file": "transformer/diffusion_pytorch_model-00012-of-00013.safetensors",
+        "bytes": 4971935336,
+        "sha256": "e48bce2ab6bb0885d72ff5e79c56c29335051e5ad715a03807267e248addaff8"
+      },
+      {
+        "file": "transformer/diffusion_pytorch_model-00013-of-00013.safetensors",
+        "bytes": 4217957112,
+        "sha256": "e0e39ee859fc696ebd2c0982202a5d1cf8206eeb82b3b582d954707b9f980f12"
+      },
+      {
+        "file": "transformer/diffusion_pytorch_model.safetensors.index.json",
+        "bytes": 119173,
+        "sha256": null
+      },
+      {
+        "file": "vae/config.json",
+        "bytes": 724,
+        "sha256": null
+      },
+      {
+        "file": "vae/diffusion_pytorch_model.safetensors",
+        "bytes": 507591892,
+        "sha256": "d6e524b3fffede1787a74e81b30976dce5400c4439ba64222168e607ed19e793"
+      }
+    ]
+  }
+]

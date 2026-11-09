@@ -1,0 +1,28 @@
+{
+  "status": "PASS_CONTRACTS_ONLY",
+  "verifiedAt": "2026-10-09T10:45:11.366265+00:00",
+  "factoryAndDirectorTests": 40,
+  "scenePerformanceTests": 8,
+  "retainedFactoryRegressionTests": 28,
+  "directorRegressionTests": 4,
+  "cpuInputGuardTests": 8,
+  "planningOnlyShots": 10,
+  "actualGeneratedHumanTakes": 0,
+  "gpuExecutionsStarted": 0,
+  "nativeStudioUserFlowQualified": false,
+  "previewFinalParityQualified": false,
+  "creativeAcceptance": false,
+  "kernelSourceCheck": "PASS after regeneration from current frontend source",
+  "kernelSha256": "55d0838266ada0dc78f96c223584807ef581ff1c47bc632824eb676d63db3e5a",
+  "staleKernelRegression": {
+    "before": "Factory snapshot contained generationProvenance; canonical editGraph.media did not. Bundle check failed.",
+    "after": "Current shared source rebuilt; stale transport provenance is overridden by serialized canonical plan/review. Guard passes.",
+    "scope": "CPU shared-kernel projection and contract fixtures; no native user flow claimed"
+  },
+  "evidence": [
+    "factory-guard-tests.json",
+    "cpu-preflight-tests.json",
+    "planning-validation.json",
+    "runtime-audit.json"
+  ]
+}

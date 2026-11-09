@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-08T06:47:59.953Z",
+  "headless": true,
+  "realAuth": true,
+  "noMocks": true,
+  "name": "Studio QA 20261008 captions",
+  "editableCaptionBlocks": 3,
+  "unrelatedCompletedOutput": 0,
+  "autoPromoteOverlay": 0,
+  "media": {
+    "ready": 4,
+    "paused": false
+  }
+}

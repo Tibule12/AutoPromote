@@ -1,0 +1,12 @@
+{
+  "error": "page.waitForFunction: Timeout 30000ms exceeded.",
+  "checks": [
+    "Reduced motion keeps the actual tour behind explicit user intent and requests no film",
+    "02 Studio: chapter seek, decoded moving footage and active control verified",
+    "01 Uploads: chapter seek, decoded moving footage and active control verified",
+    "03 Schedule: chapter seek, decoded moving footage and active control verified",
+    "04 Analytics: chapter seek, decoded moving footage and active control verified",
+    "Scrolling away pauses tour playback"
+  ],
+  "errors": []
+}

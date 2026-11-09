@@ -1,0 +1,1331 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": 1,
+  "updatedAt": "2026-10-09T10:45:11.366265+00:00",
+  "assessment": "Retained October8 audit plus scoped October9 native NVIDIA podcast delivery/recovery evidence; no full conformance, production or creative promotion.",
+  "readinessStates": [
+    "UNIMPLEMENTED",
+    "BROKEN",
+    "PARTIAL",
+    "FUNCTIONAL",
+    "PRO-READY",
+    "PRODUCTION-READY"
+  ],
+  "sourceRefs": {
+    "graph": "frontend/src/components/studioProjectDocument.js",
+    "clock": "frontend/src/components/studioTime.js",
+    "compiler": "frontend/src/components/studioRenderCompiler.js",
+    "commands": "frontend/src/components/studioCommands.js",
+    "registry": "frontend/src/components/studioCapabilities.js",
+    "studio": "frontend/src/components/ViralClipStudio.js",
+    "history": "frontend/src/components/studioHistoryMedia.js",
+    "storage": "frontend/src/components/viralStudioProjectStore.js",
+    "recovery": "frontend/src/utils/viralRenderRecovery.js",
+    "payload": "frontend/src/components/viralRenderPayload.js",
+    "worker": "python_media_worker/main_media_server.py",
+    "caption": "frontend/src/components/studioCaptionPreviewStyle.js",
+    "captionStyles": "frontend/src/components/studioCaptionRenderStyles.json",
+    "subject": "frontend/src/components/StudioSubjectVfxPanel.js",
+    "subjectContract": "frontend/src/components/studioSubjectVfxContract.js",
+    "subjectRenderer": "python_media_worker/studio_vfx_plan.py",
+    "subjectService": "src/services/studioSubjectVfxService.js",
+    "model3D": "frontend/src/components/threeD/studio3DModel.js",
+    "panel3D": "frontend/src/components/threeD/Studio3DPanel.js",
+    "canvas3D": "frontend/src/components/threeD/Studio3DCanvas.js",
+    "blender": "studio_3d_renderer/blender_scene.py",
+    "dispatch3D": "src/services/studio3DService.js",
+    "nvidia": "src/services/studio3DNvidia.js",
+    "factoryAdapter": "src/services/contentFactoryStudioAdapter.js",
+    "factoryRoutes": "src/routes/adminContentFactoryRoutes.js",
+    "factory": "src/services/contentFactoryService.js",
+    "director": "frontend/src/components/studioDirectorProposals.js",
+    "directorServer": "src/services/studioDirectorReplayService.js",
+    "revisionServer": "src/services/studioProjectRevisionService.js",
+    "motion": "frontend/src/components/motion/MotionPanel.js",
+    "motionModel": "frontend/src/components/motion/motionModel.js",
+    "audio": "frontend/src/components/audio/AudioRemixPanel.js",
+    "timeline": "frontend/src/components/StudioProTimeline.js"
+  },
+  "policy": {
+    "sameGraphRequired": true,
+    "sameDecisionTimingAndOrderRequired": true,
+    "qualityMayDiffer": true,
+    "finishedVideoPlaybackIsPreFinalParity": false,
+    "unknownIsPassing": false,
+    "acceptedPixelTolerances": "Measured title-only ROI: max 1 preview pixel glyph-box drift, declared tolerance 2 pixels across three lines. This does not permit source-crop/decision changes; other domains are not calibrated.",
+    "domainClock": "90000 integer ticks/second; explicit source/programme/output mapping",
+    "boundaryTolerance": "At most one declared output frame where media boundary rounding permits; no timing/order/asset decision drift."
+  },
+  "checks": [
+    {
+      "id": "canonical_projection",
+      "capabilityIds": [
+        "preview",
+        "final_render",
+        "save_reload",
+        "director"
+      ],
+      "readiness": "PARTIAL",
+      "assertion": "Whole graph serialization/projection digest and mode equivalence",
+      "gap": "115-field snapshot inventory is classified and remaining edit decisions are canonical; nested consumers, global output clock/order and whole paired output remain open.",
+      "sourceRefs": [
+        "graph",
+        "compiler",
+        "commands"
+      ],
+      "automatedGuardFiles": [
+        "frontend/src/components/__tests__/studioProjectDocument.test.js",
+        "frontend/src/components/__tests__/studioRenderCompiler.test.js",
+        "frontend/src/components/__tests__/studioCanonicalMedia.test.js",
+        "test/studioDirectorReplayService.jest.test.js",
+        "frontend/src/components/__tests__/studioEditableProjection.test.js",
+        "frontend/src/components/__tests__/studioCanonicalVisual.test.js",
+        "test/e2e/playwright/studio-stability/canonical-visual-reopen.js",
+        "frontend/src/components/__tests__/studioCanonicalDecisions.test.js",
+        "test/e2e/playwright/studio-stability/canonical-decisions-reopen.js"
+      ],
+      "automatedGuardResultThisSession": "PASS: schema compatibility/mixed-state guards and real normal mixed UI recovery; no full paired output qualification.",
+      "realPairedRunThisSession": "NOT_RUN",
+      "measurement": null,
+      "requiredEvidence": [
+        "canonical input digest/settings",
+        "pre-final preview capture at mapped times",
+        "real final output and device receipt where GPU required",
+        "paired state/timing/visual or audio review"
+      ],
+      "blocker": "No full paired conformance proof for this check.",
+      "foundationEvidence": "reports/studio-canonical-completion-20261008/README.md",
+      "latestNativeStateEvidence": "reports/studio-canonical-completion-20261008/browser-flow/receipt.json"
+    },
+    {
+      "id": "edited_clock",
+      "capabilityIds": [
+        "preview",
+        "cuts_speed",
+        "captions",
+        "audio"
+      ],
+      "readiness": "PARTIAL",
+      "assertion": "Trim/split/global speed/ramp/repeated-source output clock",
+      "gap": "Native selected 2x/60fps exact 360-frame tail, mapped cut and lossless ordered-frame regression PASS. Ramps/dense audio and broader clocks unqualified.",
+      "sourceRefs": [
+        "clock",
+        "compiler",
+        "timeline",
+        "studio"
+      ],
+      "automatedGuardFiles": [
+        "frontend/src/components/__tests__/studioRenderCompiler.test.js"
+      ],
+      "automatedGuardResultThisSession": "NOT_RUN",
+      "realPairedRunThisSession": "Actual r2 CPU and r4 NVIDIA same-edit pre-final/delivery; 13 samples. Scoped fade-clock PASS; full row UNQUALIFIED.",
+      "measurement": null,
+      "requiredEvidence": [
+        "canonical input digest/settings",
+        "pre-final preview capture at mapped times",
+        "real final output and device receipt where GPU required",
+        "paired state/timing/visual or audio review"
+      ],
+      "blocker": "No full paired conformance proof for this check.",
+      "latestNativeTrimEvidence": "reports/studio-canonical-completion-20261008/native-trim-clock-r5/receipt.json",
+      "latestSpeedEvidence": [
+        "reports/studio-canonical-completion-20261008/paired-speed-2x-r2/clock-retest-review.json",
+        "reports/studio-canonical-completion-20261008/paired-speed-2x-gpu-r4/gpu-delivery-review.json"
+      ],
+      "latestSpeedScope": "2x native combined output and Minimal cue/fade clock subset pass; full row remains PARTIAL. Real ramps/listening/mixed media unqualified.",
+      "latestDeliveryTailEvidence": "reports/studio-canonical-completion-20261008/subject-programme-cpu-r7/visual-review.json",
+      "latestNativeEvidence": "reports/studio-canonical-completion-20261008/subject-programme-cpu-r9/visual-review.json"
+    },
+    {
+      "id": "aspect_crop",
+      "capabilityIds": [
+        "reframing",
+        "preview"
+      ],
+      "readiness": "PARTIAL",
+      "assertion": "Aspect/crop/sourceFocus on each source and speed boundary",
+      "gap": "Landscape\u2192portrait real source-centre fix; broader paired geometry not measured.",
+      "sourceRefs": [
+        "studio",
+        "worker"
+      ],
+      "automatedGuardFiles": [],
+      "automatedGuardResultThisSession": "NOT_RUN",
+      "realPairedRunThisSession": "7.5s bounded footage geometry PASS; all modes/boundaries UNQUALIFIED",
+      "measurement": null,
+      "requiredEvidence": [
+        "canonical input digest/settings",
+        "pre-final preview capture at mapped times",
+        "real final output and device receipt where GPU required",
+        "paired state/timing/visual or audio review"
+      ],
+      "blocker": "Broad modes, fixtures/cuts/masks and full outer-frame stage conformance unqualified.",
+      "latestFoundationEvidence": "reports/studio-canonical-visual-20261008/README.md",
+      "latestNativeStateEvidence": "reports/studio-canonical-visual-20261008/browser-flow/receipt.json",
+      "latestRealFailure": {
+        "result": "CORRECTED_QA_COMPARISON_ERROR",
+        "description": "Apparent mismatch was unnormalized comparison. Actual normalized SIFT measurement 102 inliers, median .50px/p95 1.18px.",
+        "evidence": "reports/studio-canonical-completion-20261008/paired-flow-r11/footage-geometry-7.5.json"
+      },
+      "latestEditableMainFrameScope": "Native toggle/history/reset/save/cold-reopen retains disabled frame and identity transform. Real final delivery and embedded-source-border visual review PASS; r11 bad envelope assertion/r12 seek harness failure/r13 interrupted; complete all-gate framing run remains unqualified.",
+      "latestEmbeddedSourceBorderEvidence": "reports/studio-canonical-completion-20261008/frame-controls-r11/source-border-review.json"
+    },
+    {
+      "id": "caption_layout_animation",
+      "capabilityIds": [
+        "captions",
+        "overlays"
+      ],
+      "readiness": "PARTIAL",
+      "assertion": "Exact reviewed words, cue clocks, fonts/lines/safe areas/emphasis/animation",
+      "gap": "21 shared style values are foundation; complete paired animation and edge qualification missing.",
+      "sourceRefs": [
+        "caption",
+        "captionStyles",
+        "worker"
+      ],
+      "automatedGuardFiles": [
+        "frontend/src/components/__tests__/studioCaptionPreviewStyle.test.js"
+      ],
+      "automatedGuardResultThisSession": "8 helper/shared-definition/font guards PASS; these alone do not qualify real output",
+      "realPairedRunThisSession": "Actual r2 CPU and r4 NVIDIA same-edit pre-final/delivery; 13 samples. Scoped fade-clock PASS; full row UNQUALIFIED.",
+      "measurement": {
+        "scope": "Title glyph geometry only at 3.5s; captions/animation remain unqualified",
+        "result": "PASS",
+        "maxErrorPreviewPixels": 1,
+        "tolerancePreviewPixels": 2,
+        "expectedLines": 3
+      },
+      "requiredEvidence": [
+        "canonical input digest/settings",
+        "pre-final preview capture at mapped times",
+        "real final output and device receipt where GPU required",
+        "paired state/timing/visual or audio review"
+      ],
+      "blocker": "Other styles/retimed cues, complete raster/line/baseline and fade edge calibration unqualified.",
+      "latestFoundationEvidence": "reports/studio-canonical-visual-20261008/README.md",
+      "latestNativeStateEvidence": "reports/studio-canonical-visual-20261008/browser-flow/receipt.json",
+      "latestTitleSubsetEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/title-geometry-retest.json",
+      "latestCaptionSubsetEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/caption-retest-review.json",
+      "latestSpeedEvidence": [
+        "reports/studio-canonical-completion-20261008/paired-speed-2x-r2/clock-retest-review.json",
+        "reports/studio-canonical-completion-20261008/paired-speed-2x-gpu-r4/gpu-delivery-review.json"
+      ],
+      "latestSpeedScope": "2x native combined output and Minimal cue/fade clock subset pass; full row remains PARTIAL. Real ramps/listening/mixed media unqualified."
+    },
+    {
+      "id": "transform_curves",
+      "capabilityIds": [
+        "overlays",
+        "motion_graphics",
+        "cuts_speed"
+      ],
+      "readiness": "PARTIAL",
+      "assertion": "Transform/anchor/keyframe/easing/motion path sample equality",
+      "gap": "Premature crop fixed in source and actual same saved edit. Static rotation/scale/position, top-label recovery and restricted background geometry PASS; all curves/crop/opacity/nesting not qualified.",
+      "sourceRefs": [
+        "studio",
+        "motionModel",
+        "worker"
+      ],
+      "automatedGuardFiles": [],
+      "automatedGuardResultThisSession": "NOT_RUN",
+      "realPairedRunThisSession": "NOT_RUN",
+      "measurement": null,
+      "requiredEvidence": [
+        "canonical input digest/settings",
+        "pre-final preview capture at mapped times",
+        "real final output and device receipt where GPU required",
+        "paired state/timing/visual or audio review"
+      ],
+      "blocker": "No full paired conformance proof for this check.",
+      "latestFoundationEvidence": "reports/studio-canonical-visual-20261008/README.md",
+      "latestNativeStateEvidence": "reports/studio-canonical-visual-20261008/browser-flow/receipt.json",
+      "latestNativeEvidence": "reports/studio-canonical-completion-20261008/subject-programme-cpu-r9/visual-review.json"
+    },
+    {
+      "id": "mask_subject",
+      "capabilityIds": [
+        "masking",
+        "segmentation"
+      ],
+      "readiness": "PARTIAL",
+      "assertion": "Same source/matte/target/settings hash, mask IoU and temporal edges",
+      "gap": "Real reviewed 3s proxy/final first-range output; dense/long/cut/edge coverage missing.",
+      "sourceRefs": [
+        "subject",
+        "subjectContract",
+        "subjectRenderer"
+      ],
+      "automatedGuardFiles": [
+        "python_media_worker/test_studio_subject_vfx_export.py"
+      ],
+      "automatedGuardResultThisSession": "NOT_RUN",
+      "realPairedRunThisSession": "Real native r2 .25s/output vs .5s/source FAIL: programme omits reviewed effects. Matching source proxy implementation and actual r7 programme/cold recovery PASS; native complete retest pending shared GPU availability/CPU fallback. Whole row remains PARTIAL.",
+      "measurement": null,
+      "requiredEvidence": [
+        "canonical input digest/settings",
+        "pre-final preview capture at mapped times",
+        "real final output and device receipt where GPU required",
+        "paired state/timing/visual or audio review"
+      ],
+      "blocker": "No full paired conformance proof for this check.",
+      "latestNativeDeliveryEvidence": "reports/studio-canonical-completion-20261008/subject-final-delivery-r3/receipt.json",
+      "latestSubjectProgrammeScope": "Actual same-edit 2x subject+3D NVENC output is 6s/60fps and fully decoded. Paired .25s programme/.5s source review reproduces omission of reviewed SAM2 effects from programme and a separate Three.js/Blender geometry mismatch. Main programme now consumes only matching source-bound verified subject frames; muted decoder follows source seek/rate/playback. Owned URL recovery retains pixel-bound approval, and refresh URLs are excluded from edit history. Real r7 undo/redo/cold recovery and subject monitor PASS; final was rejected with real worker-unavailable 503 while another existing job held the GPU lock. Real 503 failure was hidden from Export; inline error is repaired and native no-charge/retry visibility PASS. Same complete flow is retesting through the real CPU worker, reusing the owned GPU subject job without inference. Full subject/3D/composition parity is not yet qualified.",
+      "latestSubjectProgrammeEvidence": [
+        "reports/studio-canonical-completion-20261008/subject-speed-gpu-r2/visual-review.json",
+        "reports/studio-canonical-completion-20261008/subject-speed-gpu-r7/receipt.json",
+        "reports/studio-canonical-completion-20261008/native-worker-unavailable-ui/receipt.json",
+        "reports/studio-canonical-completion-20261008/subject-programme-history-tests.log",
+        "reports/studio-canonical-completion-20261008/programme-export-component-retest.log"
+      ]
+    },
+    {
+      "id": "track_cuts",
+      "capabilityIds": [
+        "tracking",
+        "masking",
+        "segmentation"
+      ],
+      "readiness": "PARTIAL",
+      "assertion": "Track IDs, cut resets, target correction and composition coordinates",
+      "gap": "Algorithm/code guards are not a real camera-cut combination proof.",
+      "sourceRefs": [
+        "subject",
+        "subjectRenderer"
+      ],
+      "automatedGuardFiles": [
+        "python_media_worker/test_studio_subject_vfx_job.py"
+      ],
+      "automatedGuardResultThisSession": "NOT_RUN",
+      "realPairedRunThisSession": "Real native r2 .25s/output vs .5s/source FAIL: programme omits reviewed effects. Matching source proxy implementation and actual r7 programme/cold recovery PASS; native complete retest pending shared GPU availability/CPU fallback. Whole row remains PARTIAL.",
+      "measurement": null,
+      "requiredEvidence": [
+        "canonical input digest/settings",
+        "pre-final preview capture at mapped times",
+        "real final output and device receipt where GPU required",
+        "paired state/timing/visual or audio review"
+      ],
+      "blocker": "No full paired conformance proof for this check.",
+      "latestNativeDeliveryEvidence": "reports/studio-canonical-completion-20261008/subject-final-delivery-r3/receipt.json",
+      "latestSubjectProgrammeScope": "Actual same-edit 2x subject+3D NVENC output is 6s/60fps and fully decoded. Paired .25s programme/.5s source review reproduces omission of reviewed SAM2 effects from programme and a separate Three.js/Blender geometry mismatch. Main programme now consumes only matching source-bound verified subject frames; muted decoder follows source seek/rate/playback. Owned URL recovery retains pixel-bound approval, and refresh URLs are excluded from edit history. Real r7 undo/redo/cold recovery and subject monitor PASS; final was rejected with real worker-unavailable 503 while another existing job held the GPU lock. Real 503 failure was hidden from Export; inline error is repaired and native no-charge/retry visibility PASS. Same complete flow is retesting through the real CPU worker, reusing the owned GPU subject job without inference. Full subject/3D/composition parity is not yet qualified.",
+      "latestSubjectProgrammeEvidence": [
+        "reports/studio-canonical-completion-20261008/subject-speed-gpu-r2/visual-review.json",
+        "reports/studio-canonical-completion-20261008/subject-speed-gpu-r7/receipt.json",
+        "reports/studio-canonical-completion-20261008/native-worker-unavailable-ui/receipt.json",
+        "reports/studio-canonical-completion-20261008/subject-programme-history-tests.log",
+        "reports/studio-canonical-completion-20261008/programme-export-component-retest.log"
+      ]
+    },
+    {
+      "id": "depth_occlusion",
+      "capabilityIds": [
+        "depth_occlusion",
+        "compositing"
+      ],
+      "readiness": "PARTIAL",
+      "assertion": "Mask-derived 2.5D occlusion/parallax vs true claimed depth",
+      "gap": "Representative 2.5D path works; do not label it full metric/dense depth.",
+      "sourceRefs": [
+        "subjectRenderer",
+        "worker"
+      ],
+      "automatedGuardFiles": [],
+      "automatedGuardResultThisSession": "NOT_RUN",
+      "realPairedRunThisSession": "Real native r2 .25s/output vs .5s/source FAIL: programme omits reviewed effects. Matching source proxy implementation and actual r7 programme/cold recovery PASS; native complete retest pending shared GPU availability/CPU fallback. Whole row remains PARTIAL.",
+      "measurement": null,
+      "requiredEvidence": [
+        "canonical input digest/settings",
+        "pre-final preview capture at mapped times",
+        "real final output and device receipt where GPU required",
+        "paired state/timing/visual or audio review"
+      ],
+      "blocker": "No full paired conformance proof for this check.",
+      "latestNativeDeliveryEvidence": "reports/studio-canonical-completion-20261008/subject-final-delivery-r3/receipt.json",
+      "latestSubjectProgrammeScope": "Actual same-edit 2x subject+3D NVENC output is 6s/60fps and fully decoded. Paired .25s programme/.5s source review reproduces omission of reviewed SAM2 effects from programme and a separate Three.js/Blender geometry mismatch. Main programme now consumes only matching source-bound verified subject frames; muted decoder follows source seek/rate/playback. Owned URL recovery retains pixel-bound approval, and refresh URLs are excluded from edit history. Real r7 undo/redo/cold recovery and subject monitor PASS; final was rejected with real worker-unavailable 503 while another existing job held the GPU lock. Real 503 failure was hidden from Export; inline error is repaired and native no-charge/retry visibility PASS. Same complete flow is retesting through the real CPU worker, reusing the owned GPU subject job without inference. Full subject/3D/composition parity is not yet qualified.",
+      "latestSubjectProgrammeEvidence": [
+        "reports/studio-canonical-completion-20261008/subject-speed-gpu-r2/visual-review.json",
+        "reports/studio-canonical-completion-20261008/subject-speed-gpu-r7/receipt.json",
+        "reports/studio-canonical-completion-20261008/native-worker-unavailable-ui/receipt.json",
+        "reports/studio-canonical-completion-20261008/subject-programme-history-tests.log",
+        "reports/studio-canonical-completion-20261008/programme-export-component-retest.log"
+      ]
+    },
+    {
+      "id": "layer_order_blends",
+      "capabilityIds": [
+        "compositing",
+        "overlays",
+        "three_d",
+        "motion_graphics",
+        "vfx"
+      ],
+      "readiness": "PARTIAL",
+      "assertion": "One explicit global stage/order/blend model including nested masks",
+      "gap": "Canonical compatibility explicitly says separate_worker_stages; 3D order only among 3D layers.",
+      "sourceRefs": [
+        "graph",
+        "studio",
+        "worker"
+      ],
+      "automatedGuardFiles": [],
+      "automatedGuardResultThisSession": "NOT_RUN",
+      "realPairedRunThisSession": "NOT_RUN",
+      "measurement": null,
+      "requiredEvidence": [
+        "canonical input digest/settings",
+        "pre-final preview capture at mapped times",
+        "real final output and device receipt where GPU required",
+        "paired state/timing/visual or audio review"
+      ],
+      "blocker": "No full paired conformance proof for this check."
+    },
+    {
+      "id": "audio_routing_timing",
+      "capabilityIds": [
+        "audio",
+        "voiceover_sfx",
+        "audio_restoration",
+        "cuts_speed"
+      ],
+      "readiness": "PARTIAL",
+      "assertion": "Gain/mute/fades/ducking/onset/VO/music/speed and source-clock agreement",
+      "gap": "Stereo delivery collapse fixed. Native pre-final/final audio pairing, human listening, ramps/ducking and complete routing qualification remain open.",
+      "sourceRefs": [
+        "audio",
+        "studio",
+        "worker"
+      ],
+      "automatedGuardFiles": [
+        "python_media_worker/test_studio_audio_channels.py"
+      ],
+      "automatedGuardResultThisSession": "PASS: 4 real PCM/FFmpeg channel guards plus shared renderer stereo diagnostic. Mono sync default, SFX channel separation, cue onset/trim/fades and pitch-preserved centred VO tested.",
+      "realPairedRunThisSession": "NOT_RUN",
+      "measurement": null,
+      "requiredEvidence": [
+        "canonical input digest/settings",
+        "pre-final preview capture at mapped times",
+        "real final output and device receipt where GPU required",
+        "paired state/timing/visual or audio review"
+      ],
+      "blocker": "No full paired conformance proof for this check.",
+      "deliveryRegressionEvidence": "reports/studio-founder-workflow-20261008/audio-regression-measurements.json",
+      "nativeDeliveryEvidence": "reports/studio-founder-workflow-20261008/native-stereo-export-proof.json",
+      "nativeDeliveryMeasurementEvidence": "reports/studio-founder-workflow-20261008/native-stereo-audio-measurements.json"
+    },
+    {
+      "id": "three_d_pose_camera",
+      "capabilityIds": [
+        "three_d",
+        "blender"
+      ],
+      "readiness": "PARTIAL",
+      "assertion": "Scene/hash/camera/pose/material intent and keyframe curves",
+      "gap": "One HQ scene and actual alpha final works; Three.js/Blender cameras/materials/text differ.",
+      "sourceRefs": [
+        "model3D",
+        "canvas3D",
+        "blender"
+      ],
+      "automatedGuardFiles": [
+        "studio_3d_renderer/tests/test_pose_parity.py"
+      ],
+      "automatedGuardResultThisSession": "NOT_RUN",
+      "realPairedRunThisSession": "NOT_RUN",
+      "measurement": null,
+      "requiredEvidence": [
+        "canonical input digest/settings",
+        "pre-final preview capture at mapped times",
+        "real final output and device receipt where GPU required",
+        "paired state/timing/visual or audio review"
+      ],
+      "blocker": "No full paired conformance proof for this check.",
+      "latestPairedFailure": "Actual r2 source/programme versus NVENC final has a large Three.js/Blender size/geometry mismatch. Camera projection and text geometry differ; no promotion.",
+      "latestPairedFailureEvidence": "reports/studio-canonical-completion-20261008/subject-speed-gpu-r2/visual-review.json",
+      "latestProjectionRepair": "Live preview now matches measured Blender AUTO 36mm sensor-fit projection and its cameraMotion drift. Numeric guard PASS; glyph geometry/font/raster/fade remain unqualified.",
+      "latestProjectionEvidence": [
+        "reports/studio-canonical-completion-20261008/blender-camera-projection.log",
+        "reports/studio-canonical-completion-20261008/three-d-camera-projection-tests.log"
+      ]
+    },
+    {
+      "id": "three_d_ignored_fields",
+      "capabilityIds": [
+        "three_d",
+        "blender",
+        "three_d_audio"
+      ],
+      "readiness": "PARTIAL",
+      "assertion": "No active accepted field can disappear from final render",
+      "gap": "Nine unsupported fields and known ignored mode choices are now unavailable in the UI. Implementations still ignore legacy accepted values; missing renderer functionality is not resolved by disabling controls.",
+      "sourceRefs": [
+        "panel3D",
+        "blender",
+        "dispatch3D"
+      ],
+      "automatedGuardFiles": [
+        "frontend/src/components/threeD/Studio3DPanel.test.js",
+        "frontend/src/components/__tests__/studioCapabilities.test.js"
+      ],
+      "automatedGuardResultThisSession": "PASS: native field availability and component/registry guards. No final 3D rendering or paired pixels/audio.",
+      "realPairedRunThisSession": "NOT_RUN",
+      "measurement": null,
+      "requiredEvidence": [
+        "canonical input digest/settings",
+        "pre-final preview capture at mapped times",
+        "real final output and device receipt where GPU required",
+        "paired state/timing/visual or audio review"
+      ],
+      "blocker": "No full paired conformance proof for this check.",
+      "foundationEvidence": "reports/studio-canonical-visual-20261008/README.md",
+      "latestNativeControlEvidence": "reports/studio-canonical-visual-20261008/native-3d-controls.json"
+    },
+    {
+      "id": "three_d_fade_alpha",
+      "capabilityIds": [
+        "three_d",
+        "blender",
+        "compositing"
+      ],
+      "readiness": "PARTIAL",
+      "assertion": "Pose opacity reaches final alpha and paired fade boundary frames",
+      "gap": "Current Blender applies Timeline opacity at every frame; old unsupported notes are stale. Numeric/source wiring is not full paired alpha-image proof.",
+      "sourceRefs": [
+        "blender",
+        "canvas3D"
+      ],
+      "automatedGuardFiles": [
+        "studio_3d_renderer/tests/test_pose_parity.py"
+      ],
+      "automatedGuardResultThisSession": "NOT_RUN",
+      "realPairedRunThisSession": "NOT_RUN",
+      "measurement": null,
+      "requiredEvidence": [
+        "canonical input digest/settings",
+        "pre-final preview capture at mapped times",
+        "real final output and device receipt where GPU required",
+        "paired state/timing/visual or audio review"
+      ],
+      "blocker": "No full paired conformance proof for this check.",
+      "latestFoundationEvidence": "reports/studio-canonical-visual-20261008/README.md",
+      "latestNativeStateEvidence": "reports/studio-canonical-visual-20261008/browser-flow/receipt.json"
+    },
+    {
+      "id": "three_d_audio_envelope",
+      "capabilityIds": [
+        "three_d_audio",
+        "audio",
+        "blender"
+      ],
+      "readiness": "BROKEN",
+      "assertion": "Same real source-audio envelope modulates browser/proxy/final geometry",
+      "gap": "Browser live response exists; Blender receives no audio envelope.",
+      "sourceRefs": [
+        "canvas3D",
+        "blender"
+      ],
+      "automatedGuardFiles": [],
+      "automatedGuardResultThisSession": "NOT_RUN",
+      "realPairedRunThisSession": "NOT_RUN",
+      "measurement": null,
+      "requiredEvidence": [
+        "canonical input digest/settings",
+        "pre-final preview capture at mapped times",
+        "real final output and device receipt where GPU required",
+        "paired state/timing/visual or audio review"
+      ],
+      "blocker": "No full paired conformance proof for this check."
+    },
+    {
+      "id": "completed_output_seek",
+      "capabilityIds": [
+        "preview",
+        "save_reload",
+        "export"
+      ],
+      "readiness": "FUNCTIONAL",
+      "assertion": "Native completed-file seek/pause retains rendered source and actual output clock",
+      "gap": "Real normal cold frame at 0.5s and native same-SHA download after seek; this is recovery, not pre-final creative parity.",
+      "sourceRefs": [
+        "studio",
+        "recovery"
+      ],
+      "automatedGuardFiles": [
+        "frontend/src/components/__tests__/VideoEditor.viralRenderRecovery.test.js"
+      ],
+      "automatedGuardResultThisSession": "NOT_RUN",
+      "realPairedRunThisSession": "NOT_RUN",
+      "measurement": null,
+      "requiredEvidence": [
+        "canonical input digest/settings",
+        "pre-final preview capture at mapped times",
+        "real final output and device receipt where GPU required",
+        "paired state/timing/visual or audio review"
+      ],
+      "blocker": "Functional completed-output recovery scope only; no PRO-READY parity claim."
+    },
+    {
+      "id": "state_roundtrip",
+      "capabilityIds": [
+        "save_reload",
+        "project_revisions",
+        "director"
+      ],
+      "readiness": "PARTIAL",
+      "assertion": "Stable canonical decision/asset hash across undo/reopen/revision restore",
+      "gap": "Same-browser source URL refresh/project recovery repaired; all effect/blob/key/revision paths not qualified.",
+      "sourceRefs": [
+        "graph",
+        "storage",
+        "history",
+        "recovery",
+        "commands"
+      ],
+      "automatedGuardFiles": [
+        "frontend/src/components/__tests__/studioEditableProjection.test.js"
+      ],
+      "automatedGuardResultThisSession": "PASS: mixed graph roundtrip, shared manual/headless trim and undo guards; normal native split/undo/redo/save/cold-reopen preserved seven canonical fields at revision 101.",
+      "realPairedRunThisSession": "NOT_RUN",
+      "measurement": null,
+      "requiredEvidence": [
+        "canonical input digest/settings",
+        "pre-final preview capture at mapped times",
+        "real final output and device receipt where GPU required",
+        "paired state/timing/visual or audio review"
+      ],
+      "blocker": "No full paired conformance proof for this check.",
+      "latestNativeStateEvidence": "reports/studio-canonical-visual-20261008/browser-flow/receipt.json",
+      "latestFoundationEvidence": "reports/studio-canonical-visual-20261008/README.md"
+    },
+    {
+      "id": "generated_asset_equivalence",
+      "capabilityIds": [
+        "generated_image",
+        "generated_video",
+        "generated_raw",
+        "b_roll"
+      ],
+      "readiness": "PARTIAL",
+      "assertion": "Reviewed generated assets import as ordinary owned timeline assets",
+      "gap": "Exact owned generated asset SHA/review metadata and3s V2 duration survive native undo/redo/save/cold reopen and real final placement. Full mapped frame equivalence, nested live VFX and all generated types remain unqualified.",
+      "sourceRefs": [
+        "factoryAdapter",
+        "factoryRoutes",
+        "graph"
+      ],
+      "automatedGuardFiles": [],
+      "automatedGuardResultThisSession": "NOT_RUN",
+      "realPairedRunThisSession": "NOT_RUN",
+      "measurement": null,
+      "requiredEvidence": [
+        "canonical input digest/settings",
+        "pre-final preview capture at mapped times",
+        "real final output and device receipt where GPU required",
+        "paired state/timing/visual or audio review"
+      ],
+      "blocker": "No full paired conformance proof for this check.",
+      "latestPodCastEvidence": [
+        "reports/podcast-two-minute-20261009/final-render-receipt.json",
+        "reports/podcast-two-minute-20261009/final-output-review.json",
+        "reports/podcast-two-minute-20261009/final-audio-clock-retest.json",
+        "reports/podcast-two-minute-20261009/decoded-audio-gate-regression.json",
+        "reports/podcast-two-minute-20261009/gpu-worker-audio-clock-regression.json",
+        "reports/podcast-two-minute-20261009/shared-render-regressions.log",
+        "reports/podcast-two-minute-20261009/final-preflight-cold-recovery.json",
+        "reports/podcast-two-minute-20261009/generated-broll-cold-recovery.json",
+        "reports/podcast-two-minute-20261009/candle-native-acceptance.json",
+        "reports/podcast-two-minute-20261009/gpu-shutdown.json",
+        "reports/podcast-two-minute-20261009/final-worker-offline-recovery.json"
+      ],
+      "latestPrivateSceneProvenanceGuard": {
+        "evidenceRef": "reports/welcome-cinematic-rebuild-20261009/implementation-validation.json",
+        "scope": "Canonical serialization/transport overwrite and acceptance guards only",
+        "realPairedRun": false,
+        "normalUserFlowQualified": false
+      }
+    }
+  ],
+  "knownIgnored3DControls": [
+    {
+      "field": "fontFamily",
+      "status": "IGNORED_BY_FINAL_RENDER",
+      "uiActive": false,
+      "reason": "Fixed browser/Blender fonts; selected family does not reach font loading.",
+      "sourceRefs": [
+        "panel3D",
+        "canvas3D",
+        "blender",
+        "dispatch3D"
+      ],
+      "uiAvailability": "DISABLED_UNIMPLEMENTED",
+      "availabilityEvidence": "reports/studio-canonical-visual-20261008/native-3d-controls.json"
+    },
+    {
+      "field": "fontWeight",
+      "status": "IGNORED_BY_FINAL_RENDER",
+      "uiActive": false,
+      "reason": "Fixed text geometry/fonts rather than selected weight.",
+      "sourceRefs": [
+        "panel3D",
+        "canvas3D",
+        "blender",
+        "dispatch3D"
+      ],
+      "uiAvailability": "DISABLED_UNIMPLEMENTED",
+      "availabilityEvidence": "reports/studio-canonical-visual-20261008/native-3d-controls.json"
+    },
+    {
+      "field": "easing",
+      "status": "IGNORED_BY_FINAL_RENDER",
+      "uiActive": false,
+      "reason": "Scene-level choice not consumed by preset pose; per-keyframe easing is a separate implemented field.",
+      "sourceRefs": [
+        "panel3D",
+        "canvas3D",
+        "blender",
+        "dispatch3D"
+      ],
+      "uiAvailability": "DISABLED_UNIMPLEMENTED",
+      "availabilityEvidence": "reports/studio-canonical-visual-20261008/native-3d-controls.json"
+    },
+    {
+      "field": "audioReactiveIntensity",
+      "status": "IGNORED_BY_FINAL_RENDER",
+      "uiActive": false,
+      "reason": "Live browser audio scales meshes; no source envelope reaches Blender.",
+      "sourceRefs": [
+        "panel3D",
+        "canvas3D",
+        "blender",
+        "dispatch3D"
+      ],
+      "uiAvailability": "DISABLED_UNIMPLEMENTED",
+      "availabilityEvidence": "reports/studio-canonical-visual-20261008/native-3d-controls.json"
+    },
+    {
+      "field": "lightDirection",
+      "status": "IGNORED_BY_FINAL_RENDER",
+      "uiActive": false,
+      "reason": "Browser key light moves; Blender key light remains fixed.",
+      "sourceRefs": [
+        "panel3D",
+        "canvas3D",
+        "blender",
+        "dispatch3D"
+      ],
+      "uiAvailability": "DISABLED_UNIMPLEMENTED",
+      "availabilityEvidence": "reports/studio-canonical-visual-20261008/native-3d-controls.json"
+    },
+    {
+      "field": "shadows",
+      "status": "IGNORED_BY_FINAL_RENDER",
+      "uiActive": false,
+      "reason": "Accepted toggle not read to select renderer behavior.",
+      "sourceRefs": [
+        "panel3D",
+        "canvas3D",
+        "blender",
+        "dispatch3D"
+      ],
+      "uiAvailability": "DISABLED_UNIMPLEMENTED",
+      "availabilityEvidence": "reports/studio-canonical-visual-20261008/native-3d-controls.json"
+    },
+    {
+      "field": "reflections",
+      "status": "IGNORED_BY_FINAL_RENDER",
+      "uiActive": false,
+      "reason": "Accepted toggle not read to select renderer behavior.",
+      "sourceRefs": [
+        "panel3D",
+        "canvas3D",
+        "blender",
+        "dispatch3D"
+      ],
+      "uiAvailability": "DISABLED_UNIMPLEMENTED",
+      "availabilityEvidence": "reports/studio-canonical-visual-20261008/native-3d-controls.json"
+    },
+    {
+      "field": "background",
+      "status": "IGNORED_BY_FINAL_RENDER",
+      "uiActive": false,
+      "reason": "Transparent scene and fixed dark HQ matte ignore selected value.",
+      "sourceRefs": [
+        "panel3D",
+        "canvas3D",
+        "blender",
+        "dispatch3D"
+      ],
+      "uiAvailability": "DISABLED_UNIMPLEMENTED",
+      "availabilityEvidence": "reports/studio-canonical-visual-20261008/native-3d-controls.json"
+    },
+    {
+      "field": "quality",
+      "status": "IGNORED_BY_FINAL_RENDER",
+      "uiActive": false,
+      "reason": "Dispatch fixes dimensions/fps/profile rather than selected quality.",
+      "sourceRefs": [
+        "panel3D",
+        "canvas3D",
+        "blender",
+        "dispatch3D"
+      ],
+      "uiAvailability": "DISABLED_UNIMPLEMENTED",
+      "availabilityEvidence": "reports/studio-canonical-visual-20261008/native-3d-controls.json"
+    }
+  ],
+  "staleEvidenceCorrections": [
+    {
+      "source": "frontend/src/components/threeD/studio3DParity.js",
+      "also": "frontend/src/components/threeD/Studio3DPanel.js",
+      "obsoleteClaim": "Blender never applies pose opacity.",
+      "currentEvidence": "studio_3d_renderer/blender_scene.py:256-281 and :451 applies Timeline opacity to compositor alpha.",
+      "classification": "WIRED_BUT_FULL_PAIRED_ALPHA_PARITY_UNVERIFIED",
+      "nextTask": "UI/parity/capability metadata corrected in the visual continuation; S02 paired alpha/fade conformance and S04 complete field contracts remain open."
+    }
+  ],
+  "continuity": {
+    "nextHighestPriorityTaskId": "S02",
+    "lastSessionKind": "S02 verified native transform/clipping/clock repairs and seven-effect NVIDIA preview/recovery",
+    "lastSessionRealCapabilityRuns": 5,
+    "lastSessionGpuJobsStarted": 4,
+    "exactBlockersSource": "docs/STUDIO-PRODUCT-READINESS.md#exact-remaining-blockers",
+    "updateAtEveryStudioSessionEnd": true,
+    "recordValidation": {
+      "command": "node test/e2e/validate-studio-contract.js",
+      "result": "VALID",
+      "capabilityQualification": "Serialization/native recovery only; output/control/parity qualification remains separate."
+    },
+    "lastSessionEvidence": "reports/studio-canonical-completion-20261008/README.md",
+    "lastSessionAutomatedChecks": {
+      "modelAndHelper": 99,
+      "server": 37,
+      "productionComponent": 14,
+      "timelineSelection": 16,
+      "pythonRenderContract": 58,
+      "pythonMotion": 8,
+      "pythonTitle": 2,
+      "subjectPanel": 6,
+      "pythonDeliveryTiming": 10,
+      "totalPassed": 250,
+      "scope": "Distinct scoped checks retained across continuation. This block ran 68 worker/timing checks, three related component passes and one isolated source-metadata pass. Combined component selection had a retained fixture-order failure on source URL refresh; isolated guard passed. Other suites not rerun. Guards do not qualify actual user paths.",
+      "realUserE2E": "Native same saved r11 CPU r9 export/download/full decode PASS: 6s60fps/360 frames, 6s stereo AAC SHA 576fa3b2c4e7fe24b7e5cfc804e135189a53d9b3891a5ea6e70d3d484a0a3e51. Premature crop before rotation/translation reproduced and fixed; tracked label fully survives in actual final. Static paired geometry p95 1.29\u20131.37px at declared 2px tolerance. Exact mapped cut at 1.5s and split title PASS. Previous repaired EOS padding, selected-FPS speed preservation and editing-tool recovery retained. 68 worker/timing and 8 real FFmpeg motion guards PASS; scoped aggregate 250. Fresh seven-effect SAM2/NVENC preview completed on L40S: 72 frames/3s. Initial real status 503 stopped automatic polling; native Check saved render recovered the SAME owned job, saved it, downloaded matching bytes and fully decoded with exact reviewed-proxy PCM. Representative visual review PASS; this seven-effect project final export not run. Underlying transient 503 cause unconfirmed; redacted route diagnostics added in source/syntax checked, without a reproduced diagnostic rerun. NVIDIA window ended; exact instance freshly verified STOPPED. No new paid restart. Cloud Run read-only audit: five us-central1 services are CPU/minimum0/request-based; existing GPU qualification Job has no running execution. No new Google execution. Whole edit 3D font/material/vertical parity still FAIL; captions ASR BROKEN; whole Studio NOT READY. Continue S02 3D/raster/matte/audio parity, then S03. No creative/pro/production approval.",
+      "visualOrAudioParity": "Scoped transform clipping/cut/exact tail/static geometry PASS; seven-effect GPU preview/PCM identity PASS, final unqualified; full 3D parity FAIL."
+    },
+    "nextSlice": "S02: recover and visually inspect the same postfix CPU export; prepare seven existing subject effects; execute queued GPU checks after founder renders finish and within 22:00 SAST. Fresh Blender is blocked by daily allowance.",
+    "sessionHistory": [
+      {
+        "lastSessionKind": "S01 bounded canonical media/3D/audio migration, production hydration/export binding and regression fixes",
+        "lastSessionEvidence": "reports/studio-canonical-graph-20261008/README.md",
+        "lastSessionAutomatedChecks": {
+          "modelAndHelper": 60,
+          "server": 35,
+          "productionComponent": 5,
+          "totalPassed": 100,
+          "componentOtherCasesSkipped": 95,
+          "realUserE2E": false,
+          "visualOrAudioParity": false
+        }
+      },
+      {
+        "lastSessionKind": "Normal authenticated mixed-project persistence, owned CPU fallback stereo export/recovery and browser preflight hardening",
+        "lastSessionRealCapabilityRuns": 2,
+        "lastSessionGpuJobsStarted": 0,
+        "lastSessionEvidence": "reports/studio-founder-workflow-20261008/README.md",
+        "lastSessionAutomatedChecks": {
+          "modelAndHelper": 70,
+          "server": 52,
+          "productionComponent": 5,
+          "pythonPCMAndMotion": 15,
+          "totalPassed": 142,
+          "componentOtherCasesSkipped": 95,
+          "realUserE2E": "One bounded mixed edit/history/save/reopen run and one separate owned CPU fallback render/recovery/native download diagnostic; no complete capability or paired preview/final qualification",
+          "visualOrAudioParity": false,
+          "browserRunnerPreflightChecks": 3
+        },
+        "nextSlice": "Complete S01 field inventory and remaining hook/transition/mask/effect decisions; preserve the concurrent visual-graph slice and verify its actual native recovery. Then qualify paired preview/final projections."
+      },
+      {
+        "lastSessionKind": "Private founder-film generation followed by local QA CPU diagnosis and bounded browser suspension",
+        "lastSessionEvidence": "reports/studio-cpu-relief-20261008/README.md",
+        "lastSessionRealCapabilityRuns": 0,
+        "lastSessionGpuJobsStarted": 4,
+        "gpuScope": "One successful preview, one missing-font mount failure, one corrected raw-render job and one NVENC raw-materialization job. Private assets only; no native Studio capability qualification.",
+        "visualOrAudioParity": false,
+        "creativeApproval": false,
+        "nextSlice": "S01: remaining hook/transition/silence/watermark-region/effect/mask decisions and durable uploaded-camera binding; then S02 paired preview/final conformance. HQ 3D and uncovered caption speech still block the latest exact combined output.",
+        "runtimeState": "Private QA Chromium suspended, saved login/page state retained, measured combined QA CPU 0%; CPU fallback preserved."
+      },
+      {
+        "nextHighestPriorityTaskId": "S01",
+        "lastSessionKind": "S01 canonical visual projection/shared compilation and native combined recovery; real export blockers; S04 unavailable 3D controls",
+        "lastSessionRealCapabilityRuns": 3,
+        "lastSessionGpuJobsStarted": 0,
+        "lastSessionEvidence": "reports/studio-canonical-visual-20261008/README.md",
+        "lastSessionAutomatedChecks": {
+          "modelAndHelper": 68,
+          "server": 36,
+          "productionComponent": 8,
+          "threeDPanel": 11,
+          "totalPassed": 123,
+          "componentOtherCasesSkipped": 93,
+          "realUserE2E": "One bounded combined control/history/save/cold-reopen state flow; full edit export BLOCKED, separate CPU 2D export FAIL",
+          "visualOrAudioParity": false
+        },
+        "nextSlice": "S01: remaining hook/transition/silence/watermark-region/effect/mask decisions and durable uploaded-camera binding; then S02 paired preview/final conformance. HQ 3D and uncovered caption speech still block the latest exact combined output."
+      },
+      {
+        "nextHighestPriorityTaskId": "S02",
+        "lastSessionKind": "S01 mixed recovery; S02 native caption/audio, framing, selection, animated filter and export handoff repairs; bounded NVIDIA preview/recovery checks",
+        "lastSessionRealCapabilityRuns": 3,
+        "lastSessionGpuJobsStarted": 2,
+        "exactBlockersSource": "docs/STUDIO-PRODUCT-READINESS.md#exact-remaining-blockers",
+        "updateAtEveryStudioSessionEnd": true,
+        "recordValidation": {
+          "command": "node test/e2e/validate-studio-contract.js",
+          "result": "VALID",
+          "capabilityQualification": "Serialization/native recovery only; output/control/parity qualification remains separate."
+        },
+        "lastSessionEvidence": "reports/studio-canonical-completion-20261008/README.md",
+        "lastSessionAutomatedChecks": {
+          "modelAndHelper": 87,
+          "server": 36,
+          "productionComponent": 6,
+          "timelineSelection": 16,
+          "pythonRenderContract": 54,
+          "pythonMotion": 6,
+          "totalPassed": 205,
+          "realUserE2E": "Mixed save/close/reopen PASS rev133. Caption coverage now identifies actual gaps. Blender and subject previews recovered. Final output delivery/parity FAIL or pending; no capability promotion.",
+          "visualOrAudioParity": false,
+          "latestComponentRetest": "PASS: same six scoped component cases; broader run had five additional failures retained for investigation"
+        },
+        "nextSlice": "S02: fix shared title typography/layout and recapture deselected pre-final frames; current paired delivery PASS, visual parity FAIL. Investigate five additional synthetic component failures separately. GPU STOPPED; continue on CPU.",
+        "gpuWindowEvidence": "reports/studio-canonical-completion-20261008/gpu-window.json",
+        "latestPairedEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r7/receipt.json"
+      },
+      {
+        "at": "2026-10-08T19:43:51.270489+00:00",
+        "kind": "S02 exact delivery tail, selected speed frame preservation and native editing-tool recovery",
+        "summary": "Real saved r11 CPU r7 native delivery/download/full decode PASS at exactly 6s/60fps/360 video frames with 6s stereo AAC. Bounded source-frame tail padding before CFR and a one-output-frame picture timing gate repair the reproduced 358-frame short-alpha export. Late completed-output recovery forcing Export over the chosen editing tool reproduced in native r6 and a failing component guard; forced navigation removed, native r7 Pacing controls PASS. Lossless 2x/60fps replay reproduced 90/180 ordered source frames; selected-FPS speed stage repairs this, 68 worker/timing checks PASS; same saved r11 native r8 is running. Identity-mask optimization is live: same prior CPU edit improved from 705.84s to 62.352s, a single-case observation. 3D font/material/vertical appearance and clipped tracking label still fail full paired scope. User priority preserves founder renders; latest foreign v4-vace occupies NVIDIA and stops the Studio worker. No new confirmed Studio GPU execution in this block. Cutoff remains 22:00 SAST. Existing Google GPU resource verified read-only as a Cloud Run Job with zero running executions; no idle GPU compute between Job executions, one-minute task minimum, storage/related costs excluded. No new Google execution authorized or started. Whole Studio NOT READY."
+      },
+      {
+        "at": "2026-10-08T20:14:31.419187+00:00",
+        "kind": "S02 verified native transform/clipping/clock repairs and seven-effect NVIDIA preview/recovery",
+        "summary": "Native same saved r11 CPU r9 export/download/full decode PASS: 6s60fps/360 frames, 6s stereo AAC SHA 576fa3b2c4e7fe24b7e5cfc804e135189a53d9b3891a5ea6e70d3d484a0a3e51. Premature crop before rotation/translation reproduced and fixed; tracked label fully survives in actual final. Static paired geometry p95 1.29\u20131.37px at declared 2px tolerance. Exact mapped cut at 1.5s and split title PASS. Previous repaired EOS padding, selected-FPS speed preservation and editing-tool recovery retained. 68 worker/timing and 8 real FFmpeg motion guards PASS; scoped aggregate 250. Fresh seven-effect SAM2/NVENC preview completed on L40S: 72 frames/3s. Initial real status 503 stopped automatic polling; native Check saved render recovered the SAME owned job, saved it, downloaded matching bytes and fully decoded with exact reviewed-proxy PCM. Representative visual review PASS; this seven-effect project final export not run. Underlying transient 503 cause unconfirmed; redacted route diagnostics added in source/syntax checked, without a reproduced diagnostic rerun. NVIDIA window ended; exact instance freshly verified STOPPED. No new paid restart. Cloud Run read-only audit: five us-central1 services are CPU/minimum0/request-based; existing GPU qualification Job has no running execution. No new Google execution. Whole edit 3D font/material/vertical parity still FAIL; captions ASR BROKEN; whole Studio NOT READY. Continue S02 3D/raster/matte/audio parity, then S03. No creative/pro/production approval."
+      }
+    ],
+    "gpuWindowEvidence": "reports/studio-canonical-completion-20261008/gpu-window.json",
+    "latestPairedEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/receipt.json",
+    "latestTitleMeasurementEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/title-geometry-retest.json",
+    "latestSubjectDeliveryEvidence": "reports/studio-canonical-completion-20261008/subject-final-delivery-r3/receipt.json",
+    "privateFounderFilmV3": {
+      "date": "2026-10-08",
+      "evidenceRef": "reports/flagship-founder-film-production-v3-20261008/README.md",
+      "renderEvidence": "reports/flagship-founder-film-production-v3-20261008/outputs/one-edit-hero/render-receipt.json",
+      "browserEvidence": "reports/flagship-founder-film-production-v3-20261008/browser-review/receipt.json",
+      "scope": "Three private CLI Factory/Director/worker rough outputs after verified L40S raw generation. Final encoded on bounded local CPU after paid GPU provider rejected restart for exhausted credits. No ordinary-user Studio workflow or paired preview/final qualification.",
+      "creativeApproval": false,
+      "publicApproved": false,
+      "readinessPromotion": false,
+      "nextSharedTaskId": "S02",
+      "blockers": [
+        "CG sea/yacht still below flagship visual quality",
+        "Repeated interview and static zero beat",
+        "Logo ident lacks cinematic depth",
+        "Full-mix human listening and native Studio paired parity open",
+        "GPU account credits exhausted"
+      ]
+    },
+    "latestCaptionRetestEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/caption-retest-review.json",
+    "latestOwnedSubjectRecoveryEvidence": "reports/studio-canonical-completion-20261008/subject-expired-native-recovery.json",
+    "frameControlRetestScope": "Native toggle/history/reset/save/cold-reopen retains disabled frame and identity transform. Real final delivery and embedded-source-border visual review PASS; r11 bad envelope assertion/r12 seek harness failure/r13 interrupted; complete all-gate framing run remains unqualified.",
+    "qaComparisonCorrection": "Earlier apparent whole-frame source crop mismatch was an unnormalized comparison error. Restricted footage SIFT geometry passes; this does not qualify outer-frame mask/stage geometry.",
+    "userStopCheckpoint": {
+      "at": "2026-10-08T14:15:07.243718+00:00",
+      "state": "STOPPED_AT_USER_REQUEST",
+      "scope": "User explicitly stopped work; resume only after a new user instruction. NVIDIA window ended and instance was last verified STOPPED; no new GPU authorization. Main frame on/off, history and reset implementation is repaired; real save/cold-reopen/final delivery remains unverified. Latest r6 harness failed because it tried the in-editor project rail after App reload instead of opening the normal Saved Studio projects entry. No render was submitted by this framing run. Next: repair that harness entry, rerun unchanged framing test and inspect the actual final; continue S02 outer-frame/retiming/audio parity, then S03. All changes/attempts preserved.",
+      "servicesSignalled": [
+        {
+          "servicePid": 269464,
+          "processesSignalled": 1
+        },
+        {
+          "servicePid": 172159,
+          "processesSignalled": 1
+        }
+      ]
+    },
+    "latestResumeCheckpoint": {
+      "at": "2026-10-08T17:56:09.117356+00:00",
+      "userInstruction": "continue; GPU start now, stop by 22:00 SAST; use it wisely",
+      "scope": "User confirmed queueing Studio GPU tests behind founder renders; those jobs and controllers are preserved. Hard cutoff remains 22:00 SAST. Explicit speed-stage CFR repair passed the real FFmpeg before-fail/after-pass replay and all 56 CPU-configured worker guards. Same saved Studio r11 retest captured six correct source-mapped pre-final frames; its test timeout expired while the accepted CPU job was still processing. Recovery observes that same owned job without resubmission. Split-source title visibility passes natively. Seven actual FFmpeg motion checks pass, including byte-identical transformed output with identity mask keys; unnecessary identity pixel work is skipped in source, pending live worker reload. Fresh Blender rerun is BLOCKED by real daily allowance. The original accepted failure has no retained SSH exit reason, so its root cause is unconfirmed. Bounded GPU lock wait, lease deadline and redacted diagnostics are guarded implementation repairs, without fresh GPU qualification. Whole Studio remains NOT READY.",
+      "nextTaskId": "S02",
+      "newGpuJobsStarted": 3
+    },
+    "latestSpeedParityEvidence": [
+      "reports/studio-canonical-completion-20261008/paired-speed-2x-r2/clock-retest-review.json",
+      "reports/studio-canonical-completion-20261008/paired-speed-2x-gpu-r4/gpu-delivery-review.json",
+      "reports/studio-canonical-completion-20261008/frame-controls-r11/source-border-review.json"
+    ],
+    "currentAuthorizedGpuWindow": {
+      "evidence": "reports/studio-canonical-completion-20261008/gpu-resume-2200-window.json",
+      "status": "ENDED_INSTANCE_STOPPED",
+      "cutoff": "2026-10-08T22:00:00+02:00",
+      "newRestartAuthorized": false
+    },
+    "latestSubjectProgrammeEvidence": [
+      "reports/studio-canonical-completion-20261008/subject-speed-gpu-r2/visual-review.json",
+      "reports/studio-canonical-completion-20261008/subject-speed-gpu-r7/receipt.json",
+      "reports/studio-canonical-completion-20261008/native-worker-unavailable-ui/receipt.json",
+      "reports/studio-canonical-completion-20261008/subject-programme-history-tests.log",
+      "reports/studio-canonical-completion-20261008/programme-export-component-retest.log",
+      "reports/studio-canonical-completion-20261008/subject-speed-gpu-r11/receipt.json",
+      "reports/studio-canonical-completion-20261008/blender-camera-projection.log",
+      "reports/studio-canonical-completion-20261008/three-d-camera-projection-tests.log",
+      "reports/studio-canonical-completion-20261008/programme-seek-export-component-retest.log"
+    ],
+    "latestGpuCapacityBlocker": "Native Blender retest ended with daily allowance rejection after capacity retries. Original accepted failure root cause unconfirmed; no allowance bypass.",
+    "sharedGpuPriority": {
+      "at": "2026-10-08T19:05:37.178658+00:00",
+      "instruction": "Let those renders finish; queue Studio GPU tests",
+      "gpuDeadlineSast": "2026-10-08T22:00:00+02:00",
+      "foreignJobsStopped": false
+    },
+    "latestExecutionCheckpoint": {
+      "at": "2026-10-08T20:14:31.419187+00:00",
+      "summary": "Native same saved r11 CPU r9 export/download/full decode PASS: 6s60fps/360 frames, 6s stereo AAC SHA 576fa3b2c4e7fe24b7e5cfc804e135189a53d9b3891a5ea6e70d3d484a0a3e51. Premature crop before rotation/translation reproduced and fixed; tracked label fully survives in actual final. Static paired geometry p95 1.29\u20131.37px at declared 2px tolerance. Exact mapped cut at 1.5s and split title PASS. Previous repaired EOS padding, selected-FPS speed preservation and editing-tool recovery retained. 68 worker/timing and 8 real FFmpeg motion guards PASS; scoped aggregate 250. Fresh seven-effect SAM2/NVENC preview completed on L40S: 72 frames/3s. Initial real status 503 stopped automatic polling; native Check saved render recovered the SAME owned job, saved it, downloaded matching bytes and fully decoded with exact reviewed-proxy PCM. Representative visual review PASS; this seven-effect project final export not run. Underlying transient 503 cause unconfirmed; redacted route diagnostics added in source/syntax checked, without a reproduced diagnostic rerun. NVIDIA window ended; exact instance freshly verified STOPPED. No new paid restart. Cloud Run read-only audit: five us-central1 services are CPU/minimum0/request-based; existing GPU qualification Job has no running execution. No new Google execution. Whole edit 3D font/material/vertical parity still FAIL; captions ASR BROKEN; whole Studio NOT READY. Continue S02 3D/raster/matte/audio parity, then S03. No creative/pro/production approval.",
+      "status": "SCOPED_REPAIRS_PASS_FULL_PARITY_FAIL_GPU_WINDOW_ENDED"
+    },
+    "gpuFailureAttributionCorrection": {
+      "evidence": "reports/studio-canonical-completion-20261008/blender-camera-gpu-r3/three-d-attempt-failure.json",
+      "scope": "Accepted Blender failure is confirmed, but the truncated log did not retain its SSH exit reason. Bounded capacity wait/lease/logging guard repairs are implementation foundations; real rerun is BLOCKED by daily allowance."
+    },
+    "latestIdentityMaskEvidence": "reports/studio-canonical-completion-20261008/identity-mask-motion-regression.log",
+    "latestDeliveryTailEvidence": "reports/studio-canonical-completion-20261008/subject-programme-cpu-r7/visual-review.json",
+    "latestCloudRunBillingAudit": "reports/studio-canonical-completion-20261008/cloud-run-job-billing-audit.json",
+    "latestSpeedFrameEvidence": "reports/studio-canonical-completion-20261008/selected-speed-clock-and-tail-regression.log",
+    "latestNativeRetest": {
+      "evidence": "reports/studio-canonical-completion-20261008/subject-programme-cpu-r9/visual-review.json",
+      "status": "SCOPED_PASS_FULL_PARITY_FAIL"
+    },
+    "latestSevenEffectGpuEvidence": "reports/studio-canonical-completion-20261008/subject-seven-effects/visual-review.json",
+    "latestCloudRunServiceAudit": "reports/studio-canonical-completion-20261008/cloud-run-service-billing-audit.json"
+  },
+  "privateFounderFilmV4Preparation": {
+    "date": "2026-10-08",
+    "evidenceRef": "reports/flagship-founder-film-production-v4-20261008/README.md",
+    "packageReceipt": "reports/flagship-founder-film-production-v4-20261008/preparation-receipt.json",
+    "status": "PREPARED_CPU_ONLY_PENDING_NVIDIA_GENERATION",
+    "scope": "Private v4 story/asset preparation: hash-bound VACE control/endpoints, raw 3D story and ident preview templates, bounded L40S runners and a decoded continuity-review helper. No generation or end-to-end Studio qualification.",
+    "gpuJobsStarted": 0,
+    "creativeApproval": false,
+    "publicApproved": false,
+    "readinessPromotion": false,
+    "nextSharedTaskId": "S02",
+    "blockers": [
+      "GPU account credits unavailable at preparation time",
+      "V4 transformation/ident/story assets unrendered and unreviewed",
+      "Director and created-by replacement shots pending accepted footage",
+      "Whole-film listening, creative approval and native Studio paired parity open"
+    ]
+  },
+  "privateFounderFilmV5Execution": {
+    "date": "2026-10-08",
+    "at": "2026-10-08T20:03:21.682118+00:00",
+    "status": "NO_APPROVED_FILM_TRANSFORMATION_REJECTED",
+    "evidenceRef": "reports/flagship-founder-film-production-v5-20261008/README.md",
+    "assetCatalog": "reports/flagship-founder-film-production-v5-20261008/asset-catalog-current.json",
+    "scope": "Private NVIDIA generation and editable ident assets, exact-byte creative rejections, source-supported human action, optional trained-model CLI profiles, and existing Factory/Director compile-only foundation. No ordinary-user Studio flow or finished marketing output.",
+    "gpuCutoffSast": "2026-10-08T22:00:00+02:00",
+    "currentObservation": "Provider independently confirmed STOPPED after the 22:00 SAST cutoff. All film GPU jobs completed before cutoff. No new authorized GPU window exists.",
+    "creativeApproval": false,
+    "publicApproved": false,
+    "readinessPromotion": false,
+    "nativeStudioQualification": false,
+    "previewFinalParityQualified": false,
+    "nextSharedTaskId": "S02",
+    "results": {
+      "helmResponse": "Accepted for private visual asset use; deck/wide-yacht contextual continuity and normal-speed whole-film review pending.",
+      "identV8": "Complete 4.5s 720p NVIDIA OptiX physical reveal, editable scene and timed sound; private candidate, no whole-film approval.",
+      "i2vTransformation": "Rejected hard replacement at 2.125s.",
+      "flf14bTransformation": "Rejected second yacht behind intact paper.",
+      "vace14bTransformation": "Rejected tearing-shape photographic wipe; no same-vessel deformation.",
+      "alignedPaperSource": "Rejected: remains real yacht rather than recognizable paper.",
+      "compileOnly": "Four actual-media behavior checks pass; independent of paid GPU window; rejected/hash-changed sources excluded and actual expired authorization cannot dispatch."
+    },
+    "evidenceRefs": [
+      "reports/flagship-founder-film-production-v5-20261008/helm-response-review/creative-verdict.json",
+      "reports/flagship-founder-film-production-v5-20261008/ident-v8-full/creative-verdict.json",
+      "reports/flagship-founder-film-production-v5-20261008/flf-transform-preview-review/creative-verdict.json",
+      "reports/flagship-founder-film-production-v5-20261008/vace14b-review/creative-verdict.json",
+      "reports/flagship-founder-film-production-v5-20261008/vace14b-model-evidence/integrity-verdict.json",
+      "reports/flagship-founder-film-production-v5-20261008/compile-only-verification.json",
+      "reports/flagship-founder-film-production-v5-20261008/vace14b-controller-recovery.json",
+      "reports/flagship-founder-film-production-v5-20261008/asset-playback/receipt.json"
+    ],
+    "remainingBlockers": [
+      "Identity-preserving paper hull/sail deformation and material handoff into photographic yacht pixels are unproven. Endpoint/camera alignment and continuous water/depth interaction remain unmet requirements.",
+      "No accepted transformation exists; full hero/cutdown/teaser and whole-film sound/listening remain unfinished.",
+      "Normal founder/admin Studio generation/review/import bridge remains absent; private CLI evidence qualifies no customer gates."
+    ],
+    "nextPrivateTask": "Prove aligned camera/endpoints and persistent hull/sail regions with explicit deformation/material handoff, inspecting representative middle frames against their geometry evidence before another expensive full take. Then assemble only accepted sources through existing Factory/Director/renderer.",
+    "gpuCutoffEvidenceRef": "reports/flagship-founder-film-production-v5-20261008/gpu-cutoff-verified.json"
+  },
+  "podcastEditing20261009": {
+    "at": "2026-10-09T10:15:46.220401+00:00",
+    "userRequest": "Produce a two-minute edited podcast with background treatment, colour grade and captions. This is a requested edit using existing capabilities, not new creative feature work.",
+    "gpuAuthorization": "User explicitly extended the existing NVIDIA window to13:00 SAST today. New independent watchdog is alive and will request stop12:59, deadline1791543600. Prior11:00 watchdog removed only after exact owner verification and replacement startup. No new instance created. Same native final submission retry is in progress after genuine coverage preflight was cleared by holding the unchanged completed phrase across its source pause; native coverage check PASS. No final success or broad readiness claimed.",
+    "state": "DELIVERY_READY_FOR_REVIEW_CLOUD_STOP_CONFIRMATION_BLOCKED",
+    "source": "User-provided 34:27 1080p podcast; original preserved. Raw opening 120 seconds materialized and ingested through real signed-in Studio.",
+    "fixes": [
+      "Repeated disjoint ranges of one source now remain selectable in the subject-effects picker, while scene source ID and owned storage identity remain stable. Meaningful regression before FAIL; all seven panel checks after PASS; native first-minute six 10-second ranges visible.",
+      "Actual completed GPU job polling failed with ECONNRESET/socket hang up. Idempotent status/media GETs now use separate non-keepalive agents and one bounded transport retry, preserving authorization and disabling redirect/resubmission. Two real HTTP transport guards PASS. Same completed GPU job recovered through native Check saved render and downloaded with the exact worker SHA. Precise cause of the socket reset is not established."
+    ],
+    "evidence": [
+      "reports/podcast-two-minute-20261009/worker-read-recovery-tests.log",
+      "reports/podcast-two-minute-20261009/background-previews/subject-vfx-7ed7b64f-edb6-40f7-8e73-f65f84dcf403.mp4.technical.json",
+      "reports/podcast-two-minute-20261009/source-cuts.json",
+      "reports/podcast-two-minute-20261009/english-caption-review.json",
+      "reports/podcast-two-minute-20261009/session.json",
+      "reports/podcast-two-minute-20261009/generated-broll-cold-recovery.json",
+      "reports/podcast-two-minute-20261009/native-tail-failure.json",
+      "reports/podcast-two-minute-20261009/gpu-timeline-mux-regression.log",
+      "reports/podcast-two-minute-20261009/audio-packet-clock-audit.json",
+      "reports/podcast-two-minute-20261009/gpu-worker-audio-clock-regression.json",
+      "reports/podcast-two-minute-20261009/final-render-receipt.json",
+      "reports/podcast-two-minute-20261009/final-output-review.json",
+      "reports/podcast-two-minute-20261009/final-audio-clock-retest.json",
+      "reports/podcast-two-minute-20261009/decoded-audio-gate-regression.json",
+      "reports/podcast-two-minute-20261009/shared-render-regressions.log",
+      "reports/podcast-two-minute-20261009/final-preflight-cold-recovery.json",
+      "reports/podcast-two-minute-20261009/candle-native-acceptance.json",
+      "reports/podcast-two-minute-20261009/gpu-shutdown.json",
+      "reports/podcast-two-minute-20261009/final-worker-offline-recovery.json",
+      "reports/podcast-two-minute-20261009/capability-outcomes.json"
+    ],
+    "nativeGpuScope": "All twelve real Studio subject-background previews completed: each 10 seconds, 1080p/24fps/240 frames, original stereo audio, SAM2 segmentation and NVENC on NVIDIA L40S. All twelve owned downloads match independent worker receipt hashes and exact source ranges. Samples from every section visually reviewed. No hair-matte or all-frame temporal-quality guarantee.",
+    "remaining": [
+      "Fresh human listening and creative approval; processing-reference correlation remains unqualified.",
+      "Brev provider STOPPED/billing confirmation blocked by authenticated API EOF/timeouts.",
+      "Ordinary-user automatic generation, ignored professional export fields, S02/S03 parity/composition and broad production qualification remain open."
+    ],
+    "readinessPromotion": false,
+    "creativeApproval": false,
+    "nextSharedTaskId": "S02",
+    "assembly": "Twelve completed native Studio previews assembled by stream copy into an ordinary owned derived media asset. Two saved source-background projects retain the effect controls. The assembled 120-second video has 2,880 frames and continuous original audio with exact decoded sample equality. Normal signed-in Studio ingested that asset for the final captions, grade and framing.",
+    "gpuDeadlineSast": "2026-10-09T13:00:00+02:00",
+    "gpuExtensionAuthorizedBy": "User: increase GPU time to 01:00 pm",
+    "generatedBrollRequest": "Generate podcast B-roll and reusable transcript-grounded Studio generation for user content",
+    "engineeringChecks": {
+      "brollContractGuards": 14,
+      "captionBulkAndCanonicalGuards": 23,
+      "scope": "Engineering regressions plus separately cited real native executions; no full Studio promotion.",
+      "generatedPanelGuards": 7,
+      "cutawayCaptionRasterRegression": 1,
+      "nvencTimelineMuxGuards": 2,
+      "exportAudioBitrateGuards": 2,
+      "audioDeliveryClockGuards": 2,
+      "sharedRenderChecks": 15,
+      "renderAttemptRouteChecks": 7
+    },
+    "captionStatus": "Normal native controls corrected all 51 English caption identities and approved authored wording; actual saved snapshot has zero reviewRequired cues. This is engineering review of manually condensed English, not human listening or multilingual ASR qualification.",
+    "generationStatus": "Candle actual same-SHA recheck PASS, native owner acceptance/import, duration undo/redo and normal cold recovery PASS. Microphone actual recheck still rejects subject mismatch; excluded.",
+    "finalGrade": "Native grade saved/cold reopened and sampled final pixels reviewed.",
+    "previewReview": "Same normal saved-project entry retains 16:9, programme-zero Reframe off, disabled main frame, precision colour settings, 51 reviewed manual English cues with Minimal style and six held main transforms (42 keys). Global default crop flag is shadowed by the programme-zero off decision.",
+    "nativeFraming": "Six normal held main-transform poses saved at source camera cuts: 0/1x, 52.5/1.16x, 63.5/1x, 85.75/1.16x, 105.25/1x, 110.25/1.16x; main frame disabled.",
+    "brollJobRecovery": "Queued generation recovered from the authenticated owner/project job list after local API reload; exact job ID retained in both saved snapshot and canonical editGraph settings at revision121. No duplicate model job dispatched.",
+    "failuresFound": [
+      "First B-roll plan copied caption wording without punctuation; strict transcript guard correctly rejected it. Grounding now joins selected known cue ID to authoritative wording/clock instead of asking the model to retype them.",
+      "Definitive caption validation rejection retained a stale pending request. Retry now uses corrected input; uncertain/network retry retains idempotent identity. Five panel guards PASS.",
+      "Previous pointer/keyboard configuration was not established in the saved project; direct IndexedDB audit found defaults. Correcting normal UI and requiring saved-state/reopen verification before output.",
+      "Real FFmpeg raster reproduces lost caption pixels when opaque B-roll covers early-burned subtitles. Worker now burns programme captions after media/graphics composition, consistent with default browser caption stacking. Native podcast output verification pending."
+    ],
+    "savedFinishVerification": {
+      "result": "PASS",
+      "evidence": "reports/podcast-two-minute-20261009/finish-cold-reopen.json",
+      "revision": 161,
+      "scope": "Same normal saved-project entry retains 16:9, programme-zero Reframe off, disabled main frame, precision colour settings, 51 reviewed manual English cues with Minimal style and six held main transforms (42 keys). Global default crop flag is shadowed by the programme-zero off decision.",
+      "latestRevision": 173,
+      "watermarkEnabled": false
+    },
+    "generationEvidence": [
+      "reports/podcast-two-minute-20261009/generation-first-attempt-rejection.json",
+      "reports/podcast-two-minute-20261009/church-motion-measurement.json",
+      "reports/podcast-two-minute-20261009/broll-grounded-motion-job.json"
+    ],
+    "watchdog": {
+      "pid": 103220,
+      "stopRequestSast": "Immediate repeated retries after completed delivery; do not wait until cutoff",
+      "hardDeadlineSast": "13:00",
+      "deadlineEpoch": 1791543600,
+      "remoteGuestDeadlineFallback": "12:59 SAST was armed",
+      "guestPoweroffAccepted": true,
+      "providerStoppedConfirmed": false,
+      "billingStopConfirmed": false,
+      "stopRetryStartsImmediately": true
+    },
+    "captionExport": {
+      "count": 51,
+      "file": "reports/podcast-two-minute-20261009/podcast-2min-captions.srt",
+      "scope": "Read-only extraction from the actual normal saved project; native SRT-export UI is not claimed.",
+      "humanListening": false
+    },
+    "finalStatus": "The requested opening two-minute edit is available for review: 1920x1080, 24fps, 2880 frames, H.264 NVENC, AAC256 stereo at48kHz and exactly120s decoded picture/audio. Twelve real native SAM2 background treatments, subtle precision grade, six held camera-cut poses, 51 reviewed authored English captions and one exact-SHA accepted church cutaway are included. The microphone take remains rejected and excluded. Added AutoPromote output watermark is absent. Actual final tail loss and104ms AAC clock discontinuity were reproduced, repaired and retested. Sampled pre-final/final visuals pass; no full raster/matte, fresh human listening or creative approval. Natural-restoration audio reference correlation0.987 does not meet the uncalibrated0.99 threshold; processing fidelity remains unqualified although exact sample continuity and no full-scale clipping pass. Native paused-result scrub now clears stale Play intent. Cold normal entry, paused97.5s seek and repeat native download with identical SHA pass with the worker offline. Brev authenticated control-plane reads/stops repeatedly EOF/time out. Owned worker stopped; guest poweroff accepted and subsequent SSH closed. Provider STOPPED/billing shutdown is unconfirmed. Independent13:00 SAST cloud stop watchdog retained. No GPU restart or new generated take after final completion. Founder generation is a tested private foundation; ordinary-user automatic B-roll is unqualified. Whole Studio remains NOT READY; next shared task S02 then S03.",
+    "finalOutput": "reports/podcast-two-minute-20261009/podcast-2min-background-grade-captions-broll.mp4",
+    "finalOutputSha256": "5f2b71f5b19046f37fe3482ae4b86afd636edde5946daba4a9f15c4dfd80face",
+    "updatedAt": "2026-10-09T10:28:52.820101+00:00",
+    "finalOperatingHandoff": "Final operating handoff: selected 120s native delivery and same-job, worker-offline, paused 97.5s recovery/repeat browser download PASS with identical SHA. Owner/path/object metadata checks precede separate signed attachment access, avoiding failed full-file blob buffering. Seven render-attempt route checks PASS, including offline readiness rejecting queueing before credit charge or phantom job; these are engineering tests, separately from native E2E. Tracking evidence remains the retained attached-callout test; mask-derived text occlusion is distinct from unqualified full depth-map editing. No new full tracking/depth execution is inferred from background-tone previews. Provider STOPPED/billing remains unconfirmed. Immediate bounded cloud-stop retries replace the waiting watchdog; guest and owned worker are already off. No restart or generation occurs. Full Studio NOT READY; next S02 then S03.",
+    "finalRecoveryDownload": {
+      "result": "PASS",
+      "workerOffline": true,
+      "normalColdEntry": true,
+      "nativeBrowserDownload": true,
+      "sameSha256": true,
+      "pausedSeekSeconds": 97.5,
+      "evidence": "reports/podcast-two-minute-20261009/final-worker-offline-recovery.json"
+    }
+  },
+  "privateFounderRealism20261009": {
+    "at": "2026-10-09T07:30:19.456888+00:00",
+    "state": "PRIVATE_SCENE_RENDERED_FULL_FILM_UNFINISHED",
+    "userSteering": "GPU is active; generated human, boat and sea must look photographic. Preserve original work and CPU fallbacks.",
+    "nativeYacht": {
+      "sha256": "9a779712e28e5c2252c5b4eafd4099236d59a538c92894d54a36a339de921fa6",
+      "width": 1280,
+      "height": 720,
+      "frames": 49,
+      "fps": 16,
+      "usableSourceRange": {
+        "start": 0,
+        "end": 2.25
+      },
+      "fullTakeAccepted": false,
+      "scope": "Photographic wide asset only; distant crew anatomy/identity not certified."
+    },
+    "privateScene": {
+      "sha256": "0a45991d499bda0ffff3159f3a9debeea5625c87b6c48842ef2dc987d9171708",
+      "pictureDuration": 3.75,
+      "delivery": "1080p/24fps resampling of native720/16fps assets; existing final NVENC encoder and remote CPU preparation",
+      "pipeline": "Existing private Factory/Director/shared document/intelligence/RenderViralRequest/render_viral_clip_impl",
+      "review": "All 90 picture frames; actual headless muted 1x playback, stereo audio measurements, byte-range transport. Not a complete film or human listening approval."
+    },
+    "rejectedPaperSources": 4,
+    "extraTransformationVideoTakes": 0,
+    "backendFixes": [
+      "Protect completed and interrupted takes before model loading; both endpoint path/hash and duplicate-identity guards. Optional aspect-fit preserves existing conditioning defaults.",
+      "Retain recorded-source origin/licence/parent provenance in existing assembly. Enforce reviewed source intervals for every occurrence before mutations/dispatch.",
+      "Bounded all-frame/native-detail evidence helper; byte-bound creative review remains separate."
+    ],
+    "evidence": [
+      "reports/flagship-realism-20261009/README.md",
+      "reports/flagship-realism-20261009/session.json",
+      "reports/flagship-realism-20261009/yacht-review/creative-verdict.json",
+      "reports/flagship-realism-20261009/scene-review/creative-verdict.json",
+      "reports/flagship-realism-20261009/playback/receipt.json",
+      "reports/flagship-realism-20261009/input-guards.json",
+      "reports/flagship-realism-20261009/paired-input-guards.json",
+      "reports/flagship-realism-20261009/assembly-guards.json",
+      "reports/flagship-realism-20261009/rejected-source-catalog.json",
+      "reports/flagship-realism-20261009/borrowed-render-receipt-attempt1.json",
+      "reports/flagship-realism-20261009/borrowed-render-receipt.json"
+    ],
+    "remainingBlockers": [
+      "No spatially matched paper endpoint or accepted identity-preserving continuous hull/sail deformation and photographic material handoff. All prior video transformations remain rejected.",
+      "Close sailor identity, matching wide crew/deck/wardrobe/light, complete-film pace/payoff and fresh human sound review remain unqualified.",
+      "Final welcome hero/cutdown/teaser and approved ident integration remain unfinished; nothing published.",
+      "Private CLI/standalone playback does not qualify ordinary Studio generation/review/import, undo/save/reopen or predictive preview/final parity. Existing worker legacy-request plan migration remains incomplete."
+    ],
+    "nextPrivateTask": "Match evaluated connected native geometry, camera and persistent vessel regions to the photographic endpoint; review representative middle frames before another bounded video test. Reuse existing native scene/control providers and Factory/Director/renderer.",
+    "nextSharedTaskId": "S02",
+    "gpuDeadlineSast": "2026-10-09T11:00:00+02:00",
+    "gpuAuthorizationEvidenceRef": "reports/podcast-two-minute-20261009/session.json#/gpuExtension",
+    "paidInstanceStarted": false,
+    "readinessPromotion": false,
+    "wholeFilmCreativeApproval": false,
+    "publicApproved": false,
+    "previewFinalParityPromotion": false
+  },
+  "privateWelcomeCinematic20261009": {
+    "status": "CREATIVELY_REJECTED_BY_FOUNDER",
+    "duration": 38,
+    "resolution": [
+      1920,
+      1080
+    ],
+    "fps": 24,
+    "frames": 912,
+    "canonicalProject": "reports/welcome-cinematic-20261009/outputs/final/project.json",
+    "savedProject": "reports/welcome-cinematic-20261009/outputs/final/studio-saved-project.json",
+    "nativeSource": "reports/welcome-cinematic-20261009/assets/welcome-world.blend",
+    "proxy": "reports/welcome-cinematic-20261009/outputs/proxy/final.mp4",
+    "final": "reports/welcome-cinematic-20261009/outputs/final/final.mp4",
+    "evidenceRefs": [
+      "reports/welcome-cinematic-20261009/README.md",
+      "reports/welcome-cinematic-20261009/final-validation.json",
+      "reports/welcome-cinematic-20261009/final-creative-review.json",
+      "reports/welcome-cinematic-20261009/preview-final-parity.json",
+      "reports/welcome-cinematic-20261009/browser-player-final.json",
+      "reports/welcome-cinematic-20261009/studio-open-evidence.json",
+      "reports/welcome-cinematic-20261009/studio-final-open.json",
+      "reports/welcome-cinematic-20261009/gpu-final-receipt.json",
+      "reports/welcome-cinematic-20261009/gpu-zero-after.json",
+      "reports/welcome-cinematic-20261009/cloud-time-accounting.json"
+    ],
+    "founderCreativeApproval": false,
+    "qualifiesCustomerLifecycle": false,
+    "remainingBlockers": [
+      "Exact original reference image files are absent; four visible inline anchors remain unbound to actual inference input bytes.",
+      "Pinned RTX container has no torch/diffusers; runtime/model preparation and Cloud Run inference bootstrap/dispatch remain unqualified. Official A14B full snapshot exceeds existing memory-backed job filesystem.",
+      "No new moving human take, corrected planar screen/subject tracks, native moving-footage transformation, accepted moving proxy or listening-reviewed score exists.",
+      "Normal Studio image-driven generation/review/import and professional editable VFX/3D controls for this film remain incomplete; CPU guard tests do not qualify those flows."
+    ],
+    "nextTask": "Obtain original reference files, bind exact bytes, prepare/CPU-qualify RTX runtime/model and existing on-demand job transport, then generate and inspect one creator performance before expanding the film.",
+    "rebuildEvidenceRefs": [
+      "reports/welcome-cinematic-rebuild-20261009/STORY-AND-SHOTS.md",
+      "reports/welcome-cinematic-rebuild-20261009/production-plan.json",
+      "reports/welcome-cinematic-rebuild-20261009/acceptance-reset.json",
+      "reports/welcome-cinematic-rebuild-20261009/CAPABILITY-GAPS.md",
+      "reports/welcome-cinematic-rebuild-20261009/runtime-audit.json",
+      "reports/welcome-cinematic-rebuild-20261009/implementation-validation.json"
+    ]
+  },
+  "retainedAssessmentBeforePodcast20261009": "r17 normal signed-in CPU preview/final/download/full decode PASS; same canonical finish and composition requests. Three-line title geometry at 3.5s PASS, max1px at declared2px tolerance. Eighteen Minimal cue-presence/no-unexpected-word-animation guards PASS. Font scale, white text and cue boundaries visually reviewed; complete caption raster, all styles/retiming, outer-frame stages and full audio remain UNQUALIFIED.",
+  "privateWelcomeCinematicRebuild20261009": {
+    "status": "REBUILD_IN_PROGRESS_WAITING_REFERENCE_FILES",
+    "previousCreativeVerdict": "REJECTED_BY_FOUNDER",
+    "requestedDurationSeconds": 42,
+    "plannedShots": 10,
+    "exactReferenceCount": 4,
+    "exactReferencesBound": 0,
+    "acceptedMovingHumanTakes": 0,
+    "newGpuExecutions": 0,
+    "runtimeReadyForInference": false,
+    "sharedChanges": [
+      "Reusable creativeScene fields in existing Factory direction/schema",
+      "Full-video action/identity/anatomy acceptance bound to source bytes and scene plan",
+      "Shared import guard and canonical generated-media provenance",
+      "Preserved-take review retry without regeneration",
+      "CPU pre-CUDA source/attempt/deadline/settings guards and explicit unqualified RTX profile",
+      "Regenerated stale shared Director bundle from current frontend source"
+    ],
+    "evidenceRefs": [
+      "reports/welcome-cinematic-rebuild-20261009/STORY-AND-SHOTS.md",
+      "reports/welcome-cinematic-rebuild-20261009/production-plan.json",
+      "reports/welcome-cinematic-rebuild-20261009/acceptance-reset.json",
+      "reports/welcome-cinematic-rebuild-20261009/CAPABILITY-GAPS.md",
+      "reports/welcome-cinematic-rebuild-20261009/runtime-audit.json",
+      "reports/welcome-cinematic-rebuild-20261009/implementation-validation.json"
+    ],
+    "remainingBlockers": [
+      "Exact original reference image files are absent; four visible inline anchors remain unbound to actual inference input bytes.",
+      "Pinned RTX container has no torch/diffusers; runtime/model preparation and Cloud Run inference bootstrap/dispatch remain unqualified. Official A14B full snapshot exceeds existing memory-backed job filesystem.",
+      "No new moving human take, corrected planar screen/subject tracks, native moving-footage transformation, accepted moving proxy or listening-reviewed score exists.",
+      "Normal Studio image-driven generation/review/import and professional editable VFX/3D controls for this film remain incomplete; CPU guard tests do not qualify those flows."
+    ],
+    "nextTask": "Obtain original reference files, bind exact bytes, prepare/CPU-qualify RTX runtime/model and existing on-demand job transport, then generate and inspect one creator performance before expanding the film.",
+    "nextSharedTaskId": "S02",
+    "founderCreativeApproval": false,
+    "readinessPromotion": false,
+    "previewFinalParityPromotion": false,
+    "qualifiesCustomerLifecycle": false
+  }
+}

@@ -1,0 +1,262 @@
+{
+  "model": "Wan-AI/Wan2.1-FLF2V-14B-720P-diffusers",
+  "revision": "17c30769b1e0b5dcaa1799b117bf20a9c31f59d7",
+  "license": "Apache-2.0",
+  "source": "https://huggingface.co/Wan-AI/Wan2.1-FLF2V-14B-720P-diffusers",
+  "status": "PREPARED_PENDING_NVIDIA_QUALIFICATION",
+  "settings": {
+    "transformerDtype": "bfloat16",
+    "imageEncoderDtype": "float32",
+    "vaeDtype": "float32"
+  },
+  "files": [
+    {
+      "file": "image_encoder/config.json",
+      "sha256": "c17d9882d76bcaec8f1d093b3cea27dc2fd1d9b45e5fdf4ba97eb5cb5d59d4bb",
+      "bytes": 583
+    },
+    {
+      "file": "image_processor/merges.txt",
+      "sha256": "9fd691f7c8039210e0fced15865466c65820d09b63988b0174bfe25de299051a",
+      "bytes": 524619
+    },
+    {
+      "file": "image_processor/preprocessor_config.json",
+      "sha256": "8fb547403656e9019b0982d2310b045bef39b9d2a811a0c98756e52d48e25db6",
+      "bytes": 504
+    },
+    {
+      "file": "image_processor/special_tokens_map.json",
+      "sha256": "2cdb3b8331a60c92fc1e55a13e9fd61fd2293c5a51275fdcccd62b780052530e",
+      "bytes": 588
+    },
+    {
+      "file": "image_processor/tokenizer.json",
+      "sha256": "6d9109cc838977f3ca94a379eec36aecc7c807e1785cd729660ca2fc0171fb35",
+      "bytes": 3642073
+    },
+    {
+      "file": "image_processor/tokenizer_config.json",
+      "sha256": "c3d2a67c48a59ffa8fd92de060608524b12cae93acb4fe83e5eb03147a001f5a",
+      "bytes": 774
+    },
+    {
+      "file": "image_processor/vocab.json",
+      "sha256": "5047b556ce86ccaf6aa22b3ffccfc52d391ea4accdab9c2f2407da5b742d4363",
+      "bytes": 862328
+    },
+    {
+      "file": "model_index.json",
+      "sha256": "6388aa5cef35dbce53614175f7d9fb1407ab8710b701462921e342652ff86d4a",
+      "bytes": 562
+    },
+    {
+      "file": "scheduler/scheduler_config.json",
+      "sha256": "38f3678cb4e7ef05b6c282d6c5657e1d49f4d88cc2cf0c4be4c7929fee3ded34",
+      "bytes": 752
+    },
+    {
+      "file": "text_encoder/config.json",
+      "sha256": "4087b6192155a4643f6d29fd326c4610103130674011ef4d0a53f8bce5de967d",
+      "bytes": 854
+    },
+    {
+      "file": "tokenizer/special_tokens_map.json",
+      "sha256": "456b58fd240a06c743a7c2cf8008bec501240d68ebd1fc4018ea569505fea270",
+      "bytes": 7079
+    },
+    {
+      "file": "tokenizer/spiece.model",
+      "sha256": "e3909a67b780650b35cf529ac782ad2b6b26e6d1f849d3fbb6a872905f452458",
+      "bytes": 4548313
+    },
+    {
+      "file": "tokenizer/tokenizer.json",
+      "sha256": "20a46ac256746594ed7e1e3ef733b83fbc5a6f0922aa7480eda961743de080ef",
+      "bytes": 16837459
+    },
+    {
+      "file": "tokenizer/tokenizer_config.json",
+      "sha256": "1d8d2a216bf8e70ac15b7ddcea566c4dd0433c024b39a58ca5e4c66bd78defbd",
+      "bytes": 61758
+    },
+    {
+      "file": "transformer/config.json",
+      "sha256": "2e9071c96852f55ac6e66a55dc6d4d207a0bf08c45040a96733ea4024f6b8f18",
+      "bytes": 494
+    },
+    {
+      "file": "transformer/diffusion_pytorch_model.safetensors.index.json",
+      "sha256": "4dfcbb2da9af5a36366d65fd1c19ddb630dd32b92df4cc6fdc5c038ab2536803",
+      "bytes": 117159,
+      "conversion": "Updated bf16 index metadata; original weight map retained"
+    },
+    {
+      "file": "vae/config.json",
+      "sha256": "7a3afcf422b9a9d63e0b6ca7e0d3b5193220a61f5b203bb8417900bc090705e8",
+      "bytes": 724
+    },
+    {
+      "file": "image_encoder/model.safetensors",
+      "sha256": "f5c0bbf4f43f319a80335387d371742333807589c5bb4130a1a2a5d4abf6bf72",
+      "bytes": 1264217760
+    }
+  ],
+  "convertedTransformer": [
+    {
+      "file": "transformer/diffusion_pytorch_model-00001-of-00014.safetensors",
+      "sourceSha256": "6bfe9811d1f0fcddea310e68ab0e37ba2a59d7db63182fdfc996658e402635df",
+      "sourceBytes": 4931751664,
+      "sha256": "ee406fc98480c7fca7274d2c606fd374c43797db9d7e4c89a59767ef2bf39532",
+      "bytes": 2465881400,
+      "conversion": "floating tensor fp32 to bf16; keys/shapes retained"
+    },
+    {
+      "file": "transformer/diffusion_pytorch_model-00002-of-00014.safetensors",
+      "sourceSha256": "a4548d19b8723a76e421096912f067a4c13f5bdf9bef4da734c262a8d708f557",
+      "sourceBytes": 4950949632,
+      "sha256": "d2b9a1ff7c319a1c6ec9402b5a6ba0f60460c656b378a849012f79682edd512a",
+      "bytes": 2475479864,
+      "conversion": "floating tensor fp32 to bf16; keys/shapes retained"
+    },
+    {
+      "file": "transformer/diffusion_pytorch_model-00003-of-00014.safetensors",
+      "sourceSha256": "b9004f07b874aa52e8705d7f04dc897ab698393ca428bc6480ceb6c1aa46db4e",
+      "sourceBytes": 4950949632,
+      "sha256": "1a6c8029269e99070eddf050c323369439b5390719ab2eb3414228e5140c41c0",
+      "bytes": 2475479864,
+      "conversion": "floating tensor fp32 to bf16; keys/shapes retained"
+    },
+    {
+      "file": "transformer/diffusion_pytorch_model-00004-of-00014.safetensors",
+      "sourceSha256": "5439e95e5443546e280b8edd8830b11f1f944e60644b645d36e20a8f1eea316f",
+      "sourceBytes": 4951011392,
+      "sha256": "b8e87155a6a3d64273c1ade5d22b0f40826caf2bb2b0249a0b1927c14a464437",
+      "bytes": 2475510912,
+      "conversion": "floating tensor fp32 to bf16; keys/shapes retained"
+    },
+    {
+      "file": "transformer/diffusion_pytorch_model-00005-of-00014.safetensors",
+      "sourceSha256": "3ef80e425724d24085dda3dccea76b4c129cb8274b0234a14660c111404c56ed",
+      "sourceBytes": 4846071440,
+      "sha256": "7d0a67a426cf4bbeac00cd9ee8f966bbfd368dfd393a46293d4f7ea3b30f1992",
+      "bytes": 2423040720,
+      "conversion": "floating tensor fp32 to bf16; keys/shapes retained"
+    },
+    {
+      "file": "transformer/diffusion_pytorch_model-00006-of-00014.safetensors",
+      "sourceSha256": "3c4cf3fcec64c0af0535cd441d34aacab6ca9245b9d38c3b6c58d67090445923",
+      "sourceBytes": 4846071440,
+      "sha256": "3b11ba4a9cca68ed81b01d817533bba34352d1f26dcfebad493ddb39ea73cdb8",
+      "bytes": 2423040720,
+      "conversion": "floating tensor fp32 to bf16; keys/shapes retained"
+    },
+    {
+      "file": "transformer/diffusion_pytorch_model-00007-of-00014.safetensors",
+      "sourceSha256": "5a645ce6efdc91eb95c3ab4692260d549469aba0bbae18fd01673e18fc9f4d2d",
+      "sourceBytes": 4846071440,
+      "sha256": "e4016b4e0ed26153b35b3edae37f4a5fd08a0ad10c453b25e7d574ab047d2dcb",
+      "bytes": 2423040720,
+      "conversion": "floating tensor fp32 to bf16; keys/shapes retained"
+    },
+    {
+      "file": "transformer/diffusion_pytorch_model-00008-of-00014.safetensors",
+      "sourceSha256": "7da71b5b00e2ef3da9be96b59bec6b1ba53a4c704ee324c7037344610d9ed01c",
+      "sourceBytes": 4846071440,
+      "sha256": "69f6098709d5ebf037c4c06c170be93b0ded1bdba70b1dac3e6a0fe4eead0a1d",
+      "bytes": 2423040720,
+      "conversion": "floating tensor fp32 to bf16; keys/shapes retained"
+    },
+    {
+      "file": "transformer/diffusion_pytorch_model-00009-of-00014.safetensors",
+      "sourceSha256": "2d0521429f02d5d765a286bdb7f7de5e5881731aa25190b3a4eb1ff6d8b5984b",
+      "sourceBytes": 4846071440,
+      "sha256": "690bcf0b458d2466dabc58a0cc48dc39dc52fce74542753cb5d7d60797e0b72d",
+      "bytes": 2423040720,
+      "conversion": "floating tensor fp32 to bf16; keys/shapes retained"
+    },
+    {
+      "file": "transformer/diffusion_pytorch_model-00010-of-00014.safetensors",
+      "sourceSha256": "cff55b12239fb72ff599c326d4acb6d8c1f688a0e34035d6bc694c2cf40d7c6d",
+      "sourceBytes": 4846071440,
+      "sha256": "b3e667d821d69bc09e75041170af0c81cfc1ea2df15b40792e53a9a51ab3b3d2",
+      "bytes": 2423040720,
+      "conversion": "floating tensor fp32 to bf16; keys/shapes retained"
+    },
+    {
+      "file": "transformer/diffusion_pytorch_model-00011-of-00014.safetensors",
+      "sourceSha256": "6438dd33fb8a166fb14406e81a6828bde190c51db1f071f49cacb7783896933e",
+      "sourceBytes": 4846071440,
+      "sha256": "17cf244ab93e5adf23f9aca2f23bc8972ff9b5c5d1bcd9edf0e013205ec0bf1b",
+      "bytes": 2423040720,
+      "conversion": "floating tensor fp32 to bf16; keys/shapes retained"
+    },
+    {
+      "file": "transformer/diffusion_pytorch_model-00012-of-00014.safetensors",
+      "sourceSha256": "d1286eacdf92429cdcc851023b987eaca05dc27a78ba6ae954b9f6c9692ac4e6",
+      "sourceBytes": 4846071440,
+      "sha256": "e06651bcd6aa7ac7712996f0a8918390d9c9315ae5f6fe97dce7916435a4ca8e",
+      "bytes": 2423040720,
+      "conversion": "floating tensor fp32 to bf16; keys/shapes retained"
+    },
+    {
+      "file": "transformer/diffusion_pytorch_model-00013-of-00014.safetensors",
+      "sourceSha256": "30d6af2c7d57fa58c2200fabade2c41383d4ce578286bb7cc6426be0b47100d3",
+      "sourceBytes": 4846071440,
+      "sha256": "44a017c2475b44f0418082147a0ef75b99e2eb4b289f71a74be9080ab29b85dd",
+      "bytes": 2423040720,
+      "conversion": "floating tensor fp32 to bf16; keys/shapes retained"
+    },
+    {
+      "file": "transformer/diffusion_pytorch_model-00014-of-00014.safetensors",
+      "sourceSha256": "0c79bcf3cace0a9f85d0464d47b4e2b0a923ba1e9e7c2c6fced27a993d1bd258",
+      "sourceBytes": 2182975528,
+      "sha256": "34af08d66b943e9f6853dd5f3e8e9462f9aa3dfed80ce007f6d7e618ff29b8cc",
+      "bytes": 1091489704,
+      "conversion": "floating tensor fp32 to bf16; keys/shapes retained"
+    }
+  ],
+  "reusedComponents": {
+    "model": "Wan-AI/Wan2.2-I2V-A14B-Diffusers",
+    "revision": "596658fd9ca6b7b71d5057529bbf319ecbc61d74",
+    "textEncoder": {
+      "path": "/retained/text_encoder",
+      "files": [
+        {
+          "file": "text_encoder/model-00001-of-00003.safetensors",
+          "sha256": "a8e861969c7433e707cc5a74065d795d36cca07ec96eb6763eb4083df7248f58",
+          "bytes": 4935812536
+        },
+        {
+          "file": "text_encoder/model-00002-of-00003.safetensors",
+          "sha256": "d57d948ece4837d850b7a859a4415121d57cacf8b9ee1d4db200c67f592902d7",
+          "bytes": 4983103192
+        },
+        {
+          "file": "text_encoder/model-00003-of-00003.safetensors",
+          "sha256": "0da9ee284e21d1406df708788db1d502d95d75f69faa25cd26151bf8829b7c5f",
+          "bytes": 1442935480
+        }
+      ],
+      "validation": "Pinned retained UMT5 weights and matching architecture; bf16 encoder reused explicitly"
+    },
+    "vae": {
+      "path": "/retained/vae",
+      "sha256": "d6e524b3fffede1787a74e81b30976dce5400c4439ba64222168e607ed19e793",
+      "validation": "Byte-identical to official FLF VAE weights"
+    }
+  },
+  "preparedAtEpoch": 1791482283.3005245,
+  "seconds": 591.9890151310001,
+  "receiptCorrections": [
+    {
+      "originalRecord": {
+        "file": "transformer/diffusion_pytorch_model.safetensors.index.json",
+        "sha256": "09c370e96a4bf61ce1bfd2535a454a3601bb97662b08bf05dcfe0272b3aa9a43",
+        "bytes": 117160
+      },
+      "atEpoch": 1791482723.749162,
+      "reason": "Refresh prepared index hash after bf16 metadata update; weight map unchanged."
+    }
+  ]
+}

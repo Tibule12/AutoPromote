@@ -1,0 +1,185 @@
+{
+  "reviewer": "Codex visual rough-assembly selection",
+  "creativeApproval": false,
+  "status": "ROUGH_SELECTION_ONLY",
+  "assets": [
+    {
+      "assetId": "vessel",
+      "accepted": true,
+      "artifactSha256": "da5c769a1d02d01ee6dcc622718162757b877329b575aab287e55da3accc34d3",
+      "reason": "Select for rough assembly: connected hull/sail transformation and safe framing. Physical CG finish remains below the premium flagship bar.",
+      "reviewer": "Codex visual rough-assembly selection",
+      "evidence": "decoded-source-review.jpg"
+    },
+    {
+      "assetId": "ident",
+      "accepted": true,
+      "artifactSha256": "a9a9aafcdc7a9a7266f1d23c4bfc47cf338995c3c488c4d862b5225c2cbd3f2a",
+      "reason": "Select for rough assembly: original vector proportions, layered titanium/glass geometry, moving macro camera and clean readable hold. No founder brand approval.",
+      "reviewer": "Codex visual rough-assembly selection",
+      "evidence": "decoded-source-review.jpg"
+    },
+    {
+      "assetId": "origin",
+      "accepted": true,
+      "artifactSha256": "ff2171bf6c166b3b1d020e19f84f1f61168def04d10350b26da49c5cb659a960",
+      "reason": "Select moving retained conversation with visibly converging sound signals for the opening problem.",
+      "reviewer": "Codex visual rough-assembly selection",
+      "evidence": "decoded-source-review.jpg"
+    },
+    {
+      "assetId": "cascade",
+      "accepted": true,
+      "artifactSha256": "6a7f3a74a81eb4ebd1b3201a123819b4d0b8cc46207e80c58e1e328782b58787",
+      "reason": "Select readable sync/sound/render consequences and FAILED interruption for escalation.",
+      "reviewer": "Codex visual rough-assembly selection",
+      "evidence": "decoded-source-review.jpg"
+    },
+    {
+      "assetId": "failure",
+      "accepted": true,
+      "artifactSha256": "a8be6b781c401958d8ab1e38296b60f3dc9b9d96c97dcaab6c3ced8ce2245b85",
+      "reason": "Select readable AGAIN and archived error reconstruction for the emotional setback.",
+      "reviewer": "Codex visual rough-assembly selection",
+      "evidence": "decoded-source-review.jpg"
+    },
+    {
+      "assetId": "quota",
+      "accepted": true,
+      "artifactSha256": "06dcaf2597e3d902e3c4b782ce4dfc33aef70b23f3f793fae40fbf83b33aa6e8",
+      "reason": "Select extruded zero and NO CAPACITY for the low point. No live quota grant or archive email is represented.",
+      "reviewer": "Codex visual rough-assembly selection",
+      "evidence": "decoded-source-review.jpg"
+    },
+    {
+      "assetId": "breakthrough",
+      "accepted": true,
+      "artifactSha256": "9be93b83c1a7018081ee474b298bba59e3a40d0fcf14b44be18c88e34226c163",
+      "reason": "Select capacity-wall release into retained generated yacht footage; historical 3000 milliGPU is capacity, not a hardware count.",
+      "reviewer": "Codex visual rough-assembly selection",
+      "evidence": "decoded-source-review.jpg"
+    },
+    {
+      "assetId": "director",
+      "accepted": true,
+      "artifactSha256": "b849b6d520319c4da6039beb6ff976c074bc610c586bf3f1efca1e9a833062d0",
+      "reason": "Select story/shot/cut/sound concept visualization; this is not a live UI recording or proof of arbitrary autonomous planning.",
+      "reviewer": "Codex visual rough-assembly selection",
+      "evidence": "decoded-source-review.jpg"
+    },
+    {
+      "assetId": "reveal",
+      "accepted": true,
+      "artifactSha256": "86f95612978f02eda26dd563096114d9c8818b0a716e009e75e5077a5f7ad535",
+      "reason": "Select the readable created-by sentence; production attribution is qualified by actual Factory/Director/renderer receipts and assistant-directed source creation.",
+      "reviewer": "Codex visual rough-assembly selection",
+      "evidence": "decoded-source-review.jpg"
+    },
+    {
+      "assetId": "vo-cold-open",
+      "accepted": true,
+      "artifactSha256": "b81f0a3ba05220b7e85c81b2eb596da37cb07b92eea4ad92c0df3b2853a47e80",
+      "reason": "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance.",
+      "reviewer": "Codex visual rough-assembly selection"
+    },
+    {
+      "assetId": "vo-origin",
+      "accepted": true,
+      "artifactSha256": "87ccf9d8c3f4da55aa3189a6d0887e8180c3ed954bec34a565e0b66f312d9b45",
+      "reason": "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance.",
+      "reviewer": "Codex visual rough-assembly selection"
+    },
+    {
+      "assetId": "vo-cascade",
+      "accepted": true,
+      "artifactSha256": "983858a242fbac92dc1173689057f0882a5fbb715d3d533703e9043a4d4796c4",
+      "reason": "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance.",
+      "reviewer": "Codex visual rough-assembly selection"
+    },
+    {
+      "assetId": "vo-failure",
+      "accepted": true,
+      "artifactSha256": "90e1326401f5d98303da9fe78ed85da6605baabc47a4cdf96117dae096b0ac2e",
+      "reason": "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance.",
+      "reviewer": "Codex visual rough-assembly selection"
+    },
+    {
+      "assetId": "vo-quota",
+      "accepted": true,
+      "artifactSha256": "3677901cbffbbf11741f023b6aa67cd419d826dba5511158eb50b3eba12f4f91",
+      "reason": "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance.",
+      "reviewer": "Codex visual rough-assembly selection"
+    },
+    {
+      "assetId": "vo-breakthrough",
+      "accepted": true,
+      "artifactSha256": "c81c56ed7512a554e8af218dde94d2d8df9bf470f0280b79ab4317f3f70fcc2d",
+      "reason": "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance.",
+      "reviewer": "Codex visual rough-assembly selection"
+    },
+    {
+      "assetId": "vo-director",
+      "accepted": true,
+      "artifactSha256": "8c69f9c77b5fd0b8f8944312f399a5aef1bf6770a22059695c0ba727248a1117",
+      "reason": "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance.",
+      "reviewer": "Codex visual rough-assembly selection"
+    },
+    {
+      "assetId": "vo-magic",
+      "accepted": true,
+      "artifactSha256": "a4177157a9f82de1728a32482b8eaf346b1920e8aa2743d9c3e8d99be5a8b4de",
+      "reason": "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance.",
+      "reviewer": "Codex visual rough-assembly selection"
+    },
+    {
+      "assetId": "vo-reveal",
+      "accepted": true,
+      "artifactSha256": "43ec9f03541b141676c92863769213ae0fe664655a9e3f1b31a6506a8155b139",
+      "reason": "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance.",
+      "reviewer": "Codex visual rough-assembly selection"
+    },
+    {
+      "assetId": "score",
+      "accepted": true,
+      "artifactSha256": "e21838722d939d93d46acedca7c45b620c1648b01000ec1202f7eb1c08bfba5a",
+      "reason": "Select authored stereo score/effect stem with verified peaks, duration and synchronized story/lockup cues. Listening acceptance remains open.",
+      "reviewer": "Codex visual rough-assembly selection"
+    },
+    {
+      "assetId": "cues",
+      "accepted": true,
+      "artifactSha256": "04bd044058b9b9239c93acbb0b151eb746ca3ad1f06fcfc0990f4ecdad34e3b0",
+      "reason": "Select authored stereo score/effect stem with verified peaks, duration and synchronized story/lockup cues. Listening acceptance remains open.",
+      "reviewer": "Codex visual rough-assembly selection"
+    },
+    {
+      "assetId": "score-cutdown",
+      "accepted": true,
+      "artifactSha256": "6bc85fed339906028aa72c9203460ec00db62063c20dd7a7f8eaf77714a22256",
+      "reason": "Select authored stereo score/effect stem with verified peaks, duration and synchronized story/lockup cues. Listening acceptance remains open.",
+      "reviewer": "Codex visual rough-assembly selection"
+    },
+    {
+      "assetId": "cues-cutdown",
+      "accepted": true,
+      "artifactSha256": "6d2987c64beda52e458d900107513d377e8cbe4fc108a0fd04d1f32d06a24ff2",
+      "reason": "Select authored stereo score/effect stem with verified peaks, duration and synchronized story/lockup cues. Listening acceptance remains open.",
+      "reviewer": "Codex visual rough-assembly selection"
+    },
+    {
+      "assetId": "score-teaser",
+      "accepted": true,
+      "artifactSha256": "31f07e62b558d82c1ca2ad3d3d984da428c4f4133978931cfa485a19f36a178f",
+      "reason": "Select authored stereo score/effect stem with verified peaks, duration and synchronized story/lockup cues. Listening acceptance remains open.",
+      "reviewer": "Codex visual rough-assembly selection"
+    },
+    {
+      "assetId": "cues-teaser",
+      "accepted": true,
+      "artifactSha256": "21b9d89b42ab9a6e4c4b3c4134318bac0065dc24837b1b80ba57fe93eee1e9db",
+      "reason": "Select authored stereo score/effect stem with verified peaks, duration and synchronized story/lockup cues. Listening acceptance remains open.",
+      "reviewer": "Codex visual rough-assembly selection"
+    }
+  ],
+  "scope": "Byte-bound selections for evaluation of a complete rough. Final marketing quality and human listening are not accepted."
+}

@@ -3,6 +3,7 @@ const axios = require("axios");
 const admin = require("firebase-admin");
 const { db } = require("../firebaseAdmin");
 const { buildWorkerRequestConfig } = require("../utils/cloudRunAuth");
+const { ownerRequestJobId, requestFingerprint } = require("./studioJobIdentity");
 const {
   getOwnedStudioSourceBinding,
   assertOwnedStudioSourceBinding,
@@ -112,8 +113,7 @@ const readVerifiedResultBytes = async ({
   if (length !== size || digest.digest("hex") !== resultSha256) throw invalidResult();
   return Buffer.concat(chunks, length);
 };
-const jobIdFor = (uid, requestId) => hash(`${uid}\0${requestId}`);
-const requestFingerprint = request => hash(stable(request));
+const jobIdFor = ownerRequestJobId;
 const publicJob = record => ({
   jobId: record.jobId,
   projectId: record.projectId,

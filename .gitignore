@@ -82,6 +82,10 @@ test/e2e/playwright/test-assets/
 *.webm
 *.gif
 *.png
+!frontend/public/landing/workspace-studio.png
+!frontend/public/landing/workspace-publisher.png
+!frontend/public/landing/workspace-calendar.png
+!frontend/public/landing/workspace-analytics.png
 diff.txt
 fix_*.js
 test-*.js
@@ -93,5 +97,4 @@ patch_broll_upgrades.js
 rewrite_backend_jcut.py
 fix_indentation.py
 *.bak
-
 

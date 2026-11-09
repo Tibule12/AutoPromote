@@ -1,0 +1,37 @@
+{
+  "tool": "Blender",
+  "version": "4.5.9 LTS",
+  "device": {
+    "backend": "OPTIX",
+    "devices": [
+      "NVIDIA L40S"
+    ],
+    "gpu_verified": true,
+    "denoiser": "OPTIX"
+  },
+  "frames": 84,
+  "fps": 24,
+  "config": {
+    "template": "autopromote_ident",
+    "style": "cinematic",
+    "duration": 3.5,
+    "seed": 2026100780,
+    "sourceBrief": "Create cinematic editable AutoPromote studio logo reveals: cinematic, AI compute, premium minimal and creator-energy. Brand ink, violet and ivory. Real extrusion, reflections, timed reveal and original impact audio.",
+    "deadlineEpoch": 1791363059.6449072
+  },
+  "nativeScene": "autopromote-ident.blend",
+  "editable": [
+    "wordmark text",
+    "extrusion",
+    "materials",
+    "studio lights",
+    "camera keyframes",
+    "data/edit fragment trajectories",
+    "glow compositor"
+  ],
+  "impactAt": 1.47,
+  "resolveAt": 2.45,
+  "renderSeconds": 51.914406486999724,
+  "status": "GENERATED_PENDING_REVIEW",
+  "scriptSha256": "6acf5ac537aac84c64c12b0be91c4b8f3ea85aa383367e50dcc6e63fd6000708"
+}

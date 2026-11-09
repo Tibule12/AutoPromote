@@ -1,0 +1,31 @@
+{
+  "reviewer": "Codex visual inspection",
+  "creativeApproval": false,
+  "purpose": "Asset selection for complete rough assembly; no flagship quality acceptance",
+  "observations": [
+    {
+      "assetId": "vessel",
+      "result": "Selected for complete motion review",
+      "evidence": "vessel-preview-v3-sheet.jpg and framing-receipt.json",
+      "notes": "Connected geometry/world and safe framing observed. Yacht/water retain CG finish; no photoreal acceptance."
+    },
+    {
+      "assetId": "ident",
+      "result": "Selected for motion review",
+      "evidence": "NVIDIA ident-cinematic-preview-v3 frame_0036.png",
+      "notes": "Macro extrusion, per-part rotation, layered materials visible. Readable final original lockup seen in v2; latest final motion still pending."
+    },
+    {
+      "assetId": "problems",
+      "result": "Rejected as final source; regeneration requested",
+      "evidence": "Fresh story-v3 previews",
+      "notes": "Portrait frames occlude FORMATS label. Regenerate unique source with label z=3.2 and narrower centered label positions."
+    },
+    {
+      "assetId": "director",
+      "result": "Selected for rough assembly",
+      "evidence": "Fresh story-v3 previews",
+      "notes": "All four decision labels readable now. Same retained interview repeated in earlier scenes; long hero may feel repetitive."
+    }
+  ]
+}

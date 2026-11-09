@@ -1,0 +1,16 @@
+{
+  "accepted": true,
+  "artifactSha256": "b8642205c018e908c677f5a1d759087131f8a874ac9d03cefbff0851737281b9",
+  "reviewer": "Codex visual inspection of time-ordered frames",
+  "reason": "Actual existing Studio shows these generated source clips. Native paused scrubbing follows the decoded source through a clip change without a loading overlay or resumed playback.",
+  "evidenceSha256": "5015368e379d6fb4c63ffba64b52adf26ddfcb4e3a26293c858689adb8e46062",
+  "evidence": "ui/studio-source-assembly-v17/review.jpg",
+  "criteria": [
+    {
+      "criterion": "Assigned raw story role",
+      "passed": true,
+      "observation": "Actual existing Studio shows these generated source clips. Native paused scrubbing follows the decoded source through a clip change without a loading overlay or resumed playback."
+    }
+  ],
+  "limitation": "Private raw-role selection, not whole-film creative approval or public feature release."
+}

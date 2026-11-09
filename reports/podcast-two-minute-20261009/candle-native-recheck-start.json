@@ -1,0 +1,67 @@
+{
+  "httpStatus": 202,
+  "jobId": "eadbcbcc5c2975a49b1480e91584e11e5f5b9c26",
+  "status": "reviewing",
+  "shots": [
+    {
+      "id": "shot-1",
+      "status": "rejected",
+      "review": {
+        "accepted": false,
+        "reason": "Shot does not depict two candles as required; shows multiple candles (at least seven).",
+        "revisionInstructions": "Generate a shot with exactly two lit candles, maintaining the lateral glide and church background context, ensuring no other candles or objects appear in frame during the sequence. Avoid any visual clutter or additional elements beyond the specified subject and environment. Ensure the movement remains restrained and stable for podcast use. Confirm all frames show only the intended two candles without distortion or artifacts. No text, logos, or distracting elements should be present. Frame count:",
+        "criteria": [
+          {
+            "criterion": "The moving shot depicts the concrete subject in the quoted transcript as an illustration",
+            "passed": false,
+            "observation": "Sampled frames show multiple candles (at least seven), not the required two candles"
+          },
+          {
+            "criterion": "No visible distorted anatomy, broken objects, text, logos or distracting generation defects in sampled frames",
+            "passed": true,
+            "observation": "No visible distortions, text, logos, or distracting defects observed in sampled frames"
+          },
+          {
+            "criterion": "The shot has stable framing and believable restrained movement suitable for a short podcast cutaway",
+            "passed": true,
+            "observation": "Framing is stable and movement is lateral glide, consistent with restrained motion for podcast use"
+          }
+        ],
+        "reviewer": "Qwen/Qwen3-VL-8B-Instruct",
+        "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+        "evidenceSha256": "f3315f547ff85a429bdd8dcb24a97ab44358c8e3854927e90cdd9538a7f701c2",
+        "artifactSha256": "ffebda68521ae52f42a675f13eae4b3bc284c1db7c9ff7216838277fe85435e6"
+      }
+    },
+    {
+      "id": "shot-2",
+      "status": "rejected",
+      "review": {
+        "accepted": false,
+        "reason": "The microphone is not visibly swinging on a cable as described in the prompt; instead, it appears stationary with slight camera drift, failing to meet the requirement for restrained movement suitable for a podcast cutaway. The shot also lacks the dynamic motion implied by 'gently swinging'.",
+        "revisionInstructions": "Re-render the shot to show the microphone actively swinging on its cable with subtle, believable motion while maintaining shallow depth of field and ambient lighting. Ensure the camera remains stable and the movement is restrained for a podcast context. Avoid any static or frozen appearance across frames. Confirm no text, logos, or generation artifacts appear in the output frames. Re-check the negative prompt constraints during generation to prevent distortion or artifacts. Ensure the subject (a",
+        "criteria": [
+          {
+            "criterion": "The moving shot depicts the concrete subject in the quoted transcript as an illustration",
+            "passed": true,
+            "observation": "The microphone is clearly visible and central to the frame, matching the subject described in the prompt"
+          },
+          {
+            "criterion": "No visible distorted anatomy, broken objects, text, logos or distracting generation defects in sampled frames",
+            "passed": true,
+            "observation": "No text, logos, or generation artifacts are visible in any of the sampled frames"
+          },
+          {
+            "criterion": "The shot has stable framing and believable restrained movement suitable for a short podcast cutaway",
+            "passed": false,
+            "observation": "The microphone does not exhibit any discernible swinging motion; the camera appears to drift slightly, which fails to meet the requirement for restrained movement"
+          }
+        ],
+        "reviewer": "Qwen/Qwen3-VL-8B-Instruct",
+        "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+        "evidenceSha256": "31fe9f46f531cf9509be27a52b77fd769c407147084c7e7120c451607a48137d",
+        "artifactSha256": "8fc4ca5e7dfa10517b85b2d5701301146f35d15447294bbf5465a1f804745da9"
+      }
+    }
+  ]
+}

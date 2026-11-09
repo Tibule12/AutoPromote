@@ -1,0 +1,28 @@
+{
+  "at": "2026-10-08T06:54:04.552397+00:00",
+  "baselineFiles": 1465,
+  "missingFiles": [],
+  "changedFiles": [
+    "test/e2e/playwright/studio-stability/readiness.js",
+    "python_media_worker/main_media_server.py",
+    "python_media_worker/test_viral_render_contract.py",
+    "frontend/src/components/VideoEditor.js",
+    "docs/HANDOFF-START-HERE-20261007.md",
+    "test/e2e/playwright/studio-stability/flows.js",
+    "frontend/src/components/StudioTimeline.css",
+    "frontend/src/components/ViralStudioChrome.js",
+    "test/e2e/playwright/studio-stability/director.js",
+    "frontend/src/components/viralRenderPayload.js",
+    "frontend/src/components/ViralClipStudio.js",
+    "docs/HANDOFF-studio-stability-hour-20261008.md",
+    "test/e2e/playwright/studio-stability/blocked-3d.js",
+    "test/e2e/playwright/studio-stability/README.md",
+    "frontend/src/components/__tests__/VideoEditor.viralRenderRecovery.test.js",
+    "frontend/src/components/StudioControls.css",
+    "test/e2e/playwright/studio-stability/run.js",
+    "test/e2e/playwright/studio-stability/worker-qa.sh",
+    "test/e2e/playwright/studio-stability/backend-qa.js"
+  ],
+  "changedLogoOrIdentArtifacts": [],
+  "gitResetCleanDiscardStageCommitPushDeployPerformed": false
+}

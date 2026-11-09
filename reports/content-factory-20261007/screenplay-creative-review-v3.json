@@ -1,0 +1,23 @@
+{
+  "status": "SOURCE_CONTRACT_VALID_CREATIVE_PLANS_REJECTED",
+  "productionId": "b4a295dbb937c8d992784382609ef08ef304758ef7d8d4a3bdaecfc237c7c2c3",
+  "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+  "checks": [
+    {
+      "sceneId": "scene_001_3ffc412e",
+      "planHash": "4120e0ee51efa23cc8ad4393241f84b542d5a22bfe89f092b15f77fb13886b0f",
+      "accepted": false,
+      "reason": "The written plan invents lost-dreams/memory backstory absent from the screenplay, registers lighting and object parts as independent props, and chooses stillness without a concrete dramatic purpose. Its source quotes pass the contract, but that does not make this strong storytelling.",
+      "generationGuard": "SCREENPLAY_SCENE_PLAN_REJECTED"
+    },
+    {
+      "sceneId": "scene_002_ddaf2281",
+      "planHash": "56b57329ddd5c78d55e1acc575efa5013dfdbb0b29594f99ac9abcb1765e3184",
+      "accepted": false,
+      "reason": "The written plan reveals the finished yacht in its hook and divides the transformation into four separate shots. It creates new prop identities from action fragments instead of resolving the same transforming vessel. This hides the requested continuous creative event and invents renewal-from-memory symbolism.",
+      "generationGuard": "SCREENPLAY_SCENE_PLAN_REJECTED"
+    }
+  ],
+  "actualSceneGenerationLaunched": false,
+  "limitation": "Actual NVIDIA written plans and root textual review. No generated movie, pixel continuity or heard audio qualification."
+}

@@ -1,0 +1,36 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "sourceBrief": "A real cinematic voyage begins as a folded paper boat. AutoPromote generates the raw material from an idea and uses its existing Director and render pipeline to make the film. The reveal is a full-size working boat at sea, not a paper boat surviving at sea.",
+  "prompt": "Cinematic photograph of one full-size classic mahogany sailing yacht crossing deep blue ocean waves. Cream triangular canvas sails, real rigging, polished timber hull, brass rails, powerful white bow wake. Entire yacht visible, low water-level tracking angle, storm clouds opening to warm amber sunlight, photoreal marine cinematography.",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "modelRevision": "462165984030d82259a11f4367a4eed129e94a7b",
+  "tool": "AutoPromote NVIDIA image adapter",
+  "seed": 20261007106,
+  "settings": {
+    "steps": 35,
+    "guidance": 7,
+    "width": 1344,
+    "height": 768,
+    "dtype": "float16",
+    "encodedTokenCounts": [
+      64,
+      64
+    ],
+    "promptTruncated": false
+  },
+  "gpu": "NVIDIA L40S",
+  "origin": "native_generated_image",
+  "artifact": {
+    "path": "/work/native-images/real-sailboat-v6/video.mp4",
+    "sha256": "f66b99dcfaf80f881c5485cbc93bd9d66bdbab696a2dcd5aef9f26f81d470423",
+    "duration": 3.0
+  },
+  "reusableArtifacts": [
+    {
+      "role": "native_image",
+      "path": "/work/native-images/real-sailboat-v6/image.png",
+      "sha256": "2ee92584176de8e91500a8ce4ddef1217f09b063c5f633eed3578c8a6e49297b"
+    }
+  ],
+  "seconds": 6.013706521000131
+}

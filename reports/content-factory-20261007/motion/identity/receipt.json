@@ -1,0 +1,33 @@
+{
+  "artifact": {
+    "path": "reports/content-factory-20261007/motion/identity/video.mp4",
+    "sha256": "ddb5903d8d119fa895adbb87175c1b359dcf7d8e8008843d497690afe5fe4b8a",
+    "duration": 3.0
+  },
+  "model": "AutoPromote Studio motion renderer",
+  "modelRevision": "viral_motion_graphics/v1",
+  "tool": "Studio motion raw-asset adapter",
+  "settings": {
+    "scene": {
+      "id": "factory-title",
+      "preset": "title",
+      "design": "editorial",
+      "canvasMode": "standalone",
+      "canvasColor": "#080b10",
+      "text": "AutoPromote",
+      "secondary": "A brief. No footage.",
+      "color": "#d6b782",
+      "startTime": 0,
+      "duration": 3.0,
+      "x": 50,
+      "y": 50,
+      "scale": 1,
+      "easing": "smooth"
+    },
+    "fps": 24,
+    "width": 1280,
+    "height": 704,
+    "frames": 72
+  },
+  "status": "GENERATED_PENDING_REVIEW"
+}

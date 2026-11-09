@@ -1,0 +1,268 @@
+"""Creative effect contracts and FFmpeg-only Viral Clip Studio filters.
+
+Motion Sculpture is intentionally excluded from this module's FFmpeg graph: it is
+rendered by :mod:`motion_sculpture`, where temporal layers are masked to a detected
+human subject instead of mixing the whole frame.
+"""
+
+from __future__ import annotations
+
+import math
+from typing import Any, Dict, Iterable, List, Mapping, Tuple
+
+
+SUPPORTED_CREATIVE_PRESETS = {
+    "beat_echo",
+    "motion_sculpture",
+    "reality_break",
+    "tracked_reveal",
+}
+SUPPORTED_CREATIVE_INTENSITIES = {"clean", "bold", "unreal"}
+SUPPORTED_REALITY_COMPOSITIONS = {
+    "monitor",
+    "full_background",
+    "broll_cutaway",
+    "paced_hybrid",
+}
+
+
+def _read(value: Any, *keys: str, default: Any = None) -> Any:
+    if isinstance(value, Mapping):
+        for key in keys:
+            if key in value:
+                return value[key]
+        return default
+    for key in keys:
+        if hasattr(value, key):
+            return getattr(value, key)
+    return default
+
+
+def _finite_number(value: Any, default: float) -> float:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return default
+    return number if math.isfinite(number) else default
+
+
+def normalize_creative_plan(plan: Any, duration: Any) -> Dict[str, Any]:
+    """Return a bounded, deterministic plan or a disabled safe plan."""
+
+    clip_duration = max(0.05, _finite_number(duration, 0.05))
+    disabled = {
+        "version": 1,
+        "enabled": False,
+        "intensity": "bold",
+        "fallback": "clean",
+        "effects": [],
+    }
+    if not plan or not bool(_read(plan, "enabled", default=False)):
+        return disabled
+
+    default_intensity = str(_read(plan, "intensity", default="bold") or "bold").lower()
+    if default_intensity not in SUPPORTED_CREATIVE_INTENSITIES:
+        default_intensity = "bold"
+
+    normalized_effects: List[Dict[str, Any]] = []
+    for index, effect in enumerate(_read(plan, "effects", default=[]) or []):
+        preset = str(_read(effect, "preset", "type", default="") or "").strip().lower()
+        if preset not in SUPPORTED_CREATIVE_PRESETS:
+            continue
+        start = min(clip_duration, max(0.0, _finite_number(_read(effect, "start_time", "startTime"), 0.0)))
+        end = min(
+            clip_duration,
+            max(start, _finite_number(_read(effect, "end_time", "endTime"), clip_duration)),
+        )
+        if end - start < 0.05:
+            continue
+        intensity = str(_read(effect, "intensity", default=default_intensity) or default_intensity).lower()
+        if intensity not in SUPPORTED_CREATIVE_INTENSITIES:
+            intensity = default_intensity
+        normalized_effect = {
+                "id": str(_read(effect, "id", default=f"creative-{index + 1}")),
+                "preset": preset,
+                "intensity": intensity,
+                "start_time": round(start, 3),
+                "end_time": round(end, 3),
+                "studio_makeover": bool(
+                    _read(effect, "studio_makeover", "studioMakeover", default=False)
+                ),
+            }
+        if preset == "reality_break":
+            scene_brief = _read(effect, "scene_brief", "sceneBrief")
+            story_assets = _read(effect, "story_assets", "storyAssets")
+            integration_surface = _read(
+                effect, "integration_surface", "integrationSurface"
+            )
+            composition_mode = str(
+                _read(effect, "composition_mode", "compositionMode", default="monitor")
+                or "monitor"
+            ).strip().lower()
+            if composition_mode not in SUPPORTED_REALITY_COMPOSITIONS:
+                composition_mode = "monitor"
+            normalized_effect["composition_mode"] = composition_mode
+            if isinstance(scene_brief, Mapping):
+                normalized_effect["scene_brief"] = dict(scene_brief)
+            if isinstance(story_assets, list):
+                normalized_effect["story_assets"] = [
+                    dict(item) for item in story_assets if isinstance(item, Mapping)
+                ][:6]
+            if isinstance(integration_surface, Mapping):
+                normalized_effect["integration_surface"] = dict(integration_surface)
+        normalized_effects.append(normalized_effect)
+        # Keep export cost and render complexity predictable in the first release.
+        if len(normalized_effects) == 3:
+            break
+
+    return {
+        "version": 1,
+        "enabled": bool(normalized_effects),
+        "intensity": default_intensity,
+        "fallback": "clean",
+        "effects": normalized_effects,
+    }
+
+
+def _motion_sculpture_filter(
+    input_label: str, output_label: str, effect: Mapping[str, Any], index: int
+) -> str:
+    raise ValueError(
+        "motion_sculpture requires the subject-aware OpenCV render stage"
+    )
+
+
+def _beat_echo_filter(
+    input_label: str, output_label: str, effect: Mapping[str, Any], index: int
+) -> str:
+    """Build visible time-sliced movement echoes while preserving the clean base frame.
+
+    Each ghost is a real delayed frame from the source, not a decorative overlay. The
+    staggered timing makes fast movement readable as a sequence and works without
+    changing the audio stream.
+    """
+
+    intensity = effect["intensity"]
+    echo_count = {"clean": 3, "bold": 4, "unreal": 5}[intensity]
+    delay_step = {"clean": 0.07, "bold": 0.085, "unreal": 0.10}[intensity]
+    shift_step = {"clean": 3, "bold": 6, "unreal": 9}[intensity]
+    alpha_start = {"clean": 0.19, "bold": 0.25, "unreal": 0.31}[intensity]
+    start = float(effect["start_time"])
+    end = float(effect["end_time"])
+
+    delayed_labels = [f"creative_echo_delayed_{index}_{echo}" for echo in range(echo_count)]
+    reference_labels = [f"creative_echo_reference_{index}_{echo}" for echo in range(echo_count)]
+    split_labels = "".join(
+        f"[{delayed_labels[echo]}][{reference_labels[echo]}]" for echo in range(echo_count)
+    )
+    filters = [
+        f"[{input_label}]split={echo_count * 2 + 1}"
+        f"[creative_echo_base_{index}]"
+        + split_labels
+    ]
+
+    composite_label = f"creative_echo_base_{index}"
+    hue_angles = [300, 185, 255, 25]
+
+    for echo_index, (delayed_label, reference_label) in enumerate(
+        zip(delayed_labels, reference_labels), start=1
+    ):
+        delay = delay_step * echo_index
+        alpha = max(0.16, alpha_start * 2.5 * (1 - (echo_index - 1) / (echo_count + 1)))
+        horizontal_shift = shift_step * echo_index
+        delayed_color_source = f"creative_echo_color_source_{index}_{echo_index}"
+        delayed_mask_source = f"creative_echo_mask_source_{index}_{echo_index}"
+        colored_label = f"creative_echo_colored_{index}_{echo_index}"
+        mask_label = f"creative_echo_mask_{index}_{echo_index}"
+        echo_label = f"creative_echo_ghost_{index}_{echo_index}"
+        next_composite = (
+            output_label
+            if echo_index == echo_count
+            else f"creative_echo_mix_{index}_{echo_index}"
+        )
+
+        filters.append(
+            f"[{delayed_label}]setpts=PTS+{delay:.3f}/TB,split=2"
+            f"[{delayed_color_source}][{delayed_mask_source}]"
+        )
+        filters.append(
+            f"[{delayed_color_source}]hue=h={hue_angles[(echo_index - 1) % len(hue_angles)]}:s=1.75,"
+            f"eq=contrast=1.12:saturation=1.42,format=rgba[{colored_label}]"
+        )
+        filters.append(
+            f"[{reference_label}][{delayed_mask_source}]blend=all_mode=difference:shortest=1,"
+            f"format=gray,lut=y='if(gt(val,14),min(255,(val-14)*6),0)',"
+            f"boxblur=2:1[{mask_label}]"
+        )
+        filters.append(
+            f"[{colored_label}][{mask_label}]alphamerge,"
+            f"colorchannelmixer=aa={alpha:.3f}[{echo_label}]"
+        )
+        filters.append(
+            f"[{composite_label}][{echo_label}]overlay="
+            f"x=-{horizontal_shift}:y=0:eof_action=pass:repeatlast=0:format=auto:"
+            f"enable='between(t,{start:.3f},{end:.3f})'[{next_composite}]"
+        )
+        composite_label = next_composite
+
+    return ";".join(filters)
+
+
+def _reality_break_filter(
+    input_label: str, output_label: str, effect: Mapping[str, Any], index: int
+) -> str:
+    raise ValueError(
+        "reality_break requires the evidence-grounded subject-aware render stage"
+    )
+
+
+def _tracked_reveal_filter(input_label: str, output_label: str, effect: Mapping[str, Any], index: int) -> str:
+    intensity = effect["intensity"]
+    start = float(effect["start_time"])
+    available = max(0.25, float(effect["end_time"]) - start)
+    reveal_duration = min(available, {"clean": 1.15, "bold": 0.78, "unreal": 0.48}[intensity])
+    saturation = {"clean": 1.12, "bold": 1.30, "unreal": 1.52}[intensity]
+    contrast = {"clean": 1.04, "bold": 1.12, "unreal": 1.22}[intensity]
+    clean_label = f"creative_reveal_clean_{index}"
+    grade_label = f"creative_reveal_grade_{index}"
+    return (
+        f"[{input_label}]split=2[{clean_label}][{grade_label}_src];"
+        f"[{grade_label}_src]curves=preset=increase_contrast,"
+        f"eq=contrast={contrast:.2f}:saturation={saturation:.2f}[{grade_label}];"
+        f"[{clean_label}][{grade_label}]blend="
+        f"all_expr='if(between(T,{start:.3f},{float(effect['end_time']):.3f}),"
+        f"if(lte(X/W,clip((T-{start:.3f})/{reveal_duration:.3f},0,1)),B,A),A)'"
+        f"[{output_label}]"
+    )
+
+
+def build_creative_filter_complex(plan: Mapping[str, Any]) -> Tuple[str, str, List[Dict[str, Any]]]:
+    """Build a sequential FFmpeg graph and an export receipt.
+
+    The graph always starts from ``0:v``. Audio is deliberately excluded so the
+    caller can stream-copy it untouched into the protected intermediate.
+    """
+
+    effects: Iterable[Mapping[str, Any]] = plan.get("effects") or []
+    filters: List[str] = []
+    receipt: List[Dict[str, Any]] = []
+    input_label = "0:v"
+    output_label = input_label
+
+    for index, effect in enumerate(effects):
+        output_label = f"creative_{index}"
+        preset = effect["preset"]
+        if preset == "beat_echo":
+            filters.append(_beat_echo_filter(input_label, output_label, effect, index))
+        elif preset == "motion_sculpture":
+            filters.append(_motion_sculpture_filter(input_label, output_label, effect, index))
+        elif preset == "reality_break":
+            filters.append(_reality_break_filter(input_label, output_label, effect, index))
+        elif preset == "tracked_reveal":
+            filters.append(_tracked_reveal_filter(input_label, output_label, effect, index))
+        else:
+            continue
+        receipt.append(dict(effect))
+        input_label = output_label
+
+    return ";".join(filters), output_label, receipt

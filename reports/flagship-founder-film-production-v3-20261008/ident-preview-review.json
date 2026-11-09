@@ -1,0 +1,16 @@
+{
+  "acceptedForFullRender": false,
+  "evidence": "ident-directions-sheet.jpg",
+  "observations": [
+    "The original curves/proportions remain intact",
+    "Opening wrongly shows large wordmark fragments because ivory had constant emission",
+    "Diffuse field receives too much specular lighting",
+    "Final lockup is too small"
+  ],
+  "corrections": [
+    "Remove wordmark emission",
+    "Link anticipation lights only to the actual symbol geometry",
+    "Use a clean world field with low ambience",
+    "Bring the final camera closer for a readable lockup"
+  ]
+}

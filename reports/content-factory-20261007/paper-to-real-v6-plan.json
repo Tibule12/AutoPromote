@@ -1,0 +1,19 @@
+{
+  "settings": {
+    "steps": 50,
+    "frame_count": 121,
+    "width": 1280,
+    "height": 704
+  },
+  "shots": [
+    {
+      "name": "paper-to-real-v6",
+      "seed": 20261007118,
+      "reference_image": "/work/native-images/boat-desk-v4/image.png",
+      "sourceBrief": "A real cinematic voyage begins as a folded paper boat. AutoPromote generates the raw material from an idea and uses its existing Director and render pipeline to make the film. The reveal is a full-size working boat at sea, not a paper boat surviving at sea.",
+      "storyRole": "Actual material and scale transformation: the paper model becomes a real boat at sea.",
+      "prompt": "A small ivory folded paper boat sits on a wooden workbench. The camera pushes close toward its pointed bow. The paper hull visibly transforms into polished dark mahogany planks: paper fibres become wood grain, the hull lengthens and grows. The central white paper folds stretch upward into tall cream canvas sails and real rigging forms around a wooden mast. Blue moving seawater rushes around the transforming hull as the desk disappears. The camera pulls back to reveal a full-size classic mahogany sailing yacht moving forward across an immense real blue ocean, with white bow spray and a turbulent wake. Begin as an unmistakable small paper model; finish as an unmistakable full-size REAL yacht made of timber and canvas. Cinematic believable material textures, one continuous transformation shot, dramatic amber light, no text, no extra boats.",
+      "negative_prompt": "unchanged paper boat, toy yacht at the end, bird, crane, flying boat, melting hull, sinking, duplicates, text, watermark, cartoon, static image, white background"
+    }
+  ]
+}

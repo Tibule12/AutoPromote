@@ -1,0 +1,38 @@
+{
+  "status": "EXTRACTED_PENDING_LISTENING_REVIEW",
+  "sourceBrief": "Private The Small Boat real-world payoff; physical marine ambience from licensed field recordings.",
+  "model": "licensed field recording source trim",
+  "modelRevision": "ffmpeg-trim-resample-v1",
+  "tool": "AutoPromote audio source preparation",
+  "origin": "recorded_sound_trim",
+  "parentProvenance": {
+    "path": "dock-creak-preview.mp3",
+    "sha256": "251b002796863bed8002013666d24100442e06d9287993d8e037370c361fc046",
+    "bytes": 5655456,
+    "origin": "recorded_sound_preview",
+    "creator": "Filipe Chagas",
+    "sourceUrl": "https://cdn.freesound.org/previews/91/91912_1512131-hq.mp3",
+    "license": "CC0-1.0",
+    "licenseEvidence": "https://freesound.org/people/Filipe%20Chagas/sounds/91912/",
+    "retrievedAt": "2026-10-09T06:25:20.637485+00:00",
+    "limitation": "Public compressed HQ preview; not the full-resolution source recording."
+  },
+  "parentSha256": "251b002796863bed8002013666d24100442e06d9287993d8e037370c361fc046",
+  "sourceRange": {
+    "start": 19,
+    "duration": 3
+  },
+  "settings": {
+    "sampleRate": 48000,
+    "channels": 2,
+    "sampleFormat": "pcm_s24le",
+    "trimStart": 19,
+    "duration": 3
+  },
+  "artifact": {
+    "path": "audio/deck-creak.wav",
+    "sha256": "a16952beef1f7698e30ecebe63c8a452e60eeca1c15b59d98a1b15f7aa724712",
+    "duration": 3
+  },
+  "listeningApproval": false
+}

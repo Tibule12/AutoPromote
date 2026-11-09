@@ -1,0 +1,19 @@
+{
+  "startedAt": "2026-10-09T06:19:02.626990+00:00",
+  "deadlineEpoch": 1791536400,
+  "stage": "one native720 yacht take",
+  "stages": [
+    {
+      "script": "run-yacht.sh",
+      "exitCode": 0
+    }
+  ],
+  "preflight": {
+    "gpu": "NVIDIA L40S, 0 %, 0 %, 0 %, 1 MiB",
+    "cudaProcesses": "",
+    "containerNames": [],
+    "idleServiceGracefulShutdownRequested": false
+  },
+  "restoredMediaPid": 21949,
+  "completedAt": "2026-10-09T06:54:16.250685+00:00"
+}

@@ -1,6 +1,7 @@
 import React from "react";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import WelcomePage from "../WelcomePage";
+import { PRODUCT_TOUR } from "../components/landing/productTour";
 import Features from "../Features";
 import About from "../About";
 import Integrations from "../Integrations";
@@ -59,56 +60,47 @@ describe("public marketing pages", () => {
     expect(onGetStarted).toHaveBeenCalledTimes(1);
   });
 
-  test("welcome page shows real product screens with concise overlays", () => {
-    const scrollIntoView = jest.fn();
-    window.HTMLElement.prototype.scrollIntoView = scrollIntoView;
+  test("welcome page opens the recorded product tour on demand", () => {
+    // jsdom has no native dialog implementation; browser checks cover the focus trap.
+    Object.defineProperty(HTMLDialogElement.prototype, "showModal", {
+      configurable: true,
+      writable: true,
+      value: jest.fn(function () {
+        this.setAttribute("open", "");
+      }),
+    });
+    Object.defineProperty(HTMLDialogElement.prototype, "close", {
+      configurable: true,
+      writable: true,
+      value: jest.fn(function () {
+        this.removeAttribute("open");
+      }),
+    });
     render(<WelcomePage onGetStarted={() => {}} onSignIn={() => {}} />);
-
-    const demoVideos = screen.getByLabelText(/AutoPromote demo videos/i);
-    expect(within(demoVideos).getByLabelText(/Updated Dashboard video demo/i)).toHaveAttribute(
-      "src",
-      "/demos/dashboard-demo.webm"
-    );
-
-    fireEvent.click(within(demoVideos).getByRole("tab", { name: /Cam Combiner/i }));
-    expect(within(demoVideos).getByLabelText(/Cam Combiner video demo/i)).toHaveAttribute(
-      "src",
-      "/demos/cam-combiner-demo.webm"
-    );
-
-    const productTour = screen.getByLabelText(/Choose a product screen/i);
-    expect(screen.getByText(/Click through the workspace/i)).toBeInTheDocument();
-    expect(screen.getByText(/Real product screens/i)).toBeInTheDocument();
-    expect(screen.getByAltText(/Overview page in AutoPromote/i)).toHaveAttribute(
-      "src",
-      "/screenshots/dashboard/overview.jpg"
-    );
-    expect(screen.queryByText(/typically 3-7 hours/i)).not.toBeInTheDocument();
-    expect(
-      screen.queryByText(/AI-assisted variations focus on stronger hooks/i)
-    ).not.toBeInTheDocument();
-
-    fireEvent.click(within(productTour).getByRole("tab", { name: /Cam Combiner/i }));
-    expect(screen.getByAltText(/Cam Combiner page in AutoPromote/i)).toHaveAttribute(
-      "src",
-      "/screenshots/dashboard/cam-combiner.jpg"
-    );
-    expect(screen.getByText(/Sync cameras, direct speakers/i)).toBeInTheDocument();
-
-    fireEvent.click(within(productTour).getByRole("tab", { name: /Viral Clip Studio/i }));
-    expect(screen.getByAltText(/Viral Clip Studio page in AutoPromote/i)).toHaveAttribute(
-      "src",
-      "/screenshots/dashboard/viral-clip-studio.jpg"
-    );
-
-    fireEvent.click(within(productTour).getByRole("tab", { name: /Smart Promo/i }));
-    expect(screen.getByAltText(/Smart Promo page in AutoPromote/i)).toHaveAttribute(
-      "src",
-      "/screenshots/dashboard/smart-promo.jpg"
-    );
-
-    fireEvent.click(screen.getByRole("button", { name: /Explore product screens/i }));
-    expect(scrollIntoView).toHaveBeenCalled();
+    expect(screen.getByLabelText(/AutoPromote product tour/i)).not.toHaveAttribute("src");
+    const trigger = screen.getByRole("button", { name: /Watch Demo/ });
+    trigger.focus();
+    fireEvent.click(trigger);
+    expect(HTMLDialogElement.prototype.showModal).toHaveBeenCalledTimes(1);
+    const dialog = screen.getByRole("dialog");
+    const video = within(dialog).getByLabelText(/AutoPromote product tour/i);
+    const pauseVideo = jest.spyOn(video, "pause").mockImplementation(() => {});
+    const releaseVideo = jest.spyOn(video, "load").mockImplementation(() => {});
+    pauseVideo.mockClear();
+    releaseVideo.mockClear();
+    expect(video).not.toHaveAttribute("src");
+    fireEvent.click(within(dialog).getByRole("button", { name: /Play product tour/ }));
+    expect(video).toHaveAttribute("src", PRODUCT_TOUR.src);
+    expect(video).toHaveAttribute("preload", "none");
+    expect(document.body.style.overflow).toBe("hidden");
+    fireEvent.click(within(dialog).getByRole("button", { name: "Close demo" }));
+    expect(pauseVideo).toHaveBeenCalledTimes(1);
+    expect(video).not.toHaveAttribute("src");
+    expect(releaseVideo).toHaveBeenCalledTimes(2);
+    expect(HTMLDialogElement.prototype.close).toHaveBeenCalled();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(document.body.style.overflow).toBe("");
+    expect(trigger).toHaveFocus();
   });
 
   test("features and changelog avoid retired viral bonus promises", () => {

@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-09T07:27:35.156Z",
+  "passed": true,
+  "beforeRevision": 161,
+  "afterRevision": 161,
+  "verifiedFields": [
+    "aspect",
+    "smartCrop",
+    "modes",
+    "frame",
+    "finish",
+    "captionStyle",
+    "captions",
+    "keys",
+    "job"
+  ],
+  "realNormalEntry": true,
+  "scope": "Programme mode at zero is off and overrides the saved default crop flag."
+}

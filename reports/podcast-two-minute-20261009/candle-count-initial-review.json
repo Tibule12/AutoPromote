@@ -1,0 +1,88 @@
+{
+  "fingerprint": "21603b05d1ff6ebcf789648c8a3dba3cb4d945bf68b3a8bb1c93bb498b7280f4",
+  "result": {
+    "id": "review-ffebda68521ae52f",
+    "value": {
+      "accepted": false,
+      "reason": "Shot does not depict two candles as required; shows multiple candles (at least seven).",
+      "revisionInstructions": "Generate a shot with exactly two lit candles, maintaining the lateral glide and church background context, ensuring no other candles or objects appear in frame during the sequence. Avoid any visual clutter or additional elements beyond the specified subject and environment. Ensure the movement remains restrained and stable for podcast use. Confirm all frames show only the intended two candles without distortion or artifacts. No text, logos, or distracting elements should be present. Frame count:",
+      "criteria": [
+        {
+          "criterion": "The moving shot depicts the concrete subject in the quoted transcript as an illustration",
+          "passed": false,
+          "observation": "Sampled frames show multiple candles (at least seven), not the required two candles"
+        },
+        {
+          "criterion": "No visible distorted anatomy, broken objects, text, logos or distracting generation defects in sampled frames",
+          "passed": true,
+          "observation": "No visible distortions, text, logos, or distracting defects observed in sampled frames"
+        },
+        {
+          "criterion": "The shot has stable framing and believable restrained movement suitable for a short podcast cutaway",
+          "passed": true,
+          "observation": "Framing is stable and movement is lateral glide, consistent with restrained motion for podcast use"
+        }
+      ]
+    },
+    "rawValue": {
+      "accepted": false,
+      "reason": "Shot does not depict two candles as required; shows multiple candles (at least seven).",
+      "revisionInstructions": "Generate a shot with exactly two lit candles, maintaining the lateral glide and church background context, ensuring no other candles or objects appear in frame during the sequence. Avoid any visual clutter or additional elements beyond the specified subject and environment. Ensure the movement remains restrained and stable for podcast use. Confirm all frames show only the intended two candles without distortion or artifacts. No text, logos, or distracting elements should be present. Frame count:",
+      "criteria": [
+        {
+          "criterion": "The moving shot depicts the concrete subject in the quoted transcript as an illustration",
+          "passed": false,
+          "observation": "Sampled frames show multiple candles (at least seven), not the required two candles"
+        },
+        {
+          "criterion": "No visible distorted anatomy, broken objects, text, logos or distracting generation defects in sampled frames",
+          "passed": true,
+          "observation": "No visible distortions, text, logos, or distracting defects observed in sampled frames"
+        },
+        {
+          "criterion": "The shot has stable framing and believable restrained movement suitable for a short podcast cutaway",
+          "passed": true,
+          "observation": "Framing is stable and movement is lateral glide, consistent with restrained motion for podcast use"
+        }
+      ]
+    },
+    "contractRepairs": [],
+    "model": "Qwen/Qwen3-VL-8B-Instruct",
+    "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+    "settings": {
+      "dtype": "bfloat16",
+      "attention": "sdpa",
+      "do_sample": false,
+      "max_tokens": 2400
+    },
+    "evidenceSha256": "f3315f547ff85a429bdd8dcb24a97ab44358c8e3854927e90cdd9538a7f701c2",
+    "frameEvidence": [
+      {
+        "timestamp": 0,
+        "sha256": "47ce606e601727e999cdea0634ffebe4fafdc7c664bac9a6a7f946538dc96dbe"
+      },
+      {
+        "timestamp": 1.0083334000000002,
+        "sha256": "9d937d4177add16e515fe4664c9992e7ee233107db9fed1f1fea6ad2e927fa69"
+      },
+      {
+        "timestamp": 2.0166668000000003,
+        "sha256": "f45e5ef1bc5efc357d2667fa7dd5e1ec2984c3541ac7dbe772c7d8d0bf7edf50"
+      },
+      {
+        "timestamp": 3.0250002,
+        "sha256": "85837729be5464484f0f10dff7074269955d4c8faca0f90a07b5977e0156f90e"
+      },
+      {
+        "timestamp": 4.033333600000001,
+        "sha256": "ddbcd1d1c19c49357df83f9a92010e537f93176dd43cd1e7b17007f71bdb9e48"
+      },
+      {
+        "timestamp": 4.961667,
+        "sha256": "0fe5789e57d38e8f1ae82cd6208cefa834f02c447d5c651f7d52e0482aabe04d"
+      }
+    ],
+    "seconds": 14.599740559000566,
+    "gpu": "NVIDIA L40S"
+  }
+}

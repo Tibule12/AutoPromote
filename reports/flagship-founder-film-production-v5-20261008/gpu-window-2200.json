@@ -1,0 +1,14 @@
+{
+  "authorizedBy": "User: no the GPU will run up until 22:00",
+  "vm": "autopromote-l40s-staging",
+  "gpu": "NVIDIA L40S",
+  "startedVmHere": true,
+  "startedAtUtc": "2026-10-08T16:39:32.614763+00:00",
+  "cutoffEpoch": 1791489600,
+  "cutoffSast": "2026-10-08T22:00:00+02:00",
+  "preflight": "NVIDIA L40S 1 MiB; no compute apps or exclusive containers at 2026-10-08T16:39:15Z",
+  "watchdog": "watchdog-2200-receipt.json",
+  "status": "STOPPED_WINDOW_EXPIRED",
+  "lastObservedAt": "2026-10-08T20:03:21.682118+00:00",
+  "finalEvidence": "gpu-cutoff-verified.json"
+}

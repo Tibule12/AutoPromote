@@ -1,0 +1,12 @@
+{
+  "at": "2026-10-09T09:46:00.592436+00:00",
+  "scope": "Independent120s reference encoded on the same worker FFmpeg build from losslessly decoded original source with the actual saved Natural restoration settings and repaired clock. No Studio render or generated B-roll used in reference. Technical signal only.",
+  "referenceSeconds": 120.0,
+  "finalSeconds": 120.0,
+  "alignedCorrelation": 0.9872462881096021,
+  "minimumAudibleOneSecondCorrelation": 0.9340389284350088,
+  "peak": 0.9621459245681763,
+  "fullScaleSamples": 0,
+  "passed": false,
+  "humanListening": false
+}

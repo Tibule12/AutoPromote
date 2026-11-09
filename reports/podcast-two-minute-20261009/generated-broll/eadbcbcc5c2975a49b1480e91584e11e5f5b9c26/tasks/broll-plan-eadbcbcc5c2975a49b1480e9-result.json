@@ -1,0 +1,57 @@
+{
+  "fingerprint": "bdc4f9688e5acd383e86e2e3f8a1fba667e8b03ce0e4d6af9da01aad83903c0e",
+  "result": {
+    "id": "broll-plan-eadbcbcc5c2975a49b1480e9",
+    "value": {
+      "reason": "Selects two high-impact visual beats: church candles for 'church-going child' and microphone swing for 'singer', both with active motion and natural lighting. Avoids static shots and repeats. Matches subjectQuote tokens strictly and keeps speaker visible where required. Duration and spacing meet criteria. No invented locations or people. No filler shots. No emotional payoffs or intros replaced. No text/logos/people in shots. No generic details. All prompts grounded in physical action and allowed",
+      "shots": [
+        {
+          "captionId": "transcript-caption-35-timeline-1",
+          "subjectQuote": "church",
+          "title": "Church-Going Child",
+          "prompt": "Two lit candles with dancing flames in foreground, lateral camera glide rightward, soft church window glow behind, natural daylight, no people or text",
+          "duration": 3
+        },
+        {
+          "captionId": "transcript-caption-40-cue-1-timeline-1",
+          "subjectQuote": "singer",
+          "title": "Singer's Microphone",
+          "prompt": "Microphone gently swinging on cable against slow-moving stage lights, shallow depth of field, natural ambient light, no people or logos",
+          "duration": 2
+        }
+      ]
+    },
+    "rawValue": {
+      "reason": "Selects two high-impact visual beats: church candles for 'church-going child' and microphone swing for 'singer', both with active motion and natural lighting. Avoids static shots and repeats. Matches subjectQuote tokens strictly and keeps speaker visible where required. Duration and spacing meet criteria. No invented locations or people. No filler shots. No emotional payoffs or intros replaced. No text/logos/people in shots. No generic details. All prompts grounded in physical action and allowed",
+      "shots": [
+        {
+          "captionId": "transcript-caption-35-timeline-1",
+          "subjectQuote": "church",
+          "title": "Church-Going Child",
+          "prompt": "Two lit candles with dancing flames in foreground, lateral camera glide rightward, soft church window glow behind, natural daylight, no people or text",
+          "duration": 3
+        },
+        {
+          "captionId": "transcript-caption-40-cue-1-timeline-1",
+          "subjectQuote": "singer",
+          "title": "Singer's Microphone",
+          "prompt": "Microphone gently swinging on cable against slow-moving stage lights, shallow depth of field, natural ambient light, no people or logos",
+          "duration": 2
+        }
+      ]
+    },
+    "contractRepairs": [],
+    "model": "Qwen/Qwen3-VL-8B-Instruct",
+    "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+    "settings": {
+      "dtype": "bfloat16",
+      "attention": "sdpa",
+      "do_sample": false,
+      "max_tokens": 4500
+    },
+    "evidenceSha256": null,
+    "frameEvidence": [],
+    "seconds": 13.772659537999061,
+    "gpu": "NVIDIA L40S"
+  }
+}

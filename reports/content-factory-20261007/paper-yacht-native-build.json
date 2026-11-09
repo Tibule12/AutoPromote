@@ -1,0 +1,11 @@
+{
+  "template": "paper_to_yacht",
+  "duration": 6,
+  "fps": 24,
+  "width": 1280,
+  "height": 720,
+  "seed": 20261007139,
+  "sourceBrief": "A real cinematic voyage begins as a folded paper boat. AutoPromote generates the raw material from an idea and uses its existing Director and render pipeline to make the film. The reveal is a full-size working boat at sea, not a paper boat surviving at sea.",
+  "deadlineEpoch": 1791374400,
+  "buildOnly": true
+}

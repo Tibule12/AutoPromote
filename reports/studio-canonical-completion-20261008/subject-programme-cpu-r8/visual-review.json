@@ -1,0 +1,37 @@
+{
+  "at": "2026-10-08T19:54:44.787473+00:00",
+  "status": "SELECTED_SPEED_CLOCK_AND_EXACT_TAIL_PASS_FULL_PARITY_FAIL",
+  "actualStudioUserFlow": true,
+  "outputSha256": "eed3ffce445a1183f35c2a1df86185430ab4d34b7267d3b4ae6bd98034fed9dc",
+  "video": {
+    "width": 1280,
+    "height": 720,
+    "codec": "h264",
+    "fps": "60/1",
+    "duration": "6.000000",
+    "frameCount": 360,
+    "pixelFormat": "yuv420p",
+    "encoder": "Lavc60.31.102 libx264"
+  },
+  "audio": {
+    "codec": "aac",
+    "channels": 2,
+    "sampleRate": "96000",
+    "duration": "6.000000"
+  },
+  "independentFullDecode": true,
+  "visualReviewedFrames": [
+    0.25,
+    0.75
+  ],
+  "selectedSpeedClock": "Native 2x/60fps and lossless ordered-source regression PASS; no general dense frame/matte parity claim",
+  "remaining": [
+    "3D font/material/vertical appearance differs",
+    "Tracked label clipped; premature crop before translation reproduced and repaired in source; 8 motion guards PASS; native retest pending",
+    "Full audio listening and broader clocks unqualified"
+  ],
+  "newGpuUsed": false,
+  "inferencePosts": 0,
+  "readinessPromotion": false,
+  "creativeApproval": false
+}

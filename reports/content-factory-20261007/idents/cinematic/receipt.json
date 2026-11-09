@@ -1,0 +1,57 @@
+{
+  "tool": "Blender",
+  "version": "4.5.9 LTS",
+  "device": {
+    "backend": "OPTIX",
+    "devices": [
+      "NVIDIA L40S"
+    ],
+    "gpu_verified": true,
+    "denoiser": "OPTIX"
+  },
+  "frames": 84,
+  "fps": 24,
+  "config": {
+    "template": "autopromote_ident",
+    "style": "cinematic",
+    "duration": 3.5,
+    "seed": 2026100780,
+    "sourceBrief": "Create cinematic editable AutoPromote studio logo reveals: cinematic, AI compute, premium minimal and creator-energy. Brand ink, violet and ivory. Real extrusion, reflections, timed reveal and original impact audio.",
+    "deadlineEpoch": 1791363059.6449072
+  },
+  "nativeScene": "autopromote-ident.blend",
+  "editable": [
+    "wordmark text",
+    "extrusion",
+    "materials",
+    "studio lights",
+    "camera keyframes",
+    "data/edit fragment trajectories",
+    "glow compositor"
+  ],
+  "impactAt": 1.47,
+  "resolveAt": 2.45,
+  "renderSeconds": 41.80305772799966,
+  "status": "GENERATED_PENDING_REVIEW",
+  "scriptSha256": "3a33bab7d6c41c62342c483b11d2dccb50b41522ea0b96de0e7240497af70ddc",
+  "model": "Blender AutoPromote studio ident",
+  "modelRevision": "4.5.9 LTS",
+  "audioRole": "brand_ident",
+  "artifact": {
+    "path": "reports/content-factory-20261007/idents/cinematic/ident.mp4",
+    "sha256": "00940a7be67f6991ec975f810f53e933ad52ec24efdcd56dda735483207b0ad1",
+    "duration": 3.5
+  },
+  "reusableArtifacts": [
+    {
+      "role": "native_scene",
+      "path": "reports/content-factory-20261007/idents/cinematic/autopromote-ident.blend",
+      "sha256": "8145e6c0ba0e2cda814d8406a390fe9ff9a45425c28d6eccb0da32b09d2da80b"
+    },
+    {
+      "role": "sound_design",
+      "path": "reports/content-factory-20261007/idents/cinematic/ident.wav",
+      "sha256": "b9a35a694ed0eb449154f96bcf57ac3b14de7812972064c16cb2cad1f31f2d4a"
+    }
+  ]
+}

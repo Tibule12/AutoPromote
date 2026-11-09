@@ -1,0 +1,41 @@
+{
+  "status": "PRIVATE_TRANSFORMATION_PROTOTYPE_PENDING_FOUNDER_REVIEW",
+  "acceptedForMarketing": false,
+  "artifactSha256": "10b7a0377e61e73ce01cbf1299dbf597c617bca48e0dcd48fb25908803db46e3",
+  "actualSourceReview": "controlled-transform-creative-review-v17.json",
+  "finalEvidence": "transformation-prototype-review-v21.jpg",
+  "rootReview": {
+    "framesInspected": 12,
+    "observations": [
+      "The paper-to-sail/wood sequence has actual generated motion and expanding sea.",
+      "The photographic yacht endpoint continues into the retained moving yacht source.",
+      "White captions remain legible.",
+      "The ident provides the final brand resolution."
+    ],
+    "remainingDefects": [
+      "The early mast/sail appears before the connected paper form clearly becomes canvas.",
+      "The workbench-to-ocean change is rushed.",
+      "Hull material change is partly obscured by spray.",
+      "The yacht continuation has a visible lighting/composition change.",
+      "The final narration overlaps the ident opening.",
+      "Native generated picture is 832x480, upscaled to 1080p.",
+      "Listening and premium-marketing creative acceptance remain pending."
+    ]
+  },
+  "audioMeasurements": {
+    "sampleRate": 48000,
+    "channels": 2,
+    "peak": 0.35857266187667847,
+    "rms": 0.04094607010483742,
+    "clippedSamples": 0,
+    "duration": 11.584,
+    "limitation": "Objective decoded measurements; listening and speech comprehension require founder review."
+  },
+  "transformationSound": {
+    "payoffAt": 2.35,
+    "source": "audio/transformation-v21/sound.wav",
+    "CPU": true
+  },
+  "renderer": "AutoPromote RenderViralRequest/render_viral_clip_impl",
+  "encoding": "Actual local CPU libx264 with original canonical renderer."
+}

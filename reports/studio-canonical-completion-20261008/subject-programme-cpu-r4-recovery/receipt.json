@@ -1,0 +1,247 @@
+{
+  "startedAt": "2026-10-08T19:02:52.484Z",
+  "jobId": "viral_9ec9e3f9c79c03ac0119118a09db750f43598584d05f9b02f3b544635952037d",
+  "realAuth": true,
+  "noMocks": true,
+  "headless": true,
+  "muted": true,
+  "newRenderSubmissions": 0,
+  "status": "EXISTING_NATIVE_EXPORT_RECOVERED_VISUAL_REVIEW_PENDING",
+  "events": [
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:02:57.065Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:03:02.949Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:03:08.993Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:03:15.922Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:03:20.981Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:03:27.333Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:03:33.018Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:03:38.989Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:03:45.002Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:03:51.106Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:03:57.011Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:04:03.605Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:04:09.003Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:04:15.702Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:04:21.732Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:04:27.090Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:04:33.030Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:04:40.173Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:04:45.509Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:04:51.090Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:04:57.029Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:05:03.054Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:05:15.156Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:05:21.832Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:05:27.077Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:05:33.074Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:05:39.160Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:05:45.123Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:05:51.106Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:05:57.761Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:06:03.171Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:06:09.132Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:06:16.128Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:06:21.175Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:06:27.132Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:06:33.636Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:06:39.111Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:06:45.079Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "processing",
+      "at": "2026-10-08T19:06:51.887Z"
+    },
+    {
+      "status": 200,
+      "jobStatus": "completed",
+      "at": "2026-10-08T19:06:59.021Z"
+    }
+  ],
+  "completedResponse": {
+    "status": "completed",
+    "jobId": "viral_9ec9e3f9c79c03ac0119118a09db750f43598584d05f9b02f3b544635952037d"
+  },
+  "download": {
+    "nativeCompleted": true,
+    "bytes": 1723676,
+    "suggestedName": "viral_clip_rendered.mp4"
+  },
+  "technical": {
+    "passed": true,
+    "sha256": "0cf758b24cb800df4797783eced663c20b7826d2c9ed5bb9c608f2846d955f46",
+    "bytes": 1723676,
+    "seconds": 6,
+    "video": {
+      "width": 1280,
+      "height": 720,
+      "codec": "h264",
+      "fps": "60/1",
+      "duration": "5.966667",
+      "pixelFormat": "yuv420p",
+      "encoder": "Lavc60.31.102 libx264"
+    },
+    "audio": {
+      "codec": "aac",
+      "channels": 2,
+      "sampleRate": "96000",
+      "duration": "6.000000"
+    },
+    "independentFullDecode": true,
+    "contactSheet": "reports/studio-canonical-completion-20261008/subject-programme-cpu-r4-recovery/download.mp4.frames.jpg",
+    "scope": "Technical only. Pixel and listening review are separate required evidence."
+  },
+  "output": "reports/studio-canonical-completion-20261008/subject-programme-cpu-r4-recovery/download.mp4",
+  "finishedAt": "2026-10-08T19:07:09.542Z"
+}

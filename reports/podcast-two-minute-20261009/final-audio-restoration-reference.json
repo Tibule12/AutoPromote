@@ -1,0 +1,30 @@
+{
+  "at": "2026-10-09T09:20:33.889901+00:00",
+  "scope": "Independent decoded final versus CPU reference applying the actual saved Natural restoration settings to reviewed source. Technical signal check only. Raw-versus-processed equality is not expected.",
+  "filter": "highpass=f=55,lowpass=f=18000,afftdn=nr=8.28:nf=-57.16:tn=1:gs=4,bandreject=f=50:width_type=h:width=3,bandreject=f=100:width_type=h:width=4,deesser=i=0.180:m=0.450:f=.62,acompressor=threshold=0.1710:ratio=3.45:attack=12:release=180:makeup=1.42:knee=3:link=maximum,loudnorm=I=-14.0:LRA=9:TP=-1.0,alimiter=limit=0.891251:level=false:latency=true",
+  "settings": {
+    "enabled": true,
+    "preset": "natural",
+    "voice_isolation": false,
+    "denoise": 22.0,
+    "de_esser": 18.0,
+    "hum_frequency": 50,
+    "compressor": 35.0,
+    "limiter": -1.0,
+    "loudness": -14.0,
+    "eq": {
+      "low": 0.0,
+      "mid": 0.0,
+      "high": 0.0
+    }
+  },
+  "referenceSeconds": 120.00075,
+  "finalSeconds": 119.904,
+  "lagMs": 0.0,
+  "alignedCorrelation": 0.9868565733101342,
+  "minimumAudibleOneSecondCorrelation": 0.9339282774599528,
+  "peak": 0.9383690357208252,
+  "fullScaleSamples": 0,
+  "passed": false,
+  "humanListening": false
+}

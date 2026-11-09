@@ -77,6 +77,7 @@ export function CreativeToolRail({ tools, mode, activeTool, onSelect }) {
           type="button"
           className={activeTool === tool.id ? "is-active" : ""}
           aria-pressed={activeTool === tool.id}
+          title={tool.helper || tool.label}
           onClick={() => onSelect(tool.id)}
         >
           <span aria-hidden="true">{tool.icon}</span>

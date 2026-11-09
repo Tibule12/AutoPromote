@@ -1,0 +1,62 @@
+import subprocess
+from pathlib import Path
+
+import numpy as np
+from PIL import Image
+import unittest
+import tempfile
+
+from python_media_worker.studio_text import render_title_asset
+from python_media_worker.studio_layer_motion import render_image_layer_motion
+
+
+def check_wrapped_weighted_title_preserves_outline_background_and_alignment(tmp_path):
+    overlay = {"text": "Shared project state\nSecond line", "fontFamily": "Inter", "fontWeight": 900,
+               "strokeWidth": 2, "shadow": "strong", "bg": "rgba(7,10,20,0.88)", "textAlign": "right"}
+    output = tmp_path/"title.png"
+    geometry = render_title_asset(overlay, output, 576, 720)
+    assert geometry["lines"] == ["Shared project state", "Second line"]
+    pixels = np.asarray(Image.open(output))
+    assert pixels[..., 3].max() == 255
+    assert pixels[..., 3].min() == 0
+    assert (pixels[..., :3] > 240).all(axis=2).sum() > 1000
+    assert (pixels[..., 3] == round(.88*255)).sum() > 100
+    regular = tmp_path/"regular.png"
+    lighter = render_title_asset({**overlay, "fontWeight": 400}, regular, 576, 720)
+    assert lighter["width"] < geometry["width"]
+    wrapped = {**overlay, "text": "Shared project state", "width": 45}
+    canonical = render_title_asset(wrapped, output, 576, 720)
+    proxy = render_title_asset(wrapped, regular, 328, 410)
+    assert canonical["lines"] == proxy["lines"] == ["Shared", "project", "state"]
+    with unittest.TestCase().assertRaisesRegex(ValueError, "choose Inter"):
+        render_title_asset({**overlay, "fontFamily": "Impact"}, output, 576, 720)
+
+
+def check_real_title_compositor_renders_timed_fades_and_keyframe_position(tmp_path):
+    overlay = {"type": "text", "text": "Title", "start_time": .2, "duration": .8,
+               "x": 30, "y": 50, "fontWeight": 900, "shadow": "none",
+               "animation": {"enter": "fade", "exit": "fade", "enterDuration": .2, "exitDuration": .2}}
+    asset, output = tmp_path/"asset.png", tmp_path/"title.mov"
+    geometry = render_title_asset(overlay, asset, 160, 90)
+    overlay.update({k: v for k, v in geometry.items() if k != "lines"})
+    layer = {"anchor_x": geometry["anchorX"], "anchor_y": geometry["anchorY"],
+             "motion_keyframes": [{"property": "x", "time": .2, "value": 30},
+                                  {"property": "x", "time": 1, "value": 70, "easing": "linear"}]}
+    receipt = render_image_layer_motion(asset, output, overlay, layer, 160, 90, 1.2, [], fps=10)
+    raw = subprocess.check_output(["ffmpeg", "-v", "error", "-i", str(output), "-f", "rawvideo", "-pix_fmt", "rgba", "-"])
+    frames = np.frombuffer(raw, dtype=np.uint8).reshape(-1, 90, 160, 4)
+    assert receipt["start_time"] == .2
+    assert frames[0, ..., 3].max() == 0
+    assert frames[2, ..., 3].max() > 180
+    assert frames[-1, ..., 3].max() < frames[2, ..., 3].max()
+    assert np.where(frames[-1, ..., 3] > 20)[1].mean() > np.where(frames[2, ..., 3] > 20)[1].mean()+20
+
+
+class StudioTextTests(unittest.TestCase):
+    def test_styled_asset(self):
+        with tempfile.TemporaryDirectory() as temp:
+            check_wrapped_weighted_title_preserves_outline_background_and_alignment(Path(temp))
+
+    def test_real_timed_composition(self):
+        with tempfile.TemporaryDirectory() as temp:
+            check_real_title_compositor_renders_timed_fades_and_keyframe_position(Path(temp))

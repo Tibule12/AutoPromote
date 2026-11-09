@@ -1,7 +1,7 @@
 // Store changed JSON values, not a copy of every caption and track per edit.
 const FIELDS = [
   "clipOccurrences", "timeMaps", "outputTimeMap", "constraints", "layers",
-  "linkedTiming", "programmeSpeedKeys",
+  "linkedTiming", "programmeSpeedKeys", "editGraph",
 ];
 const own = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
 const object = value => value !== null && typeof value === "object" && !Array.isArray(value);

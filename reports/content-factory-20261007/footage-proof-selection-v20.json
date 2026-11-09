@@ -1,0 +1,142 @@
+{
+  "status": "PRIVATE_FOOTAGE_SOUND_AND_STUDIO_PROOF_PENDING_WHOLE_FILM_REVIEW",
+  "directionFile": "footage-proof-direction-v15.json",
+  "assets": [
+    {
+      "assetId": "real-vessel",
+      "type": "video",
+      "beatId": "hook",
+      "path": "generated/real-voyage-v6.mp4",
+      "receipt": "generated/real-voyage-v6-receipt.json",
+      "audioRole": null,
+      "review": "selected-reviews/real-vessel.json"
+    },
+    {
+      "assetId": "studio-ui",
+      "type": "ui",
+      "beatId": "reveal",
+      "path": "ui/studio-source-assembly-v17/video.mp4",
+      "receipt": "ui/studio-source-assembly-v17/receipt.json",
+      "audioRole": null,
+      "review": "selected-reviews/studio-ui.json"
+    },
+    {
+      "assetId": "identity",
+      "type": "three_d",
+      "beatId": "ending",
+      "path": "idents/cinematic-v2/ident.mp4",
+      "receipt": "idents/cinematic-v2/receipt.json",
+      "audioRole": "brand_ident",
+      "review": "selected-reviews/identity.json",
+      "reusableArtifacts": [
+        {
+          "role": "native_scene",
+          "path": "idents/cinematic-v2/autopromote-ident.blend",
+          "sha256": "3b56f8815b98d67eaa795f68dd5adf0375a22e293d7790d07dc543f89ed39e62"
+        },
+        {
+          "role": "audio_source",
+          "path": "idents/cinematic-v2/ident.wav",
+          "sha256": "b9a35a694ed0eb449154f96bcf57ac3b14de7812972064c16cb2cad1f31f2d4a"
+        }
+      ]
+    },
+    {
+      "assetId": "score",
+      "type": "audio",
+      "beatId": "hook",
+      "path": "assets/founder-music-v8/audio.wav",
+      "receipt": "assets/founder-music-v8/receipt.json",
+      "audioRole": "music",
+      "review": "selected-reviews/score-v8.json"
+    },
+    {
+      "assetId": "one-idea",
+      "type": "audio",
+      "beatId": "hook",
+      "path": "narration-processed-v11/one-idea.wav",
+      "receipt": "narration-processed-v11/one-idea-receipt.json",
+      "audioRole": "voiceover",
+      "review": "selected-reviews/one-idea-v11.json"
+    },
+    {
+      "assetId": "brief-no-footage",
+      "type": "audio",
+      "beatId": "reveal",
+      "path": "narration-cpu/brief-no-footage.wav",
+      "receipt": "narration-cpu/brief-no-footage-receipt.json",
+      "audioRole": "voiceover",
+      "review": "selected-reviews/brief-no-footage.json"
+    }
+  ],
+  "output": {
+    "outputId": "generated-footage-proof",
+    "aspect": "16:9",
+    "purpose": "Private viewing proof of generated yacht footage, actual Studio source editing and designed sound. This is not the rejected paper-to-real transformation or a released movie-generation feature.",
+    "musicAssetId": "score",
+    "musicVolume": 0.25,
+    "sequence": [
+      {
+        "assetId": "real-vessel",
+        "start": 0,
+        "duration": 5.0625,
+        "reason": "Let coherent yacht motion and moving water establish the generated shot."
+      },
+      {
+        "assetId": "studio-ui",
+        "start": 0,
+        "duration": 3,
+        "reason": "Show these generated sources in the actual Studio."
+      },
+      {
+        "assetId": "identity",
+        "start": 0,
+        "duration": 3.5,
+        "reason": "Resolve with the editable cinematic brand ident."
+      }
+    ],
+    "audioCues": [
+      {
+        "assetId": "one-idea",
+        "kind": "voiceover",
+        "startTime": 0.05,
+        "duration": 2.325,
+        "trimStart": 0,
+        "volume": 0.9
+      },
+      {
+        "assetId": "brief-no-footage",
+        "kind": "voiceover",
+        "startTime": 5,
+        "duration": 3.65,
+        "trimStart": 0,
+        "volume": 0.9
+      }
+    ],
+    "captionSegments": [
+      {
+        "start": 0.05,
+        "end": 2.375,
+        "text": "One idea. No footage.",
+        "captionIcon": "none",
+        "captionAccent": "#ffffff"
+      },
+      {
+        "start": 5,
+        "end": 6.65,
+        "text": "This started with a brief.",
+        "captionIcon": "none",
+        "captionAccent": "#ffffff"
+      },
+      {
+        "start": 6.65,
+        "end": 8.65,
+        "text": "No camera. No footage.",
+        "captionIcon": "none",
+        "captionAccent": "#ffffff"
+      }
+    ],
+    "captionScale": 1,
+    "captionStyle": "minimal"
+  }
+}

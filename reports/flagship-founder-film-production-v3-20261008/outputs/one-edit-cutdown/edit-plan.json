@@ -1,0 +1,119 @@
+{
+  "outputId": "one-edit-cutdown",
+  "aspect": "16:9",
+  "purpose": "26.5-second problem, capacity obstacle, breakthrough, connected transformation and self-referential ending.",
+  "musicAssetId": "score-cutdown",
+  "musicVolume": 0.68,
+  "sequence": [
+    {
+      "assetId": "origin",
+      "start": 0,
+      "duration": 3,
+      "reason": "One small editing problem"
+    },
+    {
+      "assetId": "quota",
+      "start": 0,
+      "duration": 3.5,
+      "reason": "The capacity obstacle"
+    },
+    {
+      "assetId": "breakthrough",
+      "start": 0,
+      "duration": 3.5,
+      "reason": "The route opens"
+    },
+    {
+      "assetId": "vessel",
+      "start": 0,
+      "duration": 7,
+      "reason": "Earn the changed creative ambition"
+    },
+    {
+      "assetId": "reveal",
+      "start": 0,
+      "duration": 4.5,
+      "reason": "Name who made this"
+    },
+    {
+      "assetId": "ident",
+      "start": 0,
+      "duration": 5,
+      "reason": "Complete clean brand resolution"
+    }
+  ],
+  "audioCues": [
+    {
+      "assetId": "vo-cold-open",
+      "kind": "voiceover",
+      "startTime": 0.15,
+      "trimStart": 0,
+      "duration": 2.175,
+      "volume": 0.94
+    },
+    {
+      "assetId": "vo-quota",
+      "kind": "voiceover",
+      "startTime": 3.1,
+      "trimStart": 0,
+      "duration": 3.325,
+      "volume": 0.94
+    },
+    {
+      "assetId": "vo-breakthrough",
+      "kind": "voiceover",
+      "startTime": 6.65,
+      "trimStart": 0,
+      "duration": 3.225,
+      "volume": 0.94
+    },
+    {
+      "assetId": "vo-magic",
+      "kind": "voiceover",
+      "startTime": 10.3,
+      "trimStart": 0,
+      "duration": 3.075,
+      "volume": 0.94
+    },
+    {
+      "assetId": "vo-reveal",
+      "kind": "voiceover",
+      "startTime": 17.35,
+      "trimStart": 0,
+      "duration": 3.4,
+      "volume": 0.94
+    },
+    {
+      "assetId": "cues-cutdown",
+      "kind": "sfx",
+      "startTime": 0,
+      "trimStart": 0,
+      "duration": 12,
+      "volume": 0.8
+    },
+    {
+      "assetId": "cues-cutdown",
+      "kind": "sfx",
+      "startTime": 12,
+      "trimStart": 12,
+      "duration": 12,
+      "volume": 0.8
+    },
+    {
+      "assetId": "cues-cutdown",
+      "kind": "sfx",
+      "startTime": 24,
+      "trimStart": 24,
+      "duration": 2.5,
+      "volume": 0.8
+    }
+  ],
+  "captionSegments": [],
+  "plannedBlackRanges": [
+    {
+      "start": 21.5,
+      "end": 22.05,
+      "reason": "Complete dedicated ident anticipation."
+    }
+  ]
+}

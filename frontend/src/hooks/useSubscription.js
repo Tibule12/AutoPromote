@@ -66,6 +66,7 @@ export const useSubscription = () => {
   const requiresUpgrade = feature => !canUseFeature(feature);
 
   return {
+    loading: authContext?.loading === true,
     planId: normalized.planId,
     capabilities: normalized.capabilities,
     editing: normalized.editing,

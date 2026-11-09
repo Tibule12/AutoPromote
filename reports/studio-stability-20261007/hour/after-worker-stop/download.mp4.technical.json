@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "sha256": "a55c92114196f16fac1ad7f013e73045e1040f08bc197f20c7d489a779aea28c",
+  "bytes": 2187364,
+  "seconds": 12,
+  "video": {
+    "width": 1280,
+    "height": 720,
+    "codec": "h264",
+    "fps": "30/1",
+    "duration": "12.000000",
+    "pixelFormat": "yuv420p"
+  },
+  "audio": {
+    "codec": "aac",
+    "channels": 2,
+    "sampleRate": "96000",
+    "duration": "12.000000"
+  },
+  "independentFullDecode": true,
+  "contactSheet": "reports/studio-stability-20261007/hour/after-worker-stop/download.mp4.frames.jpg",
+  "scope": "Technical only. Pixel and listening review are separate required evidence."
+}

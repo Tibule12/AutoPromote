@@ -1,0 +1,45 @@
+{
+  "at": "2026-10-08T20:11:03.641798+00:00",
+  "readOnly": true,
+  "newGoogleExecutions": 0,
+  "project": "autopromote-cc6d3",
+  "region": "us-central1",
+  "services": [
+    {
+      "name": "cam-combiner-worker",
+      "gpuLimit": 0,
+      "accelerator": null,
+      "minimumInstances": "0",
+      "cpuThrottling": "true"
+    },
+    {
+      "name": "media-worker-v1",
+      "gpuLimit": 0,
+      "accelerator": null,
+      "minimumInstances": "0",
+      "cpuThrottling": "true"
+    },
+    {
+      "name": "thulani-api",
+      "gpuLimit": 0,
+      "accelerator": null,
+      "minimumInstances": "0",
+      "cpuThrottling": "true"
+    },
+    {
+      "name": "thulani-frontend",
+      "gpuLimit": 0,
+      "accelerator": null,
+      "minimumInstances": "0",
+      "cpuThrottling": "true"
+    },
+    {
+      "name": "thulani-worker",
+      "gpuLimit": 0,
+      "accelerator": null,
+      "minimumInstances": "0",
+      "cpuThrottling": "true"
+    }
+  ],
+  "scope": "This project and region only; excludes storage/network and other projects or regions."
+}

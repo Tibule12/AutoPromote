@@ -1,0 +1,1 @@
+[{"argv": ["docker", "ps", "-a", "--filter", "name=autopromote-l40s-qualification-20261006", "--format", "{{.Names}} {{.Status}}"], "exitCode": 0, "stdout": "", "stderr": ""}, {"argv": ["nvidia-smi", "--query-compute-apps=pid,process_name,used_memory", "--format=csv,noheader"], "exitCode": 0, "stdout": "", "stderr": ""}]

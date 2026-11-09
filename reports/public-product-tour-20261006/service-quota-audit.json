@@ -1,0 +1,12 @@
+{
+  "run.googleapis.com": {
+    "status": "UNVERIFIED",
+    "httpStatus": 404,
+    "reason": "Quota API read unavailable; no API activation or infrastructure change attempted."
+  },
+  "compute.googleapis.com": {
+    "status": "UNVERIFIED",
+    "httpStatus": 404,
+    "reason": "Quota API read unavailable; no API activation or infrastructure change attempted."
+  }
+}

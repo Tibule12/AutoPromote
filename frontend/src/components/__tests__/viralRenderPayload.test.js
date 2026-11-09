@@ -29,6 +29,13 @@ describe("viralRenderPayload", () => {
     });
     expect(payload.brand_watermark).toBe(false);
   });
+  test("ignores saved legacy watermark opt-ins and movement schedules", () => {
+    const payload = buildViralRenderData({ finalVideoUrl: "https://example.com/source.mp4",
+      selectedClip: { start: 0, end: 10 }, extraOptions: { brandWatermark: true,
+        brandWatermarkVariant: "studio", brandWatermarkSchedule: [{ startTime: 0, endTime: 10 }] } });
+    expect(payload.brand_watermark).toBe(false);
+    expect(payload).not.toHaveProperty("brand_watermark_schedule");
+  });
   test("marks a caption review copy without claiming the transcript is approved", () => {
     const payload = buildViralRenderData({
       finalVideoUrl: "https://example.com/source.mp4",
@@ -41,7 +48,7 @@ describe("viralRenderPayload", () => {
     });
     expect(payload.caption_review_copy).toBe(true);
     expect(payload.caption_segments[0].review_required).toBe(true);
-    expect(payload.brand_watermark).toBe(true);
+    expect(payload.brand_watermark).toBe(false);
   });
   test("forwards dialogue restoration settings to the native render", () => {
     const audioRestoration = { preset: "broadcast", voiceIsolation: true, denoise: 64,
@@ -256,7 +263,7 @@ describe("viralRenderPayload", () => {
       end_time: 15,
       overlays: [{ id: "overlay-1" }],
       auto_captions: true,
-      brand_watermark: true,
+      brand_watermark: false,
       professional_cleanup: false,
       timeline_segments: [
         {
@@ -501,24 +508,13 @@ describe("viralRenderPayload", () => {
         min_silence_duration: 0.6,
         remove_watermark: false,
         watermark_mode: "adaptive",
-        brand_watermark: true,
-        brand_watermark_variant: "studio",
-        brand_watermark_schedule: [
-          {
-            startTime: 0,
-            endTime: 3.75,
-            position: "top_left",
-            left: 6,
-            top: 7,
-          },
-        ],
+        brand_watermark: false,
         output_settings: {
           resolution: "1080p",
           fps: "30",
           codec: "h264",
           quality: "high",
         },
-        watermark_text: "AutoPromote · Viral Clip Studio",
         add_hook: true,
         hook_text: "Stop scrolling",
         hook_intro_seconds: 2.5,

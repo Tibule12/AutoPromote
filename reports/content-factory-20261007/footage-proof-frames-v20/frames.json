@@ -1,0 +1,65 @@
+{
+  "sourceSha256": "e1aef9d59d85150183df7b32bdb4c2a5270552a0d2e6466bd248f881ed1dc4b1",
+  "frames": [
+    {
+      "path": "reports/content-factory-20261007/footage-proof-frames-v20/frame-01.png",
+      "timestamp": 0.0,
+      "sha256": "191e6f34448d5663b0b328eed4871b62638a1ea81ddd4a0f317320364f09a77e"
+    },
+    {
+      "path": "reports/content-factory-20261007/footage-proof-frames-v20/frame-02.png",
+      "timestamp": 1.0530302727272727,
+      "sha256": "9885fc043d342f8c4aaf1bdb55867fe6ad11e38be0231e533c0e7b6ae97695be"
+    },
+    {
+      "path": "reports/content-factory-20261007/footage-proof-frames-v20/frame-03.png",
+      "timestamp": 2.1060605454545454,
+      "sha256": "aadcb922dc4f5638f17345e4f69f0e5f4f004e33d15daa556fe2edd513d0faf3"
+    },
+    {
+      "path": "reports/content-factory-20261007/footage-proof-frames-v20/frame-04.png",
+      "timestamp": 3.1590908181818182,
+      "sha256": "af40528ec5c74ae3b7c67a32671149bb253b7cafb60961dd3b4e603086cc0ee5"
+    },
+    {
+      "path": "reports/content-factory-20261007/footage-proof-frames-v20/frame-05.png",
+      "timestamp": 4.212121090909091,
+      "sha256": "355e07478491b000c86482f0e403f8365d2d9a4b49308ee5e9731f66e72cc727"
+    },
+    {
+      "path": "reports/content-factory-20261007/footage-proof-frames-v20/frame-06.png",
+      "timestamp": 5.265151363636363,
+      "sha256": "9345aaadb4633fa03e9f7303e9fba4602d2ebed8c561bc9eee65c49d26af051f"
+    },
+    {
+      "path": "reports/content-factory-20261007/footage-proof-frames-v20/frame-07.png",
+      "timestamp": 6.3181816363636365,
+      "sha256": "77aad25aeba31c2579d3b37d27bbffcffaa8f7b40f575d1faae6a5c66138fa9f"
+    },
+    {
+      "path": "reports/content-factory-20261007/footage-proof-frames-v20/frame-08.png",
+      "timestamp": 7.371211909090909,
+      "sha256": "32865ec850c357a508b169dc95795f8aff58eeece0949cdfaaa86d4f2052b83a"
+    },
+    {
+      "path": "reports/content-factory-20261007/footage-proof-frames-v20/frame-09.png",
+      "timestamp": 8.424242181818181,
+      "sha256": "82729c47c100e722ff5c033157ac1f37594db69ab54a04cad793d31699a77d23"
+    },
+    {
+      "path": "reports/content-factory-20261007/footage-proof-frames-v20/frame-10.png",
+      "timestamp": 9.477272454545455,
+      "sha256": "2d306cf200221bdd4f4ef2489cd36f80f16607a24286edafaf6e9415868ada5b"
+    },
+    {
+      "path": "reports/content-factory-20261007/footage-proof-frames-v20/frame-11.png",
+      "timestamp": 10.530302727272726,
+      "sha256": "7d2c090d0e43850d0dc2cce5bc2bfe279b0517bdf29626670f7f6d3ec3b53d9d"
+    },
+    {
+      "path": "reports/content-factory-20261007/footage-proof-frames-v20/frame-12.png",
+      "timestamp": 11.503333,
+      "sha256": "cb5fdc8821a83994b15d16a3620ef562a0e1a699373f6839ddc226210a7b3580"
+    }
+  ]
+}

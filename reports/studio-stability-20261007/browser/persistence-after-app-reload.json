@@ -1,0 +1,140 @@
+{
+  "url": "http://localhost:5000/login",
+  "text": "Skip to content\nAutoPromote.\nThe Workspace\nFeatures\nProduct Tour\nPricing\nSign In\nStart Creating\n\nTHE CREATOR’S CUTTING ROOM\n\nOne recording.\nMore great clips.\n\nFind promising moments with AI. Edit the timing, framing, captions and sound in Studio. Prepare each clip for your connected social channels.\n\nStart Creating\nWatch Demo\n36 sec\n\nFree account to start. Your creative decisions, throughout.\n\nFind the moment\n/\nMake the cut\n/\nShare the story\nTHE CONVERSATION\n01 / SOURCE\nAUTOPROMOTE STUDIO\n02 / THE EDIT\nOne conversation. A whole new creative direction.\nActual editor · Sample project\nMAKE ROOM FOR YOUR NEXT RELEASE\nTikTok\nYouTube Shorts\nInstagram Reels\n\nFROM THE FIRST CUT TO THE NEXT RELEASE\n\nThe whole story.\nOne workspace.\n\nYour footage deserves more than a quick crop.\nExplore the tools behind your next release.\n\n01\nMake the cut\n02\nChoose your audience\n03\nPlan the release\n04\nLearn what lands\nRECORDED IN AUTOPROMOTE / SAMPLE WORKSPACE\nA proper timeline. Your kind of edit.\n\nCompare your source and edit side by side. Split the timeline, refine the framing, and keep the original audio in the story.\n\nBefore / after comparison\nPrecise split and trim\nVertical, square and wide formats\nWatch the walkthrough\n\nLESS FRICTION. MORE CREATIVE FREEDOM.\n\nGet to the\ngood part.\n\nBring your angles, audio and ideas.\nKeep your creative decisions in one place.\n\n01 / EVERY ANGLE, IN SYNC\nMulti-Camera Editing\n\nBring your camera angles together. Detect active speakers and use automatic camera switches or make the cut yourself.\n\n02 / THE MOMENTS THAT MATTER\nAI Viral Clip Finder\n\nFind and rank promising moments in your long-form videos. Review the candidates and choose what makes the cut.\n\n03 / LET EVERY WORD LAND\nAuto Captions\n\nGenerate caption drafts in English or isiXhosa. Review the words, refine the styling, and keep your voice in the edit.\n\n04 / SOUND AS GOOD AS YOU LOOK\nExternal Audio Sync\n\nUse your clean recorder audio as the master track. Align it with your cameras and keep the conversation in sync.\n\n05 / A SECOND CREATIVE PERSPECTIVE\nAI Director\n\nReview project-aware split and trim suggestions. You decide which proposed edits belong in your timeline.\n\nEvery proposed edit starts with your review.\n\n06 / ONE STORY. EVERY FORMAT.\nSocial Export\n\nReframe for vertical and square video, add captions, and prepare your edit for TikTok, YouTube Shorts and Instagram Reels.\n\nMulti-camera and premium creative tools are available on paid plans. Analysis, audio sync and server exports use credits.\n\nTHE AUTOPROMOTE FLOW\n\nMake it yours.\nThen make it seen.\n\nFrom the first upload to your next release.\nSee the real workspace, one chapter at a time.\n\nAUTOPROMOTE / IN ACTION\n01 — 04 / 00:36\nPlay product tour\nFour pages. One creative flow.\n01\nUploads\nBring in your footage. Choose where the story goes.\n02\nStudio\nPlay it back. Make the cut. Keep creative control.\n03\nSchedule\nSee what is queued and plan your next release.\n04\nAnalytics\nExplore views, clicks and performance by platform.\nRecorded in AutoPromote · Sample workspace and metrics\nOpen film ↗\n\nFOR THE PEOPLE BEHIND THE CAMERA\n\nYou bring the story.\nWe bring the tools.\n\nFor the conversations, ideas and perspectives\nthat deserve to get out into the world.\n\n01 / MADE FOR YOU\nPodcasters\n\nKeep the conversation. Lose the editing marathon.\n\n02 / MADE FOR YOU\nInterviews & conversations\n\nGive every angle and every voice its moment.\n\n03 / MADE FOR YOU\nSocial-first creators\n\nTurn a longer story into your next short-form cut.\n\nTHE NEXT GREAT CLIP IS IN YOUR FOOTAGE.\n\nLet’s make it happen.\n\nYour perspective. Your voice. Your next creation.\n\nStart Creating\nFree account to start · Paid creative tools and credit-based exports\nAutoPromote.\n\nAI video editing.\nMade for your next great story.\n\nPRODUCT\nFeatures\nPricing\nDocumentation\nAUTOPROMOTE\nAbout\nContact\nHelp Center\nMADE TO CREATE.\n\nFrom a conversation\nto a connection.\n\n© 2026 AutoPromote. All rights reserved.\nPrivacy\nTerms\nAccessibility",
+  "controls": [
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "The Workspace",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Features",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Product Tour",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Sign In",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Start Creating",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Start Creating",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Watch Demo\n36 sec",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "01\nMake the cut",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "02\nChoose your audience",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "03\nPlan the release",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "04\nLearn what lands",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Watch the walkthrough",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Play product tour\nFour pages. One creative flow.",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "01\nUploads\nBring in your footage. Choose where the story goes.",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "02\nStudio\nPlay it back. Make the cut. Keep creative control.",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "03\nSchedule\nSee what is queued and plan your next release.",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "04\nAnalytics\nExplore views, clicks and performance by platform.",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Start Creating",
+      "options": null
+    }
+  ],
+  "media": [
+    {
+      "readyState": 0,
+      "duration": null,
+      "time": 0,
+      "paused": true
+    }
+  ]
+}

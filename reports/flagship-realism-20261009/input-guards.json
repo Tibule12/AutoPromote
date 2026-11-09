@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "checks": [
+    "Actual reviewed native PNG accepted before inference",
+    "Interrupted take protected before model loading",
+    "Completed take protected before model loading",
+    "Changed source hash rejected",
+    "Reference outside private root rejected"
+  ],
+  "scope": "CPU-only generation input guards using actual native PNG. No model/inference dispatch or creative qualification.",
+  "runningJobScript": "Earlier staged snapshot remains unchanged during its active generation; final adapter guard will apply to subsequent tasks."
+}

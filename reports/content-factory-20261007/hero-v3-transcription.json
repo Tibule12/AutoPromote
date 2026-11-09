@@ -1,0 +1,164 @@
+{
+  "sourceSha256": "99c8bf4e51965f5c02a489eb3a23423a29a6bc58896f5635db8b9515ca242de8",
+  "modelPath": "/models/studio-whisper",
+  "device": "cpu",
+  "computeType": "int8",
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 15.44,
+      "text": " one idea no footage it needs a world a little courage and a way through this started with a brief no camera no footage",
+      "avgLogProbability": -0.24995204920952135,
+      "noSpeechProbability": 1.0340842765410585e-10,
+      "words": [
+        {
+          "word": " one",
+          "start": 0.0,
+          "end": 0.56,
+          "probability": 0.3857734203338623
+        },
+        {
+          "word": " idea",
+          "start": 0.56,
+          "end": 0.86,
+          "probability": 0.7920117378234863
+        },
+        {
+          "word": " no",
+          "start": 0.86,
+          "end": 1.42,
+          "probability": 0.9938393235206604
+        },
+        {
+          "word": " footage",
+          "start": 1.42,
+          "end": 1.72,
+          "probability": 0.9790487289428711
+        },
+        {
+          "word": " it",
+          "start": 1.72,
+          "end": 2.98,
+          "probability": 0.990105926990509
+        },
+        {
+          "word": " needs",
+          "start": 2.98,
+          "end": 3.18,
+          "probability": 0.7713780999183655
+        },
+        {
+          "word": " a",
+          "start": 3.18,
+          "end": 3.32,
+          "probability": 0.9660646319389343
+        },
+        {
+          "word": " world",
+          "start": 3.32,
+          "end": 3.7,
+          "probability": 0.9960894584655762
+        },
+        {
+          "word": " a",
+          "start": 3.7,
+          "end": 5.06,
+          "probability": 0.9862566590309143
+        },
+        {
+          "word": " little",
+          "start": 5.06,
+          "end": 5.22,
+          "probability": 0.9798275232315063
+        },
+        {
+          "word": " courage",
+          "start": 5.22,
+          "end": 5.56,
+          "probability": 0.9926154613494873
+        },
+        {
+          "word": " and",
+          "start": 5.56,
+          "end": 9.18,
+          "probability": 0.9851834177970886
+        },
+        {
+          "word": " a",
+          "start": 9.18,
+          "end": 9.3,
+          "probability": 0.7507103085517883
+        },
+        {
+          "word": " way",
+          "start": 9.3,
+          "end": 9.44,
+          "probability": 0.9944108128547668
+        },
+        {
+          "word": " through",
+          "start": 9.44,
+          "end": 9.74,
+          "probability": 0.9002279043197632
+        },
+        {
+          "word": " this",
+          "start": 9.74,
+          "end": 12.92,
+          "probability": 0.8110699653625488
+        },
+        {
+          "word": " started",
+          "start": 12.92,
+          "end": 13.22,
+          "probability": 0.9365087747573853
+        },
+        {
+          "word": " with",
+          "start": 13.22,
+          "end": 13.4,
+          "probability": 0.9848513007164001
+        },
+        {
+          "word": " a",
+          "start": 13.4,
+          "end": 13.5,
+          "probability": 0.9968949556350708
+        },
+        {
+          "word": " brief",
+          "start": 13.5,
+          "end": 13.68,
+          "probability": 0.9462913870811462
+        },
+        {
+          "word": " no",
+          "start": 13.68,
+          "end": 14.32,
+          "probability": 0.9861093163490295
+        },
+        {
+          "word": " camera",
+          "start": 14.32,
+          "end": 14.66,
+          "probability": 0.784683883190155
+        },
+        {
+          "word": " no",
+          "start": 14.66,
+          "end": 15.16,
+          "probability": 0.9971970319747925
+        },
+        {
+          "word": " footage",
+          "start": 15.16,
+          "end": 15.44,
+          "probability": 0.9949344992637634
+        }
+      ]
+    }
+  ],
+  "text": "one idea no footage it needs a world a little courage and a way through this started with a brief no camera no footage",
+  "seconds": 14.895173052000246,
+  "limitation": "ASR verifies recoverable speech in actual audio; it is not a human listening or emotional-quality judgment."
+}

@@ -1,0 +1,8 @@
+{
+  "containerAccess": true,
+  "deviceName": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "driverAPIVersion": 13000,
+  "memoryFreeBytes": 101388648448,
+  "memoryTotalBytes": 101973950464,
+  "visibleDeviceCount": 1
+}

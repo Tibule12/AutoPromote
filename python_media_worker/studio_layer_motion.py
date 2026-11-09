@@ -189,6 +189,17 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
                         if normalized_speed_plan else sample_output
                     )
                     pose = layer_pose(layer, overlay, edit_time)
+                    if _get(overlay, "type") == "text":
+                        try:
+                            from .studio_text import title_animation_pose
+                        except ImportError:
+                            from studio_text import title_animation_pose
+                        values = overlay if isinstance(overlay, dict) else overlay.model_dump()
+                        animation = title_animation_pose(values, edit_time)
+                        pose["opacity"] *= animation["opacity"]
+                        pose["scale"] *= animation["scale"]
+                        pose["x"] += animation["x"]
+                        pose["y"] += animation["y"]
                     sample_opacity = 1 if sample == samples - 1 else .28 / max(1, samples - 1)
                     frame.alpha_composite(
                         _render_pose(asset, overlay, layer, pose, (width, height), sample_opacity)

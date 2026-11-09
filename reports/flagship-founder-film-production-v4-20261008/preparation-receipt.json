@@ -1,0 +1,18 @@
+{
+  "status": "PREPARED_CPU_ONLY_PENDING_NVIDIA_GENERATION",
+  "sourceControlSha256": "0f5016cbf1e8af1d327eae9715d14394b26606f9be0919f294890ac0858088fa",
+  "preparedControlSha256": "d3a51fd4d1a0a78f93b9365c0a612ea98e48c87f65f0316b1c86574d14915b39",
+  "firstImageSha256": "b3eb1b794e787906cf7539ed5bd0df180c9c16c98e90364ae320cc455ecb0115",
+  "lastImageSha256": "ec65d8f80b03608a8a638482d849d4cdc16c02d81f5d6af03fc7ce05388ae462",
+  "requestTemplateSha256": "46b7c2b76a719ded129b6260ddb34ae47f87085bd1160655497d276ab0d873fb",
+  "frameCount": 81,
+  "fps": 16,
+  "review": "Not a generated image or film; no creative acceptance.",
+  "generatorSha256": "cbe044a9c8b21f51e4e018c3b2dd29280816e1b259e89d7cc8dd1a11b75939e6",
+  "logoGeometrySha256": "c88e7a6e9c145f6ac8a50bd873cb5cab49ee6b4ef387e787cdf842b3548b082c",
+  "identScriptSha256": "64f7e48bb9775162a90373536ae43204f92b8bff3bb0ee8632e69afb7ee107e1",
+  "identRequestTemplateSha256": "65d5a86ac473a1c7a0a6fd1a16216618f85b4f2867110edb1b2c718b6513ba20",
+  "vectorGeometryScriptSha256": "238e65386a1f7ffbc09ca1ea545fbaf58c7d13755041f67e525d1c7e679d1ea0",
+  "packageManifestSha256": "7d81277f25ee7c6bfefe6cb5b13ee8c573387b0a77dc554205d584a7c9c1e757",
+  "storyReliefScriptSha256": "dfa66f35c091e6db7b53c4aef686599eb6de4b1cb3b0ba060f1ae48e8fa42266"
+}

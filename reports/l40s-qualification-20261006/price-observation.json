@@ -1,0 +1,11 @@
+{
+  "source": "Authenticated Brev console instance header observed before qualification",
+  "observedActiveHourlyUSD": 1.79,
+  "advertisedMemoryGB": 147,
+  "displayedStorageGiB": 384,
+  "actualStorageLayout": "128 GiB OS disk plus 256 GiB data disk; see environment.json",
+  "briefStoppedStorageHourlyUSDApprox": 0.03,
+  "stoppedStoragePriceIndependentlyVerified": false,
+  "computeKeptRunningOnExplicitUserRequest": true,
+  "newInstancesCreated": 0
+}

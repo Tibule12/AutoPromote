@@ -1,0 +1,45 @@
+{
+  "outputId": "one-edit-teaser",
+  "aspect": "16:9",
+  "purpose": "10-second teaser connects the opening world directly to the created-by reveal and short brand lockup.",
+  "musicAssetId": "score-teaser",
+  "musicVolume": 0.6,
+  "sequence": [
+    {
+      "assetId": "cold-open",
+      "start": 0.7,
+      "duration": 3,
+      "reason": "Open inside the finished world"
+    },
+    {
+      "assetId": "reveal",
+      "start": 1,
+      "duration": 4,
+      "reason": "Answer where the film came from"
+    },
+    {
+      "assetId": "ident",
+      "start": 2,
+      "duration": 3,
+      "reason": "Use resolving geometry and clean hold"
+    }
+  ],
+  "audioCues": [
+    {
+      "assetId": "vo-reveal",
+      "kind": "voiceover",
+      "startTime": 2.65,
+      "duration": 3.4,
+      "volume": 0.94
+    },
+    {
+      "assetId": "cues-teaser",
+      "kind": "sfx",
+      "startTime": 0,
+      "trimStart": 0,
+      "duration": 10,
+      "volume": 0.8
+    }
+  ],
+  "captionSegments": []
+}

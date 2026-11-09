@@ -1,0 +1,21 @@
+{
+  "reviewedAt": "2026-10-08T11:13:42.655521+00:00",
+  "visualEvidence": [
+    "preview-contact.jpg",
+    "generated-v2-contact.jpg"
+  ],
+  "verdict": "REJECT_AS_PREMIUM_FILM",
+  "assets": {
+    "ident": {
+      "accepted": false,
+      "reason": "Visible shutter ends and broad reflection streaks still read as mechanical reveal; sound synchronization and full motion/listening review absent."
+    },
+    "magic": {
+      "accepted": false,
+      "reason": "Warped/stretched image and seams; does not accomplish physical paper-boat-to-yacht continuity."
+    }
+  },
+  "wholeFilmAssembled": false,
+  "humanListeningApproval": false,
+  "customerReadinessPromotion": false
+}

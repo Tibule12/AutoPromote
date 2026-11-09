@@ -1,0 +1,56 @@
+{
+  "scope": "Studio NVENC export, subject mask/tracking retiming and Blender alpha conformance; no creative generation",
+  "authorization": "User: Start now; stop by 22:00 SAST; use it wisely",
+  "deadlineEpoch": 1791489600,
+  "deadlineSast": "2026-10-08T22:00:00+02:00",
+  "instance": "autopromote-l40s-staging",
+  "instanceId": "xgh6wcu74",
+  "watchdogPid": 398781,
+  "newInstanceCreated": false,
+  "stopEarlierWhenGpuWorkEnds": false,
+  "verifiedGpuJobs": 4,
+  "jobs": [
+    {
+      "type": "Native Studio final NVENC",
+      "evidence": "paired-speed-2x-gpu-r3/results.json",
+      "scope": "6s30fps; harness fps expectation failed"
+    },
+    {
+      "type": "Native Studio final NVENC",
+      "evidence": "paired-speed-2x-gpu-r4/receipt.json",
+      "scope": "6s60fps exact selected settings; native download/full decode; Minimal fade-clock visual subset PASS, full raster/listening unqualified"
+    },
+    {
+      "type": "Native Studio subject+3D 2x final NVENC",
+      "evidence": "subject-speed-gpu-r2/receipt.json",
+      "scope": "6s60fps source-bound cached SAM2 reused; native download/full decode PASS; actual programme omission and 3D size mismatch reproduced"
+    },
+    {
+      "type": "Normal Studio seven-effect SAM2/NVENC preview",
+      "jobId": "28775092-1b3b-4739-8a70-53c5abda74e3",
+      "evidence": "subject-seven-effects/receipt-recovery.json",
+      "scope": "72 frames/3s; fresh native POST then completed status 503; normal same-job Check recovery and matching native preview bytes/full decode; representative visual and exact PCM identity PASS; no seven-effect final."
+    }
+  ],
+  "sharedGpuPriority": {
+    "at": "2026-10-08T18:03:19.226159+00:00",
+    "userInstruction": "Let those renders finish; queue Studio GPU tests",
+    "studioQueueState": "WAITING_FOR_SHARED_GPU_LOCK",
+    "deadlineUnchanged": true,
+    "stopOtherJobs": false
+  },
+  "latestQueueObservation": {
+    "at": "2026-10-08T20:14:31.419187+00:00",
+    "state": "WINDOW_ENDED_INSTANCE_STOPPED",
+    "foreignJobsStoppedByStudio": false,
+    "confirmedStudioGpuJobs": 4
+  },
+  "status": "ENDED_INSTANCE_VERIFIED_STOPPED",
+  "stopVerification": {
+    "at": "2026-10-08T20:14:31.419187+00:00",
+    "instanceId": "xgh6wcu74",
+    "status": "STOPPED",
+    "watchdogStopAccepted": true,
+    "newPaidRestartAuthorized": false
+  }
+}

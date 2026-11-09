@@ -1,0 +1,65 @@
+{
+  "sourceSha256": "20af57364aef3328e8cea1c433e1ea7a1ee7c1ab97290b9d5bf22d522f690d85",
+  "frames": [
+    {
+      "path": "reports/content-factory-20261007/generated/boat-launch-v4-frames/frame-01.png",
+      "timestamp": 0.0,
+      "sha256": "de91965c44a09462f1a1b878d93d816cbf0f2db2c5435ffc305f45b63ed221fd"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/boat-launch-v4-frames/frame-02.png",
+      "timestamp": 0.4583333636363637,
+      "sha256": "dc5d8967836cfe34f9e9e4d1da3b6fe6a3ddb86bd2c04fec6652d9fb34c5959f"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/boat-launch-v4-frames/frame-03.png",
+      "timestamp": 0.9166667272727274,
+      "sha256": "995f5b4dd0f59311d0ac453814ab580e92a4227ea0365d7c0d4039ed24b45a4d"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/boat-launch-v4-frames/frame-04.png",
+      "timestamp": 1.375000090909091,
+      "sha256": "3faafc8beae0a2a0358ce1f8789a27e6ad7817d8382d0d2ec42045146e67c0e1"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/boat-launch-v4-frames/frame-05.png",
+      "timestamp": 1.8333334545454547,
+      "sha256": "872c60acade6507ef8ee5a06b350adc375a489df429374b524bfcf9f76c8dac2"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/boat-launch-v4-frames/frame-06.png",
+      "timestamp": 2.2916668181818185,
+      "sha256": "6472ede5d3082c8e0be3f7135c05e1c107dbf5daa4cd8855b55f682927f9133d"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/boat-launch-v4-frames/frame-07.png",
+      "timestamp": 2.750000181818182,
+      "sha256": "3eca21017b4a718da4e42c0aac691f959729bc6cd969d66e85ef34a431bef6c3"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/boat-launch-v4-frames/frame-08.png",
+      "timestamp": 3.208333545454545,
+      "sha256": "7dc0359d3bfb1424e720d8b4cf04649367e4c87bad5714943e15ebd2a25e4e6a"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/boat-launch-v4-frames/frame-09.png",
+      "timestamp": 3.6666669090909094,
+      "sha256": "9a4c00b1c13e4cd759f710d8391256a08bab1fad18b743e6674ca002345bd3d4"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/boat-launch-v4-frames/frame-10.png",
+      "timestamp": 4.125000272727274,
+      "sha256": "44fc3e9d1c994590e097f33f794360cf03f5cac69e558af09c4dc921b25171ff"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/boat-launch-v4-frames/frame-11.png",
+      "timestamp": 4.583333636363637,
+      "sha256": "992e26cb0740e6d422250fd4148a2706ec53e1a93906b140c5cb30db9a91f1fd"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/boat-launch-v4-frames/frame-12.png",
+      "timestamp": 4.961667,
+      "sha256": "4ab48286bb6c38ae0c81548acc50062af6d9cc511710111eba469681226457ad"
+    }
+  ]
+}

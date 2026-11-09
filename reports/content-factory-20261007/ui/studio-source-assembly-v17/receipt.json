@@ -1,0 +1,85 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "model": "AutoPromote actual Studio browser capture",
+  "modelRevision": "studio-ui-capture-v2",
+  "tool": "Playwright and BrowserOperator observe-act-verify",
+  "origin": "actual_product_ui",
+  "settings": {
+    "url": "http://127.0.0.1:5009/?fixture=factory",
+    "projectName": "Paper to real · generated source assembly",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "fps": 24,
+    "frames": 72,
+    "interaction": "Native edited-output slider keyboard scrubbing",
+    "sourceClock": {
+      "start": 2.5,
+      "end": 6.1
+    }
+  },
+  "sourceMedia": [
+    {
+      "src": "http://127.0.0.1:5009/factory-media/generated/boat-launch-v4-qualified.mp4",
+      "readyState": 4,
+      "width": 1280,
+      "duration": 3.625
+    },
+    {
+      "src": "http://127.0.0.1:5009/factory-media/generated/boat-launch-v4-qualified.mp4",
+      "readyState": 4,
+      "width": 1280,
+      "duration": 3.625
+    },
+    {
+      "src": "http://127.0.0.1:5009/factory-media/generated/boat-launch-v4-qualified.mp4",
+      "readyState": 4,
+      "width": 1280,
+      "duration": 3.625
+    },
+    {
+      "src": "",
+      "readyState": 0,
+      "width": 0,
+      "duration": null
+    },
+    {
+      "src": "",
+      "readyState": 0,
+      "width": 0,
+      "duration": null
+    },
+    {
+      "src": "http://127.0.0.1:5009/factory-media/generated/boat-launch-v4-qualified.mp4",
+      "readyState": 4,
+      "width": 1280,
+      "duration": 3.625
+    },
+    {
+      "src": "http://127.0.0.1:5009/factory-media/generated/boat-launch-v4-qualified.mp4",
+      "readyState": 1,
+      "width": 1280,
+      "duration": 3.625
+    },
+    {
+      "src": "http://127.0.0.1:5009/factory-media/generated/boat-launch-v4-qualified.mp4",
+      "readyState": 4,
+      "width": 1280,
+      "duration": 3.625
+    },
+    {
+      "src": "http://127.0.0.1:5009/factory-media/generated/boat-launch-v4-qualified.mp4",
+      "readyState": 1,
+      "width": 1280,
+      "duration": 3.625
+    }
+  ],
+  "pageErrors": [],
+  "artifact": {
+    "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/content-factory-20261007/ui/studio-source-assembly-v17/video.mp4",
+    "sha256": "b8642205c018e908c677f5a1d759087131f8a874ac9d03cefbff0851737281b9",
+    "duration": 3
+  },
+  "limitation": "Raw capture of the existing local Studio project; timed screenshot sampling compresses actual keyboard scrubbing. No public feature or customer outcome is implied."
+}

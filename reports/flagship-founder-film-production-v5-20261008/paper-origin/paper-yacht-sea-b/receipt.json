@@ -1,0 +1,36 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "sourceBrief": "# AutoPromote flagship film: The Small Boat\n\n**Private creative reset, 8 October 2026.** The podcast, quota, interview, and UI montage edit is rejected. This treatment supersedes that sequence. The film must stand on one visual idea and sound, with AutoPromote's identity at the opening and the final movie itself as the product proof. No feature narration or unsupported product claim.\n\n## The story\n\nAn ordinary folded paper boat sits on a worktable. A drop of water spreads across the paper. The table seems to become an ocean; the little boat is suddenly too fragile for the scale of its world. Its creases become structure, the folded sail becomes canvas, the hull becomes timber, and the camera carries us into a real yacht moving through the same wave. One sailor aboard the real vessel hauls a mainsheet before the wave arrives, then takes the helm and commits to the open water. The opening identity is the ignition of that world, not an unrelated bumper.\n\nWhy should a stranger care? They understand a tiny vessel confronted by an overwhelming sea, and they want to see whether it survives. The paper-to-yacht change is the first answer; the sailor choosing to act is the emotional payoff. The ordinary starting material and impossible transformation imply what made the film without explaining a tool list.\n\n## Intended cut (approximately 18\u201324 seconds, pending source review)\n\n| Time | Visual / sound | Story function |\n| --- | --- | --- |\n| 0\u20135s | Black. A restrained light reveals one edge of a physical AutoPromote identity. Separate material layers meet under a moving camera. Bass and mechanical texture rise; the mark locks on an impact and holds clearly. | Establish authorship and promise a crafted cinematic world. The ident must look like illuminated depth and motion, never a glowing 2D word. |\n| 5\u20138s | The departing highlight matches a line of light across folded paper on a dark worktable. One boat, one drop, a slight camera push. Room tone narrows to a low pulse. | Give the viewer an object and an impending threat. Withhold the ocean and yacht. |\n| 8\u201313s | Water overtakes the surface. The paper boat remains readable long enough to recognize its folds; its sail/mast grows from the crease and its hull changes material as the camera moves through the wave. Sound rises with the water and structural change. | Make the transition the main creative event. Every new element must have visible continuity with the paper shape. |\n| 13\u201318s | The vessel has become a photographic yacht moving through the same sea. Give its full hull and sail room in frame. Music opens; water and wind continue across the seam. | Pay off the visual transformation and prove it was one continuous world. |\n| 18\u201322s | A single sailor hauls a mainsheet visibly connected to the sail as a wave approaches. An answer shot shows the sail fill and the boat surge forward. | Make the scale change matter to a person. Keep action and rigging continuity; reject unconnected hands or glamour posing. |\n| 22\u201325s | Hold on the yacht and sailor's forward motion toward a clean horizon, then cut on sound to black. | Let the human decision and earned result breathe. Avoid an explanatory card. |\n\nNo beginning shot should reveal the yacht before the paper has earned it. No podcast, quota screenshot, app UI, stock montage, camera-switch effect, fake human identity, or decorative particles. The sailor is a fictional generated character, clearly treated as such in asset provenance; no impersonation or invented testimony. If the transition shows a detached mast, disguises the hull change with spray, or cuts abruptly from desk to sea, reject the take. If the ident reads as a flat fade or tiny logo, reject the ident.\n\n## Asset and editorial gates\n\n1. Review the current bounded NVIDIA VACE take frame by frame and at normal speed. Save its artifact hash, request/model/settings, contact sheet and seam evidence. Only accepted footage enters the existing Content Factory asset library.\n2. Review five NVIDIA Blender ident frames before a complete 5-second render. Preserve editable camera, material, layer, light and sound-cue parameters. Revise geometry/material or camera if the mark lacks physical depth.\n3. Capture or generate a short opening bridge from the ident highlight to the paper worktable only if the paper shot needs it. It must carry the same screen direction and light, not introduce another story.\n4. Build sound around the emotional change: near silence \u2192 texture and water pressure \u2192 structural rise \u2192 impact \u2192 expansive wind/sea/music. Verify the impact against the logo lock and the transformation against the first full-yacht frame.\n5. Assemble with the existing Factory \u2192 Director \u2192 renderer contracts, retain CPU final-encode fallback, and watch/listen to the full private render. A technical pass is not creative acceptance.\n\nThe prior 51-second founder cut and derivatives remain private rejected prototypes. Do not publish or call this treatment a delivered film until all visual and audio gates pass.\n",
+  "prompt": "Photoreal low camera near rough midnight-blue seawater. One handmade cream paper sailboat with a clear folded hull and triangular sail faces a looming wave. Late-day silver clouds and warm rim light, fine paper texture, sea spray, dramatic depth, cinematic 35mm film. Boat remains visibly paper, no other vessel.",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "modelRevision": "462165984030d82259a11f4367a4eed129e94a7b",
+  "tool": "AutoPromote NVIDIA image adapter",
+  "seed": 20261008222,
+  "settings": {
+    "steps": 35,
+    "guidance": 7,
+    "width": 1344,
+    "height": 768,
+    "dtype": "float16",
+    "encodedTokenCounts": [
+      70,
+      70
+    ],
+    "promptTruncated": false
+  },
+  "gpu": "NVIDIA L40S",
+  "origin": "native_generated_image",
+  "artifact": {
+    "path": "/work/output/paper-origin/paper-yacht-sea-b/video.mp4",
+    "sha256": "1235ee947228557e90d463258b3b4de262d273daf7c00cd94fde8f97819c2d0a",
+    "duration": 2.0
+  },
+  "reusableArtifacts": [
+    {
+      "role": "native_image",
+      "path": "/work/output/paper-origin/paper-yacht-sea-b/image.png",
+      "sha256": "9946de76b67ba6e685184e7dbd06de059943a9d933a1a3c61159122d6b52e152"
+    }
+  ],
+  "seconds": 5.559637701
+}

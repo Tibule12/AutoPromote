@@ -1,0 +1,59 @@
+{
+  "status": "PASS_NON_SILENT_UNCLIPPED",
+  "encodedLayout": "mono",
+  "limitation": "Authored source music/cues are stereo; current Studio music materialization and SFX bus downmix them to mono. Spatial delivery is not qualified.",
+  "outputs": [
+    {
+      "artifact": "outputs/final-v2/one-edit-hero/final.mp4",
+      "sha256": "d6ae987aed7bed591ba9dcf685e86aedc4c855a3c632a6a249f89718b937b07a",
+      "audio": {
+        "sampleRate": 48000,
+        "channels": 1,
+        "peak": 0.5903173089027405,
+        "rms": 0.07075912033764181,
+        "clippedSamples": 0,
+        "duration": 53.845333333333336,
+        "limitation": "Actual encoded channel layout; objective decode only, no human listening or speech comprehension acceptance."
+      }
+    },
+    {
+      "artifact": "outputs/final-v2/one-edit-teaser/final.mp4",
+      "sha256": "5b9f84402e60c8e4b31c4db17d0314869928b52f1b23b5c452d00f3323dea97f",
+      "audio": {
+        "sampleRate": 48000,
+        "channels": 1,
+        "peak": 0.5332610607147217,
+        "rms": 0.05490131154620971,
+        "clippedSamples": 0,
+        "duration": 10.005333333333333,
+        "limitation": "Actual encoded channel layout; objective decode only, no human listening or speech comprehension acceptance."
+      }
+    },
+    {
+      "artifact": "outputs/final-v2/one-edit-cutdown/final.mp4",
+      "sha256": "507fdc4a42642d5e47cf4c5c476a703158865781c4c301013142e52bde4ab364",
+      "audio": {
+        "sampleRate": 48000,
+        "channels": 1,
+        "peak": 0.5984081029891968,
+        "rms": 0.0667282558632355,
+        "clippedSamples": 0,
+        "duration": 27.008,
+        "limitation": "Actual encoded channel layout; objective decode only, no human listening or speech comprehension acceptance."
+      }
+    },
+    {
+      "artifact": "outputs/rough-v1/one-edit-hero/final.mp4",
+      "sha256": "0768e456186bfa96f84e9ca4c45ed922eb94ca0524b606eabdd301b09f63303a",
+      "audio": {
+        "sampleRate": 48000,
+        "channels": 1,
+        "peak": 0.605968713760376,
+        "rms": 0.06508275213835377,
+        "clippedSamples": 0,
+        "duration": 66.00533333333334,
+        "limitation": "Actual encoded channel layout; objective decode only, no human listening or speech comprehension acceptance."
+      }
+    }
+  ]
+}

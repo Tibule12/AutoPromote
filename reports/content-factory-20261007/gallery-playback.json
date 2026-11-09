@@ -1,0 +1,63 @@
+{
+  "status": "PASS",
+  "videos": [
+    {
+      "src": "http://127.0.0.1:3096/outputs/ca3ada265da8c9519e24c822/paper-voyage-hero/v3/final.mp4",
+      "duration": 19.416667,
+      "width": 1920,
+      "height": 1080,
+      "decoded": 9,
+      "currentTime": 0.224402
+    },
+    {
+      "src": "http://127.0.0.1:3096/outputs/9426c19f3153de6c19f85391/paper-voyage-story/v4/final.mp4",
+      "duration": 32.916667,
+      "width": 1920,
+      "height": 1080,
+      "decoded": 9,
+      "currentTime": 0.215538
+    },
+    {
+      "src": "http://127.0.0.1:3096/outputs/b0bca64f7b9460c7971db80b/paper-voyage-before-after/v3/final.mp4",
+      "duration": 16.5,
+      "width": 1920,
+      "height": 1080,
+      "decoded": 9,
+      "currentTime": 0.208417
+    },
+    {
+      "src": "http://127.0.0.1:3096/idents/cinematic-v2/ident.mp4",
+      "duration": 3.5,
+      "width": 1280,
+      "height": 720,
+      "decoded": 9,
+      "currentTime": 0.224146
+    },
+    {
+      "src": "http://127.0.0.1:3096/idents/compute/ident.mp4",
+      "duration": 3.5,
+      "width": 1280,
+      "height": 720,
+      "decoded": 9,
+      "currentTime": 0.207021
+    },
+    {
+      "src": "http://127.0.0.1:3096/idents/minimal/ident.mp4",
+      "duration": 3.5,
+      "width": 1280,
+      "height": 720,
+      "decoded": 9,
+      "currentTime": 0.210461
+    },
+    {
+      "src": "http://127.0.0.1:3096/idents/creator/ident.mp4",
+      "duration": 3.5,
+      "width": 1280,
+      "height": 720,
+      "decoded": 9,
+      "currentTime": 0.209368
+    }
+  ],
+  "pageErrors": [],
+  "limitation": "Actual browser video decoding and seeks; muted playback does not establish sound quality"
+}

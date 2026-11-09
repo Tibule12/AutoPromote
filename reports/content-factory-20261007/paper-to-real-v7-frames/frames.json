@@ -1,0 +1,85 @@
+{
+  "sourceSha256": "b93de4c5a6e85ea475c1462947a420c989f65103d149d001151b5dc1e896c2b1",
+  "frames": [
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v7-frames/frame-01.png",
+      "timestamp": 0.0,
+      "sha256": "0c062ddcaa3eeddac8ba9b293c6ac26d5e6ab183494f253314fd8eccbba29ce1"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v7-frames/frame-02.png",
+      "timestamp": 0.3375,
+      "sha256": "71c690a7fde94ddda6b7828f7e621ec4cfbdfc77365022feddd5f82760022e84"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v7-frames/frame-03.png",
+      "timestamp": 0.675,
+      "sha256": "a92c3bf48669dd173022e0ba9dddc6cad6028a61669ba4d2afb0efc5bf35d8b5"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v7-frames/frame-04.png",
+      "timestamp": 1.0125,
+      "sha256": "5ae1a4e38b853f6f7a36f2e995d1f2f44c2293c7171bddf8fcdb2a420dcf0ff7"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v7-frames/frame-05.png",
+      "timestamp": 1.35,
+      "sha256": "454deab106f3619bdfe31e16ed21b379773f5498547475b656912cad84633a7e"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v7-frames/frame-06.png",
+      "timestamp": 1.6875,
+      "sha256": "65472d2cfeadeee898fed08d491f715c75d53b133a4e4d6647ce425cafdb546f"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v7-frames/frame-07.png",
+      "timestamp": 2.025,
+      "sha256": "e44ffc35c7a4b61bc854baf7b466edb6ef58d30e1f60f990135baec106c9b5de"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v7-frames/frame-08.png",
+      "timestamp": 2.3625,
+      "sha256": "6b78299edaefe6de68ffe643a716d8388ecdbb4937b4c42a8ee9373f0bcce297"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v7-frames/frame-09.png",
+      "timestamp": 2.7,
+      "sha256": "d451e6e19d81c429fe3c6ce386ff0338ef18df0834cc9da5d02d95cd947ba2f5"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v7-frames/frame-10.png",
+      "timestamp": 3.0375,
+      "sha256": "126014757f0baa3966b5d450f3347866c0271bfcececaed40a4fc7eb11bcebeb"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v7-frames/frame-11.png",
+      "timestamp": 3.375,
+      "sha256": "a745c49880aada2623b51554532f63324293d4e196b707e7f57e3c24b13bde70"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v7-frames/frame-12.png",
+      "timestamp": 3.7125,
+      "sha256": "5f45848e036e66e44959d95c15d0c5c155f98ff8fb22641f992e47f0fa3012f5"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v7-frames/frame-13.png",
+      "timestamp": 4.05,
+      "sha256": "abbda6497c22dacf5f6bea93041661b03218ce61800c92ebeaba8f17cbe90559"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v7-frames/frame-14.png",
+      "timestamp": 4.3875,
+      "sha256": "8f3af1c94cd6897b5cc3e2d9c39631e8c91fe703c409380e9d987ce17f5e45e1"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v7-frames/frame-15.png",
+      "timestamp": 4.725,
+      "sha256": "5ab235f60d93e9613abe79f924d62b6e5d7f7b06e5e2fedcbb8b7adb271ca728"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v7-frames/frame-16.png",
+      "timestamp": 4.9825,
+      "sha256": "b4c742f51f717e94c39fa7cc8b2a48308d2f39ea5a06255a6cdb4f7b43ab3256"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "startedAt": "2026-10-08T17:16:24.865Z",
+  "realAuth": true,
+  "noMocks": true,
+  "headless": true,
+  "muted": true,
+  "projectName": "Studio subject speed NVIDIA QA 20261008 r6",
+  "inferenceJobsStarted": 0,
+  "status": "FAIL",
+  "lastStep": "Normal saved subject project duplicated",
+  "error": "Expected values to be strictly equal:\n\n'false' !== 'true'\n",
+  "finishedAt": "2026-10-08T17:16:56.005Z",
+  "subjectApiEvents": []
+}

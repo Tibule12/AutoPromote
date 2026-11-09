@@ -1,0 +1,47 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "assetId": "breakthrough",
+  "sourceBrief": {
+    "sha256": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+    "artifact": "source-brief.txt"
+  },
+  "settings": {
+    "duration": 6,
+    "fps": 24,
+    "samples": 16,
+    "width": 1280,
+    "height": 720
+  },
+  "device": {
+    "backend": "OPTIX",
+    "devices": [
+      "NVIDIA L40S"
+    ],
+    "gpu_verified": true,
+    "denoiser": "OPTIX"
+  },
+  "tool": "AutoPromote Studio Blender / original founder-film template",
+  "nativeScene": "scene.blend",
+  "scriptSha256": "b7e6d4509a422559aedc2b6cfe61d54bfe309dae5b3281f82c22aec79a3fa841",
+  "provenance": "Original authored spatial sequence; archived true records; retained AI-generated ocean source",
+  "seconds": 90.91611989800003,
+  "editable": [
+    "camera quaternion curves",
+    "actual logo Bezier geometry",
+    "staggered layer timing",
+    "materials",
+    "lighting",
+    "physical source carriers",
+    "film route",
+    "sound cue plan"
+  ],
+  "artifact": {
+    "path": "/film/assets/breakthrough/video.mp4",
+    "sha256": "07083bf511f13cc8dc17e25b7c841cabe21b51195f8ed6963cf7555e85223c19",
+    "duration": 6,
+    "fps": 24,
+    "container": "mp4",
+    "codec": "h264",
+    "nativeScene": "scene.blend"
+  }
+}

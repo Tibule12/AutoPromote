@@ -1,0 +1,36 @@
+{
+  "status": "GENERATED_PENDING_LISTENING_REVIEW",
+  "model": "ACE-Step/ACE-Step-v1-3.5B",
+  "modelRevision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+  "implementationRevision": "1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+  "license": "Apache-2.0",
+  "sourceBrief": "A real cinematic voyage begins as a folded paper boat. AutoPromote generates the raw material from an idea and uses its existing Director and render pipeline to make the film. The reveal is a full-size working boat at sea, not a paper boat surviving at sea.",
+  "prompt": "Instrumental cinematic studio ident score, no singing, no voice. Intimate felt piano and delicate organic paper-like percussion opening, low orchestral strings and deep sub bass build with accelerating restrained percussion through the first eight seconds, a moment of breath then a powerful warm orchestral reveal, expansive strings and brass harmony over flowing ocean atmosphere, premium film trailer sound design, clear melodic motif, controlled dynamics, crisp impact, elegant resolved ending. 92 BPM, D minor moving into F major, modern cinematic, emotional, immersive, high production quality.",
+  "seed": 20261007129,
+  "tool": "AutoPromote NVIDIA instrumental stem generation",
+  "gpu": "NVIDIA L40S",
+  "seconds": 10.519936900000175,
+  "peakCudaAllocatedBytes": 8291581952,
+  "settings": {
+    "duration": 24,
+    "inferStep": 60,
+    "guidanceScale": 15,
+    "scheduler": "euler",
+    "cfg": "apg",
+    "lyrics": "[inst]",
+    "dtype": "bfloat16",
+    "sampleRate": 48000,
+    "channels": 2,
+    "normalization": "-20 LUFS, -2 dBTP"
+  },
+  "artifact": {
+    "path": "/work/assets/founder-music-v7/audio.wav",
+    "sha256": "043aa65f330df292d18f85b0c0e9ecd28da83610b2f32c76bedffe82989aad86",
+    "duration": 23.963
+  },
+  "nativeArtifact": {
+    "path": "/work/assets/founder-music-v7/native.wav",
+    "sha256": "e80b08c8395c2bfddc42c880263ff0dab977ca00902c43466c3eb192fce5e85a"
+  },
+  "limitation": "Instrumental intent is prompted, not a guarantee. Listening review and final sound direction are required."
+}

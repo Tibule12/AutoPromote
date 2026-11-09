@@ -10476,15 +10476,34 @@ body.dashboard-mode.viral-studio-open {
   white-space: nowrap;
 }
 
-.draggable-overlay.is-text-overlay {
+.draggable-overlay.is-text-overlay:not(.broll-fullscreen) {
+  box-sizing: border-box;
+  paint-order: stroke fill;
+  font-size: 36px;
+  padding: 8px 16px;
+  border: 0;
+  box-shadow: none;
+  border-radius: 10px;
+  animation: none;
+  transition: none;
   -webkit-text-stroke: var(--title-stroke, 0) rgba(0, 0, 0, 0.92);
-  transform: translate(-50%, -50%) rotate(var(--title-rotation, 0deg)) scale(var(--title-scale, 1));
-  transform-origin: center;
+  transform: translate(var(--layer-translate-x, -50%), var(--layer-translate-y, -50%)) rotate(var(--title-rotation, 0deg)) scale(calc(var(--title-preview-scale, 0.444444) * var(--title-scale, 1)));
+  transform-origin: var(--layer-anchor-x, 50%) var(--layer-anchor-y, 50%);
 }
 
-.draggable-overlay.is-text-overlay:active {
-  transform: translate(-50%, -50%) rotate(var(--title-rotation, 0deg))
-    scale(calc(var(--title-scale, 1) * 1.04));
+.draggable-overlay.is-text-overlay.active { outline: 2px solid #fb7185; }
+
+@font-face { font-family: "Studio Inter"; font-style: normal; font-weight: 400; src: url("./motion/fonts/Inter-Regular.ttf") format("truetype"); }
+@font-face { font-family: "Studio Inter"; font-style: normal; font-weight: 600; src: url("./motion/fonts/Inter-SemiBold.ttf") format("truetype"); }
+@font-face { font-family: "Studio Inter"; font-style: normal; font-weight: 800; src: url("./motion/fonts/Inter-ExtraBold.ttf") format("truetype"); }
+@font-face { font-family: "Studio Inter"; font-style: normal; font-weight: 900; src: url("./motion/fonts/Inter-Black.ttf") format("truetype"); }
+@font-face { font-family: "Studio Caption DejaVu Sans"; font-style: normal; font-weight: 400; src: url("./motion/fonts/DejaVuSans.ttf") format("truetype"); }
+@font-face { font-family: "Studio Caption DejaVu Sans"; font-style: normal; font-weight: 700; src: url("./motion/fonts/DejaVuSans-Bold.ttf") format("truetype"); }
+@font-face { font-family: "Studio Caption Noto Sans Symbols2"; font-style: normal; font-weight: 400; src: url("./motion/fonts/NotoSansSymbols2-Regular.ttf") format("truetype"); }
+
+.draggable-overlay.is-text-overlay:not(.broll-fullscreen):active {
+  transform: translate(var(--layer-translate-x, -50%), var(--layer-translate-y, -50%)) rotate(var(--title-rotation, 0deg))
+    scale(calc(var(--title-preview-scale, 0.444444) * var(--title-scale, 1) * 1.04));
 }
 
 .title-preset-grid {
@@ -17147,4 +17166,39 @@ body.dashboard-mode.viral-studio-open {
   .viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode .preview-intelligence-stack {
     display: none;
   }
+}
+
+/* The editable caption preview follows the renderer definitions rather than
+   painting a default card over every preset. Completed renders use video pixels. */
+.caption-preview-stack[data-caption-render-style] {
+  width: 92%;
+  opacity: 1;
+  filter: none;
+}
+.caption-preview-stack[data-caption-render-style] .caption-preview-pill-active::after {
+  display: none;
+}
+.caption-preview-stack[data-caption-render-style] .caption-preview-story-icon {
+  display: inline-block;
+  width: auto;
+  height: auto;
+  margin: 0 .25em 0 0;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  font-family: "Noto Sans Symbols2", sans-serif;
+  font-size: 1.36em;
+  color: var(--caption-story-accent);
+}
+.caption-preview-stack[data-caption-render-style].caption-placement-bottom_left,
+.caption-preview-stack[data-caption-render-style].caption-placement-bottom_center,
+.caption-preview-stack[data-caption-render-style].caption-placement-bottom_right {
+  bottom: 14%;
+}
+.caption-preview-stack[data-caption-render-style].caption-placement-background_left {
+  transform: scale(var(--caption-preview-scale, 1));
+}
+.caption-preview-stack[data-caption-render-style].caption-placement-background_right {
+  transform: scale(var(--caption-preview-scale, 1));
 }

@@ -1,0 +1,219 @@
+{
+  "status": "GENERATED_PENDING_VISUAL_REVIEW",
+  "shot": {
+    "name": "violet-ribbon",
+    "seed": 20261006,
+    "prompt": "Premium cinematic motion design for a professional creative video editing brand. A single broad ribbon of translucent violet glass with polished metallic edges flows elegantly through a dark obsidian studio, slowly folding into a precise ascending arch. Close-up macro photography, subtle ultraviolet edge lighting and a restrained cyan reflection, exquisite physically realistic glass and metal materials. Smooth controlled camera tracking, fluid continuous movement, gentle depth of field. Sophisticated, minimal, crisp, clean, expensive product film aesthetic. The subject sits mainly in the right half of the wide frame. Large quiet black negative space on the left for later typography. No words, no letters, no logos, no screens, no people. One uninterrupted 5-second shot."
+  },
+  "negative_prompt": "text, words, captions, letters, watermarks, logo, screen interface, oversaturated, messy, excessive glow, strobing, shaky camera, flickering, static image, distorted geometry, warped straight lines, blurry, low quality, artifacts, cartoon, illustration, crowded composition",
+  "model": {
+    "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+    "revision": "b8fff7315c768468a5333511427288870b2e9635",
+    "license": "Apache-2.0",
+    "files": [
+      {
+        "file": "model_index.json",
+        "bytes": 499
+      },
+      {
+        "file": "README.md",
+        "bytes": 17633
+      },
+      {
+        "file": "scheduler/scheduler_config.json",
+        "bytes": 820
+      },
+      {
+        "file": "vae/diffusion_pytorch_model.safetensors",
+        "bytes": 2818777808
+      },
+      {
+        "file": "vae/config.json",
+        "bytes": 1701
+      },
+      {
+        "file": "transformer/diffusion_pytorch_model-00003-of-00005.safetensors",
+        "bytes": 4972658392
+      },
+      {
+        "file": "transformer/diffusion_pytorch_model-00001-of-00005.safetensors",
+        "bytes": 4978254344
+      },
+      {
+        "file": "transformer/diffusion_pytorch_model.safetensors.index.json",
+        "bytes": 73297
+      },
+      {
+        "file": "transformer/diffusion_pytorch_model-00005-of-00005.safetensors",
+        "bytes": 354751840
+      },
+      {
+        "file": "transformer/config.json",
+        "bytes": 495
+      },
+      {
+        "file": "transformer/diffusion_pytorch_model-00002-of-00005.safetensors",
+        "bytes": 4846784976
+      },
+      {
+        "file": "transformer/diffusion_pytorch_model-00004-of-00005.safetensors",
+        "bytes": 4846785080
+      },
+      {
+        "file": "tokenizer/tokenizer.json",
+        "bytes": 16837459
+      },
+      {
+        "file": "tokenizer/spiece.model",
+        "bytes": 4548313
+      },
+      {
+        "file": "tokenizer/tokenizer_config.json",
+        "bytes": 61758
+      },
+      {
+        "file": "tokenizer/special_tokens_map.json",
+        "bytes": 7079
+      },
+      {
+        "file": "text_encoder/config.json",
+        "bytes": 855
+      },
+      {
+        "file": "text_encoder/model.safetensors.index.json",
+        "bytes": 22476
+      },
+      {
+        "file": "text_encoder/model-00002-of-00003.safetensors",
+        "bytes": 4983103192
+      },
+      {
+        "file": "text_encoder/model-00001-of-00003.safetensors",
+        "bytes": 4935812536
+      },
+      {
+        "file": "text_encoder/model-00003-of-00003.safetensors",
+        "bytes": 1442935480
+      }
+    ],
+    "downloaded_bytes": 34201436033,
+    "source": "https://huggingface.co/Wan-AI/Wan2.2-TI2V-5B-Diffusers"
+  },
+  "gpu": "NVIDIA L40S",
+  "torch": "2.7.1+cu126",
+  "cuda": "12.6",
+  "diffusers": "0.36.0",
+  "dtype": "bfloat16; VAE float32",
+  "steps": 50,
+  "frame_count": 121,
+  "fps": 24,
+  "width": 1280,
+  "height": 704,
+  "load_seconds": 2.0429465150000397,
+  "shot_seconds": 518.145502842,
+  "peak_cuda_allocated_bytes": 15650862080,
+  "peak_cuda_reserved_bytes": 18192793600,
+  "sha256": "24c6143fa70685602c9f4c737a57a2801efa67e1e0bbae80433a75213bb97b02",
+  "bytes": 940877,
+  "encode_command": [
+    "ffmpeg",
+    "-y",
+    "-hide_banner",
+    "-loglevel",
+    "error",
+    "-hwaccel",
+    "cuda",
+    "-i",
+    "/work/generated/violet-ribbon-raw.mp4",
+    "-c:v",
+    "h264_nvenc",
+    "-preset",
+    "p6",
+    "-rc",
+    "vbr",
+    "-cq",
+    "18",
+    "-b:v",
+    "0",
+    "-pix_fmt",
+    "yuv420p",
+    "-movflags",
+    "+faststart",
+    "/work/generated/violet-ribbon.mp4"
+  ],
+  "probe": {
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "h264",
+        "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+        "profile": "Main",
+        "codec_type": "video",
+        "codec_tag_string": "avc1",
+        "codec_tag": "0x31637661",
+        "width": 1280,
+        "height": 704,
+        "coded_width": 1280,
+        "coded_height": 704,
+        "closed_captions": 0,
+        "has_b_frames": 1,
+        "sample_aspect_ratio": "1:1",
+        "display_aspect_ratio": "20:11",
+        "pix_fmt": "yuv420p",
+        "level": 31,
+        "chroma_location": "left",
+        "refs": 1,
+        "is_avc": "true",
+        "nal_length_size": "4",
+        "r_frame_rate": "24/1",
+        "avg_frame_rate": "24/1",
+        "time_base": "1/12288",
+        "start_pts": 0,
+        "start_time": "0.000000",
+        "duration_ts": 61952,
+        "duration": "5.041667",
+        "bit_rate": "1489288",
+        "bits_per_raw_sample": "8",
+        "nb_frames": "121",
+        "disposition": {
+          "default": 1,
+          "dub": 0,
+          "original": 0,
+          "comment": 0,
+          "lyrics": 0,
+          "karaoke": 0,
+          "forced": 0,
+          "hearing_impaired": 0,
+          "visual_impaired": 0,
+          "clean_effects": 0,
+          "attached_pic": 0,
+          "timed_thumbnails": 0
+        },
+        "tags": {
+          "language": "und",
+          "handler_name": "VideoHandler",
+          "vendor_id": "[0][0][0][0]"
+        }
+      }
+    ],
+    "format": {
+      "filename": "/work/generated/violet-ribbon.mp4",
+      "nb_streams": 1,
+      "nb_programs": 0,
+      "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+      "format_long_name": "QuickTime / MOV",
+      "start_time": "0.000000",
+      "duration": "5.042000",
+      "size": "940877",
+      "bit_rate": "1492863",
+      "probe_score": 100,
+      "tags": {
+        "major_brand": "isom",
+        "minor_version": "512",
+        "compatible_brands": "isomiso2avc1mp41",
+        "encoder": "Lavf58.76.100"
+      }
+    }
+  },
+  "completed_at": "2026-10-06T18:08:21.035264+00:00"
+}

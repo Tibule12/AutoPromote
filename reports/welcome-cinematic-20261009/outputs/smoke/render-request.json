@@ -1,0 +1,52 @@
+{
+  "video_url": "http://127.0.0.1:8765/assets/proxy/smoke.mp4",
+  "start_time": 0,
+  "end_time": 2,
+  "timeline_segments": [
+    {
+      "id": "smoke",
+      "source_clip_id": "smoke",
+      "url": "http://127.0.0.1:8765/assets/proxy/smoke.mp4",
+      "start_time": 0,
+      "end_time": 2,
+      "duration": 2
+    }
+  ],
+  "overlays": [
+    {
+      "id": "smoke-title",
+      "type": "text",
+      "text": "Every great story starts as an idea.",
+      "x": 50,
+      "y": 90,
+      "width": 88,
+      "height": 7,
+      "start_time": 0.4,
+      "duration": 1.6,
+      "fontWeight": 400,
+      "scale": 0.8,
+      "color": "#eeeaff",
+      "animation": {
+        "enter": "fade",
+        "exit": "fade",
+        "enterDuration": 0.5,
+        "exitDuration": 0.45
+      }
+    }
+  ],
+  "add_music": true,
+  "music_url": "http://127.0.0.1:8765/assets/score.wav",
+  "music_volume": 0.82,
+  "mute_audio": true,
+  "output_settings": {
+    "resolution": "source",
+    "fps": 24
+  },
+  "planned_black_ranges": [
+    {
+      "start": 0,
+      "end": 1.8,
+      "reason": "Deliberate anticipation"
+    }
+  ]
+}

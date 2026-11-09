@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "actualEncodedChannels": 2,
+  "sampleRate": 48000,
+  "duration": 3.0,
+  "music220HzLR": [
+    0.10014823597351301,
+    1.0720038979115677e-05
+  ],
+  "music440HzLR": [
+    3.4613581623161183e-06,
+    0.10036499709205672
+  ],
+  "leftCue880HzLR": [
+    0.0998550577381904,
+    4.7354078206263415e-06
+  ],
+  "centerVoice330HzLR": [
+    0.09971500584168852,
+    0.0999432222346813
+  ],
+  "fullDecode": true,
+  "scope": "Real shared renderer with private local artifact transport; CPU diagnostic only. Not a native Studio export, listening review or creative output."
+}

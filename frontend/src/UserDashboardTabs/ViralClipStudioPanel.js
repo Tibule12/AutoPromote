@@ -5,6 +5,8 @@ import { useSubscription } from "../hooks/useSubscription";
 import { sanitizeUrl } from "../utils/security";
 import { uploadSourceFileViaBackend } from "../utils/sourceUpload";
 import { getMediaAuthToken } from "../utils/mediaAuth";
+import { API_BASE_URL } from "../config";
+import { listViralStudioProjects } from "../components/viralStudioProjectStore";
 
 const resolveSourceUrl = source => {
   if (typeof source === "string") return sanitizeUrl(source);
@@ -67,7 +69,7 @@ function ViralClipStudioPanel({
   onOpenPublisher,
   onUpgrade,
 }) {
-  const { canUseFeature } = useSubscription();
+  const { canUseFeature, loading: subscriptionLoading } = useSubscription();
   const uploadRequestRef = useRef(0);
   const retrySourceRef = useRef(null);
   const [sourceFile, setSourceFile] = useState(null);
@@ -79,12 +81,62 @@ function ViralClipStudioPanel({
   const [pendingSourceName, setPendingSourceName] = useState("");
   const [studioSource, setStudioSource] = useState(null);
   const [additionalSourceFiles, setAdditionalSourceFiles] = useState([]);
+  const [savedProjects, setSavedProjects] = useState([]);
+  const [savedProjectsError, setSavedProjectsError] = useState("");
+  const [resumedProject, setResumedProject] = useState(null);
+  const [resumingProject, setResumingProject] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    listViralStudioProjects().then(projects => {
+      if (active) setSavedProjects(projects);
+    }).catch(error => {
+      console.warn("Could not load saved Studio projects", error);
+      if (active) setSavedProjectsError("Saved projects could not be loaded. Retry to reopen your edits.");
+    });
+    return () => { active = false; };
+  }, []);
+
+  const resumeSavedProject = async project => {
+    if (subscriptionLoading) return;
+    if (!canUseFeature("viralClipStudio")) {
+      onUpgrade?.();
+      return;
+    }
+    setResumingProject(true);
+    setSourceError("");
+    try {
+      const snapshot = project.snapshot;
+      const sources = [...(snapshot?.projectMedia || []), ...(snapshot?.timeline || [])];
+      const source = sources.find(item => item.storagePath || item.sourceStoragePath);
+      const storagePath = source?.storagePath || source?.sourceStoragePath;
+      if (!storagePath) throw new Error("This saved project has no saved source video. Open its original video first.");
+      const token = await getMediaAuthToken();
+      if (!token) throw new Error("Sign in to reopen saved videos.");
+      const response = await fetch(`${API_BASE_URL}/api/media/studio-assets/resolve`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ storagePath }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.url) throw new Error(result.message || result.error || "Saved video is unavailable.");
+      const clip = (snapshot.orderedClips || [])[0];
+      const restoredSource = { ...source, url: result.url, storagePath, isRemote: true };
+      setResumedProject(project);
+      setStudioSource(createStudioSource(restoredSource, clip, source.duration));
+    } catch (error) {
+      setSourceError(error.message || "Saved project could not be reopened.");
+    } finally {
+      setResumingProject(false);
+    }
+  };
 
   const prepareSource = useCallback(async incomingSource => {
     retrySourceRef.current = incomingSource;
     const requestId = uploadRequestRef.current + 1;
     uploadRequestRef.current = requestId;
     setStudioSource(null);
+    setResumedProject(null);
     setSourceDuration(0);
     setSourceError("");
     setSourceUploadProgress(0);
@@ -207,6 +259,7 @@ function ViralClipStudioPanel({
       <VideoEditor
         file={studioSource}
         initialProjectFiles={additionalSourceFiles}
+        initialSavedProject={resumedProject}
         onCancel={() => {
           setStudioSource(null);
           onBack?.();
@@ -227,6 +280,25 @@ function ViralClipStudioPanel({
         </button>
       ) : null}
       <div className="viral-clips-workspace creator-studio-entry">
+        {savedProjectsError && <div role="alert">
+          <p>{savedProjectsError}</p>
+          <button type="button" onClick={async () => {
+            try { setSavedProjects(await listViralStudioProjects()); setSavedProjectsError(""); }
+            catch (error) { console.warn("Could not reload saved Studio projects", error); }
+          }}>Retry saved projects</button>
+        </div>}
+        {savedProjects.length > 0 && (
+          <section aria-label="Saved Studio projects">
+            <h3>Open saved project</h3>
+            {savedProjects.map(project => (
+              <button key={project.id} type="button" className="btn-secondary"
+                disabled={resumingProject || subscriptionLoading} onClick={() => void resumeSavedProject(project)}>
+                {project.name || "Untitled viral edit"}
+              </button>
+            ))}
+            {sourceError && sourceState === "idle" ? <p role="alert">{sourceError}</p> : null}
+          </section>
+        )}
         {sourceState === "idle" && !previewUrl && (
           <label
             className="creator-studio-dropzone"
@@ -319,7 +391,7 @@ function ViralClipStudioPanel({
                 type="button"
                 className="creator-studio-btn"
                 style={{ pointerEvents: "auto", cursor: "pointer", fontSize: "1.1rem" }}
-                disabled={sourceState !== "ready"}
+                disabled={sourceState !== "ready" || subscriptionLoading}
                 onClick={() => {
                   if (!canUseFeature("viralClipStudio")) {
                     onUpgrade?.();

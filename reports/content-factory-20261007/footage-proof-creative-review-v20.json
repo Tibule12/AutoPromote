@@ -1,0 +1,31 @@
+{
+  "status": "PRIVATE_VIEWING_PROOF",
+  "acceptedForMarketing": false,
+  "artifactSha256": "e1aef9d59d85150183df7b32bdb4c2a5270552a0d2e6466bd248f881ed1dc4b1",
+  "rootReview": {
+    "evidence": "12 actually decoded frames in footage-proof-review-v20.jpg",
+    "observations": [
+      "Moving full-size yacht retains moving waves and bow spray.",
+      "White captions are materially clearer than the former small purple captions.",
+      "Actual Studio source assembly reveals the generated sources.",
+      "Cinematic ident resolves the private proof."
+    ],
+    "remainingCreativeLimits": [
+      "This is generated-footage/editing proof, not the continuous paper-to-yacht transformation.",
+      "The Studio reveal is brief and the final phrase overlaps the opening of the ident.",
+      "The native yacht shot is 832x480, upscaled to 1080p.",
+      "Human listening and founder creative approval remain pending."
+    ]
+  },
+  "audioMeasurements": {
+    "sampleRate": 48000,
+    "channels": 2,
+    "peak": 0.35849735140800476,
+    "rms": 0.04009620100259781,
+    "clippedSamples": 0,
+    "duration": 11.584,
+    "limitation": "Objective decoded measurements; listening and speech comprehension require founder review."
+  },
+  "renderer": "AutoPromote RenderViralRequest/render_viral_clip_impl",
+  "encoding": "Actual local CPU libx264, existing canonical renderer; no GPU used for this render."
+}

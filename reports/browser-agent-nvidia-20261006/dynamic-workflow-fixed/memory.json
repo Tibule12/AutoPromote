@@ -1,0 +1,55 @@
+{
+  "identity": "0961d7914bdf1917e5947c59c5c31ffba658ecbdc554607342de07f5ce37b1ae",
+  "actions": [],
+  "observations": [
+    {
+      "id": "observation-1",
+      "url": "http://127.0.0.1:44629/",
+      "pageId": "page-1",
+      "at": "2026-10-06T18:52:58.663Z"
+    },
+    {
+      "id": "observation-2",
+      "url": "http://127.0.0.1:44629/",
+      "pageId": "page-1",
+      "at": "2026-10-06T18:53:12.561Z"
+    },
+    {
+      "id": "observation-3",
+      "url": "http://127.0.0.1:44629/",
+      "pageId": "page-1",
+      "at": "2026-10-06T18:53:12.837Z"
+    },
+    {
+      "id": "observation-4",
+      "url": "http://127.0.0.1:44629/",
+      "pageId": "page-1",
+      "at": "2026-10-06T18:53:26.275Z"
+    },
+    {
+      "id": "observation-5",
+      "url": "http://127.0.0.1:44629/",
+      "pageId": "page-1",
+      "at": "2026-10-06T18:53:26.524Z"
+    },
+    {
+      "id": "observation-6",
+      "url": "http://127.0.0.1:44629/",
+      "pageId": "page-1",
+      "at": "2026-10-06T18:53:39.898Z"
+    },
+    {
+      "id": "observation-7",
+      "url": "http://127.0.0.1:44629/",
+      "pageId": "page-1",
+      "at": "2026-10-06T18:53:40.171Z"
+    },
+    {
+      "id": "observation-8",
+      "url": "http://127.0.0.1:44629/",
+      "pageId": "page-1",
+      "at": "2026-10-06T18:53:54.328Z"
+    }
+  ],
+  "status": "blocked"
+}

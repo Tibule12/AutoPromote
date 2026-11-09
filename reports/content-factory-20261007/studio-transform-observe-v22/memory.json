@@ -1,0 +1,14 @@
+{
+  "identity": "6d0c1aa04cd7cc917125dfaf9f9020d6c55ec5d030a199fa0a156292cb7a241c",
+  "actions": [],
+  "observations": [
+    {
+      "id": "observation-1",
+      "url": "http://127.0.0.1:5009/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T14:01:47.150Z"
+    }
+  ],
+  "artifacts": [],
+  "status": "running"
+}

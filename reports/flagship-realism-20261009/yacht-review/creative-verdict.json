@@ -1,0 +1,39 @@
+{
+  "accepted": true,
+  "reason": "Accept for private wide-shot use within source 0.0\u20132.25s only. The navy hull, cream sails and rigging retain photographic structure; the same source crew remains aboard while continuous water rolls under the immersed hull and bow spray develops. The camera creeps forward and the stern reaches the left frame boundary near the tail, so the full 3.0625s take fails the requested complete-vessel framing. It is not an approved final welcome film or close-up human identity proof.",
+  "reviewer": "Codex all-decoded-frame and native keyframe inspection",
+  "modelRevision": "private-realism-review-20261009",
+  "evidenceSha256": "27411ec60d7663991fcdd03d9c72ded723c6070afce813018720709c185b924a",
+  "artifactSha256": "9a779712e28e5c2252c5b4eafd4099236d59a538c92894d54a36a339de921fa6",
+  "criteria": [
+    {
+      "criterion": "Photographic full-size vessel and continuous hull-water contact in source 0\u20132.25s",
+      "passed": true,
+      "observation": "All 49 frames and native 0,8,16,24,32,40,48 reviewed. Hull shape, deck openings, mast and cream sails persist; successive bow sprays move above a rolling sea and return along the waterline. No world replacement occurs."
+    },
+    {
+      "criterion": "Retained crew during the usable wide-shot range",
+      "passed": true,
+      "observation": "Crew remain on the same stern/deck as the vessel rolls. This distant framing cannot certify fingers, facial identity or every rigging contact; no close-up human quality claim is made."
+    },
+    {
+      "criterion": "Use only the stable framed range",
+      "passed": true,
+      "observation": "Usable source 0\u20132.25s; exclude 2.25\u20133.0625s as the advancing camera clips the stern and makes crew harder to read. Mast tops were already outside the photographic reference framing."
+    }
+  ],
+  "usableSourceRange": {
+    "start": 0,
+    "end": 2.25
+  },
+  "fullTakeAccepted": false,
+  "wholeFilmCreativeApproval": false,
+  "publicApproved": false,
+  "ordinaryStudioQualification": false,
+  "integrationConstraints": [
+    "Do not use after 2.25s in the private assembly.",
+    "Sailor/deck/wardrobe/rigging/light match remains pending in the comparison edit.",
+    "No sound in generated source; real recorded ambience is separate.",
+    "This proves no paper-to-yacht transformation."
+  ]
+}

@@ -7,6 +7,7 @@ const admin = require("firebase-admin");
 const crypto = require("crypto");
 const db = admin.firestore();
 const fs = require("fs");
+const { isTransientWorkerOutput, persistWorkerOutput } = require("./studioWorkerOutputService");
 const { queueAudioExtractionTask } = require("./mediaWorkerTaskQueue");
 const { deductCredits, refundCredits } = require("../creditSystem");
 const { buildWorkerRequestConfig } = require("../utils/cloudRunAuth");
@@ -132,6 +133,24 @@ function getMulticamExpiryIso(fromMs = Date.now()) {
 const { v4: uuidv4 } = require("uuid");
 
 class VideoEditingService {
+  async assertRenderWorkerReady() {
+    try {
+      const target = `${MEDIA_WORKER_URL}/health`;
+      const config = await buildWorkerRequestConfig(target, { timeout: Math.max(10000,
+        Number(process.env.MEDIA_WORKER_HEALTH_TIMEOUT_MS) || 60000) });
+      const response = await axios.get(target, config);
+      if (response.data?.status !== "ok") throw new Error("Worker health is not ready");
+      if (response.data?.worker_state?.status && response.data.worker_state.status !== "idle") {
+        throw Object.assign(new Error("The render worker is busy. Try again shortly; no credits were charged."),
+          { code: "STUDIO_RENDER_WORKER_BUSY", statusCode: 503 });
+      }
+    } catch (error) {
+      if (error.code === "STUDIO_RENDER_WORKER_BUSY") throw error;
+      throw Object.assign(new Error("The render worker is unavailable. Try again once it is online; no credits were charged."),
+        { code: "STUDIO_RENDER_WORKER_UNAVAILABLE", statusCode: 503 });
+    }
+  }
+
   async startAudioExtractionJob(videoUrl, userId, options = {}) {
     const jobId = uuidv4();
     console.log(`[VideoEditing] Starting audio extraction job ${jobId} for User ${userId}`);
@@ -411,6 +430,8 @@ class VideoEditingService {
         progress: 100,
         result: result, // { success: true, url: ..., remainingCredits: ... }
         outputUrl: result.url,
+        ...(result.outputStoragePath ? { outputStoragePath: result.outputStoragePath,
+          storagePath: result.outputStoragePath } : {}),
         completedAt: new Date().toISOString(),
       });
 
@@ -1018,6 +1039,7 @@ class VideoEditingService {
           caption_text_override:
             viralData.caption_text_override ?? viralData.captionTextOverride ?? null,
           caption_review_copy: viralData.caption_review_copy === true,
+          caption_coverage_mode: viralData.caption_coverage_mode || "full",
           preview_speed: Number(
             viralData.preview_speed ?? viralData.previewSpeed ?? 1
           ),
@@ -1148,7 +1170,10 @@ class VideoEditingService {
         };
       }
 
-      console.log("[VideoEditing] Payload to worker:", JSON.stringify(payload));
+      console.log("[VideoEditing] Submitting worker request", {
+        timelineSegments: payload.timeline_segments?.length || 0,
+        overlays: payload.overlays?.length || 0,
+      });
 
       // A reviewed long-form Studio render may use the full 60-minute Cloud Run
       // window. Keep the Node request alive slightly longer so it cannot mark a
@@ -1175,11 +1200,31 @@ class VideoEditingService {
 
       // Check if the worker already uploaded the file (Distributed Worker Support)
       if (result.output_url && result.output_url.startsWith("http")) {
-        console.log(`[VideoEditing] Worker returned remote URL: ${result.output_url}`);
+        let outputUrl = result.output_url;
+        let outputStoragePath = result.output_storage_path || null;
+        let thumbnailUrl = result.thumbnail_url || result.thumbnailUrl || null;
+        let durableOutput = null;
+        if (isTransientWorkerOutput(outputUrl, MEDIA_WORKER_URL)) {
+          durableOutput = await persistWorkerOutput({ url: outputUrl, workerUrl: MEDIA_WORKER_URL, userId, jobId });
+          outputUrl = durableOutput.url;
+          outputStoragePath = durableOutput.storagePath;
+          if (thumbnailUrl && isTransientWorkerOutput(thumbnailUrl, MEDIA_WORKER_URL)) {
+            try {
+              thumbnailUrl = (await persistWorkerOutput({ url: thumbnailUrl, workerUrl: MEDIA_WORKER_URL,
+                userId, jobId, thumbnail: true })).url;
+            } catch (error) {
+              console.warn("[VideoEditing] Optional export thumbnail transfer failed:", error.message);
+              thumbnailUrl = null;
+            }
+          }
+        }
+        console.log("[VideoEditing] Worker output ready", { durable: Boolean(durableOutput) });
         return {
           success: true,
-          url: result.output_url,
-          thumbnailUrl: result.thumbnail_url || result.thumbnailUrl || null,
+          url: outputUrl,
+          outputStoragePath,
+          ...(durableOutput ? { outputSha256: durableOutput.sha256, outputBytes: durableOutput.bytes } : {}),
+          thumbnailUrl,
           coverFrame: result.cover_frame || result.coverFrame || null,
           thumbnailFrame: result.thumbnail_frame || result.thumbnailFrame || null,
           duration: result.duration || 0,

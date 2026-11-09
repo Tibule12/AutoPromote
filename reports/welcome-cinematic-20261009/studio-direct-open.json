@@ -1,0 +1,49 @@
+{
+  "initialSavedProjectHydration": true,
+  "scope": "Production component existing initialSavedProject; local signed-out private fixture",
+  "programmeDurationLabel": "0:38.0",
+  "timelineClips": 5,
+  "titleLayers": 7,
+  "videos": [
+    {
+      "src": "http://127.0.0.1:8765/assets/proxy/idea.mp4",
+      "duration": 8,
+      "error": null
+    },
+    {
+      "src": "http://127.0.0.1:8765/assets/proxy/idea.mp4",
+      "duration": 8,
+      "error": null
+    },
+    {
+      "src": "http://127.0.0.1:8765/assets/proxy/idea.mp4",
+      "duration": 8,
+      "error": null
+    },
+    {
+      "src": "http://127.0.0.1:8765/assets/proxy/idea.mp4",
+      "duration": 8,
+      "error": null
+    },
+    {
+      "src": "http://127.0.0.1:8765/assets/proxy/idea.mp4",
+      "duration": 8,
+      "error": null
+    },
+    {
+      "src": "http://127.0.0.1:8765/assets/proxy/idea.mp4",
+      "duration": 8,
+      "error": null
+    },
+    {
+      "src": "http://127.0.0.1:8765/assets/proxy/idea.mp4",
+      "duration": 8,
+      "error": null
+    },
+    {
+      "src": "http://127.0.0.1:8765/assets/proxy/structure.mp4",
+      "duration": null,
+      "error": null
+    }
+  ]
+}

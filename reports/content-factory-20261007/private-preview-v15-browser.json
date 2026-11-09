@@ -1,0 +1,30 @@
+{
+  "url": "http://127.0.0.1:3096/review.html",
+  "state": {
+    "duration": 11.583333,
+    "currentTime": 6.011138,
+    "width": 1920,
+    "height": 1080,
+    "readyState": 4,
+    "error": null,
+    "decodedFrames": 36
+  },
+  "rangeStatus": 206,
+  "rangeBytes": 1024,
+  "blocked": [
+    {
+      "path": "/gpu-window.json",
+      "status": 404
+    },
+    {
+      "path": "/outputs/e48f2172787a5ea39a8041cb/generated-footage-proof/v15/render-request.json",
+      "status": 404
+    },
+    {
+      "path": "/%2e%2e/.env",
+      "status": 404
+    }
+  ],
+  "errors": [],
+  "limitation": "Muted headless playback checks decoding and seeking; it does not prove a human listened to the soundtrack."
+}

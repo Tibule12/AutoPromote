@@ -1,0 +1,16 @@
+{
+  "accepted": true,
+  "assignedRole": "Private continuous-transformation prototype, with visible defects; not finished marketing footage.",
+  "artifactSha256": "0bdd08d05b04d6977bd6fa766e8d92346693750c264349d4ee43001fc2d09bb8",
+  "evidenceSha256": "011433c2636368a24fc81eb81937be320180eae8b92171cfd8aeb692c20caee7",
+  "reviewer": "Codex inspection of sixteen actual decoded frames",
+  "modelRevision": "root-visible-frame-review-v1",
+  "reason": "Paper structure becomes canvas sails and a timber yacht through the sequence, while the surrounding world becomes ocean. The flat CGI disc is absent; this demonstrates a material improvement over rejected takes.",
+  "limitations": [
+    "An early mast/sail appears behind the paper hull before the structure clearly joins.",
+    "The desk-to-ocean transition is too fast.",
+    "The paper-to-timber hull change is partly obscured by spray.",
+    "This remains a private prototype, with whole-film and listening review pending."
+  ],
+  "acceptedForMarketing": false
+}

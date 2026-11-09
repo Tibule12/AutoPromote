@@ -1,0 +1,57 @@
+{
+  "status": "DECODED_PENDING_CREATIVE_REVIEW",
+  "generatedSha256": "0bdd08d05b04d6977bd6fa766e8d92346693750c264349d4ee43001fc2d09bb8",
+  "continuationSha256": "54e4102b5fa6df99491cee642dac927732fcd1860a119b213a3ffa97650e61bb",
+  "generatedFrames": 81,
+  "fps": 16,
+  "width": 832,
+  "height": 480,
+  "largestMotionChanges": [
+    {
+      "betweenFrames": [
+        7,
+        8
+      ],
+      "meanAbsolutePixelChange": 66.242
+    },
+    {
+      "betweenFrames": [
+        0,
+        1
+      ],
+      "meanAbsolutePixelChange": 51.056
+    },
+    {
+      "betweenFrames": [
+        6,
+        7
+      ],
+      "meanAbsolutePixelChange": 49.22
+    },
+    {
+      "betweenFrames": [
+        1,
+        2
+      ],
+      "meanAbsolutePixelChange": 45.763
+    },
+    {
+      "betweenFrames": [
+        8,
+        9
+      ],
+      "meanAbsolutePixelChange": 44.621
+    }
+  ],
+  "seamMeanAbsolutePixelChange": 13.076,
+  "seamMSE": 328.595,
+  "requiredVisualChecks": [
+    "Paper origin remains readable before ocean appears",
+    "Mast grows from existing paper crease, never appears detached",
+    "Hull visibly changes into timber; spray does not hide the event",
+    "Water and camera obey one continuous world and scale",
+    "Last generated frame joins moving yacht without an obvious jump",
+    "Full sequence is compelling with its sound design"
+  ],
+  "limitation": "Numerical differences do not establish visual continuity or creative acceptance."
+}

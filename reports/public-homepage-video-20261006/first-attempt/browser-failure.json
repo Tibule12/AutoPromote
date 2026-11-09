@@ -1,0 +1,267 @@
+{
+  "message": "The expression evaluated to a falsy value:\n\n  assert(await page.evaluate(() => window.__landingVideos.every(video => video.paused && !video.getAttribute(\"src\"))))\n",
+  "stack": "AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert(await page.evaluate(() => window.__landingVideos.every(video => video.paused && !video.getAttribute(\"src\"))))\n\n    at main (/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/test/e2e/playwright/run-public-homepage.js:258:5)",
+  "checks": [
+    {
+      "label": "Public root uses the actual App/router and a Three.js WebGL hero"
+    },
+    {
+      "label": "Kinetic headline runs real finite mask, blur, scale and gradient animations",
+      "animationCount": 4,
+      "matteCount": 3
+    },
+    {
+      "label": "Unconfigured After Effects asset slots fetch no authored media or Lottie runtime"
+    },
+    {
+      "label": "Opening sequence: 01-camera-entry",
+      "engine": "three.js r186",
+      "meshCount": "66",
+      "renderCount": "13",
+      "drawCalls": "13",
+      "time": "3.333",
+      "camera": "0.037,0.320,10.843",
+      "speaker": "host",
+      "videoTime": "2.265",
+      "videoFrames": "55",
+      "videoPaused": "true",
+      "videoDecoders": "1",
+      "videoSurfaces": "3",
+      "previewSource": "poster",
+      "cutCount": "0",
+      "captionLetters": "0",
+      "selected": "false",
+      "cropAspect": "hidden",
+      "matteCount": "0",
+      "verticalCount": "0",
+      "running": "false"
+    },
+    {
+      "label": "Opening sequence: 02-timeline-assembly",
+      "engine": "three.js r186",
+      "meshCount": "66",
+      "renderCount": "36",
+      "drawCalls": "28",
+      "time": "8.533",
+      "camera": "0.000,0.320,10.818",
+      "speaker": "host",
+      "videoTime": "7.425",
+      "videoFrames": "184",
+      "videoPaused": "true",
+      "videoDecoders": "1",
+      "videoSurfaces": "4",
+      "previewSource": "video",
+      "cutCount": "8",
+      "captionLetters": "0",
+      "selected": "false",
+      "cropAspect": "hidden",
+      "matteCount": "0",
+      "verticalCount": "0",
+      "running": "false"
+    },
+    {
+      "label": "Opening sequence: 03-speaker-and-sync",
+      "engine": "three.js r186",
+      "meshCount": "66",
+      "renderCount": "55",
+      "drawCalls": "32",
+      "time": "10.850",
+      "camera": "0.000,0.320,10.818",
+      "speaker": "guest",
+      "videoTime": "9.751",
+      "videoFrames": "239",
+      "videoPaused": "true",
+      "videoDecoders": "1",
+      "videoSurfaces": "1",
+      "previewSource": "video",
+      "cutCount": "8",
+      "captionLetters": "0",
+      "selected": "false",
+      "cropAspect": "hidden",
+      "matteCount": "0",
+      "verticalCount": "0",
+      "running": "false"
+    },
+    {
+      "label": "Opening sequence: 04-director-and-captions",
+      "engine": "three.js r186",
+      "meshCount": "66",
+      "renderCount": "80",
+      "drawCalls": "42",
+      "time": "15.300",
+      "camera": "0.000,0.320,10.818",
+      "speaker": "host",
+      "videoTime": "3.951",
+      "videoFrames": "344",
+      "videoPaused": "true",
+      "videoDecoders": "1",
+      "videoSurfaces": "1",
+      "previewSource": "video",
+      "cutCount": "8",
+      "captionLetters": "23",
+      "selected": "false",
+      "cropAspect": "hidden",
+      "matteCount": "0",
+      "verticalCount": "0",
+      "running": "false"
+    },
+    {
+      "label": "Opening sequence: 05-selected-range-lift",
+      "engine": "three.js r186",
+      "meshCount": "66",
+      "renderCount": "105",
+      "drawCalls": "54",
+      "time": "18.999",
+      "camera": "0.000,0.320,10.765",
+      "speaker": "host",
+      "videoTime": "7.624",
+      "videoFrames": "433",
+      "videoPaused": "true",
+      "videoDecoders": "1",
+      "videoSurfaces": "4",
+      "previewSource": "video",
+      "cutCount": "8",
+      "captionLetters": "23",
+      "selected": "true",
+      "cropAspect": "0.759",
+      "matteCount": "0",
+      "verticalCount": "0",
+      "running": "false"
+    },
+    {
+      "label": "Final creation CTA sits below the composition",
+      "canvasBottom": 425.640625,
+      "ctaTop": 467.640625
+    },
+    {
+      "label": "Opening sequence: 06-vertical-export",
+      "engine": "three.js r186",
+      "meshCount": "66",
+      "renderCount": "136",
+      "drawCalls": "52",
+      "time": "24.000",
+      "camera": "0.000,0.320,10.668",
+      "speaker": "host",
+      "videoTime": "2.593",
+      "videoFrames": "553",
+      "videoPaused": "true",
+      "videoDecoders": "1",
+      "videoSurfaces": "4",
+      "previewSource": "video",
+      "cutCount": "8",
+      "captionLetters": "23",
+      "selected": "true",
+      "cropAspect": "hidden",
+      "matteCount": "0",
+      "verticalCount": "3",
+      "running": "false"
+    },
+    {
+      "label": "Choreography holds at its final edit while real footage loops in all four output screens",
+      "held": {
+        "engine": "three.js r186",
+        "meshCount": "66",
+        "renderCount": "136",
+        "drawCalls": "52",
+        "time": "24.000",
+        "camera": "0.000,0.320,10.668",
+        "speaker": "host",
+        "videoTime": "2.593",
+        "videoFrames": "553",
+        "videoPaused": "true",
+        "videoDecoders": "1",
+        "videoSurfaces": "4",
+        "previewSource": "video",
+        "cutCount": "8",
+        "captionLetters": "23",
+        "selected": "true",
+        "cropAspect": "hidden",
+        "matteCount": "0",
+        "verticalCount": "3",
+        "running": "true"
+      },
+      "looping": {
+        "engine": "three.js r186",
+        "meshCount": "66",
+        "renderCount": "156",
+        "drawCalls": "52",
+        "time": "24.000",
+        "camera": "0.000,0.320,10.668",
+        "speaker": "host",
+        "videoTime": "3.465",
+        "videoFrames": "578",
+        "videoPaused": "false",
+        "videoDecoders": "1",
+        "videoSurfaces": "4",
+        "previewSource": "video",
+        "cutCount": "8",
+        "captionLetters": "23",
+        "selected": "true",
+        "cropAspect": "hidden",
+        "matteCount": "0",
+        "verticalCount": "3",
+        "running": "true"
+      }
+    },
+    {
+      "label": "Desktop 1440×900 has no horizontal overflow",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "overflow": []
+    },
+    {
+      "label": "Replay, pause and resume control the real animation clock"
+    },
+    {
+      "label": "Pinned scroll chapter 1",
+      "target": 2.8,
+      "top": 0
+    },
+    {
+      "label": "Pinned scroll chapter 2",
+      "target": 8.5,
+      "top": 0
+    },
+    {
+      "label": "Pinned scroll chapter 3",
+      "target": 10.8,
+      "top": 0
+    },
+    {
+      "label": "Pinned scroll chapter 4",
+      "target": 12.2,
+      "top": 0
+    },
+    {
+      "label": "Pinned scroll chapter 5",
+      "target": 15,
+      "top": 0
+    },
+    {
+      "label": "Pinned scroll chapter 6",
+      "target": 17,
+      "top": 0
+    },
+    {
+      "label": "Animated crop guide reaches 9:16 while the subject remains framed",
+      "ratio": 0.562
+    },
+    {
+      "label": "Pinned scroll chapter 7",
+      "target": 20,
+      "top": 0
+    },
+    {
+      "label": "Pinned scroll chapter 8",
+      "target": 24,
+      "top": -0.359375
+    },
+    {
+      "label": "Offscreen hero stops rendering while the visitor reads later sections"
+    },
+    {
+      "label": "Existing podcast demo plays; Escape closes it and restores focus"
+    }
+  ],
+  "errors": []
+}

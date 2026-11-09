@@ -1,0 +1,36 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "sourceBrief": "Private AutoPromote flagship film The Small Boat: after a paper boat becomes one photoreal navy-hulled yacht, one sailor hauls a connected mainsheet as a real swell approaches. Human effort makes the transformation matter. No feature narration or public claim. Source art is only accepted after visual review.",
+  "prompt": "Photoreal 35mm film frame on a dark navy sailing yacht. One Black woman sailor in navy jacket with cream collar braces on wet teak deck, hauling a taut white mainsheet with both hands through a visible deck block connected to the cream sail boom. Blue ocean swell, warm low sun, natural spray, credible rigging and anatomy.",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "modelRevision": "462165984030d82259a11f4367a4eed129e94a7b",
+  "tool": "AutoPromote NVIDIA image adapter",
+  "seed": 20261008228,
+  "settings": {
+    "steps": 35,
+    "guidance": 7,
+    "width": 1344,
+    "height": 768,
+    "dtype": "float16",
+    "encodedTokenCounts": [
+      71,
+      71
+    ],
+    "promptTruncated": false
+  },
+  "gpu": "NVIDIA L40S",
+  "origin": "native_generated_image",
+  "artifact": {
+    "path": "/work/output/sailor-source/sailor-connected-sheet/video.mp4",
+    "sha256": "2436874740fe5bdb82c5efae6dcef034a14d3d6009fbf4e4422ede4d3b88c90f",
+    "duration": 2.0
+  },
+  "reusableArtifacts": [
+    {
+      "role": "native_image",
+      "path": "/work/output/sailor-source/sailor-connected-sheet/image.png",
+      "sha256": "1939f862ac93505404cd7f3d9a2e505dd1cc019e48fa8fc9651e9f31c1afedf9"
+    }
+  ],
+  "seconds": 6.170847359999925
+}

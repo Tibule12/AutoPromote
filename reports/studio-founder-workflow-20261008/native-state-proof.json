@@ -1,0 +1,28 @@
+{
+  "at": "2026-10-08T09:28:17.451Z",
+  "normalAuth": true,
+  "headless": true,
+  "muted": true,
+  "noFixtureOrMock": true,
+  "signedInAfterBrowserRestart": true,
+  "nativeUpload": true,
+  "nativeTitleAnd3DAndAudioControls": true,
+  "nativeSplitUndoRedo": true,
+  "projectId": "viral-project-f28cae5c-969d-4753-8e2b-395dd40b991e",
+  "beforeRevision": 101,
+  "afterRevision": 101,
+  "canonicalDecisionsEqual": true,
+  "fieldsCompared": [
+    "assets",
+    "clipOccurrences",
+    "layers",
+    "linkedTiming",
+    "audioGraph",
+    "output",
+    "outputTimeMap"
+  ],
+  "gpuStarted": false,
+  "finalRenderRun": false,
+  "pairedPreviewFinalRun": false,
+  "listeningReview": false
+}

@@ -1,0 +1,10 @@
+{
+  "status": "PASS_PLANNING_ONLY",
+  "shots": 10,
+  "referenceCount": 4,
+  "durationTicks": 3780000,
+  "clock": 90000,
+  "acceptedSourceCount": 0,
+  "finalGpuReady": false,
+  "limitation": "Scene schema/clock validation only; no footage or output has been generated or accepted."
+}

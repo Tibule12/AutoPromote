@@ -1,0 +1,32 @@
+[
+  {
+    "kind": "input",
+    "input": "7.5",
+    "time": 0,
+    "seeking": false
+  },
+  {
+    "kind": "change",
+    "input": "7.5",
+    "time": 7.5,
+    "seeking": true
+  },
+  {
+    "kind": "seeking",
+    "input": "7.5",
+    "time": 7.5,
+    "seeking": true
+  },
+  {
+    "kind": "timeupdate",
+    "input": "7.5",
+    "time": 7.5,
+    "seeking": false
+  },
+  {
+    "kind": "seeked",
+    "input": "7.5",
+    "time": 7.5,
+    "seeking": false
+  }
+]

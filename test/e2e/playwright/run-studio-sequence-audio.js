@@ -5,8 +5,10 @@ const assert = require("assert/strict"),
   crypto = require("crypto");
 const { chromium } = require("@playwright/test");
 const root = path.resolve(__dirname, "../../.."),
-  folder = path.join(root, "artifacts/studio-sequence-audio-20261004");
+  folder = path.resolve(root, process.env.STUDIO_SEQUENCE_EVIDENCE_FOLDER || "artifacts/studio-sequence-audio-20261004"),
+  fixtureFolder = path.resolve(root, process.env.STUDIO_INTERACTION_FOLDER || "artifacts/studio-sequence-audio-20261004");
 async function main() {
+  fs.mkdirSync(folder,{recursive:true});
   const browser = await chromium.launch({
     headless: true,
     args: ["--disable-gpu"],
@@ -40,10 +42,9 @@ async function main() {
   });
   const video = page.getByTestId("studio-after-video");
   const pause = async () => {
-    if (!(await video.evaluate((v) => v.paused)))
-      await page
-        .getByRole("button", { name: "Pause comparison", exact: true })
-        .click();
+    const control=page.getByRole("button", { name: "Pause comparison", exact: true });
+    if (await control.isVisible()) await control.click();
+    await page.waitForFunction(() => document.querySelector('[data-testid="studio-after-video"]')?.paused === true);
   };
   const seek = async (time) => {
     const lane = await page
@@ -144,27 +145,39 @@ async function main() {
     });
     stage = "seek first source before EOF";
     await seek(11.8);
+    const firstCycleStart=await page.evaluate(()=>window.__sequenceEvents.length);
     stage = "first native EOF";
     await page
       .getByRole("button", { name: "Play comparison", exact: true })
       .click();
-    await page.waitForFunction(() => {
-      const v = document.querySelector('[data-testid="studio-after-video"]');
-      return v.duration === 4 && !v.paused && v.currentTime < 1;
-    });
+    await page.waitForFunction(start => {
+      const events=window.__sequenceEvents.slice(start);
+      const ended=events.findIndex(e=>e.name==='ended'&&e.duration===12);
+      const following=events.slice(ended+1);
+      return ended>=0&&following.some(e=>e.name==='loadedmetadata'&&e.duration===4&&e.time<.05)&&
+        following.some(e=>e.name==='play'&&e.duration===4&&!e.paused);
+    }, firstCycleStart, { polling: 100 });
     check(
       "Native 12-second source EOF advances into the 4-second second video",
     );
     await pause();
     stage = "last native EOF";
     await seek(15.8);
+    const lastCycleStart=await page.evaluate(()=>window.__sequenceEvents.length);
     await page
       .getByRole("button", { name: "Play comparison", exact: true })
       .click();
-    await page.waitForFunction(() => {
-      const v = document.querySelector('[data-testid="studio-after-video"]');
-      return v.duration === 12 && !v.paused && v.currentTime < 1;
-    });
+    await page.waitForFunction(start => {
+      const events = (window.__sequenceEvents || []).slice(start);
+      const ended = events.findLastIndex(e => e.name === "ended" && e.duration === 4);
+      // Verify the native transition itself. A busy editor can render its
+      // thumbnails after the first second has already played; that is not
+      // evidence that the source failed to loop.
+      return ended >= 0 &&
+        events.slice(ended + 1).some(e => e.name === "loadedmetadata" &&
+          e.duration === 12 && e.time < .05)&&
+        events.slice(ended + 1).some(e=>e.name==='play'&&e.duration===12&&!e.paused);
+    }, lastCycleStart, { polling: 100 });
     check(
       "Native EOF of the last video loops to the first source and keeps playing",
     );
@@ -239,9 +252,12 @@ async function main() {
     near(retimedEnd, 7);
     check("Source trim retimes B-roll once onto the 14-second edited sequence");
     await seek(3.5);
-    await page.waitForFunction(() =>
-      document.querySelectorAll(".pro-source-filmstrip .pro-source-frame img").length === 9
-    );
+    await page.waitForFunction(() => {
+      const frames = [...document.querySelectorAll(".pro-source-filmstrip .pro-source-frame img")];
+      // Filmstrip density follows the visible clip width and timeline zoom.
+      return frames.length >= 3 && frames.every(img => img.complete && img.naturalWidth > 0) &&
+        new Set(frames.map(img => img.src)).size >= 3;
+    });
     await page.screenshot({ path: path.join(folder, "edited-sequence.png") });
     await page
       .getByRole("navigation", { name: "Creative tools" })
@@ -285,14 +301,10 @@ async function main() {
           apiRequests,
           mediaEvents: await page.evaluate(() => window.__sequenceEvents),
           sourceHashes: Object.fromEntries(files.map((f) => [f, sha(f)])),
-          bundleSha256: sha(
-            "artifacts/studio-sequence-audio-20261004/build/static/js/bundle.js",
-          ),
+          bundleSha256: sha(path.relative(root,path.join(fixtureFolder,"build/static/js/bundle.js"))),
           fixtureHashes: {
-            first: sha("artifacts/studio-sequence-audio-20261004/fixture.mp4"),
-            second: sha(
-              "artifacts/studio-sequence-audio-20261004/fixture-second.mp4",
-            ),
+            first: sha(path.relative(root,path.join(fixtureFolder,"fixture.mp4"))),
+            second: sha(path.relative(root,path.join(fixtureFolder,"fixture-second.mp4"))),
           },
         },
         null,

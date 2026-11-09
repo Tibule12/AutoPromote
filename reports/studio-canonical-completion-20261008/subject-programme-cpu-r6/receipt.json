@@ -1,0 +1,21 @@
+{
+  "startedAt": "2026-10-08T19:30:50.608Z",
+  "projectName": "Studio subject speed NVIDIA QA 20261008 r11",
+  "realAuth": true,
+  "noMocks": true,
+  "headless": true,
+  "muted": true,
+  "graphChanges": 0,
+  "inferenceJobsStarted": 0,
+  "status": "FAIL",
+  "events": [
+    {
+      "route": "/api/media/studio-subject-vfx/b9de374e-cfd5-49d5-9dce-79351b1fe877",
+      "method": "GET"
+    }
+  ],
+  "samples": [],
+  "lastStep": "Reopened the exact saved 2x subject/3D edit without changing its graph",
+  "error": "locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.speed-preset-grid').getByRole('button', { name: '1×', exact: true })\u001b[22m\n\u001b[2m    - locator resolved to <button class=\"\" type=\"button\" aria-pressed=\"false\">1×</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    26 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n",
+  "finishedAt": "2026-10-08T19:31:21.318Z"
+}

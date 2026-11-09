@@ -1,0 +1,158 @@
+{
+  "sourceSha256": "b437ad0e56065ad791982aff34019be9cb5360ea19d9bc692f43b34f1bd4c27d",
+  "sourceRange": [
+    0,
+    120
+  ],
+  "scenes": [
+    {
+      "sceneId": "subject-vfx-7ed7b64f-edb6-40f7-8e73-f65f84dcf403",
+      "start": 0,
+      "end": 10,
+      "sha256": "80653fe12bed9a9d4ce0c36359cee62b963d023f755336156bfae7fb99e857fa",
+      "file": "reports/podcast-two-minute-20261009/background-previews/subject-vfx-7ed7b64f-edb6-40f7-8e73-f65f84dcf403.mp4",
+      "technicalPass": true,
+      "gpuJobId": "ce6f5568-9412-4632-99e7-045dee927a90",
+      "workerReceiptShaVerified": true
+    },
+    {
+      "sceneId": "subject-vfx-5f77dade-09e1-46a3-99b8-d6b56110f7f3",
+      "start": 10,
+      "end": 20,
+      "sha256": "c4291160564430b4df3737ee9e7b1cc879c93af7e8bb852b2a5a45ef2f313250",
+      "file": "reports/podcast-two-minute-20261009/background-previews/subject-vfx-5f77dade-09e1-46a3-99b8-d6b56110f7f3.mp4",
+      "technicalPass": true,
+      "gpuJobId": "3b1b34c8-7aac-4e32-94a1-ce25d008eb6b",
+      "workerReceiptShaVerified": true
+    },
+    {
+      "sceneId": "subject-vfx-a1779f34-0642-4fd7-bda1-a2b0729e2f08",
+      "start": 20,
+      "end": 30,
+      "sha256": "7d7b31737ff6c7e34861f0865628a8197fda027eb8f302818e07f97505fcebc9",
+      "file": "reports/podcast-two-minute-20261009/background-previews/subject-vfx-a1779f34-0642-4fd7-bda1-a2b0729e2f08.mp4",
+      "technicalPass": true,
+      "gpuJobId": "cc0b5b9b-4dae-4dfa-a0a4-cfd4b42222dd",
+      "workerReceiptShaVerified": true
+    },
+    {
+      "sceneId": "subject-vfx-17598b90-f85e-421f-a71c-81d8dfc03222",
+      "start": 30,
+      "end": 40,
+      "sha256": "c2d0705eb4da0e2f2fa273eb2fbc13ecd375fc85176ba85fcfb5557473e6380d",
+      "file": "reports/podcast-two-minute-20261009/background-previews/subject-vfx-17598b90-f85e-421f-a71c-81d8dfc03222.mp4",
+      "technicalPass": true,
+      "gpuJobId": "458fa132-e5e7-41bc-bfdc-a40a161c93a9",
+      "workerReceiptShaVerified": true
+    },
+    {
+      "sceneId": "subject-vfx-993967e9-321b-4c62-b9e0-fd4cee783767",
+      "start": 40,
+      "end": 50,
+      "sha256": "128135cff690b65419329474729047df4589ec87c24cfdbfcefb6385fe91185a",
+      "file": "reports/podcast-two-minute-20261009/background-previews/subject-vfx-993967e9-321b-4c62-b9e0-fd4cee783767.mp4",
+      "technicalPass": true,
+      "gpuJobId": "3b4b8cd4-0253-4605-a656-442fdb374fc6",
+      "workerReceiptShaVerified": true
+    },
+    {
+      "sceneId": "subject-vfx-2853af0d-5bb0-468e-9429-b89b97e885e0",
+      "start": 50,
+      "end": 60,
+      "sha256": "fd3bf662dbed72179cc529d1bdcaa0920790d6448d8786150236f7d798195448",
+      "file": "reports/podcast-two-minute-20261009/background-previews/subject-vfx-2853af0d-5bb0-468e-9429-b89b97e885e0.mp4",
+      "technicalPass": true,
+      "gpuJobId": "f669d276-a323-4907-a708-023d040853f4",
+      "workerReceiptShaVerified": true
+    },
+    {
+      "sceneId": "subject-vfx-907745e6-9bf7-47e5-a47f-281ea1713076",
+      "start": 60,
+      "end": 70,
+      "sha256": "64c1c2108164bb65285e5b6141083480c5a979d1281293a076aa81bc773a8dc2",
+      "file": "reports/podcast-two-minute-20261009/background-previews/subject-vfx-907745e6-9bf7-47e5-a47f-281ea1713076.mp4",
+      "technicalPass": true,
+      "gpuJobId": "3d6db6ad-4dd7-4ceb-8965-3879680bc87f",
+      "workerReceiptShaVerified": true
+    },
+    {
+      "sceneId": "subject-vfx-2a979016-5085-4bf0-ae00-9677310d3901",
+      "start": 70,
+      "end": 80,
+      "sha256": "db2db411de00674a967838803a140f2a9879b55b6b0d26bbc98b749baa4a022e",
+      "file": "reports/podcast-two-minute-20261009/background-previews/subject-vfx-2a979016-5085-4bf0-ae00-9677310d3901.mp4",
+      "technicalPass": true,
+      "gpuJobId": "5db58fa5-bcbf-4ff7-bdc5-4584cbcdc60f",
+      "workerReceiptShaVerified": true
+    },
+    {
+      "sceneId": "subject-vfx-6403f020-1184-4b38-9a04-e96446bfea80",
+      "start": 80,
+      "end": 90,
+      "sha256": "7a0805e8cb3adff13b13090d19253940ef694ee4b749ee9a104e1031865e89ca",
+      "file": "reports/podcast-two-minute-20261009/background-previews/subject-vfx-6403f020-1184-4b38-9a04-e96446bfea80.mp4",
+      "technicalPass": true,
+      "gpuJobId": "9461ce7d-f792-494d-8a70-69ded7abe863",
+      "workerReceiptShaVerified": true
+    },
+    {
+      "sceneId": "subject-vfx-30b2d536-c842-4476-89ca-e1a1fa2055c3",
+      "start": 90,
+      "end": 100,
+      "sha256": "6b1465f8d5ea48c4b3606276a1939512028cc08d55c6346991ea13cc4f20335c",
+      "file": "reports/podcast-two-minute-20261009/background-previews/subject-vfx-30b2d536-c842-4476-89ca-e1a1fa2055c3.mp4",
+      "technicalPass": true,
+      "gpuJobId": "d31e2c1b-9425-47e3-a5b6-cb8c698959d6",
+      "workerReceiptShaVerified": true
+    },
+    {
+      "sceneId": "subject-vfx-aeda45f0-ce35-4fa2-91a4-3a6bf7f7d1a0",
+      "start": 100,
+      "end": 110,
+      "sha256": "c654e7460416d77a546d5ccaa47f7de355fbdf2d7a5376cece3b585afb5bb6e2",
+      "file": "reports/podcast-two-minute-20261009/background-previews/subject-vfx-aeda45f0-ce35-4fa2-91a4-3a6bf7f7d1a0.mp4",
+      "technicalPass": true,
+      "gpuJobId": "0177f329-74b7-4871-9f2c-de23a932bef0",
+      "workerReceiptShaVerified": true
+    },
+    {
+      "sceneId": "subject-vfx-4d7d266d-d396-4e81-ae40-52c0c680851d",
+      "start": 110,
+      "end": 120,
+      "sha256": "2e782f14bd0984d3cbc4a106e9712f77316725e876d453e011a3797b8b43d72e",
+      "file": "reports/podcast-two-minute-20261009/background-previews/subject-vfx-4d7d266d-d396-4e81-ae40-52c0c680851d.mp4",
+      "technicalPass": true,
+      "gpuJobId": "e509ab16-58af-4855-affe-8334df9debe1",
+      "workerReceiptShaVerified": true
+    }
+  ],
+  "technical": {
+    "passed": true,
+    "sha256": "22e542475e6bda984846b925c74d07df1141a90018f469c58e8c52f30e741764",
+    "bytes": 167655599,
+    "seconds": 120.023031,
+    "video": {
+      "width": 1920,
+      "height": 1080,
+      "codec": "h264",
+      "fps": "24/1",
+      "duration": "120.000000",
+      "frameCount": 2880,
+      "pixelFormat": "yuv420p",
+      "encoder": "Lavc60.31.102 h264_nvenc"
+    },
+    "audio": {
+      "codec": "aac",
+      "channels": 2,
+      "sampleRate": "44100",
+      "duration": "120.000000"
+    },
+    "independentFullDecode": true,
+    "contactSheet": "reports/podcast-two-minute-20261009/podcast-background-2min.mp4.frames.jpg",
+    "scope": "Technical only. Pixel and listening review are separate required evidence."
+  },
+  "continuousOriginalAudioDecodedSampleEquality": true,
+  "assembly": "Stream-copy assembly of twelve actual owned Studio GPU previews; retain continuous original audio. Imported into normal Studio for editable caption, colour and cut-aware framing and final native export. Two source-background projects remain separately adjustable.",
+  "creativeApproval": false,
+  "readinessPromotion": false
+}

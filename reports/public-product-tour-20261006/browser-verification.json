@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "checks": [
+    "Reduced motion keeps the actual tour behind explicit user intent and requests no film",
+    "02 Studio: chapter seek, decoded moving footage and active control verified",
+    "01 Uploads: chapter seek, decoded moving footage and active control verified",
+    "03 Schedule: chapter seek, decoded moving footage and active control verified",
+    "04 Analytics: chapter seek, decoded moving footage and active control verified",
+    "Scrolling away pauses tour playback",
+    "Watch Demo opens the full tour; Escape releases its decoder and restores focus",
+    "Tour at 1920px: readable chapter controls, playback and no horizontal overflow",
+    "Tour at 390px: readable chapter controls, playback and no horizontal overflow",
+    "Original sign-in route works and releases tour media",
+    "Missing media offers a direct film link and recovers after retry"
+  ],
+  "errors": [],
+  "filmRequestsBeforeUserIntent": 0,
+  "routes": [
+    "public homepage",
+    "product tour modal",
+    "original sign-in"
+  ]
+}

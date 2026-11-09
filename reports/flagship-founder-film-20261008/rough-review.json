@@ -1,0 +1,18 @@
+{
+  "status": "REJECTED_FOR_FINAL_CREATIVE_USE",
+  "artifact": "outputs/rough-v1/one-edit-hero/final.mp4",
+  "evidenceSha256": "22d2d44750c412874f402c2f9780176a4081678683aaf17da5fac0c196d082a7",
+  "viewerFindings": [
+    "The story is legible but the middle uses too many repeated source carriers and long holds.",
+    "The 66-second tempo gives technical evidence more screen time than the emotional question needs.",
+    "Words near the top and lower edge risk unreadable framing.",
+    "The first ident is glowing text with insufficient anticipation and a tight frame."
+  ],
+  "fixes": [
+    "Shorten hero to 53.75 seconds with completed action source ranges.",
+    "Retain every complete narration take and retime score/sound per scene.",
+    "Use a later wordmark reveal, physical material layers and a macro camera; broaden the final hold.",
+    "Treat dark anticipation as explicitly planned editing, while preserving rejection of black gaps elsewhere."
+  ],
+  "remainingCreativeLimit": "This remains a motion-design founder-film candidate, not established After Effects feature parity or fully autonomous script-to-film."
+}

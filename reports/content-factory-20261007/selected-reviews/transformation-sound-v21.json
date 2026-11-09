@@ -1,0 +1,9 @@
+{
+  "accepted": true,
+  "artifactSha256": "679ca15570d367c55a675137f5660376aff7a5d254c52b16204fa8e685fdeb8c",
+  "evidenceSha256": "679ca15570d367c55a675137f5660376aff7a5d254c52b16204fa8e685fdeb8c",
+  "reason": "Measured original stereo audio: peak 0.355, RMS 0.023, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+  "reviewer": "CPU decoded audio measurement",
+  "modelRevision": "audio-measurements-v1",
+  "limitation": "Technical assembly qualification; no listening approval."
+}

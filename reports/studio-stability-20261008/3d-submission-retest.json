@@ -1,0 +1,8 @@
+{
+  "at": "2026-10-08T06:35:25.678Z",
+  "realAuth": true,
+  "noMocks": true,
+  "endpoint": "/api/media/studio-3d/preview",
+  "status": 503,
+  "code": "3D preview is temporarily unavailable"
+}

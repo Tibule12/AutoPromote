@@ -1,0 +1,127 @@
+{
+  "video_url": "http://127.0.0.1:8765/generated/real-voyage-v6.mp4",
+  "start_time": 0,
+  "end_time": 11.5625,
+  "overlays": [],
+  "auto_captions": true,
+  "timeline_segments": [
+    {
+      "id": "generated-footage-proof-1",
+      "source_clip_id": "real-vessel",
+      "start_time": 0,
+      "end_time": 5.0625,
+      "duration": 5.0625,
+      "url": "http://127.0.0.1:8765/generated/real-voyage-v6.mp4"
+    },
+    {
+      "id": "generated-footage-proof-2",
+      "source_clip_id": "studio-ui",
+      "start_time": 0,
+      "end_time": 3,
+      "duration": 3,
+      "url": "http://127.0.0.1:8765/ui/studio-source-assembly-v17/video.mp4"
+    },
+    {
+      "id": "generated-footage-proof-3",
+      "source_clip_id": "identity",
+      "start_time": 0,
+      "end_time": 3.5,
+      "duration": 3.5,
+      "url": "http://127.0.0.1:8765/idents/cinematic-v2/ident.mp4"
+    }
+  ],
+  "background_audio": null,
+  "hook_focus_point": null,
+  "cover_frame": null,
+  "thumbnail_frame": null,
+  "caption_style": "minimal",
+  "caption_position": "bottom",
+  "caption_scale": 1,
+  "caption_segments": [
+    {
+      "id": "caption-1",
+      "start_time": 0.05,
+      "end_time": 2.375,
+      "text": "One idea. No footage.",
+      "caption_icon": "none",
+      "caption_accent": "#ffffff"
+    },
+    {
+      "id": "caption-2",
+      "start_time": 5,
+      "end_time": 6.65,
+      "text": "This started with a brief.",
+      "caption_icon": "none",
+      "caption_accent": "#ffffff"
+    },
+    {
+      "id": "caption-3",
+      "start_time": 6.65,
+      "end_time": 8.65,
+      "text": "No camera. No footage.",
+      "caption_icon": "none",
+      "caption_accent": "#ffffff"
+    }
+  ],
+  "creative_intent": "Private viewing proof of generated yacht footage, actual Studio source editing and designed sound. This is not the rejected paper-to-real transformation or a released movie-generation feature.",
+  "professional_cleanup": false,
+  "finish_plan": {
+    "version": 1,
+    "enabled": true,
+    "reframe": {
+      "enabled": true,
+      "aspect": "16:9",
+      "mode": "off"
+    }
+  },
+  "smart_crop": true,
+  "smart_crop_mode": "safe_fit",
+  "brand_watermark": false,
+  "output_settings": {
+    "resolution": "1080p",
+    "fps": 24,
+    "codec": "h264",
+    "audioCodec": "aac"
+  },
+  "add_music": true,
+  "music_url": "http://127.0.0.1:8765/assets/founder-music-v8/audio.wav",
+  "music_name": "score",
+  "music_volume": 0.25,
+  "music_ducking": false,
+  "music_fade_in": 0.25,
+  "music_fade_out": 0.6,
+  "music_loop": false,
+  "sound_effects": [
+    {
+      "id": "generated-footage-proof-audio-1",
+      "name": "one-idea",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/narration-processed-v11/one-idea.wav",
+      "startTime": 0.05,
+      "duration": 2.325,
+      "trimStart": 0,
+      "volume": 0.9,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "generated-footage-proof-audio-2",
+      "name": "brief-no-footage",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/narration-cpu/brief-no-footage.wav",
+      "startTime": 5,
+      "duration": 3.65,
+      "trimStart": 0,
+      "volume": 0.9,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    }
+  ],
+  "motionGraphics": {
+    "version": 1,
+    "scenes": []
+  },
+  "mute_audio": false
+}

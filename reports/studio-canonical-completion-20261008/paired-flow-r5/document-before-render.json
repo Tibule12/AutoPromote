@@ -1,0 +1,828 @@
+{
+  "schemaVersion": 1,
+  "projectId": "viral-project-c28599fa-c72b-43ce-b149-b01669c91abf",
+  "revision": 4,
+  "clock": {
+    "ticksPerSecond": 90000,
+    "interval": "half_open"
+  },
+  "output": {
+    "aspectRatio": "4:5",
+    "requestedResolution": "source",
+    "frameRate": {
+      "numerator": 30,
+      "denominator": 1
+    },
+    "codec": "h264",
+    "audioCodec": "aac",
+    "audioSampleRate": null,
+    "audioSampleRatePolicy": "worker_selected"
+  },
+  "assets": [
+    {
+      "assetId": "source:main",
+      "sourceId": "main",
+      "storagePath": "uploads/videos/bf04dPKELvVMivWoUyLsAVyw2sg2/1791450777532_podcast-12s.mp4",
+      "identityState": "legacy_reference_unverified"
+    }
+  ],
+  "clipOccurrences": [
+    {
+      "occurrenceId": "main",
+      "assetId": "source:main",
+      "sourceRange": {
+        "space": "source",
+        "startTick": 0,
+        "endTick": 1080000
+      },
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 1080000
+      },
+      "timeMapId": "map:main",
+      "parameterSchemaVersion": 1,
+      "parameters": {
+        "name": "podcast-12s.mp4",
+        "duration": 12
+      },
+      "playback": {
+        "direction": "forward",
+        "freeze": false,
+        "rate": {
+          "numerator": 1,
+          "denominator": 1
+        }
+      }
+    }
+  ],
+  "timeMaps": [
+    {
+      "timeMapId": "map:main",
+      "occurrenceId": "main",
+      "segments": [
+        {
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 1080000
+          },
+          "clipLocalRange": {
+            "space": "clip_local",
+            "startTick": 0,
+            "endTick": 1080000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 0,
+            "endTick": 1080000
+          },
+          "rate": {
+            "numerator": 1,
+            "denominator": 1
+          },
+          "direction": "forward",
+          "freeze": false
+        }
+      ]
+    }
+  ],
+  "layers": [
+    {
+      "layerId": "title-d3a6315f-a29b-4a2f-bf7a-caab55f45510",
+      "type": "title",
+      "legacyType": "text",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 90000,
+        "endTick": 360000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "textAlign": "center",
+        "bg": "transparent",
+        "shadow": "strong",
+        "strokeWidth": 2,
+        "coverMainVideo": false,
+        "muteMainAudio": false,
+        "useOverlayAudio": false,
+        "overlayAudioVolume": 0.7,
+        "audioDucking": false,
+        "audioDuckingStrength": 0.35,
+        "isRainbow": false,
+        "text": "Shared project state",
+        "fontFamily": "Inter",
+        "fontWeight": 900,
+        "color": "#ffffff",
+        "opacity": 1,
+        "x": 72,
+        "y": 18,
+        "rotation": 0,
+        "scale": 1.15,
+        "startTime": 1,
+        "duration": 3,
+        "animation": {
+          "enter": "fade",
+          "exit": "fade",
+          "enterDuration": 0.3,
+          "exitDuration": 0.3
+        },
+        "titlePreset": "headline",
+        "clipId": "main",
+        "mixAudio": false
+      }
+    },
+    {
+      "layerId": "studio-3d-7441e0d5-c776-499e-90e4-9f6ecfd98ddb",
+      "type": "three_d",
+      "legacyType": null,
+      "legacyCollection": "threeDScenes",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 360000,
+        "endTick": 630000
+      },
+      "compositionStage": "final_alpha",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "version": 1,
+        "name": "Cinematic 3D Title",
+        "secondary": "Editable scene",
+        "endTime": 7,
+        "assetStoragePath": "",
+        "assetName": "",
+        "hqPreviewRevision": "",
+        "hqPreviewJobId": "",
+        "textAlign": "center",
+        "lineSpacing": 1,
+        "primaryColor": "#79d9ff",
+        "secondaryColor": "#e8ecff",
+        "extrusionDepth": 0.28,
+        "bevel": 0.04,
+        "rotationX": 0,
+        "rotationY": 0,
+        "rotationZ": 0,
+        "hold": "float",
+        "intensity": 0.65,
+        "audioReactiveIntensity": 0,
+        "cameraMotion": 0.28,
+        "focalLength": 65,
+        "lightDirection": 35,
+        "lightColor": "#ffffff",
+        "lightIntensity": 3.5,
+        "shadows": true,
+        "reflections": true,
+        "bloom": 0.32,
+        "background": "transparent",
+        "text": "Scene continuity",
+        "fontFamily": "studio",
+        "fontWeight": "bold",
+        "glowColor": "#79d9ff",
+        "material": "glass",
+        "x": 50,
+        "y": 50,
+        "z": 0,
+        "scale": 1,
+        "startTime": 4,
+        "duration": 3,
+        "entrance": "dolly",
+        "exit": "fade",
+        "easing": "ease_out",
+        "keyframes": [],
+        "template": "cinematic_title",
+        "enabled": false,
+        "layerOrder": 50,
+        "quality": "preview"
+      }
+    },
+    {
+      "layerId": "transcript-caption-0",
+      "type": "caption",
+      "legacyCollection": "captionSegments",
+      "compositionStage": "worker_caption",
+      "sourceRange": {
+        "space": "source",
+        "startTick": 270000,
+        "endTick": 450000
+      },
+      "sourceId": null,
+      "parameterSchemaVersion": 1,
+      "parameters": {
+        "text": "Shared project state reviewed",
+        "reviewRequired": false,
+        "textReviewed": true,
+        "textReviewRequired": false,
+        "speaker": "host",
+        "speakerLabel": "Host",
+        "language": "en",
+        "languageLabel": "English",
+        "languages": [
+          "en"
+        ],
+        "languageConfidence": 0,
+        "transcriptConfidence": 0,
+        "transcriptionReviewReasons": [],
+        "translatedToEnglish": false,
+        "captionPlacement": "custom",
+        "captionIcon": "auto",
+        "captionAccent": "#abcdef",
+        "captionX": 35,
+        "captionY": 70,
+        "placement": "custom"
+      }
+    },
+    {
+      "layerId": "transcript-caption-1",
+      "type": "caption",
+      "legacyCollection": "captionSegments",
+      "compositionStage": "worker_caption",
+      "sourceRange": {
+        "space": "source",
+        "startTick": 630000,
+        "endTick": 810000
+      },
+      "sourceId": null,
+      "parameterSchemaVersion": 1,
+      "parameters": {
+        "text": "Reviewed timeline words verified",
+        "reviewRequired": false,
+        "textReviewed": true,
+        "textReviewRequired": false,
+        "speaker": "host",
+        "speakerLabel": "Host",
+        "language": "en",
+        "languageLabel": "English",
+        "languages": [
+          "en"
+        ],
+        "languageConfidence": 0,
+        "transcriptConfidence": 0,
+        "transcriptionReviewReasons": [],
+        "translatedToEnglish": false,
+        "captionPlacement": "auto",
+        "captionIcon": "auto",
+        "captionAccent": "",
+        "captionX": 50,
+        "captionY": 82,
+        "placement": "auto"
+      }
+    }
+  ],
+  "linkedTiming": {
+    "cues": {
+      "soundEffects": [
+        {
+          "cueId": "sfx-a52e7821-b74f-4cb6-9bfa-be4ba03560ba",
+          "type": null,
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "enabled": true,
+            "builtIn": false,
+            "tone": "custom",
+            "name": "speech",
+            "volume": 0.4,
+            "fadeIn": 0.2,
+            "fadeOut": 0.2
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 630000,
+            "endTick": 810000
+          },
+          "trimStartTick": 0
+        }
+      ],
+      "voiceovers": [],
+      "adjustmentLayers": []
+    },
+    "keys": {
+      "motionKeyframes": [
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "easing": "ease_in_out",
+            "id": "motion-key-155183fa-731e-4529-8faf-9c923efb2ea5",
+            "targetId": "main-video",
+            "property": "x",
+            "value": 45
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "easing": "ease_in_out",
+            "id": "motion-key-70061fc8-cf6a-4275-afeb-1e2ae26cf0e2",
+            "targetId": "main-video",
+            "property": "y",
+            "value": 55
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "easing": "ease_in_out",
+            "id": "motion-key-873b30a6-0cb4-4fe2-a4a2-9c522717576b",
+            "targetId": "main-video",
+            "property": "scale",
+            "value": 1.1
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "easing": "ease_in_out",
+            "id": "motion-key-ffe9b2fd-7ccb-444f-9521-5e6a51070337",
+            "targetId": "main-video",
+            "property": "rotation",
+            "value": 4
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "easing": "ease_in_out",
+            "id": "motion-key-602f4798-7ec4-4a20-acb7-218eedb41ce5",
+            "targetId": "main-video",
+            "property": "opacity",
+            "value": 1
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "easing": "ease_in_out",
+            "id": "motion-key-f160ecb0-7e62-42b8-8d70-57a17ceb6673",
+            "targetId": "main-video",
+            "property": "cropX",
+            "value": 0
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "easing": "ease_in_out",
+            "id": "motion-key-48f6aa64-f44f-4364-9a59-1aafff2e9a2f",
+            "targetId": "main-video",
+            "property": "cropY",
+            "value": 0
+          }
+        }
+      ],
+      "finishKeyframes": [],
+      "reframeKeyframes": [],
+      "reframeModeCuts": [
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "id": "reframe-mode-388b88f0-a961-4884-8434-1041d17abb4f",
+            "mode": "speaker_track"
+          }
+        },
+        {
+          "atProgrammeTick": 964260,
+          "parameters": {
+            "id": "reframe-mode-226257b9-dea1-47bf-9491-e70847efa9e7",
+            "mode": "center"
+          }
+        },
+        {
+          "atProgrammeTick": 997560,
+          "parameters": {
+            "id": "reframe-mode-ec679955-c6bb-442a-b1b4-705444956672",
+            "mode": "center"
+          }
+        }
+      ],
+      "speakerFocusCuts": [],
+      "audioKeyframes.originalAudio": [],
+      "audioKeyframes.masterPodcast": [],
+      "audioKeyframes.voiceover": [],
+      "audioKeyframes.music": [],
+      "audioKeyframes.broll": [],
+      "audioKeyframes.sfx": []
+    }
+  },
+  "audioGraph": {
+    "legacySnapshotRef": "audioRemix",
+    "parameterSchemaVersion": 1,
+    "settings": {
+      "addMusic": false,
+      "musicSelection": "upbeat_pop.mp3",
+      "musicSearchMode": false,
+      "safeSearch": true,
+      "musicVolume": 0.15,
+      "musicDucking": true,
+      "musicDuckingStrength": 0.35,
+      "muteOriginalAudio": false,
+      "audioRemix": {
+        "version": 1,
+        "enabled": false,
+        "preset": "slowed_reverb",
+        "speed": 0.82,
+        "pitch": -3,
+        "bass": 8,
+        "clarity": 2,
+        "air": 1,
+        "reverb": 68,
+        "intensity": 75,
+        "keepPitch": false,
+        "contentType": "auto",
+        "target": "master",
+        "outputGain": 0,
+        "levelMatch": true,
+        "quality": "studio"
+      },
+      "audioRestoration": {
+        "preset": "natural",
+        "voiceIsolation": false,
+        "denoise": 22,
+        "deEsser": 18,
+        "humFrequency": 50,
+        "compressor": 35,
+        "limiter": -1,
+        "loudness": -14,
+        "eq": {
+          "low": 0,
+          "mid": 0,
+          "high": 0
+        },
+        "enabled": true
+      },
+      "audioAutomationSource": "originalAudio"
+    },
+    "music": null,
+    "routes": [
+      {
+        "trackId": "video",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "adjustment",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "graphics",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "broll",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "captions",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "originalAudio",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "voiceover",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "music",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "sfx",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      }
+    ],
+    "routing": {
+      "muteOriginalAudio": false,
+      "musicDucking": true,
+      "musicDuckingStrength": 0.35,
+      "musicTrackId": null
+    }
+  },
+  "visualGraph": {
+    "parameterSchemaVersion": 1,
+    "settings": {
+      "mainTransform": {
+        "id": "main-video",
+        "name": "Main video",
+        "type": "video",
+        "x": 45,
+        "y": 55,
+        "scale": 1.1,
+        "rotation": 4,
+        "opacity": 1,
+        "cropX": 0,
+        "cropY": 0
+      },
+      "finishFx": {
+        "precisionGrade": true,
+        "exposureStops": 0,
+        "lift": 0,
+        "gamma": 1,
+        "gain": 1,
+        "tint": 0,
+        "preset": null,
+        "brightness": 1.08,
+        "contrast": 1.08,
+        "saturation": 1,
+        "temperature": 0,
+        "sharpness": 0,
+        "vignette": 0,
+        "blur": 0,
+        "blurMode": "edge",
+        "blurStart": -1,
+        "blurEnd": -1,
+        "zoom": 1,
+        "zoomAnchor": "center",
+        "overlayType": "",
+        "overlayOpacity": 0.4,
+        "overlayColor": "#000000",
+        "filmGrain": 0,
+        "chromaticAberration": 0,
+        "vhsTracking": 0,
+        "lightLeak": 0,
+        "letterbox": 0,
+        "fadeIn": 0,
+        "fadeOut": 0
+      },
+      "mainFrame": {
+        "insetPercent": 2.5,
+        "radiusPercent": 6,
+        "background": "studio_black",
+        "enabled": true
+      },
+      "advancedColor": {
+        "lutName": "",
+        "lutFile": null,
+        "lutIntensity": 100,
+        "curve": {
+          "shadows": 0,
+          "midtones": 0,
+          "highlights": 0
+        },
+        "hsl": {
+          "hue": 0,
+          "saturation": 0,
+          "luminance": 0
+        }
+      },
+      "podcastVisualizer": {
+        "enabled": false,
+        "mode": "wave",
+        "color": "#72f7ff",
+        "intensity": 0.75,
+        "position": "bottom"
+      },
+      "videoFit": "cover",
+      "safeFaceFraming": false,
+      "faceAnchorPreset": "center",
+      "autoCaptions": true,
+      "captionStyle": "minimal",
+      "captionPosition": "bottom_center",
+      "captionScale": 1,
+      "captionTextOverride": "",
+      "translateCaptionsToEnglish": false,
+      "smartCrop": true,
+      "smartCropMode": "center",
+      "reframeAspect": "4:5",
+      "speakerTrackZoom": 1,
+      "speakerStackFraming": {
+        "dividerPercent": 50,
+        "gapPercent": 1.2,
+        "cardGapPercent": 2.5,
+        "roundedCards": true,
+        "cardInsetPercent": 2.5,
+        "cardRadiusPercent": 8,
+        "secondaryXPercent": 80,
+        "secondaryYPercent": 20,
+        "secondarySizePercent": 30,
+        "top": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        },
+        "bottom": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        },
+        "third": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        },
+        "fourth": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        }
+      },
+      "speakerStackSourceIds": {
+        "top": null,
+        "bottom": null,
+        "third": null,
+        "fourth": null
+      },
+      "speakerStackOffsets": {
+        "top": 0,
+        "bottom": 0,
+        "third": 0,
+        "fourth": 0
+      },
+      "speakerStackCameraCount": 2,
+      "speakerStackLayout": "stack_2",
+      "speakerStackSyncConfirmed": false,
+      "exportSettings": {
+        "resolution": "source",
+        "fps": "30",
+        "codec": "h264",
+        "quality": "high",
+        "videoBitrate": "auto",
+        "targetFileSizeMb": "",
+        "audioCodec": "aac",
+        "audioBitrate": "192",
+        "colorSpace": "rec709"
+      },
+      "stabilization": {
+        "enabled": false,
+        "strength": 35,
+        "crop": "adaptive",
+        "rollingShutter": false
+      },
+      "enhanceQuality": false,
+      "beatSnapEnabled": true,
+      "creativeIntent": "energy",
+      "creativeEffectsEnabled": false,
+      "creativePreset": "auto_story",
+      "creativeIntensity": "bold",
+      "pacingLevel": "balanced"
+    },
+    "cameraSources": []
+  },
+  "editGraph": {
+    "parameterSchemaVersion": 1,
+    "settings": {
+      "captionCoverageMode": "selected",
+      "contentProfile": "auto",
+      "joinTransition": "cross_dissolve",
+      "joinTransitionDuration": 0.3,
+      "silenceRemoval": false,
+      "silenceThreshold": -35,
+      "minSilenceDuration": 0.75,
+      "silencePreview": null,
+      "removeWatermark": false,
+      "watermarkMode": "adaptive",
+      "brandWatermark": false,
+      "manualWatermarkRegions": [],
+      "addHook": false,
+      "hookText": "Canonical decisions checked",
+      "hookTemplate": "zoom_focus",
+      "hookIntroSeconds": 3,
+      "hookStartTime": 0.8,
+      "hookEndTime": 3.8,
+      "hookBlurBackground": false,
+      "hookDarkOverlay": true,
+      "hookFreezeFrame": false,
+      "hookZoomScale": 1.08,
+      "hookTextAnimation": "fade-in",
+      "hookFocusPoint": {
+        "x": 50,
+        "y": 42
+      },
+      "bRollCadence": "balanced",
+      "compoundClips": [],
+      "creatorPreview": {
+        "enabled": true,
+        "section": "reactions",
+        "activeDemo": "",
+        "intensity": 62,
+        "duration": 0.8,
+        "zoom": 1.34,
+        "x": 78,
+        "y": 68,
+        "color": "#ffcb67",
+        "accent": "#7457ff",
+        "text": "THIS CHANGED EVERYTHING",
+        "name": "",
+        "role": "",
+        "entity": "",
+        "emoji": "🤯",
+        "rank": 3,
+        "tracking": false,
+        "maskShape": "person",
+        "transition": "whip",
+        "introStyle": "cinematic",
+        "reactionMode": "instant",
+        "comparisonLeft": "",
+        "comparisonRight": ""
+      },
+      "splitExportEnabled": false,
+      "splitExportHooks": [],
+      "proxySettings": {
+        "enabled": true,
+        "resolution": "720p",
+        "codec": "h264",
+        "status": "source_ready"
+      }
+    },
+    "media": [
+      {
+        "id": "primary-uploads/videos/bf04dPKELvVMivWoUyLsAVyw2sg2/1791450777532_podcast-12s.mp4",
+        "name": "podcast-12s.mp4",
+        "duration": 12,
+        "sourceStoragePath": "uploads/videos/bf04dPKELvVMivWoUyLsAVyw2sg2/1791450777532_podcast-12s.mp4",
+        "storagePath": "uploads/videos/bf04dPKELvVMivWoUyLsAVyw2sg2/1791450777532_podcast-12s.mp4",
+        "isPrimary": true
+      }
+    ],
+    "sources": [
+      {
+        "id": "full-video",
+        "duration": 12
+      }
+    ],
+    "musicMix": null,
+    "hookBinding": null,
+    "angleGroups": [],
+    "extractedAudio": null
+  },
+  "constraints": {
+    "locks": []
+  },
+  "styleRef": null,
+  "analysisRefs": [],
+  "projectIntelligenceRefs": [],
+  "programmeSpeedKeys": [],
+  "fallbackSpeed": 1,
+  "outputTimeMap": [
+    {
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 1080000
+      },
+      "outputRange": {
+        "space": "output",
+        "startTick": 0,
+        "endTick": 1080000
+      },
+      "rateNumerator": 1000000,
+      "rateDenominator": 1000000
+    }
+  ],
+  "journal": [],
+  "idempotency": {},
+  "directorReviewJournal": [],
+  "compatibility": {
+    "legacySnapshotVersion": 1,
+    "projection": "clip_occurrences_canonical_other_fields_legacy",
+    "editableStateVersion": 1,
+    "visualStateVersion": 1,
+    "editStateVersion": 1,
+    "layerComposition": "separate_worker_stages"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "acceptedForFullRender": false,
+  "evidence": "vessel-preview-sheet.jpg",
+  "observations": [
+    "Water now has genuine depth/waves and no water-disc edge",
+    "Opening paper hull has corrugated station shading",
+    "Workbench is below the water instead of visible at the start",
+    "Midpoint hull falls below the image while the camera path expands"
+  ],
+  "corrections": [
+    "Use a planar diamond fold profile and smooth station shading",
+    "Start the paper on the actual workbench above water",
+    "Move the middle camera farther back and frame the growing sail/hull together"
+  ]
+}

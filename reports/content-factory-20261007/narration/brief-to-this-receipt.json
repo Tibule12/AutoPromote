@@ -1,0 +1,32 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "assetId": "brief-to-this",
+  "type": "audio",
+  "audioRole": "voiceover",
+  "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+  "prompt": "From a brief... to this.",
+  "model": "hexgrad/Kokoro-82M",
+  "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+  "tool": "AutoPromote NVIDIA narration adapter",
+  "origin": "synthetic_brand_narration",
+  "settings": {
+    "voice": "af_heart",
+    "speed": 0.98,
+    "sampleRate": 48000,
+    "loudnessTargetLUFS": -18
+  },
+  "artifact": {
+    "path": "/work/narration/brief-to-this.wav",
+    "sha256": "d6b771243d18b9a509234af11fe42c1f71a114fa92fac8e183a1a8bc40250367",
+    "duration": 2.05,
+    "container": "wav",
+    "codec": "pcm_s16le"
+  },
+  "device": "cuda",
+  "gpu": "NVIDIA L40S",
+  "phonemes": [
+    "f\u0279\u02cc\u028cm \u0250 b\u0279\u02c8if... t\u0259 \u00f0\u02c8\u026as."
+  ],
+  "seconds": 0.12791546699963874,
+  "disclosure": "Generated narration using a standard licensed model preset; no founder voice or real person's identity is represented."
+}

@@ -1,0 +1,21 @@
+{
+  "observedAt": "2026-10-08T19:44:49.706026+00:00",
+  "wrapperExitCode": 143,
+  "wrapperCompletionReceiptMissing": true,
+  "rootCause": "Unconfirmed controller termination; no active job is assumed failed from the wrapper exit.",
+  "remoteObservation": {
+    "container": "autopromote-founder-v4-vace",
+    "status": "Up 14 minutes",
+    "gpuUtilizationPercent": 100,
+    "gpuMemoryMiB": 42985,
+    "lastCallbackStep": 26,
+    "steps": 30
+  },
+  "recovery": "Observe and collect this same already-running job through Docker logs and its output receipt. No new inference or duplicate submission.",
+  "status": "SAME_JOB_COMPLETED_AND_BYTES_RECOVERED",
+  "generationSeconds": 963.8555109040008,
+  "artifactSha256": "e9c6285ef9576edde93b9b36f1a4531aeed0efa654ef35a4127029a7b75ea14a",
+  "gpuAfterCompletion": "0%, 1 MiB, no GPU container",
+  "qaRestoration": "Started existing bounded media launcher after observed idle GPU; authorization ends 22:00 SAST",
+  "duplicateInference": false
+}

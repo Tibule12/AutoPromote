@@ -1,0 +1,115 @@
+{
+  "identity": "1adff7951b8951c1ae13c917078f9205d5618f3a6459dbf75ad2b10a10d4b4f6",
+  "actions": [
+    {
+      "signature": "5548af7d9e6a5da8aa211b0ecc1125bccfd57c9e937d0ad3a090e24907bbae1f",
+      "operationKey": "operation:download-hero",
+      "type": "click",
+      "target": {
+        "role": "link",
+        "name": "Download the hero film"
+      },
+      "expect": [
+        {
+          "type": "download",
+          "value": "autopromote-one-edit-hero.mp4"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-08T08:02:19.152Z",
+      "reason": "Observed the matching film after actual playback and seeking; verify retained bytes.",
+      "planner": null,
+      "afterState": "c28775cc874121b7d33bd19e8af80fc60dac942ee66c6886f36f705921385cb2"
+    },
+    {
+      "signature": "060e2e916a24f27ae6a4b57d2a5fae29b6b9f788371e9098c0d757b85f64b174",
+      "operationKey": "operation:download-cutdown",
+      "type": "click",
+      "target": {
+        "role": "link",
+        "name": "Download the cutdown"
+      },
+      "expect": [
+        {
+          "type": "download",
+          "value": "autopromote-one-edit-cutdown.mp4"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-08T08:02:21.363Z",
+      "reason": "Observed the matching film after actual playback and seeking; verify retained bytes.",
+      "planner": null,
+      "afterState": "c28775cc874121b7d33bd19e8af80fc60dac942ee66c6886f36f705921385cb2"
+    },
+    {
+      "signature": "8f8796d17c2ca670dced805880b2212b836bccafa8c2a28154c166de0ab569e4",
+      "operationKey": "operation:download-teaser",
+      "type": "click",
+      "target": {
+        "role": "link",
+        "name": "Download the teaser"
+      },
+      "expect": [
+        {
+          "type": "download",
+          "value": "autopromote-one-edit-teaser.mp4"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-08T08:02:22.779Z",
+      "reason": "Observed the matching film after actual playback and seeking; verify retained bytes.",
+      "planner": null,
+      "afterState": "c28775cc874121b7d33bd19e8af80fc60dac942ee66c6886f36f705921385cb2"
+    }
+  ],
+  "observations": [
+    {
+      "id": "observation-1",
+      "url": "http://127.0.0.1:3098/review.html",
+      "pageId": "page-1",
+      "at": "2026-10-08T08:02:19.069Z"
+    },
+    {
+      "id": "observation-2",
+      "url": "http://127.0.0.1:3098/review.html",
+      "pageId": "page-1",
+      "at": "2026-10-08T08:02:21.291Z"
+    },
+    {
+      "id": "observation-3",
+      "url": "http://127.0.0.1:3098/review.html",
+      "pageId": "page-1",
+      "at": "2026-10-08T08:02:22.712Z"
+    }
+  ],
+  "artifacts": [
+    {
+      "type": "download",
+      "page": "page-1",
+      "filename": "autopromote-one-edit-hero.mp4",
+      "artifact": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/flagship-founder-film-20261008/browser-review/downloads/09c14b28-1163-4164-8b81-24d24248f904-autopromote-one-edit-hero.mp4",
+      "bytes": 24787537,
+      "sha256": "d6ae987aed7bed591ba9dcf685e86aedc4c855a3c632a6a249f89718b937b07a",
+      "at": "2026-10-08T08:02:19.498Z"
+    },
+    {
+      "type": "download",
+      "page": "page-1",
+      "filename": "autopromote-one-edit-cutdown.mp4",
+      "artifact": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/flagship-founder-film-20261008/browser-review/downloads/da96fc40-4e76-4fe4-8360-6828f9adc83d-autopromote-one-edit-cutdown.mp4",
+      "bytes": 11862840,
+      "sha256": "507fdc4a42642d5e47cf4c5c476a703158865781c4c301013142e52bde4ab364",
+      "at": "2026-10-08T08:02:21.532Z"
+    },
+    {
+      "type": "download",
+      "page": "page-1",
+      "filename": "autopromote-one-edit-teaser.mp4",
+      "artifact": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/flagship-founder-film-20261008/browser-review/downloads/a0d89786-e030-4f49-a264-27d019757b75-autopromote-one-edit-teaser.mp4",
+      "bytes": 6528395,
+      "sha256": "5b9f84402e60c8e4b31c4db17d0314869928b52f1b23b5c452d00f3323dea97f",
+      "at": "2026-10-08T08:02:22.881Z"
+    }
+  ],
+  "status": "completed"
+}

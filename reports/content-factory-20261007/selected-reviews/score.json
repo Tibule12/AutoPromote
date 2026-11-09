@@ -1,0 +1,19 @@
+{
+  "accepted": false,
+  "artifactSha256": "043aa65f330df292d18f85b0c0e9ecd28da83610b2f32c76bedffe82989aad86",
+  "reviewer": "AutoPromote objective decoded audio measurements",
+  "reason": "Technical headroom passes, but independent CPU ASR recovers repeated vocal-like words across the generated score. Instrumental-only status is uncertain; this take is held out of the final mix pending listening or replacement.",
+  "evidenceSha256": "043aa65f330df292d18f85b0c0e9ecd28da83610b2f32c76bedffe82989aad86",
+  "measurements": {
+    "accepted": true,
+    "reason": "Measured original stereo audio: peak 0.555, RMS 0.100, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+    "peak": 0.554840087890625,
+    "rms": 0.10021798583207048,
+    "clippedFraction": 0.0,
+    "channels": 2,
+    "sampleRate": 48000,
+    "duration": 23.963
+  },
+  "limitation": "Technical role only. Musical direction, narration delivery and emotional effect have not been heard by this reviewer; final listening remains required.",
+  "speechEvidence": "score-speech-review.json"
+}

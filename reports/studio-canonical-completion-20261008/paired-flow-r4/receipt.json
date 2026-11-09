@@ -1,0 +1,15 @@
+{
+  "startedAt": "2026-10-08T11:50:05.852Z",
+  "projectName": "Studio paired visual QA 20261008 r4",
+  "headless": true,
+  "muted": true,
+  "realAuth": true,
+  "noMocks": true,
+  "gpuUsed": false,
+  "gpuJobsStarted": 0,
+  "status": "FAIL",
+  "pairs": [],
+  "fullCoveragePreflight": "Possible uncovered audio: 0.0–2.8s, 5.2–6.8s, 9.2–12.0s. Caption these phrases, or choose Selected phrases if the gaps are intentional.",
+  "error": "flows.mediaRail is not a function",
+  "finishedAt": "2026-10-08T11:50:41.904Z"
+}

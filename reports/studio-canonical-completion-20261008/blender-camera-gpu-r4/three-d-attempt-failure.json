@@ -1,0 +1,111 @@
+{
+  "at": "2026-10-08T18:35:19.193Z",
+  "project": "Studio Blender camera NVIDIA QA 20261008 r2",
+  "realAuth": true,
+  "noMocks": true,
+  "status": "BLOCKED_GPU_CAPACITY",
+  "events": [
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T18:25:03.300Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T18:25:39.851Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T18:26:17.030Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T18:27:00.395Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T18:27:40.078Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T18:28:22.621Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T18:29:07.834Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T18:29:48.172Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T18:30:30.890Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T18:31:13.864Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T18:31:54.171Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T18:32:33.863Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T18:33:19.585Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T18:33:58.012Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview capacity is busy; retry shortly",
+      "at": "2026-10-08T18:34:37.911Z"
+    },
+    {
+      "path": "/api/media/studio-3d/preview",
+      "status": 429,
+      "error": "3D preview daily limit reached",
+      "at": "2026-10-08T18:35:18.726Z"
+    }
+  ],
+  "error": "HQ submission 429: 3D preview daily limit reached",
+  "classificationCorrection": {
+    "originalStatus": "BLOCKED_GPU_CAPACITY",
+    "correctedStatus": "BLOCKED_DAILY_ALLOWANCE",
+    "reason": "Final actual API response is daily limit reached, following earlier capacity responses. No allowance reset or bypass performed."
+  }
+}

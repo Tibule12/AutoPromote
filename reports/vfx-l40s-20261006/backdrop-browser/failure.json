@@ -1,0 +1,8 @@
+{
+  "error": "locator.click: Error: strict mode violation: getByRole('button', { name: 'Pause editing animation', exact: true }) resolved to 2 elements:\n    1) <button type=\"button\" aria-label=\"Pause editing animation\">…</button> aka getByRole('region', { name: 'Turn podcasts into Viral' }).getByLabel('Pause editing animation')\n    2) <button disabled type=\"button\" aria-label=\"Pause editing animation\">…</button> aka getByRole('region', { name: 'Bring every angle.' }).getByLabel('Pause editing animation')\n\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Pause editing animation', exact: true })\u001b[22m\n",
+  "checks": [
+    "Original generated backdrop loads and plays with the available editing scene"
+  ],
+  "missing": [],
+  "errors": []
+}

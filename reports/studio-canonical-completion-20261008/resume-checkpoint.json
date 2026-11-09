@@ -1,0 +1,8 @@
+{
+  "at": "2026-10-08T16:15:46.556146+00:00",
+  "userInstruction": "continue",
+  "scope": "Resumed CPU QA. Restored retained normal-login headless/muted browser after stalled session; no GPU start. Reproduced real frame-off export HTTP500 caused by mandatory podcast frame preflight. Repaired optional frame validation; 55 worker guards PASS. Native same-flow final retest running.",
+  "newGpuJobsStarted": 0,
+  "nextTaskId": "S02",
+  "failureEvidence": "reports/studio-canonical-completion-20261008/frame-controls-r10/receipt.json"
+}

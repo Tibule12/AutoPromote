@@ -1,0 +1,365 @@
+[
+  {
+    "assetId": "real-vessel",
+    "type": "video",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "generated/real-voyage-v6.mp4",
+      "sha256": "54e4102b5fa6df99491cee642dac927732fcd1860a119b213a3ffa97650e61bb",
+      "bytes": 2041470,
+      "duration": 5.0625,
+      "codec": "h264",
+      "container": "mp4",
+      "fps": 16,
+      "width": 832,
+      "height": 480,
+      "hasAudio": false
+    },
+    "audioRole": null,
+    "review": {
+      "accepted": true,
+      "artifactSha256": "54e4102b5fa6df99491cee642dac927732fcd1860a119b213a3ffa97650e61bb",
+      "reviewer": "Codex visual inspection of time-ordered frames",
+      "reason": "A coherent full-size mahogany yacht has cream canvas sails, rigging, moving bow spray and wake throughout. Camera tracks and pushes closer; this is not an aerial/wide reveal.",
+      "evidenceSha256": "161e4ca8b619f45e89d59d7e3f190ba4f52a3fdf77bed9f5e1c4dc04b04dc310",
+      "evidence": "generated/real-voyage-v6-review.jpg",
+      "criteria": [
+        {
+          "criterion": "Assigned raw story role",
+          "passed": true,
+          "observation": "A coherent full-size mahogany yacht has cream canvas sails, rigging, moving bow spray and wake throughout. Camera tracks and pushes closer; this is not an aerial/wide reveal."
+        }
+      ],
+      "limitation": "Private raw-role selection, not whole-film creative approval or public feature release."
+    },
+    "provenance": {
+      "sourceBrief": "A real cinematic voyage begins as a folded paper boat. AutoPromote generates the raw material from an idea and uses its existing Director and render pipeline to make the film. The reveal is a full-size working boat at sea, not a paper boat surviving at sea.",
+      "model": "Wan-AI/Wan2.2-I2V-A14B-Diffusers",
+      "modelRevision": "596658fd9ca6b7b71d5057529bbf319ecbc61d74",
+      "settings": {
+        "width": 832,
+        "height": 480,
+        "frames": 81,
+        "fps": 16,
+        "steps": 40,
+        "guidance": 3.5,
+        "dtype": "bfloat16; VAE float32",
+        "cpuOffload": true
+      },
+      "seed": 20261007116,
+      "tool": "AutoPromote NVIDIA conditioned-video adapter",
+      "origin": "server_generated",
+      "parentArtifactSha256": null,
+      "sourceBriefHash": "c8fe4c7f3d8d2edea4925e861108be9be085113c4ac39d26a1b85dbf0de74cba",
+      "directionHash": "80927191ae9cdbbd83e18b47c82ac61cca457492628400a2cd93e4ec8aee8c1a"
+    },
+    "reusableArtifacts": []
+  },
+  {
+    "assetId": "studio-ui",
+    "type": "ui",
+    "beatId": "reveal",
+    "status": "accepted",
+    "artifact": {
+      "path": "ui/studio-source-assembly-v17/video.mp4",
+      "sha256": "b8642205c018e908c677f5a1d759087131f8a874ac9d03cefbff0851737281b9",
+      "bytes": 785679,
+      "duration": 3,
+      "codec": "h264",
+      "container": "mp4",
+      "fps": 24,
+      "width": 1440,
+      "height": 900,
+      "hasAudio": false
+    },
+    "audioRole": null,
+    "review": {
+      "accepted": true,
+      "artifactSha256": "b8642205c018e908c677f5a1d759087131f8a874ac9d03cefbff0851737281b9",
+      "reviewer": "Codex visual inspection of time-ordered frames",
+      "reason": "Actual existing Studio shows these generated source clips. Native paused scrubbing follows the decoded source through a clip change without a loading overlay or resumed playback.",
+      "evidenceSha256": "5015368e379d6fb4c63ffba64b52adf26ddfcb4e3a26293c858689adb8e46062",
+      "evidence": "ui/studio-source-assembly-v17/review.jpg",
+      "criteria": [
+        {
+          "criterion": "Assigned raw story role",
+          "passed": true,
+          "observation": "Actual existing Studio shows these generated source clips. Native paused scrubbing follows the decoded source through a clip change without a loading overlay or resumed playback."
+        }
+      ],
+      "limitation": "Private raw-role selection, not whole-film creative approval or public feature release."
+    },
+    "provenance": {
+      "sourceBrief": "A real cinematic voyage begins as a folded paper boat. AutoPromote generates the raw material from an idea and uses its existing Director and render pipeline to make the film. The reveal is a full-size working boat at sea, not a paper boat surviving at sea.",
+      "model": "AutoPromote actual Studio browser capture",
+      "modelRevision": "studio-ui-capture-v2",
+      "settings": {
+        "url": "http://127.0.0.1:5009/?fixture=factory",
+        "projectName": "Paper to real · generated source assembly",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "fps": 24,
+        "frames": 72,
+        "interaction": "Native edited-output slider keyboard scrubbing",
+        "sourceClock": {
+          "start": 2.5,
+          "end": 6.1
+        }
+      },
+      "seed": null,
+      "tool": "Playwright and BrowserOperator observe-act-verify",
+      "origin": "actual_product_ui",
+      "parentArtifactSha256": null,
+      "sourceBriefHash": "c8fe4c7f3d8d2edea4925e861108be9be085113c4ac39d26a1b85dbf0de74cba",
+      "directionHash": "80927191ae9cdbbd83e18b47c82ac61cca457492628400a2cd93e4ec8aee8c1a"
+    },
+    "reusableArtifacts": []
+  },
+  {
+    "assetId": "identity",
+    "type": "three_d",
+    "beatId": "ending",
+    "status": "accepted",
+    "artifact": {
+      "path": "idents/cinematic-v2/ident.mp4",
+      "sha256": "2f97dc971ff1c0fdf7d9a057cb3abf4626907423d92fb6b6eccb916c457dcf05",
+      "bytes": 1239941,
+      "duration": 3.5,
+      "codec": "h264",
+      "container": "mp4",
+      "fps": 24,
+      "width": 1280,
+      "height": 720,
+      "hasAudio": true
+    },
+    "audioRole": "brand_ident",
+    "review": {
+      "accepted": true,
+      "artifactSha256": "2f97dc971ff1c0fdf7d9a057cb3abf4626907423d92fb6b6eccb916c457dcf05",
+      "reviewer": "Codex visual inspection of time-ordered frames",
+      "reason": "Extruded AutoPromote wordmark resolves through travelling studio light, reflections and restrained glow; editable native scene and timed impact sound are retained.",
+      "evidenceSha256": "c4a5749bbd34c52494498d4909c802db72740192f90221088225d2414a359e41",
+      "evidence": "idents/cinematic-v2/review.jpg",
+      "criteria": [
+        {
+          "criterion": "Assigned raw story role",
+          "passed": true,
+          "observation": "Extruded AutoPromote wordmark resolves through travelling studio light, reflections and restrained glow; editable native scene and timed impact sound are retained."
+        }
+      ],
+      "limitation": "Private raw-role selection, not whole-film creative approval or public feature release."
+    },
+    "provenance": {
+      "sourceBrief": "Create cinematic editable AutoPromote studio logo reveals: cinematic, AI compute, premium minimal and creator-energy. Brand ink, violet and ivory. Real extrusion, reflections, timed reveal and original impact audio.",
+      "model": "Blender AutoPromote studio ident",
+      "modelRevision": "4.5.9 LTS",
+      "settings": {
+        "template": "autopromote_ident",
+        "style": "cinematic",
+        "duration": 3.5,
+        "seed": 2026100780,
+        "sourceBrief": "Create cinematic editable AutoPromote studio logo reveals: cinematic, AI compute, premium minimal and creator-energy. Brand ink, violet and ivory. Real extrusion, reflections, timed reveal and original impact audio.",
+        "deadlineEpoch": 1791363059.6449072
+      },
+      "seed": 2026100780,
+      "tool": "Blender",
+      "origin": "server_generated",
+      "parentArtifactSha256": null,
+      "sourceBriefHash": "4e187b129d82a3b239f6752c54697ba0ecdfe94279eaeed70455a31e5501328b",
+      "directionHash": "80927191ae9cdbbd83e18b47c82ac61cca457492628400a2cd93e4ec8aee8c1a"
+    },
+    "reusableArtifacts": [
+      {
+        "role": "native_scene",
+        "path": "idents/cinematic-v2/autopromote-ident.blend",
+        "sha256": "3b56f8815b98d67eaa795f68dd5adf0375a22e293d7790d07dc543f89ed39e62"
+      },
+      {
+        "role": "audio_source",
+        "path": "idents/cinematic-v2/ident.wav",
+        "sha256": "b9a35a694ed0eb449154f96bcf57ac3b14de7812972064c16cb2cad1f31f2d4a"
+      }
+    ]
+  },
+  {
+    "assetId": "score",
+    "type": "audio",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "assets/founder-music-v8/audio.wav",
+      "sha256": "0d06c67776806f51482698216b2ae3cd761761395072196464ffab0351ee4792",
+      "bytes": 4600974,
+      "duration": 23.963,
+      "codec": "pcm_s16le",
+      "container": "wav",
+      "fps": 24,
+      "width": null,
+      "height": null,
+      "hasAudio": true
+    },
+    "audioRole": "music",
+    "review": {
+      "accepted": true,
+      "artifactSha256": "0d06c67776806f51482698216b2ae3cd761761395072196464ffab0351ee4792",
+      "evidenceSha256": "0d06c67776806f51482698216b2ae3cd761761395072196464ffab0351ee4792",
+      "reviewer": "AutoPromote decoded audio measurements and CPU speech diagnostic",
+      "reason": "Replacement generated score: measurable audibility, stereo headroom and duration pass; CPU VAD/ASR recovers no speech. Accepted for a private assembly test only. Musical effectiveness and instrumental-only status still require listening.",
+      "measurements": {
+        "accepted": true,
+        "reason": "Measured original stereo audio: peak 0.629, RMS 0.122, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+        "peak": 0.628570556640625,
+        "rms": 0.12185135693991446,
+        "clippedFraction": 0,
+        "channels": 2,
+        "sampleRate": 48000,
+        "duration": 23.963
+      },
+      "limitation": "Technical role acceptance only; final listening is required.",
+      "speechEvidence": "score-speech-review-v8.json"
+    },
+    "provenance": {
+      "sourceBrief": "A real cinematic voyage begins as a folded paper boat. AutoPromote generates the raw material from an idea and uses its existing Director and render pipeline to make the film. The reveal is a full-size working boat at sea, not a paper boat surviving at sea.",
+      "model": "ACE-Step/ACE-Step-v1-3.5B",
+      "modelRevision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+      "settings": {
+        "duration": 24,
+        "inferStep": 60,
+        "guidanceScale": 15,
+        "scheduler": "euler",
+        "cfg": "apg",
+        "lyrics": "[instrumental]",
+        "useErgLyric": false,
+        "dtype": "bfloat16",
+        "sampleRate": 48000,
+        "channels": 2,
+        "normalization": "-20 LUFS, -2 dBTP"
+      },
+      "seed": 20261007149,
+      "tool": "AutoPromote NVIDIA instrumental stem generation",
+      "origin": "generated_audio",
+      "parentArtifactSha256": null,
+      "sourceBriefHash": "c8fe4c7f3d8d2edea4925e861108be9be085113c4ac39d26a1b85dbf0de74cba",
+      "directionHash": "80927191ae9cdbbd83e18b47c82ac61cca457492628400a2cd93e4ec8aee8c1a"
+    },
+    "reusableArtifacts": []
+  },
+  {
+    "assetId": "one-idea",
+    "type": "audio",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "narration-processed-v11/one-idea.wav",
+      "sha256": "6469b6cd3f59304c34e34a1640fcba734e5166918301cbff3062ecf495af8f0f",
+      "bytes": 446478,
+      "duration": 2.325,
+      "codec": "pcm_s16le",
+      "container": "wav",
+      "fps": 24,
+      "width": null,
+      "height": null,
+      "hasAudio": true
+    },
+    "audioRole": "voiceover",
+    "review": {
+      "accepted": true,
+      "artifactSha256": "6469b6cd3f59304c34e34a1640fcba734e5166918301cbff3062ecf495af8f0f",
+      "evidenceSha256": "6469b6cd3f59304c34e34a1640fcba734e5166918301cbff3062ecf495af8f0f",
+      "reviewer": "AutoPromote decoded audio measurements",
+      "reason": "Measured original stereo audio: peak 0.427, RMS 0.062, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "measurements": {
+        "accepted": true,
+        "reason": "Measured original stereo audio: peak 0.427, RMS 0.062, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+        "peak": 0.4271240234375,
+        "rms": 0.062305675748035465,
+        "clippedFraction": 0,
+        "channels": 2,
+        "sampleRate": 48000,
+        "duration": 2.325
+      },
+      "limitation": "Technical role acceptance only; final listening is required."
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "model": "hexgrad/Kokoro-82M",
+      "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+      "settings": {
+        "voice": "af_heart",
+        "speed": 0.98,
+        "sampleRate": 48000,
+        "loudnessTargetLUFS": -18,
+        "postprocessing": {
+          "operation": "CPU linear gain",
+          "gain": 4,
+          "reason": "Short opening voice was measurably quieter than the later narration; preserve intelligibility over the score."
+        }
+      },
+      "seed": null,
+      "tool": "AutoPromote NVIDIA narration adapter",
+      "origin": "generated_audio",
+      "parentArtifactSha256": "f72bacef2b75809f042b44c3de7fc74f11a66efe6c197d44c89fc269c975cca3",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "80927191ae9cdbbd83e18b47c82ac61cca457492628400a2cd93e4ec8aee8c1a"
+    },
+    "reusableArtifacts": []
+  },
+  {
+    "assetId": "brief-no-footage",
+    "type": "audio",
+    "beatId": "reveal",
+    "status": "accepted",
+    "artifact": {
+      "path": "narration-cpu/brief-no-footage.wav",
+      "sha256": "e78da06e03e8aa9d029cfd282d157aa19946379c82411d916d34f49d9af9d6b1",
+      "bytes": 700878,
+      "duration": 3.65,
+      "codec": "pcm_s16le",
+      "container": "wav",
+      "fps": 24,
+      "width": null,
+      "height": null,
+      "hasAudio": true
+    },
+    "audioRole": "voiceover",
+    "review": {
+      "accepted": true,
+      "artifactSha256": "e78da06e03e8aa9d029cfd282d157aa19946379c82411d916d34f49d9af9d6b1",
+      "reviewer": "AutoPromote objective decoded audio measurements",
+      "reason": "Measured original stereo audio: peak 0.561, RMS 0.082, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "evidenceSha256": "e78da06e03e8aa9d029cfd282d157aa19946379c82411d916d34f49d9af9d6b1",
+      "measurements": {
+        "accepted": true,
+        "reason": "Measured original stereo audio: peak 0.561, RMS 0.082, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+        "peak": 0.56097412109375,
+        "rms": 0.0824021993283638,
+        "clippedFraction": 0,
+        "channels": 2,
+        "sampleRate": 48000,
+        "duration": 3.65
+      },
+      "limitation": "Technical role only. Musical direction, narration delivery and emotional effect have not been heard by this reviewer; final listening remains required."
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "model": "hexgrad/Kokoro-82M",
+      "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+      "settings": {
+        "voice": "af_heart",
+        "speed": 0.98,
+        "sampleRate": 48000,
+        "loudnessTargetLUFS": -18
+      },
+      "seed": null,
+      "tool": "AutoPromote NVIDIA narration adapter",
+      "origin": "generated_audio",
+      "parentArtifactSha256": null,
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "80927191ae9cdbbd83e18b47c82ac61cca457492628400a2cd93e4ec8aee8c1a"
+    },
+    "reusableArtifacts": []
+  }
+]

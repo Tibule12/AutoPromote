@@ -10,6 +10,7 @@ const DOCUMENT_FIELDS = [
   "constraints", "styleRef", "analysisRefs", "programmeSpeedKeys", "fallbackSpeed",
   "outputTimeMap", "journal", "idempotency", "directorReviewJournal", "compatibility",
   "projectIntelligenceRefs",
+  "visualGraph", "editGraph",
 ];
 
 const plain = value => {
@@ -99,7 +100,7 @@ const validAsset = asset => allowedKeys(asset,
 const validOccurrence = (occurrence, assetIds, programmeStart) =>
   allowedKeys(occurrence, [
     "occurrenceId", "assetId", "sourceRange", "programmeRange", "timeMapId", "playback",
-  ], ["inheritedFromOccurrenceId", "legacyParentIds"]) &&
+  ], ["inheritedFromOccurrenceId", "legacyParentIds", "parameterSchemaVersion", "parameters"]) &&
   validId(occurrence.occurrenceId) && assetIds.has(occurrence.assetId) &&
   occurrence.timeMapId === `map:${occurrence.occurrenceId}` &&
   validRange(occurrence.sourceRange, "source") &&
@@ -156,7 +157,7 @@ const validOutputMap = (segments, programmeDuration) => {
 
 const validateStudioProjectRevisionDocument = document => {
   if (!allowedKeys(document, DOCUMENT_FIELDS.filter(key =>
-    key !== "projectIntelligenceRefs"), ["projectIntelligenceRefs"]) ||
+    !["projectIntelligenceRefs", "visualGraph", "editGraph"].includes(key)), ["projectIntelligenceRefs", "visualGraph", "editGraph"]) ||
       !boundedJsonTree(document) ||
       document.schemaVersion !== SCHEMA_VERSION || !validId(document.projectId) ||
       !Number.isSafeInteger(document.revision) || document.revision < 0 ||
@@ -191,7 +192,7 @@ const validateStudioProjectRevisionDocument = document => {
     validTimeMap(map, document.clipOccurrences[index])) ||
       !validOutputMap(document.outputTimeMap, programmeDuration)) throw invalid();
   if (!document.layers.every(layer => plain(layer) && validId(layer.layerId) &&
-      ["caption", "title", "b_roll", "motion", "three_d"].includes(layer.type) &&
+      ["caption", "title", "b_roll", "motion", "three_d", "subject_vfx"].includes(layer.type) &&
       plain(layer.parameters))) throw invalid();
   if (!Object.values(document.linkedTiming.cues).every(Array.isArray) ||
       !Object.values(document.linkedTiming.keys).every(Array.isArray) ||
@@ -212,8 +213,9 @@ const validateStudioProjectRevisionDocument = document => {
           validHash(ref.dependencyDigest)) ||
         new Set(document.projectIntelligenceRefs.map(ref => ref.revisionId)).size !==
           document.projectIntelligenceRefs.length)) throw invalid();
-  if (!document.programmeSpeedKeys.every(key => ownKeys(key,
-    ["atProgrammeTick", "rate", "easing"]) && validTick(key.atProgrammeTick) &&
+  if (!document.programmeSpeedKeys.every(key => allowedKeys(key,
+    ["atProgrammeTick", "rate", "easing"], ["id"]) &&
+    (key.id === undefined || validId(key.id)) && validTick(key.atProgrammeTick) &&
     Number.isFinite(key.rate) && key.rate > 0 && typeof key.easing === "string")) throw invalid();
   let documentJson;
   try {
@@ -222,6 +224,15 @@ const validateStudioProjectRevisionDocument = document => {
     throw invalid();
   }
   if (Buffer.byteLength(documentJson, "utf8") > MAX_DOCUMENT_BYTES) throw tooLarge();
+  // Use the same versioned parameter contract as manual editing and Director.
+  // Keep the existing ownership, JSON bounds and time-map checks above.
+  if (document.compatibility.editableStateVersion !== undefined) {
+    try {
+      require("../generated/studioDirectorReplayKernel.cjs").validateStudioProjectDocument(document);
+    } catch (_) {
+      throw invalid();
+    }
+  }
   return { documentJson, documentFingerprint: sha256(documentJson) };
 };
 

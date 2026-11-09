@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "sha256": "a86dac7a549a37d0cde367b342e968345a100c772f1c64701f36c934c597eed8",
+  "bytes": 52495,
+  "seconds": 1,
+  "video": {
+    "width": 1280,
+    "height": 720,
+    "codec": "h264",
+    "fps": "30/1",
+    "duration": "1.000000",
+    "pixelFormat": "yuv420p"
+  },
+  "audio": null,
+  "independentFullDecode": true,
+  "contactSheet": "reports/studio-stability-20261008/three_d/nvidia-preview/preview-4228a404-1c5c-4e38-9203-94881fe54b17.mp4.frames.jpg",
+  "scope": "Technical only. Pixel and listening review are separate required evidence."
+}

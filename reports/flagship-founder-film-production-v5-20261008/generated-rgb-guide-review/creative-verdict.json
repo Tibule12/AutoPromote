@@ -1,0 +1,17 @@
+{
+  "status": "REJECTED_FOR_FILM",
+  "artifactSha256": "df97761ebf8e5bda1123c4a19e3980daa27fe94b24a0cbf95ab5a108f104fecb",
+  "reviewedBy": "Codex frame inspection",
+  "evidence": [
+    "decoded-review.png",
+    "seam-review.png",
+    "receipt.json"
+  ],
+  "findings": [
+    "The RGB guide keeps one boat, but from 0.25s the paper and water become visibly synthetic.",
+    "The ocean changes into broad flat blue bands and the hull remains a miniature orange CGI object through 4.5s.",
+    "The final photographic yacht enters by an abrupt style/scale substitution at frame 80.",
+    "The final-frame seam metric does not measure the huge preceding style change."
+  ],
+  "decision": "Exclude from film. Control data solved duplication but destroyed photographic credibility; do not rerun this exact approach."
+}

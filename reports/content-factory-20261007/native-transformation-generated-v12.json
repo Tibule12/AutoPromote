@@ -1,0 +1,64 @@
+{
+  "status": "GENERATED_PENDING_VISUAL_REVIEW",
+  "model": "Blender connected paper-to-yacht transformation",
+  "modelRevision": "4.5.9 LTS",
+  "tool": "AutoPromote editable 3D raw asset",
+  "device": {
+    "backend": "OPTIX",
+    "devices": [
+      "NVIDIA L40S"
+    ],
+    "gpu_verified": true,
+    "denoiser": "OPTIX"
+  },
+  "sourceBrief": "A real cinematic voyage begins as a folded paper boat. AutoPromote generates the raw material from an idea and uses its existing Director and render pipeline to make the film. The reveal is a full-size working boat at sea, not a paper boat surviving at sea.",
+  "settings": {
+    "template": "paper_to_yacht",
+    "deadlineEpoch": 1791381600,
+    "duration": 6,
+    "fps": 24,
+    "width": 1280,
+    "height": 720,
+    "seed": 20261007139,
+    "sourceBrief": "A real cinematic voyage begins as a folded paper boat. AutoPromote generates the raw material from an idea and uses its existing Director and render pipeline to make the film. The reveal is a full-size working boat at sea, not a paper boat surviving at sea."
+  },
+  "nativeScene": "paper-yacht.blend",
+  "nativeSceneSha256": "51a724d5378a03109c0151ae6967f8cce106a1b12d6627a5edf0be5cddd26772",
+  "scriptSha256": "3f296c23b6e17cdf24cfb6245fc9435a94f7ada58c45d62d70b4b0ac41efa18a",
+  "frames": 144,
+  "fps": 24,
+  "seconds": 125.75915057499878,
+  "editable": [
+    "connected hull shape keys",
+    "sail unfold shape keys",
+    "paper-to-timber and paper-to-canvas material keys",
+    "mast and rigging growth",
+    "ocean expansion and wave depth",
+    "workbench descent",
+    "camera path",
+    "reflection lighting",
+    "fibre-to-spray trajectories",
+    "glow compositor"
+  ],
+  "limitation": "Authored 3D transformation; visual quality and continuity with adjoining generated footage require separate review. No semantic transformation feature is declared released.",
+  "artifact": {
+    "path": "assets/founder-native-transform-v12/video.mp4",
+    "sha256": "1732614db0b563b4756c33b793e016c59515774884076134f6b4e9c415945ead",
+    "bytes": 4987124,
+    "duration": 6,
+    "codec": "h264",
+    "container": "mp4",
+    "fps": 24,
+    "width": 1280,
+    "height": 720,
+    "hasAudio": false
+  },
+  "reusableArtifacts": [
+    {
+      "role": "native_scene",
+      "path": "assets/founder-native-transform-v12/paper-yacht.blend",
+      "sha256": "51a724d5378a03109c0151ae6967f8cce106a1b12d6627a5edf0be5cddd26772"
+    }
+  ],
+  "recovery": "GPU render completed after interrupted local caller. Recovered original native scene and frame receipt; encoded complete frames on CPU without repeating generation."
+}

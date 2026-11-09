@@ -1,0 +1,23 @@
+{
+  "tool": "Blender",
+  "version": "4.5.9 LTS",
+  "device": {
+    "backend": "OPTIX",
+    "devices": [
+      "NVIDIA L40S"
+    ],
+    "gpu_verified": true,
+    "denoiser": "OPTIX"
+  },
+  "frames": 72,
+  "config": {
+    "template": "paper_ocean",
+    "duration": 3,
+    "fps": 24,
+    "width": 1280,
+    "height": 704,
+    "seed": 2026100741,
+    "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list."
+  },
+  "status": "GENERATED_PENDING_REVIEW"
+}

@@ -1,0 +1,1052 @@
+{
+  "projectId": "factory:founder-transform-prototype-v21:continuous-transformation-prototype",
+  "ownerUid": "founder-local",
+  "document": {
+    "schemaVersion": 1,
+    "projectId": "factory:founder-transform-prototype-v21:continuous-transformation-prototype",
+    "revision": 1,
+    "clock": {
+      "ticksPerSecond": 90000,
+      "interval": "half_open"
+    },
+    "output": {
+      "aspectRatio": "16:9",
+      "requestedResolution": "1080p",
+      "frameRate": {
+        "numerator": 24,
+        "denominator": 1
+      },
+      "codec": "h264",
+      "audioCodec": "aac",
+      "audioSampleRate": null,
+      "audioSampleRatePolicy": "worker_selected"
+    },
+    "assets": [
+      {
+        "assetId": "source:continuous-transform:sha256:0bdd08d05b04d6977bd6fa766e8d92346693750c264349d4ee43001fc2d09bb8",
+        "sourceId": "continuous-transform",
+        "storagePath": "assets/founder-control-transform-v17/video.mp4",
+        "contentHash": "0bdd08d05b04d6977bd6fa766e8d92346693750c264349d4ee43001fc2d09bb8",
+        "identityState": "hash_verified"
+      },
+      {
+        "assetId": "source:real-vessel:sha256:54e4102b5fa6df99491cee642dac927732fcd1860a119b213a3ffa97650e61bb",
+        "sourceId": "real-vessel",
+        "storagePath": "generated/real-voyage-v6.mp4",
+        "contentHash": "54e4102b5fa6df99491cee642dac927732fcd1860a119b213a3ffa97650e61bb",
+        "identityState": "hash_verified"
+      },
+      {
+        "assetId": "source:identity:sha256:2f97dc971ff1c0fdf7d9a057cb3abf4626907423d92fb6b6eccb916c457dcf05",
+        "sourceId": "identity",
+        "storagePath": "idents/cinematic-v2/ident.mp4",
+        "contentHash": "2f97dc971ff1c0fdf7d9a057cb3abf4626907423d92fb6b6eccb916c457dcf05",
+        "identityState": "hash_verified"
+      }
+    ],
+    "clipOccurrences": [
+      {
+        "occurrenceId": "continuous-transformation-prototype-1",
+        "assetId": "source:continuous-transform:sha256:0bdd08d05b04d6977bd6fa766e8d92346693750c264349d4ee43001fc2d09bb8",
+        "sourceRange": {
+          "space": "source",
+          "startTick": 0,
+          "endTick": 455625
+        },
+        "programmeRange": {
+          "space": "programme",
+          "startTick": 0,
+          "endTick": 455625
+        },
+        "timeMapId": "map:continuous-transformation-prototype-1",
+        "playback": {
+          "direction": "forward",
+          "freeze": false,
+          "rate": {
+            "numerator": 1,
+            "denominator": 1
+          }
+        }
+      },
+      {
+        "occurrenceId": "continuous-transformation-prototype-2",
+        "assetId": "source:real-vessel:sha256:54e4102b5fa6df99491cee642dac927732fcd1860a119b213a3ffa97650e61bb",
+        "sourceRange": {
+          "space": "source",
+          "startTick": 5625,
+          "endTick": 275625
+        },
+        "programmeRange": {
+          "space": "programme",
+          "startTick": 455625,
+          "endTick": 725625
+        },
+        "timeMapId": "map:continuous-transformation-prototype-2",
+        "playback": {
+          "direction": "forward",
+          "freeze": false,
+          "rate": {
+            "numerator": 1,
+            "denominator": 1
+          }
+        }
+      },
+      {
+        "occurrenceId": "continuous-transformation-prototype-3",
+        "assetId": "source:identity:sha256:2f97dc971ff1c0fdf7d9a057cb3abf4626907423d92fb6b6eccb916c457dcf05",
+        "sourceRange": {
+          "space": "source",
+          "startTick": 0,
+          "endTick": 315000
+        },
+        "programmeRange": {
+          "space": "programme",
+          "startTick": 725625,
+          "endTick": 1040625
+        },
+        "timeMapId": "map:continuous-transformation-prototype-3",
+        "playback": {
+          "direction": "forward",
+          "freeze": false,
+          "rate": {
+            "numerator": 1,
+            "denominator": 1
+          }
+        }
+      }
+    ],
+    "timeMaps": [
+      {
+        "timeMapId": "map:continuous-transformation-prototype-1",
+        "occurrenceId": "continuous-transformation-prototype-1",
+        "segments": [
+          {
+            "sourceRange": {
+              "space": "source",
+              "startTick": 0,
+              "endTick": 455625
+            },
+            "clipLocalRange": {
+              "space": "clip_local",
+              "startTick": 0,
+              "endTick": 455625
+            },
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 0,
+              "endTick": 455625
+            },
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            },
+            "direction": "forward",
+            "freeze": false
+          }
+        ]
+      },
+      {
+        "timeMapId": "map:continuous-transformation-prototype-2",
+        "occurrenceId": "continuous-transformation-prototype-2",
+        "segments": [
+          {
+            "sourceRange": {
+              "space": "source",
+              "startTick": 5625,
+              "endTick": 275625
+            },
+            "clipLocalRange": {
+              "space": "clip_local",
+              "startTick": 0,
+              "endTick": 270000
+            },
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 455625,
+              "endTick": 725625
+            },
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            },
+            "direction": "forward",
+            "freeze": false
+          }
+        ]
+      },
+      {
+        "timeMapId": "map:continuous-transformation-prototype-3",
+        "occurrenceId": "continuous-transformation-prototype-3",
+        "segments": [
+          {
+            "sourceRange": {
+              "space": "source",
+              "startTick": 0,
+              "endTick": 315000
+            },
+            "clipLocalRange": {
+              "space": "clip_local",
+              "startTick": 0,
+              "endTick": 315000
+            },
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 725625,
+              "endTick": 1040625
+            },
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            },
+            "direction": "forward",
+            "freeze": false
+          }
+        ]
+      }
+    ],
+    "layers": [
+      {
+        "layerId": "caption-1",
+        "type": "caption",
+        "legacyCollection": "captionSegments",
+        "compositionStage": "worker_caption",
+        "sourceRange": {
+          "space": "source",
+          "startTick": 4500,
+          "endTick": 213750
+        },
+        "sourceId": null,
+        "parameters": {
+          "text": "One idea. No footage.",
+          "reviewRequired": false,
+          "textReviewed": false,
+          "speaker": null,
+          "placement": null
+        }
+      },
+      {
+        "layerId": "caption-2",
+        "type": "caption",
+        "legacyCollection": "captionSegments",
+        "compositionStage": "worker_caption",
+        "sourceRange": {
+          "space": "source",
+          "startTick": 450000,
+          "endTick": 598500
+        },
+        "sourceId": null,
+        "parameters": {
+          "text": "This started with a brief.",
+          "reviewRequired": false,
+          "textReviewed": false,
+          "speaker": null,
+          "placement": null
+        }
+      },
+      {
+        "layerId": "caption-3",
+        "type": "caption",
+        "legacyCollection": "captionSegments",
+        "compositionStage": "worker_caption",
+        "sourceRange": {
+          "space": "source",
+          "startTick": 598500,
+          "endTick": 778500
+        },
+        "sourceId": null,
+        "parameters": {
+          "text": "No camera. No footage.",
+          "reviewRequired": false,
+          "textReviewed": false,
+          "speaker": null,
+          "placement": null
+        }
+      }
+    ],
+    "linkedTiming": {
+      "cues": {
+        "soundEffects": [
+          {
+            "cueId": "continuous-transformation-prototype-audio-1",
+            "type": null,
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 4500,
+              "endTick": 213750
+            },
+            "trimStartTick": 0
+          },
+          {
+            "cueId": "continuous-transformation-prototype-audio-2",
+            "type": null,
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 450000,
+              "endTick": 778500
+            },
+            "trimStartTick": 0
+          },
+          {
+            "cueId": "continuous-transformation-prototype-audio-3",
+            "type": null,
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 0,
+              "endTick": 725625
+            },
+            "trimStartTick": 0
+          }
+        ],
+        "voiceovers": [],
+        "adjustmentLayers": []
+      },
+      "keys": {
+        "motionKeyframes": [],
+        "finishKeyframes": [],
+        "reframeKeyframes": [],
+        "reframeModeCuts": [],
+        "speakerFocusCuts": []
+      }
+    },
+    "audioGraph": {
+      "legacySnapshotRef": "audioRemix",
+      "routes": [],
+      "routing": {
+        "muteOriginalAudio": false,
+        "musicDucking": false,
+        "musicDuckingStrength": 0,
+        "musicTrackId": "score"
+      }
+    },
+    "constraints": {
+      "locks": []
+    },
+    "styleRef": null,
+    "analysisRefs": [],
+    "projectIntelligenceRefs": [],
+    "programmeSpeedKeys": [],
+    "fallbackSpeed": 1,
+    "outputTimeMap": [
+      {
+        "programmeRange": {
+          "space": "programme",
+          "startTick": 0,
+          "endTick": 1040625
+        },
+        "outputRange": {
+          "space": "output",
+          "startTick": 0,
+          "endTick": 1040625
+        },
+        "rateNumerator": 1000000,
+        "rateDenominator": 1000000
+      }
+    ],
+    "journal": [],
+    "idempotency": {},
+    "directorReviewJournal": [],
+    "compatibility": {
+      "legacySnapshotVersion": 1,
+      "projection": "clip_occurrences_canonical_other_fields_legacy",
+      "layerComposition": "separate_worker_stages"
+    }
+  },
+  "snapshot": {
+    "timeline": [
+      {
+        "id": "continuous-transformation-prototype-1",
+        "sourceClipId": "continuous-transform",
+        "startRequest": 0,
+        "endRequest": 5.0625,
+        "duration": 5.0625,
+        "contentHash": "0bdd08d05b04d6977bd6fa766e8d92346693750c264349d4ee43001fc2d09bb8",
+        "storagePath": "assets/founder-control-transform-v17/video.mp4",
+        "name": "continuous-transform"
+      },
+      {
+        "id": "continuous-transformation-prototype-2",
+        "sourceClipId": "real-vessel",
+        "startRequest": 0.0625,
+        "endRequest": 3.0625,
+        "duration": 3,
+        "contentHash": "54e4102b5fa6df99491cee642dac927732fcd1860a119b213a3ffa97650e61bb",
+        "storagePath": "generated/real-voyage-v6.mp4",
+        "name": "real-vessel"
+      },
+      {
+        "id": "continuous-transformation-prototype-3",
+        "sourceClipId": "identity",
+        "startRequest": 0,
+        "endRequest": 3.5,
+        "duration": 3.5,
+        "contentHash": "2f97dc971ff1c0fdf7d9a057cb3abf4626907423d92fb6b6eccb916c457dcf05",
+        "storagePath": "idents/cinematic-v2/ident.mp4",
+        "name": "identity"
+      }
+    ],
+    "orderedClips": [],
+    "selectedClipId": null,
+    "reframeAspect": "16:9",
+    "exportSettings": {
+      "resolution": "1080p",
+      "fps": 24,
+      "codec": "h264",
+      "audioCodec": "aac"
+    },
+    "overlays": [],
+    "motionScenes": [],
+    "captionSegments": [
+      {
+        "start": 0.05,
+        "end": 2.375,
+        "text": "One idea. No footage.",
+        "captionIcon": "none",
+        "captionAccent": "#ffffff"
+      },
+      {
+        "start": 5,
+        "end": 6.65,
+        "text": "This started with a brief.",
+        "captionIcon": "none",
+        "captionAccent": "#ffffff"
+      },
+      {
+        "start": 6.65,
+        "end": 8.65,
+        "text": "No camera. No footage.",
+        "captionIcon": "none",
+        "captionAccent": "#ffffff"
+      }
+    ],
+    "autoCaptions": true,
+    "soundEffects": [
+      {
+        "id": "continuous-transformation-prototype-audio-1",
+        "name": "one-idea",
+        "kind": "voiceover",
+        "url": "http://127.0.0.1:8765/narration-processed-v11/one-idea.wav",
+        "startTime": 0.05,
+        "duration": 2.325,
+        "trimStart": 0,
+        "volume": 0.9,
+        "fadeIn": 0.02,
+        "fadeOut": 0.05,
+        "enabled": true
+      },
+      {
+        "id": "continuous-transformation-prototype-audio-2",
+        "name": "brief-no-footage",
+        "kind": "voiceover",
+        "url": "http://127.0.0.1:8765/narration-cpu/brief-no-footage.wav",
+        "startTime": 5,
+        "duration": 3.65,
+        "trimStart": 0,
+        "volume": 0.9,
+        "fadeIn": 0.02,
+        "fadeOut": 0.05,
+        "enabled": true
+      },
+      {
+        "id": "continuous-transformation-prototype-audio-3",
+        "name": "transformation-sound",
+        "kind": "sfx",
+        "url": "http://127.0.0.1:8765/audio/transformation-v21/sound.wav",
+        "startTime": 0,
+        "duration": 8.0625,
+        "trimStart": 0,
+        "volume": 0.65,
+        "fadeIn": 0.02,
+        "fadeOut": 0.05,
+        "enabled": true
+      }
+    ],
+    "speedKeyframes": [],
+    "trackStates": {},
+    "muteOriginalAudio": false,
+    "musicDucking": false,
+    "musicDuckingStrength": 0,
+    "addMusic": true,
+    "musicVolume": 0.25,
+    "musicTrack": {
+      "id": "score",
+      "url": "http://127.0.0.1:8765/assets/founder-music-v8/audio.wav",
+      "duration": 23.963
+    }
+  },
+  "directorBatch": {
+    "projectId": "factory:founder-transform-prototype-v21:continuous-transformation-prototype",
+    "baseRevision": 0,
+    "idempotencyKey": "factory-edit-founder-transform-protot-continuous-transformation-prototype",
+    "actor": {
+      "type": "ai",
+      "id": "content_factory_director"
+    },
+    "operations": [
+      {
+        "type": "trim_clip",
+        "target": {
+          "occurrenceId": "continuous-transformation-prototype-1"
+        },
+        "keep": {
+          "space": "source",
+          "startTick": 0,
+          "endTick": 455625
+        }
+      },
+      {
+        "type": "trim_clip",
+        "target": {
+          "occurrenceId": "continuous-transformation-prototype-2"
+        },
+        "keep": {
+          "space": "source",
+          "startTick": 5625,
+          "endTick": 275625
+        }
+      },
+      {
+        "type": "trim_clip",
+        "target": {
+          "occurrenceId": "continuous-transformation-prototype-3"
+        },
+        "keep": {
+          "space": "source",
+          "startTick": 0,
+          "endTick": 315000
+        }
+      }
+    ]
+  },
+  "directorPreview": {
+    "duplicate": false,
+    "baseRevision": 0,
+    "newRevision": 1,
+    "affectedNodes": [
+      "continuous-transformation-prototype-1",
+      "continuous-transformation-prototype-2",
+      "continuous-transformation-prototype-3"
+    ],
+    "readSet": [
+      "occurrence:continuous-transformation-prototype-1",
+      "occurrence:continuous-transformation-prototype-2",
+      "occurrence:continuous-transformation-prototype-3",
+      "programme:layers",
+      "programme:linked_timing",
+      "programme:speed_keys"
+    ],
+    "writeSet": [
+      "occurrence:continuous-transformation-prototype-1",
+      "occurrence:continuous-transformation-prototype-2",
+      "occurrence:continuous-transformation-prototype-3",
+      "programme:timeline",
+      "time_maps",
+      "programme:layers",
+      "programme:linked_timing",
+      "programme:speed_keys"
+    ],
+    "previewDocument": {
+      "schemaVersion": 1,
+      "projectId": "factory:founder-transform-prototype-v21:continuous-transformation-prototype",
+      "revision": 0,
+      "clock": {
+        "ticksPerSecond": 90000,
+        "interval": "half_open"
+      },
+      "output": {
+        "aspectRatio": "16:9",
+        "requestedResolution": "1080p",
+        "frameRate": {
+          "numerator": 24,
+          "denominator": 1
+        },
+        "codec": "h264",
+        "audioCodec": "aac",
+        "audioSampleRate": null,
+        "audioSampleRatePolicy": "worker_selected"
+      },
+      "assets": [
+        {
+          "assetId": "source:continuous-transform:sha256:0bdd08d05b04d6977bd6fa766e8d92346693750c264349d4ee43001fc2d09bb8",
+          "sourceId": "continuous-transform",
+          "storagePath": "assets/founder-control-transform-v17/video.mp4",
+          "contentHash": "0bdd08d05b04d6977bd6fa766e8d92346693750c264349d4ee43001fc2d09bb8",
+          "identityState": "hash_verified"
+        },
+        {
+          "assetId": "source:real-vessel:sha256:54e4102b5fa6df99491cee642dac927732fcd1860a119b213a3ffa97650e61bb",
+          "sourceId": "real-vessel",
+          "storagePath": "generated/real-voyage-v6.mp4",
+          "contentHash": "54e4102b5fa6df99491cee642dac927732fcd1860a119b213a3ffa97650e61bb",
+          "identityState": "hash_verified"
+        },
+        {
+          "assetId": "source:identity:sha256:2f97dc971ff1c0fdf7d9a057cb3abf4626907423d92fb6b6eccb916c457dcf05",
+          "sourceId": "identity",
+          "storagePath": "idents/cinematic-v2/ident.mp4",
+          "contentHash": "2f97dc971ff1c0fdf7d9a057cb3abf4626907423d92fb6b6eccb916c457dcf05",
+          "identityState": "hash_verified"
+        }
+      ],
+      "clipOccurrences": [
+        {
+          "occurrenceId": "continuous-transformation-prototype-1",
+          "assetId": "source:continuous-transform:sha256:0bdd08d05b04d6977bd6fa766e8d92346693750c264349d4ee43001fc2d09bb8",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 455625
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 0,
+            "endTick": 455625
+          },
+          "timeMapId": "map:continuous-transformation-prototype-1",
+          "playback": {
+            "direction": "forward",
+            "freeze": false,
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            }
+          }
+        },
+        {
+          "occurrenceId": "continuous-transformation-prototype-2",
+          "assetId": "source:real-vessel:sha256:54e4102b5fa6df99491cee642dac927732fcd1860a119b213a3ffa97650e61bb",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 5625,
+            "endTick": 275625
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 455625,
+            "endTick": 725625
+          },
+          "timeMapId": "map:continuous-transformation-prototype-2",
+          "playback": {
+            "direction": "forward",
+            "freeze": false,
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            }
+          }
+        },
+        {
+          "occurrenceId": "continuous-transformation-prototype-3",
+          "assetId": "source:identity:sha256:2f97dc971ff1c0fdf7d9a057cb3abf4626907423d92fb6b6eccb916c457dcf05",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 315000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 725625,
+            "endTick": 1040625
+          },
+          "timeMapId": "map:continuous-transformation-prototype-3",
+          "playback": {
+            "direction": "forward",
+            "freeze": false,
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            }
+          }
+        }
+      ],
+      "timeMaps": [
+        {
+          "timeMapId": "map:continuous-transformation-prototype-1",
+          "occurrenceId": "continuous-transformation-prototype-1",
+          "segments": [
+            {
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 455625
+              },
+              "clipLocalRange": {
+                "space": "clip_local",
+                "startTick": 0,
+                "endTick": 455625
+              },
+              "programmeRange": {
+                "space": "programme",
+                "startTick": 0,
+                "endTick": 455625
+              },
+              "rate": {
+                "numerator": 1,
+                "denominator": 1
+              },
+              "direction": "forward",
+              "freeze": false
+            }
+          ]
+        },
+        {
+          "timeMapId": "map:continuous-transformation-prototype-2",
+          "occurrenceId": "continuous-transformation-prototype-2",
+          "segments": [
+            {
+              "sourceRange": {
+                "space": "source",
+                "startTick": 5625,
+                "endTick": 275625
+              },
+              "clipLocalRange": {
+                "space": "clip_local",
+                "startTick": 0,
+                "endTick": 270000
+              },
+              "programmeRange": {
+                "space": "programme",
+                "startTick": 455625,
+                "endTick": 725625
+              },
+              "rate": {
+                "numerator": 1,
+                "denominator": 1
+              },
+              "direction": "forward",
+              "freeze": false
+            }
+          ]
+        },
+        {
+          "timeMapId": "map:continuous-transformation-prototype-3",
+          "occurrenceId": "continuous-transformation-prototype-3",
+          "segments": [
+            {
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 315000
+              },
+              "clipLocalRange": {
+                "space": "clip_local",
+                "startTick": 0,
+                "endTick": 315000
+              },
+              "programmeRange": {
+                "space": "programme",
+                "startTick": 725625,
+                "endTick": 1040625
+              },
+              "rate": {
+                "numerator": 1,
+                "denominator": 1
+              },
+              "direction": "forward",
+              "freeze": false
+            }
+          ]
+        }
+      ],
+      "layers": [
+        {
+          "layerId": "caption-1",
+          "type": "caption",
+          "legacyCollection": "captionSegments",
+          "compositionStage": "worker_caption",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 4500,
+            "endTick": 213750
+          },
+          "sourceId": null,
+          "parameters": {
+            "text": "One idea. No footage.",
+            "reviewRequired": false,
+            "textReviewed": false,
+            "speaker": null,
+            "placement": null
+          }
+        },
+        {
+          "layerId": "caption-2",
+          "type": "caption",
+          "legacyCollection": "captionSegments",
+          "compositionStage": "worker_caption",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 450000,
+            "endTick": 598500
+          },
+          "sourceId": null,
+          "parameters": {
+            "text": "This started with a brief.",
+            "reviewRequired": false,
+            "textReviewed": false,
+            "speaker": null,
+            "placement": null
+          }
+        },
+        {
+          "layerId": "caption-3",
+          "type": "caption",
+          "legacyCollection": "captionSegments",
+          "compositionStage": "worker_caption",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 598500,
+            "endTick": 778500
+          },
+          "sourceId": null,
+          "parameters": {
+            "text": "No camera. No footage.",
+            "reviewRequired": false,
+            "textReviewed": false,
+            "speaker": null,
+            "placement": null
+          }
+        }
+      ],
+      "linkedTiming": {
+        "cues": {
+          "soundEffects": [],
+          "voiceovers": [],
+          "adjustmentLayers": []
+        },
+        "keys": {
+          "motionKeyframes": [],
+          "finishKeyframes": [],
+          "reframeKeyframes": [],
+          "reframeModeCuts": [],
+          "speakerFocusCuts": []
+        }
+      },
+      "audioGraph": {
+        "legacySnapshotRef": "audioRemix",
+        "routes": [],
+        "routing": {
+          "muteOriginalAudio": false,
+          "musicDucking": false,
+          "musicDuckingStrength": 0,
+          "musicTrackId": "score"
+        }
+      },
+      "constraints": {
+        "locks": []
+      },
+      "styleRef": null,
+      "analysisRefs": [],
+      "projectIntelligenceRefs": [],
+      "programmeSpeedKeys": [],
+      "fallbackSpeed": 1,
+      "outputTimeMap": [
+        {
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 0,
+            "endTick": 1040625
+          },
+          "outputRange": {
+            "space": "output",
+            "startTick": 0,
+            "endTick": 1040625
+          },
+          "rateNumerator": 1000000,
+          "rateDenominator": 1000000
+        }
+      ],
+      "journal": [],
+      "idempotency": {},
+      "directorReviewJournal": [],
+      "compatibility": {
+        "legacySnapshotVersion": 1,
+        "projection": "clip_occurrences_canonical_other_fields_legacy",
+        "layerComposition": "separate_worker_stages"
+      }
+    }
+  },
+  "renderRequest": {
+    "video_url": "http://127.0.0.1:8765/assets/founder-control-transform-v17/video.mp4",
+    "start_time": 0,
+    "end_time": 11.5625,
+    "overlays": [],
+    "auto_captions": true,
+    "timeline_segments": [
+      {
+        "id": "continuous-transformation-prototype-1",
+        "source_clip_id": "continuous-transform",
+        "start_time": 0,
+        "end_time": 5.0625,
+        "duration": 5.0625,
+        "url": "http://127.0.0.1:8765/assets/founder-control-transform-v17/video.mp4"
+      },
+      {
+        "id": "continuous-transformation-prototype-2",
+        "source_clip_id": "real-vessel",
+        "start_time": 0.0625,
+        "end_time": 3.0625,
+        "duration": 3,
+        "url": "http://127.0.0.1:8765/generated/real-voyage-v6.mp4"
+      },
+      {
+        "id": "continuous-transformation-prototype-3",
+        "source_clip_id": "identity",
+        "start_time": 0,
+        "end_time": 3.5,
+        "duration": 3.5,
+        "url": "http://127.0.0.1:8765/idents/cinematic-v2/ident.mp4"
+      }
+    ],
+    "background_audio": null,
+    "hook_focus_point": null,
+    "cover_frame": null,
+    "thumbnail_frame": null,
+    "caption_style": "minimal",
+    "caption_position": "bottom",
+    "caption_scale": 1,
+    "caption_segments": [
+      {
+        "id": "caption-1",
+        "start_time": 0.05,
+        "end_time": 2.375,
+        "text": "One idea. No footage.",
+        "caption_icon": "none",
+        "caption_accent": "#ffffff"
+      },
+      {
+        "id": "caption-2",
+        "start_time": 5,
+        "end_time": 6.65,
+        "text": "This started with a brief.",
+        "caption_icon": "none",
+        "caption_accent": "#ffffff"
+      },
+      {
+        "id": "caption-3",
+        "start_time": 6.65,
+        "end_time": 8.65,
+        "text": "No camera. No footage.",
+        "caption_icon": "none",
+        "caption_accent": "#ffffff"
+      }
+    ],
+    "creative_intent": "Private continuous paper-to-yacht transformation prototype with visible early-structure defects. Not approved public marketing or proof of full autonomous movie generation.",
+    "professional_cleanup": false,
+    "finish_plan": {
+      "version": 1,
+      "enabled": true,
+      "reframe": {
+        "enabled": true,
+        "aspect": "16:9",
+        "mode": "off"
+      }
+    },
+    "smart_crop": true,
+    "smart_crop_mode": "safe_fit",
+    "brand_watermark": false,
+    "output_settings": {
+      "resolution": "1080p",
+      "fps": 24,
+      "codec": "h264",
+      "audioCodec": "aac"
+    },
+    "add_music": true,
+    "music_url": "http://127.0.0.1:8765/assets/founder-music-v8/audio.wav",
+    "music_name": "score",
+    "music_volume": 0.25,
+    "music_ducking": false,
+    "music_fade_in": 0.25,
+    "music_fade_out": 0.6,
+    "music_loop": false,
+    "sound_effects": [
+      {
+        "id": "continuous-transformation-prototype-audio-1",
+        "name": "one-idea",
+        "kind": "voiceover",
+        "url": "http://127.0.0.1:8765/narration-processed-v11/one-idea.wav",
+        "startTime": 0.05,
+        "duration": 2.325,
+        "trimStart": 0,
+        "volume": 0.9,
+        "fadeIn": 0.02,
+        "fadeOut": 0.05,
+        "enabled": true
+      },
+      {
+        "id": "continuous-transformation-prototype-audio-2",
+        "name": "brief-no-footage",
+        "kind": "voiceover",
+        "url": "http://127.0.0.1:8765/narration-cpu/brief-no-footage.wav",
+        "startTime": 5,
+        "duration": 3.65,
+        "trimStart": 0,
+        "volume": 0.9,
+        "fadeIn": 0.02,
+        "fadeOut": 0.05,
+        "enabled": true
+      },
+      {
+        "id": "continuous-transformation-prototype-audio-3",
+        "name": "transformation-sound",
+        "kind": "sfx",
+        "url": "http://127.0.0.1:8765/audio/transformation-v21/sound.wav",
+        "startTime": 0,
+        "duration": 8.0625,
+        "trimStart": 0,
+        "volume": 0.65,
+        "fadeIn": 0.02,
+        "fadeOut": 0.05,
+        "enabled": true
+      }
+    ],
+    "motionGraphics": {
+      "version": 1,
+      "scenes": []
+    },
+    "mute_audio": false
+  },
+  "documentHash": "96b7d397c58d0d24730ac994af19f8a81c8fbbd6ba6781d6f2633537416c8d85",
+  "sourceEvidence": [
+    {
+      "assetId": "continuous-transform",
+      "contentHash": "0bdd08d05b04d6977bd6fa766e8d92346693750c264349d4ee43001fc2d09bb8",
+      "provenanceHash": "5c9ba9032b29e607af65e94e5212278e0d25ac5ca492227ea5416542cfa815eb",
+      "reviewEvidenceHash": "011433c2636368a24fc81eb81937be320180eae8b92171cfd8aeb692c20caee7"
+    },
+    {
+      "assetId": "real-vessel",
+      "contentHash": "54e4102b5fa6df99491cee642dac927732fcd1860a119b213a3ffa97650e61bb",
+      "provenanceHash": "b40562c070233feca477cb1b922213752e1170733c5dcf4b400c9427429fc260",
+      "reviewEvidenceHash": "161e4ca8b619f45e89d59d7e3f190ba4f52a3fdf77bed9f5e1c4dc04b04dc310"
+    },
+    {
+      "assetId": "identity",
+      "contentHash": "2f97dc971ff1c0fdf7d9a057cb3abf4626907423d92fb6b6eccb916c457dcf05",
+      "provenanceHash": "46d40a0d16d463fa4c6e4d0eaa5d656cc803c8fd1f9a91fa9ccd6f773b6d56b1",
+      "reviewEvidenceHash": "c4a5749bbd34c52494498d4909c802db72740192f90221088225d2414a359e41"
+    },
+    {
+      "assetId": "one-idea",
+      "contentHash": "6469b6cd3f59304c34e34a1640fcba734e5166918301cbff3062ecf495af8f0f",
+      "provenanceHash": "bf73fd60593c6c78b8eb9a7a8c848d2498db7245070d7be708ad275a3df54d9d",
+      "reviewEvidenceHash": "6469b6cd3f59304c34e34a1640fcba734e5166918301cbff3062ecf495af8f0f"
+    },
+    {
+      "assetId": "brief-no-footage",
+      "contentHash": "e78da06e03e8aa9d029cfd282d157aa19946379c82411d916d34f49d9af9d6b1",
+      "provenanceHash": "ec96df76170d30fd39bbbdfd3b19aa562843210418ce165c64b677f9f93578ca",
+      "reviewEvidenceHash": "e78da06e03e8aa9d029cfd282d157aa19946379c82411d916d34f49d9af9d6b1"
+    },
+    {
+      "assetId": "transformation-sound",
+      "contentHash": "679ca15570d367c55a675137f5660376aff7a5d254c52b16204fa8e685fdeb8c",
+      "provenanceHash": "8fa3de3e6334e0c8d604dcfaa41a58d82a8902e6331d2df94d314b9543075b6c",
+      "reviewEvidenceHash": "679ca15570d367c55a675137f5660376aff7a5d254c52b16204fa8e685fdeb8c"
+    },
+    {
+      "assetId": "score",
+      "contentHash": "0d06c67776806f51482698216b2ae3cd761761395072196464ffab0351ee4792",
+      "provenanceHash": "7be827dee93f14a78f4fea6968528fbb8b146b7c1e0b85d08f57f751c8b17b65",
+      "reviewEvidenceHash": "0d06c67776806f51482698216b2ae3cd761761395072196464ffab0351ee4792"
+    }
+  ]
+}

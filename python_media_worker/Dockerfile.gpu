@@ -1,0 +1,22 @@
+# L40S default. For RTX PRO 6000, select the CUDA 12.8 base at build time.
+ARG CUDA_BASE=nvidia/cuda:12.6.3-cudnn-runtime-ubuntu24.04
+FROM ${CUDA_BASE}
+ENV DEBIAN_FRONTEND=noninteractive PYTHONUNBUFFERED=1 PORT=8080
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 python3-venv ffmpeg fonts-dejavu-core libegl1 libgles2 libgl1 libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+RUN python3 -m venv /opt/media
+ENV PATH=/opt/media/bin:$PATH NVIDIA_DRIVER_CAPABILITIES=compute,utility,video
+WORKDIR /app
+COPY requirements.txt requirements.motion-sculpture.txt ./
+RUN pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir --no-deps -r requirements.motion-sculpture.txt
+COPY *.py ./
+COPY assets ./assets
+COPY models/yunet ./models/yunet
+# Auto device detection and int8 preserve execution without a GPU. Qualification
+# may explicitly request float16 and strict CUDA; normal workers retain fallback.
+ENV WHISPER_ENGINE=faster FASTER_WHISPER_DEVICE=auto FASTER_WHISPER_STRICT=false \
+    ALLOW_RUNTIME_DEPENDENCY_INSTALL=false VIRAL_EXPORT_ENCODER=auto
+EXPOSE 8080
+CMD ["sh", "-c", "uvicorn main_media_server:app --host 0.0.0.0 --port ${PORT:-8080}"]

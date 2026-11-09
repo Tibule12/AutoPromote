@@ -1,0 +1,13 @@
+{
+  "startedAt": "2026-10-08T17:15:12.155Z",
+  "realAuth": true,
+  "noMocks": true,
+  "headless": true,
+  "muted": true,
+  "projectName": "Studio subject speed NVIDIA QA 20261008 r5",
+  "inferenceJobsStarted": 0,
+  "status": "FAIL",
+  "error": "page.waitForFunction: Timeout 20000ms exceeded.",
+  "finishedAt": "2026-10-08T17:15:47.410Z",
+  "subjectApiEvents": []
+}

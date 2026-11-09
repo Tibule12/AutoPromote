@@ -1,0 +1,8 @@
+{
+  "deadline_epoch": 1791536400,
+  "cutoffSast": "2026-10-09T11:00:00+02:00",
+  "renderRemoteRoot": "/data/autopromote-founder-realism-20261009/render",
+  "python": "/usr/bin/python3",
+  "renderDevice": "nvenc",
+  "authorizationSource": "GPU is active; current explicit extension in ../podcast-two-minute-20261009/session.json#/gpuExtension"
+}

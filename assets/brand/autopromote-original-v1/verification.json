@@ -1,0 +1,15 @@
+{
+  "svgAndPngArtifactsHashVerified": 16,
+  "appIconSizes": [
+    24,
+    32,
+    48,
+    64,
+    128,
+    256
+  ],
+  "transparency": "Verified transparent wordmark and symbol exports",
+  "fontDependency": "Wordmark outlined; SVG has no external font or image dependencies",
+  "gpuUsed": false,
+  "creativeStatus": "Original AP design for founder review; no public branding replacement"
+}

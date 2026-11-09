@@ -1,0 +1,8 @@
+{
+  "accepted": false,
+  "artifactSha256": "b93de4c5a6e85ea475c1462947a420c989f65103d149d001151b5dc1e896c2b1",
+  "reviewer": "Codex intermediate-frame visual inspection",
+  "reason": "Paper gains a sail on a flat blue tabletop mat, then the whole scene abruptly cuts to the yacht between 3.71 and 4.05 seconds. Camera retreats into the workshop instead of the world continuously becoming ocean. Fails the requested continuous-world transformation.",
+  "evidence": "paper-to-real-v7-review.jpg",
+  "revisionInstructions": "Match right-pointing bow geometry from earlier paper frame; extend transformation time; continuously track the same hull and flood the workbench into real water; prohibit a cut or replacement."
+}

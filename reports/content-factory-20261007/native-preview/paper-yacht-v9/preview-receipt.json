@@ -1,0 +1,29 @@
+{
+  "status": "NATIVE_PREVIEW_PENDING_VISUAL_REVIEW",
+  "nativeSceneSha256": "2d82fb1ac937231e33e1f82effe07bcdee6165ac9f41a75e41570c09e5c289de",
+  "device": {
+    "backend": "OPTIX",
+    "devices": [
+      "NVIDIA L40S"
+    ],
+    "gpu_verified": true,
+    "denoiser": "OPTIX"
+  },
+  "frames": [
+    {
+      "frame": 1,
+      "sha256": "46a6f16c590ebadddd48616815b9966363184e0897702fcf46d6d5db36cbe617",
+      "path": "/work/native-preview/paper-yacht-v9/frame-001.png"
+    },
+    {
+      "frame": 72,
+      "sha256": "3a09e694f4f88cd3bcbb26f8a473addd4f7e1d44b19d1df08fd1d18a8e53faf3",
+      "path": "/work/native-preview/paper-yacht-v9/frame-072.png"
+    },
+    {
+      "frame": 144,
+      "sha256": "68eb79f5f4181aa4ce16fe37b7e109a1c31184dd4122498f0734c77aee934491",
+      "path": "/work/native-preview/paper-yacht-v9/frame-144.png"
+    }
+  ]
+}

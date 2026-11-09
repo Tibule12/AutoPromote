@@ -185,6 +185,11 @@ const reflow = document => {
   return {
     ...document,
     clipOccurrences,
+    ...(document.editGraph ? { editGraph: { ...document.editGraph,
+      hookBinding: document.editGraph.hookBinding ? { occurrenceId:
+        (clipOccurrences.find(item => item.occurrenceId === document.editGraph.hookBinding.occurrenceId) ||
+          clipOccurrences.find(item => item.legacyParentIds?.includes(document.editGraph.hookBinding.occurrenceId)))?.occurrenceId || "",
+      } : null } } : {}),
     timeMaps: clipOccurrences.map(occurrence => ({
       timeMapId: occurrence.timeMapId,
       occurrenceId: occurrence.occurrenceId,
@@ -553,6 +558,8 @@ export const projectStudioCommandResultOnSnapshot = ({ snapshot, projectId, plan
       "layers",
       "linkedTiming",
       "audioGraph",
+      "visualGraph",
+      "editGraph",
       "programmeSpeedKeys",
       "fallbackSpeed",
       "outputTimeMap",

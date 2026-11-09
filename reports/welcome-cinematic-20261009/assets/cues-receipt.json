@@ -1,0 +1,48 @@
+{
+  "provider": "AutoPromote authored CPU synthesis",
+  "seed": 20261009,
+  "sampleRate": 48000,
+  "channels": 2,
+  "duration": 38,
+  "sha256": "dd9a31a0a2ac47c50b98c33c02f02109d624a343d323a8af1aeaaac5bc1259e1",
+  "notes": [
+    {
+      "at": 6.7,
+      "duration": 1.6,
+      "kind": "motivated rise"
+    },
+    {
+      "at": 13.1,
+      "duration": 2.4,
+      "kind": "motivated rise"
+    },
+    {
+      "at": 15.4,
+      "kind": "low impact",
+      "power": 0.26
+    },
+    {
+      "at": 22.8,
+      "duration": 2.3,
+      "kind": "motivated rise"
+    },
+    {
+      "at": 25.1,
+      "kind": "low impact",
+      "power": 0.13
+    },
+    {
+      "at": 32.1,
+      "duration": 2.5,
+      "kind": "motivated rise"
+    },
+    {
+      "at": 34.6,
+      "kind": "low impact",
+      "power": 0.36
+    }
+  ],
+  "unmasteredSha256": "69342db2fbe5785cad1248acdebce51535d57036078cbabc47a75305796bce84",
+  "masterGainDb": 8,
+  "purpose": "Measured prior complete mix at -28.3 LUFS. Raise both reusable stems by 8 dB for a -20.3 LUFS cinematic web mix; maintain transition balance and headroom."
+}

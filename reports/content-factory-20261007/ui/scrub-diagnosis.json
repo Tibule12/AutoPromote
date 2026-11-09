@@ -1,0 +1,132 @@
+[
+  {
+    "time": 1.549259,
+    "paused": false,
+    "ready": 4,
+    "src": "http://127.0.0.1:5008/factory-media/generated/paper-awakens.mp4",
+    "slider": "1.1",
+    "button": [
+      "Pause edited preview"
+    ]
+  },
+  {
+    "time": 3.960329,
+    "paused": true,
+    "ready": 4,
+    "src": "http://127.0.0.1:5008/factory-media/generated/paper-awakens.mp4",
+    "slider": "3.95",
+    "button": [
+      "Play edited preview"
+    ]
+  },
+  {
+    "time": 0,
+    "paused": true,
+    "ready": 4,
+    "src": "http://127.0.0.1:5008/factory-media/generated/paper-awakens.mp4",
+    "slider": "0",
+    "button": [
+      "Play edited preview"
+    ]
+  },
+  {
+    "time": 0.05,
+    "paused": true,
+    "ready": 4,
+    "src": "http://127.0.0.1:5008/factory-media/generated/paper-awakens.mp4",
+    "slider": "0.05",
+    "button": [
+      "Play edited preview"
+    ]
+  },
+  {
+    "time": 0.1,
+    "paused": true,
+    "ready": 4,
+    "src": "http://127.0.0.1:5008/factory-media/generated/paper-awakens.mp4",
+    "slider": "0.1",
+    "button": [
+      "Play edited preview"
+    ]
+  },
+  {
+    "time": 0.15,
+    "paused": true,
+    "ready": 4,
+    "src": "http://127.0.0.1:5008/factory-media/generated/paper-awakens.mp4",
+    "slider": "0.15",
+    "button": [
+      "Play edited preview"
+    ]
+  },
+  {
+    "time": 0.2,
+    "paused": true,
+    "ready": 4,
+    "src": "http://127.0.0.1:5008/factory-media/generated/paper-awakens.mp4",
+    "slider": "0.2",
+    "button": [
+      "Play edited preview"
+    ]
+  },
+  {
+    "time": 0.25,
+    "paused": true,
+    "ready": 4,
+    "src": "http://127.0.0.1:5008/factory-media/generated/paper-awakens.mp4",
+    "slider": "0.25",
+    "button": [
+      "Play edited preview"
+    ]
+  },
+  {
+    "time": 0.3,
+    "paused": true,
+    "ready": 4,
+    "src": "http://127.0.0.1:5008/factory-media/generated/paper-awakens.mp4",
+    "slider": "0.3",
+    "button": [
+      "Play edited preview"
+    ]
+  },
+  {
+    "time": 0.35,
+    "paused": true,
+    "ready": 4,
+    "src": "http://127.0.0.1:5008/factory-media/generated/paper-awakens.mp4",
+    "slider": "0.35",
+    "button": [
+      "Play edited preview"
+    ]
+  },
+  {
+    "time": 0.4,
+    "paused": true,
+    "ready": 4,
+    "src": "http://127.0.0.1:5008/factory-media/generated/paper-awakens.mp4",
+    "slider": "0.4",
+    "button": [
+      "Play edited preview"
+    ]
+  },
+  {
+    "time": 0.45,
+    "paused": true,
+    "ready": 4,
+    "src": "http://127.0.0.1:5008/factory-media/generated/paper-awakens.mp4",
+    "slider": "0.45",
+    "button": [
+      "Play edited preview"
+    ]
+  },
+  {
+    "time": 0.5,
+    "paused": true,
+    "ready": 4,
+    "src": "http://127.0.0.1:5008/factory-media/generated/paper-awakens.mp4",
+    "slider": "0.5",
+    "button": [
+      "Play edited preview"
+    ]
+  }
+]

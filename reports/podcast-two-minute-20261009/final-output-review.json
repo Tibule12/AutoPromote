@@ -1,0 +1,37 @@
+{
+  "at": "2026-10-09T09:51:09.163261+00:00",
+  "outputSha256": "5f2b71f5b19046f37fe3482ae4b86afd636edde5946daba4a9f15c4dfd80face",
+  "technicalPass": true,
+  "sampleTimes": [
+    2,
+    54.5,
+    65,
+    88.9,
+    96,
+    97.5,
+    99.5,
+    106,
+    113.5,
+    119
+  ],
+  "pairedPreFinalDirectory": "browser/final-prefinal-*.png",
+  "outputFrameDirectory": "final-frames-retested",
+  "sampledVisualPass": true,
+  "findings": [
+    "Standard rectangular landscape frame; added AutoPromote render watermark absent",
+    "Speakers retain usable head framing across held source-camera cut poses",
+    "Minimal white captions present, legible and inside picture, including church cutaway",
+    "Generated church illustration visible at97.5s and returns to original speaker after99.4s",
+    "Original background receives restrained SAM2 tone treatment and precision colour grade"
+  ],
+  "limitations": [
+    "Sampled visual review, not an all-frame subject-matte or exact raster equivalence guarantee",
+    "Source camera master already contains a baked-in inset and a visible monitor cursor; retained",
+    "Final uses flattened reviewed background media; underlying SAM2 controls retained in separate source-background projects",
+    "English captions are authored condensation/translation, not validated automatic multilingual transcription",
+    "Independent processed-audio reference correlation0.987 fell below the uncalibrated0.99 target; human listening and processing fidelity remain unqualified; sample continuity and no full-scale clipping pass",
+    "No fresh human listening or creative approval"
+  ],
+  "creativeApproval": false,
+  "humanListening": false
+}

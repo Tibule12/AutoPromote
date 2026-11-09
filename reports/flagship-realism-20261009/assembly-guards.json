@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "checks": [
+    "Actual reviewed yacht/helm/audio bytes compile through canonical Director with all source trims in range",
+    "Rejected yacht tail cannot replace the existing edit or dispatch a render",
+    "Recorded-source licence and parent provenance survive shared compilation without false AI generation label"
+  ],
+  "scope": "Actual-source canonical compilation; no renderer/GPU/browser or creative qualification."
+}

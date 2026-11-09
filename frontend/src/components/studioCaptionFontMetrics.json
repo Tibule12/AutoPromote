@@ -1,0 +1,30 @@
+{
+  "DejaVu Sans": {
+    "400": {
+      "unitsPerEm": 2048,
+      "winAscent": 1901,
+      "winDescent": 483,
+      "cssSizePerAssSize": 0.8590604026845637,
+      "file": "DejaVuSans.ttf",
+      "sha256": "ae7b7855e115a5966d8b1b3f80f254ccc117ec86f9965e202ee2940453837280"
+    },
+    "700": {
+      "unitsPerEm": 2048,
+      "winAscent": 1901,
+      "winDescent": 483,
+      "cssSizePerAssSize": 0.8590604026845637,
+      "file": "DejaVuSans-Bold.ttf",
+      "sha256": "5c1247acef7f2b8522a31742c76d6adcb5569bacc0be7ceaa4dc39dd252ce895"
+    }
+  },
+  "Noto Sans Symbols2": {
+    "400": {
+      "unitsPerEm": 1000,
+      "winAscent": 1069,
+      "winDescent": 630,
+      "cssSizePerAssSize": 0.5885815185403178,
+      "file": "NotoSansSymbols2-Regular.ttf",
+      "sha256": "876598db5f1e3bef2bc77c4d94c5b0d5d2c1620be4878a06f18fb5434e331688"
+    }
+  }
+}

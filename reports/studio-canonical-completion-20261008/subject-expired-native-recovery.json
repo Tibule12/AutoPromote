@@ -1,0 +1,25 @@
+{
+  "startedAt": "2026-10-08T13:36:55.813Z",
+  "realAuth": true,
+  "headless": true,
+  "muted": true,
+  "noMocks": true,
+  "status": "PASS_OWNED_PLAYBACK",
+  "media": {
+    "readyState": 4,
+    "seconds": 3,
+    "time": 3,
+    "error": null
+  },
+  "reviewRetained": true,
+  "automaticRefreshObserved": true,
+  "newGpuJobsStarted": 0,
+  "events": [
+    {
+      "path": "/api/media/studio-subject-vfx/b9de374e-cfd5-49d5-9dce-79351b1fe877",
+      "method": "GET",
+      "at": "2026-10-08T13:36:57.969Z"
+    }
+  ],
+  "finishedAt": "2026-10-08T13:37:09.794Z"
+}

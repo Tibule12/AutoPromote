@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "sha256": "075953789836bab65d725b5cd8d791d86c56b14b5454fe92612da95b3e3623e4",
+  "bytes": 4460822,
+  "seconds": 6,
+  "video": {
+    "width": 1280,
+    "height": 720,
+    "codec": "h264",
+    "fps": "60/1",
+    "duration": "6.000000",
+    "pixelFormat": "yuv420p"
+  },
+  "audio": {
+    "codec": "aac",
+    "channels": 2,
+    "sampleRate": "96000",
+    "duration": "6.000000"
+  },
+  "independentFullDecode": true,
+  "contactSheet": "reports/studio-canonical-completion-20261008/paired-speed-2x-gpu-r4/compositing/download.mp4.frames.jpg",
+  "scope": "Technical only. Pixel and listening review are separate required evidence."
+}

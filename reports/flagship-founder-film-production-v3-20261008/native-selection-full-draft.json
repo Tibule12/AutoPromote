@@ -1,0 +1,63 @@
+[
+  {
+    "assetId": "vessel",
+    "directory": "vessel-full",
+    "receipt": "scene-receipt.json",
+    "prefix": "frame_"
+  },
+  {
+    "assetId": "ident",
+    "directory": "ident-full",
+    "receipt": "render-receipt.json",
+    "prefix": "frame_",
+    "nativeScene": "scene.blend"
+  },
+  {
+    "assetId": "origin",
+    "directory": "story-v3/assets/origin",
+    "receipt": "render-receipt.json",
+    "prefix": "frame-"
+  },
+  {
+    "assetId": "cascade",
+    "directory": "story-v3/assets/cascade",
+    "receipt": "render-receipt.json",
+    "prefix": "frame-"
+  },
+  {
+    "assetId": "problems",
+    "directory": "story-labels/assets/problems",
+    "receipt": "render-receipt.json",
+    "prefix": "frame-"
+  },
+  {
+    "assetId": "failure",
+    "directory": "story-v3/assets/failure",
+    "receipt": "render-receipt.json",
+    "prefix": "frame-"
+  },
+  {
+    "assetId": "quota",
+    "directory": "story-v3/assets/quota",
+    "receipt": "render-receipt.json",
+    "prefix": "frame-"
+  },
+  {
+    "assetId": "breakthrough",
+    "directory": "story-v3/assets/breakthrough",
+    "receipt": "render-receipt.json",
+    "prefix": "frame-"
+  },
+  {
+    "assetId": "director",
+    "directory": "story-v3/assets/director",
+    "receipt": "render-receipt.json",
+    "prefix": "frame-"
+  },
+  {
+    "assetId": "reveal",
+    "directory": "story-v3/assets/reveal",
+    "receipt": "render-receipt.json",
+    "prefix": "frame-"
+  }
+]

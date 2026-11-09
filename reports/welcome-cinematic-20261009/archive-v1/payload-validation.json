@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "duration": 38,
+  "finalFrames": 912,
+  "timelineSegments": 5,
+  "titleLayers": 7,
+  "directorOperations": 5,
+  "proxyFullDecode": true,
+  "audioMeasurements": {
+    "sampleRate": 48000,
+    "channels": 2,
+    "peak": 0.2723795175552368,
+    "rms": 0.03064754791557789,
+    "clippedSamples": 0,
+    "duration": 38.016,
+    "limitation": "Objective decoded measurements; listening and speech comprehension require founder review."
+  },
+  "canonicalClock": 90000,
+  "workerSourceSha256": "5bdea4cae17459a2b9e746eba5a160e49980b5bcd21118ede5e31516a45bd8e2",
+  "finalPayloadSha256": "31bc4779c3e74d751fb5499bbaa64629fd889fd3fa61951b4a241565db0a15bb",
+  "nativeSceneSha256": "bd8567a77dc5c8f076ca71ea995d9efe2358e89e50e052df1c95aa38f540bee9",
+  "gpuStarted": false,
+  "pinnedContainerPreflight": {
+    "sameImmutableImage": true,
+    "cpuBlenderFrame": true,
+    "workerImport": true,
+    "finalRequestPydantic": true,
+    "missingLibrariesFixed": [
+      "libSM.so.6",
+      "libICE.so.6"
+    ],
+    "libraryBundleSha256": "0ad9751ece48b0d032f69d8c66d74c6824bf6443c49d41ed9992becc350e91aa"
+  },
+  "priorAttempt": "First failed execution is terminal with zero active executions and retained logs; no frames were generated."
+}

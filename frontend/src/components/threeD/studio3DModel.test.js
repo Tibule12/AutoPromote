@@ -23,6 +23,27 @@ test("bounds extreme controls and keeps preview artifacts out of revision", () =
   expect(studio3DSceneRevision(scene)).not.toBe(studio3DSceneRevision({ ...scene, text: "Changed" }));
 });
 
+test("a completed HQ revision survives project save/reload normalisation", () => {
+  const scene = createStudio3DScene("cinematic_title", 0, "saved-title");
+  const revision = studio3DSceneRevision(scene);
+  expect(revision.length).toBeLessThan(128);
+  const saved = normalizeStudio3DScene(JSON.parse(JSON.stringify({ ...scene,
+    hqPreviewJobId: "owned-preview-job", hqPreviewRevision: revision,
+  })));
+  expect(saved.hqPreviewJobId).toBe("owned-preview-job");
+  expect(saved.hqPreviewRevision).toBe(studio3DSceneRevision(saved));
+  expect(saved.hqPreviewRevision).not.toBe(studio3DSceneRevision({ ...saved, text: "Edited after rendering" }));
+});
+
+test("migrates complete legacy revisions but never endorses truncated ones", () => {
+  const scene = createStudio3DScene("cinematic_title", 0, "legacy-title");
+  const { hqPreviewUrl, hqPreviewRevision, hqPreviewJobId, ...renderValues } = scene;
+  const legacy = JSON.stringify(renderValues);
+  expect(legacy.length).toBeGreaterThan(128);
+  expect(normalizeStudio3DScene({ ...scene, hqPreviewRevision: legacy }).hqPreviewRevision).toBe(studio3DSceneRevision(scene));
+  expect(normalizeStudio3DScene({ ...scene, hqPreviewRevision: legacy.slice(0, 128) }).hqPreviewRevision).not.toBe(studio3DSceneRevision(scene));
+});
+
 test("cut ripple retimes and trims real 3D objects", () => {
   const first = normalizeStudio3DScene({ ...createStudio3DScene("cinematic_title", 1, "a"), keyframes: [{
     id: "pose-a", time: 2, easing: "linear",

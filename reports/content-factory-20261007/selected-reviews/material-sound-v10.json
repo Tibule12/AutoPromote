@@ -1,0 +1,18 @@
+{
+  "accepted": true,
+  "artifactSha256": "645a47a1df1d7c1951f6f2e11b5b5c486f2c14e3eb6f9c13148484273dac9ec1",
+  "evidenceSha256": "645a47a1df1d7c1951f6f2e11b5b5c486f2c14e3eb6f9c13148484273dac9ec1",
+  "reviewer": "AutoPromote decoded audio measurements and CPU speech diagnostic",
+  "reason": "Original separate fold/water/rise/impact stems follow the native transformation clock, with impact at 4.5 seconds. Measured audibility, stereo headroom and duration pass; private assembly test only.",
+  "measurements": {
+    "accepted": true,
+    "reason": "Measured original stereo audio: peak 0.388, RMS 0.022, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+    "peak": 0.387847900390625,
+    "rms": 0.02163956051237675,
+    "clippedFraction": 0.0,
+    "channels": 2,
+    "sampleRate": 48000,
+    "duration": 11.0625
+  },
+  "limitation": "Technical role acceptance only; final listening is required."
+}

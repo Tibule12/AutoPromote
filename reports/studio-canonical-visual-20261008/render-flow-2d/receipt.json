@@ -1,0 +1,19 @@
+{
+  "startedAt": "2026-10-08T10:17:25.417Z",
+  "projectName": "Studio canonical visual QA 20261008 CPU 2D",
+  "realAuth": true,
+  "noMocks": true,
+  "headless": true,
+  "muted": true,
+  "stateFlowReceipt": "reports/studio-canonical-visual-20261008/browser-flow/receipt.json",
+  "parentStateSha256": "7b701df7cb0421e9c3f62a72b4e37eb284fbd46f8b2e6d8ce3527dd3fbdfcbc3",
+  "gpuJobsStarted": 0,
+  "workerStarted": false,
+  "status": "FAIL",
+  "scope": "Separately duplicated 2D edit; 3D explicitly disabled through its normal control",
+  "visualReview": "PENDING",
+  "listeningReview": "NOT_RUN",
+  "unsupported3DControls": "PASS: all nine unavailable controls disabled in the actual Studio",
+  "error": "Video processing failed: Request failed with status code 500 - Worker says: Caption review is incomplete: audible speech has no captions at 0.0-2.8s, 5.2-6.8s, 9.2-12.0s. Return to the editable transcript and caption every spoken phrase.",
+  "finishedAt": "2026-10-08T10:19:10.260Z"
+}

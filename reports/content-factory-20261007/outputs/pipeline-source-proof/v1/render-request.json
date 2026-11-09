@@ -1,0 +1,57 @@
+{
+  "video_url": "http://127.0.0.1:8765/generated/paper-awakens.mp4",
+  "start_time": 0,
+  "end_time": 5.2,
+  "overlays": [],
+  "auto_captions": false,
+  "timeline_segments": [
+    {
+      "id": "pipeline-source-proof-1",
+      "source_clip_id": "paper-awakens",
+      "start_time": 2.5,
+      "end_time": 5,
+      "duration": 2.5,
+      "url": "http://127.0.0.1:8765/generated/paper-awakens.mp4"
+    },
+    {
+      "id": "pipeline-source-proof-2",
+      "source_clip_id": "identity",
+      "start_time": 0.1,
+      "end_time": 2.8,
+      "duration": 2.7,
+      "url": "http://127.0.0.1:8765/motion/identity/video.mp4"
+    }
+  ],
+  "background_audio": {
+    "url": "http://127.0.0.1:8765/audio/hero/score.wav",
+    "volume": 0.85,
+    "mode": "replace",
+    "enabled": true
+  },
+  "hook_focus_point": null,
+  "cover_frame": null,
+  "thumbnail_frame": null,
+  "creative_intent": "Internal verification of the real Studio edit and sound path; not a finished campaign",
+  "professional_cleanup": false,
+  "finish_plan": {
+    "version": 1,
+    "enabled": true,
+    "reframe": {
+      "enabled": true,
+      "aspect": "16:9",
+      "mode": "off"
+    }
+  },
+  "brand_watermark": false,
+  "output_settings": {
+    "resolution": "1080p",
+    "fps": 24,
+    "codec": "h264",
+    "audioCodec": "aac"
+  },
+  "sound_effects": [],
+  "motionGraphics": {
+    "version": 1,
+    "scenes": []
+  }
+}

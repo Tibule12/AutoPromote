@@ -1,0 +1,5244 @@
+{
+  "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+  "ownerUid": "founder-private",
+  "document": {
+    "schemaVersion": 1,
+    "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+    "revision": 1,
+    "clock": {
+      "ticksPerSecond": 90000,
+      "interval": "half_open"
+    },
+    "output": {
+      "aspectRatio": "16:9",
+      "requestedResolution": "1080p",
+      "frameRate": {
+        "numerator": 24,
+        "denominator": 1
+      },
+      "codec": "h264",
+      "audioCodec": "aac",
+      "audioSampleRate": null,
+      "audioSampleRatePolicy": "worker_selected"
+    },
+    "assets": [
+      {
+        "assetId": "source:vessel:sha256:da5c769a1d02d01ee6dcc622718162757b877329b575aab287e55da3accc34d3",
+        "sourceId": "vessel",
+        "storagePath": "vessel-full/video.mp4",
+        "contentHash": "da5c769a1d02d01ee6dcc622718162757b877329b575aab287e55da3accc34d3",
+        "identityState": "hash_verified"
+      },
+      {
+        "assetId": "source:reveal:sha256:86f95612978f02eda26dd563096114d9c8818b0a716e009e75e5077a5f7ad535",
+        "sourceId": "reveal",
+        "storagePath": "story-v3/assets/reveal/video.mp4",
+        "contentHash": "86f95612978f02eda26dd563096114d9c8818b0a716e009e75e5077a5f7ad535",
+        "identityState": "hash_verified"
+      },
+      {
+        "assetId": "source:ident:sha256:a9a9aafcdc7a9a7266f1d23c4bfc47cf338995c3c488c4d862b5225c2cbd3f2a",
+        "sourceId": "ident",
+        "storagePath": "ident-full/video.mp4",
+        "contentHash": "a9a9aafcdc7a9a7266f1d23c4bfc47cf338995c3c488c4d862b5225c2cbd3f2a",
+        "identityState": "hash_verified"
+      }
+    ],
+    "clipOccurrences": [
+      {
+        "occurrenceId": "one-edit-teaser-1",
+        "assetId": "source:vessel:sha256:da5c769a1d02d01ee6dcc622718162757b877329b575aab287e55da3accc34d3",
+        "sourceRange": {
+          "space": "source",
+          "startTick": 315000,
+          "endTick": 585000
+        },
+        "programmeRange": {
+          "space": "programme",
+          "startTick": 0,
+          "endTick": 270000
+        },
+        "timeMapId": "map:one-edit-teaser-1",
+        "parameterSchemaVersion": 1,
+        "parameters": {
+          "name": "vessel",
+          "duration": 3
+        },
+        "playback": {
+          "direction": "forward",
+          "freeze": false,
+          "rate": {
+            "numerator": 1,
+            "denominator": 1
+          }
+        }
+      },
+      {
+        "occurrenceId": "one-edit-teaser-2",
+        "assetId": "source:reveal:sha256:86f95612978f02eda26dd563096114d9c8818b0a716e009e75e5077a5f7ad535",
+        "sourceRange": {
+          "space": "source",
+          "startTick": 0,
+          "endTick": 360000
+        },
+        "programmeRange": {
+          "space": "programme",
+          "startTick": 270000,
+          "endTick": 630000
+        },
+        "timeMapId": "map:one-edit-teaser-2",
+        "parameterSchemaVersion": 1,
+        "parameters": {
+          "name": "reveal",
+          "duration": 4
+        },
+        "playback": {
+          "direction": "forward",
+          "freeze": false,
+          "rate": {
+            "numerator": 1,
+            "denominator": 1
+          }
+        }
+      },
+      {
+        "occurrenceId": "one-edit-teaser-3",
+        "assetId": "source:ident:sha256:a9a9aafcdc7a9a7266f1d23c4bfc47cf338995c3c488c4d862b5225c2cbd3f2a",
+        "sourceRange": {
+          "space": "source",
+          "startTick": 180000,
+          "endTick": 450000
+        },
+        "programmeRange": {
+          "space": "programme",
+          "startTick": 630000,
+          "endTick": 900000
+        },
+        "timeMapId": "map:one-edit-teaser-3",
+        "parameterSchemaVersion": 1,
+        "parameters": {
+          "name": "ident",
+          "duration": 3
+        },
+        "playback": {
+          "direction": "forward",
+          "freeze": false,
+          "rate": {
+            "numerator": 1,
+            "denominator": 1
+          }
+        }
+      }
+    ],
+    "timeMaps": [
+      {
+        "timeMapId": "map:one-edit-teaser-1",
+        "occurrenceId": "one-edit-teaser-1",
+        "segments": [
+          {
+            "sourceRange": {
+              "space": "source",
+              "startTick": 315000,
+              "endTick": 585000
+            },
+            "clipLocalRange": {
+              "space": "clip_local",
+              "startTick": 0,
+              "endTick": 270000
+            },
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 0,
+              "endTick": 270000
+            },
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            },
+            "direction": "forward",
+            "freeze": false
+          }
+        ]
+      },
+      {
+        "timeMapId": "map:one-edit-teaser-2",
+        "occurrenceId": "one-edit-teaser-2",
+        "segments": [
+          {
+            "sourceRange": {
+              "space": "source",
+              "startTick": 0,
+              "endTick": 360000
+            },
+            "clipLocalRange": {
+              "space": "clip_local",
+              "startTick": 0,
+              "endTick": 360000
+            },
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 270000,
+              "endTick": 630000
+            },
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            },
+            "direction": "forward",
+            "freeze": false
+          }
+        ]
+      },
+      {
+        "timeMapId": "map:one-edit-teaser-3",
+        "occurrenceId": "one-edit-teaser-3",
+        "segments": [
+          {
+            "sourceRange": {
+              "space": "source",
+              "startTick": 180000,
+              "endTick": 450000
+            },
+            "clipLocalRange": {
+              "space": "clip_local",
+              "startTick": 0,
+              "endTick": 270000
+            },
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 630000,
+              "endTick": 900000
+            },
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            },
+            "direction": "forward",
+            "freeze": false
+          }
+        ]
+      }
+    ],
+    "layers": [],
+    "linkedTiming": {
+      "cues": {
+        "soundEffects": [
+          {
+            "cueId": "one-edit-teaser-audio-1",
+            "type": null,
+            "parameterSchemaVersion": 1,
+            "parameters": {
+              "enabled": true,
+              "kind": "voiceover",
+              "name": "vo-reveal",
+              "sourceClipId": "vo-reveal",
+              "storagePath": "assets/narration/reveal.wav",
+              "contentHash": "43ec9f03541b141676c92863769213ae0fe664655a9e3f1b31a6506a8155b139",
+              "volume": 0.94,
+              "fadeIn": 0.02,
+              "fadeOut": 0.05
+            },
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 283500,
+              "endTick": 589500
+            },
+            "trimStartTick": 0
+          },
+          {
+            "cueId": "one-edit-teaser-audio-2",
+            "type": null,
+            "parameterSchemaVersion": 1,
+            "parameters": {
+              "enabled": true,
+              "kind": "sfx",
+              "name": "cues-teaser",
+              "sourceClipId": "cues-teaser",
+              "storagePath": "assets/sound/cues-teaser.wav",
+              "contentHash": "21b9d89b42ab9a6e4c4b3c4134318bac0065dc24837b1b80ba57fe93eee1e9db",
+              "volume": 0.8,
+              "fadeIn": 0.02,
+              "fadeOut": 0.05
+            },
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 0,
+              "endTick": 900000
+            },
+            "trimStartTick": 0
+          }
+        ],
+        "voiceovers": [],
+        "adjustmentLayers": []
+      },
+      "keys": {
+        "motionKeyframes": [],
+        "finishKeyframes": [],
+        "reframeKeyframes": [],
+        "reframeModeCuts": [],
+        "speakerFocusCuts": []
+      }
+    },
+    "audioGraph": {
+      "legacySnapshotRef": "audioRemix",
+      "parameterSchemaVersion": 1,
+      "settings": {
+        "addMusic": true,
+        "musicVolume": 0.65,
+        "musicDucking": false,
+        "musicDuckingStrength": 0,
+        "muteOriginalAudio": true,
+        "musicLoop": false,
+        "musicFadeIn": 0.25,
+        "musicFadeOut": 0.6
+      },
+      "music": {
+        "id": "score-teaser",
+        "storagePath": "assets/sound/score-teaser.wav",
+        "contentHash": "31f07e62b558d82c1ca2ad3d3d984da428c4f4133978931cfa485a19f36a178f",
+        "duration": 10
+      },
+      "routes": [],
+      "routing": {
+        "muteOriginalAudio": true,
+        "musicDucking": false,
+        "musicDuckingStrength": 0,
+        "musicTrackId": "score-teaser"
+      }
+    },
+    "visualGraph": {
+      "parameterSchemaVersion": 1,
+      "settings": {
+        "autoCaptions": false,
+        "reframeAspect": "16:9",
+        "exportSettings": {
+          "resolution": "1080p",
+          "fps": 24,
+          "codec": "h264",
+          "audioCodec": "aac"
+        }
+      },
+      "cameraSources": []
+    },
+    "editGraph": {
+      "parameterSchemaVersion": 1,
+      "settings": {},
+      "media": [],
+      "sources": [],
+      "musicMix": {},
+      "hookBinding": null,
+      "angleGroups": [],
+      "extractedAudio": null
+    },
+    "constraints": {
+      "locks": []
+    },
+    "styleRef": null,
+    "analysisRefs": [],
+    "projectIntelligenceRefs": [],
+    "programmeSpeedKeys": [],
+    "fallbackSpeed": 1,
+    "outputTimeMap": [
+      {
+        "programmeRange": {
+          "space": "programme",
+          "startTick": 0,
+          "endTick": 900000
+        },
+        "outputRange": {
+          "space": "output",
+          "startTick": 0,
+          "endTick": 900000
+        },
+        "rateNumerator": 1000000,
+        "rateDenominator": 1000000
+      }
+    ],
+    "journal": [],
+    "idempotency": {},
+    "directorReviewJournal": [],
+    "compatibility": {
+      "legacySnapshotVersion": 1,
+      "projection": "clip_occurrences_canonical_other_fields_legacy",
+      "editableStateVersion": 1,
+      "visualStateVersion": 1,
+      "editStateVersion": 1,
+      "layerComposition": "separate_worker_stages"
+    }
+  },
+  "snapshot": {
+    "timeline": [
+      {
+        "id": "one-edit-teaser-1",
+        "sourceClipId": "vessel",
+        "startRequest": 3.5,
+        "endRequest": 6.5,
+        "duration": 3,
+        "contentHash": "da5c769a1d02d01ee6dcc622718162757b877329b575aab287e55da3accc34d3",
+        "storagePath": "vessel-full/video.mp4",
+        "name": "vessel"
+      },
+      {
+        "id": "one-edit-teaser-2",
+        "sourceClipId": "reveal",
+        "startRequest": 0,
+        "endRequest": 4,
+        "duration": 4,
+        "contentHash": "86f95612978f02eda26dd563096114d9c8818b0a716e009e75e5077a5f7ad535",
+        "storagePath": "story-v3/assets/reveal/video.mp4",
+        "name": "reveal"
+      },
+      {
+        "id": "one-edit-teaser-3",
+        "sourceClipId": "ident",
+        "startRequest": 2,
+        "endRequest": 5,
+        "duration": 3,
+        "contentHash": "a9a9aafcdc7a9a7266f1d23c4bfc47cf338995c3c488c4d862b5225c2cbd3f2a",
+        "storagePath": "ident-full/video.mp4",
+        "name": "ident"
+      }
+    ],
+    "orderedClips": [],
+    "selectedClipId": null,
+    "reframeAspect": "16:9",
+    "exportSettings": {
+      "resolution": "1080p",
+      "fps": 24,
+      "codec": "h264",
+      "audioCodec": "aac"
+    },
+    "overlays": [],
+    "motionScenes": [],
+    "captionSegments": [],
+    "autoCaptions": false,
+    "soundEffects": [
+      {
+        "id": "one-edit-teaser-audio-1",
+        "name": "vo-reveal",
+        "kind": "voiceover",
+        "url": "http://127.0.0.1:8765/assets/narration/reveal.wav",
+        "sourceClipId": "vo-reveal",
+        "storagePath": "assets/narration/reveal.wav",
+        "contentHash": "43ec9f03541b141676c92863769213ae0fe664655a9e3f1b31a6506a8155b139",
+        "startTime": 3.15,
+        "duration": 3.4,
+        "trimStart": 0,
+        "volume": 0.94,
+        "fadeIn": 0.02,
+        "fadeOut": 0.05,
+        "enabled": true
+      },
+      {
+        "id": "one-edit-teaser-audio-2",
+        "name": "cues-teaser",
+        "kind": "sfx",
+        "url": "http://127.0.0.1:8765/assets/sound/cues-teaser.wav",
+        "sourceClipId": "cues-teaser",
+        "storagePath": "assets/sound/cues-teaser.wav",
+        "contentHash": "21b9d89b42ab9a6e4c4b3c4134318bac0065dc24837b1b80ba57fe93eee1e9db",
+        "startTime": 0,
+        "duration": 10,
+        "trimStart": 0,
+        "volume": 0.8,
+        "fadeIn": 0.02,
+        "fadeOut": 0.05,
+        "enabled": true
+      }
+    ],
+    "speedKeyframes": [],
+    "trackStates": {},
+    "muteOriginalAudio": true,
+    "musicDucking": false,
+    "musicDuckingStrength": 0,
+    "addMusic": true,
+    "musicVolume": 0.65,
+    "musicLoop": false,
+    "musicFadeIn": 0.25,
+    "musicFadeOut": 0.6,
+    "musicTrack": {
+      "id": "score-teaser",
+      "url": "http://127.0.0.1:8765/assets/sound/score-teaser.wav",
+      "duration": 10,
+      "storagePath": "assets/sound/score-teaser.wav",
+      "contentHash": "31f07e62b558d82c1ca2ad3d3d984da428c4f4133978931cfa485a19f36a178f"
+    }
+  },
+  "directorBatch": {
+    "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+    "baseRevision": 0,
+    "idempotencyKey": "factory-edit-founder-film-production--one-edit-teaser",
+    "actor": {
+      "type": "ai",
+      "id": "content_factory_director"
+    },
+    "operations": [
+      {
+        "type": "trim_clip",
+        "target": {
+          "occurrenceId": "one-edit-teaser-1"
+        },
+        "keep": {
+          "space": "source",
+          "startTick": 315000,
+          "endTick": 585000
+        }
+      },
+      {
+        "type": "trim_clip",
+        "target": {
+          "occurrenceId": "one-edit-teaser-2"
+        },
+        "keep": {
+          "space": "source",
+          "startTick": 0,
+          "endTick": 360000
+        }
+      },
+      {
+        "type": "trim_clip",
+        "target": {
+          "occurrenceId": "one-edit-teaser-3"
+        },
+        "keep": {
+          "space": "source",
+          "startTick": 180000,
+          "endTick": 450000
+        }
+      }
+    ]
+  },
+  "directorPreview": {
+    "duplicate": false,
+    "baseRevision": 0,
+    "newRevision": 1,
+    "affectedNodes": [
+      "one-edit-teaser-1",
+      "one-edit-teaser-2",
+      "one-edit-teaser-3"
+    ],
+    "readSet": [
+      "occurrence:one-edit-teaser-1",
+      "occurrence:one-edit-teaser-2",
+      "occurrence:one-edit-teaser-3",
+      "programme:layers",
+      "programme:linked_timing",
+      "programme:speed_keys"
+    ],
+    "writeSet": [
+      "occurrence:one-edit-teaser-1",
+      "occurrence:one-edit-teaser-2",
+      "occurrence:one-edit-teaser-3",
+      "programme:timeline",
+      "time_maps",
+      "programme:layers",
+      "programme:linked_timing",
+      "programme:speed_keys"
+    ],
+    "previewDocument": {
+      "schemaVersion": 1,
+      "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+      "revision": 0,
+      "clock": {
+        "ticksPerSecond": 90000,
+        "interval": "half_open"
+      },
+      "output": {
+        "aspectRatio": "16:9",
+        "requestedResolution": "1080p",
+        "frameRate": {
+          "numerator": 24,
+          "denominator": 1
+        },
+        "codec": "h264",
+        "audioCodec": "aac",
+        "audioSampleRate": null,
+        "audioSampleRatePolicy": "worker_selected"
+      },
+      "assets": [
+        {
+          "assetId": "source:vessel:sha256:da5c769a1d02d01ee6dcc622718162757b877329b575aab287e55da3accc34d3",
+          "sourceId": "vessel",
+          "storagePath": "vessel-full/video.mp4",
+          "contentHash": "da5c769a1d02d01ee6dcc622718162757b877329b575aab287e55da3accc34d3",
+          "identityState": "hash_verified"
+        },
+        {
+          "assetId": "source:reveal:sha256:86f95612978f02eda26dd563096114d9c8818b0a716e009e75e5077a5f7ad535",
+          "sourceId": "reveal",
+          "storagePath": "story-v3/assets/reveal/video.mp4",
+          "contentHash": "86f95612978f02eda26dd563096114d9c8818b0a716e009e75e5077a5f7ad535",
+          "identityState": "hash_verified"
+        },
+        {
+          "assetId": "source:ident:sha256:a9a9aafcdc7a9a7266f1d23c4bfc47cf338995c3c488c4d862b5225c2cbd3f2a",
+          "sourceId": "ident",
+          "storagePath": "ident-full/video.mp4",
+          "contentHash": "a9a9aafcdc7a9a7266f1d23c4bfc47cf338995c3c488c4d862b5225c2cbd3f2a",
+          "identityState": "hash_verified"
+        }
+      ],
+      "clipOccurrences": [
+        {
+          "occurrenceId": "one-edit-teaser-1",
+          "assetId": "source:vessel:sha256:da5c769a1d02d01ee6dcc622718162757b877329b575aab287e55da3accc34d3",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 315000,
+            "endTick": 585000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 0,
+            "endTick": 270000
+          },
+          "timeMapId": "map:one-edit-teaser-1",
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "name": "vessel",
+            "duration": 7
+          },
+          "playback": {
+            "direction": "forward",
+            "freeze": false,
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            }
+          }
+        },
+        {
+          "occurrenceId": "one-edit-teaser-2",
+          "assetId": "source:reveal:sha256:86f95612978f02eda26dd563096114d9c8818b0a716e009e75e5077a5f7ad535",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 360000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 270000,
+            "endTick": 630000
+          },
+          "timeMapId": "map:one-edit-teaser-2",
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "name": "reveal",
+            "duration": 5
+          },
+          "playback": {
+            "direction": "forward",
+            "freeze": false,
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            }
+          }
+        },
+        {
+          "occurrenceId": "one-edit-teaser-3",
+          "assetId": "source:ident:sha256:a9a9aafcdc7a9a7266f1d23c4bfc47cf338995c3c488c4d862b5225c2cbd3f2a",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 180000,
+            "endTick": 450000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 630000,
+            "endTick": 900000
+          },
+          "timeMapId": "map:one-edit-teaser-3",
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "name": "ident",
+            "duration": 5
+          },
+          "playback": {
+            "direction": "forward",
+            "freeze": false,
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            }
+          }
+        }
+      ],
+      "timeMaps": [
+        {
+          "timeMapId": "map:one-edit-teaser-1",
+          "occurrenceId": "one-edit-teaser-1",
+          "segments": [
+            {
+              "sourceRange": {
+                "space": "source",
+                "startTick": 315000,
+                "endTick": 585000
+              },
+              "clipLocalRange": {
+                "space": "clip_local",
+                "startTick": 0,
+                "endTick": 270000
+              },
+              "programmeRange": {
+                "space": "programme",
+                "startTick": 0,
+                "endTick": 270000
+              },
+              "rate": {
+                "numerator": 1,
+                "denominator": 1
+              },
+              "direction": "forward",
+              "freeze": false
+            }
+          ]
+        },
+        {
+          "timeMapId": "map:one-edit-teaser-2",
+          "occurrenceId": "one-edit-teaser-2",
+          "segments": [
+            {
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 360000
+              },
+              "clipLocalRange": {
+                "space": "clip_local",
+                "startTick": 0,
+                "endTick": 360000
+              },
+              "programmeRange": {
+                "space": "programme",
+                "startTick": 270000,
+                "endTick": 630000
+              },
+              "rate": {
+                "numerator": 1,
+                "denominator": 1
+              },
+              "direction": "forward",
+              "freeze": false
+            }
+          ]
+        },
+        {
+          "timeMapId": "map:one-edit-teaser-3",
+          "occurrenceId": "one-edit-teaser-3",
+          "segments": [
+            {
+              "sourceRange": {
+                "space": "source",
+                "startTick": 180000,
+                "endTick": 450000
+              },
+              "clipLocalRange": {
+                "space": "clip_local",
+                "startTick": 0,
+                "endTick": 270000
+              },
+              "programmeRange": {
+                "space": "programme",
+                "startTick": 630000,
+                "endTick": 900000
+              },
+              "rate": {
+                "numerator": 1,
+                "denominator": 1
+              },
+              "direction": "forward",
+              "freeze": false
+            }
+          ]
+        }
+      ],
+      "layers": [],
+      "linkedTiming": {
+        "cues": {
+          "soundEffects": [],
+          "voiceovers": [],
+          "adjustmentLayers": []
+        },
+        "keys": {
+          "motionKeyframes": [],
+          "finishKeyframes": [],
+          "reframeKeyframes": [],
+          "reframeModeCuts": [],
+          "speakerFocusCuts": []
+        }
+      },
+      "audioGraph": {
+        "legacySnapshotRef": "audioRemix",
+        "parameterSchemaVersion": 1,
+        "settings": {
+          "addMusic": true,
+          "musicVolume": 0.65,
+          "musicDucking": false,
+          "musicDuckingStrength": 0,
+          "muteOriginalAudio": true,
+          "musicLoop": false,
+          "musicFadeIn": 0.25,
+          "musicFadeOut": 0.6
+        },
+        "music": {
+          "id": "score-teaser",
+          "storagePath": "assets/sound/score-teaser.wav",
+          "contentHash": "31f07e62b558d82c1ca2ad3d3d984da428c4f4133978931cfa485a19f36a178f",
+          "duration": 10
+        },
+        "routes": [],
+        "routing": {
+          "muteOriginalAudio": true,
+          "musicDucking": false,
+          "musicDuckingStrength": 0,
+          "musicTrackId": "score-teaser"
+        }
+      },
+      "visualGraph": {
+        "parameterSchemaVersion": 1,
+        "settings": {
+          "autoCaptions": false,
+          "reframeAspect": "16:9",
+          "exportSettings": {
+            "resolution": "1080p",
+            "fps": 24,
+            "codec": "h264",
+            "audioCodec": "aac"
+          }
+        },
+        "cameraSources": []
+      },
+      "editGraph": {
+        "parameterSchemaVersion": 1,
+        "settings": {},
+        "media": [],
+        "sources": [],
+        "musicMix": {},
+        "hookBinding": null,
+        "angleGroups": [],
+        "extractedAudio": null
+      },
+      "constraints": {
+        "locks": []
+      },
+      "styleRef": null,
+      "analysisRefs": [],
+      "projectIntelligenceRefs": [],
+      "programmeSpeedKeys": [],
+      "fallbackSpeed": 1,
+      "outputTimeMap": [
+        {
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 0,
+            "endTick": 900000
+          },
+          "outputRange": {
+            "space": "output",
+            "startTick": 0,
+            "endTick": 900000
+          },
+          "rateNumerator": 1000000,
+          "rateDenominator": 1000000
+        }
+      ],
+      "journal": [],
+      "idempotency": {},
+      "directorReviewJournal": [],
+      "compatibility": {
+        "legacySnapshotVersion": 1,
+        "projection": "clip_occurrences_canonical_other_fields_legacy",
+        "editableStateVersion": 1,
+        "visualStateVersion": 1,
+        "editStateVersion": 1,
+        "layerComposition": "separate_worker_stages"
+      }
+    }
+  },
+  "renderRequest": {
+    "video_url": "http://127.0.0.1:8765/vessel-full/video.mp4",
+    "start_time": 0,
+    "end_time": 10,
+    "overlays": [],
+    "auto_captions": false,
+    "timeline_segments": [
+      {
+        "id": "one-edit-teaser-1",
+        "source_clip_id": "vessel",
+        "start_time": 3.5,
+        "end_time": 6.5,
+        "duration": 3,
+        "url": "http://127.0.0.1:8765/vessel-full/video.mp4"
+      },
+      {
+        "id": "one-edit-teaser-2",
+        "source_clip_id": "reveal",
+        "start_time": 0,
+        "end_time": 4,
+        "duration": 4,
+        "url": "http://127.0.0.1:8765/story-v3/assets/reveal/video.mp4"
+      },
+      {
+        "id": "one-edit-teaser-3",
+        "source_clip_id": "ident",
+        "start_time": 2,
+        "end_time": 5,
+        "duration": 3,
+        "url": "http://127.0.0.1:8765/ident-full/video.mp4"
+      }
+    ],
+    "background_audio": null,
+    "hook_focus_point": null,
+    "cover_frame": null,
+    "thumbnail_frame": null,
+    "caption_style": "minimal",
+    "caption_position": "bottom",
+    "caption_scale": 0.72,
+    "caption_segments": [],
+    "creative_intent": "10-second transformation event, clear created-by payoff and resolving brand lockup.",
+    "professional_cleanup": false,
+    "finish_plan": {
+      "version": 1,
+      "enabled": true,
+      "reframe": {
+        "enabled": true,
+        "aspect": "16:9",
+        "mode": "off"
+      }
+    },
+    "smart_crop": true,
+    "smart_crop_mode": "safe_fit",
+    "brand_watermark": false,
+    "output_settings": {
+      "resolution": "1080p",
+      "fps": 24,
+      "codec": "h264",
+      "audioCodec": "aac"
+    },
+    "add_music": true,
+    "music_url": "http://127.0.0.1:8765/assets/sound/score-teaser.wav",
+    "music_name": "score-teaser",
+    "music_volume": 0.65,
+    "music_ducking": false,
+    "music_fade_in": 0.25,
+    "music_fade_out": 0.6,
+    "music_loop": false,
+    "sound_effects": [
+      {
+        "id": "one-edit-teaser-audio-1",
+        "url": "http://127.0.0.1:8765/assets/narration/reveal.wav",
+        "enabled": true,
+        "kind": "voiceover",
+        "name": "vo-reveal",
+        "sourceClipId": "vo-reveal",
+        "storagePath": "assets/narration/reveal.wav",
+        "contentHash": "43ec9f03541b141676c92863769213ae0fe664655a9e3f1b31a6506a8155b139",
+        "volume": 0.94,
+        "fadeIn": 0.02,
+        "fadeOut": 0.05,
+        "startTime": 3.15,
+        "duration": 3.4,
+        "trimStart": 0
+      },
+      {
+        "id": "one-edit-teaser-audio-2",
+        "url": "http://127.0.0.1:8765/assets/sound/cues-teaser.wav",
+        "enabled": true,
+        "kind": "sfx",
+        "name": "cues-teaser",
+        "sourceClipId": "cues-teaser",
+        "storagePath": "assets/sound/cues-teaser.wav",
+        "contentHash": "21b9d89b42ab9a6e4c4b3c4134318bac0065dc24837b1b80ba57fe93eee1e9db",
+        "volume": 0.8,
+        "fadeIn": 0.02,
+        "fadeOut": 0.05,
+        "startTime": 0,
+        "duration": 10,
+        "trimStart": 0
+      }
+    ],
+    "motionGraphics": {
+      "version": 1,
+      "scenes": []
+    },
+    "mute_audio": true
+  },
+  "documentHash": "dadce49edc66096caf58786a1c481610024c6c9db45da8b219efaaba28c97ed9",
+  "sourceEvidence": [
+    {
+      "assetId": "vessel",
+      "contentHash": "da5c769a1d02d01ee6dcc622718162757b877329b575aab287e55da3accc34d3",
+      "provenanceHash": "d774b2ab9a7d35c3a3c82e6ebccd648de4034bfb3bc5a494f9d127aea674ed63",
+      "reviewEvidenceHash": "77ac85d46b06797a600e6b5c43970c331d23bfb730ef99afa5eb9c428c9ce2f1"
+    },
+    {
+      "assetId": "reveal",
+      "contentHash": "86f95612978f02eda26dd563096114d9c8818b0a716e009e75e5077a5f7ad535",
+      "provenanceHash": "1fbe4fa933010b95bf4459ff452f5ecdd3b35ccee60f567e462b5450b27d8a1e",
+      "reviewEvidenceHash": "77ac85d46b06797a600e6b5c43970c331d23bfb730ef99afa5eb9c428c9ce2f1"
+    },
+    {
+      "assetId": "ident",
+      "contentHash": "a9a9aafcdc7a9a7266f1d23c4bfc47cf338995c3c488c4d862b5225c2cbd3f2a",
+      "provenanceHash": "239250a2ea5188c2f998d63f8a18f7747cc8fff60a83248e932a27011ad2911c",
+      "reviewEvidenceHash": "77ac85d46b06797a600e6b5c43970c331d23bfb730ef99afa5eb9c428c9ce2f1"
+    },
+    {
+      "assetId": "vo-reveal",
+      "contentHash": "43ec9f03541b141676c92863769213ae0fe664655a9e3f1b31a6506a8155b139",
+      "provenanceHash": "fa31441bef9caa826f7560520b1b1755cf371bda4853d127665d5edb739c4332",
+      "reviewEvidenceHash": "77ac85d46b06797a600e6b5c43970c331d23bfb730ef99afa5eb9c428c9ce2f1"
+    },
+    {
+      "assetId": "cues-teaser",
+      "contentHash": "21b9d89b42ab9a6e4c4b3c4134318bac0065dc24837b1b80ba57fe93eee1e9db",
+      "provenanceHash": "a7105f7048869fd22a82e127c39b99feb0a3927c6d55c33a333735551d72813e",
+      "reviewEvidenceHash": "77ac85d46b06797a600e6b5c43970c331d23bfb730ef99afa5eb9c428c9ce2f1"
+    },
+    {
+      "assetId": "score-teaser",
+      "contentHash": "31f07e62b558d82c1ca2ad3d3d984da428c4f4133978931cfa485a19f36a178f",
+      "provenanceHash": "2027ea5a31e7348baa660949e73ea8aca34a8fca35db055d666fd1ee14f51c5b",
+      "reviewEvidenceHash": "77ac85d46b06797a600e6b5c43970c331d23bfb730ef99afa5eb9c428c9ce2f1"
+    }
+  ],
+  "intelligence": {
+    "revision": {
+      "schemaVersion": 1,
+      "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+      "ownerUid": "founder-private",
+      "baseRevisionId": null,
+      "createdBy": {
+        "kind": "content_factory",
+        "id": "founder-private"
+      },
+      "assets": [
+        {
+          "assetId": "vessel",
+          "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+          "ownerUid": "founder-private",
+          "contentHash": "da5c769a1d02d01ee6dcc622718162757b877329b575aab287e55da3accc34d3",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "vessel"
+          },
+          "durationTicks": 630000,
+          "mediaType": "video",
+          "streams": [
+            {
+              "streamId": "vessel:video",
+              "assetId": "vessel",
+              "kind": "video",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 630000,
+              "sampleRateHz": null,
+              "frameRate": {
+                "numerator": 24,
+                "denominator": 1
+              },
+              "channelLayout": null
+            }
+          ],
+          "technical": {
+            "container": "mp4",
+            "codec": "h264"
+          },
+          "provenance": {
+            "origin": "server_generated",
+            "method": "Content Factory receipt d774b2ab9a7d35c3a3c82e6ebccd648de4034bfb3bc5a494f9d127aea674ed63"
+          }
+        },
+        {
+          "assetId": "ident",
+          "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+          "ownerUid": "founder-private",
+          "contentHash": "a9a9aafcdc7a9a7266f1d23c4bfc47cf338995c3c488c4d862b5225c2cbd3f2a",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "ident"
+          },
+          "durationTicks": 450000,
+          "mediaType": "video",
+          "streams": [
+            {
+              "streamId": "ident:video",
+              "assetId": "ident",
+              "kind": "video",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 450000,
+              "sampleRateHz": null,
+              "frameRate": {
+                "numerator": 24,
+                "denominator": 1
+              },
+              "channelLayout": null
+            }
+          ],
+          "technical": {
+            "container": "mp4",
+            "codec": "h264"
+          },
+          "provenance": {
+            "origin": "server_generated",
+            "method": "Content Factory receipt 239250a2ea5188c2f998d63f8a18f7747cc8fff60a83248e932a27011ad2911c"
+          }
+        },
+        {
+          "assetId": "origin",
+          "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+          "ownerUid": "founder-private",
+          "contentHash": "ff2171bf6c166b3b1d020e19f84f1f61168def04d10350b26da49c5cb659a960",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "origin"
+          },
+          "durationTicks": 472500,
+          "mediaType": "video",
+          "streams": [
+            {
+              "streamId": "origin:video",
+              "assetId": "origin",
+              "kind": "video",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 472500,
+              "sampleRateHz": null,
+              "frameRate": {
+                "numerator": 24,
+                "denominator": 1
+              },
+              "channelLayout": null
+            }
+          ],
+          "technical": {
+            "container": "mp4",
+            "codec": "h264"
+          },
+          "provenance": {
+            "origin": "server_generated",
+            "method": "Content Factory receipt 82925527516d719810a9cf28d93ccfcb9464b27eef2f6a44ee9280491a82dc10"
+          }
+        },
+        {
+          "assetId": "cascade",
+          "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+          "ownerUid": "founder-private",
+          "contentHash": "6a7f3a74a81eb4ebd1b3201a123819b4d0b8cc46207e80c58e1e328782b58787",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "cascade"
+          },
+          "durationTicks": 495000,
+          "mediaType": "video",
+          "streams": [
+            {
+              "streamId": "cascade:video",
+              "assetId": "cascade",
+              "kind": "video",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 495000,
+              "sampleRateHz": null,
+              "frameRate": {
+                "numerator": 24,
+                "denominator": 1
+              },
+              "channelLayout": null
+            }
+          ],
+          "technical": {
+            "container": "mp4",
+            "codec": "h264"
+          },
+          "provenance": {
+            "origin": "server_generated",
+            "method": "Content Factory receipt 72a959a33893e44575f9c3ec49ad20a7599207e6e232a0e50d433beaa964b0ff"
+          }
+        },
+        {
+          "assetId": "failure",
+          "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+          "ownerUid": "founder-private",
+          "contentHash": "a8be6b781c401958d8ab1e38296b60f3dc9b9d96c97dcaab6c3ced8ce2245b85",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "failure"
+          },
+          "durationTicks": 405000,
+          "mediaType": "video",
+          "streams": [
+            {
+              "streamId": "failure:video",
+              "assetId": "failure",
+              "kind": "video",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 405000,
+              "sampleRateHz": null,
+              "frameRate": {
+                "numerator": 24,
+                "denominator": 1
+              },
+              "channelLayout": null
+            }
+          ],
+          "technical": {
+            "container": "mp4",
+            "codec": "h264"
+          },
+          "provenance": {
+            "origin": "server_generated",
+            "method": "Content Factory receipt f273ef299a8a3ce1cd7a2d1ac8047d3dd2d16c9dc22eabfc52bfeadf40e8f417"
+          }
+        },
+        {
+          "assetId": "quota",
+          "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+          "ownerUid": "founder-private",
+          "contentHash": "06dcaf2597e3d902e3c4b782ce4dfc33aef70b23f3f793fae40fbf83b33aa6e8",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "quota"
+          },
+          "durationTicks": 427500,
+          "mediaType": "video",
+          "streams": [
+            {
+              "streamId": "quota:video",
+              "assetId": "quota",
+              "kind": "video",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 427500,
+              "sampleRateHz": null,
+              "frameRate": {
+                "numerator": 24,
+                "denominator": 1
+              },
+              "channelLayout": null
+            }
+          ],
+          "technical": {
+            "container": "mp4",
+            "codec": "h264"
+          },
+          "provenance": {
+            "origin": "server_generated",
+            "method": "Content Factory receipt 9b6e8f3ee9776ef38fe55bed964ab117dc018ba069072ba67bed403f39f35fa4"
+          }
+        },
+        {
+          "assetId": "breakthrough",
+          "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+          "ownerUid": "founder-private",
+          "contentHash": "9be93b83c1a7018081ee474b298bba59e3a40d0fcf14b44be18c88e34226c163",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "breakthrough"
+          },
+          "durationTicks": 382500,
+          "mediaType": "video",
+          "streams": [
+            {
+              "streamId": "breakthrough:video",
+              "assetId": "breakthrough",
+              "kind": "video",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 382500,
+              "sampleRateHz": null,
+              "frameRate": {
+                "numerator": 24,
+                "denominator": 1
+              },
+              "channelLayout": null
+            }
+          ],
+          "technical": {
+            "container": "mp4",
+            "codec": "h264"
+          },
+          "provenance": {
+            "origin": "server_generated",
+            "method": "Content Factory receipt cec6afec2c7363732c8868d4645674b9cbf35bcba8407adf3c889cbd6aed2af5"
+          }
+        },
+        {
+          "assetId": "director",
+          "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+          "ownerUid": "founder-private",
+          "contentHash": "b849b6d520319c4da6039beb6ff976c074bc610c586bf3f1efca1e9a833062d0",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "director"
+          },
+          "durationTicks": 607500,
+          "mediaType": "video",
+          "streams": [
+            {
+              "streamId": "director:video",
+              "assetId": "director",
+              "kind": "video",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 607500,
+              "sampleRateHz": null,
+              "frameRate": {
+                "numerator": 24,
+                "denominator": 1
+              },
+              "channelLayout": null
+            }
+          ],
+          "technical": {
+            "container": "mp4",
+            "codec": "h264"
+          },
+          "provenance": {
+            "origin": "server_generated",
+            "method": "Content Factory receipt accc683db818e1cab9af1513a8d733d0eea238574e4827365d220a9344457e07"
+          }
+        },
+        {
+          "assetId": "reveal",
+          "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+          "ownerUid": "founder-private",
+          "contentHash": "86f95612978f02eda26dd563096114d9c8818b0a716e009e75e5077a5f7ad535",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "reveal"
+          },
+          "durationTicks": 450000,
+          "mediaType": "video",
+          "streams": [
+            {
+              "streamId": "reveal:video",
+              "assetId": "reveal",
+              "kind": "video",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 450000,
+              "sampleRateHz": null,
+              "frameRate": {
+                "numerator": 24,
+                "denominator": 1
+              },
+              "channelLayout": null
+            }
+          ],
+          "technical": {
+            "container": "mp4",
+            "codec": "h264"
+          },
+          "provenance": {
+            "origin": "server_generated",
+            "method": "Content Factory receipt 1fbe4fa933010b95bf4459ff452f5ecdd3b35ccee60f567e462b5450b27d8a1e"
+          }
+        },
+        {
+          "assetId": "vo-cold-open",
+          "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+          "ownerUid": "founder-private",
+          "contentHash": "b81f0a3ba05220b7e85c81b2eb596da37cb07b92eea4ad92c0df3b2853a47e80",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "vo-cold-open"
+          },
+          "durationTicks": 195750,
+          "mediaType": "audio",
+          "streams": [
+            {
+              "streamId": "vo-cold-open:audio",
+              "assetId": "vo-cold-open",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 195750,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ],
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "provenance": {
+            "origin": "server_generated",
+            "method": "Content Factory receipt bbdc2c3b11105dc2ce3d2f0d7305756a34ab0f738d9cefa5d79f36040b0df8fa"
+          }
+        },
+        {
+          "assetId": "vo-origin",
+          "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+          "ownerUid": "founder-private",
+          "contentHash": "87ccf9d8c3f4da55aa3189a6d0887e8180c3ed954bec34a565e0b66f312d9b45",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "vo-origin"
+          },
+          "durationTicks": 396000,
+          "mediaType": "audio",
+          "streams": [
+            {
+              "streamId": "vo-origin:audio",
+              "assetId": "vo-origin",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 396000,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ],
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "provenance": {
+            "origin": "server_generated",
+            "method": "Content Factory receipt 42bf8138fa8ab36fcff7cb2659d6da27c98f0fa2ee3c730b2d5a7db891dfc89d"
+          }
+        },
+        {
+          "assetId": "vo-cascade",
+          "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+          "ownerUid": "founder-private",
+          "contentHash": "983858a242fbac92dc1173689057f0882a5fbb715d3d533703e9043a4d4796c4",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "vo-cascade"
+          },
+          "durationTicks": 409500,
+          "mediaType": "audio",
+          "streams": [
+            {
+              "streamId": "vo-cascade:audio",
+              "assetId": "vo-cascade",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 409500,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ],
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "provenance": {
+            "origin": "server_generated",
+            "method": "Content Factory receipt 103874ff25baf5d4138019df140c1c9eb8d7411afc40a2f4d130dd18511f1ba4"
+          }
+        },
+        {
+          "assetId": "vo-failure",
+          "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+          "ownerUid": "founder-private",
+          "contentHash": "90e1326401f5d98303da9fe78ed85da6605baabc47a4cdf96117dae096b0ac2e",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "vo-failure"
+          },
+          "durationTicks": 330750,
+          "mediaType": "audio",
+          "streams": [
+            {
+              "streamId": "vo-failure:audio",
+              "assetId": "vo-failure",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 330750,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ],
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "provenance": {
+            "origin": "server_generated",
+            "method": "Content Factory receipt 040e9fd5e0bf81c81dd6c78b584bc15029f300b4128047b859795dc40f6741ed"
+          }
+        },
+        {
+          "assetId": "vo-quota",
+          "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+          "ownerUid": "founder-private",
+          "contentHash": "3677901cbffbbf11741f023b6aa67cd419d826dba5511158eb50b3eba12f4f91",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "vo-quota"
+          },
+          "durationTicks": 299250,
+          "mediaType": "audio",
+          "streams": [
+            {
+              "streamId": "vo-quota:audio",
+              "assetId": "vo-quota",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 299250,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ],
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "provenance": {
+            "origin": "server_generated",
+            "method": "Content Factory receipt 2b21cf38563b6be73b9c1288769c3ad074e704a1daff472612fddd1c0478c2a9"
+          }
+        },
+        {
+          "assetId": "vo-breakthrough",
+          "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+          "ownerUid": "founder-private",
+          "contentHash": "c81c56ed7512a554e8af218dde94d2d8df9bf470f0280b79ab4317f3f70fcc2d",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "vo-breakthrough"
+          },
+          "durationTicks": 290250,
+          "mediaType": "audio",
+          "streams": [
+            {
+              "streamId": "vo-breakthrough:audio",
+              "assetId": "vo-breakthrough",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 290250,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ],
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "provenance": {
+            "origin": "server_generated",
+            "method": "Content Factory receipt d94eecec101d5bb41b38affab9e90b822260f25fea4c8b57c99639b4e44c0b03"
+          }
+        },
+        {
+          "assetId": "vo-director",
+          "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+          "ownerUid": "founder-private",
+          "contentHash": "8c69f9c77b5fd0b8f8944312f399a5aef1bf6770a22059695c0ba727248a1117",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "vo-director"
+          },
+          "durationTicks": 549000,
+          "mediaType": "audio",
+          "streams": [
+            {
+              "streamId": "vo-director:audio",
+              "assetId": "vo-director",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 549000,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ],
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "provenance": {
+            "origin": "server_generated",
+            "method": "Content Factory receipt a1177b3240a362508ac9999b39f238c7b5811b6e150fdcc125b09f3eaea13dbb"
+          }
+        },
+        {
+          "assetId": "vo-magic",
+          "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+          "ownerUid": "founder-private",
+          "contentHash": "a4177157a9f82de1728a32482b8eaf346b1920e8aa2743d9c3e8d99be5a8b4de",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "vo-magic"
+          },
+          "durationTicks": 276750,
+          "mediaType": "audio",
+          "streams": [
+            {
+              "streamId": "vo-magic:audio",
+              "assetId": "vo-magic",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 276750,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ],
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "provenance": {
+            "origin": "server_generated",
+            "method": "Content Factory receipt 9d1f7b850476c00ed0cad2c948a4844f1b3172429822ab8d2f76490217d8d5a7"
+          }
+        },
+        {
+          "assetId": "vo-reveal",
+          "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+          "ownerUid": "founder-private",
+          "contentHash": "43ec9f03541b141676c92863769213ae0fe664655a9e3f1b31a6506a8155b139",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "vo-reveal"
+          },
+          "durationTicks": 306000,
+          "mediaType": "audio",
+          "streams": [
+            {
+              "streamId": "vo-reveal:audio",
+              "assetId": "vo-reveal",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 306000,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ],
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "provenance": {
+            "origin": "server_generated",
+            "method": "Content Factory receipt fa31441bef9caa826f7560520b1b1755cf371bda4853d127665d5edb739c4332"
+          }
+        },
+        {
+          "assetId": "score",
+          "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+          "ownerUid": "founder-private",
+          "contentHash": "e21838722d939d93d46acedca7c45b620c1648b01000ec1202f7eb1c08bfba5a",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "score"
+          },
+          "durationTicks": 4590000,
+          "mediaType": "audio",
+          "streams": [
+            {
+              "streamId": "score:audio",
+              "assetId": "score",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 4590000,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ],
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "provenance": {
+            "origin": "server_generated",
+            "method": "Content Factory receipt c94bbd97a097f2ce201d8020ff9c5bcab8e32239570d490ae7215cfffbd1ed2f"
+          }
+        },
+        {
+          "assetId": "cues",
+          "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+          "ownerUid": "founder-private",
+          "contentHash": "04bd044058b9b9239c93acbb0b151eb746ca3ad1f06fcfc0990f4ecdad34e3b0",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "cues"
+          },
+          "durationTicks": 4590000,
+          "mediaType": "audio",
+          "streams": [
+            {
+              "streamId": "cues:audio",
+              "assetId": "cues",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 4590000,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ],
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "provenance": {
+            "origin": "server_generated",
+            "method": "Content Factory receipt c7dc5b2084ae5c57c227decfcd47b84bb5e31a89d21d1f5daff442a33545b317"
+          }
+        },
+        {
+          "assetId": "score-cutdown",
+          "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+          "ownerUid": "founder-private",
+          "contentHash": "6bc85fed339906028aa72c9203460ec00db62063c20dd7a7f8eaf77714a22256",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "score-cutdown"
+          },
+          "durationTicks": 2385000,
+          "mediaType": "audio",
+          "streams": [
+            {
+              "streamId": "score-cutdown:audio",
+              "assetId": "score-cutdown",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 2385000,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ],
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "provenance": {
+            "origin": "server_generated",
+            "method": "Content Factory receipt 84fb84cb2218e67edf84f9755843ed9eeb141ff6c575a0e4b987c189986272c5"
+          }
+        },
+        {
+          "assetId": "cues-cutdown",
+          "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+          "ownerUid": "founder-private",
+          "contentHash": "6d2987c64beda52e458d900107513d377e8cbe4fc108a0fd04d1f32d06a24ff2",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "cues-cutdown"
+          },
+          "durationTicks": 2385000,
+          "mediaType": "audio",
+          "streams": [
+            {
+              "streamId": "cues-cutdown:audio",
+              "assetId": "cues-cutdown",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 2385000,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ],
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "provenance": {
+            "origin": "server_generated",
+            "method": "Content Factory receipt f42836d592793d2797adeedb6e42998f21a3aa5e93ab950e4567cc03b36b8626"
+          }
+        },
+        {
+          "assetId": "score-teaser",
+          "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+          "ownerUid": "founder-private",
+          "contentHash": "31f07e62b558d82c1ca2ad3d3d984da428c4f4133978931cfa485a19f36a178f",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "score-teaser"
+          },
+          "durationTicks": 900000,
+          "mediaType": "audio",
+          "streams": [
+            {
+              "streamId": "score-teaser:audio",
+              "assetId": "score-teaser",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 900000,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ],
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "provenance": {
+            "origin": "server_generated",
+            "method": "Content Factory receipt 2027ea5a31e7348baa660949e73ea8aca34a8fca35db055d666fd1ee14f51c5b"
+          }
+        },
+        {
+          "assetId": "cues-teaser",
+          "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+          "ownerUid": "founder-private",
+          "contentHash": "21b9d89b42ab9a6e4c4b3c4134318bac0065dc24837b1b80ba57fe93eee1e9db",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "cues-teaser"
+          },
+          "durationTicks": 900000,
+          "mediaType": "audio",
+          "streams": [
+            {
+              "streamId": "cues-teaser:audio",
+              "assetId": "cues-teaser",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 900000,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ],
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "provenance": {
+            "origin": "server_generated",
+            "method": "Content Factory receipt a7105f7048869fd22a82e127c39b99feb0a3927c6d55c33a333735551d72813e"
+          }
+        }
+      ],
+      "evidenceRefs": [
+        {
+          "evidenceId": "generation:vessel",
+          "kind": "generated_asset",
+          "sourceAssetId": "vessel",
+          "sourceContentHash": "da5c769a1d02d01ee6dcc622718162757b877329b575aab287e55da3accc34d3",
+          "artifactHash": "61d58c4bacf81c5b477c1a36cc2d65cee6f3b72e9680950048322138f0a2d327",
+          "analysisType": "content_generation",
+          "modelRevision": "48a430950197d224e3eafb1fa78d0e228fb9229be1d6884c879e6a0f1d46da72",
+          "configHash": "264e5fa511206a14e28dcc121a80f141e0d0e8de81f9ef95c7d523e5b86d565d",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:ident",
+          "kind": "generated_asset",
+          "sourceAssetId": "ident",
+          "sourceContentHash": "a9a9aafcdc7a9a7266f1d23c4bfc47cf338995c3c488c4d862b5225c2cbd3f2a",
+          "artifactHash": "8be1b51104d6aadfa2d83ccfad9e89631b5509fb80910527613acb1bf01ebe46",
+          "analysisType": "content_generation",
+          "modelRevision": "7993a1bb3d87448ccc8cc7ee2ed84b2fc5782b2de8162ca905192259170b3a27",
+          "configHash": "4d3f5f4e0a8f9dea2798d73c8b5311a3c673ac19cd40f25c7bbb746b1e2f85fd",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:origin",
+          "kind": "generated_asset",
+          "sourceAssetId": "origin",
+          "sourceContentHash": "ff2171bf6c166b3b1d020e19f84f1f61168def04d10350b26da49c5cb659a960",
+          "artifactHash": "be457a677f5fe76b282852abdd7aba8c502d31a601797a2f2ed3451aab38e054",
+          "analysisType": "content_generation",
+          "modelRevision": "d0091527a841ad98a9d12c021fff3dabb8a3e8a39608baf84a42bebfa9ce2276",
+          "configHash": "80e8891a5f521ed63687ae8ad2df5a4bd8c6588398b9b32929ba6f7ccce8e128",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:cascade",
+          "kind": "generated_asset",
+          "sourceAssetId": "cascade",
+          "sourceContentHash": "6a7f3a74a81eb4ebd1b3201a123819b4d0b8cc46207e80c58e1e328782b58787",
+          "artifactHash": "49b4a95d0510c664cbfc4db231e9c2fd93cd6ee83839fef256a5e1ee67bc7d8c",
+          "analysisType": "content_generation",
+          "modelRevision": "d0091527a841ad98a9d12c021fff3dabb8a3e8a39608baf84a42bebfa9ce2276",
+          "configHash": "80e8891a5f521ed63687ae8ad2df5a4bd8c6588398b9b32929ba6f7ccce8e128",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:failure",
+          "kind": "generated_asset",
+          "sourceAssetId": "failure",
+          "sourceContentHash": "a8be6b781c401958d8ab1e38296b60f3dc9b9d96c97dcaab6c3ced8ce2245b85",
+          "artifactHash": "4701b04dedfa68e0604c7562219d2924bdd0d5f7f42de28d22f6c682921ad9e6",
+          "analysisType": "content_generation",
+          "modelRevision": "d0091527a841ad98a9d12c021fff3dabb8a3e8a39608baf84a42bebfa9ce2276",
+          "configHash": "80e8891a5f521ed63687ae8ad2df5a4bd8c6588398b9b32929ba6f7ccce8e128",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:quota",
+          "kind": "generated_asset",
+          "sourceAssetId": "quota",
+          "sourceContentHash": "06dcaf2597e3d902e3c4b782ce4dfc33aef70b23f3f793fae40fbf83b33aa6e8",
+          "artifactHash": "b6c17d629d09fa1e973506a0cdf96685479a483ffbfab2fd4209122745f5d081",
+          "analysisType": "content_generation",
+          "modelRevision": "d0091527a841ad98a9d12c021fff3dabb8a3e8a39608baf84a42bebfa9ce2276",
+          "configHash": "80e8891a5f521ed63687ae8ad2df5a4bd8c6588398b9b32929ba6f7ccce8e128",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:breakthrough",
+          "kind": "generated_asset",
+          "sourceAssetId": "breakthrough",
+          "sourceContentHash": "9be93b83c1a7018081ee474b298bba59e3a40d0fcf14b44be18c88e34226c163",
+          "artifactHash": "5f497c1dfd58956ab2e944991178c125472b2bca95c0f7a0a3dd2e17304f1cf0",
+          "analysisType": "content_generation",
+          "modelRevision": "d0091527a841ad98a9d12c021fff3dabb8a3e8a39608baf84a42bebfa9ce2276",
+          "configHash": "80e8891a5f521ed63687ae8ad2df5a4bd8c6588398b9b32929ba6f7ccce8e128",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:director",
+          "kind": "generated_asset",
+          "sourceAssetId": "director",
+          "sourceContentHash": "b849b6d520319c4da6039beb6ff976c074bc610c586bf3f1efca1e9a833062d0",
+          "artifactHash": "d3939aea2dc5ce3af249f5e1ec204e44eb6c0f58ddff0e1f67f177c1c3c7b4a0",
+          "analysisType": "content_generation",
+          "modelRevision": "d0091527a841ad98a9d12c021fff3dabb8a3e8a39608baf84a42bebfa9ce2276",
+          "configHash": "80e8891a5f521ed63687ae8ad2df5a4bd8c6588398b9b32929ba6f7ccce8e128",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:reveal",
+          "kind": "generated_asset",
+          "sourceAssetId": "reveal",
+          "sourceContentHash": "86f95612978f02eda26dd563096114d9c8818b0a716e009e75e5077a5f7ad535",
+          "artifactHash": "8fc29476d85a97f6e1083f3a88cf1c399e5fe7bbd2bd54d48cd334c4a7da98f6",
+          "analysisType": "content_generation",
+          "modelRevision": "d0091527a841ad98a9d12c021fff3dabb8a3e8a39608baf84a42bebfa9ce2276",
+          "configHash": "80e8891a5f521ed63687ae8ad2df5a4bd8c6588398b9b32929ba6f7ccce8e128",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:vo-cold-open",
+          "kind": "generated_asset",
+          "sourceAssetId": "vo-cold-open",
+          "sourceContentHash": "b81f0a3ba05220b7e85c81b2eb596da37cb07b92eea4ad92c0df3b2853a47e80",
+          "artifactHash": "fd4f1436ab8c39ea5b7e7aaf87a60305e91f12b6103a46f77cfba5e0f5a88551",
+          "analysisType": "content_generation",
+          "modelRevision": "c9db519d49a9ea3e641f06f8ce3f473c41738d9d88ed6906148d7389c04ede92",
+          "configHash": "98959df27f53d0878e64a0097ec11a20f3254d23b58654c6d654ab6630746546",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:vo-origin",
+          "kind": "generated_asset",
+          "sourceAssetId": "vo-origin",
+          "sourceContentHash": "87ccf9d8c3f4da55aa3189a6d0887e8180c3ed954bec34a565e0b66f312d9b45",
+          "artifactHash": "0c5e1595865c6d8df8435e857b627788e32f9e27b2429646c2febb5ee3715c0d",
+          "analysisType": "content_generation",
+          "modelRevision": "c9db519d49a9ea3e641f06f8ce3f473c41738d9d88ed6906148d7389c04ede92",
+          "configHash": "98959df27f53d0878e64a0097ec11a20f3254d23b58654c6d654ab6630746546",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:vo-cascade",
+          "kind": "generated_asset",
+          "sourceAssetId": "vo-cascade",
+          "sourceContentHash": "983858a242fbac92dc1173689057f0882a5fbb715d3d533703e9043a4d4796c4",
+          "artifactHash": "372ab12bded84a3f2508247dcf050b9a3818d088b31d8a30b2d36c8986476efd",
+          "analysisType": "content_generation",
+          "modelRevision": "c9db519d49a9ea3e641f06f8ce3f473c41738d9d88ed6906148d7389c04ede92",
+          "configHash": "98959df27f53d0878e64a0097ec11a20f3254d23b58654c6d654ab6630746546",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:vo-failure",
+          "kind": "generated_asset",
+          "sourceAssetId": "vo-failure",
+          "sourceContentHash": "90e1326401f5d98303da9fe78ed85da6605baabc47a4cdf96117dae096b0ac2e",
+          "artifactHash": "dc0c8f846bd29c5489431eabdc05f45778d47082f1baeaaf7d4b59ed1bffd159",
+          "analysisType": "content_generation",
+          "modelRevision": "c9db519d49a9ea3e641f06f8ce3f473c41738d9d88ed6906148d7389c04ede92",
+          "configHash": "98959df27f53d0878e64a0097ec11a20f3254d23b58654c6d654ab6630746546",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:vo-quota",
+          "kind": "generated_asset",
+          "sourceAssetId": "vo-quota",
+          "sourceContentHash": "3677901cbffbbf11741f023b6aa67cd419d826dba5511158eb50b3eba12f4f91",
+          "artifactHash": "d8ea1808cf93d10e187de64eabdfefb513b8d8821fc369c3e745769254486eaf",
+          "analysisType": "content_generation",
+          "modelRevision": "c9db519d49a9ea3e641f06f8ce3f473c41738d9d88ed6906148d7389c04ede92",
+          "configHash": "98959df27f53d0878e64a0097ec11a20f3254d23b58654c6d654ab6630746546",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:vo-breakthrough",
+          "kind": "generated_asset",
+          "sourceAssetId": "vo-breakthrough",
+          "sourceContentHash": "c81c56ed7512a554e8af218dde94d2d8df9bf470f0280b79ab4317f3f70fcc2d",
+          "artifactHash": "923651ab1e6c6fd35b201e79370dab8c4730a7184d1f69fc2bf9eb1871ec89d3",
+          "analysisType": "content_generation",
+          "modelRevision": "c9db519d49a9ea3e641f06f8ce3f473c41738d9d88ed6906148d7389c04ede92",
+          "configHash": "98959df27f53d0878e64a0097ec11a20f3254d23b58654c6d654ab6630746546",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:vo-director",
+          "kind": "generated_asset",
+          "sourceAssetId": "vo-director",
+          "sourceContentHash": "8c69f9c77b5fd0b8f8944312f399a5aef1bf6770a22059695c0ba727248a1117",
+          "artifactHash": "eb8c2fe8ab63b5fc35a6eea1b645a6b565500b6f0f96175738d6fb807039dc51",
+          "analysisType": "content_generation",
+          "modelRevision": "c9db519d49a9ea3e641f06f8ce3f473c41738d9d88ed6906148d7389c04ede92",
+          "configHash": "98959df27f53d0878e64a0097ec11a20f3254d23b58654c6d654ab6630746546",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:vo-magic",
+          "kind": "generated_asset",
+          "sourceAssetId": "vo-magic",
+          "sourceContentHash": "a4177157a9f82de1728a32482b8eaf346b1920e8aa2743d9c3e8d99be5a8b4de",
+          "artifactHash": "746992f529024593990243da6ce223c809e3cc4bc61a809d342e4e8d0942d0a5",
+          "analysisType": "content_generation",
+          "modelRevision": "c9db519d49a9ea3e641f06f8ce3f473c41738d9d88ed6906148d7389c04ede92",
+          "configHash": "98959df27f53d0878e64a0097ec11a20f3254d23b58654c6d654ab6630746546",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:vo-reveal",
+          "kind": "generated_asset",
+          "sourceAssetId": "vo-reveal",
+          "sourceContentHash": "43ec9f03541b141676c92863769213ae0fe664655a9e3f1b31a6506a8155b139",
+          "artifactHash": "8d6af3bfbf93dd6b57b213cc734f05b95fddb03f08eee3dae89cb891335bfa1b",
+          "analysisType": "content_generation",
+          "modelRevision": "c9db519d49a9ea3e641f06f8ce3f473c41738d9d88ed6906148d7389c04ede92",
+          "configHash": "98959df27f53d0878e64a0097ec11a20f3254d23b58654c6d654ab6630746546",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:score",
+          "kind": "generated_asset",
+          "sourceAssetId": "score",
+          "sourceContentHash": "e21838722d939d93d46acedca7c45b620c1648b01000ec1202f7eb1c08bfba5a",
+          "artifactHash": "006a8a4913020a88cd72bcdf4be18583d24cc348faf8be5b7300cc7de3dd5094",
+          "analysisType": "content_generation",
+          "modelRevision": "ba2635bc2d6c66881b538f1bd683167e720cacb845be3961aae58216be3cb3bf",
+          "configHash": "34bbdb63e539b79f216ba49c9627dd97d88b416f109f037c65667ff04fbea648",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:cues",
+          "kind": "generated_asset",
+          "sourceAssetId": "cues",
+          "sourceContentHash": "04bd044058b9b9239c93acbb0b151eb746ca3ad1f06fcfc0990f4ecdad34e3b0",
+          "artifactHash": "ba494f29c3e96339821a3de569cac7ded48d4db59b8954e4975765aaf9b8467b",
+          "analysisType": "content_generation",
+          "modelRevision": "ba2635bc2d6c66881b538f1bd683167e720cacb845be3961aae58216be3cb3bf",
+          "configHash": "7b106a542ced3b1bbba18cf3bf119e9b92941a197c9c0ea766e577ffd0785f65",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:score-cutdown",
+          "kind": "generated_asset",
+          "sourceAssetId": "score-cutdown",
+          "sourceContentHash": "6bc85fed339906028aa72c9203460ec00db62063c20dd7a7f8eaf77714a22256",
+          "artifactHash": "77ee266c89d2085ab93ca4f2e54ac22f344f13ce882dccf82cd5a2eb23e39bb9",
+          "analysisType": "content_generation",
+          "modelRevision": "d7bcc6f39d6e9fdcac8a176924985737a627415d40b0a745c80430384cfe5bb1",
+          "configHash": "57d49be1db7135b948960a609bda342bb4ed910facd8868f1399e71bb8c1ac31",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:cues-cutdown",
+          "kind": "generated_asset",
+          "sourceAssetId": "cues-cutdown",
+          "sourceContentHash": "6d2987c64beda52e458d900107513d377e8cbe4fc108a0fd04d1f32d06a24ff2",
+          "artifactHash": "76b75df68ba0eba3fda49d53dac671eb38375e3db37b82ac39a35d4699c82eab",
+          "analysisType": "content_generation",
+          "modelRevision": "d7bcc6f39d6e9fdcac8a176924985737a627415d40b0a745c80430384cfe5bb1",
+          "configHash": "57d49be1db7135b948960a609bda342bb4ed910facd8868f1399e71bb8c1ac31",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:score-teaser",
+          "kind": "generated_asset",
+          "sourceAssetId": "score-teaser",
+          "sourceContentHash": "31f07e62b558d82c1ca2ad3d3d984da428c4f4133978931cfa485a19f36a178f",
+          "artifactHash": "62ee764d831cacbcd5a96f7b9fe797c1bfc617aa84e45712f6f1e1ac91bf746e",
+          "analysisType": "content_generation",
+          "modelRevision": "d7bcc6f39d6e9fdcac8a176924985737a627415d40b0a745c80430384cfe5bb1",
+          "configHash": "9c240216caa20843ff4d53688b8bfaa8638a581564cfefae4c913c2603139d47",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:cues-teaser",
+          "kind": "generated_asset",
+          "sourceAssetId": "cues-teaser",
+          "sourceContentHash": "21b9d89b42ab9a6e4c4b3c4134318bac0065dc24837b1b80ba57fe93eee1e9db",
+          "artifactHash": "c921c060b649decbf259d1355ddc9c1b98f553c93ef6e96369d8dec3b40b057a",
+          "analysisType": "content_generation",
+          "modelRevision": "d7bcc6f39d6e9fdcac8a176924985737a627415d40b0a745c80430384cfe5bb1",
+          "configHash": "9c240216caa20843ff4d53688b8bfaa8638a581564cfefae4c913c2603139d47",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        }
+      ],
+      "beats": [
+        {
+          "beatId": "cold-open",
+          "title": "Enter the final three seconds of the same transformed vessel, withholding its paper origin.",
+          "origin": "model_generated"
+        },
+        {
+          "beatId": "origin",
+          "title": "A retained moving conversation fills the frame. Two differently timed amber/violet waveform rows align below it.",
+          "origin": "model_generated"
+        },
+        {
+          "beatId": "cascade",
+          "title": "The moving conversation and SYNC / SOUND / RENDER labels are interrupted by a physical dark shutter and a red FAILED lockup.",
+          "origin": "model_generated"
+        },
+        {
+          "beatId": "failure",
+          "title": "An archived graphic reconstruction of render errors sits in depth beside the illuminated word AGAIN. This is not an unmodified error screenshot.",
+          "origin": "model_generated"
+        },
+        {
+          "beatId": "quota",
+          "title": "A large extruded zero on a dark stage with NO CAPACITY. The narration carries the setback; no quota email, archive date or GPU class is shown in this shot.",
+          "origin": "model_generated"
+        },
+        {
+          "beatId": "breakthrough",
+          "title": "The extruded zero and physical panels move aside to show retained generated yacht footage. 3000 milliGPU labels the historical capacity; this is not a new grant or 3000 physical GPUs.",
+          "origin": "model_generated"
+        },
+        {
+          "beatId": "director",
+          "title": "STORY / SHOT / CUT / SOUND labels resolve over the retained conversation, then the retained generated yacht becomes the chosen source. This is an authored concept visualization, not a recording of a live Director plan.",
+          "origin": "model_generated"
+        },
+        {
+          "beatId": "magic",
+          "title": "One continuous folded-paper hull and sail become timber and canvas while the workbench sinks into a deep ocean; the camera follows the same vessel.",
+          "origin": "model_generated"
+        },
+        {
+          "beatId": "reveal",
+          "title": "The created-by sentence resolves on a dark dimensional field, with restrained camera movement. No live Studio UI/project recording is represented.",
+          "origin": "model_generated"
+        },
+        {
+          "beatId": "ident",
+          "title": "Original exact logo contours emerge as titanium, optical-black, anodized-violet and glass layers; grazing light and a macro-to-lockup camera resolve at 3.2s, followed by a clean static hold.",
+          "origin": "model_generated"
+        }
+      ],
+      "captureGroups": [],
+      "assertions": [],
+      "syncMappings": [],
+      "dialogueUnits": [],
+      "continuityObservations": [],
+      "coverage": [
+        {
+          "coverageId": "coverage:vessel",
+          "beatId": "magic",
+          "assetId": "vessel",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 630000
+          },
+          "takeAssertionId": null,
+          "shotRoleAssertionId": null,
+          "dialogueUnitId": null,
+          "audioEvidenceRefs": [],
+          "technicalEvidenceRefs": [
+            "generation:vessel"
+          ],
+          "continuityEvidenceRefs": [],
+          "warnings": [
+            "Generated asset; machine-reviewed, founder approval remains pending"
+          ],
+          "state": "proposed",
+          "provenance": {
+            "origin": "model_inferred",
+            "producerId": "content_factory",
+            "method": "Story beat asset requirement and generated artifact receipt"
+          },
+          "uncertainty": {
+            "level": "medium",
+            "basis": "Visual review is model-assisted; not a human-verified recording"
+          },
+          "review": null,
+          "evidenceRefs": [
+            "generation:vessel"
+          ],
+          "supersedes": null
+        },
+        {
+          "coverageId": "coverage:ident",
+          "beatId": "ident",
+          "assetId": "ident",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 450000
+          },
+          "takeAssertionId": null,
+          "shotRoleAssertionId": null,
+          "dialogueUnitId": null,
+          "audioEvidenceRefs": [],
+          "technicalEvidenceRefs": [
+            "generation:ident"
+          ],
+          "continuityEvidenceRefs": [],
+          "warnings": [
+            "Generated asset; machine-reviewed, founder approval remains pending"
+          ],
+          "state": "proposed",
+          "provenance": {
+            "origin": "model_inferred",
+            "producerId": "content_factory",
+            "method": "Story beat asset requirement and generated artifact receipt"
+          },
+          "uncertainty": {
+            "level": "medium",
+            "basis": "Visual review is model-assisted; not a human-verified recording"
+          },
+          "review": null,
+          "evidenceRefs": [
+            "generation:ident"
+          ],
+          "supersedes": null
+        },
+        {
+          "coverageId": "coverage:origin",
+          "beatId": "origin",
+          "assetId": "origin",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 472500
+          },
+          "takeAssertionId": null,
+          "shotRoleAssertionId": null,
+          "dialogueUnitId": null,
+          "audioEvidenceRefs": [],
+          "technicalEvidenceRefs": [
+            "generation:origin"
+          ],
+          "continuityEvidenceRefs": [],
+          "warnings": [
+            "Generated asset; machine-reviewed, founder approval remains pending"
+          ],
+          "state": "proposed",
+          "provenance": {
+            "origin": "model_inferred",
+            "producerId": "content_factory",
+            "method": "Story beat asset requirement and generated artifact receipt"
+          },
+          "uncertainty": {
+            "level": "medium",
+            "basis": "Visual review is model-assisted; not a human-verified recording"
+          },
+          "review": null,
+          "evidenceRefs": [
+            "generation:origin"
+          ],
+          "supersedes": null
+        },
+        {
+          "coverageId": "coverage:cascade",
+          "beatId": "cascade",
+          "assetId": "cascade",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 495000
+          },
+          "takeAssertionId": null,
+          "shotRoleAssertionId": null,
+          "dialogueUnitId": null,
+          "audioEvidenceRefs": [],
+          "technicalEvidenceRefs": [
+            "generation:cascade"
+          ],
+          "continuityEvidenceRefs": [],
+          "warnings": [
+            "Generated asset; machine-reviewed, founder approval remains pending"
+          ],
+          "state": "proposed",
+          "provenance": {
+            "origin": "model_inferred",
+            "producerId": "content_factory",
+            "method": "Story beat asset requirement and generated artifact receipt"
+          },
+          "uncertainty": {
+            "level": "medium",
+            "basis": "Visual review is model-assisted; not a human-verified recording"
+          },
+          "review": null,
+          "evidenceRefs": [
+            "generation:cascade"
+          ],
+          "supersedes": null
+        },
+        {
+          "coverageId": "coverage:failure",
+          "beatId": "failure",
+          "assetId": "failure",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 405000
+          },
+          "takeAssertionId": null,
+          "shotRoleAssertionId": null,
+          "dialogueUnitId": null,
+          "audioEvidenceRefs": [],
+          "technicalEvidenceRefs": [
+            "generation:failure"
+          ],
+          "continuityEvidenceRefs": [],
+          "warnings": [
+            "Generated asset; machine-reviewed, founder approval remains pending"
+          ],
+          "state": "proposed",
+          "provenance": {
+            "origin": "model_inferred",
+            "producerId": "content_factory",
+            "method": "Story beat asset requirement and generated artifact receipt"
+          },
+          "uncertainty": {
+            "level": "medium",
+            "basis": "Visual review is model-assisted; not a human-verified recording"
+          },
+          "review": null,
+          "evidenceRefs": [
+            "generation:failure"
+          ],
+          "supersedes": null
+        },
+        {
+          "coverageId": "coverage:quota",
+          "beatId": "quota",
+          "assetId": "quota",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 427500
+          },
+          "takeAssertionId": null,
+          "shotRoleAssertionId": null,
+          "dialogueUnitId": null,
+          "audioEvidenceRefs": [],
+          "technicalEvidenceRefs": [
+            "generation:quota"
+          ],
+          "continuityEvidenceRefs": [],
+          "warnings": [
+            "Generated asset; machine-reviewed, founder approval remains pending"
+          ],
+          "state": "proposed",
+          "provenance": {
+            "origin": "model_inferred",
+            "producerId": "content_factory",
+            "method": "Story beat asset requirement and generated artifact receipt"
+          },
+          "uncertainty": {
+            "level": "medium",
+            "basis": "Visual review is model-assisted; not a human-verified recording"
+          },
+          "review": null,
+          "evidenceRefs": [
+            "generation:quota"
+          ],
+          "supersedes": null
+        },
+        {
+          "coverageId": "coverage:breakthrough",
+          "beatId": "breakthrough",
+          "assetId": "breakthrough",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 382500
+          },
+          "takeAssertionId": null,
+          "shotRoleAssertionId": null,
+          "dialogueUnitId": null,
+          "audioEvidenceRefs": [],
+          "technicalEvidenceRefs": [
+            "generation:breakthrough"
+          ],
+          "continuityEvidenceRefs": [],
+          "warnings": [
+            "Generated asset; machine-reviewed, founder approval remains pending"
+          ],
+          "state": "proposed",
+          "provenance": {
+            "origin": "model_inferred",
+            "producerId": "content_factory",
+            "method": "Story beat asset requirement and generated artifact receipt"
+          },
+          "uncertainty": {
+            "level": "medium",
+            "basis": "Visual review is model-assisted; not a human-verified recording"
+          },
+          "review": null,
+          "evidenceRefs": [
+            "generation:breakthrough"
+          ],
+          "supersedes": null
+        },
+        {
+          "coverageId": "coverage:director",
+          "beatId": "director",
+          "assetId": "director",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 607500
+          },
+          "takeAssertionId": null,
+          "shotRoleAssertionId": null,
+          "dialogueUnitId": null,
+          "audioEvidenceRefs": [],
+          "technicalEvidenceRefs": [
+            "generation:director"
+          ],
+          "continuityEvidenceRefs": [],
+          "warnings": [
+            "Generated asset; machine-reviewed, founder approval remains pending"
+          ],
+          "state": "proposed",
+          "provenance": {
+            "origin": "model_inferred",
+            "producerId": "content_factory",
+            "method": "Story beat asset requirement and generated artifact receipt"
+          },
+          "uncertainty": {
+            "level": "medium",
+            "basis": "Visual review is model-assisted; not a human-verified recording"
+          },
+          "review": null,
+          "evidenceRefs": [
+            "generation:director"
+          ],
+          "supersedes": null
+        },
+        {
+          "coverageId": "coverage:reveal",
+          "beatId": "reveal",
+          "assetId": "reveal",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 450000
+          },
+          "takeAssertionId": null,
+          "shotRoleAssertionId": null,
+          "dialogueUnitId": null,
+          "audioEvidenceRefs": [],
+          "technicalEvidenceRefs": [
+            "generation:reveal"
+          ],
+          "continuityEvidenceRefs": [],
+          "warnings": [
+            "Generated asset; machine-reviewed, founder approval remains pending"
+          ],
+          "state": "proposed",
+          "provenance": {
+            "origin": "model_inferred",
+            "producerId": "content_factory",
+            "method": "Story beat asset requirement and generated artifact receipt"
+          },
+          "uncertainty": {
+            "level": "medium",
+            "basis": "Visual review is model-assisted; not a human-verified recording"
+          },
+          "review": null,
+          "evidenceRefs": [
+            "generation:reveal"
+          ],
+          "supersedes": null
+        },
+        {
+          "coverageId": "coverage:vo-cold-open",
+          "beatId": "cold-open",
+          "assetId": "vo-cold-open",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 195750
+          },
+          "takeAssertionId": null,
+          "shotRoleAssertionId": null,
+          "dialogueUnitId": null,
+          "audioEvidenceRefs": [],
+          "technicalEvidenceRefs": [
+            "generation:vo-cold-open"
+          ],
+          "continuityEvidenceRefs": [],
+          "warnings": [
+            "Generated asset; machine-reviewed, founder approval remains pending"
+          ],
+          "state": "proposed",
+          "provenance": {
+            "origin": "model_inferred",
+            "producerId": "content_factory",
+            "method": "Story beat asset requirement and generated artifact receipt"
+          },
+          "uncertainty": {
+            "level": "medium",
+            "basis": "Visual review is model-assisted; not a human-verified recording"
+          },
+          "review": null,
+          "evidenceRefs": [
+            "generation:vo-cold-open"
+          ],
+          "supersedes": null
+        },
+        {
+          "coverageId": "coverage:vo-origin",
+          "beatId": "origin",
+          "assetId": "vo-origin",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 396000
+          },
+          "takeAssertionId": null,
+          "shotRoleAssertionId": null,
+          "dialogueUnitId": null,
+          "audioEvidenceRefs": [],
+          "technicalEvidenceRefs": [
+            "generation:vo-origin"
+          ],
+          "continuityEvidenceRefs": [],
+          "warnings": [
+            "Generated asset; machine-reviewed, founder approval remains pending"
+          ],
+          "state": "proposed",
+          "provenance": {
+            "origin": "model_inferred",
+            "producerId": "content_factory",
+            "method": "Story beat asset requirement and generated artifact receipt"
+          },
+          "uncertainty": {
+            "level": "medium",
+            "basis": "Visual review is model-assisted; not a human-verified recording"
+          },
+          "review": null,
+          "evidenceRefs": [
+            "generation:vo-origin"
+          ],
+          "supersedes": null
+        },
+        {
+          "coverageId": "coverage:vo-cascade",
+          "beatId": "cascade",
+          "assetId": "vo-cascade",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 409500
+          },
+          "takeAssertionId": null,
+          "shotRoleAssertionId": null,
+          "dialogueUnitId": null,
+          "audioEvidenceRefs": [],
+          "technicalEvidenceRefs": [
+            "generation:vo-cascade"
+          ],
+          "continuityEvidenceRefs": [],
+          "warnings": [
+            "Generated asset; machine-reviewed, founder approval remains pending"
+          ],
+          "state": "proposed",
+          "provenance": {
+            "origin": "model_inferred",
+            "producerId": "content_factory",
+            "method": "Story beat asset requirement and generated artifact receipt"
+          },
+          "uncertainty": {
+            "level": "medium",
+            "basis": "Visual review is model-assisted; not a human-verified recording"
+          },
+          "review": null,
+          "evidenceRefs": [
+            "generation:vo-cascade"
+          ],
+          "supersedes": null
+        },
+        {
+          "coverageId": "coverage:vo-failure",
+          "beatId": "failure",
+          "assetId": "vo-failure",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 330750
+          },
+          "takeAssertionId": null,
+          "shotRoleAssertionId": null,
+          "dialogueUnitId": null,
+          "audioEvidenceRefs": [],
+          "technicalEvidenceRefs": [
+            "generation:vo-failure"
+          ],
+          "continuityEvidenceRefs": [],
+          "warnings": [
+            "Generated asset; machine-reviewed, founder approval remains pending"
+          ],
+          "state": "proposed",
+          "provenance": {
+            "origin": "model_inferred",
+            "producerId": "content_factory",
+            "method": "Story beat asset requirement and generated artifact receipt"
+          },
+          "uncertainty": {
+            "level": "medium",
+            "basis": "Visual review is model-assisted; not a human-verified recording"
+          },
+          "review": null,
+          "evidenceRefs": [
+            "generation:vo-failure"
+          ],
+          "supersedes": null
+        },
+        {
+          "coverageId": "coverage:vo-quota",
+          "beatId": "quota",
+          "assetId": "vo-quota",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 299250
+          },
+          "takeAssertionId": null,
+          "shotRoleAssertionId": null,
+          "dialogueUnitId": null,
+          "audioEvidenceRefs": [],
+          "technicalEvidenceRefs": [
+            "generation:vo-quota"
+          ],
+          "continuityEvidenceRefs": [],
+          "warnings": [
+            "Generated asset; machine-reviewed, founder approval remains pending"
+          ],
+          "state": "proposed",
+          "provenance": {
+            "origin": "model_inferred",
+            "producerId": "content_factory",
+            "method": "Story beat asset requirement and generated artifact receipt"
+          },
+          "uncertainty": {
+            "level": "medium",
+            "basis": "Visual review is model-assisted; not a human-verified recording"
+          },
+          "review": null,
+          "evidenceRefs": [
+            "generation:vo-quota"
+          ],
+          "supersedes": null
+        },
+        {
+          "coverageId": "coverage:vo-breakthrough",
+          "beatId": "breakthrough",
+          "assetId": "vo-breakthrough",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 290250
+          },
+          "takeAssertionId": null,
+          "shotRoleAssertionId": null,
+          "dialogueUnitId": null,
+          "audioEvidenceRefs": [],
+          "technicalEvidenceRefs": [
+            "generation:vo-breakthrough"
+          ],
+          "continuityEvidenceRefs": [],
+          "warnings": [
+            "Generated asset; machine-reviewed, founder approval remains pending"
+          ],
+          "state": "proposed",
+          "provenance": {
+            "origin": "model_inferred",
+            "producerId": "content_factory",
+            "method": "Story beat asset requirement and generated artifact receipt"
+          },
+          "uncertainty": {
+            "level": "medium",
+            "basis": "Visual review is model-assisted; not a human-verified recording"
+          },
+          "review": null,
+          "evidenceRefs": [
+            "generation:vo-breakthrough"
+          ],
+          "supersedes": null
+        },
+        {
+          "coverageId": "coverage:vo-director",
+          "beatId": "director",
+          "assetId": "vo-director",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 549000
+          },
+          "takeAssertionId": null,
+          "shotRoleAssertionId": null,
+          "dialogueUnitId": null,
+          "audioEvidenceRefs": [],
+          "technicalEvidenceRefs": [
+            "generation:vo-director"
+          ],
+          "continuityEvidenceRefs": [],
+          "warnings": [
+            "Generated asset; machine-reviewed, founder approval remains pending"
+          ],
+          "state": "proposed",
+          "provenance": {
+            "origin": "model_inferred",
+            "producerId": "content_factory",
+            "method": "Story beat asset requirement and generated artifact receipt"
+          },
+          "uncertainty": {
+            "level": "medium",
+            "basis": "Visual review is model-assisted; not a human-verified recording"
+          },
+          "review": null,
+          "evidenceRefs": [
+            "generation:vo-director"
+          ],
+          "supersedes": null
+        },
+        {
+          "coverageId": "coverage:vo-magic",
+          "beatId": "magic",
+          "assetId": "vo-magic",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 276750
+          },
+          "takeAssertionId": null,
+          "shotRoleAssertionId": null,
+          "dialogueUnitId": null,
+          "audioEvidenceRefs": [],
+          "technicalEvidenceRefs": [
+            "generation:vo-magic"
+          ],
+          "continuityEvidenceRefs": [],
+          "warnings": [
+            "Generated asset; machine-reviewed, founder approval remains pending"
+          ],
+          "state": "proposed",
+          "provenance": {
+            "origin": "model_inferred",
+            "producerId": "content_factory",
+            "method": "Story beat asset requirement and generated artifact receipt"
+          },
+          "uncertainty": {
+            "level": "medium",
+            "basis": "Visual review is model-assisted; not a human-verified recording"
+          },
+          "review": null,
+          "evidenceRefs": [
+            "generation:vo-magic"
+          ],
+          "supersedes": null
+        },
+        {
+          "coverageId": "coverage:vo-reveal",
+          "beatId": "reveal",
+          "assetId": "vo-reveal",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 306000
+          },
+          "takeAssertionId": null,
+          "shotRoleAssertionId": null,
+          "dialogueUnitId": null,
+          "audioEvidenceRefs": [],
+          "technicalEvidenceRefs": [
+            "generation:vo-reveal"
+          ],
+          "continuityEvidenceRefs": [],
+          "warnings": [
+            "Generated asset; machine-reviewed, founder approval remains pending"
+          ],
+          "state": "proposed",
+          "provenance": {
+            "origin": "model_inferred",
+            "producerId": "content_factory",
+            "method": "Story beat asset requirement and generated artifact receipt"
+          },
+          "uncertainty": {
+            "level": "medium",
+            "basis": "Visual review is model-assisted; not a human-verified recording"
+          },
+          "review": null,
+          "evidenceRefs": [
+            "generation:vo-reveal"
+          ],
+          "supersedes": null
+        },
+        {
+          "coverageId": "coverage:score",
+          "beatId": "cold-open",
+          "assetId": "score",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 4590000
+          },
+          "takeAssertionId": null,
+          "shotRoleAssertionId": null,
+          "dialogueUnitId": null,
+          "audioEvidenceRefs": [],
+          "technicalEvidenceRefs": [
+            "generation:score"
+          ],
+          "continuityEvidenceRefs": [],
+          "warnings": [
+            "Generated asset; machine-reviewed, founder approval remains pending"
+          ],
+          "state": "proposed",
+          "provenance": {
+            "origin": "model_inferred",
+            "producerId": "content_factory",
+            "method": "Story beat asset requirement and generated artifact receipt"
+          },
+          "uncertainty": {
+            "level": "medium",
+            "basis": "Visual review is model-assisted; not a human-verified recording"
+          },
+          "review": null,
+          "evidenceRefs": [
+            "generation:score"
+          ],
+          "supersedes": null
+        },
+        {
+          "coverageId": "coverage:cues",
+          "beatId": "cold-open",
+          "assetId": "cues",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 4590000
+          },
+          "takeAssertionId": null,
+          "shotRoleAssertionId": null,
+          "dialogueUnitId": null,
+          "audioEvidenceRefs": [],
+          "technicalEvidenceRefs": [
+            "generation:cues"
+          ],
+          "continuityEvidenceRefs": [],
+          "warnings": [
+            "Generated asset; machine-reviewed, founder approval remains pending"
+          ],
+          "state": "proposed",
+          "provenance": {
+            "origin": "model_inferred",
+            "producerId": "content_factory",
+            "method": "Story beat asset requirement and generated artifact receipt"
+          },
+          "uncertainty": {
+            "level": "medium",
+            "basis": "Visual review is model-assisted; not a human-verified recording"
+          },
+          "review": null,
+          "evidenceRefs": [
+            "generation:cues"
+          ],
+          "supersedes": null
+        },
+        {
+          "coverageId": "coverage:score-cutdown",
+          "beatId": "cold-open",
+          "assetId": "score-cutdown",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 2385000
+          },
+          "takeAssertionId": null,
+          "shotRoleAssertionId": null,
+          "dialogueUnitId": null,
+          "audioEvidenceRefs": [],
+          "technicalEvidenceRefs": [
+            "generation:score-cutdown"
+          ],
+          "continuityEvidenceRefs": [],
+          "warnings": [
+            "Generated asset; machine-reviewed, founder approval remains pending"
+          ],
+          "state": "proposed",
+          "provenance": {
+            "origin": "model_inferred",
+            "producerId": "content_factory",
+            "method": "Story beat asset requirement and generated artifact receipt"
+          },
+          "uncertainty": {
+            "level": "medium",
+            "basis": "Visual review is model-assisted; not a human-verified recording"
+          },
+          "review": null,
+          "evidenceRefs": [
+            "generation:score-cutdown"
+          ],
+          "supersedes": null
+        },
+        {
+          "coverageId": "coverage:cues-cutdown",
+          "beatId": "cold-open",
+          "assetId": "cues-cutdown",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 2385000
+          },
+          "takeAssertionId": null,
+          "shotRoleAssertionId": null,
+          "dialogueUnitId": null,
+          "audioEvidenceRefs": [],
+          "technicalEvidenceRefs": [
+            "generation:cues-cutdown"
+          ],
+          "continuityEvidenceRefs": [],
+          "warnings": [
+            "Generated asset; machine-reviewed, founder approval remains pending"
+          ],
+          "state": "proposed",
+          "provenance": {
+            "origin": "model_inferred",
+            "producerId": "content_factory",
+            "method": "Story beat asset requirement and generated artifact receipt"
+          },
+          "uncertainty": {
+            "level": "medium",
+            "basis": "Visual review is model-assisted; not a human-verified recording"
+          },
+          "review": null,
+          "evidenceRefs": [
+            "generation:cues-cutdown"
+          ],
+          "supersedes": null
+        },
+        {
+          "coverageId": "coverage:score-teaser",
+          "beatId": "cold-open",
+          "assetId": "score-teaser",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 900000
+          },
+          "takeAssertionId": null,
+          "shotRoleAssertionId": null,
+          "dialogueUnitId": null,
+          "audioEvidenceRefs": [],
+          "technicalEvidenceRefs": [
+            "generation:score-teaser"
+          ],
+          "continuityEvidenceRefs": [],
+          "warnings": [
+            "Generated asset; machine-reviewed, founder approval remains pending"
+          ],
+          "state": "proposed",
+          "provenance": {
+            "origin": "model_inferred",
+            "producerId": "content_factory",
+            "method": "Story beat asset requirement and generated artifact receipt"
+          },
+          "uncertainty": {
+            "level": "medium",
+            "basis": "Visual review is model-assisted; not a human-verified recording"
+          },
+          "review": null,
+          "evidenceRefs": [
+            "generation:score-teaser"
+          ],
+          "supersedes": null
+        },
+        {
+          "coverageId": "coverage:cues-teaser",
+          "beatId": "cold-open",
+          "assetId": "cues-teaser",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 900000
+          },
+          "takeAssertionId": null,
+          "shotRoleAssertionId": null,
+          "dialogueUnitId": null,
+          "audioEvidenceRefs": [],
+          "technicalEvidenceRefs": [
+            "generation:cues-teaser"
+          ],
+          "continuityEvidenceRefs": [],
+          "warnings": [
+            "Generated asset; machine-reviewed, founder approval remains pending"
+          ],
+          "state": "proposed",
+          "provenance": {
+            "origin": "model_inferred",
+            "producerId": "content_factory",
+            "method": "Story beat asset requirement and generated artifact receipt"
+          },
+          "uncertainty": {
+            "level": "medium",
+            "basis": "Visual review is model-assisted; not a human-verified recording"
+          },
+          "review": null,
+          "evidenceRefs": [
+            "generation:cues-teaser"
+          ],
+          "supersedes": null
+        }
+      ],
+      "sourceAssetSetDigest": "ce9da4a19dd5e3ea8541a915ff224a5b3d575a1fb941598c8851d0f2cdd397d2",
+      "analysisDependencyDigests": [
+        "006a8a4913020a88cd72bcdf4be18583d24cc348faf8be5b7300cc7de3dd5094",
+        "0c5e1595865c6d8df8435e857b627788e32f9e27b2429646c2febb5ee3715c0d",
+        "372ab12bded84a3f2508247dcf050b9a3818d088b31d8a30b2d36c8986476efd",
+        "4701b04dedfa68e0604c7562219d2924bdd0d5f7f42de28d22f6c682921ad9e6",
+        "49b4a95d0510c664cbfc4db231e9c2fd93cd6ee83839fef256a5e1ee67bc7d8c",
+        "5f497c1dfd58956ab2e944991178c125472b2bca95c0f7a0a3dd2e17304f1cf0",
+        "61d58c4bacf81c5b477c1a36cc2d65cee6f3b72e9680950048322138f0a2d327",
+        "62ee764d831cacbcd5a96f7b9fe797c1bfc617aa84e45712f6f1e1ac91bf746e",
+        "746992f529024593990243da6ce223c809e3cc4bc61a809d342e4e8d0942d0a5",
+        "76b75df68ba0eba3fda49d53dac671eb38375e3db37b82ac39a35d4699c82eab",
+        "77ee266c89d2085ab93ca4f2e54ac22f344f13ce882dccf82cd5a2eb23e39bb9",
+        "8be1b51104d6aadfa2d83ccfad9e89631b5509fb80910527613acb1bf01ebe46",
+        "8d6af3bfbf93dd6b57b213cc734f05b95fddb03f08eee3dae89cb891335bfa1b",
+        "8fc29476d85a97f6e1083f3a88cf1c399e5fe7bbd2bd54d48cd334c4a7da98f6",
+        "923651ab1e6c6fd35b201e79370dab8c4730a7184d1f69fc2bf9eb1871ec89d3",
+        "b6c17d629d09fa1e973506a0cdf96685479a483ffbfab2fd4209122745f5d081",
+        "ba494f29c3e96339821a3de569cac7ded48d4db59b8954e4975765aaf9b8467b",
+        "be457a677f5fe76b282852abdd7aba8c502d31a601797a2f2ed3451aab38e054",
+        "c921c060b649decbf259d1355ddc9c1b98f553c93ef6e96369d8dec3b40b057a",
+        "d3939aea2dc5ce3af249f5e1ec204e44eb6c0f58ddff0e1f67f177c1c3c7b4a0",
+        "d8ea1808cf93d10e187de64eabdfefb513b8d8821fc369c3e745769254486eaf",
+        "dc0c8f846bd29c5489431eabdc05f45778d47082f1baeaaf7d4b59ed1bffd159",
+        "eb8c2fe8ab63b5fc35a6eea1b645a6b565500b6f0f96175738d6fb807039dc51",
+        "fd4f1436ab8c39ea5b7e7aaf87a60305e91f12b6103a46f77cfba5e0f5a88551"
+      ],
+      "revisionId": "f7fe95cca0c4306ce997685919513f85b76ceb243893397381bc92cf3774db40"
+    },
+    "summary": {
+      "projectId": "factory:founder-film-production-v3-20261008:one-edit-teaser",
+      "revisionId": "f7fe95cca0c4306ce997685919513f85b76ceb243893397381bc92cf3774db40",
+      "assets": [
+        {
+          "assetId": "vessel",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "vessel"
+          },
+          "contentHash": "da5c769a1d02d01ee6dcc622718162757b877329b575aab287e55da3accc34d3",
+          "durationTicks": 630000,
+          "mediaType": "video",
+          "technical": {
+            "container": "mp4",
+            "codec": "h264"
+          },
+          "streams": [
+            {
+              "streamId": "vessel:video",
+              "assetId": "vessel",
+              "kind": "video",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 630000,
+              "sampleRateHz": null,
+              "frameRate": {
+                "numerator": 24,
+                "denominator": 1
+              },
+              "channelLayout": null
+            }
+          ]
+        },
+        {
+          "assetId": "ident",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "ident"
+          },
+          "contentHash": "a9a9aafcdc7a9a7266f1d23c4bfc47cf338995c3c488c4d862b5225c2cbd3f2a",
+          "durationTicks": 450000,
+          "mediaType": "video",
+          "technical": {
+            "container": "mp4",
+            "codec": "h264"
+          },
+          "streams": [
+            {
+              "streamId": "ident:video",
+              "assetId": "ident",
+              "kind": "video",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 450000,
+              "sampleRateHz": null,
+              "frameRate": {
+                "numerator": 24,
+                "denominator": 1
+              },
+              "channelLayout": null
+            }
+          ]
+        },
+        {
+          "assetId": "origin",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "origin"
+          },
+          "contentHash": "ff2171bf6c166b3b1d020e19f84f1f61168def04d10350b26da49c5cb659a960",
+          "durationTicks": 472500,
+          "mediaType": "video",
+          "technical": {
+            "container": "mp4",
+            "codec": "h264"
+          },
+          "streams": [
+            {
+              "streamId": "origin:video",
+              "assetId": "origin",
+              "kind": "video",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 472500,
+              "sampleRateHz": null,
+              "frameRate": {
+                "numerator": 24,
+                "denominator": 1
+              },
+              "channelLayout": null
+            }
+          ]
+        },
+        {
+          "assetId": "cascade",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "cascade"
+          },
+          "contentHash": "6a7f3a74a81eb4ebd1b3201a123819b4d0b8cc46207e80c58e1e328782b58787",
+          "durationTicks": 495000,
+          "mediaType": "video",
+          "technical": {
+            "container": "mp4",
+            "codec": "h264"
+          },
+          "streams": [
+            {
+              "streamId": "cascade:video",
+              "assetId": "cascade",
+              "kind": "video",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 495000,
+              "sampleRateHz": null,
+              "frameRate": {
+                "numerator": 24,
+                "denominator": 1
+              },
+              "channelLayout": null
+            }
+          ]
+        },
+        {
+          "assetId": "failure",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "failure"
+          },
+          "contentHash": "a8be6b781c401958d8ab1e38296b60f3dc9b9d96c97dcaab6c3ced8ce2245b85",
+          "durationTicks": 405000,
+          "mediaType": "video",
+          "technical": {
+            "container": "mp4",
+            "codec": "h264"
+          },
+          "streams": [
+            {
+              "streamId": "failure:video",
+              "assetId": "failure",
+              "kind": "video",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 405000,
+              "sampleRateHz": null,
+              "frameRate": {
+                "numerator": 24,
+                "denominator": 1
+              },
+              "channelLayout": null
+            }
+          ]
+        },
+        {
+          "assetId": "quota",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "quota"
+          },
+          "contentHash": "06dcaf2597e3d902e3c4b782ce4dfc33aef70b23f3f793fae40fbf83b33aa6e8",
+          "durationTicks": 427500,
+          "mediaType": "video",
+          "technical": {
+            "container": "mp4",
+            "codec": "h264"
+          },
+          "streams": [
+            {
+              "streamId": "quota:video",
+              "assetId": "quota",
+              "kind": "video",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 427500,
+              "sampleRateHz": null,
+              "frameRate": {
+                "numerator": 24,
+                "denominator": 1
+              },
+              "channelLayout": null
+            }
+          ]
+        },
+        {
+          "assetId": "breakthrough",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "breakthrough"
+          },
+          "contentHash": "9be93b83c1a7018081ee474b298bba59e3a40d0fcf14b44be18c88e34226c163",
+          "durationTicks": 382500,
+          "mediaType": "video",
+          "technical": {
+            "container": "mp4",
+            "codec": "h264"
+          },
+          "streams": [
+            {
+              "streamId": "breakthrough:video",
+              "assetId": "breakthrough",
+              "kind": "video",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 382500,
+              "sampleRateHz": null,
+              "frameRate": {
+                "numerator": 24,
+                "denominator": 1
+              },
+              "channelLayout": null
+            }
+          ]
+        },
+        {
+          "assetId": "director",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "director"
+          },
+          "contentHash": "b849b6d520319c4da6039beb6ff976c074bc610c586bf3f1efca1e9a833062d0",
+          "durationTicks": 607500,
+          "mediaType": "video",
+          "technical": {
+            "container": "mp4",
+            "codec": "h264"
+          },
+          "streams": [
+            {
+              "streamId": "director:video",
+              "assetId": "director",
+              "kind": "video",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 607500,
+              "sampleRateHz": null,
+              "frameRate": {
+                "numerator": 24,
+                "denominator": 1
+              },
+              "channelLayout": null
+            }
+          ]
+        },
+        {
+          "assetId": "reveal",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "reveal"
+          },
+          "contentHash": "86f95612978f02eda26dd563096114d9c8818b0a716e009e75e5077a5f7ad535",
+          "durationTicks": 450000,
+          "mediaType": "video",
+          "technical": {
+            "container": "mp4",
+            "codec": "h264"
+          },
+          "streams": [
+            {
+              "streamId": "reveal:video",
+              "assetId": "reveal",
+              "kind": "video",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 450000,
+              "sampleRateHz": null,
+              "frameRate": {
+                "numerator": 24,
+                "denominator": 1
+              },
+              "channelLayout": null
+            }
+          ]
+        },
+        {
+          "assetId": "vo-cold-open",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "vo-cold-open"
+          },
+          "contentHash": "b81f0a3ba05220b7e85c81b2eb596da37cb07b92eea4ad92c0df3b2853a47e80",
+          "durationTicks": 195750,
+          "mediaType": "audio",
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "streams": [
+            {
+              "streamId": "vo-cold-open:audio",
+              "assetId": "vo-cold-open",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 195750,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ]
+        },
+        {
+          "assetId": "vo-origin",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "vo-origin"
+          },
+          "contentHash": "87ccf9d8c3f4da55aa3189a6d0887e8180c3ed954bec34a565e0b66f312d9b45",
+          "durationTicks": 396000,
+          "mediaType": "audio",
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "streams": [
+            {
+              "streamId": "vo-origin:audio",
+              "assetId": "vo-origin",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 396000,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ]
+        },
+        {
+          "assetId": "vo-cascade",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "vo-cascade"
+          },
+          "contentHash": "983858a242fbac92dc1173689057f0882a5fbb715d3d533703e9043a4d4796c4",
+          "durationTicks": 409500,
+          "mediaType": "audio",
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "streams": [
+            {
+              "streamId": "vo-cascade:audio",
+              "assetId": "vo-cascade",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 409500,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ]
+        },
+        {
+          "assetId": "vo-failure",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "vo-failure"
+          },
+          "contentHash": "90e1326401f5d98303da9fe78ed85da6605baabc47a4cdf96117dae096b0ac2e",
+          "durationTicks": 330750,
+          "mediaType": "audio",
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "streams": [
+            {
+              "streamId": "vo-failure:audio",
+              "assetId": "vo-failure",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 330750,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ]
+        },
+        {
+          "assetId": "vo-quota",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "vo-quota"
+          },
+          "contentHash": "3677901cbffbbf11741f023b6aa67cd419d826dba5511158eb50b3eba12f4f91",
+          "durationTicks": 299250,
+          "mediaType": "audio",
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "streams": [
+            {
+              "streamId": "vo-quota:audio",
+              "assetId": "vo-quota",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 299250,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ]
+        },
+        {
+          "assetId": "vo-breakthrough",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "vo-breakthrough"
+          },
+          "contentHash": "c81c56ed7512a554e8af218dde94d2d8df9bf470f0280b79ab4317f3f70fcc2d",
+          "durationTicks": 290250,
+          "mediaType": "audio",
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "streams": [
+            {
+              "streamId": "vo-breakthrough:audio",
+              "assetId": "vo-breakthrough",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 290250,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ]
+        },
+        {
+          "assetId": "vo-director",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "vo-director"
+          },
+          "contentHash": "8c69f9c77b5fd0b8f8944312f399a5aef1bf6770a22059695c0ba727248a1117",
+          "durationTicks": 549000,
+          "mediaType": "audio",
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "streams": [
+            {
+              "streamId": "vo-director:audio",
+              "assetId": "vo-director",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 549000,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ]
+        },
+        {
+          "assetId": "vo-magic",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "vo-magic"
+          },
+          "contentHash": "a4177157a9f82de1728a32482b8eaf346b1920e8aa2743d9c3e8d99be5a8b4de",
+          "durationTicks": 276750,
+          "mediaType": "audio",
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "streams": [
+            {
+              "streamId": "vo-magic:audio",
+              "assetId": "vo-magic",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 276750,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ]
+        },
+        {
+          "assetId": "vo-reveal",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "vo-reveal"
+          },
+          "contentHash": "43ec9f03541b141676c92863769213ae0fe664655a9e3f1b31a6506a8155b139",
+          "durationTicks": 306000,
+          "mediaType": "audio",
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "streams": [
+            {
+              "streamId": "vo-reveal:audio",
+              "assetId": "vo-reveal",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 306000,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ]
+        },
+        {
+          "assetId": "score",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "score"
+          },
+          "contentHash": "e21838722d939d93d46acedca7c45b620c1648b01000ec1202f7eb1c08bfba5a",
+          "durationTicks": 4590000,
+          "mediaType": "audio",
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "streams": [
+            {
+              "streamId": "score:audio",
+              "assetId": "score",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 4590000,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ]
+        },
+        {
+          "assetId": "cues",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "cues"
+          },
+          "contentHash": "04bd044058b9b9239c93acbb0b151eb746ca3ad1f06fcfc0990f4ecdad34e3b0",
+          "durationTicks": 4590000,
+          "mediaType": "audio",
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "streams": [
+            {
+              "streamId": "cues:audio",
+              "assetId": "cues",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 4590000,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ]
+        },
+        {
+          "assetId": "score-cutdown",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "score-cutdown"
+          },
+          "contentHash": "6bc85fed339906028aa72c9203460ec00db62063c20dd7a7f8eaf77714a22256",
+          "durationTicks": 2385000,
+          "mediaType": "audio",
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "streams": [
+            {
+              "streamId": "score-cutdown:audio",
+              "assetId": "score-cutdown",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 2385000,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ]
+        },
+        {
+          "assetId": "cues-cutdown",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "cues-cutdown"
+          },
+          "contentHash": "6d2987c64beda52e458d900107513d377e8cbe4fc108a0fd04d1f32d06a24ff2",
+          "durationTicks": 2385000,
+          "mediaType": "audio",
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "streams": [
+            {
+              "streamId": "cues-cutdown:audio",
+              "assetId": "cues-cutdown",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 2385000,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ]
+        },
+        {
+          "assetId": "score-teaser",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "score-teaser"
+          },
+          "contentHash": "31f07e62b558d82c1ca2ad3d3d984da428c4f4133978931cfa485a19f36a178f",
+          "durationTicks": 900000,
+          "mediaType": "audio",
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "streams": [
+            {
+              "streamId": "score-teaser:audio",
+              "assetId": "score-teaser",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 900000,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ]
+        },
+        {
+          "assetId": "cues-teaser",
+          "sourceRef": {
+            "kind": "studio_source_binding",
+            "sourceAssetId": "cues-teaser"
+          },
+          "contentHash": "21b9d89b42ab9a6e4c4b3c4134318bac0065dc24837b1b80ba57fe93eee1e9db",
+          "durationTicks": 900000,
+          "mediaType": "audio",
+          "technical": {
+            "container": "wav",
+            "codec": "pcm_s16le"
+          },
+          "streams": [
+            {
+              "streamId": "cues-teaser:audio",
+              "assetId": "cues-teaser",
+              "kind": "audio",
+              "timebase": {
+                "numerator": 1,
+                "denominator": 90000
+              },
+              "durationTicks": 900000,
+              "sampleRateHz": 48000,
+              "frameRate": null,
+              "channelLayout": "stereo"
+            }
+          ]
+        }
+      ],
+      "evidenceCatalog": [
+        {
+          "evidenceId": "generation:vessel",
+          "kind": "generated_asset",
+          "sourceAssetId": "vessel",
+          "sourceContentHash": "da5c769a1d02d01ee6dcc622718162757b877329b575aab287e55da3accc34d3",
+          "artifactHash": "61d58c4bacf81c5b477c1a36cc2d65cee6f3b72e9680950048322138f0a2d327",
+          "analysisType": "content_generation",
+          "modelRevision": "48a430950197d224e3eafb1fa78d0e228fb9229be1d6884c879e6a0f1d46da72",
+          "configHash": "264e5fa511206a14e28dcc121a80f141e0d0e8de81f9ef95c7d523e5b86d565d",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:ident",
+          "kind": "generated_asset",
+          "sourceAssetId": "ident",
+          "sourceContentHash": "a9a9aafcdc7a9a7266f1d23c4bfc47cf338995c3c488c4d862b5225c2cbd3f2a",
+          "artifactHash": "8be1b51104d6aadfa2d83ccfad9e89631b5509fb80910527613acb1bf01ebe46",
+          "analysisType": "content_generation",
+          "modelRevision": "7993a1bb3d87448ccc8cc7ee2ed84b2fc5782b2de8162ca905192259170b3a27",
+          "configHash": "4d3f5f4e0a8f9dea2798d73c8b5311a3c673ac19cd40f25c7bbb746b1e2f85fd",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:origin",
+          "kind": "generated_asset",
+          "sourceAssetId": "origin",
+          "sourceContentHash": "ff2171bf6c166b3b1d020e19f84f1f61168def04d10350b26da49c5cb659a960",
+          "artifactHash": "be457a677f5fe76b282852abdd7aba8c502d31a601797a2f2ed3451aab38e054",
+          "analysisType": "content_generation",
+          "modelRevision": "d0091527a841ad98a9d12c021fff3dabb8a3e8a39608baf84a42bebfa9ce2276",
+          "configHash": "80e8891a5f521ed63687ae8ad2df5a4bd8c6588398b9b32929ba6f7ccce8e128",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:cascade",
+          "kind": "generated_asset",
+          "sourceAssetId": "cascade",
+          "sourceContentHash": "6a7f3a74a81eb4ebd1b3201a123819b4d0b8cc46207e80c58e1e328782b58787",
+          "artifactHash": "49b4a95d0510c664cbfc4db231e9c2fd93cd6ee83839fef256a5e1ee67bc7d8c",
+          "analysisType": "content_generation",
+          "modelRevision": "d0091527a841ad98a9d12c021fff3dabb8a3e8a39608baf84a42bebfa9ce2276",
+          "configHash": "80e8891a5f521ed63687ae8ad2df5a4bd8c6588398b9b32929ba6f7ccce8e128",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:failure",
+          "kind": "generated_asset",
+          "sourceAssetId": "failure",
+          "sourceContentHash": "a8be6b781c401958d8ab1e38296b60f3dc9b9d96c97dcaab6c3ced8ce2245b85",
+          "artifactHash": "4701b04dedfa68e0604c7562219d2924bdd0d5f7f42de28d22f6c682921ad9e6",
+          "analysisType": "content_generation",
+          "modelRevision": "d0091527a841ad98a9d12c021fff3dabb8a3e8a39608baf84a42bebfa9ce2276",
+          "configHash": "80e8891a5f521ed63687ae8ad2df5a4bd8c6588398b9b32929ba6f7ccce8e128",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:quota",
+          "kind": "generated_asset",
+          "sourceAssetId": "quota",
+          "sourceContentHash": "06dcaf2597e3d902e3c4b782ce4dfc33aef70b23f3f793fae40fbf83b33aa6e8",
+          "artifactHash": "b6c17d629d09fa1e973506a0cdf96685479a483ffbfab2fd4209122745f5d081",
+          "analysisType": "content_generation",
+          "modelRevision": "d0091527a841ad98a9d12c021fff3dabb8a3e8a39608baf84a42bebfa9ce2276",
+          "configHash": "80e8891a5f521ed63687ae8ad2df5a4bd8c6588398b9b32929ba6f7ccce8e128",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:breakthrough",
+          "kind": "generated_asset",
+          "sourceAssetId": "breakthrough",
+          "sourceContentHash": "9be93b83c1a7018081ee474b298bba59e3a40d0fcf14b44be18c88e34226c163",
+          "artifactHash": "5f497c1dfd58956ab2e944991178c125472b2bca95c0f7a0a3dd2e17304f1cf0",
+          "analysisType": "content_generation",
+          "modelRevision": "d0091527a841ad98a9d12c021fff3dabb8a3e8a39608baf84a42bebfa9ce2276",
+          "configHash": "80e8891a5f521ed63687ae8ad2df5a4bd8c6588398b9b32929ba6f7ccce8e128",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:director",
+          "kind": "generated_asset",
+          "sourceAssetId": "director",
+          "sourceContentHash": "b849b6d520319c4da6039beb6ff976c074bc610c586bf3f1efca1e9a833062d0",
+          "artifactHash": "d3939aea2dc5ce3af249f5e1ec204e44eb6c0f58ddff0e1f67f177c1c3c7b4a0",
+          "analysisType": "content_generation",
+          "modelRevision": "d0091527a841ad98a9d12c021fff3dabb8a3e8a39608baf84a42bebfa9ce2276",
+          "configHash": "80e8891a5f521ed63687ae8ad2df5a4bd8c6588398b9b32929ba6f7ccce8e128",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:reveal",
+          "kind": "generated_asset",
+          "sourceAssetId": "reveal",
+          "sourceContentHash": "86f95612978f02eda26dd563096114d9c8818b0a716e009e75e5077a5f7ad535",
+          "artifactHash": "8fc29476d85a97f6e1083f3a88cf1c399e5fe7bbd2bd54d48cd334c4a7da98f6",
+          "analysisType": "content_generation",
+          "modelRevision": "d0091527a841ad98a9d12c021fff3dabb8a3e8a39608baf84a42bebfa9ce2276",
+          "configHash": "80e8891a5f521ed63687ae8ad2df5a4bd8c6588398b9b32929ba6f7ccce8e128",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:vo-cold-open",
+          "kind": "generated_asset",
+          "sourceAssetId": "vo-cold-open",
+          "sourceContentHash": "b81f0a3ba05220b7e85c81b2eb596da37cb07b92eea4ad92c0df3b2853a47e80",
+          "artifactHash": "fd4f1436ab8c39ea5b7e7aaf87a60305e91f12b6103a46f77cfba5e0f5a88551",
+          "analysisType": "content_generation",
+          "modelRevision": "c9db519d49a9ea3e641f06f8ce3f473c41738d9d88ed6906148d7389c04ede92",
+          "configHash": "98959df27f53d0878e64a0097ec11a20f3254d23b58654c6d654ab6630746546",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:vo-origin",
+          "kind": "generated_asset",
+          "sourceAssetId": "vo-origin",
+          "sourceContentHash": "87ccf9d8c3f4da55aa3189a6d0887e8180c3ed954bec34a565e0b66f312d9b45",
+          "artifactHash": "0c5e1595865c6d8df8435e857b627788e32f9e27b2429646c2febb5ee3715c0d",
+          "analysisType": "content_generation",
+          "modelRevision": "c9db519d49a9ea3e641f06f8ce3f473c41738d9d88ed6906148d7389c04ede92",
+          "configHash": "98959df27f53d0878e64a0097ec11a20f3254d23b58654c6d654ab6630746546",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:vo-cascade",
+          "kind": "generated_asset",
+          "sourceAssetId": "vo-cascade",
+          "sourceContentHash": "983858a242fbac92dc1173689057f0882a5fbb715d3d533703e9043a4d4796c4",
+          "artifactHash": "372ab12bded84a3f2508247dcf050b9a3818d088b31d8a30b2d36c8986476efd",
+          "analysisType": "content_generation",
+          "modelRevision": "c9db519d49a9ea3e641f06f8ce3f473c41738d9d88ed6906148d7389c04ede92",
+          "configHash": "98959df27f53d0878e64a0097ec11a20f3254d23b58654c6d654ab6630746546",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:vo-failure",
+          "kind": "generated_asset",
+          "sourceAssetId": "vo-failure",
+          "sourceContentHash": "90e1326401f5d98303da9fe78ed85da6605baabc47a4cdf96117dae096b0ac2e",
+          "artifactHash": "dc0c8f846bd29c5489431eabdc05f45778d47082f1baeaaf7d4b59ed1bffd159",
+          "analysisType": "content_generation",
+          "modelRevision": "c9db519d49a9ea3e641f06f8ce3f473c41738d9d88ed6906148d7389c04ede92",
+          "configHash": "98959df27f53d0878e64a0097ec11a20f3254d23b58654c6d654ab6630746546",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:vo-quota",
+          "kind": "generated_asset",
+          "sourceAssetId": "vo-quota",
+          "sourceContentHash": "3677901cbffbbf11741f023b6aa67cd419d826dba5511158eb50b3eba12f4f91",
+          "artifactHash": "d8ea1808cf93d10e187de64eabdfefb513b8d8821fc369c3e745769254486eaf",
+          "analysisType": "content_generation",
+          "modelRevision": "c9db519d49a9ea3e641f06f8ce3f473c41738d9d88ed6906148d7389c04ede92",
+          "configHash": "98959df27f53d0878e64a0097ec11a20f3254d23b58654c6d654ab6630746546",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:vo-breakthrough",
+          "kind": "generated_asset",
+          "sourceAssetId": "vo-breakthrough",
+          "sourceContentHash": "c81c56ed7512a554e8af218dde94d2d8df9bf470f0280b79ab4317f3f70fcc2d",
+          "artifactHash": "923651ab1e6c6fd35b201e79370dab8c4730a7184d1f69fc2bf9eb1871ec89d3",
+          "analysisType": "content_generation",
+          "modelRevision": "c9db519d49a9ea3e641f06f8ce3f473c41738d9d88ed6906148d7389c04ede92",
+          "configHash": "98959df27f53d0878e64a0097ec11a20f3254d23b58654c6d654ab6630746546",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:vo-director",
+          "kind": "generated_asset",
+          "sourceAssetId": "vo-director",
+          "sourceContentHash": "8c69f9c77b5fd0b8f8944312f399a5aef1bf6770a22059695c0ba727248a1117",
+          "artifactHash": "eb8c2fe8ab63b5fc35a6eea1b645a6b565500b6f0f96175738d6fb807039dc51",
+          "analysisType": "content_generation",
+          "modelRevision": "c9db519d49a9ea3e641f06f8ce3f473c41738d9d88ed6906148d7389c04ede92",
+          "configHash": "98959df27f53d0878e64a0097ec11a20f3254d23b58654c6d654ab6630746546",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:vo-magic",
+          "kind": "generated_asset",
+          "sourceAssetId": "vo-magic",
+          "sourceContentHash": "a4177157a9f82de1728a32482b8eaf346b1920e8aa2743d9c3e8d99be5a8b4de",
+          "artifactHash": "746992f529024593990243da6ce223c809e3cc4bc61a809d342e4e8d0942d0a5",
+          "analysisType": "content_generation",
+          "modelRevision": "c9db519d49a9ea3e641f06f8ce3f473c41738d9d88ed6906148d7389c04ede92",
+          "configHash": "98959df27f53d0878e64a0097ec11a20f3254d23b58654c6d654ab6630746546",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:vo-reveal",
+          "kind": "generated_asset",
+          "sourceAssetId": "vo-reveal",
+          "sourceContentHash": "43ec9f03541b141676c92863769213ae0fe664655a9e3f1b31a6506a8155b139",
+          "artifactHash": "8d6af3bfbf93dd6b57b213cc734f05b95fddb03f08eee3dae89cb891335bfa1b",
+          "analysisType": "content_generation",
+          "modelRevision": "c9db519d49a9ea3e641f06f8ce3f473c41738d9d88ed6906148d7389c04ede92",
+          "configHash": "98959df27f53d0878e64a0097ec11a20f3254d23b58654c6d654ab6630746546",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:score",
+          "kind": "generated_asset",
+          "sourceAssetId": "score",
+          "sourceContentHash": "e21838722d939d93d46acedca7c45b620c1648b01000ec1202f7eb1c08bfba5a",
+          "artifactHash": "006a8a4913020a88cd72bcdf4be18583d24cc348faf8be5b7300cc7de3dd5094",
+          "analysisType": "content_generation",
+          "modelRevision": "ba2635bc2d6c66881b538f1bd683167e720cacb845be3961aae58216be3cb3bf",
+          "configHash": "34bbdb63e539b79f216ba49c9627dd97d88b416f109f037c65667ff04fbea648",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:cues",
+          "kind": "generated_asset",
+          "sourceAssetId": "cues",
+          "sourceContentHash": "04bd044058b9b9239c93acbb0b151eb746ca3ad1f06fcfc0990f4ecdad34e3b0",
+          "artifactHash": "ba494f29c3e96339821a3de569cac7ded48d4db59b8954e4975765aaf9b8467b",
+          "analysisType": "content_generation",
+          "modelRevision": "ba2635bc2d6c66881b538f1bd683167e720cacb845be3961aae58216be3cb3bf",
+          "configHash": "7b106a542ced3b1bbba18cf3bf119e9b92941a197c9c0ea766e577ffd0785f65",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:score-cutdown",
+          "kind": "generated_asset",
+          "sourceAssetId": "score-cutdown",
+          "sourceContentHash": "6bc85fed339906028aa72c9203460ec00db62063c20dd7a7f8eaf77714a22256",
+          "artifactHash": "77ee266c89d2085ab93ca4f2e54ac22f344f13ce882dccf82cd5a2eb23e39bb9",
+          "analysisType": "content_generation",
+          "modelRevision": "d7bcc6f39d6e9fdcac8a176924985737a627415d40b0a745c80430384cfe5bb1",
+          "configHash": "57d49be1db7135b948960a609bda342bb4ed910facd8868f1399e71bb8c1ac31",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:cues-cutdown",
+          "kind": "generated_asset",
+          "sourceAssetId": "cues-cutdown",
+          "sourceContentHash": "6d2987c64beda52e458d900107513d377e8cbe4fc108a0fd04d1f32d06a24ff2",
+          "artifactHash": "76b75df68ba0eba3fda49d53dac671eb38375e3db37b82ac39a35d4699c82eab",
+          "analysisType": "content_generation",
+          "modelRevision": "d7bcc6f39d6e9fdcac8a176924985737a627415d40b0a745c80430384cfe5bb1",
+          "configHash": "57d49be1db7135b948960a609bda342bb4ed910facd8868f1399e71bb8c1ac31",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:score-teaser",
+          "kind": "generated_asset",
+          "sourceAssetId": "score-teaser",
+          "sourceContentHash": "31f07e62b558d82c1ca2ad3d3d984da428c4f4133978931cfa485a19f36a178f",
+          "artifactHash": "62ee764d831cacbcd5a96f7b9fe797c1bfc617aa84e45712f6f1e1ac91bf746e",
+          "analysisType": "content_generation",
+          "modelRevision": "d7bcc6f39d6e9fdcac8a176924985737a627415d40b0a745c80430384cfe5bb1",
+          "configHash": "9c240216caa20843ff4d53688b8bfaa8638a581564cfefae4c913c2603139d47",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        },
+        {
+          "evidenceId": "generation:cues-teaser",
+          "kind": "generated_asset",
+          "sourceAssetId": "cues-teaser",
+          "sourceContentHash": "21b9d89b42ab9a6e4c4b3c4134318bac0065dc24837b1b80ba57fe93eee1e9db",
+          "artifactHash": "c921c060b649decbf259d1355ddc9c1b98f553c93ef6e96369d8dec3b40b057a",
+          "analysisType": "content_generation",
+          "modelRevision": "d7bcc6f39d6e9fdcac8a176924985737a627415d40b0a745c80430384cfe5bb1",
+          "configHash": "9c240216caa20843ff4d53688b8bfaa8638a581564cfefae4c913c2603139d47",
+          "dependencyHashes": [
+            "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "fd5314245a6f4071779f8b281a5554c98e3f325c3bcab8d7d3ab6f1318e43503"
+          ],
+          "statement": null
+        }
+      ],
+      "captureGroups": [],
+      "assertions": [],
+      "syncMappings": [],
+      "dialogueUnits": [],
+      "continuityObservations": [],
+      "beats": [
+        {
+          "beatId": "cold-open",
+          "title": "Enter the final three seconds of the same transformed vessel, withholding its paper origin.",
+          "origin": "model_generated",
+          "candidates": [
+            {
+              "coverageId": "coverage:vo-cold-open",
+              "beatId": "cold-open",
+              "assetId": "vo-cold-open",
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 195750
+              },
+              "takeAssertionId": null,
+              "shotRoleAssertionId": null,
+              "dialogueUnitId": null,
+              "audioEvidenceRefs": [],
+              "technicalEvidenceRefs": [
+                "generation:vo-cold-open"
+              ],
+              "continuityEvidenceRefs": [],
+              "warnings": [
+                "Generated asset; machine-reviewed, founder approval remains pending"
+              ],
+              "state": "proposed",
+              "provenance": {
+                "origin": "model_inferred",
+                "producerId": "content_factory",
+                "method": "Story beat asset requirement and generated artifact receipt"
+              },
+              "uncertainty": {
+                "level": "medium",
+                "basis": "Visual review is model-assisted; not a human-verified recording"
+              },
+              "review": null,
+              "evidenceRefs": [
+                "generation:vo-cold-open"
+              ],
+              "supersedes": null
+            },
+            {
+              "coverageId": "coverage:score",
+              "beatId": "cold-open",
+              "assetId": "score",
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 4590000
+              },
+              "takeAssertionId": null,
+              "shotRoleAssertionId": null,
+              "dialogueUnitId": null,
+              "audioEvidenceRefs": [],
+              "technicalEvidenceRefs": [
+                "generation:score"
+              ],
+              "continuityEvidenceRefs": [],
+              "warnings": [
+                "Generated asset; machine-reviewed, founder approval remains pending"
+              ],
+              "state": "proposed",
+              "provenance": {
+                "origin": "model_inferred",
+                "producerId": "content_factory",
+                "method": "Story beat asset requirement and generated artifact receipt"
+              },
+              "uncertainty": {
+                "level": "medium",
+                "basis": "Visual review is model-assisted; not a human-verified recording"
+              },
+              "review": null,
+              "evidenceRefs": [
+                "generation:score"
+              ],
+              "supersedes": null
+            },
+            {
+              "coverageId": "coverage:cues",
+              "beatId": "cold-open",
+              "assetId": "cues",
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 4590000
+              },
+              "takeAssertionId": null,
+              "shotRoleAssertionId": null,
+              "dialogueUnitId": null,
+              "audioEvidenceRefs": [],
+              "technicalEvidenceRefs": [
+                "generation:cues"
+              ],
+              "continuityEvidenceRefs": [],
+              "warnings": [
+                "Generated asset; machine-reviewed, founder approval remains pending"
+              ],
+              "state": "proposed",
+              "provenance": {
+                "origin": "model_inferred",
+                "producerId": "content_factory",
+                "method": "Story beat asset requirement and generated artifact receipt"
+              },
+              "uncertainty": {
+                "level": "medium",
+                "basis": "Visual review is model-assisted; not a human-verified recording"
+              },
+              "review": null,
+              "evidenceRefs": [
+                "generation:cues"
+              ],
+              "supersedes": null
+            },
+            {
+              "coverageId": "coverage:score-cutdown",
+              "beatId": "cold-open",
+              "assetId": "score-cutdown",
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 2385000
+              },
+              "takeAssertionId": null,
+              "shotRoleAssertionId": null,
+              "dialogueUnitId": null,
+              "audioEvidenceRefs": [],
+              "technicalEvidenceRefs": [
+                "generation:score-cutdown"
+              ],
+              "continuityEvidenceRefs": [],
+              "warnings": [
+                "Generated asset; machine-reviewed, founder approval remains pending"
+              ],
+              "state": "proposed",
+              "provenance": {
+                "origin": "model_inferred",
+                "producerId": "content_factory",
+                "method": "Story beat asset requirement and generated artifact receipt"
+              },
+              "uncertainty": {
+                "level": "medium",
+                "basis": "Visual review is model-assisted; not a human-verified recording"
+              },
+              "review": null,
+              "evidenceRefs": [
+                "generation:score-cutdown"
+              ],
+              "supersedes": null
+            },
+            {
+              "coverageId": "coverage:cues-cutdown",
+              "beatId": "cold-open",
+              "assetId": "cues-cutdown",
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 2385000
+              },
+              "takeAssertionId": null,
+              "shotRoleAssertionId": null,
+              "dialogueUnitId": null,
+              "audioEvidenceRefs": [],
+              "technicalEvidenceRefs": [
+                "generation:cues-cutdown"
+              ],
+              "continuityEvidenceRefs": [],
+              "warnings": [
+                "Generated asset; machine-reviewed, founder approval remains pending"
+              ],
+              "state": "proposed",
+              "provenance": {
+                "origin": "model_inferred",
+                "producerId": "content_factory",
+                "method": "Story beat asset requirement and generated artifact receipt"
+              },
+              "uncertainty": {
+                "level": "medium",
+                "basis": "Visual review is model-assisted; not a human-verified recording"
+              },
+              "review": null,
+              "evidenceRefs": [
+                "generation:cues-cutdown"
+              ],
+              "supersedes": null
+            },
+            {
+              "coverageId": "coverage:score-teaser",
+              "beatId": "cold-open",
+              "assetId": "score-teaser",
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 900000
+              },
+              "takeAssertionId": null,
+              "shotRoleAssertionId": null,
+              "dialogueUnitId": null,
+              "audioEvidenceRefs": [],
+              "technicalEvidenceRefs": [
+                "generation:score-teaser"
+              ],
+              "continuityEvidenceRefs": [],
+              "warnings": [
+                "Generated asset; machine-reviewed, founder approval remains pending"
+              ],
+              "state": "proposed",
+              "provenance": {
+                "origin": "model_inferred",
+                "producerId": "content_factory",
+                "method": "Story beat asset requirement and generated artifact receipt"
+              },
+              "uncertainty": {
+                "level": "medium",
+                "basis": "Visual review is model-assisted; not a human-verified recording"
+              },
+              "review": null,
+              "evidenceRefs": [
+                "generation:score-teaser"
+              ],
+              "supersedes": null
+            },
+            {
+              "coverageId": "coverage:cues-teaser",
+              "beatId": "cold-open",
+              "assetId": "cues-teaser",
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 900000
+              },
+              "takeAssertionId": null,
+              "shotRoleAssertionId": null,
+              "dialogueUnitId": null,
+              "audioEvidenceRefs": [],
+              "technicalEvidenceRefs": [
+                "generation:cues-teaser"
+              ],
+              "continuityEvidenceRefs": [],
+              "warnings": [
+                "Generated asset; machine-reviewed, founder approval remains pending"
+              ],
+              "state": "proposed",
+              "provenance": {
+                "origin": "model_inferred",
+                "producerId": "content_factory",
+                "method": "Story beat asset requirement and generated artifact receipt"
+              },
+              "uncertainty": {
+                "level": "medium",
+                "basis": "Visual review is model-assisted; not a human-verified recording"
+              },
+              "review": null,
+              "evidenceRefs": [
+                "generation:cues-teaser"
+              ],
+              "supersedes": null
+            }
+          ],
+          "coverageState": "candidate_available"
+        },
+        {
+          "beatId": "origin",
+          "title": "A retained moving conversation fills the frame. Two differently timed amber/violet waveform rows align below it.",
+          "origin": "model_generated",
+          "candidates": [
+            {
+              "coverageId": "coverage:origin",
+              "beatId": "origin",
+              "assetId": "origin",
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 472500
+              },
+              "takeAssertionId": null,
+              "shotRoleAssertionId": null,
+              "dialogueUnitId": null,
+              "audioEvidenceRefs": [],
+              "technicalEvidenceRefs": [
+                "generation:origin"
+              ],
+              "continuityEvidenceRefs": [],
+              "warnings": [
+                "Generated asset; machine-reviewed, founder approval remains pending"
+              ],
+              "state": "proposed",
+              "provenance": {
+                "origin": "model_inferred",
+                "producerId": "content_factory",
+                "method": "Story beat asset requirement and generated artifact receipt"
+              },
+              "uncertainty": {
+                "level": "medium",
+                "basis": "Visual review is model-assisted; not a human-verified recording"
+              },
+              "review": null,
+              "evidenceRefs": [
+                "generation:origin"
+              ],
+              "supersedes": null
+            },
+            {
+              "coverageId": "coverage:vo-origin",
+              "beatId": "origin",
+              "assetId": "vo-origin",
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 396000
+              },
+              "takeAssertionId": null,
+              "shotRoleAssertionId": null,
+              "dialogueUnitId": null,
+              "audioEvidenceRefs": [],
+              "technicalEvidenceRefs": [
+                "generation:vo-origin"
+              ],
+              "continuityEvidenceRefs": [],
+              "warnings": [
+                "Generated asset; machine-reviewed, founder approval remains pending"
+              ],
+              "state": "proposed",
+              "provenance": {
+                "origin": "model_inferred",
+                "producerId": "content_factory",
+                "method": "Story beat asset requirement and generated artifact receipt"
+              },
+              "uncertainty": {
+                "level": "medium",
+                "basis": "Visual review is model-assisted; not a human-verified recording"
+              },
+              "review": null,
+              "evidenceRefs": [
+                "generation:vo-origin"
+              ],
+              "supersedes": null
+            }
+          ],
+          "coverageState": "candidate_available"
+        },
+        {
+          "beatId": "cascade",
+          "title": "The moving conversation and SYNC / SOUND / RENDER labels are interrupted by a physical dark shutter and a red FAILED lockup.",
+          "origin": "model_generated",
+          "candidates": [
+            {
+              "coverageId": "coverage:cascade",
+              "beatId": "cascade",
+              "assetId": "cascade",
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 495000
+              },
+              "takeAssertionId": null,
+              "shotRoleAssertionId": null,
+              "dialogueUnitId": null,
+              "audioEvidenceRefs": [],
+              "technicalEvidenceRefs": [
+                "generation:cascade"
+              ],
+              "continuityEvidenceRefs": [],
+              "warnings": [
+                "Generated asset; machine-reviewed, founder approval remains pending"
+              ],
+              "state": "proposed",
+              "provenance": {
+                "origin": "model_inferred",
+                "producerId": "content_factory",
+                "method": "Story beat asset requirement and generated artifact receipt"
+              },
+              "uncertainty": {
+                "level": "medium",
+                "basis": "Visual review is model-assisted; not a human-verified recording"
+              },
+              "review": null,
+              "evidenceRefs": [
+                "generation:cascade"
+              ],
+              "supersedes": null
+            },
+            {
+              "coverageId": "coverage:vo-cascade",
+              "beatId": "cascade",
+              "assetId": "vo-cascade",
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 409500
+              },
+              "takeAssertionId": null,
+              "shotRoleAssertionId": null,
+              "dialogueUnitId": null,
+              "audioEvidenceRefs": [],
+              "technicalEvidenceRefs": [
+                "generation:vo-cascade"
+              ],
+              "continuityEvidenceRefs": [],
+              "warnings": [
+                "Generated asset; machine-reviewed, founder approval remains pending"
+              ],
+              "state": "proposed",
+              "provenance": {
+                "origin": "model_inferred",
+                "producerId": "content_factory",
+                "method": "Story beat asset requirement and generated artifact receipt"
+              },
+              "uncertainty": {
+                "level": "medium",
+                "basis": "Visual review is model-assisted; not a human-verified recording"
+              },
+              "review": null,
+              "evidenceRefs": [
+                "generation:vo-cascade"
+              ],
+              "supersedes": null
+            }
+          ],
+          "coverageState": "candidate_available"
+        },
+        {
+          "beatId": "failure",
+          "title": "An archived graphic reconstruction of render errors sits in depth beside the illuminated word AGAIN. This is not an unmodified error screenshot.",
+          "origin": "model_generated",
+          "candidates": [
+            {
+              "coverageId": "coverage:failure",
+              "beatId": "failure",
+              "assetId": "failure",
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 405000
+              },
+              "takeAssertionId": null,
+              "shotRoleAssertionId": null,
+              "dialogueUnitId": null,
+              "audioEvidenceRefs": [],
+              "technicalEvidenceRefs": [
+                "generation:failure"
+              ],
+              "continuityEvidenceRefs": [],
+              "warnings": [
+                "Generated asset; machine-reviewed, founder approval remains pending"
+              ],
+              "state": "proposed",
+              "provenance": {
+                "origin": "model_inferred",
+                "producerId": "content_factory",
+                "method": "Story beat asset requirement and generated artifact receipt"
+              },
+              "uncertainty": {
+                "level": "medium",
+                "basis": "Visual review is model-assisted; not a human-verified recording"
+              },
+              "review": null,
+              "evidenceRefs": [
+                "generation:failure"
+              ],
+              "supersedes": null
+            },
+            {
+              "coverageId": "coverage:vo-failure",
+              "beatId": "failure",
+              "assetId": "vo-failure",
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 330750
+              },
+              "takeAssertionId": null,
+              "shotRoleAssertionId": null,
+              "dialogueUnitId": null,
+              "audioEvidenceRefs": [],
+              "technicalEvidenceRefs": [
+                "generation:vo-failure"
+              ],
+              "continuityEvidenceRefs": [],
+              "warnings": [
+                "Generated asset; machine-reviewed, founder approval remains pending"
+              ],
+              "state": "proposed",
+              "provenance": {
+                "origin": "model_inferred",
+                "producerId": "content_factory",
+                "method": "Story beat asset requirement and generated artifact receipt"
+              },
+              "uncertainty": {
+                "level": "medium",
+                "basis": "Visual review is model-assisted; not a human-verified recording"
+              },
+              "review": null,
+              "evidenceRefs": [
+                "generation:vo-failure"
+              ],
+              "supersedes": null
+            }
+          ],
+          "coverageState": "candidate_available"
+        },
+        {
+          "beatId": "quota",
+          "title": "A large extruded zero on a dark stage with NO CAPACITY. The narration carries the setback; no quota email, archive date or GPU class is shown in this shot.",
+          "origin": "model_generated",
+          "candidates": [
+            {
+              "coverageId": "coverage:quota",
+              "beatId": "quota",
+              "assetId": "quota",
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 427500
+              },
+              "takeAssertionId": null,
+              "shotRoleAssertionId": null,
+              "dialogueUnitId": null,
+              "audioEvidenceRefs": [],
+              "technicalEvidenceRefs": [
+                "generation:quota"
+              ],
+              "continuityEvidenceRefs": [],
+              "warnings": [
+                "Generated asset; machine-reviewed, founder approval remains pending"
+              ],
+              "state": "proposed",
+              "provenance": {
+                "origin": "model_inferred",
+                "producerId": "content_factory",
+                "method": "Story beat asset requirement and generated artifact receipt"
+              },
+              "uncertainty": {
+                "level": "medium",
+                "basis": "Visual review is model-assisted; not a human-verified recording"
+              },
+              "review": null,
+              "evidenceRefs": [
+                "generation:quota"
+              ],
+              "supersedes": null
+            },
+            {
+              "coverageId": "coverage:vo-quota",
+              "beatId": "quota",
+              "assetId": "vo-quota",
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 299250
+              },
+              "takeAssertionId": null,
+              "shotRoleAssertionId": null,
+              "dialogueUnitId": null,
+              "audioEvidenceRefs": [],
+              "technicalEvidenceRefs": [
+                "generation:vo-quota"
+              ],
+              "continuityEvidenceRefs": [],
+              "warnings": [
+                "Generated asset; machine-reviewed, founder approval remains pending"
+              ],
+              "state": "proposed",
+              "provenance": {
+                "origin": "model_inferred",
+                "producerId": "content_factory",
+                "method": "Story beat asset requirement and generated artifact receipt"
+              },
+              "uncertainty": {
+                "level": "medium",
+                "basis": "Visual review is model-assisted; not a human-verified recording"
+              },
+              "review": null,
+              "evidenceRefs": [
+                "generation:vo-quota"
+              ],
+              "supersedes": null
+            }
+          ],
+          "coverageState": "candidate_available"
+        },
+        {
+          "beatId": "breakthrough",
+          "title": "The extruded zero and physical panels move aside to show retained generated yacht footage. 3000 milliGPU labels the historical capacity; this is not a new grant or 3000 physical GPUs.",
+          "origin": "model_generated",
+          "candidates": [
+            {
+              "coverageId": "coverage:breakthrough",
+              "beatId": "breakthrough",
+              "assetId": "breakthrough",
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 382500
+              },
+              "takeAssertionId": null,
+              "shotRoleAssertionId": null,
+              "dialogueUnitId": null,
+              "audioEvidenceRefs": [],
+              "technicalEvidenceRefs": [
+                "generation:breakthrough"
+              ],
+              "continuityEvidenceRefs": [],
+              "warnings": [
+                "Generated asset; machine-reviewed, founder approval remains pending"
+              ],
+              "state": "proposed",
+              "provenance": {
+                "origin": "model_inferred",
+                "producerId": "content_factory",
+                "method": "Story beat asset requirement and generated artifact receipt"
+              },
+              "uncertainty": {
+                "level": "medium",
+                "basis": "Visual review is model-assisted; not a human-verified recording"
+              },
+              "review": null,
+              "evidenceRefs": [
+                "generation:breakthrough"
+              ],
+              "supersedes": null
+            },
+            {
+              "coverageId": "coverage:vo-breakthrough",
+              "beatId": "breakthrough",
+              "assetId": "vo-breakthrough",
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 290250
+              },
+              "takeAssertionId": null,
+              "shotRoleAssertionId": null,
+              "dialogueUnitId": null,
+              "audioEvidenceRefs": [],
+              "technicalEvidenceRefs": [
+                "generation:vo-breakthrough"
+              ],
+              "continuityEvidenceRefs": [],
+              "warnings": [
+                "Generated asset; machine-reviewed, founder approval remains pending"
+              ],
+              "state": "proposed",
+              "provenance": {
+                "origin": "model_inferred",
+                "producerId": "content_factory",
+                "method": "Story beat asset requirement and generated artifact receipt"
+              },
+              "uncertainty": {
+                "level": "medium",
+                "basis": "Visual review is model-assisted; not a human-verified recording"
+              },
+              "review": null,
+              "evidenceRefs": [
+                "generation:vo-breakthrough"
+              ],
+              "supersedes": null
+            }
+          ],
+          "coverageState": "candidate_available"
+        },
+        {
+          "beatId": "director",
+          "title": "STORY / SHOT / CUT / SOUND labels resolve over the retained conversation, then the retained generated yacht becomes the chosen source. This is an authored concept visualization, not a recording of a live Director plan.",
+          "origin": "model_generated",
+          "candidates": [
+            {
+              "coverageId": "coverage:director",
+              "beatId": "director",
+              "assetId": "director",
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 607500
+              },
+              "takeAssertionId": null,
+              "shotRoleAssertionId": null,
+              "dialogueUnitId": null,
+              "audioEvidenceRefs": [],
+              "technicalEvidenceRefs": [
+                "generation:director"
+              ],
+              "continuityEvidenceRefs": [],
+              "warnings": [
+                "Generated asset; machine-reviewed, founder approval remains pending"
+              ],
+              "state": "proposed",
+              "provenance": {
+                "origin": "model_inferred",
+                "producerId": "content_factory",
+                "method": "Story beat asset requirement and generated artifact receipt"
+              },
+              "uncertainty": {
+                "level": "medium",
+                "basis": "Visual review is model-assisted; not a human-verified recording"
+              },
+              "review": null,
+              "evidenceRefs": [
+                "generation:director"
+              ],
+              "supersedes": null
+            },
+            {
+              "coverageId": "coverage:vo-director",
+              "beatId": "director",
+              "assetId": "vo-director",
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 549000
+              },
+              "takeAssertionId": null,
+              "shotRoleAssertionId": null,
+              "dialogueUnitId": null,
+              "audioEvidenceRefs": [],
+              "technicalEvidenceRefs": [
+                "generation:vo-director"
+              ],
+              "continuityEvidenceRefs": [],
+              "warnings": [
+                "Generated asset; machine-reviewed, founder approval remains pending"
+              ],
+              "state": "proposed",
+              "provenance": {
+                "origin": "model_inferred",
+                "producerId": "content_factory",
+                "method": "Story beat asset requirement and generated artifact receipt"
+              },
+              "uncertainty": {
+                "level": "medium",
+                "basis": "Visual review is model-assisted; not a human-verified recording"
+              },
+              "review": null,
+              "evidenceRefs": [
+                "generation:vo-director"
+              ],
+              "supersedes": null
+            }
+          ],
+          "coverageState": "candidate_available"
+        },
+        {
+          "beatId": "magic",
+          "title": "One continuous folded-paper hull and sail become timber and canvas while the workbench sinks into a deep ocean; the camera follows the same vessel.",
+          "origin": "model_generated",
+          "candidates": [
+            {
+              "coverageId": "coverage:vessel",
+              "beatId": "magic",
+              "assetId": "vessel",
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 630000
+              },
+              "takeAssertionId": null,
+              "shotRoleAssertionId": null,
+              "dialogueUnitId": null,
+              "audioEvidenceRefs": [],
+              "technicalEvidenceRefs": [
+                "generation:vessel"
+              ],
+              "continuityEvidenceRefs": [],
+              "warnings": [
+                "Generated asset; machine-reviewed, founder approval remains pending"
+              ],
+              "state": "proposed",
+              "provenance": {
+                "origin": "model_inferred",
+                "producerId": "content_factory",
+                "method": "Story beat asset requirement and generated artifact receipt"
+              },
+              "uncertainty": {
+                "level": "medium",
+                "basis": "Visual review is model-assisted; not a human-verified recording"
+              },
+              "review": null,
+              "evidenceRefs": [
+                "generation:vessel"
+              ],
+              "supersedes": null
+            },
+            {
+              "coverageId": "coverage:vo-magic",
+              "beatId": "magic",
+              "assetId": "vo-magic",
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 276750
+              },
+              "takeAssertionId": null,
+              "shotRoleAssertionId": null,
+              "dialogueUnitId": null,
+              "audioEvidenceRefs": [],
+              "technicalEvidenceRefs": [
+                "generation:vo-magic"
+              ],
+              "continuityEvidenceRefs": [],
+              "warnings": [
+                "Generated asset; machine-reviewed, founder approval remains pending"
+              ],
+              "state": "proposed",
+              "provenance": {
+                "origin": "model_inferred",
+                "producerId": "content_factory",
+                "method": "Story beat asset requirement and generated artifact receipt"
+              },
+              "uncertainty": {
+                "level": "medium",
+                "basis": "Visual review is model-assisted; not a human-verified recording"
+              },
+              "review": null,
+              "evidenceRefs": [
+                "generation:vo-magic"
+              ],
+              "supersedes": null
+            }
+          ],
+          "coverageState": "candidate_available"
+        },
+        {
+          "beatId": "reveal",
+          "title": "The created-by sentence resolves on a dark dimensional field, with restrained camera movement. No live Studio UI/project recording is represented.",
+          "origin": "model_generated",
+          "candidates": [
+            {
+              "coverageId": "coverage:reveal",
+              "beatId": "reveal",
+              "assetId": "reveal",
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 450000
+              },
+              "takeAssertionId": null,
+              "shotRoleAssertionId": null,
+              "dialogueUnitId": null,
+              "audioEvidenceRefs": [],
+              "technicalEvidenceRefs": [
+                "generation:reveal"
+              ],
+              "continuityEvidenceRefs": [],
+              "warnings": [
+                "Generated asset; machine-reviewed, founder approval remains pending"
+              ],
+              "state": "proposed",
+              "provenance": {
+                "origin": "model_inferred",
+                "producerId": "content_factory",
+                "method": "Story beat asset requirement and generated artifact receipt"
+              },
+              "uncertainty": {
+                "level": "medium",
+                "basis": "Visual review is model-assisted; not a human-verified recording"
+              },
+              "review": null,
+              "evidenceRefs": [
+                "generation:reveal"
+              ],
+              "supersedes": null
+            },
+            {
+              "coverageId": "coverage:vo-reveal",
+              "beatId": "reveal",
+              "assetId": "vo-reveal",
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 306000
+              },
+              "takeAssertionId": null,
+              "shotRoleAssertionId": null,
+              "dialogueUnitId": null,
+              "audioEvidenceRefs": [],
+              "technicalEvidenceRefs": [
+                "generation:vo-reveal"
+              ],
+              "continuityEvidenceRefs": [],
+              "warnings": [
+                "Generated asset; machine-reviewed, founder approval remains pending"
+              ],
+              "state": "proposed",
+              "provenance": {
+                "origin": "model_inferred",
+                "producerId": "content_factory",
+                "method": "Story beat asset requirement and generated artifact receipt"
+              },
+              "uncertainty": {
+                "level": "medium",
+                "basis": "Visual review is model-assisted; not a human-verified recording"
+              },
+              "review": null,
+              "evidenceRefs": [
+                "generation:vo-reveal"
+              ],
+              "supersedes": null
+            }
+          ],
+          "coverageState": "candidate_available"
+        },
+        {
+          "beatId": "ident",
+          "title": "Original exact logo contours emerge as titanium, optical-black, anodized-violet and glass layers; grazing light and a macro-to-lockup camera resolve at 3.2s, followed by a clean static hold.",
+          "origin": "model_generated",
+          "candidates": [
+            {
+              "coverageId": "coverage:ident",
+              "beatId": "ident",
+              "assetId": "ident",
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 450000
+              },
+              "takeAssertionId": null,
+              "shotRoleAssertionId": null,
+              "dialogueUnitId": null,
+              "audioEvidenceRefs": [],
+              "technicalEvidenceRefs": [
+                "generation:ident"
+              ],
+              "continuityEvidenceRefs": [],
+              "warnings": [
+                "Generated asset; machine-reviewed, founder approval remains pending"
+              ],
+              "state": "proposed",
+              "provenance": {
+                "origin": "model_inferred",
+                "producerId": "content_factory",
+                "method": "Story beat asset requirement and generated artifact receipt"
+              },
+              "uncertainty": {
+                "level": "medium",
+                "basis": "Visual review is model-assisted; not a human-verified recording"
+              },
+              "review": null,
+              "evidenceRefs": [
+                "generation:ident"
+              ],
+              "supersedes": null
+            }
+          ],
+          "coverageState": "candidate_available"
+        }
+      ],
+      "findings": [],
+      "planningBlocked": false
+    }
+  }
+}

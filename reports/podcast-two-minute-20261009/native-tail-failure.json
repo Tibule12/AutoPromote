@@ -1,0 +1,495 @@
+{
+  "finish_plan": {
+    "version": 1,
+    "enabled": true,
+    "color_cube": null,
+    "main_frame": {
+      "enabled": false,
+      "shape": "round",
+      "inset_percent": 2.5,
+      "border_radius_percent": 6,
+      "background": "studio_black"
+    },
+    "color": {
+      "preset": null,
+      "exposureStops": 0,
+      "lift": 0,
+      "gamma": 1,
+      "gain": 1,
+      "tint": 0,
+      "brightness": 1.02,
+      "contrast": 1.04,
+      "saturation": 0.95,
+      "temperature": -0.03,
+      "sharpness": 0.1,
+      "vignette": 0,
+      "precisionGrade": true
+    },
+    "motion": {
+      "zoom": 1,
+      "zoom_anchor": "center",
+      "base_scale": 1.16,
+      "scale_keyframes": [
+        {
+          "easing": "hold",
+          "id": "motion-key-00783e69-18e6-4e67-9ae1-cb0878f92bad",
+          "targetId": "main-video",
+          "property": "scale",
+          "value": 1,
+          "time": 0
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-59261f7b-400f-4e0f-9f89-9ff08655fb83",
+          "targetId": "main-video",
+          "property": "scale",
+          "value": 1.16,
+          "time": 52.5
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-4dd89785-55f1-4b50-a84e-f4edc8fa02e2",
+          "targetId": "main-video",
+          "property": "scale",
+          "value": 1,
+          "time": 63.5
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-c13b81e3-e254-40b5-8b7e-d9052daa0e81",
+          "targetId": "main-video",
+          "property": "scale",
+          "value": 1.16,
+          "time": 85.75
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-504f5a36-77f0-4dd0-8a28-262ca53a8bac",
+          "targetId": "main-video",
+          "property": "scale",
+          "value": 1,
+          "time": 105.25
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-6e38cda5-7a91-4a13-afc2-3e5a426124eb",
+          "targetId": "main-video",
+          "property": "scale",
+          "value": 1.16,
+          "time": 110.25
+        }
+      ],
+      "base_transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.16,
+        "rotation": 0,
+        "opacity": 1,
+        "crop_x": 0,
+        "crop_y": 0
+      },
+      "keyframes": [
+        {
+          "easing": "hold",
+          "id": "motion-key-df8851f1-4c25-4a7e-afa4-744d24c1a4b5",
+          "targetId": "main-video",
+          "property": "x",
+          "value": 50,
+          "time": 0
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-5d0b8893-2ed8-4fff-9f6e-6dbb5aac7df2",
+          "targetId": "main-video",
+          "property": "y",
+          "value": 50,
+          "time": 0
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-00783e69-18e6-4e67-9ae1-cb0878f92bad",
+          "targetId": "main-video",
+          "property": "scale",
+          "value": 1,
+          "time": 0
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-f63ea81b-e187-49c8-bdb3-b2353c4f9a12",
+          "targetId": "main-video",
+          "property": "rotation",
+          "value": 0,
+          "time": 0
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-675f0e17-b204-4dac-a613-b95913d92bf7",
+          "targetId": "main-video",
+          "property": "opacity",
+          "value": 1,
+          "time": 0
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-34b2b142-46cd-44fc-8d2c-0dca618b8db9",
+          "targetId": "main-video",
+          "property": "cropX",
+          "value": 0,
+          "time": 0
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-91805320-affd-450e-b5a6-38ed0796eed4",
+          "targetId": "main-video",
+          "property": "cropY",
+          "value": 0,
+          "time": 0
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-496f818d-2570-46f5-b023-7f8b3a09c5f8",
+          "targetId": "main-video",
+          "property": "x",
+          "value": 50,
+          "time": 52.5
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-f547b0cd-60f3-4004-83a4-a81fb7f1624f",
+          "targetId": "main-video",
+          "property": "y",
+          "value": 50,
+          "time": 52.5
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-59261f7b-400f-4e0f-9f89-9ff08655fb83",
+          "targetId": "main-video",
+          "property": "scale",
+          "value": 1.16,
+          "time": 52.5
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-6bb4bb1a-0551-4f3e-9ab4-77587bbd6f42",
+          "targetId": "main-video",
+          "property": "rotation",
+          "value": 0,
+          "time": 52.5
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-c8831717-0117-4c08-8fe5-5c11cdc6dacf",
+          "targetId": "main-video",
+          "property": "opacity",
+          "value": 1,
+          "time": 52.5
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-0fbf3e84-6dd5-43d6-a1b9-dd6374394c70",
+          "targetId": "main-video",
+          "property": "cropX",
+          "value": 0,
+          "time": 52.5
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-a1ca59aa-53a8-4846-bc2e-21b86d40ce47",
+          "targetId": "main-video",
+          "property": "cropY",
+          "value": 0,
+          "time": 52.5
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-fc104151-93ba-4c4c-8353-26b7fda16370",
+          "targetId": "main-video",
+          "property": "x",
+          "value": 50,
+          "time": 63.5
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-a7928b44-6867-4f07-8f8a-085c7c5b76f3",
+          "targetId": "main-video",
+          "property": "y",
+          "value": 50,
+          "time": 63.5
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-4dd89785-55f1-4b50-a84e-f4edc8fa02e2",
+          "targetId": "main-video",
+          "property": "scale",
+          "value": 1,
+          "time": 63.5
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-a5f731b8-2323-4df8-afb0-60bf1599e0cc",
+          "targetId": "main-video",
+          "property": "rotation",
+          "value": 0,
+          "time": 63.5
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-b7114788-a2a4-4652-a417-bd296a5bfbaa",
+          "targetId": "main-video",
+          "property": "opacity",
+          "value": 1,
+          "time": 63.5
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-612190bb-ec6d-46e8-a40a-441a2154a4b4",
+          "targetId": "main-video",
+          "property": "cropX",
+          "value": 0,
+          "time": 63.5
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-3f4c982c-26bd-4b78-9428-d97876e09cf7",
+          "targetId": "main-video",
+          "property": "cropY",
+          "value": 0,
+          "time": 63.5
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-630a7f33-75b9-4d97-b206-a0ae20a00e2e",
+          "targetId": "main-video",
+          "property": "x",
+          "value": 50,
+          "time": 85.75
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-8445f4dd-4774-4c69-a368-c0432e0a93c9",
+          "targetId": "main-video",
+          "property": "y",
+          "value": 50,
+          "time": 85.75
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-c13b81e3-e254-40b5-8b7e-d9052daa0e81",
+          "targetId": "main-video",
+          "property": "scale",
+          "value": 1.16,
+          "time": 85.75
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-143e9f41-734a-4e8f-bcef-04ab21016a33",
+          "targetId": "main-video",
+          "property": "rotation",
+          "value": 0,
+          "time": 85.75
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-7c4421ca-3c00-43be-b186-772cbdc6e7aa",
+          "targetId": "main-video",
+          "property": "opacity",
+          "value": 1,
+          "time": 85.75
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-9102d04c-176e-4b20-937e-9427823d20dd",
+          "targetId": "main-video",
+          "property": "cropX",
+          "value": 0,
+          "time": 85.75
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-a4d93ddd-a1d9-46f1-9ee6-b73a5631d90e",
+          "targetId": "main-video",
+          "property": "cropY",
+          "value": 0,
+          "time": 85.75
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-72071994-9e6d-47a2-83cc-f6fad5882938",
+          "targetId": "main-video",
+          "property": "x",
+          "value": 50,
+          "time": 105.25
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-3021e3b6-d5b5-4bbf-bf1a-bea5b3c9fb19",
+          "targetId": "main-video",
+          "property": "y",
+          "value": 50,
+          "time": 105.25
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-504f5a36-77f0-4dd0-8a28-262ca53a8bac",
+          "targetId": "main-video",
+          "property": "scale",
+          "value": 1,
+          "time": 105.25
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-183b849c-558f-4873-aa86-9be660d79297",
+          "targetId": "main-video",
+          "property": "rotation",
+          "value": 0,
+          "time": 105.25
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-e4ea4d71-0762-4be7-a50c-ce51726f3469",
+          "targetId": "main-video",
+          "property": "opacity",
+          "value": 1,
+          "time": 105.25
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-4066817c-0d25-4102-93fd-a27578596b6a",
+          "targetId": "main-video",
+          "property": "cropX",
+          "value": 0,
+          "time": 105.25
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-0a1bdc21-263c-4306-8b6e-d6d596ca5b7e",
+          "targetId": "main-video",
+          "property": "cropY",
+          "value": 0,
+          "time": 105.25
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-0810233c-749c-4645-a654-34b9d99cd5a3",
+          "targetId": "main-video",
+          "property": "x",
+          "value": 50,
+          "time": 110.25
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-fd776ddd-0210-4636-9068-024ed964398d",
+          "targetId": "main-video",
+          "property": "y",
+          "value": 50,
+          "time": 110.25
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-6e38cda5-7a91-4a13-afc2-3e5a426124eb",
+          "targetId": "main-video",
+          "property": "scale",
+          "value": 1.16,
+          "time": 110.25
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-766cbbba-39be-472f-9ea9-73c2e02d3076",
+          "targetId": "main-video",
+          "property": "rotation",
+          "value": 0,
+          "time": 110.25
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-aad57740-34e9-417f-8125-8c353d2090ce",
+          "targetId": "main-video",
+          "property": "opacity",
+          "value": 1,
+          "time": 110.25
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-4b6f64c0-76f4-415a-a44a-c15769f6d446",
+          "targetId": "main-video",
+          "property": "cropX",
+          "value": 0,
+          "time": 110.25
+        },
+        {
+          "easing": "hold",
+          "id": "motion-key-b3137132-e3a8-4e40-842a-c3007cd57e55",
+          "targetId": "main-video",
+          "property": "cropY",
+          "value": 0,
+          "time": 110.25
+        }
+      ]
+    },
+    "texture": {
+      "film_grain": 0,
+      "chromatic_aberration": 0,
+      "vhs_tracking": 0,
+      "light_leak": 0
+    },
+    "visualizer": {
+      "enabled": false,
+      "mode": "wave",
+      "color": "#72f7ff",
+      "intensity": 0.75,
+      "position": "bottom",
+      "source": "original_speech"
+    },
+    "keyframes": [],
+    "adjustment_layers": [],
+    "magnetic_beats": {
+      "enabled": true,
+      "markers": []
+    },
+    "reframe": {
+      "enabled": true,
+      "aspect": "16:9",
+      "mode": "speaker_track",
+      "zoom": 1,
+      "timeline_cuts": [
+        {
+          "time": 0,
+          "mode": "off"
+        }
+      ],
+      "keyframes": []
+    }
+  },
+  "output_settings": {
+    "resolution": "source",
+    "fps": "24",
+    "codec": "h264",
+    "quality": "high",
+    "videoBitrate": "auto",
+    "targetFileSizeMb": "",
+    "audioCodec": "aac",
+    "audioBitrate": "192",
+    "colorSpace": "rec709"
+  },
+  "start_time": 0,
+  "end_time": 120.02303333333333,
+  "speed_segments": [
+    {
+      "id": "speed-1",
+      "start_time": 0,
+      "end_time": 120.02303333333333,
+      "rate": 1,
+      "pitch_preserved": true
+    }
+  ],
+  "at": "2026-10-09T08:46:37.745251+00:00",
+  "jobId": "viral_10f7df626bb4fb7c0788a61033fd19acf2d16bc6fc4b8c08467be761a5388028",
+  "status": "FAIL",
+  "failure": "Final picture119.916667s/2878frames, audio120.023s; finish intermediate119.900s/3597frames. Native quality gate correctly rejected the output. Root cause under measured investigation.",
+  "rootCause": "NVENC reordered final packets are discarded by intermediate -shortest stream-copy mux when AAC reaches EOF first.",
+  "measuredReplay": "6.033333s181-frame NVENC picture +6.022993s AAC: former mux retains177frames/5.9s; canonical-duration mux retains181frames/6.033333s and unchanged audio. Final selected24fps replay144frames/6s fully decodes.",
+  "fix": "Use planned duration instead of -shortest for shared reframe and timed finish intermediate mux.",
+  "retest": "Real L40S guard PASS; normal full-podcast final retest pending.",
+  "retainedFailureOutput": "reports/podcast-two-minute-20261009/failed-native-tail.mp4"
+}

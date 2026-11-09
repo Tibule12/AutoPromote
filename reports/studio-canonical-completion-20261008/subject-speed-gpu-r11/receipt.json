@@ -1,0 +1,23 @@
+{
+  "startedAt": "2026-10-08T17:45:48.812Z",
+  "realAuth": true,
+  "noMocks": true,
+  "headless": true,
+  "muted": true,
+  "projectName": "Studio subject speed NVIDIA QA 20261008 r11",
+  "inferenceJobsStarted": 0,
+  "status": "FAIL",
+  "lastStep": "Programme 0.25s maps to decoded source 0.5s; paired preview captured before submission",
+  "coldRecovery": "PASS",
+  "reviewedProxySha256": "fa90d4e44ab9cffce3c5dd24cc42c2abf5ad2c8b4935435e3875d5edd7496ba0",
+  "reviewedSubjectInProgramme": "PASS",
+  "preFinalSourceTime": 0.5,
+  "error": "STUDIO_RENDER_WORKER_UNAVAILABLE: The render worker is unavailable. Try again once it is online; no credits were charged. (503)",
+  "finishedAt": "2026-10-08T17:48:02.327Z",
+  "subjectApiEvents": [
+    {
+      "route": "/api/media/studio-subject-vfx/b9de374e-cfd5-49d5-9dce-79351b1fe877",
+      "method": "GET"
+    }
+  ]
+}

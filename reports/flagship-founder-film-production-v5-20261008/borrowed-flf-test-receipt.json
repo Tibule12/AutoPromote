@@ -1,0 +1,13 @@
+{
+  "startedAt": "2026-10-08T18:16:43.916281+00:00",
+  "cutoffEpoch": 1791489600,
+  "qaPause": "Graceful SIGTERM to idle uvicorn after completed requests; 0% compute/encode/decode; no CUDA process",
+  "stages": [
+    {
+      "script": "run-flf-transform-on-l40s.sh",
+      "exitCode": 0
+    }
+  ],
+  "qaRestorePid": 477090,
+  "completedAt": "2026-10-08T18:27:57.465476+00:00"
+}

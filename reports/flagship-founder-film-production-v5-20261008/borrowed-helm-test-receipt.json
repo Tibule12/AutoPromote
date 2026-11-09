@@ -1,0 +1,13 @@
+{
+  "startedAt": "2026-10-08T17:46:03.280198+00:00",
+  "cutoffEpoch": 1791489600,
+  "qaPause": "Graceful SIGTERM to idle uvicorn after completed requests; 0% compute/encode/decode; no CUDA process",
+  "stages": [
+    {
+      "script": "run-helm-i2v-on-l40s.sh",
+      "exitCode": 0
+    }
+  ],
+  "qaRestorePid": 465461,
+  "completedAt": "2026-10-08T18:12:42.924779+00:00"
+}

@@ -1,0 +1,7 @@
+{
+  "observation": "One owned native720 take running under shared exclusive flock; API had already exited by immediately-before-launch preflight. No active job was stopped.",
+  "cutoffEpoch": 1791536400,
+  "cutoffSast": "2026-10-09T11:00:00+02:00",
+  "hardStopWatchdogPid": 9189,
+  "status": "GENERATING_PENDING_REVIEW"
+}

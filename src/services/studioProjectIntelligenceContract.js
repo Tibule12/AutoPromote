@@ -78,7 +78,7 @@ const sourceAssetSetDigest = assets => digest(assets.map(asset =>
   [asset.assetId, asset.contentHash]).sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
 const dependencyDigests = evidenceRefs => [...new Set(evidenceRefs
   .filter(item => item.kind === "source_shot_artifact" ||
-    item.kind === "analysis_artifact")
+    item.kind === "analysis_artifact" || item.kind === "generated_asset")
   .map(item => item.artifactHash))].sort();
 const RECORD_IDS = Object.freeze({ captureGroups: "groupId", assertions: "assertionId",
   syncMappings: "mappingId", dialogueUnits: "dialogueUnitId",
@@ -147,7 +147,7 @@ const lifecycle = (value, path, evidenceIds, ownerUid) => {
   if (value.supersedes !== null) id(value.supersedes, `${path}.supersedes`);
 };
 
-const validateAssetManifest = manifest => {
+const validateAssetManifest = (manifest, { allowServerGenerated = false } = {}) => {
   exact(manifest, ["schemaVersion", "projectId", "ownerUid", "assets"], [], "manifest");
   if (manifest.schemaVersion !== VERSION) fail("PROJECT_INTELLIGENCE_VERSION", "manifest");
   id(manifest.projectId, "manifest.projectId"); id(manifest.ownerUid, "manifest.ownerUid");
@@ -169,7 +169,8 @@ const validateAssetManifest = manifest => {
     exact(asset.technical, ["container", "codec"], [], `${path}.technical`);
     text(asset.technical.container, path, 80); text(asset.technical.codec, path, 80);
     exact(asset.provenance, ["origin", "method"], [], `${path}.provenance`);
-    if (asset.provenance.origin !== "user_declared") fail("PROJECT_INTELLIGENCE_PROVENANCE", path);
+    if (asset.provenance.origin !== "user_declared" &&
+        !(allowServerGenerated && asset.provenance.origin === "server_generated")) fail("PROJECT_INTELLIGENCE_PROVENANCE", path);
     text(asset.provenance.method, path, 160);
     list(asset.streams, 16, `${path}.streams`);
     if (asset.mediaType !== "image" && !asset.streams.length)
@@ -224,7 +225,7 @@ const createProjectIntelligenceRevision = core => {
   return { ...withoutId, revisionId: digest(withoutId) };
 };
 
-const validateProjectIntelligenceRevision = revision => {
+const validateProjectIntelligenceRevision = (revision, { allowServerGenerated = false } = {}) => {
   exact(revision, ["schemaVersion", "projectId", "ownerUid", "baseRevisionId",
     "sourceAssetSetDigest", "analysisDependencyDigests", "createdBy", "assets",
     "evidenceRefs", "captureGroups", "assertions", "syncMappings", "dialogueUnits",
@@ -240,12 +241,12 @@ const validateProjectIntelligenceRevision = revision => {
       revision.sourceAssetSetDigest !== sourceAssetSetDigest(revision.assets))
     fail("PROJECT_INTELLIGENCE_DIGEST", "revision");
   exact(revision.createdBy, ["kind", "id"], [], "createdBy");
-  if (revision.createdBy.kind !== "human" || revision.createdBy.id !== revision.ownerUid)
+  if ((revision.createdBy.kind !== "human" && !(allowServerGenerated && revision.createdBy.kind === "content_factory")) || revision.createdBy.id !== revision.ownerUid)
     fail("PROJECT_INTELLIGENCE_AUTHOR", "createdBy");
   const { assetIds, streamIds } = validateAssetManifest({
     schemaVersion: VERSION, projectId: revision.projectId,
     ownerUid: revision.ownerUid, assets: revision.assets,
-  });
+  }, { allowServerGenerated });
   const assets = new Map(revision.assets.map(asset => [asset.assetId, asset]));
   const streams = new Map(revision.assets.flatMap(asset => asset.streams.map(stream =>
     [stream.streamId, { ...stream, asset }] )));
@@ -282,6 +283,11 @@ const validateProjectIntelligenceRevision = revision => {
       id(evidence.analysisType, path); id(evidence.modelRevision, path);
       if (evidence.statement !== null || evidence.dependencyHashes.length === 0)
         fail("PROJECT_INTELLIGENCE_EVIDENCE", path);
+    } else if (allowServerGenerated && evidence.kind === "generated_asset") {
+      hash(evidence.artifactHash, path); hash(evidence.configHash, path);
+      id(evidence.modelRevision, path);
+      if (evidence.analysisType !== "content_generation" || evidence.statement !== null || !evidence.dependencyHashes.length)
+        fail("PROJECT_INTELLIGENCE_EVIDENCE", path);
     } else fail("PROJECT_INTELLIGENCE_EVIDENCE", path);
   });
   unique(revision.evidenceRefs, "evidenceId", "evidenceRefs");
@@ -296,7 +302,7 @@ const validateProjectIntelligenceRevision = revision => {
     const path = `beats[${index}]`;
     exact(beat, ["beatId", "title", "origin"], [], path);
     id(beat.beatId, path); text(beat.title, path);
-    if (beat.origin !== "human_supplied") fail("PROJECT_INTELLIGENCE_PROVENANCE", path);
+    if (beat.origin !== "human_supplied" && !(allowServerGenerated && beat.origin === "model_generated")) fail("PROJECT_INTELLIGENCE_PROVENANCE", path);
   });
   unique(revision.beats, "beatId", "beats");
   const beatIds = new Set(revision.beats.map(item => item.beatId));
@@ -605,8 +611,8 @@ const assertRevisionTransition = (previous, next) => {
   }
 };
 
-const summarizeProjectIntelligence = revision => {
-  const { findings, planningBlocked } = validateProjectIntelligenceRevision(revision);
+const summarizeProjectIntelligence = (revision, options = {}) => {
+  const { findings, planningBlocked } = validateProjectIntelligenceRevision(revision, options);
   return {
     projectId: revision.projectId, revisionId: revision.revisionId,
     assets: revision.assets.map(asset => ({ assetId: asset.assetId,

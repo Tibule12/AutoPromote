@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "source_sha256": "2eaa225f1ecc7e26f7afa62abca88a3c9e985fa0db437cd983c906e034ccfcc7",
+  "matte_sha256": "b2e61cf389d845fa896e845e73479d47e799ef10c1c94e2379388d8b04d842f2",
+  "effects": [
+    {
+      "id": "title",
+      "type": "text_behind",
+      "start": 0,
+      "end": 6,
+      "text": "STORIES MOVE",
+      "x": 50,
+      "y": 43,
+      "font_size": 78,
+      "color": "#f1ecff"
+    },
+    {
+      "id": "depth",
+      "type": "depth",
+      "start": 0,
+      "end": 6,
+      "amount": 0.015
+    },
+    {
+      "id": "light",
+      "type": "glow",
+      "start": 0,
+      "end": 6,
+      "color": "#a855f7",
+      "strength": 0.2,
+      "radius": 15
+    },
+    {
+      "id": "dust",
+      "type": "particles",
+      "start": 0,
+      "end": 6,
+      "seed": 20261006,
+      "count": 24,
+      "color": "#b8a4ff",
+      "opacity": 0.35,
+      "speed": 18
+    },
+    {
+      "id": "callout",
+      "type": "tracked_callout",
+      "start": 0.3,
+      "end": 5.8,
+      "text": "THE STORYTELLER",
+      "offset_x": -130,
+      "offset_y": -200,
+      "font_size": 18,
+      "color": "#a855f7",
+      "avoid_subject": true
+    }
+  ]
+}

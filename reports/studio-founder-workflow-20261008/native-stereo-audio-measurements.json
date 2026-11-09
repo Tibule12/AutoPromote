@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "sourceCueDuration": 3.0,
+  "nativeTimelineCueStartSeconds": 5,
+  "nativeTimelineCueSlotDurationSeconds": 2,
+  "leftCue880HzLR": [
+    0.15991628134538627,
+    0.0
+  ],
+  "preCue880HzLR": [
+    0.0,
+    0.0
+  ],
+  "leftRightAmplitudeRatio": 159916281.34538627,
+  "actualEncodedChannels": 2,
+  "sampleRate": 48000,
+  "durationSeconds": 12.010666666666667,
+  "scope": "Spectral stereo isolation and cue placement in actual owned native Studio export. No human listening or pre-final parity."
+}

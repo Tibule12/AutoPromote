@@ -1,0 +1,83 @@
+{
+  "tool": "Blender / existing Studio Cycles device policy",
+  "version": "4.5.3 LTS",
+  "device": {
+    "backend": "CPU",
+    "devices": [],
+    "gpu_verified": false,
+    "fallback_reasons": []
+  },
+  "frames": 120,
+  "fps": 24,
+  "config": {
+    "template": "autopromote_ident",
+    "identTemplate": "layered_logo_v1",
+    "style": "cinematic",
+    "duration": 5,
+    "fps": 24,
+    "width": 1280,
+    "height": 720,
+    "seed": 2026100701,
+    "sourceBrief": "Build a cinematic AutoPromote ident from the actual existing rocket and Auto-Promote logo asset. Dark opening, anticipation, separated geometry/material layers, controlled camera parallax, premium reflections, clean wordmark lockup, original rise and impact at 2.7 seconds, 1.7-second readable final hold. No replacement glyphs, opacity reveal, random transitions or decorative particles.",
+    "logoGeometry": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/studio_3d_renderer/assets/autopromote-logo-geometry.json",
+    "logoGeometrySha256": "3b2948e30841b2a94d01877dc8bef7420c7aa61e9b115f1071dd53158f9609a6",
+    "camera": {
+      "lens": 52,
+      "parallax": 0.7
+    },
+    "materials": {
+      "depth": 0.16,
+      "bevel": 0.008,
+      "roughness": 0.2
+    },
+    "lighting": {
+      "intensity": 1
+    },
+    "particles": {
+      "count": 18
+    }
+  },
+  "model": "AutoPromote actual-logo layered geometry ident",
+  "modelRevision": "layered_logo_v1",
+  "sourceBrief": "Build a cinematic AutoPromote ident from the actual existing rocket and Auto-Promote logo asset. Dark opening, anticipation, separated geometry/material layers, controlled camera parallax, premium reflections, clean wordmark lockup, original rise and impact at 2.7 seconds, 1.7-second readable final hold. No replacement glyphs, opacity reveal, random transitions or decorative particles.",
+  "timings": {
+    "anticipation": 0.32,
+    "revealStart": 0.55,
+    "geometryLock": 1.85,
+    "lockup": 2.7,
+    "cameraSettle": 3.3
+  },
+  "impactAt": 2.7,
+  "resolveAt": 3.3,
+  "cleanHoldSeconds": 1.7000000000000002,
+  "logoProvenance": {
+    "sourceAsset": "frontend/public/WhatsApp Image 2025-10-03 at 10.19.41.jpeg",
+    "sourceSha256": "31dd8b1cfa2ede947f1af181b024dcda3f6ca1ec32272c2dc04289e6a166e8a4",
+    "bounds": [
+      29,
+      422,
+      981,
+      599
+    ],
+    "aspectRatio": 5.378531073446328,
+    "thresholdMaskIoU": 0.9985476093650149,
+    "fontSubstitution": false
+  },
+  "geometrySha256": "3b2948e30841b2a94d01877dc8bef7420c7aa61e9b115f1071dd53158f9609a6",
+  "nativeScene": "autopromote-ident.blend",
+  "nativeSceneSha256": "53930e04666dfb1c5798c3dacf115cba6d35de27ea93d39e1c3718cf68e50838",
+  "scriptSha256": "ceef6ef41d62e524a46e1f755e4d250a3285075369349e0d6a42c8d96cc8fb47",
+  "editable": [
+    "source contour components / no font replacement",
+    "separated rocket depth layers",
+    "individual original-glyph rotations and depth",
+    "timing",
+    "camera keyframes",
+    "materials / extrusion / bevel",
+    "studio lights",
+    "bounded contour-converging data packets",
+    "sound cues"
+  ],
+  "status": "PREVIEW_PENDING_VISUAL_REVIEW",
+  "renderSeconds": 163.47623289499984
+}

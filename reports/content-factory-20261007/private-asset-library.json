@@ -1,0 +1,522 @@
+{
+  "schemaVersion": 1,
+  "ownerUid": "founder-local",
+  "assets": [
+    {
+      "assetId": "paper-awakens",
+      "type": "video",
+      "beatId": "hook",
+      "status": "rejected",
+      "artifact": {
+        "path": "generated/paper-awakens.mp4",
+        "sha256": "7fd8e4a2b7ccef15a96d0a0d08b73117e56024cdaea9798028f78ad8703ad278",
+        "bytes": 1596307,
+        "duration": 5.041667,
+        "codec": "h264",
+        "container": "mp4",
+        "fps": 24,
+        "width": 1280,
+        "height": 704,
+        "hasAudio": false
+      },
+      "audioRole": null,
+      "review": {
+        "accepted": false,
+        "reviewer": "Codex visual inspection",
+        "modelRevision": "content-factory-selected-roles-20261007",
+        "evidenceSha256": "b6559a0ca74ec49808b6e3a8f528891a64fc8ed10e58b95d4402e4d070f8f08b",
+        "reason": "The central object reads as a folded bird/crane with a long spike rather than a recognisable boat. The operator wrongly qualified its geometry. Dependent films require source replacement.",
+        "criteria": [
+          {
+            "criterion": "Usable for the explicitly assigned story role",
+            "passed": true,
+            "observation": "Use the final 2.5 seconds where water appears and the boat floats; omit the static lead-in."
+          }
+        ],
+        "revisionInstructions": "Replace the malformed folded bird with a visibly recognisable boat.",
+        "limitation": "Machine visual selection; final story review remains separate."
+      },
+      "provenance": {
+        "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+        "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+        "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+        "prompt": "Photoreal cinematic miniature world, tactile ivory origami paper boat with one crisp triangular sail and sharply folded hull, no writing on the paper. Warm amber practical light against deep petrol-blue shadows, natural film contrast, 35mm commercial cinematography. The same single small ivory paper boat is the only hero object. Extreme close-up at table level. A small ivory origami sailboat rests on a dark wooden desk beside one blank sheet of paper. A thin shimmering pool of water slowly spreads underneath the boat; the boat lifts gently and floats as the desk surface becomes a deep blue ocean. An impossible transformation shown with physically convincing water and crisp stable folds. Slow controlled camera push. Quiet amber light from the left. One uninterrupted five-second shot.",
+        "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+        "modelRevision": "b8fff7315c768468a5333511427288870b2e9635",
+        "settings": {
+          "steps": 50,
+          "referenceImageSha256": null
+        },
+        "seed": 2026100711,
+        "tool": "AutoPromote Wan adapter",
+        "origin": "server_generated",
+        "generationReceipt": "generated/paper-awakens-receipt.json"
+      },
+      "usedIn": []
+    },
+    {
+      "assetId": "world-on-desk",
+      "type": "video",
+      "beatId": "hook",
+      "status": "rejected",
+      "artifact": {
+        "path": "generated/world-on-desk.mp4",
+        "sha256": "ae70b7bec1bddf4f3dd080ab85daae2e75692f6e3fa4d15b230408f68789874a",
+        "bytes": 1793365,
+        "duration": 5.041667,
+        "codec": "h264",
+        "container": "mp4",
+        "fps": 24,
+        "width": 1280,
+        "height": 704,
+        "hasAudio": false
+      },
+      "audioRole": null,
+      "review": {
+        "accepted": false,
+        "reviewer": "Codex visual inspection",
+        "modelRevision": "content-factory-selected-roles-20261007",
+        "evidenceSha256": "f374567cf48486103ee8bd07a283f9804635caefcbc33162b2c5f31ad0a0d0ed",
+        "reason": "The central object reads as a folded bird/crane with a long spike rather than a recognisable boat. The operator wrongly qualified its geometry. Dependent films require source replacement.",
+        "criteria": [
+          {
+            "criterion": "Usable for the explicitly assigned story role",
+            "passed": true,
+            "observation": "The expanding miniature pool and blank sheet reveal the ordinary origin of the world."
+          }
+        ],
+        "revisionInstructions": "Replace the malformed folded bird with a visibly recognisable boat.",
+        "limitation": "Machine visual selection; final story review remains separate."
+      },
+      "provenance": {
+        "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+        "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+        "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+        "prompt": "Photoreal cinematic miniature world, tactile ivory origami paper boat with one crisp triangular sail and sharply folded hull, no writing on the paper. Warm amber practical light against deep petrol-blue shadows, natural film contrast, 35mm commercial cinematography. The same single small ivory paper boat is the only hero object. A small ivory origami sailboat floats in a beautiful circular pool of deep blue ocean water on a dark wooden desk. The camera slowly pulls back from the boat and water to reveal that an entire miniature ocean world is contained on the desk beside a single blank sheet of paper. Strong amber side light, dark studio background. All geometry stable, realistic miniature water, no text or screens. One uninterrupted five-second shot.",
+        "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+        "modelRevision": "b8fff7315c768468a5333511427288870b2e9635",
+        "settings": {
+          "steps": 50,
+          "referenceImageSha256": null
+        },
+        "seed": 2026100715,
+        "tool": "AutoPromote Wan adapter",
+        "origin": "server_generated",
+        "generationReceipt": "generated/world-on-desk-receipt.json"
+      },
+      "usedIn": []
+    },
+    {
+      "assetId": "identity",
+      "type": "motion",
+      "beatId": "hook",
+      "status": "accepted",
+      "artifact": {
+        "path": "motion/identity/video.mp4",
+        "sha256": "ddb5903d8d119fa895adbb87175c1b359dcf7d8e8008843d497690afe5fe4b8a",
+        "bytes": 55128,
+        "duration": 3,
+        "codec": "h264",
+        "container": "mp4",
+        "fps": 24,
+        "width": 1280,
+        "height": 704,
+        "hasAudio": false
+      },
+      "audioRole": null,
+      "review": {
+        "accepted": true,
+        "reviewer": "Codex visual inspection",
+        "modelRevision": "content-factory-selected-roles-20261007",
+        "evidenceSha256": "7bb3cbc18af5c2c49c7deab47c956a23e807701f1d815d2a57b0315ebd6a4c88",
+        "reason": "Correctly spelled AutoPromote and the brief/no-footage statement give a clear ending.",
+        "criteria": [
+          {
+            "criterion": "Usable for the explicitly assigned story role",
+            "passed": true,
+            "observation": "Correctly spelled AutoPromote and the brief/no-footage statement give a clear ending."
+          }
+        ],
+        "revisionInstructions": "",
+        "limitation": "Machine visual selection; final story review remains separate."
+      },
+      "provenance": {
+        "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+        "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+        "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+        "prompt": "AutoPromote",
+        "model": "AutoPromote Studio motion renderer",
+        "modelRevision": "viral_motion_graphics/v1",
+        "settings": {
+          "scene": {
+            "id": "factory-title",
+            "preset": "title",
+            "design": "editorial",
+            "canvasMode": "standalone",
+            "canvasColor": "#080b10",
+            "text": "AutoPromote",
+            "secondary": "A brief. No footage.",
+            "color": "#d6b782",
+            "startTime": 0,
+            "duration": 3,
+            "x": 50,
+            "y": 50,
+            "scale": 1,
+            "easing": "smooth"
+          },
+          "fps": 24,
+          "width": 1280,
+          "height": 704,
+          "frames": 72
+        },
+        "seed": 0,
+        "tool": "Studio motion raw-asset adapter",
+        "origin": "server_generated",
+        "generationReceipt": "motion/identity/receipt.json"
+      },
+      "usedIn": []
+    },
+    {
+      "assetId": "studio-ui",
+      "type": "ui",
+      "beatId": "hook",
+      "status": "accepted",
+      "artifact": {
+        "path": "ui/studio-source-assembly-v5/video.mp4",
+        "sha256": "03aa2eead0f635210ecf6a05c1402aab8831c2ac301f94333f5f3ef3a21159d2",
+        "bytes": 449165,
+        "duration": 3,
+        "codec": "h264",
+        "container": "mp4",
+        "fps": 24,
+        "width": 1440,
+        "height": 900,
+        "hasAudio": false
+      },
+      "audioRole": null,
+      "review": {
+        "accepted": true,
+        "reviewer": "Codex visual inspection",
+        "modelRevision": "content-factory-selected-roles-20261007",
+        "evidenceSha256": "467f5ca08ee09a4375c889a880b4ebfb95e7c4d04e1911675f09a32dbbc4b16d",
+        "reason": "Actual AutoPromote Studio shows the generated boat footage, editable source clips and live preview.",
+        "criteria": [
+          {
+            "criterion": "Usable for the explicitly assigned story role",
+            "passed": true,
+            "observation": "Actual AutoPromote Studio shows the generated boat footage, editable source clips and live preview."
+          }
+        ],
+        "revisionInstructions": "",
+        "limitation": "Machine visual selection; final story review remains separate."
+      },
+      "provenance": {
+        "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+        "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+        "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+        "prompt": "Actual AutoPromote Studio shows the generated boat footage, editable source clips and live preview.",
+        "model": "AutoPromote actual Studio browser capture",
+        "modelRevision": "studio-ui-capture-v1",
+        "settings": {
+          "url": "http://127.0.0.1:5008/?fixture=factory",
+          "projectName": "Paper voyage \u00b7 generated source assembly",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "fps": 24,
+          "frames": 72
+        },
+        "seed": 0,
+        "tool": "Playwright and BrowserOperator observe-act-verify",
+        "origin": "server_generated",
+        "generationReceipt": "ui/studio-source-assembly-v5/receipt.json"
+      },
+      "usedIn": []
+    },
+    {
+      "assetId": "ocean-environment",
+      "type": "video",
+      "beatId": "hook",
+      "status": "rejected",
+      "artifact": {
+        "path": "generated/ocean-scale-v2.mp4",
+        "sha256": "6447770166c0fdfc744b512c0194f1d8146b70356c1cc2b6c29bb4e1333cbd76",
+        "bytes": 6113086,
+        "duration": 5.041667,
+        "codec": "h264",
+        "container": "mp4",
+        "fps": 24,
+        "width": 1280,
+        "height": 704,
+        "hasAudio": false
+      },
+      "audioRole": null,
+      "review": {
+        "accepted": false,
+        "reviewer": "Codex visual inspection",
+        "modelRevision": "content-factory-selected-roles-20261007",
+        "evidenceSha256": "6f087c655a2bc6917f09b21aaeafb7617bfec2d6d9b47e0b4580fa34557c2d9e",
+        "reason": "The central object reads as a folded bird/crane with a long spike rather than a recognisable boat. The operator wrongly qualified its geometry. Dependent films require source replacement.",
+        "criteria": [
+          {
+            "criterion": "Usable for the explicitly assigned story role",
+            "passed": true,
+            "observation": "Use only 0.4\u20132.1 seconds: the matching boat opens into a moving sea. Reject the later overexposed close ocean for the requested wide-shot role."
+          }
+        ],
+        "revisionInstructions": "Replace the malformed folded bird with a visibly recognisable boat.",
+        "limitation": "Machine visual selection; final story review remains separate."
+      },
+      "provenance": {
+        "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+        "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+        "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+        "prompt": "The camera rapidly cranes upward and pulls far back from the same single ivory origami boat with one tall triangular folded paper sail. The dark desk surface falls out of view as an immense deep blue moving ocean expands around the small intact boat. By the middle of the shot the complete boat is tiny, below fifteen percent of the frame, surrounded by vast sweeping ocean waves and a distant warm amber horizon. A coherent physical impossible miniature world unfolds into full cinematic scale. The paper sail and folded hull retain their exact shape and remain visible. One uninterrupted smooth five-second shot. No extra boats, no words or screens.",
+        "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+        "modelRevision": "b8fff7315c768468a5333511427288870b2e9635",
+        "settings": {
+          "steps": 50,
+          "referenceImageSha256": "15147e938c9001643a25ca5d7161db89b4bf3507f7f326517c32655664bdcd5a"
+        },
+        "seed": 2026100761,
+        "tool": "AutoPromote Wan adapter",
+        "origin": "server_generated",
+        "generationReceipt": "generated/ocean-scale-v2-receipt.json"
+      },
+      "usedIn": []
+    },
+    {
+      "assetId": "storm-action",
+      "type": "video",
+      "beatId": "hook",
+      "status": "accepted",
+      "artifact": {
+        "path": "generated/storm-action-v2.mp4",
+        "sha256": "af83a57035473e976d912bedd032daca954486b2c0decf7633091177e6169b57",
+        "bytes": 6706893,
+        "duration": 5.041667,
+        "codec": "h264",
+        "container": "mp4",
+        "fps": 24,
+        "width": 1280,
+        "height": 704,
+        "hasAudio": false
+      },
+      "audioRole": null,
+      "review": {
+        "accepted": true,
+        "reviewer": "Codex visual inspection",
+        "modelRevision": "content-factory-selected-roles-20261007",
+        "evidenceSha256": "4a498f504082017384e767a8443e09f14771b528709ea093b335e8f49d403b12",
+        "reason": "The wave visibly curls and collapses across successive frames. Use as an environment threat cutaway; no boat is present inside this shot.",
+        "criteria": [
+          {
+            "criterion": "Usable for the explicitly assigned story role",
+            "passed": true,
+            "observation": "The wave visibly curls and collapses across successive frames. Use as an environment threat cutaway; no boat is present inside this shot."
+          }
+        ],
+        "revisionInstructions": "",
+        "limitation": "Machine visual selection; final story review remains separate."
+      },
+      "provenance": {
+        "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+        "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+        "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+        "prompt": "This enormous dark blue curling ocean wave moves forcefully forward. The towering crest curls over, white sea spray peels from the top and crashes down into the turbulent foreground, foam surges toward the low camera. The thick curling water wall fills the frame, with physically convincing moving water and powerful scale. A warm narrow rim light makes the crest readable against deep blue storm atmosphere. One smooth uninterrupted dramatic five-second shot of a threatening wave approaching, no cut, no new objects, no boats, no text, no slow static cloud shot.",
+        "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+        "modelRevision": "b8fff7315c768468a5333511427288870b2e9635",
+        "settings": {
+          "steps": 50,
+          "referenceImageSha256": "6998e0119aa689666c5f558e039ceca7d6acc0a741f34ea42494408cc92a136a"
+        },
+        "seed": 2026100762,
+        "tool": "AutoPromote Wan adapter",
+        "origin": "server_generated",
+        "generationReceipt": "generated/storm-action-v2-receipt.json"
+      },
+      "usedIn": []
+    },
+    {
+      "assetId": "light-return",
+      "type": "video",
+      "beatId": "hook",
+      "status": "rejected",
+      "artifact": {
+        "path": "generated/golden-return-v2.mp4",
+        "sha256": "9043b7439f9cbbe7683ed68213a90fd75ac7cc300362a2d028da717b2b0df038",
+        "bytes": 6112095,
+        "duration": 5.041667,
+        "codec": "h264",
+        "container": "mp4",
+        "fps": 24,
+        "width": 1280,
+        "height": 704,
+        "hasAudio": false
+      },
+      "audioRole": null,
+      "review": {
+        "accepted": false,
+        "reviewer": "Codex visual inspection",
+        "modelRevision": "content-factory-selected-roles-20261007",
+        "evidenceSha256": "51484f3ee204ff175e11c7e5a56ab853c25c2e68922d72b1cbe49dcec8d1b2d1",
+        "reason": "The central object reads as a folded bird/crane with a long spike rather than a recognisable boat. The operator wrongly qualified its geometry. Dependent films require source replacement.",
+        "criteria": [
+          {
+            "criterion": "Usable for the explicitly assigned story role",
+            "passed": true,
+            "observation": "The same reference boat remains intact as the camera reveals a golden sea. Use 2\u20135 seconds for relief after the wave, omitting the desk lead-in."
+          }
+        ],
+        "revisionInstructions": "Replace the malformed folded bird with a visibly recognisable boat.",
+        "limitation": "Machine visual selection; final story review remains separate."
+      },
+      "provenance": {
+        "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+        "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+        "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+        "prompt": "The same single small ivory origami boat with one tall triangular paper sail floats intact on the deep blue water. The camera rises smoothly behind the boat and reveals a long luminous golden path of reflected sunrise ahead. The sea becomes spacious and calm, warm amber light grows across the crisp folded paper and ocean ripples. The boat glides toward the distant golden horizon as the camera pulls back slightly to show the complete hull and sail. The miniature desk disappears out of frame, leaving an immense peaceful ocean. Emotional relief after danger, tactile stable paper folds, physically realistic moving water. One uninterrupted five-second shot, no other objects, no writing.",
+        "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+        "modelRevision": "b8fff7315c768468a5333511427288870b2e9635",
+        "settings": {
+          "steps": 50,
+          "referenceImageSha256": "15147e938c9001643a25ca5d7161db89b4bf3507f7f326517c32655664bdcd5a"
+        },
+        "seed": 2026100763,
+        "tool": "AutoPromote Wan adapter",
+        "origin": "server_generated",
+        "generationReceipt": "generated/golden-return-v2-receipt.json"
+      },
+      "usedIn": []
+    },
+    {
+      "assetId": "score",
+      "type": "audio",
+      "beatId": "hook",
+      "status": "accepted",
+      "artifact": {
+        "path": "audio/hero-v3/score.wav",
+        "sha256": "2b51ab37572d2b5916816049137e3254ff0c13ecd1375e1dadc0dd787aaf5f25",
+        "bytes": 4032044,
+        "duration": 21,
+        "codec": "pcm_s16le",
+        "container": "wav",
+        "fps": 24,
+        "width": null,
+        "height": null,
+        "hasAudio": true
+      },
+      "audioRole": "music",
+      "review": {
+        "accepted": true,
+        "reviewer": "AutoPromote objective audio measurements",
+        "modelRevision": "content-factory-selected-roles-20261007",
+        "evidenceSha256": "2b51ab37572d2b5916816049137e3254ff0c13ecd1375e1dadc0dd787aaf5f25",
+        "reason": "Measured original stereo audio: peak 0.198, RMS 0.038, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+        "criteria": [
+          {
+            "criterion": "Usable for the explicitly assigned story role",
+            "passed": true,
+            "observation": "Original score gives the wave tension and a timed harmonic resolution."
+          }
+        ],
+        "revisionInstructions": "",
+        "limitation": "Measured audibility/headroom; speech clarity and musical effectiveness await founder listening.",
+        "measurements": {
+          "accepted": true,
+          "reason": "Measured original stereo audio: peak 0.198, RMS 0.038, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+          "peak": 0.197906494140625,
+          "rms": 0.03754211126397037,
+          "clippedFraction": 0,
+          "channels": 2,
+          "sampleRate": 48000
+        }
+      },
+      "provenance": {
+        "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+        "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+        "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+        "prompt": "Original score gives the wave tension and a timed harmonic resolution.",
+        "model": "original-procedural-composition",
+        "modelRevision": "paper-voyage-score-v1",
+        "settings": {
+          "sampleRate": 48000,
+          "tempo": 96,
+          "duration": 21,
+          "payoffAt": 8.2,
+          "motif": "minor tension to warm resolution",
+          "stereo": true
+        },
+        "seed": 2026100721,
+        "tool": "AutoPromote Content Factory original audio",
+        "origin": "server_generated",
+        "generationReceipt": "audio/hero-v3/score-receipt.json"
+      },
+      "usedIn": []
+    },
+    {
+      "assetId": "brief-no-footage",
+      "type": "audio",
+      "beatId": "hook",
+      "status": "accepted",
+      "artifact": {
+        "path": "narration-cpu/brief-no-footage.wav",
+        "sha256": "e78da06e03e8aa9d029cfd282d157aa19946379c82411d916d34f49d9af9d6b1",
+        "bytes": 700878,
+        "duration": 3.65,
+        "codec": "pcm_s16le",
+        "container": "wav",
+        "fps": 24,
+        "width": null,
+        "height": null,
+        "hasAudio": true
+      },
+      "audioRole": "voiceover",
+      "review": {
+        "accepted": true,
+        "reviewer": "AutoPromote objective audio measurements",
+        "modelRevision": "content-factory-selected-roles-20261007",
+        "evidenceSha256": "e78da06e03e8aa9d029cfd282d157aa19946379c82411d916d34f49d9af9d6b1",
+        "reason": "Measured original stereo audio: peak 0.561, RMS 0.082, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+        "criteria": [
+          {
+            "criterion": "Usable for the explicitly assigned story role",
+            "passed": true,
+            "observation": "This started with a brief. No camera. No footage."
+          }
+        ],
+        "revisionInstructions": "",
+        "limitation": "Measured audibility/headroom; speech clarity and musical effectiveness await founder listening.",
+        "measurements": {
+          "accepted": true,
+          "reason": "Measured original stereo audio: peak 0.561, RMS 0.082, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+          "peak": 0.56097412109375,
+          "rms": 0.0824021993283638,
+          "clippedFraction": 0,
+          "channels": 2,
+          "sampleRate": 48000
+        }
+      },
+      "provenance": {
+        "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+        "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+        "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+        "prompt": "This started with a brief. No camera. No footage.",
+        "model": "hexgrad/Kokoro-82M",
+        "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+        "settings": {
+          "voice": "af_heart",
+          "speed": 0.98,
+          "sampleRate": 48000,
+          "loudnessTargetLUFS": -18
+        },
+        "seed": 0,
+        "tool": "AutoPromote NVIDIA narration adapter",
+        "origin": "server_generated",
+        "generationReceipt": "narration-cpu/brief-no-footage-receipt.json"
+      },
+      "usedIn": []
+    }
+  ]
+}

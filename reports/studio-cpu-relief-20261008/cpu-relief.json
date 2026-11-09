@@ -1,0 +1,69 @@
+{
+  "recordedAt": "2026-10-08T11:11:01.957819+00:00",
+  "status": "QA_BROWSER_CPU_RELIEF_VERIFIED",
+  "causeEvidence": {
+    "gpuProcess": 80008,
+    "webglBackend": "--use-angle=swiftshader-webgl",
+    "meaning": "Browser WebGL runs locally using CPU software rendering; remote NVIDIA is a different machine.",
+    "activeQaPagesBeforePause": 3,
+    "contributors": "Multiple running Studio previews, including CPU canvas grade/compositing and software WebGL."
+  },
+  "action": "Suspend only the verified private QA browser descendants, retain login and page memory, retain two-core affinity and nice 10. No desktop browser or editor stopped.",
+  "cpuSampleSeconds": 2.0010703499974625,
+  "processSamples": [
+    {
+      "pid": 95391,
+      "state": "T",
+      "cpuPercentOfOneCore": 0.0
+    },
+    {
+      "pid": 90984,
+      "state": "T",
+      "cpuPercentOfOneCore": 0.0
+    },
+    {
+      "pid": 81083,
+      "state": "T",
+      "cpuPercentOfOneCore": 0.0
+    },
+    {
+      "pid": 80017,
+      "state": "T",
+      "cpuPercentOfOneCore": 0.0
+    },
+    {
+      "pid": 80013,
+      "state": "T",
+      "cpuPercentOfOneCore": 0.0
+    },
+    {
+      "pid": 80008,
+      "state": "T",
+      "cpuPercentOfOneCore": 0.0
+    },
+    {
+      "pid": 79992,
+      "state": "T",
+      "cpuPercentOfOneCore": 0.0
+    },
+    {
+      "pid": 79991,
+      "state": "T",
+      "cpuPercentOfOneCore": 0.0
+    },
+    {
+      "pid": 79989,
+      "state": "T",
+      "cpuPercentOfOneCore": 0.0
+    }
+  ],
+  "totalQaCpuPercent": 0.0,
+  "CPUFallbacksPreserved": true,
+  "readinessQualification": false,
+  "browserSuspendReceipt": "Private local state outside the repository; no credentials copied.",
+  "recordValidation": {
+    "command": "node test/e2e/validate-studio-contract.js",
+    "result": "VALID",
+    "scope": "Record validation only; no additional capability execution or promotion."
+  }
+}

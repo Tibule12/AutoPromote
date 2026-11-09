@@ -1,0 +1,211 @@
+{
+  "video_url": "http://127.0.0.1:8765/assets/cold-open/video.mp4",
+  "start_time": 0,
+  "end_time": 27,
+  "overlays": [],
+  "auto_captions": false,
+  "timeline_segments": [
+    {
+      "id": "one-edit-cutdown-1",
+      "source_clip_id": "cold-open",
+      "start_time": 0.3,
+      "end_time": 3.3,
+      "duration": 3,
+      "url": "http://127.0.0.1:8765/assets/cold-open/video.mp4"
+    },
+    {
+      "id": "one-edit-cutdown-2",
+      "source_clip_id": "quota",
+      "start_time": 3,
+      "end_time": 6.5,
+      "duration": 3.5,
+      "url": "http://127.0.0.1:8765/assets/quota/video.mp4"
+    },
+    {
+      "id": "one-edit-cutdown-3",
+      "source_clip_id": "breakthrough",
+      "start_time": 1,
+      "end_time": 5,
+      "duration": 4,
+      "url": "http://127.0.0.1:8765/assets/breakthrough/video.mp4"
+    },
+    {
+      "id": "one-edit-cutdown-4",
+      "source_clip_id": "director",
+      "start_time": 0.4,
+      "end_time": 6.9,
+      "duration": 6.5,
+      "url": "http://127.0.0.1:8765/assets/director/video.mp4"
+    },
+    {
+      "id": "one-edit-cutdown-5",
+      "source_clip_id": "reveal",
+      "start_time": 0.4,
+      "end_time": 5.4,
+      "duration": 5,
+      "url": "http://127.0.0.1:8765/assets/reveal/video.mp4"
+    },
+    {
+      "id": "one-edit-cutdown-6",
+      "source_clip_id": "ident",
+      "start_time": 0,
+      "end_time": 5,
+      "duration": 5,
+      "url": "http://127.0.0.1:8765/assets/ident-final/video.mp4"
+    }
+  ],
+  "background_audio": null,
+  "hook_focus_point": null,
+  "cover_frame": null,
+  "thumbnail_frame": null,
+  "caption_style": "minimal",
+  "caption_position": "bottom",
+  "caption_scale": 0.72,
+  "caption_segments": [],
+  "creative_intent": "27-second origin, constraint, breakthrough, creative question and self-reveal.",
+  "professional_cleanup": false,
+  "finish_plan": {
+    "version": 1,
+    "enabled": true,
+    "reframe": {
+      "enabled": true,
+      "aspect": "16:9",
+      "mode": "off"
+    }
+  },
+  "smart_crop": true,
+  "smart_crop_mode": "safe_fit",
+  "brand_watermark": false,
+  "output_settings": {
+    "resolution": "1080p",
+    "fps": 24,
+    "codec": "h264",
+    "audioCodec": "aac"
+  },
+  "add_music": true,
+  "music_url": "http://127.0.0.1:8765/assets/sound/score-cutdown.wav",
+  "music_name": "score-cutdown",
+  "music_volume": 0.65,
+  "music_ducking": false,
+  "music_fade_in": 0.25,
+  "music_fade_out": 0.6,
+  "music_loop": false,
+  "sound_effects": [
+    {
+      "id": "one-edit-cutdown-audio-1",
+      "name": "vo-cold-open",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/assets/narration/cold-open.wav",
+      "startTime": 0.2,
+      "duration": 2.175,
+      "trimStart": 0,
+      "volume": 0.94,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "one-edit-cutdown-audio-2",
+      "name": "vo-quota",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/assets/narration/quota.wav",
+      "startTime": 3.1,
+      "duration": 3.325,
+      "trimStart": 0,
+      "volume": 0.94,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "one-edit-cutdown-audio-3",
+      "name": "vo-breakthrough",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/assets/narration/breakthrough.wav",
+      "startTime": 6.65,
+      "duration": 3.225,
+      "trimStart": 0,
+      "volume": 0.94,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "one-edit-cutdown-audio-4",
+      "name": "vo-director",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/assets/narration/director.wav",
+      "startTime": 10.7,
+      "duration": 6.1,
+      "trimStart": 0,
+      "volume": 0.94,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "one-edit-cutdown-audio-5",
+      "name": "vo-reveal",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/assets/narration/reveal.wav",
+      "startTime": 17.35,
+      "duration": 3.4,
+      "trimStart": 0,
+      "volume": 0.94,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "one-edit-cutdown-audio-6",
+      "name": "cues-cutdown",
+      "kind": "sfx",
+      "url": "http://127.0.0.1:8765/assets/sound/cues-cutdown.wav",
+      "startTime": 0,
+      "duration": 12,
+      "trimStart": 0,
+      "volume": 0.8,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "one-edit-cutdown-audio-7",
+      "name": "cues-cutdown",
+      "kind": "sfx",
+      "url": "http://127.0.0.1:8765/assets/sound/cues-cutdown.wav",
+      "startTime": 12,
+      "duration": 12,
+      "trimStart": 12,
+      "volume": 0.8,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "one-edit-cutdown-audio-8",
+      "name": "cues-cutdown",
+      "kind": "sfx",
+      "url": "http://127.0.0.1:8765/assets/sound/cues-cutdown.wav",
+      "startTime": 24,
+      "duration": 3,
+      "trimStart": 24,
+      "volume": 0.8,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    }
+  ],
+  "motionGraphics": {
+    "version": 1,
+    "scenes": []
+  },
+  "mute_audio": true,
+  "planned_black_ranges": [
+    {
+      "start": 22,
+      "end": 23.5,
+      "reason": "Intentional dark anticipation in the complete brand ident."
+    }
+  ]
+}

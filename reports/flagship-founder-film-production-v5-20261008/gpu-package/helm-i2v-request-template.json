@@ -1,0 +1,13 @@
+{
+  "deadlineEpoch": 0,
+  "sourceBrief": "Private AutoPromote flagship The Small Boat. A tiny paper boat becomes a full-size yacht through a continuous physical transformation. The human response is one sailor steering into the swell and committing to the horizon. This test explores real human movement using the existing NVIDIA Wan provider; no still or unreviewed take is final footage.",
+  "settings": {"width": 1280, "height": 720, "frames": 49, "steps": 30},
+  "shots": [{
+    "name": "sailor-steers-into-swell",
+    "reference_image": "/work/output/sailor-source/sailor-connected-sheet/image.png",
+    "seed": 20261008229,
+    "prompt": "One continuous cinematic shot of the same woman on the same real yacht. She turns her attention from the camera toward the open water, grips the wooden helm with both hands and makes one controlled steering adjustment. Her weight shifts naturally as a swell lifts the vessel. Keep her face, short natural hair, navy shirt and ivory sailing vest consistent. The camera gently tracks sideways while wind moves her hair and the blue water and wake move naturally behind her. Warm sunlight, photographic skin, credible anatomy, purposeful human effort. End with her looking ahead, steady at the helm.",
+    "negative_prompt": "extra people, extra fingers, merged hands, hands passing through wheel, changing face, changing clothing, glamour posing, smiling at camera, floating helm, body distortion, duplicate limbs, CGI, cartoon, frozen still, text, watermark"
+  }],
+  "inputHash": "1939f862ac93505404cd7f3d9a2e505dd1cc019e48fa8fc9651e9f31c1afedf9"
+}

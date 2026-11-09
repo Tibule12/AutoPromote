@@ -1,0 +1,691 @@
+{
+  "schemaVersion": 1,
+  "jobId": "2293bba242a4fab5dac8ae68eb3d2cfc2ea3cde9fb4589c11cc2c94a5068f073",
+  "ownerUid": "founder-local",
+  "fingerprint": "403dde58550171ce9de988adf2920183e9d6273762ccf29d745f7d8203ac2360",
+  "requestId": "paper-world-founder-autonomous-v2",
+  "brief": {
+    "brief": "Create one 18–21 second AutoPromote welcome film about an ordinary idea finding a world, surviving a threat and becoming a finished story. I provide no recorded footage. Use the private generated raw library, preserving generation provenance. Open with paper-awakens at source 2.5 for 2.5 seconds. Use ocean-environment ONLY source 0.4 duration 1.7 seconds; later footage is overexposed. Use storm-action for visibly breaking wave action, light-return source 2 for 3 seconds for the SAME boat in golden calm, then world-on-desk to reveal the miniature origin. End with actual Studio UI and identity. Withhold AutoPromote until the payoff. Use the original score and the available brief-no-footage narration as a voiceover cue near the Studio reveal, fitting its complete duration; do not cut off speech. At most eight asset requirements. Every reused asset must keep an exact libraryRef, match its type and have current story-specific acceptance criteria. The absence of a boat in the wave cutaway is intentional; do not claim it is physically inside that shot. Do not imply the private factory is public. Do not pad with random effects. Return only one 16:9 welcome_hero output.",
+    "targets": [
+      "welcome_hero",
+      "short_promo",
+      "story_promo"
+    ],
+    "maxAssetAttempts": 2
+  },
+  "status": "needs_creative_revision",
+  "stage": "stopped",
+  "attempts": 2,
+  "createdAt": "2026-10-07T08:24:19.055Z",
+  "updatedAt": "2026-10-07T08:40:41.039Z",
+  "lease": null,
+  "cancelled": false,
+  "direction": {
+    "schemaVersion": 1,
+    "title": "The Boat That Found Its World",
+    "story": {
+      "about": "An ordinary idea awakens, survives a storm, and becomes a living story on a desk-sized world, revealed by AutoPromote’s private studio engine",
+      "whyCare": "Every creator needs a tool that turns imagination into reality without compromise — even when the world seems too small to matter",
+      "hook": "A single sheet of paper holds a universe waiting to be born — and it’s about to break the surface",
+      "beginning": "Water rises from the edge of a blank page, lifting a tiny boat into motion",
+      "development": "The ocean swells, threatening to swallow the fragile vessel — but the world holds its breath",
+      "tension": "A crashing wave looms — the boat vanishes, leaving only silence… until light returns",
+      "payoff": "Golden calm restores the scene — the miniature world expands, revealing its origin on a desk",
+      "ending": "AutoPromote Studio UI reveals the full creative engine — your story, fully realized, ready to scale",
+      "withheld": "AutoPromote’s name appears only at the final reveal — the tool remains hidden until the moment it proves itself",
+      "amplify": [
+        "Paper-awakens (2.5s) — water emerges, boat floats",
+        "Ocean-environment (0.4s) — wide sea opens, boat visible",
+        "Storm-action — wave curls, no boat inside",
+        "Light-return (3s) — same boat, golden calm",
+        "World-on-desk — miniature pool expands, origin revealed",
+        "Studio-ui — editable clips, live preview",
+        "Identity — correct spelling, brief/no-footage statement",
+        "Score — original emotional tone, no cuts"
+      ],
+      "remove": [
+        "Overexposed ocean footage",
+        "Boat inside storm-action shot",
+        "Static paper lead-in",
+        "Desk lead-in before world expansion",
+        "Clipped audio samples",
+        "Random effects",
+        "Public factory implication",
+        "Padding narration"
+      ]
+    },
+    "script": [
+      {
+        "beatId": "001",
+        "action": "Paper-awakens: water rises, boat floats into frame",
+        "sound": "Score begins — soft, hopeful swell"
+      },
+      {
+        "beatId": "002",
+        "action": "Ocean-environment: wide sea opens, boat visible",
+        "sound": "Wave builds — tension rises, score intensifies"
+      },
+      {
+        "beatId": "003",
+        "action": "Storm-action: wave curls, boat vanishes — silence",
+        "sound": "Score cuts — sudden void, then pause"
+      },
+      {
+        "beatId": "004",
+        "action": "Light-return: golden calm, boat intact — world expands",
+        "sound": "Score returns — warm, triumphant swell"
+      },
+      {
+        "beatId": "005",
+        "action": "World-on-desk: miniature pool reveals origin",
+        "sound": "Voiceover begins — 'Your story, fully realized…' (brief-no-footage, full duration, no cut-off)"
+      },
+      {
+        "beatId": "006",
+        "action": "Studio-ui: editable clips, live preview — AutoPromote revealed",
+        "sound": "Identity appears — 'AutoPromote' + 'brief/no-footage' statement"
+      }
+    ],
+    "assets": [
+      {
+        "assetId": "welcome_001",
+        "type": "video",
+        "beatId": "001",
+        "prompt": "Paper-awakens: water rises, boat floats into frame",
+        "reason": "Open with final 2.5s of source 2.5 — water appears, boat floats; omit static lead-in",
+        "duration": 5.041667,
+        "provider": "reuse",
+        "acceptanceCriteria": [
+          "Water emerges from edge of blank page",
+          "Boat floats into frame",
+          "No static lead-in",
+          "Exact libraryRef: paper-awakens"
+        ],
+        "seed": 12345,
+        "libraryRef": "paper-awakens"
+      },
+      {
+        "assetId": "welcome_002",
+        "type": "video",
+        "beatId": "002",
+        "prompt": "Ocean-environment: wide sea opens, boat visible",
+        "reason": "Use only 0.4–2.1s: wide sea opens, boat visible; reject overexposed later footage",
+        "duration": 5.041667,
+        "provider": "reuse",
+        "acceptanceCriteria": [
+          "Wide sea opens",
+          "Boat visible",
+          "No overexposure",
+          "Exact libraryRef: ocean-environment"
+        ],
+        "seed": 67890,
+        "libraryRef": "ocean-environment"
+      },
+      {
+        "assetId": "welcome_003",
+        "type": "video",
+        "beatId": "003",
+        "prompt": "Storm-action: wave curls, no boat inside",
+        "reason": "Environment threat cutaway — wave curls and collapses; no boat present",
+        "duration": 5.041667,
+        "provider": "reuse",
+        "acceptanceCriteria": [
+          "Wave visibly curls and collapses",
+          "No boat inside shot",
+          "Exact libraryRef: storm-action"
+        ],
+        "seed": 112233,
+        "libraryRef": "storm-action"
+      },
+      {
+        "assetId": "welcome_004",
+        "type": "video",
+        "beatId": "004",
+        "prompt": "Light-return: golden calm, boat intact — world expands",
+        "reason": "Same boat, golden calm — use 2–5s; omit desk lead-in",
+        "duration": 5.041667,
+        "provider": "reuse",
+        "acceptanceCriteria": [
+          "Same reference boat remains intact",
+          "Golden sea revealed",
+          "World expands",
+          "Exact libraryRef: light-return"
+        ],
+        "seed": 445566,
+        "libraryRef": "light-return"
+      },
+      {
+        "assetId": "welcome_005",
+        "type": "video",
+        "beatId": "005",
+        "prompt": "World-on-desk: miniature pool reveals origin",
+        "reason": "Expanding miniature pool and blank sheet reveal origin",
+        "duration": 5.041667,
+        "provider": "reuse",
+        "acceptanceCriteria": [
+          "Miniature pool expands",
+          "Blank sheet reveals origin",
+          "Exact libraryRef: world-on-desk"
+        ],
+        "seed": 778899,
+        "libraryRef": "world-on-desk"
+      },
+      {
+        "assetId": "welcome_006",
+        "type": "ui",
+        "beatId": "006",
+        "prompt": "Studio-ui: editable clips, live preview — AutoPromote revealed",
+        "reason": "Actual AutoPromote Studio shows generated boat footage, editable clips, live preview",
+        "duration": 3,
+        "provider": "reuse",
+        "acceptanceCriteria": [
+          "Editable source clips visible",
+          "Live preview active",
+          "Exact libraryRef: studio-ui"
+        ],
+        "seed": 101112,
+        "libraryRef": "studio-ui"
+      },
+      {
+        "assetId": "welcome_007",
+        "type": "motion",
+        "beatId": "006",
+        "prompt": "Identity: correct spelling, brief/no-footage statement",
+        "reason": "AutoPromote and brief/no-footage statement give clear ending",
+        "duration": 3,
+        "provider": "reuse",
+        "acceptanceCriteria": [
+          "Correctly spelled 'AutoPromote' displayed",
+          "Brief/no-footage statement visible",
+          "Exact libraryRef: identity"
+        ],
+        "seed": 131415,
+        "libraryRef": "identity"
+      },
+      {
+        "assetId": "welcome_008",
+        "type": "audio",
+        "beatId": "005",
+        "prompt": "Brief-no-footage narration: 'Your story, fully realized…' — full duration, no cut-off",
+        "reason": "Voiceover cue fits full duration; no clipping or truncation",
+        "duration": 3.65,
+        "provider": "reuse",
+        "acceptanceCriteria": [
+          "Full 3.65s narration delivered",
+          "No cut-off",
+          "Stereo, 48000Hz, no clipped samples",
+          "Exact libraryRef: brief-no-footage"
+        ],
+        "seed": 161718,
+        "libraryRef": "brief-no-footage"
+      },
+      {
+        "assetId": "factory-original-score",
+        "type": "audio",
+        "provider": "reuse",
+        "libraryRef": "score",
+        "beatId": "001",
+        "duration": 21,
+        "seed": 0,
+        "prompt": "Use the available original score for the complete story",
+        "reason": "The brief requests original score; speech must remain on the separate voiceover bus",
+        "acceptanceCriteria": [
+          "Audible stereo audio",
+          "48000 Hz sample rate",
+          "No clipped samples",
+          "Duration covers the complete output"
+        ]
+      }
+    ],
+    "outputs": [
+      {
+        "outputId": "welcome_hero",
+        "aspect": "16:9",
+        "purpose": "AutoPromote welcome film: ordinary idea awakens, survives storm, becomes story on desk, revealed by Studio UI",
+        "musicAssetId": "factory-original-score",
+        "audioCues": [
+          {
+            "assetId": "welcome_008",
+            "kind": "voiceover",
+            "startTime": 3.65,
+            "duration": 3.65,
+            "trimStart": 0,
+            "volume": 1
+          }
+        ],
+        "sequence": [
+          {
+            "assetId": "welcome_001",
+            "start": 0,
+            "duration": 2.5,
+            "reason": "Open with final 2.5s of paper-awakens — water emerges, boat floats; omit static lead-in"
+          },
+          {
+            "assetId": "welcome_002",
+            "start": 0,
+            "duration": 1.7,
+            "reason": "Ocean-environment: wide sea opens, boat visible; reject overexposed later footage"
+          },
+          {
+            "assetId": "welcome_003",
+            "start": 0,
+            "duration": 1.7,
+            "reason": "Storm-action: wave curls, no boat inside — environment threat cutaway"
+          },
+          {
+            "assetId": "welcome_004",
+            "start": 0,
+            "duration": 3,
+            "reason": "Light-return: same boat, golden calm — world expands; omit desk lead-in"
+          },
+          {
+            "assetId": "welcome_005",
+            "start": 0,
+            "duration": 5.041667,
+            "reason": "World-on-desk: miniature pool expands, origin revealed"
+          },
+          {
+            "assetId": "welcome_006",
+            "start": 0,
+            "duration": 3,
+            "reason": "Studio-ui: editable clips, live preview — AutoPromote revealed"
+          },
+          {
+            "assetId": "welcome_007",
+            "start": 0,
+            "duration": 3,
+            "reason": "Identity: correctly spelled 'AutoPromote' + 'brief/no-footage' statement"
+          }
+        ]
+      }
+    ],
+    "plannerProvenance": {
+      "model": "Qwen/Qwen3-VL-8B-Instruct",
+      "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+      "settings": [
+        {
+          "dtype": "bfloat16",
+          "attention": "sdpa",
+          "do_sample": false,
+          "max_tokens": 3200
+        },
+        {
+          "dtype": "bfloat16",
+          "attention": "sdpa",
+          "do_sample": false,
+          "max_tokens": 4500
+        },
+        {
+          "dtype": "bfloat16",
+          "attention": "sdpa",
+          "do_sample": false,
+          "max_tokens": 2400
+        }
+      ],
+      "stages": [
+        {
+          "id": "direction",
+          "seconds": 40.74370371200166
+        },
+        {
+          "id": "assets",
+          "seconds": 59.62128621000011
+        },
+        {
+          "id": "edits",
+          "seconds": 20.907633115999488
+        }
+      ],
+      "contractRepairs": [
+        {
+          "assetId": "factory-original-score",
+          "reason": "Required original score dependency resolved from the sole owner-approved music source; narrator cannot serve as score"
+        },
+        {
+          "outputId": "welcome_hero",
+          "assetId": "welcome_002",
+          "from": 2.5,
+          "to": 0,
+          "reason": "Programme position converted to individual source trim"
+        },
+        {
+          "outputId": "welcome_hero",
+          "assetId": "welcome_003",
+          "from": 4.2,
+          "to": 0,
+          "reason": "Programme position converted to individual source trim"
+        },
+        {
+          "outputId": "welcome_hero",
+          "assetId": "welcome_004",
+          "from": 5.9,
+          "to": 0,
+          "reason": "Programme position converted to individual source trim"
+        },
+        {
+          "outputId": "welcome_hero",
+          "assetId": "welcome_005",
+          "from": 8.9,
+          "to": 0,
+          "reason": "Programme position converted to individual source trim"
+        },
+        {
+          "outputId": "welcome_hero",
+          "assetId": "welcome_006",
+          "from": 13.941667,
+          "to": 0,
+          "reason": "Programme position converted to individual source trim"
+        },
+        {
+          "outputId": "welcome_hero",
+          "assetId": "welcome_007",
+          "from": 16.941667,
+          "to": 0,
+          "reason": "Programme position converted to individual source trim"
+        },
+        {
+          "assetId": "welcome_001",
+          "from": 2.5,
+          "to": 5.041667,
+          "reason": "Raw source duration measured from immutable library artifact"
+        },
+        {
+          "assetId": "welcome_002",
+          "from": 1.7,
+          "to": 5.041667,
+          "reason": "Raw source duration measured from immutable library artifact"
+        },
+        {
+          "assetId": "welcome_004",
+          "from": 3,
+          "to": 5.041667,
+          "reason": "Raw source duration measured from immutable library artifact"
+        }
+      ]
+    }
+  },
+  "assets": [
+    {
+      "assetId": "welcome_001",
+      "attempt": 1,
+      "attemptId": "2293bba242a4fab5-welcome_001-a1",
+      "type": "video",
+      "beatId": "001",
+      "status": "rejected",
+      "artifact": {
+        "path": "assets/2293bba242a4fab5-welcome_001-a1/source.mp4",
+        "sha256": "7fd8e4a2b7ccef15a96d0a0d08b73117e56024cdaea9798028f78ad8703ad278",
+        "bytes": 1596307,
+        "duration": 5.041667,
+        "codec": "h264",
+        "container": "mp4",
+        "fps": 24,
+        "width": 1280,
+        "height": 704,
+        "hasAudio": false
+      },
+      "audioRole": null,
+      "reusableArtifacts": [],
+      "provenance": {
+        "sourceBrief": "Create one 18–21 second AutoPromote welcome film about an ordinary idea finding a world, surviving a threat and becoming a finished story. I provide no recorded footage. Use the private generated raw library, preserving generation provenance. Open with paper-awakens at source 2.5 for 2.5 seconds. Use ocean-environment ONLY source 0.4 duration 1.7 seconds; later footage is overexposed. Use storm-action for visibly breaking wave action, light-return source 2 for 3 seconds for the SAME boat in golden calm, then world-on-desk to reveal the miniature origin. End with actual Studio UI and identity. Withhold AutoPromote until the payoff. Use the original score and the available brief-no-footage narration as a voiceover cue near the Studio reveal, fitting its complete duration; do not cut off speech. At most eight asset requirements. Every reused asset must keep an exact libraryRef, match its type and have current story-specific acceptance criteria. The absence of a boat in the wave cutaway is intentional; do not claim it is physically inside that shot. Do not imply the private factory is public. Do not pad with random effects. Return only one 16:9 welcome_hero output.",
+        "sourceBriefHash": "403dde58550171ce9de988adf2920183e9d6273762ccf29d745f7d8203ac2360",
+        "directionHash": "5ddd8b15d3270e34d0f70fce2337aeef6b9cfbb4fccad31b47f6fa059c1db490",
+        "prompt": "Paper-awakens: water rises, boat floats into frame",
+        "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+        "modelRevision": "b8fff7315c768468a5333511427288870b2e9635",
+        "tool": "AutoPromote private owner-scoped raw asset reuse",
+        "settings": {
+          "steps": 50,
+          "referenceImageSha256": null
+        },
+        "seed": 2026100711,
+        "generatedAt": "2026-10-07T08:39:10.147Z",
+        "origin": "reused_server_generated",
+        "parentProvenance": {
+          "origin": "reused_server_generated",
+          "parentArtifact": {
+            "path": "generated/paper-awakens.mp4",
+            "sha256": "7fd8e4a2b7ccef15a96d0a0d08b73117e56024cdaea9798028f78ad8703ad278",
+            "bytes": 1596307,
+            "duration": 5.041667,
+            "codec": "h264",
+            "container": "mp4",
+            "fps": 24,
+            "width": 1280,
+            "height": 704,
+            "hasAudio": false
+          },
+          "parentProvenance": {
+            "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+            "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+            "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+            "prompt": "Photoreal cinematic miniature world, tactile ivory origami paper boat with one crisp triangular sail and sharply folded hull, no writing on the paper. Warm amber practical light against deep petrol-blue shadows, natural film contrast, 35mm commercial cinematography. The same single small ivory paper boat is the only hero object. Extreme close-up at table level. A small ivory origami sailboat rests on a dark wooden desk beside one blank sheet of paper. A thin shimmering pool of water slowly spreads underneath the boat; the boat lifts gently and floats as the desk surface becomes a deep blue ocean. An impossible transformation shown with physically convincing water and crisp stable folds. Slow controlled camera push. Quiet amber light from the left. One uninterrupted five-second shot.",
+            "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+            "modelRevision": "b8fff7315c768468a5333511427288870b2e9635",
+            "settings": {
+              "steps": 50,
+              "referenceImageSha256": null
+            },
+            "seed": 2026100711,
+            "tool": "AutoPromote Wan adapter",
+            "origin": "server_generated",
+            "generationReceipt": "generated/paper-awakens-receipt.json"
+          },
+          "parentReview": {
+            "accepted": true,
+            "reviewer": "Codex visual inspection",
+            "modelRevision": "content-factory-selected-roles-20261007",
+            "evidenceSha256": "b6559a0ca74ec49808b6e3a8f528891a64fc8ed10e58b95d4402e4d070f8f08b",
+            "reason": "Use the final 2.5 seconds where water appears and the boat floats; omit the static lead-in.",
+            "criteria": [
+              {
+                "criterion": "Usable for the explicitly assigned story role",
+                "passed": true,
+                "observation": "Use the final 2.5 seconds where water appears and the boat floats; omit the static lead-in."
+              }
+            ],
+            "revisionInstructions": "",
+            "limitation": "Machine visual selection; final story review remains separate."
+          },
+          "sourceBrief": "Create one 18–21 second AutoPromote welcome film about an ordinary idea finding a world, surviving a threat and becoming a finished story. I provide no recorded footage. Use the private generated raw library, preserving generation provenance. Open with paper-awakens at source 2.5 for 2.5 seconds. Use ocean-environment ONLY source 0.4 duration 1.7 seconds; later footage is overexposed. Use storm-action for visibly breaking wave action, light-return source 2 for 3 seconds for the SAME boat in golden calm, then world-on-desk to reveal the miniature origin. End with actual Studio UI and identity. Withhold AutoPromote until the payoff. Use the original score and the available brief-no-footage narration as a voiceover cue near the Studio reveal, fitting its complete duration; do not cut off speech. At most eight asset requirements. Every reused asset must keep an exact libraryRef, match its type and have current story-specific acceptance criteria. The absence of a boat in the wave cutaway is intentional; do not claim it is physically inside that shot. Do not imply the private factory is public. Do not pad with random effects. Return only one 16:9 welcome_hero output.",
+          "intendedRole": "Paper-awakens: water rises, boat floats into frame",
+          "reusedAt": "2026-10-07T08:39:10.081Z"
+        }
+      },
+      "usedIn": [],
+      "review": {
+        "accepted": false,
+        "reason": "Missing payoff and static placeholder material. The 'water rises' sequence lacks dynamic motion and fails to establish the boat's journey. No clear transition to the 'storm' or 'light return' beats. Final reveal of the desk-world and studio UI is absent. The contact sheet shows only static paper states and water reflections without narrative progression or emotional payoff. The 'exact libraryRef: paper-awakens' requirement is unmet as the asset does not match the described animation or story arc",
+        "revisionInstructions": "Add dynamic water animation rising from the page, show boat floating with motion blur, include storm wave with boat submerged, then restore golden calm with expanding desk-world reveal, and finally show AutoPromote Studio UI with editable clips and live preview. Remove all static paper frames and ensure the libraryRef matches the new animated sequence",
+        "criteria": [
+          {
+            "criterion": "Water emerges from edge of blank page",
+            "passed": false,
+            "observation": "Frames 01-06 show static paper with no water animation or emergence"
+          },
+          {
+            "criterion": "Boat floats into frame",
+            "passed": false,
+            "observation": "Boat remains stationary throughout; no floating motion or entry into frame"
+          },
+          {
+            "criterion": "No static lead-in",
+            "passed": false,
+            "observation": "All frames are identical static shots with no progression or motion"
+          },
+          {
+            "criterion": "Exact libraryRef: paper-awakens",
+            "passed": false,
+            "observation": "The asset does not match the described animation or story arc; it is a static contact sheet without the required dynamic elements"
+          }
+        ],
+        "reviewer": "Qwen/Qwen3-VL-8B-Instruct",
+        "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+        "evidenceSha256": "b6559a0ca74ec49808b6e3a8f528891a64fc8ed10e58b95d4402e4d070f8f08b"
+      }
+    },
+    {
+      "assetId": "welcome_001",
+      "attempt": 2,
+      "attemptId": "2293bba242a4fab5-welcome_001-a2",
+      "type": "video",
+      "beatId": "001",
+      "status": "rejected",
+      "artifact": {
+        "path": "assets/2293bba242a4fab5-welcome_001-a2/source.mp4",
+        "sha256": "7fd8e4a2b7ccef15a96d0a0d08b73117e56024cdaea9798028f78ad8703ad278",
+        "bytes": 1596307,
+        "duration": 5.041667,
+        "codec": "h264",
+        "container": "mp4",
+        "fps": 24,
+        "width": 1280,
+        "height": 704,
+        "hasAudio": false
+      },
+      "audioRole": null,
+      "reusableArtifacts": [],
+      "provenance": {
+        "sourceBrief": "Create one 18–21 second AutoPromote welcome film about an ordinary idea finding a world, surviving a threat and becoming a finished story. I provide no recorded footage. Use the private generated raw library, preserving generation provenance. Open with paper-awakens at source 2.5 for 2.5 seconds. Use ocean-environment ONLY source 0.4 duration 1.7 seconds; later footage is overexposed. Use storm-action for visibly breaking wave action, light-return source 2 for 3 seconds for the SAME boat in golden calm, then world-on-desk to reveal the miniature origin. End with actual Studio UI and identity. Withhold AutoPromote until the payoff. Use the original score and the available brief-no-footage narration as a voiceover cue near the Studio reveal, fitting its complete duration; do not cut off speech. At most eight asset requirements. Every reused asset must keep an exact libraryRef, match its type and have current story-specific acceptance criteria. The absence of a boat in the wave cutaway is intentional; do not claim it is physically inside that shot. Do not imply the private factory is public. Do not pad with random effects. Return only one 16:9 welcome_hero output.",
+        "sourceBriefHash": "403dde58550171ce9de988adf2920183e9d6273762ccf29d745f7d8203ac2360",
+        "directionHash": "5ddd8b15d3270e34d0f70fce2337aeef6b9cfbb4fccad31b47f6fa059c1db490",
+        "prompt": "Paper-awakens: water rises, boat floats into frame\nRequired correction: Add dynamic water animation rising from the page, show boat floating with motion blur, include storm wave with boat submerged, then restore golden calm with expanding desk-world reveal, and finally show AutoPromote Studio UI with editable clips and live preview. Remove all static paper frames and ensure the libraryRef matches the new animated sequence",
+        "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+        "modelRevision": "b8fff7315c768468a5333511427288870b2e9635",
+        "tool": "AutoPromote private owner-scoped raw asset reuse",
+        "settings": {
+          "steps": 50,
+          "referenceImageSha256": null
+        },
+        "seed": 2026100711,
+        "generatedAt": "2026-10-07T08:40:38.791Z",
+        "origin": "reused_server_generated",
+        "parentProvenance": {
+          "origin": "reused_server_generated",
+          "parentArtifact": {
+            "path": "generated/paper-awakens.mp4",
+            "sha256": "7fd8e4a2b7ccef15a96d0a0d08b73117e56024cdaea9798028f78ad8703ad278",
+            "bytes": 1596307,
+            "duration": 5.041667,
+            "codec": "h264",
+            "container": "mp4",
+            "fps": 24,
+            "width": 1280,
+            "height": 704,
+            "hasAudio": false
+          },
+          "parentProvenance": {
+            "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+            "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+            "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+            "prompt": "Photoreal cinematic miniature world, tactile ivory origami paper boat with one crisp triangular sail and sharply folded hull, no writing on the paper. Warm amber practical light against deep petrol-blue shadows, natural film contrast, 35mm commercial cinematography. The same single small ivory paper boat is the only hero object. Extreme close-up at table level. A small ivory origami sailboat rests on a dark wooden desk beside one blank sheet of paper. A thin shimmering pool of water slowly spreads underneath the boat; the boat lifts gently and floats as the desk surface becomes a deep blue ocean. An impossible transformation shown with physically convincing water and crisp stable folds. Slow controlled camera push. Quiet amber light from the left. One uninterrupted five-second shot.",
+            "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+            "modelRevision": "b8fff7315c768468a5333511427288870b2e9635",
+            "settings": {
+              "steps": 50,
+              "referenceImageSha256": null
+            },
+            "seed": 2026100711,
+            "tool": "AutoPromote Wan adapter",
+            "origin": "server_generated",
+            "generationReceipt": "generated/paper-awakens-receipt.json"
+          },
+          "parentReview": {
+            "accepted": true,
+            "reviewer": "Codex visual inspection",
+            "modelRevision": "content-factory-selected-roles-20261007",
+            "evidenceSha256": "b6559a0ca74ec49808b6e3a8f528891a64fc8ed10e58b95d4402e4d070f8f08b",
+            "reason": "Use the final 2.5 seconds where water appears and the boat floats; omit the static lead-in.",
+            "criteria": [
+              {
+                "criterion": "Usable for the explicitly assigned story role",
+                "passed": true,
+                "observation": "Use the final 2.5 seconds where water appears and the boat floats; omit the static lead-in."
+              }
+            ],
+            "revisionInstructions": "",
+            "limitation": "Machine visual selection; final story review remains separate."
+          },
+          "sourceBrief": "Create one 18–21 second AutoPromote welcome film about an ordinary idea finding a world, surviving a threat and becoming a finished story. I provide no recorded footage. Use the private generated raw library, preserving generation provenance. Open with paper-awakens at source 2.5 for 2.5 seconds. Use ocean-environment ONLY source 0.4 duration 1.7 seconds; later footage is overexposed. Use storm-action for visibly breaking wave action, light-return source 2 for 3 seconds for the SAME boat in golden calm, then world-on-desk to reveal the miniature origin. End with actual Studio UI and identity. Withhold AutoPromote until the payoff. Use the original score and the available brief-no-footage narration as a voiceover cue near the Studio reveal, fitting its complete duration; do not cut off speech. At most eight asset requirements. Every reused asset must keep an exact libraryRef, match its type and have current story-specific acceptance criteria. The absence of a boat in the wave cutaway is intentional; do not claim it is physically inside that shot. Do not imply the private factory is public. Do not pad with random effects. Return only one 16:9 welcome_hero output.",
+          "intendedRole": "Paper-awakens: water rises, boat floats into frame\nRequired correction: Add dynamic water animation rising from the page, show boat floating with motion blur, include storm wave with boat submerged, then restore golden calm with expanding desk-world reveal, and finally show AutoPromote Studio UI with editable clips and live preview. Remove all static paper frames and ensure the libraryRef matches the new animated sequence",
+          "reusedAt": "2026-10-07T08:40:38.724Z"
+        }
+      },
+      "usedIn": [],
+      "review": {
+        "accepted": false,
+        "reason": "Missing payoff and static placeholder material. The 'water rises' sequence lacks dynamic motion and fails to establish the boat's journey. No clear transition to the 'storm' or 'light return' beats. Final reveal of the desk-world and studio UI is absent. The contact sheet shows only static paper states and water reflections without narrative progression or emotional payoff. The 'exact libraryRef: paper-awakens' requirement is unmet as the asset does not match the described animation or story arc",
+        "revisionInstructions": "Add dynamic water animation rising from the page, show boat floating with motion blur, include storm wave with boat submerged, then restore golden calm with expanding desk-world reveal, and finally show AutoPromote Studio UI with editable clips and live preview. Remove all static paper frames and ensure the libraryRef matches the new animated sequence",
+        "criteria": [
+          {
+            "criterion": "Water emerges from edge of blank page",
+            "passed": false,
+            "observation": "Frames 01-06 show static paper with no water animation or emergence"
+          },
+          {
+            "criterion": "Boat floats into frame",
+            "passed": false,
+            "observation": "Boat remains stationary throughout; no floating motion or entry into frame"
+          },
+          {
+            "criterion": "No static lead-in",
+            "passed": false,
+            "observation": "All frames are identical static shots with no progression or motion"
+          },
+          {
+            "criterion": "Exact libraryRef: paper-awakens",
+            "passed": false,
+            "observation": "The asset does not match the described animation or story arc; it is a static contact sheet without the required dynamic elements"
+          }
+        ],
+        "reviewer": "Qwen/Qwen3-VL-8B-Instruct",
+        "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+        "evidenceSha256": "b6559a0ca74ec49808b6e3a8f528891a64fc8ed10e58b95d4402e4d070f8f08b"
+      }
+    }
+  ],
+  "outputs": [],
+  "events": [
+    {
+      "at": "2026-10-07T08:33:33.670Z",
+      "stage": "stopped",
+      "detail": "failed"
+    },
+    {
+      "at": "2026-10-07T08:39:09.970Z",
+      "stage": "creative_direction",
+      "detail": "The Boat That Found Its World"
+    },
+    {
+      "at": "2026-10-07T08:39:09.973Z",
+      "stage": "generating",
+      "detail": "2293bba242a4fab5-welcome_001-a1"
+    },
+    {
+      "at": "2026-10-07T08:40:38.621Z",
+      "stage": "asset_review",
+      "detail": "welcome_001: rejected; Missing payoff and static placeholder material. The 'water rises' sequence lacks dynamic motion and fails to establish the boat's journey. No clear transition to the 'storm' or 'light return' beats. Final reveal of the desk-world and studio UI is absent. The contact sheet shows only static paper states and water reflections without narrative progression or emotional payoff. The 'exact libraryRef: paper-awakens' requirement is unmet as the asset does not match the described animation or story arc"
+    },
+    {
+      "at": "2026-10-07T08:40:38.625Z",
+      "stage": "generating",
+      "detail": "2293bba242a4fab5-welcome_001-a2"
+    },
+    {
+      "at": "2026-10-07T08:40:41.039Z",
+      "stage": "asset_review",
+      "detail": "welcome_001: rejected; Missing payoff and static placeholder material. The 'water rises' sequence lacks dynamic motion and fails to establish the boat's journey. No clear transition to the 'storm' or 'light return' beats. Final reveal of the desk-world and studio UI is absent. The contact sheet shows only static paper states and water reflections without narrative progression or emotional payoff. The 'exact libraryRef: paper-awakens' requirement is unmet as the asset does not match the described animation or story arc"
+    },
+    {
+      "at": "2026-10-07T08:40:41.044Z",
+      "stage": "stopped",
+      "detail": "needs_creative_revision"
+    }
+  ],
+  "failure": {
+    "code": "CONTENT_FACTORY_ASSET_REJECTED",
+    "message": "CONTENT_FACTORY_ASSET_REJECTED"
+  },
+  "private": true,
+  "directionHash": "5ddd8b15d3270e34d0f70fce2337aeef6b9cfbb4fccad31b47f6fa059c1db490"
+}

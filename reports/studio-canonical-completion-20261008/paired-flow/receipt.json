@@ -1,0 +1,14 @@
+{
+  "startedAt": "2026-10-08T11:28:00.217Z",
+  "projectName": "Studio paired visual QA 20261008",
+  "headless": true,
+  "muted": true,
+  "realAuth": true,
+  "noMocks": true,
+  "gpuUsed": false,
+  "gpuJobsStarted": 0,
+  "status": "FAIL",
+  "pairs": [],
+  "error": "locator.uncheck: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByLabel('Enabled', { exact: true })\u001b[22m\n",
+  "finishedAt": "2026-10-08T11:28:36.544Z"
+}

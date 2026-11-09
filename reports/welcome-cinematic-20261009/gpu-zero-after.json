@@ -1,0 +1,18 @@
+{
+  "verifiedAt": "2026-10-09T09:29:01.780157+00:00",
+  "project": "autopromote-cc6d3",
+  "region": "us-central1",
+  "activeExecutions": [],
+  "gpuJobs": [
+    {
+      "job": "projects/autopromote-cc6d3/locations/us-central1/jobs/viral-studio-rtx-qualification",
+      "activeExecutions": []
+    }
+  ],
+  "gpuServices": [],
+  "activeGpuTasks": 0,
+  "warmGpuServiceCapacity": 0,
+  "jobImage": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/viral-studio-3d-renderer@sha256:6b97198c6770c8f211caf8b018be7dc85290035ba5a3922580a4a324179ed522",
+  "jobDefinitionUnchanged": true,
+  "persistedFinalReceipt": "gpu-final-receipt.json"
+}

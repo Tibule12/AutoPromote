@@ -1,0 +1,1724 @@
+{
+  "entries": [
+    {
+      "protoPayload": {
+        "@type": "type.googleapis.com/google.cloud.audit.AuditLog",
+        "status": {
+          "message": "Execution viral-studio-rtx-qualification-2hsx4 has completed successfully."
+        },
+        "serviceName": "run.googleapis.com",
+        "methodName": "/Jobs.RunJob",
+        "resourceName": "namespaces/autopromote-cc6d3/executions/viral-studio-rtx-qualification-2hsx4",
+        "response": {
+          "metadata": {
+            "name": "viral-studio-rtx-qualification-2hsx4",
+            "namespace": "341498038874",
+            "selfLink": "/apis/run.googleapis.com/v1/namespaces/341498038874/executions/viral-studio-rtx-qualification-2hsx4",
+            "uid": "95c4b6b8-0656-4404-86e4-e57ce49792c9",
+            "resourceVersion": "AAZdZOQCM/k",
+            "generation": 1,
+            "creationTimestamp": "2026-10-09T09:05:59.153035Z",
+            "labels": {
+              "client.knative.dev/nonce": "wof_del_xub",
+              "product": "autopromote",
+              "production-traffic": "false",
+              "purpose": "gpu-qualification",
+              "run.googleapis.com/job": "viral-studio-rtx-qualification",
+              "run.googleapis.com/jobResourceVersion": "1791536559529935",
+              "run.googleapis.com/jobGeneration": "2",
+              "run.googleapis.com/jobUid": "56e68238-9df0-4053-a954-294fc3aa1d80",
+              "cloud.googleapis.com/location": "us-central1"
+            },
+            "annotations": {
+              "run.googleapis.com/client-name": "gcloud",
+              "run.googleapis.com/lastModifier": "tmtshwelo21@gmail.com",
+              "run.googleapis.com/client-version": "587.0.0",
+              "run.googleapis.com/creator": "tmtshwelo21@gmail.com",
+              "run.googleapis.com/execution-environment": "gen2",
+              "run.googleapis.com/gpu-zonal-redundancy-disabled": "true",
+              "run.googleapis.com/operation-id": "2cd282a7-00c3-4116-b8c8-70fd771eb822"
+            },
+            "ownerReferences": [
+              {
+                "kind": "Job",
+                "name": "viral-studio-rtx-qualification",
+                "uid": "56e68238-9df0-4053-a954-294fc3aa1d80",
+                "apiVersion": "serving.knative.dev/v1",
+                "controller": true,
+                "blockOwnerDeletion": true
+              }
+            ]
+          },
+          "apiVersion": "run.googleapis.com/v1",
+          "kind": "Execution",
+          "spec": {
+            "parallelism": 1,
+            "taskCount": 1,
+            "template": {
+              "spec": {
+                "containers": [
+                  {
+                    "image": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/viral-studio-3d-renderer@sha256:6b97198c6770c8f211caf8b018be7dc85290035ba5a3922580a4a324179ed522",
+                    "command": [
+                      "/opt/renderer-venv/bin/python3"
+                    ],
+                    "args": [
+                      "-c",
+                      "import base64,hashlib; source=base64.b64decode('IiIiQm91bmRlZCBwcml2YXRlIGZpbG0gd29ya2xvYWQgaW4gdGhlIGV4aXN0aW5nIG9uZS1HUFUgQ2xvdWQgUnVuIEpvYi4KCklucHV0cyBhcmUgcHJlcGFyZWQvdmFsaWRhdGVkIGxvY2FsbHkgYW5kIHBpbm5lZCBieSBTSEEyNTYuIE5vIHNlcnZlciwgcXVldWUsCmluZnJhc3RydWN0dXJlIGNyZWF0aW9uLCBGaXJlc3RvcmUgd3JpdGVzLCB0cmFmZmljIGNoYW5nZXMgb3IgcmV0YWluZWQgcHJvY2Vzcy4KTmF0aXZlIHNvdXJjZSBnZW5lcmF0aW9uIGZlZWRzIHRoZSBleGlzdGluZyBjYW5vbmljYWwgUmVuZGVyVmlyYWxSZXF1ZXN0IHdvcmtlci4KIiIiCmltcG9ydCBhc3luY2lvCmZyb20gZGF0ZXRpbWUgaW1wb3J0IGRhdGV0aW1lLCB0aW1lem9uZQppbXBvcnQgaGFzaGxpYgppbXBvcnQganNvbgppbXBvcnQgb3MKZnJvbSBwYXRobGliIGltcG9ydCBQYXRoCmltcG9ydCBzaHV0aWwKaW1wb3J0IHN1YnByb2Nlc3MKaW1wb3J0IHN5cwppbXBvcnQgdGFyZmlsZQppbXBvcnQgdGltZQppbXBvcnQgdGhyZWFkaW5nCmZyb20gY29uY3VycmVudC5mdXR1cmVzIGltcG9ydCBUaHJlYWRQb29sRXhlY3V0b3IKCmZyb20gZ29vZ2xlLmNsb3VkIGltcG9ydCBzdG9yYWdlCgoKZGVmIGRpZ2VzdChwKTpyZXR1cm4gaGFzaGxpYi5zaGEyNTYoUGF0aChwKS5yZWFkX2J5dGVzKCkpLmhleGRpZ2VzdCgpCmRlZiBub3coKTpyZXR1cm4gZGF0ZXRpbWUubm93KHRpbWV6b25lLnV0YykuaXNvZm9ybWF0KCkKCgpkZWYgbWFpbigpOgogICAgYnVja2V0PXN0b3JhZ2UuQ2xpZW50KHByb2plY3Q9J2F1dG9wcm9tb3RlLWNjNmQzJykuYnVja2V0KCdhdXRvcHJvbW90ZS1jYzZkMy12aXJhbC1zdHVkaW8tM2QnKQogICAgcHJlZml4PW9zLmVudmlyb25bJ1dFTENPTUVfU1RPUllfUFJFRklYJ10KICAgIGlmIG5vdCBwcmVmaXguc3RhcnRzd2l0aCgnZm91bmRlcl9maWxtcy93ZWxjb21lLWNpbmVtYXRpYy0yMDI2MTAwOS8nKSBvciAnLi4nIGluIHByZWZpeDoKICAgICAgICByYWlzZSBWYWx1ZUVycm9yKCdJbnZhbGlkIHByaXZhdGUgd29ya2xvYWQgcHJlZml4JykKICAgIGJhc2U9UGF0aCgnL3RtcC93ZWxjb21lLW5hdGl2ZScpO2Jhc2UubWtkaXIoKQogICAgcmVjZWlwdD17J3N0YXR1cyc6J1JVTk5JTkcnLCdzdGFydGVkQXQnOm5vdygpLCdleGVjdXRpb24nOm9zLmdldGVudignQ0xPVURfUlVOX0VYRUNVVElPTicpLCdzdGFnZXMnOltdLCdvdXRwdXRzJzpbXSwnZ3B1Q291bnQnOjEsJ3ByZWZpeCc6cHJlZml4fQogICAgc3RhcnRlZD10aW1lLm1vbm90b25pYygpCiAgICBkZWYgc3RhZ2UobmFtZSxhcmd2LHRpbWVvdXQ9MTIwMCxlbnY9Tm9uZSk6CiAgICAgICAgdD10aW1lLm1vbm90b25pYygpCiAgICAgICAgd2l0aCAoYmFzZS8obmFtZSsnLmxvZycpKS5vcGVuKCd3JykgYXMgZjoKICAgICAgICAgICAgcHJvY2Vzcz1zdWJwcm9jZXNzLlBvcGVuKGFyZ3Ysc3Rkb3V0PXN1YnByb2Nlc3MuUElQRSxzdGRlcnI9c3VicHJvY2Vzcy5TVERPVVQsdGV4dD1UcnVlLGJ1ZnNpemU9MSxlbnY9ZW52KQogICAgICAgICAgICBkZWFkbGluZT10aHJlYWRpbmcuVGltZXIodGltZW91dCxwcm9jZXNzLmtpbGwpCiAgICAgICAgICAgIGRlYWRsaW5lLnN0YXJ0KCkKICAgICAgICAgICAgdHJ5OgogICAgICAgICAgICAgICAgZm9yIG91dHB1dF9saW5lIGluIHByb2Nlc3Muc3Rkb3V0OgogICAgICAgICAgICAgICAgICAgIGYud3JpdGUob3V0cHV0X2xpbmUpCiAgICAgICAgICAgICAgICAgICAgaWYgb3V0cHV0X2xpbmUuc3RhcnRzd2l0aCgneyJldmVudCI6Jyk6cHJpbnQob3V0cHV0X2xpbmUuc3RyaXAoKSxmbHVzaD1UcnVlKQogICAgICAgICAgICAgICAgZXhpdF9jb2RlPXByb2Nlc3Mud2FpdCgpCiAgICAgICAgICAgIGZpbmFsbHk6CiAgICAgICAgICAgICAgICBkZWFkbGluZS5jYW5jZWwoKQogICAgICAgICAgICAgICAgZGVhZGxpbmUuam9pbigpCiAgICAgICAgICAgICAgICBpZiBwcm9jZXNzLnBvbGwoKSBpcyBOb25lOgogICAgICAgICAgICAgICAgICAgIHByb2Nlc3Mua2lsbCgpCiAgICAgICAgICAgICAgICAgICAgcHJvY2Vzcy53YWl0KHRpbWVvdXQ9MTUpCiAgICAgICAgICAgIGlmIGV4aXRfY29kZTpyYWlzZSBzdWJwcm9jZXNzLkNhbGxlZFByb2Nlc3NFcnJvcihleGl0X2NvZGUsYXJndikKICAgICAgICByZWNlaXB0WydzdGFnZXMnXS5hcHBlbmQoeyduYW1lJzpuYW1lLCdzZWNvbmRzJzp0aW1lLm1vbm90b25pYygpLXQsJ2xvZyc6bmFtZSsnLmxvZyd9KQogICAgICAgIHByaW50KGpzb24uZHVtcHMoeydldmVudCc6J3N0YWdlX2NvbXBsZXRlZCcsKipyZWNlaXB0WydzdGFnZXMnXVstMV19KSxmbHVzaD1UcnVlKQogICAgdHJ5OgogICAgICAgIHNtaT1zaHV0aWwud2hpY2goJ252aWRpYS1zbWknKSBvciAnL3Vzci9sb2NhbC9udmlkaWEvYmluL252aWRpYS1zbWknCiAgICAgICAgaWRlbnRpdHk9c3VicHJvY2Vzcy5jaGVja19vdXRwdXQoW3NtaSwnLS1xdWVyeS1ncHU9bmFtZSxtZW1vcnkudG90YWwnLCctLWZvcm1hdD1jc3Ysbm9oZWFkZXInXSx0ZXh0PVRydWUpLnN0cmlwKCkKICAgICAgICBpZiBsZW4oaWRlbnRpdHkuc3BsaXRsaW5lcygpKSE9MSBvciAnUlRYIFBSTyA2MDAwJyBub3QgaW4gaWRlbnRpdHkudXBwZXIoKTpyYWlzZSBSdW50aW1lRXJyb3IoJ1dyb25nIEdQVSBpZGVudGl0eScpCiAgICAgICAgcmVjZWlwdFsnZ3B1SWRlbnRpdHknXT1pZGVudGl0eQogICAgICAgIGFzc2V0X3ByZWZpeD1vcy5lbnZpcm9uLmdldCgnV0VMQ09NRV9BU1NFVF9QUkVGSVgnLHByZWZpeCkKICAgICAgICBpZiBub3QgYXNzZXRfcHJlZml4LnN0YXJ0c3dpdGgoJ2ZvdW5kZXJfZmlsbXMvd2VsY29tZS1jaW5lbWF0aWMtMjAyNjEwMDkvJykgb3IgJy4uJyBpbiBhc3NldF9wcmVmaXg6cmFpc2UgVmFsdWVFcnJvcignSW52YWxpZCBhc3NldCBwcmVmaXgnKQogICAgICAgIGZvciBvYmplY3RfbmFtZSxoYXNodmFyIGluIFsoJ3J1bnRpbWUudGFyLmd6JywnV0VMQ09NRV9SVU5USU1FX1NIQTI1NicpLCgnaW5wdXRzLnRhci5neicsJ1dFTENPTUVfSU5QVVRTX1NIQTI1NicpLCgnYmxlbmRlci50YXIueHonLCdXRUxDT01FX0JMRU5ERVJfU0hBMjU2JyksKCduYXRpdmUtbGlicy50YXIuZ3onLCdXRUxDT01FX05BVElWRV9MSUJTX1NIQTI1NicpXToKICAgICAgICAgICAgbG9jYWw9YmFzZS9vYmplY3RfbmFtZQogICAgICAgICAgICByZW1vdGVfbmFtZT1vcy5lbnZpcm9uLmdldCgnV0VMQ09NRV9JTlBVVF9PQkpFQ1QnLCdpbnB1dHMudGFyLmd6JykgaWYgb2JqZWN0X25hbWU9PSdpbnB1dHMudGFyLmd6JyBlbHNlIG9iamVjdF9uYW1lCiAgICAgICAgICAgIGlmICcvJyBpbiByZW1vdGVfbmFtZSBvciAnLi4nIGluIHJlbW90ZV9uYW1lOnJhaXNlIFZhbHVlRXJyb3IoJ0ludmFsaWQgaW5wdXQgb2JqZWN0JykKICAgICAgICAgICAgYnVja2V0LmJsb2IoYXNzZXRfcHJlZml4KycvJytyZW1vdGVfbmFtZSkuZG93bmxvYWRfdG9fZmlsZW5hbWUobG9jYWwsdGltZW91dD05MCkKICAgICAgICAgICAgaWYgZGlnZXN0KGxvY2FsKSE9b3MuZW52aXJvbltoYXNodmFyXTpyYWlzZSBWYWx1ZUVycm9yKCdQaW5uZWQgaW5wdXQgaGFzaCBtaXNtYXRjaDogJytvYmplY3RfbmFtZSkKICAgICAgICAgICAgd2l0aCB0YXJmaWxlLm9wZW4obG9jYWwpIGFzIHQ6CiAgICAgICAgICAgICAgICAjIElucHV0IGFyY2hpdmVzIGFyZSBhdXRob3JlZCBhbmQgcHJldmFsaWRhdGVkOyBleHRyYWN0aW9uIHN0YXlzIGluIGJhc2UuCiAgICAgICAgICAgICAgICBmb3IgbSBpbiB0LmdldG1lbWJlcnMoKToKICAgICAgICAgICAgICAgICAgICBpZiBtLm5hbWUuc3RhcnRzd2l0aCgnLycpIG9yICcuLicgaW4gUGF0aChtLm5hbWUpLnBhcnRzOnJhaXNlIFZhbHVlRXJyb3IoJ1Vuc2FmZSBhcmNoaXZlIHBhdGgnKQogICAgICAgICAgICAgICAgdC5leHRyYWN0YWxsKGJhc2UsZmlsdGVyPSdkYXRhJykKICAgICAgICAgICAgbG9jYWwudW5saW5rKCkKICAgICAgICByb290PWJhc2UvJ2ZpbG0nCiAgICAgICAgd29ya2VyPWJhc2UvJ3dvcmtlcicKICAgICAgICBydW50aW1lPWJhc2UvJ3B5dGhvbicKICAgICAgICBzeXMucGF0aC5pbnNlcnQoMCxzdHIocnVudGltZSkpCiAgICAgICAgc3lzLnBhdGguaW5zZXJ0KDAsc3RyKHdvcmtlcikpCiAgICAgICAgc3lzLnBhdGguaW5zZXJ0KDAsc3RyKGJhc2UvJ3NjcmlwdHMnKSkKICAgICAgICBvcy5lbnZpcm9uLnVwZGF0ZSh7J1ZJUkFMX0VYUE9SVF9FTkNPREVSJzonbnZlbmMnLCdWSVJBTF9SRVFVSVJFX0dQVSc6JzEnLCdMT0NBTF9NRURJQV9PVVRQVVRfT05MWSc6J3RydWUnLAogICAgICAgICAgICdFTkFCTEVfTE9DQUxfTUVESUFfT1VUUFVUX0ZBTExCQUNLJzondHJ1ZScsJ0ZJUkVCQVNFX1NUQVRVU19VUERBVEVTX0VOQUJMRUQnOidmYWxzZScsJ0FMTE9XX1JVTlRJTUVfREVQRU5ERU5DWV9JTlNUQUxMJzonZmFsc2UnLAogICAgICAgICAgICdNRURJQV9XT1JLRVJfU1VCUFJPQ0VTU19USU1FT1VUX1NFQ09ORFMnOic2MDAnLCdNRURJQV9XT1JLRVJfTUFYX1ZJREVPX0RVUkFUSU9OX1NFQ09ORFMnOic2MCcsCiAgICAgICAgICAgJ1NUVURJT18zRF9ERVZJQ0UnOidvcHRpeCcsJ1NUVURJT18zRF9TQU1QTEVTJzonMjQnfSkKICAgICAgICBvcy5lbnZpcm9uWydMRF9MSUJSQVJZX1BBVEgnXT1zdHIoYmFzZS8nbmF0aXZlLWxpYnMnKSsnOicrb3MuZW52aXJvbi5nZXQoJ0xEX0xJQlJBUllfUEFUSCcsJycpCiAgICAgICAgYmxlbmRlcj1uZXh0KGJhc2UuZ2xvYignYmxlbmRlci0qL2JsZW5kZXInKSkKICAgICAgICBzdGFnZSgnbmF0aXZlLW9wdGl4Jyxbc3RyKGJsZW5kZXIpLCctYicsJy10JywnMTYnLCctbm9hdWRpbycsJy0tcHl0aG9uJyxzdHIocm9vdC8nYXNzZXRzL2F1dGhvcl93ZWxjb21lX3dvcmxkLnB5JyksJy0tJywnLS1yb290JyxzdHIocm9vdCksJy0tbW9kZScsJ2ZyYW1lcycsJy0tZGV2aWNlJywnb3B0aXgnLCctLXdpZHRoJywnMTkyMCcsJy0tc2FtcGxlcycsJzI0J10sdGltZW91dD0zMDAwKQogICAgICAgIGZyYW1lcz1yb290LydncHUtZnJhbWVzJwogICAgICAgIGRldmljZT1qc29uLmxvYWRzKChmcmFtZXMvJ3JlY2VpcHQuanNvbicpLnJlYWRfdGV4dCgpKQogICAgICAgIGlmIG5vdCBkZXZpY2VbJ2RldmljZSddWydncHVfdmVyaWZpZWQnXSBvciBkZXZpY2VbJ2ZyYW1lQ291bnQnXSE9OTEyOnJhaXNlIFJ1bnRpbWVFcnJvcignSW5jb21wbGV0ZSBnZW51aW5lIEdQVSBzb3VyY2UnKQogICAgICAgIHJlY2VpcHRbJ25hdGl2ZVJlbmRlciddPWRldmljZQogICAgICAgIG1lZGlhPXJvb3QvJ2Fzc2V0cy9maW5hbCc7bWVkaWEubWtkaXIoZXhpc3Rfb2s9VHJ1ZSkKICAgICAgICBkZWYgcGVyc2lzdChmaWxlKToKICAgICAgICAgICAgbmFtZT1zdHIoZmlsZS5yZWxhdGl2ZV90byhyb290KSkKICAgICAgICAgICAgYnVja2V0LmJsb2IocHJlZml4KycvcmVzdWx0LycrbmFtZSkudXBsb2FkX2Zyb21fZmlsZW5hbWUoZmlsZSx0aW1lb3V0PTkwKQogICAgICAgICAgICByZWNlaXB0WydvdXRwdXRzJ10uYXBwZW5kKHsncGF0aCc6bmFtZSwnc2hhMjU2JzpkaWdlc3QoZmlsZSksJ2J5dGVzJzpmaWxlLnN0YXQoKS5zdF9zaXplfSkKICAgICAgICBzdG9yeT1qc29uLmxvYWRzKChyb290LydzdG9yeS1wbGFuLmpzb24nKS5yZWFkX3RleHQoKSkKICAgICAgICBmb3IgcyBpbiBzdG9yeVsnc2NlbmVzJ106CiAgICAgICAgICAgIHN0YWdlKCdzb3VyY2UtJytzWydpZCddLFsnZmZtcGVnJywnLXYnLCdlcnJvcicsJy15JywnLWZyYW1lcmF0ZScsJzI0JywnLXN0YXJ0X251bWJlcicsc3RyKHNbJ2F0J10qMjQrMSksJy1pJyxzdHIoZnJhbWVzLydmcmFtZV8lMDRkLnBuZycpLCctZnJhbWVzOnYnLHN0cihzWydkdXJhdGlvbiddKjI0KSwnLWM6dicsJ2gyNjRfbnZlbmMnLCctcHJlc2V0JywncDUnLCctY3EnLCcxNycsJy1iOnYnLCcwJywnLXBpeF9mbXQnLCd5dXY0MjBwJywnLWFuJywnLW1vdmZsYWdzJywnK2Zhc3RzdGFydCcsc3RyKG1lZGlhLyhzWydpZCddKycubXA0JykpXSx0aW1lb3V0PTE4MCkKICAgICAgICAgICAgIyBSZXRhaW4gY29tcGxldGVkIGV4cGVuc2l2ZSBzb3VyY2Ugd29yayBiZWZvcmUgZmluYWwgY29tcG9zaXRpb24uCiAgICAgICAgICAgIHBlcnNpc3QobWVkaWEvKHNbJ2lkJ10rJy5tcDQnKSkKICAgICAgICBwZXJzaXN0KHJvb3QvJ2Fzc2V0cy93ZWxjb21lLXdvcmxkLmJsZW5kJykKICAgICAgICBwZXJzaXN0KGZyYW1lcy8ncmVjZWlwdC5qc29uJykKICAgICAgICAjIFRoZSByZXF1ZXN0IHdhcyBjb21waWxlZC92YWxpZGF0ZWQgbG9jYWxseS4gUmVzb2x2ZSBzb3VyY2UgdHJhbnNwb3J0IHRvCiAgICAgICAgIyB0aGVzZSBuZXdseSBnZW5lcmF0ZWQgbm9ybWFsIG1lZGlhIGZpbGVzLCByZXRhaW5pbmcgZXZlcnkgZWRpdCBkZWNpc2lvbi4KICAgICAgICByZXF1ZXN0PWpzb24ubG9hZHMoKHJvb3QvJ291dHB1dHMvZmluYWwvcmVuZGVyLXJlcXVlc3QuanNvbicpLnJlYWRfdGV4dCgpKQogICAgICAgIGFzc2VydCBzdW0oc1snZW5kX3RpbWUnXS1zWydzdGFydF90aW1lJ10gZm9yIHMgaW4gcmVxdWVzdFsndGltZWxpbmVfc2VnbWVudHMnXSk9PTM4CiAgICAgICAgb3V0cHV0PXJvb3QvJ291dHB1dHMvZmluYWwnCiAgICAgICAgb3V0cHV0Lm1rZGlyKGV4aXN0X29rPVRydWUpCiAgICAgICAgaW1wb3J0IHJlbmRlcl9leGlzdGluZ19zdHVkaW8gYXMgc2hhcmVkCiAgICAgICAgZnJvbSB0eXBlcyBpbXBvcnQgU2ltcGxlTmFtZXNwYWNlCiAgICAgICAgdD10aW1lLm1vbm90b25pYygpCiAgICAgICAgYXN5bmNpby5ydW4oc2hhcmVkLnJlbmRlcihTaW1wbGVOYW1lc3BhY2Uocm9vdD1yb290LHdvcmtlcj13b3JrZXIscmVxdWVzdD1yb290LydvdXRwdXRzL2ZpbmFsL3JlbmRlci1yZXF1ZXN0Lmpzb24nLG91dHB1dD1vdXRwdXQpKSkKICAgICAgICByZWNlaXB0WydzdGFnZXMnXS5hcHBlbmQoeyduYW1lJzonZXhpc3Rpbmctc3R1ZGlvLWZpbmFsJywnc2Vjb25kcyc6dGltZS5tb25vdG9uaWMoKS10fSkKICAgICAgICByZXN1bHQ9anNvbi5sb2Fkcygob3V0cHV0LydyZW5kZXItcmVjZWlwdC5qc29uJykucmVhZF90ZXh0KCkpCiAgICAgICAgaWYgcmVzdWx0WydlbmNvZGVyJ10hPSdoMjY0X252ZW5jJzpyYWlzZSBSdW50aW1lRXJyb3IoJ0ZpbmFsIHJlbmRlcmVyIGRpZCBub3QgdXNlIE5WRU5DJykKICAgICAgICByZWNlaXB0WydzdHVkaW9SZW5kZXInXT1yZXN1bHQKICAgICAgICAjIFBlcnNpc3Qgbm9ybWFsIG1lZGlhLCBuYXRpdmUgc291cmNlLCBvdXRwdXQgYW5kIHJlY2VpcHRzIGJlZm9yZSBleGl0LgogICAgICAgIGZvciBmaWxlIGluIFtvdXRwdXQvJ2ZpbmFsLm1wNCcsb3V0cHV0Lydwb3N0ZXIuanBnJyxvdXRwdXQvJ3JlbmRlci1yZWNlaXB0Lmpzb24nXToKICAgICAgICAgICAgcGVyc2lzdChmaWxlKQogICAgICAgIHJlY2VpcHRbJ3N0YXR1cyddPSdTVUNDRUVERUQnCiAgICBleGNlcHQgRXhjZXB0aW9uIGFzIGU6CiAgICAgICAgcmVjZWlwdFsnc3RhdHVzJ109J0ZBSUxFRCc7cmVjZWlwdFsnZXJyb3InXT1yZXByKGUpCiAgICAgICAgcmFpc2UKICAgIGZpbmFsbHk6CiAgICAgICAgcmVjZWlwdFsnZmluaXNoZWRBdCddPW5vdygpO3JlY2VpcHRbJ3dvcmtsb2FkU2Vjb25kcyddPXRpbWUubW9ub3RvbmljKCktc3RhcnRlZAogICAgICAgIGNhY2hlPWJhc2UvJ2ZpbG0vZ3B1LWZyYW1lcycKICAgICAgICAjIElmIGFuIGVuY29kaW5nL2NvbXBvc2l0aW9uIHJlcGFpciBpcyBldmVyIG5lZWRlZCwgcmV0YWluIGNvbXBsZXRlZAogICAgICAgICMgc291cmNlcyBhYm92ZS4gSWYgdGhlIG5hdGl2ZSBzdGFnZSBmYWlscyBtaWQtc2VxdWVuY2UsIHByZXNlcnZlIGl0cwogICAgICAgICMgY29tcGxldGVkIGZyYW1lcyBhcyBhIGhhc2gtYm91bmQgY2FjaGUgaW5zdGVhZCBvZiB0aHJvd2luZyB0aGVtIGF3YXkuCiAgICAgICAgaWYgcmVjZWlwdFsnc3RhdHVzJ10hPSdTVUNDRUVERUQnIGFuZCBjYWNoZS5leGlzdHMoKSBhbmQgbGVuKFtvIGZvciBvIGluIHJlY2VpcHRbJ291dHB1dHMnXSBpZiBvWydwYXRoJ10uc3RhcnRzd2l0aCgnYXNzZXRzL2ZpbmFsLycpXSk8NToKICAgICAgICAgICAgZmlsZXM9bGlzdChjYWNoZS5nbG9iKCdmcmFtZV8qLnBuZycpKQogICAgICAgICAgICBkZWYga2VlcF9mcmFtZShmaWxlKToKICAgICAgICAgICAgICAgIGJ1Y2tldC5ibG9iKHByZWZpeCsnL2ZyYW1lLWNhY2hlLycrZmlsZS5uYW1lKS51cGxvYWRfZnJvbV9maWxlbmFtZShmaWxlLHRpbWVvdXQ9MzApCiAgICAgICAgICAgICAgICByZXR1cm4geyduYW1lJzpmaWxlLm5hbWUsJ3NoYTI1Nic6ZGlnZXN0KGZpbGUpLCdieXRlcyc6ZmlsZS5zdGF0KCkuc3Rfc2l6ZX0KICAgICAgICAgICAgd2l0aCBUaHJlYWRQb29sRXhlY3V0b3IobWF4X3dvcmtlcnM9OCkgYXMgcG9vbDppdGVtcz1saXN0KHBvb2wubWFwKGtlZXBfZnJhbWUsZmlsZXMpKQogICAgICAgICAgICBjYWNoZV9tYW5pZmVzdD17J25hdGl2ZVNjZW5lU2hhMjU2JzpkaWdlc3QoYmFzZS8nZmlsbS9hc3NldHMvd2VsY29tZS13b3JsZC5ibGVuZCcpLCd3aWR0aCc6MTkyMCwnc2FtcGxlcyc6MjQsJ2Rlbm9pc2VyJzonT1BFTklNQUdFREVOT0lTRV9DUFUnLCdmcmFtZXMnOml0ZW1zfQogICAgICAgICAgICBidWNrZXQuYmxvYihwcmVmaXgrJy9mcmFtZS1jYWNoZS9tYW5pZmVzdC5qc29uJykudXBsb2FkX2Zyb21fc3RyaW5nKGpzb24uZHVtcHMoY2FjaGVfbWFuaWZlc3QpLGNvbnRlbnRfdHlwZT0nYXBwbGljYXRpb24vanNvbicsdGltZW91dD0zMCkKICAgICAgICAgICAgcmVjZWlwdFsncGFydGlhbE5hdGl2ZUNhY2hlJ109eydwcmVmaXgnOnByZWZpeCsnL2ZyYW1lLWNhY2hlJywnZnJhbWVzJzpsZW4oaXRlbXMpfQogICAgICAgIGZvciBmIGluIGJhc2UuZ2xvYignKi5sb2cnKToKICAgICAgICAgICAgYnVja2V0LmJsb2IocHJlZml4KycvbG9ncy8nK2YubmFtZSkudXBsb2FkX2Zyb21fZmlsZW5hbWUoZix0aW1lb3V0PTMwKQogICAgICAgIGJ1Y2tldC5ibG9iKHByZWZpeCsnL2dwdS1yZWNlaXB0Lmpzb24nKS51cGxvYWRfZnJvbV9zdHJpbmcoanNvbi5kdW1wcyhyZWNlaXB0LGluZGVudD0yLGRlZmF1bHQ9c3RyKSxjb250ZW50X3R5cGU9J2FwcGxpY2F0aW9uL2pzb24nLHRpbWVvdXQ9MzApCiAgICAgICAgcHJpbnQoanNvbi5kdW1wcyh7J2V2ZW50Jzond29ya2xvYWRfdGVybWluYWwnLCdzdGF0dXMnOnJlY2VpcHRbJ3N0YXR1cyddLCdzZWNvbmRzJzpyZWNlaXB0Wyd3b3JrbG9hZFNlY29uZHMnXX0pLGZsdXNoPVRydWUpCiAgICAgICAgIyBObyBkYWVtb24gb3IgY2hpbGQgaXMgcmV0YWluZWQgYWZ0ZXIgc3luY2hyb25vdXMgcmVuZGVyIGNvbXBsZXRpb24uCgoKaWYgX19uYW1lX189PSdfX21haW5fXyc6bWFpbigpCg=='); assert hashlib.sha256(source).hexdigest()=='9acebdba05e75d43d2d06e9b6353d2c4f7a4835f6cbc466e45480db8ee3e9361'; exec(compile(source,'welcome_cloud_job.py','exec'),{'__name__':'__main__'})"
+                    ],
+                    "env": [
+                      {
+                        "name": "GPU_QUALIFICATION_PREFIX",
+                        "value": "temp_studio_3d/qualification/rtx-20261006-160331"
+                      },
+                      {
+                        "name": "GPU_QUALIFICATION_SOURCE_SHA256",
+                        "value": "4334b75628bd307f0a08881cbe15d10350abe0a8363b724b4580c5cc709d4cc6"
+                      },
+                      {
+                        "name": "GPU_QUALIFICATION_INPUT_SHA256",
+                        "value": "807f0f361f03c0a4936733c8c69d1232e6f4620791d3af12b0998978d008473b"
+                      },
+                      {
+                        "name": "GPU_QUALIFICATION_INPUT_GENERATION",
+                        "value": "1791302617517274"
+                      },
+                      {
+                        "name": "WELCOME_STORY_PREFIX",
+                        "value": "founder_films/welcome-cinematic-20261009/v5"
+                      },
+                      {
+                        "name": "WELCOME_ASSET_PREFIX",
+                        "value": "founder_films/welcome-cinematic-20261009/v1"
+                      },
+                      {
+                        "name": "WELCOME_INPUT_OBJECT",
+                        "value": "inputs-v5.tar.gz"
+                      },
+                      {
+                        "name": "WELCOME_RUNTIME_SHA256",
+                        "value": "cd2c52e50905be395bf3a604b5c35a6ac9cbd18426a15e1d751ac28cc4c251d5"
+                      },
+                      {
+                        "name": "WELCOME_INPUTS_SHA256",
+                        "value": "52532d8282cc74be2547e1126b06f0d89dc0a26cabe6b7e03beba00f355a778c"
+                      },
+                      {
+                        "name": "WELCOME_BLENDER_SHA256",
+                        "value": "dcdc3eca6c9825bb35a8033b689c053f3cb5a9b0cd2a61b2eac2a49436b4ad3d"
+                      },
+                      {
+                        "name": "WELCOME_NATIVE_LIBS_SHA256",
+                        "value": "0ad9751ece48b0d032f69d8c66d74c6824bf6443c49d41ed9992becc350e91aa"
+                      }
+                    ],
+                    "resources": {
+                      "limits": {
+                        "cpu": "20",
+                        "nvidia.com/gpu": "1",
+                        "memory": "80Gi"
+                      }
+                    }
+                  }
+                ],
+                "maxRetries": 0,
+                "timeoutSeconds": "3300",
+                "serviceAccountName": "viral-studio-3d-renderer@autopromote-cc6d3.iam.gserviceaccount.com",
+                "nodeSelector": {
+                  "run.googleapis.com/accelerator": "nvidia-rtx-pro-6000"
+                }
+              }
+            }
+          },
+          "status": {
+            "observedGeneration": 1,
+            "conditions": [
+              {
+                "type": "Completed",
+                "status": "True",
+                "message": "Execution completed successfully in 16m34.34s.",
+                "lastTransitionTime": "2026-10-09T09:22:41.692720Z"
+              },
+              {
+                "type": "ResourcesAvailable",
+                "status": "True",
+                "message": "Provisioned imported containers.",
+                "lastTransitionTime": "2026-10-09T09:06:00.227648Z"
+              },
+              {
+                "type": "Started",
+                "status": "True",
+                "message": "Started deployed execution in 2m10.65s.",
+                "lastTransitionTime": "2026-10-09T09:08:10.884376Z"
+              },
+              {
+                "type": "ContainerReady",
+                "status": "True",
+                "message": "Imported container image.",
+                "lastTransitionTime": "2026-10-09T09:06:00.070573Z"
+              },
+              {
+                "type": "Retry",
+                "status": "True",
+                "reason": "ImmediateRetry",
+                "message": "System will retry after 00:00 from lastTransitionTime for attempt 0.",
+                "lastTransitionTime": "2026-10-09T09:22:43.726329Z",
+                "severity": "Info"
+              }
+            ],
+            "startTime": "2026-10-09T09:06:07.349724Z",
+            "completionTime": "2026-10-09T09:22:41.692720Z",
+            "succeededCount": 1,
+            "logUri": "https://console.cloud.google.com/logs/viewer?project=autopromote-cc6d3&advancedFilter=resource.type%3D%22cloud_run_job%22%0Aresource.labels.job_name%3D%22viral-studio-rtx-qualification%22%0Aresource.labels.location%3D%22us-central1%22%0Alabels.%22run.googleapis.com/execution_name%22%3D%22viral-studio-rtx-qualification-2hsx4%22"
+          },
+          "@type": "type.googleapis.com/google.cloud.run.v1.Execution"
+        }
+      },
+      "insertId": "ozpzvpd4mao",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:43.750004Z",
+      "severity": "INFO",
+      "labels": {
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/cloudaudit.googleapis.com%2Fsystem_event",
+      "receiveTimestamp": "2026-10-09T09:22:44.642040877Z"
+    },
+    {
+      "textPayload": "Container called exit(0).",
+      "insertId": "6ac8b2590005c17240b91df1",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1",
+          "project_id": "autopromote-cc6d3"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:33.377078Z",
+      "severity": "INFO",
+      "labels": {
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "run.googleapis.com/task_index": "0",
+        "purpose": "gpu-qualification",
+        "product": "autopromote",
+        "run.googleapis.com/task_attempt": "0",
+        "production-traffic": "false",
+        "container_name": "worker"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+      "receiveTimestamp": "2026-10-09T09:22:33.387612249Z"
+    },
+    {
+      "insertId": "6ac8b259000180d131bceed7",
+      "jsonPayload": {
+        "event": "workload_terminal",
+        "seconds": 853.535984666,
+        "status": "SUCCEEDED"
+      },
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "job_name": "viral-studio-rtx-qualification",
+          "project_id": "autopromote-cc6d3",
+          "location": "us-central1"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:33.098513Z",
+      "labels": {
+        "production-traffic": "false",
+        "run.googleapis.com/task_index": "0",
+        "run.googleapis.com/task_attempt": "0",
+        "product": "autopromote",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-09T09:22:33.317528206Z"
+    },
+    {
+      "insertId": "6ac8b2550009ddae747bdd1a",
+      "jsonPayload": {
+        "duration": 38,
+        "path": "/tmp/welcome-native/film/outputs/final/final.mp4",
+        "event": "factory_rendered"
+      },
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:29.646574Z",
+      "labels": {
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "production-traffic": "false",
+        "run.googleapis.com/task_index": "0",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/task_attempt": "0",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "product": "autopromote"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-09T09:22:29.650935080Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Running async command: ffmpeg -hide_banner -loglevel error -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_finish.mp4 -itsoffset 2.100000 -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_title_0.mov -itsoffset 9.300000 -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_title_1.mov -itsoffset 15.800000 -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_title_2.mov -itsoffset 20.200000 -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_title_3.mov -itsoffset 26.000000 -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_title_4.mov -itsoffset 32.500000 -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_title_5.mov -itsoffset 35.000000 -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_title_6.mov -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_studio_music.wav -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_sfx_mix.wav -filter_complex [0:v][1:v]overlay=0:0:eof_action=pass:format=auto[text_overlay_0];[text_overlay_0][2:v]overlay=0:0:eof_action=pass:format=auto[text_overlay_1];[text_overlay_1][3:v]overlay=0:0:eof_action=pass:format=auto[text_overlay_2];[text_overlay_2][4:v]overlay=0:0:eof_action=pass:format=auto[text_overlay_3];[text_overlay_3][5:v]overlay=0:0:eof_action=pass:format=auto[text_overlay_4];[text_overlay_4][6:v]overlay=0:0:eof_action=pass:format=auto[text_overlay_5];[text_overlay_5][7:v]overlay=0:0:eof_action=pass:format=auto[text_overlay_6];[text_overlay_6]tpad=stop_mode=clone:stop_duration=0.033333333,fps=24,trim=duration=38.000000000[delivery_output];[delivery_output]null[output];[8:a]atrim=0:38.000,asetpts=PTS-STARTPTS,volume=0.820,afade=t=in:st=0:d=0.250,afade=t=out:st=37.400:d=0.600[studio_music_raw];[studio_music_raw][9:a]amix=inputs=2:duration=first:dropout_transition=2:normalize=0[a_mix_unpadded];[a_mix_unpadded]apad=whole_dur=38.000,atrim=0:38.000[a_mix] -map [output] -map [a_mix] -c:a aac -b:a 160k -t 38.000 -c:v h264_nvenc -preset p4 -rc vbr -cq 19 -b:v 0 -pix_fmt yuv420p -movflags +faststart -y /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_viral.mp4",
+      "insertId": "6ac8b250000368e3de98d80f",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "job_name": "viral-studio-rtx-qualification",
+          "project_id": "autopromote-cc6d3",
+          "location": "us-central1"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:24.223459Z",
+      "labels": {
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "product": "autopromote",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/task_index": "0",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "production-traffic": "false",
+        "run.googleapis.com/task_attempt": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:24.397509649Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Running FFmpeg: ffmpeg -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_finish.mp4 -itsoffset 2.100000 -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_title_0.mov -itsoffset 9.300000 -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_title_1.mov -itsoffset 15.800000 -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_title_2.mov -itsoffset 20.200000 -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_title_3.mov -itsoffset 26.000000 -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_title_4.mov -itsoffset 32.500000 -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_title_5.mov -itsoffset 35.000000 -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_title_6.mov -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_studio_music.wav -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_sfx_mix.wav -filter_complex [0:v][1:v]overlay=0:0:eof_action=pass:format=auto[text_overlay_0];[text_overlay_0][2:v]overlay=0:0:eof_action=pass:format=auto[text_overlay_1];[text_overlay_1][3:v]overlay=0:0:eof_action=pass:format=auto[text_overlay_2];[text_overlay_2][4:v]overlay=0:0:eof_action=pass:format=auto[text_overlay_3];[text_overlay_3][5:v]overlay=0:0:eof_action=pass:format=auto[text_overlay_4];[text_overlay_4][6:v]overlay=0:0:eof_action=pass:format=auto[text_overlay_5];[text_overlay_5][7:v]overlay=0:0:eof_action=pass:format=auto[text_overlay_6];[text_overlay_6]tpad=stop_mode=clone:stop_duration=0.033333333,fps=24,trim=duration=38.000000000[delivery_output];[delivery_output]null[output];[8:a]atrim=0:38.000,asetpts=PTS-STARTPTS,volume=0.820,afade=t=in:st=0:d=0.250,afade=t=out:st=37.400:d=0.600[studio_music_raw];[studio_music_raw][9:a]amix=inputs=2:duration=first:dropout_transition=2:normalize=0[a_mix_unpadded];[a_mix_unpadded]apad=whole_dur=38.000,atrim=0:38.000[a_mix] -map [output] -map [a_mix] -c:a aac -b:a 160k -t 38.000 -c:v h264_nvenc -preset p4 -rc vbr -cq 19 -b:v 0 -pix_fmt yuv420p -movflags +faststart -y /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_viral.mp4",
+      "insertId": "6ac8b250000368d291954c09",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification",
+          "project_id": "autopromote-cc6d3"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:24.223442Z",
+      "labels": {
+        "run.googleapis.com/task_attempt": "0",
+        "run.googleapis.com/task_index": "0",
+        "product": "autopromote",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "purpose": "gpu-qualification",
+        "production-traffic": "false",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:24.397509649Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Materialized sync audio 38.0s (7.0MB): /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_sfx_0.wav",
+      "insertId": "6ac8b24f000bec67e8fb3171",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:23.781415Z",
+      "labels": {
+        "production-traffic": "false",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "run.googleapis.com/task_index": "0",
+        "purpose": "gpu-qualification",
+        "product": "autopromote",
+        "run.googleapis.com/task_attempt": "0",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:24.065676300Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Running async command: ffmpeg -hide_banner -loglevel error -nostdin -user_agent Mozilla/5.0 -timeout 30000000 -i http://127.0.0.1:8765/assets/cues.wav -vn -ac 2 -ar 48000 -acodec pcm_s16le -y /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_sfx_0.wav.part.wav",
+      "insertId": "6ac8b24f0008c55f8ae46305",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:23.574815Z",
+      "labels": {
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "production-traffic": "false",
+        "product": "autopromote",
+        "run.googleapis.com/task_attempt": "0",
+        "run.googleapis.com/task_index": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:23.742318855Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Materialized sync audio 38.0s (7.0MB): /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_studio_music.wav",
+      "insertId": "6ac8b24f0008041cf72cf059",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1",
+          "project_id": "autopromote-cc6d3"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:23.525340Z",
+      "labels": {
+        "production-traffic": "false",
+        "run.googleapis.com/task_attempt": "0",
+        "run.googleapis.com/task_index": "0",
+        "product": "autopromote",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "purpose": "gpu-qualification"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:23.742318855Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Running async command: ffmpeg -hide_banner -loglevel error -nostdin -user_agent Mozilla/5.0 -timeout 30000000 -i http://127.0.0.1:8765/assets/score.wav -vn -ac 2 -ar 48000 -acodec pcm_s16le -y /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_studio_music.wav.part.wav",
+      "insertId": "6ac8b24f0005115bebb6a37b",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:23.332123Z",
+      "labels": {
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/task_attempt": "0",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "run.googleapis.com/task_index": "0",
+        "product": "autopromote",
+        "production-traffic": "false"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:23.398790268Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Running async command: ffmpeg -hide_banner -loglevel error -hide_banner -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_finish.mp4 -t 6.0 -vf cropdetect=24:2:0 -an -f null -",
+      "insertId": "6ac8b24400023b0256a99a54",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification",
+          "project_id": "autopromote-cc6d3"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:12.146178Z",
+      "labels": {
+        "run.googleapis.com/task_attempt": "0",
+        "purpose": "gpu-qualification",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "product": "autopromote",
+        "run.googleapis.com/task_index": "0",
+        "production-traffic": "false"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:12.412774798Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Running async command: ffmpeg -hide_banner -loglevel error -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_trimmed.mp4 -vf eq=brightness=0.0000:contrast=1.0000:saturation=1.0000:eval=frame,format=yuv420p,setsar=1 -c:v libx264 -preset veryfast -crf 19 -pix_fmt yuv420p -an -movflags +faststart -y /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_finish.mp4",
+      "insertId": "6ac8b2410004f6d7f6b6c6c7",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1",
+          "project_id": "autopromote-cc6d3"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:09.325335Z",
+      "labels": {
+        "production-traffic": "false",
+        "run.googleapis.com/task_attempt": "0",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/task_index": "0",
+        "product": "autopromote"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:09.422061992Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Running async command: ffmpeg -hide_banner -loglevel error -f concat -safe 0 -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_concat.txt -c copy -y /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_trimmed.mp4",
+      "insertId": "6ac8b241000133f38ebda9c7",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:09.078835Z",
+      "labels": {
+        "product": "autopromote",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/task_index": "0",
+        "run.googleapis.com/task_attempt": "0",
+        "production-traffic": "false"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:09.422061992Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Running async command: ffmpeg -hide_banner -loglevel error -ss 0.0 -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_segment_src_4.mp4 -t 6.0 -vf scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,fps=30,setpts=PTS-STARTPTS -map 0:v:0 -an -c:v libx264 -preset ultrafast -pix_fmt yuv420p -movflags +faststart -y /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_segment_v_4.mp4",
+      "insertId": "6ac8b240000b2f1dcc42d950",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification",
+          "project_id": "autopromote-cc6d3"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:08.732957Z",
+      "labels": {
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "product": "autopromote",
+        "production-traffic": "false",
+        "run.googleapis.com/task_attempt": "0",
+        "run.googleapis.com/task_index": "0",
+        "purpose": "gpu-qualification"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:08.747770286Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Downloaded 2.2MB in 0.3s (8.6 MB/s)",
+      "insertId": "6ac8b2400008f3e2e5695740",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification",
+          "project_id": "autopromote-cc6d3"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:08.586722Z",
+      "labels": {
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/task_index": "0",
+        "production-traffic": "false",
+        "product": "autopromote",
+        "run.googleapis.com/task_attempt": "0",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:08.747770286Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Running async command: ffmpeg -hide_banner -loglevel error -nostdin -user_agent Mozilla/5.0 -timeout 30000000 -fflags +genpts -i http://127.0.0.1:8765/assets/final/autopromote.mp4 -c:v libx264 -preset ultrafast -crf 23 -vf fps=30 -vsync cfr -movflags +faststart -y /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_segment_src_4.mp4",
+      "insertId": "6ac8b2400004f609654456af",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification",
+          "project_id": "autopromote-cc6d3"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:08.325129Z",
+      "labels": {
+        "run.googleapis.com/task_index": "0",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "run.googleapis.com/task_attempt": "0",
+        "production-traffic": "false",
+        "product": "autopromote",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:08.413671103Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Downloading source video: http://127.0.0.1:8765/assets/final/autopromote.mp4",
+      "insertId": "6ac8b2400004f5fabb795b29",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification",
+          "project_id": "autopromote-cc6d3"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:08.325114Z",
+      "labels": {
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "run.googleapis.com/task_index": "0",
+        "purpose": "gpu-qualification",
+        "production-traffic": "false",
+        "run.googleapis.com/task_attempt": "0",
+        "product": "autopromote"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:08.413671103Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Running async command: ffmpeg -hide_banner -loglevel error -ss 0.0 -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_segment_src_3.mp4 -t 7.0 -vf scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,fps=30,setpts=PTS-STARTPTS -map 0:v:0 -an -c:v libx264 -preset ultrafast -pix_fmt yuv420p -movflags +faststart -y /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_segment_v_3.mp4",
+      "insertId": "6ac8b23f000e30bc7944bdea",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:07.929980Z",
+      "labels": {
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/task_index": "0",
+        "run.googleapis.com/task_attempt": "0",
+        "product": "autopromote",
+        "production-traffic": "false"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:08.079370798Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Downloaded 8.8MB in 0.3s (26.1 MB/s)",
+      "insertId": "6ac8b23f000bdb643893778f",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:07.777060Z",
+      "labels": {
+        "product": "autopromote",
+        "run.googleapis.com/task_index": "0",
+        "purpose": "gpu-qualification",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "production-traffic": "false",
+        "run.googleapis.com/task_attempt": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:08.079370798Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Running async command: ffmpeg -hide_banner -loglevel error -nostdin -user_agent Mozilla/5.0 -timeout 30000000 -fflags +genpts -i http://127.0.0.1:8765/assets/final/impact.mp4 -c:v libx264 -preset ultrafast -crf 23 -vf fps=30 -vsync cfr -movflags +faststart -y /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_segment_src_3.mp4",
+      "insertId": "6ac8b23f0006ad13b207db04",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:07.437523Z",
+      "labels": {
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "run.googleapis.com/task_attempt": "0",
+        "run.googleapis.com/task_index": "0",
+        "product": "autopromote",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "purpose": "gpu-qualification",
+        "production-traffic": "false"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:07.759016742Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Downloading source video: http://127.0.0.1:8765/assets/final/impact.mp4",
+      "insertId": "6ac8b23f0006ad08ffbf685c",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "job_name": "viral-studio-rtx-qualification",
+          "project_id": "autopromote-cc6d3",
+          "location": "us-central1"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:07.437512Z",
+      "labels": {
+        "product": "autopromote",
+        "production-traffic": "false",
+        "run.googleapis.com/task_attempt": "0",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "run.googleapis.com/task_index": "0",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:07.759016742Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Running async command: ffmpeg -hide_banner -loglevel error -ss 0.0 -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_segment_src_2.mp4 -t 10.0 -vf scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,fps=30,setpts=PTS-STARTPTS -map 0:v:0 -an -c:v libx264 -preset ultrafast -pix_fmt yuv420p -movflags +faststart -y /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_segment_v_2.mp4",
+      "insertId": "6ac8b23e000eb77bc6814260",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "job_name": "viral-studio-rtx-qualification",
+          "project_id": "autopromote-cc6d3",
+          "location": "us-central1"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:06.964475Z",
+      "labels": {
+        "production-traffic": "false",
+        "run.googleapis.com/task_index": "0",
+        "purpose": "gpu-qualification",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "product": "autopromote",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "run.googleapis.com/task_attempt": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:07.086652474Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Downloaded 13.9MB in 0.5s (30.1 MB/s)",
+      "insertId": "6ac8b23e000bf297b7525bf4",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:06.782999Z",
+      "labels": {
+        "run.googleapis.com/task_index": "0",
+        "product": "autopromote",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "production-traffic": "false",
+        "run.googleapis.com/task_attempt": "0",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "purpose": "gpu-qualification"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:07.086652474Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Running async command: ffmpeg -hide_banner -loglevel error -nostdin -user_agent Mozilla/5.0 -timeout 30000000 -fflags +genpts -i http://127.0.0.1:8765/assets/final/motion.mp4 -c:v libx264 -preset ultrafast -crf 23 -vf fps=30 -vsync cfr -movflags +faststart -y /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_segment_src_2.mp4",
+      "insertId": "6ac8b23e0004e0f2e3b88a05",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:06.319730Z",
+      "labels": {
+        "run.googleapis.com/task_attempt": "0",
+        "purpose": "gpu-qualification",
+        "production-traffic": "false",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "run.googleapis.com/task_index": "0",
+        "product": "autopromote"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:06.417592872Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Downloading source video: http://127.0.0.1:8765/assets/final/motion.mp4",
+      "insertId": "6ac8b23e0004e0e7c5b4e60d",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:06.319719Z",
+      "labels": {
+        "run.googleapis.com/task_index": "0",
+        "product": "autopromote",
+        "run.googleapis.com/task_attempt": "0",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "purpose": "gpu-qualification",
+        "production-traffic": "false"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:06.417592872Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Running async command: ffmpeg -hide_banner -loglevel error -ss 0.0 -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_segment_src_1.mp4 -t 7.0 -vf scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,fps=30,setpts=PTS-STARTPTS -map 0:v:0 -an -c:v libx264 -preset ultrafast -pix_fmt yuv420p -movflags +faststart -y /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_segment_v_1.mp4",
+      "insertId": "6ac8b23d000e64ce5444db1a",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "job_name": "viral-studio-rtx-qualification",
+          "project_id": "autopromote-cc6d3",
+          "location": "us-central1"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:05.943310Z",
+      "labels": {
+        "product": "autopromote",
+        "run.googleapis.com/task_index": "0",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/task_attempt": "0",
+        "production-traffic": "false",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:06.092420105Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Downloaded 7.1MB in 0.3s (22.5 MB/s)",
+      "insertId": "6ac8b23d000bc01aee4fd015",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification",
+          "project_id": "autopromote-cc6d3"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:05.770074Z",
+      "labels": {
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "production-traffic": "false",
+        "product": "autopromote",
+        "run.googleapis.com/task_index": "0",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "run.googleapis.com/task_attempt": "0",
+        "purpose": "gpu-qualification"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:06.092420105Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Running async command: ffmpeg -hide_banner -loglevel error -nostdin -user_agent Mozilla/5.0 -timeout 30000000 -fflags +genpts -i http://127.0.0.1:8765/assets/final/structure.mp4 -c:v libx264 -preset ultrafast -crf 23 -vf fps=30 -vsync cfr -movflags +faststart -y /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_segment_src_1.mp4",
+      "insertId": "6ac8b23d0006f19bfc5212ca",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:05.455067Z",
+      "labels": {
+        "run.googleapis.com/task_attempt": "0",
+        "purpose": "gpu-qualification",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "run.googleapis.com/task_index": "0",
+        "product": "autopromote",
+        "production-traffic": "false",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:05.750614901Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Downloading source video: http://127.0.0.1:8765/assets/final/structure.mp4",
+      "insertId": "6ac8b23d0006f19228c3da11",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:05.455058Z",
+      "labels": {
+        "product": "autopromote",
+        "production-traffic": "false",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/task_attempt": "0",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "run.googleapis.com/task_index": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:05.750614901Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Running async command: ffmpeg -hide_banner -loglevel error -ss 0.0 -i /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_input.mp4 -t 8.0 -vf scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,fps=30,setpts=PTS-STARTPTS -map 0:v:0 -an -c:v libx264 -preset ultrafast -pix_fmt yuv420p -movflags +faststart -y /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_segment_v_0.mp4",
+      "insertId": "6ac8b23d0000d6cdd54c3009",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "job_name": "viral-studio-rtx-qualification",
+          "project_id": "autopromote-cc6d3",
+          "location": "us-central1"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:05.054989Z",
+      "labels": {
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "production-traffic": "false",
+        "product": "autopromote",
+        "run.googleapis.com/task_attempt": "0",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "run.googleapis.com/task_index": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:05.083025460Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Downloaded 6.4MB in 0.4s (18.3 MB/s)",
+      "insertId": "6ac8b23c000c298fde38c44b",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:04.797071Z",
+      "labels": {
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "product": "autopromote",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "run.googleapis.com/task_attempt": "0",
+        "production-traffic": "false",
+        "run.googleapis.com/task_index": "0",
+        "purpose": "gpu-qualification"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:05.083025460Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Running async command: ffmpeg -hide_banner -loglevel error -nostdin -user_agent Mozilla/5.0 -timeout 30000000 -fflags +genpts -i http://127.0.0.1:8765/assets/final/idea.mp4 -c:v libx264 -preset ultrafast -crf 23 -vf fps=30 -vsync cfr -movflags +faststart -y /tmp/welcome-native/tmp/f8894094-2e83-486d-b505-252f3ba37ee7_input.mp4",
+      "insertId": "6ac8b23c0006c542787df3dc",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1",
+          "project_id": "autopromote-cc6d3"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:04.443714Z",
+      "labels": {
+        "purpose": "gpu-qualification",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "production-traffic": "false",
+        "run.googleapis.com/task_attempt": "0",
+        "product": "autopromote",
+        "run.googleapis.com/task_index": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:04.750645136Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Downloading source video: http://127.0.0.1:8765/assets/final/idea.mp4",
+      "insertId": "6ac8b23c0006c52a5a4afa95",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:04.443690Z",
+      "labels": {
+        "run.googleapis.com/task_index": "0",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "purpose": "gpu-qualification",
+        "production-traffic": "false",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "run.googleapis.com/task_attempt": "0",
+        "product": "autopromote"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:04.750645136Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Rendering viral clip for http://127.0.0.1:8765/assets/final/idea.mp4 with 7 overlays (SmartCrop=False, AutoCaptions=False)",
+      "insertId": "6ac8b23c0006c517c6ba96f4",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "location": "us-central1",
+          "project_id": "autopromote-cc6d3",
+          "job_name": "viral-studio-rtx-qualification"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:04.443671Z",
+      "labels": {
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "product": "autopromote",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "run.googleapis.com/task_attempt": "0",
+        "production-traffic": "false",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/task_index": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:04.750645136Z"
+    },
+    {
+      "textPayload": "WARNING:MediaWorker:MoviePy or Edge-TTS import failed: No module named 'edge_tts'",
+      "insertId": "6ac8b23c00068fbdc0213f6b",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "location": "us-central1",
+          "project_id": "autopromote-cc6d3",
+          "job_name": "viral-studio-rtx-qualification"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:04.430013Z",
+      "labels": {
+        "run.googleapis.com/task_index": "0",
+        "product": "autopromote",
+        "run.googleapis.com/task_attempt": "0",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "production-traffic": "false",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "purpose": "gpu-qualification"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:04.750645136Z"
+    },
+    {
+      "textPayload": "INFO:MediaWorker:Video encoder: h264_nvenc (preset=p4)",
+      "insertId": "6ac8b23c000645181dc8b4f2",
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:04.410904Z",
+      "labels": {
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "product": "autopromote",
+        "run.googleapis.com/task_attempt": "0",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "production-traffic": "false",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/task_index": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstderr",
+      "receiveTimestamp": "2026-10-09T09:22:04.418748888Z"
+    },
+    {
+      "insertId": "6ac8b2390004a6b190d13e76",
+      "jsonPayload": {
+        "log": "source-autopromote.log",
+        "seconds": 2.328073943999925,
+        "event": "stage_completed",
+        "name": "source-autopromote"
+      },
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification"
+        }
+      },
+      "timestamp": "2026-10-09T09:22:01.304817Z",
+      "labels": {
+        "product": "autopromote",
+        "production-traffic": "false",
+        "run.googleapis.com/task_index": "0",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/task_attempt": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-09T09:22:01.391142114Z"
+    },
+    {
+      "insertId": "6ac8b236000aa0c5e8776bee",
+      "jsonPayload": {
+        "seconds": 1.9538791410000158,
+        "name": "source-impact",
+        "event": "stage_completed",
+        "log": "source-impact.log"
+      },
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1"
+        }
+      },
+      "timestamp": "2026-10-09T09:21:58.696517Z",
+      "labels": {
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "purpose": "gpu-qualification",
+        "production-traffic": "false",
+        "run.googleapis.com/task_index": "0",
+        "run.googleapis.com/task_attempt": "0",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "product": "autopromote"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-09T09:21:58.725061565Z"
+    },
+    {
+      "insertId": "6ac8b2340005e90a7100d151",
+      "jsonPayload": {
+        "log": "source-motion.log",
+        "name": "source-motion",
+        "seconds": 2.539900657999965,
+        "event": "stage_completed"
+      },
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1",
+          "project_id": "autopromote-cc6d3"
+        }
+      },
+      "timestamp": "2026-10-09T09:21:56.387338Z",
+      "labels": {
+        "production-traffic": "false",
+        "run.googleapis.com/task_index": "0",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/task_attempt": "0",
+        "product": "autopromote",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-09T09:21:56.394570354Z"
+    },
+    {
+      "insertId": "6ac8b231000a226a3aeda1a8",
+      "jsonPayload": {
+        "name": "source-structure",
+        "log": "source-structure.log",
+        "event": "stage_completed",
+        "seconds": 2.1049707989999433
+      },
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification",
+          "project_id": "autopromote-cc6d3"
+        }
+      },
+      "timestamp": "2026-10-09T09:21:53.664170Z",
+      "labels": {
+        "run.googleapis.com/task_index": "0",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "purpose": "gpu-qualification",
+        "production-traffic": "false",
+        "product": "autopromote",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "run.googleapis.com/task_attempt": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-09T09:21:53.731110645Z"
+    },
+    {
+      "insertId": "6ac8b22f00047b2735845448",
+      "jsonPayload": {
+        "event": "stage_completed",
+        "name": "source-idea",
+        "log": "source-idea.log",
+        "seconds": 2.56430849100002
+      },
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification"
+        }
+      },
+      "timestamp": "2026-10-09T09:21:51.293671Z",
+      "labels": {
+        "product": "autopromote",
+        "run.googleapis.com/task_index": "0",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "purpose": "gpu-qualification",
+        "production-traffic": "false",
+        "run.googleapis.com/task_attempt": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-09T09:21:51.407885452Z"
+    },
+    {
+      "insertId": "6ac8b22c000b1fb4a3269633",
+      "jsonPayload": {
+        "seconds": 769.1368391560001,
+        "event": "stage_completed",
+        "log": "native-optix.log",
+        "name": "native-optix"
+      },
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification"
+        }
+      },
+      "timestamp": "2026-10-09T09:21:48.729012Z",
+      "labels": {
+        "product": "autopromote",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "run.googleapis.com/task_attempt": "0",
+        "run.googleapis.com/task_index": "0",
+        "production-traffic": "false",
+        "purpose": "gpu-qualification",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-09T09:21:48.738723829Z"
+    },
+    {
+      "insertId": "6ac8b20800087857d7a3ebcd",
+      "jsonPayload": {
+        "event": "native_frame",
+        "elapsedSeconds": 732.545694485,
+        "frame": 865
+      },
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification",
+          "project_id": "autopromote-cc6d3"
+        }
+      },
+      "timestamp": "2026-10-09T09:21:12.555095Z",
+      "labels": {
+        "product": "autopromote",
+        "run.googleapis.com/task_attempt": "0",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "production-traffic": "false",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "run.googleapis.com/task_index": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-09T09:21:12.561906413Z"
+    },
+    {
+      "insertId": "6ac8b1e4000207746f61c555",
+      "jsonPayload": {
+        "frame": 817,
+        "elapsedSeconds": 696.1233306830001,
+        "event": "native_frame"
+      },
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "job_name": "viral-studio-rtx-qualification",
+          "project_id": "autopromote-cc6d3",
+          "location": "us-central1"
+        }
+      },
+      "timestamp": "2026-10-09T09:20:36.132980Z",
+      "labels": {
+        "run.googleapis.com/task_index": "0",
+        "product": "autopromote",
+        "run.googleapis.com/task_attempt": "0",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "purpose": "gpu-qualification",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "production-traffic": "false"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-09T09:20:36.141226416Z"
+    },
+    {
+      "insertId": "6ac8b1be0007daa23eb930f8",
+      "jsonPayload": {
+        "frame": 769,
+        "event": "native_frame",
+        "elapsedSeconds": 658.505230338
+      },
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification"
+        }
+      },
+      "timestamp": "2026-10-09T09:19:58.514722Z",
+      "labels": {
+        "purpose": "gpu-qualification",
+        "production-traffic": "false",
+        "product": "autopromote",
+        "run.googleapis.com/task_attempt": "0",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "run.googleapis.com/task_index": "0",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-09T09:19:58.521555932Z"
+    },
+    {
+      "insertId": "6ac8b195000d7aa000f0806c",
+      "jsonPayload": {
+        "frame": 721,
+        "elapsedSeconds": 617.8736308790001,
+        "event": "native_frame"
+      },
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification"
+        }
+      },
+      "timestamp": "2026-10-09T09:19:17.883360Z",
+      "labels": {
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "product": "autopromote",
+        "production-traffic": "false",
+        "run.googleapis.com/task_attempt": "0",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "run.googleapis.com/task_index": "0",
+        "purpose": "gpu-qualification"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-09T09:19:17.891375522Z"
+    },
+    {
+      "insertId": "6ac8b16c000e08f6abfa90d3",
+      "jsonPayload": {
+        "event": "native_frame",
+        "elapsedSeconds": 576.909918323,
+        "frame": 673
+      },
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1"
+        }
+      },
+      "timestamp": "2026-10-09T09:18:36.919798Z",
+      "labels": {
+        "product": "autopromote",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "run.googleapis.com/task_index": "0",
+        "purpose": "gpu-qualification",
+        "production-traffic": "false",
+        "run.googleapis.com/task_attempt": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-09T09:18:36.926310657Z"
+    },
+    {
+      "insertId": "6ac8b143000a5cb768f97fec",
+      "jsonPayload": {
+        "frame": 625,
+        "elapsedSeconds": 535.669769018,
+        "event": "native_frame"
+      },
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification"
+        }
+      },
+      "timestamp": "2026-10-09T09:17:55.679095Z",
+      "labels": {
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "run.googleapis.com/task_index": "0",
+        "production-traffic": "false",
+        "product": "autopromote",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "run.googleapis.com/task_attempt": "0",
+        "purpose": "gpu-qualification"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-09T09:17:55.689634748Z"
+    },
+    {
+      "insertId": "6ac8b119000e793b1795a130",
+      "jsonPayload": {
+        "event": "native_frame",
+        "elapsedSeconds": 493.9390731870001,
+        "frame": 577
+      },
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1"
+        }
+      },
+      "timestamp": "2026-10-09T09:17:13.948539Z",
+      "labels": {
+        "product": "autopromote",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "run.googleapis.com/task_index": "0",
+        "production-traffic": "false",
+        "purpose": "gpu-qualification",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "run.googleapis.com/task_attempt": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-09T09:17:13.954881393Z"
+    },
+    {
+      "insertId": "6ac8b0f0000484814f81a4c3",
+      "jsonPayload": {
+        "event": "native_frame",
+        "elapsedSeconds": 452.28650949400003,
+        "frame": 529
+      },
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1",
+          "project_id": "autopromote-cc6d3"
+        }
+      },
+      "timestamp": "2026-10-09T09:16:32.296065Z",
+      "labels": {
+        "product": "autopromote",
+        "run.googleapis.com/task_attempt": "0",
+        "purpose": "gpu-qualification",
+        "production-traffic": "false",
+        "run.googleapis.com/task_index": "0",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-09T09:16:32.304657076Z"
+    },
+    {
+      "insertId": "6ac8b0c60003b63a6fbfdb22",
+      "jsonPayload": {
+        "elapsedSeconds": 410.233657384,
+        "event": "native_frame",
+        "frame": 481
+      },
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "location": "us-central1",
+          "project_id": "autopromote-cc6d3",
+          "job_name": "viral-studio-rtx-qualification"
+        }
+      },
+      "timestamp": "2026-10-09T09:15:50.243258Z",
+      "labels": {
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "production-traffic": "false",
+        "product": "autopromote",
+        "run.googleapis.com/task_attempt": "0",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/task_index": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-09T09:15:50.251246836Z"
+    },
+    {
+      "insertId": "6ac8b09b0005acfa24305ea7",
+      "jsonPayload": {
+        "event": "native_frame",
+        "frame": 433,
+        "elapsedSeconds": 367.36228686699997
+      },
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification"
+        }
+      },
+      "timestamp": "2026-10-09T09:15:07.371962Z",
+      "labels": {
+        "run.googleapis.com/task_index": "0",
+        "production-traffic": "false",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "product": "autopromote",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "run.googleapis.com/task_attempt": "0",
+        "purpose": "gpu-qualification"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-09T09:15:07.378582615Z"
+    },
+    {
+      "insertId": "6ac8b0720004b738170151c2",
+      "jsonPayload": {
+        "frame": 385,
+        "elapsedSeconds": 326.29922562499996,
+        "event": "native_frame"
+      },
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "job_name": "viral-studio-rtx-qualification",
+          "project_id": "autopromote-cc6d3",
+          "location": "us-central1"
+        }
+      },
+      "timestamp": "2026-10-09T09:14:26.309048Z",
+      "labels": {
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "production-traffic": "false",
+        "run.googleapis.com/task_index": "0",
+        "product": "autopromote",
+        "run.googleapis.com/task_attempt": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-09T09:14:26.327885434Z"
+    },
+    {
+      "insertId": "6ac8b04b00064ee3d2014f8d",
+      "jsonPayload": {
+        "frame": 337,
+        "elapsedSeconds": 287.40366891400004,
+        "event": "native_frame"
+      },
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification"
+        }
+      },
+      "timestamp": "2026-10-09T09:13:47.413411Z",
+      "labels": {
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "production-traffic": "false",
+        "product": "autopromote",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "run.googleapis.com/task_attempt": "0",
+        "run.googleapis.com/task_index": "0",
+        "purpose": "gpu-qualification"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-09T09:13:47.421390384Z"
+    },
+    {
+      "insertId": "6ac8b024000a8801a02e13cd",
+      "jsonPayload": {
+        "elapsedSeconds": 248.68094416699998,
+        "event": "native_frame",
+        "frame": 289
+      },
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification",
+          "project_id": "autopromote-cc6d3"
+        }
+      },
+      "timestamp": "2026-10-09T09:13:08.690177Z",
+      "labels": {
+        "run.googleapis.com/task_index": "0",
+        "run.googleapis.com/task_attempt": "0",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "product": "autopromote",
+        "production-traffic": "false",
+        "purpose": "gpu-qualification"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-09T09:13:08.698779087Z"
+    },
+    {
+      "insertId": "6ac8affe0001a4392fc379dd",
+      "jsonPayload": {
+        "event": "native_frame",
+        "elapsedSeconds": 210.098194248,
+        "frame": 241
+      },
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification"
+        }
+      },
+      "timestamp": "2026-10-09T09:12:30.107577Z",
+      "labels": {
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "product": "autopromote",
+        "run.googleapis.com/task_attempt": "0",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "production-traffic": "false",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/task_index": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-09T09:12:30.119226071Z"
+    },
+    {
+      "insertId": "6ac8afd6000c0180dfdb1c92",
+      "jsonPayload": {
+        "elapsedSeconds": 170.777325064,
+        "frame": 193,
+        "event": "native_frame"
+      },
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1",
+          "project_id": "autopromote-cc6d3"
+        }
+      },
+      "timestamp": "2026-10-09T09:11:50.786816Z",
+      "labels": {
+        "run.googleapis.com/task_attempt": "0",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "purpose": "gpu-qualification",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "run.googleapis.com/task_index": "0",
+        "product": "autopromote",
+        "production-traffic": "false"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-09T09:11:50.792896370Z"
+    },
+    {
+      "insertId": "6ac8afac000833bd996bf8bd",
+      "jsonPayload": {
+        "elapsedSeconds": 128.528071667,
+        "event": "native_frame",
+        "frame": 145
+      },
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification"
+        }
+      },
+      "timestamp": "2026-10-09T09:11:08.537533Z",
+      "labels": {
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/task_attempt": "0",
+        "product": "autopromote",
+        "production-traffic": "false",
+        "run.googleapis.com/task_index": "0",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-09T09:11:08.549729511Z"
+    },
+    {
+      "insertId": "6ac8af820002434c4dbf7191",
+      "jsonPayload": {
+        "elapsedSeconds": 86.138611502,
+        "event": "native_frame",
+        "frame": 97
+      },
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "location": "us-central1",
+          "job_name": "viral-studio-rtx-qualification",
+          "project_id": "autopromote-cc6d3"
+        }
+      },
+      "timestamp": "2026-10-09T09:10:26.148300Z",
+      "labels": {
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/task_index": "0",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4",
+        "production-traffic": "false",
+        "product": "autopromote",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "run.googleapis.com/task_attempt": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-09T09:10:26.157066916Z"
+    },
+    {
+      "insertId": "6ac8af57000d9a0ba69d22bc",
+      "jsonPayload": {
+        "frame": 49,
+        "event": "native_frame",
+        "elapsedSeconds": 43.881616451
+      },
+      "resource": {
+        "type": "cloud_run_job",
+        "labels": {
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1",
+          "project_id": "autopromote-cc6d3"
+        }
+      },
+      "timestamp": "2026-10-09T09:09:43.891403Z",
+      "labels": {
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/task_attempt": "0",
+        "instanceId": "0010dd860705f7f92e714e03890fa8c554bf201c00c7eb8de0c15ef6bb2f8d94e45405d19fa7b695c88941a3f55cd26be39194394df24a48096b7d742cffc14f980bb0bd740b6a24ceb1367e0eb43b7c3b67e0a4859f537c4b2916fec25031",
+        "product": "autopromote",
+        "production-traffic": "false",
+        "run.googleapis.com/task_index": "0",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-2hsx4"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-09T09:09:43.898035574Z"
+    }
+  ],
+  "nextPageToken": "evYGCvEGAdjKCLqpt3r44Rk_xSWWHVSZbQCD9TD_DI43UxnzzlwtyjodT0bE-tukkSa6J3j3BFWGRac5msMfqqznh9_EzSZtrDY7QX7YIAJMpT_PgE9qqYLhQjWasy7gTjAveHYDM6oBcF0do-Lbxhp0xvwzUQlmN4W0dpyz4__EkJVJEfapxxl5IT-kcukxot170oxZNd9S6mbI4KAj7-_ahmiJl8YktHcPGMNgRqciQGrxaWXqN5If5FZM-lAlUIGamI0c8-MA9lIkh1L8pNMvHI6Hm2vKDHEsvF7C7ysBgHVlSHb92FBFEGo7ie7ZXXmhoavT-3Z9ajgnU5XTeja_YFz9Usmw_4Kabx3F3x6FwcVHtI8o9RZD4j2_JzV4wWQVb4eF1PMuEid8-xBMdQWTZNvBI7qneswqSO0n_xljOcpoGkeP3WyKrr08wLFUtkqOafrn4xcT60rP51lixG_CKWuZoUwX4h1uYwzWmPeP-C4VV3J7GC75CW5J1fe5ERWt7MhvDTtq3mepC7rfT-OAmMbE16IslR7HqXZ_D6-c4H4caopWH72qyrkk3IqsvHoJ_aEqeqdDrsqtuZ8NxyOVUBmjGBTLkgr_Nnackp7t1e4xlnKMgq1obms0JCmpkci9k99aStST81qoSSzx3Fg22LQLXqcK9MQSUyz_ZRl2dMVwcpsO1jAkheZtbQiSs9TILwGYENsrcH-XecyoyjbBHshhEmeerT7Y8Vcl3DFL87IYDELYzt-RgkagjKaWegJVwiJ-kWFX39Q7spLcyCqpT1N-C4jqBI2IfGEnG0Mt8sQxfkO2f6Zw_MX1NaE-kXBw_m_bGHTMLUgEVX3cmfmVq_uZ13qy-ROO0JIpx8BNAabtLXxwn82sCkHj9jSf4fHlRWNHwpDzfz9ixw32K674vRlVkD4zAwHLfGZVv7-AOJWdOgy_aoG9DLdxM6SkACTXc6jDy7WHqG7NVCpNXGLFESAQg_MyA9DoZPuawxq4CkzJJdQ0pG606Lj3Nc1i33EPoPjtEAwolpeV0Rg58vZ6139NJLQsSrY4Ps9JZDEoXMFlbo-AYiPhWhCmN-9WBzJ2NjK9Jo711de35F2ASmb3nMqwALkC_ZGu5v6P5AnQ1g45bS8-3KncycaXDctGvYs3netkUbQVRe3qGyuhg3GspCqmYEcQAQ"
+}

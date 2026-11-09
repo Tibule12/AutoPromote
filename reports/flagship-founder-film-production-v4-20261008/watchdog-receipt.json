@@ -1,0 +1,9 @@
+{
+  "status": "MANUAL_EARLY_VM_STOP_CONFIRMED",
+  "cutoffEpoch": 1791477488,
+  "startedVmHere": true,
+  "remoteBusyBeforeStop": false,
+  "brevFinalStatus": "STOPPED",
+  "stoppedBeforeCutoff": true,
+  "note": "The foreground watchdog session was interrupted; manual stop and Brev STOPPED confirmation supersede its scheduled action."
+}

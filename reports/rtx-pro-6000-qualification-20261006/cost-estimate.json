@@ -1,0 +1,32 @@
+{
+  "checkedAt": "2026-10-06T16:00:12.114843+00:00",
+  "source": "https://cloud.google.com/run/pricing",
+  "region": "us-central1",
+  "mode": "Cloud Run Jobs on demand, non-zonal GPU",
+  "cpu": 20,
+  "memoryGiB": 80,
+  "gpu": 1,
+  "ratesUSDPerSecond": {
+    "perVCPU": 1.8e-05,
+    "perGiB": 2e-06,
+    "perRTXPro6000": 0.00036522
+  },
+  "activeUSDPerHour": 3.186792,
+  "minimumBilledSeconds": 60,
+  "oneMinuteUSD": 0.0531132,
+  "fiveMinuteUSD": 0.265566,
+  "taskTimeoutSeconds": 300,
+  "notes": [
+    "Not an invoice; excludes storage, logs, network, taxes and discounts/free tier.",
+    "GPU billed for full instance lifecycle; task timeout is not an absolute invoice cap.",
+    "Creation does not execute the job; device workload is gated until effective configuration is verified."
+  ],
+  "observedBillableInstanceSeconds": 59.52536081790328,
+  "metricSource": "run.googleapis.com/container/billable_instance_time",
+  "estimatedQualificationBilledSeconds": 60,
+  "estimatedQualificationComputeUSD": 0.0531132,
+  "metricReceipt": "billable-instance-time.json",
+  "processElapsedSeconds": 8.7667,
+  "taskElapsedSeconds": 22.16219,
+  "executionElapsedSeconds": 156.658313
+}

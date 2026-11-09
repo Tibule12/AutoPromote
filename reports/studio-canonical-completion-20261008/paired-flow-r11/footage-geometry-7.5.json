@@ -1,0 +1,19 @@
+{
+  "scope": "7.5s footage geometry only, excludes text and cut boundaries",
+  "featureMatches": 107,
+  "inlierMatches": 102,
+  "previewToFinalAffine": [
+    [
+      0.9991053930351048,
+      0.00024865065531944985,
+      -0.2740087244351135
+    ],
+    [
+      -0.00024865065531944985,
+      0.9991053930351048,
+      0.2663654632572874
+    ]
+  ],
+  "medianMatchingFeatureDisplacementPreviewPixels": 0.5032814741134644,
+  "p95DisplacementPreviewPixels": 1.1816844940185547
+}

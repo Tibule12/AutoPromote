@@ -1,0 +1,12 @@
+{
+  "scope": "Private authored native templates; editable geometry/camera/material/light/timing. Shared Studio parity and autonomous creative generation not established.",
+  "files": {
+    "scripts/content-factory/founder-film/cinematic-vessel.py": "4e3a065d8ea940eeb22127c1255ab40adde16599009d10052c4ef649c60f2934",
+    "scripts/content-factory/founder-film/cinematic-ident.py": "a99bab485ed4d28ff76961cb2fb94d2ec2c51057eab4eee542cbc5114efcbe75",
+    "scripts/content-factory/founder-film/vector_geometry.py": "238e65386a1f7ffbc09ca1ea545fbaf58c7d13755041f67e525d1c7e679d1ea0",
+    "reports/flagship-founder-film-production-v3-20261008/story-scenes.py": "f232f0b656d217402acd0c88abba5299cb1440538910c2b7a8ea6a056cd0d238",
+    "reports/flagship-founder-film-production-v3-20261008/render-existing-studio.py": "e645fc3a6a03b0680bae3fa994cfeff985b218e76f5321b33ac1c231a46f698a",
+    "src/services/contentFactoryStudioAdapter.js": "07ce7c1fd17dd21fb48853b223cdb5ae9bfce6b98a2fbbfa84a5f509650281b9",
+    "src/generated/studioDirectorReplayKernel.cjs": "418de17ae020bf3115b41f49a2eb8dc82b85a20798cdd7f4e0a554566513e3a3"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "tool": "Original score and sound-cue editorial arrangement",
+  "model": "authored synthesis",
+  "modelRevision": "5e82cfdb9631cd819eeb6c4eb751ff774caf158069fbcd8801a50104a59c30a1",
+  "settings": {
+    "sampleRate": 48000,
+    "channels": 2,
+    "sceneDurations": [
+      3.0,
+      5.25,
+      5.5,
+      5.75,
+      4.5,
+      4.75,
+      4.25,
+      6.75,
+      4.0,
+      5.0,
+      5.0
+    ],
+    "pitchPreserved": true,
+    "method": "per-scene atempo; narrated takes remain at original speed"
+  },
+  "artifact": {
+    "duration": 53.75,
+    "path": "reports/flagship-founder-film-20261008/assets/sound/score-final.wav",
+    "sha256": "00a535e1d56d7537f2fa869b1e1e8400cfbaabea98363862e13186b75f573d6c"
+  }
+}

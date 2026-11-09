@@ -1,0 +1,29 @@
+[
+  {
+    "id": "scene",
+    "label": "Scene study with sea sound",
+    "path": "outputs/038e7daeafb0f79f83d602ee/private-real-world-scene/v30/final.mp4",
+    "width": 1920,
+    "height": 1080,
+    "duration": 3.767,
+    "minimumFrames": 85
+  },
+  {
+    "id": "yacht",
+    "label": "Native yacht source",
+    "path": "assets/yacht/video.mp4",
+    "width": 1280,
+    "height": 720,
+    "duration": 3.0625,
+    "minimumFrames": 46
+  },
+  {
+    "id": "sailor",
+    "label": "Native sailor source",
+    "path": "assets/helm/video.mp4",
+    "width": 1280,
+    "height": 720,
+    "duration": 3.0625,
+    "minimumFrames": 46
+  }
+]

@@ -1,0 +1,36 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+  "prompt": "Cinematic photograph. One ivory paper boat, pointed open hull, low central fold, floats on vast calm blue ocean. Tiny complete boat bottom centre, golden sunlight path to distant horizon, warm rim light, realistic paper fibres and water ripples, restrained film contrast.",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "modelRevision": "462165984030d82259a11f4367a4eed129e94a7b",
+  "tool": "AutoPromote NVIDIA image adapter",
+  "seed": 2026100786,
+  "settings": {
+    "steps": 35,
+    "guidance": 7,
+    "width": 1344,
+    "height": 768,
+    "dtype": "float16",
+    "encodedTokenCounts": [
+      56,
+      56
+    ],
+    "promptTruncated": false
+  },
+  "gpu": "NVIDIA L40S",
+  "origin": "native_generated_image",
+  "artifact": {
+    "path": "/work/native-images/boat-calm-v4/video.mp4",
+    "sha256": "8f76f699a97b15b96569a6a51d9696072fc52a8790d803b30da86c38f368bfae",
+    "duration": 3.0
+  },
+  "reusableArtifacts": [
+    {
+      "role": "native_image",
+      "path": "/work/native-images/boat-calm-v4/image.png",
+      "sha256": "7e3f2c6475c49e163dd40dca36cbdea238fe9ef9d5d9a6056b3a95b0ac364dbc"
+    }
+  ],
+  "seconds": 5.225063592999504
+}

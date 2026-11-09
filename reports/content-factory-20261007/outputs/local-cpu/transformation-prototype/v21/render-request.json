@@ -1,0 +1,140 @@
+{
+  "video_url": "http://127.0.0.1:8765/assets/founder-control-transform-v17/video.mp4",
+  "start_time": 0,
+  "end_time": 11.5625,
+  "overlays": [],
+  "auto_captions": true,
+  "timeline_segments": [
+    {
+      "id": "continuous-transformation-prototype-1",
+      "source_clip_id": "continuous-transform",
+      "start_time": 0,
+      "end_time": 5.0625,
+      "duration": 5.0625,
+      "url": "http://127.0.0.1:8765/assets/founder-control-transform-v17/video.mp4"
+    },
+    {
+      "id": "continuous-transformation-prototype-2",
+      "source_clip_id": "real-vessel",
+      "start_time": 0.0625,
+      "end_time": 3.0625,
+      "duration": 3,
+      "url": "http://127.0.0.1:8765/generated/real-voyage-v6.mp4"
+    },
+    {
+      "id": "continuous-transformation-prototype-3",
+      "source_clip_id": "identity",
+      "start_time": 0,
+      "end_time": 3.5,
+      "duration": 3.5,
+      "url": "http://127.0.0.1:8765/idents/cinematic-v2/ident.mp4"
+    }
+  ],
+  "background_audio": null,
+  "hook_focus_point": null,
+  "cover_frame": null,
+  "thumbnail_frame": null,
+  "caption_style": "minimal",
+  "caption_position": "bottom",
+  "caption_scale": 1,
+  "caption_segments": [
+    {
+      "id": "caption-1",
+      "start_time": 0.05,
+      "end_time": 2.375,
+      "text": "One idea. No footage.",
+      "caption_icon": "none",
+      "caption_accent": "#ffffff"
+    },
+    {
+      "id": "caption-2",
+      "start_time": 5,
+      "end_time": 6.65,
+      "text": "This started with a brief.",
+      "caption_icon": "none",
+      "caption_accent": "#ffffff"
+    },
+    {
+      "id": "caption-3",
+      "start_time": 6.65,
+      "end_time": 8.65,
+      "text": "No camera. No footage.",
+      "caption_icon": "none",
+      "caption_accent": "#ffffff"
+    }
+  ],
+  "creative_intent": "Private continuous paper-to-yacht transformation prototype with visible early-structure defects. Not approved public marketing or proof of full autonomous movie generation.",
+  "professional_cleanup": false,
+  "finish_plan": {
+    "version": 1,
+    "enabled": true,
+    "reframe": {
+      "enabled": true,
+      "aspect": "16:9",
+      "mode": "off"
+    }
+  },
+  "smart_crop": true,
+  "smart_crop_mode": "safe_fit",
+  "brand_watermark": false,
+  "output_settings": {
+    "resolution": "1080p",
+    "fps": 24,
+    "codec": "h264",
+    "audioCodec": "aac"
+  },
+  "add_music": true,
+  "music_url": "http://127.0.0.1:8765/assets/founder-music-v8/audio.wav",
+  "music_name": "score",
+  "music_volume": 0.25,
+  "music_ducking": false,
+  "music_fade_in": 0.25,
+  "music_fade_out": 0.6,
+  "music_loop": false,
+  "sound_effects": [
+    {
+      "id": "continuous-transformation-prototype-audio-1",
+      "name": "one-idea",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/narration-processed-v11/one-idea.wav",
+      "startTime": 0.05,
+      "duration": 2.325,
+      "trimStart": 0,
+      "volume": 0.9,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "continuous-transformation-prototype-audio-2",
+      "name": "brief-no-footage",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/narration-cpu/brief-no-footage.wav",
+      "startTime": 5,
+      "duration": 3.65,
+      "trimStart": 0,
+      "volume": 0.9,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "continuous-transformation-prototype-audio-3",
+      "name": "transformation-sound",
+      "kind": "sfx",
+      "url": "http://127.0.0.1:8765/audio/transformation-v21/sound.wav",
+      "startTime": 0,
+      "duration": 8.0625,
+      "trimStart": 0,
+      "volume": 0.65,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    }
+  ],
+  "motionGraphics": {
+    "version": 1,
+    "scenes": []
+  },
+  "mute_audio": false
+}

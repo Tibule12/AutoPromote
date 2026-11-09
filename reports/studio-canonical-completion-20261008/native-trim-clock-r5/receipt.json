@@ -1,0 +1,45 @@
+{
+  "startedAt": "2026-10-08T12:55:14.856Z",
+  "projectName": "Studio trim clock QA 20261008 r5",
+  "headless": true,
+  "muted": true,
+  "realAuth": true,
+  "noMocks": true,
+  "gpuUsed": false,
+  "renderJobsStarted": 0,
+  "checks": [
+    {
+      "id": "native_trim_2_to_8",
+      "result": "PASS",
+      "at": "2026-10-08T12:56:39.948Z"
+    },
+    {
+      "id": "paused_end_clock",
+      "result": "PASS",
+      "at": "2026-10-08T12:56:40.307Z"
+    },
+    {
+      "id": "timing_lock_and_undo",
+      "result": "PASS",
+      "at": "2026-10-08T12:56:50.420Z"
+    },
+    {
+      "id": "cold_trim_recovery",
+      "result": "PASS",
+      "at": "2026-10-08T12:57:45.574Z"
+    },
+    {
+      "id": "playing_trim_loop",
+      "result": "PASS",
+      "at": "2026-10-08T12:58:02.698Z"
+    }
+  ],
+  "status": "PASS",
+  "loopedClock": {
+    "sourceTime": 5.085977,
+    "paused": true,
+    "seeking": false,
+    "duration": 12
+  },
+  "finishedAt": "2026-10-08T12:58:03.893Z"
+}

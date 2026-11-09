@@ -1,0 +1,41 @@
+{
+  "artifact": {
+    "path": "assets/founder-paper-real-continuity-v8/video.mp4",
+    "sha256": "418cb6b640f46609e77bc4928311ffe832fdf7ec50da91060d4f610045e72ca5",
+    "bytes": 3665098,
+    "duration": 7.5625,
+    "codec": "h264",
+    "container": "mp4",
+    "fps": 16,
+    "width": 832,
+    "height": 480,
+    "hasAudio": false
+  },
+  "model": "Wan-AI/Wan2.2-I2V-A14B-Diffusers",
+  "modelRevision": "596658fd9ca6b7b71d5057529bbf319ecbc61d74",
+  "tool": "AutoPromote NVIDIA conditioned-video adapter",
+  "settings": {
+    "width": 832,
+    "height": 480,
+    "frames": 121,
+    "fps": 16,
+    "steps": 40,
+    "guidance": 3.5,
+    "dtype": "bfloat16; VAE float32",
+    "cpuOffload": true,
+    "conditioning": "first_and_last_frame",
+    "reference": {
+      "assetId": "paper-start",
+      "parentArtifactSha256": "0136956d2b6465fceb8af75a9f45c79c14f71fa568d3c1075df163ea185d6f66",
+      "sourceTime": 1.25,
+      "frameSha256": "511bb45ff5edb02cb28b33c1be6a55e76ab0f03a0d4e8fff061c937b02030b81"
+    },
+    "lastReference": {
+      "assetId": "real-vessel",
+      "parentArtifactSha256": "54e4102b5fa6df99491cee642dac927732fcd1860a119b213a3ffa97650e61bb",
+      "sourceTime": 0,
+      "frameSha256": "ec65d8f80b03608a8a638482d849d4cdc16c02d81f5d6af03fc7ce05388ae462"
+    }
+  },
+  "status": "generated_pending_visual_review"
+}

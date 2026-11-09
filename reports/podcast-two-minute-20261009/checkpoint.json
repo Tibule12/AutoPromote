@@ -1,0 +1,76 @@
+{
+  "at": "2026-10-09T08:07:07.913618+00:00",
+  "userRequest": "Produce a two-minute edited podcast with background treatment, colour grade and captions. This is a requested edit using existing capabilities, not new creative feature work.",
+  "gpuAuthorization": "Latest user authorization: Extend GPU time to 11:00 am. Hard cutoff 2026-10-09T11:00:00+02:00; independent watchdog alive.",
+  "state": "IN_PROGRESS",
+  "source": "User-provided 34:27 1080p podcast; original preserved. Raw opening 120 seconds materialized and ingested through real signed-in Studio.",
+  "fixes": [
+    "Repeated disjoint ranges of one source now remain selectable in the subject-effects picker, while scene source ID and owned storage identity remain stable. Meaningful regression before FAIL; all seven panel checks after PASS; native first-minute six 10-second ranges visible.",
+    "Actual completed GPU job polling failed with ECONNRESET/socket hang up. Idempotent status/media GETs now use separate non-keepalive agents and one bounded transport retry, preserving authorization and disabling redirect/resubmission. Two real HTTP transport guards PASS. Same completed GPU job recovered through native Check saved render and downloaded with the exact worker SHA. Precise cause of the socket reset is not established."
+  ],
+  "evidence": [
+    "reports/podcast-two-minute-20261009/worker-read-recovery-tests.log",
+    "reports/podcast-two-minute-20261009/background-previews/subject-vfx-7ed7b64f-edb6-40f7-8e73-f65f84dcf403.mp4.technical.json",
+    "reports/podcast-two-minute-20261009/source-cuts.json",
+    "reports/podcast-two-minute-20261009/english-caption-review.json",
+    "reports/podcast-two-minute-20261009/session.json"
+  ],
+  "nativeGpuScope": "All twelve real Studio subject-background previews completed: each 10 seconds, 1080p/24fps/240 frames, original stereo audio, SAM2 segmentation and NVENC on NVIDIA L40S. All twelve owned downloads match independent worker receipt hashes and exact source ranges. Samples from every section visually reviewed. No hair-matte or all-frame temporal-quality guarantee.",
+  "remaining": [
+    "Finish bounded corrected B-roll generation, actual review and ordinary native import; keep rejected footage out.",
+    "Render final normal Studio edit, download, decode and inspect same-time preview/output; verify saved recovery.",
+    "No fresh human listening or creative approval. Manually condensed English captions do not qualify automatic multilingual ASR.",
+    "Verify GPU STOPPED by11:00 SAST; stop earlier after authorized GPU work."
+  ],
+  "readinessPromotion": false,
+  "creativeApproval": false,
+  "nextSharedTaskId": "S02",
+  "assembly": "Twelve completed native Studio previews assembled by stream copy into an ordinary owned derived media asset. Two saved source-background projects retain the effect controls. The assembled 120-second video has 2,880 frames and continuous original audio with exact decoded sample equality. Normal signed-in Studio ingested that asset for the final captions, grade and framing.",
+  "gpuDeadlineSast": "2026-10-09T11:00:00+02:00",
+  "gpuExtensionAuthorizedBy": "User: Extend GPU time to 11:00 am",
+  "generatedBrollRequest": "Generate podcast B-roll and reusable transcript-grounded Studio generation for user content",
+  "engineeringChecks": {
+    "brollContractGuards": 12,
+    "captionBulkAndCanonicalGuards": 23,
+    "scope": "Engineering regression tests; no generated output qualification yet.",
+    "generatedPanelGuards": 5,
+    "cutawayCaptionRasterRegression": 1
+  },
+  "captionStatus": "Normal native controls corrected all 51 English caption identities and approved authored wording; actual saved snapshot has zero reviewRequired cues. This is engineering review of manually condensed English, not human listening or multilingual ASR qualification.",
+  "generationStatus": "Corrected native job eadbcbcc5c2975a49b1480e91584e11e5f5b9c26 has an actual NVIDIA-validated plan: literal church token at96.4s and singer token at112.82s. Two specific moving illustration prompts pass the strict quote/time guards; first candle cutaway is using L40S at100%. Actual assets/review/import/final output still pending.",
+  "finalGrade": "Normal UI configured and saved subtle precision RGB grade; final output verification pending.",
+  "previewReview": "Saved-state audit reproduced defaults after prior unqualified keyboard activation/HMR. Native pointer correction of aspect/style, precision colour and six transform poses is in progress; actual saved-state and cold-reopen proof required before export.",
+  "nativeFraming": "Six normal held main-transform poses saved at source camera cuts: 0/1x, 52.5/1.16x, 63.5/1x, 85.75/1.16x, 105.25/1x, 110.25/1.16x; main frame disabled.",
+  "brollJobRecovery": "Queued generation recovered from the authenticated owner/project job list after local API reload; exact job ID retained in both saved snapshot and canonical editGraph settings at revision121. No duplicate model job dispatched.",
+  "failuresFound": [
+    "First B-roll plan copied caption wording without punctuation; strict transcript guard correctly rejected it. Grounding now joins selected known cue ID to authoritative wording/clock instead of asking the model to retype them.",
+    "Definitive caption validation rejection retained a stale pending request. Retry now uses corrected input; uncertain/network retry retains idempotent identity. Five panel guards PASS.",
+    "Previous pointer/keyboard configuration was not established in the saved project; direct IndexedDB audit found defaults. Correcting normal UI and requiring saved-state/reopen verification before output.",
+    "Real FFmpeg raster reproduces lost caption pixels when opaque B-roll covers early-burned subtitles. Worker now burns programme captions after media/graphics composition, consistent with default browser caption stacking. Native podcast output verification pending."
+  ],
+  "savedFinishVerification": {
+    "result": "PASS",
+    "evidence": "reports/podcast-two-minute-20261009/finish-cold-reopen.json",
+    "revision": 161,
+    "scope": "Same normal saved-project entry retains 16:9, programme-zero Reframe off, disabled main frame, precision colour settings, 51 reviewed manual English cues with Minimal style and six held main transforms (42 keys). Global default crop flag is shadowed by the programme-zero off decision.",
+    "latestRevision": 163,
+    "watermarkEnabled": false
+  },
+  "generationEvidence": [
+    "reports/podcast-two-minute-20261009/generation-first-attempt-rejection.json",
+    "reports/podcast-two-minute-20261009/church-motion-measurement.json",
+    "reports/podcast-two-minute-20261009/broll-grounded-motion-job.json"
+  ],
+  "watchdog": {
+    "pid": 45402,
+    "stopRequestSast": "10:59",
+    "hardDeadlineSast": "11:00",
+    "deadlineEpoch": 1791536400
+  },
+  "captionExport": {
+    "count": 51,
+    "file": "reports/podcast-two-minute-20261009/podcast-saved-captions.srt",
+    "scope": "Read-only extraction from the actual normal saved project; native SRT-export UI is not claimed.",
+    "humanListening": false
+  }
+}

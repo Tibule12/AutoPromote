@@ -1,0 +1,55 @@
+{
+  "scope": "Local production Studio component; signed-out fixture; headless muted",
+  "nativeOpen": true,
+  "nativeRename": true,
+  "nativeSave": true,
+  "reloadPreservedSeed": true,
+  "nativeReopen": true,
+  "recoveredName": "AutoPromote welcome save proof",
+  "occurrences": 5,
+  "layers": 7,
+  "sequenceDuration": 38,
+  "projectMedia": 5,
+  "media": [
+    {
+      "url": "http://127.0.0.1:8765/assets/proxy/idea.mp4",
+      "duration": 8,
+      "error": null
+    },
+    {
+      "url": "http://127.0.0.1:8765/assets/proxy/idea.mp4",
+      "duration": 8,
+      "error": null
+    },
+    {
+      "url": "http://127.0.0.1:8765/assets/proxy/idea.mp4",
+      "duration": 8,
+      "error": null
+    },
+    {
+      "url": "http://127.0.0.1:8765/assets/proxy/idea.mp4",
+      "duration": 8,
+      "error": null
+    },
+    {
+      "url": "http://127.0.0.1:8765/assets/proxy/idea.mp4",
+      "duration": 8,
+      "error": null
+    },
+    {
+      "url": "http://127.0.0.1:8765/assets/proxy/idea.mp4",
+      "duration": 8,
+      "error": null
+    },
+    {
+      "url": "http://127.0.0.1:8765/assets/proxy/idea.mp4",
+      "duration": 8,
+      "error": null
+    },
+    {
+      "url": "http://127.0.0.1:8765/assets/proxy/motion.mp4",
+      "duration": 10,
+      "error": null
+    }
+  ]
+}

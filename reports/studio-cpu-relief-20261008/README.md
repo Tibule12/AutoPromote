@@ -1,0 +1,9 @@
+# Studio QA CPU relief — 8 October 2026
+
+The private headless QA browser was a major local CPU consumer. Its GPU subprocess actually selected `--use-angle=swiftshader-webgl`, so browser WebGL used software rendering on this computer, independently of the remote NVIDIA renderer. Three Studio app pages existed; multiple previews were running. Pausing video and freezing page lifecycle did not sufficiently stop the running browser workload.
+
+Only the verified QA browser descendants were suspended, preserving sign-in, page memory and existing projects. Their two-core affinity and nice 10 remain in place. The desktop Chrome browser, VS Code, normal frontend/API and idle CPU fallback worker were preserved. A fresh two-second process-tick sample measured **0% combined QA-browser CPU**; see [measurement](cpu-relief.json). This is operational relief, not a permanent application performance fix. Suspended pages cannot run QA until deliberately resumed. The private resume receipt is outside the repository in the founder workflow state directory.
+
+Existing Studio readiness and the concurrent canonical visual-state evidence remain unchanged. No new native capability/combination/parity run is claimed. Existing HQ-preview and caption-coverage blockers remain. Continue S01's remaining canonical hook/transition/silence/watermark/mask/effect decisions and durable camera media bindings, then S02 paired conformance. Before further browser qualification, use one selected page with bounded playback, retain the CPU limit, and measure actual interval CPU rather than lifetime `ps` averages.
+
+The separate founder-film rebuild uses remote NVIDIA raw generation. It is private, still incomplete, and does not qualify customer generation or creative approval. Its source, actual artifacts and remaining creative blockers are recorded in the rebuild report. CPU fallbacks and all existing changes remain intact.

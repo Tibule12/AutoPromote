@@ -1,0 +1,203 @@
+[
+  {
+    "id": "direction",
+    "value": {
+      "title": "The Origami Ocean",
+      "story": {
+        "about": "A fragile ivory origami boat sails an immense ocean born from a blank desk, surviving a tidal wall to reveal AutoPromote\u2019s power in private founder marketing",
+        "whyCare": "Founders need to see their ideas survive chaos \u2014 and thrive \u2014 before scaling. This is proof they\u2019re not alone in the storm",
+        "hook": "One folded paper boat. One desk. One impossible ocean. What happens next? You\u2019ll believe it\u2019s real \u2014 because it is",
+        "beginning": "A single ivory origami boat rests on a blank white desk. A slow, silent camera pull-back reveals the desk is now a vast, deep blue ocean under a clear sky",
+        "development": "The boat drifts calmly as waves ripple around it. Suddenly, a towering wall of water curls toward it \u2014 a physical, roaring threat that fills the frame",
+        "tension": "The boat is caught in the curling wave\u2019s grip \u2014 but doesn\u2019t break. It emerges into golden calm waters, untouched, intact, and triumphant",
+        "payoff": "The camera zooms in on the boat as the ocean recedes. Text appears: \u2018AutoPromote \u2014 Where Ideas Survive the Storm\u2019",
+        "ending": "The final frame shows the AutoPromote logo with a clean motion identity, fading into a soft instrumental score",
+        "withheld": "The origin of the ocean \u2014 how the desk became sea \u2014 is never explained. The transformation is implied, not shown",
+        "amplify": [
+          "Distant aerial wide shot: boat occupies <15% of frame on vast ocean",
+          "Physical danger: wave curls toward boat with force",
+          "Golden calm after the wave: contrast of survival",
+          "Text overlay: \u2018Where Ideas Survive the Storm\u2019",
+          "Motion identity: clean, modern, branded reveal",
+          "Instrumental score: swelling tension \u2192 relief",
+          "Origami boat remains intact despite chaos",
+          "Ocean movement feels alive, not CGI"
+        ],
+        "remove": [
+          "Static paper boat shots",
+          "Clouds or sky-only visuals",
+          "Explanations of how the ocean formed",
+          "Over-the-top dramatic music",
+          "Narration or voiceover",
+          "Multiple logos or brand mentions",
+          "Slow fade-ins without purpose",
+          "Unnecessary transitions"
+        ]
+      },
+      "script": [
+        {
+          "beatId": "WAN_001",
+          "action": "Aerial wide shot: origami boat on vast ocean, <15% of frame",
+          "sound": "Calm ambient ocean swell"
+        },
+        {
+          "beatId": "WAN_002",
+          "action": "Wave curls toward boat \u2014 physical danger, close-up",
+          "sound": "Rising tension score, low rumble"
+        },
+        {
+          "beatId": "WAN_003",
+          "action": "Boat emerges into golden calm \u2014 intact, triumphant",
+          "sound": "Relief swell, strings rise gently"
+        },
+        {
+          "beatId": "MOTION_001",
+          "action": "Text fades in: \u2018AutoPromote \u2014 Where Ideas Survive the Storm\u2019",
+          "sound": "Clean motion identity sound"
+        },
+        {
+          "beatId": "MOTION_002",
+          "action": "Logo reveal: clean, modern, branded motion identity",
+          "sound": "Final chord resolves, soft fade-out"
+        }
+      ]
+    },
+    "model": "Qwen/Qwen3-VL-8B-Instruct",
+    "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+    "settings": {
+      "dtype": "bfloat16",
+      "attention": "sdpa",
+      "do_sample": false,
+      "max_tokens": 1800
+    },
+    "evidenceSha256": null,
+    "seconds": 41.83852516300067,
+    "gpu": "NVIDIA L40S"
+  },
+  {
+    "id": "assets",
+    "value": {
+      "assets": [
+        {
+          "assetId": "wan-001",
+          "type": "video",
+          "beatId": "WAN_001",
+          "prompt": "Aerial wide shot: tiny ivory origami boat on vast deep blue ocean, occupies less than 15% of frame",
+          "reason": "Establishes scale and surreal transformation \u2014 boat is minuscule against immense moving sea",
+          "duration": 5.04,
+          "provider": "wan",
+          "acceptanceCriteria": [
+            "Visible physical action: ocean waves move realistically",
+            "Paper boat shape consistent and intact",
+            "Framing strictly aerial wide, boat <15% of frame",
+            "No text or sound"
+          ],
+          "seed": 12345
+        },
+        {
+          "assetId": "wan-002",
+          "type": "video",
+          "beatId": "WAN_002",
+          "prompt": "Close-up: steep curling wall of ocean water approaches intact origami boat, physical danger imminent",
+          "reason": "Shows tangible threat \u2014 wave curls with force, boat remains unbroken",
+          "duration": 5.04,
+          "provider": "wan",
+          "acceptanceCriteria": [
+            "Visible physical action: water curls toward boat",
+            "Paper boat shape preserved",
+            "Lighting consistent with earlier scene",
+            "No text or sound"
+          ],
+          "seed": 67890
+        },
+        {
+          "assetId": "motion-001",
+          "type": "motion",
+          "beatId": "MOTION_001",
+          "prompt": "AutoPromote \u2014 Where Ideas Survive the Storm",
+          "reason": "Literal screen text reveal \u2014 clean, centered, amber detail on dark background",
+          "duration": 2,
+          "provider": "motion",
+          "acceptanceCriteria": [
+            "White animated text on dark background",
+            "Amber accent detail",
+            "Duration 0.5\u201310 seconds",
+            "No sound or other visuals"
+          ],
+          "seed": 112233
+        },
+        {
+          "assetId": "original_audio-001",
+          "type": "audio",
+          "beatId": "WAN_001",
+          "prompt": "Original restrained electronic instrumental tension-resolution score, 20 seconds minimum, stereo, no clips, 44.1kHz",
+          "reason": "Supports visual tone \u2014 calm swell \u2192 rising tension \u2192 relief resolution",
+          "duration": 20,
+          "provider": "original_audio",
+          "acceptanceCriteria": [
+            "Stereo instrumental only",
+            "No clipped samples",
+            "Correct sample rate and duration",
+            "Full 20s score for 15s film"
+          ],
+          "seed": 44444
+        }
+      ]
+    },
+    "model": "Qwen/Qwen3-VL-8B-Instruct",
+    "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+    "settings": {
+      "dtype": "bfloat16",
+      "attention": "sdpa",
+      "do_sample": false,
+      "max_tokens": 2400
+    },
+    "evidenceSha256": null,
+    "seconds": 31.69355479600017,
+    "gpu": "NVIDIA L40S"
+  },
+  {
+    "id": "edits",
+    "value": {
+      "outputs": [
+        {
+          "outputId": "short_promo",
+          "aspect": "16:9",
+          "purpose": "Private founder marketing review",
+          "musicAssetId": "original_audio-001",
+          "sequence": [
+            {
+              "assetId": "wan-001",
+              "start": 0,
+              "duration": 5.04,
+              "reason": "Aerial wide shot: origami boat on vast ocean, <15% of frame \u2014 establishes scale and surreal transformation"
+            },
+            {
+              "assetId": "wan-002",
+              "start": 0,
+              "duration": 5.04,
+              "reason": "Close-up: wave curls toward boat \u2014 physical danger, boat remains intact"
+            },
+            {
+              "assetId": "motion-001",
+              "start": 10.08,
+              "duration": 2,
+              "reason": "Text fades in: \u2018AutoPromote \u2014 Where Ideas Survive the Storm\u2019 \u2014 clean branded reveal"
+            }
+          ]
+        }
+      ]
+    },
+    "model": "Qwen/Qwen3-VL-8B-Instruct",
+    "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+    "settings": {
+      "dtype": "bfloat16",
+      "attention": "sdpa",
+      "do_sample": false,
+      "max_tokens": 1400
+    },
+    "evidenceSha256": null,
+    "seconds": 10.517264060000343,
+    "gpu": "NVIDIA L40S"
+  }
+]

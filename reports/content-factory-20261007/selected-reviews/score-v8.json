@@ -1,0 +1,19 @@
+{
+  "accepted": true,
+  "artifactSha256": "0d06c67776806f51482698216b2ae3cd761761395072196464ffab0351ee4792",
+  "evidenceSha256": "0d06c67776806f51482698216b2ae3cd761761395072196464ffab0351ee4792",
+  "reviewer": "AutoPromote decoded audio measurements and CPU speech diagnostic",
+  "reason": "Replacement generated score: measurable audibility, stereo headroom and duration pass; CPU VAD/ASR recovers no speech. Accepted for a private assembly test only. Musical effectiveness and instrumental-only status still require listening.",
+  "measurements": {
+    "accepted": true,
+    "reason": "Measured original stereo audio: peak 0.629, RMS 0.122, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+    "peak": 0.628570556640625,
+    "rms": 0.12185135693991446,
+    "clippedFraction": 0.0,
+    "channels": 2,
+    "sampleRate": 48000,
+    "duration": 23.963
+  },
+  "limitation": "Technical role acceptance only; final listening is required.",
+  "speechEvidence": "score-speech-review-v8.json"
+}

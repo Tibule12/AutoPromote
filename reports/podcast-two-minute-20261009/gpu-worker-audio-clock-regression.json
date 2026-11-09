@@ -1,0 +1,21 @@
+{
+  "before": {
+    "rate": 96000,
+    "duration": "120.000000",
+    "decodedSeconds": 119.904,
+    "badPacketDuration": [
+      {
+        "pts": "117.088000",
+        "duration": "0.114937"
+      }
+    ],
+    "packetCount": 11242
+  },
+  "after": {
+    "rate": 48000,
+    "duration": "120.000000",
+    "decodedSeconds": 120.0,
+    "badPacketDuration": [],
+    "packetCount": 5626
+  }
+}

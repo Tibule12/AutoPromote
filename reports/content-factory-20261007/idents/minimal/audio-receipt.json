@@ -1,0 +1,24 @@
+{
+  "model": "original-procedural-ident-sound",
+  "modelRevision": "ident-score-v1",
+  "tool": "AutoPromote original ident sound design",
+  "seed": 2026100780,
+  "sourceBrief": "Create cinematic editable AutoPromote studio logo reveals: cinematic, AI compute, premium minimal and creator-energy. Brand ink, violet and ivory. Real extrusion, reflections, timed reveal and original impact audio.",
+  "settings": {
+    "style": "minimal",
+    "duration": 3.5,
+    "sampleRate": 48000,
+    "impactAt": 1.47,
+    "stems": [
+      "rising air",
+      "impact",
+      "resolving four-note resonance"
+    ]
+  },
+  "artifact": {
+    "path": "reports/content-factory-20261007/idents/minimal/ident.wav",
+    "sha256": "26c9e54694411583f8e595f4088fa5f91d0c7e66c57e8ba45369c73664bd6894",
+    "duration": 3.5
+  },
+  "status": "GENERATED_PENDING_LISTENING_REVIEW"
+}

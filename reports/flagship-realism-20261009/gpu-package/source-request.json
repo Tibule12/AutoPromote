@@ -1,0 +1,26 @@
+{
+  "deadlineEpoch": 1791536400,
+  "sourceBrief": "The Small Boat: correct the opening vessel orientation before a continuity-controlled transformation. One recognizable navy/ivory folded paper boat facing right in photographic open water, side view; maintain one hull. Stills must pass inspection before any video take. Previous near-front source and world-replacement takes remain rejected.",
+  "images": [
+    {
+      "id": "paper-broadside-a",
+      "seed": 20261009071,
+      "strength": 0.82,
+      "duration": 1,
+      "reference_image": "/work/assets/paper-ocean-reference.png",
+      "reference_image_sha256": "30228bad8a7c3a631a256d59d6d45cb9d8a414adf2dc121945635bd580a5846d",
+      "prompt": "Photograph of one tiny origami boat, navy folded paper hull and two ivory triangular paper sails, port side, pointed bow facing right. Low ocean-level camera, blue waves and distant horizon, warm light from left. Angular paper creases, paper fibres. No real vessel.",
+      "negative_prompt": "real yacht, wood, canvas, duplicate vessel, extra hull, cartoon, illustration, plastic, text, watermark"
+    },
+    {
+      "id": "paper-broadside-b",
+      "seed": 20261009072,
+      "strength": 0.86,
+      "duration": 1,
+      "reference_image": "/work/assets/paper-ocean-reference.png",
+      "reference_image_sha256": "30228bad8a7c3a631a256d59d6d45cb9d8a414adf2dc121945635bd580a5846d",
+      "prompt": "Photograph of one tiny origami boat, navy folded paper hull and two ivory triangular paper sails, port side, pointed bow facing right. Low ocean-level camera, blue waves and distant horizon, warm light from left. Angular paper creases, paper fibres. No real vessel.",
+      "negative_prompt": "real yacht, wood, canvas, duplicate vessel, extra hull, cartoon, illustration, plastic, text, watermark"
+    }
+  ]
+}

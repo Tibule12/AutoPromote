@@ -1,0 +1,9 @@
+{
+  "phase": "caption-source",
+  "at": "2026-10-07T21:53:11.139Z",
+  "realAuth": true,
+  "noMocks": true,
+  "gpuUsed": false,
+  "captionCues": 3,
+  "twoRealSources": true
+}

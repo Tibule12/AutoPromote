@@ -1,0 +1,65 @@
+{
+  "sourceSha256": "10b7a0377e61e73ce01cbf1299dbf597c617bca48e0dcd48fb25908803db46e3",
+  "frames": [
+    {
+      "path": "reports/content-factory-20261007/transformation-prototype-frames-v21/frame-01.png",
+      "timestamp": 0.0,
+      "sha256": "5c4247ecf0184d04d54a7f2da5908b90e71eee938352a0c4c9c0901405db3d6e"
+    },
+    {
+      "path": "reports/content-factory-20261007/transformation-prototype-frames-v21/frame-02.png",
+      "timestamp": 1.0530302727272727,
+      "sha256": "ab07d0c6ee1fecefd47c0249fd912635d009e0c414731b121212ca6d7b4480ef"
+    },
+    {
+      "path": "reports/content-factory-20261007/transformation-prototype-frames-v21/frame-03.png",
+      "timestamp": 2.1060605454545454,
+      "sha256": "1257895ede9324b6e26857ed7e532d4c61f9417f86784444dc63e2996ae486d2"
+    },
+    {
+      "path": "reports/content-factory-20261007/transformation-prototype-frames-v21/frame-04.png",
+      "timestamp": 3.1590908181818182,
+      "sha256": "125e300349fde54467c5cf69b8e5ac7840478c3dbf54e902888cbfe66095c402"
+    },
+    {
+      "path": "reports/content-factory-20261007/transformation-prototype-frames-v21/frame-05.png",
+      "timestamp": 4.212121090909091,
+      "sha256": "99bfbc2efa5f112e840bb2b2aed66b64624f464c2dd5eb5cc06b28d2b55e8122"
+    },
+    {
+      "path": "reports/content-factory-20261007/transformation-prototype-frames-v21/frame-06.png",
+      "timestamp": 5.265151363636363,
+      "sha256": "c932312c0bebbf2cff16df54774d648ef80d9f383ff6af631ac448a0ea57c13d"
+    },
+    {
+      "path": "reports/content-factory-20261007/transformation-prototype-frames-v21/frame-07.png",
+      "timestamp": 6.3181816363636365,
+      "sha256": "db1e89f9e91c2c17dc7d837cd70d5af86d06de7da505c38d89ba19fabf53b2b3"
+    },
+    {
+      "path": "reports/content-factory-20261007/transformation-prototype-frames-v21/frame-08.png",
+      "timestamp": 7.371211909090909,
+      "sha256": "62c32a4ff3b1ae7f0f648c69d011477e9a6b8d0ec281d404540979152708d16b"
+    },
+    {
+      "path": "reports/content-factory-20261007/transformation-prototype-frames-v21/frame-09.png",
+      "timestamp": 8.424242181818181,
+      "sha256": "8c1ee0284a13ca8c1001563766ca5f2827437e20a5f60dd5529908a5121f7c03"
+    },
+    {
+      "path": "reports/content-factory-20261007/transformation-prototype-frames-v21/frame-10.png",
+      "timestamp": 9.477272454545455,
+      "sha256": "7bbf732dc12f15100cc5fd0d145d2210cdd0d8cd164d96270e4c308d4d8a35b4"
+    },
+    {
+      "path": "reports/content-factory-20261007/transformation-prototype-frames-v21/frame-11.png",
+      "timestamp": 10.530302727272726,
+      "sha256": "d5cd3603dd32157842ee3d406d77cc65ca71912dbc4fcb379f739b808ab4676c"
+    },
+    {
+      "path": "reports/content-factory-20261007/transformation-prototype-frames-v21/frame-12.png",
+      "timestamp": 11.503333,
+      "sha256": "cb91435954cff52a12a80579a313f4265529514062509bbabf7238242c64f847"
+    }
+  ]
+}

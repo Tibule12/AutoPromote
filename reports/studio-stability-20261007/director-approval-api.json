@@ -1,0 +1,13 @@
+{
+  "events": [
+    {
+      "path": "/api/studio/director/projects/revisions",
+      "status": 201
+    },
+    {
+      "path": "/api/studio/director/reviews",
+      "status": 201
+    }
+  ],
+  "at": "2026-10-07T19:04:41.035Z"
+}

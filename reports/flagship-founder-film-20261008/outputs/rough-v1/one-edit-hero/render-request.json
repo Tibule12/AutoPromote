@@ -1,0 +1,355 @@
+{
+  "video_url": "http://127.0.0.1:8765/assets/cold-open/video.mp4",
+  "start_time": 0,
+  "end_time": 66,
+  "overlays": [],
+  "auto_captions": false,
+  "timeline_segments": [
+    {
+      "id": "one-edit-hero-1",
+      "source_clip_id": "cold-open",
+      "start_time": 0,
+      "end_time": 4,
+      "duration": 4,
+      "url": "http://127.0.0.1:8765/assets/cold-open/video.mp4"
+    },
+    {
+      "id": "one-edit-hero-2",
+      "source_clip_id": "origin",
+      "start_time": 0,
+      "end_time": 6,
+      "duration": 6,
+      "url": "http://127.0.0.1:8765/assets/origin/video.mp4"
+    },
+    {
+      "id": "one-edit-hero-3",
+      "source_clip_id": "cascade",
+      "start_time": 0,
+      "end_time": 7,
+      "duration": 7,
+      "url": "http://127.0.0.1:8765/assets/cascade/video.mp4"
+    },
+    {
+      "id": "one-edit-hero-4",
+      "source_clip_id": "problems",
+      "start_time": 0,
+      "end_time": 6,
+      "duration": 6,
+      "url": "http://127.0.0.1:8765/assets/problems/video.mp4"
+    },
+    {
+      "id": "one-edit-hero-5",
+      "source_clip_id": "failure",
+      "start_time": 0,
+      "end_time": 6,
+      "duration": 6,
+      "url": "http://127.0.0.1:8765/assets/failure/video.mp4"
+    },
+    {
+      "id": "one-edit-hero-6",
+      "source_clip_id": "quota",
+      "start_time": 0,
+      "end_time": 7,
+      "duration": 7,
+      "url": "http://127.0.0.1:8765/assets/quota/video.mp4"
+    },
+    {
+      "id": "one-edit-hero-7",
+      "source_clip_id": "breakthrough",
+      "start_time": 0,
+      "end_time": 6,
+      "duration": 6,
+      "url": "http://127.0.0.1:8765/assets/breakthrough/video.mp4"
+    },
+    {
+      "id": "one-edit-hero-8",
+      "source_clip_id": "director",
+      "start_time": 0,
+      "end_time": 7,
+      "duration": 7,
+      "url": "http://127.0.0.1:8765/assets/director/video.mp4"
+    },
+    {
+      "id": "one-edit-hero-9",
+      "source_clip_id": "magic",
+      "start_time": 0,
+      "end_time": 6,
+      "duration": 6,
+      "url": "http://127.0.0.1:8765/assets/magic/video.mp4"
+    },
+    {
+      "id": "one-edit-hero-10",
+      "source_clip_id": "reveal",
+      "start_time": 0,
+      "end_time": 6,
+      "duration": 6,
+      "url": "http://127.0.0.1:8765/assets/reveal/video.mp4"
+    },
+    {
+      "id": "one-edit-hero-11",
+      "source_clip_id": "ident",
+      "start_time": 0,
+      "end_time": 5,
+      "duration": 5,
+      "url": "http://127.0.0.1:8765/assets/ident/video.mp4"
+    }
+  ],
+  "background_audio": null,
+  "hook_focus_point": null,
+  "cover_frame": null,
+  "thumbnail_frame": null,
+  "caption_style": "minimal",
+  "caption_position": "bottom",
+  "caption_scale": 0.72,
+  "caption_segments": [],
+  "creative_intent": "One editing problem grows through real failures into a creative system; the film reveals its own AutoPromote assembly.",
+  "professional_cleanup": false,
+  "finish_plan": {
+    "version": 1,
+    "enabled": true,
+    "reframe": {
+      "enabled": true,
+      "aspect": "16:9",
+      "mode": "off"
+    }
+  },
+  "smart_crop": true,
+  "smart_crop_mode": "safe_fit",
+  "brand_watermark": false,
+  "output_settings": {
+    "resolution": "1080p",
+    "fps": 24,
+    "codec": "h264",
+    "audioCodec": "aac"
+  },
+  "add_music": true,
+  "music_url": "http://127.0.0.1:8765/assets/sound/score.wav",
+  "music_name": "score",
+  "music_volume": 0.75,
+  "music_ducking": false,
+  "music_fade_in": 0.25,
+  "music_fade_out": 0.6,
+  "music_loop": false,
+  "sound_effects": [
+    {
+      "id": "one-edit-hero-audio-1",
+      "name": "vo-cold-open",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/assets/narration/cold-open.wav",
+      "startTime": 0.35,
+      "duration": 2.175,
+      "trimStart": 0,
+      "volume": 0.94,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "one-edit-hero-audio-2",
+      "name": "vo-origin",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/assets/narration/origin.wav",
+      "startTime": 4.35,
+      "duration": 4.4,
+      "trimStart": 0,
+      "volume": 0.94,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "one-edit-hero-audio-3",
+      "name": "vo-cascade",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/assets/narration/cascade.wav",
+      "startTime": 10.35,
+      "duration": 4.55,
+      "trimStart": 0,
+      "volume": 0.94,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "one-edit-hero-audio-4",
+      "name": "vo-problems",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/assets/narration/problems.wav",
+      "startTime": 17.3,
+      "duration": 5.075,
+      "trimStart": 0,
+      "volume": 0.94,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "one-edit-hero-audio-5",
+      "name": "vo-failure",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/assets/narration/failure.wav",
+      "startTime": 23.5,
+      "duration": 3.675,
+      "trimStart": 0,
+      "volume": 0.94,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "one-edit-hero-audio-6",
+      "name": "vo-quota",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/assets/narration/quota.wav",
+      "startTime": 29.3,
+      "duration": 3.325,
+      "trimStart": 0,
+      "volume": 0.94,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "one-edit-hero-audio-7",
+      "name": "vo-breakthrough",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/assets/narration/breakthrough.wav",
+      "startTime": 36.4,
+      "duration": 3.225,
+      "trimStart": 0,
+      "volume": 0.94,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "one-edit-hero-audio-8",
+      "name": "vo-director",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/assets/narration/director.wav",
+      "startTime": 42.3,
+      "duration": 6.1,
+      "trimStart": 0,
+      "volume": 0.94,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "one-edit-hero-audio-9",
+      "name": "vo-magic",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/assets/narration/magic.wav",
+      "startTime": 49.3,
+      "duration": 3.075,
+      "trimStart": 0,
+      "volume": 0.94,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "one-edit-hero-audio-10",
+      "name": "vo-reveal",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/assets/narration/reveal.wav",
+      "startTime": 55.55,
+      "duration": 3.4,
+      "trimStart": 0,
+      "volume": 0.94,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "one-edit-hero-audio-11",
+      "name": "cues",
+      "kind": "sfx",
+      "url": "http://127.0.0.1:8765/assets/sound/cues.wav",
+      "startTime": 0,
+      "duration": 12,
+      "trimStart": 0,
+      "volume": 0.8,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "one-edit-hero-audio-12",
+      "name": "cues",
+      "kind": "sfx",
+      "url": "http://127.0.0.1:8765/assets/sound/cues.wav",
+      "startTime": 12,
+      "duration": 12,
+      "trimStart": 12,
+      "volume": 0.8,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "one-edit-hero-audio-13",
+      "name": "cues",
+      "kind": "sfx",
+      "url": "http://127.0.0.1:8765/assets/sound/cues.wav",
+      "startTime": 24,
+      "duration": 12,
+      "trimStart": 24,
+      "volume": 0.8,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "one-edit-hero-audio-14",
+      "name": "cues",
+      "kind": "sfx",
+      "url": "http://127.0.0.1:8765/assets/sound/cues.wav",
+      "startTime": 36,
+      "duration": 12,
+      "trimStart": 36,
+      "volume": 0.8,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "one-edit-hero-audio-15",
+      "name": "cues",
+      "kind": "sfx",
+      "url": "http://127.0.0.1:8765/assets/sound/cues.wav",
+      "startTime": 48,
+      "duration": 12,
+      "trimStart": 48,
+      "volume": 0.8,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "one-edit-hero-audio-16",
+      "name": "cues",
+      "kind": "sfx",
+      "url": "http://127.0.0.1:8765/assets/sound/cues.wav",
+      "startTime": 60,
+      "duration": 6,
+      "trimStart": 60,
+      "volume": 0.8,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    }
+  ],
+  "motionGraphics": {
+    "version": 1,
+    "scenes": []
+  },
+  "mute_audio": true,
+  "planned_black_ranges": [
+    {
+      "start": 61,
+      "end": 62.5,
+      "reason": "Intentional dark anticipation in the dedicated five-second AutoPromote ident."
+    }
+  ]
+}

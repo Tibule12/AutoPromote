@@ -1,0 +1,1169 @@
+{
+  "startedAt": "2026-10-08T13:45:23.780Z",
+  "projectName": "Studio paired visual QA 20261008 r16",
+  "headless": true,
+  "muted": true,
+  "realAuth": true,
+  "noMocks": true,
+  "gpuUsed": false,
+  "gpuJobsStarted": 0,
+  "status": "PAIRS_CAPTURED_REVIEW_PENDING",
+  "pairs": [
+    {
+      "outputTime": 1,
+      "preFinalSource": {
+        "currentTime": 1,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-1.png",
+      "programmeGeometry": {
+        "canvas": {
+          "width": 311.59375,
+          "height": 393.59375,
+          "x": 545.1875,
+          "y": 160.1875
+        },
+        "frame": {
+          "width": 328,
+          "height": 410,
+          "x": 537,
+          "y": 152
+        },
+        "bitmap": [
+          312,
+          394
+        ],
+        "transform": "none",
+        "filter": "none",
+        "clipPath": "none"
+      },
+      "titleLayout": [
+        {
+          "text": "Shared project state",
+          "fontFamily": "\"Studio Inter\", sans-serif",
+          "fontSize": "36px",
+          "fontWeight": "900",
+          "boxSizing": "border-box",
+          "width": "259.188px",
+          "lineHeight": "50.4px",
+          "height": "167.172px",
+          "x": 688.2903442382812,
+          "y": 171.0596923828125,
+          "renderedWidth": 169.7318115234375,
+          "renderedHeight": 109.474365234375
+        }
+      ],
+      "captionLayout": [],
+      "final": "final-1.png"
+    },
+    {
+      "outputTime": 1.1,
+      "preFinalSource": {
+        "currentTime": 1.1,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-1.1.png",
+      "programmeGeometry": {
+        "canvas": {
+          "width": 311.59375,
+          "height": 393.59375,
+          "x": 545.1875,
+          "y": 160.1875
+        },
+        "frame": {
+          "width": 328,
+          "height": 410,
+          "x": 537,
+          "y": 152
+        },
+        "bitmap": [
+          312,
+          394
+        ],
+        "transform": "none",
+        "filter": "none",
+        "clipPath": "none"
+      },
+      "titleLayout": [
+        {
+          "text": "Shared project state",
+          "fontFamily": "\"Studio Inter\", sans-serif",
+          "fontSize": "36px",
+          "fontWeight": "900",
+          "boxSizing": "border-box",
+          "width": "259.188px",
+          "lineHeight": "50.4px",
+          "height": "167.172px",
+          "x": 688.2903442382812,
+          "y": 171.0596923828125,
+          "renderedWidth": 169.7318115234375,
+          "renderedHeight": 109.474365234375
+        }
+      ],
+      "captionLayout": [],
+      "final": "final-1.1.png"
+    },
+    {
+      "outputTime": 1.3,
+      "preFinalSource": {
+        "currentTime": 1.3,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-1.3.png",
+      "programmeGeometry": {
+        "canvas": {
+          "width": 311.59375,
+          "height": 393.59375,
+          "x": 545.1875,
+          "y": 160.1875
+        },
+        "frame": {
+          "width": 328,
+          "height": 410,
+          "x": 537,
+          "y": 152
+        },
+        "bitmap": [
+          312,
+          394
+        ],
+        "transform": "none",
+        "filter": "none",
+        "clipPath": "none"
+      },
+      "titleLayout": [
+        {
+          "text": "Shared project state",
+          "fontFamily": "\"Studio Inter\", sans-serif",
+          "fontSize": "36px",
+          "fontWeight": "900",
+          "boxSizing": "border-box",
+          "width": "259.188px",
+          "lineHeight": "50.4px",
+          "height": "167.172px",
+          "x": 688.2903442382812,
+          "y": 171.0596923828125,
+          "renderedWidth": 169.7318115234375,
+          "renderedHeight": 109.474365234375
+        }
+      ],
+      "captionLayout": [],
+      "final": "final-1.3.png"
+    },
+    {
+      "outputTime": 2.9,
+      "preFinalSource": {
+        "currentTime": 2.9,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-2.9.png",
+      "programmeGeometry": {
+        "canvas": {
+          "width": 311.59375,
+          "height": 393.59375,
+          "x": 545.1875,
+          "y": 160.1875
+        },
+        "frame": {
+          "width": 328,
+          "height": 410,
+          "x": 537,
+          "y": 152
+        },
+        "bitmap": [
+          312,
+          394
+        ],
+        "transform": "none",
+        "filter": "none",
+        "clipPath": "none"
+      },
+      "titleLayout": [
+        {
+          "text": "Shared project state",
+          "fontFamily": "\"Studio Inter\", sans-serif",
+          "fontSize": "36px",
+          "fontWeight": "900",
+          "boxSizing": "border-box",
+          "width": "259.188px",
+          "lineHeight": "50.4px",
+          "height": "167.172px",
+          "x": 688.2903442382812,
+          "y": 171.0596923828125,
+          "renderedWidth": 169.7318115234375,
+          "renderedHeight": 109.474365234375
+        }
+      ],
+      "captionLayout": [],
+      "final": "final-2.9.png"
+    },
+    {
+      "outputTime": 3,
+      "preFinalSource": {
+        "currentTime": 3,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-3.png",
+      "programmeGeometry": {
+        "canvas": {
+          "width": 311.59375,
+          "height": 393.59375,
+          "x": 545.1875,
+          "y": 160.1875
+        },
+        "frame": {
+          "width": 328,
+          "height": 410,
+          "x": 537,
+          "y": 152
+        },
+        "bitmap": [
+          312,
+          394
+        ],
+        "transform": "none",
+        "filter": "none",
+        "clipPath": "none"
+      },
+      "titleLayout": [
+        {
+          "text": "Shared project state",
+          "fontFamily": "\"Studio Inter\", sans-serif",
+          "fontSize": "36px",
+          "fontWeight": "900",
+          "boxSizing": "border-box",
+          "width": "259.188px",
+          "lineHeight": "50.4px",
+          "height": "167.172px",
+          "x": 688.2903442382812,
+          "y": 171.0596923828125,
+          "renderedWidth": 169.7318115234375,
+          "renderedHeight": 109.474365234375
+        }
+      ],
+      "captionLayout": [
+        {
+          "text": "✦Shared project state reviewed",
+          "fontFamily": "\"Studio Caption DejaVu Sans\", sans-serif",
+          "fontSize": "12.5232px",
+          "opacity": 0,
+          "words": [
+            {
+              "text": "Shared",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "project",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "state",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "reviewed",
+              "transform": "none",
+              "animation": "none"
+            }
+          ]
+        }
+      ],
+      "final": "final-3.png"
+    },
+    {
+      "outputTime": 3.1,
+      "preFinalSource": {
+        "currentTime": 3.1,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-3.1.png",
+      "programmeGeometry": {
+        "canvas": {
+          "width": 311.59375,
+          "height": 393.59375,
+          "x": 545.1875,
+          "y": 160.1875
+        },
+        "frame": {
+          "width": 328,
+          "height": 410,
+          "x": 537,
+          "y": 152
+        },
+        "bitmap": [
+          312,
+          394
+        ],
+        "transform": "none",
+        "filter": "none",
+        "clipPath": "none"
+      },
+      "titleLayout": [
+        {
+          "text": "Shared project state",
+          "fontFamily": "\"Studio Inter\", sans-serif",
+          "fontSize": "36px",
+          "fontWeight": "900",
+          "boxSizing": "border-box",
+          "width": "259.188px",
+          "lineHeight": "50.4px",
+          "height": "167.172px",
+          "x": 688.2903442382812,
+          "y": 171.0596923828125,
+          "renderedWidth": 169.7318115234375,
+          "renderedHeight": 109.474365234375
+        }
+      ],
+      "captionLayout": [
+        {
+          "text": "✦Shared project state reviewed",
+          "fontFamily": "\"Studio Caption DejaVu Sans\", sans-serif",
+          "fontSize": "12.5232px",
+          "opacity": 1,
+          "words": [
+            {
+              "text": "Shared",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "project",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "state",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "reviewed",
+              "transform": "none",
+              "animation": "none"
+            }
+          ]
+        }
+      ],
+      "final": "final-3.1.png"
+    },
+    {
+      "outputTime": 3.5,
+      "preFinalSource": {
+        "currentTime": 3.5,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-3.5.png",
+      "programmeGeometry": {
+        "canvas": {
+          "width": 311.59375,
+          "height": 393.59375,
+          "x": 545.1875,
+          "y": 160.1875
+        },
+        "frame": {
+          "width": 328,
+          "height": 410,
+          "x": 537,
+          "y": 152
+        },
+        "bitmap": [
+          312,
+          394
+        ],
+        "transform": "none",
+        "filter": "none",
+        "clipPath": "none"
+      },
+      "titleLayout": [
+        {
+          "text": "Shared project state",
+          "fontFamily": "\"Studio Inter\", sans-serif",
+          "fontSize": "36px",
+          "fontWeight": "900",
+          "boxSizing": "border-box",
+          "width": "259.188px",
+          "lineHeight": "50.4px",
+          "height": "167.172px",
+          "x": 688.2903442382812,
+          "y": 171.0596923828125,
+          "renderedWidth": 169.7318115234375,
+          "renderedHeight": 109.474365234375
+        }
+      ],
+      "captionLayout": [
+        {
+          "text": "✦Shared project state reviewed",
+          "fontFamily": "\"Studio Caption DejaVu Sans\", sans-serif",
+          "fontSize": "12.5232px",
+          "opacity": 1,
+          "words": [
+            {
+              "text": "Shared",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "project",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "state",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "reviewed",
+              "transform": "none",
+              "animation": "none"
+            }
+          ]
+        }
+      ],
+      "final": "final-3.5.png"
+    },
+    {
+      "outputTime": 3.9,
+      "preFinalSource": {
+        "currentTime": 3.9,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-3.9.png",
+      "programmeGeometry": {
+        "canvas": {
+          "width": 311.59375,
+          "height": 393.59375,
+          "x": 545.1875,
+          "y": 160.1875
+        },
+        "frame": {
+          "width": 328,
+          "height": 410,
+          "x": 537,
+          "y": 152
+        },
+        "bitmap": [
+          312,
+          394
+        ],
+        "transform": "none",
+        "filter": "none",
+        "clipPath": "none"
+      },
+      "titleLayout": [
+        {
+          "text": "Shared project state",
+          "fontFamily": "\"Studio Inter\", sans-serif",
+          "fontSize": "36px",
+          "fontWeight": "900",
+          "boxSizing": "border-box",
+          "width": "259.188px",
+          "lineHeight": "50.4px",
+          "height": "167.172px",
+          "x": 688.2903442382812,
+          "y": 171.0596923828125,
+          "renderedWidth": 169.7318115234375,
+          "renderedHeight": 109.474365234375
+        }
+      ],
+      "captionLayout": [
+        {
+          "text": "✦Shared project state reviewed",
+          "fontFamily": "\"Studio Caption DejaVu Sans\", sans-serif",
+          "fontSize": "12.5232px",
+          "opacity": 1,
+          "words": [
+            {
+              "text": "Shared",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "project",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "state",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "reviewed",
+              "transform": "none",
+              "animation": "none"
+            }
+          ]
+        }
+      ],
+      "final": "final-3.9.png"
+    },
+    {
+      "outputTime": 4,
+      "preFinalSource": {
+        "currentTime": 4,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-4.png",
+      "programmeGeometry": {
+        "canvas": {
+          "width": 311.59375,
+          "height": 393.59375,
+          "x": 545.1875,
+          "y": 160.1875
+        },
+        "frame": {
+          "width": 328,
+          "height": 410,
+          "x": 537,
+          "y": 152
+        },
+        "bitmap": [
+          312,
+          394
+        ],
+        "transform": "none",
+        "filter": "none",
+        "clipPath": "none"
+      },
+      "titleLayout": [],
+      "captionLayout": [
+        {
+          "text": "✦Shared project state reviewed",
+          "fontFamily": "\"Studio Caption DejaVu Sans\", sans-serif",
+          "fontSize": "12.5232px",
+          "opacity": 1,
+          "words": [
+            {
+              "text": "Shared",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "project",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "state",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "reviewed",
+              "transform": "none",
+              "animation": "none"
+            }
+          ]
+        }
+      ],
+      "final": "final-4.png"
+    },
+    {
+      "outputTime": 4.9,
+      "preFinalSource": {
+        "currentTime": 4.9,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-4.9.png",
+      "programmeGeometry": {
+        "canvas": {
+          "width": 311.59375,
+          "height": 393.59375,
+          "x": 545.1875,
+          "y": 160.1875
+        },
+        "frame": {
+          "width": 328,
+          "height": 410,
+          "x": 537,
+          "y": 152
+        },
+        "bitmap": [
+          312,
+          394
+        ],
+        "transform": "none",
+        "filter": "none",
+        "clipPath": "none"
+      },
+      "titleLayout": [],
+      "captionLayout": [
+        {
+          "text": "✦Shared project state reviewed",
+          "fontFamily": "\"Studio Caption DejaVu Sans\", sans-serif",
+          "fontSize": "12.5232px",
+          "opacity": 0.666667,
+          "words": [
+            {
+              "text": "Shared",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "project",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "state",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "reviewed",
+              "transform": "none",
+              "animation": "none"
+            }
+          ]
+        }
+      ],
+      "final": "final-4.9.png"
+    },
+    {
+      "outputTime": 5,
+      "preFinalSource": {
+        "currentTime": 5,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-5.png",
+      "programmeGeometry": {
+        "canvas": {
+          "width": 311.59375,
+          "height": 393.59375,
+          "x": 545.1875,
+          "y": 160.1875
+        },
+        "frame": {
+          "width": 328,
+          "height": 410,
+          "x": 537,
+          "y": 152
+        },
+        "bitmap": [
+          312,
+          394
+        ],
+        "transform": "none",
+        "filter": "none",
+        "clipPath": "none"
+      },
+      "titleLayout": [],
+      "captionLayout": [],
+      "final": "final-5.png"
+    },
+    {
+      "outputTime": 5.5,
+      "preFinalSource": {
+        "currentTime": 5.5,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-5.5.png",
+      "programmeGeometry": {
+        "canvas": {
+          "width": 311.59375,
+          "height": 393.59375,
+          "x": 545.1875,
+          "y": 160.1875
+        },
+        "frame": {
+          "width": 328,
+          "height": 410,
+          "x": 537,
+          "y": 152
+        },
+        "bitmap": [
+          312,
+          394
+        ],
+        "transform": "none",
+        "filter": "none",
+        "clipPath": "none"
+      },
+      "titleLayout": [],
+      "captionLayout": [],
+      "final": "final-5.5.png"
+    },
+    {
+      "outputTime": 7,
+      "preFinalSource": {
+        "currentTime": 7,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-7.png",
+      "programmeGeometry": {
+        "canvas": {
+          "width": 311.59375,
+          "height": 393.59375,
+          "x": 545.1875,
+          "y": 160.1875
+        },
+        "frame": {
+          "width": 328,
+          "height": 410,
+          "x": 537,
+          "y": 152
+        },
+        "bitmap": [
+          312,
+          394
+        ],
+        "transform": "none",
+        "filter": "none",
+        "clipPath": "none"
+      },
+      "titleLayout": [],
+      "captionLayout": [
+        {
+          "text": "☎Reviewed timeline words verified",
+          "fontFamily": "\"Studio Caption DejaVu Sans\", sans-serif",
+          "fontSize": "12.5232px",
+          "opacity": 0,
+          "words": [
+            {
+              "text": "Reviewed",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "timeline",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "words",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "verified",
+              "transform": "none",
+              "animation": "none"
+            }
+          ]
+        }
+      ],
+      "final": "final-7.png"
+    },
+    {
+      "outputTime": 7.1,
+      "preFinalSource": {
+        "currentTime": 7.1,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-7.1.png",
+      "programmeGeometry": {
+        "canvas": {
+          "width": 311.59375,
+          "height": 393.59375,
+          "x": 545.1875,
+          "y": 160.1875
+        },
+        "frame": {
+          "width": 328,
+          "height": 410,
+          "x": 537,
+          "y": 152
+        },
+        "bitmap": [
+          312,
+          394
+        ],
+        "transform": "none",
+        "filter": "none",
+        "clipPath": "none"
+      },
+      "titleLayout": [],
+      "captionLayout": [
+        {
+          "text": "☎Reviewed timeline words verified",
+          "fontFamily": "\"Studio Caption DejaVu Sans\", sans-serif",
+          "fontSize": "12.5232px",
+          "opacity": 1,
+          "words": [
+            {
+              "text": "Reviewed",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "timeline",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "words",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "verified",
+              "transform": "none",
+              "animation": "none"
+            }
+          ]
+        }
+      ],
+      "final": "final-7.1.png"
+    },
+    {
+      "outputTime": 7.5,
+      "preFinalSource": {
+        "currentTime": 7.5,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-7.5.png",
+      "programmeGeometry": {
+        "canvas": {
+          "width": 311.59375,
+          "height": 393.59375,
+          "x": 545.1875,
+          "y": 160.1875
+        },
+        "frame": {
+          "width": 328,
+          "height": 410,
+          "x": 537,
+          "y": 152
+        },
+        "bitmap": [
+          312,
+          394
+        ],
+        "transform": "none",
+        "filter": "none",
+        "clipPath": "none"
+      },
+      "titleLayout": [],
+      "captionLayout": [
+        {
+          "text": "☎Reviewed timeline words verified",
+          "fontFamily": "\"Studio Caption DejaVu Sans\", sans-serif",
+          "fontSize": "12.5232px",
+          "opacity": 1,
+          "words": [
+            {
+              "text": "Reviewed",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "timeline",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "words",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "verified",
+              "transform": "none",
+              "animation": "none"
+            }
+          ]
+        }
+      ],
+      "final": "final-7.5.png"
+    },
+    {
+      "outputTime": 8.9,
+      "preFinalSource": {
+        "currentTime": 8.9,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-8.9.png",
+      "programmeGeometry": {
+        "canvas": {
+          "width": 311.59375,
+          "height": 393.59375,
+          "x": 545.1875,
+          "y": 160.1875
+        },
+        "frame": {
+          "width": 328,
+          "height": 410,
+          "x": 537,
+          "y": 152
+        },
+        "bitmap": [
+          312,
+          394
+        ],
+        "transform": "none",
+        "filter": "none",
+        "clipPath": "none"
+      },
+      "titleLayout": [],
+      "captionLayout": [
+        {
+          "text": "☎Reviewed timeline words verified",
+          "fontFamily": "\"Studio Caption DejaVu Sans\", sans-serif",
+          "fontSize": "12.5232px",
+          "opacity": 0.666667,
+          "words": [
+            {
+              "text": "Reviewed",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "timeline",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "words",
+              "transform": "none",
+              "animation": "none"
+            },
+            {
+              "text": "verified",
+              "transform": "none",
+              "animation": "none"
+            }
+          ]
+        }
+      ],
+      "final": "final-8.9.png"
+    },
+    {
+      "outputTime": 9,
+      "preFinalSource": {
+        "currentTime": 9,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-9.png",
+      "programmeGeometry": {
+        "canvas": {
+          "width": 311.59375,
+          "height": 393.59375,
+          "x": 545.1875,
+          "y": 160.1875
+        },
+        "frame": {
+          "width": 328,
+          "height": 410,
+          "x": 537,
+          "y": 152
+        },
+        "bitmap": [
+          312,
+          394
+        ],
+        "transform": "none",
+        "filter": "none",
+        "clipPath": "none"
+      },
+      "titleLayout": [],
+      "captionLayout": [],
+      "final": "final-9.png"
+    },
+    {
+      "outputTime": 10,
+      "preFinalSource": {
+        "currentTime": 10,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-10.png",
+      "programmeGeometry": {
+        "canvas": {
+          "width": 311.59375,
+          "height": 393.59375,
+          "x": 545.1875,
+          "y": 160.1875
+        },
+        "frame": {
+          "width": 328,
+          "height": 410,
+          "x": 537,
+          "y": 152
+        },
+        "bitmap": [
+          312,
+          394
+        ],
+        "transform": "none",
+        "filter": "none",
+        "clipPath": "none"
+      },
+      "titleLayout": [],
+      "captionLayout": [],
+      "final": "final-10.png"
+    }
+  ],
+  "fullCoveragePreflight": "Possible uncovered audio: 0.0–2.8s, 5.2–6.8s, 9.2–12.0s. Caption these phrases, or choose Selected phrases if the gaps are intentional.",
+  "documentSha256": "93495bd1c59712a0044413a8e475e0c3f5cd6406d995ba23e22e99e85e781fc2",
+  "output": {
+    "startedAt": "2026-10-08T13:46:53.832Z",
+    "finishedAt": "2026-10-08T13:48:49.236Z",
+    "projectName": "A\nAutoPromote\nVIRAL CLIP STUDIO\nStudio paired visual QA 20261008 r16",
+    "realApi": true,
+    "noMocks": true,
+    "submittedJobId": "viral_b3d022e5687a3bf5e1bb3bdb0bfc6b45227781079c4720c973278c39d7a24440",
+    "events": [
+      {
+        "path": "/api/media/process",
+        "status": 200,
+        "at": "2026-10-08T13:47:20.583Z"
+      },
+      {
+        "path": "/api/media/status/viral_b3d022e5687a3bf5e1bb3bdb0bfc6b45227781079c4720c973278c39d7a24440",
+        "status": 200,
+        "at": "2026-10-08T13:47:25.321Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_b3d022e5687a3bf5e1bb3bdb0bfc6b45227781079c4720c973278c39d7a24440",
+        "status": 200,
+        "at": "2026-10-08T13:47:30.865Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_b3d022e5687a3bf5e1bb3bdb0bfc6b45227781079c4720c973278c39d7a24440",
+        "status": 200,
+        "at": "2026-10-08T13:47:36.645Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_b3d022e5687a3bf5e1bb3bdb0bfc6b45227781079c4720c973278c39d7a24440",
+        "status": 200,
+        "at": "2026-10-08T13:47:43.347Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_b3d022e5687a3bf5e1bb3bdb0bfc6b45227781079c4720c973278c39d7a24440",
+        "status": 200,
+        "at": "2026-10-08T13:47:48.632Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_b3d022e5687a3bf5e1bb3bdb0bfc6b45227781079c4720c973278c39d7a24440",
+        "status": 200,
+        "at": "2026-10-08T13:47:54.642Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_b3d022e5687a3bf5e1bb3bdb0bfc6b45227781079c4720c973278c39d7a24440",
+        "status": 200,
+        "at": "2026-10-08T13:48:01.375Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_b3d022e5687a3bf5e1bb3bdb0bfc6b45227781079c4720c973278c39d7a24440",
+        "status": 200,
+        "at": "2026-10-08T13:48:06.643Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_b3d022e5687a3bf5e1bb3bdb0bfc6b45227781079c4720c973278c39d7a24440",
+        "status": 200,
+        "at": "2026-10-08T13:48:12.664Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_b3d022e5687a3bf5e1bb3bdb0bfc6b45227781079c4720c973278c39d7a24440",
+        "status": 200,
+        "at": "2026-10-08T13:48:18.670Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_b3d022e5687a3bf5e1bb3bdb0bfc6b45227781079c4720c973278c39d7a24440",
+        "status": 200,
+        "at": "2026-10-08T13:48:24.666Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_b3d022e5687a3bf5e1bb3bdb0bfc6b45227781079c4720c973278c39d7a24440",
+        "status": 200,
+        "at": "2026-10-08T13:48:30.682Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_b3d022e5687a3bf5e1bb3bdb0bfc6b45227781079c4720c973278c39d7a24440",
+        "status": 200,
+        "at": "2026-10-08T13:48:37.074Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_b3d022e5687a3bf5e1bb3bdb0bfc6b45227781079c4720c973278c39d7a24440",
+        "status": 200,
+        "at": "2026-10-08T13:48:43.858Z",
+        "jobStatus": "completed"
+      }
+    ],
+    "errors": [],
+    "download": {
+      "suggestedName": "viral_clip_rendered.mp4",
+      "bytes": 1410140,
+      "nativeCompleted": true
+    },
+    "output": "reports/studio-canonical-completion-20261008/paired-flow-r16/compositing/download.mp4",
+    "outputSha256": "d82c620ab2e6dd82cf689f14e5990cdb6469a33337323a719eadd5f395b60e40",
+    "technical": {
+      "passed": true,
+      "sha256": "d82c620ab2e6dd82cf689f14e5990cdb6469a33337323a719eadd5f395b60e40",
+      "bytes": 1410140,
+      "seconds": 12,
+      "video": {
+        "width": 576,
+        "height": 720,
+        "codec": "h264",
+        "fps": "30/1",
+        "duration": "11.966667",
+        "pixelFormat": "yuv420p"
+      },
+      "audio": {
+        "codec": "aac",
+        "channels": 2,
+        "sampleRate": "96000",
+        "duration": "12.000000"
+      },
+      "independentFullDecode": true,
+      "contactSheet": "reports/studio-canonical-completion-20261008/paired-flow-r16/compositing/download.mp4.frames.jpg",
+      "scope": "Technical only. Pixel and listening review are separate required evidence."
+    }
+  },
+  "previewFinalParity": "UNQUALIFIED until paired geometry/text/pixels/audio are reviewed",
+  "finishedAt": "2026-10-08T13:48:52.057Z"
+}

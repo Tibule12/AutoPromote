@@ -1,0 +1,40 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "model": "Original authored narrative synthesis",
+  "modelRevision": "826dd63eddd806a6e2722e6afbe685df578c20921c6c4c16186912a23cb7ddc8",
+  "tool": "Original score arrangement / bounded CPU preparation",
+  "settings": {
+    "duration": 10.0,
+    "sampleRate": 48000,
+    "channels": 2,
+    "sourceRanges": [
+      [
+        43.25,
+        3
+      ],
+      [
+        46.75,
+        4
+      ],
+      [
+        53.75,
+        3
+      ]
+    ],
+    "boundaryFadesSeconds": 0.018
+  },
+  "sourceLineage": {
+    "sourcePath": "reports/flagship-founder-film-production-v3-20261008/assets/sound/score.wav",
+    "sourceSha256": "22ad192dd7dc13b6bd91007a23c8f04baa4e062e99c2efaddc837c2d7aa1a0c5"
+  },
+  "artifact": {
+    "sha256": "31f07e62b558d82c1ca2ad3d3d984da428c4f4133978931cfa485a19f36a178f",
+    "duration": 10.0
+  },
+  "objectiveAudio": {
+    "peak": 0.15301513671875,
+    "rms": 0.0344085767865181,
+    "clippedSamples": 0
+  },
+  "listeningApproval": false
+}

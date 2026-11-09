@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "duration": 38,
+  "resolution": [
+    1920,
+    1080
+  ],
+  "fps": 24,
+  "frames": 912,
+  "fullDecode": true,
+  "sha256": "63aaf80638ef93e2165924a6562026392bf1f0a10ef7c9826611aa14549ceea3",
+  "persistedCloudCopiesVerified": 10,
+  "canonicalDocumentHash": "76f11d9d301a5c9ead14fe8a10e31c869cc8c58210b7c366b02327fd3c6addf4",
+  "preparedFinalPayloadSame": true,
+  "audio": {
+    "sampleRate": 48000,
+    "channels": 2,
+    "peak": 0.6840224266052246,
+    "rms": 0.07698647677898407,
+    "clippedSamples": 0,
+    "duration": 38.016,
+    "limitation": "Objective decoded measurements; listening and speech comprehension require founder review."
+  },
+  "gpuBackend": {
+    "backend": "OPTIX",
+    "gpu_verified": true,
+    "denoiser": "OPENIMAGEDENOISE_CPU",
+    "denoisingQuality": "BALANCED",
+    "denoisingPrefilter": "FAST",
+    "persistentData": true,
+    "devices": [
+      "NVIDIA RTX PRO 6000 Blackwell Server Edition"
+    ]
+  }
+}

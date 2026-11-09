@@ -1,0 +1,33 @@
+{
+  "at": "2026-10-08T05:50:47.631Z",
+  "events": [
+    {
+      "path": "/api/media/studio-assets/resolve",
+      "status": 200,
+      "artifact": false
+    },
+    {
+      "path": "/api/media/track-studio-faces",
+      "status": 200,
+      "shots": [
+        4.7,
+        5.2
+      ],
+      "artifact": true
+    },
+    {
+      "path": "/api/studio/director/projects/revisions",
+      "status": 201,
+      "artifact": false
+    },
+    {
+      "path": "/api/studio/director/reviews",
+      "status": 201,
+      "artifact": false
+    },
+    {
+      "path": "/autopromote-cc6d3.firebasestorage.app/studio/exports/bf04dPKELvVMivWoUyLsAVyw2sg2/viral_694bf4590a5d5ca6fcaec9a22e36b93e0bd47dd5f9de4acb6d01237479ea4ca4/render.mp4",
+      "status": 206
+    }
+  ]
+}

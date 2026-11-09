@@ -1,0 +1,838 @@
+[
+  {
+    "assetId": "idea",
+    "type": "video",
+    "status": "accepted",
+    "artifact": {
+      "path": "assets/proxy/idea.mp4",
+      "sha256": "607581a2f2d2b86cd978d661bfd11f6e4b5dd1cbdf94441d30eb236228ee3b69",
+      "duration": 8,
+      "hasAudio": false,
+      "codec": "h264",
+      "fps": 12
+    },
+    "provenance": {
+      "provider": "AutoPromote native Blender source",
+      "concept": "AutoPromote Creative Studio Workspace",
+      "sourceScene": "assets/welcome-world.blend",
+      "nativeSceneSha256": "a48c7c7dee9390ec1e0af711566dc0e2d1b5d9e1ea507955b58f4beea7cac73a",
+      "authorSha256": "48ed4831bd0454e4f3daccb33d2b3e7c9d050119557a446b7cfc2bc0ae31abde",
+      "photographicSources": [
+        {
+          "path": "assets/founder-studio.png",
+          "sha256": "d535accaff029e6ded7a8ef45945e38ae4f350db4ba6d4d819e03d2fe8905581",
+          "prompt": "Fictional adult male founder in black hoodie, thoughtful three-quarter portrait on right third, premium creative studio with violet/magenta practical lighting, warm background points and dark negative space on left. Photoreal cinematic editorial still, no text or UI.",
+          "originalImagegenOutput": "exec-bd742e4b-17e6-4076-8ac4-b978f209ea06.png",
+          "role": "Reusable texture embedded into native animated media surface; not a full-scene slideshow frame"
+        },
+        {
+          "path": "assets/founder-story.png",
+          "sha256": "5c2e8bed70b5ee3075ed279e64b7fe6a6f663bb5c7876de6e12663973bb9aae9",
+          "prompt": "Same fictional adult founder and black hoodie, left-third three-quarter profile on a mountain overlook at golden sunrise, misty lake, natural expression, violet shadow palette and warm horizon. Photoreal cinematic editorial still, no text or UI.",
+          "originalImagegenOutput": "exec-b3ea63fb-45aa-4838-b1e9-0e7e411704a0.png",
+          "role": "Reusable texture embedded into native animated media surface; not a full-scene slideshow frame"
+        },
+        {
+          "path": "assets/founder-foreground.png",
+          "sha256": "f8017dcba506160feda90b81c3f45ee0c078918282684bbadd0d53572f09da06",
+          "prompt": "Preserve exact fictional seated founder, original canvas and pose. Remove background to transparent alpha, retain the close rocky ledge. Clean compositing cutout.",
+          "originalImagegenOutput": "exec-d2b9291b-cf83-432e-94af-b02aa392594e.png",
+          "reference": "assets/founder-story.png",
+          "role": "Independent native depth layer"
+        },
+        {
+          "path": "assets/story-landscape.png",
+          "sha256": "e86ee995cfafc1f76149024b1ff5c49095e4af2e61d86fd66255c20bb5d1860d",
+          "prompt": "Remove founder and close foreground ledge; reconstruct continuous background mountains and misty lake. Preserve golden sunrise and violet shadows, composition and camera.",
+          "originalImagegenOutput": "exec-64ff54c3-50df-468d-94e0-c9f9afe7168f.png",
+          "reference": "assets/founder-story.png",
+          "role": "Independent native depth layer"
+        }
+      ],
+      "programmeStart": 0,
+      "frameStart": 1,
+      "frameEnd": 192
+    },
+    "review": {
+      "accepted": true,
+      "reviewer": "Codex private founder production",
+      "reason": "Native moving source from the locally reviewed continuous scene; byte-bound review is recorded separately.",
+      "evidenceSha256": "fdeeb09964dc385978bb0afa31e9adc6205a66539b8fe5642cc1bfc59d8331f1"
+    }
+  },
+  {
+    "assetId": "structure",
+    "type": "video",
+    "status": "accepted",
+    "artifact": {
+      "path": "assets/proxy/structure.mp4",
+      "sha256": "4004caba2993cdf0b478e6c9cd0e24139f8fb7f9eb62a3fc49ead971d4e2fb0f",
+      "duration": 7,
+      "hasAudio": false,
+      "codec": "h264",
+      "fps": 12
+    },
+    "provenance": {
+      "provider": "AutoPromote native Blender source",
+      "concept": "AutoPromote Motion Graphics / VFX Library",
+      "sourceScene": "assets/welcome-world.blend",
+      "nativeSceneSha256": "a48c7c7dee9390ec1e0af711566dc0e2d1b5d9e1ea507955b58f4beea7cac73a",
+      "authorSha256": "48ed4831bd0454e4f3daccb33d2b3e7c9d050119557a446b7cfc2bc0ae31abde",
+      "photographicSources": [
+        {
+          "path": "assets/founder-studio.png",
+          "sha256": "d535accaff029e6ded7a8ef45945e38ae4f350db4ba6d4d819e03d2fe8905581",
+          "prompt": "Fictional adult male founder in black hoodie, thoughtful three-quarter portrait on right third, premium creative studio with violet/magenta practical lighting, warm background points and dark negative space on left. Photoreal cinematic editorial still, no text or UI.",
+          "originalImagegenOutput": "exec-bd742e4b-17e6-4076-8ac4-b978f209ea06.png",
+          "role": "Reusable texture embedded into native animated media surface; not a full-scene slideshow frame"
+        },
+        {
+          "path": "assets/founder-story.png",
+          "sha256": "5c2e8bed70b5ee3075ed279e64b7fe6a6f663bb5c7876de6e12663973bb9aae9",
+          "prompt": "Same fictional adult founder and black hoodie, left-third three-quarter profile on a mountain overlook at golden sunrise, misty lake, natural expression, violet shadow palette and warm horizon. Photoreal cinematic editorial still, no text or UI.",
+          "originalImagegenOutput": "exec-b3ea63fb-45aa-4838-b1e9-0e7e411704a0.png",
+          "role": "Reusable texture embedded into native animated media surface; not a full-scene slideshow frame"
+        },
+        {
+          "path": "assets/founder-foreground.png",
+          "sha256": "f8017dcba506160feda90b81c3f45ee0c078918282684bbadd0d53572f09da06",
+          "prompt": "Preserve exact fictional seated founder, original canvas and pose. Remove background to transparent alpha, retain the close rocky ledge. Clean compositing cutout.",
+          "originalImagegenOutput": "exec-d2b9291b-cf83-432e-94af-b02aa392594e.png",
+          "reference": "assets/founder-story.png",
+          "role": "Independent native depth layer"
+        },
+        {
+          "path": "assets/story-landscape.png",
+          "sha256": "e86ee995cfafc1f76149024b1ff5c49095e4af2e61d86fd66255c20bb5d1860d",
+          "prompt": "Remove founder and close foreground ledge; reconstruct continuous background mountains and misty lake. Preserve golden sunrise and violet shadows, composition and camera.",
+          "originalImagegenOutput": "exec-64ff54c3-50df-468d-94e0-c9f9afe7168f.png",
+          "reference": "assets/founder-story.png",
+          "role": "Independent native depth layer"
+        }
+      ],
+      "programmeStart": 8,
+      "frameStart": 193,
+      "frameEnd": 360
+    },
+    "review": {
+      "accepted": true,
+      "reviewer": "Codex private founder production",
+      "reason": "Native moving source from the locally reviewed continuous scene; byte-bound review is recorded separately.",
+      "evidenceSha256": "fdeeb09964dc385978bb0afa31e9adc6205a66539b8fe5642cc1bfc59d8331f1"
+    }
+  },
+  {
+    "assetId": "motion",
+    "type": "video",
+    "status": "accepted",
+    "artifact": {
+      "path": "assets/proxy/motion.mp4",
+      "sha256": "23b29e80713e95379dfb2cf864496212839f5672040281bc2513f6a313ab04c2",
+      "duration": 10,
+      "hasAudio": false,
+      "codec": "h264",
+      "fps": 12
+    },
+    "provenance": {
+      "provider": "AutoPromote native Blender source",
+      "concept": "AutoPromote 3D Creative Dashboard",
+      "sourceScene": "assets/welcome-world.blend",
+      "nativeSceneSha256": "a48c7c7dee9390ec1e0af711566dc0e2d1b5d9e1ea507955b58f4beea7cac73a",
+      "authorSha256": "48ed4831bd0454e4f3daccb33d2b3e7c9d050119557a446b7cfc2bc0ae31abde",
+      "photographicSources": [
+        {
+          "path": "assets/founder-studio.png",
+          "sha256": "d535accaff029e6ded7a8ef45945e38ae4f350db4ba6d4d819e03d2fe8905581",
+          "prompt": "Fictional adult male founder in black hoodie, thoughtful three-quarter portrait on right third, premium creative studio with violet/magenta practical lighting, warm background points and dark negative space on left. Photoreal cinematic editorial still, no text or UI.",
+          "originalImagegenOutput": "exec-bd742e4b-17e6-4076-8ac4-b978f209ea06.png",
+          "role": "Reusable texture embedded into native animated media surface; not a full-scene slideshow frame"
+        },
+        {
+          "path": "assets/founder-story.png",
+          "sha256": "5c2e8bed70b5ee3075ed279e64b7fe6a6f663bb5c7876de6e12663973bb9aae9",
+          "prompt": "Same fictional adult founder and black hoodie, left-third three-quarter profile on a mountain overlook at golden sunrise, misty lake, natural expression, violet shadow palette and warm horizon. Photoreal cinematic editorial still, no text or UI.",
+          "originalImagegenOutput": "exec-b3ea63fb-45aa-4838-b1e9-0e7e411704a0.png",
+          "role": "Reusable texture embedded into native animated media surface; not a full-scene slideshow frame"
+        },
+        {
+          "path": "assets/founder-foreground.png",
+          "sha256": "f8017dcba506160feda90b81c3f45ee0c078918282684bbadd0d53572f09da06",
+          "prompt": "Preserve exact fictional seated founder, original canvas and pose. Remove background to transparent alpha, retain the close rocky ledge. Clean compositing cutout.",
+          "originalImagegenOutput": "exec-d2b9291b-cf83-432e-94af-b02aa392594e.png",
+          "reference": "assets/founder-story.png",
+          "role": "Independent native depth layer"
+        },
+        {
+          "path": "assets/story-landscape.png",
+          "sha256": "e86ee995cfafc1f76149024b1ff5c49095e4af2e61d86fd66255c20bb5d1860d",
+          "prompt": "Remove founder and close foreground ledge; reconstruct continuous background mountains and misty lake. Preserve golden sunrise and violet shadows, composition and camera.",
+          "originalImagegenOutput": "exec-64ff54c3-50df-468d-94e0-c9f9afe7168f.png",
+          "reference": "assets/founder-story.png",
+          "role": "Independent native depth layer"
+        }
+      ],
+      "programmeStart": 15,
+      "frameStart": 361,
+      "frameEnd": 600
+    },
+    "review": {
+      "accepted": true,
+      "reviewer": "Codex private founder production",
+      "reason": "Native moving source from the locally reviewed continuous scene; byte-bound review is recorded separately.",
+      "evidenceSha256": "fdeeb09964dc385978bb0afa31e9adc6205a66539b8fe5642cc1bfc59d8331f1"
+    }
+  },
+  {
+    "assetId": "impact",
+    "type": "video",
+    "status": "accepted",
+    "artifact": {
+      "path": "assets/proxy/impact.mp4",
+      "sha256": "cbce92d40212b0800ee10b2a2e747842c55b753ea1a2ad743cc205fd3a3c77a4",
+      "duration": 7,
+      "hasAudio": false,
+      "codec": "h264",
+      "fps": 12
+    },
+    "provenance": {
+      "provider": "AutoPromote native Blender source",
+      "concept": "AutoPromote Stories That Move Brands",
+      "sourceScene": "assets/welcome-world.blend",
+      "nativeSceneSha256": "a48c7c7dee9390ec1e0af711566dc0e2d1b5d9e1ea507955b58f4beea7cac73a",
+      "authorSha256": "48ed4831bd0454e4f3daccb33d2b3e7c9d050119557a446b7cfc2bc0ae31abde",
+      "photographicSources": [
+        {
+          "path": "assets/founder-studio.png",
+          "sha256": "d535accaff029e6ded7a8ef45945e38ae4f350db4ba6d4d819e03d2fe8905581",
+          "prompt": "Fictional adult male founder in black hoodie, thoughtful three-quarter portrait on right third, premium creative studio with violet/magenta practical lighting, warm background points and dark negative space on left. Photoreal cinematic editorial still, no text or UI.",
+          "originalImagegenOutput": "exec-bd742e4b-17e6-4076-8ac4-b978f209ea06.png",
+          "role": "Reusable texture embedded into native animated media surface; not a full-scene slideshow frame"
+        },
+        {
+          "path": "assets/founder-story.png",
+          "sha256": "5c2e8bed70b5ee3075ed279e64b7fe6a6f663bb5c7876de6e12663973bb9aae9",
+          "prompt": "Same fictional adult founder and black hoodie, left-third three-quarter profile on a mountain overlook at golden sunrise, misty lake, natural expression, violet shadow palette and warm horizon. Photoreal cinematic editorial still, no text or UI.",
+          "originalImagegenOutput": "exec-b3ea63fb-45aa-4838-b1e9-0e7e411704a0.png",
+          "role": "Reusable texture embedded into native animated media surface; not a full-scene slideshow frame"
+        },
+        {
+          "path": "assets/founder-foreground.png",
+          "sha256": "f8017dcba506160feda90b81c3f45ee0c078918282684bbadd0d53572f09da06",
+          "prompt": "Preserve exact fictional seated founder, original canvas and pose. Remove background to transparent alpha, retain the close rocky ledge. Clean compositing cutout.",
+          "originalImagegenOutput": "exec-d2b9291b-cf83-432e-94af-b02aa392594e.png",
+          "reference": "assets/founder-story.png",
+          "role": "Independent native depth layer"
+        },
+        {
+          "path": "assets/story-landscape.png",
+          "sha256": "e86ee995cfafc1f76149024b1ff5c49095e4af2e61d86fd66255c20bb5d1860d",
+          "prompt": "Remove founder and close foreground ledge; reconstruct continuous background mountains and misty lake. Preserve golden sunrise and violet shadows, composition and camera.",
+          "originalImagegenOutput": "exec-64ff54c3-50df-468d-94e0-c9f9afe7168f.png",
+          "reference": "assets/founder-story.png",
+          "role": "Independent native depth layer"
+        }
+      ],
+      "programmeStart": 25,
+      "frameStart": 601,
+      "frameEnd": 768
+    },
+    "review": {
+      "accepted": true,
+      "reviewer": "Codex private founder production",
+      "reason": "Native moving source from the locally reviewed continuous scene; byte-bound review is recorded separately.",
+      "evidenceSha256": "fdeeb09964dc385978bb0afa31e9adc6205a66539b8fe5642cc1bfc59d8331f1"
+    }
+  },
+  {
+    "assetId": "autopromote",
+    "type": "video",
+    "status": "accepted",
+    "artifact": {
+      "path": "assets/proxy/autopromote.mp4",
+      "sha256": "24e10d7efc11ce50950e4b6e816d9a66db7487f7edc070d24d98c0623682ae3a",
+      "duration": 6,
+      "hasAudio": false,
+      "codec": "h264",
+      "fps": 12
+    },
+    "provenance": {
+      "provider": "AutoPromote native Blender source",
+      "concept": "AutoPromote brand lockup",
+      "sourceScene": "assets/welcome-world.blend",
+      "nativeSceneSha256": "a48c7c7dee9390ec1e0af711566dc0e2d1b5d9e1ea507955b58f4beea7cac73a",
+      "authorSha256": "48ed4831bd0454e4f3daccb33d2b3e7c9d050119557a446b7cfc2bc0ae31abde",
+      "photographicSources": [
+        {
+          "path": "assets/founder-studio.png",
+          "sha256": "d535accaff029e6ded7a8ef45945e38ae4f350db4ba6d4d819e03d2fe8905581",
+          "prompt": "Fictional adult male founder in black hoodie, thoughtful three-quarter portrait on right third, premium creative studio with violet/magenta practical lighting, warm background points and dark negative space on left. Photoreal cinematic editorial still, no text or UI.",
+          "originalImagegenOutput": "exec-bd742e4b-17e6-4076-8ac4-b978f209ea06.png",
+          "role": "Reusable texture embedded into native animated media surface; not a full-scene slideshow frame"
+        },
+        {
+          "path": "assets/founder-story.png",
+          "sha256": "5c2e8bed70b5ee3075ed279e64b7fe6a6f663bb5c7876de6e12663973bb9aae9",
+          "prompt": "Same fictional adult founder and black hoodie, left-third three-quarter profile on a mountain overlook at golden sunrise, misty lake, natural expression, violet shadow palette and warm horizon. Photoreal cinematic editorial still, no text or UI.",
+          "originalImagegenOutput": "exec-b3ea63fb-45aa-4838-b1e9-0e7e411704a0.png",
+          "role": "Reusable texture embedded into native animated media surface; not a full-scene slideshow frame"
+        },
+        {
+          "path": "assets/founder-foreground.png",
+          "sha256": "f8017dcba506160feda90b81c3f45ee0c078918282684bbadd0d53572f09da06",
+          "prompt": "Preserve exact fictional seated founder, original canvas and pose. Remove background to transparent alpha, retain the close rocky ledge. Clean compositing cutout.",
+          "originalImagegenOutput": "exec-d2b9291b-cf83-432e-94af-b02aa392594e.png",
+          "reference": "assets/founder-story.png",
+          "role": "Independent native depth layer"
+        },
+        {
+          "path": "assets/story-landscape.png",
+          "sha256": "e86ee995cfafc1f76149024b1ff5c49095e4af2e61d86fd66255c20bb5d1860d",
+          "prompt": "Remove founder and close foreground ledge; reconstruct continuous background mountains and misty lake. Preserve golden sunrise and violet shadows, composition and camera.",
+          "originalImagegenOutput": "exec-64ff54c3-50df-468d-94e0-c9f9afe7168f.png",
+          "reference": "assets/founder-story.png",
+          "role": "Independent native depth layer"
+        }
+      ],
+      "programmeStart": 32,
+      "frameStart": 769,
+      "frameEnd": 912
+    },
+    "review": {
+      "accepted": true,
+      "reviewer": "Codex private founder production",
+      "reason": "Native moving source from the locally reviewed continuous scene; byte-bound review is recorded separately.",
+      "evidenceSha256": "fdeeb09964dc385978bb0afa31e9adc6205a66539b8fe5642cc1bfc59d8331f1"
+    }
+  },
+  {
+    "assetId": "score",
+    "type": "audio",
+    "audioRole": "music",
+    "status": "accepted",
+    "artifact": {
+      "path": "assets/score.wav",
+      "sha256": "ee42b4a75802188d6c4e53ae149bea0313b113033cd21cf96fea199231f8cf68",
+      "duration": 38,
+      "hasAudio": true
+    },
+    "provenance": {
+      "provider": "AutoPromote authored CPU synthesis",
+      "seed": 20261009,
+      "sampleRate": 48000,
+      "channels": 2,
+      "duration": 38,
+      "sha256": "ee42b4a75802188d6c4e53ae149bea0313b113033cd21cf96fea199231f8cf68",
+      "notes": [
+        {
+          "at": 0,
+          "midi": 48,
+          "duration": 7.8,
+          "pad": true,
+          "pan": -0.39
+        },
+        {
+          "at": 0,
+          "midi": 55,
+          "duration": 7.8,
+          "pad": true,
+          "pan": -0.13
+        },
+        {
+          "at": 0,
+          "midi": 60,
+          "duration": 7.8,
+          "pad": true,
+          "pan": 0.13
+        },
+        {
+          "at": 0,
+          "midi": 63,
+          "duration": 7.8,
+          "pad": true,
+          "pan": 0.39
+        },
+        {
+          "at": 8,
+          "midi": 46,
+          "duration": 7.8,
+          "pad": true,
+          "pan": -0.39
+        },
+        {
+          "at": 8,
+          "midi": 53,
+          "duration": 7.8,
+          "pad": true,
+          "pan": -0.13
+        },
+        {
+          "at": 8,
+          "midi": 58,
+          "duration": 7.8,
+          "pad": true,
+          "pan": 0.13
+        },
+        {
+          "at": 8,
+          "midi": 65,
+          "duration": 7.8,
+          "pad": true,
+          "pan": 0.39
+        },
+        {
+          "at": 15,
+          "midi": 43,
+          "duration": 7.8,
+          "pad": true,
+          "pan": -0.39
+        },
+        {
+          "at": 15,
+          "midi": 50,
+          "duration": 7.8,
+          "pad": true,
+          "pan": -0.13
+        },
+        {
+          "at": 15,
+          "midi": 55,
+          "duration": 7.8,
+          "pad": true,
+          "pan": 0.13
+        },
+        {
+          "at": 15,
+          "midi": 62,
+          "duration": 7.8,
+          "pad": true,
+          "pan": 0.39
+        },
+        {
+          "at": 21,
+          "midi": 48,
+          "duration": 7.8,
+          "pad": true,
+          "pan": -0.39
+        },
+        {
+          "at": 21,
+          "midi": 55,
+          "duration": 7.8,
+          "pad": true,
+          "pan": -0.13
+        },
+        {
+          "at": 21,
+          "midi": 60,
+          "duration": 7.8,
+          "pad": true,
+          "pan": 0.13
+        },
+        {
+          "at": 21,
+          "midi": 67,
+          "duration": 7.8,
+          "pad": true,
+          "pan": 0.39
+        },
+        {
+          "at": 25,
+          "midi": 53,
+          "duration": 7.8,
+          "pad": true,
+          "pan": -0.39
+        },
+        {
+          "at": 25,
+          "midi": 60,
+          "duration": 7.8,
+          "pad": true,
+          "pan": -0.13
+        },
+        {
+          "at": 25,
+          "midi": 65,
+          "duration": 7.8,
+          "pad": true,
+          "pan": 0.13
+        },
+        {
+          "at": 25,
+          "midi": 69,
+          "duration": 7.8,
+          "pad": true,
+          "pan": 0.39
+        },
+        {
+          "at": 32,
+          "midi": 48,
+          "duration": 6,
+          "pad": true,
+          "pan": -0.39
+        },
+        {
+          "at": 32,
+          "midi": 55,
+          "duration": 6,
+          "pad": true,
+          "pan": -0.13
+        },
+        {
+          "at": 32,
+          "midi": 60,
+          "duration": 6,
+          "pad": true,
+          "pan": 0.13
+        },
+        {
+          "at": 32,
+          "midi": 64,
+          "duration": 6,
+          "pad": true,
+          "pan": 0.39
+        },
+        {
+          "at": 32,
+          "midi": 67,
+          "duration": 6,
+          "pad": true,
+          "pan": 0.65
+        },
+        {
+          "at": 1.8,
+          "midi": 72,
+          "duration": 2.8,
+          "pad": false,
+          "pan": -0.22
+        },
+        {
+          "at": 3.7,
+          "midi": 79,
+          "duration": 2.8,
+          "pad": false,
+          "pan": -0.22
+        },
+        {
+          "at": 5.6,
+          "midi": 75,
+          "duration": 2.8,
+          "pad": false,
+          "pan": -0.22
+        },
+        {
+          "at": 7.5,
+          "midi": 74,
+          "duration": 2.8,
+          "pad": false,
+          "pan": -0.22
+        },
+        {
+          "at": 8,
+          "midi": 72,
+          "duration": 1.6,
+          "pad": false,
+          "pan": 0.39574329864935276
+        },
+        {
+          "at": 8.625,
+          "midi": 79,
+          "duration": 1.6,
+          "pad": false,
+          "pan": 0.2868805507982983
+        },
+        {
+          "at": 9.25,
+          "midi": 75,
+          "duration": 1.6,
+          "pad": false,
+          "pan": 0.06955579415217343
+        },
+        {
+          "at": 9.875,
+          "midi": 82,
+          "duration": 1.6,
+          "pad": false,
+          "pan": -0.17406618318767952
+        },
+        {
+          "at": 10.5,
+          "midi": 79,
+          "duration": 1.6,
+          "pad": false,
+          "pan": -0.35187830398866804
+        },
+        {
+          "at": 11.125,
+          "midi": 74,
+          "duration": 1.6,
+          "pad": false,
+          "pan": -0.3966544709900317
+        },
+        {
+          "at": 11.75,
+          "midi": 72,
+          "duration": 1.6,
+          "pad": false,
+          "pan": -0.291465990330868
+        },
+        {
+          "at": 12.375,
+          "midi": 79,
+          "duration": 1.6,
+          "pad": false,
+          "pan": -0.07608186650676516
+        },
+        {
+          "at": 13,
+          "midi": 72,
+          "duration": 1.6,
+          "pad": false,
+          "pan": 0.16806681473065638
+        },
+        {
+          "at": 13.625,
+          "midi": 79,
+          "duration": 1.6,
+          "pad": false,
+          "pan": 0.34867384322532236
+        },
+        {
+          "at": 14.25,
+          "midi": 75,
+          "duration": 1.6,
+          "pad": false,
+          "pan": 0.3974564404531051
+        },
+        {
+          "at": 14.875,
+          "midi": 82,
+          "duration": 1.6,
+          "pad": false,
+          "pan": 0.2959711864092575
+        },
+        {
+          "at": 15.5,
+          "midi": 79,
+          "duration": 1.6,
+          "pad": false,
+          "pan": 0.08258699277511865
+        },
+        {
+          "at": 16.125,
+          "midi": 74,
+          "duration": 1.6,
+          "pad": false,
+          "pan": -0.16202117582632733
+        },
+        {
+          "at": 16.75,
+          "midi": 72,
+          "duration": 1.6,
+          "pad": false,
+          "pan": -0.3453733891231623
+        },
+        {
+          "at": 17.375,
+          "midi": 79,
+          "duration": 1.6,
+          "pad": false,
+          "pan": -0.398148986248491
+        },
+        {
+          "at": 18,
+          "midi": 72,
+          "duration": 1.6,
+          "pad": false,
+          "pan": -0.3003948987086704
+        },
+        {
+          "at": 18.625,
+          "midi": 79,
+          "duration": 1.6,
+          "pad": false,
+          "pan": -0.08906938203198371
+        },
+        {
+          "at": 19.25,
+          "midi": 75,
+          "duration": 1.6,
+          "pad": false,
+          "pan": 0.15593093089855145
+        },
+        {
+          "at": 19.875,
+          "midi": 82,
+          "duration": 1.6,
+          "pad": false,
+          "pan": 0.3419778503296674
+        },
+        {
+          "at": 20.5,
+          "midi": 79,
+          "duration": 1.6,
+          "pad": false,
+          "pan": 0.3987319177115197
+        },
+        {
+          "at": 21.125,
+          "midi": 74,
+          "duration": 1.6,
+          "pad": false,
+          "pan": 0.30473590933759637
+        },
+        {
+          "at": 21.75,
+          "midi": 72,
+          "duration": 1.6,
+          "pad": false,
+          "pan": 0.0955272496118331
+        },
+        {
+          "at": 22.375,
+          "midi": 79,
+          "duration": 1.6,
+          "pad": false,
+          "pan": -0.1497977566516648
+        },
+        {
+          "at": 23,
+          "midi": 72,
+          "duration": 1.6,
+          "pad": false,
+          "pan": -0.3384881616700683
+        },
+        {
+          "at": 23.625,
+          "midi": 79,
+          "duration": 1.6,
+          "pad": false,
+          "pan": -0.3992050743554254
+        },
+        {
+          "at": 24.25,
+          "midi": 75,
+          "duration": 1.6,
+          "pad": false,
+          "pan": -0.30899302317310817
+        },
+        {
+          "at": 24.875,
+          "midi": 82,
+          "duration": 1.6,
+          "pad": false,
+          "pan": -0.10195881760019845
+        },
+        {
+          "at": 25.5,
+          "midi": 79,
+          "duration": 3,
+          "pad": false,
+          "pan": 0
+        },
+        {
+          "at": 27,
+          "midi": 79,
+          "duration": 3,
+          "pad": false,
+          "pan": 0
+        },
+        {
+          "at": 28.5,
+          "midi": 79,
+          "duration": 3,
+          "pad": false,
+          "pan": 0
+        },
+        {
+          "at": 30,
+          "midi": 79,
+          "duration": 3,
+          "pad": false,
+          "pan": 0
+        },
+        {
+          "at": 34.6,
+          "midi": 84,
+          "duration": 3,
+          "pad": false,
+          "pan": 0
+        }
+      ],
+      "unmasteredSha256": "2233d10393441733f34bd3fca013481a4043464b7a6aa19c3039afbf68fa1928",
+      "masterGainDb": 8,
+      "purpose": "Measured prior complete mix at -28.3 LUFS. Raise both reusable stems by 8 dB for a -20.3 LUFS cinematic web mix; maintain transition balance and headroom."
+    },
+    "review": {
+      "accepted": true,
+      "reviewer": "Codex private founder production",
+      "evidenceSha256": "306d72d1fa59ffda2b776cdca4c7cb773176dd78acb80c89fcab5b4fc005b9c8",
+      "reason": "Original synchronized stereo stem, measured for non-silence and no clipping."
+    }
+  },
+  {
+    "assetId": "cues",
+    "type": "audio",
+    "audioRole": "sfx",
+    "status": "accepted",
+    "artifact": {
+      "path": "assets/cues.wav",
+      "sha256": "dd9a31a0a2ac47c50b98c33c02f02109d624a343d323a8af1aeaaac5bc1259e1",
+      "duration": 38,
+      "hasAudio": true
+    },
+    "provenance": {
+      "provider": "AutoPromote authored CPU synthesis",
+      "seed": 20261009,
+      "sampleRate": 48000,
+      "channels": 2,
+      "duration": 38,
+      "sha256": "dd9a31a0a2ac47c50b98c33c02f02109d624a343d323a8af1aeaaac5bc1259e1",
+      "notes": [
+        {
+          "at": 6.7,
+          "duration": 1.6,
+          "kind": "motivated rise"
+        },
+        {
+          "at": 13.1,
+          "duration": 2.4,
+          "kind": "motivated rise"
+        },
+        {
+          "at": 15.4,
+          "kind": "low impact",
+          "power": 0.26
+        },
+        {
+          "at": 22.8,
+          "duration": 2.3,
+          "kind": "motivated rise"
+        },
+        {
+          "at": 25.1,
+          "kind": "low impact",
+          "power": 0.13
+        },
+        {
+          "at": 32.1,
+          "duration": 2.5,
+          "kind": "motivated rise"
+        },
+        {
+          "at": 34.6,
+          "kind": "low impact",
+          "power": 0.36
+        }
+      ],
+      "unmasteredSha256": "69342db2fbe5785cad1248acdebce51535d57036078cbabc47a75305796bce84",
+      "masterGainDb": 8,
+      "purpose": "Measured prior complete mix at -28.3 LUFS. Raise both reusable stems by 8 dB for a -20.3 LUFS cinematic web mix; maintain transition balance and headroom."
+    },
+    "review": {
+      "accepted": true,
+      "reviewer": "Codex private founder production",
+      "evidenceSha256": "e71dbaf7613bf66220f43d3a449c4ee16c2821446524e6527a9a7096f41d642e",
+      "reason": "Original synchronized stereo stem, measured for non-silence and no clipping."
+    }
+  }
+]

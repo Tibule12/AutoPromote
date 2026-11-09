@@ -1,0 +1,20 @@
+{
+  "status": "pending_whole_film_creative_review",
+  "artifact": {
+    "path": "outputs/038e7daeafb0f79f83d602ee/private-real-world-scene/v30/final.mp4",
+    "sha256": "0a45991d499bda0ffff3159f3a9debeea5625c87b6c48842ef2dc987d9171708",
+    "bytes": 7508936,
+    "duration": 3.75,
+    "codec": "h264",
+    "container": "mp4",
+    "fps": 24,
+    "width": 1920,
+    "height": 1080,
+    "hasAudio": true
+  },
+  "editArtifact": {
+    "path": "outputs/038e7daeafb0f79f83d602ee/private-real-world-scene/v30/studio-project.json",
+    "sha256": "dd39c7234b6535848d36bc6398fe015b6292ab36a9944583bb1691f6ed6b7a14"
+  },
+  "documentHash": "6083d27ff54864f7535c71963156db27babe7f916814625d9f650354f95237c6"
+}

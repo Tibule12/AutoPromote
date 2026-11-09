@@ -1,0 +1,32 @@
+{
+  "status": "TECHNICAL_REVIEW_ONLY",
+  "sources": [
+    {
+      "name": "sea-bed",
+      "accepted": false,
+      "reason": "Measured original stereo audio: peak 1.000, RMS 0.067, clipped samples 0.000001. Technical check only; emotional effectiveness requires review in the final film.",
+      "peak": 0.999969482421875,
+      "rms": 0.06700271947528008,
+      "clippedFraction": 1.3020833333333333e-06,
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 8.0,
+      "artifactSha256": "89cd7ae1b3c7184e990a0a7dc97ce33d20d862b74b84349a5da813a9bf9b8bd3",
+      "listeningApproval": false
+    },
+    {
+      "name": "deck-creak",
+      "accepted": true,
+      "reason": "Measured original stereo audio: peak 0.301, RMS 0.010, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "peak": 0.300567626953125,
+      "rms": 0.009746101408981491,
+      "clippedFraction": 0.0,
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 3.0,
+      "artifactSha256": "dcde6c601214a4aba9566290498a6dd107f37a4f1ebdae7c30d35837de5a2ff7",
+      "listeningApproval": false
+    }
+  ],
+  "listeningApproval": false
+}

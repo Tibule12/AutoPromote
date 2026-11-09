@@ -1,0 +1,11 @@
+{
+  "startedAt": "2026-10-08T17:27:35.368Z",
+  "noMocks": true,
+  "realAuth": true,
+  "headless": true,
+  "muted": true,
+  "status": "REAL_503_VISIBLE_NO_CHARGE_RETRY_MESSAGE_PASS",
+  "serverFailure": "STUDIO_RENDER_WORKER_UNAVAILABLE: The render worker is unavailable. Try again once it is online; no credits were charged. (503)",
+  "userFacingMessage": "Export failed: The render worker is unavailable. Try again once it is online; no credits were charged. (503 Service Unavailable)",
+  "finishedAt": "2026-10-08T17:28:53.769Z"
+}

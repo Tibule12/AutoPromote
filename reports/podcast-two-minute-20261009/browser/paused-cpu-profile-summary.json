@@ -1,0 +1,96 @@
+{
+  "observedAt": "2026-10-09T06:24:30.636Z",
+  "sampleDurationMs": 10000,
+  "top": [
+    {
+      "function": "exports.jsxDEV",
+      "line": 239679,
+      "milliseconds": 2360
+    },
+    {
+      "function": "exports.jsxDEV",
+      "line": 239679,
+      "milliseconds": 1146
+    },
+    {
+      "function": "exports.jsxDEV",
+      "line": 239679,
+      "milliseconds": 1109
+    },
+    {
+      "function": "exports.jsxDEV",
+      "line": 239679,
+      "milliseconds": 874
+    },
+    {
+      "function": "exports.jsxDEV",
+      "line": 239679,
+      "milliseconds": 767
+    },
+    {
+      "function": "(program)",
+      "line": -1,
+      "milliseconds": 473
+    },
+    {
+      "function": "exports.jsxDEV",
+      "line": 239679,
+      "milliseconds": 419
+    },
+    {
+      "function": "exports.jsxDEV",
+      "line": 239679,
+      "milliseconds": 390
+    },
+    {
+      "function": "exports.jsxDEV",
+      "line": 239679,
+      "milliseconds": 377
+    },
+    {
+      "function": "exports.jsxDEV",
+      "line": 239679,
+      "milliseconds": 357
+    },
+    {
+      "function": "exports.jsxDEV",
+      "line": 239679,
+      "milliseconds": 292
+    },
+    {
+      "function": "exports.jsxDEV",
+      "line": 239679,
+      "milliseconds": 280
+    },
+    {
+      "function": "exports.jsxDEV",
+      "line": 239679,
+      "milliseconds": 208
+    },
+    {
+      "function": "exports.jsxDEV",
+      "line": 239679,
+      "milliseconds": 153
+    },
+    {
+      "function": "getElementLabels",
+      "line": 4819,
+      "milliseconds": 139
+    },
+    {
+      "function": "exports.jsxDEV",
+      "line": 239679,
+      "milliseconds": 122
+    },
+    {
+      "function": "exports.jsxDEV",
+      "line": 239679,
+      "milliseconds": 82
+    },
+    {
+      "function": "(garbage collector)",
+      "line": -1,
+      "milliseconds": 72
+    }
+  ]
+}

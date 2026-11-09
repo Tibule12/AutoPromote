@@ -209,9 +209,24 @@ describe("ViralClipStudio timeline sequencing", () => {
       currentTime: { configurable: true, writable: true, value: 5 },
       duration: { configurable: true, value: 12 },
       paused: { configurable: true, get: () => paused },
+      readyState: { configurable: true, value: 4 },
+      currentSrc: { configurable: true, get: () => video.src },
     });
-    video.play = jest.fn(() => { paused = false; video.dispatchEvent(new Event("play")); return Promise.resolve(); });
-    video.pause = jest.fn(() => { paused = true; video.dispatchEvent(new Event("pause")); });
+    video.play = jest.fn(() => {
+      if (paused) { paused = false; video.dispatchEvent(new Event("play")); }
+      return Promise.resolve();
+    });
+    video.pause = jest.fn(() => {
+      if (!paused) { paused = true; video.dispatchEvent(new Event("pause")); }
+    });
+    // Complete the initial decoder/source handshake before modelling a user
+    // paused at 5s. A raw time assignment on an unready element used to leave
+    // a pending metadata restore and failed the production source-event guard.
+    fireEvent.loadedMetadata(video);
+    fireEvent.loadedData(video);
+    video.currentTime = 5;
+    fireEvent.seeked(video);
+    fireEvent.click(screen.getByRole("button", { name: "Pause comparison", exact: true }));
     return { video, props, ...rendered };
   };
 
@@ -734,7 +749,9 @@ describe("ViralClipStudio timeline sequencing", () => {
     fireEvent.click(screen.getByTestId("auto-reframe-toggle"));
     expect(screen.getByTestId("auto-reframe-toggle")).toBeChecked();
     expect(screen.getByTestId("reframe-follow-subject")).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByTestId("reframe-aspect-4-5"));
     fireEvent.click(screen.getByTestId("reframe-preserve-frame"));
+    expect(screen.getByTestId("reframe-aspect-4-5")).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByTestId("reframe-preserve-frame")).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByTestId("reframe-preview-status")).toHaveTextContent("Everyone in frame");
     expect(screen.getByTestId("reframe-speaker-stack")).toBeDisabled();
@@ -766,7 +783,9 @@ describe("ViralClipStudio timeline sequencing", () => {
       screen.getByRole("checkbox", { name: "Angles share the same source timecode" })
     );
     expect(screen.getByTestId("reframe-speaker-stack")).toBeEnabled();
+    fireEvent.click(screen.getByTestId("reframe-aspect-16-9"));
     fireEvent.click(screen.getByTestId("reframe-speaker-stack"));
+    expect(screen.getByTestId("reframe-aspect-16-9")).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByTestId("reframe-speaker-stack")).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByTestId("speaker-stack-editor")).toBeInTheDocument();
     expect(screen.getByTestId("reframe-preview-status")).toHaveTextContent(
@@ -775,8 +794,8 @@ describe("ViralClipStudio timeline sequencing", () => {
     fireEvent.change(screen.getByLabelText("Bottom speaker horizontal position"), {
       target: { value: "84" },
     });
-    fireEvent.click(screen.getByTestId("reframe-follow-subject"));
     fireEvent.click(screen.getByTestId("reframe-aspect-4-5"));
+    fireEvent.click(screen.getByTestId("reframe-follow-subject"));
     expect(screen.getByTestId("reframe-aspect-4-5")).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(screen.getByTestId("add-reframe-keyframe"));
     fireEvent.change(screen.getByLabelText("Manual frame horizontal position"), {
@@ -792,8 +811,7 @@ describe("ViralClipStudio timeline sequencing", () => {
       expect.objectContaining({
         smartCrop: true,
         smartCropMode: "speaker_track",
-        brandWatermark: true,
-        brandWatermarkText: "AutoPromote · Viral Clip Studio",
+        brandWatermark: false,
       })
     );
     expect(onSave.mock.calls[0][2].finishPlan.reframe).toEqual({
@@ -899,7 +917,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     ]));
   });
 
-  test("lets the creator disable the AutoPromote signature in preview and export", async () => {
+  test("keeps Studio preview and export free of platform watermark controls", async () => {
     const onSave = jest.fn(() => Promise.resolve());
     render(
       <ViralClipStudio
@@ -916,20 +934,11 @@ describe("ViralClipStudio timeline sequencing", () => {
       />
     );
 
-    expect(screen.getByTestId("brand-watermark-preview")).toBeInTheDocument();
-    fireEvent.click(
-      within(screen.getByRole("navigation", { name: "Creative tools" })).getByRole("button", {
-        name: "Export",
-        exact: true,
-      })
-    );
-    const signatureToggle = screen.getByRole("checkbox", {
-      name: "Include AutoPromote signature",
-    });
-    expect(signatureToggle).toBeChecked();
-    fireEvent.click(signatureToggle);
-    expect(signatureToggle).not.toBeChecked();
     expect(screen.queryByTestId("brand-watermark-preview")).not.toBeInTheDocument();
+    fireEvent.click(within(screen.getByRole("navigation", { name: "Creative tools" }))
+      .getByRole("button", { name: "Export", exact: true }));
+    expect(screen.queryByRole("checkbox", { name: "Include AutoPromote signature" }))
+      .not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /Render Final Clip/i }));
     await waitFor(() => expect(onSave).toHaveBeenCalled());
     expect(onSave.mock.calls[0][2].brandWatermark).toBe(false);
@@ -1414,6 +1423,9 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(screen.getByTestId("rendered-output-ready")).toHaveTextContent(
       "The finished file is loaded in After above."
     );
+    fireEvent.change(screen.getByLabelText("Edited output position"), { target: { value: "2.5" } });
+    expect(screen.getByTestId("studio-after-video").src).toContain("rendered.mp4?preview=1");
+    expect(screen.getByTestId("studio-after-video").currentTime).toBe(2.5);
 
     fireEvent.click(screen.getByRole("button", { name: "Download Rendered Clip" }));
     fireEvent.click(screen.getByRole("button", { name: "Use in Publisher" }));
@@ -2395,6 +2407,182 @@ describe("ViralClipStudio timeline sequencing", () => {
       expect(screen.getByTestId("live-caption-preview")).toBeInTheDocument();
       expect(afterVideo.playbackRate).toBeCloseTo(1.05);
     });
+  });
+
+  test("initial saved-project hydration preserves the matching completed output", async () => {
+    const onEditInvalidated = jest.fn();
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+      clips={[{ id: "main", start: 0, end: 12, duration: 12 }]}
+      initialSavedProject={{ id: "saved-clean", name: "Saved clean edit", snapshot: {
+        timeline: [{ id: "main", url: "https://example.com/source.mp4", startTime: 0, endTime: 12, duration: 12 }],
+        reframeAspect: "16:9", autoCaptions: false,
+      } }}
+      renderedOutput={{ url: "https://example.com/clean-render.mp4" }}
+      onEditInvalidated={onEditInvalidated} onSave={jest.fn()} onCancel={jest.fn()} />);
+    await waitFor(() => expect(screen.getByDisplayValue("Saved clean edit")).toBeInTheDocument());
+    expect(screen.getByTestId("studio-after-video")).toHaveAttribute("src", "https://example.com/clean-render.mp4");
+    expect(onEditInvalidated).not.toHaveBeenCalled();
+  });
+
+  test("late completed-output recovery preserves the user's selected editing tool", async () => {
+    const props = { videoUrl: "https://example.com/source.mp4",
+      clips: [{ id: "main", start: 0, end: 12, duration: 12 }],
+      onSave: jest.fn(), onCancel: jest.fn() };
+    const { rerender } = render(<ViralClipStudio {...props} />);
+    const tools = screen.getByRole("navigation", { name: "Creative tools" });
+    fireEvent.click(within(tools).getByRole("button", { name: "Pacing", exact: true }));
+    rerender(<ViralClipStudio {...props} renderedOutput={{ url: "https://example.com/completed.mp4" }} />);
+    expect(within(tools).getByRole("button", { name: "Pacing", exact: true }))
+      .toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByTestId("studio-after-video")).toHaveAttribute("src", "https://example.com/completed.mp4");
+  });
+
+  test("late refreshed-source metadata cannot overwrite a newer programme seek", async () => {
+    global.fetch.mockResolvedValue({ ok: true, json: async () => ({ url: "https://example.com/source.mp4?access=fresh" }) });
+    const { video } = mountNativePreview({ sourceStoragePath: "studio/sources/test-user/source.mp4" });
+    fireEvent.error(video);
+    await waitFor(() => expect(video.src).toBe("https://example.com/source.mp4?access=fresh"));
+    fireEvent.change(screen.getByRole("slider", { name: "Edited output position" }), { target: { value: "1" } });
+    expect(video.currentTime).toBe(3);
+    fireEvent.loadedMetadata(video);
+    expect(video.currentTime).toBe(3);
+  });
+
+  test("export shows worker failure in the active controls and retry preserves the edit", async () => {
+    const snapshot = {
+      orderedClips: [{ id: "source", start: 0, end: 12, duration: 12 }], selectedClipId: "source",
+      timeline: [{ id: "main", sourceClipId: "source", url: "https://example.com/source.mp4",
+        startRequest: 0, endRequest: 12, duration: 12 }],
+      reframeAspect: "16:9", smartCrop: false, autoCaptions: false,
+      overlays: [], motionScenes: [], threeDScenes: [],
+    };
+    const onSave = jest.fn().mockRejectedValueOnce(new Error("The render worker is unavailable. No credits were charged."))
+      .mockResolvedValueOnce({});
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4" clips={snapshot.orderedClips}
+      initialSavedProject={{ id: "retry-export", name: "Retry edit", snapshot }}
+      onSave={onSave} onCancel={jest.fn()} />);
+    await waitFor(() => expect(screen.getByDisplayValue("Retry edit")).toBeInTheDocument());
+    await clickRenderFinalClip();
+    const error = await screen.findByTestId("studio-export-error");
+    expect(error).toHaveAttribute("role", "alert");
+    expect(error.closest(".export-panel")).toHaveAttribute("aria-hidden", "false");
+    expect(error).toHaveTextContent("No credits were charged");
+    await clickRenderFinalClip();
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(2));
+    expect(screen.queryByTestId("studio-export-error")).not.toBeInTheDocument();
+    expect(onSave.mock.calls[1][2].timelineSegments).toEqual(onSave.mock.calls[0][2].timelineSegments);
+  });
+
+  test("reopened canonical audio decisions reach editable controls and the normal export action", async () => {
+    const projectId = "saved-canonical-audio";
+    const snapshot = {
+      orderedClips: [{ id: "source", start: 0, end: 12, duration: 12 }], selectedClipId: "source",
+      timeline: [{ id: "main", sourceClipId: "source", url: "https://example.com/source.mp4",
+        startRequest: 0, endRequest: 12, duration: 12 }],
+      reframeAspect: "16:9", smartCrop: false, autoCaptions: false,
+      overlays: [], motionScenes: [], threeDScenes: [],
+      soundEffects: [{ id: "saved-cue", name: "Saved impact", builtIn: true, tone: "impact",
+        startTime: 3, duration: 1, trimStart: 0, volume: .25, fadeIn: .1, fadeOut: .2, enabled: true }],
+      activeSoundEffectId: "saved-cue",
+    };
+    const document = studioProjectDocument.adaptStudioSnapshotToDocument({ snapshot, projectId });
+    // A stale legacy copy must not override the versioned canonical decisions.
+    const saved = { ...snapshot, studioDocument: JSON.parse(JSON.stringify(document)),
+      soundEffects: [{ ...snapshot.soundEffects[0], volume: .9, fadeOut: .8 }] };
+    const onSave = jest.fn(() => Promise.resolve());
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4" clips={snapshot.orderedClips}
+      initialSavedProject={{ id: projectId, name: "Canonical audio edit", snapshot: saved }}
+      onSave={onSave} onCancel={jest.fn()} />);
+    await waitFor(() => expect(screen.getByDisplayValue("Canonical audio edit")).toBeInTheDocument());
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("tab", { name: /Sound/i }));
+    expect(screen.getByTestId("sound-effect-volume")).toHaveValue("25");
+    await clickRenderFinalClip();
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    expect(onSave.mock.calls[0][2].soundEffects).toEqual([expect.objectContaining({
+      id: "saved-cue", startTime: 3, volume: .25, fadeIn: .1, fadeOut: .2,
+    })]);
+  });
+
+  test("reopened canonical transforms captions and crop reach the timeline and shared final render plans", async () => {
+    const projectId = "saved-canonical-visual";
+    const snapshot = {
+      orderedClips: [{ id: "footage", start: 0, end: 12, duration: 12 }], selectedClipId: "footage",
+      timeline: [{ id: "main", sourceClipId: "footage", url: "https://example.com/source.mp4",
+        startRequest: 0, endRequest: 12, duration: 12 }], overlays: [], motionScenes: [], threeDScenes: [],
+      mainTransform: { id: "main-video", type: "video", x: 38, y: 62, scale: 1.3,
+        rotation: 4, opacity: .85, cropX: 12, cropY: 8 },
+      finishFx: { contrast: 1.1, saturation: 1.2, exposureStops: .4 },
+      smartCrop: true, smartCropMode: "center", reframeAspect: "4:5",
+      captionCoverageMode: "selected",
+      autoCaptions: true, captionStyle: "minimal", captionPosition: "bottom", captionScale: 1.15,
+      captionSegments: [{ id: "reviewed-caption", text: "Reviewed words", start: 3, end: 5,
+        sourceClipId: "footage", speaker: "speaker_1", language: "en", reviewRequired: false,
+        textReviewed: true, captionPlacement: "custom", captionX: 35, captionY: 72, captionAccent: "#abcdef" }],
+    };
+    const document = studioProjectDocument.adaptStudioSnapshotToDocument({ snapshot, projectId });
+    const saved = { ...snapshot, studioDocument: JSON.parse(JSON.stringify(document)),
+      mainTransform: { ...snapshot.mainTransform, x: 99 }, captionStyle: "marker", smartCropMode: "off",
+      captionSegments: [{ ...snapshot.captionSegments[0], captionX: 99, captionY: 10 }] };
+    const onSave = jest.fn(() => Promise.resolve());
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4" clips={snapshot.orderedClips}
+      initialSavedProject={{ id: projectId, name: "Canonical visual edit", snapshot: saved }}
+      onSave={onSave} onCancel={jest.fn()} />);
+    await waitFor(() => expect(screen.getByDisplayValue("Canonical visual edit")).toBeInTheDocument());
+    expect(screen.getByTestId("pro-captions-clip-1")).toHaveTextContent("Reviewed words");
+    await clickRenderFinalClip();
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    const options = onSave.mock.calls[0][2];
+    expect(options.captionCoverageMode).toBe("selected");
+    expect(options.captionStyle).toBe("minimal");
+    expect(options.captionSegments[0]).toMatchObject({ text: "Reviewed words",
+      caption_x: 35, caption_y: 72, caption_accent: "#abcdef" });
+    expect(options.finishPlan.motion.base_transform).toEqual({ x: 38, y: 62, scale: 1.3,
+      rotation: 4, opacity: .85, crop_x: 12, crop_y: 8 });
+    expect(options.finishPlan.color).toMatchObject({ contrast: 1.1, saturation: 1.2, exposureStops: .4 });
+    expect(options.finishPlan.reframe).toMatchObject({ enabled: true, aspect: "4:5", mode: "center" });
+    expect(options.compositionPlan.layers[0].base_transform).toEqual(options.finishPlan.motion.base_transform);
+    expect(options.brandWatermark).toBe(false);
+  });
+
+  test("shows burned captions once and restores the editable preview after the output is cleared", async () => {
+    const props = {
+      videoUrl: "https://example.com/source.mp4",
+      clips: [{ id: "clip-1", start: 0, end: 12, duration: 12,
+        segments: [{ id: "cue-1", start: 0, end: 4, text: "STUDIO QA CAPTION RETEST",
+          speaker: "speaker_1", language: "en", textReviewed: true }] }],
+      onSave: jest.fn(), onCancel: jest.fn(), onStatusChange: jest.fn(),
+    };
+    const { rerender } = render(<ViralClipStudio {...props} />);
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("tab", { name: /Captions/i }));
+    fireEvent.click(within(inspector).getByRole("checkbox", { name: /Preview captions/i }));
+    expect(screen.getByTestId("live-caption-preview")).toBeInTheDocument();
+    rerender(<ViralClipStudio {...props} renderedOutput={{ url: "https://example.com/completed.mp4" }} />);
+    expect(screen.getByTestId("studio-after-video")).toHaveAttribute("src", "https://example.com/completed.mp4");
+    expect(screen.queryByTestId("live-caption-preview")).not.toBeInTheDocument();
+    rerender(<ViralClipStudio {...props} renderedOutput={null} />);
+    expect(screen.getByTestId("live-caption-preview")).toBeInTheDocument();
+  });
+
+  test("uses the actual source aspect in the programme monitor when reframing is off", () => {
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+      clips={[{ id: "clip-1", start: 0, end: 12, duration: 12 }]}
+      onSave={jest.fn()} onCancel={jest.fn()} />);
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("tab", { name: /Reframe/i }));
+    fireEvent.click(screen.getByTestId("auto-reframe-toggle"));
+    const media = screen.getByTestId("studio-after-video");
+    Object.defineProperty(media, "videoWidth", { configurable: true, value: 1280 });
+    Object.defineProperty(media, "videoHeight", { configurable: true, value: 720 });
+    fireEvent.loadedMetadata(media);
+    expect(screen.getByTestId("hook-preview-frame").style.getPropertyValue("--frame-ratio"))
+      .toBe(String(1280 / 720));
+    Object.defineProperty(media, "videoWidth", { configurable: true, value: 720 });
+    Object.defineProperty(media, "videoHeight", { configurable: true, value: 1280 });
+    fireEvent.loadedMetadata(media);
+    expect(screen.getByTestId("hook-preview-frame").style.getPropertyValue("--frame-ratio"))
+      .toBe(String(720 / 1280));
   });
 
   test("keeps only original-audio controls in the studio", async () => {
@@ -4042,7 +4230,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     });
     expect(screen.getByTestId("live-caption-preview")).toHaveClass("caption-placement-shoulder_left");
     fireEvent.click(within(inspector).getByRole("button", { name: "Fire" }));
-    expect(screen.getByTestId("live-caption-preview")).toHaveTextContent("🔥");
+    expect(screen.getByTestId("live-caption-preview")).toHaveTextContent("♨");
     fireEvent.click(within(inspector).getByRole("button", { name: /Big Headline/i }));
     expect(screen.getByTestId("live-caption-preview")).toHaveClass("caption-style-headline");
     fireEvent.change(within(inspector).getByRole("combobox", { name: "Caption 1 placement" }), {
@@ -4453,6 +4641,11 @@ describe("ViralClipStudio timeline sequencing", () => {
     );
 
     const afterVideo = screen.getByTestId("studio-after-video");
+    Object.defineProperty(afterVideo, "readyState", { configurable: true, value: 2 });
+    Object.defineProperty(afterVideo, "currentSrc", { configurable: true, get: () => afterVideo.src });
+    Object.defineProperty(afterVideo, "duration", { configurable: true, value: 20 });
+    fireEvent.loadedMetadata(afterVideo);
+    fireEvent.loadedData(afterVideo);
     Object.defineProperty(afterVideo, "currentTime", {
       configurable: true,
       writable: true,
@@ -4592,6 +4785,11 @@ describe("ViralClipStudio timeline sequencing", () => {
       clips={[{ id: "trim-motion", start: 0, end: 12, duration: 12 }]}
       onSave={onSave} onCancel={jest.fn()} />);
     const video = screen.getByTestId("studio-after-video");
+    Object.defineProperty(video, "readyState", { configurable: true, value: 2 });
+    Object.defineProperty(video, "currentSrc", { configurable: true, get: () => video.src });
+    Object.defineProperty(video, "duration", { configurable: true, value: 12 });
+    fireEvent.loadedMetadata(video);
+    fireEvent.loadedData(video);
     video.currentTime = 5;
     fireEvent.timeUpdate(video);
     fireEvent.click(within(screen.getByRole("navigation", { name: "Creative tools" })).getByRole("button", { name: "Motion", exact: true }));
@@ -4665,6 +4863,9 @@ describe("ViralClipStudio timeline sequencing", () => {
             duration: 20,
             reason: "Simplicity test",
             text: "Caption line for testing simple studio",
+            captions: [{ id: "reviewed-toolbar-cue", start: 0, end: 20,
+              text: "Caption line for testing simple studio", language: "en", speaker: "speaker_1",
+              textReviewed: true, reviewRequired: false }],
           },
         ]}
         onSave={onSave}
@@ -4674,6 +4875,8 @@ describe("ViralClipStudio timeline sequencing", () => {
 
     const afterVideo = screen.getByTestId("studio-after-video");
     Object.defineProperty(afterVideo, "duration", { configurable: true, value: 20 });
+    Object.defineProperty(afterVideo, "readyState", { configurable: true, value: 4 });
+    Object.defineProperty(afterVideo, "currentSrc", { configurable: true, get: () => afterVideo.src });
     fireEvent.loadedMetadata(afterVideo);
     fireEvent.loadedData(afterVideo);
     Object.defineProperty(afterVideo, "currentTime", { configurable: true, writable: true, value: 8 });
@@ -4706,9 +4909,13 @@ describe("ViralClipStudio timeline sequencing", () => {
     fireEvent.change(screen.getByLabelText("Speaker zoom"), { target: { value: "1.6" } });
     expect(screen.getByLabelText("Speaker zoom")).toHaveValue("1.6");
     fireEvent.click(screen.getByTestId("preview-fit-full"));
-    expect(screen.getByTestId("main-footage-frame-toggle")).toHaveAttribute("data-rounded-locked", "true");
+    const frameToggle = screen.getByTestId("main-footage-frame-toggle");
+    fireEvent.click(frameToggle);
+    expect(frameToggle).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(frameToggle);
+    expect(frameToggle).toHaveAttribute("aria-pressed", "false");
     fireEvent.click(screen.getByTestId("preview-fill-canvas"));
-    expect(screen.getByTestId("main-footage-frame-toggle")).toHaveAttribute("data-rounded-locked", "true");
+    expect(screen.getByTestId("main-footage-frame-toggle")).toHaveAttribute("aria-pressed", "false");
     afterVideo.currentTime = 10;
     fireEvent.timeUpdate(afterVideo);
     fireEvent.click(screen.getByTestId("preview-quick-both-cams"));

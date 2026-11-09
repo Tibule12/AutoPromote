@@ -1,0 +1,16 @@
+{
+  "realAuth": true,
+  "noMocks": true,
+  "captionTextVisible": true,
+  "row": {
+    "x": 1,
+    "y": 609,
+    "width": 1364,
+    "height": 52
+  },
+  "viewport": {
+    "width": 1366,
+    "height": 768
+  },
+  "at": "2026-10-07T21:34:25.363Z"
+}

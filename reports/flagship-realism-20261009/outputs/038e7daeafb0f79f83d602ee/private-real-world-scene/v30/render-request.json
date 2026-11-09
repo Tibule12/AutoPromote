@@ -1,0 +1,84 @@
+{
+  "video_url": "http://127.0.0.1:8765/assets/yacht/video.mp4",
+  "start_time": 0,
+  "end_time": 3.75,
+  "overlays": [],
+  "auto_captions": false,
+  "timeline_segments": [
+    {
+      "id": "private-real-world-scene-1",
+      "source_clip_id": "yacht-720",
+      "start_time": 0,
+      "end_time": 1.5,
+      "duration": 1.5,
+      "url": "http://127.0.0.1:8765/assets/yacht/video.mp4"
+    },
+    {
+      "id": "private-real-world-scene-2",
+      "source_clip_id": "helm-response",
+      "start_time": 0,
+      "end_time": 1.5,
+      "duration": 1.5,
+      "url": "http://127.0.0.1:8765/assets/helm/video.mp4"
+    },
+    {
+      "id": "private-real-world-scene-3",
+      "source_clip_id": "yacht-720",
+      "start_time": 1.5,
+      "end_time": 2.25,
+      "duration": 0.75,
+      "url": "http://127.0.0.1:8765/assets/yacht/video.mp4"
+    }
+  ],
+  "background_audio": null,
+  "hook_focus_point": null,
+  "cover_frame": null,
+  "thumbnail_frame": null,
+  "caption_style": "minimal",
+  "caption_position": "bottom",
+  "caption_scale": 0.72,
+  "caption_segments": [],
+  "creative_intent": "Private photographic person/yacht/sea scene study. Pending complete-film continuity, transformation, sound listening and creative review.",
+  "professional_cleanup": false,
+  "finish_plan": {
+    "version": 1,
+    "enabled": true,
+    "reframe": {
+      "enabled": true,
+      "aspect": "16:9",
+      "mode": "off"
+    }
+  },
+  "smart_crop": true,
+  "smart_crop_mode": "safe_fit",
+  "brand_watermark": false,
+  "output_settings": {
+    "resolution": "1080p",
+    "fps": 24,
+    "codec": "h264",
+    "audioCodec": "aac"
+  },
+  "sound_effects": [
+    {
+      "id": "private-real-world-scene-audio-1",
+      "url": "http://127.0.0.1:8765/audio/sea-bed-safe.wav",
+      "enabled": true,
+      "kind": "sfx",
+      "name": "sea-bed",
+      "sourceClipId": "sea-bed",
+      "storagePath": "audio/sea-bed-safe.wav",
+      "contentHash": "658ee9f2c92e70e64f23f1d9ad7f88cc5059265f7cbb7dbbb336331d77942420",
+      "volume": 0.7,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "startTime": 0,
+      "duration": 3.75,
+      "trimStart": 0
+    }
+  ],
+  "motionGraphics": {
+    "version": 1,
+    "scenes": []
+  },
+  "mute_audio": true
+}

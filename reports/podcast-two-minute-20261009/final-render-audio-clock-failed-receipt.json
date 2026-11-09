@@ -1,0 +1,74 @@
+{
+  "finishedAt": "2026-10-09T09:17:12.743Z",
+  "submittedAt": "2026-10-09T09:09:50.313Z",
+  "submittedJobId": "viral_ec7c7ca5d595e59cfb0be824d3746773d7d589243d879162a40bd440e8facaca",
+  "realApi": true,
+  "noMocks": true,
+  "normalSavedProjectRecovery": true,
+  "noDuplicateSubmission": true,
+  "recovered": {
+    "jobId": "viral_ec7c7ca5d595e59cfb0be824d3746773d7d589243d879162a40bd440e8facaca",
+    "status": "completed",
+    "outputDurable": true,
+    "audioProof": null
+  },
+  "events": [
+    {
+      "path": "/api/media/studio-assets/resolve",
+      "status": 200,
+      "at": "2026-10-09T09:15:52.430Z"
+    },
+    {
+      "path": "/api/media/studio-assets/resolve",
+      "status": 200,
+      "at": "2026-10-09T09:15:58.145Z"
+    },
+    {
+      "path": "/api/media/credits",
+      "status": 200,
+      "at": "2026-10-09T09:15:58.752Z"
+    },
+    {
+      "path": "/api/media/studio-assets/resolve",
+      "status": 200,
+      "at": "2026-10-09T09:15:58.754Z"
+    },
+    {
+      "path": "/api/media/viral-render-attempt/e5c64f4f-bfcc-4128-9522-837fc3d8e4d0",
+      "status": 200,
+      "at": "2026-10-09T09:15:59.362Z"
+    }
+  ],
+  "download": {
+    "nativeCompleted": true,
+    "suggestedName": "viral_clip_rendered.mp4",
+    "bytes": 167125226
+  },
+  "output": "reports/podcast-two-minute-20261009/vfx/download.mp4",
+  "outputSha256": "75d6e6823e2fb19f080cdce3215356a05b9f3ded479bb88cd7a2ff885ab0d69a",
+  "technical": {
+    "passed": true,
+    "sha256": "75d6e6823e2fb19f080cdce3215356a05b9f3ded479bb88cd7a2ff885ab0d69a",
+    "bytes": 167125226,
+    "seconds": 120,
+    "video": {
+      "width": 1920,
+      "height": 1080,
+      "codec": "h264",
+      "fps": "24/1",
+      "duration": "120.000000",
+      "frameCount": 2880,
+      "pixelFormat": "yuv420p",
+      "encoder": "Lavc60.31.102 h264_nvenc"
+    },
+    "audio": {
+      "codec": "aac",
+      "channels": 2,
+      "sampleRate": "96000",
+      "duration": "120.000000"
+    },
+    "independentFullDecode": true,
+    "contactSheet": "reports/podcast-two-minute-20261009/vfx/download.mp4.frames.jpg",
+    "scope": "Technical only. Pixel and listening review are separate required evidence."
+  }
+}

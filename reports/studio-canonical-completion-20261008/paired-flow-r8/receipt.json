@@ -1,0 +1,208 @@
+{
+  "startedAt": "2026-10-08T12:32:24.543Z",
+  "projectName": "Studio paired visual QA 20261008 r8",
+  "headless": true,
+  "muted": true,
+  "realAuth": true,
+  "noMocks": true,
+  "gpuUsed": false,
+  "gpuJobsStarted": 0,
+  "status": "PAIRS_CAPTURED_REVIEW_PENDING",
+  "pairs": [
+    {
+      "outputTime": 1,
+      "preFinalSource": {
+        "currentTime": 1,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-1.png",
+      "final": "final-1.png"
+    },
+    {
+      "outputTime": 3.5,
+      "preFinalSource": {
+        "currentTime": 3.5,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-3.5.png",
+      "final": "final-3.5.png"
+    },
+    {
+      "outputTime": 5.5,
+      "preFinalSource": {
+        "currentTime": 5.5,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-5.5.png",
+      "final": "final-5.5.png"
+    },
+    {
+      "outputTime": 7.5,
+      "preFinalSource": {
+        "currentTime": 7.5,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-7.5.png",
+      "final": "final-7.5.png"
+    },
+    {
+      "outputTime": 10,
+      "preFinalSource": {
+        "currentTime": 10,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-10.png",
+      "final": "final-10.png"
+    }
+  ],
+  "fullCoveragePreflight": "Possible uncovered audio: 0.0–2.8s, 5.2–6.8s, 9.2–12.0s. Caption these phrases, or choose Selected phrases if the gaps are intentional.",
+  "documentSha256": "e480470dc1e74381da9bb49b7894fa2fc892a3c6380c4c5250161f75684f9232",
+  "output": {
+    "startedAt": "2026-10-08T12:33:28.746Z",
+    "finishedAt": "2026-10-08T12:35:25.046Z",
+    "projectName": "A\nAutoPromote\nVIRAL CLIP STUDIO\nStudio paired visual QA 20261008 r8",
+    "realApi": true,
+    "noMocks": true,
+    "submittedJobId": "viral_16e18575d50e7da5c9eb57a26af937fff51934d546317658fdd5065c7226631f",
+    "events": [
+      {
+        "path": "/api/media/process",
+        "status": 200,
+        "at": "2026-10-08T12:33:49.031Z"
+      },
+      {
+        "path": "/api/media/status/viral_16e18575d50e7da5c9eb57a26af937fff51934d546317658fdd5065c7226631f",
+        "status": 200,
+        "at": "2026-10-08T12:33:53.375Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_16e18575d50e7da5c9eb57a26af937fff51934d546317658fdd5065c7226631f",
+        "status": 200,
+        "at": "2026-10-08T12:33:59.349Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_16e18575d50e7da5c9eb57a26af937fff51934d546317658fdd5065c7226631f",
+        "status": 200,
+        "at": "2026-10-08T12:34:05.326Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_16e18575d50e7da5c9eb57a26af937fff51934d546317658fdd5065c7226631f",
+        "status": 200,
+        "at": "2026-10-08T12:34:11.382Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_16e18575d50e7da5c9eb57a26af937fff51934d546317658fdd5065c7226631f",
+        "status": 200,
+        "at": "2026-10-08T12:34:17.344Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_16e18575d50e7da5c9eb57a26af937fff51934d546317658fdd5065c7226631f",
+        "status": 200,
+        "at": "2026-10-08T12:34:24.265Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_16e18575d50e7da5c9eb57a26af937fff51934d546317658fdd5065c7226631f",
+        "status": 200,
+        "at": "2026-10-08T12:34:29.342Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_16e18575d50e7da5c9eb57a26af937fff51934d546317658fdd5065c7226631f",
+        "status": 200,
+        "at": "2026-10-08T12:34:35.355Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_16e18575d50e7da5c9eb57a26af937fff51934d546317658fdd5065c7226631f",
+        "status": 200,
+        "at": "2026-10-08T12:34:41.916Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_16e18575d50e7da5c9eb57a26af937fff51934d546317658fdd5065c7226631f",
+        "status": 200,
+        "at": "2026-10-08T12:34:47.370Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_16e18575d50e7da5c9eb57a26af937fff51934d546317658fdd5065c7226631f",
+        "status": 200,
+        "at": "2026-10-08T12:34:53.615Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_16e18575d50e7da5c9eb57a26af937fff51934d546317658fdd5065c7226631f",
+        "status": 200,
+        "at": "2026-10-08T12:35:00.154Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_16e18575d50e7da5c9eb57a26af937fff51934d546317658fdd5065c7226631f",
+        "status": 200,
+        "at": "2026-10-08T12:35:06.755Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_16e18575d50e7da5c9eb57a26af937fff51934d546317658fdd5065c7226631f",
+        "status": 200,
+        "at": "2026-10-08T12:35:11.353Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_16e18575d50e7da5c9eb57a26af937fff51934d546317658fdd5065c7226631f",
+        "status": 200,
+        "at": "2026-10-08T12:35:18.360Z",
+        "jobStatus": "completed"
+      }
+    ],
+    "errors": [],
+    "download": {
+      "suggestedName": "viral_clip_rendered.mp4",
+      "bytes": 1404669,
+      "nativeCompleted": true
+    },
+    "output": "reports/studio-canonical-completion-20261008/paired-flow-r8/compositing/download.mp4",
+    "outputSha256": "e916aecb83e28847e762d8d10c75ef61b82f9c9185f1d78eac85e48464500439",
+    "technical": {
+      "passed": true,
+      "sha256": "e916aecb83e28847e762d8d10c75ef61b82f9c9185f1d78eac85e48464500439",
+      "bytes": 1404669,
+      "seconds": 12,
+      "video": {
+        "width": 576,
+        "height": 720,
+        "codec": "h264",
+        "fps": "30/1",
+        "duration": "11.966667",
+        "pixelFormat": "yuv420p"
+      },
+      "audio": {
+        "codec": "aac",
+        "channels": 2,
+        "sampleRate": "96000",
+        "duration": "12.000000"
+      },
+      "independentFullDecode": true,
+      "contactSheet": "reports/studio-canonical-completion-20261008/paired-flow-r8/compositing/download.mp4.frames.jpg",
+      "scope": "Technical only. Pixel and listening review are separate required evidence."
+    }
+  },
+  "previewFinalParity": "UNQUALIFIED until paired geometry/text/pixels/audio are reviewed",
+  "finishedAt": "2026-10-08T12:35:25.804Z"
+}

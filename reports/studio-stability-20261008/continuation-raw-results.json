@@ -1,0 +1,775 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-08T05:26:27.729Z",
+  "matrixSha256": "0d4701b2c216968aa0950b41392ea5598144fe1e86352895ffbde0e59f19181d",
+  "realAuthRequired": true,
+  "mocksAllowed": false,
+  "cases": [
+    {
+      "id": "media_ingest",
+      "capability": "Media ingest",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "preview",
+      "capability": "Preview",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "final_render",
+      "capability": "Final render",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "captions",
+      "capability": "Captions",
+      "testedEndToEnd": true,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "Expected values to be strictly equal:\n\n404 !== 1280\n",
+      "fixApplied": "",
+      "retestResult": "Real render and independent full decode completed",
+      "remainingIssue": "Output produced; visual review and GPU attribution pending",
+      "userFacingSeverity": "High",
+      "attempts": [
+        {
+          "startedAt": "2026-10-08T05:25:43.903Z",
+          "finishedAt": "2026-10-08T05:26:27.729Z",
+          "realApi": true,
+          "noMocks": true,
+          "events": [
+            {
+              "path": "/api/media/studio-assets/resolve",
+              "status": 200,
+              "at": "2026-10-08T05:25:45.849Z"
+            },
+            {
+              "path": "/api/media/process",
+              "status": 200,
+              "at": "2026-10-08T05:25:57.275Z"
+            },
+            {
+              "path": "/api/media/status/viral_5fec480ce84fe9dae832ce3c3271f178ac24499693e8b6c73f683297c355b7b0",
+              "status": 200,
+              "at": "2026-10-08T05:26:02.000Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_5fec480ce84fe9dae832ce3c3271f178ac24499693e8b6c73f683297c355b7b0",
+              "status": 200,
+              "at": "2026-10-08T05:26:08.224Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_5fec480ce84fe9dae832ce3c3271f178ac24499693e8b6c73f683297c355b7b0",
+              "status": 200,
+              "at": "2026-10-08T05:26:14.436Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_5fec480ce84fe9dae832ce3c3271f178ac24499693e8b6c73f683297c355b7b0",
+              "status": 200,
+              "at": "2026-10-08T05:26:21.007Z",
+              "jobStatus": "completed"
+            }
+          ],
+          "errors": [],
+          "error": "Expected values to be strictly equal:\n\n404 !== 1280\n"
+        },
+        {
+          "startedAt": "2026-10-08T05:30:54.285Z",
+          "finishedAt": "2026-10-08T05:32:14.954Z",
+          "projectName": "A\nAutoPromote\nVIRAL CLIP STUDIO\nStudio QA 20261008 captions",
+          "realApi": true,
+          "noMocks": true,
+          "submittedJobId": "viral_dad96b9e207c16762f8dab06ed2815ad3d97b938abb8dc4421b2a88197c37542",
+          "events": [
+            {
+              "path": "/api/media/process",
+              "status": 200,
+              "at": "2026-10-08T05:31:16.470Z"
+            },
+            {
+              "path": "/api/media/status/viral_dad96b9e207c16762f8dab06ed2815ad3d97b938abb8dc4421b2a88197c37542",
+              "status": 200,
+              "at": "2026-10-08T05:31:20.282Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_dad96b9e207c16762f8dab06ed2815ad3d97b938abb8dc4421b2a88197c37542",
+              "status": 200,
+              "at": "2026-10-08T05:31:26.524Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_dad96b9e207c16762f8dab06ed2815ad3d97b938abb8dc4421b2a88197c37542",
+              "status": 200,
+              "at": "2026-10-08T05:31:32.767Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_dad96b9e207c16762f8dab06ed2815ad3d97b938abb8dc4421b2a88197c37542",
+              "status": 200,
+              "at": "2026-10-08T05:31:38.639Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_dad96b9e207c16762f8dab06ed2815ad3d97b938abb8dc4421b2a88197c37542",
+              "status": 200,
+              "at": "2026-10-08T05:31:45.113Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_dad96b9e207c16762f8dab06ed2815ad3d97b938abb8dc4421b2a88197c37542",
+              "status": 200,
+              "at": "2026-10-08T05:31:50.728Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_dad96b9e207c16762f8dab06ed2815ad3d97b938abb8dc4421b2a88197c37542",
+              "status": 200,
+              "at": "2026-10-08T05:31:57.459Z",
+              "jobStatus": "completed"
+            }
+          ],
+          "errors": [],
+          "download": {
+            "suggestedName": "viral_clip_rendered.mp4",
+            "bytes": 2218831,
+            "nativeCompleted": true
+          },
+          "output": "reports/studio-stability-20261008/captions/download.mp4",
+          "outputSha256": "de04a95e8906f8575628f434b1d40c5343498ce1277aaee8bce4ddc33b510ca8",
+          "technical": {
+            "passed": true,
+            "sha256": "de04a95e8906f8575628f434b1d40c5343498ce1277aaee8bce4ddc33b510ca8",
+            "bytes": 2218831,
+            "seconds": 12,
+            "video": {
+              "width": 1280,
+              "height": 720,
+              "codec": "h264",
+              "fps": "30/1",
+              "duration": "12.000000",
+              "pixelFormat": "yuv420p"
+            },
+            "audio": {
+              "codec": "aac",
+              "channels": 2,
+              "sampleRate": "96000",
+              "duration": "12.000000"
+            },
+            "independentFullDecode": true,
+            "contactSheet": "reports/studio-stability-20261008/captions/download.mp4.frames.jpg",
+            "scope": "Technical only. Pixel and listening review are separate required evidence."
+          }
+        }
+      ]
+    },
+    {
+      "id": "reframing",
+      "capability": "Reframing",
+      "testedEndToEnd": true,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Real render and independent full decode completed",
+      "remainingIssue": "Output produced; visual review and GPU attribution pending",
+      "userFacingSeverity": "Unqualified",
+      "attempts": [
+        {
+          "startedAt": "2026-10-08T06:01:32.419Z",
+          "finishedAt": "2026-10-08T06:02:35.068Z",
+          "projectName": "A\nAutoPromote\nVIRAL CLIP STUDIO\nStudio QA 20261008 aspect retest",
+          "realApi": true,
+          "noMocks": true,
+          "submittedJobId": "viral_c3516111336f9c9e99e40bd52a69a719f51b421374ca8d7a3adfd18811d83e8f",
+          "events": [
+            {
+              "path": "/api/media/process",
+              "status": 200,
+              "at": "2026-10-08T06:01:46.949Z"
+            },
+            {
+              "path": "/api/media/status/viral_c3516111336f9c9e99e40bd52a69a719f51b421374ca8d7a3adfd18811d83e8f",
+              "status": 200,
+              "at": "2026-10-08T06:01:57.099Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_c3516111336f9c9e99e40bd52a69a719f51b421374ca8d7a3adfd18811d83e8f",
+              "status": 200,
+              "at": "2026-10-08T06:02:03.030Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_c3516111336f9c9e99e40bd52a69a719f51b421374ca8d7a3adfd18811d83e8f",
+              "status": 200,
+              "at": "2026-10-08T06:02:08.795Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_c3516111336f9c9e99e40bd52a69a719f51b421374ca8d7a3adfd18811d83e8f",
+              "status": 200,
+              "at": "2026-10-08T06:02:15.417Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_c3516111336f9c9e99e40bd52a69a719f51b421374ca8d7a3adfd18811d83e8f",
+              "status": 200,
+              "at": "2026-10-08T06:02:22.176Z",
+              "jobStatus": "completed"
+            }
+          ],
+          "errors": [],
+          "download": {
+            "suggestedName": "viral_clip_rendered.mp4",
+            "bytes": 1587034,
+            "nativeCompleted": true
+          },
+          "output": "reports/studio-stability-20261008/reframing/download.mp4",
+          "outputSha256": "dd83c7e13e6c0b0c120bae3bee7a7e3ec5d6c8e129761bb718435880e12d08ca",
+          "technical": {
+            "passed": true,
+            "sha256": "dd83c7e13e6c0b0c120bae3bee7a7e3ec5d6c8e129761bb718435880e12d08ca",
+            "bytes": 1587034,
+            "seconds": 12,
+            "video": {
+              "width": 404,
+              "height": 720,
+              "codec": "h264",
+              "fps": "30/1",
+              "duration": "12.000000",
+              "pixelFormat": "yuv420p"
+            },
+            "audio": {
+              "codec": "aac",
+              "channels": 2,
+              "sampleRate": "96000",
+              "duration": "12.000000"
+            },
+            "independentFullDecode": true,
+            "contactSheet": "reports/studio-stability-20261008/reframing/download.mp4.frames.jpg",
+            "scope": "Technical only. Pixel and listening review are separate required evidence."
+          }
+        }
+      ]
+    },
+    {
+      "id": "overlays",
+      "capability": "Overlays",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "motion_graphics",
+      "capability": "Motion graphics",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "masking",
+      "capability": "Masking / subject isolation",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "tracking",
+      "capability": "Tracking",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "depth_occlusion",
+      "capability": "Depth / occlusion",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "segmentation",
+      "capability": "Segmentation",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "three_d",
+      "capability": "3D",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "blender",
+      "capability": "Blender rendering",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "compositing",
+      "capability": "Compositing",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "vfx",
+      "capability": "VFX",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "audio",
+      "capability": "Audio",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "generated_image",
+      "capability": "Generated image assets",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "generated_video",
+      "capability": "Generated video assets",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "generated_raw",
+      "capability": "Generated raw content",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "save_reload",
+      "capability": "Save / reload",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "project_revisions",
+      "capability": "Project revisions",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "export",
+      "capability": "Export",
+      "testedEndToEnd": true,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Real render and independent full decode completed",
+      "remainingIssue": "Output produced; visual review and GPU attribution pending",
+      "userFacingSeverity": "Unqualified",
+      "attempts": [
+        {
+          "startedAt": "2026-10-08T05:54:53.373Z",
+          "finishedAt": "2026-10-08T05:55:45.671Z",
+          "projectName": "A\nAutoPromote\nVIRAL CLIP STUDIO\nStudio QA 20261008 Director copyStudio QA 20261008 c",
+          "realApi": true,
+          "noMocks": true,
+          "submittedJobId": "viral_b2cd9be6da4ed2d43d61ac96f5b0c472da235596d46e9cce3de4ca1e6e0baea1",
+          "events": [
+            {
+              "path": "/api/media/process",
+              "status": 200,
+              "at": "2026-10-08T05:55:03.844Z"
+            },
+            {
+              "path": "/api/media/status/viral_b2cd9be6da4ed2d43d61ac96f5b0c472da235596d46e9cce3de4ca1e6e0baea1",
+              "status": 200,
+              "at": "2026-10-08T05:55:08.571Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_b2cd9be6da4ed2d43d61ac96f5b0c472da235596d46e9cce3de4ca1e6e0baea1",
+              "status": 200,
+              "at": "2026-10-08T05:55:14.591Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_b2cd9be6da4ed2d43d61ac96f5b0c472da235596d46e9cce3de4ca1e6e0baea1",
+              "status": 200,
+              "at": "2026-10-08T05:55:20.578Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_b2cd9be6da4ed2d43d61ac96f5b0c472da235596d46e9cce3de4ca1e6e0baea1",
+              "status": 200,
+              "at": "2026-10-08T05:55:26.580Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_b2cd9be6da4ed2d43d61ac96f5b0c472da235596d46e9cce3de4ca1e6e0baea1",
+              "status": 200,
+              "at": "2026-10-08T05:55:32.954Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_b2cd9be6da4ed2d43d61ac96f5b0c472da235596d46e9cce3de4ca1e6e0baea1",
+              "status": 200,
+              "at": "2026-10-08T05:55:39.600Z",
+              "jobStatus": "completed"
+            }
+          ],
+          "errors": [],
+          "download": {
+            "suggestedName": "viral_clip_rendered.mp4",
+            "bytes": 1072122,
+            "nativeCompleted": true
+          },
+          "output": "reports/studio-stability-20261008/export/download.mp4",
+          "outputSha256": "b6ecfcab0c28f6fa4472d8f93010f92eecf0fc90d8b03685cbd39d5a2cf433a3",
+          "technical": {
+            "passed": true,
+            "sha256": "b6ecfcab0c28f6fa4472d8f93010f92eecf0fc90d8b03685cbd39d5a2cf433a3",
+            "bytes": 1072122,
+            "seconds": 12,
+            "video": {
+              "width": 404,
+              "height": 720,
+              "codec": "h264",
+              "fps": "30/1",
+              "duration": "12.000000",
+              "pixelFormat": "yuv420p"
+            },
+            "audio": {
+              "codec": "aac",
+              "channels": 2,
+              "sampleRate": "96000",
+              "duration": "12.000000"
+            },
+            "independentFullDecode": true,
+            "contactSheet": "reports/studio-stability-20261008/export/download.mp4.frames.jpg",
+            "scope": "Technical only. Pixel and listening review are separate required evidence."
+          }
+        }
+      ]
+    },
+    {
+      "id": "cuts_speed",
+      "capability": "Cuts / trim / speed",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "b_roll",
+      "capability": "B-roll / multi-source",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "color",
+      "capability": "Color / finish",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "audio_restoration",
+      "capability": "Audio restoration",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "voiceover_sfx",
+      "capability": "Voice-over / SFX",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "three_d_audio",
+      "capability": "3D audio reactivity",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "director",
+      "capability": "Director / analysis",
+      "testedEndToEnd": true,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Real render and independent full decode completed",
+      "remainingIssue": "Output produced; visual review and GPU attribution pending",
+      "userFacingSeverity": "Unqualified",
+      "attempts": [
+        {
+          "startedAt": "2026-10-08T05:49:29.512Z",
+          "finishedAt": "2026-10-08T05:50:47.630Z",
+          "projectName": "A\nAutoPromote\nVIRAL CLIP STUDIO\nStudio QA 20261008 Director",
+          "realApi": true,
+          "noMocks": true,
+          "submittedJobId": "viral_694bf4590a5d5ca6fcaec9a22e36b93e0bd47dd5f9de4acb6d01237479ea4ca4",
+          "events": [
+            {
+              "path": "/api/media/process",
+              "status": 200,
+              "at": "2026-10-08T05:49:46.395Z"
+            },
+            {
+              "path": "/api/media/status/viral_694bf4590a5d5ca6fcaec9a22e36b93e0bd47dd5f9de4acb6d01237479ea4ca4",
+              "status": 200,
+              "at": "2026-10-08T05:49:51.585Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_694bf4590a5d5ca6fcaec9a22e36b93e0bd47dd5f9de4acb6d01237479ea4ca4",
+              "status": 200,
+              "at": "2026-10-08T05:49:56.713Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_694bf4590a5d5ca6fcaec9a22e36b93e0bd47dd5f9de4acb6d01237479ea4ca4",
+              "status": 200,
+              "at": "2026-10-08T05:50:03.617Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_694bf4590a5d5ca6fcaec9a22e36b93e0bd47dd5f9de4acb6d01237479ea4ca4",
+              "status": 200,
+              "at": "2026-10-08T05:50:08.812Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_694bf4590a5d5ca6fcaec9a22e36b93e0bd47dd5f9de4acb6d01237479ea4ca4",
+              "status": 200,
+              "at": "2026-10-08T05:50:14.820Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_694bf4590a5d5ca6fcaec9a22e36b93e0bd47dd5f9de4acb6d01237479ea4ca4",
+              "status": 200,
+              "at": "2026-10-08T05:50:21.036Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_694bf4590a5d5ca6fcaec9a22e36b93e0bd47dd5f9de4acb6d01237479ea4ca4",
+              "status": 200,
+              "at": "2026-10-08T05:50:26.767Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_694bf4590a5d5ca6fcaec9a22e36b93e0bd47dd5f9de4acb6d01237479ea4ca4",
+              "status": 200,
+              "at": "2026-10-08T05:50:34.725Z",
+              "jobStatus": "completed"
+            }
+          ],
+          "errors": [],
+          "download": {
+            "suggestedName": "viral_clip_rendered.mp4",
+            "bytes": 2505633,
+            "nativeCompleted": true
+          },
+          "output": "reports/studio-stability-20261008/director/download.mp4",
+          "outputSha256": "1f2742d8a8168111229a826d713611864cae1117bbd9f92fc485a192e3b7b289",
+          "technical": {
+            "passed": true,
+            "sha256": "1f2742d8a8168111229a826d713611864cae1117bbd9f92fc485a192e3b7b289",
+            "bytes": 2505633,
+            "seconds": 12,
+            "video": {
+              "width": 1280,
+              "height": 720,
+              "codec": "h264",
+              "fps": "30/1",
+              "duration": "12.000000",
+              "pixelFormat": "yuv420p"
+            },
+            "audio": {
+              "codec": "aac",
+              "channels": 2,
+              "sampleRate": "96000",
+              "duration": "12.000000"
+            },
+            "independentFullDecode": true,
+            "contactSheet": "reports/studio-stability-20261008/director/download.mp4.frames.jpg",
+            "scope": "Technical only. Pixel and listening review are separate required evidence."
+          }
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-10-08T06:02:35.069Z"
+}

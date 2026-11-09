@@ -1,0 +1,19 @@
+{
+  "accepted": true,
+  "reason": "Accept for private measurable audio use: this eight-second source trim is audible 48kHz stereo PCM with headroom and no clipped output samples. Actual recorded-source provenance is retained. This does not establish the emotional mix or listening quality.",
+  "reviewer": "AutoPromote decoded PCM technical review",
+  "modelRevision": "audio-measurements-v1",
+  "evidenceSha256": "7a228463a68cd1eda4da0cc54d4ffed8b0c8ee1d913218abfe63e851cc3bbc0d",
+  "artifactSha256": "658ee9f2c92e70e64f23f1d9ad7f88cc5059265f7cbb7dbbb336331d77942420",
+  "criteria": [
+    {
+      "criterion": "Audible stereo 48000Hz source trim with no output clipping",
+      "passed": true,
+      "observation": "Duration 8.0s; peak 0.7036; RMS 0.0469; clipped fraction 0.0."
+    }
+  ],
+  "scope": "Private measurable source properties only",
+  "listeningApproval": false,
+  "wholeFilmCreativeApproval": false,
+  "publicApproved": false
+}

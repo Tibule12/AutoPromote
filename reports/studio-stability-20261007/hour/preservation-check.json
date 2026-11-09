@@ -1,0 +1,29 @@
+{
+  "at": "2026-10-07T22:02:34.589544+00:00",
+  "preexistingFilesChecked": 1421,
+  "missing": [],
+  "changedPreexistingFiles": [
+    "docs/HANDOFF-START-HERE-20261007.md",
+    "docs/HANDOFF-studio-stability-20261007.md",
+    "frontend/src/components/StudioControls.css",
+    "frontend/src/components/StudioTimeline.css",
+    "reports/studio-stability-20261007/README.md",
+    "reports/studio-stability-20261007/matrix.md",
+    "reports/studio-stability-20261007/results.json",
+    "test/e2e/playwright/studio-stability/README.md",
+    "frontend/src/UserDashboardTabs/ViralClipStudioPanel.js",
+    "frontend/src/components/VideoEditor.js",
+    "frontend/src/components/ViralClipStudio.js",
+    "python_media_worker/main_media_server.py",
+    "src/mediaRoutes.js"
+  ],
+  "previouslyCleanTrackedFilesNowModified": [
+    "frontend/src/UserDashboardTabs/__tests__/ViralClipStudioPanel.test.js",
+    "frontend/src/components/__tests__/VideoEditor.viralRenderRecovery.test.js",
+    "frontend/src/hooks/useSubscription.js",
+    "src/services/videoEditingService.js"
+  ],
+  "changedLogoOrBrandFiles": [],
+  "noResetCleanCommitPushDeploy": true,
+  "scope": "Hash audit of the start-of-hour dirty/untracked baseline. Listed modifications are deliberate stability source/report/checkpoint updates; hashes alone do not establish semantic preservation."
+}

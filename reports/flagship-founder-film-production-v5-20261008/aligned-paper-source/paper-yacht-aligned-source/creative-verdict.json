@@ -1,0 +1,16 @@
+{
+  "accepted": false,
+  "reason": "The reference-conditioned source remains a photographic fabric-sailed yacht. It did not become a readable folded-paper vessel, so it cannot be the transformation opening. Do not spend a video take on this failed source.",
+  "reviewer": "Codex native still inspection",
+  "modelRevision": "private visual review 2026-10-08",
+  "evidenceSha256": "9f4e62ca67c47837a062d84a9bd6d755eb95314e71006952e376b19b0548712d",
+  "artifactSha256": "9f4e62ca67c47837a062d84a9bd6d755eb95314e71006952e376b19b0548712d",
+  "criteria": [
+    {
+      "criterion": "Readable folded-paper hull and sails in the target yacht composition",
+      "passed": false,
+      "observation": "Fabric panel seams, rope rigging and rounded navy hull persist; no origami paper hull or folded paper sails."
+    }
+  ],
+  "revisionInstructions": "Use physical connected geometry control for the transformation; retain this rejected source and its reference provenance."
+}

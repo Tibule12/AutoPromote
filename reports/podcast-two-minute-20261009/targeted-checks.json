@@ -1,0 +1,25 @@
+{
+  "panelGuards": {
+    "passed": 7,
+    "newRegressionBefore": "FAIL",
+    "newRegressionAfter": "PASS",
+    "scope": "Disjoint source-range selection keeps owned media identity"
+  },
+  "idempotentReadTransportGuards": {
+    "passed": 2,
+    "scope": "Actual HTTP socket-reset recovery and no retry of HTTP authorization failures"
+  },
+  "existingSubjectServiceSuite": {
+    "passed": 13,
+    "scope": "Existing ownership, caps and subject service behavior; mocked service tests, not real render qualification"
+  },
+  "nativeWorkerDownloads": {
+    "passed": 12,
+    "scope": "Independent owned worker hashes, ranges, full video/audio decode, all 240 frames for each real 10-second NVIDIA result"
+  },
+  "creativeApproval": false,
+  "productReadinessPromotion": false,
+  "generatedBrollContract": 14,
+  "generatedBrollPanel": 7,
+  "sameArtifactRecheck": "Owner and exact artifact hash are guarded; actual native recheck in progress."
+}

@@ -1,0 +1,21 @@
+{
+  "status": "PRIVATE_SCENE_STUDY_REVIEWED_NOT_FINISHED_FILM",
+  "accepted": false,
+  "at": "2026-10-09T07:19:51.888052+00:00",
+  "artifactSha256": "0a45991d499bda0ffff3159f3a9debeea5625c87b6c48842ef2dc987d9171708",
+  "evidenceSha256": "07c9b69fca36e69f89ce37b6452a98f3a04a30981880e0a1ba4f2a456e4a994a",
+  "reviewer": "Codex all-90-frame contact-sheet and generated-source inspection",
+  "reason": "The sailing shots make a photographic-looking world and an intelligible sailor response, but this 3.75-second comparison has no originating idea, unfolding event, escalation or earned transformation payoff. It cannot sell autonomous creativity as a finished welcome film. Separate light, deck and wardrobe continuity and human listening remain unqualified.",
+  "privateAssetComparisonUsable": true,
+  "wholeFilmCreativeApproval": false,
+  "publicApproved": false,
+  "observations": [
+    "Clean hard cuts at 1.5s and 3.0s. No black or flash transition conceals them. The rejected yacht tail and orange canopy are excluded.",
+    "Navy hull, cream sails, timber and rolling water remain visually readable. The close sailor balances on actual wheel/rail and turns toward the sea.",
+    "The wide framing cannot verify that this woman is one of the distant crew; her identity, stern geometry and light continuity require an explicit same-world test.",
+    "The 1080p/24fps delivery is resampling of native720/16fps generation, not native1080 generation or additional native temporal detail.",
+    "No paper-to-yacht transformation appears. This scene is a reviewable component, not the requested flagship film.",
+    "Recorded sea audio is present and technically measured; fresh human listening and complete-film emotional sound timing have not occurred."
+  ],
+  "nextCreativeDecision": "Create and inspect a readable paper endpoint with the same bow direction and camera/world as the yacht before another bounded continuity test. Require one persistent hull/sail in middle frames; reject any second vessel or replacement."
+}

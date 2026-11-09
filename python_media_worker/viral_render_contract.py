@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+import os
 import re
 from typing import Any, Dict, Iterable, List, Mapping, Optional
 
@@ -10,6 +11,74 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional
 MIN_SPEED_RATE = 0.5
 MAX_SPEED_RATE = 2.0
 SUPPORTED_JOIN_TRANSITIONS = {"clean_cut", "soft_dip", "energy_flash"}
+
+
+def append_studio_caption_filter(filter_chain, input_label, ass_path, fonts_path):
+    """Burn programme captions after media composition, as in Studio preview."""
+    if not ass_path or not os.path.isfile(ass_path):
+        return input_label
+    escape = lambda value: str(value).replace("\\", "/").replace(":", "\\:").replace("'", "\\'")
+    filter_chain.append(
+        f"[{input_label}]ass='{escape(ass_path)}':fontsdir='{escape(fonts_path)}'[v_captions];"
+    )
+    return "v_captions"
+
+
+def build_delivery_video_clock_filter(fps: float, duration: float, source_fps: float) -> str:
+    """Preserve the final frame's duration through overlay framesync and CFR.
+
+    Framesync can report EOF at the last input PTS rather than that frame's
+    end. Extend by at most one actual source frame, then bound the selected
+    delivery clock to the canonical edit duration. This cannot conceal a
+    longer missing-picture tail.
+    """
+    if not all(math.isfinite(value) and value > 0 for value in (fps, duration, source_fps)):
+        raise ValueError("Delivery clock requires a positive finite rate and duration")
+    return (
+        f"tpad=stop_mode=clone:stop_duration={1.0 / source_fps:.9f},"
+        f"fps={fps:g},trim=duration={duration:.9f}"
+    )
+
+
+def build_studio_timeline_mux_args(duration: float) -> List[str]:
+    """Bound intermediate stream copies without dropping buffered video packets.
+
+    With NVENC B-frames, -shortest can discard the final reordered picture
+    packets when AAC reaches EOF first. The reviewed timeline already supplies
+    the explicit boundary; keep all picture packets belonging to that window.
+    This does not pad or conceal a missing source picture.
+    """
+    if not math.isfinite(duration) or duration <= 0:
+        raise ValueError("Studio timeline mux requires a positive finite duration")
+    return ["-t", f"{duration:.9f}"]
+
+
+def resolve_studio_audio_bitrate(output_settings, *, studio_remix=False):
+    """Honor the editor's existing bitrate selection with legacy defaults."""
+    requested = (output_settings or {}).get("audioBitrate")
+    if requested is None:
+        return "256k" if studio_remix else "160k"
+    requested = str(requested).strip()
+    if requested not in {"128", "192", "256", "320"}:
+        raise ValueError("Unsupported Studio audio bitrate")
+    return requested + "k"
+
+
+def build_studio_audio_delivery_filter(duration: float) -> str:
+    """Deliver continuous PCM time after restoration and timeline mixing.
+
+    FFmpeg loudnorm can change its output sample clock while flushing its
+    lookahead tail. AAC packet timestamps must follow decoded samples rather
+    than retain that discontinuity. Resample to the editor's 48 kHz delivery
+    clock before applying the existing programme duration boundary.
+    """
+    if not math.isfinite(duration) or duration <= 0:
+        raise ValueError("Studio audio delivery requires a positive finite duration")
+    return (
+        "aresample=48000,asetpts=N/SR/TB,"
+        f"apad=whole_dur={duration:.9f},atrim=0:{duration:.9f},"
+        "asetpts=N/SR/TB"
+    )
 
 
 def _read(item: Any, *names: str, default: Any = None) -> Any:
@@ -133,13 +202,19 @@ def map_timeline_time(plan: Iterable[Mapping[str, float]], source_time: Any) -> 
 
 
 def build_speed_filter_complex(
-    plan: Iterable[Mapping[str, float]], has_audio: bool
+    plan: Iterable[Mapping[str, float]], has_audio: bool, output_fps: Any = 30
 ) -> str:
     """Build an FFmpeg filter that applies speed ranges and rejoins them."""
 
     normalized = list(plan)
     if not normalized or not speed_plan_changes_timing(normalized):
         return ""
+    selected_fps = _finite_number(output_fps, 30)
+    if selected_fps not in {24, 25, 30, 50, 60}:
+        raise ValueError("Unsupported Studio speed delivery frame rate")
+    # Retain the assembled source clock for lower-rate delivery. Higher-rate
+    # delivery must not first discard frames and duplicate the remainder.
+    intermediate_fps = max(30, selected_fps)
 
     filters: List[str] = []
     video_labels: List[str] = []
@@ -151,7 +226,9 @@ def build_speed_filter_complex(
         video_label = f"speed_v_{index}"
         filters.append(
             f"[0:v]trim=start={start:.6f}:end={end:.6f},"
-            f"setpts=(PTS-STARTPTS)/{rate:.6f}[{video_label}]"
+            # Materialize the selected delivery clock before encoding, retaining
+            # all source events that can fit after the speed change.
+            f"setpts=(PTS-STARTPTS)/{rate:.6f},fps={intermediate_fps:g}[{video_label}]"
         )
         video_labels.append(f"[{video_label}]")
         if has_audio:

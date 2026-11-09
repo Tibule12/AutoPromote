@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "source_sha256": "876b4f5ad5dea554610e8f95d456d274c26e2424a799b183d7560eebb3e2822d",
+  "matte_sha256": "4b6cb8676a4dfe43a4d7dcc5d29fccc9f530ae49a90c566a5ae77cb8e34f1858",
+  "effects": [
+    {
+      "id": "violet-stage",
+      "type": "background_replace",
+      "start": 0,
+      "end": 6,
+      "asset_id": "reviewed-wan-violet-ribbon",
+      "asset_sha256": "24c6143fa70685602c9f4c737a57a2801efa67e1e0bbae80433a75213bb97b02",
+      "blur": 16,
+      "exposure": -0.8,
+      "saturation": 0.75
+    },
+    {
+      "id": "rim",
+      "type": "glow",
+      "start": 0,
+      "end": 6,
+      "color": "#b397f5",
+      "strength": 0.065,
+      "radius": 22
+    },
+    {
+      "id": "every",
+      "type": "kinetic_type",
+      "start": 0.18,
+      "end": 3.72,
+      "text": "EVERY",
+      "x": 6,
+      "y": 43,
+      "font_size": 185,
+      "color": "#f5f1ed",
+      "tracking": 5,
+      "travel": 70,
+      "align": "left"
+    },
+    {
+      "id": "voice",
+      "type": "kinetic_type",
+      "start": 0.3,
+      "end": 3.72,
+      "text": "VOICE",
+      "x": 6,
+      "y": 63,
+      "font_size": 185,
+      "color": "#b59ae8",
+      "tracking": 5,
+      "travel": 70,
+      "align": "left"
+    },
+    {
+      "id": "every-screen",
+      "type": "kinetic_type",
+      "start": 4.25,
+      "end": 6,
+      "text": "EVERY",
+      "x": 6,
+      "y": 43,
+      "font_size": 172,
+      "color": "#f5f1ed",
+      "tracking": 5,
+      "travel": 70,
+      "align": "left"
+    },
+    {
+      "id": "screen",
+      "type": "kinetic_type",
+      "start": 4.4,
+      "end": 6,
+      "text": "SCREEN.",
+      "x": 6,
+      "y": 63,
+      "font_size": 156,
+      "color": "#f5f1ed",
+      "tracking": 5,
+      "travel": 70,
+      "align": "left"
+    }
+  ]
+}

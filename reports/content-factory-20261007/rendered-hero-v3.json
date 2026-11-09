@@ -1,0 +1,20 @@
+{
+  "status": "pending_creative_review",
+  "artifact": {
+    "path": "outputs/ca3ada265da8c9519e24c822/paper-voyage-hero/v3/final.mp4",
+    "sha256": "99c8bf4e51965f5c02a489eb3a23423a29a6bc58896f5635db8b9515ca242de8",
+    "bytes": 13130599,
+    "duration": 19.416667,
+    "codec": "h264",
+    "container": "mp4",
+    "fps": 24,
+    "width": 1920,
+    "height": 1080,
+    "hasAudio": true
+  },
+  "editArtifact": {
+    "path": "outputs/ca3ada265da8c9519e24c822/paper-voyage-hero/v3/studio-project.json",
+    "sha256": "efc2e11a3a98f16e1ed77394591158f8040835583dec8e3df7f8aee6b88e626a"
+  },
+  "documentHash": "c8d40b752dfb961496dd6ed6ce535364ed15ab20f592deaa3654a9823b87e2fd"
+}

@@ -1,0 +1,59 @@
+{
+  "scope": "Inter 900 white title, width45 scale1.15 x72 y18, 3.5s in real mixed edit; no whole-frame/audio qualification",
+  "previewSize": [
+    328,
+    410
+  ],
+  "lineCount": 3,
+  "previewGlyphBoxes": [
+    [
+      195,
+      32,
+      277,
+      49
+    ],
+    [
+      195,
+      65,
+      278,
+      87
+    ],
+    [
+      207,
+      100,
+      265,
+      116
+    ]
+  ],
+  "finalNormalizedGlyphBoxes": [
+    [
+      195,
+      33,
+      276,
+      49
+    ],
+    [
+      196,
+      65,
+      277,
+      87
+    ],
+    [
+      207,
+      100,
+      265,
+      115
+    ]
+  ],
+  "maximumGlyphBoxErrorPreviewPixels": 1,
+  "declaredGeometryTolerancePreviewPixels": 2,
+  "wording": "Shared project state",
+  "canonicalLineLayout": [
+    "Shared",
+    "project",
+    "state"
+  ],
+  "fontAssetHashesMatch": true,
+  "captureBeforeSubmission": true,
+  "result": "PASS"
+}

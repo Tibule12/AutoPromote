@@ -1,0 +1,49 @@
+{
+  "status": "PASS",
+  "results": [
+    {
+      "id": "hero",
+      "artifact": "outputs/final-v2/one-edit-hero/final.mp4",
+      "sha256": "d6ae987aed7bed591ba9dcf685e86aedc4c855a3c632a6a249f89718b937b07a",
+      "playback": {
+        "duration": 53.833333,
+        "width": 1920,
+        "height": 1080,
+        "at": 37,
+        "decodedFrames": 109
+      },
+      "downloadBytes": 24787537,
+      "rangeStatus": 206
+    },
+    {
+      "id": "cutdown",
+      "artifact": "outputs/final-v2/one-edit-cutdown/final.mp4",
+      "sha256": "507fdc4a42642d5e47cf4c5c476a703158865781c4c301013142e52bde4ab364",
+      "playback": {
+        "duration": 27,
+        "width": 1920,
+        "height": 1080,
+        "at": 16,
+        "decodedFrames": 147
+      },
+      "downloadBytes": 11862840,
+      "rangeStatus": 206
+    },
+    {
+      "id": "teaser",
+      "artifact": "outputs/final-v2/one-edit-teaser/final.mp4",
+      "sha256": "5b9f84402e60c8e4b31c4db17d0314869928b52f1b23b5c452d00f3323dea97f",
+      "playback": {
+        "duration": 10,
+        "width": 1920,
+        "height": 1080,
+        "at": 7,
+        "decodedFrames": 14
+      },
+      "downloadBytes": 6528395,
+      "rangeStatus": 206
+    }
+  ],
+  "errors": [],
+  "scope": "Real Chromium picture playback, seek, exact downloads, Range responses and private-file exclusions; no human sound or creative acceptance claimed."
+}

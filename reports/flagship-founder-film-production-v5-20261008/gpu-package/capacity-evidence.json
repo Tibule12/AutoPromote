@@ -1,0 +1,11 @@
+{
+  "kind": "documented_historical_quota_change",
+  "sourcePath": "reports/rtx-pro-6000-qualification-20261006/verification-summary.json",
+  "sourceSha256": "d8d23707c96a46a81ae7719fc37ac67b6abe145d50af16da996558ba86f04254",
+  "project": "autopromote-cc6d3",
+  "region": "us-central1",
+  "metric": "run.googleapis.com/nvidia_rtx_pro_6000_gpu_allocation_no_zonal_redundancy",
+  "beforeMilliGPU": 0,
+  "afterMilliGPU": 3000,
+  "limitation": "Historical cloud quota capacity, not physical GPU count or current Brev credits."
+}

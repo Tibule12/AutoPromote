@@ -1,0 +1,3198 @@
+{
+  "projectId": "factory:welcome-cinematic-20261009:welcome-story",
+  "ownerUid": "founder-private",
+  "document": {
+    "schemaVersion": 1,
+    "projectId": "factory:welcome-cinematic-20261009:welcome-story",
+    "revision": 2,
+    "clock": {
+      "ticksPerSecond": 90000,
+      "interval": "half_open"
+    },
+    "output": {
+      "aspectRatio": "16:9",
+      "requestedResolution": "1080p",
+      "frameRate": {
+        "numerator": 24,
+        "denominator": 1
+      },
+      "codec": "h264",
+      "audioCodec": "aac",
+      "audioSampleRate": null,
+      "audioSampleRatePolicy": "worker_selected"
+    },
+    "assets": [
+      {
+        "assetId": "source:idea:sha256:607581a2f2d2b86cd978d661bfd11f6e4b5dd1cbdf94441d30eb236228ee3b69",
+        "sourceId": "idea",
+        "contentHash": "607581a2f2d2b86cd978d661bfd11f6e4b5dd1cbdf94441d30eb236228ee3b69",
+        "identityState": "hash_verified"
+      },
+      {
+        "assetId": "source:structure:sha256:4004caba2993cdf0b478e6c9cd0e24139f8fb7f9eb62a3fc49ead971d4e2fb0f",
+        "sourceId": "structure",
+        "contentHash": "4004caba2993cdf0b478e6c9cd0e24139f8fb7f9eb62a3fc49ead971d4e2fb0f",
+        "identityState": "hash_verified"
+      },
+      {
+        "assetId": "source:motion:sha256:23b29e80713e95379dfb2cf864496212839f5672040281bc2513f6a313ab04c2",
+        "sourceId": "motion",
+        "contentHash": "23b29e80713e95379dfb2cf864496212839f5672040281bc2513f6a313ab04c2",
+        "identityState": "hash_verified"
+      },
+      {
+        "assetId": "source:impact:sha256:cbce92d40212b0800ee10b2a2e747842c55b753ea1a2ad743cc205fd3a3c77a4",
+        "sourceId": "impact",
+        "contentHash": "cbce92d40212b0800ee10b2a2e747842c55b753ea1a2ad743cc205fd3a3c77a4",
+        "identityState": "hash_verified"
+      },
+      {
+        "assetId": "source:autopromote:sha256:24e10d7efc11ce50950e4b6e816d9a66db7487f7edc070d24d98c0623682ae3a",
+        "sourceId": "autopromote",
+        "contentHash": "24e10d7efc11ce50950e4b6e816d9a66db7487f7edc070d24d98c0623682ae3a",
+        "identityState": "hash_verified"
+      }
+    ],
+    "clipOccurrences": [
+      {
+        "occurrenceId": "welcome-story-1",
+        "assetId": "source:idea:sha256:607581a2f2d2b86cd978d661bfd11f6e4b5dd1cbdf94441d30eb236228ee3b69",
+        "sourceRange": {
+          "space": "source",
+          "startTick": 0,
+          "endTick": 720000
+        },
+        "programmeRange": {
+          "space": "programme",
+          "startTick": 0,
+          "endTick": 720000
+        },
+        "timeMapId": "map:welcome-story-1",
+        "parameterSchemaVersion": 1,
+        "parameters": {
+          "name": "idea",
+          "duration": 8
+        },
+        "playback": {
+          "direction": "forward",
+          "freeze": false,
+          "rate": {
+            "numerator": 1,
+            "denominator": 1
+          }
+        }
+      },
+      {
+        "occurrenceId": "welcome-story-2",
+        "assetId": "source:structure:sha256:4004caba2993cdf0b478e6c9cd0e24139f8fb7f9eb62a3fc49ead971d4e2fb0f",
+        "sourceRange": {
+          "space": "source",
+          "startTick": 0,
+          "endTick": 630000
+        },
+        "programmeRange": {
+          "space": "programme",
+          "startTick": 720000,
+          "endTick": 1350000
+        },
+        "timeMapId": "map:welcome-story-2",
+        "parameterSchemaVersion": 1,
+        "parameters": {
+          "name": "structure",
+          "duration": 7
+        },
+        "playback": {
+          "direction": "forward",
+          "freeze": false,
+          "rate": {
+            "numerator": 1,
+            "denominator": 1
+          }
+        }
+      },
+      {
+        "occurrenceId": "welcome-story-3",
+        "assetId": "source:motion:sha256:23b29e80713e95379dfb2cf864496212839f5672040281bc2513f6a313ab04c2",
+        "sourceRange": {
+          "space": "source",
+          "startTick": 0,
+          "endTick": 900000
+        },
+        "programmeRange": {
+          "space": "programme",
+          "startTick": 1350000,
+          "endTick": 2250000
+        },
+        "timeMapId": "map:welcome-story-3",
+        "parameterSchemaVersion": 1,
+        "parameters": {
+          "name": "motion",
+          "duration": 10
+        },
+        "playback": {
+          "direction": "forward",
+          "freeze": false,
+          "rate": {
+            "numerator": 1,
+            "denominator": 1
+          }
+        }
+      },
+      {
+        "occurrenceId": "welcome-story-4",
+        "assetId": "source:impact:sha256:cbce92d40212b0800ee10b2a2e747842c55b753ea1a2ad743cc205fd3a3c77a4",
+        "sourceRange": {
+          "space": "source",
+          "startTick": 0,
+          "endTick": 630000
+        },
+        "programmeRange": {
+          "space": "programme",
+          "startTick": 2250000,
+          "endTick": 2880000
+        },
+        "timeMapId": "map:welcome-story-4",
+        "parameterSchemaVersion": 1,
+        "parameters": {
+          "name": "impact",
+          "duration": 7
+        },
+        "playback": {
+          "direction": "forward",
+          "freeze": false,
+          "rate": {
+            "numerator": 1,
+            "denominator": 1
+          }
+        }
+      },
+      {
+        "occurrenceId": "welcome-story-5",
+        "assetId": "source:autopromote:sha256:24e10d7efc11ce50950e4b6e816d9a66db7487f7edc070d24d98c0623682ae3a",
+        "sourceRange": {
+          "space": "source",
+          "startTick": 0,
+          "endTick": 540000
+        },
+        "programmeRange": {
+          "space": "programme",
+          "startTick": 2880000,
+          "endTick": 3420000
+        },
+        "timeMapId": "map:welcome-story-5",
+        "parameterSchemaVersion": 1,
+        "parameters": {
+          "name": "autopromote",
+          "duration": 6
+        },
+        "playback": {
+          "direction": "forward",
+          "freeze": false,
+          "rate": {
+            "numerator": 1,
+            "denominator": 1
+          }
+        }
+      }
+    ],
+    "timeMaps": [
+      {
+        "timeMapId": "map:welcome-story-1",
+        "occurrenceId": "welcome-story-1",
+        "segments": [
+          {
+            "sourceRange": {
+              "space": "source",
+              "startTick": 0,
+              "endTick": 720000
+            },
+            "clipLocalRange": {
+              "space": "clip_local",
+              "startTick": 0,
+              "endTick": 720000
+            },
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 0,
+              "endTick": 720000
+            },
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            },
+            "direction": "forward",
+            "freeze": false
+          }
+        ]
+      },
+      {
+        "timeMapId": "map:welcome-story-2",
+        "occurrenceId": "welcome-story-2",
+        "segments": [
+          {
+            "sourceRange": {
+              "space": "source",
+              "startTick": 0,
+              "endTick": 630000
+            },
+            "clipLocalRange": {
+              "space": "clip_local",
+              "startTick": 0,
+              "endTick": 630000
+            },
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 720000,
+              "endTick": 1350000
+            },
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            },
+            "direction": "forward",
+            "freeze": false
+          }
+        ]
+      },
+      {
+        "timeMapId": "map:welcome-story-3",
+        "occurrenceId": "welcome-story-3",
+        "segments": [
+          {
+            "sourceRange": {
+              "space": "source",
+              "startTick": 0,
+              "endTick": 900000
+            },
+            "clipLocalRange": {
+              "space": "clip_local",
+              "startTick": 0,
+              "endTick": 900000
+            },
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 1350000,
+              "endTick": 2250000
+            },
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            },
+            "direction": "forward",
+            "freeze": false
+          }
+        ]
+      },
+      {
+        "timeMapId": "map:welcome-story-4",
+        "occurrenceId": "welcome-story-4",
+        "segments": [
+          {
+            "sourceRange": {
+              "space": "source",
+              "startTick": 0,
+              "endTick": 630000
+            },
+            "clipLocalRange": {
+              "space": "clip_local",
+              "startTick": 0,
+              "endTick": 630000
+            },
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 2250000,
+              "endTick": 2880000
+            },
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            },
+            "direction": "forward",
+            "freeze": false
+          }
+        ]
+      },
+      {
+        "timeMapId": "map:welcome-story-5",
+        "occurrenceId": "welcome-story-5",
+        "segments": [
+          {
+            "sourceRange": {
+              "space": "source",
+              "startTick": 0,
+              "endTick": 540000
+            },
+            "clipLocalRange": {
+              "space": "clip_local",
+              "startTick": 0,
+              "endTick": 540000
+            },
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 2880000,
+              "endTick": 3420000
+            },
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            },
+            "direction": "forward",
+            "freeze": false
+          }
+        ]
+      }
+    ],
+    "layers": [
+      {
+        "layerId": "line-1",
+        "type": "title",
+        "legacyType": "text",
+        "legacyCollection": "overlays",
+        "programmeRange": {
+          "space": "programme",
+          "startTick": 189000,
+          "endTick": 630000
+        },
+        "compositionStage": "worker_overlay",
+        "parameterSchemaVersion": 3,
+        "parameters": {
+          "textAlign": "center",
+          "bg": "transparent",
+          "shadow": "soft",
+          "text": "Every great story starts as an idea.",
+          "fontFamily": "Inter",
+          "fontWeight": 400,
+          "color": "#eeeaff",
+          "opacity": 1,
+          "x": 50,
+          "y": 90,
+          "width": 88,
+          "height": 7,
+          "scale": 0.8,
+          "startTime": 2.1,
+          "duration": 4.9,
+          "animation": {
+            "enter": "fade",
+            "exit": "fade",
+            "enterDuration": 0.5,
+            "exitDuration": 0.45
+          }
+        }
+      },
+      {
+        "layerId": "line-2",
+        "type": "title",
+        "legacyType": "text",
+        "legacyCollection": "overlays",
+        "programmeRange": {
+          "space": "programme",
+          "startTick": 837000,
+          "endTick": 1197000
+        },
+        "compositionStage": "worker_overlay",
+        "parameterSchemaVersion": 3,
+        "parameters": {
+          "textAlign": "center",
+          "bg": "transparent",
+          "shadow": "soft",
+          "text": "But ideas need structure.",
+          "fontFamily": "Inter",
+          "fontWeight": 400,
+          "color": "#eeeaff",
+          "opacity": 1,
+          "x": 50,
+          "y": 90,
+          "width": 88,
+          "height": 7,
+          "scale": 0.8,
+          "startTime": 9.3,
+          "duration": 4,
+          "animation": {
+            "enter": "fade",
+            "exit": "fade",
+            "enterDuration": 0.5,
+            "exitDuration": 0.45
+          }
+        }
+      },
+      {
+        "layerId": "line-3",
+        "type": "title",
+        "legacyType": "text",
+        "legacyCollection": "overlays",
+        "programmeRange": {
+          "space": "programme",
+          "startTick": 1422000,
+          "endTick": 1755000
+        },
+        "compositionStage": "worker_overlay",
+        "parameterSchemaVersion": 3,
+        "parameters": {
+          "textAlign": "center",
+          "bg": "transparent",
+          "shadow": "soft",
+          "text": "Structure becomes motion.",
+          "fontFamily": "Inter",
+          "fontWeight": 400,
+          "color": "#eeeaff",
+          "opacity": 1,
+          "x": 50,
+          "y": 90,
+          "width": 88,
+          "height": 7,
+          "scale": 0.8,
+          "startTime": 15.8,
+          "duration": 3.7,
+          "animation": {
+            "enter": "fade",
+            "exit": "fade",
+            "enterDuration": 0.5,
+            "exitDuration": 0.45
+          }
+        }
+      },
+      {
+        "layerId": "line-4",
+        "type": "title",
+        "legacyType": "text",
+        "legacyCollection": "overlays",
+        "programmeRange": {
+          "space": "programme",
+          "startTick": 1818000,
+          "endTick": 2142000
+        },
+        "compositionStage": "worker_overlay",
+        "parameterSchemaVersion": 3,
+        "parameters": {
+          "textAlign": "center",
+          "bg": "transparent",
+          "shadow": "soft",
+          "text": "Motion becomes experience.",
+          "fontFamily": "Inter",
+          "fontWeight": 400,
+          "color": "#eeeaff",
+          "opacity": 1,
+          "x": 50,
+          "y": 90,
+          "width": 88,
+          "height": 7,
+          "scale": 0.8,
+          "startTime": 20.2,
+          "duration": 3.6,
+          "animation": {
+            "enter": "fade",
+            "exit": "fade",
+            "enterDuration": 0.5,
+            "exitDuration": 0.45
+          }
+        }
+      },
+      {
+        "layerId": "line-5",
+        "type": "title",
+        "legacyType": "text",
+        "legacyCollection": "overlays",
+        "programmeRange": {
+          "space": "programme",
+          "startTick": 2340000,
+          "endTick": 2772000
+        },
+        "compositionStage": "worker_overlay",
+        "parameterSchemaVersion": 3,
+        "parameters": {
+          "textAlign": "center",
+          "bg": "transparent",
+          "shadow": "soft",
+          "text": "And experience becomes a story people remember.",
+          "fontFamily": "Inter",
+          "fontWeight": 400,
+          "color": "#eeeaff",
+          "opacity": 1,
+          "x": 50,
+          "y": 90,
+          "width": 88,
+          "height": 7,
+          "scale": 0.72,
+          "startTime": 26,
+          "duration": 4.8,
+          "animation": {
+            "enter": "fade",
+            "exit": "fade",
+            "enterDuration": 0.5,
+            "exitDuration": 0.45
+          }
+        }
+      },
+      {
+        "layerId": "line-6",
+        "type": "title",
+        "legacyType": "text",
+        "legacyCollection": "overlays",
+        "programmeRange": {
+          "space": "programme",
+          "startTick": 2925000,
+          "endTick": 3105000
+        },
+        "compositionStage": "worker_overlay",
+        "parameterSchemaVersion": 3,
+        "parameters": {
+          "textAlign": "center",
+          "bg": "transparent",
+          "shadow": "soft",
+          "text": "This is AutoPromote.",
+          "fontFamily": "Inter",
+          "fontWeight": 400,
+          "color": "#eeeaff",
+          "opacity": 1,
+          "x": 50,
+          "y": 90,
+          "width": 88,
+          "height": 7,
+          "scale": 0.8,
+          "startTime": 32.5,
+          "duration": 2,
+          "animation": {
+            "enter": "fade",
+            "exit": "fade",
+            "enterDuration": 0.5,
+            "exitDuration": 0.45
+          }
+        }
+      },
+      {
+        "layerId": "line-7",
+        "type": "title",
+        "legacyType": "text",
+        "legacyCollection": "overlays",
+        "programmeRange": {
+          "space": "programme",
+          "startTick": 3150000,
+          "endTick": 3420000
+        },
+        "compositionStage": "worker_overlay",
+        "parameterSchemaVersion": 3,
+        "parameters": {
+          "textAlign": "center",
+          "bg": "transparent",
+          "shadow": "soft",
+          "text": "Ideas into motion.",
+          "fontFamily": "Inter",
+          "fontWeight": 400,
+          "color": "#eeeaff",
+          "opacity": 1,
+          "x": 50,
+          "y": 72,
+          "width": 88,
+          "height": 7,
+          "scale": 0.8,
+          "startTime": 35,
+          "duration": 3,
+          "animation": {
+            "enter": "fade",
+            "exit": "fade",
+            "enterDuration": 0.5,
+            "exitDuration": 0.45
+          }
+        }
+      }
+    ],
+    "linkedTiming": {
+      "cues": {
+        "soundEffects": [
+          {
+            "cueId": "welcome-story-audio-1",
+            "type": null,
+            "parameterSchemaVersion": 1,
+            "parameters": {
+              "enabled": true,
+              "kind": "sfx",
+              "name": "cues",
+              "sourceClipId": "cues",
+              "sourceStoragePath": null,
+              "storagePath": null,
+              "contentHash": "dd9a31a0a2ac47c50b98c33c02f02109d624a343d323a8af1aeaaac5bc1259e1",
+              "volume": 0.8,
+              "fadeIn": 0.02,
+              "fadeOut": 0.05
+            },
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 0,
+              "endTick": 900000
+            },
+            "trimStartTick": 0
+          },
+          {
+            "cueId": "welcome-story-audio-2",
+            "type": null,
+            "parameterSchemaVersion": 1,
+            "parameters": {
+              "enabled": true,
+              "kind": "sfx",
+              "name": "cues",
+              "sourceClipId": "cues",
+              "sourceStoragePath": null,
+              "storagePath": null,
+              "contentHash": "dd9a31a0a2ac47c50b98c33c02f02109d624a343d323a8af1aeaaac5bc1259e1",
+              "volume": 0.8,
+              "fadeIn": 0.02,
+              "fadeOut": 0.05
+            },
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 900000,
+              "endTick": 1800000
+            },
+            "trimStartTick": 900000
+          },
+          {
+            "cueId": "welcome-story-audio-3",
+            "type": null,
+            "parameterSchemaVersion": 1,
+            "parameters": {
+              "enabled": true,
+              "kind": "sfx",
+              "name": "cues",
+              "sourceClipId": "cues",
+              "sourceStoragePath": null,
+              "storagePath": null,
+              "contentHash": "dd9a31a0a2ac47c50b98c33c02f02109d624a343d323a8af1aeaaac5bc1259e1",
+              "volume": 0.8,
+              "fadeIn": 0.02,
+              "fadeOut": 0.05
+            },
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 1800000,
+              "endTick": 2700000
+            },
+            "trimStartTick": 1800000
+          },
+          {
+            "cueId": "welcome-story-audio-4",
+            "type": null,
+            "parameterSchemaVersion": 1,
+            "parameters": {
+              "enabled": true,
+              "kind": "sfx",
+              "name": "cues",
+              "sourceClipId": "cues",
+              "sourceStoragePath": null,
+              "storagePath": null,
+              "contentHash": "dd9a31a0a2ac47c50b98c33c02f02109d624a343d323a8af1aeaaac5bc1259e1",
+              "volume": 0.8,
+              "fadeIn": 0.02,
+              "fadeOut": 0.05
+            },
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 2700000,
+              "endTick": 3420000
+            },
+            "trimStartTick": 2700000
+          }
+        ],
+        "voiceovers": [],
+        "adjustmentLayers": []
+      },
+      "keys": {
+        "motionKeyframes": [],
+        "finishKeyframes": [],
+        "reframeKeyframes": [],
+        "reframeModeCuts": [],
+        "speakerFocusCuts": []
+      }
+    },
+    "audioGraph": {
+      "legacySnapshotRef": "audioRemix",
+      "parameterSchemaVersion": 1,
+      "settings": {
+        "addMusic": true,
+        "musicVolume": 0.82,
+        "musicDucking": false,
+        "musicDuckingStrength": 0,
+        "muteOriginalAudio": true,
+        "musicLoop": false,
+        "musicFadeIn": 0.25,
+        "musicFadeOut": 0.6
+      },
+      "music": {
+        "id": "score",
+        "sourceStoragePath": null,
+        "storagePath": null,
+        "contentHash": "ee42b4a75802188d6c4e53ae149bea0313b113033cd21cf96fea199231f8cf68",
+        "duration": 38
+      },
+      "routes": [],
+      "routing": {
+        "muteOriginalAudio": true,
+        "musicDucking": false,
+        "musicDuckingStrength": 0,
+        "musicTrackId": "score"
+      }
+    },
+    "visualGraph": {
+      "parameterSchemaVersion": 1,
+      "settings": {
+        "autoCaptions": false,
+        "smartCrop": false,
+        "reframeAspect": "16:9",
+        "exportSettings": {
+          "resolution": "1080p",
+          "fps": 24,
+          "codec": "h264",
+          "audioCodec": "aac"
+        }
+      },
+      "cameraSources": []
+    },
+    "editGraph": {
+      "parameterSchemaVersion": 1,
+      "settings": {},
+      "media": [
+        {
+          "id": "idea",
+          "name": "idea",
+          "duration": 8,
+          "contentHash": "607581a2f2d2b86cd978d661bfd11f6e4b5dd1cbdf94441d30eb236228ee3b69"
+        },
+        {
+          "id": "structure",
+          "name": "structure",
+          "duration": 7,
+          "contentHash": "4004caba2993cdf0b478e6c9cd0e24139f8fb7f9eb62a3fc49ead971d4e2fb0f"
+        },
+        {
+          "id": "motion",
+          "name": "motion",
+          "duration": 10,
+          "contentHash": "23b29e80713e95379dfb2cf864496212839f5672040281bc2513f6a313ab04c2"
+        },
+        {
+          "id": "impact",
+          "name": "impact",
+          "duration": 7,
+          "contentHash": "cbce92d40212b0800ee10b2a2e747842c55b753ea1a2ad743cc205fd3a3c77a4"
+        },
+        {
+          "id": "autopromote",
+          "name": "autopromote",
+          "duration": 6,
+          "contentHash": "24e10d7efc11ce50950e4b6e816d9a66db7487f7edc070d24d98c0623682ae3a"
+        }
+      ],
+      "sources": [
+        {
+          "id": "welcome-story-1",
+          "name": "idea",
+          "duration": 8,
+          "sourceClipId": "idea",
+          "storagePath": null,
+          "contentHash": "607581a2f2d2b86cd978d661bfd11f6e4b5dd1cbdf94441d30eb236228ee3b69"
+        },
+        {
+          "id": "welcome-story-2",
+          "name": "structure",
+          "duration": 7,
+          "sourceClipId": "structure",
+          "storagePath": null,
+          "contentHash": "4004caba2993cdf0b478e6c9cd0e24139f8fb7f9eb62a3fc49ead971d4e2fb0f"
+        },
+        {
+          "id": "welcome-story-3",
+          "name": "motion",
+          "duration": 10,
+          "sourceClipId": "motion",
+          "storagePath": null,
+          "contentHash": "23b29e80713e95379dfb2cf864496212839f5672040281bc2513f6a313ab04c2"
+        },
+        {
+          "id": "welcome-story-4",
+          "name": "impact",
+          "duration": 7,
+          "sourceClipId": "impact",
+          "storagePath": null,
+          "contentHash": "cbce92d40212b0800ee10b2a2e747842c55b753ea1a2ad743cc205fd3a3c77a4"
+        },
+        {
+          "id": "welcome-story-5",
+          "name": "autopromote",
+          "duration": 6,
+          "sourceClipId": "autopromote",
+          "storagePath": null,
+          "contentHash": "24e10d7efc11ce50950e4b6e816d9a66db7487f7edc070d24d98c0623682ae3a"
+        }
+      ],
+      "musicMix": {},
+      "hookBinding": null,
+      "angleGroups": [],
+      "extractedAudio": null
+    },
+    "constraints": {
+      "locks": []
+    },
+    "styleRef": null,
+    "analysisRefs": [],
+    "projectIntelligenceRefs": [],
+    "programmeSpeedKeys": [],
+    "fallbackSpeed": 1,
+    "outputTimeMap": [
+      {
+        "programmeRange": {
+          "space": "programme",
+          "startTick": 0,
+          "endTick": 3420000
+        },
+        "outputRange": {
+          "space": "output",
+          "startTick": 0,
+          "endTick": 3420000
+        },
+        "rateNumerator": 1000000,
+        "rateDenominator": 1000000
+      }
+    ],
+    "journal": [],
+    "idempotency": {},
+    "directorReviewJournal": [],
+    "compatibility": {
+      "legacySnapshotVersion": 1,
+      "projection": "clip_occurrences_canonical_other_fields_legacy",
+      "editableStateVersion": 1,
+      "visualStateVersion": 1,
+      "editStateVersion": 1,
+      "layerComposition": "separate_worker_stages"
+    }
+  },
+  "snapshot": {
+    "timeline": [
+      {
+        "id": "welcome-story-1",
+        "sourceClipId": "idea",
+        "startRequest": 0,
+        "endRequest": 8,
+        "duration": 8,
+        "contentHash": "607581a2f2d2b86cd978d661bfd11f6e4b5dd1cbdf94441d30eb236228ee3b69",
+        "storagePath": null,
+        "name": "idea",
+        "artifactPath": "assets/proxy/idea.mp4",
+        "url": "http://127.0.0.1:8765/assets/proxy/idea.mp4"
+      },
+      {
+        "id": "welcome-story-2",
+        "sourceClipId": "structure",
+        "startRequest": 0,
+        "endRequest": 7,
+        "duration": 7,
+        "contentHash": "4004caba2993cdf0b478e6c9cd0e24139f8fb7f9eb62a3fc49ead971d4e2fb0f",
+        "storagePath": null,
+        "name": "structure",
+        "artifactPath": "assets/proxy/structure.mp4",
+        "url": "http://127.0.0.1:8765/assets/proxy/structure.mp4"
+      },
+      {
+        "id": "welcome-story-3",
+        "sourceClipId": "motion",
+        "startRequest": 0,
+        "endRequest": 10,
+        "duration": 10,
+        "contentHash": "23b29e80713e95379dfb2cf864496212839f5672040281bc2513f6a313ab04c2",
+        "storagePath": null,
+        "name": "motion",
+        "artifactPath": "assets/proxy/motion.mp4",
+        "url": "http://127.0.0.1:8765/assets/proxy/motion.mp4"
+      },
+      {
+        "id": "welcome-story-4",
+        "sourceClipId": "impact",
+        "startRequest": 0,
+        "endRequest": 7,
+        "duration": 7,
+        "contentHash": "cbce92d40212b0800ee10b2a2e747842c55b753ea1a2ad743cc205fd3a3c77a4",
+        "storagePath": null,
+        "name": "impact",
+        "artifactPath": "assets/proxy/impact.mp4",
+        "url": "http://127.0.0.1:8765/assets/proxy/impact.mp4"
+      },
+      {
+        "id": "welcome-story-5",
+        "sourceClipId": "autopromote",
+        "startRequest": 0,
+        "endRequest": 6,
+        "duration": 6,
+        "contentHash": "24e10d7efc11ce50950e4b6e816d9a66db7487f7edc070d24d98c0623682ae3a",
+        "storagePath": null,
+        "name": "autopromote",
+        "artifactPath": "assets/proxy/autopromote.mp4",
+        "url": "http://127.0.0.1:8765/assets/proxy/autopromote.mp4"
+      }
+    ],
+    "orderedClips": [
+      {
+        "id": "welcome-story-1",
+        "sourceClipId": "idea",
+        "startRequest": 0,
+        "endRequest": 8,
+        "duration": 8,
+        "contentHash": "607581a2f2d2b86cd978d661bfd11f6e4b5dd1cbdf94441d30eb236228ee3b69",
+        "storagePath": null,
+        "name": "idea",
+        "artifactPath": "assets/proxy/idea.mp4",
+        "url": "http://127.0.0.1:8765/assets/proxy/idea.mp4",
+        "start": 0,
+        "end": 8,
+        "sourceDuration": 8
+      },
+      {
+        "id": "welcome-story-2",
+        "sourceClipId": "structure",
+        "startRequest": 0,
+        "endRequest": 7,
+        "duration": 7,
+        "contentHash": "4004caba2993cdf0b478e6c9cd0e24139f8fb7f9eb62a3fc49ead971d4e2fb0f",
+        "storagePath": null,
+        "name": "structure",
+        "artifactPath": "assets/proxy/structure.mp4",
+        "url": "http://127.0.0.1:8765/assets/proxy/structure.mp4",
+        "start": 0,
+        "end": 7,
+        "sourceDuration": 7
+      },
+      {
+        "id": "welcome-story-3",
+        "sourceClipId": "motion",
+        "startRequest": 0,
+        "endRequest": 10,
+        "duration": 10,
+        "contentHash": "23b29e80713e95379dfb2cf864496212839f5672040281bc2513f6a313ab04c2",
+        "storagePath": null,
+        "name": "motion",
+        "artifactPath": "assets/proxy/motion.mp4",
+        "url": "http://127.0.0.1:8765/assets/proxy/motion.mp4",
+        "start": 0,
+        "end": 10,
+        "sourceDuration": 10
+      },
+      {
+        "id": "welcome-story-4",
+        "sourceClipId": "impact",
+        "startRequest": 0,
+        "endRequest": 7,
+        "duration": 7,
+        "contentHash": "cbce92d40212b0800ee10b2a2e747842c55b753ea1a2ad743cc205fd3a3c77a4",
+        "storagePath": null,
+        "name": "impact",
+        "artifactPath": "assets/proxy/impact.mp4",
+        "url": "http://127.0.0.1:8765/assets/proxy/impact.mp4",
+        "start": 0,
+        "end": 7,
+        "sourceDuration": 7
+      },
+      {
+        "id": "welcome-story-5",
+        "sourceClipId": "autopromote",
+        "startRequest": 0,
+        "endRequest": 6,
+        "duration": 6,
+        "contentHash": "24e10d7efc11ce50950e4b6e816d9a66db7487f7edc070d24d98c0623682ae3a",
+        "storagePath": null,
+        "name": "autopromote",
+        "artifactPath": "assets/proxy/autopromote.mp4",
+        "url": "http://127.0.0.1:8765/assets/proxy/autopromote.mp4",
+        "start": 0,
+        "end": 6,
+        "sourceDuration": 6
+      }
+    ],
+    "selectedClipId": "welcome-story-1",
+    "reframeAspect": "16:9",
+    "exportSettings": {
+      "resolution": "1080p",
+      "fps": 24,
+      "codec": "h264",
+      "audioCodec": "aac"
+    },
+    "overlays": [
+      {
+        "id": "line-1",
+        "type": "text",
+        "text": "Every great story starts as an idea.",
+        "x": 50,
+        "y": 90,
+        "width": 88,
+        "height": 7,
+        "startTime": 2.1,
+        "start_time": 2.1,
+        "duration": 4.9,
+        "fontFamily": "Inter",
+        "fontWeight": 400,
+        "textAlign": "center",
+        "color": "#eeeaff",
+        "bg": "transparent",
+        "shadow": "soft",
+        "scale": 0.8,
+        "opacity": 1,
+        "animation": {
+          "enter": "fade",
+          "exit": "fade",
+          "enterDuration": 0.5,
+          "exitDuration": 0.45
+        }
+      },
+      {
+        "id": "line-2",
+        "type": "text",
+        "text": "But ideas need structure.",
+        "x": 50,
+        "y": 90,
+        "width": 88,
+        "height": 7,
+        "startTime": 9.3,
+        "start_time": 9.3,
+        "duration": 4,
+        "fontFamily": "Inter",
+        "fontWeight": 400,
+        "textAlign": "center",
+        "color": "#eeeaff",
+        "bg": "transparent",
+        "shadow": "soft",
+        "scale": 0.8,
+        "opacity": 1,
+        "animation": {
+          "enter": "fade",
+          "exit": "fade",
+          "enterDuration": 0.5,
+          "exitDuration": 0.45
+        }
+      },
+      {
+        "id": "line-3",
+        "type": "text",
+        "text": "Structure becomes motion.",
+        "x": 50,
+        "y": 90,
+        "width": 88,
+        "height": 7,
+        "startTime": 15.8,
+        "start_time": 15.8,
+        "duration": 3.7,
+        "fontFamily": "Inter",
+        "fontWeight": 400,
+        "textAlign": "center",
+        "color": "#eeeaff",
+        "bg": "transparent",
+        "shadow": "soft",
+        "scale": 0.8,
+        "opacity": 1,
+        "animation": {
+          "enter": "fade",
+          "exit": "fade",
+          "enterDuration": 0.5,
+          "exitDuration": 0.45
+        }
+      },
+      {
+        "id": "line-4",
+        "type": "text",
+        "text": "Motion becomes experience.",
+        "x": 50,
+        "y": 90,
+        "width": 88,
+        "height": 7,
+        "startTime": 20.2,
+        "start_time": 20.2,
+        "duration": 3.6,
+        "fontFamily": "Inter",
+        "fontWeight": 400,
+        "textAlign": "center",
+        "color": "#eeeaff",
+        "bg": "transparent",
+        "shadow": "soft",
+        "scale": 0.8,
+        "opacity": 1,
+        "animation": {
+          "enter": "fade",
+          "exit": "fade",
+          "enterDuration": 0.5,
+          "exitDuration": 0.45
+        }
+      },
+      {
+        "id": "line-5",
+        "type": "text",
+        "text": "And experience becomes a story people remember.",
+        "x": 50,
+        "y": 90,
+        "width": 88,
+        "height": 7,
+        "startTime": 26,
+        "start_time": 26,
+        "duration": 4.8,
+        "fontFamily": "Inter",
+        "fontWeight": 400,
+        "textAlign": "center",
+        "color": "#eeeaff",
+        "bg": "transparent",
+        "shadow": "soft",
+        "scale": 0.72,
+        "opacity": 1,
+        "animation": {
+          "enter": "fade",
+          "exit": "fade",
+          "enterDuration": 0.5,
+          "exitDuration": 0.45
+        }
+      },
+      {
+        "id": "line-6",
+        "type": "text",
+        "text": "This is AutoPromote.",
+        "x": 50,
+        "y": 90,
+        "width": 88,
+        "height": 7,
+        "startTime": 32.5,
+        "start_time": 32.5,
+        "duration": 2,
+        "fontFamily": "Inter",
+        "fontWeight": 400,
+        "textAlign": "center",
+        "color": "#eeeaff",
+        "bg": "transparent",
+        "shadow": "soft",
+        "scale": 0.8,
+        "opacity": 1,
+        "animation": {
+          "enter": "fade",
+          "exit": "fade",
+          "enterDuration": 0.5,
+          "exitDuration": 0.45
+        }
+      },
+      {
+        "id": "line-7",
+        "type": "text",
+        "text": "Ideas into motion.",
+        "x": 50,
+        "y": 72,
+        "width": 88,
+        "height": 7,
+        "startTime": 35,
+        "start_time": 35,
+        "duration": 3,
+        "fontFamily": "Inter",
+        "fontWeight": 400,
+        "textAlign": "center",
+        "color": "#eeeaff",
+        "bg": "transparent",
+        "shadow": "soft",
+        "scale": 0.8,
+        "opacity": 1,
+        "animation": {
+          "enter": "fade",
+          "exit": "fade",
+          "enterDuration": 0.5,
+          "exitDuration": 0.45
+        }
+      }
+    ],
+    "motionScenes": [],
+    "captionSegments": [],
+    "autoCaptions": false,
+    "soundEffects": [
+      {
+        "id": "welcome-story-audio-1",
+        "name": "cues",
+        "kind": "sfx",
+        "url": "http://127.0.0.1:8765/assets/cues.wav",
+        "sourceClipId": "cues",
+        "storagePath": null,
+        "contentHash": "dd9a31a0a2ac47c50b98c33c02f02109d624a343d323a8af1aeaaac5bc1259e1",
+        "startTime": 0,
+        "duration": 10,
+        "trimStart": 0,
+        "volume": 0.8,
+        "fadeIn": 0.02,
+        "fadeOut": 0.05,
+        "enabled": true,
+        "artifactPath": "assets/cues.wav",
+        "sourceStoragePath": null
+      },
+      {
+        "id": "welcome-story-audio-2",
+        "name": "cues",
+        "kind": "sfx",
+        "url": "http://127.0.0.1:8765/assets/cues.wav",
+        "sourceClipId": "cues",
+        "storagePath": null,
+        "contentHash": "dd9a31a0a2ac47c50b98c33c02f02109d624a343d323a8af1aeaaac5bc1259e1",
+        "startTime": 10,
+        "duration": 10,
+        "trimStart": 10,
+        "volume": 0.8,
+        "fadeIn": 0.02,
+        "fadeOut": 0.05,
+        "enabled": true,
+        "artifactPath": "assets/cues.wav",
+        "sourceStoragePath": null
+      },
+      {
+        "id": "welcome-story-audio-3",
+        "name": "cues",
+        "kind": "sfx",
+        "url": "http://127.0.0.1:8765/assets/cues.wav",
+        "sourceClipId": "cues",
+        "storagePath": null,
+        "contentHash": "dd9a31a0a2ac47c50b98c33c02f02109d624a343d323a8af1aeaaac5bc1259e1",
+        "startTime": 20,
+        "duration": 10,
+        "trimStart": 20,
+        "volume": 0.8,
+        "fadeIn": 0.02,
+        "fadeOut": 0.05,
+        "enabled": true,
+        "artifactPath": "assets/cues.wav",
+        "sourceStoragePath": null
+      },
+      {
+        "id": "welcome-story-audio-4",
+        "name": "cues",
+        "kind": "sfx",
+        "url": "http://127.0.0.1:8765/assets/cues.wav",
+        "sourceClipId": "cues",
+        "storagePath": null,
+        "contentHash": "dd9a31a0a2ac47c50b98c33c02f02109d624a343d323a8af1aeaaac5bc1259e1",
+        "startTime": 30,
+        "duration": 8,
+        "trimStart": 30,
+        "volume": 0.8,
+        "fadeIn": 0.02,
+        "fadeOut": 0.05,
+        "enabled": true,
+        "artifactPath": "assets/cues.wav",
+        "sourceStoragePath": null
+      }
+    ],
+    "speedKeyframes": [],
+    "trackStates": {},
+    "muteOriginalAudio": true,
+    "musicDucking": false,
+    "musicDuckingStrength": 0,
+    "addMusic": true,
+    "musicVolume": 0.82,
+    "musicLoop": false,
+    "musicFadeIn": 0.25,
+    "musicFadeOut": 0.6,
+    "musicTrack": {
+      "id": "score",
+      "url": "http://127.0.0.1:8765/assets/score.wav",
+      "duration": 38,
+      "storagePath": null,
+      "contentHash": "ee42b4a75802188d6c4e53ae149bea0313b113033cd21cf96fea199231f8cf68",
+      "artifactPath": "assets/score.wav",
+      "sourceStoragePath": null
+    },
+    "studioDocument": {
+      "schemaVersion": 1,
+      "projectId": "factory:welcome-cinematic-20261009:welcome-story",
+      "revision": 2,
+      "clock": {
+        "ticksPerSecond": 90000,
+        "interval": "half_open"
+      },
+      "output": {
+        "aspectRatio": "16:9",
+        "requestedResolution": "1080p",
+        "frameRate": {
+          "numerator": 24,
+          "denominator": 1
+        },
+        "codec": "h264",
+        "audioCodec": "aac",
+        "audioSampleRate": null,
+        "audioSampleRatePolicy": "worker_selected"
+      },
+      "assets": [
+        {
+          "assetId": "source:idea:sha256:607581a2f2d2b86cd978d661bfd11f6e4b5dd1cbdf94441d30eb236228ee3b69",
+          "sourceId": "idea",
+          "contentHash": "607581a2f2d2b86cd978d661bfd11f6e4b5dd1cbdf94441d30eb236228ee3b69",
+          "identityState": "hash_verified"
+        },
+        {
+          "assetId": "source:structure:sha256:4004caba2993cdf0b478e6c9cd0e24139f8fb7f9eb62a3fc49ead971d4e2fb0f",
+          "sourceId": "structure",
+          "contentHash": "4004caba2993cdf0b478e6c9cd0e24139f8fb7f9eb62a3fc49ead971d4e2fb0f",
+          "identityState": "hash_verified"
+        },
+        {
+          "assetId": "source:motion:sha256:23b29e80713e95379dfb2cf864496212839f5672040281bc2513f6a313ab04c2",
+          "sourceId": "motion",
+          "contentHash": "23b29e80713e95379dfb2cf864496212839f5672040281bc2513f6a313ab04c2",
+          "identityState": "hash_verified"
+        },
+        {
+          "assetId": "source:impact:sha256:cbce92d40212b0800ee10b2a2e747842c55b753ea1a2ad743cc205fd3a3c77a4",
+          "sourceId": "impact",
+          "contentHash": "cbce92d40212b0800ee10b2a2e747842c55b753ea1a2ad743cc205fd3a3c77a4",
+          "identityState": "hash_verified"
+        },
+        {
+          "assetId": "source:autopromote:sha256:24e10d7efc11ce50950e4b6e816d9a66db7487f7edc070d24d98c0623682ae3a",
+          "sourceId": "autopromote",
+          "contentHash": "24e10d7efc11ce50950e4b6e816d9a66db7487f7edc070d24d98c0623682ae3a",
+          "identityState": "hash_verified"
+        }
+      ],
+      "clipOccurrences": [
+        {
+          "occurrenceId": "welcome-story-1",
+          "assetId": "source:idea:sha256:607581a2f2d2b86cd978d661bfd11f6e4b5dd1cbdf94441d30eb236228ee3b69",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 720000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 0,
+            "endTick": 720000
+          },
+          "timeMapId": "map:welcome-story-1",
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "name": "idea",
+            "duration": 8
+          },
+          "playback": {
+            "direction": "forward",
+            "freeze": false,
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            }
+          }
+        },
+        {
+          "occurrenceId": "welcome-story-2",
+          "assetId": "source:structure:sha256:4004caba2993cdf0b478e6c9cd0e24139f8fb7f9eb62a3fc49ead971d4e2fb0f",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 630000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 720000,
+            "endTick": 1350000
+          },
+          "timeMapId": "map:welcome-story-2",
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "name": "structure",
+            "duration": 7
+          },
+          "playback": {
+            "direction": "forward",
+            "freeze": false,
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            }
+          }
+        },
+        {
+          "occurrenceId": "welcome-story-3",
+          "assetId": "source:motion:sha256:23b29e80713e95379dfb2cf864496212839f5672040281bc2513f6a313ab04c2",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 900000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 1350000,
+            "endTick": 2250000
+          },
+          "timeMapId": "map:welcome-story-3",
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "name": "motion",
+            "duration": 10
+          },
+          "playback": {
+            "direction": "forward",
+            "freeze": false,
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            }
+          }
+        },
+        {
+          "occurrenceId": "welcome-story-4",
+          "assetId": "source:impact:sha256:cbce92d40212b0800ee10b2a2e747842c55b753ea1a2ad743cc205fd3a3c77a4",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 630000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 2250000,
+            "endTick": 2880000
+          },
+          "timeMapId": "map:welcome-story-4",
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "name": "impact",
+            "duration": 7
+          },
+          "playback": {
+            "direction": "forward",
+            "freeze": false,
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            }
+          }
+        },
+        {
+          "occurrenceId": "welcome-story-5",
+          "assetId": "source:autopromote:sha256:24e10d7efc11ce50950e4b6e816d9a66db7487f7edc070d24d98c0623682ae3a",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 540000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 2880000,
+            "endTick": 3420000
+          },
+          "timeMapId": "map:welcome-story-5",
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "name": "autopromote",
+            "duration": 6
+          },
+          "playback": {
+            "direction": "forward",
+            "freeze": false,
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            }
+          }
+        }
+      ],
+      "timeMaps": [
+        {
+          "timeMapId": "map:welcome-story-1",
+          "occurrenceId": "welcome-story-1",
+          "segments": [
+            {
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 720000
+              },
+              "clipLocalRange": {
+                "space": "clip_local",
+                "startTick": 0,
+                "endTick": 720000
+              },
+              "programmeRange": {
+                "space": "programme",
+                "startTick": 0,
+                "endTick": 720000
+              },
+              "rate": {
+                "numerator": 1,
+                "denominator": 1
+              },
+              "direction": "forward",
+              "freeze": false
+            }
+          ]
+        },
+        {
+          "timeMapId": "map:welcome-story-2",
+          "occurrenceId": "welcome-story-2",
+          "segments": [
+            {
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 630000
+              },
+              "clipLocalRange": {
+                "space": "clip_local",
+                "startTick": 0,
+                "endTick": 630000
+              },
+              "programmeRange": {
+                "space": "programme",
+                "startTick": 720000,
+                "endTick": 1350000
+              },
+              "rate": {
+                "numerator": 1,
+                "denominator": 1
+              },
+              "direction": "forward",
+              "freeze": false
+            }
+          ]
+        },
+        {
+          "timeMapId": "map:welcome-story-3",
+          "occurrenceId": "welcome-story-3",
+          "segments": [
+            {
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 900000
+              },
+              "clipLocalRange": {
+                "space": "clip_local",
+                "startTick": 0,
+                "endTick": 900000
+              },
+              "programmeRange": {
+                "space": "programme",
+                "startTick": 1350000,
+                "endTick": 2250000
+              },
+              "rate": {
+                "numerator": 1,
+                "denominator": 1
+              },
+              "direction": "forward",
+              "freeze": false
+            }
+          ]
+        },
+        {
+          "timeMapId": "map:welcome-story-4",
+          "occurrenceId": "welcome-story-4",
+          "segments": [
+            {
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 630000
+              },
+              "clipLocalRange": {
+                "space": "clip_local",
+                "startTick": 0,
+                "endTick": 630000
+              },
+              "programmeRange": {
+                "space": "programme",
+                "startTick": 2250000,
+                "endTick": 2880000
+              },
+              "rate": {
+                "numerator": 1,
+                "denominator": 1
+              },
+              "direction": "forward",
+              "freeze": false
+            }
+          ]
+        },
+        {
+          "timeMapId": "map:welcome-story-5",
+          "occurrenceId": "welcome-story-5",
+          "segments": [
+            {
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 540000
+              },
+              "clipLocalRange": {
+                "space": "clip_local",
+                "startTick": 0,
+                "endTick": 540000
+              },
+              "programmeRange": {
+                "space": "programme",
+                "startTick": 2880000,
+                "endTick": 3420000
+              },
+              "rate": {
+                "numerator": 1,
+                "denominator": 1
+              },
+              "direction": "forward",
+              "freeze": false
+            }
+          ]
+        }
+      ],
+      "layers": [
+        {
+          "layerId": "line-1",
+          "type": "title",
+          "legacyType": "text",
+          "legacyCollection": "overlays",
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 189000,
+            "endTick": 630000
+          },
+          "compositionStage": "worker_overlay",
+          "parameterSchemaVersion": 3,
+          "parameters": {
+            "textAlign": "center",
+            "bg": "transparent",
+            "shadow": "soft",
+            "text": "Every great story starts as an idea.",
+            "fontFamily": "Inter",
+            "fontWeight": 400,
+            "color": "#eeeaff",
+            "opacity": 1,
+            "x": 50,
+            "y": 90,
+            "width": 88,
+            "height": 7,
+            "scale": 0.8,
+            "startTime": 2.1,
+            "duration": 4.9,
+            "animation": {
+              "enter": "fade",
+              "exit": "fade",
+              "enterDuration": 0.5,
+              "exitDuration": 0.45
+            }
+          }
+        },
+        {
+          "layerId": "line-2",
+          "type": "title",
+          "legacyType": "text",
+          "legacyCollection": "overlays",
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 837000,
+            "endTick": 1197000
+          },
+          "compositionStage": "worker_overlay",
+          "parameterSchemaVersion": 3,
+          "parameters": {
+            "textAlign": "center",
+            "bg": "transparent",
+            "shadow": "soft",
+            "text": "But ideas need structure.",
+            "fontFamily": "Inter",
+            "fontWeight": 400,
+            "color": "#eeeaff",
+            "opacity": 1,
+            "x": 50,
+            "y": 90,
+            "width": 88,
+            "height": 7,
+            "scale": 0.8,
+            "startTime": 9.3,
+            "duration": 4,
+            "animation": {
+              "enter": "fade",
+              "exit": "fade",
+              "enterDuration": 0.5,
+              "exitDuration": 0.45
+            }
+          }
+        },
+        {
+          "layerId": "line-3",
+          "type": "title",
+          "legacyType": "text",
+          "legacyCollection": "overlays",
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 1422000,
+            "endTick": 1755000
+          },
+          "compositionStage": "worker_overlay",
+          "parameterSchemaVersion": 3,
+          "parameters": {
+            "textAlign": "center",
+            "bg": "transparent",
+            "shadow": "soft",
+            "text": "Structure becomes motion.",
+            "fontFamily": "Inter",
+            "fontWeight": 400,
+            "color": "#eeeaff",
+            "opacity": 1,
+            "x": 50,
+            "y": 90,
+            "width": 88,
+            "height": 7,
+            "scale": 0.8,
+            "startTime": 15.8,
+            "duration": 3.7,
+            "animation": {
+              "enter": "fade",
+              "exit": "fade",
+              "enterDuration": 0.5,
+              "exitDuration": 0.45
+            }
+          }
+        },
+        {
+          "layerId": "line-4",
+          "type": "title",
+          "legacyType": "text",
+          "legacyCollection": "overlays",
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 1818000,
+            "endTick": 2142000
+          },
+          "compositionStage": "worker_overlay",
+          "parameterSchemaVersion": 3,
+          "parameters": {
+            "textAlign": "center",
+            "bg": "transparent",
+            "shadow": "soft",
+            "text": "Motion becomes experience.",
+            "fontFamily": "Inter",
+            "fontWeight": 400,
+            "color": "#eeeaff",
+            "opacity": 1,
+            "x": 50,
+            "y": 90,
+            "width": 88,
+            "height": 7,
+            "scale": 0.8,
+            "startTime": 20.2,
+            "duration": 3.6,
+            "animation": {
+              "enter": "fade",
+              "exit": "fade",
+              "enterDuration": 0.5,
+              "exitDuration": 0.45
+            }
+          }
+        },
+        {
+          "layerId": "line-5",
+          "type": "title",
+          "legacyType": "text",
+          "legacyCollection": "overlays",
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 2340000,
+            "endTick": 2772000
+          },
+          "compositionStage": "worker_overlay",
+          "parameterSchemaVersion": 3,
+          "parameters": {
+            "textAlign": "center",
+            "bg": "transparent",
+            "shadow": "soft",
+            "text": "And experience becomes a story people remember.",
+            "fontFamily": "Inter",
+            "fontWeight": 400,
+            "color": "#eeeaff",
+            "opacity": 1,
+            "x": 50,
+            "y": 90,
+            "width": 88,
+            "height": 7,
+            "scale": 0.72,
+            "startTime": 26,
+            "duration": 4.8,
+            "animation": {
+              "enter": "fade",
+              "exit": "fade",
+              "enterDuration": 0.5,
+              "exitDuration": 0.45
+            }
+          }
+        },
+        {
+          "layerId": "line-6",
+          "type": "title",
+          "legacyType": "text",
+          "legacyCollection": "overlays",
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 2925000,
+            "endTick": 3105000
+          },
+          "compositionStage": "worker_overlay",
+          "parameterSchemaVersion": 3,
+          "parameters": {
+            "textAlign": "center",
+            "bg": "transparent",
+            "shadow": "soft",
+            "text": "This is AutoPromote.",
+            "fontFamily": "Inter",
+            "fontWeight": 400,
+            "color": "#eeeaff",
+            "opacity": 1,
+            "x": 50,
+            "y": 90,
+            "width": 88,
+            "height": 7,
+            "scale": 0.8,
+            "startTime": 32.5,
+            "duration": 2,
+            "animation": {
+              "enter": "fade",
+              "exit": "fade",
+              "enterDuration": 0.5,
+              "exitDuration": 0.45
+            }
+          }
+        },
+        {
+          "layerId": "line-7",
+          "type": "title",
+          "legacyType": "text",
+          "legacyCollection": "overlays",
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 3150000,
+            "endTick": 3420000
+          },
+          "compositionStage": "worker_overlay",
+          "parameterSchemaVersion": 3,
+          "parameters": {
+            "textAlign": "center",
+            "bg": "transparent",
+            "shadow": "soft",
+            "text": "Ideas into motion.",
+            "fontFamily": "Inter",
+            "fontWeight": 400,
+            "color": "#eeeaff",
+            "opacity": 1,
+            "x": 50,
+            "y": 72,
+            "width": 88,
+            "height": 7,
+            "scale": 0.8,
+            "startTime": 35,
+            "duration": 3,
+            "animation": {
+              "enter": "fade",
+              "exit": "fade",
+              "enterDuration": 0.5,
+              "exitDuration": 0.45
+            }
+          }
+        }
+      ],
+      "linkedTiming": {
+        "cues": {
+          "soundEffects": [
+            {
+              "cueId": "welcome-story-audio-1",
+              "type": null,
+              "parameterSchemaVersion": 1,
+              "parameters": {
+                "enabled": true,
+                "kind": "sfx",
+                "name": "cues",
+                "sourceClipId": "cues",
+                "sourceStoragePath": null,
+                "storagePath": null,
+                "contentHash": "dd9a31a0a2ac47c50b98c33c02f02109d624a343d323a8af1aeaaac5bc1259e1",
+                "volume": 0.8,
+                "fadeIn": 0.02,
+                "fadeOut": 0.05
+              },
+              "programmeRange": {
+                "space": "programme",
+                "startTick": 0,
+                "endTick": 900000
+              },
+              "trimStartTick": 0
+            },
+            {
+              "cueId": "welcome-story-audio-2",
+              "type": null,
+              "parameterSchemaVersion": 1,
+              "parameters": {
+                "enabled": true,
+                "kind": "sfx",
+                "name": "cues",
+                "sourceClipId": "cues",
+                "sourceStoragePath": null,
+                "storagePath": null,
+                "contentHash": "dd9a31a0a2ac47c50b98c33c02f02109d624a343d323a8af1aeaaac5bc1259e1",
+                "volume": 0.8,
+                "fadeIn": 0.02,
+                "fadeOut": 0.05
+              },
+              "programmeRange": {
+                "space": "programme",
+                "startTick": 900000,
+                "endTick": 1800000
+              },
+              "trimStartTick": 900000
+            },
+            {
+              "cueId": "welcome-story-audio-3",
+              "type": null,
+              "parameterSchemaVersion": 1,
+              "parameters": {
+                "enabled": true,
+                "kind": "sfx",
+                "name": "cues",
+                "sourceClipId": "cues",
+                "sourceStoragePath": null,
+                "storagePath": null,
+                "contentHash": "dd9a31a0a2ac47c50b98c33c02f02109d624a343d323a8af1aeaaac5bc1259e1",
+                "volume": 0.8,
+                "fadeIn": 0.02,
+                "fadeOut": 0.05
+              },
+              "programmeRange": {
+                "space": "programme",
+                "startTick": 1800000,
+                "endTick": 2700000
+              },
+              "trimStartTick": 1800000
+            },
+            {
+              "cueId": "welcome-story-audio-4",
+              "type": null,
+              "parameterSchemaVersion": 1,
+              "parameters": {
+                "enabled": true,
+                "kind": "sfx",
+                "name": "cues",
+                "sourceClipId": "cues",
+                "sourceStoragePath": null,
+                "storagePath": null,
+                "contentHash": "dd9a31a0a2ac47c50b98c33c02f02109d624a343d323a8af1aeaaac5bc1259e1",
+                "volume": 0.8,
+                "fadeIn": 0.02,
+                "fadeOut": 0.05
+              },
+              "programmeRange": {
+                "space": "programme",
+                "startTick": 2700000,
+                "endTick": 3420000
+              },
+              "trimStartTick": 2700000
+            }
+          ],
+          "voiceovers": [],
+          "adjustmentLayers": []
+        },
+        "keys": {
+          "motionKeyframes": [],
+          "finishKeyframes": [],
+          "reframeKeyframes": [],
+          "reframeModeCuts": [],
+          "speakerFocusCuts": []
+        }
+      },
+      "audioGraph": {
+        "legacySnapshotRef": "audioRemix",
+        "parameterSchemaVersion": 1,
+        "settings": {
+          "addMusic": true,
+          "musicVolume": 0.82,
+          "musicDucking": false,
+          "musicDuckingStrength": 0,
+          "muteOriginalAudio": true,
+          "musicLoop": false,
+          "musicFadeIn": 0.25,
+          "musicFadeOut": 0.6
+        },
+        "music": {
+          "id": "score",
+          "sourceStoragePath": null,
+          "storagePath": null,
+          "contentHash": "ee42b4a75802188d6c4e53ae149bea0313b113033cd21cf96fea199231f8cf68",
+          "duration": 38
+        },
+        "routes": [],
+        "routing": {
+          "muteOriginalAudio": true,
+          "musicDucking": false,
+          "musicDuckingStrength": 0,
+          "musicTrackId": "score"
+        }
+      },
+      "visualGraph": {
+        "parameterSchemaVersion": 1,
+        "settings": {
+          "autoCaptions": false,
+          "smartCrop": false,
+          "reframeAspect": "16:9",
+          "exportSettings": {
+            "resolution": "1080p",
+            "fps": 24,
+            "codec": "h264",
+            "audioCodec": "aac"
+          }
+        },
+        "cameraSources": []
+      },
+      "editGraph": {
+        "parameterSchemaVersion": 1,
+        "settings": {},
+        "media": [
+          {
+            "id": "idea",
+            "name": "idea",
+            "duration": 8,
+            "contentHash": "607581a2f2d2b86cd978d661bfd11f6e4b5dd1cbdf94441d30eb236228ee3b69"
+          },
+          {
+            "id": "structure",
+            "name": "structure",
+            "duration": 7,
+            "contentHash": "4004caba2993cdf0b478e6c9cd0e24139f8fb7f9eb62a3fc49ead971d4e2fb0f"
+          },
+          {
+            "id": "motion",
+            "name": "motion",
+            "duration": 10,
+            "contentHash": "23b29e80713e95379dfb2cf864496212839f5672040281bc2513f6a313ab04c2"
+          },
+          {
+            "id": "impact",
+            "name": "impact",
+            "duration": 7,
+            "contentHash": "cbce92d40212b0800ee10b2a2e747842c55b753ea1a2ad743cc205fd3a3c77a4"
+          },
+          {
+            "id": "autopromote",
+            "name": "autopromote",
+            "duration": 6,
+            "contentHash": "24e10d7efc11ce50950e4b6e816d9a66db7487f7edc070d24d98c0623682ae3a"
+          }
+        ],
+        "sources": [
+          {
+            "id": "welcome-story-1",
+            "name": "idea",
+            "duration": 8,
+            "sourceClipId": "idea",
+            "storagePath": null,
+            "contentHash": "607581a2f2d2b86cd978d661bfd11f6e4b5dd1cbdf94441d30eb236228ee3b69"
+          },
+          {
+            "id": "welcome-story-2",
+            "name": "structure",
+            "duration": 7,
+            "sourceClipId": "structure",
+            "storagePath": null,
+            "contentHash": "4004caba2993cdf0b478e6c9cd0e24139f8fb7f9eb62a3fc49ead971d4e2fb0f"
+          },
+          {
+            "id": "welcome-story-3",
+            "name": "motion",
+            "duration": 10,
+            "sourceClipId": "motion",
+            "storagePath": null,
+            "contentHash": "23b29e80713e95379dfb2cf864496212839f5672040281bc2513f6a313ab04c2"
+          },
+          {
+            "id": "welcome-story-4",
+            "name": "impact",
+            "duration": 7,
+            "sourceClipId": "impact",
+            "storagePath": null,
+            "contentHash": "cbce92d40212b0800ee10b2a2e747842c55b753ea1a2ad743cc205fd3a3c77a4"
+          },
+          {
+            "id": "welcome-story-5",
+            "name": "autopromote",
+            "duration": 6,
+            "sourceClipId": "autopromote",
+            "storagePath": null,
+            "contentHash": "24e10d7efc11ce50950e4b6e816d9a66db7487f7edc070d24d98c0623682ae3a"
+          }
+        ],
+        "musicMix": {},
+        "hookBinding": null,
+        "angleGroups": [],
+        "extractedAudio": null
+      },
+      "constraints": {
+        "locks": []
+      },
+      "styleRef": null,
+      "analysisRefs": [],
+      "projectIntelligenceRefs": [],
+      "programmeSpeedKeys": [],
+      "fallbackSpeed": 1,
+      "outputTimeMap": [
+        {
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 0,
+            "endTick": 3420000
+          },
+          "outputRange": {
+            "space": "output",
+            "startTick": 0,
+            "endTick": 3420000
+          },
+          "rateNumerator": 1000000,
+          "rateDenominator": 1000000
+        }
+      ],
+      "journal": [],
+      "idempotency": {},
+      "directorReviewJournal": [],
+      "compatibility": {
+        "legacySnapshotVersion": 1,
+        "projection": "clip_occurrences_canonical_other_fields_legacy",
+        "editableStateVersion": 1,
+        "visualStateVersion": 1,
+        "editStateVersion": 1,
+        "layerComposition": "separate_worker_stages"
+      }
+    },
+    "projectName": "One idea. An entire creative world.",
+    "clipMedia": {
+      "idea": {
+        "id": "idea",
+        "url": "http://127.0.0.1:8765/assets/proxy/idea.mp4",
+        "name": "idea",
+        "duration": 8,
+        "artifactPath": "assets/proxy/idea.mp4",
+        "contentHash": "607581a2f2d2b86cd978d661bfd11f6e4b5dd1cbdf94441d30eb236228ee3b69",
+        "status": "ready",
+        "type": "video"
+      },
+      "structure": {
+        "id": "structure",
+        "url": "http://127.0.0.1:8765/assets/proxy/structure.mp4",
+        "name": "structure",
+        "duration": 7,
+        "artifactPath": "assets/proxy/structure.mp4",
+        "contentHash": "4004caba2993cdf0b478e6c9cd0e24139f8fb7f9eb62a3fc49ead971d4e2fb0f",
+        "status": "ready",
+        "type": "video"
+      },
+      "motion": {
+        "id": "motion",
+        "url": "http://127.0.0.1:8765/assets/proxy/motion.mp4",
+        "name": "motion",
+        "duration": 10,
+        "artifactPath": "assets/proxy/motion.mp4",
+        "contentHash": "23b29e80713e95379dfb2cf864496212839f5672040281bc2513f6a313ab04c2",
+        "status": "ready",
+        "type": "video"
+      },
+      "impact": {
+        "id": "impact",
+        "url": "http://127.0.0.1:8765/assets/proxy/impact.mp4",
+        "name": "impact",
+        "duration": 7,
+        "artifactPath": "assets/proxy/impact.mp4",
+        "contentHash": "cbce92d40212b0800ee10b2a2e747842c55b753ea1a2ad743cc205fd3a3c77a4",
+        "status": "ready",
+        "type": "video"
+      },
+      "autopromote": {
+        "id": "autopromote",
+        "url": "http://127.0.0.1:8765/assets/proxy/autopromote.mp4",
+        "name": "autopromote",
+        "duration": 6,
+        "artifactPath": "assets/proxy/autopromote.mp4",
+        "contentHash": "24e10d7efc11ce50950e4b6e816d9a66db7487f7edc070d24d98c0623682ae3a",
+        "status": "ready",
+        "type": "video"
+      }
+    },
+    "projectMedia": [
+      {
+        "id": "idea",
+        "url": "http://127.0.0.1:8765/assets/proxy/idea.mp4",
+        "name": "idea",
+        "duration": 8,
+        "artifactPath": "assets/proxy/idea.mp4",
+        "contentHash": "607581a2f2d2b86cd978d661bfd11f6e4b5dd1cbdf94441d30eb236228ee3b69",
+        "status": "ready",
+        "type": "video"
+      },
+      {
+        "id": "structure",
+        "url": "http://127.0.0.1:8765/assets/proxy/structure.mp4",
+        "name": "structure",
+        "duration": 7,
+        "artifactPath": "assets/proxy/structure.mp4",
+        "contentHash": "4004caba2993cdf0b478e6c9cd0e24139f8fb7f9eb62a3fc49ead971d4e2fb0f",
+        "status": "ready",
+        "type": "video"
+      },
+      {
+        "id": "motion",
+        "url": "http://127.0.0.1:8765/assets/proxy/motion.mp4",
+        "name": "motion",
+        "duration": 10,
+        "artifactPath": "assets/proxy/motion.mp4",
+        "contentHash": "23b29e80713e95379dfb2cf864496212839f5672040281bc2513f6a313ab04c2",
+        "status": "ready",
+        "type": "video"
+      },
+      {
+        "id": "impact",
+        "url": "http://127.0.0.1:8765/assets/proxy/impact.mp4",
+        "name": "impact",
+        "duration": 7,
+        "artifactPath": "assets/proxy/impact.mp4",
+        "contentHash": "cbce92d40212b0800ee10b2a2e747842c55b753ea1a2ad743cc205fd3a3c77a4",
+        "status": "ready",
+        "type": "video"
+      },
+      {
+        "id": "autopromote",
+        "url": "http://127.0.0.1:8765/assets/proxy/autopromote.mp4",
+        "name": "autopromote",
+        "duration": 6,
+        "artifactPath": "assets/proxy/autopromote.mp4",
+        "contentHash": "24e10d7efc11ce50950e4b6e816d9a66db7487f7edc070d24d98c0623682ae3a",
+        "status": "ready",
+        "type": "video"
+      }
+    ],
+    "smartCrop": false
+  },
+  "directorBatch": {
+    "projectId": "factory:welcome-cinematic-20261009:welcome-story",
+    "baseRevision": 0,
+    "idempotencyKey": "factory-edit-welcome-cinematic-202610-welcome-story",
+    "actor": {
+      "type": "ai",
+      "id": "content_factory_director"
+    },
+    "operations": [
+      {
+        "type": "trim_clip",
+        "target": {
+          "occurrenceId": "welcome-story-1"
+        },
+        "keep": {
+          "space": "source",
+          "startTick": 0,
+          "endTick": 720000
+        }
+      },
+      {
+        "type": "trim_clip",
+        "target": {
+          "occurrenceId": "welcome-story-2"
+        },
+        "keep": {
+          "space": "source",
+          "startTick": 0,
+          "endTick": 630000
+        }
+      },
+      {
+        "type": "trim_clip",
+        "target": {
+          "occurrenceId": "welcome-story-3"
+        },
+        "keep": {
+          "space": "source",
+          "startTick": 0,
+          "endTick": 900000
+        }
+      },
+      {
+        "type": "trim_clip",
+        "target": {
+          "occurrenceId": "welcome-story-4"
+        },
+        "keep": {
+          "space": "source",
+          "startTick": 0,
+          "endTick": 630000
+        }
+      },
+      {
+        "type": "trim_clip",
+        "target": {
+          "occurrenceId": "welcome-story-5"
+        },
+        "keep": {
+          "space": "source",
+          "startTick": 0,
+          "endTick": 540000
+        }
+      }
+    ]
+  },
+  "directorPreview": {
+    "duplicate": false,
+    "baseRevision": 0,
+    "newRevision": 1,
+    "affectedNodes": [
+      "welcome-story-1",
+      "welcome-story-2",
+      "welcome-story-3",
+      "welcome-story-4",
+      "welcome-story-5"
+    ],
+    "readSet": [
+      "occurrence:welcome-story-1",
+      "occurrence:welcome-story-2",
+      "occurrence:welcome-story-3",
+      "occurrence:welcome-story-4",
+      "occurrence:welcome-story-5"
+    ],
+    "writeSet": [
+      "occurrence:welcome-story-1",
+      "occurrence:welcome-story-2",
+      "occurrence:welcome-story-3",
+      "occurrence:welcome-story-4",
+      "occurrence:welcome-story-5",
+      "programme:timeline",
+      "time_maps"
+    ],
+    "previewDocument": {
+      "schemaVersion": 1,
+      "projectId": "factory:welcome-cinematic-20261009:welcome-story",
+      "revision": 0,
+      "clock": {
+        "ticksPerSecond": 90000,
+        "interval": "half_open"
+      },
+      "output": {
+        "aspectRatio": "16:9",
+        "requestedResolution": "1080p",
+        "frameRate": {
+          "numerator": 24,
+          "denominator": 1
+        },
+        "codec": "h264",
+        "audioCodec": "aac",
+        "audioSampleRate": null,
+        "audioSampleRatePolicy": "worker_selected"
+      },
+      "assets": [
+        {
+          "assetId": "source:idea:sha256:607581a2f2d2b86cd978d661bfd11f6e4b5dd1cbdf94441d30eb236228ee3b69",
+          "sourceId": "idea",
+          "storagePath": "assets/proxy/idea.mp4",
+          "contentHash": "607581a2f2d2b86cd978d661bfd11f6e4b5dd1cbdf94441d30eb236228ee3b69",
+          "identityState": "hash_verified"
+        },
+        {
+          "assetId": "source:structure:sha256:4004caba2993cdf0b478e6c9cd0e24139f8fb7f9eb62a3fc49ead971d4e2fb0f",
+          "sourceId": "structure",
+          "storagePath": "assets/proxy/structure.mp4",
+          "contentHash": "4004caba2993cdf0b478e6c9cd0e24139f8fb7f9eb62a3fc49ead971d4e2fb0f",
+          "identityState": "hash_verified"
+        },
+        {
+          "assetId": "source:motion:sha256:23b29e80713e95379dfb2cf864496212839f5672040281bc2513f6a313ab04c2",
+          "sourceId": "motion",
+          "storagePath": "assets/proxy/motion.mp4",
+          "contentHash": "23b29e80713e95379dfb2cf864496212839f5672040281bc2513f6a313ab04c2",
+          "identityState": "hash_verified"
+        },
+        {
+          "assetId": "source:impact:sha256:cbce92d40212b0800ee10b2a2e747842c55b753ea1a2ad743cc205fd3a3c77a4",
+          "sourceId": "impact",
+          "storagePath": "assets/proxy/impact.mp4",
+          "contentHash": "cbce92d40212b0800ee10b2a2e747842c55b753ea1a2ad743cc205fd3a3c77a4",
+          "identityState": "hash_verified"
+        },
+        {
+          "assetId": "source:autopromote:sha256:24e10d7efc11ce50950e4b6e816d9a66db7487f7edc070d24d98c0623682ae3a",
+          "sourceId": "autopromote",
+          "storagePath": "assets/proxy/autopromote.mp4",
+          "contentHash": "24e10d7efc11ce50950e4b6e816d9a66db7487f7edc070d24d98c0623682ae3a",
+          "identityState": "hash_verified"
+        }
+      ],
+      "clipOccurrences": [
+        {
+          "occurrenceId": "welcome-story-1",
+          "assetId": "source:idea:sha256:607581a2f2d2b86cd978d661bfd11f6e4b5dd1cbdf94441d30eb236228ee3b69",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 720000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 0,
+            "endTick": 720000
+          },
+          "timeMapId": "map:welcome-story-1",
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "name": "idea",
+            "duration": 8
+          },
+          "playback": {
+            "direction": "forward",
+            "freeze": false,
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            }
+          }
+        },
+        {
+          "occurrenceId": "welcome-story-2",
+          "assetId": "source:structure:sha256:4004caba2993cdf0b478e6c9cd0e24139f8fb7f9eb62a3fc49ead971d4e2fb0f",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 630000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 720000,
+            "endTick": 1350000
+          },
+          "timeMapId": "map:welcome-story-2",
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "name": "structure",
+            "duration": 7
+          },
+          "playback": {
+            "direction": "forward",
+            "freeze": false,
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            }
+          }
+        },
+        {
+          "occurrenceId": "welcome-story-3",
+          "assetId": "source:motion:sha256:23b29e80713e95379dfb2cf864496212839f5672040281bc2513f6a313ab04c2",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 900000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 1350000,
+            "endTick": 2250000
+          },
+          "timeMapId": "map:welcome-story-3",
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "name": "motion",
+            "duration": 10
+          },
+          "playback": {
+            "direction": "forward",
+            "freeze": false,
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            }
+          }
+        },
+        {
+          "occurrenceId": "welcome-story-4",
+          "assetId": "source:impact:sha256:cbce92d40212b0800ee10b2a2e747842c55b753ea1a2ad743cc205fd3a3c77a4",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 630000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 2250000,
+            "endTick": 2880000
+          },
+          "timeMapId": "map:welcome-story-4",
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "name": "impact",
+            "duration": 7
+          },
+          "playback": {
+            "direction": "forward",
+            "freeze": false,
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            }
+          }
+        },
+        {
+          "occurrenceId": "welcome-story-5",
+          "assetId": "source:autopromote:sha256:24e10d7efc11ce50950e4b6e816d9a66db7487f7edc070d24d98c0623682ae3a",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 540000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 2880000,
+            "endTick": 3420000
+          },
+          "timeMapId": "map:welcome-story-5",
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "name": "autopromote",
+            "duration": 6
+          },
+          "playback": {
+            "direction": "forward",
+            "freeze": false,
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            }
+          }
+        }
+      ],
+      "timeMaps": [
+        {
+          "timeMapId": "map:welcome-story-1",
+          "occurrenceId": "welcome-story-1",
+          "segments": [
+            {
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 720000
+              },
+              "clipLocalRange": {
+                "space": "clip_local",
+                "startTick": 0,
+                "endTick": 720000
+              },
+              "programmeRange": {
+                "space": "programme",
+                "startTick": 0,
+                "endTick": 720000
+              },
+              "rate": {
+                "numerator": 1,
+                "denominator": 1
+              },
+              "direction": "forward",
+              "freeze": false
+            }
+          ]
+        },
+        {
+          "timeMapId": "map:welcome-story-2",
+          "occurrenceId": "welcome-story-2",
+          "segments": [
+            {
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 630000
+              },
+              "clipLocalRange": {
+                "space": "clip_local",
+                "startTick": 0,
+                "endTick": 630000
+              },
+              "programmeRange": {
+                "space": "programme",
+                "startTick": 720000,
+                "endTick": 1350000
+              },
+              "rate": {
+                "numerator": 1,
+                "denominator": 1
+              },
+              "direction": "forward",
+              "freeze": false
+            }
+          ]
+        },
+        {
+          "timeMapId": "map:welcome-story-3",
+          "occurrenceId": "welcome-story-3",
+          "segments": [
+            {
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 900000
+              },
+              "clipLocalRange": {
+                "space": "clip_local",
+                "startTick": 0,
+                "endTick": 900000
+              },
+              "programmeRange": {
+                "space": "programme",
+                "startTick": 1350000,
+                "endTick": 2250000
+              },
+              "rate": {
+                "numerator": 1,
+                "denominator": 1
+              },
+              "direction": "forward",
+              "freeze": false
+            }
+          ]
+        },
+        {
+          "timeMapId": "map:welcome-story-4",
+          "occurrenceId": "welcome-story-4",
+          "segments": [
+            {
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 630000
+              },
+              "clipLocalRange": {
+                "space": "clip_local",
+                "startTick": 0,
+                "endTick": 630000
+              },
+              "programmeRange": {
+                "space": "programme",
+                "startTick": 2250000,
+                "endTick": 2880000
+              },
+              "rate": {
+                "numerator": 1,
+                "denominator": 1
+              },
+              "direction": "forward",
+              "freeze": false
+            }
+          ]
+        },
+        {
+          "timeMapId": "map:welcome-story-5",
+          "occurrenceId": "welcome-story-5",
+          "segments": [
+            {
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 540000
+              },
+              "clipLocalRange": {
+                "space": "clip_local",
+                "startTick": 0,
+                "endTick": 540000
+              },
+              "programmeRange": {
+                "space": "programme",
+                "startTick": 2880000,
+                "endTick": 3420000
+              },
+              "rate": {
+                "numerator": 1,
+                "denominator": 1
+              },
+              "direction": "forward",
+              "freeze": false
+            }
+          ]
+        }
+      ],
+      "layers": [],
+      "linkedTiming": {
+        "cues": {
+          "soundEffects": [],
+          "voiceovers": [],
+          "adjustmentLayers": []
+        },
+        "keys": {
+          "motionKeyframes": [],
+          "finishKeyframes": [],
+          "reframeKeyframes": [],
+          "reframeModeCuts": [],
+          "speakerFocusCuts": []
+        }
+      },
+      "audioGraph": {
+        "legacySnapshotRef": "audioRemix",
+        "parameterSchemaVersion": 1,
+        "settings": {
+          "addMusic": true,
+          "musicVolume": 0.82,
+          "musicDucking": false,
+          "musicDuckingStrength": 0,
+          "muteOriginalAudio": true,
+          "musicLoop": false,
+          "musicFadeIn": 0.25,
+          "musicFadeOut": 0.6
+        },
+        "music": {
+          "id": "score",
+          "storagePath": "assets/score.wav",
+          "contentHash": "ee42b4a75802188d6c4e53ae149bea0313b113033cd21cf96fea199231f8cf68",
+          "duration": 38
+        },
+        "routes": [],
+        "routing": {
+          "muteOriginalAudio": true,
+          "musicDucking": false,
+          "musicDuckingStrength": 0,
+          "musicTrackId": "score"
+        }
+      },
+      "visualGraph": {
+        "parameterSchemaVersion": 1,
+        "settings": {
+          "autoCaptions": false,
+          "reframeAspect": "16:9",
+          "exportSettings": {
+            "resolution": "1080p",
+            "fps": 24,
+            "codec": "h264",
+            "audioCodec": "aac"
+          }
+        },
+        "cameraSources": []
+      },
+      "editGraph": {
+        "parameterSchemaVersion": 1,
+        "settings": {},
+        "media": [],
+        "sources": [],
+        "musicMix": {},
+        "hookBinding": null,
+        "angleGroups": [],
+        "extractedAudio": null
+      },
+      "constraints": {
+        "locks": []
+      },
+      "styleRef": null,
+      "analysisRefs": [],
+      "projectIntelligenceRefs": [],
+      "programmeSpeedKeys": [],
+      "fallbackSpeed": 1,
+      "outputTimeMap": [
+        {
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 0,
+            "endTick": 3420000
+          },
+          "outputRange": {
+            "space": "output",
+            "startTick": 0,
+            "endTick": 3420000
+          },
+          "rateNumerator": 1000000,
+          "rateDenominator": 1000000
+        }
+      ],
+      "journal": [],
+      "idempotency": {},
+      "directorReviewJournal": [],
+      "compatibility": {
+        "legacySnapshotVersion": 1,
+        "projection": "clip_occurrences_canonical_other_fields_legacy",
+        "editableStateVersion": 1,
+        "visualStateVersion": 1,
+        "editStateVersion": 1,
+        "layerComposition": "separate_worker_stages"
+      }
+    }
+  },
+  "renderRequest": {
+    "video_url": "http://127.0.0.1:8765/assets/proxy/idea.mp4",
+    "start_time": 0,
+    "end_time": 38,
+    "overlays": [
+      {
+        "id": "line-1",
+        "type": "text",
+        "start_time": 2.1,
+        "textAlign": "center",
+        "bg": "transparent",
+        "shadow": "soft",
+        "text": "Every great story starts as an idea.",
+        "fontFamily": "Inter",
+        "fontWeight": 400,
+        "color": "#eeeaff",
+        "opacity": 1,
+        "x": 50,
+        "y": 90,
+        "width": 88,
+        "height": 7,
+        "scale": 0.8,
+        "startTime": 2.1,
+        "duration": 4.9,
+        "animation": {
+          "enter": "fade",
+          "exit": "fade",
+          "enterDuration": 0.5,
+          "exitDuration": 0.45
+        }
+      },
+      {
+        "id": "line-2",
+        "type": "text",
+        "start_time": 9.3,
+        "textAlign": "center",
+        "bg": "transparent",
+        "shadow": "soft",
+        "text": "But ideas need structure.",
+        "fontFamily": "Inter",
+        "fontWeight": 400,
+        "color": "#eeeaff",
+        "opacity": 1,
+        "x": 50,
+        "y": 90,
+        "width": 88,
+        "height": 7,
+        "scale": 0.8,
+        "startTime": 9.3,
+        "duration": 4,
+        "animation": {
+          "enter": "fade",
+          "exit": "fade",
+          "enterDuration": 0.5,
+          "exitDuration": 0.45
+        }
+      },
+      {
+        "id": "line-3",
+        "type": "text",
+        "start_time": 15.8,
+        "textAlign": "center",
+        "bg": "transparent",
+        "shadow": "soft",
+        "text": "Structure becomes motion.",
+        "fontFamily": "Inter",
+        "fontWeight": 400,
+        "color": "#eeeaff",
+        "opacity": 1,
+        "x": 50,
+        "y": 90,
+        "width": 88,
+        "height": 7,
+        "scale": 0.8,
+        "startTime": 15.8,
+        "duration": 3.7,
+        "animation": {
+          "enter": "fade",
+          "exit": "fade",
+          "enterDuration": 0.5,
+          "exitDuration": 0.45
+        }
+      },
+      {
+        "id": "line-4",
+        "type": "text",
+        "start_time": 20.2,
+        "textAlign": "center",
+        "bg": "transparent",
+        "shadow": "soft",
+        "text": "Motion becomes experience.",
+        "fontFamily": "Inter",
+        "fontWeight": 400,
+        "color": "#eeeaff",
+        "opacity": 1,
+        "x": 50,
+        "y": 90,
+        "width": 88,
+        "height": 7,
+        "scale": 0.8,
+        "startTime": 20.2,
+        "duration": 3.6,
+        "animation": {
+          "enter": "fade",
+          "exit": "fade",
+          "enterDuration": 0.5,
+          "exitDuration": 0.45
+        }
+      },
+      {
+        "id": "line-5",
+        "type": "text",
+        "start_time": 26,
+        "textAlign": "center",
+        "bg": "transparent",
+        "shadow": "soft",
+        "text": "And experience becomes a story people remember.",
+        "fontFamily": "Inter",
+        "fontWeight": 400,
+        "color": "#eeeaff",
+        "opacity": 1,
+        "x": 50,
+        "y": 90,
+        "width": 88,
+        "height": 7,
+        "scale": 0.72,
+        "startTime": 26,
+        "duration": 4.8,
+        "animation": {
+          "enter": "fade",
+          "exit": "fade",
+          "enterDuration": 0.5,
+          "exitDuration": 0.45
+        }
+      },
+      {
+        "id": "line-6",
+        "type": "text",
+        "start_time": 32.5,
+        "textAlign": "center",
+        "bg": "transparent",
+        "shadow": "soft",
+        "text": "This is AutoPromote.",
+        "fontFamily": "Inter",
+        "fontWeight": 400,
+        "color": "#eeeaff",
+        "opacity": 1,
+        "x": 50,
+        "y": 90,
+        "width": 88,
+        "height": 7,
+        "scale": 0.8,
+        "startTime": 32.5,
+        "duration": 2,
+        "animation": {
+          "enter": "fade",
+          "exit": "fade",
+          "enterDuration": 0.5,
+          "exitDuration": 0.45
+        }
+      },
+      {
+        "id": "line-7",
+        "type": "text",
+        "start_time": 35,
+        "textAlign": "center",
+        "bg": "transparent",
+        "shadow": "soft",
+        "text": "Ideas into motion.",
+        "fontFamily": "Inter",
+        "fontWeight": 400,
+        "color": "#eeeaff",
+        "opacity": 1,
+        "x": 50,
+        "y": 72,
+        "width": 88,
+        "height": 7,
+        "scale": 0.8,
+        "startTime": 35,
+        "duration": 3,
+        "animation": {
+          "enter": "fade",
+          "exit": "fade",
+          "enterDuration": 0.5,
+          "exitDuration": 0.45
+        }
+      }
+    ],
+    "auto_captions": false,
+    "timeline_segments": [
+      {
+        "id": "welcome-story-1",
+        "source_clip_id": "idea",
+        "start_time": 0,
+        "end_time": 8,
+        "duration": 8,
+        "url": "http://127.0.0.1:8765/assets/proxy/idea.mp4"
+      },
+      {
+        "id": "welcome-story-2",
+        "source_clip_id": "structure",
+        "start_time": 0,
+        "end_time": 7,
+        "duration": 7,
+        "url": "http://127.0.0.1:8765/assets/proxy/structure.mp4"
+      },
+      {
+        "id": "welcome-story-3",
+        "source_clip_id": "motion",
+        "start_time": 0,
+        "end_time": 10,
+        "duration": 10,
+        "url": "http://127.0.0.1:8765/assets/proxy/motion.mp4"
+      },
+      {
+        "id": "welcome-story-4",
+        "source_clip_id": "impact",
+        "start_time": 0,
+        "end_time": 7,
+        "duration": 7,
+        "url": "http://127.0.0.1:8765/assets/proxy/impact.mp4"
+      },
+      {
+        "id": "welcome-story-5",
+        "source_clip_id": "autopromote",
+        "start_time": 0,
+        "end_time": 6,
+        "duration": 6,
+        "url": "http://127.0.0.1:8765/assets/proxy/autopromote.mp4"
+      }
+    ],
+    "background_audio": null,
+    "hook_focus_point": null,
+    "cover_frame": null,
+    "thumbnail_frame": null,
+    "caption_style": "minimal",
+    "caption_position": "bottom",
+    "caption_scale": 0.72,
+    "caption_segments": [],
+    "creative_intent": "One idea becomes structure, motion, experience, impact and AutoPromote in one evolving creative world.",
+    "professional_cleanup": false,
+    "finish_plan": {
+      "version": 1,
+      "enabled": true,
+      "reframe": {
+        "enabled": true,
+        "aspect": "16:9",
+        "mode": "off"
+      }
+    },
+    "smart_crop": false,
+    "smart_crop_mode": "safe_fit",
+    "brand_watermark": false,
+    "output_settings": {
+      "resolution": "360p",
+      "fps": 24,
+      "codec": "h264",
+      "audioCodec": "aac"
+    },
+    "add_music": true,
+    "music_url": "http://127.0.0.1:8765/assets/score.wav",
+    "music_name": "score",
+    "music_volume": 0.82,
+    "music_ducking": false,
+    "music_fade_in": 0.25,
+    "music_fade_out": 0.6,
+    "music_loop": false,
+    "sound_effects": [
+      {
+        "id": "welcome-story-audio-1",
+        "url": "http://127.0.0.1:8765/assets/cues.wav",
+        "enabled": true,
+        "kind": "sfx",
+        "name": "cues",
+        "sourceClipId": "cues",
+        "storagePath": "assets/cues.wav",
+        "contentHash": "dd9a31a0a2ac47c50b98c33c02f02109d624a343d323a8af1aeaaac5bc1259e1",
+        "volume": 0.8,
+        "fadeIn": 0.02,
+        "fadeOut": 0.05,
+        "startTime": 0,
+        "duration": 10,
+        "trimStart": 0
+      },
+      {
+        "id": "welcome-story-audio-2",
+        "url": "http://127.0.0.1:8765/assets/cues.wav",
+        "enabled": true,
+        "kind": "sfx",
+        "name": "cues",
+        "sourceClipId": "cues",
+        "storagePath": "assets/cues.wav",
+        "contentHash": "dd9a31a0a2ac47c50b98c33c02f02109d624a343d323a8af1aeaaac5bc1259e1",
+        "volume": 0.8,
+        "fadeIn": 0.02,
+        "fadeOut": 0.05,
+        "startTime": 10,
+        "duration": 10,
+        "trimStart": 10
+      },
+      {
+        "id": "welcome-story-audio-3",
+        "url": "http://127.0.0.1:8765/assets/cues.wav",
+        "enabled": true,
+        "kind": "sfx",
+        "name": "cues",
+        "sourceClipId": "cues",
+        "storagePath": "assets/cues.wav",
+        "contentHash": "dd9a31a0a2ac47c50b98c33c02f02109d624a343d323a8af1aeaaac5bc1259e1",
+        "volume": 0.8,
+        "fadeIn": 0.02,
+        "fadeOut": 0.05,
+        "startTime": 20,
+        "duration": 10,
+        "trimStart": 20
+      },
+      {
+        "id": "welcome-story-audio-4",
+        "url": "http://127.0.0.1:8765/assets/cues.wav",
+        "enabled": true,
+        "kind": "sfx",
+        "name": "cues",
+        "sourceClipId": "cues",
+        "storagePath": "assets/cues.wav",
+        "contentHash": "dd9a31a0a2ac47c50b98c33c02f02109d624a343d323a8af1aeaaac5bc1259e1",
+        "volume": 0.8,
+        "fadeIn": 0.02,
+        "fadeOut": 0.05,
+        "startTime": 30,
+        "duration": 8,
+        "trimStart": 30
+      }
+    ],
+    "motionGraphics": {
+      "version": 1,
+      "scenes": []
+    },
+    "mute_audio": true,
+    "planned_black_ranges": [
+      {
+        "start": 0,
+        "end": 1.8,
+        "reason": "Deliberate near-dark opening before the environment wakes."
+      }
+    ]
+  },
+  "documentHash": "ab3e084d7cbd4040e788b40c899a8d3a08652274835e6b6f366072603147a63f",
+  "sourceEvidence": [
+    {
+      "assetId": "idea",
+      "contentHash": "607581a2f2d2b86cd978d661bfd11f6e4b5dd1cbdf94441d30eb236228ee3b69",
+      "provenanceHash": "72211af569db91e359cd62de6a58ab72a6a6ec7578f18dd3f93d04055c2242da",
+      "reviewEvidenceHash": "fdeeb09964dc385978bb0afa31e9adc6205a66539b8fe5642cc1bfc59d8331f1"
+    },
+    {
+      "assetId": "structure",
+      "contentHash": "4004caba2993cdf0b478e6c9cd0e24139f8fb7f9eb62a3fc49ead971d4e2fb0f",
+      "provenanceHash": "5cdb5e11d235975f682812c4f6932e6ab1eb897e7ca96510ce2a2706632931b0",
+      "reviewEvidenceHash": "fdeeb09964dc385978bb0afa31e9adc6205a66539b8fe5642cc1bfc59d8331f1"
+    },
+    {
+      "assetId": "motion",
+      "contentHash": "23b29e80713e95379dfb2cf864496212839f5672040281bc2513f6a313ab04c2",
+      "provenanceHash": "564adbdd35bbd989de4e54e72675f45a2b07a5a70a8bc5513f6f7aa95a777189",
+      "reviewEvidenceHash": "fdeeb09964dc385978bb0afa31e9adc6205a66539b8fe5642cc1bfc59d8331f1"
+    },
+    {
+      "assetId": "impact",
+      "contentHash": "cbce92d40212b0800ee10b2a2e747842c55b753ea1a2ad743cc205fd3a3c77a4",
+      "provenanceHash": "096cd09b56b61937b2529dd961e0c9a7eb28d84c261dc00b0b134fcf4ff5431e",
+      "reviewEvidenceHash": "fdeeb09964dc385978bb0afa31e9adc6205a66539b8fe5642cc1bfc59d8331f1"
+    },
+    {
+      "assetId": "autopromote",
+      "contentHash": "24e10d7efc11ce50950e4b6e816d9a66db7487f7edc070d24d98c0623682ae3a",
+      "provenanceHash": "2b82322f6757826da8cf129617f6b4618e0875b11571cb5c6c2be241ea933218",
+      "reviewEvidenceHash": "fdeeb09964dc385978bb0afa31e9adc6205a66539b8fe5642cc1bfc59d8331f1"
+    },
+    {
+      "assetId": "cues",
+      "contentHash": "dd9a31a0a2ac47c50b98c33c02f02109d624a343d323a8af1aeaaac5bc1259e1",
+      "provenanceHash": "5ce89e5d7d9c6e297047fdd75fca178343551781b246b89ebf4a3780de88016e",
+      "reviewEvidenceHash": "e71dbaf7613bf66220f43d3a449c4ee16c2821446524e6527a9a7096f41d642e"
+    },
+    {
+      "assetId": "score",
+      "contentHash": "ee42b4a75802188d6c4e53ae149bea0313b113033cd21cf96fea199231f8cf68",
+      "provenanceHash": "e341eef5c7b08e0e5a927fec7113b30292e59a474d954719729171e485d30e45",
+      "reviewEvidenceHash": "306d72d1fa59ffda2b776cdca4c7cb773176dd78acb80c89fcab5b4fc005b9c8"
+    }
+  ]
+}

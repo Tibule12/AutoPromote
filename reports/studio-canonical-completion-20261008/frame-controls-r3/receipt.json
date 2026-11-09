@@ -1,0 +1,15 @@
+{
+  "startedAt": "2026-10-08T14:05:58.481Z",
+  "realAuth": true,
+  "headless": true,
+  "muted": true,
+  "noMocks": true,
+  "gpuJobsStarted": 0,
+  "projectName": "Studio framing controls QA 20261008 r3",
+  "status": "FAIL",
+  "steps": [
+    "Native Reset transform removes the QA tilt, zoom, offsets and main-video keys"
+  ],
+  "error": "locator.getAttribute: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'View options', exact: true })\u001b[22m\n",
+  "finishedAt": "2026-10-08T14:06:48.301Z"
+}

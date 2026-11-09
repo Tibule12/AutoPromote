@@ -1,0 +1,61 @@
+{
+  "at": "2026-10-09T10:07:03.483Z",
+  "passed": true,
+  "revision": 173,
+  "captions": 51,
+  "caption37": {
+    "text": "I was born here in Cape Town.",
+    "reviewRequired": false,
+    "textReviewed": true,
+    "textReviewRequired": false,
+    "speaker": "guest",
+    "speakerLabel": "Guest",
+    "language": "en",
+    "languageLabel": "English",
+    "languages": [
+      "en"
+    ],
+    "languageConfidence": 0,
+    "transcriptConfidence": 0,
+    "transcriptionReviewReasons": [],
+    "translatedToEnglish": false,
+    "captionPlacement": "auto",
+    "captionIcon": "none",
+    "captionAccent": "#ffffff",
+    "captionX": 50,
+    "captionY": 82,
+    "placement": "auto",
+    "id": "transcript-caption-32",
+    "sourceClipId": null,
+    "start": 86.04,
+    "end": 90.22,
+    "duration": 4.18
+  },
+  "sourceEnd": 120,
+  "mainFrame": {
+    "insetPercent": 2.5,
+    "radiusPercent": 6,
+    "background": "studio_black",
+    "enabled": false
+  },
+  "exportSettings": {
+    "resolution": "source",
+    "fps": "24",
+    "codec": "h264",
+    "quality": "master",
+    "videoBitrate": "auto",
+    "targetFileSizeMb": "",
+    "audioCodec": "aac",
+    "audioBitrate": "256",
+    "colorSpace": "rec709"
+  },
+  "broll": [
+    {
+      "duration": 3,
+      "startTime": 96.4,
+      "contentHash": "ffebda68521ae52f42a675f13eae4b3bc284c1db7c9ff7216838277fe85435e6"
+    }
+  ],
+  "motionKeys": 42,
+  "watermark": false
+}

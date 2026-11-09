@@ -1,0 +1,32 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "assetId": "make-world",
+  "type": "audio",
+  "audioRole": "voiceover",
+  "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+  "prompt": "Make a world.",
+  "model": "hexgrad/Kokoro-82M",
+  "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+  "tool": "AutoPromote NVIDIA narration adapter",
+  "origin": "synthetic_brand_narration",
+  "settings": {
+    "voice": "af_heart",
+    "speed": 0.98,
+    "sampleRate": 48000,
+    "loudnessTargetLUFS": -18
+  },
+  "artifact": {
+    "path": "/work/narration/make-world.wav",
+    "sha256": "b183dd1d5909839689519a328316eb7d3d75375dddedcc39d32c8dfc061307d0",
+    "duration": 1.625,
+    "container": "wav",
+    "codec": "pcm_s16le"
+  },
+  "device": "cuda",
+  "gpu": "NVIDIA L40S",
+  "phonemes": [
+    "m\u02ccAk \u0250 w\u02c8\u025c\u0279ld."
+  ],
+  "seconds": 0.11987308700008725,
+  "disclosure": "Generated narration using a standard licensed model preset; no founder voice or real person's identity is represented."
+}

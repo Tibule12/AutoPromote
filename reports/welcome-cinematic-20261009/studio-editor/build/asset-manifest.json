@@ -1,0 +1,18 @@
+{
+  "files": {
+    "main.js": "/static/js/bundle.js",
+    "static/js/src_components_threeD_Studio3DCanvas_js.chunk.js": "/static/js/src_components_threeD_Studio3DCanvas_js.chunk.js",
+    "static/js/vendors-AutoPromote_frontend_node_modules_three_build_three_module_js-AutoPromote_frontend_no-21c983.chunk.js": "/static/js/vendors-AutoPromote_frontend_node_modules_three_build_three_module_js-AutoPromote_frontend_no-21c983.chunk.js",
+    "static/media/DejaVuSans.ttf": "/static/media/DejaVuSans.00c5a849fed00223aad6.ttf",
+    "static/media/DejaVuSans-Bold.ttf": "/static/media/DejaVuSans-Bold.263039d2364a6d1ae687.ttf",
+    "static/media/StudioMotion-Bold.ttf": "/static/media/StudioMotion-Bold.263039d2364a6d1ae687.ttf",
+    "static/media/NotoSansSymbols2-Regular.ttf": "/static/media/NotoSansSymbols2-Regular.553b5b4e197ce627f01a.ttf",
+    "static/media/Inter-ExtraBold.ttf": "/static/media/Inter-ExtraBold.58d3a8bccabac2ee22a5.ttf",
+    "static/media/Inter-Black.ttf": "/static/media/Inter-Black.9f338602a2c79d04ff1c.ttf",
+    "static/media/Inter-SemiBold.ttf": "/static/media/Inter-SemiBold.f12f49972afe1369d72b.ttf",
+    "static/media/Inter-Regular.ttf": "/static/media/Inter-Regular.b3b207f0f59cc178c8da.ttf"
+  },
+  "entrypoints": [
+    "static/js/bundle.js"
+  ]
+}

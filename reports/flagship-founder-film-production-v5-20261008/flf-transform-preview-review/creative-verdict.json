@@ -1,0 +1,27 @@
+{
+  "accepted": false,
+  "reason": "Reject the transformation. A fully formed second yacht arrives behind the intact paper boat; the paper boat turns and drifts out of frame. No paper sail unfolds into the yacht sail, and no paper hull becomes the real hull. More continuous water and camera movement do not make this the same vessel.",
+  "reviewer": "Codex complete decoded-frame inspection",
+  "modelRevision": "private visual review 2026-10-08",
+  "evidenceSha256": "bb3c1f23892b2517d0c6dbf0746e0776be532cb91baec7a0dd550d60ac829031",
+  "artifactSha256": "51e08193f34525c7a502f1779b10af07ab5249d98b82633c5545f8abb911c50b",
+  "criteria": [
+    {
+      "criterion": "One physical vessel persists from paper to yacht",
+      "passed": false,
+      "observation": "Separate yacht hull appears behind the intact paper boat by approximately 1s; both remain visible together until the paper boat leaves at about 2.5s."
+    },
+    {
+      "criterion": "Paper folds visibly become attached mast, sail and hull",
+      "passed": false,
+      "observation": "The paper shape rotates but retains its paper geometry; the complete yacht is revealed independently."
+    },
+    {
+      "criterion": "Photographic moving water and a readable yacht payoff",
+      "passed": true,
+      "observation": "Water and individual boat spans look photographic and moving; this does not qualify their causal connection."
+    }
+  ],
+  "revisionInstructions": "Do not launch full resolution from this rejected preview. Reduce the endpoint mismatch: derive folded-paper source geometry from the exact yacht composition, keeping one aligned hull/mast/sail trajectory and camera. Test once against the same-vessel gate before another full render.",
+  "modelTaskLimitation": "A trained endpoint video model still does not guarantee a specified physical transformation from mismatched camera/geometry references."
+}

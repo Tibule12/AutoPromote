@@ -4075,7 +4075,7 @@ body.dashboard-mode {
   overflow-x: auto !important;
 }
 
-.ap-dashboard-redesign .caption-preview-word-active {
+.ap-dashboard-redesign .caption-preview-stack:not([data-caption-render-style]) .caption-preview-word-active {
   display: inline-block;
   color: #fff !important;
   text-shadow: 0 0 20px var(--studio-accent-neon), 0 0 40px var(--studio-accent-neon) !important;

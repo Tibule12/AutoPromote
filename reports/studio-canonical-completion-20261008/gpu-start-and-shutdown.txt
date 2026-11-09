@@ -1,0 +1,3 @@
+NVIDIA L40S, 46068 MiB
+Running timer as unit: autopromote-qa-20261008-1791461180.timer
+Will run service as unit: autopromote-qa-20261008-1791461180.service

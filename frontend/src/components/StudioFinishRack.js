@@ -69,14 +69,13 @@ export default function StudioFinishRack({
           <label className="main-frame-toggle">
             <span>
               <b>Rounded footage</b>
-              <small>Always applied to After and the final export.</small>
+              <small>Add a margin and rounded corners to the footage.</small>
             </span>
             <input
               type="checkbox"
               aria-label="Rounded main footage"
-              checked
-              disabled
-              readOnly
+              checked={mainFrame?.enabled !== false}
+              onChange={event => onUpdateMainFrame?.("enabled", event.target.checked)}
             />
           </label>
           <div className="finish-rack-grid">

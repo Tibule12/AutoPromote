@@ -1,0 +1,78 @@
+{
+  "message": "page.waitForFunction: Timeout 10000ms exceeded.",
+  "errors": [],
+  "url": "http://127.0.0.1:5009/?fixture=factory",
+  "state": {
+    "media": [
+      {
+        "src": "http://127.0.0.1:5009/factory-media/native-images/real-sailboat-v6/video.mp4",
+        "readyState": 4,
+        "paused": true,
+        "time": 3,
+        "seeking": false
+      },
+      {
+        "src": "http://127.0.0.1:5009/factory-media/native-images/real-sailboat-v6/video.mp4",
+        "readyState": 4,
+        "paused": true,
+        "time": 0,
+        "seeking": false
+      },
+      {
+        "src": "http://127.0.0.1:5009/factory-media/native-images/real-sailboat-v6/video.mp4",
+        "readyState": 4,
+        "paused": true,
+        "time": 0,
+        "seeking": false
+      },
+      {
+        "src": "",
+        "readyState": 0,
+        "paused": true,
+        "time": 0,
+        "seeking": false
+      },
+      {
+        "src": "",
+        "readyState": 0,
+        "paused": true,
+        "time": 0,
+        "seeking": false
+      },
+      {
+        "src": "http://127.0.0.1:5009/factory-media/native-images/real-sailboat-v6/video.mp4",
+        "readyState": 4,
+        "paused": true,
+        "time": 0,
+        "seeking": false
+      },
+      {
+        "src": "http://127.0.0.1:5009/factory-media/native-images/real-sailboat-v6/video.mp4",
+        "readyState": 4,
+        "paused": true,
+        "time": 2.407853,
+        "seeking": false
+      },
+      {
+        "src": "http://127.0.0.1:5009/factory-media/native-images/real-sailboat-v6/video.mp4",
+        "readyState": 4,
+        "paused": true,
+        "time": 0.8,
+        "seeking": false
+      },
+      {
+        "src": "http://127.0.0.1:5009/factory-media/native-images/real-sailboat-v6/video.mp4",
+        "readyState": 4,
+        "paused": true,
+        "time": 3,
+        "seeking": false
+      }
+    ],
+    "slider": "6.05",
+    "loading": [
+      "Some saved videos could not be reopened. Use Refresh link on an affected video.",
+      "🔒 Rounded frame locked",
+      "✓Project saved locally with media, captions, layers and render settings."
+    ]
+  }
+}

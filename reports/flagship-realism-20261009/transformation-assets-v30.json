@@ -1,0 +1,237 @@
+[
+  {
+    "assetId": "yacht-720",
+    "type": "video",
+    "beatId": "vessel",
+    "status": "accepted",
+    "artifact": {
+      "path": "assets/yacht/video.mp4",
+      "sha256": "9a779712e28e5c2252c5b4eafd4099236d59a538c92894d54a36a339de921fa6",
+      "bytes": 3129148,
+      "duration": 3.0625,
+      "codec": "h264",
+      "container": "mp4",
+      "fps": 16,
+      "width": 1280,
+      "height": 720,
+      "hasAudio": false
+    },
+    "audioRole": null,
+    "review": {
+      "accepted": true,
+      "reason": "Accept for private wide-shot use within source 0.0–2.25s only. The navy hull, cream sails and rigging retain photographic structure; the same source crew remains aboard while continuous water rolls under the immersed hull and bow spray develops. The camera creeps forward and the stern reaches the left frame boundary near the tail, so the full 3.0625s take fails the requested complete-vessel framing. It is not an approved final welcome film or close-up human identity proof.",
+      "reviewer": "Codex all-decoded-frame and native keyframe inspection",
+      "modelRevision": "private-realism-review-20261009",
+      "evidenceSha256": "27411ec60d7663991fcdd03d9c72ded723c6070afce813018720709c185b924a",
+      "artifactSha256": "9a779712e28e5c2252c5b4eafd4099236d59a538c92894d54a36a339de921fa6",
+      "criteria": [
+        {
+          "criterion": "Photographic full-size vessel and continuous hull-water contact in source 0–2.25s",
+          "passed": true,
+          "observation": "All 49 frames and native 0,8,16,24,32,40,48 reviewed. Hull shape, deck openings, mast and cream sails persist; successive bow sprays move above a rolling sea and return along the waterline. No world replacement occurs."
+        },
+        {
+          "criterion": "Retained crew during the usable wide-shot range",
+          "passed": true,
+          "observation": "Crew remain on the same stern/deck as the vessel rolls. This distant framing cannot certify fingers, facial identity or every rigging contact; no close-up human quality claim is made."
+        },
+        {
+          "criterion": "Use only the stable framed range",
+          "passed": true,
+          "observation": "Usable source 0–2.25s; exclude 2.25–3.0625s as the advancing camera clips the stern and makes crew harder to read. Mast tops were already outside the photographic reference framing."
+        }
+      ],
+      "usableSourceRange": {
+        "start": 0,
+        "end": 2.25
+      },
+      "fullTakeAccepted": false,
+      "wholeFilmCreativeApproval": false,
+      "publicApproved": false,
+      "ordinaryStudioQualification": false,
+      "integrationConstraints": [
+        "Do not use after 2.25s in the private assembly.",
+        "Sailor/deck/wardrobe/rigging/light match remains pending in the comparison edit.",
+        "No sound in generated source; real recorded ambience is separate.",
+        "This proves no paper-to-yacht transformation."
+      ]
+    },
+    "provenance": {
+      "sourceBrief": "Private AutoPromote The Small Boat: a folded paper vessel must visibly become one full-size working yacht; its human response is a sailor committing to the sea. This asset establishes the real-world payoff, not the still-unproven transformation. Preserve the navy hull, cream canvas, timber deck, crew positions and low warm light. Person, boat and sea must look like live-action footage and interact physically. A technically successful render is only raw material pending all-frame visual review.",
+      "model": "Wan-AI/Wan2.2-I2V-A14B-Diffusers",
+      "modelRevision": "596658fd9ca6b7b71d5057529bbf319ecbc61d74",
+      "settings": {
+        "width": 1280,
+        "height": 720,
+        "frames": 49,
+        "fps": 16,
+        "steps": 30,
+        "guidance": 3.5,
+        "dtype": "bfloat16; VAE float32",
+        "cpuOffload": true,
+        "conditioning": "first_frame",
+        "referenceResize": "aspect-preserving centre crop"
+      },
+      "seed": 20261009041,
+      "tool": "AutoPromote NVIDIA conditioned-video adapter",
+      "origin": "server_generated",
+      "parentArtifactSha256": "2ee92584176de8e91500a8ce4ddef1217f09b063c5f633eed3578c8a6e49297b",
+      "sourceBriefHash": "61bf25ea581ac23f62fb5468245f092298ea0bbd8a1e06abed6d8e10d5ab8ea5",
+      "directionHash": "66a7a58810540fe8bad61e08c86e73adb85bae9bf12cfb9630c8131aff2dfcf7"
+    },
+    "reusableArtifacts": [
+      {
+        "role": "native_reference_image",
+        "path": "assets/yacht-reference.png",
+        "sha256": "2ee92584176de8e91500a8ce4ddef1217f09b063c5f633eed3578c8a6e49297b"
+      }
+    ]
+  },
+  {
+    "assetId": "helm-response",
+    "type": "video",
+    "beatId": "response",
+    "status": "accepted",
+    "artifact": {
+      "path": "assets/helm/video.mp4",
+      "sha256": "4c0cc8ff183a396523d2c49137100f7b23a9c89a967a1d8ef730b22b109b92cd",
+      "bytes": 2174193,
+      "duration": 3.0625,
+      "codec": "h264",
+      "container": "mp4",
+      "fps": 16,
+      "width": 1280,
+      "height": 720,
+      "hasAudio": false
+    },
+    "audioRole": null,
+    "review": {
+      "accepted": true,
+      "reason": "Accept as a private visual asset for the source-supported helm response: the sailor keeps both grips connected to real props, balances with the vessel and deliberately turns toward open water. This does not approve the full film or establish that this deck matches the wide yacht.",
+      "reviewer": "Codex all-decoded-frame and native keyframe inspection",
+      "modelRevision": "private visual review 2026-10-08",
+      "evidenceSha256": "3979d97fb535b014853c4bd21d573df8d13e2e92ac6f8773fce2017981735978",
+      "artifactSha256": "4c0cc8ff183a396523d2c49137100f7b23a9c89a967a1d8ef730b22b109b92cd",
+      "criteria": [
+        {
+          "criterion": "Photographic person, boat fittings and moving water",
+          "passed": true,
+          "observation": "All 49 decoded frames retain photographic face, clothing, helm, rail and ocean. Native frames 0,23,32,48 were inspected at 1280x720."
+        },
+        {
+          "criterion": "Both grips stay connected to existing physical props",
+          "passed": true,
+          "observation": "The hand at screen right remains at the wooden wheel rim; the hand at screen left stays on the timber rail. The prior invisible-control pantomime is gone."
+        },
+        {
+          "criterion": "Intentional attention turns from camera toward open water",
+          "passed": true,
+          "observation": "The head turns toward screen left during the first second and continues looking across the sea. Body angle adjusts with the swell, retaining both grips."
+        }
+      ],
+      "scope": "Private generated visual asset, restrained helm-response action only",
+      "wholeFilmCreativeApproval": false,
+      "publicApproved": false,
+      "integrationConstraints": [
+        "Match deck, sail/canopy, rigging and light against the accepted wide yacht before continuity approval. Orange overhead fabric enters the upper edge; do not claim it matches the cream wide sail without review.",
+        "This is 3.0625 seconds of genuine generated motion at native 1280x720/16fps. It has no source soundtrack; add coherent sea/wind in the existing edit.",
+        "No rope hauling or large steering adjustment is established."
+      ],
+      "limitations": "All-decoded-frame/native keyframe visual inspection plus actual Chromium 1x playback to completion. Contextual wide-yacht continuity and the finished-film soundtrack/listening remain pending.",
+      "playbackEvidence": "asset-playback/receipt.json"
+    },
+    "provenance": {
+      "sourceBrief": "Private AutoPromote flagship The Small Boat. A tiny paper boat becomes a full-size yacht through a continuous physical transformation. The human response is one sailor steering into the swell and committing to the horizon. This test explores real human movement using the existing NVIDIA Wan provider; no still or unreviewed take is final footage. Correct the rejected physical action without changing the source or seed: maintain the actual right-hand wheel grip and left-hand rail grip; an intentional gaze to sea provides the human response. Previous rejected take remains preserved.",
+      "model": "Wan-AI/Wan2.2-I2V-A14B-Diffusers",
+      "modelRevision": "596658fd9ca6b7b71d5057529bbf319ecbc61d74",
+      "settings": {
+        "width": 1280,
+        "height": 720,
+        "frames": 49,
+        "fps": 16,
+        "steps": 30,
+        "guidance": 3.5,
+        "dtype": "bfloat16; VAE float32",
+        "cpuOffload": true,
+        "conditioning": "first_frame"
+      },
+      "seed": 20261008229,
+      "tool": "AutoPromote NVIDIA conditioned-video adapter",
+      "origin": "server_generated",
+      "parentArtifactSha256": "1939f862ac93505404cd7f3d9a2e505dd1cc019e48fa8fc9651e9f31c1afedf9",
+      "sourceBriefHash": "f65ecba99de0460aee2519ad0e605501ccc0f578550329223053bb80aa78e156",
+      "directionHash": "66a7a58810540fe8bad61e08c86e73adb85bae9bf12cfb9630c8131aff2dfcf7"
+    },
+    "reusableArtifacts": []
+  },
+  {
+    "assetId": "sea-bed",
+    "type": "audio",
+    "beatId": "vessel",
+    "status": "accepted",
+    "artifact": {
+      "path": "audio/sea-bed-safe.wav",
+      "sha256": "658ee9f2c92e70e64f23f1d9ad7f88cc5059265f7cbb7dbbb336331d77942420",
+      "bytes": 1536078,
+      "duration": 8,
+      "codec": "pcm_s16le",
+      "container": "wav",
+      "fps": 24,
+      "width": null,
+      "height": null,
+      "hasAudio": true
+    },
+    "audioRole": "sfx",
+    "review": {
+      "accepted": true,
+      "reason": "Accept for private measurable audio use: this eight-second source trim is audible 48kHz stereo PCM with headroom and no clipped output samples. Actual recorded-source provenance is retained. This does not establish the emotional mix or listening quality.",
+      "reviewer": "AutoPromote decoded PCM technical review",
+      "modelRevision": "audio-measurements-v1",
+      "evidenceSha256": "7a228463a68cd1eda4da0cc54d4ffed8b0c8ee1d913218abfe63e851cc3bbc0d",
+      "artifactSha256": "658ee9f2c92e70e64f23f1d9ad7f88cc5059265f7cbb7dbbb336331d77942420",
+      "criteria": [
+        {
+          "criterion": "Audible stereo 48000Hz source trim with no output clipping",
+          "passed": true,
+          "observation": "Duration 8.0s; peak 0.7036; RMS 0.0469; clipped fraction 0.0."
+        }
+      ],
+      "scope": "Private measurable source properties only",
+      "listeningApproval": false,
+      "wholeFilmCreativeApproval": false,
+      "publicApproved": false
+    },
+    "provenance": {
+      "sourceBrief": "Private The Small Boat real-world payoff; physical marine ambience from licensed field recordings.",
+      "model": "licensed field recording source trim",
+      "modelRevision": "ffmpeg-trim-resample-v1",
+      "settings": {
+        "sampleRate": 48000,
+        "channels": 2,
+        "sampleFormat": "pcm_s16le",
+        "trimStart": 11,
+        "duration": 8,
+        "gainBeforePcmConversion": 0.7
+      },
+      "seed": null,
+      "tool": "AutoPromote audio source preparation; normalized for existing PCM review contract",
+      "origin": "recorded_sound_trim",
+      "parentArtifactSha256": "4763c1949f77cb921d6fa9242b154f518335cc4a424b5deccb98b762e1bf2db7",
+      "parentProvenance": {
+        "path": "sea-recording-preview.mp3",
+        "sha256": "4763c1949f77cb921d6fa9242b154f518335cc4a424b5deccb98b762e1bf2db7",
+        "bytes": 1541280,
+        "origin": "recorded_sound_preview",
+        "creator": "Tom_Kaszuba",
+        "sourceUrl": "https://cdn.freesound.org/previews/659/659002_11673893-hq.mp3",
+        "license": "CC0-1.0",
+        "licenseEvidence": "https://freesound.org/people/Tom_Kaszuba/sounds/659002/",
+        "retrievedAt": "2026-10-09T06:25:41.481510+00:00",
+        "limitation": "Public compressed HQ preview; not the full-resolution source recording."
+      },
+      "sourceBriefHash": "aba9164363d449ab6ebe658d402593f997d7355b1c213f2c5fd2c300595b6e6c",
+      "directionHash": "66a7a58810540fe8bad61e08c86e73adb85bae9bf12cfb9630c8131aff2dfcf7"
+    },
+    "reusableArtifacts": []
+  }
+]

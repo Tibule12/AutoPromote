@@ -1,0 +1,28 @@
+{
+  "at": "2026-10-07T19:01:34.659Z",
+  "realAuth": true,
+  "noMocks": true,
+  "normalStudioTools": [
+    "✦\nMoments",
+    "✂\nCut",
+    "⌁\nHook",
+    "⌗\nReframe",
+    "CC\nCaptions",
+    "T\nGraphics",
+    "◆\nMotion",
+    "◫\nComposite",
+    "✺\nCreator FX",
+    "≋\nPacing",
+    "▣\nB-roll",
+    "◐\nColor",
+    "♫\nSound",
+    "⇧\nExport"
+  ],
+  "generationEntryPresent": false,
+  "codeBoundaries": [
+    "frontend/src/UserDashboardTabs/IdeaVideoPanel.js: external /api/ai-video/script and /generate stock-footage path",
+    "src/routes/adminContentFactoryRoutes.js: founder-only, CONTENT_FACTORY_ENABLED must be true",
+    "src/services/contentFactoryProviders.js: cached NVIDIA generation is a separate private provider"
+  ],
+  "qaFactoryEnabled": false
+}

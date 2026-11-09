@@ -28,5 +28,9 @@ imageio[ffmpeg]
 
 # Production Tools
 firebase-admin
-faster-whisper
+# PyAV 19 removed the metadata_errors argument used by Faster-Whisper 1.2.1.
+# Pin the known working decoder on CPU and CUDA runtimes alike.
+faster-whisper==1.2.1
+ctranslate2==4.6.0
+av==17.1.0
 yt-dlp

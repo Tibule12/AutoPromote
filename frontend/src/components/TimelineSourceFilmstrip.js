@@ -41,8 +41,8 @@ export default function TimelineSourceFilmstrip({ frames = [] }) {
       height: "72px",
     });
     const canvas = document.createElement("canvas");
-    canvas.width = 128;
-    canvas.height = 72;
+    canvas.width = 192;
+    canvas.height = 108;
     const context = canvas.getContext("2d");
     if (!context) return undefined;
     document.body.appendChild(video);
@@ -89,11 +89,11 @@ export default function TimelineSourceFilmstrip({ frames = [] }) {
             });
           }
           context.fillStyle = "#0a0e1b";
-          context.fillRect(0, 0, 128, 72);
-          const scale = Math.min(128 / video.videoWidth, 72 / video.videoHeight);
+          context.fillRect(0, 0, 192, 108);
+          const scale = Math.min(192 / video.videoWidth, 108 / video.videoHeight);
           const width = video.videoWidth * scale,
             height = video.videoHeight * scale;
-          context.drawImage(video, (128 - width) / 2, (72 - height) / 2, width, height);
+          context.drawImage(video, (192 - width) / 2, (108 - height) / 2, width, height);
           values[id] = canvas.toDataURL("image/jpeg", 0.65);
           thumbnailCache.set(JSON.stringify([src, time]), values[id]);
           if (thumbnailCache.size > 24) thumbnailCache.delete(thumbnailCache.keys().next().value);
@@ -131,7 +131,6 @@ export default function TimelineSourceFilmstrip({ frames = [] }) {
             style={{
               left: `${frame.left}%`,
               width: `${frame.width}%`,
-              backgroundImage: `url(${images.values[frame.id]})`,
             }}
           >
             <img src={images.values[frame.id]} alt="" data-source-time={frame.previewTime} />

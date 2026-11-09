@@ -1,0 +1,53 @@
+{
+  "sources": [
+    {
+      "path": "wave_01_cc0-11505__transitking__wavesound.flac",
+      "sha256": "0bd84b2061a82c234470bd4e16efc6ab24851928d3f93e1757bfea048b2d7a33",
+      "bytes": 265335,
+      "origin": "recorded_sound",
+      "creator": "transitking",
+      "sourceUrl": "https://opengameart.org/sites/default/files/wave_01_cc0-11505__transitking__wavesound.flac",
+      "license": "CC0-1.0",
+      "licenseEvidence": "https://opengameart.org/content/water-waves",
+      "originalSource": "https://freesound.org/people/transitking/sounds/11505/",
+      "retrievedAt": "2026-10-09T06:22:11.979746+00:00"
+    },
+    {
+      "path": "wave_03_cc0-11505__transitking__wavesound.flac",
+      "sha256": "1657a0002367e6e97eb34fc9f4d841f4a910981450c634bdc6c09ae1978049c1",
+      "bytes": 401955,
+      "origin": "recorded_sound",
+      "creator": "transitking",
+      "sourceUrl": "https://opengameart.org/sites/default/files/wave_03_cc0-11505__transitking__wavesound.flac",
+      "license": "CC0-1.0",
+      "licenseEvidence": "https://opengameart.org/content/water-waves",
+      "originalSource": "https://freesound.org/people/transitking/sounds/11505/",
+      "retrievedAt": "2026-10-09T06:22:14.892222+00:00"
+    },
+    {
+      "path": "dock-creak-preview.mp3",
+      "sha256": "251b002796863bed8002013666d24100442e06d9287993d8e037370c361fc046",
+      "bytes": 5655456,
+      "origin": "recorded_sound_preview",
+      "creator": "Filipe Chagas",
+      "sourceUrl": "https://cdn.freesound.org/previews/91/91912_1512131-hq.mp3",
+      "license": "CC0-1.0",
+      "licenseEvidence": "https://freesound.org/people/Filipe%20Chagas/sounds/91912/",
+      "retrievedAt": "2026-10-09T06:25:20.637485+00:00",
+      "limitation": "Public compressed HQ preview; not the full-resolution source recording."
+    },
+    {
+      "path": "sea-recording-preview.mp3",
+      "sha256": "4763c1949f77cb921d6fa9242b154f518335cc4a424b5deccb98b762e1bf2db7",
+      "bytes": 1541280,
+      "origin": "recorded_sound_preview",
+      "creator": "Tom_Kaszuba",
+      "sourceUrl": "https://cdn.freesound.org/previews/659/659002_11673893-hq.mp3",
+      "license": "CC0-1.0",
+      "licenseEvidence": "https://freesound.org/people/Tom_Kaszuba/sounds/659002/",
+      "retrievedAt": "2026-10-09T06:25:41.481510+00:00",
+      "limitation": "Public compressed HQ preview; not the full-resolution source recording."
+    }
+  ],
+  "status": "DOWNLOADED_PENDING_SOUND_REVIEW"
+}

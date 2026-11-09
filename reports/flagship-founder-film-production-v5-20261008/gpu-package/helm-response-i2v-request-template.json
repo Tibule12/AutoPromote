@@ -1,0 +1,20 @@
+{
+  "deadlineEpoch": 0,
+  "sourceBrief": "Private AutoPromote flagship The Small Boat. A tiny paper boat becomes a full-size yacht through a continuous physical transformation. The human response is one sailor steering into the swell and committing to the horizon. This test explores real human movement using the existing NVIDIA Wan provider; no still or unreviewed take is final footage. Correct the rejected physical action without changing the source or seed: maintain the actual right-hand wheel grip and left-hand rail grip; an intentional gaze to sea provides the human response. Previous rejected take remains preserved.",
+  "settings": {
+    "width": 1280,
+    "height": 720,
+    "frames": 49,
+    "steps": 30
+  },
+  "shots": [
+    {
+      "name": "sailor-holds-course-looks-to-sea",
+      "reference_image": "/work/output/sailor-source/sailor-connected-sheet/image.png",
+      "seed": 20261008229,
+      "prompt": "One continuous locked medium cinematic shot of the same woman maintaining course on the same real yacht. Her right hand keeps its firm grip on the actual wooden wheel rim at the same visible contact point, and her left hand stays braced on the timber rail. Both hands remain attached to these existing props throughout. She deliberately turns her head to her left toward the open water and looks out of frame, away from the camera. A gentle swell rocks the yacht and her body balances naturally while those grips stay fixed. Wind moves her short natural hair; blue waves and wake move behind her. Preserve the same face, navy shirt, ivory sailing vest, wheel, fittings and deck. Photographic skin and water, restrained purposeful action. End with her attention on the sea, still holding course.",
+      "negative_prompt": "hands leaving wheel, hands leaving rail, changing grip, disconnected hands, invented controls, invisible rope, pantomime, extra people, extra fingers, merged hands, changing face, changing clothes, looking into camera throughout, glamour posing, frozen ocean, CGI, cartoon, text, watermark"
+    }
+  ],
+  "inputHash": "1939f862ac93505404cd7f3d9a2e505dd1cc019e48fa8fc9651e9f31c1afedf9"
+}

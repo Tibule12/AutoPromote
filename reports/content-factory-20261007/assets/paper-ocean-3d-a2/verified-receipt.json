@@ -1,0 +1,42 @@
+{
+  "artifact": {
+    "path": "assets/paper-ocean-3d-a2/video.mp4",
+    "sha256": "40d02c9954f8f01c81c3ae8e974fa39eeea299b449ca0f404261415446e38571",
+    "bytes": 490486,
+    "duration": 3,
+    "codec": "h264",
+    "container": "mp4",
+    "fps": 24,
+    "width": 1280,
+    "height": 704,
+    "hasAudio": false
+  },
+  "model": "Blender procedural paper ocean",
+  "modelRevision": "4.5.9 LTS",
+  "tool": "Blender",
+  "settings": {
+    "template": "paper_ocean",
+    "duration": 3,
+    "fps": 24,
+    "width": 1280,
+    "height": 704,
+    "seed": 2026100741,
+    "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+    "device": {
+      "backend": "OPTIX",
+      "devices": [
+        "NVIDIA L40S"
+      ],
+      "gpu_verified": true,
+      "denoiser": "OPTIX"
+    }
+  },
+  "audioRole": null,
+  "reusableArtifacts": [
+    {
+      "role": "native_scene",
+      "path": "assets/paper-ocean-3d-a2/paper-ocean.blend",
+      "sha256": "f1c430aefc9067fb5fcdc152ca35eab72521df2a0bba647e6ab4bc981f2cbc4c"
+    }
+  ]
+}

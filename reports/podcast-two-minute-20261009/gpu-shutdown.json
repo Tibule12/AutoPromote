@@ -1,0 +1,21 @@
+{
+  "at": "2026-10-09T10:01:40.397225+00:00",
+  "instance": "autopromote-l40s-staging",
+  "instanceId": "xgh6wcu74",
+  "authorizedHardCutoffSast": "2026-10-09T13:00:00+02:00",
+  "noOtherRunningGpuJobsObserved": true,
+  "ownedRenderWorkerStopped": true,
+  "guestPoweroffCommandAccepted": true,
+  "subsequentSshConnectionClosed": true,
+  "providerStoppedStateConfirmed": false,
+  "billingStopConfirmed": false,
+  "cloudApiBlocker": "Repeated authenticated Brev ls/stop and direct exact-instance API requests returned EOF or timed out; unauthenticated endpoint401 was reachable. Precise provider-side cause unconfirmed.",
+  "independentStopWatchdogPid": 103220,
+  "remoteDeadlineFallbackWasArmed": "2026-10-09T10:59:00Z",
+  "gpuRestartedAfterCompletedRender": false,
+  "updatedAt": "2026-10-09T10:27:37.499118+00:00",
+  "stopRetryStartsImmediately": true,
+  "stopRetryLog": "/home/tibule12/.local/share/autopromote/podcast-two-minute-20261009/gpu-stop-retry-1300.log",
+  "replacementWatchdogVerifiedAlive": true,
+  "latestBrevStateProbe": "12:25 SAST: bounded status request timed out; no provider stop confirmation."
+}

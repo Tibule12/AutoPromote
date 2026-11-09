@@ -1,0 +1,66 @@
+{
+  "error": {
+    "code": "INVALID_ACTION",
+    "message": "Unsupported action"
+  },
+  "id": "observation-4",
+  "pageId": "page-1",
+  "url": "http://127.0.0.1:44629/",
+  "pages": [
+    {
+      "id": "page-1",
+      "url": "http://127.0.0.1:44629/"
+    }
+  ],
+  "dialog": null,
+  "frames": [
+    {
+      "index": 0,
+      "url": "http://127.0.0.1:44629/",
+      "text": "Local browser operator regression fixture\nPrepare a review copy\n\nOpen the editor, enter a title, choose landscape, and create one draft.\n\nOpen editor",
+      "headings": [
+        "Prepare a review copy",
+        "Editing workspace",
+        "Draft settings"
+      ],
+      "alerts": [],
+      "busy": false,
+      "captcha": false,
+      "scroll": {
+        "x": 0,
+        "y": 0,
+        "height": 900,
+        "viewportHeight": 900
+      },
+      "controls": [
+        {
+          "ref": "observation-4:f0:e0",
+          "role": "button",
+          "name": "Open editor",
+          "label": "",
+          "tag": "button",
+          "type": "",
+          "submitsForm": false,
+          "disabled": false,
+          "checked": null,
+          "expanded": null,
+          "selected": null,
+          "value": "",
+          "href": null,
+          "inModal": false,
+          "modalName": "",
+          "box": {
+            "x": 54,
+            "y": 217.21875,
+            "width": 129.78125,
+            "height": 52
+          },
+          "inViewport": true,
+          "occluded": false
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "priorActions": []
+}

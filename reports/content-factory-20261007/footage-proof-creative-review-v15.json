@@ -1,0 +1,23 @@
+{
+  "artifactSha256": "dbf6fe853b22ad65a79aa055572d79cf0dccef90cff84c0d517dc35f643a5aaa",
+  "status": "private_viewing_proof",
+  "acceptedForMarketing": false,
+  "reviewer": "root decoded-frame review",
+  "observations": [
+    "Full-size generated yacht moves through waves and bow spray.",
+    "Actual Studio shows the same generated source assets.",
+    "Cinematic ident resolves with a sound-bearing film."
+  ],
+  "limitations": [
+    "No continuous paper-to-yacht transformation in this film.",
+    "Studio shot is brief and the caption colour has limited contrast.",
+    "End ident could be tighter; narration carries across its opening.",
+    "Human listening and creative approval remain pending."
+  ],
+  "audioEvidence": {
+    "transcriptFile": "footage-proof-transcription-v15.json",
+    "sourceSha256": "dbf6fe853b22ad65a79aa055572d79cf0dccef90cff84c0d517dc35f643a5aaa",
+    "wordsRecovered": "one idea no footage this started with a brief no camera no footage",
+    "limitation": "ASR verifies recoverable speech in actual audio; it is not a human listening or emotional-quality judgment."
+  }
+}

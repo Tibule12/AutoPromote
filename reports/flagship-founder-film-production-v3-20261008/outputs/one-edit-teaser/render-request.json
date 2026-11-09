@@ -1,0 +1,108 @@
+{
+  "video_url": "http://127.0.0.1:8765/vessel-full/video.mp4",
+  "start_time": 0,
+  "end_time": 10,
+  "overlays": [],
+  "auto_captions": false,
+  "timeline_segments": [
+    {
+      "id": "one-edit-teaser-1",
+      "source_clip_id": "vessel",
+      "start_time": 3.5,
+      "end_time": 6.5,
+      "duration": 3,
+      "url": "http://127.0.0.1:8765/vessel-full/video.mp4"
+    },
+    {
+      "id": "one-edit-teaser-2",
+      "source_clip_id": "reveal",
+      "start_time": 0,
+      "end_time": 4,
+      "duration": 4,
+      "url": "http://127.0.0.1:8765/story-v3/assets/reveal/video.mp4"
+    },
+    {
+      "id": "one-edit-teaser-3",
+      "source_clip_id": "ident",
+      "start_time": 2,
+      "end_time": 5,
+      "duration": 3,
+      "url": "http://127.0.0.1:8765/ident-full/video.mp4"
+    }
+  ],
+  "background_audio": null,
+  "hook_focus_point": null,
+  "cover_frame": null,
+  "thumbnail_frame": null,
+  "caption_style": "minimal",
+  "caption_position": "bottom",
+  "caption_scale": 0.72,
+  "caption_segments": [],
+  "creative_intent": "10-second transformation event, clear created-by payoff and resolving brand lockup.",
+  "professional_cleanup": false,
+  "finish_plan": {
+    "version": 1,
+    "enabled": true,
+    "reframe": {
+      "enabled": true,
+      "aspect": "16:9",
+      "mode": "off"
+    }
+  },
+  "smart_crop": true,
+  "smart_crop_mode": "safe_fit",
+  "brand_watermark": false,
+  "output_settings": {
+    "resolution": "1080p",
+    "fps": 24,
+    "codec": "h264",
+    "audioCodec": "aac"
+  },
+  "add_music": true,
+  "music_url": "http://127.0.0.1:8765/assets/sound/score-teaser.wav",
+  "music_name": "score-teaser",
+  "music_volume": 0.65,
+  "music_ducking": false,
+  "music_fade_in": 0.25,
+  "music_fade_out": 0.6,
+  "music_loop": false,
+  "sound_effects": [
+    {
+      "id": "one-edit-teaser-audio-1",
+      "url": "http://127.0.0.1:8765/assets/narration/reveal.wav",
+      "enabled": true,
+      "kind": "voiceover",
+      "name": "vo-reveal",
+      "sourceClipId": "vo-reveal",
+      "storagePath": "assets/narration/reveal.wav",
+      "contentHash": "43ec9f03541b141676c92863769213ae0fe664655a9e3f1b31a6506a8155b139",
+      "volume": 0.94,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "startTime": 3.15,
+      "duration": 3.4,
+      "trimStart": 0
+    },
+    {
+      "id": "one-edit-teaser-audio-2",
+      "url": "http://127.0.0.1:8765/assets/sound/cues-teaser.wav",
+      "enabled": true,
+      "kind": "sfx",
+      "name": "cues-teaser",
+      "sourceClipId": "cues-teaser",
+      "storagePath": "assets/sound/cues-teaser.wav",
+      "contentHash": "21b9d89b42ab9a6e4c4b3c4134318bac0065dc24837b1b80ba57fe93eee1e9db",
+      "volume": 0.8,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "startTime": 0,
+      "duration": 10,
+      "trimStart": 0
+    }
+  ],
+  "motionGraphics": {
+    "version": 1,
+    "scenes": []
+  },
+  "mute_audio": true
+}

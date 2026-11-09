@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "title": "The idea that refused to stay on paper",
+  "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+  "about": "The gap between the world you imagine and the material you have to make it. A small paper boat escapes a blank page and survives an ocean; the final reveal shows this world was made from a brief and edited in AutoPromote.",
+  "whyCare": "Everyone has an idea they cannot yet turn into something others can see. The fragile boat makes that struggle visible.",
+  "hook": "A paper boat on a desk moves as the desk becomes an ocean. Impossible but immediately readable.",
+  "beginning": "A single ordinary sheet becomes a boat; one idea, no footage.",
+  "development": "The boat becomes the central subject of a much larger cinematic world.",
+  "tension": "A dark wave threatens the fragile boat. Will the idea survive becoming real?",
+  "payoff": "A warm path of light opens across the ocean; the boat survives. The camera reveals the created world as editable material in the real AutoPromote Studio.",
+  "ending": "The finished world fills the screen again: A brief. No footage. AutoPromote.",
+  "withheld": "The origin of the footage and the AutoPromote identity until the payoff.",
+  "amplify": [
+    "The first impossible desk-to-ocean movement",
+    "The small boat against the dark wave",
+    "The calm after the storm",
+    "The reveal of this exact footage in the real Studio"
+  ],
+  "remove": [
+    "Random technology abstractions",
+    "Feature lists",
+    "Fake creator testimonials",
+    "Unrelated podcast material",
+    "Generic lens shots",
+    "Unmotivated particle overlays"
+  ],
+  "soundDirection": "Dry paper texture and a restrained ticking pulse at the desk; ocean and a low tense swell for the storm; a deliberate near-silence before a warm harmonic resolution. Original instrumental score, no imitation voice or placeholder beeps.",
+  "reviewCriteria": [
+    "Boat remains recognisable and intact",
+    "Each shot advances the voyage",
+    "No unreadable generated lettering",
+    "Hook is readable without sound",
+    "Storm feels threatening without chaotic geometry",
+    "Payoff gives a complete ending",
+    "AutoPromote reveal uses actual product UI"
+  ]
+}

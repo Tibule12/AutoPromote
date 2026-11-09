@@ -1,0 +1,70 @@
+{
+  "status": "PASS_PLAYBACK_ONLY",
+  "at": "2026-10-09T07:15:32.040Z",
+  "headless": true,
+  "muted": true,
+  "results": [
+    {
+      "id": "scene",
+      "label": "Scene study with sea sound",
+      "path": "outputs/038e7daeafb0f79f83d602ee/private-real-world-scene/v30/final.mp4",
+      "width": 1920,
+      "height": 1080,
+      "duration": 3.767,
+      "minimumFrames": 85,
+      "artifactSha256": "0a45991d499bda0ffff3159f3a9debeea5625c87b6c48842ef2dc987d9171708",
+      "playing": {
+        "duration": 3.767,
+        "width": 1920,
+        "height": 1080,
+        "rate": 1,
+        "ended": true,
+        "decodedFrames": 89,
+        "droppedFrames": 1
+      },
+      "rangeStatus": 206
+    },
+    {
+      "id": "yacht",
+      "label": "Native yacht source",
+      "path": "assets/yacht/video.mp4",
+      "width": 1280,
+      "height": 720,
+      "duration": 3.0625,
+      "minimumFrames": 46,
+      "artifactSha256": "9a779712e28e5c2252c5b4eafd4099236d59a538c92894d54a36a339de921fa6",
+      "playing": {
+        "duration": 3.0625,
+        "width": 1280,
+        "height": 720,
+        "rate": 1,
+        "ended": true,
+        "decodedFrames": 49,
+        "droppedFrames": 0
+      },
+      "rangeStatus": 206
+    },
+    {
+      "id": "sailor",
+      "label": "Native sailor source",
+      "path": "assets/helm/video.mp4",
+      "width": 1280,
+      "height": 720,
+      "duration": 3.0625,
+      "minimumFrames": 46,
+      "artifactSha256": "4c0cc8ff183a396523d2c49137100f7b23a9c89a967a1d8ef730b22b109b92cd",
+      "playing": {
+        "duration": 3.0625,
+        "width": 1280,
+        "height": 720,
+        "rate": 1,
+        "ended": true,
+        "decodedFrames": 49,
+        "droppedFrames": 0
+      },
+      "rangeStatus": 206
+    }
+  ],
+  "errors": [],
+  "scope": "Actual 1x Chromium playback through the persistent private loopback review transport. No app/login changes, listening claim, final welcome-film approval or Studio qualification."
+}

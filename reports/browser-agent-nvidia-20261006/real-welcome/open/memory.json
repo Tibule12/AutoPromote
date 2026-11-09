@@ -1,0 +1,50 @@
+{
+  "identity": "d127e2a3e2693785fa780f6b707f52dc8db50a1e1b491a0851da4a28a9ff6781",
+  "actions": [
+    {
+      "signature": "6d36e72feab3efdc183d02d7323461fc029bffb7c989f9bf128b91b6ff4affbd",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Watch Demo"
+      },
+      "expect": [
+        {
+          "type": "modal_open",
+          "role": null,
+          "name": null,
+          "value": null,
+          "pageId": null,
+          "frameIndex": null
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-06T19:24:51.371Z",
+      "reason": "Click the 'Watch Demo' button to open the product tour modal as required by the goal",
+      "planner": {
+        "model": "Qwen/Qwen3-VL-8B-Instruct",
+        "revision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+        "gpu": "NVIDIA L40S",
+        "seconds": 18.25392640300015,
+        "inputTokens": 10050,
+        "outputTokens": 115
+      }
+    }
+  ],
+  "observations": [
+    {
+      "id": "observation-1",
+      "url": "http://127.0.0.1:3095/",
+      "pageId": "page-1",
+      "at": "2026-10-06T19:24:09.895Z"
+    },
+    {
+      "id": "observation-2",
+      "url": "http://127.0.0.1:3095/",
+      "pageId": "page-1",
+      "at": "2026-10-06T19:25:19.030Z"
+    }
+  ],
+  "status": "completed"
+}

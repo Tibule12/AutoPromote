@@ -1,0 +1,6 @@
+{
+  "status": "rejected_for_hero",
+  "reviewer": "Codex visual inspection of actual PNG",
+  "reason": "Boat fills frame and hull is missing; no wide scale contrast",
+  "evidence": "image.png"
+}

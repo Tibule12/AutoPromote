@@ -1,0 +1,17 @@
+{
+  "deadlineEpoch": 0,
+  "sourceBrief": "Private flagship AutoPromote film: The Small Boat. One recognizable folded paper boat becomes one real yacht in the same physical ocean. Its navy hull facets map to the navy hull and its white central crease becomes the cream sail. The transition is the creative event, followed by purposeful real-looking human action. No two-clip substitution, explanatory feature montage or public release before full creative review.",
+  "settings": {"width": 1280, "height": 720, "frames": 81, "steps": 30},
+  "shots": [{
+    "name": "paper-to-yacht-trained-flf",
+    "reference_image": "/work/output/creative-v2/origami-ocean-d/image.png",
+    "last_reference_image": "/work/assets/lastImage.png",
+    "seed": 20261008230,
+    "prompt": "A single continuous cinematic transformation with one vessel in real moving water. The tiny folded white-and-navy paper boat rides a swell. Its navy paper hull facets curve and lengthen into the dark navy yacht hull while the central white fold visibly unfolds upward into taut cream canvas on a mast rooted in that same hull. The paper structure becomes timber and fabric progressively, with visible folds and edges throughout. The camera arcs slowly from the paper boat's near-front view to the yacht's port side and pulls back as the vessel grows, bow remaining pointed right. Natural reflections, sunlight and spray change scale with the same swell. Finish on the supplied real-looking full-size yacht sailing forward. Hold the completed hull and sail long enough to read the payoff. One world changes; the hull never disappears.",
+    "negative_prompt": "cut, jump cut, dissolve, crossfade, flash, different scene, second vessel, yacht appearing behind paper, disappearing hull, detached mast, floating sail, melted boat, miniature yacht, cartoon, CGI, painted ocean, static water, text, watermark"
+  }],
+  "inputHashes": {
+    "first": "30228bad8a7c3a631a256d59d6d45cb9d8a414adf2dc121945635bd580a5846d",
+    "last": "ec65d8f80b03608a8a638482d849d4cdc16c02d81f5d6af03fc7ce05388ae462"
+  }
+}

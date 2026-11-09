@@ -1,0 +1,152 @@
+{
+  "startedAt": "2026-10-08T17:02:32.225Z",
+  "realAuth": true,
+  "noMocks": true,
+  "headless": true,
+  "muted": true,
+  "projectName": "Studio subject speed NVIDIA QA 20261008 r2",
+  "inferenceJobsStarted": 0,
+  "status": "NATIVE_SPEED_RECOVERY_NVENC_DELIVERY_PASS_VISUAL_PAIR_REVIEW_PENDING",
+  "lastStep": "Programme 0.25s maps to decoded source 0.5s; paired preview captured before submission",
+  "coldRecovery": "PASS",
+  "reviewedProxySha256": "fa90d4e44ab9cffce3c5dd24cc42c2abf5ad2c8b4935435e3875d5edd7496ba0",
+  "preFinalSourceTime": 0.5,
+  "output": {
+    "startedAt": "2026-10-08T17:03:44.326Z",
+    "finishedAt": "2026-10-08T17:05:29.251Z",
+    "projectName": "A\nAutoPromote\nVIRAL CLIP STUDIO\nStudio subject speed NVIDIA QA 20261008 r2",
+    "realApi": true,
+    "noMocks": true,
+    "submittedJobId": "viral_dbed7a0f76c8debb2380d09f06f31fe300763b70e98faa627afc5c86754266cf",
+    "events": [
+      {
+        "path": "/api/media/process",
+        "status": 200,
+        "at": "2026-10-08T17:03:56.695Z"
+      },
+      {
+        "path": "/api/media/status/viral_dbed7a0f76c8debb2380d09f06f31fe300763b70e98faa627afc5c86754266cf",
+        "status": 200,
+        "at": "2026-10-08T17:04:03.341Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_dbed7a0f76c8debb2380d09f06f31fe300763b70e98faa627afc5c86754266cf",
+        "status": 200,
+        "at": "2026-10-08T17:04:09.692Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_dbed7a0f76c8debb2380d09f06f31fe300763b70e98faa627afc5c86754266cf",
+        "status": 200,
+        "at": "2026-10-08T17:04:15.233Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_dbed7a0f76c8debb2380d09f06f31fe300763b70e98faa627afc5c86754266cf",
+        "status": 200,
+        "at": "2026-10-08T17:04:21.323Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_dbed7a0f76c8debb2380d09f06f31fe300763b70e98faa627afc5c86754266cf",
+        "status": 200,
+        "at": "2026-10-08T17:04:27.660Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_dbed7a0f76c8debb2380d09f06f31fe300763b70e98faa627afc5c86754266cf",
+        "status": 200,
+        "at": "2026-10-08T17:04:33.354Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_dbed7a0f76c8debb2380d09f06f31fe300763b70e98faa627afc5c86754266cf",
+        "status": 200,
+        "at": "2026-10-08T17:04:39.705Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_dbed7a0f76c8debb2380d09f06f31fe300763b70e98faa627afc5c86754266cf",
+        "status": 200,
+        "at": "2026-10-08T17:04:45.337Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_dbed7a0f76c8debb2380d09f06f31fe300763b70e98faa627afc5c86754266cf",
+        "status": 200,
+        "at": "2026-10-08T17:04:51.355Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_dbed7a0f76c8debb2380d09f06f31fe300763b70e98faa627afc5c86754266cf",
+        "status": 200,
+        "at": "2026-10-08T17:04:57.341Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_dbed7a0f76c8debb2380d09f06f31fe300763b70e98faa627afc5c86754266cf",
+        "status": 200,
+        "at": "2026-10-08T17:05:03.687Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_dbed7a0f76c8debb2380d09f06f31fe300763b70e98faa627afc5c86754266cf",
+        "status": 200,
+        "at": "2026-10-08T17:05:09.826Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_dbed7a0f76c8debb2380d09f06f31fe300763b70e98faa627afc5c86754266cf",
+        "status": 200,
+        "at": "2026-10-08T17:05:15.366Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_dbed7a0f76c8debb2380d09f06f31fe300763b70e98faa627afc5c86754266cf",
+        "status": 200,
+        "at": "2026-10-08T17:05:22.400Z",
+        "jobStatus": "completed"
+      }
+    ],
+    "errors": [],
+    "download": {
+      "suggestedName": "viral_clip_rendered.mp4",
+      "bytes": 4847941,
+      "nativeCompleted": true
+    },
+    "output": "reports/studio-canonical-completion-20261008/subject-speed-gpu-r2/vfx/download.mp4",
+    "outputSha256": "ce8934854fc7564143006fa8b7f9ad76662d54c9fbad4a37711c879d1513b7d2",
+    "technical": {
+      "passed": true,
+      "sha256": "ce8934854fc7564143006fa8b7f9ad76662d54c9fbad4a37711c879d1513b7d2",
+      "bytes": 4847941,
+      "seconds": 6,
+      "video": {
+        "width": 1280,
+        "height": 720,
+        "codec": "h264",
+        "fps": "60/1",
+        "duration": "6.000000",
+        "pixelFormat": "yuv420p",
+        "encoder": "Lavc60.31.102 h264_nvenc"
+      },
+      "audio": {
+        "codec": "aac",
+        "channels": 2,
+        "sampleRate": "96000",
+        "duration": "6.000000"
+      },
+      "independentFullDecode": true,
+      "contactSheet": "reports/studio-canonical-completion-20261008/subject-speed-gpu-r2/vfx/download.mp4.frames.jpg",
+      "scope": "Technical only. Pixel and listening review are separate required evidence."
+    }
+  },
+  "finishedAt": "2026-10-08T17:05:30.405Z",
+  "subjectApiEvents": [
+    {
+      "route": "/api/media/studio-subject-vfx/b9de374e-cfd5-49d5-9dce-79351b1fe877",
+      "method": "GET"
+    }
+  ]
+}

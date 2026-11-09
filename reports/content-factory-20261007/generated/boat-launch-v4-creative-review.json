@@ -1,0 +1,18 @@
+{
+  "acceptedFullTake": false,
+  "status": "qualified_only_for_short_opening_trim",
+  "reviewer": "Codex visual inspection",
+  "reason": "Corrected hull reads as a traditional paper boat. Water physically appears and the hull turns while remaining coherent until roughly 3.7 s. At 4.1 s it rises into air and exits the frame; no convincing ocean-scale reveal occurs. The ending fails buoyancy and continuity.",
+  "usableRange": {
+    "start": 0.8,
+    "end": 3.65
+  },
+  "rejectedRange": {
+    "start": 3.7,
+    "end": 5.041667
+  },
+  "revisionInstructions": "Keep the hull in contact with water and inside frame; generate a real ocean threat with the corrected boat.",
+  "artifactSha256": "20af57364aef3328e8cea1c433e1ea7a1ee7c1ab97290b9d5bf22d522f690d85",
+  "evidenceSha256": "b4d5f59ea0f69da67b11a2e53603c00d65afd62190ace649ff3badb4cb86a692",
+  "founderApproval": null
+}

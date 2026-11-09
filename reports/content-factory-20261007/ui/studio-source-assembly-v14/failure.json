@@ -1,0 +1,77 @@
+{
+  "message": "page.waitForFunction: Timeout 10000ms exceeded.",
+  "errors": [],
+  "url": "http://127.0.0.1:5009/?fixture=factory",
+  "state": {
+    "media": [
+      {
+        "src": "http://127.0.0.1:5009/factory-media/generated/boat-launch-v4-qualified.mp4",
+        "readyState": 0,
+        "paused": true,
+        "time": 0,
+        "seeking": false
+      },
+      {
+        "src": "http://127.0.0.1:5009/factory-media/generated/boat-launch-v4-qualified.mp4",
+        "readyState": 0,
+        "paused": true,
+        "time": 0,
+        "seeking": false
+      },
+      {
+        "src": "http://127.0.0.1:5009/factory-media/generated/boat-launch-v4-qualified.mp4",
+        "readyState": 0,
+        "paused": true,
+        "time": 0,
+        "seeking": false
+      },
+      {
+        "src": "",
+        "readyState": 0,
+        "paused": true,
+        "time": 0,
+        "seeking": false
+      },
+      {
+        "src": "",
+        "readyState": 0,
+        "paused": true,
+        "time": 0,
+        "seeking": false
+      },
+      {
+        "src": "http://127.0.0.1:5009/factory-media/generated/boat-launch-v4-qualified.mp4",
+        "readyState": 0,
+        "paused": true,
+        "time": 0,
+        "seeking": false
+      },
+      {
+        "src": "http://127.0.0.1:5009/factory-media/generated/boat-launch-v4-qualified.mp4",
+        "readyState": 0,
+        "paused": true,
+        "time": 0,
+        "seeking": false
+      },
+      {
+        "src": "http://127.0.0.1:5009/factory-media/generated/boat-launch-v4-qualified.mp4",
+        "readyState": 0,
+        "paused": true,
+        "time": 0.8,
+        "seeking": false
+      },
+      {
+        "src": "http://127.0.0.1:5009/factory-media/generated/boat-launch-v4-qualified.mp4",
+        "readyState": 0,
+        "paused": true,
+        "time": 0,
+        "seeking": false
+      }
+    ],
+    "slider": "6.6",
+    "loading": [
+      "🔒 Rounded frame locked",
+      "✓Project saved locally with media, captions, layers and render settings."
+    ]
+  }
+}

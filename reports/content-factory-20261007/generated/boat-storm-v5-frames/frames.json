@@ -1,0 +1,65 @@
+{
+  "sourceSha256": "96362c0e985724e0ad79da43ce2bc4de4f714dbfa0e16d908e4e3b0dfdfb355c",
+  "frames": [
+    {
+      "path": "reports/content-factory-20261007/generated/boat-storm-v5-frames/frame-01.png",
+      "timestamp": 0.0,
+      "sha256": "c01aecaf64250af1387c38facfd8dcaed85a8252c17bd4e44380c06004c8f277"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/boat-storm-v5-frames/frame-02.png",
+      "timestamp": 0.4602272727272727,
+      "sha256": "4d228521319eb1d959db107a28267f00fe78133eb332505e001a9ee50652df5a"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/boat-storm-v5-frames/frame-03.png",
+      "timestamp": 0.9204545454545454,
+      "sha256": "120cbf0578f95734ecee5e1fad131193e2b81842751872e97c877e460ed9a580"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/boat-storm-v5-frames/frame-04.png",
+      "timestamp": 1.3806818181818181,
+      "sha256": "210f3709ad277141f65578374e41d8d802d4271095f3e17eaa14059d94d2245a"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/boat-storm-v5-frames/frame-05.png",
+      "timestamp": 1.8409090909090908,
+      "sha256": "fcc31e147b16c0a1434da6a100cdacffd233d79e80e8c1e3b2fa06ec87cad95b"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/boat-storm-v5-frames/frame-06.png",
+      "timestamp": 2.3011363636363638,
+      "sha256": "6b403bfe431dd863baaed1e762179beed5dae5c25a5993b71971dbb8a01a911b"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/boat-storm-v5-frames/frame-07.png",
+      "timestamp": 2.7613636363636362,
+      "sha256": "8caaded102bb162886329f221b2403f7e23a6855cb5d9b6d0e951af2770471af"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/boat-storm-v5-frames/frame-08.png",
+      "timestamp": 3.221590909090909,
+      "sha256": "29166e8fb0199a7d3087bef03177538e1da43584afea287ca175ea41460dd040"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/boat-storm-v5-frames/frame-09.png",
+      "timestamp": 3.6818181818181817,
+      "sha256": "c0bc7df29ed0b215e2fd0a63ddbe77e35b935beec76d9502bc1f5e3a75b772ed"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/boat-storm-v5-frames/frame-10.png",
+      "timestamp": 4.142045454545454,
+      "sha256": "fa2b934492480411953745df1fa18aaa7c9e96da77b0a7fbec25434e579fcc72"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/boat-storm-v5-frames/frame-11.png",
+      "timestamp": 4.6022727272727275,
+      "sha256": "05eca71e82a3f575a68686c92188505474e9bfb3806e0e9b2081871d0b5d5afa"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/boat-storm-v5-frames/frame-12.png",
+      "timestamp": 4.9825,
+      "sha256": "7c8078fa8e54e52dbd00900aee61b95f49a8dfec2b642f1da50c01fbb599414d"
+    }
+  ]
+}

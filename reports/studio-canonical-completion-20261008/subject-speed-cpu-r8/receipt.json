@@ -1,0 +1,21 @@
+{
+  "startedAt": "2026-10-08T17:30:09.246Z",
+  "realAuth": true,
+  "noMocks": true,
+  "headless": true,
+  "muted": true,
+  "projectName": "Studio subject speed CPU QA 20261008 r8",
+  "inferenceJobsStarted": 0,
+  "status": "FAIL",
+  "lastStep": "Same reviewed owned subject preview refreshed and downloaded",
+  "coldRecovery": "PASS",
+  "reviewedProxySha256": "fa90d4e44ab9cffce3c5dd24cc42c2abf5ad2c8b4935435e3875d5edd7496ba0",
+  "error": "page.waitForFunction: Timeout 20000ms exceeded.",
+  "finishedAt": "2026-10-08T17:33:01.926Z",
+  "subjectApiEvents": [
+    {
+      "route": "/api/media/studio-subject-vfx/b9de374e-cfd5-49d5-9dce-79351b1fe877",
+      "method": "GET"
+    }
+  ]
+}

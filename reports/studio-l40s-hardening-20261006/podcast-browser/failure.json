@@ -1,0 +1,90 @@
+{
+  "error": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('render-caption-review-copy')\u001b[22m\n\u001b[2m    - locator resolved to <button type=\"button\" class=\"export-btn\" data-testid=\"render-caption-review-copy\">Render caption review copy (draft, not publishabl…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m    - element is visible, enabled and stable\u001b[22m\n\u001b[2m    - scrolling into view if needed\u001b[22m\n\u001b[2m    - done scrolling\u001b[22m\n\u001b[2m    - performing click action\u001b[22m\n",
+  "checks": [
+    "Actual podcast source and NVIDIA caption draft open as a 20-second edit",
+    "Timeline scrub preserves the matching source picture at 19.08 seconds",
+    "An actual pointer command splits the real podcast into editable sequence clips"
+  ],
+  "errors": [],
+  "requests": [],
+  "media": [
+    {
+      "testId": "studio-after-video",
+      "src": "http://127.0.0.1:5007/podcast-source-45s.mp4",
+      "readyState": 4,
+      "networkState": 1,
+      "currentTime": 19.070654,
+      "paused": true,
+      "duration": 45.999349
+    },
+    {
+      "testId": "speaker-stack-top-video",
+      "src": "http://127.0.0.1:5007/podcast-source-45s.mp4",
+      "readyState": 4,
+      "networkState": 1,
+      "currentTime": 0,
+      "paused": true,
+      "duration": 45.999349
+    },
+    {
+      "testId": "speaker-stack-bottom-video",
+      "src": "http://127.0.0.1:5007/podcast-source-45s.mp4",
+      "readyState": 4,
+      "networkState": 1,
+      "currentTime": 0,
+      "paused": true,
+      "duration": 45.999349
+    },
+    {
+      "testId": "speaker-stack-third-video",
+      "src": "",
+      "readyState": 0,
+      "networkState": 0,
+      "currentTime": 0,
+      "paused": true,
+      "duration": null
+    },
+    {
+      "testId": "speaker-stack-fourth-video",
+      "src": "",
+      "readyState": 0,
+      "networkState": 0,
+      "currentTime": 0,
+      "paused": true,
+      "duration": null
+    },
+    {
+      "testId": "source-split-alternate-video",
+      "src": "http://127.0.0.1:5007/podcast-source-45s.mp4",
+      "readyState": 4,
+      "networkState": 1,
+      "currentTime": 0,
+      "paused": true,
+      "duration": 45.999349
+    },
+    {
+      "src": "http://127.0.0.1:5007/podcast-source-45s.mp4",
+      "readyState": 4,
+      "networkState": 1,
+      "currentTime": 19.070654,
+      "paused": true,
+      "duration": 45.999349
+    },
+    {
+      "src": "http://127.0.0.1:5007/podcast-source-45s.mp4",
+      "readyState": 4,
+      "networkState": 1,
+      "currentTime": 19.870655,
+      "paused": true,
+      "duration": 45.999349
+    },
+    {
+      "src": "http://127.0.0.1:5007/podcast-source-45s.mp4",
+      "readyState": 4,
+      "networkState": 1,
+      "currentTime": 19.070654,
+      "paused": true,
+      "duration": 45.999349
+    }
+  ]
+}

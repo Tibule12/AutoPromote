@@ -1,0 +1,983 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-08T11:42:30.742Z",
+  "matrixSha256": "c575f34815143eaca40e2014e6ae246757b1a3575fb4442dd55b5dab0b260219",
+  "realAuthRequired": true,
+  "mocksAllowed": false,
+  "cases": [
+    {
+      "id": "media_ingest",
+      "capability": "Media ingest",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "preview",
+      "capability": "Preview",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "final_render",
+      "capability": "Final render",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "captions",
+      "capability": "Captions",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "reframing",
+      "capability": "Reframing",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "overlays",
+      "capability": "Overlays",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "motion_graphics",
+      "capability": "Motion graphics",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "masking",
+      "capability": "Masking / subject isolation",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "tracking",
+      "capability": "Tracking",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "depth_occlusion",
+      "capability": "Depth / occlusion",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "segmentation",
+      "capability": "Segmentation",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "three_d",
+      "capability": "3D",
+      "testedEndToEnd": true,
+      "gpuUsed": true,
+      "status": "FAIL",
+      "failureFound": "Studio did not acknowledge a render submission within 30 seconds; inspect the recorded UI validation and requests",
+      "fixApplied": "Existing Blender renderer connected to owned private jobs through bounded NVIDIA transport; strict GPU and transfer/decode checks",
+      "retestResult": "Failed",
+      "remainingIssue": "Investigate recorded request and UI error",
+      "userFacingSeverity": "High",
+      "attempts": [
+        {
+          "at": "2026-10-08T11:42:30.741Z",
+          "realAuth": true,
+          "noMocks": true,
+          "events": [
+            {
+              "path": "/api/media/studio-3d/preview",
+              "status": 202,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "queued",
+              "at": "2026-10-08T11:40:55.210Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "queued",
+              "at": "2026-10-08T11:40:56.185Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "queued",
+              "at": "2026-10-08T11:41:02.188Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "queued",
+              "at": "2026-10-08T11:41:08.214Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "queued",
+              "at": "2026-10-08T11:41:14.164Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "queued",
+              "at": "2026-10-08T11:41:20.155Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "rendering",
+              "at": "2026-10-08T11:41:26.633Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "rendering",
+              "at": "2026-10-08T11:41:32.144Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "rendering",
+              "at": "2026-10-08T11:41:38.208Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "rendering",
+              "at": "2026-10-08T11:41:44.174Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "rendering",
+              "at": "2026-10-08T11:41:50.220Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "rendering",
+              "at": "2026-10-08T11:41:56.169Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "rendering",
+              "at": "2026-10-08T11:42:02.494Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "rendering",
+              "at": "2026-10-08T11:42:08.225Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "rendering",
+              "at": "2026-10-08T11:42:14.272Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "rendering",
+              "at": "2026-10-08T11:42:20.195Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "completed",
+              "at": "2026-10-08T11:42:26.183Z"
+            }
+          ],
+          "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+          "hash": "8d13c0d99282ff961c88e632778b8229b801af17fc1548d3ef2a06054e12d67b",
+          "renderReceipt": {
+            "artifacts": {
+              "overlay.mov": {
+                "bytes": 6142361,
+                "sha256": "a947c2ffe1d1e509f6befc6c09d38eaabd54f33b9bb1c1c31df6be26f11967d1"
+              },
+              "preview.mp4": {
+                "bytes": 43579,
+                "sha256": "a3ebdd3b57ec0b80e8d48ce72b4082fb608de5aea0d7a1280477dc46a5adf707"
+              }
+            },
+            "device": {
+              "backend": "OPTIX",
+              "denoiser": "OPTIX",
+              "devices": [
+                "NVIDIA L40S"
+              ],
+              "engine": "CYCLES",
+              "event": "render_device",
+              "gpu_verified": true
+            },
+            "version": 1
+          },
+          "output": "reports/studio-canonical-completion-20261008/gpu/three_d/nvidia-preview/preview-46eae101-703d-4a66-ab3a-4aa4f113f74e.mp4",
+          "outputSha256": "a3ebdd3b57ec0b80e8d48ce72b4082fb608de5aea0d7a1280477dc46a5adf707",
+          "technical": {
+            "passed": true,
+            "sha256": "a3ebdd3b57ec0b80e8d48ce72b4082fb608de5aea0d7a1280477dc46a5adf707",
+            "bytes": 43579,
+            "seconds": 1,
+            "video": {
+              "width": 1280,
+              "height": 720,
+              "codec": "h264",
+              "fps": "30/1",
+              "duration": "1.000000",
+              "pixelFormat": "yuv420p"
+            },
+            "audio": null,
+            "independentFullDecode": true,
+            "contactSheet": "reports/studio-canonical-completion-20261008/gpu/three_d/nvidia-preview/preview-46eae101-703d-4a66-ab3a-4aa4f113f74e.mp4.frames.jpg",
+            "scope": "Technical only. Pixel and listening review are separate required evidence."
+          }
+        },
+        {
+          "startedAt": "2026-10-08T11:43:23.543Z",
+          "finishedAt": "2026-10-08T11:44:03.786Z",
+          "realApi": true,
+          "noMocks": true,
+          "events": [
+            {
+              "path": "/api/media/studio-assets/resolve",
+              "status": 200,
+              "at": "2026-10-08T11:43:27.051Z"
+            },
+            {
+              "path": "/api/media/process",
+              "status": 200,
+              "at": "2026-10-08T11:43:46.211Z"
+            },
+            {
+              "path": "/api/media/status/viral_3de37fec76ca923e187a93d7a688b0128f78bc813690ab5cccb86d23e23d0f20",
+              "status": 200,
+              "at": "2026-10-08T11:43:49.795Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_3de37fec76ca923e187a93d7a688b0128f78bc813690ab5cccb86d23e23d0f20",
+              "status": 200,
+              "at": "2026-10-08T11:43:55.977Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_3de37fec76ca923e187a93d7a688b0128f78bc813690ab5cccb86d23e23d0f20",
+              "status": 200,
+              "at": "2026-10-08T11:44:02.808Z",
+              "jobStatus": "failed"
+            }
+          ],
+          "errors": [],
+          "error": "Video processing failed: Request failed with status code 500 - Worker says: Framing could not reproduce the reviewed edit: Podcast timeline preflight failed: Show Everyone needs two reviewed speaker crops"
+        },
+        {
+          "startedAt": "2026-10-08T11:59:54.017Z",
+          "finishedAt": "2026-10-08T12:02:20.441Z",
+          "projectName": "A\nAutoPromote\nVIRAL CLIP STUDIO\nStudio NVIDIA alpha QA 20261008",
+          "realApi": true,
+          "noMocks": true,
+          "submittedJobId": "viral_315b18f626aaefd7413b0f40c60aba606957e0c8e3aabc81dd29f988042841fd",
+          "events": [
+            {
+              "path": "/api/media/process",
+              "status": 200,
+              "at": "2026-10-08T12:00:04.465Z"
+            },
+            {
+              "path": "/api/media/status/viral_315b18f626aaefd7413b0f40c60aba606957e0c8e3aabc81dd29f988042841fd",
+              "status": 200,
+              "at": "2026-10-08T12:00:08.095Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_315b18f626aaefd7413b0f40c60aba606957e0c8e3aabc81dd29f988042841fd",
+              "status": 200,
+              "at": "2026-10-08T12:00:14.096Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_315b18f626aaefd7413b0f40c60aba606957e0c8e3aabc81dd29f988042841fd",
+              "status": 200,
+              "at": "2026-10-08T12:00:20.124Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_315b18f626aaefd7413b0f40c60aba606957e0c8e3aabc81dd29f988042841fd",
+              "status": 200,
+              "at": "2026-10-08T12:00:26.101Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_315b18f626aaefd7413b0f40c60aba606957e0c8e3aabc81dd29f988042841fd",
+              "status": 200,
+              "at": "2026-10-08T12:00:32.127Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_315b18f626aaefd7413b0f40c60aba606957e0c8e3aabc81dd29f988042841fd",
+              "status": 200,
+              "at": "2026-10-08T12:00:38.462Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_315b18f626aaefd7413b0f40c60aba606957e0c8e3aabc81dd29f988042841fd",
+              "status": 200,
+              "at": "2026-10-08T12:00:44.116Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_315b18f626aaefd7413b0f40c60aba606957e0c8e3aabc81dd29f988042841fd",
+              "status": 200,
+              "at": "2026-10-08T12:00:50.107Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_315b18f626aaefd7413b0f40c60aba606957e0c8e3aabc81dd29f988042841fd",
+              "status": 200,
+              "at": "2026-10-08T12:00:56.401Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_315b18f626aaefd7413b0f40c60aba606957e0c8e3aabc81dd29f988042841fd",
+              "status": 200,
+              "at": "2026-10-08T12:01:02.129Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_315b18f626aaefd7413b0f40c60aba606957e0c8e3aabc81dd29f988042841fd",
+              "status": 200,
+              "at": "2026-10-08T12:01:08.116Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_315b18f626aaefd7413b0f40c60aba606957e0c8e3aabc81dd29f988042841fd",
+              "status": 200,
+              "at": "2026-10-08T12:01:14.546Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_315b18f626aaefd7413b0f40c60aba606957e0c8e3aabc81dd29f988042841fd",
+              "status": 200,
+              "at": "2026-10-08T12:01:20.120Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_315b18f626aaefd7413b0f40c60aba606957e0c8e3aabc81dd29f988042841fd",
+              "status": 200,
+              "at": "2026-10-08T12:01:26.180Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_315b18f626aaefd7413b0f40c60aba606957e0c8e3aabc81dd29f988042841fd",
+              "status": 200,
+              "at": "2026-10-08T12:01:32.130Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_315b18f626aaefd7413b0f40c60aba606957e0c8e3aabc81dd29f988042841fd",
+              "status": 200,
+              "at": "2026-10-08T12:01:38.146Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_315b18f626aaefd7413b0f40c60aba606957e0c8e3aabc81dd29f988042841fd",
+              "status": 200,
+              "at": "2026-10-08T12:01:44.523Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_315b18f626aaefd7413b0f40c60aba606957e0c8e3aabc81dd29f988042841fd",
+              "status": 200,
+              "at": "2026-10-08T12:01:50.560Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_315b18f626aaefd7413b0f40c60aba606957e0c8e3aabc81dd29f988042841fd",
+              "status": 200,
+              "at": "2026-10-08T12:01:56.880Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_315b18f626aaefd7413b0f40c60aba606957e0c8e3aabc81dd29f988042841fd",
+              "status": 200,
+              "at": "2026-10-08T12:02:02.131Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_315b18f626aaefd7413b0f40c60aba606957e0c8e3aabc81dd29f988042841fd",
+              "status": 200,
+              "at": "2026-10-08T12:02:08.152Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_315b18f626aaefd7413b0f40c60aba606957e0c8e3aabc81dd29f988042841fd",
+              "status": 200,
+              "at": "2026-10-08T12:02:15.159Z",
+              "jobStatus": "completed"
+            }
+          ],
+          "errors": [],
+          "download": {
+            "suggestedName": "viral_clip_rendered.mp4",
+            "bytes": 2366071,
+            "nativeCompleted": true
+          },
+          "output": "reports/studio-canonical-completion-20261008/gpu/three_d/download.mp4",
+          "outputSha256": "83a5c555492db4f1bf4103e6c731e07a2f54bf582e8368fefad58cbf0c986900",
+          "technical": {
+            "passed": true,
+            "sha256": "83a5c555492db4f1bf4103e6c731e07a2f54bf582e8368fefad58cbf0c986900",
+            "bytes": 2366071,
+            "seconds": 12,
+            "video": {
+              "width": 1280,
+              "height": 720,
+              "codec": "h264",
+              "fps": "30/1",
+              "duration": "11.966667",
+              "pixelFormat": "yuv420p"
+            },
+            "audio": {
+              "codec": "aac",
+              "channels": 2,
+              "sampleRate": "96000",
+              "duration": "12.000000"
+            },
+            "independentFullDecode": true,
+            "contactSheet": "reports/studio-canonical-completion-20261008/gpu/three_d/download.mp4.frames.jpg",
+            "scope": "Technical only. Pixel and listening review are separate required evidence."
+          }
+        },
+        {
+          "startedAt": "2026-10-08T12:04:14.910Z",
+          "finishedAt": "2026-10-08T12:04:49.966Z",
+          "realApi": true,
+          "noMocks": true,
+          "events": [],
+          "errors": [],
+          "error": "Studio did not acknowledge a render submission within 30 seconds; inspect the recorded UI validation and requests"
+        },
+        {
+          "startedAt": "2026-10-08T12:19:14.346Z",
+          "finishedAt": "2026-10-08T12:19:49.651Z",
+          "realApi": true,
+          "noMocks": true,
+          "events": [
+            {
+              "path": "/api/media/studio-assets/resolve",
+              "status": 200,
+              "at": "2026-10-08T12:19:18.240Z"
+            },
+            {
+              "path": "/api/media/viral-render-attempt/2645ce8d-e78d-4474-8aa4-ed4fcc596eb5",
+              "status": 200,
+              "at": "2026-10-08T12:19:18.241Z"
+            },
+            {
+              "path": "/api/media/studio-assets/resolve",
+              "status": 403,
+              "at": "2026-10-08T12:19:18.238Z",
+              "code": "STUDIO_SOURCE_FORBIDDEN",
+              "error": "Choose a video uploaded to your Studio project"
+            }
+          ],
+          "errors": [],
+          "error": "Studio did not acknowledge a render submission within 30 seconds; inspect the recorded UI validation and requests"
+        }
+      ]
+    },
+    {
+      "id": "blender",
+      "capability": "Blender rendering",
+      "testedEndToEnd": false,
+      "gpuUsed": true,
+      "status": "BLOCKED",
+      "failureFound": "Studio HQ previously returned 503: no retained NVIDIA dispatch/private output bucket",
+      "fixApplied": "Existing Blender renderer connected to owned private jobs through bounded NVIDIA transport; strict GPU and transfer/decode checks",
+      "retestResult": "Actual HQ preview delivered and decoded",
+      "remainingIssue": "Visual review and timeline final export/reload pending",
+      "userFacingSeverity": "High",
+      "attempts": [
+        {
+          "at": "2026-10-08T11:42:30.741Z",
+          "realAuth": true,
+          "noMocks": true,
+          "events": [
+            {
+              "path": "/api/media/studio-3d/preview",
+              "status": 202,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "queued",
+              "at": "2026-10-08T11:40:55.210Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "queued",
+              "at": "2026-10-08T11:40:56.185Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "queued",
+              "at": "2026-10-08T11:41:02.188Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "queued",
+              "at": "2026-10-08T11:41:08.214Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "queued",
+              "at": "2026-10-08T11:41:14.164Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "queued",
+              "at": "2026-10-08T11:41:20.155Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "rendering",
+              "at": "2026-10-08T11:41:26.633Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "rendering",
+              "at": "2026-10-08T11:41:32.144Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "rendering",
+              "at": "2026-10-08T11:41:38.208Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "rendering",
+              "at": "2026-10-08T11:41:44.174Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "rendering",
+              "at": "2026-10-08T11:41:50.220Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "rendering",
+              "at": "2026-10-08T11:41:56.169Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "rendering",
+              "at": "2026-10-08T11:42:02.494Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "rendering",
+              "at": "2026-10-08T11:42:08.225Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "rendering",
+              "at": "2026-10-08T11:42:14.272Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "rendering",
+              "at": "2026-10-08T11:42:20.195Z"
+            },
+            {
+              "path": "/api/media/studio-3d/preview/46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "status": 200,
+              "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+              "jobStatus": "completed",
+              "at": "2026-10-08T11:42:26.183Z"
+            }
+          ],
+          "jobId": "46eae101-703d-4a66-ab3a-4aa4f113f74e",
+          "hash": "8d13c0d99282ff961c88e632778b8229b801af17fc1548d3ef2a06054e12d67b",
+          "renderReceipt": {
+            "artifacts": {
+              "overlay.mov": {
+                "bytes": 6142361,
+                "sha256": "a947c2ffe1d1e509f6befc6c09d38eaabd54f33b9bb1c1c31df6be26f11967d1"
+              },
+              "preview.mp4": {
+                "bytes": 43579,
+                "sha256": "a3ebdd3b57ec0b80e8d48ce72b4082fb608de5aea0d7a1280477dc46a5adf707"
+              }
+            },
+            "device": {
+              "backend": "OPTIX",
+              "denoiser": "OPTIX",
+              "devices": [
+                "NVIDIA L40S"
+              ],
+              "engine": "CYCLES",
+              "event": "render_device",
+              "gpu_verified": true
+            },
+            "version": 1
+          },
+          "output": "reports/studio-canonical-completion-20261008/gpu/three_d/nvidia-preview/preview-46eae101-703d-4a66-ab3a-4aa4f113f74e.mp4",
+          "outputSha256": "a3ebdd3b57ec0b80e8d48ce72b4082fb608de5aea0d7a1280477dc46a5adf707",
+          "technical": {
+            "passed": true,
+            "sha256": "a3ebdd3b57ec0b80e8d48ce72b4082fb608de5aea0d7a1280477dc46a5adf707",
+            "bytes": 43579,
+            "seconds": 1,
+            "video": {
+              "width": 1280,
+              "height": 720,
+              "codec": "h264",
+              "fps": "30/1",
+              "duration": "1.000000",
+              "pixelFormat": "yuv420p"
+            },
+            "audio": null,
+            "independentFullDecode": true,
+            "contactSheet": "reports/studio-canonical-completion-20261008/gpu/three_d/nvidia-preview/preview-46eae101-703d-4a66-ab3a-4aa4f113f74e.mp4.frames.jpg",
+            "scope": "Technical only. Pixel and listening review are separate required evidence."
+          }
+        }
+      ]
+    },
+    {
+      "id": "compositing",
+      "capability": "Compositing",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "vfx",
+      "capability": "VFX",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "audio",
+      "capability": "Audio",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "generated_image",
+      "capability": "Generated image assets",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "generated_video",
+      "capability": "Generated video assets",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "generated_raw",
+      "capability": "Generated raw content",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "save_reload",
+      "capability": "Save / reload",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "project_revisions",
+      "capability": "Project revisions",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "export",
+      "capability": "Export",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "cuts_speed",
+      "capability": "Cuts / trim / speed",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "b_roll",
+      "capability": "B-roll / multi-source",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "color",
+      "capability": "Color / finish",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "audio_restoration",
+      "capability": "Audio restoration",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "voiceover_sfx",
+      "capability": "Voice-over / SFX",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "three_d_audio",
+      "capability": "3D audio reactivity",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "director",
+      "capability": "Director / analysis",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    }
+  ],
+  "updatedAt": "2026-10-08T12:19:49.652Z"
+}

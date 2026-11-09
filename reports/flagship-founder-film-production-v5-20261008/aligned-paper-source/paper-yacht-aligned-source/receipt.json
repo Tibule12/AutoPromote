@@ -1,0 +1,40 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "sourceBrief": "Correct the rejected two-object transformation by aligning the paper endpoint to the actual target yacht composition. Preserve source framing and a single hull/sail silhouette while changing its materials into folded paper. Reference-conditioned still only; neither cinematic transformation nor moving footage is approved by this generation.",
+  "prompt": "Photographic origami sailing yacht made entirely of folded navy and ivory paper, afloat on blue ocean. One angular creased paper hull, paper mast, two triangular folded paper sails. Port side view, bow points right, distant horizon, warm sunlight. Visible paper fibres and folds, real water. No wood or fabric.",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "modelRevision": "462165984030d82259a11f4367a4eed129e94a7b",
+  "tool": "AutoPromote NVIDIA image adapter",
+  "seed": 20261008232,
+  "settings": {
+    "steps": 35,
+    "guidance": 7,
+    "width": 1344,
+    "height": 768,
+    "dtype": "float16",
+    "encodedTokenCounts": [
+      67,
+      67
+    ],
+    "promptTruncated": false,
+    "conditioning": "image-to-image",
+    "strength": 0.72,
+    "referenceResize": "aspect-preserving centre crop"
+  },
+  "gpu": "NVIDIA L40S",
+  "origin": "reference_conditioned_generated_image",
+  "artifact": {
+    "path": "/work/output/aligned-paper-source/paper-yacht-aligned-source/video.mp4",
+    "sha256": "34b070adc5a198bde665e83d9a25880e9e3197574a13b2d1e0149440b7ab77ab",
+    "duration": 2.0
+  },
+  "reusableArtifacts": [
+    {
+      "role": "native_image",
+      "path": "/work/output/aligned-paper-source/paper-yacht-aligned-source/image.png",
+      "sha256": "9f4e62ca67c47837a062d84a9bd6d755eb95314e71006952e376b19b0548712d"
+    }
+  ],
+  "seconds": 5.400003495000419,
+  "referenceImageSha256": "ec65d8f80b03608a8a638482d849d4cdc16c02d81f5d6af03fc7ce05388ae462"
+}

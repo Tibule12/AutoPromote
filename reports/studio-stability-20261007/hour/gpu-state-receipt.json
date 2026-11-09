@@ -1,0 +1,10 @@
+{
+  "checkedAt": "2026-10-07T22:02:33.725377+00:00",
+  "command": "brev ls",
+  "exitCode": 0,
+  "stdout": "You have 1 instances in Org tmtshwelo21-abb980-gp65\n NAME                      STATUS   BUILD      SHELL      ID         MACHINE       GPU  \n autopromote-l40s-staging  STOPPED  COMPLETED  NOT READY  xgh6wcu74  l40s-48gb.1x  L40S \n\n",
+  "status": "STOPPED",
+  "gpuJobsThisHour": 0,
+  "startBlocker": "insufficient funds to create or start this environment",
+  "localCpuWorkerPort8008Listening": false
+}

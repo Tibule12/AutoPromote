@@ -1,0 +1,62 @@
+{
+  "command": [
+    "gcloud",
+    "artifacts",
+    "docker",
+    "images",
+    "list",
+    "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo",
+    "--include-tags",
+    "--filter=package~viral-studio",
+    "--format=json"
+  ],
+  "exit_code": 0,
+  "stderr": "Listing items under project autopromote-cc6d3, location us-central1, repository thulani-repo.\n\n",
+  "data": [
+    {
+      "createTime": "2026-09-16T17:06:58.364303Z",
+      "metadata": {
+        "buildTime": "2026-09-16T17:01:37.875258458Z",
+        "imageSizeBytes": "407137822",
+        "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+        "name": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo/dockerImages/viral-studio-3d-renderer@sha256:6b97198c6770c8f211caf8b018be7dc85290035ba5a3922580a4a324179ed522"
+      },
+      "package": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/viral-studio-3d-renderer",
+      "tags": [
+        "agent-20260916c"
+      ],
+      "updateTime": "2026-09-16T17:06:58.364303Z",
+      "version": "sha256:6b97198c6770c8f211caf8b018be7dc85290035ba5a3922580a4a324179ed522"
+    },
+    {
+      "createTime": "2026-09-16T16:27:28.127807Z",
+      "metadata": {
+        "buildTime": "2026-09-16T16:01:34.754339322Z",
+        "imageSizeBytes": "407137119",
+        "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+        "name": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo/dockerImages/viral-studio-3d-renderer@sha256:6e5dc25e91405a00437883a9da0ffc34fb3336f495c64bd6ba36aeab5d2a82b9"
+      },
+      "package": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/viral-studio-3d-renderer",
+      "tags": [
+        "agent-20260916b"
+      ],
+      "updateTime": "2026-09-16T16:27:28.127807Z",
+      "version": "sha256:6e5dc25e91405a00437883a9da0ffc34fb3336f495c64bd6ba36aeab5d2a82b9"
+    },
+    {
+      "createTime": "2026-09-16T14:27:14.270351Z",
+      "metadata": {
+        "buildTime": "2026-09-16T14:21:01.501848663Z",
+        "imageSizeBytes": "407135683",
+        "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+        "name": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo/dockerImages/viral-studio-3d-renderer@sha256:eb966edbc878fc8e937b5ad46e0c73210e1a4135246f6bf7c9b016b6930b44c8"
+      },
+      "package": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/viral-studio-3d-renderer",
+      "tags": [
+        "agent-20260916"
+      ],
+      "updateTime": "2026-09-16T14:27:14.270351Z",
+      "version": "sha256:eb966edbc878fc8e937b5ad46e0c73210e1a4135246f6bf7c9b016b6930b44c8"
+    }
+  ]
+}

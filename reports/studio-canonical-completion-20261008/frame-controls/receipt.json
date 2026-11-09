@@ -1,0 +1,14 @@
+{
+  "startedAt": "2026-10-08T14:02:10.546Z",
+  "realAuth": true,
+  "headless": true,
+  "muted": true,
+  "noMocks": true,
+  "gpuJobsStarted": 0,
+  "projectName": "Studio framing controls QA 20261008",
+  "status": "FAIL",
+  "steps": [
+    "Native Reset transform removes the QA tilt, zoom, offsets and main-video keys"
+  ],
+  "finishedAt": "2026-10-08T14:03:17.218Z"
+}

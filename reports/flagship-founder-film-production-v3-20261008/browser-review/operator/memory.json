@@ -1,0 +1,57 @@
+{
+  "identity": "ae00a2ae5eba4087e9d123b917623275319a6be50d377318a4bd9d30b25d1c0d",
+  "actions": [
+    {
+      "signature": "30f3108653782a05a34ca2b071ab1717e9dfea674dcaafa22dcd9e4688ad7786",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "link",
+        "name": "Download film"
+      },
+      "expect": [
+        {
+          "type": "download",
+          "value": "AutoPromote-One-Edit.mp4"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-08T13:24:20.592Z",
+      "reason": "The full rendered film is playable; retain one verified download.",
+      "planner": null,
+      "afterState": "f53d1f64da481b738fc6dd7c08a9e321074161a49f922fa50ef9394ea43ffcb3"
+    }
+  ],
+  "observations": [
+    {
+      "id": "observation-1",
+      "url": "http://127.0.0.1:3099/",
+      "pageId": "page-1",
+      "at": "2026-10-08T13:24:16.346Z"
+    },
+    {
+      "id": "observation-2",
+      "url": "http://127.0.0.1:3099/",
+      "pageId": "page-1",
+      "at": "2026-10-08T13:24:20.494Z"
+    },
+    {
+      "id": "observation-3",
+      "url": "http://127.0.0.1:3099/",
+      "pageId": "page-1",
+      "at": "2026-10-08T13:24:21.491Z"
+    }
+  ],
+  "artifacts": [
+    {
+      "type": "download",
+      "page": "page-1",
+      "filename": "AutoPromote-One-Edit.mp4",
+      "artifact": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/flagship-founder-film-production-v3-20261008/browser-review/operator/downloads/53a958f2-4b82-4d39-9c5d-c3ad3d33f503-AutoPromote-One-Edit.mp4",
+      "bytes": 23872749,
+      "sha256": "3b22a99aead61be0e43e4ec58745a6137fc850d33187af6c1578da950eb9f76e",
+      "at": "2026-10-08T13:24:20.846Z"
+    }
+  ],
+  "status": "running"
+}

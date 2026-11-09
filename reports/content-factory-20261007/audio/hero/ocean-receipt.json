@@ -1,0 +1,26 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "artifact": {
+    "path": "reports/content-factory-20261007/audio/hero/ocean.wav",
+    "sha256": "40e94f8be3da3a1386850aa597b9c498637825dfded3f5ef74f50a423a7e39d7",
+    "duration": 24.0,
+    "fps": 24,
+    "container": "wav",
+    "codec": "pcm_s16le",
+    "sampleRate": 48000,
+    "channels": 2,
+    "peak": 0.04876345598916595,
+    "rms": 0.008043805682130024
+  },
+  "model": "original-procedural-composition",
+  "modelRevision": "paper-voyage-score-v1",
+  "tool": "AutoPromote Content Factory original audio",
+  "settings": {
+    "sampleRate": 48000,
+    "tempo": 96,
+    "duration": 24.0,
+    "motif": "minor tension to warm resolution",
+    "stereo": true
+  },
+  "seed": 2026100711
+}
