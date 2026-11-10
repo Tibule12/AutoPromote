@@ -1,0 +1,16 @@
+{
+  "seconds": 24,
+  "plans": [
+    "01 - Empty night",
+    "02 - opening double exposure",
+    "02 - return double exposure",
+    "03 - Through the eyes",
+    "04 - Enter the screen",
+    "05 - Time echoes",
+    "06 - Sound becomes movement",
+    "07 - Native alpha bindings"
+  ],
+  "addedWords": 0,
+  "sourceAudioMuted": true,
+  "sourceMasks": "Reused exact cached CPU inputs"
+}

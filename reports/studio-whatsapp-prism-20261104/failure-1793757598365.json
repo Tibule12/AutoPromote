@@ -1,0 +1,8 @@
+{
+  "phase": "author",
+  "error": "locator.click: Timeout 45000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('comp-layer-row-scene-dc2440a9-b547-4d85-8b7d-6bb9b341beaa').locator('.ap-comp-layer-title')\u001b[22m\n\n    at clear (/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/scripts/studio-professional/whatsapp-prism-proof.cjs:21:93)\n    at async duplicate (/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/scripts/studio-professional/whatsapp-prism-proof.cjs:15:2)\n    at async author (/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/scripts/studio-professional/whatsapp-prism-proof.cjs:27:13)\n    at async /home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/scripts/studio-professional/whatsapp-prism-proof.cjs:51:586",
+  "errors": [
+    "Track matte source scene-b7ded7c6-a3b1-4076-aaf1-aba88f7a00bb does not exist."
+  ],
+  "body": ""
+}

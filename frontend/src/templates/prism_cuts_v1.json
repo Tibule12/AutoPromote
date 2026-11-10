@@ -1,0 +1,6219 @@
+{
+  "schemaVersion": 1,
+  "templateId": "prism_cuts_v1",
+  "version": "1.0.0",
+  "label": "Prism cuts \u2014 wordless",
+  "status": "draft",
+  "canonicalContractVersion": 1,
+  "compiler": "studioRenderCompiler",
+  "renderer": "render_viral_clip_impl",
+  "surfaces": [
+    "studio",
+    "director",
+    "welcome"
+  ],
+  "workflow": "studio",
+  "categoryIds": [
+    "motion_graphics"
+  ],
+  "inputSlots": [
+    {
+      "id": "hookFootage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "productFootage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "detailFootage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "screenFootage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "music",
+      "type": "audio",
+      "required": false
+    }
+  ],
+  "supportedAspects": [
+    "16:9"
+  ],
+  "durationTicks": 2160000,
+  "qualification": {
+    "studioLifecycle": "unverified",
+    "directorInstantiation": "unverified",
+    "creativeQuality": "unapproved",
+    "previewFinalParity": "unverified"
+  },
+  "executionDefinition": {
+    "clock": 90000,
+    "defaultAspect": "16:9",
+    "sequence": [
+      {
+        "slot": "hookFootage",
+        "offset": 0.25,
+        "duration": 3,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      {
+        "slot": "detailFootage",
+        "offset": 0,
+        "duration": 6,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      {
+        "slot": "screenFootage",
+        "offset": 2,
+        "duration": 5,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      {
+        "slot": "productFootage",
+        "offset": 7,
+        "duration": 7,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      {
+        "slot": "hookFootage",
+        "offset": 0.25,
+        "duration": 3,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      }
+    ],
+    "titles": [],
+    "logo": {},
+    "animation": {
+      "enterSeconds": 0.2,
+      "settleSeconds": 0.45,
+      "exitSeconds": 0.12,
+      "curve": [
+        0.16,
+        1,
+        0.3,
+        1
+      ]
+    },
+    "music": {
+      "volume": 60,
+      "fadeIn": 0.1,
+      "fadeOut": 0.8
+    },
+    "soundCues": [
+      {
+        "tone": "airy_whoosh",
+        "time": 2.8,
+        "duration": 0.4,
+        "volume": 0.13
+      },
+      {
+        "tone": "airy_whoosh",
+        "time": 8.8,
+        "duration": 0.4,
+        "volume": 0.13
+      },
+      {
+        "tone": "airy_whoosh",
+        "time": 13.8,
+        "duration": 0.4,
+        "volume": 0.13
+      },
+      {
+        "tone": "airy_whoosh",
+        "time": 20.8,
+        "duration": 0.4,
+        "volume": 0.13
+      }
+    ],
+    "sourceKeyframes": [],
+    "sceneActions": [],
+    "directorDescription": "Prism cuts \u2014 wordless: a wordless authored motion style using your four saved clips. All layers, masks, groups and motion stay editable. No model job.",
+    "defaultCopy": {},
+    "muteOriginalAudio": true,
+    "framing": {
+      "forceAspect": true,
+      "mode": "off",
+      "positions": []
+    },
+    "videoFit": "contain",
+    "ordinaryMotion": {
+      "version": 1,
+      "layers": [
+        {
+          "id": "plane-0",
+          "type": "image",
+          "motionDesign": true,
+          "name": "P / cobalt",
+          "bg": "transparent",
+          "anchorX": 50,
+          "anchorY": 50,
+          "glow": {
+            "enabled": false
+          },
+          "layerShadow": {
+            "enabled": false
+          },
+          "motionBlur": {
+            "enabled": false
+          },
+          "shadow": "none",
+          "strokeWidth": 0,
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "mediaFit": "stretch",
+          "fontFamily": "Inter",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 100,
+          "height": 100,
+          "rotation": 0,
+          "scale": 1,
+          "startTime": 0,
+          "duration": 24,
+          "bRollMode": "pip",
+          "animation": {
+            "enter": "none",
+            "exit": "none",
+            "enterDuration": 0,
+            "exitDuration": 0
+          },
+          "vectorShape": {
+            "version": 1,
+            "closed": true,
+            "nodes": [
+              {
+                "x": 0,
+                "y": 0,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 100,
+                "y": 0,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 100,
+                "y": 100,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 0,
+                "y": 100,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "fill": {
+              "kind": "solid",
+              "color": "#1636c9",
+              "endColor": "#1636c9",
+              "start": [
+                0,
+                0
+              ],
+              "end": [
+                100,
+                100
+              ]
+            },
+            "stroke": {
+              "color": "#1636c9",
+              "width": 0
+            }
+          }
+        },
+        {
+          "id": "plane-1",
+          "type": "video",
+          "muted": true,
+          "name": "P / portrait bridge",
+          "anchorX": 50,
+          "anchorY": 50,
+          "blendMode": "normal",
+          "layerShadow": {
+            "enabled": false,
+            "color": "#000000",
+            "opacity": 0.35,
+            "blur": 12,
+            "x": 0,
+            "y": 16
+          },
+          "shadow": "none",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "mediaFit": "contain",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 70,
+          "height": 70,
+          "rotation": 0,
+          "scale": 1.4285714285714286,
+          "startTime": 0,
+          "duration": 3,
+          "sourceStartTime": 0.25,
+          "bRollMode": "pip",
+          "volume": 0,
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "sourceSlot": "hookFootage"
+        },
+        {
+          "id": "plane-2",
+          "type": "video",
+          "muted": true,
+          "name": "P / live fragment 0-0",
+          "anchorX": 50,
+          "anchorY": 50,
+          "blendMode": "normal",
+          "layerShadow": {
+            "enabled": false
+          },
+          "shadow": "none",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "mediaFit": "contain",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 70,
+          "height": 70,
+          "rotation": 0,
+          "scale": 1.4285714285714286,
+          "startTime": 0,
+          "duration": 3,
+          "sourceStartTime": 0.25,
+          "bRollMode": "pip",
+          "volume": 0,
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(34.17% -0.08%,44.83% -0.08%,44.83% 25.08%,34.17% 25.08%)",
+            "feather": 0,
+            "inverted": false
+          },
+          "sourceSlot": "hookFootage"
+        },
+        {
+          "id": "plane-3",
+          "type": "video",
+          "muted": true,
+          "name": "P / live fragment 0-1",
+          "anchorX": 50,
+          "anchorY": 50,
+          "blendMode": "normal",
+          "layerShadow": {
+            "enabled": false
+          },
+          "shadow": "none",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "mediaFit": "contain",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 70,
+          "height": 70,
+          "rotation": 0,
+          "scale": 1.4285714285714286,
+          "startTime": 0,
+          "duration": 3,
+          "sourceStartTime": 0.25,
+          "bRollMode": "pip",
+          "volume": 0,
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(44.67% -0.08%,55.33% -0.08%,55.33% 25.08%,44.67% 25.08%)",
+            "feather": 0,
+            "inverted": false
+          },
+          "sourceSlot": "hookFootage"
+        },
+        {
+          "id": "plane-4",
+          "type": "video",
+          "muted": true,
+          "name": "P / live fragment 0-2",
+          "anchorX": 50,
+          "anchorY": 50,
+          "blendMode": "normal",
+          "layerShadow": {
+            "enabled": false
+          },
+          "shadow": "none",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "mediaFit": "contain",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 70,
+          "height": 70,
+          "rotation": 0,
+          "scale": 1.4285714285714286,
+          "startTime": 0,
+          "duration": 3,
+          "sourceStartTime": 0.25,
+          "bRollMode": "pip",
+          "volume": 0,
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(55.17% -0.08%,65.83% -0.08%,65.83% 25.08%,55.17% 25.08%)",
+            "feather": 0,
+            "inverted": false
+          },
+          "sourceSlot": "hookFootage"
+        },
+        {
+          "id": "plane-5",
+          "type": "video",
+          "muted": true,
+          "name": "P / live fragment 1-0",
+          "anchorX": 50,
+          "anchorY": 50,
+          "blendMode": "normal",
+          "layerShadow": {
+            "enabled": false
+          },
+          "shadow": "none",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "mediaFit": "contain",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 70,
+          "height": 70,
+          "rotation": 0,
+          "scale": 1.4285714285714286,
+          "startTime": 0,
+          "duration": 3,
+          "sourceStartTime": 0.25,
+          "bRollMode": "pip",
+          "volume": 0,
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(34.17% 24.92%,44.83% 24.92%,44.83% 50.08%,34.17% 50.08%)",
+            "feather": 0,
+            "inverted": false
+          },
+          "sourceSlot": "hookFootage"
+        },
+        {
+          "id": "plane-6",
+          "type": "video",
+          "muted": true,
+          "name": "P / live fragment 1-1",
+          "anchorX": 50,
+          "anchorY": 50,
+          "blendMode": "normal",
+          "layerShadow": {
+            "enabled": false
+          },
+          "shadow": "none",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "mediaFit": "contain",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 70,
+          "height": 70,
+          "rotation": 0,
+          "scale": 1.4285714285714286,
+          "startTime": 0,
+          "duration": 3,
+          "sourceStartTime": 0.25,
+          "bRollMode": "pip",
+          "volume": 0,
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(44.67% 24.92%,55.33% 24.92%,55.33% 50.08%,44.67% 50.08%)",
+            "feather": 0,
+            "inverted": false
+          },
+          "sourceSlot": "hookFootage"
+        },
+        {
+          "id": "plane-7",
+          "type": "video",
+          "muted": true,
+          "name": "P / live fragment 1-2",
+          "anchorX": 50,
+          "anchorY": 50,
+          "blendMode": "normal",
+          "layerShadow": {
+            "enabled": false
+          },
+          "shadow": "none",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "mediaFit": "contain",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 70,
+          "height": 70,
+          "rotation": 0,
+          "scale": 1.4285714285714286,
+          "startTime": 0,
+          "duration": 3,
+          "sourceStartTime": 0.25,
+          "bRollMode": "pip",
+          "volume": 0,
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(55.17% 24.92%,65.83% 24.92%,65.83% 50.08%,55.17% 50.08%)",
+            "feather": 0,
+            "inverted": false
+          },
+          "sourceSlot": "hookFootage"
+        },
+        {
+          "id": "plane-8",
+          "type": "video",
+          "muted": true,
+          "name": "P / live fragment 2-0",
+          "anchorX": 50,
+          "anchorY": 50,
+          "blendMode": "normal",
+          "layerShadow": {
+            "enabled": false
+          },
+          "shadow": "none",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "mediaFit": "contain",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 70,
+          "height": 70,
+          "rotation": 0,
+          "scale": 1.4285714285714286,
+          "startTime": 0,
+          "duration": 3,
+          "sourceStartTime": 0.25,
+          "bRollMode": "pip",
+          "volume": 0,
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(34.17% 49.92%,44.83% 49.92%,44.83% 75.08%,34.17% 75.08%)",
+            "feather": 0,
+            "inverted": false
+          },
+          "sourceSlot": "hookFootage"
+        },
+        {
+          "id": "plane-9",
+          "type": "video",
+          "muted": true,
+          "name": "P / live fragment 2-1",
+          "anchorX": 50,
+          "anchorY": 50,
+          "blendMode": "normal",
+          "layerShadow": {
+            "enabled": false
+          },
+          "shadow": "none",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "mediaFit": "contain",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 70,
+          "height": 70,
+          "rotation": 0,
+          "scale": 1.4285714285714286,
+          "startTime": 0,
+          "duration": 3,
+          "sourceStartTime": 0.25,
+          "bRollMode": "pip",
+          "volume": 0,
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(44.67% 49.92%,55.33% 49.92%,55.33% 75.08%,44.67% 75.08%)",
+            "feather": 0,
+            "inverted": false
+          },
+          "sourceSlot": "hookFootage"
+        },
+        {
+          "id": "plane-10",
+          "type": "video",
+          "muted": true,
+          "name": "P / live fragment 2-2",
+          "anchorX": 50,
+          "anchorY": 50,
+          "blendMode": "normal",
+          "layerShadow": {
+            "enabled": false
+          },
+          "shadow": "none",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "mediaFit": "contain",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 70,
+          "height": 70,
+          "rotation": 0,
+          "scale": 1.4285714285714286,
+          "startTime": 0,
+          "duration": 3,
+          "sourceStartTime": 0.25,
+          "bRollMode": "pip",
+          "volume": 0,
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(55.17% 49.92%,65.83% 49.92%,65.83% 75.08%,55.17% 75.08%)",
+            "feather": 0,
+            "inverted": false
+          },
+          "sourceSlot": "hookFootage"
+        },
+        {
+          "id": "plane-11",
+          "type": "video",
+          "muted": true,
+          "name": "P / live fragment 3-0",
+          "anchorX": 50,
+          "anchorY": 50,
+          "blendMode": "normal",
+          "layerShadow": {
+            "enabled": false
+          },
+          "shadow": "none",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "mediaFit": "contain",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 70,
+          "height": 70,
+          "rotation": 0,
+          "scale": 1.4285714285714286,
+          "startTime": 0,
+          "duration": 3,
+          "sourceStartTime": 0.25,
+          "bRollMode": "pip",
+          "volume": 0,
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(34.17% 74.92%,44.83% 74.92%,44.83% 100.08%,34.17% 100.08%)",
+            "feather": 0,
+            "inverted": false
+          },
+          "sourceSlot": "hookFootage"
+        },
+        {
+          "id": "plane-12",
+          "type": "video",
+          "muted": true,
+          "name": "P / live fragment 3-1",
+          "anchorX": 50,
+          "anchorY": 50,
+          "blendMode": "normal",
+          "layerShadow": {
+            "enabled": false
+          },
+          "shadow": "none",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "mediaFit": "contain",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 70,
+          "height": 70,
+          "rotation": 0,
+          "scale": 1.4285714285714286,
+          "startTime": 0,
+          "duration": 3,
+          "sourceStartTime": 0.25,
+          "bRollMode": "pip",
+          "volume": 0,
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(44.67% 74.92%,55.33% 74.92%,55.33% 100.08%,44.67% 100.08%)",
+            "feather": 0,
+            "inverted": false
+          },
+          "sourceSlot": "hookFootage"
+        },
+        {
+          "id": "plane-13",
+          "type": "video",
+          "muted": true,
+          "name": "P / live fragment 3-2",
+          "anchorX": 50,
+          "anchorY": 50,
+          "blendMode": "normal",
+          "layerShadow": {
+            "enabled": false
+          },
+          "shadow": "none",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "mediaFit": "contain",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 70,
+          "height": 70,
+          "rotation": 0,
+          "scale": 1.4285714285714286,
+          "startTime": 0,
+          "duration": 3,
+          "sourceStartTime": 0.25,
+          "bRollMode": "pip",
+          "volume": 0,
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(55.17% 74.92%,65.83% 74.92%,65.83% 100.08%,55.17% 100.08%)",
+            "feather": 0,
+            "inverted": false
+          },
+          "sourceSlot": "hookFootage"
+        },
+        {
+          "id": "plane-14",
+          "type": "video",
+          "muted": true,
+          "name": "P / prism ground",
+          "anchorX": 50,
+          "anchorY": 50,
+          "blendMode": "normal",
+          "layerShadow": {
+            "enabled": false,
+            "color": "#000000",
+            "opacity": 0.35,
+            "blur": 12,
+            "x": 0,
+            "y": 16
+          },
+          "shadow": "none",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "mediaFit": "cover",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 70,
+          "height": 70,
+          "rotation": 0,
+          "scale": 1.4285714285714286,
+          "startTime": 3,
+          "duration": 6,
+          "sourceStartTime": 0,
+          "bRollMode": "pip",
+          "volume": 0,
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "sourceSlot": "detailFootage"
+        },
+        {
+          "id": "plane-15",
+          "type": "video",
+          "muted": true,
+          "name": "P / code ground",
+          "anchorX": 50,
+          "anchorY": 50,
+          "blendMode": "normal",
+          "layerShadow": {
+            "enabled": false,
+            "color": "#000000",
+            "opacity": 0.35,
+            "blur": 12,
+            "x": 0,
+            "y": 16
+          },
+          "shadow": "none",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "mediaFit": "cover",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 70,
+          "height": 70,
+          "rotation": 0,
+          "scale": 1.4285714285714286,
+          "startTime": 9,
+          "duration": 5,
+          "sourceStartTime": 2,
+          "bRollMode": "pip",
+          "volume": 0,
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "sourceSlot": "screenFootage"
+        },
+        {
+          "id": "plane-16",
+          "type": "image",
+          "motionDesign": true,
+          "name": "P / wipe blue",
+          "bg": "transparent",
+          "anchorX": 50,
+          "anchorY": 50,
+          "glow": {
+            "enabled": false
+          },
+          "layerShadow": {
+            "enabled": false
+          },
+          "motionBlur": {
+            "enabled": false
+          },
+          "shadow": "none",
+          "strokeWidth": 0,
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "mediaFit": "stretch",
+          "fontFamily": "Inter",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 100,
+          "height": 100,
+          "rotation": 0,
+          "scale": 1,
+          "startTime": 9,
+          "duration": 5,
+          "bRollMode": "pip",
+          "animation": {
+            "enter": "none",
+            "exit": "none",
+            "enterDuration": 0,
+            "exitDuration": 0
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(-100% -10%,0% -10%,-35% 110%,-100% 110%)",
+            "feather": 0,
+            "inverted": false
+          },
+          "vectorShape": {
+            "version": 1,
+            "closed": true,
+            "nodes": [
+              {
+                "x": 0,
+                "y": 0,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 100,
+                "y": 0,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 100,
+                "y": 100,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 0,
+                "y": 100,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "fill": {
+              "kind": "solid",
+              "color": "#1636c9",
+              "endColor": "#1636c9",
+              "start": [
+                0,
+                0
+              ],
+              "end": [
+                100,
+                100
+              ]
+            },
+            "stroke": {
+              "color": "#1636c9",
+              "width": 0
+            }
+          }
+        },
+        {
+          "id": "plane-17",
+          "type": "video",
+          "muted": true,
+          "name": "P / diagonal performer",
+          "anchorX": 50,
+          "anchorY": 50,
+          "blendMode": "normal",
+          "layerShadow": {
+            "enabled": false
+          },
+          "shadow": "none",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "mediaFit": "contain",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 70,
+          "height": 70,
+          "rotation": 0,
+          "scale": 1.4285714285714286,
+          "startTime": 9,
+          "duration": 5,
+          "sourceStartTime": 2,
+          "bRollMode": "pip",
+          "volume": 0,
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(-100% -10%,0% -10%,-35% 110%,-100% 110%)",
+            "feather": 0,
+            "inverted": false
+          },
+          "sourceSlot": "productFootage"
+        },
+        {
+          "id": "plane-18",
+          "type": "video",
+          "muted": true,
+          "name": "P / medium panel",
+          "anchorX": 50,
+          "anchorY": 50,
+          "blendMode": "normal",
+          "layerShadow": {
+            "enabled": false,
+            "color": "#000000",
+            "opacity": 0.35,
+            "blur": 12,
+            "x": 0,
+            "y": 16
+          },
+          "perspective": {
+            "version": 1,
+            "corners": [
+              [
+                4,
+                4
+              ],
+              [
+                48,
+                4
+              ],
+              [
+                48,
+                96
+              ],
+              [
+                4,
+                96
+              ]
+            ],
+            "sourceRect": [
+              0,
+              4,
+              100,
+              70
+            ]
+          },
+          "shadow": "none",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "mediaFit": "contain",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 70,
+          "height": 70,
+          "rotation": 0,
+          "scale": 1.4285714285714286,
+          "startTime": 14,
+          "duration": 7,
+          "sourceStartTime": 7,
+          "bRollMode": "pip",
+          "volume": 0,
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "sourceSlot": "productFootage"
+        },
+        {
+          "id": "plane-19",
+          "type": "video",
+          "muted": true,
+          "name": "P / detail panel",
+          "anchorX": 50,
+          "anchorY": 50,
+          "blendMode": "normal",
+          "layerShadow": {
+            "enabled": false,
+            "color": "#000000",
+            "opacity": 0.35,
+            "blur": 12,
+            "x": 0,
+            "y": 16
+          },
+          "perspective": {
+            "version": 1,
+            "corners": [
+              [
+                52,
+                4
+              ],
+              [
+                96,
+                4
+              ],
+              [
+                96,
+                96
+              ],
+              [
+                52,
+                96
+              ]
+            ],
+            "sourceRect": [
+              0,
+              5,
+              100,
+              70
+            ]
+          },
+          "shadow": "none",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "mediaFit": "contain",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 70,
+          "height": 70,
+          "rotation": 0,
+          "scale": 1.4285714285714286,
+          "startTime": 14,
+          "duration": 7,
+          "sourceStartTime": 7,
+          "bRollMode": "pip",
+          "volume": 0,
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "sourceSlot": "detailFootage"
+        },
+        {
+          "id": "plane-20",
+          "type": "video",
+          "muted": true,
+          "name": "P / closing iris",
+          "anchorX": 50,
+          "anchorY": 50,
+          "blendMode": "normal",
+          "layerShadow": {
+            "enabled": false
+          },
+          "shadow": "none",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "mediaFit": "contain",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 70,
+          "height": 70,
+          "rotation": 0,
+          "scale": 1.4285714285714286,
+          "startTime": 21,
+          "duration": 3,
+          "sourceStartTime": 0.25,
+          "bRollMode": "pip",
+          "volume": 0,
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(0% 0%,50% 0%,100% 0%,100% 50%,100% 100%,50% 100%,0% 100%,0% 50%)",
+            "feather": 0,
+            "inverted": false
+          },
+          "sourceSlot": "hookFootage"
+        },
+        {
+          "id": "plane-21",
+          "type": "video",
+          "muted": true,
+          "name": "P / prism image 0",
+          "anchorX": 50,
+          "anchorY": 50,
+          "blendMode": "normal",
+          "layerShadow": {
+            "enabled": false
+          },
+          "shadow": "none",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "mediaFit": "cover",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 70,
+          "height": 70,
+          "rotation": 0,
+          "scale": 1.4285714285714286,
+          "startTime": 3,
+          "duration": 6,
+          "sourceStartTime": 0,
+          "bRollMode": "pip",
+          "volume": 0,
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(21.875% 0%,78.125% 0%,50% 50%)",
+            "feather": 0,
+            "inverted": false
+          },
+          "sourceSlot": "detailFootage"
+        },
+        {
+          "id": "plane-22",
+          "type": "video",
+          "muted": true,
+          "name": "P / prism image 1",
+          "anchorX": 50,
+          "anchorY": 50,
+          "blendMode": "normal",
+          "layerShadow": {
+            "enabled": false
+          },
+          "shadow": "none",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "mediaFit": "cover",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 70,
+          "height": 70,
+          "rotation": 0,
+          "scale": 1.4285714285714286,
+          "startTime": 3,
+          "duration": 6,
+          "sourceStartTime": 0,
+          "bRollMode": "pip",
+          "volume": 0,
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(21.875% 0%,78.125% 0%,50% 50%)",
+            "feather": 0,
+            "inverted": false
+          },
+          "sourceSlot": "detailFootage"
+        },
+        {
+          "id": "plane-23",
+          "type": "video",
+          "muted": true,
+          "name": "P / prism image 2",
+          "anchorX": 50,
+          "anchorY": 50,
+          "blendMode": "normal",
+          "layerShadow": {
+            "enabled": false
+          },
+          "shadow": "none",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "mediaFit": "cover",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 70,
+          "height": 70,
+          "rotation": 0,
+          "scale": 1.4285714285714286,
+          "startTime": 3,
+          "duration": 6,
+          "sourceStartTime": 0,
+          "bRollMode": "pip",
+          "volume": 0,
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(21.875% 0%,78.125% 0%,50% 50%)",
+            "feather": 0,
+            "inverted": false
+          },
+          "sourceSlot": "detailFootage"
+        },
+        {
+          "id": "plane-24",
+          "type": "video",
+          "muted": true,
+          "name": "P / prism image 3",
+          "anchorX": 50,
+          "anchorY": 50,
+          "blendMode": "normal",
+          "layerShadow": {
+            "enabled": false
+          },
+          "shadow": "none",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "mediaFit": "cover",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 70,
+          "height": 70,
+          "rotation": 0,
+          "scale": 1.4285714285714286,
+          "startTime": 3,
+          "duration": 6,
+          "sourceStartTime": 0,
+          "bRollMode": "pip",
+          "volume": 0,
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(21.875% 0%,78.125% 0%,50% 50%)",
+            "feather": 0,
+            "inverted": false
+          },
+          "sourceSlot": "detailFootage"
+        }
+      ],
+      "keys": [
+        {
+          "property": "opacity",
+          "value": 0,
+          "easing": "hold",
+          "targetId": "main-video",
+          "time": 0
+        },
+        {
+          "property": "opacity",
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-1",
+          "time": 0
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-2",
+          "time": 0
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-2",
+          "time": 0
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-2",
+          "time": 0
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-3",
+          "time": 0
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-3",
+          "time": 0
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-3",
+          "time": 0
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-4",
+          "time": 0
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-4",
+          "time": 0
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-4",
+          "time": 0
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-5",
+          "time": 0
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-5",
+          "time": 0
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-5",
+          "time": 0
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-6",
+          "time": 0
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-6",
+          "time": 0
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-6",
+          "time": 0
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-7",
+          "time": 0
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-7",
+          "time": 0
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-7",
+          "time": 0
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-8",
+          "time": 0
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-8",
+          "time": 0
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-8",
+          "time": 0
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-9",
+          "time": 0
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-9",
+          "time": 0
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-9",
+          "time": 0
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-10",
+          "time": 0
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-10",
+          "time": 0
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-10",
+          "time": 0
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-11",
+          "time": 0
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-11",
+          "time": 0
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-11",
+          "time": 0
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-12",
+          "time": 0
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-12",
+          "time": 0
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-12",
+          "time": 0
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-13",
+          "time": 0
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-13",
+          "time": 0
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-13",
+          "time": 0
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-2",
+          "time": 0.22
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-2",
+          "time": 0.22
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-2",
+          "time": 0.22
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-3",
+          "time": 0.22
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-3",
+          "time": 0.22
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-3",
+          "time": 0.22
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-4",
+          "time": 0.22
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-4",
+          "time": 0.22
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-4",
+          "time": 0.22
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-5",
+          "time": 0.22
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-5",
+          "time": 0.22
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-5",
+          "time": 0.22
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-6",
+          "time": 0.22
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-6",
+          "time": 0.22
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-6",
+          "time": 0.22
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-7",
+          "time": 0.22
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-7",
+          "time": 0.22
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-7",
+          "time": 0.22
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-8",
+          "time": 0.22
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-8",
+          "time": 0.22
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-8",
+          "time": 0.22
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-9",
+          "time": 0.22
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-9",
+          "time": 0.22
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-9",
+          "time": 0.22
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-10",
+          "time": 0.22
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-10",
+          "time": 0.22
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-10",
+          "time": 0.22
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-11",
+          "time": 0.22
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-11",
+          "time": 0.22
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-11",
+          "time": 0.22
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-12",
+          "time": 0.22
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-12",
+          "time": 0.22
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-12",
+          "time": 0.22
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-13",
+          "time": 0.22
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-13",
+          "time": 0.22
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-13",
+          "time": 0.22
+        },
+        {
+          "property": "opacity",
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-1",
+          "time": 0.25
+        },
+        {
+          "property": "opacity",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-1",
+          "time": 0.6
+        },
+        {
+          "property": "x",
+          "value": 44.0582389,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-2",
+          "time": 0.7
+        },
+        {
+          "property": "y",
+          "value": 23.310741,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-2",
+          "time": 0.7
+        },
+        {
+          "property": "rotation",
+          "value": -25.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-2",
+          "time": 0.7
+        },
+        {
+          "property": "x",
+          "value": 56.8440306,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-3",
+          "time": 0.76
+        },
+        {
+          "property": "y",
+          "value": 34.372059,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-3",
+          "time": 0.76
+        },
+        {
+          "property": "rotation",
+          "value": -10.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-3",
+          "time": 0.76
+        },
+        {
+          "property": "x",
+          "value": 31.6884467,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-5",
+          "time": 0.78
+        },
+        {
+          "property": "y",
+          "value": 38.4310254,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-5",
+          "time": 0.78
+        },
+        {
+          "property": "rotation",
+          "value": -18.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-5",
+          "time": 0.78
+        },
+        {
+          "property": "x",
+          "value": 68.3773714,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-4",
+          "time": 0.82
+        },
+        {
+          "property": "y",
+          "value": 33.4198302,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-4",
+          "time": 0.82
+        },
+        {
+          "property": "rotation",
+          "value": 4.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-4",
+          "time": 0.82
+        },
+        {
+          "property": "x",
+          "value": 47.4292475,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-6",
+          "time": 0.84
+        },
+        {
+          "property": "y",
+          "value": 44.976685,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-6",
+          "time": 0.84
+        },
+        {
+          "property": "rotation",
+          "value": -3.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-6",
+          "time": 0.84
+        },
+        {
+          "property": "x",
+          "value": 34.3874036,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-8",
+          "time": 0.86
+        },
+        {
+          "property": "y",
+          "value": 51.5294064,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-8",
+          "time": 0.86
+        },
+        {
+          "property": "rotation",
+          "value": -11.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-8",
+          "time": 0.86
+        },
+        {
+          "property": "x",
+          "value": 62.8089848,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-7",
+          "time": 0.9
+        },
+        {
+          "property": "y",
+          "value": 41.027524,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-7",
+          "time": 0.9
+        },
+        {
+          "property": "rotation",
+          "value": 11.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-7",
+          "time": 0.9
+        },
+        {
+          "property": "x",
+          "value": 53.4292475,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-9",
+          "time": 0.92
+        },
+        {
+          "property": "y",
+          "value": 55.023315,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-9",
+          "time": 0.92
+        },
+        {
+          "property": "rotation",
+          "value": 3.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-9",
+          "time": 0.92
+        },
+        {
+          "property": "x",
+          "value": 28.3126355,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-11",
+          "time": 0.94
+        },
+        {
+          "property": "y",
+          "value": 63.6510302,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-11",
+          "time": 0.94
+        },
+        {
+          "property": "rotation",
+          "value": -4.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-11",
+          "time": 0.94
+        },
+        {
+          "property": "x",
+          "value": 72.77365,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-10",
+          "time": 0.98
+        },
+        {
+          "property": "y",
+          "value": 49.7229341,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-10",
+          "time": 0.98
+        },
+        {
+          "property": "rotation",
+          "value": 18.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-10",
+          "time": 0.98
+        },
+        {
+          "property": "x",
+          "value": 50.8440306,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-12",
+          "time": 1
+        },
+        {
+          "property": "y",
+          "value": 65.627941,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-12",
+          "time": 1
+        },
+        {
+          "property": "rotation",
+          "value": 10.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-12",
+          "time": 1
+        },
+        {
+          "property": "x",
+          "value": 74.103948,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-13",
+          "time": 1.06
+        },
+        {
+          "property": "y",
+          "value": 60.6168447,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-13",
+          "time": 1.06
+        },
+        {
+          "property": "rotation",
+          "value": 25.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-13",
+          "time": 1.06
+        },
+        {
+          "property": "x",
+          "value": 44.0582389,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-2",
+          "time": 1.65
+        },
+        {
+          "property": "y",
+          "value": 23.310741,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-2",
+          "time": 1.65
+        },
+        {
+          "property": "rotation",
+          "value": -25.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-2",
+          "time": 1.65
+        },
+        {
+          "property": "x",
+          "value": 56.8440306,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-3",
+          "time": 1.65
+        },
+        {
+          "property": "y",
+          "value": 34.372059,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-3",
+          "time": 1.65
+        },
+        {
+          "property": "rotation",
+          "value": -10.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-3",
+          "time": 1.65
+        },
+        {
+          "property": "x",
+          "value": 68.3773714,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-4",
+          "time": 1.65
+        },
+        {
+          "property": "y",
+          "value": 33.4198302,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-4",
+          "time": 1.65
+        },
+        {
+          "property": "rotation",
+          "value": 4.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-4",
+          "time": 1.65
+        },
+        {
+          "property": "x",
+          "value": 31.6884467,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-5",
+          "time": 1.65
+        },
+        {
+          "property": "y",
+          "value": 38.4310254,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-5",
+          "time": 1.65
+        },
+        {
+          "property": "rotation",
+          "value": -18.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-5",
+          "time": 1.65
+        },
+        {
+          "property": "x",
+          "value": 47.4292475,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-6",
+          "time": 1.65
+        },
+        {
+          "property": "y",
+          "value": 44.976685,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-6",
+          "time": 1.65
+        },
+        {
+          "property": "rotation",
+          "value": -3.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-6",
+          "time": 1.65
+        },
+        {
+          "property": "x",
+          "value": 62.8089848,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-7",
+          "time": 1.65
+        },
+        {
+          "property": "y",
+          "value": 41.027524,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-7",
+          "time": 1.65
+        },
+        {
+          "property": "rotation",
+          "value": 11.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-7",
+          "time": 1.65
+        },
+        {
+          "property": "x",
+          "value": 34.3874036,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-8",
+          "time": 1.65
+        },
+        {
+          "property": "y",
+          "value": 51.5294064,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-8",
+          "time": 1.65
+        },
+        {
+          "property": "rotation",
+          "value": -11.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-8",
+          "time": 1.65
+        },
+        {
+          "property": "x",
+          "value": 53.4292475,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-9",
+          "time": 1.65
+        },
+        {
+          "property": "y",
+          "value": 55.023315,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-9",
+          "time": 1.65
+        },
+        {
+          "property": "rotation",
+          "value": 3.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-9",
+          "time": 1.65
+        },
+        {
+          "property": "x",
+          "value": 72.77365,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-10",
+          "time": 1.65
+        },
+        {
+          "property": "y",
+          "value": 49.7229341,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-10",
+          "time": 1.65
+        },
+        {
+          "property": "rotation",
+          "value": 18.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-10",
+          "time": 1.65
+        },
+        {
+          "property": "x",
+          "value": 28.3126355,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-11",
+          "time": 1.65
+        },
+        {
+          "property": "y",
+          "value": 63.6510302,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-11",
+          "time": 1.65
+        },
+        {
+          "property": "rotation",
+          "value": -4.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-11",
+          "time": 1.65
+        },
+        {
+          "property": "x",
+          "value": 50.8440306,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-12",
+          "time": 1.65
+        },
+        {
+          "property": "y",
+          "value": 65.627941,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-12",
+          "time": 1.65
+        },
+        {
+          "property": "rotation",
+          "value": 10.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-12",
+          "time": 1.65
+        },
+        {
+          "property": "x",
+          "value": 74.103948,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-13",
+          "time": 1.65
+        },
+        {
+          "property": "y",
+          "value": 60.6168447,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-13",
+          "time": 1.65
+        },
+        {
+          "property": "rotation",
+          "value": 25.5,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-13",
+          "time": 1.65
+        },
+        {
+          "property": "opacity",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-1",
+          "time": 2.4
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-2",
+          "time": 2.65
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-2",
+          "time": 2.65
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-2",
+          "time": 2.65
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-5",
+          "time": 2.65
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-5",
+          "time": 2.65
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-5",
+          "time": 2.65
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-8",
+          "time": 2.65
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-8",
+          "time": 2.65
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-8",
+          "time": 2.65
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-11",
+          "time": 2.65
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-11",
+          "time": 2.65
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-11",
+          "time": 2.65
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-3",
+          "time": 2.7
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-3",
+          "time": 2.7
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-3",
+          "time": 2.7
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-6",
+          "time": 2.7
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-6",
+          "time": 2.7
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-6",
+          "time": 2.7
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-9",
+          "time": 2.7
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-9",
+          "time": 2.7
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-9",
+          "time": 2.7
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-12",
+          "time": 2.7
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-12",
+          "time": 2.7
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-12",
+          "time": 2.7
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-4",
+          "time": 2.75
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-4",
+          "time": 2.75
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-4",
+          "time": 2.75
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-7",
+          "time": 2.75
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-7",
+          "time": 2.75
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-7",
+          "time": 2.75
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-10",
+          "time": 2.75
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-10",
+          "time": 2.75
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-10",
+          "time": 2.75
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-13",
+          "time": 2.75
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-13",
+          "time": 2.75
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-13",
+          "time": 2.75
+        },
+        {
+          "property": "opacity",
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-1",
+          "time": 2.8
+        },
+        {
+          "property": "opacity",
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-1",
+          "time": 3
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-2",
+          "time": 3
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-2",
+          "time": 3
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-2",
+          "time": 3
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-3",
+          "time": 3
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-3",
+          "time": 3
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-3",
+          "time": 3
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-4",
+          "time": 3
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-4",
+          "time": 3
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-4",
+          "time": 3
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-5",
+          "time": 3
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-5",
+          "time": 3
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-5",
+          "time": 3
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-6",
+          "time": 3
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-6",
+          "time": 3
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-6",
+          "time": 3
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-7",
+          "time": 3
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-7",
+          "time": 3
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-7",
+          "time": 3
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-8",
+          "time": 3
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-8",
+          "time": 3
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-8",
+          "time": 3
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-9",
+          "time": 3
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-9",
+          "time": 3
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-9",
+          "time": 3
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-10",
+          "time": 3
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-10",
+          "time": 3
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-10",
+          "time": 3
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-11",
+          "time": 3
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-11",
+          "time": 3
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-11",
+          "time": 3
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-12",
+          "time": 3
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-12",
+          "time": 3
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-12",
+          "time": 3
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-13",
+          "time": 3
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-13",
+          "time": 3
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-13",
+          "time": 3
+        },
+        {
+          "property": "opacity",
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-14",
+          "time": 3
+        },
+        {
+          "property": "opacity",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-21",
+          "time": 3
+        },
+        {
+          "property": "opacity",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-22",
+          "time": 3
+        },
+        {
+          "property": "opacity",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-23",
+          "time": 3
+        },
+        {
+          "property": "opacity",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-24",
+          "time": 3
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "hold",
+          "targetId": "plane-21",
+          "time": 3
+        },
+        {
+          "property": "scale",
+          "value": 1.4285714285714286,
+          "easing": "hold",
+          "targetId": "plane-21",
+          "time": 3
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "hold",
+          "targetId": "plane-21",
+          "time": 3
+        },
+        {
+          "property": "y",
+          "value": 30,
+          "easing": "hold",
+          "targetId": "plane-21",
+          "time": 3
+        },
+        {
+          "property": "maskPoint0Y",
+          "value": 20,
+          "easing": "hold",
+          "targetId": "plane-21",
+          "time": 3
+        },
+        {
+          "property": "maskPoint1Y",
+          "value": 20,
+          "easing": "hold",
+          "targetId": "plane-21",
+          "time": 3
+        },
+        {
+          "property": "maskPoint2Y",
+          "value": 70,
+          "easing": "hold",
+          "targetId": "plane-21",
+          "time": 3
+        },
+        {
+          "property": "rotation",
+          "value": 90,
+          "easing": "hold",
+          "targetId": "plane-22",
+          "time": 3
+        },
+        {
+          "property": "scale",
+          "value": 1.4285714285714286,
+          "easing": "hold",
+          "targetId": "plane-22",
+          "time": 3
+        },
+        {
+          "property": "x",
+          "value": 61.25,
+          "easing": "hold",
+          "targetId": "plane-22",
+          "time": 3
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "hold",
+          "targetId": "plane-22",
+          "time": 3
+        },
+        {
+          "property": "maskPoint0Y",
+          "value": 20,
+          "easing": "hold",
+          "targetId": "plane-22",
+          "time": 3
+        },
+        {
+          "property": "maskPoint1Y",
+          "value": 20,
+          "easing": "hold",
+          "targetId": "plane-22",
+          "time": 3
+        },
+        {
+          "property": "maskPoint2Y",
+          "value": 70,
+          "easing": "hold",
+          "targetId": "plane-22",
+          "time": 3
+        },
+        {
+          "property": "rotation",
+          "value": 180,
+          "easing": "hold",
+          "targetId": "plane-23",
+          "time": 3
+        },
+        {
+          "property": "scale",
+          "value": 1.4285714285714286,
+          "easing": "hold",
+          "targetId": "plane-23",
+          "time": 3
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "hold",
+          "targetId": "plane-23",
+          "time": 3
+        },
+        {
+          "property": "y",
+          "value": 70,
+          "easing": "hold",
+          "targetId": "plane-23",
+          "time": 3
+        },
+        {
+          "property": "maskPoint0Y",
+          "value": 20,
+          "easing": "hold",
+          "targetId": "plane-23",
+          "time": 3
+        },
+        {
+          "property": "maskPoint1Y",
+          "value": 20,
+          "easing": "hold",
+          "targetId": "plane-23",
+          "time": 3
+        },
+        {
+          "property": "maskPoint2Y",
+          "value": 70,
+          "easing": "hold",
+          "targetId": "plane-23",
+          "time": 3
+        },
+        {
+          "property": "rotation",
+          "value": 270,
+          "easing": "hold",
+          "targetId": "plane-24",
+          "time": 3
+        },
+        {
+          "property": "scale",
+          "value": 1.4285714285714286,
+          "easing": "hold",
+          "targetId": "plane-24",
+          "time": 3
+        },
+        {
+          "property": "x",
+          "value": 38.75,
+          "easing": "hold",
+          "targetId": "plane-24",
+          "time": 3
+        },
+        {
+          "property": "y",
+          "value": 50.00000000000001,
+          "easing": "hold",
+          "targetId": "plane-24",
+          "time": 3
+        },
+        {
+          "property": "maskPoint0Y",
+          "value": 20,
+          "easing": "hold",
+          "targetId": "plane-24",
+          "time": 3
+        },
+        {
+          "property": "maskPoint1Y",
+          "value": 20,
+          "easing": "hold",
+          "targetId": "plane-24",
+          "time": 3
+        },
+        {
+          "property": "maskPoint2Y",
+          "value": 70,
+          "easing": "hold",
+          "targetId": "plane-24",
+          "time": 3
+        },
+        {
+          "easing": "ease_in_out",
+          "targetId": "group-0",
+          "property": "rotation",
+          "value": 38,
+          "time": 3
+        },
+        {
+          "easing": "ease_in_out",
+          "targetId": "group-0",
+          "property": "scale",
+          "value": 0.45,
+          "time": 3
+        },
+        {
+          "property": "opacity",
+          "value": 0.28,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-14",
+          "time": 3.5
+        },
+        {
+          "property": "opacity",
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-21",
+          "time": 3.5
+        },
+        {
+          "property": "opacity",
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-22",
+          "time": 3.5
+        },
+        {
+          "property": "opacity",
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-23",
+          "time": 3.5
+        },
+        {
+          "property": "opacity",
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-24",
+          "time": 3.5
+        },
+        {
+          "easing": "ease_in_out",
+          "targetId": "group-0",
+          "property": "scale",
+          "value": 1,
+          "time": 3.7916666666666665
+        },
+        {
+          "easing": "ease_in_out",
+          "targetId": "group-0",
+          "property": "rotation",
+          "value": 0,
+          "time": 3.7916666666666665
+        },
+        {
+          "easing": "ease_in_out",
+          "targetId": "group-0",
+          "property": "rotation",
+          "value": 22,
+          "time": 5.583333333333333
+        },
+        {
+          "easing": "ease_in_out",
+          "targetId": "group-0",
+          "property": "scale",
+          "value": 1.1,
+          "time": 6.208333333333333
+        },
+        {
+          "easing": "ease_in_out",
+          "targetId": "group-0",
+          "property": "scale",
+          "value": 1,
+          "time": 7.291666666666667
+        },
+        {
+          "easing": "ease_in_out",
+          "targetId": "group-0",
+          "property": "rotation",
+          "value": -16,
+          "time": 7.291666666666667
+        },
+        {
+          "property": "opacity",
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-21",
+          "time": 7.5
+        },
+        {
+          "property": "opacity",
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-22",
+          "time": 7.5
+        },
+        {
+          "property": "opacity",
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-23",
+          "time": 7.5
+        },
+        {
+          "property": "opacity",
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-24",
+          "time": 7.5
+        },
+        {
+          "property": "opacity",
+          "value": 0.28,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-14",
+          "time": 7.6
+        },
+        {
+          "easing": "ease_in_out",
+          "targetId": "group-0",
+          "property": "scale",
+          "value": 1.65,
+          "time": 8.583333333333334
+        },
+        {
+          "easing": "ease_in_out",
+          "targetId": "group-0",
+          "property": "rotation",
+          "value": -40,
+          "time": 8.583333333333334
+        },
+        {
+          "property": "opacity",
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-14",
+          "time": 8.6
+        },
+        {
+          "property": "opacity",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-21",
+          "time": 8.65
+        },
+        {
+          "property": "opacity",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-22",
+          "time": 8.65
+        },
+        {
+          "property": "opacity",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-23",
+          "time": 8.65
+        },
+        {
+          "property": "opacity",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-24",
+          "time": 8.65
+        },
+        {
+          "property": "opacity",
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-14",
+          "time": 9
+        },
+        {
+          "property": "maskPoint1X",
+          "value": -5,
+          "easing": "linear",
+          "targetId": "plane-16",
+          "time": 9
+        },
+        {
+          "property": "maskPoint2X",
+          "value": -40,
+          "easing": "linear",
+          "targetId": "plane-16",
+          "time": 9
+        },
+        {
+          "property": "maskPoint1X",
+          "value": -5,
+          "easing": "linear",
+          "targetId": "plane-17",
+          "time": 9
+        },
+        {
+          "property": "maskPoint2X",
+          "value": -40,
+          "easing": "linear",
+          "targetId": "plane-17",
+          "time": 9
+        },
+        {
+          "property": "opacity",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-21",
+          "time": 9
+        },
+        {
+          "property": "opacity",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-22",
+          "time": 9
+        },
+        {
+          "property": "opacity",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-23",
+          "time": 9
+        },
+        {
+          "property": "opacity",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-24",
+          "time": 9
+        },
+        {
+          "property": "rotation",
+          "value": 0,
+          "easing": "hold",
+          "targetId": "plane-21",
+          "time": 9
+        },
+        {
+          "property": "scale",
+          "value": 1.4285714285714286,
+          "easing": "hold",
+          "targetId": "plane-21",
+          "time": 9
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "hold",
+          "targetId": "plane-21",
+          "time": 9
+        },
+        {
+          "property": "y",
+          "value": 30,
+          "easing": "hold",
+          "targetId": "plane-21",
+          "time": 9
+        },
+        {
+          "property": "maskPoint0Y",
+          "value": 20,
+          "easing": "hold",
+          "targetId": "plane-21",
+          "time": 9
+        },
+        {
+          "property": "maskPoint1Y",
+          "value": 20,
+          "easing": "hold",
+          "targetId": "plane-21",
+          "time": 9
+        },
+        {
+          "property": "maskPoint2Y",
+          "value": 70,
+          "easing": "hold",
+          "targetId": "plane-21",
+          "time": 9
+        },
+        {
+          "property": "rotation",
+          "value": 90,
+          "easing": "hold",
+          "targetId": "plane-22",
+          "time": 9
+        },
+        {
+          "property": "scale",
+          "value": 1.4285714285714286,
+          "easing": "hold",
+          "targetId": "plane-22",
+          "time": 9
+        },
+        {
+          "property": "x",
+          "value": 61.25,
+          "easing": "hold",
+          "targetId": "plane-22",
+          "time": 9
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "hold",
+          "targetId": "plane-22",
+          "time": 9
+        },
+        {
+          "property": "maskPoint0Y",
+          "value": 20,
+          "easing": "hold",
+          "targetId": "plane-22",
+          "time": 9
+        },
+        {
+          "property": "maskPoint1Y",
+          "value": 20,
+          "easing": "hold",
+          "targetId": "plane-22",
+          "time": 9
+        },
+        {
+          "property": "maskPoint2Y",
+          "value": 70,
+          "easing": "hold",
+          "targetId": "plane-22",
+          "time": 9
+        },
+        {
+          "property": "rotation",
+          "value": 180,
+          "easing": "hold",
+          "targetId": "plane-23",
+          "time": 9
+        },
+        {
+          "property": "scale",
+          "value": 1.4285714285714286,
+          "easing": "hold",
+          "targetId": "plane-23",
+          "time": 9
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "hold",
+          "targetId": "plane-23",
+          "time": 9
+        },
+        {
+          "property": "y",
+          "value": 70,
+          "easing": "hold",
+          "targetId": "plane-23",
+          "time": 9
+        },
+        {
+          "property": "maskPoint0Y",
+          "value": 20,
+          "easing": "hold",
+          "targetId": "plane-23",
+          "time": 9
+        },
+        {
+          "property": "maskPoint1Y",
+          "value": 20,
+          "easing": "hold",
+          "targetId": "plane-23",
+          "time": 9
+        },
+        {
+          "property": "maskPoint2Y",
+          "value": 70,
+          "easing": "hold",
+          "targetId": "plane-23",
+          "time": 9
+        },
+        {
+          "property": "rotation",
+          "value": 270,
+          "easing": "hold",
+          "targetId": "plane-24",
+          "time": 9
+        },
+        {
+          "property": "scale",
+          "value": 1.4285714285714286,
+          "easing": "hold",
+          "targetId": "plane-24",
+          "time": 9
+        },
+        {
+          "property": "x",
+          "value": 38.75,
+          "easing": "hold",
+          "targetId": "plane-24",
+          "time": 9
+        },
+        {
+          "property": "y",
+          "value": 50.00000000000001,
+          "easing": "hold",
+          "targetId": "plane-24",
+          "time": 9
+        },
+        {
+          "property": "maskPoint0Y",
+          "value": 20,
+          "easing": "hold",
+          "targetId": "plane-24",
+          "time": 9
+        },
+        {
+          "property": "maskPoint1Y",
+          "value": 20,
+          "easing": "hold",
+          "targetId": "plane-24",
+          "time": 9
+        },
+        {
+          "property": "maskPoint2Y",
+          "value": 70,
+          "easing": "hold",
+          "targetId": "plane-24",
+          "time": 9
+        },
+        {
+          "easing": "ease_in_out",
+          "targetId": "group-0",
+          "property": "rotation",
+          "value": -40,
+          "time": 9
+        },
+        {
+          "easing": "ease_in_out",
+          "targetId": "group-0",
+          "property": "scale",
+          "value": 1.65,
+          "time": 9
+        },
+        {
+          "property": "maskPoint1X",
+          "value": -5,
+          "easing": "linear",
+          "targetId": "plane-16",
+          "time": 9.5
+        },
+        {
+          "property": "maskPoint2X",
+          "value": -40,
+          "easing": "linear",
+          "targetId": "plane-16",
+          "time": 9.5
+        },
+        {
+          "property": "maskPoint1X",
+          "value": -5,
+          "easing": "linear",
+          "targetId": "plane-17",
+          "time": 9.5
+        },
+        {
+          "property": "maskPoint2X",
+          "value": -40,
+          "easing": "linear",
+          "targetId": "plane-17",
+          "time": 9.5
+        },
+        {
+          "property": "maskPoint1X",
+          "value": 140,
+          "easing": "linear",
+          "targetId": "plane-16",
+          "time": 11.9
+        },
+        {
+          "property": "maskPoint2X",
+          "value": 105,
+          "easing": "linear",
+          "targetId": "plane-16",
+          "time": 11.9
+        },
+        {
+          "property": "maskPoint1X",
+          "value": 140,
+          "easing": "linear",
+          "targetId": "plane-17",
+          "time": 11.9
+        },
+        {
+          "property": "maskPoint2X",
+          "value": 105,
+          "easing": "linear",
+          "targetId": "plane-17",
+          "time": 11.9
+        },
+        {
+          "property": "maskPoint1X",
+          "value": 140,
+          "easing": "linear",
+          "targetId": "plane-16",
+          "time": 14
+        },
+        {
+          "property": "maskPoint2X",
+          "value": 105,
+          "easing": "linear",
+          "targetId": "plane-16",
+          "time": 14
+        },
+        {
+          "property": "maskPoint1X",
+          "value": 140,
+          "easing": "linear",
+          "targetId": "plane-17",
+          "time": 14
+        },
+        {
+          "property": "maskPoint2X",
+          "value": 105,
+          "easing": "linear",
+          "targetId": "plane-17",
+          "time": 14
+        },
+        {
+          "property": "y",
+          "value": -15,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-18",
+          "time": 14
+        },
+        {
+          "property": "opacity",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-18",
+          "time": 14
+        },
+        {
+          "property": "y",
+          "value": 115,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-19",
+          "time": 14
+        },
+        {
+          "property": "opacity",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-19",
+          "time": 14
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-18",
+          "time": 14
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-19",
+          "time": 14
+        },
+        {
+          "property": "opacity",
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-18",
+          "time": 14.35
+        },
+        {
+          "property": "opacity",
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-19",
+          "time": 14.35
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-18",
+          "time": 14.65
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-19",
+          "time": 14.65
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-18",
+          "time": 17
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-19",
+          "time": 17
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-18",
+          "time": 17
+        },
+        {
+          "property": "x",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-19",
+          "time": 17
+        },
+        {
+          "property": "y",
+          "value": 46,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-18",
+          "time": 17.3
+        },
+        {
+          "property": "y",
+          "value": 54,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-19",
+          "time": 17.3
+        },
+        {
+          "property": "x",
+          "value": 98,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-18",
+          "time": 17.65
+        },
+        {
+          "property": "x",
+          "value": 2,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-19",
+          "time": 17.65
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-18",
+          "time": 17.7
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-19",
+          "time": 17.7
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-18",
+          "time": 20.55
+        },
+        {
+          "property": "y",
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-19",
+          "time": 20.55
+        },
+        {
+          "property": "opacity",
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-18",
+          "time": 20.65
+        },
+        {
+          "property": "opacity",
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-19",
+          "time": 20.65
+        },
+        {
+          "property": "y",
+          "value": 115,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-18",
+          "time": 21
+        },
+        {
+          "property": "opacity",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-18",
+          "time": 21
+        },
+        {
+          "property": "y",
+          "value": -15,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-19",
+          "time": 21
+        },
+        {
+          "property": "opacity",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-19",
+          "time": 21
+        },
+        {
+          "property": "maskPoint0X",
+          "value": 0,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21
+        },
+        {
+          "property": "maskPoint0Y",
+          "value": 0,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21
+        },
+        {
+          "property": "maskPoint1X",
+          "value": 50,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21
+        },
+        {
+          "property": "maskPoint1Y",
+          "value": 0,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21
+        },
+        {
+          "property": "maskPoint2X",
+          "value": 100,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21
+        },
+        {
+          "property": "maskPoint2Y",
+          "value": 0,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21
+        },
+        {
+          "property": "maskPoint3X",
+          "value": 100,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21
+        },
+        {
+          "property": "maskPoint3Y",
+          "value": 50,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21
+        },
+        {
+          "property": "maskPoint4X",
+          "value": 100,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21
+        },
+        {
+          "property": "maskPoint4Y",
+          "value": 100,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21
+        },
+        {
+          "property": "maskPoint5X",
+          "value": 50,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21
+        },
+        {
+          "property": "maskPoint5Y",
+          "value": 100,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21
+        },
+        {
+          "property": "maskPoint6X",
+          "value": 0,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21
+        },
+        {
+          "property": "maskPoint6Y",
+          "value": 100,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21
+        },
+        {
+          "property": "maskPoint7X",
+          "value": 0,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21
+        },
+        {
+          "property": "maskPoint7Y",
+          "value": 50,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21
+        },
+        {
+          "property": "opacity",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-20",
+          "time": 21
+        },
+        {
+          "property": "x",
+          "value": 98,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-18",
+          "time": 21
+        },
+        {
+          "property": "x",
+          "value": 2,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-19",
+          "time": 21
+        },
+        {
+          "property": "opacity",
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-20",
+          "time": 21.25
+        },
+        {
+          "property": "maskPoint0X",
+          "value": 0,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21.35
+        },
+        {
+          "property": "maskPoint0Y",
+          "value": 0,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21.35
+        },
+        {
+          "property": "maskPoint1X",
+          "value": 50,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21.35
+        },
+        {
+          "property": "maskPoint1Y",
+          "value": 0,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21.35
+        },
+        {
+          "property": "maskPoint2X",
+          "value": 100,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21.35
+        },
+        {
+          "property": "maskPoint2Y",
+          "value": 0,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21.35
+        },
+        {
+          "property": "maskPoint3X",
+          "value": 100,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21.35
+        },
+        {
+          "property": "maskPoint3Y",
+          "value": 50,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21.35
+        },
+        {
+          "property": "maskPoint4X",
+          "value": 100,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21.35
+        },
+        {
+          "property": "maskPoint4Y",
+          "value": 100,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21.35
+        },
+        {
+          "property": "maskPoint5X",
+          "value": 50,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21.35
+        },
+        {
+          "property": "maskPoint5Y",
+          "value": 100,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21.35
+        },
+        {
+          "property": "maskPoint6X",
+          "value": 0,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21.35
+        },
+        {
+          "property": "maskPoint6Y",
+          "value": 100,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21.35
+        },
+        {
+          "property": "maskPoint7X",
+          "value": 0,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21.35
+        },
+        {
+          "property": "maskPoint7Y",
+          "value": 50,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 21.35
+        },
+        {
+          "property": "maskPoint0X",
+          "value": 38.6862915,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.4
+        },
+        {
+          "property": "maskPoint0Y",
+          "value": 17.8867719,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.4
+        },
+        {
+          "property": "maskPoint1X",
+          "value": 50,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.4
+        },
+        {
+          "property": "maskPoint1Y",
+          "value": 9.5556,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.4
+        },
+        {
+          "property": "maskPoint2X",
+          "value": 61.3137085,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.4
+        },
+        {
+          "property": "maskPoint2Y",
+          "value": 17.8867719,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.4
+        },
+        {
+          "property": "maskPoint3X",
+          "value": 66,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.4
+        },
+        {
+          "property": "maskPoint3Y",
+          "value": 38,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.4
+        },
+        {
+          "property": "maskPoint4X",
+          "value": 61.3137085,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.4
+        },
+        {
+          "property": "maskPoint4Y",
+          "value": 58.1132281,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.4
+        },
+        {
+          "property": "maskPoint5X",
+          "value": 50,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.4
+        },
+        {
+          "property": "maskPoint5Y",
+          "value": 66.4444,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.4
+        },
+        {
+          "property": "maskPoint6X",
+          "value": 38.6862915,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.4
+        },
+        {
+          "property": "maskPoint6Y",
+          "value": 58.1132281,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.4
+        },
+        {
+          "property": "maskPoint7X",
+          "value": 34,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.4
+        },
+        {
+          "property": "maskPoint7Y",
+          "value": 38,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.4
+        },
+        {
+          "property": "maskPoint0X",
+          "value": 38.6862915,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.9
+        },
+        {
+          "property": "maskPoint0Y",
+          "value": 17.8867719,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.9
+        },
+        {
+          "property": "maskPoint1X",
+          "value": 50,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.9
+        },
+        {
+          "property": "maskPoint1Y",
+          "value": 9.5556,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.9
+        },
+        {
+          "property": "maskPoint2X",
+          "value": 61.3137085,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.9
+        },
+        {
+          "property": "maskPoint2Y",
+          "value": 17.8867719,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.9
+        },
+        {
+          "property": "maskPoint3X",
+          "value": 66,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.9
+        },
+        {
+          "property": "maskPoint3Y",
+          "value": 38,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.9
+        },
+        {
+          "property": "maskPoint4X",
+          "value": 61.3137085,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.9
+        },
+        {
+          "property": "maskPoint4Y",
+          "value": 58.1132281,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.9
+        },
+        {
+          "property": "maskPoint5X",
+          "value": 50,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.9
+        },
+        {
+          "property": "maskPoint5Y",
+          "value": 66.4444,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.9
+        },
+        {
+          "property": "maskPoint6X",
+          "value": 38.6862915,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.9
+        },
+        {
+          "property": "maskPoint6Y",
+          "value": 58.1132281,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.9
+        },
+        {
+          "property": "maskPoint7X",
+          "value": 34,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.9
+        },
+        {
+          "property": "maskPoint7Y",
+          "value": 38,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 22.9
+        },
+        {
+          "property": "opacity",
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-20",
+          "time": 23.75
+        },
+        {
+          "property": "opacity",
+          "value": 0,
+          "easing": "hold",
+          "targetId": "main-video",
+          "time": 24
+        },
+        {
+          "property": "maskPoint0X",
+          "value": 50,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 24
+        },
+        {
+          "property": "maskPoint0Y",
+          "value": 38,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 24
+        },
+        {
+          "property": "maskPoint1X",
+          "value": 50,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 24
+        },
+        {
+          "property": "maskPoint1Y",
+          "value": 38,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 24
+        },
+        {
+          "property": "maskPoint2X",
+          "value": 50,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 24
+        },
+        {
+          "property": "maskPoint2Y",
+          "value": 38,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 24
+        },
+        {
+          "property": "maskPoint3X",
+          "value": 50,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 24
+        },
+        {
+          "property": "maskPoint3Y",
+          "value": 38,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 24
+        },
+        {
+          "property": "maskPoint4X",
+          "value": 50,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 24
+        },
+        {
+          "property": "maskPoint4Y",
+          "value": 38,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 24
+        },
+        {
+          "property": "maskPoint5X",
+          "value": 50,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 24
+        },
+        {
+          "property": "maskPoint5Y",
+          "value": 38,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 24
+        },
+        {
+          "property": "maskPoint6X",
+          "value": 50,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 24
+        },
+        {
+          "property": "maskPoint6Y",
+          "value": 38,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 24
+        },
+        {
+          "property": "maskPoint7X",
+          "value": 50,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 24
+        },
+        {
+          "property": "maskPoint7Y",
+          "value": 38,
+          "easing": "linear",
+          "targetId": "plane-20",
+          "time": 24
+        },
+        {
+          "property": "opacity",
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ],
+          "targetId": "plane-20",
+          "time": 24
+        }
+      ],
+      "groups": [
+        {
+          "id": "group-0",
+          "name": "Prism",
+          "kind": "graphic_group",
+          "layerIds": [
+            "plane-21",
+            "plane-22",
+            "plane-23",
+            "plane-24"
+          ],
+          "transform": {
+            "x": 0,
+            "y": 0,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1
+          }
+        }
+      ],
+      "order": [
+        "plane-0",
+        "plane-1",
+        "plane-2",
+        "plane-3",
+        "plane-4",
+        "plane-5",
+        "plane-6",
+        "plane-7",
+        "plane-8",
+        "plane-9",
+        "plane-10",
+        "plane-11",
+        "plane-12",
+        "plane-13",
+        "plane-14",
+        "plane-15",
+        "plane-16",
+        "plane-17",
+        "plane-18",
+        "plane-19",
+        "plane-20",
+        "plane-21",
+        "plane-22",
+        "plane-23",
+        "plane-24"
+      ]
+    }
+  }
+}

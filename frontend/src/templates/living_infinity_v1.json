@@ -1,0 +1,607 @@
+{
+  "schemaVersion": 1,
+  "templateId": "living_infinity_v1",
+  "version": "1.0.1",
+  "label": "Living type \u2014 cinematic X",
+  "status": "draft",
+  "canonicalContractVersion": 1,
+  "compiler": "studioRenderCompiler",
+  "renderer": "render_viral_clip_impl",
+  "surfaces": [
+    "studio",
+    "director",
+    "welcome"
+  ],
+  "workflow": "studio",
+  "categoryIds": [
+    "motion_graphics"
+  ],
+  "inputSlots": [
+    {
+      "id": "footage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "music",
+      "type": "audio",
+      "required": false
+    }
+  ],
+  "supportedAspects": [
+    "16:9"
+  ],
+  "durationTicks": 720000,
+  "qualification": {
+    "studioLifecycle": "unverified",
+    "directorInstantiation": "unverified",
+    "creativeQuality": "unapproved",
+    "previewFinalParity": "unverified"
+  },
+  "executionDefinition": {
+    "clock": 90000,
+    "defaultAspect": "16:9",
+    "sequence": [
+      {
+        "slot": "footage",
+        "offset": 0,
+        "duration": 8,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      }
+    ],
+    "titles": [],
+    "logo": {},
+    "animation": {
+      "enterSeconds": 0.2,
+      "settleSeconds": 0.45,
+      "exitSeconds": 0.12,
+      "curve": [
+        0.16,
+        1,
+        0.3,
+        1
+      ]
+    },
+    "music": {
+      "volume": 55,
+      "fadeIn": 0.1,
+      "fadeOut": 0.5
+    },
+    "soundCues": [
+      {
+        "tone": "airy_whoosh",
+        "time": 0,
+        "duration": 0.6,
+        "volume": 0.2
+      },
+      {
+        "tone": "airy_whoosh",
+        "time": 3.3,
+        "duration": 0.5,
+        "volume": 0.16
+      },
+      {
+        "tone": "airy_whoosh",
+        "time": 6.4,
+        "duration": 0.6,
+        "volume": 0.18
+      }
+    ],
+    "sourceKeyframes": [],
+    "sceneActions": [],
+    "directorDescription": "A live dancer fills an editable X glyph; the glyph opens into a cinematic full-frame finish without added words. Uses one saved source and ordinary editable Studio layers. No model job.",
+    "defaultCopy": {},
+    "muteOriginalAudio": true,
+    "framing": {
+      "forceAspect": true,
+      "mode": "off",
+      "positions": []
+    },
+    "videoFit": "contain",
+    "ordinaryMotion": {
+      "version": 1,
+      "layers": [
+        {
+          "id": "Backdrop",
+          "name": "Backdrop",
+          "type": "image",
+          "vectorShape": {
+            "version": 1,
+            "closed": true,
+            "nodes": [
+              {
+                "x": 0,
+                "y": 0,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 100,
+                "y": 0,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 100,
+                "y": 100,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 0,
+                "y": 100,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "fill": {
+              "kind": "solid",
+              "color": "#09090c",
+              "endColor": "#09090c",
+              "start": [
+                0,
+                0
+              ],
+              "end": [
+                100,
+                100
+              ]
+            },
+            "stroke": {
+              "color": "#09090c",
+              "width": 0
+            }
+          },
+          "startTime": 0,
+          "duration": 8,
+          "x": 50,
+          "y": 50,
+          "width": 100,
+          "height": 100,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "stretch",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "Scarlet atmosphere",
+          "name": "Scarlet atmosphere",
+          "type": "video",
+          "sourceSlot": "footage",
+          "sourceStartTime": 0,
+          "startTime": 0,
+          "duration": 8,
+          "x": 50,
+          "y": 50,
+          "width": 100,
+          "height": 100,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 0.18,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "cover",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "Infinity glyph",
+          "name": "Cross glyph",
+          "type": "text",
+          "text": "X",
+          "x": 50,
+          "y": 50,
+          "width": 96,
+          "fontFamily": "Inter",
+          "fontWeight": 900,
+          "textAlign": "center",
+          "color": "#ffffff",
+          "bg": "transparent",
+          "shadow": "none",
+          "scale": 8.2,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "startTime": 0,
+          "duration": 8,
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "Living infinity",
+          "name": "Living infinity",
+          "type": "video",
+          "sourceSlot": "footage",
+          "sourceStartTime": 0,
+          "startTime": 0,
+          "duration": 8,
+          "x": 50,
+          "y": 50,
+          "width": 100,
+          "height": 100,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "cover",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "trackMatte": {
+            "mode": "alpha",
+            "sourceLayerId": "Infinity glyph"
+          }
+        }
+      ],
+      "keys": [
+        {
+          "targetId": "Infinity glyph",
+          "property": "rotation",
+          "time": 0,
+          "value": -35,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Infinity glyph",
+          "property": "rotation",
+          "time": 1.4,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Infinity glyph",
+          "property": "rotation",
+          "time": 3.5,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Infinity glyph",
+          "property": "rotation",
+          "time": 5,
+          "value": 15,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Infinity glyph",
+          "property": "rotation",
+          "time": 6.5,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Infinity glyph",
+          "property": "rotation",
+          "time": 8,
+          "value": -15,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Living infinity",
+          "property": "rotation",
+          "time": 0,
+          "value": -35,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Living infinity",
+          "property": "rotation",
+          "time": 1.4,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Living infinity",
+          "property": "rotation",
+          "time": 3.5,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Living infinity",
+          "property": "rotation",
+          "time": 5,
+          "value": 15,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Living infinity",
+          "property": "rotation",
+          "time": 6.5,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Living infinity",
+          "property": "rotation",
+          "time": 8,
+          "value": -15,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Infinity glyph",
+          "property": "scale",
+          "time": 0,
+          "value": 1.8,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Infinity glyph",
+          "property": "scale",
+          "time": 1.2,
+          "value": 8.2,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Infinity glyph",
+          "property": "scale",
+          "time": 3.8,
+          "value": 8.2,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Infinity glyph",
+          "property": "scale",
+          "time": 5.5,
+          "value": 13,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Infinity glyph",
+          "property": "scale",
+          "time": 7,
+          "value": 20,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Infinity glyph",
+          "property": "scale",
+          "time": 8,
+          "value": 26,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Living infinity",
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Living infinity",
+          "property": "opacity",
+          "time": 0.45,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Living infinity",
+          "property": "opacity",
+          "time": 7.3,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Living infinity",
+          "property": "opacity",
+          "time": 8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "main-video",
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "targetId": "main-video",
+          "property": "opacity",
+          "time": 8,
+          "value": 0,
+          "easing": "hold"
+        }
+      ],
+      "groups": [],
+      "order": [
+        "Backdrop",
+        "Scarlet atmosphere",
+        "Infinity glyph",
+        "Living infinity"
+      ]
+    }
+  }
+}

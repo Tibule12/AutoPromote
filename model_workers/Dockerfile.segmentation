@@ -4,6 +4,6 @@ COPY contracts/model-capabilities-v1.json contracts/
 COPY config/model-runtime config/model-runtime
 COPY model_workers/common.py model_workers/main.py model_workers/
 COPY model_workers/adapters/segmentation.py model_workers/adapters/
-COPY python_media_worker/studio_subject_matte.py python_media_worker/
+COPY python_media_worker/studio_subject_matte.py python_media_worker/studio_source_background.py python_media_worker/
 ENV MODEL_WORKER_CLASS=segmentation-tracking HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
 CMD ["python3", "-m", "model_workers.main"]

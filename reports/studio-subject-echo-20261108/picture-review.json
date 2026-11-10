@@ -1,0 +1,113 @@
+{
+  "seconds": 8,
+  "frames": 192,
+  "fps": 24,
+  "fullDecode": true,
+  "reviewedBoundaryFrames": [
+    0,
+    1,
+    3,
+    4,
+    7,
+    8,
+    11,
+    12,
+    15,
+    16,
+    24,
+    36,
+    48,
+    60,
+    72,
+    84,
+    94,
+    95,
+    96,
+    97,
+    99,
+    100,
+    103,
+    104,
+    107,
+    108,
+    111,
+    112,
+    120,
+    132,
+    144,
+    156,
+    168,
+    180,
+    190,
+    191
+  ],
+  "pairedDiagnostics": [
+    {
+      "requestedProgrammeTime": 0.5,
+      "exportFrame": 12,
+      "diagnosticPsnrDb": 28.511567770243687,
+      "strictParityClaimed": false,
+      "limit": "Initial preview selected source-rate clock; source/frame raster and full mix equality remain unqualified."
+    },
+    {
+      "requestedProgrammeTime": 1.5,
+      "exportFrame": 36,
+      "diagnosticPsnrDb": 28.257576691196217,
+      "strictParityClaimed": false,
+      "limit": "Initial preview selected source-rate clock; source/frame raster and full mix equality remain unqualified."
+    },
+    {
+      "requestedProgrammeTime": 2.75,
+      "exportFrame": 66,
+      "diagnosticPsnrDb": 28.405193885760443,
+      "strictParityClaimed": false,
+      "limit": "Initial preview selected source-rate clock; source/frame raster and full mix equality remain unqualified."
+    },
+    {
+      "requestedProgrammeTime": 3.958333,
+      "exportFrame": 95,
+      "diagnosticPsnrDb": 27.544811229456904,
+      "strictParityClaimed": false,
+      "limit": "Initial preview selected source-rate clock; source/frame raster and full mix equality remain unqualified."
+    },
+    {
+      "requestedProgrammeTime": 4,
+      "exportFrame": 96,
+      "diagnosticPsnrDb": 28.482881685192645,
+      "strictParityClaimed": false,
+      "limit": "Initial preview selected source-rate clock; source/frame raster and full mix equality remain unqualified."
+    },
+    {
+      "requestedProgrammeTime": 4.5,
+      "exportFrame": 108,
+      "diagnosticPsnrDb": 28.278589403919394,
+      "strictParityClaimed": false,
+      "limit": "Initial preview selected source-rate clock; source/frame raster and full mix equality remain unqualified."
+    },
+    {
+      "requestedProgrammeTime": 5.5,
+      "exportFrame": 132,
+      "diagnosticPsnrDb": 28.24653682027959,
+      "strictParityClaimed": false,
+      "limit": "Initial preview selected source-rate clock; source/frame raster and full mix equality remain unqualified."
+    },
+    {
+      "requestedProgrammeTime": 6.75,
+      "exportFrame": 162,
+      "diagnosticPsnrDb": 28.368885411452585,
+      "strictParityClaimed": false,
+      "limit": "Initial preview selected source-rate clock; source/frame raster and full mix equality remain unqualified."
+    },
+    {
+      "requestedProgrammeTime": 7.958333,
+      "exportFrame": 191,
+      "diagnosticPsnrDb": 27.292406347288576,
+      "strictParityClaimed": false,
+      "limit": "Initial preview selected source-rate clock; source/frame raster and full mix equality remain unqualified."
+    }
+  ],
+  "minimumDiagnosticPsnrDb": 27.292406347288576,
+  "strictPictureAudioParity": false,
+  "humanListeningQualified": false,
+  "ownerCreativeApproval": false
+}

@@ -1,0 +1,6 @@
+{
+  "stoppedObserverPid": 1880539,
+  "acceptedJob": "a078c46d-dc9e-404c-9e44-ca307d8e0ed4",
+  "workerCancelled": false,
+  "reason": "Only redundant browser observer stopped; sequential pipeline keeps ordinary same-job observation active."
+}

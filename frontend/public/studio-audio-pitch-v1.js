@@ -1,115 +1,77 @@
 /* global AudioWorkletProcessor, registerProcessor, sampleRate */
-// Live pitch audition in the existing Remix Audio graph. Bounded FFT work
-// runs on the audio thread, not Studio's UI/timeline thread. Final mastering
-// continues to use the canonical worker's Rubber Band chain.
-const SIZE = 2048, HOP = 512, LATENCY = SIZE - HOP;
-function fft(real, imaginary, inverse = false) {
-  for (let i = 1, j = 0; i < SIZE; i++) {
-    let bit = SIZE >> 1;
-    for (; j & bit; bit >>= 1) j ^= bit;
-    j ^= bit;
-    if (i < j) {
-      [real[i], real[j]] = [real[j], real[i]];
-      [imaginary[i], imaginary[j]] = [imaginary[j], imaginary[i]];
-    }
-  }
-  for (let length = 2; length <= SIZE; length *= 2) {
-    const angle = (inverse ? 2 : -2) * Math.PI / length;
-    const wr = Math.cos(angle), wi = Math.sin(angle);
-    for (let start = 0; start < SIZE; start += length) {
-      let ur = 1, ui = 0;
-      for (let offset = 0; offset < length / 2; offset++) {
-        const a = start + offset, b = a + length / 2;
-        const vr = real[b] * ur - imaginary[b] * ui;
-        const vi = real[b] * ui + imaginary[b] * ur;
-        real[b] = real[a] - vr; imaginary[b] = imaginary[a] - vi;
-        real[a] += vr; imaginary[a] += vi;
-        const next = ur * wr - ui * wi;
-        ui = ur * wi + ui * wr; ur = next;
-      }
-    }
-  }
-  if (inverse) for (let i = 0; i < SIZE; i++) { real[i] /= SIZE; imaginary[i] /= SIZE; }
-}
-class PitchChannel {
-  constructor() {
-    for (const key of ["input", "output", "real", "imaginary", "lastPhase", "sumPhase", "magnitude", "frequency", "accumulator"])
-      this[key] = new Float32Array(SIZE);
-    this.position = LATENCY;
-  }
-  frame(ratio, window) {
-    for (let i = 0; i < SIZE; i++) { this.real[i] = this.input[i] * window[i]; this.imaginary[i] = 0; }
-    fft(this.real, this.imaginary);
-    this.magnitude.fill(0); this.frequency.fill(0);
-    const step = 2 * Math.PI * HOP / SIZE;
-    for (let bin = 0; bin <= SIZE / 2; bin++) {
-      const magnitude = Math.hypot(this.real[bin], this.imaginary[bin]);
-      const phase = Math.atan2(this.imaginary[bin], this.real[bin]);
-      const delta = phase - this.lastPhase[bin] - bin * step;
-      this.lastPhase[bin] = phase;
-      const deviation = Math.atan2(Math.sin(delta), Math.cos(delta)) / step;
-      const destination = Math.round(bin * ratio);
-      if (destination <= SIZE / 2) {
-        this.magnitude[destination] += magnitude;
-        this.frequency[destination] += magnitude * (bin + deviation) * ratio;
-      }
-    }
-    this.real.fill(0); this.imaginary.fill(0);
-    for (let bin = 0; bin <= SIZE / 2; bin++) {
-      const magnitude = this.magnitude[bin];
-      const frequency = magnitude ? this.frequency[bin] / magnitude : bin;
-      this.sumPhase[bin] += frequency * step;
-      this.sumPhase[bin] %= 2 * Math.PI;
-      this.real[bin] = magnitude * Math.cos(this.sumPhase[bin]);
-      this.imaginary[bin] = bin && bin < SIZE / 2 ? magnitude * Math.sin(this.sumPhase[bin]) : 0;
-      if (bin && bin < SIZE / 2) {
-        this.real[SIZE - bin] = this.real[bin];
-        this.imaginary[SIZE - bin] = -this.imaginary[bin];
-      }
-    }
-    fft(this.real, this.imaginary, true);
-    for (let i = 0; i < SIZE; i++) this.accumulator[i] += this.real[i] * window[i] * (2 / 3);
-    this.output.set(this.accumulator.subarray(0, HOP));
-    this.accumulator.copyWithin(0, HOP); this.accumulator.fill(0, SIZE - HOP);
-    this.input.copyWithin(0, HOP);
-  }
-}
+import createStretch from "./vendor/signalsmith/stretch-wasm-1.3.2.js";
+
+// Keep Studio's pitch-node contract and programme clock. Only live DSP changes;
+// worker mastering and authored project values are untouched.
 export class StudioPitchProcessor extends (typeof AudioWorkletProcessor === "undefined" ? class {} : AudioWorkletProcessor) {
   static get parameterDescriptors() {
     return [{ name: "semitones", defaultValue: 0, minValue: -12, maxValue: 12, automationRate: "k-rate" }];
   }
-  constructor() {
+  constructor(options = {}) {
     super();
-    this.sampleRate = typeof sampleRate === "number" ? sampleRate : 48000;
-    this.channels = [new PitchChannel(), new PitchChannel()];
-    this.window = Float32Array.from({ length: SIZE }, (_, i) => .5 - .5 * Math.cos(2 * Math.PI * i / SIZE));
+    this.rate = typeof sampleRate === "number" ? sampleRate : 48000;
+    this.mix = 0;
+    this.lastPitch = 0;
+    this.channels = 2;
+    this.blockSize = 128;
+    this.ready = createStretch({ wasmModule: options.processorOptions?.wasmModule }).then(wasm => {
+      this.wasm = wasm;
+      // Preserve low-voice harmonics with an ~85 ms analysis window at 48 kHz.
+      // Spread computation across quanta; measured input/output latency is
+      // reported to the graph and never changes the programme clock.
+      wasm._configure(this.channels, 4096, 512, true);
+      this.latency = wasm._inputLatency() + wasm._outputLatency();
+      this.allocateBuffers();
+      this.reset();
+      this.port?.postMessage({ type: "ready", latencySeconds: this.latency / this.rate });
+    }).catch(() => { this.port?.postMessage({ type: "error" }); });
     if (this.port) this.port.onmessage = event => { if (event.data?.type === "reset") this.reset(); };
   }
+  allocateBuffers() {
+    const pointer = this.wasm._setBuffers(this.channels, this.blockSize);
+    this.inputPointers = [pointer, pointer + this.blockSize * 4];
+    this.outputPointers = this.inputPointers.map(offset => offset + this.channels * this.blockSize * 4);
+  }
   reset() {
-    for (const channel of this.channels) {
-      for (const value of Object.values(channel)) if (value instanceof Float32Array) value.fill(0);
-      channel.position = LATENCY;
-    }
+    this.wasm?._reset();
+    this.warmup = this.latency || 0;
+    this.mix = 0;
   }
   process(inputs, outputs, parameters) {
     const input = inputs[0] || [], output = outputs[0] || [];
+    if (!output.length) return true;
+    const size = output[0].length;
     const pitch = Math.max(-12, Math.min(12, Number(parameters.semitones?.[0]) || 0));
-    const ratio = 2 ** (pitch / 12);
-    for (let channel = 0; channel < output.length; channel++) {
-      const state = this.channels[Math.min(channel, 1)];
-      const source = input[Math.min(channel, input.length - 1)];
-      for (let frame = 0; frame < output[channel].length; frame++) {
-        const value = source?.[frame] || 0;
-        state.input[state.position] = value;
-        output[channel][frame] = Math.abs(pitch) < .001 ? value : state.output[state.position - LATENCY];
-        state.position++;
-        if (state.position === SIZE) {
-          state.position = LATENCY;
-          if (Math.abs(pitch) >= .001) state.frame(ratio, this.window);
-          else state.input.copyWithin(0, HOP);
-        }
+    if (this.wasm) {
+      if (size > this.blockSize) { this.blockSize = size; this.allocateBuffers(); }
+      if (pitch !== this.lastPitch) {
+        this.wasm._setTransposeSemitones(pitch, 8000 / this.rate);
+        this.lastPitch = pitch;
       }
+      for (let channel = 0; channel < this.channels; channel++) {
+        const source = input[Math.min(channel, input.length - 1)];
+        const buffer = new Float32Array(this.wasm.HEAP8.buffer, this.inputPointers[channel], size);
+        if (source) buffer.set(source); else buffer.fill(0);
+      }
+      this.wasm._process(size, size);
     }
+    // Warm without cutting off speech, then crossfade preset/bypass changes.
+    // Seeking clears all buffered old-position speech.
+    const target = this.wasm && this.warmup <= 0 && Math.abs(pitch) >= .001 ? 1 : 0;
+    const startMix = this.mix, step = 1 / (this.rate * .012);
+    for (let channel = 0; channel < output.length; channel++) {
+      const source = input[Math.min(channel, input.length - 1)];
+      const shifted = this.wasm && new Float32Array(this.wasm.HEAP8.buffer,
+        this.outputPointers[Math.min(channel, 1)], size);
+      let mix = startMix;
+      for (let frame = 0; frame < size; frame++) {
+        mix = target > mix ? Math.min(target, mix + step) : Math.max(target, mix - step);
+        const dry = source?.[frame] || 0;
+        output[channel][frame] = dry * (1 - mix) + (shifted?.[frame] || 0) * mix;
+      }
+      this.mix = mix;
+    }
+    this.warmup = Math.max(0, this.warmup - size);
     return true;
   }
 }

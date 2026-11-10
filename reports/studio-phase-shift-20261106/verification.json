@@ -1,0 +1,145 @@
+{
+  "recordedAt": "2026-11-06T19:23:29.198867+00:00",
+  "evidence": "reports/studio-phase-shift-20261106/README.md",
+  "deliveryDirectory": "/home/tibule12/Videos/Studio - Phase Shift - 2026-11-06",
+  "result": "NATIVE_PHASE_SHIFT_DELIVERED_AND_LOCAL_FEATURE_CONTROLS_REDESIGNED_REVIEW_PENDING",
+  "actualStudioFrontend": true,
+  "sharedCanonicalCpuRenderer": true,
+  "ordinaryEditableProject": true,
+  "nativeSeconds": 15,
+  "nativeFrames": 360,
+  "nativeFps": 24,
+  "nativeWidth": 1280,
+  "nativeHeight": 720,
+  "projectId": "viral-project-af5d54ce-2f58-4f27-8050-9b5c8ad7e5a9",
+  "projectHash": "779404b289dbb9474e72a0d33e6f4d4e7c8e873467d29559ae6874e4ea768b54",
+  "movieSha256": "f120949d5b66e41e6bc70bfeace2d49e49d8e8f9e6a52a5acb018786c081bf04",
+  "jobId": "viral_d6e3283518cad2a8375f5097af45af057df848cfe6b597d2d85f14a8d6eccbac",
+  "executionId": "38b90fe83b3171ef6be5d2700e44c9818076d633ca114f993d9548e19e311938",
+  "nativeBackupMatchesRenderedDocument": true,
+  "compiledCompositionMatchesSubmitted": true,
+  "workerArtifactMatchesNativeDownload": true,
+  "actualNativeDownload": true,
+  "layers": 22,
+  "keys": 177,
+  "sourceSpeechMuted": true,
+  "captions": 0,
+  "creativeTechniques": [
+    "Eight time-offset video strips with independent mask/transform motion",
+    "Retained source-bound video luma matte fills a walking silhouette with another moving shot",
+    "Eight independently timed/rotated triangular video sectors reassemble into a final horizon"
+  ],
+  "manualCreativeDirection": true,
+  "autonomousDirectorInference": false,
+  "newInferenceCalls": 0,
+  "nativeExecutions": 1,
+  "worker": {
+    "wallSeconds": 414.7296293850013,
+    "cpuSeconds": 747.310356,
+    "peakRssKiB": 1305132,
+    "cpuCeilingSeconds": 600,
+    "localFileCeilingBytes": 134217728,
+    "providerChargesStarted": false,
+    "invoiceCostMicros": null,
+    "termination": {
+      "code": 0,
+      "signal": null,
+      "startedAt": "2026-11-06T19:09:58.479Z",
+      "finishedAt": "2026-11-06T19:16:53.493Z"
+    }
+  },
+  "nativeRestoreEditUndoRedo": {
+    "independentRestore": true,
+    "meaningfulUndoRedo": true
+  },
+  "allFilmFramesFullyDecoded": true,
+  "fullLiveAndFinishedTimelineRecordings": true,
+  "livePlayback": {
+    "complete": true,
+    "programmeSeconds": 15,
+    "elapsedMs": 16931,
+    "mediaTime": 14.958333,
+    "total": 437,
+    "dropped": 53
+  },
+  "finishedPlayback": {
+    "complete": true,
+    "programmeSeconds": 15,
+    "elapsedMs": 17753,
+    "mediaTime": 14.988083,
+    "total": 363,
+    "dropped": 9
+  },
+  "captureRates": {
+    "live": {
+      "seconds": 16.29200005531311,
+      "frames": 208,
+      "observedCaptureFps": 12.7670021663281
+    },
+    "finished": {
+      "seconds": 17.871000051498413,
+      "frames": 310,
+      "observedCaptureFps": 17.346539035682433
+    }
+  },
+  "pausedPreviewExportPairs": 10,
+  "sampledExportFrames": 17,
+  "minimumDiagnosticPsnrDb": 5.790480282494661,
+  "firstSeekOmissionsObserved": [
+    "5.5s silhouette absent in paused preview but present in export",
+    "9.5s iris absent; 11s/13s only some sectors appear",
+    "14.5s final shot absent in paused preview but present in export",
+    "Independent fresh 6.5s live screenshot initially omitted the silhouette"
+  ],
+  "uiChanges": [
+    "Shared readable inspector typography, contrast and spacing",
+    "Consistent fields, range thumbs, keyboard focus and selected/disabled states",
+    "Untruncated 2-column aspect choices with visual ratio outlines",
+    "Compact descriptive audio preset rows; existing native preset actions retained",
+    "Named feature-controls region with current-tool metadata"
+  ],
+  "nativeControlChecks": 19,
+  "desktopPanelsExercised": 14,
+  "desktopWidths": [
+    1440,
+    1280
+  ],
+  "mobileWidth": 390,
+  "mobileDesktopRequiredBoundaryPreserved": true,
+  "focusedEditorTests": 5,
+  "editorCasesUnselectedByPattern": 164,
+  "audioPanelTests": 15,
+  "distinctAutomatedTests": 20,
+  "candidateBuilds": 3,
+  "welcomeViewportComparisonsPerCandidate": 8,
+  "normalSignedInHelpOnFinalCandidate": true,
+  "kernelMatchesFrontend": true,
+  "earlierTemplateCollectionFilesUnchanged": 154,
+  "originalSourcesRetained": true,
+  "durablePrivateDemoEvidence": {
+    "archive": "reports/studio-phase-shift-20261106/private/native-proof-and-demo-evidence.tar.gz",
+    "archiveSha256": "36534fe4b820386d95654c6c762b56b8d47c3afe9bd473002aa4b0b0f8f1013a",
+    "files": 220,
+    "bytes": 71693581,
+    "roundTripHashesVerified": true,
+    "demoOnly": true,
+    "authSessionsIncluded": false,
+    "replayOfCompleteOriginalEmulatorClaimed": false
+  },
+  "wholePreviewFinalParityQualified": false,
+  "humanListeningQualified": false,
+  "creativeApproval": false,
+  "readinessPromotion": false,
+  "localUiBuildSelected": true,
+  "productionDeployment": false,
+  "pushOrMerge": false,
+  "paidCalls": 0,
+  "productionWrites": 0,
+  "remaining": [
+    "S02 first-seek/independent source sampling, omitted secondary layers, whole colour/alpha/edge/audio parity and live/capture throughput",
+    "Owner creative/listening review; this is a short authored demonstration, not AE/Fusion completeness",
+    "S04 motion/Director depth and S03 graph ownership remain open",
+    "Local controls need normal release review; production has not received these changes"
+  ],
+  "nextTask": "Repair the retained S02 first-seek layer omissions before claiming predictive preview parity; continue shared S04/S03 and owner review of this film/controls."
+}

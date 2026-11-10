@@ -1,0 +1,25 @@
+{
+  "available": true,
+  "capturedAtUtc": "2026-10-27T03:16:05.704863+00:00",
+  "data": {
+    "metadata": {
+      "creationTimestamp": "2026-07-10T16:38:57.311883Z",
+      "labels": {
+        "cloud.googleapis.com/location": "us-central1",
+        "run.googleapis.com/startupProbeType": "Default",
+        "serving.knative.dev/configuration": "thulani-api",
+        "serving.knative.dev/configurationGeneration": "18",
+        "serving.knative.dev/route": "thulani-api",
+        "serving.knative.dev/service": "thulani-api",
+        "serving.knative.dev/serviceUid": "10f3fc7a-6821-491a-94e4-7cd1d1e2efbf"
+      },
+      "name": "thulani-api-00021-joc"
+    },
+    "spec": {
+      "serviceAccountName": "341498038874-compute@developer.gserviceaccount.com"
+    },
+    "status": {
+      "imageDigest": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/thulani-api@sha256:1c78cd2eaffaf5fde046fa9750261aebbde8c4b436579a2c36531865e548e715"
+    }
+  }
+}

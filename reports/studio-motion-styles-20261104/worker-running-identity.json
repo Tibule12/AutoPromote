@@ -1,0 +1,16 @@
+{
+  "childPid": 1183638,
+  "childCwd": "/tmp/autopromote-application-demo-5izIlF/worker/9619e66e01816ff8d860a5af4b17d5561e3e8e7c9efa92d29b7461a15ce0e0df",
+  "sourceRoot": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031",
+  "providerPid": 454290,
+  "providerCwd": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031",
+  "apiPid": 1168716,
+  "apiCwd": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031",
+  "sourceHashes": {
+    "python_media_worker/main_media_server.py": "ea92bbefa960c47621bb4a2d0cb7fe089f531b7745e5b6022ea7fb4ed1c71b07",
+    "python_media_worker/studio_layer_cache.py": "c01f6fb690f0e1e296743fff0fc30f32e518ea822fa01a2d35d6fdcb3361b76f",
+    "frontend/src/utils/sourceUpload.js": "d24ac3b0fe303fbee8d2b3110f84ef14330df606b7a23e6a379e809efdac8b57",
+    "frontend/src/components/ViralClipStudio.js": "8637a26d592ee495afa032620940c2a0a19013363ee54a4dfe4d185b6e5cba48"
+  },
+  "verifiedWhileCorrectiveRenderRunning": true
+}

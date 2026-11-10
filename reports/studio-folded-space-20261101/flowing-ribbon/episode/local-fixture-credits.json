@@ -1,0 +1,58 @@
+{
+  "project": "demo-autopromote-credits",
+  "uid": "demo-pilot-alice",
+  "before": {
+    "sandbox": true,
+    "balance": 0,
+    "reserved": 0,
+    "tier": "free",
+    "cycle": "2026-11",
+    "renewsAt": "2026-12-01T00:00:00.000Z",
+    "monthlyAllowance": 15,
+    "maxBalance": 10000,
+    "totals": {
+      "opening": 0,
+      "granted": 30,
+      "earned": 0,
+      "purchased": 3,
+      "consumed": 20,
+      "refunded": 16,
+      "expired": 13
+    },
+    "rewardCredits": 1,
+    "adsRemaining": 20,
+    "activeReward": null,
+    "adFree": false,
+    "pricingRevision": "975594d94929a0b6497ffe3533629b0900f210698259b7616fb6b99fd9e416ea"
+  },
+  "after": {
+    "sandbox": true,
+    "balance": 2,
+    "reserved": 0,
+    "tier": "free",
+    "cycle": "2026-11",
+    "renewsAt": "2026-12-01T00:00:00.000Z",
+    "monthlyAllowance": 15,
+    "maxBalance": 10000,
+    "totals": {
+      "opening": 0,
+      "granted": 30,
+      "earned": 0,
+      "purchased": 5,
+      "consumed": 20,
+      "refunded": 16,
+      "expired": 13
+    },
+    "rewardCredits": 1,
+    "adsRemaining": 20,
+    "activeReward": null,
+    "adFree": false,
+    "pricingRevision": "975594d94929a0b6497ffe3533629b0900f210698259b7616fb6b99fd9e416ea"
+  },
+  "result": {
+    "alreadyProcessed": false,
+    "balance": 2
+  },
+  "fixtureCredits": 2,
+  "description": "Local test fixture only; no payment, production wallet or paid provider operation."
+}

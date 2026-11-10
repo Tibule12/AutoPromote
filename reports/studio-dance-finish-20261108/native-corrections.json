@@ -1,0 +1,58 @@
+{
+  "actualFrontendAuthoring": {
+    "normalSignIn": true,
+    "nativeUi": true,
+    "headless": true,
+    "muted": true,
+    "errors": [],
+    "applyUndoRedoExact": true,
+    "fractionalMatteAsset": "Two - firmer detailed matte.mp4",
+    "originalAudioPercent": 70,
+    "originalMusicAndSpeedPreserved": true,
+    "voiceRemixDisabled": true,
+    "noAddedLines": true
+  },
+  "independentExactRestore": {
+    "normalSignIn": true,
+    "exactNativeDecisions": true
+  },
+  "restoration": {
+    "completePriorExportRestored": true,
+    "source": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105/reports/studio-dance-realism-20261108/private/emulator-final-export",
+    "oldestLostOctoberHistoryRecovered": false,
+    "priorFreshCohortBalancePreserved": 7,
+    "reserved": 0,
+    "operations": 27,
+    "activeOperations": 0,
+    "auth": true,
+    "firestore": true,
+    "storage": true,
+    "newVideoObjects": 9,
+    "newVideoSignedGenerationsPreserved": true,
+    "pid": 147799,
+    "firestorePid": 147836,
+    "productionChange": false
+  },
+  "noProductionOrPaidOperation": true,
+  "noOriginalOverwritten": true,
+  "retainedFailures": [
+    {
+      "jobId": "viral_ef999a992b916584948df0e51855555299bb39fd0d4dedf19f64846d3835b2e7",
+      "cause": "Isolated emulator/API stopped during source materialization; signed terminal worker failure retained.",
+      "retryAuthorizedByFixTask": true,
+      "historyLimit": "Failure request happened after the latest full snapshot; it is retained in worker receipts, not claimed restored into the older ledger."
+    },
+    {
+      "jobId": "viral_9e39363e53ac64ed092ce054a7566c51a855c9bf17ed49efedafba477ca8f6d3",
+      "cause": "New final badge pass attempted to probe a disposable source no longer available.",
+      "correction": "Keep a separately owned source copy in a job-scoped temporary directory through final picture cleanup; remove it on exit.",
+      "normalFailureRefund": true
+    }
+  ],
+  "rejectedCompletedCandidate": {
+    "jobId": "viral_25682233658f479db47263fa15ec6e81fc2b0821594d1542363a01511ff66c83",
+    "movieSha256": "de3edd1e1211b4415c8bc509e6f567284417038c6e3cfc55c6f6c596f98adb08",
+    "reason": "A faint final badge stroke remained at the right picture boundary. Retained privately; not the delivery candidate.",
+    "fix": "Extend protected source alpha through a nearby frame edge and replicate the edge during feathering."
+  }
+}

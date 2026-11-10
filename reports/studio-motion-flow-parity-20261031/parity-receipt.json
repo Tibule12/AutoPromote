@@ -1,14 +1,28 @@
 {
   "passed": true,
-  "scope": "Local loopback pre-final browser stage vs local CPU FFmpeg worker render parity for AutoPromote Comp & Rig (Null Rig parenting, loop/wiggle/spin Motion Drivers, Bezier keyframe preset, Alpha Track Matte) + Signal Node Flow canonical compilation. No cloud uploads, no GPU calls, and not a signed-in production export proof.",
+  "scope": "Local loopback pre-final browser stage vs local CPU FFmpeg worker render parity for AutoPromote Comp & Rig (Null Rig parenting, loop/wiggle/spin Motion Drivers, Bezier keyframe preset, Alpha Track Matte), Signal Node Flow canonical compilation, and Cinema Color Grade (3-Way Wheels + 5-Knot Tone Curve + HSL + 3D .cube LUT) pixel parity. No cloud uploads, no GPU calls, and not a signed-in production export proof.",
   "thresholds": {
     "min_iou": 0.95,
-    "max_boundary_p95_px": 2.0
+    "max_boundary_p95_px": 2.0,
+    "max_color_channel_delta": 3,
+    "min_color_psnr_db": 38.0
   },
   "summary": {
-    "min_measured_iou": 0.976516,
+    "min_measured_iou": 0.976585,
     "max_measured_boundary_p95_px": 1.4142,
-    "frames_checked": 4
+    "frames_checked": 4,
+    "color_grade_psnr_db": 47.73,
+    "color_grade_max_delta": 5
+  },
+  "color_grade_parity": {
+    "passed": true,
+    "lut_preset": "kodak_2383",
+    "lut_size": 33,
+    "precision_wheel_max_delta": 2,
+    "lut3d_max_delta": 1,
+    "max_channel_delta": 5,
+    "mean_channel_delta": 0.6606,
+    "psnr_db": 47.73
   },
   "media_probe": {
     "width": 360,
@@ -22,8 +36,8 @@
     "full_decode_clean": true
   },
   "artifacts": {
-    "render_request_sha256": "1e51d89314d2e7e2e94092ba51f7998ef3831b5af9f14b122531b9c1342f333f",
-    "final_mp4_sha256": "df5725ce202cae2943c2ed56df41b62fc63f24d75cc04132d22ade9c64cff7c3"
+    "render_request_sha256": "cee39e94936d11e256561f8d13a4abc8b9dcca135a48aa2ca9661a9e01668af9",
+    "final_mp4_sha256": "04caa5024b5f364c42c4526d91bbf6bfc47a40cc1f455a47d60e948f6c4ee71e"
   },
   "frames": [
     {
@@ -37,20 +51,20 @@
         360,
         640
       ],
-      "iou": 0.976516,
+      "iou": 0.976585,
       "boundary_p95_px": 1.4142,
-      "boundary_mean_px": 0.8127,
+      "boundary_mean_px": 0.8101,
       "boundary_max_px": 2.0,
       "preview_area_px": 13862,
-      "final_area_px": 13912,
+      "final_area_px": 13911,
       "centroid_delta_px": [
-        1.06,
-        0.443
+        1.058,
+        0.447
       ],
       "passed": true,
       "preview_sha256": "e4602b8d5faca8c2ae649de9342eac089ee6f254b7cbce4ab35809da7afc3ea7",
-      "final_sha256": "7ac66b5af501bfab0844387ffb33722922be948be0447b0ce1bef07f72363a41",
-      "diff_sha256": "dd5766d5ff23d3cf460c45f0bd6f012ed4f4ffc874eb1ac8d8d4b511010df043"
+      "final_sha256": "fb68ae114b34c1cd81408ef58440d0d9f99d210c2162d7b023116a9f34300d1f",
+      "diff_sha256": "0affa3e7380583a897070f28f0b5e8f1fdd61f452ae0f0e9f322103681d46670"
     },
     {
       "time_seconds": 1.5,
@@ -75,7 +89,7 @@
       ],
       "passed": true,
       "preview_sha256": "7b983256d475efd55fde90be52f1d576806fb6723436f7fa8bc15cada3c368f1",
-      "final_sha256": "57c62db3eb154504c38490cc63fa05b0c8474d9c82a161d6037532aea906eb0d",
+      "final_sha256": "3d17b1b71e03810a447e708155968ba16ca97458ee9a48359e19f23073dbe9e6",
       "diff_sha256": "e9b30f8fe4c0473a7222f5d81a9ac370f6c40a152c16723c705c6d927a946427"
     },
     {
@@ -101,7 +115,7 @@
       ],
       "passed": true,
       "preview_sha256": "4ff9f6409f7bd682f3aede52d8a9c0374c178f6f916dd2a372cd0eace976f6a3",
-      "final_sha256": "b190d9e38e02bbb43d6b908a290b593c34ddc71bc436d7f3142cbbd0ed3fd451",
+      "final_sha256": "179d78984b584f7f84236fd6617bc7d0a6392df5ed45be546fae79821ce14495",
       "diff_sha256": "1db2e74cda35eb320aaa8e87f6eb175c2c02ce9a2177d7f586d54b49cef8b8dd"
     },
     {
@@ -115,20 +129,20 @@
         360,
         640
       ],
-      "iou": 0.992661,
+      "iou": 0.992552,
       "boundary_p95_px": 1.0,
-      "boundary_mean_px": 0.3042,
-      "boundary_max_px": 1.0,
+      "boundary_mean_px": 0.3078,
+      "boundary_max_px": 1.4142,
       "preview_area_px": 18353,
-      "final_area_px": 18300,
+      "final_area_px": 18298,
       "centroid_delta_px": [
-        0.381,
-        -0.035
+        0.38,
+        -0.024
       ],
       "passed": true,
       "preview_sha256": "2a8350b525d4bab75c647c967e90048d9c1364b57a526523201b5fecfb701ba4",
-      "final_sha256": "c0f3494d7565401e35705699a17bf843dd2815674315347fc55b2e18fa535fbd",
-      "diff_sha256": "f2f6a10926288f28e28aaf95a543eac61162665aba16ef9feb0c03e99f4f1d5f"
+      "final_sha256": "aa68722c9ee190e2db1013bba0b854201d5498013bc78b47eb751804396f19e6",
+      "diff_sha256": "7b0d8b9cb4af73d489d367549cac5b6d49b3aa30bbc8cf91745c19970e6ea60d"
     }
   ]
 }

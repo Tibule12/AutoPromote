@@ -116,6 +116,7 @@ async function uploadSourceFileViaFirebase({
   timeoutMs,
   contentHash,
 }) {
+  const deadline = Date.now() + timeoutMs;
   const user = auth.currentUser;
   if (!user?.uid) {
     throw new Error("Please sign in again before uploading.");
@@ -162,7 +163,22 @@ async function uploadSourceFileViaFirebase({
     );
   });
 
-  const url = await getDownloadURL(snapshot.ref);
+  // Byte completion is not URL availability. Storage can accept the file and
+  // then stall its metadata request; keep that phase inside the upload budget
+  // and let the existing authenticated backend fallback handle a timeout.
+  let urlTimer;
+  let url;
+  try {
+    const remainingMs = Math.max(0, Math.min(15000, deadline - Date.now()));
+    url = await Promise.race([
+      getDownloadURL(snapshot.ref),
+      new Promise((_resolve, reject) => {
+        urlTimer = setTimeout(() => reject(new Error('Uploaded media URL timed out.')), remainingMs);
+      }),
+    ]);
+  } finally {
+    clearTimeout(urlTimer);
+  }
   const size = snapshot.metadata?.size ? Number(snapshot.metadata.size) : file.size || 0;
   return {
     ok: true,
@@ -252,23 +268,26 @@ export async function uploadSourceFileViaBackend({
   }
 
   const normalizedMediaType = mediaType || inferUploadMediaType(file);
-  const audioOwnerUid = normalizedMediaType === 'audio' && !getRuntimeE2EToken()
+  const studioAssetUpload = purpose === 'studio_project' &&
+    ['image', 'audio'].includes(normalizedMediaType) && file.size <= 16 * 1024 * 1024;
+  const mediaOwnerUid = (normalizedMediaType === 'audio' || studioAssetUpload) && !getRuntimeE2EToken()
     ? auth.currentUser?.uid : null;
-  const assertAudioOwner = () => {
-    if (normalizedMediaType === 'audio' && !getRuntimeE2EToken() &&
-        (!audioOwnerUid || auth.currentUser?.uid !== audioOwnerUid)) {
-      throw new Error('Your sign-in changed during the audio upload. Sign in again and retry.');
+  const assertUploadOwner = () => {
+    if ((normalizedMediaType === 'audio' || studioAssetUpload) && !getRuntimeE2EToken() &&
+        (!mediaOwnerUid || auth.currentUser?.uid !== mediaOwnerUid)) {
+      throw new Error('Your sign-in changed during the media upload. Sign in again and retry.');
     }
   };
-  assertAudioOwner();
-  const contentHash = normalizedMediaType === 'audio' ? await hashStudioSourceBlob(file) : null;
-  assertAudioOwner();
-  const bindAudioSource = result => {
-    assertAudioOwner();
+  assertUploadOwner();
+  const contentHash = normalizedMediaType === 'audio' || studioAssetUpload
+    ? await hashStudioSourceBlob(file) : null;
+  assertUploadOwner();
+  const bindSourceIdentity = result => {
+    assertUploadOwner();
     if (!contentHash) return result;
     if (result.contentHash && result.contentHash !== contentHash)
       throw new Error('Uploaded audio does not match the selected source bytes.');
-    return { ...result, contentHash, ...(audioOwnerUid ? { ownerUid: audioOwnerUid } : {}) };
+    return { ...result, contentHash, ...(mediaOwnerUid ? { ownerUid: mediaOwnerUid } : {}) };
   };
   // Small Studio videos need the same durable owner/purpose identity as large
   // recordings. General Firebase uploads cannot satisfy model source binding.
@@ -283,8 +302,18 @@ export async function uploadSourceFileViaBackend({
     });
     return { ...uploaded, uploadMode: "studio_resumable" };
   }
+  // Small authored Studio assets already have a bounded authenticated upload
+  // endpoint. Avoid an SDK upload followed by an unbounded getDownloadURL
+  // lookup for each generated layer; keep other clients and large media on
+  // their existing path. The backend retains the signed-in owner's boundary.
+  if (studioAssetUpload) {
+    return bindSourceIdentity(await uploadSourceFileViaBackendRequest({
+      file, token: token || getRuntimeE2EToken(), mediaType: normalizedMediaType,
+      fileName, onProgress, timeoutMs,
+    }));
+  }
   if (getRuntimeE2EToken()) {
-    return bindAudioSource(await uploadSourceFileViaBackendRequest({
+    return bindSourceIdentity(await uploadSourceFileViaBackendRequest({
       file,
       token: token || getRuntimeE2EToken(),
       mediaType: normalizedMediaType,
@@ -294,7 +323,7 @@ export async function uploadSourceFileViaBackend({
     }));
   }
   try {
-    return bindAudioSource(await uploadSourceFileViaFirebase({
+    return bindSourceIdentity(await uploadSourceFileViaFirebase({
       file,
       mediaType: normalizedMediaType,
       fileName,
@@ -303,9 +332,9 @@ export async function uploadSourceFileViaBackend({
       contentHash,
     }));
   } catch (firebaseError) {
-    assertAudioOwner();
+    assertUploadOwner();
     console.warn("Firebase resumable upload failed, falling back to backend upload:", firebaseError);
-    return bindAudioSource(await uploadSourceFileViaBackendRequest({
+    return bindSourceIdentity(await uploadSourceFileViaBackendRequest({
       file,
       token,
       mediaType: normalizedMediaType,

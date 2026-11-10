@@ -1,0 +1,169 @@
+{
+  "date": "2026-11-03",
+  "scope": "Original podcast 0-240s, both speakers, 51 retained camera intervals; source-specific repair and actual native flattened transport",
+  "sourceSha256": "93ce466b525041df305e839154645bd8fb5b9ec9b621c64d4c2afd5d9badff8a",
+  "previewSha256": "7e80350a5105eb0a92eedb2ebd8ad860ffe28020a0d83c57fc0173c6cf520242",
+  "nativeExportSha256": "c04fe1d917de8b89e6692386573710273e83232e1700725b7d4e2a68c6027ffd",
+  "frames": 5760,
+  "fps": 24,
+  "seconds": 240,
+  "dimensions": [
+    1920,
+    1080
+  ],
+  "fullNativeDecodePassed": true,
+  "normalNativeUploadSaveColdReopenExport": true,
+  "canonicalDocumentColdReopenExact": true,
+  "canonicalDocumentAfterExportExact": true,
+  "browserExceptions": [],
+  "actualSourceHeadPairsVisuallyInspected": 240,
+  "headPairsSpatiallyUnchangedByLaterShoulderJoin": true,
+  "actualEncodedMovingSleeveFramesInspected": 48,
+  "actualEncodedShoulderJoinFramesInspected": 48,
+  "shortToLongMatteByteExact": true,
+  "nativePicturePairsMeasured": 24,
+  "meanFittedPreviewNativeRgbDifference": 1.6039429481202847,
+  "maximumMeasuredFrameMeanRgbDifference": 1.9126425861625513,
+  "audioZeroLagMinimumCorrelation": 0.9916657889909797,
+  "audioWindows": 8,
+  "completeActualStudioPlayback": true,
+  "studioCapturedFrames": 2204,
+  "studioCapturedBytes": 221547013,
+  "captureSmoothnessQualified": false,
+  "deliveryViewerComparisons": 43,
+  "deliveryViewerVideoChecks": 5,
+  "currentSessionAutomatedBoundTests": 4,
+  "priorScopedTestsNotClaimedRerun": 49,
+  "nativeSourceIsFlattenedReview": true,
+  "editableLongFormMasksQualified": false,
+  "creativeGate": false,
+  "professionalQualityClaimed": false,
+  "readinessPromotion": false,
+  "paidCloudInference": false,
+  "deployedMergedPushed": false,
+  "productionDataTouched": false,
+  "remainingBlockers": [
+    "Fine foliage, spring and stand boundaries retain red/blue original-TV contamination, rough fractional alpha and occasional small gaps. SAM silhouettes can classify mixed source-TV/foreground pixels as opaque; local CF/foreground recovery cannot reliably reverse that incorrect opaque seed. Tighter rejected plant selections removed real leaves.",
+    "Small cap/hair/ear, moving finger and cloth edges remain source-compressed and occasionally contaminated. Purple dyed hair and photographed TV light are present in the source; removing them indiscriminately also removes real foreground. Sparse 1 Hz long-form body keys plus source flow are not a qualified dense high-quality video-matting path for arbitrary fast motion or occlusion.",
+    "A slight local grade/join difference and source-specific cropped-furniture/prop boundaries remain visible under close inspection; neither successful encode nor measured fitted-picture similarity qualifies those edges.",
+    "Physical perspective, scale, photographed key/rim illumination and contact shadows are only approximate against the selected replacement still. No new scene geometry, physically correct relighting or arbitrary moving-camera qualification.",
+    "The four-minute Studio project imports the flattened corrected movie. Its mask sequence and actual corrective component masks are separate evidence; editable native long-form model artifact/correction save/reopen/export is still unqualified. The prior editable two-second SAM2/ViTMatte project is preserved.",
+    "Earlier private cached GPL-3.0 RVM guidance remains private evaluation, outside the product registry. The final body/shoulder corrections use existing pinned Apache-2.0 SAM2 and source-conditioned MIT PyMatting. This does not qualify a commercially distributed RVM integration."
+  ],
+  "deliveryDirectory": "/home/tibule12/Videos/AutoPromote Background Replacement - 2026-11-01/Four-minute repair - 2026-11-03",
+  "retainedRejectedNativeExportSha256": "0e95a6d32c44eafa9dce94fa915f56ea713baa4355b6535d74c372a6cc10f631",
+  "diskCleanup": {
+    "removed": [
+      {
+        "file": "reports/background-replacement-20261101/private/four-minute-r9/before-observed-background/Four-minute repaired preview.mp4",
+        "bytes": 159236003,
+        "sha256": "70fb41915a0edf1d1e23944b773d0bca1ceefdcee88de565a4d24a1cc8f59666"
+      },
+      {
+        "file": "reports/background-replacement-20261101/private/four-minute-r9/before-observed-background/Full alpha matte - lossless.mkv",
+        "bytes": 172976393,
+        "sha256": "e3401bc42088bf853fd5f9745960d110342612c219d6d190ff8e92bd9ebf159d"
+      },
+      {
+        "file": "reports/background-replacement-20261101/private/four-minute-r9/before-raised-hand/Four-minute repaired preview.mp4",
+        "bytes": 152419512,
+        "sha256": "64a1b8228b3fd4d3f03f96c1e272cf35df8b82577da9e4f2498aecfee2551756"
+      },
+      {
+        "file": "reports/background-replacement-20261101/private/four-minute-r9/before-raised-hand/Full alpha matte - lossless.mkv",
+        "bytes": 173322573,
+        "sha256": "fa72b06fe269292dd318e40a05b2d85d08902e09ee8b864e8d94d474d3b73462"
+      },
+      {
+        "file": "reports/background-replacement-20261101/private/four-minute-r9/before-sleeve-assembly/Four-minute repaired preview.mp4",
+        "bytes": 147274815,
+        "sha256": "a8ba2e3d5bdb65119e25eae5bfd1f9b5b38a3384de32310a1fe55c8b0dcd2cbb"
+      },
+      {
+        "file": "reports/background-replacement-20261101/private/four-minute-r9/before-sleeve-assembly/Full alpha matte - lossless.mkv",
+        "bytes": 173360654,
+        "sha256": "e3923c8b1b22b6801033aa53aabbba63ffcf0c07a320a942a43e5804e3d1869a"
+      },
+      {
+        "file": "reports/background-replacement-20261101/private/four-minute-r9/before-shoulder-join-assembly/Four-minute repaired preview.mp4",
+        "bytes": 142741054,
+        "sha256": "71e114e4b73601659baab97dc2e84db35d66ce1b8f4c5f29c04fdd29aad6d16e",
+        "retainedWorkingCopyInRam": "/dev/shm/autopromote-background-four-minute-r9/current-neural-full/Four-minute repaired preview.mp4"
+      },
+      {
+        "file": "reports/background-replacement-20261101/private/four-minute-r9/before-shoulder-join-assembly/Full alpha matte - lossless.mkv",
+        "bytes": 173743467,
+        "sha256": "3e77bf008633719afc489e6e6370751722b9abe7fc0668bc3a1170781cbb86e7",
+        "retainedWorkingCopyInRam": "/dev/shm/autopromote-background-four-minute-r9/current-neural-full/Full alpha matte - lossless.mkv"
+      }
+    ],
+    "logicalBytesRemoved": 1295074471,
+    "reason": "Superseded internal assemblies only; final source/alpha, source master, user-delivered movies and before/after frame evidence preserved.",
+    "originalAndPriorDeliveredMediaDeleted": false,
+    "actualDiskFreeBytesAfter": 1077841920
+  },
+  "completedWorkerDeduplication": {
+    "byteExactHardlinkReplacements": [
+      {
+        "file": "/tmp/autopromote-application-demo-46N4Hm/worker-long-r9/329deb012acaaf1f2812648253721f1b1c86e6d25cf8367fe6932ee276bcf6c1/artifact.mp4",
+        "identicalRetainedMedia": "reports/background-replacement-20261101/private/four-minute-r9/native-final/Four-minute native export.mp4",
+        "bytes": 113730053,
+        "sha256": "0e95a6d32c44eafa9dce94fa915f56ea713baa4355b6535d74c372a6cc10f631"
+      },
+      {
+        "file": "/tmp/autopromote-application-demo-46N4Hm/worker-long-r9/329deb012acaaf1f2812648253721f1b1c86e6d25cf8367fe6932ee276bcf6c1/retained-0.mp4",
+        "identicalRetainedMedia": "reports/background-replacement-20261101/private/four-minute-r9/native-final/Four-minute native export.mp4",
+        "bytes": 113730053,
+        "sha256": "0e95a6d32c44eafa9dce94fa915f56ea713baa4355b6535d74c372a6cc10f631"
+      },
+      {
+        "file": "/tmp/autopromote-application-demo-46N4Hm/worker-long-r9/329deb012acaaf1f2812648253721f1b1c86e6d25cf8367fe6932ee276bcf6c1/handoff.mp4",
+        "identicalRetainedMedia": "reports/background-replacement-20261101/private/four-minute-r9/native-final/Four-minute native export.mp4",
+        "bytes": 113730053,
+        "sha256": "0e95a6d32c44eafa9dce94fa915f56ea713baa4355b6535d74c372a6cc10f631"
+      },
+      {
+        "file": "/tmp/autopromote-application-demo-YU8K0a/worker/de6a8c6f40d519973fa844e2e7f403d7f30831de0b7e63ea9bbe200622c5eaa5/artifact.mp4",
+        "identicalRetainedMedia": "reports/background-replacement-20261101/private/four-minute-r9/native-final/Four-minute native export.mp4",
+        "bytes": 115544574,
+        "sha256": "c04fe1d917de8b89e6692386573710273e83232e1700725b7d4e2a68c6027ffd"
+      },
+      {
+        "file": "/tmp/autopromote-application-demo-YU8K0a/worker/de6a8c6f40d519973fa844e2e7f403d7f30831de0b7e63ea9bbe200622c5eaa5/retained-0.mp4",
+        "identicalRetainedMedia": "reports/background-replacement-20261101/private/four-minute-r9/native-final/Four-minute native export.mp4",
+        "bytes": 115544574,
+        "sha256": "c04fe1d917de8b89e6692386573710273e83232e1700725b7d4e2a68c6027ffd"
+      },
+      {
+        "file": "/tmp/autopromote-application-demo-YU8K0a/worker/de6a8c6f40d519973fa844e2e7f403d7f30831de0b7e63ea9bbe200622c5eaa5/handoff.mp4",
+        "identicalRetainedMedia": "reports/background-replacement-20261101/private/four-minute-r9/native-final/Four-minute native export.mp4",
+        "bytes": 115544574,
+        "sha256": "c04fe1d917de8b89e6692386573710273e83232e1700725b7d4e2a68c6027ffd"
+      },
+      {
+        "file": "/home/tibule12/Projects/AutoPromte/AutoPromote-background-replacement-20261101/tmp/viral_c58fa7653ba5f5fa34187231cda8ba9f82b607d3129367a5ae4cde11094c2c3a_viral.mp4",
+        "identicalRetainedMedia": "reports/background-replacement-20261101/private/four-minute-r9/native-final/Four-minute native export.mp4",
+        "bytes": 115544574,
+        "sha256": "c04fe1d917de8b89e6692386573710273e83232e1700725b7d4e2a68c6027ffd"
+      }
+    ],
+    "logicalDuplicateBytesRemoved": 803368455,
+    "mediaBytesChanged": false,
+    "activeJobsTouched": false,
+    "productionDataTouched": false,
+    "actualDiskFreeBytesAfter": 1790357504
+  },
+  "regenerableReviewJpegPruning": {
+    "regenerableFullFrameJpegsRemoved": 511,
+    "bytesRemoved": 180303222,
+    "all519SamplesPreservedIn44ContactSheets": true,
+    "originalAndDeliveredMoviesPreserved": true,
+    "currentFullAlphaAndSourcePreserved": true,
+    "actualDiskFreeBytesAfter": 1326575616
+  },
+  "actualDiskFreeBytesAtReport": 1665142784,
+  "studioContractValidationPassed": true,
+  "gitDiffCheckPassed": true,
+  "actualNativeBeforeAfterVisuallyInspected": true,
+  "actualDiskFreeBytesAtFinalReview": 1663225856
+}

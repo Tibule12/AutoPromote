@@ -1,0 +1,12 @@
+{
+  "sameRules": true,
+  "objectsPreserved": true,
+  "ruleSha256": "b362e56ed1980cc781b051299e57838c61e66923083809fc844625c2ea6c52a3",
+  "storageFiles": 296,
+  "runtimePid": 224629,
+  "lineFramingAdapter": true,
+  "permissionChecksUnchanged": true,
+  "noRequestReplay": true,
+  "productionChange": false,
+  "permissionsChanged": false
+}

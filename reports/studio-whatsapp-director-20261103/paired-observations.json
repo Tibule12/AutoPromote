@@ -1,0 +1,138 @@
+{
+  "pairs": [
+    {
+      "requested": 0.75,
+      "measuredProgrammeTime": 0.75,
+      "exportFrameIndex": 18,
+      "previewSize": [
+        1016,
+        572
+      ],
+      "psnrDb": 26.19842151155485,
+      "pixelPassClaimed": false
+    },
+    {
+      "requested": 1.75,
+      "measuredProgrammeTime": 1.75,
+      "exportFrameIndex": 42,
+      "previewSize": [
+        1016,
+        572
+      ],
+      "psnrDb": 25.93406705447055,
+      "pixelPassClaimed": false
+    },
+    {
+      "requested": 3.8,
+      "measuredProgrammeTime": 3.791666,
+      "exportFrameIndex": 91,
+      "previewSize": [
+        1016,
+        572
+      ],
+      "psnrDb": 33.916866760164936,
+      "pixelPassClaimed": false
+    },
+    {
+      "requested": 5.5,
+      "measuredProgrammeTime": 5.5,
+      "exportFrameIndex": 132,
+      "previewSize": [
+        1016,
+        572
+      ],
+      "psnrDb": 32.98136120343625,
+      "pixelPassClaimed": false
+    },
+    {
+      "requested": 8,
+      "measuredProgrammeTime": 8.0,
+      "exportFrameIndex": 192,
+      "previewSize": [
+        1016,
+        572
+      ],
+      "psnrDb": 33.07731132880144,
+      "pixelPassClaimed": false
+    },
+    {
+      "requested": 10.1,
+      "measuredProgrammeTime": 10.083333,
+      "exportFrameIndex": 242,
+      "previewSize": [
+        1016,
+        572
+      ],
+      "psnrDb": 22.339216890655365,
+      "pixelPassClaimed": false
+    },
+    {
+      "requested": 12.2,
+      "measuredProgrammeTime": 12.208333,
+      "exportFrameIndex": 293,
+      "previewSize": [
+        1016,
+        572
+      ],
+      "psnrDb": 22.389099503678565,
+      "pixelPassClaimed": false
+    },
+    {
+      "requested": 15.2,
+      "measuredProgrammeTime": 15.208333,
+      "exportFrameIndex": 365,
+      "previewSize": [
+        1016,
+        572
+      ],
+      "psnrDb": 22.683165833088946,
+      "pixelPassClaimed": false
+    },
+    {
+      "requested": 17.6,
+      "measuredProgrammeTime": 17.583333,
+      "exportFrameIndex": 422,
+      "previewSize": [
+        1016,
+        572
+      ],
+      "psnrDb": 22.06448424981078,
+      "pixelPassClaimed": false
+    },
+    {
+      "requested": 19.6,
+      "measuredProgrammeTime": 19.583333,
+      "exportFrameIndex": 470,
+      "previewSize": [
+        1016,
+        572
+      ],
+      "psnrDb": 22.89916093167751,
+      "pixelPassClaimed": false
+    },
+    {
+      "requested": 21.7,
+      "measuredProgrammeTime": 21.708333,
+      "exportFrameIndex": 521,
+      "previewSize": [
+        1016,
+        572
+      ],
+      "psnrDb": 23.903424595538652,
+      "pixelPassClaimed": false
+    },
+    {
+      "requested": 23.7,
+      "measuredProgrammeTime": 23.708333,
+      "exportFrameIndex": 569,
+      "previewSize": [
+        1016,
+        572
+      ],
+      "psnrDb": 24.772422472901383,
+      "pixelPassClaimed": false
+    }
+  ],
+  "minimumPsnrDb": 22.06448424981078,
+  "qualification": "Diagnostic only. Source decoding, glyph edges and video projection still require broader parity work."
+}

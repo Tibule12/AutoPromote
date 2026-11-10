@@ -1,0 +1,17 @@
+[
+  {
+    "port": 5006,
+    "status": 200,
+    "knowledge_version": "1.0.43"
+  },
+  {
+    "port": 5145,
+    "status": 200,
+    "knowledge_version": "1.0.43"
+  },
+  {
+    "port": 5119,
+    "status": 200,
+    "knowledge_version": "1.0.10"
+  }
+]

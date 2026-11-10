@@ -1,0 +1,32 @@
+{
+  "passed": true,
+  "sha256": "145c23a171e9f11f8933263f9eddf2a42d7218ad55ba5866fd3f78b469e76859",
+  "bytes": 3134576,
+  "seconds": 8,
+  "video": {
+    "width": 1280,
+    "height": 720,
+    "codec": "h264",
+    "fps": "24/1",
+    "duration": "8.000000",
+    "frameCount": 192,
+    "pixelFormat": "yuv420p",
+    "encoder": "Lavc60.31.102 libx264"
+  },
+  "audio": {
+    "codec": "aac",
+    "channels": 2,
+    "sampleRate": "48000",
+    "duration": "8.000000"
+  },
+  "independentFullDecode": true,
+  "decodedAudio": {
+    "samples": 384000,
+    "sampleRate": 48000,
+    "seconds": 8,
+    "toleranceSeconds": 0.04466666666666667,
+    "passed": true
+  },
+  "contactSheet": "reports/studio-template-collection-20261104/coastal_postcards_v1/native-motion-flow/final.mp4.frames.jpg",
+  "scope": "Technical only. Pixel and listening review are separate required evidence."
+}

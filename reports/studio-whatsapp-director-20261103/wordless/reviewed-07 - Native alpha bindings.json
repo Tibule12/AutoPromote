@@ -1,0 +1,51 @@
+{
+  "format": "autopromote-scene-actions",
+  "version": 1,
+  "projectId": "viral-project-b3c8d7e9-cdff-4bdd-87dd-23b2297b83a6",
+  "baseRevision": 63,
+  "name": "07 - Native alpha bindings",
+  "actions": [
+    {
+      "type": "matte",
+      "targetId": "scene-dc2440a9-b547-4d85-8b7d-6bb9b341beaa",
+      "matteSourceId": "scene-b7ded7c6-a3b1-4076-aaf1-aba88f7a00bb",
+      "mode": "luma"
+    },
+    {
+      "type": "matte",
+      "targetId": "scene-8efc6db9-1ad6-4aee-8972-66bd7d036f35",
+      "matteSourceId": "scene-b7ded7c6-a3b1-4076-aaf1-aba88f7a00bb",
+      "mode": "luma"
+    },
+    {
+      "type": "matte",
+      "targetId": "scene-6a46d393-8487-4e5e-9eeb-aa058223346e",
+      "matteSourceId": "scene-931b5bac-8a91-4bb6-8d9b-497cd4017a50",
+      "mode": "luma"
+    },
+    {
+      "type": "matte",
+      "targetId": "scene-089ee0be-4a8d-4505-8c7d-0da3bf20fff6",
+      "matteSourceId": "scene-931b5bac-8a91-4bb6-8d9b-497cd4017a50",
+      "mode": "luma"
+    },
+    {
+      "type": "matte",
+      "targetId": "scene-3bd49188-4ccb-43e7-be2b-5eb25b456b64",
+      "matteSourceId": "scene-3226214f-8d62-4f6c-9031-f5ad53caad05",
+      "mode": "luma"
+    },
+    {
+      "type": "matte",
+      "targetId": "scene-d090e060-d9f3-4aae-aac4-35c7328e1026",
+      "matteSourceId": "scene-cbe08ba3-50c4-41a9-996c-6aa7a25bcc4d",
+      "mode": "luma"
+    },
+    {
+      "type": "matte",
+      "targetId": "scene-a7bb4a13-73a3-439e-a717-1868be0ff71f",
+      "matteSourceId": "scene-49ce57f9-b392-4be2-a6d3-0474bc83eb49",
+      "mode": "luma"
+    }
+  ]
+}

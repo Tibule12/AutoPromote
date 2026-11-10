@@ -5,57 +5,44 @@
       "feature_id": "studio.keyframes",
       "documentation_impact": [
         "FEATURE",
-        "CONTROLS",
-        "TASKS",
-        "DEPENDENCIES",
-        "READINESS"
+        "CONTROLS"
       ],
       "status_before": "FUNCTIONAL",
       "status_after": "FUNCTIONAL",
       "source_paths": [
-        "frontend/src/components/StudioAdvancedInspectors.js",
-        "test/e2e/studio-capability-matrix.json",
-        "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
-        "frontend/src/components/studioAutomation.js"
+        "frontend/src/components/StudioControls.css",
+        "frontend/src/components/ViralClipStudio.js",
+        "reports/studio-ui-controls-20261021/README.md"
       ],
-      "reason": "First documentation qualification against actual implementation and retained evidence. No product readiness status is promoted."
+      "reason": "Knowledge 1.0.42 documents the current inspector location, scrolling, Motion fields, Logo Workshop choices and wrapped sound-cue workflow after the verified local UI repair. Existing feature/control IDs and readiness are unchanged."
     },
     {
       "feature_id": "cam_combiner.switching",
       "documentation_impact": [
-        "FEATURE",
-        "CONTROLS",
-        "TASKS",
-        "DEPENDENCIES",
-        "READINESS"
+        "FEATURE"
       ],
       "status_before": "PARTIAL",
       "status_after": "PARTIAL",
       "source_paths": [
-        "frontend/src/components/multicamUtils.js",
-        "frontend/src/components/MultiCamCombiner.js"
+        "src/productAssistance/index.js",
+        "src/routes/productAssistanceRoutes.js",
+        "frontend/src/components/ProductAssistance.js"
       ],
-      "reason": "First documentation qualification against actual implementation and retained evidence. No product readiness status is promoted."
+      "reason": "Product Assistance V1: reviewed public retrieval, seven contextual help entry points and actual error-code mappings. Feature/control/task counts and readiness unchanged; read-only assistance grants no execution authority."
     },
     {
       "feature_id": "studio.compositing.text_behind_subject",
       "documentation_impact": [
-        "FEATURE",
-        "CONTROLS",
-        "TASKS",
-        "DEPENDENCIES",
-        "READINESS"
+        "FEATURE"
       ],
       "status_before": "PARTIAL",
       "status_after": "PARTIAL",
       "source_paths": [
-        "frontend/src/components/studioSubjectVfxContract.js",
-        "src/services/studioSubjectVfxService.js",
-        "test/e2e/studio-capability-matrix.json",
-        "frontend/src/components/StudioCreatorWorkbench.js",
-        "contracts/model-capabilities-v1.json"
+        "src/productAssistance/index.js",
+        "src/routes/productAssistanceRoutes.js",
+        "frontend/src/components/ProductAssistance.js"
       ],
-      "reason": "First documentation qualification against actual implementation and retained evidence. No product readiness status is promoted."
+      "reason": "Product Assistance V1: reviewed public retrieval, seven contextual help entry points and actual error-code mappings. Feature/control/task counts and readiness unchanged; read-only assistance grants no execution authority."
     },
     {
       "feature_id": "publishing.connections",
@@ -71,25 +58,26 @@
         "frontend/src/features/publishing/utils/publishingUtils.js",
         "src/server.js"
       ],
-      "reason": "Review actual Publisher scheduling/account flow and local owned status, Page selection, Reddit identity/video repairs. Retain PARTIAL; pending queue is not external publication or creative readiness."
+      "reason": "Integrate current main Publisher/Schedule UI and review bounded LinkedIn credential and Reddit native video confirmation repairs. Keep PARTIAL; per-post recovery does not qualify universal delivery or Studio readiness."
     },
     {
       "feature_id": "publishing.schedule",
       "documentation_impact": [
         "FEATURE",
-        "CONTROLS"
+        "DEPENDENCIES",
+        "READINESS"
       ],
       "status_before": "PARTIAL",
       "status_after": "PARTIAL",
       "source_paths": [
-        "frontend/src/features/publishing/UnifiedPublisher.js",
-        "src/services/viralOptimizationService.js",
-        "src/promotionService.js",
         "frontend/src/UserDashboardTabs/SchedulesPanel.js",
-        "frontend/src/App.js",
-        "src/services/publishingScheduleQuery.js"
+        "frontend/src/UserDashboardTabs/SchedulesPanel.css",
+        "frontend/src/components/PlatformIcon.js",
+        "src/services/publishedVideoRetention.js",
+        "src/services/contentMediaDependency.js",
+        "reports/daily-studio/README.md"
       ],
-      "reason": "Review next-seven-days/all queue periods and owned cursor pagination, account checks and pending-versus-published distinction. No readiness promotion."
+      "reason": "Verify four real native edits and 24 adapted schedules with exact owned media hashes; show full upcoming queue and brand icons, and document opted-in confirmed-publication retention with dependency guards. No provider-publication or readiness promotion."
     },
     {
       "feature_id": "publishing.export",
@@ -101,7 +89,7 @@
       "source_paths": [
         "frontend/src/features/publishing/UnifiedPublisher.js"
       ],
-      "reason": "Review actual Publisher scheduling/account flow and local owned status, Page selection, Reddit identity/video repairs. Retain PARTIAL; pending queue is not external publication or creative readiness."
+      "reason": "Integrate current main Publisher/Schedule UI and review bounded LinkedIn credential and Reddit native video confirmation repairs. Keep PARTIAL; per-post recovery does not qualify universal delivery or Studio readiness."
     },
     {
       "feature_id": "publishing.publish",
@@ -115,9 +103,13 @@
         "src/contentRoutes.js",
         "src/services/platformPoster.js",
         "src/services/publishingIntent.js",
-        "frontend/src/App.js"
+        "frontend/src/App.js",
+        "src/services/redditPublication.js",
+        "src/services/redditVideoPoster.js",
+        "src/services/promotionTaskQueue.js",
+        "src/services/linkedinService.js"
       ],
-      "reason": "Review actual Publisher scheduling/account flow and local owned status, Page selection, Reddit identity/video repairs. Retain PARTIAL; pending queue is not external publication or creative readiness. Correct own-brand commercial versus sponsored classification; preserve exact selected media by explicitly disabling unrequested enhancement."
+      "reason": "Integrate current main Publisher/Schedule UI and review bounded LinkedIn credential and Reddit native video confirmation repairs. Keep PARTIAL; per-post recovery does not qualify universal delivery or Studio readiness."
     },
     {
       "feature_id": "studio.persistence",
@@ -132,48 +124,6 @@
       "reason": "Preserve legacy full-source duration metadata on unchanged owned occurrence hydration; meaningful source-range edits still increment revision. Native recovery remains subject to exact-project receipt checks."
     },
     {
-      "feature_id": "studio.keyframes",
-      "documentation_impact": [
-        "FEATURE"
-      ],
-      "status_before": "FUNCTIONAL",
-      "status_after": "FUNCTIONAL",
-      "source_paths": [
-        "src/productAssistance/index.js",
-        "src/routes/productAssistanceRoutes.js",
-        "frontend/src/components/ProductAssistance.js"
-      ],
-      "reason": "Product Assistance V1: reviewed public retrieval, seven contextual help entry points and actual error-code mappings. Feature/control/task counts and readiness unchanged; read-only assistance grants no execution authority."
-    },
-    {
-      "feature_id": "cam_combiner.switching",
-      "documentation_impact": [
-        "FEATURE"
-      ],
-      "status_before": "PARTIAL",
-      "status_after": "PARTIAL",
-      "source_paths": [
-        "src/productAssistance/index.js",
-        "src/routes/productAssistanceRoutes.js",
-        "frontend/src/components/ProductAssistance.js"
-      ],
-      "reason": "Product Assistance V1: reviewed public retrieval, seven contextual help entry points and actual error-code mappings. Feature/control/task counts and readiness unchanged; read-only assistance grants no execution authority."
-    },
-    {
-      "feature_id": "studio.compositing.text_behind_subject",
-      "documentation_impact": [
-        "FEATURE"
-      ],
-      "status_before": "PARTIAL",
-      "status_after": "PARTIAL",
-      "source_paths": [
-        "src/productAssistance/index.js",
-        "src/routes/productAssistanceRoutes.js",
-        "frontend/src/components/ProductAssistance.js"
-      ],
-      "reason": "Product Assistance V1: reviewed public retrieval, seven contextual help entry points and actual error-code mappings. Feature/control/task counts and readiness unchanged; read-only assistance grants no execution authority."
-    },
-    {
       "feature_id": "studio.captions",
       "documentation_impact": [
         "FEATURE"
@@ -181,25 +131,28 @@
       "status_before": "BROKEN",
       "status_after": "BROKEN",
       "source_paths": [
-        "src/productAssistance/index.js",
-        "src/routes/productAssistanceRoutes.js",
-        "frontend/src/components/ProductAssistance.js"
+        "frontend/src/components/ViralClipStudio.js",
+        "src/productAssistance/index.js"
       ],
-      "reason": "Product Assistance V1: reviewed public retrieval, seven contextual help entry points and actual error-code mappings. Feature/control/task counts and readiness unchanged; read-only assistance grants no execution authority."
+      "reason": "Map actual existing 3D/caption messages and provider reason codes to reviewed documentation. No new features, execution authority or readiness promotion."
     },
     {
       "feature_id": "studio.templates",
       "documentation_impact": [
-        "FEATURE"
+        "FEATURE",
+        "CONTROLS",
+        "TASKS",
+        "DEPENDENCIES",
+        "READINESS"
       ],
       "status_before": "PARTIAL",
       "status_after": "PARTIAL",
       "source_paths": [
-        "src/productAssistance/index.js",
-        "src/routes/productAssistanceRoutes.js",
-        "frontend/src/components/ProductAssistance.js"
+        "config/creative-templates/registry.v1.json",
+        "frontend/src/components/studioCreativeTemplate.js",
+        "frontend/src/components/StudioLaunchTemplatePanel.js"
       ],
-      "reason": "Product Assistance V1: reviewed public retrieval, seven contextual help entry points and actual error-code mappings. Feature/control/task counts and readiness unchanged; read-only assistance grants no execution authority."
+      "reason": "Consolidate isolated property controls and exact newly added draft template versions. Retain readiness and creative-review limits; no new qualification or public approval."
     },
     {
       "feature_id": "studio.three_d",
@@ -232,16 +185,25 @@
     {
       "feature_id": "studio.masks",
       "documentation_impact": [
-        "FEATURE"
+        "FEATURE",
+        "CONTROLS",
+        "TASKS",
+        "DEPENDENCIES",
+        "READINESS"
       ],
       "status_before": "FUNCTIONAL",
       "status_after": "FUNCTIONAL",
       "source_paths": [
-        "src/productAssistance/index.js",
-        "src/routes/productAssistanceRoutes.js",
-        "frontend/src/components/ProductAssistance.js"
+        "model_workers/adapters/source_edge_alpha.py",
+        "model_workers/adapters/cpu_matting.py",
+        "frontend/src/components/StudioSubjectMaskControls.js",
+        "frontend/src/components/studioProjectDocument.js",
+        "contracts/model-capabilities-v1.json",
+        "src/modelRuntime/contract.js",
+        "test/e2e/studio-capability-matrix.json",
+        "reports/background-replacement-20261101/fine-props-repair.md"
       ],
-      "reason": "Product Assistance V1: reviewed public retrieval, seven contextual help entry points and actual error-code mappings. Feature/control/task counts and readiness unchanged; read-only assistance grants no execution authority."
+      "reason": "Knowledge 1.0.53 records opt-in selected fixed-object colour refinement, actual native short-shot save/reopen/export and inspected frames. Broad object correction and a late framing export were rejected and preserved. Fine boundaries and full four-minute visual quality remain unqualified; no readiness promotion."
     },
     {
       "feature_id": "studio.tracking",
@@ -285,228 +247,32 @@
       "reason": "Map actual existing 3D/caption messages and provider reason codes to reviewed documentation. No new features, execution authority or readiness promotion."
     },
     {
-      "feature_id": "studio.captions",
-      "documentation_impact": [
-        "FEATURE"
-      ],
-      "status_before": "BROKEN",
-      "status_after": "BROKEN",
-      "source_paths": [
-        "frontend/src/components/ViralClipStudio.js",
-        "src/productAssistance/index.js"
-      ],
-      "reason": "Map actual existing 3D/caption messages and provider reason codes to reviewed documentation. No new features, execution authority or readiness promotion."
-    },
-    {
-      "feature_id": "publishing.publish",
-      "documentation_impact": [
-        "FEATURE"
-      ],
-      "status_before": "PARTIAL",
-      "status_after": "PARTIAL",
-      "source_paths": [
-        "src/services/platformPoster.js",
-        "src/productAssistance/index.js"
-      ],
-      "reason": "Map actual existing 3D/caption messages and provider reason codes to reviewed documentation. No new features, execution authority or readiness promotion."
-    },
-    {
       "feature_id": "studio.compositing",
       "documentation_impact": [
         "FEATURE",
-        "CONTROLS",
-        "DEPENDENCIES",
-        "READINESS"
+        "TASKS"
       ],
       "status_before": "PARTIAL",
       "status_after": "PARTIAL",
       "source_paths": [
-        "frontend/src/components/studioRenderCompiler.js",
-        "python_media_worker/studio_layer_motion.py",
-        "python_media_worker/studio_text.py",
-        "python_media_worker/main_media_server.py",
-        "frontend/src/components/studioGroups.js",
-        "frontend/src/components/StudioGroupInspector.js",
-        "frontend/src/components/StudioGroupPreview.js",
-        "python_media_worker/studio_composition.py",
-        "test/e2e/studio-capability-matrix.json",
-        "frontend/src/components/StudioProTimeline.js",
-        "frontend/src/components/studioMotionProperties.js",
-        "frontend/src/components/StudioKeyframeCurveEditor.js",
-        "python_media_worker/studio_motion.py",
-        "frontend/src/components/studioMaskGeometry.js",
-        "frontend/src/components/StudioMaskPathEditor.js",
-        "frontend/src/components/studioGroupTiming.js",
-        "frontend/src/components/StudioGroupTimelineClip.js",
-        "frontend/src/components/StudioGroupTimingInspector.js",
-        "reports/studio-professional-group-workflow-20261014/README.md"
-      ],
-      "reason": "Add canonical group clip timing and reversible descendant ownership transactions to the normal timeline. Real-footage group move/trim/key/lock/delete/source-split history and exact cold reopen are exercised; unchanged readiness and broader source-occurrence/group/media/parity limits remain explicit."
-    },
-    {
-      "feature_id": "publishing.connections",
-      "documentation_impact": [
-        "FEATURE"
-      ],
-      "status_before": "PARTIAL",
-      "status_after": "PARTIAL",
-      "source_paths": [
-        "src/routes/platformRoutes.js",
-        "src/middlewares/platformStatusPolicy.js",
-        "src/services/redditService.js",
-        "frontend/src/features/publishing/utils/publishingUtils.js",
-        "src/server.js"
-      ],
-      "reason": "Integrate current main Publisher/Schedule UI and review bounded LinkedIn credential and Reddit native video confirmation repairs. Keep PARTIAL; per-post recovery does not qualify universal delivery or Studio readiness."
-    },
-    {
-      "feature_id": "publishing.schedule",
-      "documentation_impact": [
-        "FEATURE"
-      ],
-      "status_before": "PARTIAL",
-      "status_after": "PARTIAL",
-      "source_paths": [
-        "frontend/src/features/publishing/UnifiedPublisher.js",
-        "src/services/viralOptimizationService.js",
-        "src/promotionService.js",
-        "frontend/src/UserDashboardTabs/SchedulesPanel.js",
-        "frontend/src/App.js",
-        "src/services/publishingScheduleQuery.js"
-      ],
-      "reason": "Integrate current main Publisher/Schedule UI and review bounded LinkedIn credential and Reddit native video confirmation repairs. Keep PARTIAL; per-post recovery does not qualify universal delivery or Studio readiness."
-    },
-    {
-      "feature_id": "publishing.export",
-      "documentation_impact": [
-        "FEATURE"
-      ],
-      "status_before": "PARTIAL",
-      "status_after": "PARTIAL",
-      "source_paths": [
-        "frontend/src/features/publishing/UnifiedPublisher.js"
-      ],
-      "reason": "Integrate current main Publisher/Schedule UI and review bounded LinkedIn credential and Reddit native video confirmation repairs. Keep PARTIAL; per-post recovery does not qualify universal delivery or Studio readiness."
-    },
-    {
-      "feature_id": "publishing.publish",
-      "documentation_impact": [
-        "FEATURE"
-      ],
-      "status_before": "PARTIAL",
-      "status_after": "PARTIAL",
-      "source_paths": [
-        "frontend/src/features/publishing/UnifiedPublisher.js",
-        "src/contentRoutes.js",
-        "src/services/platformPoster.js",
-        "src/services/publishingIntent.js",
-        "frontend/src/App.js",
-        "src/services/redditPublication.js",
-        "src/services/redditVideoPoster.js",
-        "src/services/promotionTaskQueue.js",
-        "src/services/linkedinService.js"
-      ],
-      "reason": "Integrate current main Publisher/Schedule UI and review bounded LinkedIn credential and Reddit native video confirmation repairs. Keep PARTIAL; per-post recovery does not qualify universal delivery or Studio readiness."
-    },
-    {
-      "feature_id": "studio.keyframes",
-      "documentation_impact": [
-        "FEATURE",
-        "CONTROLS",
-        "TASKS",
-        "DEPENDENCIES",
-        "READINESS"
-      ],
-      "status_before": "FUNCTIONAL",
-      "status_after": "FUNCTIONAL",
-      "source_paths": [
-        "frontend/src/components/StudioProTimeline.js",
-        "frontend/src/components/ViralClipStudio.js",
-        "frontend/src/components/studioMotionProperties.js",
-        "frontend/src/components/studioGroups.js",
-        "frontend/src/components/StudioKeyframeCurveEditor.js",
-        "python_media_worker/studio_motion.py",
-        "reports/studio-professional-group-keyframes-20261014/README.md",
-        "frontend/src/components/StudioGroupInspector.js",
-        "frontend/src/components/StudioGroupPreview.js",
-        "frontend/src/components/studioRenderCompiler.js",
-        "python_media_worker/studio_composition.py"
-      ],
-      "reason": "Document five group properties using the existing canonical motion keys, shared timeline rows, group bounds/curve inspector and CPU compositor. One native 16-key/eight-channel nested edit and four geometry pairs are bounded evidence; 180 cases plus 261 subtests and strict builds pass. Retain FUNCTIONAL and all broader curve/retiming/raster/media/live sound readiness limits."
-    },
-    {
-      "feature_id": "studio.templates",
-      "documentation_impact": [
-        "FEATURE",
-        "CONTROLS",
-        "TASKS",
-        "DEPENDENCIES",
-        "READINESS"
-      ],
-      "status_before": "PARTIAL",
-      "status_after": "PARTIAL",
-      "source_paths": [
-        "config/creative-templates/registry.v1.json",
-        "frontend/src/components/studioCreativeTemplate.js",
-        "frontend/src/components/StudioLaunchTemplatePanel.js"
-      ],
-      "reason": "Consolidate isolated property controls and exact newly added draft template versions. Retain readiness and creative-review limits; no new qualification or public approval."
-    },
-    {
-      "feature_id": "studio.timeline",
-      "documentation_impact": [
-        "FEATURE",
-        "CONTROLS",
-        "DEPENDENCIES",
-        "READINESS"
-      ],
-      "status_before": "PARTIAL",
-      "status_after": "PARTIAL",
-      "source_paths": [
-        "frontend/src/components/studioGroupTiming.js",
-        "frontend/src/components/StudioGroupTimelineClip.js",
-        "frontend/src/components/StudioGroupTimingInspector.js",
-        "frontend/src/components/StudioProTimeline.js",
-        "frontend/src/components/ViralClipStudio.js",
-        "python_media_worker/studio_composition.py",
-        "reports/studio-professional-group-workflow-20261014/README.md"
-      ],
-      "reason": "Document real editable group clip bars, delivery-frame move/trim, descendant starts/keys, locks, focused properties and reversible deletion. Restore/edit/history/cold reopen use a retained real 20-second footage/music/SFX project; group split/duplicate/source-occurrence remapping and broad conformance remain open."
-    },
-    {
-      "feature_id": "studio.keyframes",
-      "documentation_impact": [
-        "FEATURE",
-        "CONTROLS",
-        "TASKS",
-        "READINESS"
-      ],
-      "status_before": "FUNCTIONAL",
-      "status_after": "FUNCTIONAL",
-      "source_paths": [
-        "frontend/src/components/studioKeyframeSelection.js",
-        "frontend/src/components/StudioKeyframeActions.js",
-        "frontend/src/components/ViralClipStudio.js",
-        "reports/studio-keyframe-selection-20261015/README.md"
-      ],
-      "reason": "Add ordinary timeline multi-selection, atomic drag/nudge, clipboard, time scaling, interpolation and deletion on the existing canonical keys. Native history/cold/export and explicit cross-layer/media/parity limits; no readiness promotion."
-    },
-    {
-      "feature_id": "studio.timeline",
-      "documentation_impact": [
-        "FEATURE",
-        "CONTROLS",
-        "TASKS",
-        "READINESS"
-      ],
-      "status_before": "PARTIAL",
-      "status_after": "PARTIAL",
-      "source_paths": [
-        "frontend/src/components/studioKeyframeSelection.js",
-        "frontend/src/components/StudioKeyframeActions.js",
+        "frontend/src/components/StudioSubjectVfxPanel.js",
         "frontend/src/components/ViralClipStudio.js"
       ],
-      "reason": "Expose keyframe batch actions directly in expanded property rows; keep one shared graph and existing readiness."
+      "reason": "21 October source audit: document the actual optional Composite replacement and manual style workflow, expose in-product guides, retain model availability/source-specific fringe limits and unchanged readiness."
+    },
+    {
+      "feature_id": "studio.timeline",
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "documentation_impact": [
+        "FEATURE",
+        "TASKS"
+      ],
+      "source_paths": [
+        "frontend/src/components/StudioSubjectVfxPanel.js",
+        "frontend/src/components/ViralClipStudio.js"
+      ],
+      "reason": "21 October source audit: document the actual optional Composite replacement and manual style workflow, expose in-product guides, retain model availability/source-specific fringe limits and unchanged readiness."
     },
     {
       "feature_id": "studio.preview",
@@ -542,104 +308,23 @@
       "reason": "Cache time-only opacity/crop expressions per row without changing8-bit RGB. Actual20s native export completes within the existing12-minute budget with all decoded pictures unchanged; sound and full parity remain unqualified."
     },
     {
-      "feature_id": "studio.keyframes",
-      "documentation_impact": [
-        "FEATURE",
-        "CONTROLS",
-        "TASKS",
-        "READINESS"
-      ],
-      "status_before": "FUNCTIONAL",
-      "status_after": "FUNCTIONAL",
-      "source_paths": [
-        "frontend/src/components/useStudioKeyframeMarquee.js",
-        "frontend/src/components/studioKeyframeSelection.js",
-        "frontend/src/components/StudioKeyframeActions.js",
-        "frontend/src/components/StudioProTimeline.js",
-        "frontend/src/components/ViralClipStudio.js",
-        "reports/studio-keyframe-marquee-20261015/README.md"
-      ],
-      "reason": "Box-select across property rows, add/subtract/cancel, and paste onto a compatible layer using the existing canonical keys/history/compiler. Keep readiness and wider picture/sound limits unchanged."
-    },
-    {
-      "feature_id": "studio.timeline",
-      "documentation_impact": [
-        "FEATURE",
-        "CONTROLS",
-        "TASKS",
-        "READINESS"
-      ],
-      "status_before": "PARTIAL",
-      "status_after": "PARTIAL",
-      "source_paths": [
-        "frontend/src/components/useStudioKeyframeMarquee.js",
-        "frontend/src/components/studioKeyframeSelection.js",
-        "frontend/src/components/StudioKeyframeActions.js",
-        "frontend/src/components/StudioProTimeline.js",
-        "frontend/src/components/ViralClipStudio.js",
-        "reports/studio-keyframe-marquee-20261015/README.md"
-      ],
-      "reason": "Box-select across property rows, add/subtract/cancel, and paste onto a compatible layer using the existing canonical keys/history/compiler. Keep readiness and wider picture/sound limits unchanged."
-    },
-    {
-      "feature_id": "studio.keyframes",
-      "documentation_impact": [
-        "FEATURE",
-        "CONTROLS",
-        "TASKS",
-        "READINESS"
-      ],
-      "status_before": "FUNCTIONAL",
-      "status_after": "FUNCTIONAL",
-      "source_paths": [
-        "frontend/src/components/StudioMotionPathEditor.js",
-        "frontend/src/components/studioMotionEditing.js",
-        "frontend/src/components/StudioKeyframeVelocityControls.js",
-        "frontend/src/components/StudioKeyframeCurveEditor.js",
-        "frontend/src/components/ViralClipStudio.js",
-        "reports/studio-motion-workspace-20261015/README.md"
-      ],
-      "reason": "Direct on-picture paired position editing, timeline value/velocity graph and numeric influence on the existing canonical cubic graph; repair animated Motion inspector writes. Retain exact scope and wider picture/sound limits."
-    },
-    {
       "feature_id": "studio.easing",
       "documentation_impact": [
         "FEATURE",
         "CONTROLS",
         "TASKS",
-        "READINESS"
+        "DEPENDENCIES"
       ],
       "status_before": "FUNCTIONAL",
       "status_after": "FUNCTIONAL",
       "source_paths": [
         "frontend/src/components/StudioMotionPathEditor.js",
         "frontend/src/components/studioMotionEditing.js",
-        "frontend/src/components/StudioKeyframeVelocityControls.js",
-        "frontend/src/components/StudioKeyframeCurveEditor.js",
-        "frontend/src/components/ViralClipStudio.js",
-        "reports/studio-motion-workspace-20261015/README.md"
+        "frontend/src/components/studioAutomation.js",
+        "python_media_worker/studio_motion.py",
+        "reports/studio-spatial-paths-20261017/README.md"
       ],
-      "reason": "Direct on-picture paired position editing, timeline value/velocity graph and numeric influence on the existing canonical cubic graph; repair animated Motion inspector writes. Retain exact scope and wider picture/sound limits."
-    },
-    {
-      "feature_id": "studio.timeline",
-      "documentation_impact": [
-        "FEATURE",
-        "CONTROLS",
-        "TASKS",
-        "READINESS"
-      ],
-      "status_before": "PARTIAL",
-      "status_after": "PARTIAL",
-      "source_paths": [
-        "frontend/src/components/StudioMotionPathEditor.js",
-        "frontend/src/components/studioMotionEditing.js",
-        "frontend/src/components/StudioKeyframeVelocityControls.js",
-        "frontend/src/components/StudioKeyframeCurveEditor.js",
-        "frontend/src/components/ViralClipStudio.js",
-        "reports/studio-motion-workspace-20261015/README.md"
-      ],
-      "reason": "Direct on-picture paired position editing, timeline value/velocity graph and numeric influence on the existing canonical cubic graph; repair animated Motion inspector writes. Retain exact scope and wider picture/sound limits."
+      "reason": "Owner requested stronger motion design and preview/export precision. Add spatial route controls and distinguish normalized travel timing from scalar velocity; retain bounded evidence and all broader readiness limits."
     },
     {
       "feature_id": "studio.titles",
@@ -652,48 +337,11 @@
       "status_before": "FUNCTIONAL",
       "status_after": "FUNCTIONAL",
       "source_paths": [
-        "frontend/src/components/StudioKineticTypePanel.js",
-        "frontend/src/components/studioKineticType.js",
-        "frontend/src/components/ViralClipStudio.js",
-        "reports/studio-kinetic-typography-20261015/README.md",
-        "reports/studio-kinetic-composition-20261015/README.md"
-      ],
-      "reason": "Kinetic word/grapheme authoring emits existing ordinary grouped titles and motion keys; document real constraints without promoting readiness. Native full-frame typography continuation uses ordinary artwork/group keys; a 100% image preview now honors its saved width instead of the legacy 90% CSS cap."
-    },
-    {
-      "feature_id": "studio.titles",
-      "documentation_impact": [
-        "FEATURE",
-        "CONTROLS",
-        "TASKS",
-        "READINESS"
-      ],
-      "status_before": "FUNCTIONAL",
-      "status_after": "FUNCTIONAL",
-      "source_paths": [
-        "frontend/src/components/StudioGraphicsImport.js",
         "frontend/src/components/studioGraphicsPackage.js",
-        "frontend/src/components/ViralClipStudio.js",
-        "reports/studio-break-the-loop-20261015/README.md"
+        "python_media_worker/studio_text.py",
+        "reports/studio-noise-pressure-20261016/README.md"
       ],
-      "reason": "Native graphics interchange imports authored choreography as ordinary editable titles, artwork, groups and property keys with atomic history and no separate animation evaluator. Preserve user rejection of both previous samples and separate creative approval from native delivery evidence."
-    },
-    {
-      "feature_id": "studio.timeline",
-      "documentation_impact": [
-        "FEATURE",
-        "CONTROLS",
-        "TASKS",
-        "READINESS"
-      ],
-      "status_before": "PARTIAL",
-      "status_after": "PARTIAL",
-      "source_paths": [
-        "frontend/src/components/StudioProTimeline.js",
-        "frontend/src/components/studioTimelineLayers.js",
-        "frontend/src/components/ViralClipStudio.js"
-      ],
-      "reason": "Replace unreadable overlapping motion-design rows with a view of the real composition stack and parent timing gates. Ordinary layer moves retain their transform keys and owning-track locks. UI/native qualification does not establish whole picture/sound or creative approval."
+      "reason": "User rejected the prior creative level. Import ordinary static layer/group masks for editable sliced typography and reveal windows, and retain title layout while rendering denser glyph assets for enlarged text. Technical evidence does not establish creative approval or broad picture parity."
     },
     {
       "feature_id": "studio.media_ingest",
@@ -714,60 +362,6 @@
       "reason": "Remove inherited unrelated source material through native sequence replacement and unused-reference cleanup; depth choreography uses ordinary editable title outline color and motion keys. Preserve the user request for stronger creativity and separate native delivery from creative approval."
     },
     {
-      "feature_id": "studio.titles",
-      "documentation_impact": [
-        "FEATURE",
-        "CONTROLS",
-        "TASKS",
-        "READINESS"
-      ],
-      "status_before": "FUNCTIONAL",
-      "status_after": "FUNCTIONAL",
-      "source_paths": [
-        "frontend/src/components/ViralClipStudio.js",
-        "frontend/src/components/studioGraphicsPackage.js",
-        "python_media_worker/studio_text.py",
-        "reports/studio-break-loop-depth-20261015/README.md"
-      ],
-      "reason": "Remove inherited unrelated source material through native sequence replacement and unused-reference cleanup; depth choreography uses ordinary editable title outline color and motion keys. Preserve the user request for stronger creativity and separate native delivery from creative approval."
-    },
-    {
-      "feature_id": "studio.titles",
-      "documentation_impact": [
-        "FEATURE",
-        "CONTROLS",
-        "TASKS",
-        "READINESS"
-      ],
-      "status_before": "FUNCTIONAL",
-      "status_after": "FUNCTIONAL",
-      "source_paths": [
-        "frontend/src/components/studioGraphicsPackage.js",
-        "python_media_worker/studio_text.py",
-        "reports/studio-noise-pressure-20261016/README.md"
-      ],
-      "reason": "User rejected the prior creative level. Import ordinary static layer/group masks for editable sliced typography and reveal windows, and retain title layout while rendering denser glyph assets for enlarged text. Technical evidence does not establish creative approval or broad picture parity."
-    },
-    {
-      "feature_id": "publishing.schedule",
-      "documentation_impact": [
-        "FEATURE",
-        "DEPENDENCIES",
-        "READINESS"
-      ],
-      "status_before": "PARTIAL",
-      "status_after": "PARTIAL",
-      "source_paths": [
-        "frontend/src/UserDashboardTabs/SchedulesPanel.js",
-        "frontend/src/UserDashboardTabs/SchedulesPanel.css",
-        "frontend/src/components/PlatformIcon.js",
-        "src/services/publishedVideoRetention.js",
-        "src/services/contentMediaDependency.js",
-        "reports/daily-studio/README.md"
-      ],
-      "reason": "Verify four real native edits and 24 adapted schedules with exact owned media hashes; show full upcoming queue and brand icons, and document opted-in confirmed-publication retention with dependency guards. No provider-publication or readiness promotion."
-    },
-    {
       "feature_id": "system.account",
       "documentation_impact": [
         "FEATURE",
@@ -784,44 +378,6 @@
         "frontend/src/App.js"
       ],
       "reason": "Owner explicitly requested an audited account-specific capacity increase and 24-hour published-copy retention. Normal account limits remain enforced. Replace the visible text help launcher and legacy floating chatbot with one accessible header icon."
-    },
-    {
-      "feature_id": "studio.keyframes",
-      "documentation_impact": [
-        "FEATURE",
-        "CONTROLS",
-        "TASKS",
-        "DEPENDENCIES"
-      ],
-      "status_before": "FUNCTIONAL",
-      "status_after": "FUNCTIONAL",
-      "source_paths": [
-        "frontend/src/components/StudioMotionPathEditor.js",
-        "frontend/src/components/studioMotionEditing.js",
-        "frontend/src/components/studioAutomation.js",
-        "python_media_worker/studio_motion.py",
-        "reports/studio-spatial-paths-20261017/README.md"
-      ],
-      "reason": "Owner requested stronger motion design and preview/export precision. Add spatial route controls and distinguish normalized travel timing from scalar velocity; retain bounded evidence and all broader readiness limits."
-    },
-    {
-      "feature_id": "studio.easing",
-      "documentation_impact": [
-        "FEATURE",
-        "CONTROLS",
-        "TASKS",
-        "DEPENDENCIES"
-      ],
-      "status_before": "FUNCTIONAL",
-      "status_after": "FUNCTIONAL",
-      "source_paths": [
-        "frontend/src/components/StudioMotionPathEditor.js",
-        "frontend/src/components/studioMotionEditing.js",
-        "frontend/src/components/studioAutomation.js",
-        "python_media_worker/studio_motion.py",
-        "reports/studio-spatial-paths-20261017/README.md"
-      ],
-      "reason": "Owner requested stronger motion design and preview/export precision. Add spatial route controls and distinguish normalized travel timing from scalar velocity; retain bounded evidence and all broader readiness limits."
     },
     {
       "feature_id": "studio.export",
@@ -880,39 +436,16 @@
       "feature_id": "studio.logo_design",
       "documentation_impact": [
         "FEATURE",
-        "CONTROLS",
-        "TASKS",
-        "DEPENDENCIES",
-        "READINESS"
-      ],
-      "status_before": "UNIMPLEMENTED",
-      "status_after": "PARTIAL",
-      "source_paths": [
-        "frontend/src/components/studioLogoDesign.js",
-        "frontend/src/components/StudioLogoDesignPanel.js",
-        "frontend/src/components/studioVectorShape.js",
-        "python_media_worker/studio_vector_shape.py",
-        "scripts/build-studio-logo-glyphs.py",
-        "frontend/src/components/motion/logoGlyphs.v1.json",
-        "reports/studio-logo-design-20261018/README.md",
-        "frontend/src/UserDashboardTabs/ViralClipStudioPanel.js"
-      ],
-      "reason": "Owner explicitly requested native logo design. Add deterministic design controls, real editable letter/counter contours, native layer/group/motion authoring and transparent master exports; retain all broader parity and creative gates."
-    },
-    {
-      "feature_id": "studio.keyframes",
-      "documentation_impact": [
-        "FEATURE",
         "CONTROLS"
       ],
-      "status_before": "FUNCTIONAL",
-      "status_after": "FUNCTIONAL",
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
       "source_paths": [
-        "frontend/src/components/StudioAdvancedInspectors.js",
-        "frontend/src/components/__tests__/StudioMotionInspectorPose.test.js",
-        "reports/studio-boxing-edit-20261019/README.md"
+        "frontend/src/components/StudioControls.css",
+        "frontend/src/components/ViralClipStudio.js",
+        "reports/studio-ui-controls-20261021/README.md"
       ],
-      "reason": "Motion transform/crop fields now display the existing evaluated playhead pose, including zero opacity, instead of misleading static base values. Document the seven field values; preserve canonical/render semantics and FUNCTIONAL classification. Two focused component cases, strict build, scoped lint and three actual signed-in field observations are bounded evidence."
+      "reason": "Knowledge 1.0.42 documents the current inspector location, scrolling, Motion fields, Logo Workshop choices and wrapped sound-cue workflow after the verified local UI repair. Existing feature/control IDs and readiness are unchanged."
     },
     {
       "feature_id": "studio.crop_reframe",
@@ -932,96 +465,33 @@
     {
       "feature_id": "studio.audio_automation",
       "documentation_impact": [
-        "FEATURE",
-        "DEPENDENCIES"
-      ],
-      "status_before": "FUNCTIONAL",
-      "status_after": "FUNCTIONAL",
-      "source_paths": [
-        "python_media_worker/studio_audio.py",
-        "python_media_worker/test_studio_audio_depth.py",
-        "reports/studio-boxing-edit-20261019/README.md"
-      ],
-      "reason": "Preserve every sampled gain segment while balancing expression selection to avoid FFmpeg parser depth failure. Actual 157-point failed envelope and dense held/retimed real PCM regressions pass; no audio-readiness promotion."
-    },
-    {
-      "feature_id": "studio.audio_automation",
-      "documentation_impact": [
-        "FEATURE",
-        "DEPENDENCIES"
+        "FEATURE"
       ],
       "status_before": "FUNCTIONAL",
       "status_after": "FUNCTIONAL",
       "source_paths": [
         "frontend/src/components/ViralClipStudio.js",
-        "reports/studio-restaurant-film-20261020/README.md"
+        "frontend/src/components/audio/audioRemixPreview.js",
+        "reports/studio-source-audio-clock-20261024/README.md"
       ],
-      "reason": "Bound HTML music-fallback volume to its real browser range for valid raised automation, preventing the observed IndexSizeError while preserving full decoded-buffer GainNode gain. Native 190-percent edit/playback/cold recovery and thirteen focused audio cases pass; whole preview audio parity and readiness remain separate."
+      "reason": "Decoded source gain/dialogue clock, stale occurrence guards and wait/seek suspension qualified in scoped tests and a native CPU flow. Retain full-mix, UI clock, listening, colour/edge, latency and formal readiness limits."
     },
     {
       "feature_id": "creative.showroom",
       "documentation_impact": [
-        "FEATURE",
-        "DEPENDENCIES",
-        "READINESS"
+        "FEATURE"
       ],
       "status_before": "UNIMPLEMENTED",
       "status_after": "UNIMPLEMENTED",
       "source_paths": [
-        "frontend/src/WelcomePage.js",
-        "frontend/src/components/landing/StudioWelcomePage.js",
-        "frontend/src/components/landing/StudioWelcomePage.css",
-        "scripts/creative-templates/capture-welcome-workflow.js",
-        "reports/welcome-real-workflow-20261021/README.md",
-        "reports/welcome-studio-reel-20261021/README.md"
+        "frontend/src/Docs.js",
+        "frontend/src/docs/content.js",
+        "frontend/src/App.js",
+        "frontend/src/components/public/PublicFooter.js",
+        "frontend/src/publicPageContent.js",
+        "reports/footer-pages-20261021/README.md"
       ],
-      "reason": "Refine the private real-workflow welcome through a normal native Studio 28-second film, matching complete timeline/backup, actual Queue/copy sources, and viewport-sized viewers with zoom. Preserve dated-capture limits, default production/invitation flow and all public/creative/template readiness gates."
-    },
-    {
-      "feature_id": "studio.timeline",
-      "documentation_impact": [
-        "FEATURE",
-        "CONTROLS"
-      ],
-      "status_before": "PARTIAL",
-      "status_after": "PARTIAL",
-      "source_paths": [
-        "frontend/src/components/StudioControls.css",
-        "frontend/src/components/ViralClipStudio.js",
-        "frontend/src/components/VideoEditor.js",
-        "reports/studio-ui-controls-20261021/README.md"
-      ],
-      "reason": "Knowledge 1.0.42 documents the current inspector location, scrolling, Motion fields, Logo Workshop choices and wrapped sound-cue workflow after the verified local UI repair. Existing feature/control IDs and readiness are unchanged."
-    },
-    {
-      "feature_id": "studio.keyframes",
-      "documentation_impact": [
-        "FEATURE",
-        "CONTROLS"
-      ],
-      "status_before": "FUNCTIONAL",
-      "status_after": "FUNCTIONAL",
-      "source_paths": [
-        "frontend/src/components/StudioControls.css",
-        "frontend/src/components/ViralClipStudio.js",
-        "reports/studio-ui-controls-20261021/README.md"
-      ],
-      "reason": "Knowledge 1.0.42 documents the current inspector location, scrolling, Motion fields, Logo Workshop choices and wrapped sound-cue workflow after the verified local UI repair. Existing feature/control IDs and readiness are unchanged."
-    },
-    {
-      "feature_id": "studio.logo_design",
-      "documentation_impact": [
-        "FEATURE",
-        "CONTROLS"
-      ],
-      "status_before": "PARTIAL",
-      "status_after": "PARTIAL",
-      "source_paths": [
-        "frontend/src/components/StudioControls.css",
-        "frontend/src/components/ViralClipStudio.js",
-        "reports/studio-ui-controls-20261021/README.md"
-      ],
-      "reason": "Knowledge 1.0.42 documents the current inspector location, scrolling, Motion fields, Logo Workshop choices and wrapped sound-cue workflow after the verified local UI repair. Existing feature/control IDs and readiness are unchanged."
+      "reason": "Knowledge 1.0.43 source-review of the current footer pages and public reader of the canonical generated documentation. This changes navigation and explanation, not Studio readiness, a qualified public showroom, account entitlements or model availability."
     },
     {
       "feature_id": "studio.sfx",
@@ -1039,255 +509,9 @@
       "reason": "Knowledge 1.0.42 documents the current inspector location, scrolling, Motion fields, Logo Workshop choices and wrapped sound-cue workflow after the verified local UI repair. Existing feature/control IDs and readiness are unchanged."
     },
     {
-      "feature_id": "studio.timeline",
-      "documentation_impact": [
-        "FEATURE"
-      ],
-      "status_before": "PARTIAL",
-      "status_after": "PARTIAL",
-      "source_paths": [
-        "frontend/src/Docs.js",
-        "frontend/src/docs/content.js",
-        "frontend/src/App.js",
-        "frontend/src/components/public/PublicFooter.js",
-        "frontend/src/publicPageContent.js",
-        "reports/footer-pages-20261021/README.md"
-      ],
-      "reason": "Knowledge 1.0.43 source-review of the current footer pages and public reader of the canonical generated documentation. This changes navigation and explanation, not Studio readiness, a qualified public showroom, account entitlements or model availability."
-    },
-    {
-      "feature_id": "creative.showroom",
-      "documentation_impact": [
-        "FEATURE"
-      ],
-      "status_before": "UNIMPLEMENTED",
-      "status_after": "UNIMPLEMENTED",
-      "source_paths": [
-        "frontend/src/Docs.js",
-        "frontend/src/docs/content.js",
-        "frontend/src/App.js",
-        "frontend/src/components/public/PublicFooter.js",
-        "frontend/src/publicPageContent.js",
-        "reports/footer-pages-20261021/README.md"
-      ],
-      "reason": "Knowledge 1.0.43 source-review of the current footer pages and public reader of the canonical generated documentation. This changes navigation and explanation, not Studio readiness, a qualified public showroom, account entitlements or model availability."
-    },
-    {
-      "feature_id": "studio.subject_cutout",
-      "documentation_impact": [
-        "FEATURE",
-        "CONTROLS",
-        "DEPENDENCIES"
-      ],
-      "status_before": "FUNCTIONAL",
-      "status_after": "FUNCTIONAL",
-      "source_paths": [
-        "frontend/src/components/StudioSubjectVfxPanel.js",
-        "frontend/src/components/studioSubjectCorrections.js",
-        "frontend/src/components/studioProjectDocument.js",
-        "model_workers/adapters/component_segmentation.py",
-        "model_workers/adapters/cpu_matting.py",
-        "model_workers/adapters/temporal_alpha.py",
-        "src/modelRuntime/router.js",
-        "src/services/studioSubjectVfxService.js",
-        "reports/background-replacement-20261101/README.md"
-      ],
-      "reason": "Knowledge 1.0.47 records the opt-in local multi-object and corrective-click replacement workflow and its actual failed visual quality gate. Native short-shot export and cold recovery do not promote formal readiness, whole preview parity, production model availability or creative approval."
-    },
-    {
-      "feature_id": "studio.masks",
-      "documentation_impact": [
-        "FEATURE",
-        "CONTROLS",
-        "DEPENDENCIES"
-      ],
-      "status_before": "FUNCTIONAL",
-      "status_after": "FUNCTIONAL",
-      "source_paths": [
-        "frontend/src/components/StudioSubjectVfxPanel.js",
-        "frontend/src/components/studioSubjectCorrections.js",
-        "frontend/src/components/studioProjectDocument.js",
-        "model_workers/adapters/component_segmentation.py",
-        "model_workers/adapters/cpu_matting.py",
-        "model_workers/adapters/temporal_alpha.py",
-        "src/modelRuntime/router.js",
-        "src/services/studioSubjectVfxService.js",
-        "reports/background-replacement-20261101/README.md"
-      ],
-      "reason": "Knowledge 1.0.47 records the opt-in local multi-object and corrective-click replacement workflow and its actual failed visual quality gate. Native short-shot export and cold recovery do not promote formal readiness, whole preview parity, production model availability or creative approval."
-    },
-    {
-      "feature_id": "studio.masks",
-      "documentation_impact": [
-        "FEATURE"
-      ],
-      "status_before": "FUNCTIONAL",
-      "status_after": "FUNCTIONAL",
-      "source_paths": [
-        "model_workers/adapters/temporal_alpha.py",
-        "model_workers/adapters/cpu_matting.py",
-        "python_media_worker/studio_vfx_plan.py",
-        "test/model-runtime/temporalAlpha.py",
-        "python_media_worker/test_studio_vfx_plan.py"
-      ],
-      "reason": "Knowledge 1.0.48 explains the bounded motion repair: stationary-source opacity consensus with object-scoped correction intervals and soft colour-key transitions. Retained visual failures and broader hair/motion limits prevent creative/readiness promotion."
-    },
-    {
-      "feature_id": "studio.masks",
-      "documentation_impact": [
-        "FEATURE"
-      ],
-      "status_before": "FUNCTIONAL",
-      "status_after": "FUNCTIONAL",
-      "source_paths": [
-        "config/model-runtime/registry.v1.json",
-        "model_workers/adapters/source_edge_alpha.py",
-        "model_workers/adapters/cpu_matting.py",
-        "src/modelRuntime/componentGuidance.js",
-        "src/services/studioModelCapabilityService.js",
-        "python_media_worker/studio_vfx_plan.py",
-        "reports/background-replacement-20261101/movement-equipment-repair.md"
-      ],
-      "reason": "Knowledge 1.0.49 records source-resolution couch reveal and protected microphone cleanup on the reviewed moving shot, exact native persistence and complete final playback. Fine foliage colour/detail and broader motion/physical limits prevent professional/readiness promotion."
-    },
-    {
-      "feature_id": "studio.masks",
-      "documentation_impact": [
-        "FEATURE"
-      ],
-      "status_before": "FUNCTIONAL",
-      "status_after": "FUNCTIONAL",
-      "source_paths": [
-        "test/e2e/studio-capability-matrix.json",
-        "reports/background-replacement-20261101/two-speakers.md"
-      ],
-      "reason": "Knowledge 1.0.50 records the actual six-second native two-speaker continuation, exact save/reopen/export and complete Studio playback. Model tracks plus existing native corrections repair bounded shirt/boom and TV remnants; fine foliage/props and broader temporal/physical limits remain. No engine feature or readiness promotion."
-    },
-    {
-      "feature_id": "studio.masks",
-      "documentation_impact": [
-        "FEATURE"
-      ],
-      "status_before": "FUNCTIONAL",
-      "status_after": "FUNCTIONAL",
-      "source_paths": [
-        "frontend/src/components/StudioSubjectVfxPanel.js",
-        "frontend/src/components/StudioSubjectMaskControls.js",
-        "frontend/src/components/studioSubjectCorrections.js",
-        "frontend/src/components/studioProjectDocument.js",
-        "test/e2e/studio-capability-matrix.json",
-        "reports/background-replacement-20261101/body-edge-repair.md"
-      ],
-      "reason": "Knowledge 1.0.51 records actual moving body-edge repair, soft-alpha cleanup default and correction-box persistence through canonical recovery. Existing source-specific object corrections replace sleeve colour reconstruction. Fine props/foliage, physical integration and broader motion remain unqualified; no readiness promotion."
-    },
-    {
-      "feature_id": "studio.masks",
-      "documentation_impact": [
-        "FEATURE"
-      ],
-      "status_before": "FUNCTIONAL",
-      "status_after": "FUNCTIONAL",
-      "source_paths": [
-        "python_media_worker/main_media_server.py",
-        "scripts/monetization/local-worker-execution.py",
-        "test/e2e/studio-capability-matrix.json",
-        "reports/background-replacement-20261101/original-comparison-repair.md"
-      ],
-      "reason": "Knowledge 1.0.52 records matched-original review and preservation of reviewed subject detail through sequence/reframe/finish intermediate encoding. Corrected object prompts improve second-angle TV separation. Fine foreground boundaries, physical integration, broad motion and latency remain unqualified; no readiness promotion."
-    },
-    {
-      "feature_id": "studio.masks",
-      "documentation_impact": [
-        "FEATURE"
-      ],
-      "status_before": "FUNCTIONAL",
-      "status_after": "FUNCTIONAL",
-      "source_paths": [
-        "python_media_worker/studio_vfx_plan.py",
-        "model_workers/adapters/temporal_alpha.py",
-        "scripts/monetization/local-review-bounds.cjs",
-        "test/e2e/studio-capability-matrix.json",
-        "reports/background-replacement-20261101/four-minute-continuation.md"
-      ],
-      "reason": "Four-minute actual-footage review exposes remaining boom/couch/plant/head defects; local weak person trimap leakage and redundant foreground preparation repaired. Private hybrid model proof and flattened native import do not qualify native editable long-form masks. No public feature/readiness promotion; default production transports and limits preserved."
-    },
-    {
-      "feature_id": "studio.audio_automation",
-      "documentation_impact": [
-        "FEATURE",
-        "CONTROLS"
-      ],
-      "status_before": "FUNCTIONAL",
-      "status_after": "FUNCTIONAL",
-      "source_paths": [
-        "frontend/src/components/ViralClipStudio.js",
-        "frontend/src/components/audio/audioRemixPreview.js"
-      ],
-      "reason": "Knowledge 1.0.48 source review: native media boosts use a post-effects gain node instead of invalid HTML volume, original source keys override the master fallback as in export, dialogue wings follow original-track controls, inspector changes retain B-roll gain automation, and finished-video monitoring bypasses authored source gain and additional sources. Existing readiness and broader mixed-picture/sound limitations are retained."
-    },
-    {
-      "feature_id": "studio.audio_automation",
-      "documentation_impact": [
-        "FEATURE"
-      ],
-      "status_before": "FUNCTIONAL",
-      "status_after": "FUNCTIONAL",
-      "source_paths": [
-        "frontend/src/components/ViralClipStudio.js",
-        "frontend/src/components/audio/audioRemixPreview.js",
-        "reports/studio-source-audio-clock-20261024/README.md"
-      ],
-      "reason": "Decoded source gain/dialogue clock, stale occurrence guards and wait/seek suspension qualified in scoped tests and a native CPU flow. Retain full-mix, UI clock, listening, colour/edge, latency and formal readiness limits."
-    },
-    {
-      "feature_id": "studio.timeline",
-      "documentation_impact": [
-        "FEATURE",
-        "CONTROLS"
-      ],
-      "status_before": "PARTIAL",
-      "status_after": "PARTIAL",
-      "source_paths": [
-        "frontend/src/components/ViralClipStudio.js",
-        "frontend/src/components/StudioProTimeline.js",
-        "frontend/src/components/studioPlaybackClock.js",
-        "frontend/src/components/StudioPlaybackPosition.js",
-        "reports/studio-playhead-precision-20261024/README.md"
-      ],
-      "reason": "Document the existing decoder-backed playhead/readouts and source split/trim sampling. Keep native timing failures, inspector/filter and whole picture/sound limits explicit; no readiness promotion."
-    },
-    {
-      "feature_id": "studio.compositing",
-      "documentation_impact": [
-        "FEATURE",
-        "TASKS"
-      ],
-      "status_before": "PARTIAL",
-      "status_after": "PARTIAL",
-      "source_paths": [
-        "frontend/src/components/StudioSubjectVfxPanel.js",
-        "frontend/src/components/ViralClipStudio.js"
-      ],
-      "reason": "21 October source audit: document the actual optional Composite replacement and manual style workflow, expose in-product guides, retain model availability/source-specific fringe limits and unchanged readiness."
-    },
-    {
       "feature_id": "studio.subject_cutout",
       "status_before": "FUNCTIONAL",
       "status_after": "FUNCTIONAL",
-      "documentation_impact": [
-        "FEATURE",
-        "TASKS"
-      ],
-      "source_paths": [
-        "frontend/src/components/StudioSubjectVfxPanel.js",
-        "frontend/src/components/ViralClipStudio.js"
-      ],
-      "reason": "21 October source audit: document the actual optional Composite replacement and manual style workflow, expose in-product guides, retain model availability/source-specific fringe limits and unchanged readiness."
-    },
-    {
-      "feature_id": "studio.timeline",
-      "status_before": "PARTIAL",
-      "status_after": "PARTIAL",
       "documentation_impact": [
         "FEATURE",
         "TASKS"

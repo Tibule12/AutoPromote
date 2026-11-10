@@ -1,0 +1,252 @@
+{
+  "recordedAt": "2026-11-07T08:08:42.519863+00:00",
+  "report": "reports/studio-director-creative-20261107/README.md",
+  "deliveryDirectory": "/home/tibule12/Videos/Studio - Director Creates the Edit - 2026-11-07",
+  "state": "LOCAL_MODEL_DIRECTOR_NATIVE_EDIT_DELIVERED_WITH_LIMITS",
+  "actualStudioFrontend": true,
+  "normalEmulatorSignIn": true,
+  "autonomousModelPlanning": true,
+  "preparedPlanImportUsed": false,
+  "model": "phi3:latest",
+  "modelPlanningMs": 70350,
+  "modelContext": "brief_and_clip_metadata_only",
+  "modelIntents": "sources, relative shot weights, beginning/middle/end source position, supported motion treatment, creative rationale",
+  "timingAllocation": "source-bounded 90000Hz integer-tick arithmetic",
+  "planFingerprint": "8ef21af0bb8d32a88303af0a5d32bdea4151220d8654edd0ae878271f2ef4834",
+  "shots": 3,
+  "treatmentsUsed": [
+    "orbit_cards",
+    "time_weave",
+    "full_frame"
+  ],
+  "nativeEditUndoRedo": true,
+  "manualGeneratedKeyEditUndoRedoRestore": {
+    "generatedLayerId": "scene-ac88f101-3e02-473e-ab9e-86dc1ce11c4c",
+    "originalValue": -15,
+    "editedValue": -12,
+    "meaningfulManualKeyChange": true,
+    "undoRedoRestoreExact": true,
+    "normalSignedInUi": true
+  },
+  "independentRestoreExact": true,
+  "ordinaryOverlays": 10,
+  "motionKeys": 74,
+  "nativeSeconds": 12,
+  "nativeFrames": 288,
+  "nativeFps": 24,
+  "nativeWidth": 1280,
+  "nativeHeight": 720,
+  "nativeExecutions": 1,
+  "nativeJobId": "viral_947aeb45de9ecdf920c2d0198182d9aad17c8f5f87127d7d9f9789edd85e7bb9",
+  "workerExecutionId": "84d93cc7838db808097d3cc4a97e85afe6e6d286226280144c0e015faae63e6c",
+  "worker": {
+    "wallSeconds": 225.91367274700315,
+    "cpuSeconds": 344.415701,
+    "peakRssKiB": 778604,
+    "cpuCeilingSeconds": 600,
+    "localFileCeilingBytes": 134217728,
+    "providerChargesStarted": false,
+    "invoiceCostMicros": null
+  },
+  "termination": {
+    "code": 0,
+    "signal": null,
+    "startedAt": "2026-11-07T07:48:41.612Z",
+    "finishedAt": "2026-11-07T07:52:27.882Z"
+  },
+  "exactBinding": {
+    "nativeBackupMatchesRenderedDocument": true,
+    "compiledCompositionMatchesSubmitted": true,
+    "workerArtifactMatchesNativeDownload": true,
+    "projectHash": "1a2999b6294c6a2bdcbc6a3b63d959c0ce5337a5153c0d1510cef368c515589c",
+    "movieSha256": "75c183d75d6c3719902f0c23ab5911b4934518ce588c1aa538ba7dbc931b518d",
+    "compositionLayers": 11,
+    "ordinaryOverlays": 10,
+    "keys": 74
+  },
+  "actualNativeDownload": true,
+  "allFramesFullyDecode": true,
+  "pictureReview": {
+    "fullDecode": true,
+    "frames": 288,
+    "seconds": 12,
+    "fps": 24,
+    "cutBoundaries": [
+      5.75,
+      9.75
+    ],
+    "sampledFrameIndices": [
+      0,
+      12,
+      48,
+      91,
+      108,
+      137,
+      138,
+      139,
+      144,
+      187,
+      204,
+      233,
+      234,
+      235,
+      240,
+      283,
+      287
+    ],
+    "pairedDiagnosticSamples": [
+      {
+        "programmeTime": 0.5,
+        "exportFrame": 12,
+        "diagnosticPsnrDb": 30.8386085435134,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 2,
+        "exportFrame": 48,
+        "diagnosticPsnrDb": 31.302477165012675,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 3.8,
+        "exportFrame": 91,
+        "diagnosticPsnrDb": 30.185045614353573,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 4.5,
+        "exportFrame": 108,
+        "diagnosticPsnrDb": 30.02690643360104,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 6,
+        "exportFrame": 144,
+        "diagnosticPsnrDb": 28.728790136873094,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 7.8,
+        "exportFrame": 187,
+        "diagnosticPsnrDb": 30.481544152373814,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 8.5,
+        "exportFrame": 204,
+        "diagnosticPsnrDb": 28.917239959167453,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 10,
+        "exportFrame": 240,
+        "diagnosticPsnrDb": 29.199411022494598,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 11.8,
+        "exportFrame": 283,
+        "diagnosticPsnrDb": 32.1834787216669,
+        "strictPassClaimed": false
+      }
+    ],
+    "minimumDiagnosticPsnrDb": 28.728790136873094,
+    "wholePictureParityQualified": false,
+    "humanListeningQualified": false,
+    "creativeApproval": false
+  },
+  "livePlayback": {
+    "complete": true,
+    "programmeSeconds": 12,
+    "wallMs": 12201,
+    "decoder": {
+      "time": 11.958333,
+      "decoded": 1068,
+      "dropped": 93
+    }
+  },
+  "finishedPlayback": {
+    "complete": true,
+    "programmeSeconds": 12,
+    "wallMs": 12342,
+    "decoder": {
+      "time": 11.967298,
+      "decoded": 288,
+      "dropped": 31
+    }
+  },
+  "capture": {
+    "Live Studio playback": {
+      "seconds": 12.123999834060669,
+      "frames": 87,
+      "rawBytes": 11634051,
+      "nativeControlsOnly": true,
+      "setupExcluded": true,
+      "audio": "Silent native editing capture",
+      "observedCaptureFps": 7.175849652817196
+    },
+    "Finished movie in Studio": {
+      "seconds": 12.230999946594238,
+      "frames": 301,
+      "rawBytes": 39042193,
+      "nativeControlsOnly": true,
+      "setupExcluded": true,
+      "audio": "Silent native editing capture",
+      "observedCaptureFps": 24.609598668489443
+    },
+    "Director planning and native apply": {
+      "seconds": 70.82100009918213,
+      "frames": 71,
+      "rawBytes": 8656916,
+      "nativeControlsOnly": true,
+      "setupExcluded": true,
+      "audio": "Silent native editing capture",
+      "observedCaptureFps": 1.00252749750169
+    }
+  },
+  "welcomeComparisons": 8,
+  "normalSignedInHelp": true,
+  "inspectorWidthsWithoutOverflow": [
+    1440,
+    1280
+  ],
+  "scopedFrontendTests": 30,
+  "scopedBackendTests": 18,
+  "focusedActualEditorTests": 7,
+  "distinctAutomatedTests": 55,
+  "fullEditorSuiteRun": false,
+  "historyRegressionFailedBeforeAndPassedAfter": true,
+  "newPreviewLayerPairs": 5,
+  "previewLayerEvidence": "reports/studio-preview-layers-20261107/ready-comparisons.json",
+  "earlierDeliveryFilesUnchanged": 203,
+  "protectedDeliveries": [
+    {
+      "directory": "/home/tibule12/Videos/Studio - Phase Shift - 2026-11-06",
+      "filesUnchanged": 49
+    },
+    {
+      "directory": "/home/tibule12/Videos/Studio Template Collection - 2026-11-04",
+      "filesUnchanged": 154
+    }
+  ],
+  "productionDeployment": false,
+  "pushOrMerge": false,
+  "paidProviderCalls": 0,
+  "cloudGpuJobs": 0,
+  "productionWrites": 0,
+  "wholePictureAudioParityQualified": false,
+  "realtimeSmoothnessQualified": false,
+  "humanListeningQualified": false,
+  "creativeApproval": false,
+  "readinessPromotion": false,
+  "limits": [
+    "Motion-sequence planner selects among four authored supported treatments; it is not unrestricted AE/Fusion editing.",
+    "Model sees brief/clip names/durations, not picture, speech, beats or actual visual semantics.",
+    "Source music was selected manually before planning. Music choice, transcript-based cuts, sound design and vision planning remain open.",
+    "Motion layers cover the chosen range at programme start; original programme sequencing/timing and existing layers remain. The tested project was natively trimmed to the requested twelve seconds before planning.",
+    "Preview ready waits 0.687\u20135.500 seconds in the paired Phase Shift test; no instant-seek or whole colour/edge/audio parity is claimed.",
+    "Native capture/display rates and reported decoder drops do not qualify real-time motion smoothness.",
+    "The server and frontend planner flags are enabled only in the retained isolated demo; release and ordinary-account cost/availability qualification remain separate."
+  ],
+  "nextTask": "Add source-bound scene/transcript evidence to model decisions, then shared S02 first-seek/live throughput and sound/edge parity; continue S04/S03 without bypassing the current review/execution engine."
+}

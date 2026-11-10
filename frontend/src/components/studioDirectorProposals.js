@@ -10,6 +10,7 @@ import {
   validateStudioProjectDocument,
 } from "./studioProjectDocument";
 import { isStudioCapabilityDirectorAllowed } from "./studioCapabilities";
+import { validDirectorReframeEvidence } from "./studioDirectorWorkspaceProposals";
 
 export const STUDIO_DIRECTOR_PROPOSAL_VERSION = 1;
 export const STUDIO_DIRECTOR_REVIEW_IDENTITY_STATUS = "client_claim_unverified";
@@ -42,9 +43,9 @@ const digest = async value => {
 };
 
 const assertBoundedOperation = (document, operation) => {
-  if (!operation || !["split_clip", "trim_clip"].includes(operation.type) ||
+  if (!operation || !["split_clip", "trim_clip", "reframe"].includes(operation.type) ||
       !isStudioCapabilityDirectorAllowed(operation.type)) {
-    proposalError("UNSUPPORTED_DIRECTOR_OPERATION", "Director proposals support one split or edge trim.");
+    proposalError("UNSUPPORTED_DIRECTOR_OPERATION", "Director proposals support one split, source-range trim or tracked reframe.");
   }
   const occurrence = document.clipOccurrences.find(
     item => item.occurrenceId === operation.target?.occurrenceId
@@ -61,7 +62,7 @@ const assertBoundedOperation = (document, operation) => {
     ) {
       proposalError("DIRECTOR_EDGE_LIMIT", "Director split must leave 0.2 seconds at each edge.");
     }
-  } else {
+  } else if (operation.type === "trim_clip") {
     const keep = operation.keep;
     if (
       keep?.space !== "source" ||
@@ -75,9 +76,11 @@ const assertBoundedOperation = (document, operation) => {
     }
     const removedStart = keep.startTick - source.startTick;
     const removedEnd = source.endTick - keep.endTick;
-    if ((removedStart > 0) === (removedEnd > 0)) {
-      proposalError("UNSUPPORTED_DIRECTOR_OPERATION", "Director trim must remove one edge only.");
+    if (removedStart === 0 && removedEnd === 0) {
+      proposalError("UNSUPPORTED_DIRECTOR_OPERATION", "Director trim must change the selected range.");
     }
+    if ([removedStart, removedEnd].some(value => value > 0 && value < MINIMUM_SPLIT_DISTANCE_TICKS))
+      proposalError("DIRECTOR_EDGE_LIMIT", "Each trimmed edge must remove at least 0.2 seconds.");
     if (Math.max(removedStart, removedEnd) < MINIMUM_SPLIT_DISTANCE_TICKS ||
         keep.endTick - keep.startTick < MINIMUM_SPLIT_DISTANCE_TICKS) {
       proposalError("DIRECTOR_EDGE_LIMIT", "Director trim must retain and remove at least 0.2 seconds.");
@@ -87,6 +90,15 @@ const assertBoundedOperation = (document, operation) => {
 };
 
 const assertSourceShotEvidence = (document, occurrence, operation, evidence) => {
+  if (operation.type === "reframe") {
+    const asset = document.assets.find(item => item.assetId === occurrence.assetId);
+    if (!validDirectorReframeEvidence(evidence, operation) || evidence.sourceAssetId !== asset?.assetId ||
+        evidence.sourceIdentityState !== asset.identityState || evidence.sourceContentHash !== (asset.contentHash || null) ||
+        evidence.analysisRange.startTick !== occurrence.sourceRange.startTick ||
+        evidence.analysisRange.endTick !== occurrence.sourceRange.endTick)
+      proposalError("INVALID_DIRECTOR_EVIDENCE", "Framing requires the exact source-bound tracking result.");
+    return;
+  }
   if (evidence === undefined) return;
   const asset = document.assets.find(item => item.assetId === occurrence.assetId);
   const range = evidence?.analysisRange;

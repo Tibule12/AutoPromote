@@ -1,0 +1,409 @@
+{
+  "date": "2026-11-08",
+  "branch": "fix/studio-remix-clarity-20261108",
+  "baseRevision": "f0665ee3507abe6f433cd32a315e544db75d89e4",
+  "status": "LOCAL_LIVE_REMIX_AND_NATIVE_RECOVERY_VERIFIED_NOT_DEPLOYED",
+  "tests": {
+    "audioAndClock": {
+      "passed": 68,
+      "suites": 6,
+      "failed": 0
+    },
+    "actualEditorComponent": {
+      "passed": 4,
+      "skipped": 174,
+      "wholeSuiteClaimed": false
+    },
+    "canonicalWorkerUnchanged": {
+      "passed": 11,
+      "failed": 0,
+      "boundary": "actual local FFmpeg CPU regression tests"
+    }
+  },
+  "targetedTestsPassed": 83,
+  "strictBuild": {
+    "passed": true,
+    "activeBuildReplaced": false,
+    "sourceManifestSha256": "42d69b1fef02d9c832ab97a2d96620d9e7bcd6cf9dc96293849a9765b9a387b4",
+    "sourceUnchangedAfterBuild": true
+  },
+  "lint": {
+    "newErrors": 0,
+    "newWarnings": 0,
+    "retainedWarning": "Existing no-loop-func at StudioPlaybackPosition.test.js:135, present in base."
+  },
+  "dspComparison": {
+    "fixture": "2-second steady six-harmonic 173 Hz synthetic voice-like tone, 48 kHz; assess after 0.5s. Harmonic exclusion bands are \u00b110 Hz. Diagnostic, not human listening approval.",
+    "measurements": [
+      {
+        "semitones": 12,
+        "before": {
+          "rms": 0.09823998808860779,
+          "peak": 0.37061992287635803,
+          "outOfHarmonicEnergyDb": -18.219882835914326
+        },
+        "after": {
+          "rms": 0.1603085845708847,
+          "peak": 0.47423872351646423,
+          "outOfHarmonicEnergyDb": -76.27222477068617
+        },
+        "unwantedEnergyReductionDb": 58.05234193477184
+      },
+      {
+        "semitones": -2.25,
+        "before": {
+          "rms": 0.15564113855361938,
+          "peak": 0.4229889214038849,
+          "outOfHarmonicEnergyDb": -37.557413074640664
+        },
+        "after": {
+          "rms": 0.1621702015399933,
+          "peak": 0.46469324827194214,
+          "outOfHarmonicEnergyDb": -63.821324637741334
+        },
+        "unwantedEnergyReductionDb": 26.26391156310067
+      },
+      {
+        "semitones": -2.8,
+        "before": {
+          "rms": 0.15495549142360687,
+          "peak": 0.3828579783439636,
+          "outOfHarmonicEnergyDb": -37.871047653516555
+        },
+        "after": {
+          "rms": 0.16259722411632538,
+          "peak": 0.4144271910190582,
+          "outOfHarmonicEnergyDb": -63.227881529639575
+        },
+        "unwantedEnergyReductionDb": 25.35683387612302
+      },
+      {
+        "semitones": 0,
+        "before": {
+          "rms": 0.16300706565380096,
+          "peak": 0.3238104283809662,
+          "outOfHarmonicEnergyDb": -76.61825851452062
+        },
+        "after": {
+          "rms": 0.16300706565380096,
+          "peak": 0.3238104283809662,
+          "outOfHarmonicEnergyDb": -76.61825851452062
+        },
+        "unwantedEnergyReductionDb": 0.0
+      }
+    ]
+  },
+  "browserAudioThreadLoad": {
+    "passed": true,
+    "frames": 119808,
+    "zero": 0,
+    "nonFinite": 0,
+    "rms": 0.14003460698928002,
+    "peak": 0.2212870717048645,
+    "latencySeconds": 0.096,
+    "uiBlockedForMs": 1680,
+    "uiBusyBlockMs": 40
+  },
+  "preservation": {
+    "firestore.rules": {
+      "sameAsBase": true,
+      "sha256": "8daebc8a0d4638bea8baecf4fd069ffbbf4d200e1651e935e9fb93d47c931a31"
+    },
+    "storage.rules": {
+      "sameAsBase": true,
+      "sha256": "b362e56ed1980cc781b051299e57838c61e66923083809fc844625c2ea6c52a3"
+    },
+    "src/authMiddleware.js": {
+      "sameAsBase": true,
+      "sha256": "a35e5d581db80fc7842f4882b3e635f0283feeb9478f2bf3efd22469e4551df5"
+    },
+    "src/mediaRoutes.js": {
+      "sameAsBase": true,
+      "sha256": "9204d51ab26a3de36744c012c2521bac7b86695ad97c5be65a22b7e0b8b91f97"
+    },
+    "python_media_worker/viral_audio_remix.py": {
+      "sameAsBase": true,
+      "sha256": "a53ed4870d9c8233cfe409fdd889ee0fbf1fcca33215d37ac62a1f4d770dff0f"
+    },
+    "python_media_worker/main_media_server.py": {
+      "sameAsBase": true,
+      "sha256": "dfac143f3db866ff3d057a6798df35f69e3f92d38c8ae025aefeecb89fac565f"
+    },
+    "frontend/src/components/audio/audioRemixModel.js": {
+      "sameAsBase": true,
+      "sha256": "9636b47b1570d2442aef9d68294fbd8a071d71298ee0972e73a68ec21b511543"
+    },
+    "frontend/src/components/ViralClipStudio.js": {
+      "sameAsBase": true,
+      "sha256": "10050ac1936dcac759d2566bdbe252bd8e8384d580492bc51130660c159e5316"
+    },
+    "originalLoginUnchanged": true
+  },
+  "limitations": [
+    "96 ms pitch-node latency at 48 kHz; precise preview/final lip-sync and whole-mix parity are not qualified.",
+    "Live EQ/reverb/dynamics stay approximate; canonical Rubber Band mastering is unchanged.",
+    "Signal measurements and automatic checks do not establish human listening acceptance or every input/device.",
+    "Music/voice-over/SFX target-isolation paths are not expanded in this repair.",
+    "Firefox/Safari/mobile and large simultaneous media graphs not qualified."
+  ],
+  "failuresAndCorrections": [
+    "The first pitch test ran before its asynchronous WASM initializer; corrected tests await readiness.",
+    "Stereo paths differ below -80 dB; exact-array assertion replaced by a bounded stereo error check and independent-channel tests.",
+    "The first PCM capture exceeded JavaScript argument-stack limits; the observer now reduces the array without spread.",
+    "Intercepted module delivery failed to initialize; actual loopback static serving and precompiled WASM module delivery now run.",
+    "The isolated loopback app required explicit API/media forwarding of authenticated reads; its temporary CORS transport stays in private QA.",
+    "A real Home-seek target froze the thumb while verified media/timecode advanced; corrected release condition passes paused-step and advancing-clock guards.",
+    "The Keep Pitch input is visually replaced by a styled label; automation uses the ordinary visible label.",
+    "A completed browser run hit an in-flight read cancellation during teardown; final run guards expected closure cancellations.",
+    "An attempted pytest packet-clock import could not run without pytest; not counted. The eleven unittest worker regressions passed separately.",
+    "The upstream vendor module contained trailing blank-line spaces. Removed only that whitespace, updated its provenance hash and repeated the strict build; DSP bytes and executable tokens are unchanged."
+  ],
+  "productionWrites": 0,
+  "paidWorkloads": 0,
+  "merged": false,
+  "pushed": false,
+  "deployed": false,
+  "readinessPromoted": false,
+  "nativeBrowser": {
+    "origin": "loopback static candidate build",
+    "headless": true,
+    "muted": true,
+    "source": "existing authorised owned speech project",
+    "checks": [
+      {
+        "id": "native-live-remix",
+        "passed": true,
+        "allElevenPresetsAudible": true,
+        "clocksAdvance": true,
+        "pitchBypass": true,
+        "keepPitch": true,
+        "saveColdReopen": true
+      }
+    ],
+    "presets": [
+      {
+        "preset": "chipmunk",
+        "sampleRate": 48000,
+        "peak": 0.7428976893424988,
+        "rms": 0.176049507917193,
+        "samples": 191488,
+        "time": 4.520719,
+        "paused": false,
+        "position": 4.38566666666667,
+        "rate": 1,
+        "pitch": 12,
+        "latency": 0.096,
+        "nonFinite": false,
+        "zeroBlocks": 0,
+        "sourceAdvance": 4.221762,
+        "positionAdvance": 4.086844444444448
+      },
+      {
+        "preset": "slowed_reverb",
+        "sampleRate": 48000,
+        "peak": 0.6926186084747314,
+        "rms": 0.142846442078881,
+        "samples": 193536,
+        "time": 3.655413,
+        "paused": false,
+        "position": 4.37954444444444,
+        "rate": 0.82,
+        "pitch": -2.25,
+        "latency": 0.096,
+        "nonFinite": false,
+        "zeroBlocks": 0,
+        "sourceAdvance": 3.384922,
+        "positionAdvance": 4.049999999999995
+      },
+      {
+        "preset": "deep_voice",
+        "sampleRate": 48000,
+        "peak": 0.6854481101036072,
+        "rms": 0.16031503113596643,
+        "samples": 192512,
+        "time": 4.405986,
+        "paused": false,
+        "position": 4.29735555555556,
+        "rate": 1,
+        "pitch": -2.799999952316284,
+        "latency": 0.096,
+        "nonFinite": false,
+        "zeroBlocks": 0,
+        "sourceAdvance": 4.138957,
+        "positionAdvance": 4.030322222222227
+      },
+      {
+        "preset": "sped_up",
+        "sampleRate": 48000,
+        "peak": 0.7437537312507629,
+        "rms": 0.1577731169558414,
+        "samples": 57856,
+        "time": 1.799025,
+        "paused": false,
+        "position": 1.46774444444444,
+        "rate": 1.2,
+        "pitch": 1.9500000476837158,
+        "latency": 0.096,
+        "nonFinite": false,
+        "zeroBlocks": 0,
+        "sourceAdvance": 1.4888890000000001,
+        "positionAdvance": 1.209299999999996
+      },
+      {
+        "preset": "nightcore",
+        "sampleRate": 48000,
+        "peak": 0.6845195293426514,
+        "rms": 0.1538631289357265,
+        "samples": 57856,
+        "time": 1.837528,
+        "paused": false,
+        "position": 1.41908888888889,
+        "rate": 1.25,
+        "pitch": 3.0399999618530273,
+        "latency": 0.096,
+        "nonFinite": false,
+        "zeroBlocks": 0,
+        "sourceAdvance": 1.562494,
+        "positionAdvance": 1.1990666666666678
+      },
+      {
+        "preset": "amapiano_space",
+        "sampleRate": 48000,
+        "peak": 0.6674891710281372,
+        "rms": 0.1433197641505365,
+        "samples": 58368,
+        "time": 1.485533,
+        "paused": false,
+        "position": 1.52372222222222,
+        "rate": 0.95,
+        "pitch": -0.7799999713897705,
+        "latency": 0.096,
+        "nonFinite": false,
+        "zeroBlocks": 0,
+        "sourceAdvance": 1.206508,
+        "positionAdvance": 1.230011111111109
+      },
+      {
+        "preset": "warm_vocal",
+        "sampleRate": 48000,
+        "peak": 0.676565408706665,
+        "rms": 0.1604923465287485,
+        "samples": 58368,
+        "time": 1.53542,
+        "paused": false,
+        "position": 1.5151,
+        "rate": 1,
+        "pitch": 0,
+        "latency": 0.096,
+        "nonFinite": false,
+        "zeroBlocks": 0,
+        "sourceAdvance": 1.2369080000000001,
+        "positionAdvance": 1.224477777777778
+      },
+      {
+        "preset": "bass_boost",
+        "sampleRate": 48000,
+        "peak": 0.6783771514892578,
+        "rms": 0.14826109444384322,
+        "samples": 58368,
+        "time": 1.557385,
+        "paused": false,
+        "position": 1.5151,
+        "rate": 1,
+        "pitch": 0,
+        "latency": 0.096,
+        "nonFinite": false,
+        "zeroBlocks": 0,
+        "sourceAdvance": 1.258428,
+        "positionAdvance": 1.2161444444444438
+      },
+      {
+        "preset": "lo_fi",
+        "sampleRate": 48000,
+        "peak": 0.6426498889923096,
+        "rms": 0.15147110207699865,
+        "samples": 57344,
+        "time": 1.415034,
+        "paused": false,
+        "position": 1.55225555555556,
+        "rate": 0.9,
+        "pitch": -0.7200000286102295,
+        "latency": 0.096,
+        "nonFinite": false,
+        "zeroBlocks": 0,
+        "sourceAdvance": 1.1366969999999998,
+        "positionAdvance": 1.243444444444449
+      },
+      {
+        "preset": "telephone",
+        "sampleRate": 48000,
+        "peak": 0.7213272452354431,
+        "rms": 0.16223979414963868,
+        "samples": 58368,
+        "time": 1.532814,
+        "paused": false,
+        "position": 1.50348888888889,
+        "rate": 1,
+        "pitch": 0,
+        "latency": 0.096,
+        "nonFinite": false,
+        "zeroBlocks": 0,
+        "sourceAdvance": 1.2570769999999998,
+        "positionAdvance": 1.228044444444446
+      },
+      {
+        "preset": "spatial_8d",
+        "sampleRate": 48000,
+        "peak": 0.6143704056739807,
+        "rms": 0.14205264424037808,
+        "samples": 57344,
+        "time": 1.543039,
+        "paused": false,
+        "position": 1.54452222222222,
+        "rate": 0.98,
+        "pitch": 0,
+        "latency": 0.096,
+        "nonFinite": false,
+        "zeroBlocks": 0,
+        "sourceAdvance": 1.215216,
+        "positionAdvance": 1.210011111111109
+      }
+    ],
+    "beforeBypassesPitch": true,
+    "keepPitchBypassesPitch": true,
+    "exactSavedDocumentColdReopen": true,
+    "providerAnalyses": 0,
+    "productionReviews": 0,
+    "productionMutations": 0,
+    "teardownCancelledReads": 1,
+    "processExitCode": 0,
+    "assetBoundary": "Final native run used the same executable source and DSP binary; only upstream blank-line whitespace was stripped afterward. The final strict build and byte manifest pass."
+  },
+  "evidenceLogSha256": {
+    "audio-clock-tests-final.log": "b820cacc7a8fbcc006776aaadecf83759640b35fce84f6583cd73902e75dcb52",
+    "editor-audio-tests-final.log": "015f60ef5aad3dc21b49dd36a2d38fd63efc1b0687b6999d1b2a29c571335e9b",
+    "worker-regressions-corrected.log": "d59d99e14a74ec9450bc9cbe31386396c0280e39a1631b2afc8b14f02af67459",
+    "frontend-build.log": "f7c11a5c53cd2a8f6f0af29bb3302c09a7b3e7bac36a5e91dc2e77603c8eab37",
+    "audio-browser.log": "c7902391ce747466a24959e820ade62d9ececbb65c960666a8632e56f961b48a",
+    "browser-dsp-load.json": "2f313a73e0bcfc6b9db5b8c3283e001b11b636bd873310b513bb819a4eccd819",
+    "dsp-measurements.json": "d27e09d14432697006090b940c2a6c5f7d25fba84ce7991e0ee05fb1f4e8567f"
+  },
+  "cloudRenderOrAnalysisJobsRequested": 0,
+  "continuityRecordValidation": {
+    "valid": true,
+    "capabilities": 29,
+    "counts": {
+      "UNIMPLEMENTED": 2,
+      "BROKEN": 1,
+      "PARTIAL": 9,
+      "FUNCTIONAL": 17,
+      "PRO-READY": 0,
+      "PRODUCTION-READY": 0
+    },
+    "combinations": 13,
+    "parityChecks": 17,
+    "presentFixtures": 4,
+    "newCapabilityExecutions": 0,
+    "note": "Record validation only; no browser, provider or GPU execution."
+  }
+}

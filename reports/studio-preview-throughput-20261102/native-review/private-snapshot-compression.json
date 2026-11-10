@@ -1,0 +1,48 @@
+{
+  "lossless": true,
+  "records": [
+    {
+      "original": "cold-reopened-project.private.json",
+      "archive": "cold-reopened-project.private.json.gz",
+      "sha256": "a90109c53dc5bbb19ad6b70079daf19b323838da9471650673422ddd76a88957",
+      "originalBytes": 16174909,
+      "compressedBytes": 1956999
+    },
+    {
+      "original": "edited-project.private.json",
+      "archive": "edited-project.private.json.gz",
+      "sha256": "16e805aae6bd61bf4bba428a460f355c61aeb54762780474b6dc8e3f8d8eb6e1",
+      "originalBytes": 24677771,
+      "compressedBytes": 2946727
+    },
+    {
+      "original": "redone-project.private.json",
+      "archive": "redone-project.private.json.gz",
+      "sha256": "52e113f7d308f10cdc859120760c8aec0704ed30a3efde19c90fd70be72a08ea",
+      "originalBytes": 41686043,
+      "compressedBytes": 4939043
+    },
+    {
+      "original": "rejected-without-mutation-project.private.json",
+      "archive": "rejected-without-mutation-project.private.json.gz",
+      "sha256": "3e2cfe0419d360163efcf68441ea284eacfc3eec58fd69bda364b7115eecc542",
+      "originalBytes": 58697163,
+      "compressedBytes": 6920337
+    },
+    {
+      "original": "restored-project.private.json",
+      "archive": "restored-project.private.json.gz",
+      "sha256": "df0db33051da56b57dcd277d07e288d508ad9eca5b106c4ce8596f76f1854f99",
+      "originalBytes": 50191553,
+      "compressedBytes": 5939691
+    },
+    {
+      "original": "undone-project.private.json",
+      "archive": "undone-project.private.json.gz",
+      "sha256": "1eb276ab6ecbc92d288997c9f1142fa4338e38e61df1c3c549a40e2ea7b9388e",
+      "originalBytes": 33181437,
+      "compressedBytes": 3947687
+    }
+  ],
+  "scope": "Only this run own QA snapshot dumps; native editable backups and retained media are unchanged"
+}

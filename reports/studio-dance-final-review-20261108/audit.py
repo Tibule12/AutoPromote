@@ -1,0 +1,26 @@
+from pathlib import Path
+import json,hashlib,subprocess,io
+import numpy as np
+from PIL import Image,ImageDraw
+from scipy.signal import correlate,correlation_lags
+r=Path(__file__).resolve().parent;source_report=r.parent/'studio-dance-realism-20261108';delivery=Path('/home/tibule12/Videos/Studio - Grounded Dance Revision - 2026-11-08');film=delivery/'Grounded doubles.mp4';original=Path('/home/tibule12/Videos/number two dance.mp4');expected='b047ad2171665b41242451ad8468b8fd0d4d031a37df099698726e72eb339966';sha=lambda f:hashlib.file_digest(f.open('rb'),'sha256').hexdigest();assert sha(film)==expected
+manifest=json.load(open(delivery/'SHA256.json'));checked=[]
+for name,digest in manifest.items():assert sha(delivery/name)==digest,name;checked.append(name)
+probe=json.loads(subprocess.check_output(['ffprobe','-v','error','-count_frames','-show_streams','-show_format','-of','json',str(film)]));video=next(s for s in probe['streams']if s['codec_type']=='video');audio=next(s for s in probe['streams']if s['codec_type']=='audio');assert(video['width'],video['height'],video['r_frame_rate'],video['nb_read_frames'])==(576,1024,'24/1','144');assert float(video['duration'])==6
+subprocess.run(['ffmpeg','-v','error','-threads','2','-i',str(film),'-f','null','-'],check=True)
+raw=subprocess.check_output(['ffmpeg','-v','error','-threads','2','-i',str(film),'-an','-pix_fmt','rgb24','-f','rawvideo','-']);frames=np.frombuffer(raw,np.uint8).reshape(144,1024,576,3)
+regions={'full':(0,0,576,1024),'faces-hands':(0,230,576,650),'feet':(0,760,576,910),'cleanup':(430,740,576,910)}
+for group,(x0,y0,x1,y1)in regions.items():
+ width=144 if group=='full' else 288
+ height=round((y1-y0)*width/(x1-x0));cols=6;rows=4
+ for page in range(6):
+  board=Image.new('RGB',(cols*width,rows*(height+22)),'#12151b');d=ImageDraw.Draw(board)
+  for j in range(24):
+   i=page*24+j;im=Image.fromarray(frames[i,y0:y1,x0:x1]).resize((width,height),Image.Resampling.LANCZOS);x=(j%cols)*width;y=(j//cols)*(height+22);board.paste(im,(x,y+22));d.text((x+4,y+3),f'f{i:03d} / {i/24:.4f}s',fill='white')
+  board.save(r/'private'/f'{group}-{page+1}.jpg',quality=94)
+for index in [0,13,18,19,21,25,28,29,48,72,96,119,130,133,135,136,143]:Image.fromarray(frames[index]).save(r/'private'/f'frame-{index:03d}.png')
+small=frames[:,::16,::16].astype(float);diff=np.abs(np.diff(small,axis=0)).mean(axis=(1,2,3));means=small.mean(axis=(1,2,3));packets=json.loads(subprocess.check_output(['ffprobe','-v','error','-select_streams','v:0','-show_frames','-show_entries','frame=best_effort_timestamp_time,pkt_duration_time','-of','json',str(film)]))['frames'];times=[float(x['best_effort_timestamp_time'])for x in packets];assert all(abs(t-i/24)<1e-5 for i,t in enumerate(times))
+def sound(f,start=0):return np.frombuffer(subprocess.check_output(['ffmpeg','-v','error','-ss',str(start),'-i',str(f),'-t','6','-vn','-ar','48000','-ac','2','-f','f32le','-']),'<f4').reshape(-1,2).astype(float)
+a=sound(film);b=sound(original,8);x=b.mean(axis=1);y=a.mean(axis=1);c=correlate(y,x,method='fft');lags=correlation_lags(len(y),len(x));pick=np.abs(lags)<=2400;lag=int(lags[pick][np.argmax(c[pick])]);limit=min(len(y),len(x));corr=float(np.corrcoef(x[:limit],y[:limit])[0,1]);gain=float(x[:limit].dot(y[:limit])/x[:limit].dot(x[:limit]));rms=lambda z:float(np.sqrt(np.mean(z*z)));db=lambda z:float(20*np.log10(max(z,1e-12)))
+windows=[{'start':i/10,'rmsDbfs':db(rms(a[i*4800:(i+1)*4800]))}for i in range(60)];result={'exactMovie':str(film),'movieSha256':expected,'deliveryManifestFilesVerified':len(checked),'fullDecodePassed':True,'video':{'width':576,'height':1024,'fps':24,'frames':144,'seconds':6,'codec':video['codec_name'],'pixelFormat':video['pix_fmt'],'colourRange':video.get('color_range'),'colourSpace':video.get('color_space'),'colourTransfer':video.get('color_transfer'),'colourPrimaries':video.get('color_primaries'),'displayAspect':video.get('display_aspect_ratio'),'allTimestampsFollow24fps':True,'firstFrameTime':times[0],'lastFrameTime':times[-1],'consecutiveIdenticalDownscaledFrames':int(np.count_nonzero(diff==0)),'minimumFrameMean':float(means.min()),'firstLastMeanDifference':float(np.abs(small[0]-small[-1]).mean()),'seamlessLoopClaimQualified':False},'audio':{'codec':audio['codec_name'],'rate':audio['sample_rate'],'channels':audio['channels'],'samples':len(a),'seconds':len(a)/48000,'sourceInterval':[8,14],'sourceWaveformCorrelation':corr,'bestLagSamplesAt48k':lag,'bestLagMs':lag/48,'fittedGain':gain,'fittedGainDb':db(gain),'peakDbfs':db(float(np.max(np.abs(a)))),'rmsDbfs':db(rms(a)),'samplesAtOrAboveFullScale':int(np.count_nonzero(np.abs(a)>=1)),'firstSample':a[0].tolist(),'lastSample':a[-1].tolist(),'rms100ms':windows,'humanListeningQualified':False},'visualReviewSheets':{'allDecodedFrames':144,'groups':list(regions),'pagesPerGroup':6,'nativeFramesAltered':False,'sheetsAreDiagnosticOnly':True},'publishingAttempted':False,'nativeRenderSubmitted':False}
+(r/'technical-audit.json').write_text(json.dumps(result,indent=2));print(json.dumps({k:result[k]for k in ['movieSha256','deliveryManifestFilesVerified','video','audio']if k!='audio'}));print(json.dumps({k:result['audio'][k]for k in ['sourceWaveformCorrelation','bestLagMs','fittedGainDb','peakDbfs','samplesAtOrAboveFullScale','humanListeningQualified']}))

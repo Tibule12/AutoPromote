@@ -1,0 +1,345 @@
+{
+  "format": "autopromote-scene-actions",
+  "version": 1,
+  "projectId": "viral-project-b3c8d7e9-cdff-4bdd-87dd-23b2297b83a6",
+  "baseRevision": 69,
+  "name": "Screen black plane",
+  "actions": [
+    {
+      "type": "keys",
+      "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 9.7,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 10.25,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af",
+      "keys": [
+        {
+          "property": "planeCorner0X",
+          "time": 9.7,
+          "value": 12,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 10.8,
+          "value": 12,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 12.4,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 14,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af",
+      "keys": [
+        {
+          "property": "planeCorner0Y",
+          "time": 9.7,
+          "value": 5,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 10.8,
+          "value": 5,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 12.4,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 14,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af",
+      "keys": [
+        {
+          "property": "planeCorner1X",
+          "time": 9.7,
+          "value": 96,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 10.8,
+          "value": 96,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 12.4,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 14,
+          "value": 100,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af",
+      "keys": [
+        {
+          "property": "planeCorner1Y",
+          "time": 9.7,
+          "value": 10,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 10.8,
+          "value": 10,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 12.4,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 14,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af",
+      "keys": [
+        {
+          "property": "planeCorner2X",
+          "time": 9.7,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 10.8,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 12.4,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 14,
+          "value": 100,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af",
+      "keys": [
+        {
+          "property": "planeCorner2Y",
+          "time": 9.7,
+          "value": 96,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 10.8,
+          "value": 96,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 12.4,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 14,
+          "value": 100,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af",
+      "keys": [
+        {
+          "property": "planeCorner3X",
+          "time": 9.7,
+          "value": 10,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 10.8,
+          "value": 10,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 12.4,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 14,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af",
+      "keys": [
+        {
+          "property": "planeCorner3Y",
+          "time": 9.7,
+          "value": 92,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 10.8,
+          "value": 92,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 12.4,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 14,
+          "value": 100,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-088c730d-b1ff-4310-ac25-9a7aa7d5e2af",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 9.7,
+          "value": 1.001,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 12.4,
+          "value": 1.001,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 13.65,
+          "value": 1.19,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 14,
+          "value": 1.274,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    }
+  ]
+}

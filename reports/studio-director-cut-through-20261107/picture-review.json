@@ -1,0 +1,206 @@
+{
+  "fullDecode": true,
+  "frames": 192,
+  "seconds": 8,
+  "fps": 24,
+  "poseBoundaries": [
+    0,
+    1,
+    1.05,
+    1.1,
+    1.15,
+    1.2,
+    3,
+    3.05,
+    3.1,
+    3.15,
+    3.2,
+    3.7,
+    4.24,
+    4.29,
+    4.34,
+    4.39,
+    4.44,
+    5,
+    5.05,
+    5.1,
+    5.15,
+    5.2,
+    5.9,
+    7,
+    7.05,
+    7.1,
+    7.15,
+    7.2,
+    8
+  ],
+  "sampledFrameIndices": [
+    0,
+    1,
+    12,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    36,
+    48,
+    60,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    84,
+    88,
+    89,
+    90,
+    96,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    119,
+    120,
+    121,
+    122,
+    123,
+    124,
+    125,
+    126,
+    132,
+    141,
+    142,
+    143,
+    144,
+    156,
+    167,
+    168,
+    169,
+    170,
+    171,
+    172,
+    173,
+    174,
+    180,
+    191
+  ],
+  "pairedDiagnosticSamples": [
+    {
+      "programmeTime": 0,
+      "exportFrame": 0,
+      "diagnosticPsnrDb": 28.72729316543588,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 0.5,
+      "exportFrame": 12,
+      "diagnosticPsnrDb": 28.852121914753283,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 1,
+      "exportFrame": 24,
+      "diagnosticPsnrDb": 27.908703860906527,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 1.5,
+      "exportFrame": 36,
+      "diagnosticPsnrDb": 25.854800149130508,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 2,
+      "exportFrame": 48,
+      "diagnosticPsnrDb": 27.04172198894424,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 2.5,
+      "exportFrame": 60,
+      "diagnosticPsnrDb": 26.481516254658107,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 3,
+      "exportFrame": 72,
+      "diagnosticPsnrDb": 27.013742178023612,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 3.5,
+      "exportFrame": 84,
+      "diagnosticPsnrDb": 27.71474514482314,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 4,
+      "exportFrame": 96,
+      "diagnosticPsnrDb": 27.737003025862982,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 4.5,
+      "exportFrame": 108,
+      "diagnosticPsnrDb": 27.7405032995906,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 5,
+      "exportFrame": 120,
+      "diagnosticPsnrDb": 29.61657683006491,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 5.5,
+      "exportFrame": 132,
+      "diagnosticPsnrDb": 28.47243331495737,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 6,
+      "exportFrame": 144,
+      "diagnosticPsnrDb": 28.80784397275498,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 6.5,
+      "exportFrame": 156,
+      "diagnosticPsnrDb": 27.974234551378135,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 7,
+      "exportFrame": 168,
+      "diagnosticPsnrDb": 30.39447950598037,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 7.5,
+      "exportFrame": 180,
+      "diagnosticPsnrDb": 32.85842523325837,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 7.9583333333,
+      "exportFrame": 191,
+      "diagnosticPsnrDb": 32.61880357468938,
+      "strictPassClaimed": false
+    }
+  ],
+  "minimumDiagnosticPsnrDb": 25.854800149130508,
+  "wholePictureParityQualified": false,
+  "humanListeningQualified": false,
+  "creativeApproval": false
+}

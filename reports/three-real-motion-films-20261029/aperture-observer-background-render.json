@@ -1,0 +1,7 @@
+{
+  "jobId": "5a59dafa-0559-42ff-9448-03fc9b86a927",
+  "acceptedBackupRetained": true,
+  "observerPid": 1714611,
+  "workerContinuesIndependently": true,
+  "reason": "Release software-preview CPU while canonical full-resolution work continues; recover the same accepted request later."
+}

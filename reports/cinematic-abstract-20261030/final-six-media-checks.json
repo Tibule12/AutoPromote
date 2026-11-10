@@ -1,0 +1,64 @@
+{
+  "media": [
+    {
+      "identity": "current",
+      "kind": "cinema",
+      "frames": 576,
+      "duration": 24,
+      "sha256": "d83e2dfc6dfdf492520f2335a9eca0353317c2e688f93fc3d17e05ec6ee6f4e7",
+      "decodePassed": true,
+      "stemCorrelation": 0.999664500340871
+    },
+    {
+      "identity": "current",
+      "kind": "episode",
+      "frames": 2914,
+      "duration": 121.41666666666666,
+      "sha256": "31370440dfa239f5fb8d41cc2ed193376bfc0a4afa5d7c4d6c41304443d694ca",
+      "decodePassed": true,
+      "stemCorrelation": 0.9999438615164904
+    },
+    {
+      "identity": "prism",
+      "kind": "cinema",
+      "frames": 576,
+      "duration": 24,
+      "sha256": "cb65c829e76b1c83560ba4e93183b9d3a2eed21c7fa55c68fd9da4242e0e531f",
+      "decodePassed": true,
+      "stemCorrelation": 0.999738360614889
+    },
+    {
+      "identity": "prism",
+      "kind": "episode",
+      "frames": 2865,
+      "duration": 119.375,
+      "sha256": "8bf493346538b257b43b1f97e7682eab02ebe86078ca3239ebc344df477b1d3b",
+      "decodePassed": true,
+      "stemCorrelation": 0.9999440954014184
+    },
+    {
+      "identity": "fold",
+      "kind": "cinema",
+      "frames": 576,
+      "duration": 24,
+      "sha256": "5619f34a34e255a7907c19594651ee37b13b7c3e7c7e57e793eb5d43297a41c2",
+      "decodePassed": true,
+      "stemCorrelation": 0.9998233738709511
+    },
+    {
+      "identity": "fold",
+      "kind": "episode",
+      "frames": 2868,
+      "duration": 119.5,
+      "sha256": "bb54f3d0ca263799fbbc719987a102ae5235102818d15b5c36efc7f05404d390",
+      "decodePassed": true,
+      "stemCorrelation": 0.9999415961180965
+    }
+  ],
+  "timer": {
+    "is-active": "inactive",
+    "is-enabled": "disabled"
+  },
+  "ownerApproved": false,
+  "scheduled": false
+}

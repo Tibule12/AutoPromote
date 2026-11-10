@@ -1,0 +1,3 @@
+{
+  "firestore": { "rules": "config/security/firestore.restrictive-fallback.rules" }
+}

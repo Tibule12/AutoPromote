@@ -1,0 +1,311 @@
+{
+  "exactMovie": "/home/tibule12/Videos/Studio - Grounded Dance Revision - 2026-11-08/Grounded doubles.mp4",
+  "movieSha256": "b047ad2171665b41242451ad8468b8fd0d4d031a37df099698726e72eb339966",
+  "deliveryManifestFilesVerified": 36,
+  "fullDecodePassed": true,
+  "video": {
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "frames": 144,
+    "seconds": 6,
+    "codec": "h264",
+    "pixelFormat": "yuv420p",
+    "colourRange": "tv",
+    "colourSpace": null,
+    "colourTransfer": "bt709",
+    "colourPrimaries": "bt709",
+    "displayAspect": "9:16",
+    "allTimestampsFollow24fps": true,
+    "firstFrameTime": 0.0,
+    "lastFrameTime": 5.958333,
+    "consecutiveIdenticalDownscaledFrames": 0,
+    "minimumFrameMean": 81.52329282407408,
+    "firstLastMeanDifference": 17.932725694444443,
+    "seamlessLoopClaimQualified": false
+  },
+  "audio": {
+    "codec": "aac",
+    "rate": "48000",
+    "channels": 2,
+    "samples": 288000,
+    "seconds": 6.0,
+    "sourceInterval": [
+      8,
+      14
+    ],
+    "sourceWaveformCorrelation": 0.9952974173843818,
+    "bestLagSamplesAt48k": 0,
+    "bestLagMs": 0.0,
+    "fittedGain": 0.8932067342715561,
+    "fittedGainDb": -0.9809602250896625,
+    "peakDbfs": 0.651657272910237,
+    "rmsDbfs": -6.073555786940919,
+    "samplesAtOrAboveFullScale": 125,
+    "firstSample": [
+      -0.07742059975862503,
+      -0.1323518007993698
+    ],
+    "lastSample": [
+      -0.3565276265144348,
+      -0.3037722706794739
+    ],
+    "rms100ms": [
+      {
+        "start": 0.0,
+        "rmsDbfs": -14.987684800212932
+      },
+      {
+        "start": 0.1,
+        "rmsDbfs": -12.866491640562188
+      },
+      {
+        "start": 0.2,
+        "rmsDbfs": -13.407343616985546
+      },
+      {
+        "start": 0.3,
+        "rmsDbfs": -14.331685246472638
+      },
+      {
+        "start": 0.4,
+        "rmsDbfs": -6.894808801109365
+      },
+      {
+        "start": 0.5,
+        "rmsDbfs": -3.4195435735945834
+      },
+      {
+        "start": 0.6,
+        "rmsDbfs": -3.832700977603487
+      },
+      {
+        "start": 0.7,
+        "rmsDbfs": -12.255096124255314
+      },
+      {
+        "start": 0.8,
+        "rmsDbfs": -13.052965676719094
+      },
+      {
+        "start": 0.9,
+        "rmsDbfs": -3.9064597334118316
+      },
+      {
+        "start": 1.0,
+        "rmsDbfs": -2.7013721282698553
+      },
+      {
+        "start": 1.1,
+        "rmsDbfs": -6.412738780234868
+      },
+      {
+        "start": 1.2,
+        "rmsDbfs": -12.594289485051036
+      },
+      {
+        "start": 1.3,
+        "rmsDbfs": -9.70685587405174
+      },
+      {
+        "start": 1.4,
+        "rmsDbfs": -3.463960591994973
+      },
+      {
+        "start": 1.5,
+        "rmsDbfs": -2.8707407796658977
+      },
+      {
+        "start": 1.6,
+        "rmsDbfs": -11.089151517965412
+      },
+      {
+        "start": 1.7,
+        "rmsDbfs": -12.586217539232251
+      },
+      {
+        "start": 1.8,
+        "rmsDbfs": -6.528420873135893
+      },
+      {
+        "start": 1.9,
+        "rmsDbfs": -2.9616799006657684
+      },
+      {
+        "start": 2.0,
+        "rmsDbfs": -4.360203417801982
+      },
+      {
+        "start": 2.1,
+        "rmsDbfs": -13.15758560479997
+      },
+      {
+        "start": 2.2,
+        "rmsDbfs": -12.751792477378617
+      },
+      {
+        "start": 2.3,
+        "rmsDbfs": -4.153402166677941
+      },
+      {
+        "start": 2.4,
+        "rmsDbfs": -2.6955798041071866
+      },
+      {
+        "start": 2.5,
+        "rmsDbfs": -7.49331077948352
+      },
+      {
+        "start": 2.6,
+        "rmsDbfs": -13.55462157932215
+      },
+      {
+        "start": 2.7,
+        "rmsDbfs": -7.373744213667253
+      },
+      {
+        "start": 2.8,
+        "rmsDbfs": -2.5971720603935595
+      },
+      {
+        "start": 2.9,
+        "rmsDbfs": -3.494234872428203
+      },
+      {
+        "start": 3.0,
+        "rmsDbfs": -13.206949730369978
+      },
+      {
+        "start": 3.1,
+        "rmsDbfs": -12.773238907815301
+      },
+      {
+        "start": 3.2,
+        "rmsDbfs": -4.730120897131141
+      },
+      {
+        "start": 3.3,
+        "rmsDbfs": -2.5130282714621948
+      },
+      {
+        "start": 3.4,
+        "rmsDbfs": -5.248271656443561
+      },
+      {
+        "start": 3.5,
+        "rmsDbfs": -12.552286568789409
+      },
+      {
+        "start": 3.6,
+        "rmsDbfs": -11.071034036217045
+      },
+      {
+        "start": 3.7,
+        "rmsDbfs": -3.02070466894444
+      },
+      {
+        "start": 3.8,
+        "rmsDbfs": -2.6777257741711398
+      },
+      {
+        "start": 3.9,
+        "rmsDbfs": -10.285871389233598
+      },
+      {
+        "start": 4.0,
+        "rmsDbfs": -12.89018320822387
+      },
+      {
+        "start": 4.1,
+        "rmsDbfs": -6.153263325304995
+      },
+      {
+        "start": 4.2,
+        "rmsDbfs": -2.7588420782518837
+      },
+      {
+        "start": 4.3,
+        "rmsDbfs": -4.340684848271572
+      },
+      {
+        "start": 4.4,
+        "rmsDbfs": -14.43904984001296
+      },
+      {
+        "start": 4.5,
+        "rmsDbfs": -12.318065712802216
+      },
+      {
+        "start": 4.6,
+        "rmsDbfs": -3.745612962642549
+      },
+      {
+        "start": 4.7,
+        "rmsDbfs": -2.839254674943467
+      },
+      {
+        "start": 4.8,
+        "rmsDbfs": -6.794709004906105
+      },
+      {
+        "start": 4.9,
+        "rmsDbfs": -12.469441138625093
+      },
+      {
+        "start": 5.0,
+        "rmsDbfs": -8.862882365646055
+      },
+      {
+        "start": 5.1,
+        "rmsDbfs": -3.2919780401998224
+      },
+      {
+        "start": 5.2,
+        "rmsDbfs": -2.9811757797599925
+      },
+      {
+        "start": 5.3,
+        "rmsDbfs": -12.496327775701326
+      },
+      {
+        "start": 5.4,
+        "rmsDbfs": -12.790173369108963
+      },
+      {
+        "start": 5.5,
+        "rmsDbfs": -5.168475543703844
+      },
+      {
+        "start": 5.6,
+        "rmsDbfs": -2.6982824686873474
+      },
+      {
+        "start": 5.7,
+        "rmsDbfs": -4.928603279543276
+      },
+      {
+        "start": 5.8,
+        "rmsDbfs": -14.13891666978818
+      },
+      {
+        "start": 5.9,
+        "rmsDbfs": -13.263064776180503
+      }
+    ],
+    "humanListeningQualified": false
+  },
+  "visualReviewSheets": {
+    "allDecodedFrames": 144,
+    "groups": [
+      "full",
+      "faces-hands",
+      "feet",
+      "cleanup"
+    ],
+    "pagesPerGroup": 6,
+    "nativeFramesAltered": false,
+    "sheetsAreDiagnosticOnly": true
+  },
+  "publishingAttempted": false,
+  "nativeRenderSubmitted": false
+}

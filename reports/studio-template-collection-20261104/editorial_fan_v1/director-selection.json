@@ -1,0 +1,7 @@
+{
+  "template": "editorial_fan_v1",
+  "review": "editorial_fan_v1 · 1.0.1\n\nThree paper-mounted live portraits fan out, reform into an editorial grid and peel into the final shot. Uses one saved source and ordinary editable Studio layers. No model job.\n\nUses your saved inputs. No model job is started.Apply Director launchDismiss selection",
+  "normalFrontend": true,
+  "visualInference": false,
+  "modelCalls": 0
+}

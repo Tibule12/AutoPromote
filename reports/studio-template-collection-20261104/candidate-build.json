@@ -1,0 +1,21 @@
+{
+  "build": "/dev/shm/autopromote-template-collection-20261104-r3-build",
+  "origin": "http://127.0.0.1:43927",
+  "demoProject": "demo-autopromote-credits",
+  "welcomeFlag": "true",
+  "mainAsset": "/static/js/main.59c99216.js",
+  "mainSha256": "af6339a55633ed309190e95eec36ea240f45b64b9d2ea5556ff851dfdc1ee943",
+  "sources": {
+    "frontend/src/components/studioCreativeTemplate.js": "9e1d1b8091effa8bdadc6190230a9d74f48b4983a9ad7009028a147a35600245",
+    "frontend/src/components/studioMotionRecipe.js": "2f79d080beedabdbfea768993f172bb4c9e54738ca1af7d810045c564ad0e077",
+    "frontend/src/components/StudioLaunchTemplatePanel.js": "5ac5865b575a1989f99cfaed8acc7eb724727919fd9a9d4cbde271829b8a8597",
+    "frontend/src/templates/aperture_product_v1.json": "e3f5179f667b8f827083e48d2a468e69c73fda58a828a86cba17481f488c1d82",
+    "frontend/src/templates/editorial_fan_v1.json": "40a228e24f753661689735d3bbdc36ba74497250489ef2e04b07030fe32b4a1b",
+    "frontend/src/templates/split_impact_v1.json": "7f764e7cb88f01274369ddc182cee278191f1f275a4406543e24c5c0e5cddca9",
+    "frontend/src/templates/coastal_postcards_v1.json": "900fbb3ebd31c2a9e23ffaaf1da107661a941e58e2ee9096228fa886eaf7f705",
+    "frontend/src/templates/vinyl_pulse_v1.json": "205addbfe89e425bbac4034ec6fd962c9833e85cd7905c444bca564bba9cf998",
+    "frontend/src/templates/living_infinity_v1.json": "cf6ffb43a913356ab7e14f7f5f6d2d4b05a0f73bdd5dea944575b8925a00c461",
+    "config/creative-templates/registry.v1.json": "d549c50b92c525dc3ae4dc9f6d9b4fc1ba36f2028cc363501890ecd5c6e2abb0",
+    "src/generated/studioDirectorReplayKernel.cjs": "3a8edb459c336aad4ec7b2e212b78b12dee2ecb009a12ae9434e48996564006f"
+  }
+}

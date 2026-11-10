@@ -1,0 +1,6 @@
+{
+  "pid": 762499,
+  "port": 5008,
+  "purpose": "Temporary read-only entry-point comparison before replacing the local app build.",
+  "stoppedAfterVerification": true
+}

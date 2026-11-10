@@ -1,0 +1,207 @@
+{
+  "format": "autopromote-scene-actions",
+  "version": 1,
+  "projectId": "viral-project-d5df376b-ad19-48e6-bb01-21d2b3b4e1fb",
+  "baseRevision": 29,
+  "name": "05 - Diagonal cut",
+  "actions": [
+    {
+      "type": "media_plane",
+      "id": "P / code ground",
+      "name": "P / code ground",
+      "sourceMediaId": "launch-72d89720ee9db0d593c6120c",
+      "sourceStart": 2,
+      "startTime": 9,
+      "duration": 5,
+      "mediaFit": "cover",
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      }
+    },
+    {
+      "type": "media_plane",
+      "id": "P / diagonal performer",
+      "name": "P / diagonal performer",
+      "sourceMediaId": "launch-f845b91a06ef40d16ae43d84",
+      "sourceStart": 2,
+      "startTime": 9,
+      "duration": 5,
+      "mediaFit": "contain",
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      },
+      "mask": {
+        "enabled": true,
+        "shape": "polygon",
+        "path": "polygon(-100% -10%,0% -10%,-35% 110%,-100% 110%)",
+        "feather": 0,
+        "inverted": false
+      }
+    },
+    {
+      "type": "move_layer",
+      "targetId": "P / wipe blue",
+      "beforeId": "P / diagonal performer"
+    },
+    {
+      "type": "keys",
+      "targetId": "P / wipe blue",
+      "keys": [
+        {
+          "property": "maskPoint1X",
+          "time": 9,
+          "value": -5,
+          "easing": "linear"
+        },
+        {
+          "property": "maskPoint1X",
+          "time": 9.5,
+          "value": -5,
+          "easing": "linear"
+        },
+        {
+          "property": "maskPoint1X",
+          "time": 11.9,
+          "value": 140,
+          "easing": "linear"
+        },
+        {
+          "property": "maskPoint1X",
+          "time": 14,
+          "value": 140,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / wipe blue",
+      "keys": [
+        {
+          "property": "maskPoint2X",
+          "time": 9,
+          "value": -40,
+          "easing": "linear"
+        },
+        {
+          "property": "maskPoint2X",
+          "time": 9.5,
+          "value": -40,
+          "easing": "linear"
+        },
+        {
+          "property": "maskPoint2X",
+          "time": 11.9,
+          "value": 105,
+          "easing": "linear"
+        },
+        {
+          "property": "maskPoint2X",
+          "time": 14,
+          "value": 105,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / diagonal performer",
+      "keys": [
+        {
+          "property": "maskPoint1X",
+          "time": 9,
+          "value": -5,
+          "easing": "linear"
+        },
+        {
+          "property": "maskPoint1X",
+          "time": 9.5,
+          "value": -5,
+          "easing": "linear"
+        },
+        {
+          "property": "maskPoint1X",
+          "time": 11.9,
+          "value": 140,
+          "easing": "linear"
+        },
+        {
+          "property": "maskPoint1X",
+          "time": 14,
+          "value": 140,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / diagonal performer",
+      "keys": [
+        {
+          "property": "maskPoint2X",
+          "time": 9,
+          "value": -40,
+          "easing": "linear"
+        },
+        {
+          "property": "maskPoint2X",
+          "time": 9.5,
+          "value": -40,
+          "easing": "linear"
+        },
+        {
+          "property": "maskPoint2X",
+          "time": 11.9,
+          "value": 105,
+          "easing": "linear"
+        },
+        {
+          "property": "maskPoint2X",
+          "time": 14,
+          "value": 105,
+          "easing": "linear"
+        }
+      ]
+    }
+  ],
+  "graphics": {
+    "format": "autopromote-graphics",
+    "version": 1,
+    "name": "05 - Diagonal cut",
+    "width": 1280,
+    "height": 720,
+    "duration": 24,
+    "layers": [
+      {
+        "id": "P / wipe blue",
+        "name": "P / wipe blue",
+        "type": "artwork",
+        "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\"><rect width=\"1280\" height=\"720\" fill=\"#1636c9\"/></svg>",
+        "startTime": 9,
+        "duration": 5,
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "height": 100,
+        "scale": 1,
+        "rotation": 0,
+        "opacity": 1,
+        "keys": [],
+        "mask": {
+          "enabled": true,
+          "shape": "polygon",
+          "path": "polygon(-100% -10%,0% -10%,-35% 110%,-100% 110%)",
+          "feather": 0,
+          "inverted": false
+        }
+      }
+    ],
+    "groups": []
+  }
+}

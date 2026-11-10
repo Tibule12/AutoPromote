@@ -17,6 +17,7 @@ import {
   defaultMotionDriverForProperty,
   evaluateWorldLayerPose,
   isHiddenTrackMatteSource,
+  removeStudioLayerSafely,
   reparentStudioLayerPreservingWorldPose,
 } from "./studioCompRigging";
 import "./StudioMotionFlow.css";
@@ -144,6 +145,26 @@ export default function StudioCompWorkbench({
       onChangeOverlays?.(next);
     } catch (_err) {
       // Cycle or invalid parent rejected cleanly
+    }
+  };
+
+  const handleDeleteLayer = layerId => {
+    if (!layerId || layerId === "main-video") return;
+    const cleaned = removeStudioLayerSafely(
+      {
+        overlays,
+        motionKeyframes,
+        mainTransform,
+      },
+      layerId,
+      currentTime
+    );
+    onChangeOverlays?.(cleaned.overlays);
+    if (Array.isArray(cleaned.motionKeyframes)) {
+      onChangeMotionKeyframes?.(cleaned.motionKeyframes);
+    }
+    if (String(selectedLayer.id) === String(layerId)) {
+      onSelectOverlay?.(null);
     }
   };
 
@@ -596,6 +617,16 @@ export default function StudioCompWorkbench({
                     }
                   >
                     M
+                  </button>
+                  <button
+                    type="button"
+                    className="ap-comp-sw"
+                    aria-label={`Delete ${layer.name || layer.text || layer.id}`}
+                    title="Delete layer safely (auto-detaches Track Mattes & preserves child poses)"
+                    data-testid={`comp-delete-layer-${layer.id}`}
+                    onClick={() => handleDeleteLayer(layer.id)}
+                  >
+                    ×
                   </button>
                 </div>
 

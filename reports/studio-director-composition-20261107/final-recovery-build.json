@@ -1,0 +1,31 @@
+{
+  "recordedAt": "2026-11-07T11:58:15.472247+00:00",
+  "demoProject": "demo-autopromote-credits",
+  "api": "http://127.0.0.1:34899",
+  "build": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105/reports/studio-director-composition-20261107/private/runtime/autopromote-application-demo-6YGcoz/build",
+  "mainAsset": "/static/js/main.e641e25e.js",
+  "mainSha256": "9150fdbb6f8ccad440680e88ffebdce938dfc1aca160a6ceea44b50e02ecd160",
+  "welcomeFlag": true,
+  "directorMotionUiFlag": true,
+  "directorModelServerEnabled": false,
+  "sourceHashes": {
+    "frontend/src/components/ViralClipStudio.js": "55e9543b2aa8e4c48c54872d6b1a8baade6debb675f76e337b291184ac363819",
+    "frontend/src/components/StudioProgrammeFrame.js": "47527a377a72841f275e0f9c9f4e78f168259b80b4601bd8550ff4519a952578",
+    "frontend/src/components/studioVideoMatte.js": "522026f84d7134a6d4d766528c18a955620694d3f6d057c1c61a9fbb9a7929fb",
+    "frontend/src/components/studioSharedOverlayFrame.js": "581c7ed0459eeee9838d9108aeca5e646ce53f8069807ae161cafb4bf73c45fe",
+    "frontend/src/components/studioDirectorComposition.js": "6856aaedc2d4cf7f71f24e85ede7aef78442f765c8664f852edacea145099cfc",
+    "frontend/src/components/studioDirectorCreativeClient.js": "98ed29ee11a8c7bcc5df793f316bb3390c3b16eedd111230ea60df1d5b9790e4",
+    "frontend/src/components/StudioDirectorCreativePanel.js": "28c0f80a83e5cfce6cde1a7366aca8bd032b6cd1eaac1383c456fa4cacaf2268",
+    "frontend/src/components/studioDirectorCreativePlan.js": "e8e8942a2718e1340f8b52a1827a7d0bbb02603aca08dfd1cb42c0c2646de994",
+    "src/services/studioDirectorCompositionPlanner.js": "016fe937f7f9b943770b28f46ea5b868bd3bb517af5ffa7796099ca5105e9593",
+    "src/services/studioDirectorCreativePlanner.js": "5849a181dab311d93f22b57d47866c409405ce78f46b1273a43093be898634c8",
+    "src/services/studioLocalModelTransport.js": "6a26a77b15ebd9c29f7b846cfbc8d9b8d4585bae6f5534ef440f355bd7b280a7",
+    "src/routes/studioDirectorCreativeRoutes.js": "15a2ba650bdf39dd43a1a0a8d0a35d1aedbaa0c443242388768b5bae3c3e3262",
+    "scripts/monetization/application-host.cjs": "26feebedb7226ea284dd77c319e9f1321110576c51a035be3e61e030f0cb0e4d",
+    "src/generated/studioDirectorReplayKernel.cjs": "2c89c123c59b7297fff4bf1fd7373860aeeec4138d7b8c105fdf46407fc61c08",
+    "python_media_worker/main_media_server.py": "0afacd9efed66dbb00a53c9fc1a2b461b0da5d3fe5dbc3cf6fe07910cb0b6f64"
+  },
+  "freshRuntime": true,
+  "originalRuntimeAndWorkerHistoryUnavailable": true,
+  "noNativeRerenderAfterRecovery": true
+}

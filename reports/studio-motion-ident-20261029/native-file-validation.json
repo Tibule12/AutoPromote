@@ -1,0 +1,32 @@
+{
+  "native-blender-preview.mp4": {
+    "sha256": "919963cefd6556a22e22a22712e93ee3604ad081cc02959a060ac058df0fc677",
+    "bytes": 29569,
+    "streams": [
+      {
+        "codec": "h264",
+        "width": 640,
+        "height": 360,
+        "fps": "24/1",
+        "frames": "84",
+        "pixelFormat": "yuv420p"
+      }
+    ],
+    "duration": 3.5
+  },
+  "native-final.mp4": {
+    "sha256": "12c1cad04b060531fda0aa95bd0a5ff740d833e7cfabff438ab87c181d85a870",
+    "bytes": 151386,
+    "streams": [
+      {
+        "codec": "h264",
+        "width": 1920,
+        "height": 1080,
+        "fps": "30/1",
+        "frames": "120",
+        "pixelFormat": "yuv420p"
+      }
+    ],
+    "duration": 4
+  }
+}

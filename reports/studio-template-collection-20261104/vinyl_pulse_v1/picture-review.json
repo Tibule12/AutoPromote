@@ -1,0 +1,59 @@
+{
+  "fullDecode": true,
+  "frames": 192,
+  "fps": 24,
+  "seconds": 8,
+  "width": 1280,
+  "height": 720,
+  "movieSha256": "7028e16cb01253bfe1d3c26856dbf44b16adb2ce090e14f6db0d1c97500f664f",
+  "sampleTimes": [
+    0,
+    0.25,
+    1.5,
+    2.5,
+    3.5,
+    4.5,
+    5.5,
+    6.5,
+    7.958333
+  ],
+  "pairs": [
+    {
+      "requested": 0.25,
+      "measuredProgrammeTime": 0.25,
+      "exportFrameIndex": 6,
+      "psnrDb": 26.59174473092353,
+      "passClaimed": false
+    },
+    {
+      "requested": 1.5,
+      "measuredProgrammeTime": 1.5,
+      "exportFrameIndex": 36,
+      "psnrDb": 24.9411505306224,
+      "passClaimed": false
+    },
+    {
+      "requested": 3.5,
+      "measuredProgrammeTime": 3.5,
+      "exportFrameIndex": 84,
+      "psnrDb": 25.66674368659688,
+      "passClaimed": false
+    },
+    {
+      "requested": 5.5,
+      "measuredProgrammeTime": 5.5,
+      "exportFrameIndex": 132,
+      "psnrDb": 27.291528964162982,
+      "passClaimed": false
+    },
+    {
+      "requested": 7.5,
+      "measuredProgrammeTime": 7.5,
+      "exportFrameIndex": 180,
+      "psnrDb": 39.45146311526427,
+      "passClaimed": false
+    }
+  ],
+  "minimumPsnrDb": 24.9411505306224,
+  "wholeParityQualified": false
+}

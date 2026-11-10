@@ -1,0 +1,268 @@
+{
+  "id": "unmuted-cinematic-revision-20261031",
+  "duration": 16.291666666666668,
+  "frames": 391,
+  "sourceSha256": "7a16b8ba2eba836eac74bcfb1f830313907ac0e19f314e636d4b7f833643578c",
+  "cuts": [
+    [
+      12.25,
+      13.416666666666666
+    ],
+    [
+      19.625,
+      34.75
+    ]
+  ],
+  "background": "Native 3D architectural set with source-bound prepared alpha presenter",
+  "scenes": [
+    {
+      "id": "podcast-set-1",
+      "hqPreviewUrl": "",
+      "sceneType": "cinematic_evidence",
+      "cinematic": {
+        "version": 1,
+        "preset": "podcast_stage_v1",
+        "sources": {
+          "presenter": "b979b787d81a4ff3296cad8099419675a84ec60091a3bbcff6c80ace1a3f060f",
+          "evidence": "fa70e8b95a6c7bd5c5483177202af4c328f873b8307b39e487098da3ec41d6f8",
+          "presenterOffset": 0,
+          "evidenceOffset": 0
+        },
+        "camera": {
+          "focalLength": 36,
+          "pushIn": 1,
+          "screenYaw": -8
+        },
+        "material": {
+          "color": "#624332",
+          "roughness": 0.26,
+          "metallic": 0.7
+        },
+        "lighting": {
+          "key": 850,
+          "fill": 500
+        },
+        "content": {
+          "brand": "UNMUTED",
+          "headline": "WE ARE BACK.",
+          "tagline": "DEEP. RAW. AUTHENTIC.",
+          "disclosure": "UNMUTED PODCAST"
+        },
+        "timing": {
+          "pushAt": 0.24,
+          "holdUntil": 0.67,
+          "returnAt": 0.86,
+          "wordA": 0.6473846153846153,
+          "wordB": 0.7507692307692307,
+          "wordC": 0.7827692307692308
+        },
+        "cueMode": "editorial"
+      },
+      "localExport": {
+        "url": "/api/cinematic/jobs/efaae1643c2a32511cc6d1f4241fcf2c8a4ae24c8734ca69151e3f3f3acaa79a/movie.mp4",
+        "revision": "scene-v2:qr:c1dc7805bea71b37",
+        "jobId": "efaae1643c2a32511cc6d1f4241fcf2c8a4ae24c8734ca69151e3f3f3acaa79a",
+        "sha256": "80b3f164987826e73e9e8fbdb6dad66f687849154a3e1a9fccf366ee7b735ed6"
+      },
+      "version": 1,
+      "name": "Cinematic podcast set",
+      "endTime": 8.125,
+      "hqPreviewRevision": "",
+      "hqPreviewJobId": "",
+      "primaryColor": "#f4b969",
+      "text": "WE ARE BACK.",
+      "startTime": 0,
+      "duration": 8.125,
+      "keyframes": [],
+      "template": "podcast_stage_v1",
+      "enabled": true,
+      "layerOrder": 50
+    },
+    {
+      "version": 1,
+      "id": "podcast-set-2",
+      "sceneType": "cinematic_evidence",
+      "template": "podcast_stage_v1",
+      "name": "Podcast set · shot 2",
+      "text": "UNTOLD STORIES",
+      "startTime": 8.125,
+      "duration": 8.166666666666666,
+      "endTime": 16.291666666666664,
+      "enabled": true,
+      "layerOrder": 50,
+      "keyframes": [],
+      "cinematic": {
+        "version": 1,
+        "preset": "podcast_stage_v1",
+        "sources": {
+          "presenter": "7dd5b5d84e5a5bae64b04a2a8f10b3c2dd32f0eed46cd793d95a5a0bbf37709d",
+          "evidence": "fa70e8b95a6c7bd5c5483177202af4c328f873b8307b39e487098da3ec41d6f8",
+          "presenterOffset": 0,
+          "evidenceOffset": 8.125
+        },
+        "camera": {
+          "focalLength": 42,
+          "pushIn": 1,
+          "screenYaw": -8
+        },
+        "material": {
+          "color": "#624332",
+          "roughness": 0.26,
+          "metallic": 0.7
+        },
+        "lighting": {
+          "key": 850,
+          "fill": 500
+        },
+        "content": {
+          "brand": "UNMUTED",
+          "headline": "UNTOLD STORIES",
+          "tagline": "LAYER BY LAYER. TRUTH BY TRUTH.",
+          "disclosure": "UNMUTED PODCAST"
+        },
+        "timing": {
+          "pushAt": 0.24,
+          "holdUntil": 0.67,
+          "returnAt": 0.86,
+          "wordA": 0.7098000000000001,
+          "wordB": 0.886126530612245,
+          "wordC": 0.9183673469387755
+        },
+        "cueMode": "editorial"
+      }
+    }
+  ],
+  "soundEffects": [
+    {
+      "id": "podcast-return",
+      "name": "return",
+      "kind": "sfx",
+      "builtIn": true,
+      "tone": "cinematic_hit",
+      "startTime": 0,
+      "duration": 0.9,
+      "volume": 0.13,
+      "fadeIn": 0.015,
+      "fadeOut": 0.15,
+      "enabled": true
+    },
+    {
+      "id": "podcast-space",
+      "name": "space",
+      "kind": "sfx",
+      "builtIn": true,
+      "tone": "airy_whoosh",
+      "startTime": 1.05,
+      "duration": 0.65,
+      "volume": 0.08,
+      "fadeIn": 0.015,
+      "fadeOut": 0.15,
+      "enabled": true
+    },
+    {
+      "id": "podcast-camera",
+      "name": "camera",
+      "kind": "sfx",
+      "builtIn": true,
+      "tone": "riser",
+      "startTime": 2.1,
+      "duration": 1.6,
+      "volume": 0.035,
+      "fadeIn": 0.015,
+      "fadeOut": 0.15,
+      "enabled": true
+    },
+    {
+      "id": "podcast-deep",
+      "name": "deep",
+      "kind": "sfx",
+      "builtIn": true,
+      "tone": "bass_punch",
+      "startTime": 5.26,
+      "duration": 0.42,
+      "volume": 0.09,
+      "fadeIn": 0.015,
+      "fadeOut": 0.15,
+      "enabled": true
+    },
+    {
+      "id": "podcast-raw",
+      "name": "raw",
+      "kind": "sfx",
+      "builtIn": true,
+      "tone": "click",
+      "startTime": 6.1,
+      "duration": 0.14,
+      "volume": 0.07,
+      "fadeIn": 0.015,
+      "fadeOut": 0.15,
+      "enabled": true
+    },
+    {
+      "id": "podcast-authentic",
+      "name": "authentic",
+      "kind": "sfx",
+      "builtIn": true,
+      "tone": "chime",
+      "startTime": 6.36,
+      "duration": 0.75,
+      "volume": 0.055,
+      "fadeIn": 0.015,
+      "fadeOut": 0.15,
+      "enabled": true
+    },
+    {
+      "id": "podcast-angle",
+      "name": "angle",
+      "kind": "sfx",
+      "builtIn": true,
+      "tone": "airy_whoosh",
+      "startTime": 7.95,
+      "duration": 0.65,
+      "volume": 0.07,
+      "fadeIn": 0.015,
+      "fadeOut": 0.15,
+      "enabled": true
+    },
+    {
+      "id": "podcast-story",
+      "name": "story",
+      "kind": "sfx",
+      "builtIn": true,
+      "tone": "subdrop",
+      "startTime": 13.02,
+      "duration": 1.4,
+      "volume": 0.06,
+      "fadeIn": 0.015,
+      "fadeOut": 0.15,
+      "enabled": true
+    },
+    {
+      "id": "podcast-layers",
+      "name": "layers",
+      "kind": "sfx",
+      "builtIn": true,
+      "tone": "click",
+      "startTime": 13.92,
+      "duration": 0.15,
+      "volume": 0.05,
+      "fadeIn": 0.015,
+      "fadeOut": 0.15,
+      "enabled": true
+    },
+    {
+      "id": "podcast-truth",
+      "name": "truth",
+      "kind": "sfx",
+      "builtIn": true,
+      "tone": "cinematic_hit",
+      "startTime": 15.36,
+      "duration": 0.85,
+      "volume": 0.075,
+      "fadeIn": 0.015,
+      "fadeOut": 0.15,
+      "enabled": true
+    }
+  ],
+  "sourceMatte": "Private local CPU preprocessing; editable imported alpha video, not a claim of native automatic matting"
+}

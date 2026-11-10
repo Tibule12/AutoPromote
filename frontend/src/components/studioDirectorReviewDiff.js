@@ -100,11 +100,17 @@ export const describeStudioDirectorReview = ({ document, previewDocument, propos
   }
   const operation = proposal.batch?.operations?.[0];
   if (!operation || proposal.batch.operations.length !== 1 ||
-      !["split_clip", "trim_clip"].includes(operation.type)) {
-    throw new Error("Director review requires one split or trim operation.");
+      !["split_clip", "trim_clip", "reframe"].includes(operation.type)) {
+    throw new Error("Director review requires one split, range trim or tracked reframe operation.");
   }
   return {
-    operationLabel: operation.type === "split_clip" ? "Split clip" : "Trim clip",
+    operationLabel: operation.type === "split_clip" ? "Split clip" : operation.type === "reframe" ? "Reframe source" : "Trim clip",
+    ...(operation.type === "reframe" ? { framing: {
+      beforeAspect: document.visualGraph.settings.reframeAspect || document.output.aspectRatio,
+      afterAspect: operation.aspect, zoom: operation.zoom,
+      sourceRange: document.clipOccurrences.find(item => item.occurrenceId === operation.target.occurrenceId).sourceRange,
+      points: operation.keyframes,
+    } } : {}),
     clipRows: changedRows(clipRows(document), clipRows(previewDocument)),
     timingRows: changedRows(timingRows(document), timingRows(previewDocument)),
   };

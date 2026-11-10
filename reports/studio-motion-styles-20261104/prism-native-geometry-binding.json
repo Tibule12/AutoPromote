@@ -1,0 +1,12 @@
+{
+  "all23VideoGeometriesExact": true,
+  "all447KeysExact": true,
+  "oneGroupMembershipExact": true,
+  "vectorBackdropReplacesSameColourRaster": true,
+  "previewFirstSeekQuarterIncomplete": true,
+  "fullParityQualified": false,
+  "normalIndependentNativeRestore": true,
+  "allFourWedgesPresentAfterReseek": true,
+  "initialIncompleteQuarterRetained": true,
+  "sharedFirstSeekSamplingRepair": false
+}

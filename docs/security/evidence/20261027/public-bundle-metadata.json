@@ -1,0 +1,13 @@
+{
+  "url": "https://autopromote.org/static/js/main.3b046ac5.js",
+  "sha256": "fea2699903a0375ef0c5b417534f63e7eb4e5ca06a5314f75cd81d83160ae7ed",
+  "bytes": 3931087,
+  "relevantUrls": [
+    "https://api.autopromote.org",
+    "https://autopromote.org",
+    "https://firebasestorage.googleapis.com/v0/b/autopromote-cc6d3.firebasestorage.app/o/public"
+  ],
+  "sourceMapName": [
+    "main.3b046ac5.js.map"
+  ]
+}

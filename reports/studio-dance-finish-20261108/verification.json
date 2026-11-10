@@ -1,0 +1,70 @@
+{
+  "movieSha256": "4d4ac1f433aadd9b422b2acd3cd5e858e8fc775b750e19a397f34fc0c1f282e5",
+  "oldMovieSha256": "b047ad2171665b41242451ad8468b8fd0d4d031a37df099698726e72eb339966",
+  "fullDecodePassed": true,
+  "seconds": 6,
+  "frames": 144,
+  "fps": 24,
+  "size": [
+    576,
+    1024
+  ],
+  "videoCodec": "h264",
+  "pixelFormat": "yuv420p",
+  "colourMatrix": "bt709",
+  "colourTransfer": "bt709",
+  "colourPrimaries": "bt709",
+  "audio": {
+    "codec": "aac",
+    "rate": 48000,
+    "channels": 2,
+    "seconds": 6,
+    "waveformCorrelation": 0.9955963701928169,
+    "bestLagSamples": 0,
+    "originalGainDb": -4.001317444624176,
+    "integratedLufs": -10.1,
+    "truePeakDbtp": -2.1,
+    "decodedSamplesAtOrAboveFullScale": 0,
+    "humanListeningQualified": false,
+    "originalSongAndSpeedRetained": true
+  },
+  "oldDeliveryFilesExact": 36,
+  "allFramesDecodedAndDiagnosticSheetsCreated": 144,
+  "visualQualityApprovalFromMetrics": false,
+  "newNativeJob": "viral_d6f2a4503826fae3bd9979388d1d998539888e6b72635310ae0b7c71c2c5a6ad",
+  "scheduled": false,
+  "published": false,
+  "nativeBindingVerified": true,
+  "sourceBackgroundFrames": [
+    144
+  ],
+  "visualReview": {
+    "all144FullFramesAndCornerCropsInspected": true,
+    "closingShoeSmearReduced": true,
+    "remainingRightEdgeBadgeStrokeRemoved": true,
+    "fringeReducedByFirmerFractionalMatte": true,
+    "noAddedLinesOrText": true,
+    "remainingLimits": [
+      "The reconstructed corner has smoother inferred texture than the untouched floor/backdrop.",
+      "Compressed source edges and stylised echo/contact integration remain visible; not reference-level photorealism.",
+      "Human listening, whole live/export parity and owner creative acceptance remain unqualified."
+    ],
+    "verdict": "Correction candidate delivered for owner review; no publication or professional-readiness promotion."
+  },
+  "capture": {
+    "live": {
+      "frames": 40,
+      "seconds": 6.604000091552734,
+      "observedCaptureFps": 6.056935106824808,
+      "audioMuted": true,
+      "smoothDisplayQualified": false
+    },
+    "finished": {
+      "frames": 104,
+      "seconds": 6.107000112533569,
+      "observedCaptureFps": 17.029637806385143,
+      "audioMuted": true,
+      "smoothDisplayQualified": false
+    }
+  }
+}

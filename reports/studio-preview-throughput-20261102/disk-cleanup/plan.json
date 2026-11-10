@@ -1,0 +1,41 @@
+{
+  "beforeAvailableBytes": 12196556800,
+  "allowlist": [
+    {
+      "path": "/home/tibule12/.config/Code/CachedExtensionVSIXs",
+      "state": "already_absent_not_attributed_to_this_run"
+    },
+    {
+      "path": "/home/tibule12/.config/Code/CachedData",
+      "allocatedBytesBefore": 46542848,
+      "state": "planned"
+    },
+    {
+      "path": "/home/tibule12/.cache/pip/http-v2",
+      "state": "already_absent_not_attributed_to_this_run"
+    },
+    {
+      "path": "/home/tibule12/.npm/_cacache",
+      "allocatedBytesBefore": 39571456,
+      "state": "planned"
+    },
+    {
+      "path": "/home/tibule12/.cache/thumbnails",
+      "allocatedBytesBefore": 20787200,
+      "state": "planned"
+    },
+    {
+      "path": "/home/tibule12/Projects/AutoPromte/AutoPromote/frontend/node_modules/.cache/babel-loader",
+      "state": "already_absent_not_attributed_to_this_run"
+    },
+    {
+      "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-dependabot-20261028/frontend/node_modules/.cache/babel-loader",
+      "state": "already_absent_not_attributed_to_this_run"
+    },
+    {
+      "path": "/tmp/autopromote-application-demo-5izIlF/build-corner-index-20261102",
+      "allocatedBytesBefore": 80478208,
+      "state": "planned"
+    }
+  ]
+}

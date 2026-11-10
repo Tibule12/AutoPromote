@@ -1,0 +1,30 @@
+{
+  "projectId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58",
+  "templateRef": {
+    "templateId": "coastal_postcards_v1",
+    "version": "1.0.0",
+    "definitionHash": "27260c19a11d56aab1eb14d3654654660b94109b5aea28dc86393355d7340985"
+  },
+  "decisions": "ac84616b5cb189aa6b7f97be80d5e6ac31351c52a997d0b5025d08e4be974ad0",
+  "layers": 4,
+  "keys": 146,
+  "seconds": 8,
+  "source": {
+    "name": "coast",
+    "title": "Aerial view of the beautiful turquoise  waves crashing on the sand beach with white umbrellas",
+    "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/reports/studio-template-collection-20261104/sources/coast.mp4",
+    "sha256": "19aa1634a3f25ba28266b048d2a8b5df57eb6677e20f2cb67013bc77156296a3",
+    "page": "https://mixkit.co/free-stock-video/aerial-view-of-the-beautiful-turquoise-waves-crashing-on-the-51500/",
+    "downloadUrl": "https://assets.mixkit.co/videos/51500/51500-720.mp4",
+    "license": "https://mixkit.co/license/modal/videoFree/",
+    "sourceHtmlSha256": "77a86036ebe20cb38c3d9daf72f371a1fe5da5d6727deb6ac8cb979fe1ebedc9",
+    "bytes": 9558228,
+    "seconds": 24.065708,
+    "width": 720,
+    "height": 1280,
+    "fps": "24000/1001",
+    "fullDecode": true
+  },
+  "normalFrontend": true,
+  "paidCalls": 0
+}

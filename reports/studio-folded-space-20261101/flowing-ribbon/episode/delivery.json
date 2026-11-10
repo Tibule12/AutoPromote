@@ -1,0 +1,271 @@
+{
+  "directory": "/home/tibule12/Videos/AutoPromote Motion and Flow - 2026-11-01/Cinematic Episode/Flowing worlds - 2026-11-02",
+  "nativeReceipt": {
+    "projectId": "viral-project-93f04c77-7a41-4c69-b546-f19182f3749d",
+    "projectHash": "d404953b0028dd8d83ed2c101137e8f6ce7914c7a85b7cd704a187cc709c33a0",
+    "submittedJobId": "viral_9ab45bc4e0c82da566c8a081eaefce06cc5d10eb40e3f58becba01858334d6f7",
+    "outputSha256": "b02b6605a7d843541a6bd6d209bdfc2143ff10a6c4e69ab1825f0549e0ef4734",
+    "startedAt": "2026-11-01T22:15:44.615Z",
+    "finishedAt": "2026-11-01T22:29:55.769Z",
+    "technical": {
+      "seconds": 36,
+      "frames": 864,
+      "fps": 24,
+      "width": 1280,
+      "height": 720,
+      "fullDecode": true
+    }
+  },
+  "files": [
+    {
+      "file": "Editable Project.autopromote.json",
+      "bytes": 7672033,
+      "sha256": "832accc9874df6f5155e35ee9988dbddd6a46360ba999a29153dbed4423dfc19"
+    },
+    {
+      "file": "Feedback.md",
+      "bytes": 2058,
+      "sha256": "d3fd5a90d663c709916a28b7ef7d14d8b2f8bbc51b1093252cd71348202a5e1b"
+    },
+    {
+      "file": "Finished Playback.mp4",
+      "bytes": 4663758,
+      "sha256": "5df22e17bd60f5163b7577917fcb1dc8f893913fb6d2412e4a601639768f77c8"
+    },
+    {
+      "file": "Flowing worlds.mp4",
+      "bytes": 15803037,
+      "sha256": "b02b6605a7d843541a6bd6d209bdfc2143ff10a6c4e69ab1825f0549e0ef4734"
+    },
+    {
+      "file": "Live Playback.mp4",
+      "bytes": 2191895,
+      "sha256": "a961f57aa3c0e4d9330a0fbc54f0d55abe9d894e51535af162213bd9da4fbbe6"
+    },
+    {
+      "file": "Live vs export.jpg",
+      "bytes": 1068286,
+      "sha256": "9feaae2b48ed879b215df60e7c53d1b256011bb58294f410694b2ad0b4ff101e"
+    },
+    {
+      "file": "Native Authoring.mp4",
+      "bytes": 2989351,
+      "sha256": "b4017afd9198ecf3b430a71fa4861847ba87db18438af94fc02766778eb0df99"
+    },
+    {
+      "file": "Native episode overview.jpg",
+      "bytes": 426904,
+      "sha256": "972c93b5242f15fbbc006652e2e6303a5caada04318897f419c8b69981f31f94"
+    },
+    {
+      "file": "README.md",
+      "bytes": 7702,
+      "sha256": "79eba66ef201ca5c9df3a73960221c6f59b972d9a809b0cf604443d15d11312c"
+    },
+    {
+      "file": "Raw source cuts.mp4",
+      "bytes": 18832607,
+      "sha256": "8326e627e741acc136d532f33ce690341c2ad8a770ef8ba0ac85d84c688309a2"
+    },
+    {
+      "file": "Raw vs flowing worlds.mp4",
+      "bytes": 10525648,
+      "sha256": "cfa32898a95cdaec6a3822ec0ddd1fcf50b75bf1a55f007ba18e817f99aaf865"
+    },
+    {
+      "file": "Stills/preview-0.25.png",
+      "bytes": 31420,
+      "sha256": "1de0c167644566aba86a62325d46988150014cc7519ac06eccc2e3042dbb316f"
+    },
+    {
+      "file": "Stills/preview-11.50.png",
+      "bytes": 378780,
+      "sha256": "4d5181faf0ff2ece72b9658bf07523dcb67b0f80d8fab368a5e4f1efcfc4dbfc"
+    },
+    {
+      "file": "Stills/preview-17.00.png",
+      "bytes": 296205,
+      "sha256": "df13d7ecbf54f9184ee582b689f3dcb52cb257acc235398880d8128b4906dae4"
+    },
+    {
+      "file": "Stills/preview-20.25.png",
+      "bytes": 649433,
+      "sha256": "3be02e02b53f799d76e02ff4aeb3745822c5cda7f93fe33827419a01d2613a65"
+    },
+    {
+      "file": "Stills/preview-21.00.png",
+      "bytes": 559953,
+      "sha256": "bf3f4ca8b51b4df55d34540e9d55015ef080a6bfa8e0745db09245f63d3ceae2"
+    },
+    {
+      "file": "Stills/preview-21.75.png",
+      "bytes": 366635,
+      "sha256": "a843a54123dc8f3539b32c882884f6670803d5d499e5420502123ada54e53b2c"
+    },
+    {
+      "file": "Stills/preview-22.50.png",
+      "bytes": 280969,
+      "sha256": "96eb2ff9a388262b3b4c48a8732b6e9347b8c451407051ab7541882e2b34c7ee"
+    },
+    {
+      "file": "Stills/preview-23.50.png",
+      "bytes": 282459,
+      "sha256": "dbff1e19f88d63bd1a533ddfb32e85eb90f4bccacc7037f5071fe8aba627a194"
+    },
+    {
+      "file": "Stills/preview-24.25.png",
+      "bytes": 301078,
+      "sha256": "acc720b0b61d030029a701005652a759bf0b35e8c403d5d02ec5bfa6c03e1746"
+    },
+    {
+      "file": "Stills/preview-25.00.png",
+      "bytes": 252254,
+      "sha256": "886bb7c4b11949e4a86958928c6b7c798df2e4c13c2b8b6bb640e063e4e0f54b"
+    },
+    {
+      "file": "Stills/preview-26.00.png",
+      "bytes": 289096,
+      "sha256": "5d957d84114d26a91e33a6560f914f6496cae7d1f76f489bae5b906f5363c289"
+    },
+    {
+      "file": "Stills/preview-27.00.png",
+      "bytes": 407232,
+      "sha256": "e80b808bd66b36b5b4089b53cefa61ff1beb088111f0625b804e2c4feeb31f82"
+    },
+    {
+      "file": "Stills/preview-27.90.png",
+      "bytes": 455270,
+      "sha256": "c9ac186f1f57353b4318397d2852de4f0ef354f464f1bbc44072e200d97408b8"
+    },
+    {
+      "file": "Stills/preview-28.00.png",
+      "bytes": 418369,
+      "sha256": "31c1aec91400cd9dd22f0ce3ac25c2ba1e4e32eba44d40786d57ecf1361a6d79"
+    },
+    {
+      "file": "Stills/preview-28.10.png",
+      "bytes": 413615,
+      "sha256": "fddb6364becc5e9a7c38c314c10674663e2dccdd121e8a4a6fad4c9ae6d7bbab"
+    },
+    {
+      "file": "Stills/preview-3.00.png",
+      "bytes": 484058,
+      "sha256": "dedf99872e1f260280b29ce4db82ca1973a53ee64981ab149d50d1cfaeb9aeaa"
+    },
+    {
+      "file": "Stills/preview-31.50.png",
+      "bytes": 13715,
+      "sha256": "5fbbab33400f809b8205e5bea6f0c3e0b54856a9fedf1e40edf2ec05d572fbf0"
+    },
+    {
+      "file": "Stills/preview-35.90.png",
+      "bytes": 32687,
+      "sha256": "6c741eca2727feb231ad5af94e707ee6d5f33758c4eb3734eed8dda58e0611c0"
+    },
+    {
+      "file": "Stills/preview-6.00.png",
+      "bytes": 478358,
+      "sha256": "85ec58816c3739bda86beb8c2e0a3727d92605cf04dc9565474323f91a78267a"
+    },
+    {
+      "file": "Technical/Native receipt.json",
+      "bytes": 560,
+      "sha256": "56d6201218d4de74a5a6a219b46c20027986fe36e06107aac281d10c479f1efb"
+    },
+    {
+      "file": "Technical/actual-job-archive.json",
+      "bytes": 890,
+      "sha256": "5cfbec73f9f820ba40bb96bac0419435e006cdc2f26a42323d3fc68c40261c4b"
+    },
+    {
+      "file": "Technical/creative-progress.json",
+      "bytes": 1720,
+      "sha256": "6167e433bced5f32cc9f6443dc1dff18b007d0c17ed2e51b7c3110956b674f1f"
+    },
+    {
+      "file": "Technical/exact-backup-and-guard-compilation.json",
+      "bytes": 175,
+      "sha256": "a0d28e1a2cd0eab471bf580912cebd492236935985f7f03225a43cd6d807f43c"
+    },
+    {
+      "file": "Technical/final-preflight.json",
+      "bytes": 3356,
+      "sha256": "105529cff52e2539a1c84f258a9cd148e6da03515cda3dd5cf5d1101829c2cbd"
+    },
+    {
+      "file": "Technical/finished-file-identity.json",
+      "bytes": 112,
+      "sha256": "9a1e1db030319bc07a4f5620cf3bbf790dbcf33762569aa0cf14c939bb4361fd"
+    },
+    {
+      "file": "Technical/finished-playback capture.json",
+      "bytes": 174,
+      "sha256": "add24156603ce45598039bd58dae724941d5e02095b95ac822c11ef925320e7e"
+    },
+    {
+      "file": "Technical/finished-playback.json",
+      "bytes": 2896,
+      "sha256": "ee0f849684a42cd099f61b43dd3407c054a66fbec525420ab0a095aa2a3a92ac"
+    },
+    {
+      "file": "Technical/guard-ui.json",
+      "bytes": 119,
+      "sha256": "755e076b3eb2d995eeb9f32120d35d4c13848c72e91543259a47305694ee0adc"
+    },
+    {
+      "file": "Technical/live-playback capture.json",
+      "bytes": 176,
+      "sha256": "70d9f123dbdc328960b7802a1ecbf219d860308d520299f114f795896aa5b4f4"
+    },
+    {
+      "file": "Technical/live-playback.json",
+      "bytes": 3300,
+      "sha256": "9472fc690dbc623edfa9925a76c14c2de8bcb5543fa788ece678f2a5d7eed332"
+    },
+    {
+      "file": "Technical/local-fixture-credits.json",
+      "bytes": 1408,
+      "sha256": "3707cba7d11a4e5fab8c531313dcccafa9f70b1a3867cfe0ae6d6fd67202c885"
+    },
+    {
+      "file": "Technical/native-authoring capture.json",
+      "bytes": 175,
+      "sha256": "ee25526833de77fe2908d374e0a886d754c39ab5ac538098563942a35e6282d1"
+    },
+    {
+      "file": "Technical/native-media-validation.json",
+      "bytes": 263,
+      "sha256": "310c649fe4823b7d67e9515910dfbf170dcc1fc72ab500e9630facabbaa7f381"
+    },
+    {
+      "file": "Technical/native-shared-source-observations.json",
+      "bytes": 869,
+      "sha256": "dde3c1b2cdbf47ab567002b77debf67612d160f44439d9c69f619896a347dcfe"
+    },
+    {
+      "file": "Technical/paired-measurements.json",
+      "bytes": 5639,
+      "sha256": "16dbb94ea963ad11f5607ccfdfeed967b0d22194df42c1d32adb38390242a81b"
+    },
+    {
+      "file": "Technical/preview-samples.json",
+      "bytes": 95905,
+      "sha256": "a1ca2e384dd39813470b6a24511ea4337a0659a290cb355057081be746722ea3"
+    },
+    {
+      "file": "Technical/reopen-edit.json",
+      "bytes": 166,
+      "sha256": "8960977026c975b58679ae42fd5266e7faa3706b1ce7eb0e47e8b3aed774e09a"
+    },
+    {
+      "file": "Technical/validation.json",
+      "bytes": 2763,
+      "sha256": "e74e7ceebae7a92810f479d12704b5012291219002dfb375bb3828a6ab03fa50"
+    },
+    {
+      "file": "Technical/worker-summary.json",
+      "bytes": 672,
+      "sha256": "e8997b750f08b46e2cd04be30062e863bebab0cbc2e6e020374dd605f6b5c186"
+    }
+  ]
+}

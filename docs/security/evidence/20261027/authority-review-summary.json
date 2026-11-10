@@ -1,0 +1,15 @@
+{
+  "authorityReadSucceeded": true,
+  "project": "autopromote-cc6d3",
+  "database": "(default)",
+  "tenant": null,
+  "complete": true,
+  "capturedAtUtc": "2026-10-27T03:23:53.928800+00:00",
+  "authUserCount": 17,
+  "adminDocumentCount": 1,
+  "privilegedStoredClaimsCount": 1,
+  "privilegedProfileSignalsCount": 2,
+  "privateSnapshot": "/tmp/autopromote-security-private-20261027/authority.json",
+  "legitimacy": "Not established by stored fields alone; independent owner confirmation and provisioning evidence required.",
+  "operatorMatchCount": 1
+}

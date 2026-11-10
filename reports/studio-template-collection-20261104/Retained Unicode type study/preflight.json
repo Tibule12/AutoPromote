@@ -1,0 +1,39 @@
+{
+  "build": "/dev/shm/autopromote-template-collection-20261104-build",
+  "origin": "http://127.0.0.1:43927",
+  "demoProject": "demo-autopromote-credits",
+  "welcomeFlag": "true",
+  "mainAsset": "/static/js/main.57e0d7df.js",
+  "mainSha256": "113a0fd5ee19b12d62200057fca947b8fa04331094b7c990e285a31de91ea762",
+  "sources": {
+    "frontend/src/components/studioCreativeTemplate.js": "e7eb29208dacd47c8c6ab14eb82f63c4cb1b4f2c4547d9c88f4f2d00424aa4a4",
+    "frontend/src/components/studioMotionRecipe.js": "2f79d080beedabdbfea768993f172bb4c9e54738ca1af7d810045c564ad0e077",
+    "frontend/src/components/StudioLaunchTemplatePanel.js": "5ac5865b575a1989f99cfaed8acc7eb724727919fd9a9d4cbde271829b8a8597",
+    "frontend/src/templates/aperture_product_v1.json": "e3f5179f667b8f827083e48d2a468e69c73fda58a828a86cba17481f488c1d82",
+    "frontend/src/templates/editorial_fan_v1.json": "f2e140fa7e7a9f96404b3b1c68677304878dd6ae5c475e0e3fe356f56d5602b9",
+    "frontend/src/templates/split_impact_v1.json": "7f764e7cb88f01274369ddc182cee278191f1f275a4406543e24c5c0e5cddca9",
+    "frontend/src/templates/coastal_postcards_v1.json": "900fbb3ebd31c2a9e23ffaaf1da107661a941e58e2ee9096228fa886eaf7f705",
+    "frontend/src/templates/vinyl_pulse_v1.json": "205addbfe89e425bbac4034ec6fd962c9833e85cd7905c444bca564bba9cf998",
+    "frontend/src/templates/living_infinity_v1.json": "b012860afc6734cebb9186a2441324ec1cf7bc0388518356c985fb434a6f39a5",
+    "config/creative-templates/registry.v1.json": "78e643f197bf41be8e0b16e6e907ad23efb3280a5e1733f571d9b8696c70eff4",
+    "src/generated/studioDirectorReplayKernel.cjs": "8feec2e9bf05543c326c924353241189de0b2458ade33c99575563a14c03e7b3"
+  },
+  "api": {
+    "previousPid": 1201571,
+    "pid": 1202809,
+    "origin": "http://127.0.0.1:43927"
+  },
+  "sourceHashes": {
+    "python_media_worker/main_media_server.py": "ea92bbefa960c47621bb4a2d0cb7fe089f531b7745e5b6022ea7fb4ed1c71b07",
+    "python_media_worker/studio_layer_cache.py": "c01f6fb690f0e1e296743fff0fc30f32e518ea822fa01a2d35d6fdcb3361b76f",
+    "frontend/src/components/ViralClipStudio.js": "8637a26d592ee495afa032620940c2a0a19013363ee54a4dfe4d185b6e5cba48",
+    "frontend/src/utils/sourceUpload.js": "d24ac3b0fe303fbee8d2b3110f84ef14330df606b7a23e6a379e809efdac8b57"
+  },
+  "workerPid": 454290,
+  "workerCwd": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031",
+  "priorBuildPreserved": "/dev/shm/autopromote-motion-styles-20261104-r2-build",
+  "normalSignIn": true,
+  "welcomeChecks": 8,
+  "paidCalls": 0,
+  "productionWrites": 0
+}

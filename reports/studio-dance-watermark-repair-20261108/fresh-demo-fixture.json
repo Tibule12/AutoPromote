@@ -1,0 +1,14 @@
+{
+  "uid": "demo-pilot-repaired-dance-20261108",
+  "normalDemoAllowance": true,
+  "existingWalletsReset": false,
+  "productionAccount": false,
+  "api": {
+    "previousPid": 89671,
+    "pid": 93825,
+    "origin": "http://127.0.0.1:34899"
+  },
+  "originalWallets": 4,
+  "priorOperations": 19,
+  "activeOperations": 0
+}

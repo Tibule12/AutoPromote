@@ -1,0 +1,20 @@
+{
+  "at": "2026-11-01T22:20:00.801Z",
+  "project": "demo-autopromote-credits",
+  "jobId": "viral_9ab45bc4e0c82da566c8a081eaefce06cc5d10eb40e3f58becba01858334d6f7",
+  "observedStatus": "processing",
+  "encoding": "gzip-json-v1",
+  "jsonBytes": 3781917,
+  "gzipBytes": 713803,
+  "optionsSha256": "d43ae0a7ab43b742ec474ca9c4742cb5ccf8b43d039319a35f138e1ee65ac71d",
+  "canonicalCompositionAndEditorTimelineUnchanged": true,
+  "archiveDigestAndLengthVerified": true,
+  "transportNormalization": "The existing backend refreshes video_url and source URLs in overlays/timeline_segments. These transport fields differ from the browser submission; canonical composition and editor timeline match exactly.",
+  "canonicalLayers": 50,
+  "canonicalKeys": 10968,
+  "requestBytes": 3782800,
+  "archiveCeilingBytes": 786432,
+  "expandedCeilingBytes": 4194304,
+  "paidCalls": 0,
+  "productionWrites": false
+}

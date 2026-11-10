@@ -1,0 +1,44 @@
+[
+  {
+    "original": "Working Project.autopromote.json",
+    "archive": "Working Project.autopromote.json.gz",
+    "sha256": "da75810045871533ec58deeba9bdb6e3dafd2b36aed3ee4eb03576fc78e6322c",
+    "bytes": 14043085,
+    "compressed": 6047891
+  },
+  {
+    "original": "Before unsupported effect.autopromote.json",
+    "archive": "Before unsupported effect.autopromote.json.gz",
+    "sha256": "851a09277701bc43b11b0563540535317999c019d731f6b081b2f4440fc39e91",
+    "bytes": 5854807,
+    "compressed": 685259
+  },
+  {
+    "original": "Unsupported effect refused.autopromote.json",
+    "archive": "Unsupported effect refused.autopromote.json.gz",
+    "sha256": "4b029fa552a850d0a1abc4e18966cc6bf57105b36c3935c3318e186f34210820",
+    "bytes": 5854807,
+    "compressed": 685260
+  },
+  {
+    "original": "Interrupted Project.autopromote.json",
+    "archive": "Interrupted Project.autopromote.json.gz",
+    "sha256": "bb3b482648551bd917e830de1b4b0972b9a5dd20f88fa9b50f6861c28d41911f",
+    "bytes": 5854807,
+    "compressed": 685285
+  },
+  {
+    "original": "Draft - polygon matte.autopromote.json",
+    "archive": "Draft - polygon matte.autopromote.json.gz",
+    "sha256": "26b47ac85dbefa0ca55db00ba98e016cc40daa18cc388de23f36b0d38d5510aa",
+    "bytes": 14030201,
+    "compressed": 6040954
+  },
+  {
+    "original": "Project before media materialization.autopromote.json",
+    "archive": "Project before media materialization.autopromote.json.gz",
+    "sha256": "da75810045871533ec58deeba9bdb6e3dafd2b36aed3ee4eb03576fc78e6322c",
+    "bytes": 14043085,
+    "compressed": 6047891
+  }
+]

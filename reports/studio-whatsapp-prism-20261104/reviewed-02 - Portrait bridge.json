@@ -1,0 +1,103 @@
+{
+  "format": "autopromote-scene-actions",
+  "version": 1,
+  "projectId": "viral-project-d5df376b-ad19-48e6-bb01-21d2b3b4e1fb",
+  "baseRevision": 23,
+  "name": "02 - Portrait bridge",
+  "actions": [
+    {
+      "type": "media_plane",
+      "id": "P / portrait bridge",
+      "name": "P / portrait bridge",
+      "sourceMediaId": "launch-5217554acdae6f4623c8d9bb",
+      "sourceStart": 0.25,
+      "startTime": 0,
+      "duration": 3,
+      "mediaFit": "contain",
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      }
+    },
+    {
+      "type": "keys",
+      "targetId": "P / portrait bridge",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 0.25,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 0.6,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 2.4,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 2.8,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 3,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        }
+      ]
+    }
+  ]
+}

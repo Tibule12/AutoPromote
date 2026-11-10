@@ -4,12 +4,14 @@ import { act, fireEvent, render, screen, waitFor, within } from "@testing-librar
 import { getAuth } from "firebase/auth";
 import ViralClipStudio from "../ViralClipStudio";
 import { uploadSourceFileViaBackend } from "../../utils/sourceUpload";
+import * as studioVideoMatte from '../studioVideoMatte';
 import * as studioCommands from "../studioCommands";
 import * as studioProjectDocument from "../studioProjectDocument";
 import * as studioDirectorProposals from "../studioDirectorProposals";
 import * as studioDirectorEvidenceProposals from "../studioDirectorEvidenceProposals";
 import * as studioAnalysisJobClient from "../studioAnalysisJobClient";
 import * as studioProjectStore from "../viralStudioProjectStore";
+import * as studioDirectorSavedDraft from "../studioDirectorSavedDraft";
 import { secondsToTicks } from "../studioTime";
 
 jest.mock("../../utils/clipWorkflowAnalytics", () => ({
@@ -5969,6 +5971,31 @@ describe("ViralClipStudio timeline sequencing", () => {
     );
   });
 
+  test("original audio 200 percent stays in the editor and restores attenuation through the same bus", async () => {
+    const previousContext = window.AudioContext;
+    const context = require('./fixtures/studioAudioGraph').gainTestContext();
+    window.AudioContext = jest.fn(() => context);
+    let editor;
+    try {
+      editor = mountNativePreview();
+      const inspector = screen.getByTestId('clip-studio-inspector');
+      fireEvent.click(within(inspector).getByRole('tab', { name: /Sound/i }));
+      fireEvent.change(screen.getByLabelText('Automation source'), { target: { value: 'originalAudio' } });
+      fireEvent.click(screen.getByRole('button', { name: /Add volume keyframe at/i }));
+      fireEvent.change(screen.getByRole('slider', { name: /originalAudio volume at/ }), { target: { value: '200' } });
+      await waitFor(() => expect(editor.video.__audioRemixGraph?.trackGain.gain.value).toBe(2));
+      expect(editor.video.volume).toBe(1);
+      expect(screen.getByLabelText('Edited output position')).toBeInTheDocument();
+      fireEvent.change(screen.getByRole('slider', { name: /originalAudio volume at/ }), { target: { value: '40' } });
+      await waitFor(() => expect(editor.video.__audioRemixGraph.trackGain.gain.value).toBe(.4));
+      expect(editor.video.volume).toBe(1);
+      expect(context.createMediaElementSource).toHaveBeenCalledTimes(1);
+    } finally {
+      editor?.unmount();
+      window.AudioContext = previousContext;
+    }
+  });
+
   test.each([false, true])("SFX volume keys preserve the fader and change an already playing cue (audio clock: %s)", async scheduled => {
     const originalAudioContext = window.AudioContext;
     const gains = [], sources = [];
@@ -6788,6 +6815,79 @@ describe("ViralClipStudio timeline sequencing", () => {
     ).toBe(false);
   });
 
+  test("Quick cold reopen paints a video track matte when its decoder settles", async () => {
+    const uri=jest.spyOn(studioVideoMatte,'studioVideoMatteUri').mockImplementation(({video})=>video?.readyState>=2?{}:null);
+    const alpha=jest.spyOn(studioVideoMatte,'studioVideoMatteAlpha').mockReturnValue('url("data:image/png;base64,cold")');
+    const source={id:'range',url:'https://example.com/source.mp4',start:0,end:8,duration:8};
+    try {
+      const {video,container}=mountNativePreview({clips:[source],initialSavedProject:{id:'cold-matte',name:'Cold matte',snapshot:{
+        orderedClips:[source],selectedClipId:'range',timeline:[{id:'main',sourceClipId:'range',url:source.url,startRequest:0,endRequest:8}],
+        addHook:false,overlays:[{id:'matte',type:'video',src:'https://example.com/matte.mp4',sourceDuration:8,sourceStartTime:0,startTime:0,duration:8,
+          x:50,y:50,width:70,height:70,scale:1,opacity:1,frameShape:'edge',layerShadow:{enabled:false},muted:true},
+          {id:'fill',type:'image',url:'https://example.com/fill.png',src:'https://example.com/fill.png',startTime:0,duration:8,x:50,y:50,width:70,height:70,
+            scale:1,opacity:1,trackMatte:{mode:'luma',sourceLayerId:'matte'}}],motionKeyframes:[],
+      }}});
+      await waitFor(()=>expect(screen.getByRole('textbox',{name:'Project name',exact:true,includeHidden:true})).toHaveValue('Cold matte'));
+      const matte=await screen.findByTestId('broll-preview-matte');
+      for(const [key,value]of Object.entries({readyState:4,seeking:false,paused:true,currentTime:5,videoWidth:1280,videoHeight:720}))Object.defineProperty(matte,key,{value,configurable:true});
+      const currentMain=screen.getByTestId('studio-after-video');for(const [key,value]of Object.entries({readyState:4,seeking:false,paused:true,currentTime:5,duration:8}))Object.defineProperty(currentMain,key,{value,configurable:true});Object.defineProperty(currentMain,'currentSrc',{get:()=>currentMain.src,configurable:true});fireEvent.loadedMetadata(currentMain);fireEvent.loadedData(currentMain);currentMain.currentTime=5;fireEvent.seeked(currentMain);fireEvent.loadedData(matte);
+      await waitFor(()=>expect(document.querySelector('[data-studio-matte-wrap="fill"]').style.maskImage).toContain('base64,cold'));
+      expect(uri).toHaveBeenCalledWith(expect.objectContaining({video:matte,layer:expect.objectContaining({id:'matte'}),time:5}));
+    } finally {uri.mockRestore();alpha.mockRestore();}
+  });
+
+  test("Quick cold reopen paints a bitmap alpha matte when its image loads", async () => {
+    const uri=jest.spyOn(studioVideoMatte,'studioVideoMatteUri').mockImplementation(({picture})=>picture?.naturalWidth>0?{}:null);
+    const alpha=jest.spyOn(studioVideoMatte,'studioVideoMatteAlpha').mockReturnValue('url("data:image/png;base64,cold")');
+    const source={id:'range',url:'https://example.com/source.mp4',start:0,end:8,duration:8};
+    try {
+      const {video,container}=mountNativePreview({clips:[source],initialSavedProject:{id:'cold-matte',name:'Cold matte',snapshot:{
+        orderedClips:[source],selectedClipId:'range',timeline:[{id:'main',sourceClipId:'range',url:source.url,startRequest:0,endRequest:8}],
+        addHook:false,overlays:[{id:'matte',type:'image',src:'https://example.com/matte.png',sourceDuration:8,sourceStartTime:0,startTime:0,duration:8,
+          x:50,y:50,width:70,height:70,scale:1,opacity:1,frameShape:'edge',layerShadow:{enabled:false},muted:true},
+          {id:'fill',type:'image',url:'https://example.com/fill.png',src:'https://example.com/fill.png',startTime:0,duration:8,x:50,y:50,width:70,height:70,
+            scale:1,opacity:1,trackMatte:{mode:'luma',sourceLayerId:'matte'}}],motionKeyframes:[],
+      }}});
+      await waitFor(()=>expect(screen.getByRole('textbox',{name:'Project name',exact:true,includeHidden:true})).toHaveValue('Cold matte'));
+      const matte=await waitFor(()=>{const img=document.querySelector('[data-studio-layer-id="matte"] img');expect(img).not.toBeNull();return img;});
+      expect(matte.crossOrigin).toBe('anonymous');
+      for(const [key,value]of Object.entries({complete:true,naturalWidth:1280,naturalHeight:720}))Object.defineProperty(matte,key,{value,configurable:true});
+      const currentMain=screen.getByTestId('studio-after-video');for(const [key,value]of Object.entries({readyState:4,seeking:false,paused:true,currentTime:5,duration:8}))Object.defineProperty(currentMain,key,{value,configurable:true});Object.defineProperty(currentMain,'currentSrc',{get:()=>currentMain.src,configurable:true});fireEvent.loadedMetadata(currentMain);fireEvent.loadedData(currentMain);currentMain.currentTime=5;fireEvent.seeked(currentMain);fireEvent.load(matte);
+      await waitFor(()=>expect(document.querySelector('[data-studio-matte-wrap="fill"]').style.maskImage).toContain('base64,cold'));
+      expect(uri).toHaveBeenCalledWith(expect.objectContaining({picture:matte,layer:expect.objectContaining({id:'matte'}),time:5}));
+    } finally {uri.mockRestore();alpha.mockRestore();}
+  });
+
+  test("Undo of a reviewed scene preserves the earlier Director trim transaction", async () => {
+    const reviewed = jest.fn();
+    mockDirectorReviewServer();
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+      clips={[{ id: "scene-history", start: 0, end: 20, duration: 20 }]}
+      directorProposalRequest={{ proposalId: "history-trim", idempotencyKey: "history-trim", directorId: "director",
+        operation: { type: "trim_clip", target: { occurrenceId: "main" },
+          keep: { space: "source", startTick: 0, endTick: secondsToTicks(15) } } }}
+      onDirectorReview={reviewed} onSave={jest.fn()} onCancel={jest.fn()} />);
+    fireEvent.click(screen.getByTestId("studio-director-review-open"));
+    const approval = await within(screen.getByTestId("studio-director-review")).findByTestId("studio-director-review-approve");
+    await act(async () => fireEvent.click(approval));
+    await waitFor(() => expect(reviewed).toHaveBeenCalledTimes(1));
+    expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:15.0");
+    const document = reviewed.mock.calls[0][0].document;
+    fireEvent.click(within(screen.getByRole("navigation", {name:"Creative tools"})).getByRole("button",{name:"Node Flow",exact:true}));
+    const panel=screen.getByTestId("studio-scene-actions");
+    fireEvent.click(within(panel).getByText("Cinematic Scene · editable actions"));
+    const plan={format:"autopromote-scene-actions",version:1,projectId:document.projectId,baseRevision:document.revision,
+      name:"Scene after trim",actions:[{type:"title",id:"after-trim",name:"After trim",text:"AFTER",startTime:0,duration:4}]};
+    fireEvent.change(within(panel).getByLabelText("Scene action plan",{exact:true}),{target:{files:[{size:300,text:async()=>JSON.stringify(plan)}]}});
+    await within(panel).findByText("Review this plan before applying.");
+    fireEvent.click(within(panel).getByRole("button",{name:"Apply reviewed scene actions",exact:true}));
+    await within(panel).findByText("Scene actions applied. Undo restores the previous edit.");
+    fireEvent.click(screen.getByTestId("studio-undo-button"));
+    expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:15.0");
+    fireEvent.click(screen.getByTestId("studio-redo-button"));
+    expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:15.0");
+  });
+
   test("reviews exact Director trim timing and applies only after signed-in approval", async () => {
     const onDirectorReview = jest.fn(() => Promise.resolve());
     const applySpy = jest.spyOn(studioDirectorProposals, "runStudioDirectorProposalOnSnapshot");
@@ -7219,6 +7319,7 @@ describe("ViralClipStudio timeline sequencing", () => {
 
   test("source-shot analysis offers one evidence-bound split without applying it", async () => {
     const onDirectorReview = jest.fn();
+    const onSave = jest.fn(() => Promise.resolve());
     const requestSpy = jest.spyOn(studioDirectorEvidenceProposals, "buildSourceShotDirectorSplitRequest");
     global.fetch.mockImplementation((url, request) => {
       if (String(url).endsWith("/api/media/track-studio-faces")) {
@@ -7254,19 +7355,19 @@ describe("ViralClipStudio timeline sequencing", () => {
         blob: () => Promise.resolve(new Blob(["video"], { type: "video/mp4" })),
       });
     });
-    render(
+    const mounted = render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
         clips={[{ id: "clip-review", start: 0, end: 20, duration: 20 }]}
         onDirectorReview={onDirectorReview}
-        onSave={jest.fn()}
+        onSave={onSave}
         onCancel={jest.fn()}
       />
     );
 
     fireEvent.click(screen.getByTestId("preview-quick-track-speaker"));
     fireEvent.click(screen.getByTestId("analyze-source-shots"));
-    const panel = await screen.findByTestId("studio-director-review");
+    const panel = await screen.findByTestId("studio-director-review", {}, { timeout: 10000 });
     await waitFor(() => expect(requestSpy).toHaveBeenCalled());
     const builderInput = requestSpy.mock.calls[0][0];
     expect(builderInput.occurrenceId).toBe("main");
@@ -7301,7 +7402,147 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(within(panel).getByTestId("studio-director-review-evidence")).toHaveTextContent("1260000 ticks");
     expect(within(choices).getByRole("button", { name: "Preview cut at 0:14.0", exact: true })).toHaveAttribute("aria-pressed", "true");
     requestSpy.mockRestore();
-  });
+
+    let saved;
+    const saveProject = jest.spyOn(studioProjectStore, "saveViralStudioProject")
+      .mockImplementation(async project => (saved = { ...project, updatedAt: Date.now() }));
+    const listProjects = jest.spyOn(studioProjectStore, "listViralStudioProjects")
+      .mockImplementation(async () => saved ? [saved] : []);
+    try {
+      fireEvent.click(screen.getByTestId("studio-save-project"));
+      await waitFor(() => expect(saved?.snapshot.sourceShotDirectorDraft).toBeTruthy());
+      const stored = JSON.parse(JSON.stringify(saved));
+      expect(await studioDirectorSavedDraft.restoreSourceShotDirectorDraft(
+        stored.snapshot.studioDocument, stored.snapshot.sourceShotDirectorDraft)).not.toBeNull();
+      const selectedId = stored.snapshot.sourceShotDirectorDraft.selectedProposalId;
+      const analysisRequests = global.fetch.mock.calls.filter(([url]) =>
+        String(url).endsWith("/api/media/track-studio-faces")).length;
+      mounted.unmount();
+      render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-review", start: 0, end: 20, duration: 20 }]}
+        initialSavedProject={stored} onDirectorReview={onDirectorReview}
+        onSave={onSave} onCancel={jest.fn()} />);
+      const recovered = await screen.findByTestId("studio-director-review", {}, { timeout: 10000 });
+      expect(within(recovered).queryByTestId("studio-director-review-approve")).not.toBeInTheDocument();
+      expect(within(recovered).getByRole("button", { name: "Preview cut at 0:14.0", exact: true }))
+        .toHaveAttribute("aria-pressed", "true");
+      expect(global.fetch.mock.calls.filter(([url]) =>
+        String(url).endsWith("/api/media/track-studio-faces"))).toHaveLength(analysisRequests);
+      expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:20.0");
+      expect(onDirectorReview).not.toHaveBeenCalled();
+
+      fireEvent.click(within(recovered).getByTestId("studio-director-review-open"));
+      await within(recovered).findByTestId("studio-director-review-approve");
+      expect(within(recovered).getByTestId("studio-director-review-evidence"))
+        .toHaveTextContent("1260000 ticks");
+      expect(recovered).toHaveTextContent(selectedId);
+      mockDirectorReviewServer();
+      fireEvent.click(within(recovered).getByTestId("studio-director-review-approve"));
+      await waitFor(() => expect(onDirectorReview).toHaveBeenCalledTimes(1));
+      expect(onDirectorReview.mock.calls[0][0].decision).toBe("approve");
+      expect(screen.getAllByTestId(/^pro-video-clip-\d+$/)).toHaveLength(2);
+      fireEvent.click(screen.getByTestId("studio-undo-button"));
+      await waitFor(() => expect(screen.getAllByTestId(/^pro-video-clip-\d+$/)).toHaveLength(1));
+      fireEvent.click(screen.getByTestId("studio-redo-button"));
+      await waitFor(() => expect(screen.getAllByTestId(/^pro-video-clip-\d+$/)).toHaveLength(2));
+      expect(onDirectorReview).toHaveBeenCalledTimes(1);
+      fireEvent.click(screen.getByTestId("studio-save-project"));
+      await waitFor(() => expect(saved.snapshot.sourceShotDirectorDraft).toBeNull());
+      await clickRenderFinalClip();
+      await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+      expect(onSave.mock.calls[0][2].timelineSegments.map(segment =>
+        [segment.start_time, segment.end_time])).toEqual([[0, 14], [14, 20]]);
+    } finally {
+      saveProject.mockRestore(); listProjects.mockRestore();
+    }
+  }, 90000);
+
+  test("Director tracked framing stays unchanged until review, then supports Undo and export", async () => {
+    const onSave = jest.fn(() => Promise.resolve()), onDirectorReview = jest.fn();
+    global.fetch.mockImplementation((url, options) => {
+      if (String(url).endsWith("/api/media/track-studio-faces")) return Promise.resolve({ ok: true, json: async () => ({
+        mode: "source_shots", engine: "opencv-yunet-source-shot-follow", start: 0, end: 20,
+        sceneCuts: [8], reviewRequired: true, decodeFailures: [],
+        tracks: { solo: { coverage: .9, keyframes: [{ time: 0, x: 30, y: 40 }, { time: 8, x: 70, y: 45, cut: true }, { time: 20, x: 60, y: 50 }] } },
+        editPlan: { version: 1, preflight: { passed: true }, mainFrame: { enabled: true, insetPercent: 10 } },
+        sourceShotArtifact: { artifactHash: "d".repeat(64), sourceSha256: "e".repeat(64),
+          projectId: options.body.get("projectId"), sourceAssetId: options.body.get("sourceAssetId"),
+          analysisRange: { space: "source", startTick: 0, endTick: secondsToTicks(20) } },
+      }) });
+      return Promise.resolve({ ok: true, blob: async () => new Blob(["video"], { type: "video/mp4" }) });
+    });
+    let saved;
+    const save = jest.spyOn(studioProjectStore, "saveViralStudioProject").mockImplementation(async record => (saved = { ...record, updatedAt: Date.now() }));
+    const list = jest.spyOn(studioProjectStore, "listViralStudioProjects").mockImplementation(async () => saved ? [saved] : []);
+    try {
+      render(<ViralClipStudio videoUrl="https://example.com/source.mp4" clips={[{ id: "source", start: 0, end: 20, duration: 20 }]}
+        initialSavedProject={{ id: "director-off", name: "Director chooses framing", snapshot: {
+          orderedClips: [{ id: "source", start: 0, end: 20, duration: 20 }], selectedClipId: "source",
+          timeline: [{ id: "main", sourceClipId: "source", startRequest: 0, endRequest: 20, duration: 20,
+            url: "https://example.com/source.mp4" }], smartCrop: false, smartCropMode: "off", reframeAspect: "9:16",
+        } }} onSave={onSave} onDirectorReview={onDirectorReview} onCancel={jest.fn()} />);
+      fireEvent.click(within(screen.getByRole("navigation", { name: "Creative tools" })).getByRole("button", { name: "Reframe", exact: true }));
+      await waitFor(() => expect(screen.getByTestId("auto-reframe-toggle")).not.toBeChecked());
+      const loadedSource = readyCutawaySource(20);
+      Object.defineProperties(loadedSource, { videoWidth: { configurable: true, value: 1280 },
+        videoHeight: { configurable: true, value: 720 } });
+      fireEvent.click(screen.getByTestId("studio-save-project"));await waitFor(() => expect(saved).toBeTruthy());
+      const before = JSON.parse(JSON.stringify(saved.snapshot));
+      fireEvent.click(screen.getByTestId("director-propose-reframe"));
+      const panel = await screen.findByTestId("studio-director-review", {}, { timeout: 10000 });
+      fireEvent.click(screen.getByTestId("studio-save-project"));
+      await waitFor(() => expect(saved.snapshot.sourceShotDirectorDraft?.requests[0].operation.type).toBe("reframe"));
+      expect(saved.snapshot.reframeKeyframes).toEqual(before.reframeKeyframes);
+      expect(saved.snapshot.mainFrame).toEqual(before.mainFrame);
+      expect(screen.getByTestId("auto-reframe-toggle")).not.toBeChecked();
+      expect(onDirectorReview).not.toHaveBeenCalled();
+      fireEvent.click(within(panel).getByTestId("studio-director-review-open"));
+      await screen.findByTestId("studio-director-reframe-evidence", {}, { timeout: 10000 });
+      expect(screen.getByTestId("studio-director-reframe-evidence")).toHaveTextContent("Source tracking points 3");
+      mockDirectorReviewServer();
+      fireEvent.click(within(panel).getByTestId("studio-director-review-approve"));
+      await waitFor(() => expect(onDirectorReview).toHaveBeenCalledTimes(1));
+      fireEvent.click(screen.getByTestId("studio-save-project"));
+      await waitFor(() => expect(saved.snapshot.reframeKeyframes).toHaveLength(3));
+      expect(saved.snapshot.sourceShotDirectorDraft).toBeNull();
+      expect(saved.snapshot.mainFrame).toEqual(before.mainFrame);
+      const approvedFraming = JSON.parse(JSON.stringify(saved.snapshot.reframeModeCuts));
+      fireEvent.click(screen.getByTestId("studio-undo-button"));
+      fireEvent.click(screen.getByTestId("studio-save-project"));
+      await waitFor(() => expect(saved.snapshot.reframeKeyframes).toEqual(before.reframeKeyframes));
+      fireEvent.click(screen.getByTestId("studio-redo-button"));
+      fireEvent.click(screen.getByTestId("studio-save-project"));
+      await waitFor(() => expect(saved.snapshot.reframeModeCuts).toEqual(approvedFraming));
+      await clickRenderFinalClip();await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+      expect(onSave.mock.calls[0][2].finishPlan.reframe.timeline_cuts[0]).toMatchObject({ time: 0, mode: "speaker_track" });
+      expect(onSave.mock.calls[0][2].finishPlan.reframe.keyframes).toHaveLength(3);
+      expect(onDirectorReview).toHaveBeenCalledTimes(1);
+    } finally { save.mockRestore();list.mockRestore(); }
+  }, 90000);
+
+  test("Director chooses an owned moment and reviews both boundaries before trimming", async () => {
+    const onDirectorReview = jest.fn(), onSave = jest.fn(() => Promise.resolve());
+    const url = "https://example.com/source.mp4", storagePath = "studio/sources/test-user/source.mp4";
+    render(<ViralClipStudio videoUrl={url} sourceStoragePath={storagePath}
+      clips={[{ id: "source", start: 0, end: 20, duration: 20, url, storagePath, score: 10 },
+        { id: "best", start: 3, end: 16, duration: 13, url, storagePath, score: 95 }]}
+      onSave={onSave} onDirectorReview={onDirectorReview} onCancel={jest.fn()} />);
+    readyCutawaySource(20);
+    fireEvent.click(screen.getByTestId("director-propose-moment"));
+    const panel = await screen.findByTestId("studio-director-review", {}, { timeout: 10000 });
+    expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:20.0");
+    fireEvent.click(within(panel).getByTestId("studio-director-review-open"));
+    await within(panel).findByTestId("studio-director-review-approve");
+    expect(panel).toHaveTextContent("Trim clip");
+    mockDirectorReviewServer();fireEvent.click(within(panel).getByTestId("studio-director-review-approve"));
+    await waitFor(() => expect(onDirectorReview).toHaveBeenCalledTimes(1));
+    expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:13.0");
+    fireEvent.click(screen.getByTestId("studio-undo-button"));
+    await waitFor(() => expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:20.0"));
+    fireEvent.click(screen.getByTestId("studio-redo-button"));
+    await clickRenderFinalClip();await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    expect(onSave.mock.calls[0][2].timelineSegments.map(c => [c.start_time, c.end_time])).toEqual([[3, 16]]);
+  }, 90000);
 
   test("blocks review without Firebase sign-in and marks a changed preview stale", async () => {
     const onDirectorReview = jest.fn();
@@ -7413,16 +7654,16 @@ describe("ViralClipStudio timeline sequencing", () => {
     fireEvent.click(screen.getByTestId("dock-tab-node_flow"));
     const flowSurface = screen.getByTestId("studio-node-flow");
     expect(flowSurface).toBeInTheDocument();
-    expect(within(flowSurface).getByText("Null Rig 1")).toBeInTheDocument();
+    expect(within(flowSurface).getByTitle("Null Rig 1")).toBeInTheDocument();
 
     // Undo removes Null Rig from stage and graph; Redo restores it
     fireEvent.keyDown(window, { key: "z", ctrlKey: true });
     await waitFor(() => {
-      expect(within(flowSurface).queryByText("Null Rig 1")).not.toBeInTheDocument();
+      expect(within(flowSurface).queryByTitle("Null Rig 1")).not.toBeInTheDocument();
     });
     fireEvent.keyDown(window, { key: "y", ctrlKey: true });
     await waitFor(() => {
-      expect(within(flowSurface).getByText("Null Rig 1")).toBeInTheDocument();
+      expect(within(flowSurface).getByTitle("Null Rig 1")).toBeInTheDocument();
     });
   });
   test('source-dialogue preview candidate can open the real editor without forward state references', () => {

@@ -1,0 +1,184 @@
+{
+  "verifiedAt": "2026-11-10T00:51:51.392Z",
+  "nativePublisher": true,
+  "normalProductionSignIn": true,
+  "independentReadOnlyQueueReload": true,
+  "allSchedulePagesLoaded": true,
+  "mutations": 0,
+  "finalMovies": 2,
+  "verifiedDestinationSchedules": 12,
+  "distinctDances": true,
+  "onceOnly": true,
+  "date": "2026-11-10",
+  "timezone": "Africa/Johannesburg",
+  "releases": [
+    {
+      "key": "three",
+      "contentIds": [
+        "0TspcemQu9p7I15Aft9j"
+      ],
+      "title": "Prism Relay | The crew steps out of the frame",
+      "localTime": "18:00",
+      "timezone": "Africa/Johannesburg",
+      "sha256": "fe67500d225ddd4ae9dfa938c1d1744e42356a4662deda02c2348456b8c12764"
+    },
+    {
+      "key": "four",
+      "contentIds": [
+        "BhwXCRMdDOPycMCvSASF"
+      ],
+      "title": "Mirror Pulse | The crew leaves a colour echo",
+      "localTime": "20:00",
+      "timezone": "Africa/Johannesburg",
+      "sha256": "5c8555cb8b0dfbbd6d6b2598effc02dccddec8330771f8de20c54cf6725e5be2"
+    }
+  ],
+  "checked": [
+    {
+      "movie": "three",
+      "scheduleId": "owFLVlZdNZKJDDWvJ6Cw",
+      "contentId": "0TspcemQu9p7I15Aft9j",
+      "platform": "instagram",
+      "startTime": "2026-11-10T16:00:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once",
+      "mediaSha256": "fe67500d225ddd4ae9dfa938c1d1744e42356a4662deda02c2348456b8c12764",
+      "copyMatches": true
+    },
+    {
+      "movie": "three",
+      "scheduleId": "XpXWLb8QhRbPolNYfHuf",
+      "contentId": "0TspcemQu9p7I15Aft9j",
+      "platform": "facebook",
+      "startTime": "2026-11-10T16:00:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once",
+      "mediaSha256": "fe67500d225ddd4ae9dfa938c1d1744e42356a4662deda02c2348456b8c12764",
+      "copyMatches": true
+    },
+    {
+      "movie": "three",
+      "scheduleId": "QHsmBYu0XyBtdzwjc9mq",
+      "contentId": "0TspcemQu9p7I15Aft9j",
+      "platform": "youtube",
+      "startTime": "2026-11-10T16:00:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once",
+      "mediaSha256": "fe67500d225ddd4ae9dfa938c1d1744e42356a4662deda02c2348456b8c12764",
+      "copyMatches": true
+    },
+    {
+      "movie": "three",
+      "scheduleId": "BBvyYaa5fmReopDErwxk",
+      "contentId": "0TspcemQu9p7I15Aft9j",
+      "platform": "tiktok",
+      "startTime": "2026-11-10T16:00:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once",
+      "mediaSha256": "fe67500d225ddd4ae9dfa938c1d1744e42356a4662deda02c2348456b8c12764",
+      "copyMatches": true
+    },
+    {
+      "movie": "three",
+      "scheduleId": "B5xzGijlRLAhK3gQkBen",
+      "contentId": "0TspcemQu9p7I15Aft9j",
+      "platform": "reddit",
+      "startTime": "2026-11-10T16:00:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once",
+      "mediaSha256": "fe67500d225ddd4ae9dfa938c1d1744e42356a4662deda02c2348456b8c12764",
+      "copyMatches": true
+    },
+    {
+      "movie": "three",
+      "scheduleId": "4NK4JAREmdcxwZBN4con",
+      "contentId": "0TspcemQu9p7I15Aft9j",
+      "platform": "linkedin",
+      "startTime": "2026-11-10T16:00:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once",
+      "mediaSha256": "fe67500d225ddd4ae9dfa938c1d1744e42356a4662deda02c2348456b8c12764",
+      "copyMatches": true
+    },
+    {
+      "movie": "four",
+      "scheduleId": "jCwBC9RhP7SiOMdHGDBX",
+      "contentId": "BhwXCRMdDOPycMCvSASF",
+      "platform": "instagram",
+      "startTime": "2026-11-10T18:00:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once",
+      "mediaSha256": "5c8555cb8b0dfbbd6d6b2598effc02dccddec8330771f8de20c54cf6725e5be2",
+      "copyMatches": true
+    },
+    {
+      "movie": "four",
+      "scheduleId": "g5Cbg4XfJpRIjCtsIw0f",
+      "contentId": "BhwXCRMdDOPycMCvSASF",
+      "platform": "youtube",
+      "startTime": "2026-11-10T18:00:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once",
+      "mediaSha256": "5c8555cb8b0dfbbd6d6b2598effc02dccddec8330771f8de20c54cf6725e5be2",
+      "copyMatches": true
+    },
+    {
+      "movie": "four",
+      "scheduleId": "Oyv0jltzvevNptxWOxNG",
+      "contentId": "BhwXCRMdDOPycMCvSASF",
+      "platform": "facebook",
+      "startTime": "2026-11-10T18:00:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once",
+      "mediaSha256": "5c8555cb8b0dfbbd6d6b2598effc02dccddec8330771f8de20c54cf6725e5be2",
+      "copyMatches": true
+    },
+    {
+      "movie": "four",
+      "scheduleId": "LTJHhrYdvLwYKYGVRtdJ",
+      "contentId": "BhwXCRMdDOPycMCvSASF",
+      "platform": "linkedin",
+      "startTime": "2026-11-10T18:00:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once",
+      "mediaSha256": "5c8555cb8b0dfbbd6d6b2598effc02dccddec8330771f8de20c54cf6725e5be2",
+      "copyMatches": true
+    },
+    {
+      "movie": "four",
+      "scheduleId": "JAUNpRQO4Qa9vz7VA12o",
+      "contentId": "BhwXCRMdDOPycMCvSASF",
+      "platform": "reddit",
+      "startTime": "2026-11-10T18:00:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once",
+      "mediaSha256": "5c8555cb8b0dfbbd6d6b2598effc02dccddec8330771f8de20c54cf6725e5be2",
+      "copyMatches": true
+    },
+    {
+      "movie": "four",
+      "scheduleId": "EpUbKWQPzkVh5k7qvbKi",
+      "contentId": "BhwXCRMdDOPycMCvSASF",
+      "platform": "tiktok",
+      "startTime": "2026-11-10T18:00:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once",
+      "mediaSha256": "5c8555cb8b0dfbbd6d6b2598effc02dccddec8330771f8de20c54cf6725e5be2",
+      "copyMatches": true
+    }
+  ],
+  "previousSchedulesPreserved": 6926,
+  "providerPublicationVerified": false
+}

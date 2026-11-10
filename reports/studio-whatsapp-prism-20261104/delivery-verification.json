@@ -1,0 +1,16 @@
+{
+  "nativeMovieSha256": "1c241e106ebeeec48cf80c445f7a20effca99cf0a6a12b2ed3a8eea54569a67c",
+  "nativeProjectMatchesDelivered": true,
+  "comparisonFrames": 576,
+  "comparisonFps": 24,
+  "comparisonDimensions": [
+    1280,
+    360
+  ],
+  "comparisonScope": "Utility side-by-side packaging only; previous film left, corrected native film right, new native soundtrack.",
+  "priorDeliveryFilesVerifiedUnchanged": 135,
+  "originalClipsVerifiedUnchanged": 4,
+  "diskFreeBytes": 9759506432,
+  "allFiveAuthoritiesValidated": true,
+  "syntaxAndDiffCheckPassed": true
+}

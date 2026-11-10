@@ -1,0 +1,8 @@
+{
+  "phase": "reopen",
+  "nativeFrontend": true,
+  "normalDemoAuth": true,
+  "headless": true,
+  "muted": true,
+  "errors": []
+}

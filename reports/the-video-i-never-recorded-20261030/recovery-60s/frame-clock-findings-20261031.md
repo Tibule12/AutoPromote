@@ -1,0 +1,24 @@
+# Native motion graphics continuation — 31 October 2026
+
+The requested professional motion edit and complete cinematic minute remain unfinished. The owner means advanced motion graphics and compositing of the standard associated with After Effects and Fusion, implemented through AutoPromote's native Studio. A tilted video rectangle alone does not meet that creative requirement.
+
+This session isolates a real preview defect: the ordinary graphics and the programme canvas previously evaluated different clocks, while frame-triggered React updates arrived late. A diagnostic composition consumer now evaluates existing native transforms, title entrance/choreography, vector stroke, masks and groups on the same decoded-frame dispatch as the canvas. It updates existing native nodes, does not author a second project/render engine, and preserves the canonical keys. Presented source time is reused across slower editor commits. Perspective surfaces retain their default native playback path and now rebind when a new programme decoder becomes active.
+
+The broader consumer is **disabled by default** behind `REACT_APP_STUDIO_PRESENTED_FRAME_PREVIEW`; the isolated demo opts in with `CREDITS_DEMO_PRESENTED_FRAME_PREVIEW=true`. This protects the ordinary editing path while the diagnostic path remains incomplete. No deployment or production configuration was changed.
+
+The actual updated Studio, normal fresh-demo sign-in, native B-roll/Composite/Motion/Graphics authoring, Undo/Redo and malformed geometry rejection were exercised with the recovered presenter source. Both complete live cycles finished. Across the retained sampled callbacks, layer timestamps, canvas timestamps and the observed source-frame timestamp agree. This is clock evidence only: it does **not** prove the displayed video textures, typography, pixels, sound or whole exported composition match. The paused screenshot was taken before a verified settled seek and is not a qualified creative still. The subsequent exact paused-seek audit could not complete after the owned QA services stopped; do not promote that screenshot.
+
+| Actual live run | Observed callbacks | Decoded pictures | Dropped display frames |
+|---|---:|---:|---:|
+| Without screencast | 286 | 381 | 14 |
+| With timeline screencast | 215 | 380 | 77 |
+
+**Smoothness fails qualification.** Earlier deferred-React, synchronous-React and uncached-layout attempts are retained with their worse timings/throughput. These measurements were not normalized into an advertised frame rate. The clock test submitted zero render jobs. The last successful native movie belongs to the previous revision, not this experimental build; cleanup removed those earlier MP4 copies, so the historical links do not establish a presently available movie.
+
+Focused checks: 101 frontend cases pass across frame/source/perspective, groups, text, vector and masks; eight selected full-editor cases pass for source scrubbing, metadata, prepared shot boundaries, canonical transforms/effects and finished-output speed. The isolated App builds. The latest anonymous welcome check passes four viewports; earlier two-build comparisons pass eight. Signed-in Help was not qualified: one observer attempted an occluded topbar, and the later help request failed authentication. These failures are retained; no normal-account or Help approval is claimed. Product readiness counts remain unchanged.
+
+During owner-authorized disk cleanup, generated MP4s and isolated runtime processes were removed. The owner subsequently said: “yeah clean up was running i need space but you can continue now”. That reply resumes this task's isolated setup and retrieval of its existing source. The earlier stop marker was archived with that explicit resumption; no unrelated service or paid generation was authorized. The exact two completed provider operations were fetched, with both original hashes verified. No new generation request was submitted. The recovered originals occupy about 20 MB once on disk; Videos entries are hard links to those same bytes. Temporary proxy/build/captures use memory. A compact evidence subset is retained on disk. Existing Downloads, personal recordings, production data and unrelated services were not modified.
+
+Next: keep the broad frame path off by default; qualify settled paused images and moving picture/sound, reduce display/capture cost, and use a cohesive visual direction rather than another flat widget. The full narration and clock sequence still need suitable source and separate source-spending authorization. No new source generation, expensive GPU work, production merge or deployment is implied.
+
+[Native measurements](../proof/recovery-frame-clock/native-cached-layout/frame-clock-playback.json) · [current scope](../proof/recovery-frame-clock/checkpoint.json) · [source retrieval receipt](completed-source-retrieval.json).

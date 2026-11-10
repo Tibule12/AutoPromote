@@ -1,0 +1,143 @@
+{
+  "format": "autopromote-scene-actions",
+  "version": 1,
+  "projectId": "viral-project-b3c8d7e9-cdff-4bdd-87dd-23b2297b83a6",
+  "baseRevision": 64,
+  "name": "Portrait contrast",
+  "actions": [
+    {
+      "type": "remove_keys",
+      "targetId": "scene-dc2440a9-b547-4d85-8b7d-6bb9b341beaa",
+      "property": "opacity"
+    },
+    {
+      "type": "keys",
+      "targetId": "scene-dc2440a9-b547-4d85-8b7d-6bb9b341beaa",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0,
+          "value": 0.85,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 0.35,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 3,
+          "value": 1,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "scene-8efc6db9-1ad6-4aee-8972-66bd7d036f35",
+      "property": "opacity"
+    },
+    {
+      "type": "keys",
+      "targetId": "scene-8efc6db9-1ad6-4aee-8972-66bd7d036f35",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0,
+          "value": 0.45,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 0.7,
+          "value": 0.34,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 1.5,
+          "value": 0.5,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 3,
+          "value": 0.05,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "scene-6a46d393-8487-4e5e-9eeb-aa058223346e",
+      "property": "opacity"
+    },
+    {
+      "type": "keys",
+      "targetId": "scene-6a46d393-8487-4e5e-9eeb-aa058223346e",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 21,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 23.4,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 24,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "scene-089ee0be-4a8d-4505-8c7d-0da3bf20fff6",
+      "property": "opacity"
+    },
+    {
+      "type": "keys",
+      "targetId": "scene-089ee0be-4a8d-4505-8c7d-0da3bf20fff6",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 21,
+          "value": 0.3,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 21.7,
+          "value": 0.45,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 22.5,
+          "value": 0.38,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 23.4,
+          "value": 0.5,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 24,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    }
+  ]
+}

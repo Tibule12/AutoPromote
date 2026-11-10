@@ -1,0 +1,81 @@
+{
+  "alphaThreshold": 128,
+  "sourceWindowRadiusFrames": 6,
+  "nativeTransformKeysCheckedAtEveryActiveOutputFrame": true,
+  "silhouetteMarginPercent": 3,
+  "figures": [
+    {
+      "layer": "Circle / vivid double 3",
+      "minLeftPercent": 14.310757167000695,
+      "maxRightPercent": 63.58650196801344,
+      "minTopPercent": 17.13709463396477,
+      "maxBottomPercent": 75.97310827877635,
+      "active24fpsFramesChecked": 170
+    },
+    {
+      "layer": "Circle / vivid double 4",
+      "minLeftPercent": 16.8976157303023,
+      "maxRightPercent": 77.13835744008087,
+      "minTopPercent": 17.130799381850053,
+      "maxBottomPercent": 77.10967189697729,
+      "active24fpsFramesChecked": 168
+    },
+    {
+      "layer": "Circle / vivid double 2",
+      "minLeftPercent": 3.576315482511184,
+      "maxRightPercent": 51.87474097608751,
+      "minTopPercent": 19.666663576577186,
+      "maxBottomPercent": 77.81009839858771,
+      "active24fpsFramesChecked": 173
+    },
+    {
+      "layer": "Circle / vivid double 5",
+      "minLeftPercent": 16.69270869134751,
+      "maxRightPercent": 90.09961060430895,
+      "minTopPercent": 19.66784263916857,
+      "maxBottomPercent": 78.25448887351183,
+      "active24fpsFramesChecked": 166
+    },
+    {
+      "layer": "Circle / vivid double 1",
+      "minLeftPercent": 3.1736111111111107,
+      "maxRightPercent": 50.0594753262837,
+      "minTopPercent": 24.29752214759064,
+      "maxBottomPercent": 77.38465162246712,
+      "active24fpsFramesChecked": 175
+    },
+    {
+      "layer": "Circle / vivid double 6",
+      "minLeftPercent": 19.87522779302276,
+      "maxRightPercent": 96.96383096851714,
+      "minTopPercent": 24.303162748596222,
+      "maxBottomPercent": 77.36451977517311,
+      "active24fpsFramesChecked": 163
+    },
+    {
+      "layer": "Circle / lead",
+      "minLeftPercent": 13.693611581014608,
+      "maxRightPercent": 73.45319065821057,
+      "minTopPercent": 30.71638339081549,
+      "maxBottomPercent": 82.59636290140291,
+      "active24fpsFramesChecked": 192
+    },
+    {
+      "layer": "Circle / vivid double 7",
+      "minLeftPercent": 17.216577856091263,
+      "maxRightPercent": 96.95458156669697,
+      "minTopPercent": 34.08423543280759,
+      "maxBottomPercent": 84.29821077357481,
+      "active24fpsFramesChecked": 161
+    },
+    {
+      "layer": "Circle / vivid double 8",
+      "minLeftPercent": 3.314928096861614,
+      "maxRightPercent": 55.125387766923986,
+      "minTopPercent": 34.50568699548059,
+      "maxBottomPercent": 84.33601865243533,
+      "active24fpsFramesChecked": 158
+    }
+  ],
+  "runtimePictureInspectionStillRequired": true
+}

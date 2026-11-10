@@ -1,0 +1,16 @@
+[
+  {
+    "origin": "https://api.autopromote.org",
+    "httpStatus": 200,
+    "commit": "88bef8ff4c9f12c78abac88b644e3b60d4ffa428",
+    "securityPolicy": "security-owner-bootstrap-20261027",
+    "capturedAtUtc": "2026-10-27T12:08:29.152999+00:00"
+  },
+  {
+    "origin": "https://autopromote.onrender.com",
+    "httpStatus": 200,
+    "commit": "88bef8ff4c9f12c78abac88b644e3b60d4ffa428",
+    "securityPolicy": "security-owner-bootstrap-20261027",
+    "capturedAtUtc": "2026-10-27T12:08:30.190053+00:00"
+  }
+]

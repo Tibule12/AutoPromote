@@ -1,0 +1,54 @@
+{
+  "Native copy-circle authoring": {
+    "seconds": 8.658999919891357,
+    "frames": 25,
+    "rawBytes": 3237769,
+    "nativeControlsOnly": true,
+    "setupExcluded": true,
+    "audio": "Silent native editing capture",
+    "observedCaptureFramesPerSecond": 2.887169445812129
+  },
+  "Native rim and reflection controls": {
+    "seconds": 20.39199995994568,
+    "frames": 105,
+    "rawBytes": 11850783,
+    "nativeControlsOnly": true,
+    "setupExcluded": true,
+    "audio": "Silent native editing capture",
+    "observedCaptureFramesPerSecond": 5.149078079945215
+  },
+  "Complete live Studio playback": {
+    "seconds": 12.828999996185303,
+    "frames": 22,
+    "rawBytes": 2617924,
+    "nativeControlsOnly": true,
+    "setupExcluded": true,
+    "audio": "Silent native editing capture",
+    "observedCaptureFramesPerSecond": 1.7148647600391058
+  },
+  "Complete finished playback in Studio": {
+    "seconds": 8.03600001335144,
+    "frames": 227,
+    "rawBytes": 29602672,
+    "nativeControlsOnly": true,
+    "setupExcluded": true,
+    "audio": "Silent native editing capture",
+    "observedCaptureFramesPerSecond": 28.247884472728977
+  },
+  "liveProgramme": {
+    "complete": true,
+    "programmeSeconds": 8,
+    "elapsedWallSeconds": 13.099,
+    "uniqueSampledProgrammeTimes": 21,
+    "exactDisplayRateQualified": false,
+    "smoothRealtimeQualified": false
+  },
+  "finishedProgramme": {
+    "complete": true,
+    "programmeSeconds": 8,
+    "elapsedWallSeconds": 8.138,
+    "uniqueSampledProgrammeTimes": 1,
+    "exactDisplayRateQualified": false,
+    "smoothRealtimeQualified": false
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "reviewDate": "2026-10-26",
+  "branch": "security/release-readiness-20261026",
+  "baseCommit": "832d11eeff5df4f3a25455cd2dca7ffed3a08b70",
+  "securityTests": 82,
+  "securityPassed": 82,
+  "jestSuites": 10,
+  "jestTests": 34,
+  "jestPassed": 34,
+  "readOnlyToolTests": 3,
+  "readOnlyToolPassed": 3,
+  "commands": {
+    "security": "SECURITY_JAVA_BIN=/path/to/java21/bin/java npm run test:security:profile",
+    "readOnlyTools": "python3 test/security/read_only_tools_test.py -v",
+    "compatibility": "FIREBASE_ADMIN_BYPASS=1 CI_ROUTE_IMPORTS=1 OPENAI_LOGGING_ENABLED=1 ENABLE_BACKGROUND_JOBS=false NODE_ENV=test node_modules/.bin/jest --runInBand --selectProjects server --runTestsByPath src/__tests__/server.hostedAdminRoutes.test.js test/paypal-subscription.routes.test.js test/payments.dev.mock.subscription.test.js test/payments-routes.test.js src/__tests__/billingService.entitlements.test.js test/contentRoutes.schedulingBehavior.jest.test.js test/contentSourceUpload.jest.test.js test/promotionTaskQueue.hashing.jest.test.js src/__tests__/mediaRoutes.studioSources.test.js src/__tests__/mediaRoutes.viralBilling.test.js"
+  },
+  "dependencyNote": "Worktree used the existing installed node_modules via NODE_PATH; no dependency manifests or lockfiles changed beyond the security test npm script.",
+  "limits": [
+    "Auth signatures, password, email, revocation and provider outcomes are controlled fixtures.",
+    "Queue/Publisher/Studio tests use mocked dispatchers/workers, not paid jobs.",
+    "Copy-server validation is filesystem packaging only, not Functions wrapper/runtime validation.",
+    "Production applications, Firebase Auth accounts and provider transactions were not exercised."
+  ]
+}

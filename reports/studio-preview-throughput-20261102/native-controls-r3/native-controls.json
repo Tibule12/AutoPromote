@@ -1,0 +1,11 @@
+{
+  "normalDemoAuth": true,
+  "nativeSave": true,
+  "coldReopenExact": true,
+  "cornerEditUndoRedo": true,
+  "reviewedPlanBuildsFromCurrentSnapshot": true,
+  "invalidPlanRefusedBeforeMutation": true,
+  "canonicalDecisionsPreserved": true,
+  "layers": 49,
+  "keys": 10968
+}

@@ -1,0 +1,16 @@
+{
+  "projectId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6",
+  "projectHash": "905d11868d8497e2e21492737b21a0eea020becb669c5c264f67a7dc6e1632a0",
+  "movieSha256": "bb19c3c3db0b9eeee99260d2f0e2ecf0b16379acc35cc6c76b85245ecd7db602",
+  "jobId": "viral_c43aaf1920f6c508b1ef3c892a3cc1fbb2f6a41dbb4ae8c797b5589195c7863c",
+  "executionId": "92f037a4d9035ad8075e5444208a070473f8af827078db38b7b0d37a114b54fb",
+  "nativeBackupMatchesRenderedDocument": true,
+  "compiledCompositionMatchesSubmitted": true,
+  "workerArtifactMatchesNativeDownload": true,
+  "templateRef": {
+    "templateId": "living_infinity_v1",
+    "version": "1.0.1",
+    "definitionHash": "6a41ada3809a2ec45a3b70756a7a86d9a64ac0eb1759a0be22f5fe67fd0ed966"
+  },
+  "actualNativeDownload": true
+}

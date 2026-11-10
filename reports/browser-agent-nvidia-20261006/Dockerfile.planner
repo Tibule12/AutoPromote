@@ -1,0 +1,3 @@
+FROM autopromote-vfx-cuda:20261006
+RUN pip3 install --no-cache-dir lm-format-enforcer==0.11.3
+RUN pip3 install --no-cache-dir transformers==4.57.1

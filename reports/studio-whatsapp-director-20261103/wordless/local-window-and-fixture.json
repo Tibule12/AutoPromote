@@ -1,0 +1,15 @@
+{
+  "demoProject": "demo-autopromote-credits",
+  "before": 1793707200000,
+  "after": 1793734990628,
+  "windowMs": 7200000,
+  "localFixtureOnly": true,
+  "availableBefore": 0,
+  "grant": {
+    "alreadyProcessed": false,
+    "balance": 2
+  },
+  "availableAfter": 2,
+  "realPurchase": false,
+  "productionActions": 0
+}

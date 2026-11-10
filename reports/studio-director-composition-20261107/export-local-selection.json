@@ -1,0 +1,37 @@
+{
+  "build": "/dev/shm/autopromote-director-composition-20261107-build",
+  "origin": "http://127.0.0.1:45109",
+  "demoProject": "demo-autopromote-credits",
+  "welcomeFlag": "true",
+  "directorMotionFlag": "true",
+  "mainAsset": "/static/js/main.52a85ff7.js",
+  "mainSha256": "c9f238efb231410ba05ae32158cc598abdd3934240c12ff870de684fecee66e6",
+  "sources": {
+    "frontend/src/components/ViralClipStudio.js": "3f9d8253efdd84421672a4ca9b01ac2522af71e3cb635002caf74a6a78388141",
+    "frontend/src/components/ViralClipStudio.css": "0e40cfd977bd4b3a04dcb03155ec6c19c32a76d53dde528972b362fcb77261c2",
+    "frontend/src/components/studioFeatureControls.css": "bf69a3b2f62f3e4067fcddf0ff0d5cb47a679a78c393433c1a50ec4b7078f39b",
+    "frontend/src/components/StudioProgrammeFrame.js": "134e4695b2b0d9c2ee2db2be594303bdf6a5e1eb945cc1c0b35f7b154f0f3115",
+    "frontend/src/components/StudioDirectorCreativePanel.js": "a50eb20bbc80a938396a0bf53c6038d383f8b817d2d621914b7d97264efeb071",
+    "frontend/src/components/studioDirectorCreativePlan.js": "6c4700aa3ab3240d332fee60ea46348e7202faa9c975c6b256a335248de36377",
+    "frontend/src/components/studioDirectorCreativeClient.js": "63331aaf4e248acdeafc85749a99a1c6e951009c226717c0ec093ae536589f96",
+    "src/services/studioDirectorCreativePlanner.js": "76a48bc211c63acabc0db82dbf5a3d594464f48a547a740d7a2a11f0a8c70b9c",
+    "src/routes/studioDirectorCreativeRoutes.js": "569797930cb373c72e3b6395990e06cc513e28fd815dc585cc7e601beb4362f1",
+    "src/server.js": "ef20adf22d7093c208640787a5a5d0e344d99adfaa916f3a953b8ab78a19e1c9",
+    "scripts/monetization/application-host.cjs": "26feebedb7226ea284dd77c319e9f1321110576c51a035be3e61e030f0cb0e4d",
+    "frontend/src/components/studioDirectorComposition.js": "2a9db9b8270bc8890b156d2706b73460530b0ae1af3cbb49d7c5edf807d5227d",
+    "src/services/studioDirectorCompositionPlanner.js": "0d438c246ceb6faf4cc0bea2770f99adc90d82914e4bc668a27e59f09b2abeb9",
+    "frontend/src/components/studioSceneActions.js": "633a6317f8b0a5f3069c810d53ebd145ae5aa114f4812aaba9b486ac625ff4c1",
+    "src/generated/studioDirectorReplayKernel.cjs": "2c89c123c59b7297fff4bf1fd7373860aeeec4138d7b8c105fdf46407fc61c08",
+    "python_media_worker/main_media_server.py": "0afacd9efed66dbb00a53c9fc1a2b461b0da5d3fe5dbc3cf6fe07910cb0b6f64"
+  },
+  "api": {
+    "previousPid": 554151,
+    "pid": 554734,
+    "origin": "http://127.0.0.1:45109"
+  },
+  "beforeBuild": "/dev/shm/autopromote-director-creative-20261107-r2-build",
+  "welcomeChecks": 8,
+  "normalSignInAndHelp": true,
+  "onlyOwnedDemoChanged": true,
+  "productionDeployment": false
+}

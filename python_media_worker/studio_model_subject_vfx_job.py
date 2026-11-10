@@ -13,14 +13,17 @@ import requests
 try:
     from .studio_subject_matte import sha256, CachedSubjectMatte
     from .studio_vfx_plan import render_vfx
+    from .studio_source_background import evidence_files
 except ImportError:
     from studio_subject_matte import sha256, CachedSubjectMatte
     from studio_vfx_plan import render_vfx
+    from studio_source_background import evidence_files
 
 # Bind the loaded worker code before work starts. A local edit during a job
 # must fail qualification rather than attest the newer file over older pixels.
 IMPLEMENTATION_FILES={name:sha256(Path(__file__).with_name(name)) for name in
-    ("studio_model_subject_vfx_job.py","studio_vfx_plan.py","studio_vfx_foreground_cache.py")}
+    ("studio_model_subject_vfx_job.py","studio_vfx_plan.py","studio_vfx_foreground_cache.py",
+     "studio_source_background.py")}
 
 def verify_implementation():
     if any(sha256(Path(__file__).with_name(name))!=digest for name,digest in IMPLEMENTATION_FILES.items()):
@@ -114,6 +117,13 @@ def extract_masks(bundle, target, data):
             output.write(block)
     with tarfile.open(raw) as archive:
         members = archive.getmembers()
+        manifest_entries = [m for m in members if m.name == "manifest.json"]
+        if len(manifest_entries) != 1 or not manifest_entries[0].isfile() or not 0 < manifest_entries[0].size <= 8*1024**2:
+            raise ValueError("Invalid bounded mask manifest")
+        manifest_bytes = archive.extractfile(manifest_entries[0]).read()
+        if hashlib.sha256(manifest_bytes).hexdigest() != data["manifestSha256"]:
+            raise ValueError("Mask manifest changed")
+        names |= evidence_files(json.loads(manifest_bytes))
         if (len(members) != len(names) or {m.name for m in members} != names
                 or any(not m.isfile() or Path(m.name).name != m.name or not 0 < m.size <= 8*1024**2 for m in members)
                 or sum(m.size for m in members) > 75*1024**2):

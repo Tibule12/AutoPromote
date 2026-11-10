@@ -1,0 +1,17 @@
+{
+  "projectId": "viral-project-ab5f9476-bbbc-42b2-8694-ace94aeea327",
+  "seconds": 24,
+  "layers": 20,
+  "keys": 289,
+  "addedTextLayers": 0,
+  "muteOriginalAudio": true,
+  "decisions": "3c3d3450f8eb003b8a960178f71f6419e99b0622c956c1438c32e055072015b4",
+  "nativeFrontend": true,
+  "selectableTemplate": true,
+  "templateRef": {
+    "templateId": "momentum_v1",
+    "version": "1.0.1",
+    "definitionHash": "7cad45e8383bee68a01d4e241a43f3eafb90974fc82e3681472fa195ecccb46f"
+  },
+  "paidCalls": 0
+}

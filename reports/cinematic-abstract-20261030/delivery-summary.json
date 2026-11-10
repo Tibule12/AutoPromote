@@ -1,0 +1,117 @@
+{
+  "date": "2026-10-30",
+  "state": "THREE_CINEMATIC_ABSTRACT_FILMS_DELIVERED_FOR_OWNER_REVIEW",
+  "report": "reports/cinematic-abstract-20261030/README.md",
+  "deliveryFolder": "/home/tibule12/Videos/AutoPromote-Cinematic-Abstract-2026-10-30",
+  "films": [
+    {
+      "identity": "current",
+      "file": "01-CURRENT.mp4",
+      "durationSeconds": 24,
+      "sha256": "d83e2dfc6dfdf492520f2335a9eca0353317c2e688f93fc3d17e05ec6ee6f4e7",
+      "walkthroughDuration": 121.41666666666666,
+      "walkthroughSha256": "31370440dfa239f5fb8d41cc2ed193376bfc0a4afa5d7c4d6c41304443d694ca",
+      "thumbnailSha256": "5b83675208e2eea19261cbdd99970f1457c62487b3dc5c166812bf7c49abde23",
+      "nativeProjectHash": "c3afacd136f8998cb07812b2b86109b927e392e17a2cbaf6f07a5d95407245f6",
+      "completeMatchingPlayback": true,
+      "independentExactRestore": true,
+      "ownerApproved": false,
+      "scheduled": false
+    },
+    {
+      "identity": "prism",
+      "file": "02-PRISM.mp4",
+      "durationSeconds": 24,
+      "sha256": "cb65c829e76b1c83560ba4e93183b9d3a2eed21c7fa55c68fd9da4242e0e531f",
+      "walkthroughDuration": 119.375,
+      "walkthroughSha256": "8bf493346538b257b43b1f97e7682eab02ebe86078ca3239ebc344df477b1d3b",
+      "thumbnailSha256": "9a0cca677812466bff358ef3a3f41100d5775c40eee79e42a0cf07a67fe7eac7",
+      "nativeProjectHash": "86998e9269fab48d4803dcb3a2d7d872a561ec7c845626324cfaccd72188a36a",
+      "completeMatchingPlayback": true,
+      "independentExactRestore": true,
+      "ownerApproved": false,
+      "scheduled": false
+    },
+    {
+      "identity": "fold",
+      "file": "03-FOLD.mp4",
+      "durationSeconds": 24,
+      "sha256": "5619f34a34e255a7907c19594651ee37b13b7c3e7c7e57e793eb5d43297a41c2",
+      "walkthroughDuration": 119.5,
+      "walkthroughSha256": "bb54f3d0ca263799fbbc719987a102ae5235102818d15b5c36efc7f05404d390",
+      "thumbnailSha256": "922ae320efd7aee1e6758f02c9dcade03063996c9c8a74ff1779d0b5f849769a",
+      "nativeProjectHash": "1c155f6c867c95d045b8e9d21fc15ac507790b233ab7135682d2563f824e9ce0",
+      "completeMatchingPlayback": true,
+      "independentExactRestore": true,
+      "ownerApproved": false,
+      "scheduled": false
+    }
+  ],
+  "actualWorkflow": "Ordinary signed-in Studio scene controls in fresh emulators, canonical local CUDA Blender jobs through the App, verified private alpha storage and native compositing. Final native sequence/CPU exports used the existing signed-in account and its ordinary private source/output Storage. Separate narrated whole-Studio teaching and editable backups.",
+  "profile": {
+    "films": [
+      1280,
+      720,
+      24,
+      24
+    ],
+    "walkthroughs": [
+      1600,
+      1000,
+      24
+    ],
+    "localGpu": "Quadro M1200",
+    "currentSamples": 32,
+    "prismAndFoldSamples": 16,
+    "cloudGpuAllocated": false
+  },
+  "surfaces": [
+    "Closed swept deforming ribbons with bounded path/width/thickness/wave/lobes/twist/speed/phase",
+    "Brushed metal, silk, per-object roughness and full plane backdrop",
+    "Opt-in sculpture reflection lighting",
+    "Persistent browser renderer/environment across form edits",
+    "Exact RGBA PNG alpha with verified large loopback Firebase resumable transfer"
+  ],
+  "tests": {
+    "frontend": 43,
+    "backendBeforeFinalSampleBudget": 65,
+    "python": 57,
+    "finalLocalSampleBudgetSuite": 11,
+    "finalOwnedOutputRecoverySuites": 39,
+    "anonymousFinalClientViewports": 8,
+    "signedInFinalClientEditableSceneAndHelp": true
+  },
+  "originalPreservation": {
+    "files": 25,
+    "allHashesUnchanged": true,
+    "loginPreserved": true,
+    "queueHolds": 5,
+    "dailyTimer": "inactive/disabled"
+  },
+  "initialFailures": [
+    "First current GPU alpha transfer exceeded emulator per-request bound; same accepted job recovered with verified chunked handoff, no extra GPU dispatch",
+    "Initial glass 32-sample job terminated at 1740 seconds; remains failed. Explicit revised native light setting and new16-sample accepted job supply the final glass",
+    "Walkthrough source download failed transiently; actual owner-scoped failed status retained before retry",
+    "Earlier local API and raw worker completion observations omitted final output integrity before the Node persistence step. Completed versions and explicit mix revision remain retained; owned recovery waits for the actual verified output hash",
+    "Initial finished-file playback records failed due local output CORS/finished-selection access; corrected ordinary receipt recovery and complete captures retained"
+  ],
+  "recordings": "Actual authoring, controls and complete matching final playback; muted headless capture cadence is separate from 24fps movie quality.",
+  "materialLightingPixelParityQualified": false,
+  "wholePredictiveParityQualified": false,
+  "humanListeningApproval": false,
+  "ownerApproved": false,
+  "scheduled": false,
+  "paidCloudComputeStarted": false,
+  "deployed": false,
+  "mainMerged": false,
+  "formalReadinessCountsUnchanged": true,
+  "retentionLimit": "The ephemeral emulator services stopped after the three native cores completed, before a complete Firestore export. Actual Storage emulator files/metadata, worker signed outcomes/media, accepted Blender specs/receipts, recordings and native backups remain. A complete original Firestore/wallet replay snapshot is unavailable. CURRENT/PRISM source backups restored exactly before shutdown; FOLD authoring cold-reopen passed, but its extra post-export source restore could not run after shutdown. All six final film/walkthrough backups and finished bytes independently restore through the existing signed-in App.",
+  "remaining": [
+    "S02 picture/processed audio/colour/edges/low-alpha/material-lighting parity, latency and long-job reconciliation; strict typography 13/16 failures remain",
+    "S04 additional contours/procedural motion, object keys across cuts/retiming/trimmed boundaries",
+    "S03 occurrence/group/source ownership",
+    "Owner creative/listening approval and phone/platform presentation; sparse headless capture does not qualify smooth UI playback",
+    "Original emulator Firestore snapshot and extra FOLD post-export native-source restore are unavailable after ephemeral services ended"
+  ],
+  "nextTask": "Owner review of exact three movies and matching thumbnails; keep all five Queue holds. Continue shared S02/S04/S03 gaps without promoting showroom or production readiness."
+}

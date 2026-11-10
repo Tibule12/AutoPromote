@@ -1,0 +1,16 @@
+[
+  {
+    "file": "Version 1 vs Revision 2.mp4",
+    "frames": 576,
+    "fps": 24,
+    "fullDecode": true,
+    "effectsScope": "Comparison packaging of already-native files only"
+  },
+  {
+    "file": "Raw vs Revision 2.mp4",
+    "frames": 576,
+    "fps": 24,
+    "fullDecode": true,
+    "effectsScope": "Comparison packaging of already-native files only"
+  }
+]

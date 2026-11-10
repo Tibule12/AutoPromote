@@ -1,0 +1,10 @@
+{
+  "previousPid": 534680,
+  "pid": 537199,
+  "origin": "http://127.0.0.1:45109",
+  "exactCandidateOrigins": [
+    "http://127.0.0.1:46831",
+    "http://127.0.0.1:39305"
+  ],
+  "authAndOwnershipUnchanged": true
+}

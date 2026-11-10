@@ -1,0 +1,11 @@
+{
+  "demoOnly": true,
+  "balanceBefore": 0,
+  "grant": {
+    "alreadyProcessed": false,
+    "balance": 2
+  },
+  "balanceAfter": 2,
+  "purpose": "Intentional corrected native export after the static transform repair; initial completed job is preserved.",
+  "realPurchase": false
+}

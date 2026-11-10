@@ -1,0 +1,13 @@
+{
+  "earlierWalletExact": true,
+  "allEarlierWalletsExact": true,
+  "priorWalletCount": 2,
+  "earlierBalance": 1,
+  "earlierReserved": 0,
+  "newFixtureBalance": 3,
+  "newFixtureReserved": 0,
+  "newNativeOperations": 4,
+  "newOperationsAllSucceeded": true,
+  "noDirectWalletWrites": true,
+  "noProductionChange": true
+}

@@ -1,0 +1,6 @@
+{
+  "nativeUi": true,
+  "normalSignIn": true,
+  "unsupportedEffectRefusedBeforeMutation": true,
+  "exactProjectPreserved": true
+}

@@ -1,0 +1,67 @@
+[
+  {
+    "requested": 0.25,
+    "testid": "studio-program-canvas",
+    "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+    "programmeTime": "0.25",
+    "programmeSource": "source",
+    "sourceSampling": "native",
+    "sourceContentHash": "",
+    "sourceFrameIndex": "",
+    "sourceGeneration": "",
+    "joinTransition": "",
+    "joinOpacity": "0"
+  },
+  {
+    "requested": 1.5,
+    "testid": "studio-program-canvas",
+    "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+    "programmeTime": "1.5",
+    "programmeSource": "source",
+    "sourceSampling": "native",
+    "sourceContentHash": "",
+    "sourceFrameIndex": "",
+    "sourceGeneration": "",
+    "joinTransition": "",
+    "joinOpacity": "0"
+  },
+  {
+    "requested": 3.5,
+    "testid": "studio-program-canvas",
+    "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+    "programmeTime": "3.5",
+    "programmeSource": "source",
+    "sourceSampling": "native",
+    "sourceContentHash": "",
+    "sourceFrameIndex": "",
+    "sourceGeneration": "",
+    "joinTransition": "",
+    "joinOpacity": "0"
+  },
+  {
+    "requested": 5.5,
+    "testid": "studio-program-canvas",
+    "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+    "programmeTime": "5.5",
+    "programmeSource": "source",
+    "sourceSampling": "native",
+    "sourceContentHash": "",
+    "sourceFrameIndex": "",
+    "sourceGeneration": "",
+    "joinTransition": "",
+    "joinOpacity": "0"
+  },
+  {
+    "requested": 7.5,
+    "testid": "studio-program-canvas",
+    "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+    "programmeTime": "7.5",
+    "programmeSource": "source",
+    "sourceSampling": "native",
+    "sourceContentHash": "",
+    "sourceFrameIndex": "",
+    "sourceGeneration": "",
+    "joinTransition": "",
+    "joinOpacity": "0"
+  }
+]

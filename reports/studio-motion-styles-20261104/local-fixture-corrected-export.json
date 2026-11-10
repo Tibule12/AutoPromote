@@ -1,0 +1,10 @@
+{
+  "localFixtureOnly": true,
+  "realPurchase": false,
+  "activeOperationsBefore": 0,
+  "availableBefore": 0,
+  "grant": {
+    "alreadyProcessed": false,
+    "balance": 2
+  }
+}

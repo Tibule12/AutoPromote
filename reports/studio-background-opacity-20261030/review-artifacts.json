@@ -1,0 +1,17 @@
+[
+  {
+    "file": "edited-in-studio.mp4",
+    "sha256": "6ff217acdf4b050e73111c6ac9686b64ff8e09b2fe29e3a3473e7be5e7e00240",
+    "bytes": 1340891
+  },
+  {
+    "file": "final.mp4",
+    "sha256": "597c9dc99f249cc1494cedbec53dbd48f36fa952824ec08c646b7990151da9c2",
+    "bytes": 7066401
+  },
+  {
+    "file": "index.html",
+    "sha256": "b73151a0393f8c6377bf3236e5adf220a34e128f188b69e0b99e35ea211bddcd",
+    "bytes": 997
+  }
+]

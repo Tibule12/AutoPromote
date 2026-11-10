@@ -1,0 +1,46 @@
+{
+  "mode": "Motion & Flow selected through native UI",
+  "normalDemoAuth": true,
+  "samples": [
+    {
+      "programmeTime": 22.5,
+      "visiblePieces": 10,
+      "sharedPieces": 10,
+      "independentOwners": 0,
+      "sourceTimes": [
+        2.5
+      ]
+    },
+    {
+      "programmeTime": 25.0,
+      "visiblePieces": 20,
+      "sharedPieces": 18,
+      "independentOwners": 2,
+      "sourceTimes": [
+        1,
+        5
+      ]
+    },
+    {
+      "programmeTime": 26.0,
+      "visiblePieces": 20,
+      "sharedPieces": 18,
+      "independentOwners": 2,
+      "sourceTimes": [
+        2,
+        6
+      ]
+    },
+    {
+      "programmeTime": 27.916666666666664,
+      "visiblePieces": 20,
+      "sharedPieces": 18,
+      "independentOwners": 2,
+      "sourceTimes": [
+        3.916666,
+        7.916666
+      ]
+    }
+  ],
+  "wholePictureParityQualified": false
+}

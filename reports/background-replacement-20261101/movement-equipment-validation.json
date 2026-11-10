@@ -1,0 +1,209 @@
+{
+  "date": "2026-11-01",
+  "status": "REVIEWED_MOVEMENT_REPAIR_WITH_REMAINING_EDGE_DEFECTS",
+  "source": {
+    "originalSha256": "7a16b8ba2eba836eac74bcfb1f830313907ac0e19f314e636d4b7f833643578c",
+    "intervalSeconds": [
+      22.4583333333,
+      25.4583333333
+    ],
+    "crop": [
+      170,
+      40,
+      1430,
+      1000
+    ],
+    "frames": 72,
+    "fps": 24
+  },
+  "review": {
+    "allPreviewFramesInspected": 72,
+    "allExportFramesInspected": 72,
+    "focusedFrames": [
+      0,
+      12,
+      18,
+      24,
+      30,
+      35,
+      36,
+      37,
+      48,
+      60,
+      71
+    ],
+    "couchRevealShapeRepaired": true,
+    "fineFoliageColourDetailQualified": false,
+    "generalMotionQualified": false,
+    "professionalCreativeGate": false,
+    "readinessPromotion": false,
+    "remainingLimitations": [
+      "Fine foliage colour contamination/detail and isolated translucent pixels at the shirt/boom junction remain; foreground-colour recovery depends on the supplied alpha and cannot reliably remove incorrectly opaque background fragments.",
+      "Longer/arbitrary motion, moving cameras, wispy hair and unseen occlusions remain unqualified.",
+      "Single-view light/perspective matching does not establish physical relighting or reconstructed geometry.",
+      "Local CPU latency and production model transport remain unqualified."
+    ],
+    "fineShirtBoomJunctionAlphaQualified": false,
+    "rightMicSupportMajorSurfaceHolesRepaired": true
+  },
+  "media": {
+    "preview": {
+      "sha256": "05aa5605c1ad46b7b1ba47bdb580ff885cca4d25eb17d5d136c77d561dd7f284",
+      "bytes": 1456954,
+      "duration": "3.000000",
+      "streams": [
+        {
+          "codec_type": "video",
+          "codec_name": "h264",
+          "width": 1430,
+          "height": 1000,
+          "r_frame_rate": "24/1",
+          "nb_read_frames": "72"
+        },
+        {
+          "codec_type": "audio",
+          "codec_name": "aac",
+          "r_frame_rate": "0/0",
+          "nb_read_frames": "130",
+          "sample_rate": "44100",
+          "channels": 2
+        }
+      ],
+      "fullDecode": true,
+      "decodeErrors": ""
+    },
+    "export": {
+      "sha256": "a895276094586c13f5cb68113b8b398559d373554588bc596abdfbcdb4058c74",
+      "bytes": 1012130,
+      "duration": "3.000000",
+      "streams": [
+        {
+          "codec_type": "video",
+          "codec_name": "h264",
+          "width": 1920,
+          "height": 1080,
+          "r_frame_rate": "24/1",
+          "nb_read_frames": "72"
+        },
+        {
+          "codec_type": "audio",
+          "codec_name": "aac",
+          "r_frame_rate": "0/0",
+          "nb_read_frames": "141",
+          "sample_rate": "48000",
+          "channels": 2
+        }
+      ],
+      "fullDecode": true,
+      "decodeErrors": "",
+      "decodedAudio": {
+        "meanDbfs": -17.3,
+        "peakDbfs": -0.7,
+        "silent": false
+      }
+    },
+    "studioRecording": {
+      "sha256": "945afae0eddaccef252ad2ca604c22c93aab8be9fdff452f11d6bfbfaea18510",
+      "bytes": 534830,
+      "duration": "3.291667",
+      "streams": [
+        {
+          "codec_type": "video",
+          "codec_name": "h264",
+          "width": 1600,
+          "height": 1100,
+          "r_frame_rate": "24/1",
+          "nb_read_frames": "79"
+        },
+        {
+          "codec_type": "audio",
+          "codec_name": "aac",
+          "r_frame_rate": "0/0",
+          "nb_read_frames": "142",
+          "sample_rate": "48000",
+          "channels": 2
+        }
+      ],
+      "fullDecode": true,
+      "decodeErrors": ""
+    },
+    "previewExportEncodingComparison": {
+      "frames": 72,
+      "meanSSIM": 0.9872392222222223,
+      "minimumSSIM": 0.986185,
+      "geometry": "export crop x188/y0/w1544/h1080 rescaled to 1430x1000; same 72 frames",
+      "creativeQualityScore": false
+    }
+  },
+  "nativePersistence": {
+    "canonicalDocumentColdReopenExact": true,
+    "subjectScenesColdReopenExact": true,
+    "canonicalDocumentAfterExportExact": true,
+    "subjectScenesAfterExportExact": true,
+    "foregroundComponentCount": 6,
+    "canonicalDocumentSha256": "96a281dff16e8ed4f8d0ff0e92d08d0f92d026557ddcc5876fe9d74cb4f2700e"
+  },
+  "studioRecording": {
+    "nativeFinishedOutput": true,
+    "editableTimelineVisible": true,
+    "exportSha256": "a895276094586c13f5cb68113b8b398559d373554588bc596abdfbcdb4058c74",
+    "capturedFrames": 79,
+    "audioOffset": 0.13893413543701172,
+    "audio": "Exact exported soundtrack muxed at the observed native frame display epoch; QA device muted.",
+    "smoothnessQualified": false,
+    "creativeGate": false,
+    "noRenderSubmitted": true
+  },
+  "nativePlayback": {
+    "duration": 3,
+    "currentTime": 3,
+    "ended": true,
+    "width": 1920,
+    "height": 1080,
+    "quality": {
+      "totalVideoFrames": 77,
+      "droppedVideoFrames": 0
+    }
+  },
+  "model": {
+    "adapterVersion": "2.4.1",
+    "jobId": "729d6556c9546cc43de7d2c000252422eacbebaf31f06ad00e2f1485815a88df",
+    "attemptId": "40254b94-af0e-4c69-9c76-d8f7139627c6",
+    "artifactHash": "8685d8d6374ae2ee42e5f8e1a699634d2b3355264ddbf9bdec9fb958f3170507",
+    "newNeuralInferencePerformed": false,
+    "localCpuWallSeconds": 371.962643,
+    "peakRssKiB": 1714496,
+    "pymattingVersion": "1.1.16",
+    "pymattingLicense": "MIT"
+  },
+  "checks": {
+    "nodeRuntimePassed": 55,
+    "temporalAlphaPassed": 9,
+    "sourceEdgeAlphaPassed": 4,
+    "compositorExportPassed": 54,
+    "pipelineTotalPassed": 122,
+    "documentationStatus": "passed",
+    "studioContinuityStatus": "passed",
+    "documentationAssistancePassed": 51,
+    "totalAutomatedPassedThisContinuation": 173,
+    "knowledgeBuildAndGeneratedCheck": "passed",
+    "pythonSyntaxFiles": 6,
+    "diffCheck": "passed",
+    "allDeliveryMoviesFullyDecoded": 10,
+    "deliveryFilesHashVerified": 58,
+    "javascriptSyntaxFiles": 3
+  },
+  "preservation": {
+    "productionChanged": false,
+    "paidCloudInference": false,
+    "merged": false,
+    "deployed": false,
+    "unrelatedWorktreesChanged": false,
+    "earlierDeliveriesPreserved": true,
+    "newLocalDemoImportsOnlyVerifiedImmutableInputs": true,
+    "financialHistoryReconstructed": false,
+    "universalOfflineProjectPortabilityClaimed": false
+  },
+  "delivery": "/home/tibule12/Videos/AutoPromote Background Replacement - 2026-11-01/Movement and equipment repair",
+  "nextWork": "Repair remaining mixed-colour fine foliage boundaries and qualify additional moving/occlusion footage before claiming general cleanliness; retain S02/S04/S03."
+}

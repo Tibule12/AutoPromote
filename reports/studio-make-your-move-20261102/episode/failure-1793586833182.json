@@ -1,0 +1,6 @@
+{
+  "phase": "inspect",
+  "error": "locator.screenshot: Target page, context or browser has been closed\nCall log:\n\u001b[2m  - taking element screenshot\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m\n\u001b[2m  - attempting scroll into view action\u001b[22m\n\u001b[2m    - waiting for element to be stable\u001b[22m\n\n    at inspect (/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/scripts/studio-professional/make-your-move-proof.cjs:45:637)\n    at async /home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/scripts/studio-professional/make-your-move-proof.cjs:65:876",
+  "errors": [],
+  "body": "Unavailable"
+}

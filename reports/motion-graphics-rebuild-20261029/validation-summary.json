@@ -1,0 +1,27 @@
+{
+  "deliveryFiles": 6,
+  "fullDecodeAndFrameCounts": true,
+  "narrationWaveformsMeasured": true,
+  "independentExactNativeDeliveryRestores": 6,
+  "completeNativeDeliveryTimelinePlaybacks": 6,
+  "originalTransitionLayeredSourceIndependentRestore": true,
+  "originalTransitionHttpJobStillFailed": true,
+  "originalSourceProjectMovieAuthHashesUnchanged": 25,
+  "publicationPolicyTestsPassed": 16,
+  "knowledgeReviewBuildCheck": true,
+  "studioContractValid": true,
+  "reviewIndexMobileDesktopAndLinks": true,
+  "captureHelperLint": {
+    "errors": 0,
+    "preexistingWarnings": 3
+  },
+  "newScriptSyntaxAndWhitespace": true,
+  "sourceUploadTestsRetained": {
+    "focusedFrontendPassed": 2,
+    "serverPassed": 20,
+    "wholeFrontendFileAttemptCompleted": false
+  },
+  "ownerApproved": false,
+  "scheduled": false,
+  "creativeStatus": "REJECTED_BY_AGENT_AFTER_OWNER_CHALLENGE"
+}

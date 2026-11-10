@@ -1,0 +1,379 @@
+{
+  "checkedAt": "2026-11-07T04:22:28.363817+00:00",
+  "approval": "Owner explicitly requested deployment on 7 November",
+  "pullRequest": "https://github.com/Tibule12/AutoPromote/pull/524",
+  "sourceRevision": "ce82bb907c858896d84a368d2b497dae6c65e746",
+  "public": {
+    "checkedAt": "2026-11-07T04:11:56.433856+00:00",
+    "expected": "ce82bb907c858896d84a368d2b497dae6c65e746",
+    "origins": {
+      "frontend": {
+        "status": 200,
+        "commit": "ce82bb907c858896d84a368d2b497dae6c65e746",
+        "builtAt": "2026-11-07T04:08:36.890Z"
+      },
+      "api": {
+        "status": 200,
+        "commit": "ce82bb907c858896d84a368d2b497dae6c65e746",
+        "securityPolicy": "security-owner-bootstrap-20261027"
+      },
+      "renderApi": {
+        "status": 200,
+        "commit": "ce82bb907c858896d84a368d2b497dae6c65e746",
+        "securityPolicy": "security-owner-bootstrap-20261027"
+      }
+    },
+    "allOriginsMatch": true,
+    "homeStatus": 200,
+    "indexSha256": "4314b540ae9369dc8ad35ab760353eeb35fa29adea6dc7f8ac91a4600ff2aaca",
+    "adsTxtExact": true,
+    "adsenseMetaExactlyOnce": true,
+    "releaseMetaMatches": true
+  },
+  "worker": {
+    "checkedAt": "2026-11-07T04:13:27.715044+00:00",
+    "sourceRevision": "ce82bb907c858896d84a368d2b497dae6c65e746",
+    "revision": "media-worker-v1-00131-mab",
+    "productionTrafficPercent": 100,
+    "image": "gcr.io/autopromote-cc6d3/media-worker-v1:ce82bb907c858896d84a368d2b497dae6c65e746",
+    "imageDigest": "gcr.io/autopromote-cc6d3/media-worker-v1@sha256:59d482ca2f6fd3fd221105b235c4287fba18339e51644de98c2c163ff84fa082",
+    "ready": true,
+    "statusHttp": 200
+  },
+  "actualOwnerTests": [
+    {
+      "id": "released-owner-project-tracks",
+      "status": "PASS",
+      "evidence": {
+        "topKeys": 24,
+        "bottomKeys": 24
+      }
+    },
+    {
+      "id": "released-native-controls-advance",
+      "status": "PASS",
+      "evidence": {
+        "observations": [
+          {
+            "output": 0.218722222222222,
+            "source": 0.231646,
+            "paused": false,
+            "marker": "1.82774%"
+          },
+          {
+            "output": 0.436511111111111,
+            "source": 0.437019,
+            "paused": false,
+            "marker": "3.64775%"
+          },
+          {
+            "output": 0.630155555555556,
+            "source": 0.638856,
+            "paused": false,
+            "marker": "5.26594%"
+          },
+          {
+            "output": 0.845144444444445,
+            "source": 0.861312,
+            "paused": false,
+            "marker": "7.0625%"
+          },
+          {
+            "output": 1.06866666666667,
+            "source": 1.074783,
+            "paused": false,
+            "marker": "8.9304%"
+          },
+          {
+            "output": 1.28022222222222,
+            "source": 1.280678,
+            "paused": false,
+            "marker": "10.6983%"
+          },
+          {
+            "output": 1.46675555555556,
+            "source": 1.483217,
+            "paused": false,
+            "marker": "12.257%"
+          },
+          {
+            "output": 1.67938888888889,
+            "source": 1.685358,
+            "paused": false,
+            "marker": "14.0338%"
+          },
+          {
+            "output": 1.89275555555556,
+            "source": 1.898748,
+            "paused": false,
+            "marker": "15.8169%"
+          },
+          {
+            "output": 2.1038,
+            "source": 2.10424,
+            "paused": false,
+            "marker": "17.5805%"
+          },
+          {
+            "output": 2.30584444444444,
+            "source": 2.306332,
+            "paused": false,
+            "marker": "19.2688%"
+          },
+          {
+            "output": 2.50113333333333,
+            "source": 2.508289,
+            "paused": false,
+            "marker": "20.9008%"
+          }
+        ],
+        "held": {
+          "output": 2.6346,
+          "source": 2.634603,
+          "paused": true,
+          "marker": "22.0162%"
+        },
+        "resumed": {
+          "output": 3.33781111111111,
+          "source": 3.344352,
+          "paused": false,
+          "marker": "27.8926%"
+        }
+      }
+    },
+    {
+      "id": "two-real-speakers-live-export",
+      "status": "PASS",
+      "evidence": {
+        "width": 720,
+        "height": 1280,
+        "frames": 287,
+        "duration": 11.958333,
+        "sourceDuration": 11.966666666666667,
+        "sha256": "f211003435208037c1805a229bf49917453054cc482602a48e5e278d7e15a627",
+        "fullDecode": true,
+        "normalCharge": 5,
+        "remainingCredits": 299,
+        "wholeNativePlayback": {
+          "source": 11.958333,
+          "output": 11.958333,
+          "duration": 11.958333,
+          "ready": 4,
+          "seeking": false,
+          "paused": true,
+          "playhead": "99.9304%"
+        }
+      }
+    },
+    {
+      "id": "released-native-save-and-cold-reopen",
+      "status": "PASS",
+      "evidence": {
+        "canonicalSha256": "a22f97d47a73557c59b7a42b23f9f7b2d95cb0cad4856c48793fa2db1f3d0d9d",
+        "exactEdit": true,
+        "exactTracking": true,
+        "noAdditionalRender": true
+      }
+    }
+  ],
+  "serverAttempt": {
+    "http": 200,
+    "status": "completed",
+    "progress": 100,
+    "creditsRefunded": false
+  },
+  "credits": {
+    "initial": 304,
+    "final": 299,
+    "normalCharge": 5,
+    "requestCount": 1,
+    "newGrants": 0,
+    "bypass": false
+  },
+  "deployedRules": [
+    {
+      "release": "projects/autopromote-cc6d3/releases/cloud.firestore",
+      "ruleset": "projects/autopromote-cc6d3/rulesets/54a118f4-dba4-474c-80b6-60fc53393b04",
+      "sourceSha256": "a6f2ddfe1a3d4f48d15b91d7e112736cb45e235bdd68dc01259d451682823deb",
+      "unchangedFromBefore": true
+    },
+    {
+      "release": "projects/autopromote-cc6d3/releases/firebase.storage/autopromote-cc6d3.firebasestorage.app",
+      "ruleset": "projects/autopromote-cc6d3/rulesets/bd07b135-d12d-4885-959a-68b1c9051845",
+      "sourceSha256": "b362e56ed1980cc781b051299e57838c61e66923083809fc844625c2ea6c52a3",
+      "unchangedFromBefore": true
+    }
+  ],
+  "preExistingFirestoreTeamRuleDrift": true,
+  "sourceDialogueActivated": false,
+  "mainActions": [
+    {
+      "id": 42337677725,
+      "name": "Auto Retry Playwright",
+      "event": "workflow_run",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Tibule12/AutoPromote/actions/runs/42337677725",
+      "head_sha": "ce82bb907c858896d84a368d2b497dae6c65e746"
+    },
+    {
+      "id": 42337640563,
+      "name": "Auto Retry Playwright",
+      "event": "workflow_run",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Tibule12/AutoPromote/actions/runs/42337640563",
+      "head_sha": "ce82bb907c858896d84a368d2b497dae6c65e746"
+    },
+    {
+      "id": 42337095372,
+      "name": "Test Report",
+      "event": "workflow_run",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Tibule12/AutoPromote/actions/runs/42337095372",
+      "head_sha": "ce82bb907c858896d84a368d2b497dae6c65e746"
+    },
+    {
+      "id": 42337081337,
+      "name": "Test Report",
+      "event": "workflow_run",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Tibule12/AutoPromote/actions/runs/42337081337",
+      "head_sha": "ce82bb907c858896d84a368d2b497dae6c65e746"
+    },
+    {
+      "id": 42336990405,
+      "name": "Emulator smoke test",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Tibule12/AutoPromote/actions/runs/42336990405",
+      "head_sha": "ce82bb907c858896d84a368d2b497dae6c65e746"
+    },
+    {
+      "id": 42336990408,
+      "name": "Semgrep",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Tibule12/AutoPromote/actions/runs/42336990408",
+      "head_sha": "ce82bb907c858896d84a368d2b497dae6c65e746"
+    },
+    {
+      "id": 42336990404,
+      "name": "CI",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Tibule12/AutoPromote/actions/runs/42336990404",
+      "head_sha": "ce82bb907c858896d84a368d2b497dae6c65e746"
+    },
+    {
+      "id": 42336990406,
+      "name": "Deploy to GitHub Pages",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Tibule12/AutoPromote/actions/runs/42336990406",
+      "head_sha": "ce82bb907c858896d84a368d2b497dae6c65e746"
+    },
+    {
+      "id": 42336990415,
+      "name": "Verify Frontend Build",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Tibule12/AutoPromote/actions/runs/42336990415",
+      "head_sha": "ce82bb907c858896d84a368d2b497dae6c65e746"
+    },
+    {
+      "id": 42336990409,
+      "name": "Deploy AutoPromote Backend",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Tibule12/AutoPromote/actions/runs/42336990409",
+      "head_sha": "ce82bb907c858896d84a368d2b497dae6c65e746"
+    },
+    {
+      "id": 42336990421,
+      "name": "Deploy Viral Media Worker",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Tibule12/AutoPromote/actions/runs/42336990421",
+      "head_sha": "ce82bb907c858896d84a368d2b497dae6c65e746"
+    },
+    {
+      "id": 42336990434,
+      "name": "Playwright E2E",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Tibule12/AutoPromote/actions/runs/42336990434",
+      "head_sha": "ce82bb907c858896d84a368d2b497dae6c65e746"
+    },
+    {
+      "id": 42336990463,
+      "name": "Emulator Unit Tests",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Tibule12/AutoPromote/actions/runs/42336990463",
+      "head_sha": "ce82bb907c858896d84a368d2b497dae6c65e746"
+    },
+    {
+      "id": 42336990433,
+      "name": "CodeQL",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Tibule12/AutoPromote/actions/runs/42336990433",
+      "head_sha": "ce82bb907c858896d84a368d2b497dae6c65e746"
+    },
+    {
+      "id": 42336989548,
+      "name": "pages build and deployment",
+      "event": "dynamic",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Tibule12/AutoPromote/actions/runs/42336989548",
+      "head_sha": "ce82bb907c858896d84a368d2b497dae6c65e746"
+    }
+  ],
+  "originalSavedLoginUnchanged": true,
+  "remaining": [
+    "Full moving picture/mix, edge/gamut/diverse footage and listening/creative qualification",
+    "Prepared source-dialogue account activation and its deployed full runtime/ownership qualification",
+    "Broader Director continuation and shared S02/S04/S03 gates",
+    "Historical security/balance/session and seven-document incident follow-up"
+  ],
+  "mainReleaseChecksAllPassed": true,
+  "mainBroadTests": {
+    "passed": 2366,
+    "skipped": 5,
+    "failed": 0,
+    "passedSuites": 355,
+    "skippedSuites": 4
+  },
+  "mainBrowserTests": {
+    "passed": 30,
+    "skipped": 17,
+    "failed": 0
+  },
+  "state": "DEPLOYED_AND_BOUNDED_LIVE_OWNER_WORKFLOW_VERIFIED",
+  "mainOpenCodeScanningAlerts": 1,
+  "preExistingOpenCodeScanningAlerts": [
+    {
+      "number": 1227,
+      "rule": "js/missing-rate-limiting",
+      "path": "test/contentListSummary.jest.test.js",
+      "createdAt": "2026-11-05T18:00:35Z",
+      "introducedByThisRelease": false,
+      "scope": "Supertest-only mocked-auth harness; file unchanged by PR524",
+      "url": "https://github.com/Tibule12/AutoPromote/security/code-scanning/1227"
+    }
+  ]
+}

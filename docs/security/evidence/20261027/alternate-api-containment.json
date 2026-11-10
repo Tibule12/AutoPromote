@@ -1,0 +1,26 @@
+{
+  "authorization": "User explicitly authorised autonomous security remediation and full access; no further approvals required within security scope",
+  "target": "thulani-api",
+  "project": "autopromote-cc6d3",
+  "region": "us-central1",
+  "startedAtUtc": "2026-10-27T04:12:46.132272+00:00",
+  "before": {
+    "bindings": [
+      {
+        "members": [
+          "allUsers"
+        ],
+        "role": "roles/run.invoker"
+      }
+    ],
+    "etag": "BwZTQ7N_ZB0=",
+    "version": 1
+  },
+  "scope": "Remove only public allUsers run.invoker binding on legacy alternate API; preserve other bindings and all worker/service/data state",
+  "after": {
+    "etag": "BwZeyqjtAcQ=",
+    "version": 1
+  },
+  "finishedAtUtc": "2026-10-27T04:12:54.142470+00:00",
+  "status": "PUBLIC_BINDING_REMOVED"
+}

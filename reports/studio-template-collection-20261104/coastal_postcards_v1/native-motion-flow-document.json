@@ -1,0 +1,2789 @@
+{
+  "schemaVersion": 1,
+  "projectId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58",
+  "revision": 8,
+  "clock": {
+    "ticksPerSecond": 90000,
+    "interval": "half_open"
+  },
+  "output": {
+    "aspectRatio": "16:9",
+    "requestedResolution": "720p",
+    "frameRate": {
+      "numerator": 24,
+      "denominator": 1
+    },
+    "codec": "h264",
+    "audioCodec": "aac",
+    "audioSampleRate": null,
+    "audioSampleRatePolicy": "worker_selected"
+  },
+  "assets": [
+    {
+      "assetId": "source:launch-19aa1634a3f25ba28266b048:sha256:19aa1634a3f25ba28266b048d2a8b5df57eb6677e20f2cb67013bc77156296a3",
+      "sourceId": "launch-19aa1634a3f25ba28266b048",
+      "storagePath": "studio/sources/demo-pilot-alice/27965d613be8d6192b266ec2_coast.mp4",
+      "contentHash": "19aa1634a3f25ba28266b048d2a8b5df57eb6677e20f2cb67013bc77156296a3",
+      "identityState": "hash_verified"
+    }
+  ],
+  "clipOccurrences": [
+    {
+      "occurrenceId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:shot:1",
+      "assetId": "source:launch-19aa1634a3f25ba28266b048:sha256:19aa1634a3f25ba28266b048d2a8b5df57eb6677e20f2cb67013bc77156296a3",
+      "sourceRange": {
+        "space": "source",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "timeMapId": "map:viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:shot:1",
+      "parameterSchemaVersion": 1,
+      "parameters": {
+        "name": "coast.mp4",
+        "duration": 8,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      "playback": {
+        "direction": "forward",
+        "freeze": false,
+        "rate": {
+          "numerator": 1,
+          "denominator": 1
+        }
+      }
+    }
+  ],
+  "timeMaps": [
+    {
+      "timeMapId": "map:viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:shot:1",
+      "occurrenceId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:shot:1",
+      "segments": [
+        {
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 720000
+          },
+          "clipLocalRange": {
+            "space": "clip_local",
+            "startTick": 0,
+            "endTick": 720000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 0,
+            "endTick": 720000
+          },
+          "rate": {
+            "numerator": 1,
+            "denominator": 1
+          },
+          "direction": "forward",
+          "freeze": false
+        }
+      ]
+    }
+  ],
+  "layers": [
+    {
+      "layerId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Backdrop",
+      "type": "b_roll",
+      "legacyType": "image",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Backdrop",
+        "sourceStoragePath": "uploads/images/demo-pilot-alice/5082317c-25e1-4903-b215-a5e421686368_overlay-49b84728-5666-432b-942a-64780dbbae36.png",
+        "contentHash": "2d4dd2b24bb73a5a6af54d732b1e5a11125ecd641bba07394d5b03592346ca13",
+        "anchorX": 50,
+        "anchorY": 50,
+        "layerShadow": {
+          "enabled": false
+        },
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "stretch",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "height": 100,
+        "rotation": 0,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 8,
+        "bRollMode": "pip",
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "vectorShape": {
+          "version": 1,
+          "closed": true,
+          "nodes": [
+            {
+              "x": 0,
+              "y": 0,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            },
+            {
+              "x": 100,
+              "y": 0,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            },
+            {
+              "x": 100,
+              "y": 100,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            },
+            {
+              "x": 0,
+              "y": 100,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            }
+          ],
+          "fill": {
+            "kind": "solid",
+            "color": "#d8eee7",
+            "endColor": "#d8eee7",
+            "start": [
+              0,
+              0
+            ],
+            "end": [
+              100,
+              100
+            ]
+          },
+          "stroke": {
+            "color": "#d8eee7",
+            "width": 0
+          }
+        }
+      }
+    },
+    {
+      "layerId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Coastal postcard 0",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/27965d613be8d6192b266ec2_coast.mp4",
+        "contentHash": "19aa1634a3f25ba28266b048d2a8b5df57eb6677e20f2cb67013bc77156296a3",
+        "anchorX": 50,
+        "anchorY": 50,
+        "layerShadow": {
+          "enabled": false
+        },
+        "sourceDuration": 24.065708,
+        "perspective": {
+          "version": 1,
+          "corners": [
+            [
+              7,
+              20
+            ],
+            [
+              30,
+              15
+            ],
+            [
+              30,
+              84
+            ],
+            [
+              7,
+              89
+            ]
+          ],
+          "sourceRect": [
+            0,
+            0,
+            100,
+            100
+          ]
+        },
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "cover",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "height": 100,
+        "rotation": 0,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 8,
+        "sourceStartTime": 0,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "launch-19aa1634a3f25ba28266b048"
+      }
+    },
+    {
+      "layerId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Coastal postcard 1",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/27965d613be8d6192b266ec2_coast.mp4",
+        "contentHash": "19aa1634a3f25ba28266b048d2a8b5df57eb6677e20f2cb67013bc77156296a3",
+        "anchorX": 50,
+        "anchorY": 50,
+        "layerShadow": {
+          "enabled": false
+        },
+        "sourceDuration": 24.065708,
+        "perspective": {
+          "version": 1,
+          "corners": [
+            [
+              38,
+              20
+            ],
+            [
+              61,
+              15
+            ],
+            [
+              61,
+              84
+            ],
+            [
+              38,
+              89
+            ]
+          ],
+          "sourceRect": [
+            0,
+            0,
+            100,
+            100
+          ]
+        },
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "cover",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "height": 100,
+        "rotation": 0,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 8,
+        "sourceStartTime": 0.7,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "launch-19aa1634a3f25ba28266b048"
+      }
+    },
+    {
+      "layerId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Coastal postcard 2",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/27965d613be8d6192b266ec2_coast.mp4",
+        "contentHash": "19aa1634a3f25ba28266b048d2a8b5df57eb6677e20f2cb67013bc77156296a3",
+        "anchorX": 50,
+        "anchorY": 50,
+        "layerShadow": {
+          "enabled": false
+        },
+        "sourceDuration": 24.065708,
+        "perspective": {
+          "version": 1,
+          "corners": [
+            [
+              69,
+              20
+            ],
+            [
+              92,
+              15
+            ],
+            [
+              92,
+              84
+            ],
+            [
+              69,
+              89
+            ]
+          ],
+          "sourceRect": [
+            0,
+            0,
+            100,
+            100
+          ]
+        },
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "cover",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "height": 100,
+        "rotation": 0,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 8,
+        "sourceStartTime": 1.4,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "launch-19aa1634a3f25ba28266b048"
+      }
+    }
+  ],
+  "linkedTiming": {
+    "cues": {
+      "soundEffects": [
+        {
+          "cueId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:sound:0",
+          "type": null,
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "enabled": true,
+            "builtIn": true,
+            "kind": "sfx",
+            "tone": "airy_whoosh",
+            "name": "airy_whoosh",
+            "volume": 0.2,
+            "fadeIn": 0.01,
+            "fadeOut": 0.04
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 0,
+            "endTick": 54000
+          }
+        },
+        {
+          "cueId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:sound:1",
+          "type": null,
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "enabled": true,
+            "builtIn": true,
+            "kind": "sfx",
+            "tone": "airy_whoosh",
+            "name": "airy_whoosh",
+            "volume": 0.16,
+            "fadeIn": 0.01,
+            "fadeOut": 0.04
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 297000,
+            "endTick": 342000
+          }
+        },
+        {
+          "cueId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:sound:2",
+          "type": null,
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "enabled": true,
+            "builtIn": true,
+            "kind": "sfx",
+            "tone": "airy_whoosh",
+            "name": "airy_whoosh",
+            "volume": 0.18,
+            "fadeIn": 0.01,
+            "fadeOut": 0.04
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 576000,
+            "endTick": 630000
+          }
+        }
+      ],
+      "voiceovers": [],
+      "adjustmentLayers": []
+    },
+    "keys": {
+      "motionKeyframes": [
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "x",
+            "value": 150,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:0"
+          }
+        },
+        {
+          "atProgrammeTick": 81000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:1"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:2"
+          }
+        },
+        {
+          "atProgrammeTick": 405000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:3"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:4"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "x",
+            "value": -80,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:5"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "rotation",
+            "value": 20,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:6"
+          }
+        },
+        {
+          "atProgrammeTick": 126000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:7"
+          }
+        },
+        {
+          "atProgrammeTick": 405000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "rotation",
+            "value": 6,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:8"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:9"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "rotation",
+            "value": -18,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:10"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner0X",
+            "value": 7,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:11"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner0X",
+            "value": 7,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:12"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner0X",
+            "value": 7,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:13"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner0X",
+            "value": 7,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:14"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner0Y",
+            "value": 20,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:15"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner0Y",
+            "value": 20,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:16"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner0Y",
+            "value": 20,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:17"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner0Y",
+            "value": 20,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:18"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner1X",
+            "value": 30,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:19"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner1X",
+            "value": 30,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:20"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner1X",
+            "value": 30,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:21"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner1X",
+            "value": 30,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:22"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner1Y",
+            "value": 15,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:23"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner1Y",
+            "value": 15,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:24"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner1Y",
+            "value": 15,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:25"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner1Y",
+            "value": 15,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:26"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner2X",
+            "value": 30,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:27"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner2X",
+            "value": 30,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:28"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner2X",
+            "value": 30,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:29"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner2X",
+            "value": 30,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:30"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner2Y",
+            "value": 84,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:31"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner2Y",
+            "value": 84,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:32"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner2Y",
+            "value": 84,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:33"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner2Y",
+            "value": 84,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:34"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner3X",
+            "value": 7,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:35"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner3X",
+            "value": 7,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:36"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner3X",
+            "value": 7,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:37"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner3X",
+            "value": 7,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:38"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner3Y",
+            "value": 89,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:39"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner3Y",
+            "value": 89,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:40"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner3Y",
+            "value": 89,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:41"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "planeCorner3Y",
+            "value": 89,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:42"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:43"
+          }
+        },
+        {
+          "atProgrammeTick": 45000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:44"
+          }
+        },
+        {
+          "atProgrammeTick": 288000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:45"
+          }
+        },
+        {
+          "atProgrammeTick": 414000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:46"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 0",
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:47"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "x",
+            "value": 150,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:48"
+          }
+        },
+        {
+          "atProgrammeTick": 100800,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:49"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:50"
+          }
+        },
+        {
+          "atProgrammeTick": 405000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:51"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:52"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "x",
+            "value": -80,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:53"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "rotation",
+            "value": 5,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:54"
+          }
+        },
+        {
+          "atProgrammeTick": 126000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:55"
+          }
+        },
+        {
+          "atProgrammeTick": 405000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "rotation",
+            "value": -6,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:56"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:57"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "rotation",
+            "value": -18,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:58"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner0X",
+            "value": 38,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:59"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner0X",
+            "value": 38,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:60"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner0X",
+            "value": 0,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:61"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner0X",
+            "value": 0,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:62"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner0Y",
+            "value": 20,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:63"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner0Y",
+            "value": 20,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:64"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner0Y",
+            "value": 0,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:65"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner0Y",
+            "value": 0,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:66"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner1X",
+            "value": 61,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:67"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner1X",
+            "value": 61,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:68"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner1X",
+            "value": 100,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:69"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner1X",
+            "value": 100,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:70"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner1Y",
+            "value": 15,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:71"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner1Y",
+            "value": 15,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:72"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner1Y",
+            "value": 0,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:73"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner1Y",
+            "value": 0,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:74"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner2X",
+            "value": 61,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:75"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner2X",
+            "value": 61,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:76"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner2X",
+            "value": 100,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:77"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner2X",
+            "value": 100,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:78"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner2Y",
+            "value": 84,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:79"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner2Y",
+            "value": 84,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:80"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner2Y",
+            "value": 100,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:81"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner2Y",
+            "value": 100,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:82"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner3X",
+            "value": 38,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:83"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner3X",
+            "value": 38,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:84"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner3X",
+            "value": 0,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:85"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner3X",
+            "value": 0,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:86"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner3Y",
+            "value": 89,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:87"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner3Y",
+            "value": 89,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:88"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner3Y",
+            "value": 100,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:89"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "planeCorner3Y",
+            "value": 100,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:90"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:91"
+          }
+        },
+        {
+          "atProgrammeTick": 63000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:92"
+          }
+        },
+        {
+          "atProgrammeTick": 288000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:93"
+          }
+        },
+        {
+          "atProgrammeTick": 414000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:94"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 1",
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:95"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "x",
+            "value": 150,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:96"
+          }
+        },
+        {
+          "atProgrammeTick": 120600,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:97"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:98"
+          }
+        },
+        {
+          "atProgrammeTick": 405000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:99"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:100"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "x",
+            "value": -80,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:101"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "rotation",
+            "value": -10,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:102"
+          }
+        },
+        {
+          "atProgrammeTick": 126000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:103"
+          }
+        },
+        {
+          "atProgrammeTick": 405000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "rotation",
+            "value": 6,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:104"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:105"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "rotation",
+            "value": -18,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:106"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner0X",
+            "value": 69,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:107"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner0X",
+            "value": 69,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:108"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner0X",
+            "value": 69,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:109"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner0X",
+            "value": 69,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:110"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner0Y",
+            "value": 20,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:111"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner0Y",
+            "value": 20,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:112"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner0Y",
+            "value": 20,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:113"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner0Y",
+            "value": 20,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:114"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner1X",
+            "value": 92,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:115"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner1X",
+            "value": 92,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:116"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner1X",
+            "value": 92,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:117"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner1X",
+            "value": 92,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:118"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner1Y",
+            "value": 15,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:119"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner1Y",
+            "value": 15,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:120"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner1Y",
+            "value": 15,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:121"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner1Y",
+            "value": 15,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:122"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner2X",
+            "value": 92,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:123"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner2X",
+            "value": 92,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:124"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner2X",
+            "value": 92,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:125"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner2X",
+            "value": 92,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:126"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner2Y",
+            "value": 84,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:127"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner2Y",
+            "value": 84,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:128"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner2Y",
+            "value": 84,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:129"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner2Y",
+            "value": 84,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:130"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner3X",
+            "value": 69,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:131"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner3X",
+            "value": 69,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:132"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner3X",
+            "value": 69,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:133"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner3X",
+            "value": 69,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:134"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner3Y",
+            "value": 89,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:135"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner3Y",
+            "value": 89,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:136"
+          }
+        },
+        {
+          "atProgrammeTick": 450000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner3Y",
+            "value": 89,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:137"
+          }
+        },
+        {
+          "atProgrammeTick": 603000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "planeCorner3Y",
+            "value": 89,
+            "easing": "linear",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:138"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:139"
+          }
+        },
+        {
+          "atProgrammeTick": 81000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:140"
+          }
+        },
+        {
+          "atProgrammeTick": 288000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:141"
+          }
+        },
+        {
+          "atProgrammeTick": 414000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:142"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:Coastal postcard 2",
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:143"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "main-video",
+            "property": "opacity",
+            "value": 0,
+            "easing": "hold",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:144"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "main-video",
+            "property": "opacity",
+            "value": 0,
+            "easing": "hold",
+            "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:look:key:145"
+          }
+        }
+      ],
+      "finishKeyframes": [],
+      "reframeKeyframes": [],
+      "reframeModeCuts": [],
+      "speakerFocusCuts": [],
+      "audioKeyframes.originalAudio": [],
+      "audioKeyframes.masterPodcast": [],
+      "audioKeyframes.voiceover": [],
+      "audioKeyframes.music": [],
+      "audioKeyframes.broll": [],
+      "audioKeyframes.sfx": []
+    }
+  },
+  "audioGraph": {
+    "legacySnapshotRef": "audioRemix",
+    "parameterSchemaVersion": 1,
+    "settings": {
+      "addMusic": true,
+      "musicSelection": "upbeat_pop.mp3",
+      "musicSearchMode": false,
+      "safeSearch": true,
+      "musicVolume": 55,
+      "musicDucking": false,
+      "musicDuckingStrength": 0,
+      "muteOriginalAudio": true,
+      "audioRemix": {
+        "version": 1,
+        "enabled": false,
+        "preset": "slowed_reverb",
+        "speed": 0.82,
+        "pitch": -3,
+        "bass": 8,
+        "clarity": 2,
+        "air": 1,
+        "reverb": 68,
+        "intensity": 75,
+        "keepPitch": false,
+        "contentType": "auto",
+        "target": "master",
+        "outputGain": 0,
+        "levelMatch": true,
+        "quality": "studio"
+      },
+      "audioRestoration": {
+        "preset": "natural",
+        "voiceIsolation": false,
+        "denoise": 22,
+        "deEsser": 18,
+        "humFrequency": 50,
+        "compressor": 35,
+        "limiter": -1,
+        "loudness": -14,
+        "eq": {
+          "low": 0,
+          "mid": 0,
+          "high": 0
+        },
+        "enabled": false
+      },
+      "audioAutomationSource": "originalAudio"
+    },
+    "music": {
+      "id": "launch-f3cade09fcb727c24508179f",
+      "name": "Make your move - original score.wav",
+      "storagePath": "uploads/audios/demo-pilot-alice/7d699fb5-44be-4de1-b97e-5221e5a30b16_Make your move - original score.wav",
+      "contentHash": "f3cade09fcb727c24508179fa1c0e7914cfe162c9fee098a8eabe6c6d3ea44a6",
+      "volume": 55,
+      "fadeIn": 0.1,
+      "fadeOut": 0.5,
+      "loop": false,
+      "duration": 24
+    },
+    "routes": [
+      {
+        "trackId": "video",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "adjustment",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "graphics",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "broll",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "captions",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "originalAudio",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "voiceover",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "music",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "sfx",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      }
+    ],
+    "routing": {
+      "muteOriginalAudio": true,
+      "musicDucking": false,
+      "musicDuckingStrength": 0,
+      "musicTrackId": "launch-f3cade09fcb727c24508179f"
+    }
+  },
+  "visualGraph": {
+    "parameterSchemaVersion": 1,
+    "settings": {
+      "mainTransform": {
+        "id": "main-video",
+        "name": "Main video",
+        "type": "video",
+        "x": 50,
+        "y": 50,
+        "scale": 1,
+        "rotation": 0,
+        "opacity": 1,
+        "cropX": 0,
+        "cropY": 0
+      },
+      "finishFx": {
+        "precisionGrade": false,
+        "exposureStops": 0,
+        "lift": 0,
+        "gamma": 1,
+        "gain": 1,
+        "tint": 0,
+        "preset": null,
+        "brightness": 1,
+        "contrast": 1,
+        "saturation": 1,
+        "temperature": 0,
+        "sharpness": 0,
+        "vignette": 0,
+        "blur": 0,
+        "blurMode": "edge",
+        "blurStart": -1,
+        "blurEnd": -1,
+        "zoom": 1,
+        "zoomAnchor": "center",
+        "overlayType": "",
+        "overlayOpacity": 0.4,
+        "overlayColor": "#000000",
+        "filmGrain": 0,
+        "chromaticAberration": 0,
+        "vhsTracking": 0,
+        "lightLeak": 0,
+        "letterbox": 0,
+        "fadeIn": 0,
+        "fadeOut": 0
+      },
+      "mainFrame": {
+        "insetPercent": 3,
+        "radiusPercent": 8,
+        "background": "studio_black",
+        "enabled": false
+      },
+      "advancedColor": {
+        "lutName": "",
+        "lutFile": null,
+        "lutIntensity": 100,
+        "curve": {
+          "shadows": 0,
+          "midtones": 0,
+          "highlights": 0
+        },
+        "hsl": {
+          "hue": 0,
+          "saturation": 0,
+          "luminance": 0
+        }
+      },
+      "podcastVisualizer": {
+        "enabled": false,
+        "mode": "wave",
+        "color": "#72f7ff",
+        "intensity": 0.75,
+        "position": "bottom"
+      },
+      "videoFit": "contain",
+      "safeFaceFraming": false,
+      "faceAnchorPreset": "center",
+      "autoCaptions": false,
+      "captionStyle": "bold_pop",
+      "captionPosition": "bottom_center",
+      "captionScale": 1,
+      "captionTextOverride": "",
+      "translateCaptionsToEnglish": false,
+      "smartCrop": true,
+      "smartCropMode": "off",
+      "reframeAspect": "16:9",
+      "speakerTrackZoom": 1,
+      "speakerStackFraming": {
+        "dividerPercent": 50,
+        "gapPercent": 1.2,
+        "cardGapPercent": 2.5,
+        "roundedCards": true,
+        "cardInsetPercent": 2.5,
+        "cardRadiusPercent": 8,
+        "secondaryXPercent": 80,
+        "secondaryYPercent": 20,
+        "secondarySizePercent": 30,
+        "top": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        },
+        "bottom": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        },
+        "third": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        },
+        "fourth": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        }
+      },
+      "speakerStackSourceIds": {
+        "top": null,
+        "bottom": null,
+        "third": null,
+        "fourth": null
+      },
+      "speakerStackOffsets": {
+        "top": 0,
+        "bottom": 0,
+        "third": 0,
+        "fourth": 0
+      },
+      "speakerStackCameraCount": 2,
+      "speakerStackLayout": "stack_2",
+      "speakerStackSyncConfirmed": false,
+      "exportSettings": {
+        "resolution": "720p",
+        "fps": "24",
+        "codec": "h264",
+        "quality": "high",
+        "videoBitrate": "auto",
+        "targetFileSizeMb": "",
+        "audioCodec": "aac",
+        "audioBitrate": "256",
+        "colorSpace": "rec709"
+      },
+      "stabilization": {
+        "enabled": false,
+        "strength": 35,
+        "crop": "adaptive",
+        "rollingShutter": false
+      },
+      "enhanceQuality": false,
+      "beatSnapEnabled": true,
+      "creativeIntent": "energy",
+      "creativeEffectsEnabled": false,
+      "creativePreset": "auto_story",
+      "creativeIntensity": "bold",
+      "pacingLevel": "balanced",
+      "nodeFlow": {
+        "version": 1,
+        "viewerA": "MediaOut",
+        "viewerB": null,
+        "splitPosition": 50,
+        "positions": {},
+        "bypassed": {}
+      },
+      "hideShyLayers": false
+    },
+    "cameraSources": []
+  },
+  "editGraph": {
+    "parameterSchemaVersion": 1,
+    "settings": {
+      "creativeTemplateInstance": {
+        "schemaVersion": 1,
+        "templateRef": {
+          "templateId": "coastal_postcards_v1",
+          "version": "1.0.0",
+          "definitionHash": "27260c19a11d56aab1eb14d3654654660b94109b5aea28dc86393355d7340985"
+        },
+        "ownerUid": "demo-pilot-alice",
+        "instantiatedBy": "director",
+        "bindings": {
+          "footage": {
+            "assetId": "launch-19aa1634a3f25ba28266b048",
+            "contentHash": "19aa1634a3f25ba28266b048d2a8b5df57eb6677e20f2cb67013bc77156296a3",
+            "storagePath": "studio/sources/demo-pilot-alice/27965d613be8d6192b266ec2_coast.mp4",
+            "trimStart": 0
+          },
+          "music": {
+            "assetId": "launch-f3cade09fcb727c24508179f",
+            "contentHash": "f3cade09fcb727c24508179fa1c0e7914cfe162c9fee098a8eabe6c6d3ea44a6",
+            "storagePath": "uploads/audios/demo-pilot-alice/7d699fb5-44be-4de1-b97e-5221e5a30b16_Make your move - original score.wav",
+            "trimStart": 0
+          }
+        },
+        "intensity": 1,
+        "aspect": "16:9",
+        "qualified": false
+      },
+      "captionCoverageMode": "full",
+      "contentProfile": "auto",
+      "joinTransition": "auto",
+      "joinTransitionDuration": 0.18,
+      "silenceRemoval": false,
+      "silenceThreshold": -35,
+      "minSilenceDuration": 0.75,
+      "silencePreview": null,
+      "removeWatermark": false,
+      "watermarkMode": "adaptive",
+      "brandWatermark": false,
+      "manualWatermarkRegions": [],
+      "addHook": false,
+      "hookText": "THIS CHANGES FAST",
+      "hookTemplate": "blur_reveal",
+      "hookIntroSeconds": 3,
+      "hookStartTime": 0.8,
+      "hookEndTime": 3.8,
+      "hookBlurBackground": true,
+      "hookDarkOverlay": true,
+      "hookFreezeFrame": false,
+      "hookZoomScale": 1.08,
+      "hookTextAnimation": "slide-up",
+      "hookFocusPoint": {
+        "x": 50,
+        "y": 42
+      },
+      "bRollCadence": "balanced",
+      "bRollGenerationJobId": "",
+      "compoundClips": [],
+      "creatorPreview": {
+        "enabled": true,
+        "section": "reactions",
+        "activeDemo": "",
+        "intensity": 62,
+        "duration": 0.8,
+        "zoom": 1.34,
+        "x": 78,
+        "y": 68,
+        "color": "#ffcb67",
+        "accent": "#7457ff",
+        "text": "THIS CHANGED EVERYTHING",
+        "name": "",
+        "role": "",
+        "entity": "",
+        "emoji": "🤯",
+        "rank": 3,
+        "tracking": false,
+        "maskShape": "person",
+        "transition": "whip",
+        "introStyle": "cinematic",
+        "reactionMode": "instant",
+        "comparisonLeft": "",
+        "comparisonRight": ""
+      },
+      "splitExportEnabled": false,
+      "splitExportHooks": [],
+      "proxySettings": {
+        "enabled": true,
+        "resolution": "720p",
+        "codec": "h264",
+        "status": "source_ready"
+      }
+    },
+    "media": [
+      {
+        "id": "launch-19aa1634a3f25ba28266b048",
+        "name": "coast.mp4",
+        "duration": 24.065708,
+        "storagePath": "studio/sources/demo-pilot-alice/27965d613be8d6192b266ec2_coast.mp4",
+        "contentHash": "19aa1634a3f25ba28266b048d2a8b5df57eb6677e20f2cb67013bc77156296a3",
+        "mediaType": "video"
+      },
+      {
+        "id": "launch-f3cade09fcb727c24508179f",
+        "name": "Make your move - original score.wav",
+        "duration": 24,
+        "storagePath": "uploads/audios/demo-pilot-alice/7d699fb5-44be-4de1-b97e-5221e5a30b16_Make your move - original score.wav",
+        "contentHash": "f3cade09fcb727c24508179fa1c0e7914cfe162c9fee098a8eabe6c6d3ea44a6",
+        "mediaType": "audio"
+      }
+    ],
+    "sources": [
+      {
+        "id": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:shot:1",
+        "name": "coast.mp4",
+        "duration": 8,
+        "sourceClipId": "launch-19aa1634a3f25ba28266b048",
+        "storagePath": "studio/sources/demo-pilot-alice/27965d613be8d6192b266ec2_coast.mp4",
+        "contentHash": "19aa1634a3f25ba28266b048d2a8b5df57eb6677e20f2cb67013bc77156296a3"
+      }
+    ],
+    "musicMix": {},
+    "hookBinding": null,
+    "angleGroups": [],
+    "extractedAudio": null
+  },
+  "constraints": {
+    "locks": []
+  },
+  "styleRef": null,
+  "analysisRefs": [],
+  "projectIntelligenceRefs": [],
+  "programmeSpeedKeys": [],
+  "fallbackSpeed": 1,
+  "outputTimeMap": [
+    {
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "outputRange": {
+        "space": "output",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "rateNumerator": 1000000,
+      "rateDenominator": 1000000
+    }
+  ],
+  "journal": [
+    {
+      "journalId": "revision:5",
+      "baseRevision": 4,
+      "newRevision": 5,
+      "actor": {
+        "type": "human",
+        "id": "viral-studio-history"
+      },
+      "operations": [
+        {
+          "type": "history_restore"
+        }
+      ],
+      "affectedNodes": [
+        "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:shot:1"
+      ],
+      "inverse": null
+    },
+    {
+      "journalId": "revision:6",
+      "baseRevision": 5,
+      "newRevision": 6,
+      "actor": {
+        "type": "human",
+        "id": "viral-studio-history"
+      },
+      "operations": [
+        {
+          "type": "history_restore"
+        }
+      ],
+      "affectedNodes": [
+        "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:shot:1"
+      ],
+      "inverse": null
+    },
+    {
+      "journalId": "revision:7",
+      "baseRevision": 6,
+      "newRevision": 7,
+      "actor": {
+        "type": "human",
+        "id": "viral-studio-history"
+      },
+      "operations": [
+        {
+          "type": "history_restore"
+        }
+      ],
+      "affectedNodes": [
+        "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58:shot:1"
+      ],
+      "inverse": null
+    }
+  ],
+  "idempotency": {},
+  "directorReviewJournal": [],
+  "compatibility": {
+    "legacySnapshotVersion": 1,
+    "projection": "clip_occurrences_canonical_other_fields_legacy",
+    "editableStateVersion": 1,
+    "visualStateVersion": 1,
+    "editStateVersion": 1,
+    "layerComposition": "ordered_flat_layers"
+  }
+}

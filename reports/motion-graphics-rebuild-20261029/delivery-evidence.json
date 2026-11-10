@@ -1,0 +1,118 @@
+{
+  "films": [
+    {
+      "story": "product",
+      "name": "Build a product reveal",
+      "description": "Layered can, lime and leaf choreography, shadow and editable type.",
+      "base": "proof/product/visible-controls/tutorial",
+      "durationSeconds": 142.125,
+      "durationLabel": "2:22",
+      "frames": 3411,
+      "movieSha256": "af53c4d8d4e139aef2e542f99ea017c807ec049ae6dc0514392b9eadeb44fb95",
+      "thumbnailSha256": "f79de6a1af0ce6ad6531f91431442d5152e6442c65a69dafbbf2030fa5cad138",
+      "projectHash": "eaa92a74e0c7a0cad5e336d60bbee82295d513aef9d14234ae0fb9d76ba5b7b8",
+      "wholeMatchingTimelinePlayback": true,
+      "independentExactRestore": true,
+      "fullDecode": true,
+      "zeroOffsetVoiceCorrelation": 0.9992240386510524,
+      "agentPictureReviewed": true,
+      "ownerApproved": false,
+      "scheduled": false,
+      "physicalIPhonePlatformVerified": false,
+      "deliveryProjectIsImportedCompletedFilm": false,
+      "originalLayeredJobSucceeded": true,
+      "feed": {
+        "base": "proof/product/visible-controls/tutorial/feed-4-5",
+        "dimensions": [
+          720,
+          900
+        ],
+        "movieSha256": "29af1b834bf233721b99aef093eb6a794e0781ac0f3d681032884686f74d93d6",
+        "thumbnailSha256": "d6845bd52195fc898f54ffd86d7f96cc44506a242d710deda959456e372f6d90",
+        "projectHash": "31c50271df8945ed24140d5edcc06d917d0f70fd7ae5e8df98ae301ceaa55a6d",
+        "wholeMatchingTimelinePlayback": true,
+        "independentExactRestore": true,
+        "agentPictureReviewed": true,
+        "zeroOffsetVoiceCorrelation": 0.9967986403371241
+      }
+    },
+    {
+      "story": "logo",
+      "name": "Assemble the selected logo",
+      "description": "Native component assembly using the original selected gradient identity.",
+      "base": "proof/logo/visible-controls/tutorial/camera-r3",
+      "durationSeconds": 92.20833333333334,
+      "durationLabel": "1:32",
+      "frames": 2213,
+      "movieSha256": "d88154b24132cd050aefcf231688dd1249ae8382a34bd9259155cf7897ab9388",
+      "thumbnailSha256": "8dd710bb9872087c7ba8dd2f1f89b835f7b311b7dd8aaa4b36832754c04de9e2",
+      "projectHash": "5956c4a4136cfd8d74b9eb14a587ef090badcb70c03409e8fbe51604d7c998ce",
+      "wholeMatchingTimelinePlayback": true,
+      "independentExactRestore": true,
+      "fullDecode": true,
+      "zeroOffsetVoiceCorrelation": 0.9992670468061862,
+      "agentPictureReviewed": true,
+      "ownerApproved": false,
+      "scheduled": false,
+      "physicalIPhonePlatformVerified": false,
+      "deliveryProjectIsImportedCompletedFilm": false,
+      "originalLayeredJobSucceeded": true,
+      "feed": {
+        "base": "proof/logo/visible-controls/tutorial/feed-4-5",
+        "dimensions": [
+          720,
+          900
+        ],
+        "movieSha256": "e2e5e5eb35958035aa97fbbfcd34e862f50deef8037b01db730cf5907183f4a6",
+        "thumbnailSha256": "9b89e50a03acf2d663455a970541eb06bc9f7548fc5f25d3818aaa7f21d3786b",
+        "projectHash": "e674a4136c6da8d57889967ef0bc10edef0d022ce21d60ee3598879c16f53d17",
+        "wholeMatchingTimelinePlayback": true,
+        "independentExactRestore": true,
+        "agentPictureReviewed": true,
+        "zeroOffsetVoiceCorrelation": 0.9969159250694137
+      }
+    },
+    {
+      "story": "transition",
+      "name": "Build a connected wipe",
+      "description": "Headphone layer motion, an ellipse mask and a circular cover/reveal.",
+      "base": "proof/transition/visible-controls/tutorial/native-recovered-portrait",
+      "durationSeconds": 175.125,
+      "durationLabel": "2:55",
+      "frames": 4203,
+      "movieSha256": "88c8fd462a117b31f09c5234bb82c74f41ed5ec48120532bea1cb03b8ade6599",
+      "thumbnailSha256": "21ccff0efa83086a84d5c0794d947ea9f1c46e165c4d865192862b8fbccf062a",
+      "projectHash": "f0fae00188c6baafc06299d031a9570d4fe7121ec8c116ab07b765509110ec57",
+      "wholeMatchingTimelinePlayback": true,
+      "independentExactRestore": true,
+      "fullDecode": true,
+      "zeroOffsetVoiceCorrelation": 0.9967833696142202,
+      "agentPictureReviewed": true,
+      "ownerApproved": false,
+      "scheduled": false,
+      "physicalIPhonePlatformVerified": false,
+      "deliveryProjectIsImportedCompletedFilm": true,
+      "originalLayeredJobSucceeded": false,
+      "feed": {
+        "base": "proof/transition/visible-controls/tutorial/feed-4-5",
+        "dimensions": [
+          720,
+          900
+        ],
+        "movieSha256": "1553aea18eed4c9688662051bba096d9d4e178bab51cc75f91428649cd790439",
+        "thumbnailSha256": "3ac35d1011364e967647d41e47b93d7dd145fff090613c26601c326b020b4e01",
+        "projectHash": "8217ea71950d743759bab61d3fb203c24de6b3a2413df299502809ab1387052d",
+        "wholeMatchingTimelinePlayback": true,
+        "independentExactRestore": true,
+        "agentPictureReviewed": true,
+        "zeroOffsetVoiceCorrelation": 0.9941345155004367
+      }
+    }
+  ],
+  "ownerApprovalRecorded": false,
+  "scheduled": false,
+  "dailyCreativeTimer": "disabled/inactive",
+  "limits": "Agent inspection and declared phone/feed simulations; physical iPhone, external platform UI, human listening and whole predictive parity remain unqualified.",
+  "creativeStatus": "REJECTED_BY_AGENT_AFTER_OWNER_CHALLENGE",
+  "ownerApproved": false
+}

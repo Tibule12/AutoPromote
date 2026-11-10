@@ -1,0 +1,30 @@
+{
+  "projectId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f",
+  "templateRef": {
+    "templateId": "editorial_fan_v1",
+    "version": "1.0.1",
+    "definitionHash": "9db56864f45ec81d6217904ef1edac7ba5eccc5c8ff02e14a2efad47dfd735c5"
+  },
+  "decisions": "18cb6430308931362943bce45dda7bcae69d7ed5dbab9b57f00ce9220beba349",
+  "layers": 8,
+  "keys": 116,
+  "seconds": 8,
+  "source": {
+    "name": "fashion-camaro",
+    "title": "Stylish woman leaning in a Camaro",
+    "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/reports/studio-template-collection-20261104/sources/fashion-camaro.mp4",
+    "sha256": "9366befc8264e2d6e000859f101f8033915df4f953a04b50360a1f8a8e58e307",
+    "page": "https://mixkit.co/free-stock-video/stylish-woman-leaning-in-a-camaro-44556/",
+    "downloadUrl": "https://assets.mixkit.co/videos/44556/44556-720.mp4",
+    "license": "https://mixkit.co/license/modal/videoFree/",
+    "sourceHtmlSha256": "e333eb60d853778a550b1a5d955433f329b9de9da0b487c34461dff6588761bc",
+    "bytes": 3644299,
+    "seconds": 9.050708,
+    "width": 720,
+    "height": 1280,
+    "fps": "24000/1001",
+    "fullDecode": true
+  },
+  "normalFrontend": true,
+  "paidCalls": 0
+}

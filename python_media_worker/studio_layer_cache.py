@@ -8,23 +8,42 @@ import json
 from pathlib import Path
 
 
-def video_layer_uses_canonical_raster(identity, layer, composition):
-    """Mattes need the full declared canvas even when their pose is held.
+def video_layer_uses_canonical_raster(identity, layer, composition, overlay=None):
+    """Canonical geometry needs its declared canvas even when the pose is held.
 
     Legacy B-roll sizing does not implement canonical anchors/scale. A static
     video matte or fill cannot use that path merely because it has no keys.
     """
     if not layer:
         return False
+    def field(name, default=None):
+        return overlay.get(name, default) if isinstance(overlay, dict) else getattr(overlay, name, default)
+    # Legacy contain pads with opaque black. Ordinary layers need transparent
+    # box-relative letterboxing even when all their transforms are identity.
+    transparent_contain = (
+        str(field('mediaFit') or field('media_fit') or '').lower() == 'contain'
+        and str(field('bRollMode') or field('b_roll_mode') or 'pip').lower() != 'fullscreen'
+        and not field('coverMainVideo', False)
+    )
+    pose = layer.get('base_transform') or {}
+    held_geometry = (
+        float(pose.get('scale', 1)) != 1
+        or float(pose.get('rotation', 0)) != 0
+        or float(pose.get('crop_x', 0)) != 0
+        or float(pose.get('crop_y', 0)) != 0
+        or float(layer.get('anchor_x', 50)) != 50
+        or float(layer.get('anchor_y', 50)) != 50
+    )
     effects = layer.get('effects') or {}
     participants = any(str((candidate.get('track_matte') or {}).get('source_layer_id') or '') == str(identity)
                        for candidate in (composition or {}).get('layers') or [])
-    return bool(layer.get('motion_keyframes') or layer.get('perspective') or participants
+    return bool(transparent_contain or held_geometry or layer.get('motion_keyframes') or layer.get('perspective') or participants
                 or (layer.get('track_matte') or {}).get('mode', 'none') != 'none'
                 or (effects.get('mask') or {}).get('enabled')
                 or (effects.get('motion_blur') or {}).get('enabled')
                 or (effects.get('shadow') or {}).get('enabled')
                 or (effects.get('glow') or {}).get('enabled')
+                or (effects.get('colorize') or {}).get('enabled')
                 or float(effects.get('blur') or 0) > 0)
 
 

@@ -1,0 +1,69 @@
+{
+  "sourceUnchanged": true,
+  "originalRejectedMovieUnchanged": true,
+  "all72SourceCropsIdentical": true,
+  "samManifestBoundToActualLocalDerivative": true,
+  "movieAndRecording": {
+    "Background Replacement - Shot Review.mp4": {
+      "sha256": "1b662f7139cf07f32b538e43622ec4c64b23fa205b08ca17ca1854dcf1b020d8",
+      "bytes": 1203552,
+      "fullDecode": true,
+      "audioRms": 0.11653077019187741,
+      "videoFrames": "72",
+      "hasAudio": true
+    },
+    "Studio Shot Review Playback with Sound.mp4": {
+      "sha256": "208fa918200677c10712d9655ecad98f991610bc63cd62a512ca59ac5ef8c9ef",
+      "bytes": 1594061,
+      "fullDecode": true,
+      "audioRms": 0.10804399228613468,
+      "videoFrames": "167",
+      "hasAudio": true
+    }
+  },
+  "actualStudioPlayback": {
+    "headless": true,
+    "mutedDevice": true,
+    "screenFrames": 148,
+    "maximumMediaTime": 3,
+    "mediaEnded": true,
+    "duration": 6.940081834793091,
+    "external": [],
+    "errors": [],
+    "output": "/home/tibule12/Videos/Unmuted - Shot Correction - 20261031/Studio Shot Review Playback with Sound.mp4",
+    "bootstrap": "Existing Studio, one actual flattened movie; loopback media/bootstrap adapters, native checkpoint and complete playback. No native 3D editing/export claim.",
+    "audio": "Actual HTMLMediaElement.captureStream monitor audio; no disk soundtrack substitution"
+  },
+  "correctMovieHashInNativePlaybackProject": true,
+  "checks": {
+    "studioContract": {
+      "exitCode": 0,
+      "output": "{\n  \"valid\": true,\n  \"capabilities\": 29,\n  \"counts\": {\n    \"UNIMPLEMENTED\": 2,\n    \"BROKEN\": 1,\n    \"PARTIAL\": 9,\n    \"FUNCTIONAL\": 17,\n    \"PRO-READY\": 0,\n    \"PRODUCTION-READY\": 0\n  },\n  \"combinations\": 13,\n  \"parityChecks\": 17,\n  \"presentFixtures\": 4,\n  \"newCapabilityExecutions\": 0,\n  \"note\": \"Record validation only; no browser, provider or GPU execution.\"\n}\n"
+    },
+    "whitespace": {
+      "exitCode": 0,
+      "output": ""
+    },
+    "recordingSyntax": {
+      "exitCode": 0,
+      "output": ""
+    }
+  },
+  "retainedFocusedApplicationTests": {
+    "foregroundPixels": 43,
+    "panel": 24,
+    "service": 24,
+    "total": 91,
+    "rerunThisShotOnlyFollowup": false
+  },
+  "actualFinalEncodedFramesReviewed": 72,
+  "review": "Equipment, edges and gestures, plus every final full frame after cue alignment",
+  "strictWholeRightPictureIdentity": false,
+  "strictPixelParityClaim": false,
+  "professionalQualification": false,
+  "ownerCreativeApproval": false,
+  "authenticatedSubjectVfxJob": false,
+  "wholeFilmRender": false,
+  "cloudJobs": 0,
+  "productionDataAccess": false
+}

@@ -1,4 +1,7 @@
-import { validateStudioParentGraph, validateStudioTrackMattes } from './studioCompRigging';
+import { validateStudioMatteSurface } from './studioMatteSurface';
+import { validateStudioMediaColorize } from './studioMediaColorize';
+import { validateStudioParentGraph, validateStudioTrackMattes, validateStudioMotionDrivers } from './studioCompRigging';
+import { connectNodeFlowPorts, deriveNodeFlowGraph } from './studioNodeFlow';
 import { validateStudioPerspectiveLayer, PERSPECTIVE_LEFT } from './studioPerspective';
 import { validateStudioTextAnimation } from './studioTextAnimator';
 import { reconcileStudioDocument } from './studioProjectDocument';
@@ -7,6 +10,9 @@ import { buildStudioGraphicsPackage } from './studioGraphicsPackage';
 import { studioMotionPropertiesForTarget } from './studioMotionProperties';
 import { validateSpatialCurve } from './studioAutomation';
 import { validateStudioGroupComposite } from './studioGroups';
+import { buildProceduralColorCube } from './studioColorCube';
+import { buildBeatSyncedGradePulses, normalizeFinishKeyframes } from './studioFinishKeyframes';
+import { STUDIO_EXPORT_BLEND_MODES } from './studioBlendModes';
 
 const only = (value, fields) => {
   if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).some(k => !fields.includes(k)))
@@ -50,8 +56,52 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
     return legacy[property] || [field.min, field.max];
   };
   for (const action of plan.actions) {
-    only(action, ['type', 'id', 'name', 'startTime', 'duration', 'transform', 'text', 'sourceMediaId', 'sourceStart', 'perspective', 'mask', 'targetId', 'parentId', 'matteSourceId', 'mode', 'keys', 'grade', 'beforeId', 'property']);
+    only(action, ['type', 'id', 'name', 'startTime', 'duration', 'transform', 'text', 'sourceMediaId', 'sourceStart', 'mediaFit', 'perspective', 'mask', 'motionDrivers', 'targetId', 'parentId', 'matteSourceId', 'mode', 'keys', 'grade', 'advancedColor', 'beatSyncPulses', 'beats', 'beforeId', 'property', 'sourceId', 'port', 'driver', 'style']);
     const type = action.type;
+    if (type === 'finish_grade') {
+      const grade = action.grade || {};
+      only(grade, ['preset', 'precisionGrade', 'exposureStops', 'brightness', 'contrast', 'saturation', 'lift', 'gamma', 'gain', 'temperature', 'tint', 'vignette', 'clarity']);
+      const nextFinishFx = {
+        ...(snapshot.finishFx || {}),
+        ...grade,
+        precisionGrade: grade.precisionGrade !== false,
+      };
+      let nextAdvancedColor = snapshot.advancedColor || null;
+      if (action.advancedColor && typeof action.advancedColor === 'object') {
+        const adv = action.advancedColor;
+        const lutPresetId = typeof adv.lutPresetId === 'string' ? adv.lutPresetId : '';
+        const lut = adv.lut || (lutPresetId ? buildProceduralColorCube(lutPresetId, 17) : null);
+        nextAdvancedColor = {
+          curve: {
+            shadows: finite(adv.curve?.shadows ?? 0, -0.45, 0.45),
+            midtones: finite(adv.curve?.midtones ?? 0, -0.45, 0.45),
+            highlights: finite(adv.curve?.highlights ?? 0, -0.45, 0.45),
+          },
+          hsl: {
+            hue: finite(adv.hsl?.hue ?? 0, -180, 180),
+            saturation: finite(adv.hsl?.saturation ?? 1, 0, 2),
+            luminance: finite(adv.hsl?.luminance ?? 0, -0.5, 0.5),
+          },
+          lut,
+          lutData: lut,
+          lutPresetId,
+          lutName: lutPresetId ? `${lutPresetId}.cube` : (adv.lutName || ''),
+          lutIntensity: finite(adv.lutIntensity ?? 0.85, 0, 1),
+        };
+        nextFinishFx.advancedColor = nextAdvancedColor;
+      }
+      snapshot = {
+        ...snapshot,
+        finishFx: nextFinishFx,
+        advancedColor: nextAdvancedColor,
+        finishKeyframes: action.beatSyncPulses
+          ? buildBeatSyncedGradePulses(nextFinishFx, Array.isArray(action.beats) ? action.beats : [], {
+              existingKeyframes: normalizeFinishKeyframes(snapshot.finishKeyframes || []),
+            })
+          : normalizeFinishKeyframes(snapshot.finishKeyframes || []),
+      };
+      continue;
+    }
     if (['null', 'title', 'media_plane', 'adjustment'].includes(type)) {
       string(action.id); string(action.name, 100);
       if (ids.has(action.id) || overlays.some(o => o.id === action.id)) throw Error('Duplicate scene layer identifier.');
@@ -59,18 +109,21 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
       if (startTime + length > duration + 1 / 90000) throw Error('Scene layer extends past the programme.');
       const id = createId('scene'); ids.set(action.id, id);
       if (type === 'adjustment') {
-        only(action.grade || {}, ['exposureStops', 'brightness', 'contrast', 'saturation']);
-        const limits = { exposureStops: [-2, 2], brightness: [.65, 1.4], contrast: [.65, 1.75], saturation: [0, 1.8] };
+        only(action.grade || {}, ['exposureStops', 'brightness', 'contrast', 'saturation', 'lift', 'gamma', 'gain', 'temperature', 'tint', 'vignette']);
+        const limits = { exposureStops: [-2, 2], brightness: [.65, 1.4], contrast: [.65, 1.75], saturation: [0, 1.8], lift: [-0.5, 0.5], gamma: [0.35, 2.2], gain: [0.4, 2.0], temperature: [-1, 1], tint: [-1, 1], vignette: [0, 0.85] };
         Object.entries(action.grade || {}).forEach(([key, value]) => finite(value, ...limits[key]));
         adjustmentLayers.push({ id, name: action.name, startTime, duration: length, enabled: true, intensity: 100, opacity: 1, finishFx: { ...action.grade } });
         continue;
       }
       const layer = { id, name: action.name, ...transform(action.transform), startTime, duration: length,
-        anchorX: 50, anchorY: 50, shadow: 'none', blendMode: 'normal', animation: { enter: 'none', exit: 'none' } };
+        anchorX: 50, anchorY: 50, shadow: 'none', blendMode: 'normal', animation: { enter: 'none', exit: 'none' },
+        ...(action.motionDrivers && typeof action.motionDrivers === 'object' ? { motionDrivers: JSON.parse(JSON.stringify(action.motionDrivers)) } : {}) };
       if (type === 'null') Object.assign(layer, { type: 'text', text: '', isNullRig: true });
       if (type === 'title') Object.assign(layer, { type: 'text', text: string(action.text, 180), bg: 'transparent',
         color: '#f1ede4', fontFamily: 'Inter', fontWeight: 800, width: 60, textAlign: 'center' });
       if (type === 'media_plane') {
+        if (action.mediaFit !== undefined && !['contain', 'cover'].includes(action.mediaFit))
+          throw Error('Scene media fit must be contain or cover.');
         const media = (snapshot.projectMedia || []).find(item => item.id === action.sourceMediaId && item.status === 'ready' && item.storagePath && item.url);
         if (!media) throw Error('Choose an available saved project video for the scene.');
         const sourceStart = finite(action.sourceStart ?? 0, 0, Number(media.duration));
@@ -78,7 +131,7 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
         Object.assign(layer, { type: 'video', src: media.url, file: media.file, sourceMediaId: media.id,
           sourceDuration: Number(media.duration), contentHash: media.contentHash || null,
           sourceStoragePath: media.storagePath, sourceStartTime: sourceStart, width: 70, height: 70,
-          bRollMode: 'pip', mediaFit: 'contain', frameShape: 'edge', borderRadius: 0, volume: 0, muted: true,
+          bRollMode: 'pip', mediaFit: action.mediaFit || 'contain', frameShape: 'edge', borderRadius: 0, volume: 0, muted: true,
           layerShadow: {enabled: true, color: '#000000', opacity: .35, blur: 12, x: 0, y: 16},
           ...(action.perspective ? { perspective: action.perspective } : {}) });
         if (action.mask) {
@@ -88,6 +141,24 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
         }
       }
       overlays.push(layer); compositionOrder.push(id);
+    } else if (type === 'layer_style') {
+      const id = target(action.targetId), index = overlays.findIndex(layer => layer.id === id);
+      if (index < 0 || overlays[index].isNullRig || !['video', 'image'].includes(overlays[index].type))
+        throw Error('Choose an ordinary image or video for layer styling.');
+      only(action.style, ['blendMode', 'glow', 'colorize', 'matteSurface']);
+      if(action.style.matteSurface!==undefined)validateStudioMatteSurface(action.style.matteSurface);
+      if (action.style.colorize !== undefined) validateStudioMediaColorize(action.style.colorize);
+      if (!Object.keys(action.style).length) throw Error('Choose a supported layer style.');
+      if (action.style.blendMode !== undefined && !STUDIO_EXPORT_BLEND_MODES.includes(action.style.blendMode))
+        throw Error('Choose a supported layer blend mode.');
+      if (action.style.glow !== undefined) {
+        const glow = action.style.glow;
+        only(glow, ['enabled', 'color', 'radius', 'intensity']);
+        if (typeof glow.enabled !== 'boolean' || !/^#[a-f0-9]{6}$/i.test(glow.color || '')) throw Error('Choose a valid glow colour and switch.');
+        finite(glow.radius, 0, 40); finite(glow.intensity, 0, 1);
+      }
+      overlays[index] = { ...overlays[index], ...action.style,
+        ...(action.style.glow ? { glow: { ...action.style.glow } } : {}) };
     } else if (type === 'parent') {
       const id = target(action.targetId), parentId = target(action.parentId);
       if (!id || !parentId || id === 'main-video') throw Error('Scene parenting refers to an unsupported or missing layer.');
@@ -108,6 +179,32 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
       for (let i = motionKeyframes.length - 1; i >= 0; i--) {
         if (motionKeyframes[i].targetId === id && motionKeyframes[i].property === action.property) motionKeyframes.splice(i, 1);
       }
+    } else if (type === 'motion_driver') {
+      const id = target(action.targetId), index = overlays.findIndex(layer => layer.id === id);
+      if (index < 0 || !['x','y','scale','rotation','opacity'].includes(action.property)) throw Error('A motion driver needs an ordinary layer and supported channel.');
+      const fields = {spin:['type','enabled','ratePerSecond'],pulse:['type','enabled','waveform','frequencyHz','amplitude','phaseDeg'],
+        wiggle:['type','enabled','frequencyHz','amplitude','octaves','seed'],spring:['type','enabled','frequencyHz','damping','amount'],
+        loop:['type','enabled','loopMode'],beat_pump:['type','enabled','bpm','amount','decay']};
+      if (!fields[action.driver?.type]) throw Error('Unsupported motion driver.');
+      only(action.driver, fields[action.driver.type]);
+      const layer = {...overlays[index], motionDrivers:{...(overlays[index].motionDrivers||{}),[action.property]:{...action.driver}}};
+      validateStudioMotionDrivers(layer);overlays[index]=layer;
+    } else if (type === 'node_connect') {
+      const sourceId = target(action.sourceId), id = target(action.targetId);
+      const source = overlays.find(layer=>layer.id===sourceId), dest = overlays.find(layer=>layer.id===id);
+      if (!source || !dest || sourceId===id || !['Parent','Mask'].includes(action.port)) throw Error('Choose two distinct ordinary nodes and a supported input.');
+      if (action.port==='Parent'&&!source.isNullRig) throw Error('A Director Parent connection needs a Null controller.');
+      if (action.port==='Mask'&&!['alpha','alpha_inverted','luma','luma_inverted'].includes(action.mode)) throw Error('Choose a supported matte mode.');
+      const state = {...snapshot,overlays,motionKeyframes,compositionOrder};
+      const fromNodeId = `${source.isNullRig?'NullRig':'Transform'}:${sourceId}`;
+      const toNodeId = `${action.port==='Mask'?'Merge':dest.isNullRig?'NullRig':'Transform'}:${id}`;
+      const graph = deriveNodeFlowGraph(state), from = graph.nodes.find(n=>n.id===fromNodeId), to=graph.nodes.find(n=>n.id===toNodeId);
+      // Root Nulls accept parenting as soon as a real connection is authored.
+      if(!from?.outputs.includes('Out')||!to||(!to.inputs.includes(action.port)&&!(dest.isNullRig&&action.port==='Parent')))throw Error('The requested Node Flow ports are unavailable.');
+      const linked=connectNodeFlowPorts(state,{fromNodeId,toNodeId,toPort:action.port,currentTime:0});
+      const replacement=linked.overlays.find(layer=>layer.id===id);
+      overlays[overlays.findIndex(layer=>layer.id===id)] = action.port==='Mask'
+        ? {...replacement,trackMatte:{...replacement.trackMatte,mode:action.mode}} : replacement;
     } else if (type === 'keys') {
       const id = target(action.targetId); if (!id || !Array.isArray(action.keys) || action.keys.length > 128) throw Error('Scene keys need an existing target and a bounded key list.');
       for (const key of action.keys) {
@@ -127,6 +224,7 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
   if (overlays.length > 128) throw Error('Scene exceeds the Studio layer budget.');
   validateStudioParentGraph(overlays, snapshot.mainTransform); validateStudioTrackMattes(overlays);
   for (const layer of overlays) {
+    validateStudioMotionDrivers(layer);
     const keys = motionKeyframes.filter(k => k.targetId === layer.id);
     validateStudioPerspectiveLayer(layer, keys, (snapshot.compoundClips || []).some(g => g.layerIds?.includes(layer.id)));
     validateStudioTextAnimation(layer, keys);
@@ -163,7 +261,7 @@ export async function prepareStudioSceneActions(plan, snapshot, createId, option
     if (!isCurrent()) throw Error('The edit changed while preparing the scene.');
     const aliases = new Map(graphics.layers.map((layer, index) => [layer.id, result.layers[index].id]));
     const remapped = { ...actionsPlan, actions: actionsPlan.actions.map(action => ({ ...action,
-      ...Object.fromEntries(['targetId', 'parentId', 'matteSourceId', 'beforeId'].filter(field => action[field])
+      ...Object.fromEntries(['targetId', 'parentId', 'matteSourceId', 'beforeId', 'sourceId'].filter(field => action[field])
         .map(field => [field, aliases.get(action[field]) || action[field]])),
     })) };
     const next = { ...snapshot, overlays: result.overlays, motionKeyframes: result.keyframes,

@@ -1,0 +1,14 @@
+{
+  "uid": "demo-pilot-dance-master-20261110",
+  "normalDemoAllowance": true,
+  "existingWalletsReset": false,
+  "productionAccount": false,
+  "api": {
+    "previousPid": 245389,
+    "pid": 259014,
+    "origin": "http://127.0.0.1:34899"
+  },
+  "originalWallets": 7,
+  "priorOperations": 36,
+  "activeOperations": 0
+}

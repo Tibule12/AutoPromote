@@ -1,0 +1,53 @@
+{
+  "Native copy-circle authoring": {
+    "seconds": 7.023999929428101,
+    "frames": 31,
+    "rawBytes": 3984612,
+    "nativeControlsOnly": true,
+    "setupExcluded": true,
+    "audio": "Silent native editing capture",
+    "observedCaptureFramesPerSecond": 4.413439679878249
+  },
+  "Native measured floor contact": {
+    "seconds": 10.184999942779541,
+    "frames": 34,
+    "rawBytes": 4271843,
+    "nativeControlsOnly": true,
+    "setupExcluded": true,
+    "audio": "Silent native editing capture",
+    "observedCaptureFramesPerSecond": 3.338242532254862
+  },
+  "Complete live Studio playback": {
+    "seconds": 10.49399995803833,
+    "frames": 29,
+    "rawBytes": 3598875,
+    "nativeControlsOnly": true,
+    "setupExcluded": true,
+    "audio": "Silent native editing capture",
+    "observedCaptureFramesPerSecond": 2.763483906609529
+  },
+  "liveProgrammeObservation": {
+    "programmeSeconds": 8,
+    "elapsedWallSeconds": 10.516,
+    "uniqueSampledProgrammeTimes": 25,
+    "sampledChangesPerWallSecond": 2.282236591860023,
+    "displayRateExactlyMeasured": false,
+    "smoothRealtimeQualified": false
+  },
+  "Complete finished playback in Studio": {
+    "seconds": 11.625,
+    "frames": 196,
+    "rawBytes": 25344206,
+    "nativeControlsOnly": true,
+    "setupExcluded": true,
+    "audio": "Silent native editing capture",
+    "observedCaptureFramesPerSecond": 16.86021505376344
+  },
+  "finishedPlayback": {
+    "complete": true,
+    "programmeSeconds": 8,
+    "elapsedWallSeconds": 11.728,
+    "audioMutedInRecording": true,
+    "exactDisplayRateQualified": false
+  }
+}

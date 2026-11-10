@@ -1,0 +1,14 @@
+{
+  "uid": "demo-pilot-clean-dance-20261108",
+  "normalDemoAllowance": true,
+  "existingWalletsReset": false,
+  "productionAccount": false,
+  "api": {
+    "previousPid": 12849,
+    "pid": 30723,
+    "origin": "http://127.0.0.1:34899"
+  },
+  "originalWallets": 2,
+  "priorOperations": 10,
+  "activeOperations": 0
+}

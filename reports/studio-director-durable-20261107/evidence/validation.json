@@ -1,0 +1,190 @@
+{
+  "date": "2026-11-07",
+  "baseRevision": "e6800b4f",
+  "productionSourceRevision": "ce82bb907c858896d84a368d2b497dae6c65e746",
+  "newBranch": "qa/studio-director-durable-suggestions-20261107",
+  "backendCompatibility": {
+    "suites": 3,
+    "passed": 28,
+    "failed": 0,
+    "providerAndFirestoreBoundary": "mocked"
+  },
+  "nativeBrowser": {
+    "checks": [
+      {
+        "id": "save-cold-reopen",
+        "passed": true,
+        "selectedPreserved": true,
+        "newAnalysis": false,
+        "approvalRestored": false
+      },
+      {
+        "id": "duplicate-project",
+        "passed": true,
+        "editPreserved": true,
+        "originalAnalysisNotRebound": true
+      },
+      {
+        "id": "review-approval-undo-redo",
+        "passed": true,
+        "reviewBoundary": "simulated; not production proof",
+        "oneDecision": true
+      },
+      {
+        "id": "native-export-compiler",
+        "passed": true,
+        "ranges": [
+          [0, 5.2],
+          [5.2, 12]
+        ],
+        "paidExecution": false
+      },
+      {
+        "id": "independent-restore",
+        "passed": true,
+        "exactDocument": true,
+        "newAnalysis": false,
+        "approvalRestored": false
+      },
+      {
+        "id": "malformed-recovery",
+        "passed": true,
+        "exactDocument": true,
+        "newAnalysis": false,
+        "approvalRestored": false
+      },
+      {
+        "id": "rejection-recovery",
+        "passed": true,
+        "timelineUnchanged": true,
+        "decisionNotRevived": true,
+        "remainingChoiceNeedsFreshReview": true,
+        "reviewBoundary": "simulated"
+      },
+      {
+        "id": "local-finished-playback",
+        "passed": true,
+        "exactNativeDownload": true,
+        "wholeFinishedPlayback": true,
+        "canonicalDocumentUnchanged": true,
+        "transportBoundary": "local completion fixture; actual CPU output, no cloud execution"
+      }
+    ],
+    "headless": true,
+    "muted": true,
+    "isolatedContexts": true,
+    "productionWritesBlocked": true,
+    "newPaidExecutions": 0
+  },
+  "canonicalCpuOutput": {
+    "duration": 12.0,
+    "frames": 360,
+    "frameRate": "30/1",
+    "width": 1080,
+    "height": 1920,
+    "sha256": "2f0b726ce6c003745c4a76ff86401e72dd71f1d9c2a635e98eab1589b834b712",
+    "bytes": 7836145,
+    "audio": true,
+    "fullDecode": true,
+    "nativeDownloadExact": true,
+    "boundary": "Actual canonical local CPU render; local delivery/completion fixture, not a cloud/provider settlement receipt."
+  },
+  "sourcePreservation": {
+    "firestore.rules": {
+      "sameAsBase": true,
+      "sha256": "8daebc8a0d4638bea8baecf4fd069ffbbf4d200e1651e935e9fb93d47c931a31"
+    },
+    "storage.rules": {
+      "sameAsBase": true,
+      "sha256": "b362e56ed1980cc781b051299e57838c61e66923083809fc844625c2ea6c52a3"
+    },
+    "src/authMiddleware.js": {
+      "sameAsBase": true,
+      "sha256": "a35e5d581db80fc7842f4882b3e635f0283feeb9478f2bf3efd22469e4551df5"
+    },
+    "src/routes/studioDirectorReviewRoutes.js": {
+      "sameAsBase": true,
+      "sha256": "4d8328b87f7ac520ba4328a98f64c6d2830d34b9583575f4464729c6f068e272"
+    },
+    "src/services/studioDirectorProjectBinding.js": {
+      "sameAsBase": true,
+      "sha256": "2a833ede793c9ac7a0f4bb1a679ece3ad6e2220e62362482e50c3d683d8bd51e"
+    },
+    "src/services/studioDirectorReplayService.js": {
+      "sameAsBase": true,
+      "sha256": "cc63e872712efaa4cf89828d71fd2be6dc4a926e8fcfaf75b20e1b36094d77bf"
+    },
+    "src/services/studioSourceShotArtifactService.js": {
+      "sameAsBase": true,
+      "sha256": "9a7404059f9368e5e80c30375c850b861ddae53f53f922782270dbe5f8a3928d"
+    },
+    "python_media_worker/main_media_server.py": {
+      "sameAsBase": true,
+      "sha256": "dfac143f3db866ff3d057a6798df35f69e3f92d38c8ae025aefeecb89fac565f"
+    },
+    "sessionUnchanged": true
+  },
+  "strictBuild": {
+    "compiledSuccessfully": true,
+    "lintEnabled": true,
+    "publicConfigMatchesDeployedApp": true,
+    "sourceManifestSha256": "e1fbf027ae67403da77d81be0115a297961bebcd792e3dec6073bd930b497980"
+  },
+  "targetedLint": "PASS",
+  "whitespace": "PASS",
+  "fullEditorRegression": {
+    "status": "INTERRUPTED",
+    "exitCode": 143,
+    "completedSuiteResult": false,
+    "countedAsPass": false
+  },
+  "evidenceBoundary": "Local native App, recorded analysis, simulated review/completion boundaries and actual canonical CPU file. No new authenticated provider execution/settlement proof.",
+  "failedAttemptsRetained": [
+    "early DOM/restore timing failures",
+    "initial local browser build public-config mismatch",
+    "literal export error matcher did not match native error UI"
+  ],
+  "productionDeployment": false,
+  "readinessPromotion": false,
+  "directorModules": {
+    "suites": 7,
+    "passed": 50,
+    "failed": 0,
+    "skipped": 0
+  },
+  "affectedEditorWorkflows": {
+    "status": "PASS",
+    "passed": 12,
+    "failed": 0,
+    "skipped": 164,
+    "suites": 1,
+    "seconds": 134.085,
+    "scope": "Director source analysis/save/reopen/approve/Undo/Redo/export, queued/owned-source analysis, existing finished-output and Hook controls"
+  },
+  "codeCheckpoint": "41ad8217",
+  "reviewRaceAndAuthRegressions": {
+    "status": "PASS",
+    "passed": 3,
+    "failed": 0,
+    "skipped": 173,
+    "suites": 1,
+    "seconds": 31.436,
+    "scope": "sign-in changes after server decision, changed project during registration, unauthenticated/stale review"
+  },
+  "distinctTargetedTestsPassed": 93,
+  "finalLocalStatus": "READY_FOR_REVIEW_NOT_DEPLOYED",
+  "finalTestEvidence": {
+    "editorWorkflows": {
+      "sha256": "c87dac29f84100c3bc4c3c1212e7af07541aaa0290665ae48ce32080cdbd3f87"
+    },
+    "reviewRaces": {
+      "sha256": "f653a863f463f22ea32141ba7d0909ccbdfca938491f4bb50d75eb47783d7c96"
+    },
+    "directorModules": {
+      "sha256": "6af2e995ff5e57e21a5df0b1f323c40b07f283ce4feafb79b98590b5fca83cde"
+    },
+    "serverCompatibility": {
+      "sha256": "a0a305873efc181fa416e3a454e9d494b7730e41372cfcd0f072ab01b6ca89db"
+    }
+  }
+}

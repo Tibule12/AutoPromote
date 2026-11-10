@@ -1,0 +1,375 @@
+{
+  "format": "autopromote-scene-actions",
+  "version": 1,
+  "projectId": "viral-project-fa5921d4-7d4c-44bb-955d-dc65ef0c1360",
+  "baseRevision": 26,
+  "name": "03 - Rhythm typography",
+  "actions": [
+    {
+      "type": "keys",
+      "targetId": "03 / FEEL",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 8.1,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    }
+  ],
+  "graphics": {
+    "format": "autopromote-graphics",
+    "version": 1,
+    "name": "03 - Rhythm typography",
+    "width": 1280,
+    "height": 720,
+    "duration": 30,
+    "layers": [
+      {
+        "id": "03 / lower contrast",
+        "name": "03 / lower contrast",
+        "startTime": 8,
+        "duration": 6,
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "scale": 1,
+        "rotation": 0,
+        "opacity": 1,
+        "keys": [],
+        "type": "artwork",
+        "height": 100,
+        "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\"><defs><linearGradient id=\"s\" x2=\"0\" y2=\"1\"><stop stop-color=\"#101114\" stop-opacity=\"0\"/><stop offset=\"1\" stop-color=\"#101114\" stop-opacity=\".65\"/></linearGradient></defs><rect width=\"1280\" height=\"720\" fill=\"url(#s)\"/></svg>"
+      },
+      {
+        "id": "03 / FEEL",
+        "name": "03 / FEEL",
+        "startTime": 8.1,
+        "duration": 2,
+        "x": 50,
+        "y": 25,
+        "width": 95,
+        "scale": 3.2,
+        "rotation": 0,
+        "opacity": 1,
+        "keys": [
+          {
+            "property": "textProgress",
+            "time": 8.1,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "textProgress",
+            "time": 8.85,
+            "value": 100,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 8.1,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 8.22,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 9.9,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 10.1,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          }
+        ],
+        "type": "text",
+        "text": "FEEL",
+        "color": "#f5f2e9",
+        "fontWeight": 900,
+        "textAlign": "center",
+        "textAnimator": {
+          "version": 1,
+          "unit": "character",
+          "order": "forward",
+          "stagger": 25,
+          "fromX": -0.4,
+          "fromY": 1.6,
+          "fromScale": 0.6,
+          "fromRotation": -18,
+          "fromOpacity": 0,
+          "tracking": -0.035,
+          "rangeStart": 0,
+          "rangeEnd": 100,
+          "easing": "ease_out"
+        },
+        "textProgress": 0
+      },
+      {
+        "id": "03 / THE",
+        "name": "03 / THE",
+        "startTime": 8.25,
+        "duration": 1.9,
+        "x": 50,
+        "y": 46,
+        "width": 95,
+        "scale": 2,
+        "rotation": 0,
+        "opacity": 1,
+        "keys": [
+          {
+            "property": "textProgress",
+            "time": 8.25,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "textProgress",
+            "time": 9,
+            "value": 100,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 8.25,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 8.37,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 9.95,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 10.15,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          }
+        ],
+        "type": "text",
+        "text": "THE",
+        "color": "#d7ff43",
+        "fontWeight": 900,
+        "textAlign": "center",
+        "textAnimator": {
+          "version": 1,
+          "unit": "character",
+          "order": "forward",
+          "stagger": 25,
+          "fromX": -0.4,
+          "fromY": 1.6,
+          "fromScale": 0.6,
+          "fromRotation": -18,
+          "fromOpacity": 0,
+          "tracking": -0.035,
+          "rangeStart": 0,
+          "rangeEnd": 100,
+          "easing": "ease_out"
+        },
+        "textProgress": 0
+      },
+      {
+        "id": "03 / RHYTHM",
+        "name": "03 / RHYTHM",
+        "startTime": 8.4,
+        "duration": 5.4,
+        "x": 50,
+        "y": 72,
+        "width": 95,
+        "scale": 3.2,
+        "rotation": 0,
+        "opacity": 1,
+        "keys": [
+          {
+            "property": "textProgress",
+            "time": 8.4,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "textProgress",
+            "time": 9.15,
+            "value": 100,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 8.4,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 8.52,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 13.6,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 13.8,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          }
+        ],
+        "type": "text",
+        "text": "RHYTHM",
+        "color": "#f5f2e9",
+        "fontWeight": 900,
+        "textAlign": "center",
+        "textAnimator": {
+          "version": 1,
+          "unit": "character",
+          "order": "forward",
+          "stagger": 25,
+          "fromX": -0.4,
+          "fromY": 1.6,
+          "fromScale": 0.6,
+          "fromRotation": -18,
+          "fromOpacity": 0,
+          "tracking": -0.035,
+          "rangeStart": 0,
+          "rangeEnd": 100,
+          "easing": "ease_out"
+        },
+        "textProgress": 0
+      }
+    ],
+    "groups": []
+  }
+}

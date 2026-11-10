@@ -11,9 +11,9 @@ const { CloudRunCapabilityWorker } = require('./cloudRunWorker');
 const { immutableJson } = require('./stores');
 const root = path.resolve(__dirname, '../..');
 const codeFiles = ['model_workers/common.py', 'model_workers/local_cpu.py', 'model_workers/adapters/cpu_matting.py',
-  'model_workers/adapters/component_segmentation.py','model_workers/adapters/temporal_alpha.py','model_workers/adapters/source_edge_alpha.py',
+  'model_workers/adapters/component_segmentation.py','model_workers/adapters/temporal_alpha.py','model_workers/adapters/source_edge_alpha.py','model_workers/adapters/moving_detail_alpha.py','model_workers/adapters/photographed_opacity.py','model_workers/adapters/person_material_alpha.py','model_workers/adapters/fixed_source_neural.py',
   'model_workers/adapters/segmentation.py', 'model_workers/adapters/cpu_segmentation.py',
-  'python_media_worker/studio_subject_matte.py', 'config/model-runtime/registry.v1.json', 'contracts/model-capabilities-v1.json'];
+  'python_media_worker/studio_subject_matte.py', 'python_media_worker/studio_source_background.py', 'config/model-runtime/registry.v1.json', 'contracts/model-capabilities-v1.json'];
 
 class LocalCpuCapabilityWorker {
   constructor({ bucket, image, directory, modelDirectory, refinementModelDirectory, artifacts, dependenciesDirectory, baseDependencies, edgeDependencies }) {

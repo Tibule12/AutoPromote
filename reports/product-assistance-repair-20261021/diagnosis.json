@@ -1,0 +1,25 @@
+{
+  "cause": "Strict knowledge initialization rejects an implementation fingerprint changed since documentation review.",
+  "changed_sources": [
+    {
+      "path": "frontend/src/components/ViralClipStudio.js",
+      "reviewed_sha256": "e9fecb09a91c92d47fa2916d222473edb2f7949dd86a41fd6fdf5285425d4c0d",
+      "current_sha256": "c7ba2fe7fa68364c547ce9d681d8f49c2c4a8cd659c249442a774da906d40fc3"
+    },
+    {
+      "path": "test/e2e/studio-capability-matrix.json",
+      "reviewed_sha256": "cfc5b66b18d071c4eb0b9a2e74a4383278b337d26ef33076bb32fdc29bc589d0",
+      "current_sha256": "925aa71f7cb22fce535562095a1fcff6f2df7ca9ec0f180e2e2d573c44472174"
+    },
+    {
+      "path": "test/e2e/studio-preview-render-parity.json",
+      "reviewed_sha256": "8c6f82158499a22b45dd71861173b5f872e08c8f7917fc084520429d1b53acec",
+      "current_sha256": "2409d61606b5ff6f2a517dfe89511912b1b760c5f4a12f1fa5785121cafd2ab8"
+    }
+  ],
+  "affected_routes": [
+    "POST /api/product-assistance/ask",
+    "GET /api/product-assistance/docs/README.md"
+  ],
+  "before_status": 503
+}

@@ -1,0 +1,8 @@
+{
+  "demoProject": "demo-autopromote-credits",
+  "before": 1793707200000,
+  "after": 1793732293041,
+  "windowMs": 7200000,
+  "reason": "Expired isolated emulator window prevented the authorized revision CPU render. Existing budget, price, concurrency, GPU/provider-off and production boundaries unchanged.",
+  "realFinancialApproval": false
+}

@@ -1,0 +1,11 @@
+# Paused layer readiness — 7 November 2026
+
+The retained Phase Shift silhouette, temporal iris and final-shot omissions were reproduced in the actual signed-in Studio frontend. At the previous fixed screenshot delays, independent video layers were still at readyState 0/1. Normal media events showed about six seconds of load/seek delay on a cold silhouette. No source or previous export was replaced.
+
+The shared programme layer stage now listens for readiness events on every independent video decoder, including decoders without a shareable source identity. Shared-source eligibility is still checked separately; ownership/hash/time checks are unchanged. The inspector's live preview displays “Preparing preview layers…” while active media has not decoded, and ordinary overlay videos request automatic preload. The marker prevents interpreting a partial source load as a finished preview; it does not promise immediate seeking or full parity.
+
+Five first/repeated native seeks wait for actual decoded layers at 5.5, 6.5, 9.5, 11 and 14.5 seconds. All active videos are ready with no pending seek. The silhouette, complete iris sectors and final horizon now appear in those measured live pictures. Ready waits were **0.687–5.500 seconds**. Diagnostic PSNR is **30.437–38.291 dB** against the existing same-time decoded export. The original native export hash is `f120949d5b66e41e6bc70bfeace2d49e49d8e8f9e6a52a5acb018786c081bf04`.
+
+[Actual comparisons](Ready%20layer%20comparisons.jpg) · [Measured results](ready-comparisons.json). These are bounded paused-picture results. Whole colour/alpha/edges/audio, arbitrary media/project coverage and real-time throughput remain unqualified. The old unloaded screenshots and failed cross-origin harness attempt remain private. One new component regression first failed, then passes with the implementation; the related shared-frame tests also pass.
+
+This code is in the same retained local build as the [Director creative edit](../studio-director-creative-20261107/README.md). No production source release, paid provider, GPU job or change to earlier films/projects occurred. Next: reduce cold media startup, compare exact source sampling around more cut/cue boundaries and continue full S02 picture/sound checks.

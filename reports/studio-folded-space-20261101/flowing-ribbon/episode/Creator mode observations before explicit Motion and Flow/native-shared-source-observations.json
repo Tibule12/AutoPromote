@@ -1,0 +1,53 @@
+{
+  "normalStudioPausedObservations": true,
+  "samples": [
+    {
+      "time": 22.5,
+      "planeCount": 10,
+      "shared": 0,
+      "owners": [
+        ""
+      ],
+      "sourceTimes": [
+        2.5
+      ]
+    },
+    {
+      "time": 25,
+      "planeCount": 20,
+      "shared": 0,
+      "owners": [
+        ""
+      ],
+      "sourceTimes": [
+        1,
+        5
+      ]
+    },
+    {
+      "time": 26,
+      "planeCount": 20,
+      "shared": 0,
+      "owners": [
+        ""
+      ],
+      "sourceTimes": [
+        2,
+        6
+      ]
+    },
+    {
+      "time": 27.9,
+      "planeCount": 20,
+      "shared": 0,
+      "owners": [
+        ""
+      ],
+      "sourceTimes": [
+        3.916666,
+        7.916666
+      ]
+    }
+  ],
+  "wholePictureParityQualified": false
+}

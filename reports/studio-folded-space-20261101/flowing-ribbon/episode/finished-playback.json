@@ -1,0 +1,171 @@
+{
+  "complete": true,
+  "programmeSeconds": 36,
+  "terminal": {
+    "programmeTime": 4,
+    "mediaTime": 36
+  },
+  "elapsedMs": 39499,
+  "events": [
+    {
+      "type": "ended",
+      "time": 36
+    }
+  ],
+  "frames": [
+    {
+      "ms": 304310.5,
+      "sourceTime": 2.458333,
+      "presented": 61
+    },
+    {
+      "ms": 305610.5,
+      "sourceTime": 3.708333,
+      "presented": 91
+    },
+    {
+      "ms": 306760.5,
+      "sourceTime": 4.958333,
+      "presented": 119
+    },
+    {
+      "ms": 307910.4,
+      "sourceTime": 6.125,
+      "presented": 147
+    },
+    {
+      "ms": 307960.4,
+      "sourceTime": 6.166667,
+      "presented": 148
+    },
+    {
+      "ms": 309227,
+      "sourceTime": 6.25,
+      "presented": 150
+    },
+    {
+      "ms": 310360.3,
+      "sourceTime": 7.375,
+      "presented": 177
+    },
+    {
+      "ms": 311543.6,
+      "sourceTime": 8.541667,
+      "presented": 205
+    },
+    {
+      "ms": 312743.5,
+      "sourceTime": 9.75,
+      "presented": 234
+    },
+    {
+      "ms": 313926.8,
+      "sourceTime": 10.916667,
+      "presented": 262
+    },
+    {
+      "ms": 315210.1,
+      "sourceTime": 13.416667,
+      "presented": 322
+    },
+    {
+      "ms": 317576.6,
+      "sourceTime": 14.583333,
+      "presented": 350
+    },
+    {
+      "ms": 318776.7,
+      "sourceTime": 15.791667,
+      "presented": 379
+    },
+    {
+      "ms": 319993.2,
+      "sourceTime": 17,
+      "presented": 408
+    },
+    {
+      "ms": 321159.9,
+      "sourceTime": 18.166667,
+      "presented": 436
+    },
+    {
+      "ms": 321209.9,
+      "sourceTime": 19.416667,
+      "presented": 466
+    },
+    {
+      "ms": 322443.2,
+      "sourceTime": 19.458333,
+      "presented": 467
+    },
+    {
+      "ms": 323659.8,
+      "sourceTime": 20.666667,
+      "presented": 496
+    },
+    {
+      "ms": 324876.4,
+      "sourceTime": 23.208333,
+      "presented": 557
+    },
+    {
+      "ms": 327393,
+      "sourceTime": 24.375,
+      "presented": 585
+    },
+    {
+      "ms": 328509.6,
+      "sourceTime": 25.5,
+      "presented": 612
+    },
+    {
+      "ms": 329759.5,
+      "sourceTime": 26.708333,
+      "presented": 641
+    },
+    {
+      "ms": 330942.8,
+      "sourceTime": 27.916667,
+      "presented": 670
+    },
+    {
+      "ms": 332159.4,
+      "sourceTime": 29.125,
+      "presented": 699
+    },
+    {
+      "ms": 333276,
+      "sourceTime": 30.25,
+      "presented": 726
+    },
+    {
+      "ms": 334442.7,
+      "sourceTime": 31.416667,
+      "presented": 754
+    },
+    {
+      "ms": 335626,
+      "sourceTime": 32.583333,
+      "presented": 782
+    },
+    {
+      "ms": 336825.9,
+      "sourceTime": 33.791667,
+      "presented": 811
+    },
+    {
+      "ms": 337975.9,
+      "sourceTime": 34.958333,
+      "presented": 839
+    },
+    {
+      "ms": 339175.8,
+      "sourceTime": 35.958333,
+      "presented": 863
+    }
+  ],
+  "quality": {
+    "decoded": 860,
+    "dropped": 2
+  }
+}

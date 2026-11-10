@@ -1,0 +1,213 @@
+{
+  "format": "autopromote-scene-actions",
+  "version": 1,
+  "projectId": "viral-project-b3c8d7e9-cdff-4bdd-87dd-23b2297b83a6",
+  "baseRevision": 38,
+  "name": "02 - opening double exposure",
+  "actions": [
+    {
+      "type": "media_plane",
+      "id": "W / opening alpha",
+      "name": "W / opening alpha",
+      "sourceMediaId": "project-media-4e17cc46-2e48-427d-9525-4ebf51204f71",
+      "sourceStart": 0,
+      "startTime": 0,
+      "duration": 3,
+      "transform": {
+        "x": 50,
+        "y": 56,
+        "scale": 1.9,
+        "opacity": 1
+      },
+      "mediaFit": "contain"
+    },
+    {
+      "type": "media_plane",
+      "id": "W / opening colour",
+      "name": "W / opening colour",
+      "sourceMediaId": "launch-5217554acdae6f4623c8d9bb",
+      "sourceStart": 0.25,
+      "startTime": 0,
+      "duration": 3,
+      "transform": {
+        "x": 50,
+        "y": 56,
+        "scale": 1.9,
+        "opacity": 1
+      },
+      "mediaFit": "contain"
+    },
+    {
+      "type": "media_plane",
+      "id": "W / opening code",
+      "name": "W / opening code",
+      "sourceMediaId": "launch-72d89720ee9db0d593c6120c",
+      "sourceStart": 2,
+      "startTime": 0,
+      "duration": 3,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.43,
+        "opacity": 1
+      },
+      "mediaFit": "cover"
+    },
+    {
+      "type": "keys",
+      "targetId": "W / opening alpha",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 0,
+          "value": 1.76,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3,
+          "value": 2.02,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / opening colour",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 0,
+          "value": 1.76,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3,
+          "value": 2.02,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / opening code",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0,
+          "value": 0.8,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 0.7,
+          "value": 0.55,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 1.5,
+          "value": 0.78,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 3,
+          "value": 0.05,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / opening colour",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0,
+          "value": 0.4,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 1.4,
+          "value": 0.7,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 3,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    }
+  ]
+}

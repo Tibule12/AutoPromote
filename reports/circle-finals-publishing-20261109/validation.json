@@ -1,0 +1,42 @@
+{
+  "verifiedAt": "2026-11-09T02:18:37.724Z",
+  "liveQueueSchedules": 12,
+  "exactMediaHashes": 12,
+  "priorSchedulesUnchanged": 6914,
+  "studioRecordValidation": {
+    "valid": true,
+    "capabilities": 29,
+    "counts": {
+      "UNIMPLEMENTED": 2,
+      "BROKEN": 1,
+      "PARTIAL": 9,
+      "FUNCTIONAL": 17,
+      "PRO-READY": 0,
+      "PRODUCTION-READY": 0
+    },
+    "combinations": 13,
+    "parityChecks": 17,
+    "presentFixtures": 4,
+    "newCapabilityExecutions": 0,
+    "note": "Record validation only; no browser, provider or GPU execution."
+  },
+  "productKnowledgeCheck": {
+    "valid": true,
+    "errors": [],
+    "file_count": 43,
+    "warnings": [
+      "Undocumented product surface: workspace.team",
+      "Undocumented product surface: workspace.rewards",
+      "Undocumented product surface: workspace.notifications",
+      "Undocumented product surface: workspace.profile",
+      "Undocumented product surface: workspace.security",
+      "Undocumented product surface: workspace.earnings",
+      "Undocumented product surface: workspace.mission_control",
+      "Undocumented product surface: workspace.memetic",
+      "Undocumented product surface: assistant.existing_chat"
+    ]
+  },
+  "diffCheck": true,
+  "runtimeProductChanges": false,
+  "productionDeployment": false
+}

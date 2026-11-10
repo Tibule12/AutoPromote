@@ -1,0 +1,12 @@
+{
+  "headless": true,
+  "mutedDevice": true,
+  "screenFrames": 78,
+  "maximumMediaTime": 2.959609,
+  "duration": 3.638389825820923,
+  "external": [],
+  "errors": [],
+  "output": "/home/tibule12/Videos/Unmuted - Shot Correction - 20261031/Studio Shot Playback with Sound.mp4",
+  "bootstrap": "Existing Studio, one actual flattened movie; loopback media/bootstrap adapters, native checkpoint and complete playback. No native 3D editing/export claim.",
+  "audio": "Actual HTMLMediaElement.captureStream monitor audio; no disk soundtrack substitution"
+}

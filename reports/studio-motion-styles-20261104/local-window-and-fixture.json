@@ -1,0 +1,24 @@
+{
+  "before": {
+    "build": "/tmp/autopromote-application-demo-5izIlF/build-whatsapp-revision-20261103",
+    "spendingEndsAt": 1793707200000,
+    "previewOrigins": []
+  },
+  "after": {
+    "spendingEndsAt": 1793779859947,
+    "previewOrigins": [
+      "http://127.0.0.1:5156"
+    ]
+  },
+  "localFixtureOnly": true,
+  "realPurchase": false,
+  "grant": {
+    "alreadyProcessed": false,
+    "balance": 2
+  },
+  "api": {
+    "previousPid": 1632889,
+    "pid": 3508511,
+    "origin": "http://127.0.0.1:43927"
+  }
+}

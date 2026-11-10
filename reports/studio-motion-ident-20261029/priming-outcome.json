@@ -1,0 +1,11 @@
+{
+  "jobId": "d37cc0a5-d188-4138-8240-ea3bab284f91",
+  "status": "completed",
+  "profile": {
+    "backend": "local_cpu",
+    "width": 640,
+    "height": 360,
+    "fps": 24
+  },
+  "nativeRecoveryQualified": false
+}

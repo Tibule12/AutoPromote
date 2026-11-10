@@ -1,0 +1,7 @@
+{
+  "nativeFrontend": true,
+  "normalSignIn": true,
+  "headless": true,
+  "muted": true,
+  "errors": []
+}

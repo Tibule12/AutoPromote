@@ -1,0 +1,10 @@
+{
+  "assertions": 18,
+  "passed": true,
+  "workerImported": false,
+  "cpuDefault": 600,
+  "cpuMaximum": 1200,
+  "wallMaximum": 1800,
+  "fileMaximumMiB": 750,
+  "scope": "Pure real helper functions loaded through AST. pytest unavailable in checked Python environments; no pytest success claimed."
+}

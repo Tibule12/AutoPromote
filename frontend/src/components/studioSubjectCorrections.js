@@ -9,6 +9,22 @@ export function savedSubjectBox(item) {
     box[0]<box[2] && box[1]<box[3] ? [...box] : undefined;
 }
 
+export function savedSubjectRefinement(item) {
+  let selection;
+  try { selection = JSON.parse(item.maskJob?.selectionJson || 'null'); } catch (_) { /* No valid legacy preferences. */ }
+  const result = {};
+  const radius = item.maskRefinementRadius ?? selection?.refinement?.radius;
+  if (Number.isInteger(radius) && radius >= 2 && radius <= 24) result.maskRefinementRadius = radius;
+  const ids = item.maskColourComponentIds ?? selection?.refinement?.colourComponentIds;
+  if (Array.isArray(ids)) {
+    const components = item.maskComponents ?? selection?.components ?? [];
+    const fixed = new Set((Array.isArray(components) ? components : [])
+      .filter(component => component?.propagate === false).map(component => component.id));
+    result.maskColourComponentIds = [...new Set(ids.filter(id => typeof id === 'string' && fixed.has(id)))];
+  }
+  return result;
+}
+
 export function correctSubjectItem(item, targetId, frameIndex, point, label, clear = false) {
   if (!Number.isInteger(frameIndex) || frameIndex < 0 || frameIndex >= Math.round((item.scene.sourceRange.end-item.scene.sourceRange.start)*24))
     throw new Error('Choose a frame inside this clip.');
@@ -39,6 +55,9 @@ export function correctSubjectItem(item, targetId, frameIndex, point, label, cle
     if(clear){target.points=[];if(frameIndex)component.shotPrompts=component.shotPrompts.filter(p=>p!==target);}
     else {if(target.points.length>=16)throw new Error('This frame already has sixteen points.');target.points.push({position:point,label});}
   }
+  // Completed job metadata was the only copy of preferences in older projects.
+  // Retain authoring choices before detaching that immutable result/request.
+  Object.assign(next, savedSubjectRefinement(next));
   delete next.preview;delete next.modelArtifactRef;delete next.trackingArtifactRef;delete next.maskJob;delete next.pending;
   return next;
 }

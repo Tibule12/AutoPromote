@@ -1,3 +1,7 @@
+import {studioMatteSurfaceStyle} from './studioMatteSurface';
+import StudioDirectorCreativePanel from './StudioDirectorCreativePanel';
+import StudioSubjectEchoControls from './StudioSubjectEchoControls';
+import StudioWatermarkControls from './StudioWatermarkControls';
 import { bindStudioOverlayMedia, prepareStudioOverlayMedia } from './studioOverlayMedia';
 import StudioSceneActionsPanel from './StudioSceneActionsPanel';
 import { prepareStudioSceneActions } from './studioSceneActions';
@@ -15,6 +19,7 @@ import {
   evaluateWorldLayerPose,
   isHiddenTrackMatteSource,
   layerHasActiveMotionDrivers,
+  removeStudioLayerSafely,
   validateStudioTrackMattes,
 } from "./studioCompRigging";
 import {
@@ -28,6 +33,7 @@ import { uploadSourceFileViaBackend } from "../utils/sourceUpload";
 import StudioLaunchTemplatePanel from "./StudioLaunchTemplatePanel";
 import ProductHelpButton from "./ProductHelpButton";
 import StudioLayerMask from "./StudioLayerMask";
+import StudioMediaColorizeFilters from "./StudioMediaColorizeFilters";
 import { studioMediaEffectFilter } from "./studioMediaEffects";
 import { studioLayerEntries, moveStudioLayer, orderStudioCollection } from "./studioLayerOrder";
 import { studioGroupTree, createStudioGroup, moveStudioGroupNode, removeStudioGroup, removeStudioGroupMembers, studioGroupLocalPoint, studioGroupProgrammePoint, GROUP_TRANSFORM, evaluateStudioGroupTransform, validateStudioGroupKeyframes, pruneRemovedStudioGroupKeys } from "./studioGroups";
@@ -197,6 +203,9 @@ import { describeStudioDirectorReview } from "./studioDirectorReviewDiff";
 import { postStudioDirectorReviewDecision } from "./studioDirectorReviewClient";
 import { registerStudioDirectorProjectRevision } from "./studioDirectorProjectRevisionClient";
 import { buildSourceShotDirectorSplitRequest, buildSourceShotDirectorSplitCandidates } from "./studioDirectorEvidenceProposals";
+import { createSourceShotDirectorDraft, restoreSourceShotDirectorDraft,
+  sourceShotDirectorDraftMatches } from "./studioDirectorSavedDraft";
+import { buildDirectorReframeRequest, buildDirectorMomentRequest } from "./studioDirectorWorkspaceProposals";
 import { secondsToTicks, ticksToSeconds, mapOutputTickToProgrammeTick, mapProgrammeTickToOutputTick } from "./studioTime";
 import { advanceStudioCueStartPlan, scheduleStudioCueGain, scheduleStudioCueRate, studioCueProgrammeTime, studioCueStartPlan } from "./studioCueGain";
 import { bindStudioAudioSource, bindStudioAudioSources, studioUploadedAudioBinding } from "./studioAudioSourceBindings";
@@ -232,6 +241,7 @@ import {
   normalizeAudioRemix,
 } from "./audio/audioRemixModel";
 import {
+  applyStudioMediaGain,
   ensureAudioRemixPreview,
   disposeAudioRemixPreview,
   unlockAudioRemixContext,
@@ -240,6 +250,7 @@ import {
 import "./audio/audioRemixTimeline.css";
 import "./ViralClipStudio.css";
 import "./StudioControls.css";
+import "./studioFeatureControls.css";
 import TimelineSourceFilmstrip from "./TimelineSourceFilmstrip";
 import StudioControlMenu from "./StudioControlMenu";
 
@@ -2343,6 +2354,9 @@ const VIRAL_STUDIO_WORKFLOW = [
 ];
 
 const CREATIVE_STUDIO_TOOLS = [
+  ...(process.env.REACT_APP_STUDIO_DIRECTOR_MOTION === "true"
+    ? [{ id: "director", label: "Director", icon: "✦", helper: "Describe a motion edit. Review the Director’s selected shots and editable motion before applying." }]
+    : []),
   { id: "moments", label: "Moments", icon: "✦", helper: "Choose a source range. Review Director suggestions before applying them to the timeline." },
   { id: "cut", label: "Cut", icon: "✂", helper: "Select a video clip for trim, split, delete and precision edits. Ripple edits move the following clips; slip edits change the source range." },
   { id: "hook", label: "Hook", icon: "⌁", helper: "Set opening text, style, focus and timing. This changes the opening of the clip, not the underlying source file." },
@@ -2801,7 +2815,10 @@ const ViralClipStudio = ({
   const [workspaceMode, setWorkspaceMode] = useState("creator");
   const [projectId, setProjectId] = useState(() => createSecureId("viral-project"));
   const [localDirectorProposal, setLocalDirectorProposal] = useState(null);
+  const [directorDraftRestore, setDirectorDraftRestore] = useState(null);
   const directorCandidateSelectionRef = useRef(0);
+  const directorDraftRestoreVersionRef = useRef(0);
+  const directorDraftSaveRef = useRef(null);
   const incomingDirectorProposalRequest = directorProposalRequest ||
     (localDirectorProposal?.projectId === projectId ? localDirectorProposal.request : null);
   const [projectName, setProjectName] = useState("Untitled viral edit");
@@ -3734,9 +3751,17 @@ const ViralClipStudio = ({
       if (error.code !== "INVALID_SOURCE_RANGE") throw error;
       snapshot.studioDocument = null;
     }
-    return snapshot.studioDocument
+    const projected = snapshot.studioDocument
       ? projectStudioEditableStateToSnapshot(snapshot.studioDocument, snapshot)
       : snapshot;
+    const savedDirectorDraft = localDirectorProposal?.savedDraft || directorDraftRestore?.saved;
+    const consumedDirectorDraft = savedDirectorDraft?.choiceProposalIds?.length === 0 &&
+      snapshot.studioDocument?.directorReviewJournal?.some(item => item.receipt?.proposalId === savedDirectorDraft.selectedProposalId);
+    projected.sourceShotDirectorDraft = !directorProposalRequest &&
+      !consumedDirectorDraft &&
+      sourceShotDirectorDraftMatches(snapshot.studioDocument, savedDirectorDraft)
+      ? savedDirectorDraft : null;
+    return projected;
   };
   latestEditorSnapshotRef.current = getEditorSnapshot;
 
@@ -3795,6 +3820,9 @@ const ViralClipStudio = ({
           snapshot: savedSnapshot,
           projectId: nextId,
         });
+        // Analysis ownership is bound to the original project. A copy keeps
+        // its edit/media but needs a new source-bound Director analysis.
+        savedSnapshot.sourceShotDirectorDraft = null;
       }
       const saved = await saveViralStudioProject({
         id: nextId,
@@ -4135,6 +4163,7 @@ const ViralClipStudio = ({
       audioAutomationSource: _audioAutomationSource,
       activeReframeKeyframeId: _activeReframeKeyframeId,
       activeAngleGroupId: _activeAngleGroupId,
+      sourceShotDirectorDraft: _sourceShotDirectorDraft,
       hookPreviewLoop: _hookPreviewLoop,
       proxySettings: _proxySettings,
       projectMedia: snapshotProjectMedia,
@@ -4209,6 +4238,19 @@ const ViralClipStudio = ({
     if (studioDocumentRef.current?.compatibility?.editableStateVersion === 1) {
       snapshot = projectStudioEditableStateToSnapshot(studioDocumentRef.current, snapshot);
     }
+    const directorRestoreVersion = ++directorDraftRestoreVersionRef.current;
+    ++directorCandidateSelectionRef.current;
+    ++faceTrackingGeneration.current;
+    setFaceTrackingStatus("idle");
+    setFaceTrackingMessage("");
+    setLocalDirectorProposal(null);
+    setDirectorReview(null);
+    setDirectorReviewState("idle");
+    setDirectorReviewError("");
+    setDirectorDraftRestore(snapshot.sourceShotDirectorDraft && studioDocumentRef.current ? {
+      version: directorRestoreVersion, projectId: studioDocumentRef.current.projectId,
+      saved: snapshot.sourceShotDirectorDraft,
+    } : null);
     const normalizedClips = snapshot.orderedClips || [];
     const normalizedOverlays = snapshot.overlays || [];
     setOrderedClips(normalizedClips);
@@ -7145,9 +7187,12 @@ const ViralClipStudio = ({
     return Math.min(1, energy);
   };
 
-  // Broader frame-driven composition remains a local diagnostic candidate
-  // until native throughput and moving picture/sound qualification pass.
-  const presentedFramePreview = workspaceMode === 'fxflow' || process.env.REACT_APP_STUDIO_PRESENTED_FRAME_PREVIEW === 'true';
+  // Video mattes need decoded pixels in every workspace, including a cold
+  // Quick reopen. Their transparent initial SVG is replaced by this painter.
+  const hasVideoTrackMatte = useMemo(() => overlays.some(layer =>
+    layer.trackMatte?.mode && layer.trackMatte.mode !== 'none' && overlays.some(source =>
+      String(source.id) === String(layer.trackMatte.sourceLayerId) && ['image','video'].includes(source.type))), [overlays]);
+  const presentedFramePreview = hasVideoTrackMatte || workspaceMode === 'fxflow' || process.env.REACT_APP_STUDIO_PRESENTED_FRAME_PREVIEW === 'true';
   const currentTimelineClip = timeline[activeTimelineIndex] || null;
   const subjectProgrammePreview = useMemo(() => renderedOutputUrl ? null :
     resolveSubjectVfxProgrammePreview(subjectVfxScenes,
@@ -7369,6 +7414,7 @@ const ViralClipStudio = ({
           audio = document.createElement("audio");
           audio.preload = "auto";
           applySafeMediaSource(audio, proxy.url);
+          remixPreviewMediaRef.current.add(audio);
           timelineAudioPoolRef.current.set(proxy.id, audio);
         }
         if (Math.abs(audio.currentTime - proxy.sourceSeekTime) > 0.15) {
@@ -7376,8 +7422,8 @@ const ViralClipStudio = ({
         }
         audio.playbackRate = video.playbackRate || 1;
         audio.preservesPitch = true;
-        audio.volume = clampNumber(previewVolume * proxy.volume * interpolateAutomationValue({
-          keyframes: audioKeyframes.originalAudio, property: 'volume', time: globalTime, fallback: 100 }) / 100, 0, 1, 0);
+        applyStudioMediaGain(audio, previewVolume * proxy.volume * interpolateAutomationValue({
+          keyframes: audioKeyframes.originalAudio, property: 'volume', time: globalTime, fallback: 100 }) / 100);
         if (audio.paused) {
           safePlayMediaElement(audio);
         }
@@ -7665,14 +7711,14 @@ const ViralClipStudio = ({
   const hookTransformOrigin = `${hookVisualFocusPoint.x}% ${hookVisualFocusPoint.y}%`;
   const finishPreviewIsLive = comparisonMode !== "before" && !renderedOutputUrl;
   const compiledAdjustmentGrades = useMemo(() => compileStudioAdjustmentStack(adjustmentLayers), [adjustmentLayers]);
-  const effectiveFinishFx = finishFx.precisionGrade ? finishFx : interpolateFinishKeyframes(
+  const effectiveFinishFx = useMemo(() => interpolateFinishKeyframes(
     finishFx,
     finishKeyframes,
     previewTimelineTime
-  );
+  ), [finishFx, finishKeyframes, previewTimelineTime]);
   const finishFilter = finishPreviewIsLive && !effectiveFinishFx.precisionGrade ? buildCinematicCssFilter(effectiveFinishFx) : "";
-  const precisionPreviewGrade = useMemo(() => finishPreviewIsLive && finishFx.precisionGrade
-    ? buildPrecisionGrade(finishFx) : null, [finishPreviewIsLive, finishFx]);
+  const precisionPreviewGrade = useMemo(() => finishPreviewIsLive && effectiveFinishFx.precisionGrade
+    ? buildPrecisionGrade(effectiveFinishFx) : null, [finishPreviewIsLive, effectiveFinishFx]);
   const advancedColorCube = useMemo(() => buildAdvancedColorCube(advancedColor), [advancedColor]);
   const finishZoom = finishPreviewIsLive ? Math.max(1, Number(effectiveFinishFx.zoom || 1)) : 1;
   const finishTransformOrigin =
@@ -8493,12 +8539,16 @@ const ViralClipStudio = ({
     });
   };
 
-  const analyzeSpeakerFaces = async (mode = "anchored") => {
+  const analyzeSpeakerFaces = async (mode = "anchored", { directorReviewOnly = false } = {}) => {
     if (faceTrackingStatus === "processing") return;
+    if (directorReviewOnly && trackStates.video?.locked) {
+      setFaceTrackingMessage("Unlock the video track before asking Director to reframe it.");
+      return;
+    }
     if (mode === "source_shots") setLocalDirectorProposal(null);
     const generation = ++faceTrackingGeneration.current;
     const clipId = currentTimelineClip?.id;
-    const split = effectiveSmartCropMode === "center" && reframeAspect !== "16:9";
+    const split = !directorReviewOnly && effectiveSmartCropMode === "center" && reframeAspect !== "16:9";
     const window = getTimelineClipWindow(currentTimelineClip);
     if (window.duration > 900) {
       setFaceTrackingMessage("Trim the analysis range to fifteen minutes or less.");
@@ -8518,6 +8568,11 @@ const ViralClipStudio = ({
         }
       }
       const source = getSafeMediaSource(currentTimelineClip?.url || videoUrl);
+      const directorSourceVideo = directorReviewOnly ? [beforeVideoRef.current,
+        !renderedOutputUrl ? videoRef.current : null].find(media => media && media.videoWidth > 0 && media.videoHeight > 0 &&
+          getSafeMediaSource(media.currentSrc || media.src) === source) : null;
+      if (directorReviewOnly && !directorSourceVideo)
+        throw new Error("Open the source in Live Edit and wait for its picture to load before asking Director to reframe it.");
       const durableStoragePath = currentTimelineClip?.sourceStoragePath ||
         currentTimelineClip?.storagePath ||
         (currentTimelineClip?.id === "main" ? sourceStoragePath : null);
@@ -8533,7 +8588,8 @@ const ViralClipStudio = ({
         blob = await response.blob();
       }
       const [aspectWidth, aspectHeight] = reframeAspect.split(":").map(Number);
-      const sourceAspect = (videoRef.current?.videoWidth || 1920)/(videoRef.current?.videoHeight || 1080);
+      const sourceAspect = directorSourceVideo ? directorSourceVideo.videoWidth / directorSourceVideo.videoHeight
+        : (videoRef.current?.videoWidth || 1920)/(videoRef.current?.videoHeight || 1080);
       const coordinates = soloTrackingCoordinates(activeReframePosition,
         sourceAspect,
         aspectWidth/aspectHeight, speakerTrackZoom);
@@ -8604,6 +8660,20 @@ const ViralClipStudio = ({
         if (!response.ok) throw new Error(result.error || result.detail || "Face analysis failed.");
       }
       if (generation !== faceTrackingGeneration.current) return;
+      if (directorReviewOnly) {
+        const snapshot = getEditorSnapshot();
+        const request = buildDirectorReframeRequest({ document: snapshot.studioDocument,
+          occurrenceId: String(clipId), analysis: result, aspect: reframeAspect,
+          zoom: speakerTrackZoom, sourceAspect,
+          proposalId: createSecureId("director-reframe"), idempotencyKey: createSecureId("director-follow-command") });
+        const draft = await createSourceShotDirectorDraft(snapshot.studioDocument, { request, occurrenceId: String(clipId) });
+        if (generation !== faceTrackingGeneration.current || activeProjectIdRef.current !== projectId) return;
+        if (!draft) throw new Error("Tracking no longer matches this edit. Request Director again.");
+        setLocalDirectorProposal(draft); setDirectorReview(null); setDirectorReviewState("idle"); setDirectorReviewError("");
+        setFaceTrackingStatus("ready");
+        setFaceTrackingMessage("Director framing is ready for review. Your current edit is unchanged; approve its exact path before applying it.");
+        return;
+      }
       const offset = getTimelineOffsetForIndex(activeTimelineIndex);
       const keys = slot => (result.tracks?.[slot]?.keyframes || []).map(mark => ({ ...(split ? mark : coordinates.toPosition(mark)),
         ...(!split ? { sourceFocus: { x: Number(mark.x), y: Number(mark.y), aspect: sourceAspect } } : {}),
@@ -8777,9 +8847,15 @@ const ViralClipStudio = ({
           };
           const request = snapshot.studioDocument && buildSourceShotDirectorSplitRequest(parameters);
           const choices = request ? buildSourceShotDirectorSplitCandidates(parameters) : [];
-          setLocalDirectorProposal(request ? { projectId, request, choices,
-            occurrenceId: String(clipId) } : null);
+          const draft = request ? await createSourceShotDirectorDraft(snapshot.studioDocument,
+            { request, choices, occurrenceId: String(clipId) }) : null;
+          if (generation !== faceTrackingGeneration.current) return;
+          if (activeProjectIdRef.current === projectId &&
+              (!draft || sourceShotDirectorDraftMatches(studioDocumentRef.current, draft.savedDraft))) {
+            setLocalDirectorProposal(draft);
+          }
         } catch (proposalError) {
+          if (generation !== faceTrackingGeneration.current) return;
           setLocalDirectorProposal(null);
           console.warn("Source-shot analysis had no reviewable clip boundary", proposalError);
         }
@@ -9507,6 +9583,12 @@ const ViralClipStudio = ({
   const applyLinkedCommandSnapshot = result => {
     const next = result.snapshot;
     studioDocumentRef.current = result.document;
+    setReframeAspect(next.reframeAspect || reframeAspect);
+    setSpeakerTrackZoom(next.speakerTrackZoom || 1);
+    setSmartCrop(!!next.smartCrop);
+    setSmartCropMode(next.smartCropMode || smartCropMode);
+    setVideoFit(next.videoFit || videoFit);
+    setSafeFaceFraming(!!next.safeFaceFraming);
     setTimeline(next.timeline);
     setCompoundClips(next.compoundClips || []);
     setOverlays(next.overlays);
@@ -9526,6 +9608,35 @@ const ViralClipStudio = ({
     setAudioKeyframes(next.audioKeyframes);
   };
 
+  const prepareDirectorMoment = async () => {
+    if (trackStates.video?.locked || directorReviewState === "working") return;
+    const selection = ++directorCandidateSelectionRef.current;
+    try {
+      const snapshot = getEditorSnapshot();
+      const current = snapshot.timeline[activeTimelineIndex];
+      if (!snapshot.studioDocument || !current) throw new Error("Open a source clip before requesting a moment.");
+      const path = current.sourceStoragePath || current.storagePath;
+      const candidates = rankedClipGuidance.map(entry => ({ ...entry, clip: { ...entry.clip,
+        ...(!entry.clip.sourceStoragePath && !entry.clip.storagePath && path &&
+          (entry.clip.url || videoUrl) === current.url ? { sourceStoragePath: path } : {}),
+      } }));
+      const request = buildDirectorMomentRequest({ document: snapshot.studioDocument,
+        occurrenceId: String(current.id), candidates,
+        proposalId: createSecureId("director-moment"), idempotencyKey: createSecureId("director-moment-command") });
+      if (!request) throw new Error("No scored moment fits this owned source range. Analyze a longer source in Find Viral Clips or keep editing this range.");
+      const draft = await createSourceShotDirectorDraft(snapshot.studioDocument,
+        { request, occurrenceId: String(current.id) });
+      if (selection !== directorCandidateSelectionRef.current || activeProjectIdRef.current !== projectId) return;
+      if (!draft || !sourceShotDirectorDraftMatches(getEditorSnapshot().studioDocument, draft.savedDraft))
+        throw new Error("The source range changed. Ask Director again for its current range.");
+      setLocalDirectorProposal(draft); setDirectorReview(null); setDirectorReviewState("idle"); setDirectorReviewError("");
+      setStudioActionMessage("Director selected a source-bound moment from the existing scores. Review both boundaries before applying it; your edit is unchanged.");
+    } catch (error) {
+      if (selection === directorCandidateSelectionRef.current && activeProjectIdRef.current === projectId)
+        setStudioActionMessage(error.message || "Director could not prepare a moment. Your edit is unchanged.");
+    }
+  };
+
   const selectDirectorSourceCut = async request => {
     if (directorReviewState === "working" || localDirectorProposal?.projectId !== projectId ||
         !localDirectorProposal.choices?.includes(request)) return;
@@ -9541,7 +9652,10 @@ const ViralClipStudio = ({
       if (activeProjectIdRef.current !== projectId || selection !== directorCandidateSelectionRef.current) return;
       const index = snapshot.timeline.findIndex(clip => String(clip.id) === request.operation.target.occurrenceId);
       if (index < 0) throw new Error("This source range changed. Analyze its current range again.");
-      setLocalDirectorProposal(current => current?.projectId === projectId ? { ...current, request } : current);
+      setLocalDirectorProposal(current => current?.projectId === projectId ? {
+        ...current, request,
+        savedDraft: current.savedDraft ? { ...current.savedDraft, selectedProposalId: request.proposalId } : null,
+      } : current);
       setDirectorReview(null);
       setDirectorReviewState("idle");
       setDirectorReviewError("");
@@ -9557,8 +9671,37 @@ const ViralClipStudio = ({
     }
   };
 
+  const applyReviewedScenePlan = async plan => {
+    if (trackStates.graphics?.locked || trackStates.broll?.locked || trackStates.video?.locked)
+      throw Error('Unlock the Video, Graphics and B-roll tracks to apply a complete scene.');
+    const projectId = activeProjectIdRef.current, signature = lastSnapshotSignatureRef.current;
+    const stage = phoneFrameRef.current;
+    const result = await prepareStudioSceneActions(plan, getEditorSnapshot(), createSecureId, {
+      aspect: (stage?.clientWidth || 1280) / (stage?.clientHeight || 720),
+      isCurrent: () => activeProjectIdRef.current === projectId && lastSnapshotSignatureRef.current === signature,
+    });
+    const next = result.snapshot;
+    result.urls.forEach(url => projectMediaObjectUrlsRef.current.add(url));
+    pendingHistoryBaselineRef.current = cloneSnapshot(getEditorSnapshot());
+    flushSync(() => {
+      setOverlays(next.overlays);
+      setMotionKeyframes(next.motionKeyframes);
+      setAdjustmentLayers(next.adjustmentLayers);
+      setCompositionOrder(next.compositionOrder);
+      setCompoundClips(next.compoundClips || []);
+      if (next.finishFx) replaceFinishFx(next.finishFx);
+      if (next.advancedColor) setAdvancedColor(next.advancedColor);
+      if (Array.isArray(next.finishKeyframes)) setFinishKeyframes(next.finishKeyframes);
+      setComparisonMode('after');
+      setPreviewFinishedFile(false);
+    });
+    setStudioActionMessage('Reviewed cinematic scene applied as editable layers, grades and motion keys.');
+  };
+
   const openDirectorReview = async () => {
     if (!incomingDirectorProposalRequest || directorReviewState === "working") return;
+    const restoreVersion = directorDraftRestoreVersionRef.current;
+    const selectionVersion = directorCandidateSelectionRef.current;
     setDirectorReviewState("working");
     setDirectorReviewError("");
     try {
@@ -9570,6 +9713,10 @@ const ViralClipStudio = ({
         snapshot.studioDocument,
         incomingDirectorProposalRequest
       );
+      if (restoreVersion !== directorDraftRestoreVersionRef.current ||
+          selectionVersion !== directorCandidateSelectionRef.current ||
+          activeProjectIdRef.current !== projectId ||
+          serializeSnapshot(directorProposalRequestRef.current) !== serializeSnapshot(incomingDirectorProposalRequest)) return;
       const prepared = {
         requestSignature: serializeSnapshot(incomingDirectorProposalRequest),
         document: cloneSnapshot(snapshot.studioDocument),
@@ -9584,6 +9731,8 @@ const ViralClipStudio = ({
       setDirectorReview(prepared);
       setDirectorReviewState("ready");
     } catch (error) {
+      if (restoreVersion !== directorDraftRestoreVersionRef.current ||
+          selectionVersion !== directorCandidateSelectionRef.current || activeProjectIdRef.current !== projectId) return;
       setDirectorReview(null);
       setDirectorReviewState("error");
       setDirectorReviewError(error.message || "The incoming edit could not be reviewed.");
@@ -9595,6 +9744,7 @@ const ViralClipStudio = ({
     setDirectorReviewState("working");
     setDirectorReviewError("");
     let serverReview = null;
+    const reviewRestoreVersion = directorDraftRestoreVersionRef.current;
     try {
       const auth = getAuth();
       const reviewer = auth?.currentUser;
@@ -9606,7 +9756,7 @@ const ViralClipStudio = ({
         throw new Error("Your sign-in changed. Sign in again before reviewing this edit.");
       }
       const snapshot = getEditorSnapshot();
-      if (!snapshot.studioDocument ||
+      if (reviewRestoreVersion !== directorDraftRestoreVersionRef.current || !snapshot.studioDocument ||
           serializeSnapshot(snapshot.studioDocument) !== serializeSnapshot(directorReview.document)) {
         const stale = new Error("The project changed after this preview. Review the edit again.");
         stale.code = "STALE_REVIEW";
@@ -9622,7 +9772,7 @@ const ViralClipStudio = ({
         throw new Error("Your sign-in changed while saving the project version. No decision was recorded.");
       }
       const registeredSnapshot = latestEditorSnapshotRef.current?.();
-      if (activeProjectIdRef.current !== projectId ||
+      if (reviewRestoreVersion !== directorDraftRestoreVersionRef.current || activeProjectIdRef.current !== projectId ||
           serializeSnapshot(directorProposalRequestRef.current) !== directorReview.requestSignature ||
           lastSnapshotSignatureRef.current !== editorSignature ||
           !registeredSnapshot?.studioDocument ||
@@ -9641,7 +9791,7 @@ const ViralClipStudio = ({
         throw new Error("Your sign-in changed during review. No local edit was applied.");
       }
       const latestSnapshot = latestEditorSnapshotRef.current?.();
-      if (activeProjectIdRef.current !== projectId ||
+      if (reviewRestoreVersion !== directorDraftRestoreVersionRef.current || activeProjectIdRef.current !== projectId ||
           serializeSnapshot(directorProposalRequestRef.current) !== directorReview.requestSignature ||
           lastSnapshotSignatureRef.current !== editorSignature ||
           !latestSnapshot?.studioDocument ||
@@ -9668,7 +9818,7 @@ const ViralClipStudio = ({
             reviewReceipt, serverReview,
           });
       const beforeCommit = latestEditorSnapshotRef.current?.();
-      if (!beforeCommit?.studioDocument ||
+      if (reviewRestoreVersion !== directorDraftRestoreVersionRef.current || !beforeCommit?.studioDocument ||
           serializeSnapshot(beforeCommit.studioDocument) !== serializeSnapshot(latestSnapshot.studioDocument)) {
         throw new Error("The project changed while the server review was being applied locally.");
       }
@@ -10009,7 +10159,9 @@ const ViralClipStudio = ({
     });
     if (
       [
+        "director",
         "moments",
+        "director",
         "cut",
         "hook",
         "reframe",
@@ -12617,6 +12769,7 @@ const ViralClipStudio = ({
           file: musicTrack.file,
           token,
           mediaType: "audio",
+          purpose: "studio_project",
           fileName: `${createSecureId("music")}.${musicExtension}`,
           onProgress: (transferred, total) => {
             const percent = total > 0 ? Math.round((transferred / total) * 100) : 0;
@@ -12639,6 +12792,7 @@ const ViralClipStudio = ({
                 file: effect.file,
                 token,
                 mediaType: "audio",
+                purpose: "studio_project",
                 fileName: `${createSecureId("sfx")}.${extension}`,
                 onProgress: (transferred, total) => {
                   const percent = total > 0 ? Math.round((transferred / total) * 100) : 0;
@@ -13049,6 +13203,45 @@ const ViralClipStudio = ({
   }, [selectedClip]);
 
   useEffect(() => {
+    if (!directorDraftRestore || directorDraftRestore.projectId !== projectId) return;
+    let cancelled = false;
+    const pending = directorDraftRestore;
+    // Run after the restored source/timeline state commits. Restoring inside
+    // applyEditorSnapshot can race the old render's document reconciliation.
+    const document = getEditorSnapshot().studioDocument;
+    void restoreSourceShotDirectorDraft(document, pending.saved).then(restored => {
+      if (cancelled || pending.version !== directorDraftRestoreVersionRef.current ||
+          activeProjectIdRef.current !== pending.projectId) return;
+      if (restored && sourceShotDirectorDraftMatches(studioDocumentRef.current, restored.savedDraft)) {
+        setLocalDirectorProposal(restored);
+      }
+      setDirectorDraftRestore(current => current?.version === pending.version ? null : current);
+    });
+    return () => { cancelled = true; };
+    // Current edits are checked again before restoring; approval stays fresh.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId, directorDraftRestore]);
+
+  useEffect(() => {
+    if (directorDraftRestore) return;
+    const snapshot = getEditorSnapshot();
+    const signature = serializeSnapshot(snapshot.sourceShotDirectorDraft);
+    const previous = directorDraftSaveRef.current;
+    directorDraftSaveRef.current = { projectId, signature };
+    if (!previous || previous.projectId !== projectId || previous.signature === signature) return;
+    // Selecting/receiving a suggestion is durable UI state, not an edit or an
+    // approval. Do not consume Undo or invalidate a completed movie for it.
+    if (lastSnapshotRef.current && lastSnapshotSignatureRef.current ===
+        serializeSnapshot(getHistoryRelevantSnapshot(snapshot))) {
+      lastSnapshotRef.current = { ...lastSnapshotRef.current,
+        sourceShotDirectorDraft: snapshot.sourceShotDirectorDraft };
+    }
+    scheduleProjectAutosave(snapshot);
+    // Editor changes keep their existing history/autosave effect below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId, localDirectorProposal, directorDraftRestore]);
+
+  useEffect(() => {
     const snapshot = cloneSnapshot(getEditorSnapshot());
     // Inspector selection and playhead navigation are not edits. Excluding
     // them keeps Undo focused on visible media/timeline changes instead of
@@ -13103,11 +13296,16 @@ const ViralClipStudio = ({
       redoStackRef.current = [];
       lastSnapshotRef.current = snapshot;
       lastSnapshotSignatureRef.current = serializedSnapshot;
-      if (cutHistoryTransactionRef.current) {
+      if (cutHistoryTransactionRef.current &&
+          serializeSnapshot(getHistoryRelevantSnapshot(cutHistoryTransactionRef.current.baseline)) === baselineSignature) {
         cutHistoryTransactionRef.current.appliedSignature = serializedSnapshot;
         cutHistoryTransactionRef.current.appliedTimelineSignature = serializeSnapshot(
           snapshot.timeline || []
         );
+      } else {
+        // A separate scene/graphics transaction must not inherit an earlier
+        // cut's baseline. Otherwise its Undo also removes later sound/settings.
+        cutHistoryTransactionRef.current = null;
       }
       syncHistoryAvailability();
       scheduleProjectAutosave(snapshot);
@@ -14877,7 +15075,7 @@ const ViralClipStudio = ({
 
     const applyAudio = (muted, vol) => {
       if (video.muted !== muted) video.muted = muted;
-      if (Math.abs(video.volume - vol) > 0.005) video.volume = vol;
+      applyStudioMediaGain(video, vol);
     };
 
     if (anyMuteMain) {
@@ -14922,7 +15120,14 @@ const ViralClipStudio = ({
         : getPreviewTimelineTime(sourceVideo.currentTime || 0);
       overlayMediaRefsRef.current.forEach((overlayVideo, overlayId) => {
         if (String(soloPreviewOverlayId) === String(overlayId)) return;
-        if(overlayVideo.dataset.sharedProgrammeFrame==='true'){overlayVideo.pause();return;}
+        const paintedAt = Number(overlayVideo.closest("[data-studio-layer-id]")?.dataset.programmeTime ?? -1);
+        if (
+          overlayVideo.dataset.sharedProgrammeFrame === "true" &&
+          Math.abs(paintedAt - outputTime) < 1e-4
+        ) {
+          overlayVideo.pause();
+          return;
+        }
         const overlay = overlays.find(item => String(item.id) === String(overlayId));
         if (!overlay || overlay.type !== "video") {
           overlayVideo.pause();
@@ -15006,6 +15211,14 @@ const ViralClipStudio = ({
       });
     };
 
+    const boundOverlayVideos = [];
+    overlayMediaRefsRef.current.forEach(overlayVideo => {
+      if (!overlayVideo) return;
+      overlayVideo.addEventListener("loadedmetadata", syncOverlayMedia);
+      overlayVideo.addEventListener("loadeddata", syncOverlayMedia);
+      boundOverlayVideos.push(overlayVideo);
+    });
+
     sourceVideo.addEventListener("play", syncOverlayMedia);
     sourceVideo.addEventListener("pause", syncOverlayMedia);
     sourceVideo.addEventListener("seeking", syncOverlayMedia);
@@ -15015,6 +15228,10 @@ const ViralClipStudio = ({
     syncOverlayMedia();
 
     return () => {
+      boundOverlayVideos.forEach(overlayVideo => {
+        overlayVideo.removeEventListener("loadedmetadata", syncOverlayMedia);
+        overlayVideo.removeEventListener("loadeddata", syncOverlayMedia);
+      });
       sourceVideo.removeEventListener("play", syncOverlayMedia);
       sourceVideo.removeEventListener("pause", syncOverlayMedia);
       sourceVideo.removeEventListener("seeking", syncOverlayMedia);
@@ -17219,7 +17436,20 @@ const ViralClipStudio = ({
     const nextCompounds = removeStudioGroupMembers(compoundClips, [id]);
     setCompoundClips(nextCompounds);
     setOverlays(current => {
-      const nextOverlays = current.filter(overlay => overlay.id !== id);
+      const cleaned = removeStudioLayerSafely(
+        {
+          overlays: current,
+          compositionOrder,
+          motionKeyframes,
+          mainTransform,
+        },
+        id,
+        previewTimelineTime
+      );
+      const nextOverlays = cleaned.overlays;
+      if (Array.isArray(cleaned.compositionOrder)) {
+        setCompositionOrder(cleaned.compositionOrder);
+      }
       setActiveOverlayId(currentId => {
         if (currentId !== id) return currentId;
         return nextOverlays[nextOverlays.length - 1]?.id || null;
@@ -18164,6 +18394,7 @@ const ViralClipStudio = ({
         volume={previewVolume} renderedOutputUrl={renderedOutputUrl} onError={setStudioActionMessage}
         onPreparation={status=>{if(status==='loading'&&previewPlaybackIntentRef.current)pauseSynchronizedPreview();}}
       /> : null}
+      <StudioMediaColorizeFilters layers={overlays} />
       <StudioVoiceoverPreview ref={preparedVoiceBusRef} takes={voiceovers} videoRef={videoRef}
         getTimelineTime={getSoundEffectProgrammeTime} activeClip={activeTimelineIndex}
         getAudioContext={ensureSoundEffectAudioContext}
@@ -19950,7 +20181,7 @@ const ViralClipStudio = ({
                           if (o.enabled === false) return false;
                           // Hidden video mattes still need their ordinary source
                           // decoder and programme-clock transport, never a visible leaf.
-                          if (isHiddenTrackMatteSource(o, overlays) && o.type !== 'video') return false;
+                          if (isHiddenTrackMatteSource(o, overlays) && !['image','video'].includes(o.type)) return false;
                           if (o.isNullRig && (comparisonMode === "split" || activeOverlayId !== o.id)) return false;
                           const anySolo = overlays.some(cand => cand && !cand.isCaption && cand.solo);
                           if (anySolo && !o.isCaption && !o.solo) return false;
@@ -20041,7 +20272,7 @@ const ViralClipStudio = ({
                             <div
                               key={overlay.id}
                               data-studio-layer-id={overlay.id}
-                              data-studio-matte-source-only={isHiddenTrackMatteSource(overlay, overlays) && overlay.type === 'video' ? 'true' : undefined}
+                              data-studio-matte-source-only={isHiddenTrackMatteSource(overlay, overlays) && ['image','video'].includes(overlay.type) ? 'true' : undefined}
                               data-programme-time={compositionTime}
                               className={`draggable-overlay ${
                                 activeOverlayId === overlay.id && isPreviewPaused && !isPreviewFullscreen && comparisonMode !== "split"
@@ -20202,6 +20433,7 @@ const ViralClipStudio = ({
                                 )
                               ) : overlay.type === "image" && safeOverlaySrc ? (
                                 <img
+                                  crossOrigin="anonymous"
                                   ref={element => {
                                     applySafeMediaSource(element, safeOverlaySrc);
                                   }}
@@ -20225,7 +20457,7 @@ const ViralClipStudio = ({
                               ) : safeOverlaySrc ? (
                                 <><canvas data-studio-shared-video="true" aria-hidden="true"
                                   style={{display:'none',width:'100%',height:'100%',objectFit:overlay.perspective?.sourceRect||overlay.mediaFit==='stretch'?'fill':overlay.mediaFit||'contain',pointerEvents:'none'}} />
-                                <video data-studio-overlay-decoder="true"
+                                <video data-studio-overlay-decoder="true" preload="auto"
                                   data-testid={`broll-preview-${overlay.id}`}
                                   poster={overlay.poster || undefined}
                                   ref={element => {
@@ -20416,7 +20648,7 @@ const ViralClipStudio = ({
                             </div>
                           );
                           if (!trackMatteUri) return overlayElement;
-                          return (
+                          const matteElement = (
                             <div
                               key={overlay.id}
                               data-studio-matte-wrap={overlay.id}
@@ -20427,7 +20659,7 @@ const ViralClipStudio = ({
                                 inset: 0,
                                 pointerEvents: "none",
                                 zIndex: compositionRank.get(overlay.id) ?? 100 + index,
-                                mixBlendMode: overlay.blendMode || "normal",
+                                mixBlendMode: overlay.matteSurface?.enabled?"normal":overlay.blendMode || "normal",
                                 maskImage: trackMatteUri,
                                 WebkitMaskImage: trackMatteUri,
                                 maskSize: "100% 100%",
@@ -20439,6 +20671,7 @@ const ViralClipStudio = ({
                               {overlayElement}
                             </div>
                           );
+                          return overlay.matteSurface?.enabled ? <div data-studio-surface-wrap={overlay.id} key={overlay.id} style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:compositionRank.get(overlay.id) ?? 100+index,mixBlendMode:overlay.blendMode||"normal",...studioMatteSurfaceStyle(overlay.matteSurface,phoneFrameRef.current?.clientHeight||720)}}>{matteElement}</div> : matteElement;
                         })}
                       </StudioGroupPreview>
                         )}
@@ -21887,8 +22120,8 @@ const ViralClipStudio = ({
                       <div className="studio-director-review__heading">
                         <div>
                           <span className="panel-kicker">Incoming proposal</span>
-                          <h4>Review one suggested cut</h4>
-                          <p>The timeline stays unchanged until you approve this exact preview.</p>
+                          <h4>Review this Director edit</h4>
+                          <p>Your edit stays unchanged until you approve this exact proposal.</p>
                         </div>
                         {(!visibleDirectorReview || ["stale", "error"].includes(directorReviewState)) ? (
                           <button
@@ -21934,6 +22167,20 @@ const ViralClipStudio = ({
                             <span>Base revision {visibleDirectorReview.proposal.baseRevision}</span>
                             <span>{visibleDirectorReview.diff.operationLabel}</span>
                           </div>
+                          {visibleDirectorReview.diff.framing ? (
+                            <div className="studio-director-review__evidence" data-testid="studio-director-reframe-evidence">
+                              <strong>Follow the foreground face — framing proposal requiring review</strong>
+                              <span>Project output aspect {visibleDirectorReview.diff.framing.beforeAspect} → {visibleDirectorReview.diff.framing.afterAspect}</span>
+                              <span>Source tracking points {visibleDirectorReview.diff.framing.points.length}; zoom {visibleDirectorReview.diff.framing.zoom.toFixed(2)}×</span>
+                              <span>Analysis source SHA-256 {visibleDirectorReview.proposal.evidence.sourceSha256.slice(0, 12)}…</span>
+                              <p>This follows the detected foreground face. It does not identify the speaker. The server must verify the stored analysis before recording your decision.</p>
+                              <details><summary>Review source tracking coordinates</summary><ol>
+                                {visibleDirectorReview.diff.framing.points.map(point => <li key={point.sourceTick}>
+                                  {formatPreviewTimePrecise(ticksToSeconds(point.sourceTick))}: x {point.x.toFixed(1)}%, y {point.y.toFixed(1)}%{point.cut ? " · camera cut" : ""}
+                                </li>)}
+                              </ol></details>
+                            </div>
+                          ) : null}
                           {visibleDirectorReview.proposal.evidence?.type === "source_shot_boundary" ? (
                             <div className="studio-director-review__evidence"
                               data-testid="studio-director-review-evidence">
@@ -22025,7 +22272,17 @@ const ViralClipStudio = ({
                 activeCreativeTool === "export" ? "is-export-hidden" : ""
               }`}
               data-testid="clip-studio-inspector"
+              aria-label="Studio feature controls"
+              data-active-tool={activeCreativeTool}
             >
+              {studioInspectorTab === "director" ? (
+                <div className="clip-inspector-body" role="tabpanel" data-testid="studio-director-inspector">
+                  <StudioDirectorCreativePanel getSnapshot={getEditorSnapshot} onApply={applyReviewedScenePlan}
+                    onOpenNodes={()=>{setWorkspaceMode('fxflow');selectCreativeTool('flow');}}
+                    locked={!!(trackStates.graphics?.locked || trackStates.broll?.locked || trackStates.video?.locked)} />
+                </div>
+              ) : null}
+
               {studioInspectorTab === "moments" ? (
                 <div className="clip-inspector-body" role="tabpanel" aria-label="Moment selection" data-testid="studio-moments-inspector">
                   <div className="inspector-heading-row">
@@ -22057,6 +22314,9 @@ const ViralClipStudio = ({
                   activeCreativeTool === "moments" ? "is-expanded" : "is-compact"
                 }`}
               >
+                <button type="button" className="mini-toggle-btn" data-testid="director-propose-moment"
+                  disabled={trackStates.video?.locked || directorReviewState === "working"}
+                  onClick={() => void prepareDirectorMoment()}>Director: prepare strongest available moment</button>
                 <button
                   type="button"
                   className="creative-director-heading"
@@ -22813,6 +23073,12 @@ const ViralClipStudio = ({
                       {effectiveSmartCrop ? "Enabled" : "Off"}
                     </span>
                   </div>
+
+                  <button type="button" className="mini-toggle-btn" data-testid="director-propose-reframe"
+                    disabled={faceTrackingStatus === "processing" || trackStates.video?.locked || speakerTrackZoom > 1.5}
+                    onClick={() => analyzeSpeakerFaces("source_shots", { directorReviewOnly: true })}>Director: propose tracked framing</button>
+                  {speakerTrackZoom > 1.5 ? <small>Set Speaker zoom to 1.5× or less for a reviewed Director proposal.</small> : null}
+                  {faceTrackingMessage && effectiveSmartCropMode !== "speaker_track" ? <p role="status">{faceTrackingMessage}</p> : null}
 
                   <label className="inspector-toggle-row">
                     <span>
@@ -23675,6 +23941,11 @@ const ViralClipStudio = ({
                   >
                     ▶ Preview {reframeAspect} Framing
                   </button>
+                  <StudioWatermarkControls enabled={removeWatermark} onEnabledChange={setRemoveWatermark}
+                    mode={watermarkMode} onModeChange={setWatermarkMode} regions={manualWatermarkRegions}
+                    activeId={activeWatermarkRegionId} onSelect={setActiveWatermarkRegionId}
+                    onAdd={addManualWatermarkRegion} onRemove={deleteManualWatermarkRegion}
+                    onRegionChange={updateManualWatermarkRegion} />
                 </div>
               ) : null}
 
@@ -25547,27 +25818,24 @@ const ViralClipStudio = ({
                       <h4>Parenting, Mattes, Drivers &amp; Node Graph</h4>
                     </div>
                   </div>
+                  <details className="studio-scene-actions" data-testid="flow-director-choreographer">
+                    <summary>✦ AI Cinema Director · Source-Bound Graph &amp; 3D LUT Choreographer</summary>
+                    <StudioDirectorCreativePanel
+                      getSnapshot={getEditorSnapshot}
+                      onApply={applyReviewedScenePlan}
+                      locked={!!(trackStates.graphics?.locked || trackStates.broll?.locked || trackStates.video?.locked)}
+                    />
+                  </details>
                   <StudioSceneActionsPanel getSnapshot={getEditorSnapshot} projectMedia={projectMedia} time={previewTimelineTime}
                     locked={!!(trackStates.graphics?.locked || trackStates.broll?.locked || trackStates.video?.locked)} onApply={async plan => {
-                    if (trackStates.graphics?.locked || trackStates.broll?.locked || trackStates.video?.locked)
-                      throw Error('Unlock the Video, Graphics and B-roll tracks to apply a complete scene.');
-                    const projectId = activeProjectIdRef.current, signature = lastSnapshotSignatureRef.current;
-                    const stage = phoneFrameRef.current;
-                    const result = await prepareStudioSceneActions(plan, getEditorSnapshot(), createSecureId, {
-                      aspect: (stage?.clientWidth || 1280) / (stage?.clientHeight || 720),
-                      isCurrent: () => activeProjectIdRef.current === projectId && lastSnapshotSignatureRef.current === signature,
-                    });
-                    const next = result.snapshot;
-                    result.urls.forEach(url => projectMediaObjectUrlsRef.current.add(url));
-                    pendingHistoryBaselineRef.current = cloneSnapshot(getEditorSnapshot());
-                    flushSync(() => {
-                      setOverlays(next.overlays); setMotionKeyframes(next.motionKeyframes);
-                      setAdjustmentLayers(next.adjustmentLayers); setCompositionOrder(next.compositionOrder);
-                      setCompoundClips(next.compoundClips || []);
-                      setComparisonMode('after'); setPreviewFinishedFile(false);
-                    });
-                    setStudioActionMessage('Reviewed cinematic scene applied as editable layers and motion keys.');
+                    await applyReviewedScenePlan(plan);
                   }} />
+                  <StudioSubjectEchoControls getSnapshot={getEditorSnapshot} projectMedia={projectMedia} time={previewTimelineTime}
+                    getSize={() => { const stage = phoneFrameRef.current;
+                      const aspect = (stage?.clientWidth || 1280) / (stage?.clientHeight || 720);
+                      return { width: Math.round(720 * aspect), height: 720 }; }}
+                    locked={!!(trackStates.graphics?.locked || trackStates.broll?.locked || trackStates.video?.locked)}
+                    onApply={applyReviewedScenePlan} />
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
                     <button
                       type="button"
@@ -25637,14 +25905,18 @@ const ViralClipStudio = ({
                       onSeek={jumpToOutputTimelineTime}
                     />
                   ) : (
-                    <StudioNodeFlow videoRef={videoRef} mapTime={getPreviewTimelineTime} advancedColor={advancedColor}
+                    <StudioNodeFlow videoRef={videoRef} mapTime={getPreviewTimelineTime} advancedColor={advancedColor} onChangeAdvancedColor={setAdvancedColor}
                       overlays={overlays}
                       mainTransform={mainTransform}
                       finishFx={finishFx}
+                      finishKeyframes={finishKeyframes}
+                      onChangeFinishKeyframes={setFinishKeyframes}
                       compositionOrder={compositionOrder}
                       adjustmentLayers={adjustmentLayers}
                       subjectVfxScenes={subjectVfxScenes}
                       motionKeyframes={motionKeyframes}
+                      onChangeMotionKeyframes={setMotionKeyframes}
+                      onSeek={jumpToOutputTimelineTime}
                       nodeFlow={nodeFlow}
                       activeOverlayId={activeOverlayId}
                       currentTime={previewTimelineTime}
@@ -25674,6 +25946,8 @@ const ViralClipStudio = ({
                         setAdjustmentLayers(next);
                         setComparisonMode("after");
                       }}
+                      onInteractionStart={() => setIsDragging(true)}
+                      onInteractionEnd={() => setIsDragging(false)}
                       onChangeNodeFlow={setNodeFlow}
                     />
                   )}
@@ -30416,14 +30690,18 @@ const ViralClipStudio = ({
                 onSeek={jumpToOutputTimelineTime}
               />
             ) : bottomDockView === "node_flow" ? (
-              <StudioNodeFlow videoRef={videoRef} mapTime={getPreviewTimelineTime} advancedColor={advancedColor}
+              <StudioNodeFlow videoRef={videoRef} mapTime={getPreviewTimelineTime} advancedColor={advancedColor} onChangeAdvancedColor={setAdvancedColor}
                 overlays={overlays}
                 mainTransform={mainTransform}
                 finishFx={finishFx}
+                finishKeyframes={finishKeyframes}
+                onChangeFinishKeyframes={setFinishKeyframes}
                 compositionOrder={compositionOrder}
                 adjustmentLayers={adjustmentLayers}
                 subjectVfxScenes={subjectVfxScenes}
                 motionKeyframes={motionKeyframes}
+                onChangeMotionKeyframes={setMotionKeyframes}
+                onSeek={jumpToOutputTimelineTime}
                 nodeFlow={nodeFlow}
                 activeOverlayId={activeOverlayId}
                 currentTime={previewTimelineTime}
@@ -30453,6 +30731,8 @@ const ViralClipStudio = ({
                   setAdjustmentLayers(next);
                   setComparisonMode("after");
                 }}
+                onInteractionStart={() => setIsDragging(true)}
+                onInteractionEnd={() => setIsDragging(false)}
                 onChangeNodeFlow={setNodeFlow}
               />
             ) : (

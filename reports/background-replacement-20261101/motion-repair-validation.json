@@ -1,0 +1,117 @@
+{
+  "sourceIntervalSeconds": [
+    22.458333333333332,
+    25.458333333333332
+  ],
+  "frames": 72,
+  "exportSha256": "81e01a9f5ddd3d8c725fd8d9be97d3b25ad17ed8724f44cdb5586c6307d6dfe3",
+  "previewSha256": "5b89077a7db24886bd5da2fceaa1f25ca37f9d43df15a8fed84cb189aa4b9e4c",
+  "previewToExport": {
+    "framesCompared": 72,
+    "ssimMean": 0.9872700694444444,
+    "ssimMin": 0.986072,
+    "pixelIdentical": false,
+    "comparison": "Exact native Fit full geometry then independent encode; not a visual cleanliness score."
+  },
+  "exportStreams": [
+    {
+      "codec_name": "h264",
+      "width": 1920,
+      "height": 1080,
+      "r_frame_rate": "24/1",
+      "duration": "3.000000",
+      "nb_frames": "72"
+    },
+    {
+      "codec_name": "aac",
+      "r_frame_rate": "0/0",
+      "duration": "3.000000",
+      "nb_frames": "142"
+    }
+  ],
+  "fullDecodePassed": true,
+  "modelAlphaStability": {
+    "before": {
+      "staticBoundaryJumpAbove32": 3341,
+      "staticPixelsTemporalRangeAbove32": 38371,
+      "staticPixelFramesJitterAbove32": 9318,
+      "meanStaticFrameDelta": 0.17695211022003962
+    },
+    "after": {
+      "staticBoundaryJumpAbove32": 2992,
+      "staticPixelsTemporalRangeAbove32": 5903,
+      "staticPixelFramesJitterAbove32": 3923,
+      "meanStaticFrameDelta": 0.021098606225493186
+    },
+    "diagnosticPopulation": "Pixels with source RGB channel range <=12/255 across all72 frames; not labelled alpha ground truth or a professional quality score."
+  },
+  "actualExportStability": {
+    "before": {
+      "staticPixelFramesRgbChangeAbove16": 16163,
+      "meanStaticRgbChannelChange255": 0.06502279310008564
+    },
+    "after": {
+      "staticPixelFramesRgbChangeAbove16": 6536,
+      "meanStaticRgbChannelChange255": 0.0501221817699218
+    }
+  },
+  "creativeGate": false,
+  "scope": {
+    "paidCloudInference": false,
+    "deploy": false,
+    "merge": false,
+    "productionDataChanges": false,
+    "unrelatedWorktreesChanged": false,
+    "sourceRgbFrozen": false,
+    "newSourceGeneration": false,
+    "newBackgroundScene": false
+  },
+  "visualStatus": "MOTION_STABILITY_IMPROVED_PROFESSIONAL_GATE_OPEN",
+  "professionalQualityClaimed": false,
+  "all72ActualPreviewAndExportFramesInspected": true,
+  "saveColdReopenCanonicalExact": true,
+  "finalSceneUnchanged": true,
+  "modelJobId": "d7d2bfbebf6d9e9d8f3dfbbaffd6a3f9b4ebda5796b3055b9e55fec9385606cb",
+  "modelVersion": "2.3.1",
+  "modelArtifactHash": "c0cb8d20e7c41ee4385e61f73bdf25bb9a4d715c4e02607069bcf38ebf674f10",
+  "actualModelInferencePerformed": false,
+  "alphaOrigin": "Source-derived temporal refinement of the prior hash-bound neural alpha; no new network inference.",
+  "previewJobId": "818e837c-275c-4515-ab61-6061e507323f",
+  "correctionFrame": 36,
+  "unchangedObjectSelections": 6,
+  "testsThisContinuation": {
+    "modelRuntime": 48,
+    "temporalAlpha": 9,
+    "compositorExport": 53,
+    "documentationAssistance": 51
+  },
+  "localNativeExportAndPreview": true,
+  "finalStudioPlaybackRecording": {
+    "completeRecording": false,
+    "exactLimitation": "Initial capture failed before playback because the headless compositor had not produced its first frame. During retries the isolated Auth/Firestore/Storage emulator stopped and the API exited with ECONNREFUSED. Its in-memory state was not recreated or replaced by mocked responses.",
+    "providedRecording": "Authentic native replacement-preview playback with editable timeline, before save/reopen/export; device-muted workflow capture. This is not a complete final-export playback recording.",
+    "nativeReplacementPreviewEndedObserved": true,
+    "priorCompleteFinalRecordingStillRetained": true
+  },
+  "remainingDefects": [
+    "Fine plant stems retain old-background spill and some missing/soft detail.",
+    "Frame-36 microphone rim still has small alpha mottling.",
+    "Object-correction boundary retains localized opacity changes inside the affected mic box; all motion-related variation is not eliminated.",
+    "Replacement photo lighting/perspective remains approximate; no physical relighting or recovered geometry."
+  ],
+  "standaloneActualFinalPlayback": {
+    "state": {
+      "ended": true,
+      "duration": 3,
+      "width": 1920,
+      "height": 1080,
+      "totalFrames": 72,
+      "droppedFrames": 30
+    },
+    "scope": "Actual exported movie playback in offline evidence page, not a Studio final playback recording.",
+    "headless": true,
+    "deviceMuted": true,
+    "smoothPlaybackQualified": false,
+    "limitation": "Read-only headless playback reached ended but reported 30 dropped frames; this run does not qualify playback performance. All actual exported frames were separately decoded and inspected."
+  }
+}

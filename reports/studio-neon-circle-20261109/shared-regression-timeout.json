@@ -1,0 +1,11 @@
+{
+  "testBatch": [
+    "StudioProgrammeFrame.test.js",
+    "ViralClipStudio.test.js"
+  ],
+  "terminatedAfterMoreThanSeconds": 600,
+  "reason": "Long optional regression run had no terminal result; local Firestore became unavailable. No causation or pass claimed.",
+  "focusedNewFrontendTestsPassed": 31,
+  "focusedWorkerTestsPassed": 25,
+  "assertionsChangedOrSkipped": false
+}

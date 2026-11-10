@@ -1,0 +1,32 @@
+{
+  "passed": true,
+  "sha256": "b415639d9d43b47fba0f6f4019728100653e9744c898da770e5cf87cd63af48f",
+  "bytes": 1753514,
+  "seconds": 8,
+  "video": {
+    "width": 1280,
+    "height": 720,
+    "codec": "h264",
+    "fps": "24/1",
+    "duration": "8.000000",
+    "frameCount": 192,
+    "pixelFormat": "yuv420p",
+    "encoder": "Lavc60.31.102 libx264"
+  },
+  "audio": {
+    "codec": "aac",
+    "channels": 2,
+    "sampleRate": "48000",
+    "duration": "8.000000"
+  },
+  "independentFullDecode": true,
+  "decodedAudio": {
+    "samples": 384000,
+    "sampleRate": 48000,
+    "seconds": 8,
+    "toleranceSeconds": 0.04466666666666667,
+    "passed": true
+  },
+  "contactSheet": "reports/studio-template-collection-20261104/editorial_fan_v1/native-motion-flow/final.mp4.frames.jpg",
+  "scope": "Technical only. Pixel and listening review are separate required evidence."
+}

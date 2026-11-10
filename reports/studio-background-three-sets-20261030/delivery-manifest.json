@@ -1,0 +1,71 @@
+{
+  "reviewFiles": [
+    {
+      "file": "cool-acoustic/final.mp4",
+      "sha256": "85da8d8e82ff9865d284d6f6a255d6e9717d248b7867c31680dd5298ddaa7063",
+      "bytes": 6976181
+    },
+    {
+      "file": "cool-acoustic/edited-in-studio.mp4",
+      "sha256": "d71e4256588bb99f4b9702e1560f98f3dc5294ced4e5a06a830402a4839ec18c",
+      "bytes": 2104652
+    },
+    {
+      "file": "cool-acoustic/compare-in-studio.mp4",
+      "sha256": "f6deab475b83c2f0ff5a26d655491c6e3947a3267db662092646a191bd7173e4",
+      "bytes": 2609816
+    },
+    {
+      "file": "warm-walnut/final.mp4",
+      "sha256": "ff8dda97e388b896a07533f88b3cd7bacd757a1fe9a99f50ab8b4534fe420cb7",
+      "bytes": 7005643
+    },
+    {
+      "file": "warm-walnut/edited-in-studio.mp4",
+      "sha256": "79782e42079247d242ea1234b86b9fb7271069ee1a34ac11b347063190121fc2",
+      "bytes": 2137598
+    },
+    {
+      "file": "warm-walnut/compare-in-studio.mp4",
+      "sha256": "397b84aa31966b5fac9a1f0dced3babd2e61cfbef8dbc4c9277a9a624ad07836",
+      "bytes": 2577940
+    },
+    {
+      "file": "neutral-gallery/final.mp4",
+      "sha256": "212477b54a8a79d5a8491f6039f5270ec2d4212835c0c02a4d60c35e3896b5ba",
+      "bytes": 6771566
+    },
+    {
+      "file": "neutral-gallery/edited-in-studio.mp4",
+      "sha256": "d4b15968b59ffd6150913312f0eff098f39e81b6d2398784764e72ca2e3a7583",
+      "bytes": 2086842
+    },
+    {
+      "file": "neutral-gallery/compare-in-studio.mp4",
+      "sha256": "47f32bf396639fde08229af04d8335bf25d54cfcbeba0db51f0ae55556261f47",
+      "bytes": 2581280
+    },
+    {
+      "file": "spoken-edit-and-three-compares.mp4",
+      "sha256": "c237f18b03925b1cf17b7ae54d9a2d2bd14b5b2c8c9a7b5c8ccd058ed3134383",
+      "bytes": 11790220
+    },
+    {
+      "file": "spoken-controls-and-results.mp4",
+      "sha256": "79c511b19e98bae85647e0b900d66b230fa4bc6ab6d720eaba2fc78203a20ff7",
+      "bytes": 3155070
+    }
+  ],
+  "videosDirectory": "/home/tibule12/Videos/AutoPromote - Three Podcast Backgrounds - 20261030",
+  "nativeEffectsOnly": true,
+  "syntheticNarration": true,
+  "allSpeechNormalTempo": true,
+  "noComputeReferenceInVoice": true,
+  "comparisonRecordingMethod": "Frame-by-frame native UI review, edited to24fps with unchanged native soundtrack; not real-time performance proof.",
+  "fullNarratedDemonstration": "spoken-edit-and-three-compares.mp4",
+  "newSchedules": 0,
+  "gpuJobs": 0,
+  "productionDeployment": false,
+  "mainMerge": false,
+  "ownerCreativeApproval": false
+}

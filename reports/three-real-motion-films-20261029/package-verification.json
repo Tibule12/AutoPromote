@@ -1,0 +1,42 @@
+{
+  "folder": "/home/tibule12/Videos/AutoPromote-Real-Motion-2026-10-29",
+  "films": [
+    {
+      "identity": "aperture",
+      "file": "01-APERTURE.mp4",
+      "durationSeconds": 110.33333333333334,
+      "sha256": "61d937608f48209b96766ef0f3b1182e752fc4208c115e666a66e46d41d04275",
+      "thumbnailSha256": "7df4fe2976b28e275eccb97c18b5ef31326e5c17c2d8d29b8d3ba9c2df343806",
+      "nativeProjectHash": "cd9255592f8dc395dd1aaccb38ccd8ba40f4906212258b02da0937f7439ae680",
+      "completeMatchingPlayback": true,
+      "independentExactRestore": true,
+      "ownerApproved": false,
+      "scheduled": false
+    },
+    {
+      "identity": "city",
+      "file": "02-BLOCK-LIGHT.mp4",
+      "durationSeconds": 110.25,
+      "sha256": "293b95984eac8620b7134c55987f5ea89a5ce80a8765cf648fc1dc998ea71384",
+      "thumbnailSha256": "c101fd669f8d005af45e3f8e58dc1d8a4afa3466cf24098ebb56c8f46d86c06c",
+      "nativeProjectHash": "e1878c0b1375d131bae9b76acb63f80fbf5aea3f4ffae1a3f824d10d670b5c77",
+      "completeMatchingPlayback": true,
+      "independentExactRestore": true,
+      "ownerApproved": false,
+      "scheduled": false
+    },
+    {
+      "identity": "chrono",
+      "file": "03-CHRONO.mp4",
+      "durationSeconds": 110,
+      "sha256": "2070d6e329b15fb0226bb92482bf9e0b2a87585376d1054d13173dc128aa7241",
+      "thumbnailSha256": "6022350c85ea641907e1f134ca7f793788dc54df93802727173fea13247c43fc",
+      "nativeProjectHash": "f854304a4867f058d55196ed406bf80706660ef7c16cd4a5f20184c555030525",
+      "completeMatchingPlayback": true,
+      "independentExactRestore": true,
+      "ownerApproved": false,
+      "scheduled": false
+    }
+  ],
+  "exactCopies": 49
+}

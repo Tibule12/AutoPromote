@@ -1,0 +1,32 @@
+{
+  "passed": true,
+  "sha256": "b02b6605a7d843541a6bd6d209bdfc2143ff10a6c4e69ab1825f0549e0ef4734",
+  "bytes": 15803037,
+  "seconds": 36,
+  "video": {
+    "width": 1280,
+    "height": 720,
+    "codec": "h264",
+    "fps": "24/1",
+    "duration": "36.000000",
+    "frameCount": 864,
+    "pixelFormat": "yuv420p",
+    "encoder": "Lavc60.31.102 libx264"
+  },
+  "audio": {
+    "codec": "aac",
+    "channels": 2,
+    "sampleRate": "48000",
+    "duration": "36.000000"
+  },
+  "independentFullDecode": true,
+  "decodedAudio": {
+    "samples": 1728512,
+    "sampleRate": 48000,
+    "seconds": 36.010666666666665,
+    "toleranceSeconds": 0.04466666666666667,
+    "passed": true
+  },
+  "contactSheet": "reports/studio-folded-space-20261101/flowing-ribbon/episode/native-motion-flow/final.mp4.frames.jpg",
+  "scope": "Technical only. Pixel and listening review are separate required evidence."
+}

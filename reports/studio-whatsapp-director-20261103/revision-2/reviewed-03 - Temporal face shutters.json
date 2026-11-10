@@ -1,0 +1,1507 @@
+{
+  "format": "autopromote-scene-actions",
+  "version": 1,
+  "projectId": "viral-project-bafcf805-f86e-4ec4-a2f4-6530a5c653ff",
+  "baseRevision": 24,
+  "name": "03 - Temporal face shutters",
+  "actions": [
+    {
+      "type": "media_plane",
+      "id": "R2 / portrait slice 1",
+      "name": "R2 / portrait slice 1",
+      "sourceMediaId": "launch-83b6bbc4008603d9dbccddcc",
+      "sourceStart": 0,
+      "startTime": 3,
+      "duration": 6,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.65,
+        "opacity": 1
+      },
+      "mediaFit": "contain",
+      "mask": {
+        "enabled": true,
+        "shape": "polygon",
+        "path": "polygon(0% 0%,100% 0%,100% 20.3%,0% 20.3%)",
+        "feather": 0,
+        "inverted": false
+      }
+    },
+    {
+      "type": "keys",
+      "targetId": "R2 / portrait slice 1",
+      "keys": [
+        {
+          "property": "x",
+          "time": 3,
+          "value": 90,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 3.55,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.4,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.65,
+          "value": 57,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.95,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 8.5,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 9,
+          "value": 90,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "R2 / portrait slice 1",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 3,
+          "value": 18,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 3.65,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 8.55,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 9,
+          "value": 13,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "R2 / portrait slice 1",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 3.18,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.7,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 9,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "media_plane",
+      "id": "R2 / portrait slice 2",
+      "name": "R2 / portrait slice 2",
+      "sourceMediaId": "launch-83b6bbc4008603d9dbccddcc",
+      "sourceStart": 0.12,
+      "startTime": 3,
+      "duration": 6,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.65,
+        "opacity": 1
+      },
+      "mediaFit": "contain",
+      "mask": {
+        "enabled": true,
+        "shape": "polygon",
+        "path": "polygon(0% 20%,100% 20%,100% 40.3%,0% 40.3%)",
+        "feather": 0,
+        "inverted": false
+      }
+    },
+    {
+      "type": "keys",
+      "targetId": "R2 / portrait slice 2",
+      "keys": [
+        {
+          "property": "x",
+          "time": 3,
+          "value": 10,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 3.61,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.4,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.65,
+          "value": 43,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.95,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 8.5,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 9,
+          "value": 10,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "R2 / portrait slice 2",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 3,
+          "value": -18,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 3.7,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 8.55,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 9,
+          "value": -13,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "R2 / portrait slice 2",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 3.23,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.7,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 9,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "media_plane",
+      "id": "R2 / portrait slice 3",
+      "name": "R2 / portrait slice 3",
+      "sourceMediaId": "launch-83b6bbc4008603d9dbccddcc",
+      "sourceStart": 0.24,
+      "startTime": 3,
+      "duration": 6,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.65,
+        "opacity": 1
+      },
+      "mediaFit": "contain",
+      "mask": {
+        "enabled": true,
+        "shape": "polygon",
+        "path": "polygon(0% 40%,100% 40%,100% 60.3%,0% 60.3%)",
+        "feather": 0,
+        "inverted": false
+      }
+    },
+    {
+      "type": "keys",
+      "targetId": "R2 / portrait slice 3",
+      "keys": [
+        {
+          "property": "x",
+          "time": 3,
+          "value": 90,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 3.67,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.4,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.65,
+          "value": 57,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.95,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 8.5,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 9,
+          "value": 90,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "R2 / portrait slice 3",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 3,
+          "value": 18,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 3.75,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 8.55,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 9,
+          "value": 13,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "R2 / portrait slice 3",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 3.28,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.7,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 9,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "media_plane",
+      "id": "R2 / portrait slice 4",
+      "name": "R2 / portrait slice 4",
+      "sourceMediaId": "launch-83b6bbc4008603d9dbccddcc",
+      "sourceStart": 0.36,
+      "startTime": 3,
+      "duration": 6,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.65,
+        "opacity": 1
+      },
+      "mediaFit": "contain",
+      "mask": {
+        "enabled": true,
+        "shape": "polygon",
+        "path": "polygon(0% 60%,100% 60%,100% 80.3%,0% 80.3%)",
+        "feather": 0,
+        "inverted": false
+      }
+    },
+    {
+      "type": "keys",
+      "targetId": "R2 / portrait slice 4",
+      "keys": [
+        {
+          "property": "x",
+          "time": 3,
+          "value": 10,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 3.73,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.4,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.65,
+          "value": 43,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.95,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 8.5,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 9,
+          "value": 10,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "R2 / portrait slice 4",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 3,
+          "value": -18,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 3.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 8.55,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 9,
+          "value": -13,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "R2 / portrait slice 4",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 3.33,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.7,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 9,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "media_plane",
+      "id": "R2 / portrait slice 5",
+      "name": "R2 / portrait slice 5",
+      "sourceMediaId": "launch-83b6bbc4008603d9dbccddcc",
+      "sourceStart": 0.48,
+      "startTime": 3,
+      "duration": 6,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.65,
+        "opacity": 1
+      },
+      "mediaFit": "contain",
+      "mask": {
+        "enabled": true,
+        "shape": "polygon",
+        "path": "polygon(0% 80%,100% 80%,100% 100%,0% 100%)",
+        "feather": 0,
+        "inverted": false
+      }
+    },
+    {
+      "type": "keys",
+      "targetId": "R2 / portrait slice 5",
+      "keys": [
+        {
+          "property": "x",
+          "time": 3,
+          "value": 90,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 3.79,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.4,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.65,
+          "value": 57,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.95,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 8.5,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 9,
+          "value": 90,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "R2 / portrait slice 5",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 3,
+          "value": 18,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 3.85,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 8.55,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 9,
+          "value": 13,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "R2 / portrait slice 5",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 3.38,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.7,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 9,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "move_layer",
+      "targetId": "R2 / BREAK",
+      "beforeId": "R2 / portrait slice 1"
+    },
+    {
+      "type": "move_layer",
+      "targetId": "R2 / THE",
+      "beforeId": "R2 / portrait slice 1"
+    },
+    {
+      "type": "move_layer",
+      "targetId": "R2 / FRAME",
+      "beforeId": "R2 / portrait slice 1"
+    }
+  ],
+  "graphics": {
+    "format": "autopromote-graphics",
+    "version": 1,
+    "name": "03 - Temporal face shutters",
+    "width": 1280,
+    "height": 720,
+    "duration": 24,
+    "layers": [
+      {
+        "id": "R2 / chapter ink",
+        "name": "R2 / chapter ink",
+        "type": "artwork",
+        "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\"><rect width=\"1280\" height=\"720\" fill=\"#15191a\"/></svg>",
+        "startTime": 3,
+        "duration": 6,
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "height": 100,
+        "scale": 1,
+        "rotation": 0,
+        "opacity": 1,
+        "keys": []
+      },
+      {
+        "id": "R2 / BREAK",
+        "name": "R2 / BREAK",
+        "type": "text",
+        "text": "BREAK",
+        "startTime": 3,
+        "duration": 6,
+        "x": 25,
+        "y": 28,
+        "width": 48,
+        "scale": 2.9,
+        "rotation": 0,
+        "opacity": 1,
+        "color": "#ece8dc",
+        "fontWeight": 900,
+        "textAlign": "center",
+        "strokeWidth": 0,
+        "strokeColor": "#15191a",
+        "keys": [
+          {
+            "property": "x",
+            "time": 3,
+            "value": 5,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "x",
+            "time": 3.5,
+            "value": 25,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "x",
+            "time": 8.5,
+            "value": 25,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "x",
+            "time": 9,
+            "value": 45,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 3,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 3.3,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 8.7,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 9,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "id": "R2 / THE",
+        "name": "R2 / THE",
+        "type": "text",
+        "text": "THE",
+        "startTime": 3,
+        "duration": 6,
+        "x": 77,
+        "y": 51,
+        "width": 48,
+        "scale": 1.45,
+        "rotation": 0,
+        "opacity": 1,
+        "color": "#d7ff43",
+        "fontWeight": 900,
+        "textAlign": "center",
+        "strokeWidth": 0,
+        "strokeColor": "#15191a",
+        "keys": [
+          {
+            "property": "x",
+            "time": 3,
+            "value": 57,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "x",
+            "time": 3.5,
+            "value": 77,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "x",
+            "time": 8.5,
+            "value": 77,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "x",
+            "time": 9,
+            "value": 97,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 3,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 3.3,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 8.7,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 9,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "id": "R2 / FRAME",
+        "name": "R2 / FRAME",
+        "type": "text",
+        "text": "FRAME",
+        "startTime": 3,
+        "duration": 6,
+        "x": 74,
+        "y": 72,
+        "width": 48,
+        "scale": 2.7,
+        "rotation": 0,
+        "opacity": 1,
+        "color": "#ece8dc",
+        "fontWeight": 900,
+        "textAlign": "center",
+        "strokeWidth": 0,
+        "strokeColor": "#15191a",
+        "keys": [
+          {
+            "property": "x",
+            "time": 3,
+            "value": 54,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "x",
+            "time": 3.5,
+            "value": 74,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "x",
+            "time": 8.5,
+            "value": 74,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "x",
+            "time": 9,
+            "value": 94,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 3,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 3.3,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 8.7,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 9,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          }
+        ]
+      }
+    ],
+    "groups": []
+  }
+}

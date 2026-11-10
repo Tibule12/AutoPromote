@@ -1,0 +1,10 @@
+{
+  "projectId": "viral-project-d5df376b-ad19-48e6-bb01-21d2b3b4e1fb",
+  "projectHash": "779aae7d9c5c3c4de8c7e67bafaf560883c099d565d3fa8bf7133e02e69031a4",
+  "movieSha256": "9c735e8dc05befeadedbd33355eacc01d4948eb85fbdd098182f801a15468cd1",
+  "nativeBackupMatchesRenderedDocument": true,
+  "compiledCompositionMatchesSubmitted": true,
+  "actualNativeDownload": true,
+  "ownedCompletedJobValidatedInNativeUi": true,
+  "observerRecoveredWithoutResubmission": true
+}

@@ -1308,6 +1308,7 @@ try {
     codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (_req, _res, next) => next(),
     require("./routes/studioDirectorReviewRoutes")
   );
+  app.use("/api/studio/director/creative-plan", require("./routes/studioDirectorCreativeRoutes"));
   app.use(
     "/api/studio/director/projects/revisions",
     routeLimiter({ windowHint: "studio_director_project_revisions" }),
@@ -1319,6 +1320,12 @@ try {
     routeLimiter({ windowHint: "studio_project_intelligence" }),
     codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (_req, _res, next) => next(),
     require("./routes/studioProjectIntelligenceRoutes")
+  );
+  app.use(
+    "/api/studio/director/creative-plan",
+    routeLimiter({ windowHint: "studio_director_creative_plan" }),
+    codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (_req, _res, next) => next(),
+    require("./routes/studioDirectorCreativeRoutes")
   );
   app.use(
     "/api/studio/director/analysis-artifacts",

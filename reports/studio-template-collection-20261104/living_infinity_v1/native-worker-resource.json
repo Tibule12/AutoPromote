@@ -1,0 +1,14 @@
+{
+  "executionId": "92f037a4d9035ad8075e5444208a070473f8af827078db38b7b0d37a114b54fb",
+  "wallSeconds": 573.9934847530094,
+  "cpuSeconds": 662.315394,
+  "peakRssKiB": 1569596,
+  "providerChargesStarted": false,
+  "invoiceCostMicros": null,
+  "termination": {
+    "code": 0,
+    "signal": null,
+    "startedAt": "2026-11-04T08:14:18.717Z",
+    "finishedAt": "2026-11-04T08:23:53.144Z"
+  }
+}

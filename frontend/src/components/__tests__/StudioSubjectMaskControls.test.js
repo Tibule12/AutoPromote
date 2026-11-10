@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import StudioSubjectMaskControls from "../StudioSubjectMaskControls";
 import { stable } from "../studioSubjectVfxContract";
+import { buildStudioLayersFromSnapshot, projectStudioLinkedTimingToSnapshot } from '../studioProjectDocument';
 const digest="c".repeat(64), jobId="a".repeat(64);
 const scene={version:1,id:"scene-a",sourceId:"source-a",sourceStoragePath:"studio/sources/owner/source.mp4",
   sourceRange:{start:0,end:6},prompt:{points:[[.4,.3]],labels:[1],shotPrompts:[]},
@@ -14,6 +15,63 @@ function Harness({initial={scene,enabled:true}}={}){const[item,setItem]=useState
   <StudioSubjectMaskControls item={item} onChange={setItem} getDocument={()=>document} getToken={async()=>"fixture-token"}
     apiBase="http://fixture.invalid" createId={()=>"request-a"}/><pre data-testid="saved-mask">{JSON.stringify(item)}</pre></>;}
 afterEach(()=>delete global.fetch);
+test('completed mask replacement and cold reopen retain the selected cleanup recipe for the next refinement',async()=>{
+ const component={id:'prop-a',box:[.4,.4,.8,.9],points:[{position:[.5,.6],label:1},{position:[.7,.6],label:0}],propagate:false};
+ const initial={scene,enabled:true,modelArtifactRef:reference,maskComponents:[component],maskJob:{finished:true,
+  selectionJson:stable({box:[.05,.02,.75,.99],refinement:{radius:15,colourComponentIds:['prop-a']}})}};
+ global.fetch=jest.fn().mockResolvedValueOnce(response({ok:true,projectId:document.projectId,revision:document.revision}))
+  .mockResolvedValueOnce(response({jobId})).mockResolvedValueOnce(response({jobId,status:'completed'}))
+  .mockResolvedValueOnce(response({scene,enabled:true,modelArtifactRef:reference}));
+ const view=render(<Harness initial={initial}/>);
+ expect(screen.getByLabelText('Edge refinement radius')).toHaveValue(15);
+ expect(screen.getByRole('checkbox',{name:'Clean fine edges of foreground object 1'})).toBeChecked();
+ fireEvent.click(screen.getByRole('button',{name:'Refine foreground selection'}));
+ fireEvent.click(screen.getByRole('button',{name:'Create subject mask'}));
+ await screen.findByRole('button',{name:'Subject mask attached'});
+ const saved=JSON.parse(screen.getByTestId('saved-mask').textContent);
+ expect(saved.maskRefinementRadius).toBe(15);expect(saved.maskColourComponentIds).toEqual(['prop-a']);
+ expect(JSON.parse(saved.maskJob.selectionJson)).not.toHaveProperty('refinement');
+ view.unmount();
+ const layers=buildStudioLayersFromSnapshot({subjectVfxScenes:[saved]});
+ const reopened=projectStudioLinkedTimingToSnapshot(JSON.parse(JSON.stringify({layers}))).subjectVfxScenes[0];
+ global.fetch=jest.fn().mockResolvedValueOnce(response({ok:true,projectId:document.projectId,revision:document.revision}))
+  .mockRejectedValueOnce(new Error('Captured restored recipe'));
+ render(<Harness initial={reopened}/>);
+ expect(screen.getByLabelText('Edge refinement radius')).toHaveValue(15);
+ expect(screen.getByRole('checkbox',{name:'Clean fine edges of foreground object 1'})).toBeChecked();
+ fireEvent.click(screen.getByRole('button',{name:'Refine saved mask edges'}));
+ await screen.findByText('Captured restored recipe');
+ expect(JSON.parse(fetch.mock.calls[1][1].body).parameters.refinement).toMatchObject({radius:15,colourComponentIds:['prop-a']});
+});
+
+test('changing the radius saves it and invalid drafts cannot start a request',()=>{
+ render(<Harness initial={{scene,enabled:true,modelArtifactRef:reference,maskRefinementRadius:15}}/>);
+ const radius=screen.getByLabelText('Edge refinement radius');
+ fireEvent.change(radius,{target:{value:'18'}});expect(JSON.parse(screen.getByTestId('saved-mask').textContent).maskRefinementRadius).toBe(18);
+ fireEvent.change(radius,{target:{value:'25'}});expect(screen.getByRole('button',{name:'Refine saved mask edges'})).toBeDisabled();
+ fireEvent.blur(radius);expect(radius).toHaveValue(18);expect(screen.getByRole('button',{name:'Refine saved mask edges'})).toBeEnabled();
+});
+
+test('selecting another scene loads its own saved radius instead of carrying the previous scene draft',()=>{
+ const props={onChange:jest.fn(),getDocument:()=>document,getToken:async()=>'fixture-token',apiBase:'http://fixture.invalid',createId:()=> 'request-a'};
+ const view=render(<StudioSubjectMaskControls {...props} item={{scene,modelArtifactRef:reference,maskRefinementRadius:15}}/>);
+ expect(screen.getByLabelText('Edge refinement radius')).toHaveValue(15);
+ view.rerender(<StudioSubjectMaskControls {...props} item={{scene:{...scene,id:'scene-b',sourceId:'source-b'},modelArtifactRef:{...reference,sourceAssetId:'source-b'}}}/>);
+ expect(screen.getByLabelText('Edge refinement radius')).toHaveValue(10);
+});
+
+test('cancelling a pending legacy refinement retains the recipe after removing its job metadata',async()=>{
+ const component={id:'prop-a',box:[.4,.4,.8,.9],points:[{position:[.5,.6],label:1},{position:[.7,.6],label:0}],propagate:false};
+ global.fetch=jest.fn().mockResolvedValue(response({status:'cancelled'}));
+ render(<Harness initial={{scene,enabled:true,modelArtifactRef:reference,maskComponents:[component],
+  maskJob:{jobId,finished:false,selectionJson:stable({refinement:{maskArtifactHash:reference.artifactHash,radius:15,colourComponentIds:['prop-a']}})}}}/>);
+ fireEvent.click(screen.getByRole('button',{name:'Cancel mask request'}));
+ await screen.findByText('Mask request cancelled.');
+ const saved=JSON.parse(screen.getByTestId('saved-mask').textContent);
+ expect(saved).not.toHaveProperty('maskJob');expect(saved.maskRefinementRadius).toBe(15);
+ expect(saved.maskColourComponentIds).toEqual(['prop-a']);expect(saved.modelArtifactRef).toEqual(reference);
+});
+
 test('fine colour correction is opt-in for the selected fixed object and stays in the refinement request',async()=>{
  const points=[{position:[.5,.6],label:1},{position:[.7,.6],label:0}];
  const component={id:'prop-a',box:[.4,.4,.8,.9],points,propagate:false};
@@ -117,7 +175,7 @@ test('a reopened legacy refinement attaches the existing job without resubmittin
   prompt:scene.prompt,box:[.05,.02,.75,.99],refinement:{maskArtifactHash:reference.artifactHash,radius:10,holdouts:[]}};
  global.fetch=jest.fn().mockResolvedValueOnce(response({jobId,status:'completed'}))
   .mockResolvedValueOnce(response({scene,enabled:true,modelArtifactRef:refined}));
- render(<Harness initial={{scene,enabled:true,modelArtifactRef:reference,
+ render(<Harness initial={{scene,enabled:true,modelArtifactRef:reference,maskRefinementRadius:15,maskColourComponentIds:[],
   maskJob:{requestId:'request-a',projectId:document.projectId,projectRevision:5,jobId,selectionJson:stable(selection)}}}/>);
  fireEvent.click(screen.getByRole('button',{name:'Resume subject mask'}));
  await waitFor(()=>expect(screen.getByRole('button',{name:'Subject mask attached'})).toBeDisabled());
@@ -126,6 +184,7 @@ test('a reopened legacy refinement attaches the existing job without resubmittin
   `http://fixture.invalid/api/media/studio-subject-masks/jobs/${jobId}/subject`]);
  const saved=JSON.parse(screen.getByTestId('saved-mask').textContent);
  expect(saved.maskJob.finished).toBe(true);expect(saved.modelArtifactRef).toEqual(refined);
+ expect(saved.maskRefinementRadius).toBe(15);expect(saved.maskColourComponentIds).toEqual([]);
 });
 
 test('a stale saved mask requires explicit native reuse and registers the current edit without another model request',async()=>{
@@ -135,7 +194,7 @@ test('a stale saved mask requires explicit native reuse and registers the curren
  global.fetch=jest.fn().mockResolvedValueOnce(response({jobId,status:'stale'}))
   .mockResolvedValueOnce(response({ok:true,projectId:document.projectId,revision:document.revision}))
   .mockResolvedValueOnce(response({scene,enabled:true,modelArtifactRef:refined}));
- render(<Harness initial={{scene,enabled:true,modelArtifactRef:reference,
+ render(<Harness initial={{scene,enabled:true,modelArtifactRef:reference,maskRefinementRadius:15,maskColourComponentIds:[],
   maskJob:{requestId:'request-a',projectId:document.projectId,projectRevision:4,jobId,selectionJson:stable(selection)}}}/>);
  fireEvent.click(screen.getByRole('button',{name:'Resume subject mask'}));
  await screen.findByRole('button',{name:'Use saved mask for this edit'});
@@ -144,5 +203,7 @@ test('a stale saved mask requires explicit native reuse and registers the curren
  await waitFor(()=>expect(screen.getByRole('button',{name:'Subject mask attached'})).toBeDisabled());
  expect(JSON.parse(fetch.mock.calls[2][1].body)).toEqual({id:scene.id,projectRevision:5});
  expect(fetch.mock.calls.some(([url])=>url.endsWith('/requests'))).toBe(false);
- expect(JSON.parse(screen.getByTestId('saved-mask').textContent).maskJob.reusedAtRevision).toBe(5);
+ const saved=JSON.parse(screen.getByTestId('saved-mask').textContent);
+ expect(saved.maskJob.reusedAtRevision).toBe(5);
+ expect(saved.maskRefinementRadius).toBe(15);expect(saved.maskColourComponentIds).toEqual([]);
 });

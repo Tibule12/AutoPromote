@@ -1,0 +1,10 @@
+{
+  "stopped": [
+    118048
+  ],
+  "activeOperations": 0,
+  "operationCount": 3,
+  "noMediaProcessRequest": true,
+  "workerExecutionCancelled": false,
+  "reason": "The stuck local Rules subprocess was restarted with an identical rule hash. Normal signed-in Storage read now returns200 in151ms. Reopen exact saved graph to discard requests bound to the stopped Rules subprocess."
+}

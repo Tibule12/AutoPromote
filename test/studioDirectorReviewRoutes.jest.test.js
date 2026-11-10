@@ -9,6 +9,7 @@ const { persistSourceShotArtifact } = require("../src/services/studioSourceShotA
 const { computeStudioDirectorPreviewFingerprint } = require("../src/services/studioDirectorReplayService");
 const { adaptStudioSnapshotToDocument } = require("../frontend/src/components/studioProjectDocument");
 const { prepareStudioDirectorProposal } = require("../frontend/src/components/studioDirectorProposals");
+const { buildDirectorReframeRequest } = require("../frontend/src/components/studioDirectorWorkspaceProposals");
 
 const store = new Map();
 const originalCollection = db.collection;
@@ -431,6 +432,66 @@ test("a bounded edge trim can be reviewed without source-shot evidence", async (
   const result = await post({ proposal: proposal(trim), decision: "approve" });
   expect(result.status).toBe(201);
   expect(result.body.decision).toBe("approve");
+});
+
+const trackedFramingProposal = async () => {
+  const document = adaptStudioSnapshotToDocument({ projectId: "project-1", snapshot: {
+    timeline: [{ id: "main", sourceClipId: "asset-1", startRequest: 0, endRequest: 20,
+      contentHash: "c".repeat(64), sourceStoragePath: "studio/sources/reviewer-1/a.mp4" }],
+    orderedClips: [{ id: "asset-1", start: 0, end: 20 }], selectedClipId: "asset-1",
+    smartCrop: false, reframeAspect: "9:16", speakerTrackZoom: 1,
+  } });
+  const sourceAssetId = document.assets[0].assetId, sourceSha256 = "c".repeat(64);
+  const analysis = { mode: "source_shots", engine: "opencv-yunet-source-shot-follow", start: 0, end: 20,
+    sceneCuts: [8], decodeFailures: [], reviewRequired: true,
+    tracks: { solo: { coverage: .9, keyframes: [{ time: 0, x: 30, y: 40 }, { time: 8, x: 70, y: 45, cut: true }, { time: 20, x: 60, y: 50 }] } },
+    editPlan: { version: 1, preflight: { passed: true } },
+  };
+  await assertOwnedStudioSourceBinding({ uid: "reviewer-1", projectId: document.projectId, sourceAssetId, sourceSha256 });
+  const artifact = await persistSourceShotArtifact({ uid: "reviewer-1", projectId: document.projectId,
+    sourceAssetId, sourceSha256, analysis });
+  const request = buildDirectorReframeRequest({ document, occurrenceId: "main", analysis: { ...analysis, sourceShotArtifact: artifact },
+    aspect: "9:16", zoom: 1, sourceAspect: 16 / 9, proposalId: "reviewed-follow", idempotencyKey: "reviewed-follow-command" });
+  seedHead("reviewer-1", document);
+  return { document, request };
+};
+
+test("tracked Director framing requires the exact server-observed result and replays identically", async () => {
+  const f = await trackedFramingProposal();
+  const { proposal: prepared } = await prepareStudioDirectorProposal(f.document, f.request);
+  const result = await post({ proposal: prepared, decision: "approve" });
+  expect(result.status).toBe(201);
+  expect(result.body.decision).toBe("approve");
+  const duplicate = await post({ proposal: prepared, decision: "approve" });
+  expect(duplicate.status).toBe(200);expect(duplicate.body.duplicate).toBe(true);
+});
+
+test("coherent client replacement of tracking and its operation still fails the stored worker hash", async () => {
+  const f = await trackedFramingProposal();
+  f.request.evidence.workerResult.tracks.solo.keyframes[1].x = 10;
+  f.request.operation.keyframes[1].x = 10;
+  const { proposal: forged } = await prepareStudioDirectorProposal(f.document, f.request);
+  const result = await post({ proposal: forged, decision: "approve" });
+  expect(result.status).toBe(409);expect(result.body.error).toBe("source_shot_evidence_mismatch");
+  expect([...store.keys()].filter(path => path.includes("studioDirectorReviews"))).toHaveLength(0);
+});
+
+test("framing without owned evidence or under another reviewer cannot record a decision", async () => {
+  const f = await trackedFramingProposal(), { proposal: prepared } = await prepareStudioDirectorProposal(f.document, f.request);
+  expect((await post({ proposal: prepared, decision: "approve" }, "other-user")).status).toBe(409);
+  const without = { ...prepared };delete without.evidence;
+  expect((await post({ proposal: rehash(without), decision: "approve" })).status).toBe(400);
+  expect([...store.keys()].filter(path => path.includes("studioDirectorReviews"))).toHaveLength(0);
+});
+
+test("Director can approve one complete moment range while each removed edge stays bounded", async () => {
+  seedHead();
+  const operation = { type: "trim_clip", target: { occurrenceId: "main" }, preconditions: { sourceRange },
+    keep: { space: "source", startTick: 180000, endTick: 1350000 } };
+  const result = await post({ proposal: proposal(operation), decision: "approve" });
+  expect(result.status).toBe(201);
+  const tiny = { ...operation, keep: { ...operation.keep, startTick: 1 } };
+  expect((await post({ proposal: proposal(tiny), decision: "approve" })).status).toBe(400);
 });
 
 test("accepts bounded shot evidence and rejects extra or unbound evidence", async () => {

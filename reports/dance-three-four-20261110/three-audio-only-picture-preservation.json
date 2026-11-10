@@ -1,0 +1,15 @@
+{
+  "basicLayoutAudioCorrection": true,
+  "all180DecodedRgbFramesIdentical": true,
+  "quietPictureHash": "SHA256=8f9b963fa49859d6633f796b0a06997686f2208752409ce8d02bba918b086204",
+  "masteredPictureHash": "SHA256=8f9b963fa49859d6633f796b0a06997686f2208752409ce8d02bba918b086204",
+  "firstQuietMovieRetainedAndExcludedFromPublishing": true,
+  "nativeMusicMastering": {
+    "originalVolumePercent": 200,
+    "outputGainDb": 6,
+    "speed": 1,
+    "pitch": 0,
+    "equalizerAndReverb": 0
+  },
+  "subsequentPopoutRevisionChangesPictureIntentionally": true
+}

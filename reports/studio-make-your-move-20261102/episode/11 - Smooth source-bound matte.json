@@ -1,0 +1,11 @@
+{
+  "name": "11 - Smooth source-bound matte",
+  "actions": [
+    {
+      "type": "matte",
+      "targetId": "02 / moving foreground",
+      "matteSourceId": "02 / smooth matte",
+      "mode": "luma"
+    }
+  ]
+}

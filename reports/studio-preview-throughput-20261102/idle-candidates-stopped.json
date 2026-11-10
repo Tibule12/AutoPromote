@@ -1,0 +1,26 @@
+[
+  {
+    "pid": 385706,
+    "origin": "http://127.0.0.1:46251",
+    "build": "/tmp/autopromote-application-demo-5izIlF/build-corner-index-verified-20261102",
+    "stopped": true
+  },
+  {
+    "pid": 388081,
+    "origin": "http://127.0.0.1:38209",
+    "build": "/tmp/autopromote-application-demo-5izIlF/build-preview-throughput-20261102",
+    "stopped": true
+  },
+  {
+    "pid": 392811,
+    "origin": "http://127.0.0.1:39493",
+    "build": "/tmp/autopromote-application-demo-5izIlF/build-preview-pool-20261102",
+    "stopped": true
+  },
+  {
+    "pid": 402391,
+    "origin": "http://127.0.0.1:41539",
+    "build": "/tmp/autopromote-application-demo-5izIlF/build-paused-presenter-20261102",
+    "stopped": true
+  }
+]

@@ -1,3 +1,4 @@
+const { rateLimit: archiveRateLimit } = require("express-rate-limit");
 const express = require("express");
 const request = require("supertest");
 
@@ -55,6 +56,9 @@ beforeEach(() => {
     .spyOn(db, "collection")
     .mockImplementation(name => (name === "content" ? query : original(name)));
   app = express();
+  app.use(
+    archiveRateLimit({ windowMs: 60000, max: 6000, standardHeaders: true, legacyHeaders: false })
+  );
   app.use(
     "/api/content",
     auth,

@@ -1,0 +1,10 @@
+{
+  "allUnrelatedWalletsExact": true,
+  "previousHistoryPreserved": true,
+  "noWalletReset": true,
+  "noDirectWalletWrite": true,
+  "newNativeOperations": 4,
+  "symbolicCredits": 8,
+  "activeOperations": 0,
+  "productionWrite": false
+}

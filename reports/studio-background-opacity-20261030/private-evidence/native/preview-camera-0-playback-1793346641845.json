@@ -1,0 +1,146 @@
+[
+  {
+    "time": 0.027195,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 0.560743,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 1.115784,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 1.681547,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 2.242035,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 2.766195,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 3.287592,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 3.796233,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 4.318496,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 4.838618,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 5.348179,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 5.860445,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 6.371534,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 6.880936,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 7.392912,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 7.903914,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 8.41403,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 8.666667,
+    "duration": 8.666667,
+    "ended": true,
+    "paused": true,
+    "ready": 4,
+    "error": null
+  }
+]

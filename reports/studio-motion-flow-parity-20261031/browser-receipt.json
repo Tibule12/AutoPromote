@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "completedAt": "2026-10-31T11:24:53.430Z",
+  "completedAt": "2026-11-07T08:28:38.273Z",
   "headless": true,
   "muted": true,
   "cdpProduct": "HeadlessChrome/147.0.7727.15",
@@ -8,10 +8,10 @@
   "gpuJobsStarted": 0,
   "cloudUploads": 0,
   "competitorBrandLeaks": 0,
-  "bundleSha256": "d4c5afabf99a777dff36db4ffbdf882a3da2096c2f8c226dbf00e234cd77d627",
+  "bundleSha256": "b718403d043db157d89ce6e1760992aedde5d5382351d49934dfc94aff809ee8",
   "projectName": "AutoPromote Motion Flow Parity 20261031",
-  "studioDocumentSha256BeforeReload": "c6d184b9eae1ecff15baf618645fc31676ee17d4794ad2d3da9ed376b1bebc7c",
-  "studioDocumentSha256AfterReload": "c6d184b9eae1ecff15baf618645fc31676ee17d4794ad2d3da9ed376b1bebc7c",
+  "studioDocumentSha256BeforeReload": "a7bc1ab61167863f253d2d520736b866110c2b371127a3cefc035f87aa5deae0",
+  "studioDocumentSha256AfterReload": "a7bc1ab61167863f253d2d520736b866110c2b371127a3cefc035f87aa5deae0",
   "pageErrors": [],
   "consoleErrors": [],
   "apiRequests": [],
@@ -46,11 +46,11 @@
           },
           "nodeFlow": {
             "x": 1145,
-            "y": 433,
+            "y": 485,
             "width": 262,
-            "height": 887,
+            "height": 416,
             "right": 1407,
-            "bottom": 1320
+            "bottom": 902
           }
         },
         {
@@ -76,11 +76,11 @@
           },
           "nodeFlow": {
             "x": 985,
-            "y": 433,
+            "y": 485,
             "width": 262,
-            "height": 887,
+            "height": 416,
             "right": 1247,
-            "bottom": 1320
+            "bottom": 902
           }
         },
         {
@@ -106,25 +106,25 @@
           },
           "nodeFlow": {
             "x": 727,
-            "y": 424,
+            "y": 477,
             "width": 274,
-            "height": 887,
+            "height": 416,
             "right": 1001,
-            "bottom": 1311
+            "bottom": 894
           }
         }
       ]
     },
     {
       "label": "Authored Null Rig, Parenting, Alpha Track Matte, loop/wiggle/spin Drivers, Whip Snap Bezier Curve, and Signal Node Flow [1]/[2] wipe",
-      "nullRigId": "null-rig-1793445808952"
+      "nullRigId": "null-rig-1794040045971"
     },
     {
       "label": "Verified keyboard Undo and Redo across canonical AutoPromote Motion & Flow edit history"
     },
     {
       "label": "Verified IndexedDB save & cold reload reopen with identical studioDocument SHA-256",
-      "studioDocumentSha256": "c6d184b9eae1ecff15baf618645fc31676ee17d4794ad2d3da9ed376b1bebc7c",
+      "studioDocumentSha256": "a7bc1ab61167863f253d2d520736b866110c2b371127a3cefc035f87aa5deae0",
       "revision": 22
     },
     {
@@ -140,11 +140,23 @@
       ]
     },
     {
-      "label": "Verified 4-frame browser preview vs local CPU FFmpeg render pixel parity",
+      "label": "Verified 4-frame browser preview vs local CPU FFmpeg render pixel parity + 3D LUT/3-Way Wheel color parity",
       "summary": {
-        "min_measured_iou": 0.976516,
+        "min_measured_iou": 0.976585,
         "max_measured_boundary_p95_px": 1.4142,
-        "frames_checked": 4
+        "frames_checked": 4,
+        "color_grade_psnr_db": 47.73,
+        "color_grade_max_delta": 5
+      },
+      "colorGradeParity": {
+        "passed": true,
+        "lut_preset": "kodak_2383",
+        "lut_size": 33,
+        "precision_wheel_max_delta": 2,
+        "lut3d_max_delta": 1,
+        "max_channel_delta": 5,
+        "mean_channel_delta": 0.6606,
+        "psnr_db": 47.73
       },
       "mediaProbe": {
         "width": 360,
@@ -160,8 +172,10 @@
     }
   ],
   "paritySummary": {
-    "min_measured_iou": 0.976516,
+    "min_measured_iou": 0.976585,
     "max_measured_boundary_p95_px": 1.4142,
-    "frames_checked": 4
+    "frames_checked": 4,
+    "color_grade_psnr_db": 47.73,
+    "color_grade_max_delta": 5
   }
 }

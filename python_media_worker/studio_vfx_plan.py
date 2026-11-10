@@ -245,11 +245,15 @@ class VfxFrameRenderer:
         self.cache = cache
         try:
             from . import studio_vfx_foreground_cache as foreground_cache_module
+            from . import studio_source_background as background_evidence_module
         except ImportError:
             import studio_vfx_foreground_cache as foreground_cache_module
+            import studio_source_background as background_evidence_module
+        self.recover_observed_foreground = background_evidence_module.recover_foreground
         # Renderer/helper code are bound alongside exact source/alpha/commands.
         self.foreground_cache=foreground_cache_module.ForegroundFrameCache(
             sha256(Path(__file__))+sha256(Path(foreground_cache_module.__file__))+
+            sha256(Path(background_evidence_module.__file__))+
             canonical_hash(cache.manifest.get("refinement",{}).get("holdoutGroups",[])))
         self.assets = {}
         self.fonts = {}
@@ -591,6 +595,11 @@ class VfxFrameRenderer:
             pixels=np.asarray(frame,dtype=np.float64)/255
             values=np.asarray(alpha,dtype=np.float64)/255
             clean=estimate_foreground_ml(pixels,values)
+            evidence=getattr(self.cache,"observed_background",None)
+            if evidence is not None:
+                background,observed=evidence
+                clean=self.recover_observed_foreground(np.asarray(frame),np.asarray(alpha),
+                    background,observed,clean)
             strength=effect["decontaminate"]
             clean=pixels*(1-strength)+np.clip(clean,0,1)*strength
             clean[(values<=0)|(values>=1)]=pixels[(values<=0)|(values>=1)]
@@ -715,7 +724,8 @@ class VfxFrameRenderer:
         active = [effect for effect in self.plan["effects"] if effect["start"] <= time_value < effect["end"]]
         foreground_effects=[effect for effect in active if effect["type"] in {"foreground_holdout","foreground_refine"}]
         foreground,alpha=self.foreground_cache.prepare(frame,alpha,foreground_effects,
-            lambda:self._prepare_foreground(frame,alpha,active,width,height))
+            lambda:self._prepare_foreground(frame,alpha,active,width,height),
+            evidence_identity=self.cache.manifest.get("observed_background"))
         background = frame.convert("RGBA")
         replacement_coverage=np.zeros((height,width),dtype=np.float64)
         for effect in active:

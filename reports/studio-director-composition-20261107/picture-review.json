@@ -1,0 +1,143 @@
+{
+  "fullDecode": true,
+  "frames": 192,
+  "seconds": 8,
+  "fps": 24,
+  "cutAndPoseBoundaries": [
+    0,
+    1.5,
+    2,
+    2.15,
+    2.3,
+    2.4,
+    2.7,
+    2.95,
+    3.3,
+    4.1,
+    4.2,
+    4.85,
+    5.1,
+    5.3,
+    5.5,
+    5.6,
+    7.5,
+    8
+  ],
+  "sampledFrameIndices": [
+    0,
+    1,
+    12,
+    35,
+    36,
+    37,
+    47,
+    48,
+    49,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    64,
+    65,
+    66,
+    70,
+    71,
+    72,
+    78,
+    79,
+    80,
+    97,
+    98,
+    99,
+    100,
+    101,
+    102,
+    114,
+    115,
+    116,
+    117,
+    121,
+    122,
+    123,
+    126,
+    127,
+    128,
+    131,
+    132,
+    133,
+    134,
+    135,
+    156,
+    179,
+    180,
+    181,
+    186,
+    191
+  ],
+  "pairedDiagnosticSamples": [
+    {
+      "programmeTime": 0.5,
+      "exportFrame": 12,
+      "diagnosticPsnrDb": 29.07137690570785,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 1.5,
+      "exportFrame": 36,
+      "diagnosticPsnrDb": 29.531629405448776,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 2.5,
+      "exportFrame": 60,
+      "diagnosticPsnrDb": 35.424635504697314,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 3.25,
+      "exportFrame": 78,
+      "diagnosticPsnrDb": 39.828249332233725,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 4.25,
+      "exportFrame": 102,
+      "diagnosticPsnrDb": 41.82478287355715,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 4.75,
+      "exportFrame": 114,
+      "diagnosticPsnrDb": 39.95111738537237,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 5.5,
+      "exportFrame": 132,
+      "diagnosticPsnrDb": 27.27540709283108,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 6.5,
+      "exportFrame": 156,
+      "diagnosticPsnrDb": 27.56892896125086,
+      "strictPassClaimed": false
+    },
+    {
+      "programmeTime": 7.75,
+      "exportFrame": 186,
+      "diagnosticPsnrDb": 28.5677270779715,
+      "strictPassClaimed": false
+    }
+  ],
+  "minimumDiagnosticPsnrDb": 27.27540709283108,
+  "wholePictureParityQualified": false,
+  "humanListeningQualified": false,
+  "creativeApproval": false
+}

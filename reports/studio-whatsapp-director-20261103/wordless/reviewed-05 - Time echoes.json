@@ -1,0 +1,1095 @@
+{
+  "format": "autopromote-scene-actions",
+  "version": 1,
+  "projectId": "viral-project-b3c8d7e9-cdff-4bdd-87dd-23b2297b83a6",
+  "baseRevision": 42,
+  "name": "05 - Time echoes",
+  "actions": [
+    {
+      "type": "media_plane",
+      "id": "W / echo 0 alpha",
+      "name": "W / echo 0 alpha",
+      "sourceMediaId": "project-media-1cb500b6-41fb-48ef-93e4-cfde7be7b06c",
+      "sourceStart": 0,
+      "startTime": 14.65,
+      "duration": 6.35,
+      "transform": {
+        "x": 24,
+        "y": 61,
+        "scale": 1.12,
+        "opacity": 1
+      },
+      "mediaFit": "contain"
+    },
+    {
+      "type": "media_plane",
+      "id": "W / echo 0 colour",
+      "name": "W / echo 0 colour",
+      "sourceMediaId": "launch-f845b91a06ef40d16ae43d84",
+      "sourceStart": 7,
+      "startTime": 14.65,
+      "duration": 6.35,
+      "transform": {
+        "x": 24,
+        "y": 61,
+        "scale": 1.12,
+        "opacity": 1
+      },
+      "mediaFit": "contain"
+    },
+    {
+      "type": "keys",
+      "targetId": "W / echo 0 alpha",
+      "keys": [
+        {
+          "property": "x",
+          "time": 14.65,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 15.9,
+          "value": 24,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 17.4,
+          "value": 24,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 19.2,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 21,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / echo 0 alpha",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 14.65,
+          "value": 1.82,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 15.9,
+          "value": 1.12,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 17.4,
+          "value": 1.12,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 19.2,
+          "value": 1.82,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 21,
+          "value": 1.9,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / echo 0 colour",
+      "keys": [
+        {
+          "property": "x",
+          "time": 14.65,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 15.9,
+          "value": 24,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 17.4,
+          "value": 24,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 19.2,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 21,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / echo 0 colour",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 14.65,
+          "value": 1.82,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 15.9,
+          "value": 1.12,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 17.4,
+          "value": 1.12,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 19.2,
+          "value": 1.82,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 21,
+          "value": 1.9,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / echo 0 colour",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 14.65,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 15.950000000000001,
+          "value": 0.5,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 17.4,
+          "value": 0.5,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 19.4,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 21,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "media_plane",
+      "id": "W / echo 1 alpha",
+      "name": "W / echo 1 alpha",
+      "sourceMediaId": "project-media-1cb500b6-41fb-48ef-93e4-cfde7be7b06c",
+      "sourceStart": 0,
+      "startTime": 14.3,
+      "duration": 6.699999999999999,
+      "transform": {
+        "x": 76,
+        "y": 61,
+        "scale": 1.2,
+        "opacity": 1
+      },
+      "mediaFit": "contain"
+    },
+    {
+      "type": "media_plane",
+      "id": "W / echo 1 colour",
+      "name": "W / echo 1 colour",
+      "sourceMediaId": "launch-f845b91a06ef40d16ae43d84",
+      "sourceStart": 7,
+      "startTime": 14.3,
+      "duration": 6.699999999999999,
+      "transform": {
+        "x": 76,
+        "y": 61,
+        "scale": 1.2,
+        "opacity": 1
+      },
+      "mediaFit": "contain"
+    },
+    {
+      "type": "keys",
+      "targetId": "W / echo 1 alpha",
+      "keys": [
+        {
+          "property": "x",
+          "time": 14.3,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 15.55,
+          "value": 76,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 17.4,
+          "value": 76,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 19.2,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 21,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / echo 1 alpha",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 14.3,
+          "value": 1.82,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 15.55,
+          "value": 1.2,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 17.4,
+          "value": 1.2,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 19.2,
+          "value": 1.82,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 21,
+          "value": 1.9,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / echo 1 colour",
+      "keys": [
+        {
+          "property": "x",
+          "time": 14.3,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 15.55,
+          "value": 76,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 17.4,
+          "value": 76,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 19.2,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 21,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / echo 1 colour",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 14.3,
+          "value": 1.82,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 15.55,
+          "value": 1.2,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 17.4,
+          "value": 1.2,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 19.2,
+          "value": 1.82,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 21,
+          "value": 1.9,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / echo 1 colour",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 14.3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 15.600000000000001,
+          "value": 0.7,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 17.4,
+          "value": 0.7,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 19.4,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 21,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "media_plane",
+      "id": "W / echo 2 alpha",
+      "name": "W / echo 2 alpha",
+      "sourceMediaId": "project-media-1cb500b6-41fb-48ef-93e4-cfde7be7b06c",
+      "sourceStart": 0,
+      "startTime": 14,
+      "duration": 7,
+      "transform": {
+        "x": 50,
+        "y": 61,
+        "scale": 1.82,
+        "opacity": 1
+      },
+      "mediaFit": "contain"
+    },
+    {
+      "type": "media_plane",
+      "id": "W / echo 2 colour",
+      "name": "W / echo 2 colour",
+      "sourceMediaId": "launch-f845b91a06ef40d16ae43d84",
+      "sourceStart": 7,
+      "startTime": 14,
+      "duration": 7,
+      "transform": {
+        "x": 50,
+        "y": 61,
+        "scale": 1.82,
+        "opacity": 1
+      },
+      "mediaFit": "contain"
+    },
+    {
+      "type": "keys",
+      "targetId": "W / echo 2 alpha",
+      "keys": [
+        {
+          "property": "x",
+          "time": 14,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 15.25,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 17.4,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 19.2,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 21,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / echo 2 alpha",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 14,
+          "value": 1.82,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 15.25,
+          "value": 1.82,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 17.4,
+          "value": 1.82,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 19.2,
+          "value": 1.82,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 21,
+          "value": 1.9,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / echo 2 colour",
+      "keys": [
+        {
+          "property": "x",
+          "time": 14,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 15.25,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 17.4,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 19.2,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 21,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / echo 2 colour",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 14,
+          "value": 1.82,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 15.25,
+          "value": 1.82,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 17.4,
+          "value": 1.82,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 19.2,
+          "value": 1.82,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 21,
+          "value": 1.9,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / echo 2 colour",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 14,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 15.3,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 17.4,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 19.4,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 21,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    }
+  ]
+}

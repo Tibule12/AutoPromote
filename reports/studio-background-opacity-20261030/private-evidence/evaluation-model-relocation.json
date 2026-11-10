@@ -1,0 +1,41 @@
+{
+  "verifiedFiles": [
+    {
+      "file": "model.safetensors",
+      "sha256": "a5a4de698739ea5e0e8bbab28e1b293dde95092b87a442d566cbc585c53cef55",
+      "bytes": 444473596
+    },
+    {
+      "file": "README.md",
+      "sha256": "834ba4551d22697900286f26909064338c1e04dd44a8feb43e2992c0d644334b",
+      "bytes": 11522
+    },
+    {
+      "file": "config.json",
+      "sha256": "d0b779ee9a76bf079673c5852c346f439591f016ca0d778a87bbd1dcbe24398a",
+      "bytes": 416
+    },
+    {
+      "file": "BiRefNet_config.py",
+      "sha256": "e7b8c2a74f6cea6a59553d517f71d47f2c1d90e670a13416af17c25fe2f3dc52",
+      "bytes": 298
+    },
+    {
+      "file": "birefnet.py",
+      "sha256": "2a45b4e0ece72d7c4212bca1a988e7d7e52bfe9f98ec59c58b8809c8a8b7a831",
+      "bytes": 92134
+    },
+    {
+      "file": "__pycache__/BiRefNet_config.cpython-312.pyc",
+      "sha256": "78ed9d12f3d5f3feee6d040e80668e1eafdcfb3e3caec5ca542d1c881338b528",
+      "bytes": 761
+    },
+    {
+      "file": "__pycache__/birefnet.cpython-312.pyc",
+      "sha256": "e752c1c413bb4e600585c7ce256f39c9bc1b3cdbab396a9754899c399261b46c",
+      "bytes": 123646
+    }
+  ],
+  "noUserSourcesMoved": true,
+  "notIntegrated": true
+}

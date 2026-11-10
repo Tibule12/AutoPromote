@@ -1,0 +1,90 @@
+{
+  "focusedTests": {
+    "compositor": 43,
+    "panel": 24,
+    "service": 24,
+    "total": 91
+  },
+  "oldFailureRetained": "private/thin-selection-before.log",
+  "authBoundary": {
+    "controlsPresent": true,
+    "sourceInterval": [
+      22.458333333333332,
+      25.458333333333332
+    ],
+    "sourceSelected": true,
+    "backgroundChoiceVisible": true,
+    "personPointAuthored": true,
+    "renderStarted": false,
+    "blocker": "Isolated engineering build has no owned Studio uploader/storage binding and disables Firebase authentication. Native render guard stops before dispatch.",
+    "noAuthBypass": true,
+    "cloudJobs": 0,
+    "external": [],
+    "errors": []
+  },
+  "professionalQualification": false,
+  "ownerCreativeApproval": false,
+  "studioContract": {
+    "exitCode": 0,
+    "output": "{\n  \"valid\": true,\n  \"capabilities\": 29,\n  \"counts\": {\n    \"UNIMPLEMENTED\": 2,\n    \"BROKEN\": 1,\n    \"PARTIAL\": 9,\n    \"FUNCTIONAL\": 17,\n    \"PRO-READY\": 0,\n    \"PRODUCTION-READY\": 0\n  },\n  \"combinations\": 13,\n  \"parityChecks\": 17,\n  \"presentFixtures\": 4,\n  \"newCapabilityExecutions\": 0,\n  \"note\": \"Record validation only; no browser, provider or GPU execution.\"\n}\n"
+  },
+  "whitespace": {
+    "exitCode": 0,
+    "output": ""
+  },
+  "backendSyntax": {
+    "exitCode": 0,
+    "output": ""
+  },
+  "pythonSyntax": {
+    "exitCode": 0,
+    "output": ""
+  },
+  "originalSourceUnchanged": true,
+  "rejectedMovieUnchanged": true,
+  "retainedPriorImplementationMatches": {
+    "frontend/src/components/threeD/StudioCinematicPanel.js": true,
+    "frontend/src/components/threeD/StudioCinematicPanel.test.js": true,
+    "frontend/src/components/threeD/cinematicContract.js": true,
+    "frontend/src/components/threeD/studio3DModel.js": true,
+    "frontend/src/components/threeD/studioCinematic.test.js": true,
+    "python_media_worker/studio_cinematic_programme.py": true,
+    "scripts/cinematic/build-local-studio.cjs": true,
+    "scripts/cinematic/localStudio.jsx": true,
+    "scripts/cinematic/record-podcast-with-audio.cjs": true,
+    "src/cinematic/localServer.cjs": true,
+    "src/cinematic/programmePlan.cjs": true,
+    "src/generated/studioDirectorReplayKernel.cjs": true,
+    "studio_3d_renderer/cinematic_local.py": true,
+    "studio_3d_renderer/cinematic_scene.py": true,
+    "test/cinematic-programme.test.cjs": true,
+    "source-video": true
+  },
+  "actualStudioPlayback": {
+    "headless": true,
+    "mutedDevice": true,
+    "screenFrames": 29,
+    "maximumMediaTime": 3,
+    "duration": 4.567394733428955,
+    "external": [],
+    "errors": [],
+    "output": "/home/tibule12/Videos/Unmuted - Shot Correction - 20261031/Studio Detail Refinement Playback with Sound.mp4",
+    "bootstrap": "Existing Studio, one actual flattened movie; loopback media/bootstrap adapters, native checkpoint and complete playback. No native 3D editing/export claim.",
+    "audio": "Actual HTMLMediaElement.captureStream monitor audio; no disk soundtrack substitution"
+  },
+  "Background Replacement - Detail Refinement.mp4": {
+    "sha256": "237a52c8113589f9c638bb516f90f4d82424bd5f6a4a66896876ce18dff6625f",
+    "fullDecodePassed": true,
+    "bytes": 1195096
+  },
+  "Studio Detail Refinement Playback with Sound.mp4": {
+    "sha256": "b56bc9d64b6f6003544626223233ab5de32ff84297f6e064365c34df56b6681a",
+    "fullDecodePassed": true,
+    "bytes": 697054
+  },
+  "codeHashes": {
+    "python_media_worker/studio_vfx_plan.py": "849b42d4f064b48d9bc5e468e918fd0ff0811c05a0051cce28b6e4f3f4e16efb",
+    "frontend/src/components/StudioSubjectVfxPanel.js": "7e9cbbb92c901cf31cd7697606ba6c3f39332a93b79695118f8b3794df76cdf0",
+    "src/services/studioSubjectVfxService.js": "92a0762c65edcdfe81c8764e263a589574573ca9b23dbd07da0140aca0736a09"
+  }
+}

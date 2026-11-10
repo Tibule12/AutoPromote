@@ -1,6 +1,7 @@
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import StudioProgrammeFrame from '../StudioProgrammeFrame';
+import * as videoMattes from '../studioVideoMatte';
 import StudioPerspectiveSurface from '../StudioPerspectiveSurface';
 import StudioGroupPreview from '../StudioGroupPreview';
 import { buildMotionAutomationStyle } from '../studioAutomation';
@@ -126,4 +127,55 @@ test('a settled secondary decoder repaints matching video pieces while the progr
  act(()=>presented(0,{mediaTime:.5}));
  expect(drawImage.mock.calls.length).toBeGreaterThan(copies);
  view.unmount();context.mockRestore();pause.mockRestore();load.mockRestore();
+});
+
+
+test('a first paused seek waits for every independent video, including sources without shared identity',()=>{
+ const main=decoder();main.paused=true;main.currentTime=2;
+ const layer={id:'independent',type:'video',startTime:0,duration:4};
+ const pause=jest.spyOn(HTMLMediaElement.prototype,'pause').mockImplementation(()=>{});
+ const load=jest.spyOn(HTMLMediaElement.prototype,'load').mockImplementation(()=>{});
+ const view=render(<div data-testid="stage"><StudioProgrammeFrame clockRef={{current:main}} mapTime={t=>t} time={2} layers={[layer]}>
+  {()=> <div data-studio-layer-id={layer.id}><video data-testid="independent" data-studio-overlay-decoder="true" /></div>}
+ </StudioProgrammeFrame></div>);
+ expect(screen.getByTestId('stage').dataset.layerPendingCount).toBe('1');
+ expect(screen.getByTestId('studio-layer-loading').hidden).toBe(false);
+ const media=screen.getByTestId('independent');
+ for(const [field,value]of Object.entries({readyState:4,seeking:false,paused:true,currentTime:2}))Object.defineProperty(media,field,{value,configurable:true});
+ act(()=>media.dispatchEvent(new Event('loadeddata')));
+ expect(screen.getByTestId('stage').dataset.layerPendingCount).toBe('0');
+ expect(screen.getByTestId('studio-layer-loading').hidden).toBe(true);
+ view.unmount();pause.mockRestore();load.mockRestore();
+});
+
+test('a shared video matte consumes its validated canvas instead of its unused clone decoder',()=>{
+ const main=decoder();main.paused=true;main.currentTime=2;
+ const source={type:'video',sourceStoragePath:'owned/matte',contentHash:'a'.repeat(64),sourceStartTime:0,startTime:0,duration:4,sourceDuration:4};
+ const layers=[{...source,id:'owner'},{...source,id:'clone'},{id:'fill',type:'image',startTime:0,duration:4,trackMatte:{mode:'luma',sourceLayerId:'clone'}}];
+ const ctx=jest.spyOn(HTMLCanvasElement.prototype,'getContext').mockReturnValue({drawImage:jest.fn()});
+ const pause=jest.spyOn(HTMLMediaElement.prototype,'pause').mockImplementation(()=>{}),load=jest.spyOn(HTMLMediaElement.prototype,'load').mockImplementation(()=>{});
+ const matte=jest.spyOn(videoMattes,'studioVideoMatteUri').mockImplementation(({picture})=>picture?{}:null),alpha=jest.spyOn(videoMattes,'studioVideoMatteAlpha').mockReturnValue('url("data:image/png;base64,shared")');
+ const view=render(<div><StudioProgrammeFrame clockRef={{current:main}} mapTime={t=>t} time={2} layers={layers}>{()=> <>
+  {layers.slice(0,2).map(l=><div key={l.id} data-studio-layer-id={l.id}><video data-testid={l.id} data-studio-overlay-decoder="true"/><canvas data-studio-shared-video="true"/></div>)}
+  <div data-studio-matte-wrap="fill"><div data-studio-layer-id="fill"/></div>
+ </>}</StudioProgrammeFrame></div>);
+ const owner=screen.getByTestId('owner'),clone=screen.getByTestId('clone');
+ for(const [key,value]of Object.entries({readyState:4,seeking:false,paused:true,currentTime:2,videoWidth:1280,videoHeight:720}))Object.defineProperty(owner,key,{value,configurable:true});
+ act(()=>owner.dispatchEvent(new Event('loadeddata')));
+ const shared=clone.parentElement.querySelector('canvas');expect(shared.dataset.sourceTime).toBe('2');
+ expect(matte).toHaveBeenLastCalledWith(expect.objectContaining({video:clone,picture:shared,layer:expect.objectContaining({id:'clone'}),time:2}));
+ expect(view.container.querySelector('[data-studio-matte-wrap="fill"]').style.maskImage).toContain('base64,shared');
+ view.unmount();matte.mockRestore();alpha.mockRestore();ctx.mockRestore();pause.mockRestore();load.mockRestore();
+});
+
+test('a decoded ordinary image supplies its actual alpha matte instead of an opaque rectangle',()=>{
+ const main=decoder();main.paused=true;main.currentTime=2;
+ const layers=[{id:'circle',type:'image',src:'blob:circle',startTime:0,duration:4,x:70,y:50,width:100,height:100,scale:.6,opacity:1},{id:'window',type:'video',startTime:0,duration:4,trackMatte:{mode:'alpha',sourceLayerId:'circle'}}];
+ const matte=jest.spyOn(videoMattes,'studioVideoMatteUri').mockImplementation(({picture})=>picture?{}:null),alpha=jest.spyOn(videoMattes,'studioVideoMatteAlpha').mockReturnValue('url("data:image/png;base64,circular-alpha")');
+ const view=render(<div data-testid="image-stage"><StudioProgrammeFrame clockRef={{current:main}} mapTime={t=>t} time={2} layers={layers}>{()=> <><div data-studio-layer-id="circle" data-studio-matte-source-only="true"><img data-testid="circle-pixels" src="blob:circle" alt="Matte source"/></div><div data-studio-matte-wrap="window"><div data-studio-layer-id="window"/></div></>}</StudioProgrammeFrame></div>);
+ const picture=screen.getByTestId('circle-pixels');expect(screen.getByTestId('image-stage').dataset.layerPendingCount).toBe('1');
+ for(const [key,value]of Object.entries({complete:true,naturalWidth:1280,naturalHeight:720}))Object.defineProperty(picture,key,{value,configurable:true});
+ act(()=>picture.dispatchEvent(new Event('load')));
+ expect(matte).toHaveBeenLastCalledWith(expect.objectContaining({picture,time:2,layer:expect.objectContaining({id:'circle'})}));expect(view.container.querySelector('[data-studio-matte-wrap="window"]').style.maskImage).toContain('circular-alpha');expect(screen.getByTestId('image-stage').dataset.layerPendingCount).toBe('0');expect(picture.parentElement.style.visibility).toBe('hidden');
+ view.unmount();matte.mockRestore();alpha.mockRestore();
 });

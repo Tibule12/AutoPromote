@@ -1,0 +1,57 @@
+{
+  "state": "NATIVE_SUBJECT_ECHO_CONTROL_AND_MOVIE_DELIVERED_FOR_OWNER_REVIEW",
+  "delivery": "/home/tibule12/Videos/Studio - Subject Echoes - 2026-11-08",
+  "movieSha256": "7dec6ac69dea06920dce4d318e29e761032b2871226b7b8bfeeae37cf8918969",
+  "nativeJobId": "viral_32e4c9662ced4839d374866462af21b5ac8b69fb0680cfe0527641975e43cbdc",
+  "seconds": 8,
+  "frames": 192,
+  "fps": 24,
+  "size": [
+    1280,
+    720
+  ],
+  "nativeLayers": 32,
+  "motionKeys": 76,
+  "focusedTests": 54,
+  "nativeApplyUndoRedoExact": true,
+  "independentNativeReopenExact": true,
+  "fullLiveAndFinishedStudioRecordings": true,
+  "exactNativeBackupCompilerWorkerDownloadBinding": true,
+  "minimumDiagnosticPsnrDb": 27.292406347288576,
+  "strictPictureAudioParityQualified": false,
+  "humanListeningQualified": false,
+  "ownerCreativeApproval": false,
+  "automaticSegmentation": false,
+  "automaticFootTracking": false,
+  "texturedColourisedEchoes": false,
+  "physicalParticlesOrRelighting": false,
+  "exactReferenceRecreated": false,
+  "readinessPromotion": false,
+  "productionDeployment": false,
+  "paidProviderExecutions": 0,
+  "nativeCpuExecutions": 1,
+  "transportFix": "Storage URL lookup bounded by15s/the remaining caller deadline; existing backend fallback retained.",
+  "runtimeRecovery": "Same Storage rules VM restarted, all117 existing objects and rule hash preserved.",
+  "existingWalletPreserved": true,
+  "freshSeededDemoAccount": true,
+  "performance": {
+    "Complete live Studio playback": {
+      "programmeSeconds": 8,
+      "wallMs": 9837,
+      "observedCaptureUpdatesPerSecond": 3.1456432249150885
+    },
+    "Complete finished playback in Studio": {
+      "programmeSeconds": 8,
+      "wallMs": 8058,
+      "observedCaptureUpdatesPerSecond": 19.252548066679438
+    }
+  },
+  "priorDeliveryFilesUnchanged": 416,
+  "limits": [
+    "A supplied matching white-subject/black-background matte is required.",
+    "Coloured echoes are flat silhouettes. Arcs are manually positioned editable paths; they do not track feet or simulate particles/scene lighting.",
+    "Live/export diagnostics do not establish full predictive picture/audio parity or realtime playback.",
+    "Editable backup uses the isolated media library; originals, matching matte and raster inputs are supplied for normal relinking.",
+    "Earlier controls/observer failures, the old account credit refusal and first pre-dispatch upload hang remain retained. Shared S02/S04/S03 and typography13/16 remain open."
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "before": {
+    "build": "/dev/shm/autopromote-motion-styles-20261104-r2-build",
+    "spendingEndsAt": 1793707200000,
+    "previewOrigins": []
+  },
+  "after": {
+    "spendingEndsAt": 1793783575517,
+    "previewOrigins": [
+      "http://127.0.0.1:5157"
+    ]
+  },
+  "grant": {
+    "alreadyProcessed": false,
+    "balance": 12
+  },
+  "realPurchase": false,
+  "localFixtureOnly": true,
+  "maxNewNativeExports": 6,
+  "api": {
+    "previousPid": 1191973,
+    "pid": 1201571,
+    "origin": "http://127.0.0.1:43927"
+  }
+}

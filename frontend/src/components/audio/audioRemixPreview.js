@@ -10,16 +10,26 @@ async function setLivePitch(graph, semitones, request) {
       if (!graph.context.audioWorklet || !window.AudioWorkletNode) return false;
       let module = pitchModules.get(graph.context);
       if (!module) {
-        module = graph.context.audioWorklet.addModule(`${process.env.PUBLIC_URL || ""}/studio-audio-pitch-v1.js`);
+        // Compile on the browser's background compiler before creating an
+        // audio-thread instance. No synchronous compilation during playback.
+        module = Promise.all([
+          graph.context.audioWorklet.addModule(`${process.env.PUBLIC_URL || ""}/studio-audio-pitch-v1.js?v=3`),
+          fetch(`${process.env.PUBLIC_URL || ""}/vendor/signalsmith/stretch-1.3.2.wasm`)
+            .then(response => {
+              if (!response.ok) throw new Error("Live pitch module could not be loaded.");
+              return response.arrayBuffer();
+            }).then(bytes => WebAssembly.compile(bytes)),
+        ]).then(([, wasmModule]) => wasmModule);
         pitchModules.set(graph.context, module);
         module.catch(() => pitchModules.delete(graph.context));
       }
-      await module;
+      const wasmModule = await module;
       // A newer preset/Before/disabled request wins while the module loads.
       if (graph.updateRequest !== request) return false;
       if (!graph.pitch) {
         const node = new window.AudioWorkletNode(graph.context, "studio-pitch-v1", {
           numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [2],
+          processorOptions: { wasmModule },
         });
         node.connect(graph.bass);
         graph.source.disconnect(graph.bass);
@@ -28,7 +38,8 @@ async function setLivePitch(graph, semitones, request) {
         graph.resetPitch = () => node.port?.postMessage({ type: "reset" });
         graph.media.addEventListener("seeking", graph.resetPitch);
         graph.media.addEventListener("emptied", graph.resetPitch);
-        node.onprocessorerror = () => {
+        const pitchFailure = () => {
+          if (graph.pitch !== node || graph.disposed) return;
           // A failed audio thread must not silence ordinary preview playback.
           graph.source.disconnect(node);
           node.disconnect();
@@ -37,6 +48,11 @@ async function setLivePitch(graph, semitones, request) {
           graph.media.removeEventListener("seeking", graph.resetPitch);
           graph.media.removeEventListener("emptied", graph.resetPitch);
           graph.media.dispatchEvent(new Event("studio-remix-pitch-error"));
+        };
+        node.onprocessorerror = pitchFailure;
+        if (node.port) node.port.onmessage = event => {
+          if (event.data?.type === "error") pitchFailure();
+          if (event.data?.type === "ready") graph.pitchLatencySeconds = event.data.latencySeconds;
         };
       }
     }

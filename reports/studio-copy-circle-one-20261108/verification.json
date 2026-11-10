@@ -1,0 +1,61 @@
+{
+  "movieSha256": "609c89d6a1aba60d482ff0c2ded1b6b5544dc3c48fa580ef0dd4d34858a4b18e",
+  "sourceSha256": "0cb27b29f57bb16acd5980278a58d98b2380cd6c486672606a67d13161af8fda",
+  "originalSourceInterval": [
+    6,
+    14
+  ],
+  "normalSpeed": true,
+  "seconds": 8,
+  "frames": 192,
+  "fps": 24,
+  "size": [
+    576,
+    1024
+  ],
+  "fullDecode": true,
+  "allFrameTimestamps24fps": true,
+  "identicalConsecutiveDownscaledFrames": 0,
+  "videoCodec": "h264",
+  "audioCodec": "aac",
+  "colourMatrix": null,
+  "layers": 34,
+  "motionKeys": 904,
+  "movingColouredCopies": 8,
+  "naturalLead": 1,
+  "audio": {
+    "sourceMusicRetained": true,
+    "samplesPerChannel": 384000,
+    "waveformCorrelation": 0.9989548513530498,
+    "lagSamplesAt48k": 0,
+    "gainDb": -4.505357015751828,
+    "integratedLufs": -19.9,
+    "truePeakDbtp": -6.0,
+    "decodedSamplesAtOrAboveFullScale": 0,
+    "humanListeningQualified": false
+  },
+  "liveExportDiagnosticPairs": [
+    {
+      "time": 1.5,
+      "diagnosticPsnrDb": 32.39932487968208,
+      "strictParity": false
+    },
+    {
+      "time": 4,
+      "diagnosticPsnrDb": 32.06077880394218,
+      "strictParity": false
+    },
+    {
+      "time": 7.5,
+      "diagnosticPsnrDb": 33.88276200221127,
+      "strictParity": false
+    }
+  ],
+  "strictPictureAudioParity": false,
+  "nativeJobId": "viral_9ef0505eaf69a9034cf02c04c3f750ea33530a4483d05354e1af094d59b17db7",
+  "sourcePreparedMatteNotAutomaticProductIsolation": true,
+  "noPaidProviderGpuExecution": true,
+  "published": false,
+  "scheduled": false,
+  "pictureApprovalFromNumbers": false
+}

@@ -1,0 +1,24 @@
+[
+  {
+    "uidLabel": "aa432707c1db",
+    "authAccountExists": false,
+    "claimAdmin": false,
+    "adminDocumentExists": true,
+    "profileSignals": {
+      "role": "admin",
+      "isAdmin": true,
+      "fromCollection": null
+    }
+  },
+  {
+    "uidLabel": "833f24436d4f",
+    "authAccountExists": true,
+    "claimAdmin": true,
+    "adminDocumentExists": false,
+    "profileSignals": {
+      "role": "admin",
+      "isAdmin": true,
+      "fromCollection": null
+    }
+  }
+]

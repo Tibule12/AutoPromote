@@ -1,0 +1,45 @@
+{
+  "normalRestore": true,
+  "observations": [
+    {
+      "time": 4.5,
+      "testid": "studio-program-canvas",
+      "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+      "programmeTime": "4.5",
+      "programmeSource": "source",
+      "sourceSampling": "native",
+      "sourceContentHash": "",
+      "sourceFrameIndex": "",
+      "sourceGeneration": "",
+      "joinTransition": "",
+      "joinOpacity": "0"
+    },
+    {
+      "time": 4.6,
+      "testid": "studio-program-canvas",
+      "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+      "programmeTime": "4.583333",
+      "programmeSource": "source",
+      "sourceSampling": "native",
+      "sourceContentHash": "",
+      "sourceFrameIndex": "",
+      "sourceGeneration": "",
+      "joinTransition": "",
+      "joinOpacity": "0"
+    },
+    {
+      "time": 4.5,
+      "testid": "studio-program-canvas",
+      "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+      "programmeTime": "4.5",
+      "programmeSource": "source",
+      "sourceSampling": "native",
+      "sourceContentHash": "",
+      "sourceFrameIndex": "",
+      "sourceGeneration": "",
+      "joinTransition": "",
+      "joinOpacity": "0"
+    }
+  ],
+  "wholeParityQualified": false
+}

@@ -1,0 +1,53 @@
+{
+  "build": "/dev/shm/autopromote-template-collection-20261104-r3-build",
+  "origin": "http://127.0.0.1:43927",
+  "demoProject": "demo-autopromote-credits",
+  "welcomeFlag": "true",
+  "mainAsset": "/static/js/main.59c99216.js",
+  "mainSha256": "af6339a55633ed309190e95eec36ea240f45b64b9d2ea5556ff851dfdc1ee943",
+  "sources": {
+    "frontend/src/components/studioCreativeTemplate.js": "9e1d1b8091effa8bdadc6190230a9d74f48b4983a9ad7009028a147a35600245",
+    "frontend/src/components/studioMotionRecipe.js": "2f79d080beedabdbfea768993f172bb4c9e54738ca1af7d810045c564ad0e077",
+    "frontend/src/components/StudioLaunchTemplatePanel.js": "5ac5865b575a1989f99cfaed8acc7eb724727919fd9a9d4cbde271829b8a8597",
+    "frontend/src/templates/aperture_product_v1.json": "e3f5179f667b8f827083e48d2a468e69c73fda58a828a86cba17481f488c1d82",
+    "frontend/src/templates/editorial_fan_v1.json": "40a228e24f753661689735d3bbdc36ba74497250489ef2e04b07030fe32b4a1b",
+    "frontend/src/templates/split_impact_v1.json": "7f764e7cb88f01274369ddc182cee278191f1f275a4406543e24c5c0e5cddca9",
+    "frontend/src/templates/coastal_postcards_v1.json": "900fbb3ebd31c2a9e23ffaaf1da107661a941e58e2ee9096228fa886eaf7f705",
+    "frontend/src/templates/vinyl_pulse_v1.json": "205addbfe89e425bbac4034ec6fd962c9833e85cd7905c444bca564bba9cf998",
+    "frontend/src/templates/living_infinity_v1.json": "cf6ffb43a913356ab7e14f7f5f6d2d4b05a0f73bdd5dea944575b8925a00c461",
+    "config/creative-templates/registry.v1.json": "d549c50b92c525dc3ae4dc9f6d9b4fc1ba36f2028cc363501890ecd5c6e2abb0",
+    "src/generated/studioDirectorReplayKernel.cjs": "3a8edb459c336aad4ec7b2e212b78b12dee2ecb009a12ae9434e48996564006f",
+    "frontend/src/templates/living_infinity_v1.0.0.json": "b012860afc6734cebb9186a2441324ec1cf7bc0388518356c985fb434a6f39a5",
+    "frontend/src/templates/editorial_fan_v1.0.0.json": "f2e140fa7e7a9f96404b3b1c68677304878dd6ae5c475e0e3fe356f56d5602b9"
+  },
+  "sourceHashes": {
+    "python_media_worker/main_media_server.py": "ea92bbefa960c47621bb4a2d0cb7fe089f531b7745e5b6022ea7fb4ed1c71b07",
+    "python_media_worker/studio_layer_cache.py": "c01f6fb690f0e1e296743fff0fc30f32e518ea822fa01a2d35d6fdcb3361b76f",
+    "frontend/src/components/ViralClipStudio.js": "8637a26d592ee495afa032620940c2a0a19013363ee54a4dfe4d185b6e5cba48",
+    "frontend/src/utils/sourceUpload.js": "d24ac3b0fe303fbee8d2b3110f84ef14330df606b7a23e6a379e809efdac8b57"
+  },
+  "workerPid": 454290,
+  "workerCwd": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031",
+  "priorBuildPreserved": "/dev/shm/autopromote-template-collection-20261104-build",
+  "api": {
+    "previousPid": 1230004,
+    "pid": 1237103,
+    "origin": "http://127.0.0.1:43927"
+  },
+  "activeOperationsBefore": 0,
+  "welcomeChecks": 8,
+  "normalSignIn": true,
+  "paidCalls": 0,
+  "localHarnessSourceHashes": {
+    "src/services/unifiedCredits/sourceGateway.js": "747809094b256e55bb07b86cfafd31bcef26014f15ffbeaa00459df17cfd9aa9",
+    "src/services/unifiedCredits/localStorageRead.js": "510bb6517cf24447e3da2e22a24ef0ac7de0f262263b69fb1a19b3aafda10c3f",
+    "scripts/monetization/application-host.cjs": "a3ecc57426c8452fdbba33cbbb63507e129314c718d53d978817f980875d6156"
+  },
+  "priorExecutionTerminalCode": 1,
+  "activeOperations": 0,
+  "availableCredits": 2,
+  "refundReused": true,
+  "newGrant": false,
+  "reason": "Renew owned admitted audio immediately before verified worker dispatch; unchanged content/generation and 30-minute TTL.",
+  "priorExecutionId": "2716b4373bb6cb89a5eab568668312436f819abc83128b1f52b5367626358a1e"
+}

@@ -1,11 +1,14 @@
 import {
   SMART_FLOW_RIGS,
   buildSmartFlowRigState,
+  computeNodeFlowBounds,
   connectNodeFlowPorts,
   createNodePaletteAddition,
+  deleteNodeFromFlow,
   deriveNodeFlowGraph,
   describeNodeViewerSignal,
   disconnectNodeFlowPort,
+  toggleNodeFlowBypass,
   validateStudioNodeFlow,
 } from "../studioNodeFlow";
 
@@ -150,6 +153,53 @@ describe("studioNodeFlow — AutoPromote Signal Node Topology & Bidirectional St
       })
     ).toBe(true);
     expect(() => validateStudioNodeFlow({ splitPosition: 150 })).toThrow(/splitPosition/);
+  });
+
+  test("toggleNodeFlowBypass, deleteNodeFromFlow, and computeNodeFlowBounds mutate canonical state cleanly", () => {
+    const baseState = {
+      mainTransform: { x: 50, y: 50, scale: 1, rotation: 0 },
+      overlays: [
+        { id: "null-1", name: "MasterNull", type: "text", isNullRig: true, x: 40, y: 30, scale: 1, rotation: 0 },
+        {
+          id: "layer-1",
+          name: "HeroPlate",
+          type: "image",
+          parentId: "null-1",
+          x: 60,
+          y: 50,
+          scale: 1,
+          rotation: 0,
+          opacity: 1,
+          mask: { enabled: true, shape: "polygon", feather: 10 },
+          glow: { enabled: true, color: "#22d3ee", radius: 20, intensity: 0.8 },
+        },
+      ],
+      compositionOrder: ["null-1", "layer-1"],
+      adjustmentLayers: [{ id: "adj-1", name: "Grade1", enabled: true, opacity: 1 }],
+      motionKeyframes: [],
+      nodeFlow: { version: 1, bypassed: {} },
+    };
+
+    const graph = deriveNodeFlowGraph(baseState);
+    const bounds = computeNodeFlowBounds(graph.nodes);
+    expect(bounds.width).toBeGreaterThan(320);
+    expect(bounds.height).toBeGreaterThan(180);
+
+    // Bypass Adjustment node -> sets adjustmentLayers[0].enabled = false
+    const bypassedAdj = toggleNodeFlowBypass(baseState, "Adjustment:adj-1");
+    expect(bypassedAdj.adjustmentLayers[0].enabled).toBe(false);
+    expect(bypassedAdj.nodeFlow.bypassed["Adjustment:adj-1"]).toBe(true);
+
+    // Bypass PolygonMask node -> sets mask.enabled = false
+    const bypassedMask = toggleNodeFlowBypass(bypassedAdj, "PolygonMask:layer-1");
+    expect(bypassedMask.overlays.find(o => o.id === "layer-1").mask.enabled).toBe(false);
+
+    // Delete NullRig node -> unparents child preserving world pose and removes NullRig from overlays
+    const afterDeleteNull = deleteNodeFromFlow(baseState, "NullRig:null-1", 0);
+    expect(afterDeleteNull.overlays.some(o => o.id === "null-1")).toBe(false);
+    const childAfter = afterDeleteNull.overlays.find(o => o.id === "layer-1");
+    expect(childAfter.parentId).toBeUndefined();
+    expect(childAfter.x).toBeCloseTo(50, 3);
   });
 });
 

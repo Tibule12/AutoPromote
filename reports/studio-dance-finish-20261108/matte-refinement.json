@@ -1,0 +1,12 @@
+{
+  "sourceSha256": "09170b74e16cb912c86ad8af3b542312516aebb5247348aeab41282e01ee1a16",
+  "outputSha256": "4c23b029b08a8626d387960b8506c77b1d414e72665716fb2e1945f82e769e09",
+  "frames": 144,
+  "fps": 24,
+  "size": [
+    576,
+    1024
+  ],
+  "preparedInputNotAutomaticStudioIsolation": true,
+  "refinement": "Bounded .07/.86 alpha remap and one-pixel erosion; retains fractional edges."
+}

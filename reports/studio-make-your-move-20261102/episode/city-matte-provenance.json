@@ -1,0 +1,16 @@
+{
+  "sourceSha256": "09f2b8bfcf899d174ecf53f6a9c5358b9d19ca7b7d8ba0b1c508abfc2a2bf15d",
+  "sourceRange": [
+    4,
+    8
+  ],
+  "matteFrames": 96,
+  "matteSeconds": 4,
+  "matteSha256": "dd5eb646c37f88771d63fbbbacc4550717f4bd925aec6cd397d1fd34c8ed9571",
+  "modelSha256": "88d4531297118f595bf2fd60f6f566aec2e559393802d1f436c380f0cbbd2828",
+  "runtime": "Pinned cached RVM, CPU only, 640x360 internal, no downloads",
+  "elapsedSeconds": 33.25134468599572,
+  "productSegmentationIntegration": false,
+  "scope": "Grayscale source-bound analysis input for ordinary Studio luma track matte; no foreground RGB movie or external effects composite.",
+  "paidCalls": 0
+}

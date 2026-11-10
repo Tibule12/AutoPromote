@@ -1,0 +1,201 @@
+{
+  "date": "2026-11-08",
+  "branch": "feat/director-reframe-moments-20261108",
+  "baseRevision": "ad3ce5e5",
+  "status": "NATIVE_COMBINED_WORKFLOW_AND_LOCAL_CPU_DELIVERY_VERIFIED_NOT_DEPLOYED",
+  "tests": {
+    "graphAndDirector": {
+      "suites": 10,
+      "passed": 110,
+      "failed": 0
+    },
+    "server": {
+      "suites": 3,
+      "passed": 32,
+      "failed": 0,
+      "FirestoreAndAuthBoundary": "mocked"
+    },
+    "editor": {
+      "passed": 2,
+      "skipped": 176,
+      "wholeEditorSuiteClaimed": false
+    },
+    "worker": {
+      "passed": 9,
+      "boundary": "real local FFmpeg/CPU and timing checks"
+    }
+  },
+  "distinctTargetedTestsPassed": 153,
+  "strictNativeApp": {
+    "checks": [
+      {
+        "id": "director-reframe",
+        "passed": true,
+        "unapprovedEditUnchanged": true,
+        "requestedFromOff": true,
+        "exactSourceBound": true,
+        "freshReviewAfterColdReopen": true,
+        "undoRedo": true,
+        "coldRecovery": true,
+        "unrelatedGradeCaptionsFrameAudioPreserved": true,
+        "providerBoundary": "recorded actual analysis; simulated review transport"
+      },
+      {
+        "id": "reframe-native-clock",
+        "passed": true,
+        "videoAndOutputControlsAdvanceTogether": true
+      },
+      {
+        "id": "director-moments",
+        "passed": true,
+        "unapprovedEditUnchanged": true,
+        "oneRangeTwoEdges": true,
+        "range": [
+          [
+            2.0654,
+            9.016955555555555
+          ]
+        ],
+        "undoRedo": true,
+        "coldRecovery": true,
+        "fixtureCandidate": "authored through native Cut/Save moment controls; not new model discovery"
+      },
+      {
+        "id": "native-export-compiler",
+        "passed": true,
+        "ranges": [
+          [
+            2.0654,
+            9.016955555555555
+          ]
+        ],
+        "paidExecution": false
+      }
+    ],
+    "muted": true,
+    "headless": true,
+    "productionMutations": 0,
+    "analysisBoundary": "previously captured actual source-shot result replayed as a fixture",
+    "reviewBoundary": "simulated responses; not production records",
+    "candidateBoundary": "native Cut/Save moment controls supply an authored test candidate; not a new discovery claim"
+  },
+  "build": {
+    "compiledSuccessfully": true,
+    "lintEnabled": true,
+    "sourceManifestSha256": "eb01cefce393ecc3c896a28803b5770fa8c6254d752e765b7a1323969dcbdbe3",
+    "changedSourceSinceBuild": false
+  },
+  "kernelSourceCheck": "PASS",
+  "preservation": {
+    "firestore.rules": {
+      "sameAsBase": true,
+      "sha256": "8daebc8a0d4638bea8baecf4fd069ffbbf4d200e1651e935e9fb93d47c931a31"
+    },
+    "storage.rules": {
+      "sameAsBase": true,
+      "sha256": "b362e56ed1980cc781b051299e57838c61e66923083809fc844625c2ea6c52a3"
+    },
+    "src/authMiddleware.js": {
+      "sameAsBase": true,
+      "sha256": "a35e5d581db80fc7842f4882b3e635f0283feeb9478f2bf3efd22469e4551df5"
+    },
+    "src/mediaRoutes.js": {
+      "sameAsBase": true,
+      "sha256": "9204d51ab26a3de36744c012c2521bac7b86695ad97c5be65a22b7e0b8b91f97"
+    },
+    "src/services/studioDirectorProjectBinding.js": {
+      "sameAsBase": true,
+      "sha256": "2a833ede793c9ac7a0f4bb1a679ece3ad6e2220e62362482e50c3d683d8bd51e"
+    },
+    "src/services/studioSourceShotArtifactService.js": {
+      "sameAsBase": true,
+      "sha256": "9a7404059f9368e5e80c30375c850b861ddae53f53f922782270dbe5f8a3928d"
+    },
+    "src/services/studioAnalysisArtifactService.js": {
+      "sameAsBase": true,
+      "sha256": "ac6ccde0b0891b6feb8c885f3a75fba0fe69e9f983396a52d3973045eece5fb3"
+    },
+    "src/services/studioAnalysisJobService.js": {
+      "sameAsBase": true,
+      "sha256": "3f94773fbebdcde49f6984e56617eee003916c60b86b8e51e834bbf90f4e13e6"
+    },
+    "python_media_worker/main_media_server.py": {
+      "sameAsBase": true,
+      "sha256": "dfac143f3db866ff3d057a6798df35f69e3f92d38c8ae025aefeecb89fac565f"
+    },
+    "originalLoginUnchanged": true
+  },
+  "failuresAndCorrections": [
+    "Native Redo dropped default zoom=1; command now emits the existing normalized representation; strict native repeat passes.",
+    "A QA precondition reselected the already selected source and correctly retained its trim; explicit saved-range then original-source selection corrected the harness.",
+    "Unescaped review-heading apostrophe caught by strict build and repaired; lint stayed enabled.",
+    "One local test invocation used the wrong working directory, ran zero tests and was corrected.",
+    "Exploratory lint calls used the wrong configuration; project configuration and strict build are the lint authority."
+  ],
+  "trainingRunStarted": false,
+  "qaApprovalsAreHumanTrainingLabels": false,
+  "productionDeployment": false,
+  "readinessPromoted": false,
+  "localCpuDelivery": {
+    "canonicalWorkerExitCode": 0,
+    "networkAndCloudWritesBlocked": true,
+    "renderInputs": "Exact captured native export options; owned source URLs materialized locally. No new detector/provider execution.",
+    "width": 720,
+    "height": 1280,
+    "fps": "24/1",
+    "frames": 167,
+    "videoDurationSeconds": 6.958333,
+    "audioDurationSeconds": 6.951,
+    "requestedRangeDurationSeconds": 6.951555555555554,
+    "durationWithinOneFrame": true,
+    "audioCodec": "aac",
+    "fullDecode": "PASS",
+    "bytes": 1782403,
+    "sha256": "eee718b2ccd26c70528a0d57c4bd3d11925c9d48501b087be54a5b3915531401",
+    "nativeFinishedPlayback": [
+      {
+        "id": "local-finished-playback",
+        "passed": true,
+        "exactNativeDownload": true,
+        "wholeFinishedPlayback": true,
+        "canonicalDocumentUnchanged": true,
+        "transportBoundary": "local completion fixture; actual CPU output, no cloud execution"
+      }
+    ],
+    "freshContextExactBackupRestore": true,
+    "sampleFramesInspected": [
+      0,
+      75,
+      95,
+      166
+    ],
+    "sampleInspection": "Foreground face retained on face shots; the brief original source room cut is preserved. Sampling does not qualify continuous predictive picture/sound parity or creative quality."
+  },
+  "privateEvidenceLogSha256": {
+    "graph-and-director-final.log": "361b182aafba74a1652d35c019615c381d8cc4b0a2cec8769e32c431504ae505",
+    "server-checked-recovery.log": "6339f0d09a1097bef20e88cc27462e772cc855e368e6df955625c18ed9963405",
+    "editor-source-metadata-final.log": "f65204573c7864e84848e3f953c4752f190587c5ae0fbd6eef65a6360372c165",
+    "worker-regressions-existing-env.log": "59064a7bea334df3d7c56cbdde0993787e8310c860ded8b112d8c89d90143550",
+    "frontend-build.log": "b13682b0f7d4977190dfa958309f1f0a9a20ee6dbc38cadf03ed407b2365a2d9",
+    "browser-final.log": "abbfc5291ef871304a2e8d798e2fe150796d47c6d041685cb967c8f93ed6afd5",
+    "browser-delivery.log": "08395053e5ee55bb9f073dfb3b776b12de3122647d6e2fbb553b8f6439bbb8aa",
+    "kernel-final-source-check.log": "075736a8f955867d00faaaf3686a2a5f5847cb70b64c7725d5ef220d7fb4cf37"
+  },
+  "continuityRecordValidation": {
+    "valid": true,
+    "capabilities": 29,
+    "counts": {
+      "UNIMPLEMENTED": 2,
+      "BROKEN": 1,
+      "PARTIAL": 9,
+      "FUNCTIONAL": 17,
+      "PRO-READY": 0,
+      "PRODUCTION-READY": 0
+    },
+    "combinations": 13,
+    "parityChecks": 17,
+    "presentFixtures": 4,
+    "newCapabilityExecutions": 0,
+    "note": "Record validation only; no browser, provider or GPU execution."
+  }
+}

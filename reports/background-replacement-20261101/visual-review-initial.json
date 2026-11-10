@@ -1,0 +1,18 @@
+{
+  "previewSha256": "b9a26759feb1f7f5d0a6d7f4582518b37f55c1bdcdab85baf23ce19f2ec4279b",
+  "actualFramesReviewed": true,
+  "frames": [
+    0,
+    12,
+    24,
+    35,
+    36,
+    37,
+    48,
+    60,
+    71
+  ],
+  "inspection": "Actual decoded source/replacement pairs and enlarged microphone frame 36 inspected. The large one-frame mic-body transparency is repaired. Main person, hands, boom rails and vertical supports stay present across sampled motion. Residual mottling along the bright mic rim, halo on fine plant edges, and single-view light/perspective integration remain; no professional/creative pass is claimed.",
+  "creativeGate": false,
+  "decision": "Proceed with diagnostic native save/reopen/export parity verification; preserve this candidate and report remaining defects honestly."
+}

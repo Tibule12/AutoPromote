@@ -1,0 +1,32 @@
+{
+  "passed": true,
+  "sha256": "707be227dcc8ce19ddfe8032eec841051a7405ab117998758ebc13571215d56b",
+  "bytes": 8989816,
+  "seconds": 24,
+  "video": {
+    "width": 1280,
+    "height": 720,
+    "codec": "h264",
+    "fps": "24/1",
+    "duration": "24.000000",
+    "frameCount": 576,
+    "pixelFormat": "yuv420p",
+    "encoder": "Lavc60.31.102 libx264"
+  },
+  "audio": {
+    "codec": "aac",
+    "channels": 2,
+    "sampleRate": "48000",
+    "duration": "24.000000"
+  },
+  "independentFullDecode": true,
+  "decodedAudio": {
+    "samples": 1152000,
+    "sampleRate": 48000,
+    "seconds": 24,
+    "toleranceSeconds": 0.04466666666666667,
+    "passed": true
+  },
+  "contactSheet": "reports/studio-motion-styles-20261104/native-motion-flow/final.mp4.frames.jpg",
+  "scope": "Technical only. Pixel and listening review are separate required evidence."
+}

@@ -1,0 +1,30 @@
+{
+  "projectId": "viral-project-70f2a9ed-f8ad-4950-a14d-dbbbd8a16066",
+  "templateRef": {
+    "templateId": "aperture_product_v1",
+    "version": "1.0.0",
+    "definitionHash": "ded9e27d439d17058f80b5054f76a73ddf1f747bc15188d722bc41a2ca88adbc"
+  },
+  "decisions": "1c0d4ea4b997348d0c418d68319e26a85aa55de74a1927424febcf2609946f1a",
+  "layers": 5,
+  "keys": 33,
+  "seconds": 8,
+  "source": {
+    "name": "watch",
+    "title": "Detailed wrist watch while working",
+    "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/reports/studio-template-collection-20261104/sources/watch.mp4",
+    "sha256": "0a1ea5fbcfeebf62f521bd782348a0d61e7a001118b13318cbfe278e03129d4b",
+    "page": "https://mixkit.co/free-stock-video/detailed-wrist-watch-while-working-3649/",
+    "downloadUrl": "https://assets.mixkit.co/videos/3649/3649-720.mp4",
+    "license": "https://mixkit.co/license/modal/videoFree/",
+    "sourceHtmlSha256": "f29cec075bddc19637ecf2fcbd788aa3df967648dd209e9ae96b86e68dc0308c",
+    "bytes": 3041983,
+    "seconds": 10.218542,
+    "width": 1280,
+    "height": 720,
+    "fps": "24000/1001",
+    "fullDecode": true
+  },
+  "normalFrontend": true,
+  "paidCalls": 0
+}

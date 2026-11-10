@@ -1,0 +1,12 @@
+{
+  "projectId": "viral-project-bafcf805-f86e-4ec4-a2f4-6530a5c653ff",
+  "seconds": 24,
+  "layers": 37,
+  "keys": 311,
+  "sourceShots": 5,
+  "decisions": "7b80b3f2bc6c07a142ccdb4476f2be9a1775048fa77b3eee09902dc62aafd334",
+  "nativeFrontend": true,
+  "manualContinuationOfDirector": true,
+  "inputMatteAssistance": "Cached local CPU RVM only; not product inference",
+  "paidCalls": 0
+}

@@ -1,0 +1,41 @@
+[
+  {
+    "requested": 1.5,
+    "testid": "studio-program-canvas",
+    "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+    "programmeTime": "1.5",
+    "programmeSource": "source",
+    "sourceSampling": "accurate-paused",
+    "sourceContentHash": "09f2b8bfcf899d174ecf53f6a9c5358b9d19ca7b7d8ba0b1c508abfc2a2bf15d",
+    "sourceFrameIndex": "36",
+    "sourceGeneration": "1793467767588",
+    "joinTransition": "",
+    "joinOpacity": "0"
+  },
+  {
+    "requested": 3.5,
+    "testid": "studio-program-canvas",
+    "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+    "programmeTime": "3.5",
+    "programmeSource": "source",
+    "sourceSampling": "accurate-paused",
+    "sourceContentHash": "09f2b8bfcf899d174ecf53f6a9c5358b9d19ca7b7d8ba0b1c508abfc2a2bf15d",
+    "sourceFrameIndex": "84",
+    "sourceGeneration": "1793467767588",
+    "joinTransition": "",
+    "joinOpacity": "0"
+  },
+  {
+    "requested": 5.5,
+    "testid": "studio-program-canvas",
+    "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+    "programmeTime": "5.5",
+    "programmeSource": "source",
+    "sourceSampling": "accurate-paused",
+    "sourceContentHash": "09f2b8bfcf899d174ecf53f6a9c5358b9d19ca7b7d8ba0b1c508abfc2a2bf15d",
+    "sourceFrameIndex": "132",
+    "sourceGeneration": "1793467767588",
+    "joinTransition": "",
+    "joinOpacity": "0"
+  }
+]

@@ -219,17 +219,14 @@ async function main() {
         }
       });
       const video = page.getByTestId("studio-after-video");
-      const isPaused = await video.evaluate(el => el.paused);
-      if (!isPaused) {
-        const pauseEdited = page.getByRole("button", { name: "Pause edited preview", exact: true });
-        const pauseComp = page.getByRole("button", { name: "Pause comparison", exact: true });
-        if (await pauseEdited.isVisible().catch(() => false)) {
-          await pauseEdited.click();
-        } else if (await pauseComp.isVisible().catch(() => false)) {
-          await pauseComp.click();
-        } else {
-          await video.evaluate(el => el.pause());
-        }
+      const pauseEdited = page.getByRole("button", { name: "Pause edited preview", exact: true });
+      const pauseComp = page.getByRole("button", { name: "Pause comparison", exact: true });
+      if (await pauseEdited.isVisible().catch(() => false)) {
+        await pauseEdited.click();
+      } else if (await pauseComp.isVisible().catch(() => false)) {
+        await pauseComp.click();
+      } else if (!(await video.evaluate(el => el.paused))) {
+        await video.evaluate(el => el.pause());
       }
       await page.waitForFunction(
         () => document.querySelector('[data-testid="studio-after-video"]')?.paused === true
@@ -237,6 +234,7 @@ async function main() {
     };
 
     const seekOutputTime = async targetSeconds => {
+      await muteAndPause();
       const scrubber = page.getByRole("slider", { name: "Edited output position" });
       await scrubber.evaluate((el, value) => {
         if (el._valueTracker) {
@@ -274,6 +272,7 @@ async function main() {
     await page.getByTestId("studio-mode-fxflow").click();
     await page.getByTestId("studio-comp-workbench").waitFor({ state: "visible" });
     await page.getByTestId("studio-node-flow").waitFor({ state: "visible" });
+    await muteAndPause();
     await assertCleanAutoPromoteBranding(page);
 
     const viewportMetrics = [];
@@ -392,15 +391,23 @@ async function main() {
     await page.getByTestId("comp-add-keyframe-playhead").click();
     await page.getByLabel("Selected keyframe value", { exact: true }).fill("1.18");
 
-    // 5. Verify Signal Node Flow Dock Swap + Dual Viewer [1]/[2] A/B Wipe
+    // 5. Verify Signal Node Flow Dock Swap + Dual Viewer [1]/[2] A/B Wipe + Cinema Color Grading Suite
     await page.getByTestId("dock-tab-node_flow").click();
-    await page.getByLabel("Assign ColorGrade to Viewer 2", { exact: true }).click();
-    const wipeSlider = page.getByLabel("Signal Flow A/B viewer wipe split", { exact: true });
+    const dockFlow = page.getByTestId("studio-node-flow").last();
+    await dockFlow.getByTestId("flow-node-ColorCorrector:finish").click();
+    await dockFlow.getByTestId("flow-color-grade-suite").waitFor({ state: "visible" });
+    await dockFlow.getByTestId("flow-color-scopes-card").waitFor({ state: "visible" });
+    await dockFlow.getByTestId("flow-grade-keyframes-card").waitFor({ state: "visible" });
+    await dockFlow.getByTestId("flow-3way-wheels-card").waitFor({ state: "visible" });
+    await dockFlow.getByTestId("flow-tone-curve-card").waitFor({ state: "visible" });
+    await dockFlow.getByTestId("flow-lut-lab-card").waitFor({ state: "visible" });
+    await dockFlow.getByLabel("Assign ColorGrade to Viewer 2", { exact: true }).click();
+    const wipeSlider = dockFlow.getByLabel("Signal Flow A/B viewer wipe split", { exact: true });
     await wipeSlider.waitFor({ state: "visible" });
     await assertCleanAutoPromoteBranding(page);
     await page.screenshot({ path: path.join(folder, "flow-ab-wipe-active.png") });
     // Toggle Viewer [2] off so stage renders clean single-viewer programme output, then return dock to Comp & Rig
-    await page.getByLabel("Assign ColorGrade to Viewer 2", { exact: true }).click();
+    await dockFlow.getByLabel("Assign ColorGrade to Viewer 2", { exact: true }).click();
     assert.equal(await wipeSlider.count(), 0);
     await page.getByTestId("dock-tab-comp_rig").click();
     recordCheck("Authored Null Rig, Parenting, Alpha Track Matte, loop/wiggle/spin Drivers, Whip Snap Bezier Curve, and Signal Node Flow [1]/[2] wipe", {
@@ -564,8 +571,14 @@ async function main() {
     const paritySummary = JSON.parse(
       fs.readFileSync(path.join(folder, "parity-receipt.json"), "utf8")
     );
-    recordCheck("Verified 4-frame browser preview vs local CPU FFmpeg render pixel parity", {
+    assert.equal(
+      paritySummary.color_grade_parity?.passed,
+      true,
+      `Color grade LUT + 3-Way wheel parity failed: ${JSON.stringify(paritySummary.color_grade_parity)}`
+    );
+    recordCheck("Verified 4-frame browser preview vs local CPU FFmpeg render pixel parity + 3D LUT/3-Way Wheel color parity", {
       summary: paritySummary.summary,
+      colorGradeParity: paritySummary.color_grade_parity,
       mediaProbe: paritySummary.media_probe,
     });
 

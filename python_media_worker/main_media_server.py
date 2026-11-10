@@ -31511,6 +31511,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
     thumbnail_output_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_thumbnail.jpg")
     downloaded_background_audio_path = None
     downloaded_music_path = None
+    watermark_source_directory = None
+    watermark_source_path = None
     color_cube_path = None
     sound_effect_paths = []
     overlay_temp_paths = []
@@ -31586,6 +31588,13 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
              raise HTTPException(status_code=400, detail=err_msg)
 
         source_has_audio = has_audio_stream(input_path)
+        if (request.remove_watermark and request.watermark_mode == 'manual'
+                and len(request.timeline_segments or []) <= 1 and not request.smart_crop):
+            # Keep the cleanup reference independent of disposable timeline
+            # inputs until the final native picture pass has completed.
+            watermark_source_directory = tempfile.TemporaryDirectory(prefix=f'{job_id}_cleanup-reference_', dir=SHARED_TMP_DIR)
+            watermark_source_path = os.path.join(watermark_source_directory.name, 'source.mp4')
+            shutil.copyfile(input_path, watermark_source_path)
         if request.subjectVfx:
             try:
                 from .studio_subject_vfx_export import download_subject_vfx
@@ -31867,7 +31876,6 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 )
         
         report_progress(30, "Timeline prepared")
-
         finish_reframe_plan = (request.finish_plan or {}).get("reframe") or {}
         requested_reframe_aspect = normalize_reframe_aspect(
             finish_reframe_plan.get("aspect") or "9:16"
@@ -33179,7 +33187,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     from .studio_layer_cache import video_layer_uses_canonical_raster
                 except ImportError:
                     from studio_layer_cache import video_layer_uses_canonical_raster
-                if video_layer_uses_canonical_raster(ov.id, layer_plan, request.composition_plan):
+                if video_layer_uses_canonical_raster(ov.id, layer_plan, request.composition_plan, ov):
                     # A moving video uses the same canonical pose/alpha
                     # compositor as images, after ordinary B-roll preparation.
                     suffix = 'mkv' if layer_plan.get('perspective') else 'mov'
@@ -33296,6 +33304,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         or float((layer_plan.get("base_transform") or {}).get("crop_y") or 0) > 0
                         or float(layer_effects.get("blur") or 0) > 0
                         or (layer_effects.get("glow") or {}).get("enabled")
+                        or (layer_effects.get("colorize") or {}).get("enabled")
                         or (layer_effects.get("shadow") or {}).get("enabled")
                         or (layer_effects.get("motion_blur") or {}).get("enabled")
                         or getattr(ov, "motionDesign", False)
@@ -33968,6 +33977,23 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             base_width,
             base_height,
         )
+        # Cleanup must affect the actual assembled native picture, including
+        # subject copies. Keeping it inside this graph preserves audio and clocks.
+        try:
+            from .studio_watermark_cleanup import studio_watermark_cleanup_filters
+        except ImportError:
+            from studio_watermark_cleanup import studio_watermark_cleanup_filters
+        watermark_filters, watermark_cleanup_receipt = await studio_watermark_cleanup_filters(
+            enabled=request.remove_watermark, mode=request.watermark_mode,
+            regions=request.watermark_regions,
+            segments=[segment.model_dump() for segment in normalized_segments] if request.timeline_segments else [],
+            start_time=request.start_time, duration=rendered_timeline_duration,
+            width=base_width, height=base_height, video_path=working_path,
+            build_filters=build_delogo_filters, time_map=rendered_timeline_time,
+        )
+        if watermark_filters:
+            filter_chain.append(f"[{current_v_label}]{','.join(watermark_filters)}[studio_watermark_clean]")
+            current_v_label = "studio_watermark_clean"
         delivery_filters = []
         if delivery_profile.get("colorSpace") == "rec709":
             # Frame properties can override encoder flags during negotiation.
@@ -34054,6 +34080,18 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         report_progress(75, "Rendering final video")
         logger.info(f"Running FFmpeg: {' '.join(cmd)}")
         await run_subprocess_async(cmd, check=True)
+
+        if watermark_cleanup_receipt.get("method") == "local_lama_masked":
+            try:
+                from .studio_watermark_cleanup import apply_studio_glyph_cleanup
+            except ImportError:
+                from studio_watermark_cleanup import apply_studio_glyph_cleanup
+            report_progress(84, "Reconstructing the covered badge area")
+            watermark_cleanup_receipt = await asyncio.to_thread(
+                apply_studio_glyph_cleanup, output_path, watermark_cleanup_receipt,
+                build_viral_export_encode_args(delivery_profile),
+                source_path=watermark_source_path,
+            )
 
         if normalized_audio_remix["enabled"] and normalized_audio_remix["target"] == "master":
             if not has_audio_stream(output_path):
@@ -34198,6 +34236,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 "creative_receipt": creative_receipt,
                 "creative_template_instance": request.creative_template_instance,
                 "professional_cleanup": cleanup_receipt,
+                "watermark_cleanup": watermark_cleanup_receipt,
                 "audio_restoration": restoration_receipt if has_main_audio else None,
                 "audio_automation": audio_automation_receipt,
                 "audio_track_states": audio_track_states,
@@ -34225,6 +34264,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         # Cleanup inputs
+        if watermark_source_directory is not None:
+            watermark_source_directory.cleanup()
         if os.path.exists(input_path): os.remove(input_path)
         for sequence_temp_path in sequence_temp_paths:
             try:

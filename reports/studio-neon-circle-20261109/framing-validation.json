@@ -1,0 +1,65 @@
+{
+  "sourceAlphaThreshold": 128,
+  "subjectFiguresInsideFrame": 7,
+  "everyActive24fpsTimeChecked": true,
+  "silhouetteMarginPercent": 3,
+  "figures": [
+    {
+      "layer": "Circle / vivid double 2",
+      "minLeftPercent": 6.228147216122057,
+      "maxRightPercent": 57.50089742381881,
+      "minTopPercent": 22.06655462835142,
+      "maxBottomPercent": 77.74968323592844,
+      "active24fpsFramesChecked": 173
+    },
+    {
+      "layer": "Circle / vivid double 3",
+      "minLeftPercent": 16.2212200060722,
+      "maxRightPercent": 86.26385032235007,
+      "minTopPercent": 22.08691606994799,
+      "maxBottomPercent": 76.7448835674924,
+      "active24fpsFramesChecked": 170
+    },
+    {
+      "layer": "Circle / vivid double 1",
+      "minLeftPercent": 3.0,
+      "maxRightPercent": 50.462700652567406,
+      "minTopPercent": 25.325373476446075,
+      "maxBottomPercent": 77.44912442028622,
+      "active24fpsFramesChecked": 175
+    },
+    {
+      "layer": "Circle / vivid double 4",
+      "minLeftPercent": 16.691135995532292,
+      "maxRightPercent": 97.0,
+      "minTopPercent": 25.30089914495995,
+      "maxBottomPercent": 77.75465611229191,
+      "active24fpsFramesChecked": 168
+    },
+    {
+      "layer": "Circle / lead",
+      "minLeftPercent": 10.876736617472638,
+      "maxRightPercent": 75.27283476100278,
+      "minTopPercent": 26.892654515964963,
+      "maxBottomPercent": 82.79780485064968,
+      "active24fpsFramesChecked": 192
+    },
+    {
+      "layer": "Circle / vivid double 5",
+      "minLeftPercent": 13.828976041641091,
+      "maxRightPercent": 97.0,
+      "minTopPercent": 29.614686692895564,
+      "maxBottomPercent": 79.57074711330985,
+      "active24fpsFramesChecked": 166
+    },
+    {
+      "layer": "Circle / vivid double 6",
+      "minLeftPercent": 3.0,
+      "maxRightPercent": 51.938498814803495,
+      "minTopPercent": 29.649397274112463,
+      "maxBottomPercent": 79.36532288641843,
+      "active24fpsFramesChecked": 163
+    }
+  ],
+  "reflectionExtendsIntoFloorAndFrameEdgeByDesign": true
+}

@@ -1,0 +1,15 @@
+{
+  "name": "OFF SCRIPT / Cut through",
+  "seconds": 24,
+  "plans": [
+    "01 - Editorial stage",
+    "02 - Portrait in the typography",
+    "03 - Temporal face shutters",
+    "04 - Code becomes the frame",
+    "05 - World behind the performer",
+    "06 - Source-bound depth"
+  ],
+  "paidCalls": 0,
+  "authoring": "Reviewed numeric art direction, native Studio controls and shared graph only",
+  "sourceMasks": "Cached CPU input alpha, not product-integrated inference"
+}

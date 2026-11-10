@@ -1,0 +1,43 @@
+{
+  "recordedAt": "2026-11-08T09:17:29.498851+00:00",
+  "state": "NATIVE_MOVIE_AND_EDITABLE_PROJECT_DELIVERED_FOR_OWNER_REVIEW",
+  "job": "viral_8aa43a0b4321db0af5553403197841b87bfd4e39f3f6033c5999490eb787265b",
+  "workerDirectory": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105/reports/studio-director-composition-20261107/private/runtime/autopromote-application-demo-6YGcoz/worker/54110669a74dc13ca26d93e327f7f6470f3ce5ee70c4885d07c929e0c5d9f77d",
+  "postprocess": "postprocess.cjs waits for actual render success then runs finished playback, cold reopen, binding, picture review and snapshot; stops on failure",
+  "noFurtherRenderUntilTerminal": true,
+  "frameTarget": 384,
+  "seconds": 16,
+  "layers": 42,
+  "keys": 2737,
+  "newSources": "sources/blue.mp4 and sources/bloom.mp4; prepared/bloom.mp4 is an identical20s stream copy through used9s",
+  "next": "Owner review of exact new film; shared performance, preview, general unmasked geometry and Director integration remain open. No new paid or production action.",
+  "protectedPriorFiles": 490,
+  "firstJob": "viral_585ce87c8608012aff823a6396c28358f08108e5faa11cb14588bfcea9c87ced",
+  "firstRejectedMovieSha256": "7d525f0366d6082846856984846e940324a8995bbddf3a2aca6b3a00c661ef3a",
+  "firstRejection": "Blue reveal incorrectly uses70percent rectangle. Native corrected project adds explicit fullframe polygon mask.",
+  "correctedStrictPausedParity": false,
+  "accurateFrameLimit": "429STUDIO_FRAME_BUSY, no final-graph strict pass. Initial22 diagnostic samples and full live playback retained separately.",
+  "renderObserverSession": 68768,
+  "postprocessObserverSession": 9243,
+  "nativeWorkerCeiling": {
+    "wallSeconds": 1200,
+    "cpuSecondsPerProcess": 1200,
+    "perFileMiB": 384,
+    "artifactMiB": 128
+  },
+  "currentLocalWallet": {
+    "available": 1,
+    "reserved": 0,
+    "operations": 5
+  },
+  "safeStopBoundary": "Do not resubmit existing processing job. Postprocess waits for normal completed render-ui receipt, then finished playback/coldreopen/binding/frame review/snapshot. Finalize only after genuine native success and actual final pictures.",
+  "firstObserverTimedOut": true,
+  "newHeaderDeadline": 1800000,
+  "noProductionChanges": true,
+  "movieSha256": "c49f5c73178db4f117932d6bfd4c7b2905740b941c3a75fa5e4f0b3aa57aee47",
+  "frames": 384,
+  "delivery": "/home/tibule12/Videos/Studio - Glass Current - 2026-11-08",
+  "nativeJobComplete": true,
+  "nativeBackupBinding": true,
+  "ownerCreativeApproval": false
+}

@@ -199,7 +199,7 @@ Stores ordinary text, image and video overlays as editable canonical layers. Arb
 
 **Guides:** [Edit a video in your own style](../task-guides/task-own_style.md)
 
-**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
+**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2, creator_identity_v1@1.0.0, prism_cuts_v1@1.0.0, momentum_v1@1.0.0, momentum_v1@1.0.1, aperture_product_v1@1.0.0, editorial_fan_v1@1.0.0, editorial_fan_v1@1.0.1, split_impact_v1@1.0.0, coastal_postcards_v1@1.0.0, vinyl_pulse_v1@1.0.0, living_infinity_v1@1.0.0, living_infinity_v1@1.0.1
 
 ## 2D layer transforms
 
@@ -297,7 +297,7 @@ Edit property keys, spatial position handles and value/velocity graphs on the sa
 
 **Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Modify Director edits manually](../task-guides/task-director_manual.md), [Edit a video in your own style](../task-guides/task-own_style.md)
 
-**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
+**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2, creator_identity_v1@1.0.0, prism_cuts_v1@1.0.0, momentum_v1@1.0.0, momentum_v1@1.0.1, aperture_product_v1@1.0.0, editorial_fan_v1@1.0.0, editorial_fan_v1@1.0.1, split_impact_v1@1.0.0, coastal_postcards_v1@1.0.0, vinyl_pulse_v1@1.0.0, living_infinity_v1@1.0.0, living_infinity_v1@1.0.1
 
 ## Motion easing
 
@@ -367,6 +367,7 @@ Reframes a source or crops an overlay using the shared time map and existing ren
 5. Show Everyone has separate top/bottom crops and reviewed tracking points. Multi-Camera needs two to four distinct, synchronized full-size sources and explicit timecode confirmation. Review timed changes in Preview and the actual export.
 6. The camera bank holds twelve angles across imports. Remove unused angles removes unused references from the current edit; Undo restores them, and original media and saved versions remain.
 7. Face detection is optional. Poor coverage leaves the current framing unchanged. Follow existing camera cuts proposes foreground crops for each shot; it does not identify who is speaking.
+8. In Reframe → Watermark cleanup, enable badge cleanup and choose Manual cleanup boxes. Add a box, set its left/top/width/height over the platform badge, and leave tracking off for a fixed position. Use a second box if the badge changes position. Save and export, then inspect the actual moving result.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
@@ -375,6 +376,7 @@ Reframes a source or crops an overlay using the shared time map and existing ren
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
+- Static manual badge cleanup requires the optional pinned local CPU reconstruction runtime. It reconstructs masked strokes; covered detail is inferred, not exactly recovered. Moving people, animated logos and temporal consistency require export review. The live box is a placement guide. This path supports a single source occurrence and SDR 8-bit output; unsupported runtimes/formats are refused. Other cleanup modes retain their existing interpolation limits. A same-size single-source export may use a bounded registered early-source background and measured texture when the badge is absent there; low-frequency fill remains inferred. Large connected colour regions crossing the box are protected. Camera changes, neutral clothing, moving shadows and temporal seams remain unqualified; inspect the actual export. This does not establish photoreal restoration.
 
 **Common errors**
 
@@ -573,26 +575,26 @@ Combines ordinary layers and animated graphic groups with shared order, static m
 
 **Workflow**
 
-1. Select an owned image or ordinary title in Studio Composite.
-2. Enable its geometric mask and choose rectangle, ellipse or polygon.
-3. For polygons, enter3–64 percentage points and commit with Enter/blur; invalid drafts are not applied and Escape cancels.
-4. For rectangles, set Mask corner radius from0–50%;0 retains square mask corners.
-5. Review feather/inversion and the actual export; whole alpha and broader stacks remain unqualified.
-6. To transform graphics together, choose root layers/groups in Composite and use Group selected layers. Choose an existing root group with other roots to nest them.
-7. Set group X/Y, scale, rotation and opacity; child edits and keys stay local. Use Composite arrows to reorder group roots or their children.
-8. Add an individual group property key at the playhead, seek and edit its next value. Expand the group in the shared timeline for property values, key navigation and frame nudges; choose easing or a custom Bézier curve in Composite.
-9. Enable the group mask and choose rectangle, ellipse or percentage polygon. Set rectangle corner radius, programme-unit feather and inversion. Polygon Enter/blur commits valid paths; Escape cancels invalid drafts. The group mask clips assembled children before its transform.
-10. Choose a supported group blend mode to combine the assembled result with its sibling backdrop. Ordinary child blends stay inside the isolated parent group. Reset group mask clears only its mask; graphics locks prevent changes.
-11. Reset transform removes that group’s keys and restores its neutral base. Remove group transform removes its keys and promotes children without baking. Undo/redo and save/reopen apply; inspect the exact final export.
-12. Select the group clip bar to move all child clips and keys, or trim its In/Out visibility. Composite provides exact timing values, Fit to children and reversible Delete group and layers. Source and child-track locks protect the same operation.
-13. Open Studio → Composite and add effects to the selected owned video clip.
-14. Leave Background choice on Keep original background, or upload a PNG, JPEG or WebP image and choose it for replacement.
-15. Select the person using Subject point on the paused source. Select optional furniture, microphones or other objects separately. Extra objects are empty by default; people selection is not automatic detection of everyone.
-16. Create and review this source’s subject mask through the available model workflow, or explicitly reuse a valid mask belonging to the same source and range.
-17. Tune foreground/background colour, matte refinement and optional holdouts, render the processed preview and inspect moving edges throughout the shot. Save and export the current reviewed revision.
-18. At a later problem frame, add both keep and remove points and rerun the selection. The selection box and points are retained together; inspect the complete moving result.
-19. For hair or fine equipment, use Refine saved mask edges on the existing selection, then render and inspect movement. Keep earlier results available; refinement cannot reconstruct a missing foreground object.
-20. After refining a saved mask, set Edge detail width to 0 to retain its refined edges. Use Remove old background colour for pale residue, render the preview and inspect the whole moving shot.
+1. Select an owned image or ordinary title in Studio Composite, enable its geometric mask and choose rectangle, ellipse or polygon.
+2. For polygons, enter3–64 percentage points and commit with Enter/blur; invalid drafts are not applied and Escape cancels.
+3. For rectangles, set Mask corner radius from0–50%;0 retains square mask corners.
+4. Review feather/inversion and the actual export; whole alpha and broader stacks remain unqualified.
+5. To transform graphics together, choose root layers/groups in Composite and use Group selected layers. Choose an existing root group with other roots to nest them.
+6. Set group X/Y, scale, rotation and opacity; child edits and keys stay local. Use Composite arrows to reorder group roots or their children.
+7. Add an individual group property key at the playhead, seek and edit its next value. Expand the group in the shared timeline for property values, key navigation and frame nudges; choose easing or a custom Bézier curve in Composite.
+8. Enable the group mask and choose rectangle, ellipse or percentage polygon. Set rectangle corner radius, programme-unit feather and inversion. Polygon Enter/blur commits valid paths; Escape cancels invalid drafts. The group mask clips assembled children before its transform.
+9. Choose a supported group blend mode to combine the assembled result with its sibling backdrop. Ordinary child blends stay inside the isolated parent group. Reset group mask clears only its mask; graphics locks prevent changes.
+10. Reset transform removes that group’s keys and restores its neutral base. Remove group transform removes its keys and promotes children without baking. Undo/redo and save/reopen apply; inspect the exact final export.
+11. Select the group clip bar to move all child clips and keys, or trim its In/Out visibility. Composite provides exact timing values, Fit to children and reversible Delete group and layers. Source and child-track locks protect the same operation.
+12. Open Studio → Composite and add effects to the selected owned video clip.
+13. Leave Background choice on Keep original background, or upload a PNG, JPEG or WebP image and choose it for replacement.
+14. Select the person using Subject point on the paused source. Select optional furniture, microphones or other objects separately. Extra objects are empty by default; people selection is not automatic detection of everyone.
+15. Create and review this source’s subject mask through the available model workflow, or explicitly reuse a valid mask belonging to the same source and range.
+16. Tune foreground/background colour, matte refinement and optional holdouts, render the processed preview and inspect moving edges throughout the shot. Save and export the current reviewed revision.
+17. At a later problem frame, add both keep and remove points and rerun the selection. The selection box and points are retained together; inspect the complete moving result.
+18. For hair or fine equipment, use Refine saved mask edges on the existing selection, then render and inspect movement. Keep earlier results available; refinement cannot reconstruct a missing foreground object.
+19. After refining a saved mask, set Edge detail width to 0 to retain its refined edges. Use Remove old background colour for pale residue, render the preview and inspect the whole moving shot.
+20. Node Flow → Subject echoes & light arcs builds delayed copies or a copy circle from footage and its aligned matte. Set source starts/duration and apply once; layers and keys stay editable. Composite → Photographic tint refines colour/detail. On isolated media, Rim light & floor reflection adds post-mask glow and a fading vertical mirror across a chosen floor Y. Review contact, layer order, history, reopen and the actual export.
 
 **Preview:** Full-canvas nested wrappers evaluate existing canonical motion keys on the shared preview clock, preserve child edits and apply a shared SVG geometric mask before the group transform/opacity. CSS group isolation retains the sibling backdrop for group and child blending. One native Multiply/Screen nested image/two-motion edit with 16 group keys has four scoped geometry and image-interior color pairs; whole glyph/alpha/raster/picture/sound and broad modes/media remain unqualified.
 
@@ -601,12 +603,15 @@ Combines ordinary layers and animated graphic groups with shared order, static m
 **Limits**
 
 - Image and title geometric masks support feather and inversion. Inspect their boundaries in the exported movie, especially with soft edges.
-- Geometric masks on the main video or video layers currently stop export. Real person/background separation uses Composite’s separately processed subject mask. Arbitrary nesting and global layer/effect order remain incomplete.
+- Supported ordinary video layers can use geometric masks and direct two-dimensional video track mattes in the canonical composition path. That does not isolate people automatically. Main-video masks, arbitrary nesting and global effect ordering need separate qualification; inspect the actual export.
 - This dated development snapshot does not establish professional or production readiness.
 - Background replacement is optional. Uploads accept PNG, JPEG or WebP up to 32 MB; a scene supports at most twelve effect layers.
 - A new video requires its own source-bound mask and available authorized model execution. A saved mask from another video cannot be transferred. An unavailable model service prevents creating a new mask.
 - The retained podcast example uses manual source-specific object contours and still has rejected fringes. Those corrections do not prove clean automatic replacement for other users’ footage.
 - Optional object holdouts and removal paths are advanced manual normalized source-frame geometry. They do not automatically identify furniture or microphones or track a hand-drawn shape through motion.
+- Subject echoes require a supplied matching subject matte; this recipe does not automatically isolate people or track feet. Coloured silhouettes remain flat fills; Tinted photographic echoes preserve source shading and texture, with source-dependent isolation and edge quality. Tint does not physically relight the scene; light arcs are editable drawn paths, not physical particles or measured scene lighting. Broad preview/export parity and production readiness remain unqualified.
+- Copy circle arranges 4–8 supplied moving subject copies on a depth-ordered floor ellipse, with source-aligned mattes, drawn light and authored contact cues. Set the source foot anchor and inspect crop/source alignment. This is 2D compositing, not reconstructed 3D viewpoints, automatic isolation or physical floor lighting; edge/contact/cleanup quality remains source-dependent.
+- Rim light & floor reflection applies to isolated ordinary image/video layers after their track matte. The reflection is a flat vertical mirror around a fixed floor line; it does not infer a floor, lighting or new views. Browser/CPU glow edge pixels differ; inspect actual paired frames. Omission preserves earlier layers.
 
 **Common errors**
 
@@ -616,7 +621,7 @@ Combines ordinary layers and animated graphic groups with shared order, static m
 
 **Guides:** [Edit a video in your own style](../task-guides/task-own_style.md)
 
-**Templates:** No pinned shared-template binding recorded.
+**Templates:** creator_identity_v1@1.0.0, prism_cuts_v1@1.0.0, momentum_v1@1.0.0, momentum_v1@1.0.1, aperture_product_v1@1.0.0, editorial_fan_v1@1.0.0, editorial_fan_v1@1.0.1, split_impact_v1@1.0.0, coastal_postcards_v1@1.0.0, vinyl_pulse_v1@1.0.0, living_infinity_v1@1.0.0, living_infinity_v1@1.0.1
 
 ## Mask-backed compositing
 
@@ -638,7 +643,8 @@ Uses reviewed owned subject-mask results in a bounded scene and deterministic fi
 2. Choose the person and separate foreground objects to retain, including the microphone and supports.
 3. Choose Correction target and a source frame; add foreground or background points where a track needs correction. Finish or cancel a pending mask request before changing it.
 4. Create the subject mask, refine saved mask edges, choose or upload the background and render the subject preview.
-5. Inspect movement and overlap frames, then save, reopen and inspect the final export. The reviewed checkbox records inspection, not professional quality approval.
+5. For a fixed foreground object with keep/remove colour examples, optionally enable Clean fine edges of foreground object N before refining. Leave it off for other objects; inspect every affected movement frame.
+6. Inspect movement and overlap frames, then save, reopen and inspect the final export. The reviewed checkbox records inspection, not professional quality approval.
 
 **Preview:** A source-bound model mask and replacement scene produce a reviewed short-shot preview. Correcting the selection detaches stale results; effect-only changes can reuse the mask.
 
@@ -653,6 +659,7 @@ Uses reviewed owned subject-mask results in a bounded scene and deterministic fi
 - The local temporal revision gates opacity consensus on unchanged source RGB and scopes corrective resets to the affected object. This reduces a specific motion-related background defect; it does not qualify clean fine foliage, all hair or arbitrary motion.
 - The latest local continuation preserves fractional model alpha instead of thresholding it again, and retains the person box when a correction detaches a completed request. These bounded repairs do not qualify arbitrary motion, hair, physical relighting or production latency.
 - The original-frame comparison found unintended lossy intermediate encodes after the subject preview. Reviewed-subject sequence, reframe and finish intermediates now preserve decoded samples before the ordinary selected final encode. This does not recover missing fine foreground detail or qualify visual cleanliness.
+- Selected fixed-object colour refinement is opt-in and source-bound. Similar-colour subpixel twigs/TV graphics, cropped furniture alpha, physical integration and four-minute clean-edge qualification remain unresolved after the latest native two-second repair.
 
 **Common errors**
 
@@ -858,7 +865,7 @@ Mixes owned original audio, master podcast, voiceover, music, B-roll and SFX bus
 
 **Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Add B-roll](../task-guides/task-add_broll.md), [Modify Director edits manually](../task-guides/task-director_manual.md), [Edit a video in your own style](../task-guides/task-own_style.md)
 
-**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
+**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2, creator_identity_v1@1.0.0, prism_cuts_v1@1.0.0, momentum_v1@1.0.0, momentum_v1@1.0.1, aperture_product_v1@1.0.0, editorial_fan_v1@1.0.0, editorial_fan_v1@1.0.1, split_impact_v1@1.0.0, coastal_postcards_v1@1.0.0, vinyl_pulse_v1@1.0.0, living_infinity_v1@1.0.0, living_infinity_v1@1.0.1
 
 ## Voiceover takes
 
@@ -973,7 +980,7 @@ Places sound cues on the native timeline. Included sound-design presets synthesi
 
 **Guides:** [Create a cinematic logo reveal](../task-guides/task-cinematic_logo.md)
 
-**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
+**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2, creator_identity_v1@1.0.0, prism_cuts_v1@1.0.0, momentum_v1@1.0.0, momentum_v1@1.0.1, aperture_product_v1@1.0.0, editorial_fan_v1@1.0.0, editorial_fan_v1@1.0.1, split_impact_v1@1.0.0, coastal_postcards_v1@1.0.0, vinyl_pulse_v1@1.0.0, living_infinity_v1@1.0.0, living_infinity_v1@1.0.1
 
 ## Voice repair
 
@@ -1410,7 +1417,7 @@ Instantiates a pinned draft template into ordinary editable clips, layers, keyfr
 
 **Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Use a creative template](../task-guides/task-use_template.md), [Edit a video in your own style](../task-guides/task-own_style.md)
 
-**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
+**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2, creator_identity_v1@1.0.0, prism_cuts_v1@1.0.0, momentum_v1@1.0.0, momentum_v1@1.0.1, aperture_product_v1@1.0.0, editorial_fan_v1@1.0.0, editorial_fan_v1@1.0.1, split_impact_v1@1.0.0, coastal_postcards_v1@1.0.0, vinyl_pulse_v1@1.0.0, living_infinity_v1@1.0.0, living_infinity_v1@1.0.1
 
 ## Studio playback preview
 
@@ -1487,7 +1494,7 @@ Compiles the canonical project into the existing deterministic final path. Outpu
 
 **Guides:** [Turn an image into a cinematic scene](../task-guides/task-image_cinematic.md), [Export a final film](../task-guides/task-final_export.md)
 
-**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
+**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2, creator_identity_v1@1.0.0, prism_cuts_v1@1.0.0, momentum_v1@1.0.0, momentum_v1@1.0.1, aperture_product_v1@1.0.0, editorial_fan_v1@1.0.0, editorial_fan_v1@1.0.1, split_impact_v1@1.0.0, coastal_postcards_v1@1.0.0, vinyl_pulse_v1@1.0.0, living_infinity_v1@1.0.0, living_infinity_v1@1.0.1
 
 ## Export and download
 
@@ -1638,7 +1645,7 @@ Preserves canonical revision and provenance for manual edits, Director proposals
 
 **Guides:** [Modify Director edits manually](../task-guides/task-director_manual.md), [Export a final film](../task-guides/task-final_export.md), [Edit a video in your own style](../task-guides/task-own_style.md)
 
-**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
+**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2, creator_identity_v1@1.0.0, prism_cuts_v1@1.0.0, momentum_v1@1.0.0, momentum_v1@1.0.1, aperture_product_v1@1.0.0, editorial_fan_v1@1.0.0, editorial_fan_v1@1.0.1, split_impact_v1@1.0.0, coastal_postcards_v1@1.0.0, vinyl_pulse_v1@1.0.0, living_infinity_v1@1.0.0, living_infinity_v1@1.0.1
 
 ## B-roll placement
 
@@ -1699,6 +1706,7 @@ Imports owned media into the ordinary project. A ready video can replace the ent
 2. Review the result and its limitations before saving or exporting.
 3. Select a saved video at least as long as the current programme and choose Replace entire sequence. Graphics and sound keep their programme timing; source captions, cameras and old template bindings are removed. Undo restores the prior sequence.
 4. Remove unused media clears unreferenced library entries and transform keys with no remaining target. Active sources, layer/camera/music/sound references and pending uploads are retained. Stored files are not deleted.
+5. For ordinary image/audio uploads, completed byte transfer is followed by a Storage URL lookup. If that lookup does not finish within fifteen seconds or the shorter remaining upload deadline, the existing authenticated backend upload fallback is used. A failed fallback still reports an upload error; a completed byte counter alone is not a saved source.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 

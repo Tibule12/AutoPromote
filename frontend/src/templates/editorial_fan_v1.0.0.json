@@ -1,0 +1,2063 @@
+{
+  "schemaVersion": 1,
+  "templateId": "editorial_fan_v1",
+  "version": "1.0.0",
+  "label": "Editorial fan \u2014 fashion collage",
+  "status": "draft",
+  "canonicalContractVersion": 1,
+  "compiler": "studioRenderCompiler",
+  "renderer": "render_viral_clip_impl",
+  "surfaces": [
+    "studio",
+    "director",
+    "welcome"
+  ],
+  "workflow": "studio",
+  "categoryIds": [
+    "motion_graphics"
+  ],
+  "inputSlots": [
+    {
+      "id": "footage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "music",
+      "type": "audio",
+      "required": false
+    }
+  ],
+  "supportedAspects": [
+    "16:9"
+  ],
+  "durationTicks": 720000,
+  "qualification": {
+    "studioLifecycle": "unverified",
+    "directorInstantiation": "unverified",
+    "creativeQuality": "unapproved",
+    "previewFinalParity": "unverified"
+  },
+  "executionDefinition": {
+    "clock": 90000,
+    "defaultAspect": "16:9",
+    "sequence": [
+      {
+        "slot": "footage",
+        "offset": 0,
+        "duration": 8,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      }
+    ],
+    "titles": [],
+    "logo": {},
+    "animation": {
+      "enterSeconds": 0.2,
+      "settleSeconds": 0.45,
+      "exitSeconds": 0.12,
+      "curve": [
+        0.16,
+        1,
+        0.3,
+        1
+      ]
+    },
+    "music": {
+      "volume": 55,
+      "fadeIn": 0.1,
+      "fadeOut": 0.5
+    },
+    "soundCues": [
+      {
+        "tone": "airy_whoosh",
+        "time": 0,
+        "duration": 0.6,
+        "volume": 0.2
+      },
+      {
+        "tone": "airy_whoosh",
+        "time": 3.3,
+        "duration": 0.5,
+        "volume": 0.16
+      },
+      {
+        "tone": "airy_whoosh",
+        "time": 6.4,
+        "duration": 0.6,
+        "volume": 0.18
+      }
+    ],
+    "sourceKeyframes": [],
+    "sceneActions": [],
+    "directorDescription": "Three paper-mounted live portraits fan out, reform into an editorial grid and peel into the final shot. Uses one saved source and ordinary editable Studio layers. No model job.",
+    "defaultCopy": {},
+    "muteOriginalAudio": true,
+    "framing": {
+      "forceAspect": true,
+      "mode": "off",
+      "positions": []
+    },
+    "videoFit": "contain",
+    "ordinaryMotion": {
+      "version": 1,
+      "layers": [
+        {
+          "id": "Backdrop",
+          "name": "Backdrop",
+          "type": "image",
+          "vectorShape": {
+            "version": 1,
+            "closed": true,
+            "nodes": [
+              {
+                "x": 0,
+                "y": 0,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 100,
+                "y": 0,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 100,
+                "y": 100,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 0,
+                "y": 100,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "fill": {
+              "kind": "solid",
+              "color": "#eee6d8",
+              "endColor": "#eee6d8",
+              "start": [
+                0,
+                0
+              ],
+              "end": [
+                100,
+                100
+              ]
+            },
+            "stroke": {
+              "color": "#eee6d8",
+              "width": 0
+            }
+          },
+          "startTime": 0,
+          "duration": 8,
+          "x": 50,
+          "y": 50,
+          "width": 100,
+          "height": 100,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "stretch",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "Editorial sheet 0",
+          "name": "Editorial sheet 0",
+          "type": "image",
+          "vectorShape": {
+            "version": 1,
+            "closed": true,
+            "nodes": [
+              {
+                "x": 0,
+                "y": 0,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 100,
+                "y": 0,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 100,
+                "y": 100,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 0,
+                "y": 100,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "fill": {
+              "kind": "solid",
+              "color": "#fffcf5",
+              "endColor": "#fffcf5",
+              "start": [
+                0,
+                0
+              ],
+              "end": [
+                100,
+                100
+              ]
+            },
+            "stroke": {
+              "color": "#fffcf5",
+              "width": 0
+            }
+          },
+          "startTime": 0,
+          "duration": 8,
+          "x": 24,
+          "y": 50,
+          "width": 29,
+          "height": 86,
+          "scale": 1,
+          "rotation": -11,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "stretch",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "Editorial live 0",
+          "name": "Editorial live 0",
+          "type": "video",
+          "sourceSlot": "footage",
+          "sourceStartTime": 0,
+          "startTime": 0,
+          "duration": 8,
+          "x": 24,
+          "y": 50,
+          "width": 27,
+          "height": 79,
+          "scale": 1,
+          "rotation": -11,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "cover",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "Editorial sheet 1",
+          "name": "Editorial sheet 1",
+          "type": "image",
+          "vectorShape": {
+            "version": 1,
+            "closed": true,
+            "nodes": [
+              {
+                "x": 0,
+                "y": 0,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 100,
+                "y": 0,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 100,
+                "y": 100,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 0,
+                "y": 100,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "fill": {
+              "kind": "solid",
+              "color": "#fffcf5",
+              "endColor": "#fffcf5",
+              "start": [
+                0,
+                0
+              ],
+              "end": [
+                100,
+                100
+              ]
+            },
+            "stroke": {
+              "color": "#fffcf5",
+              "width": 0
+            }
+          },
+          "startTime": 0,
+          "duration": 8,
+          "x": 50,
+          "y": 50,
+          "width": 29,
+          "height": 86,
+          "scale": 1,
+          "rotation": 3,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "stretch",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "Editorial live 1",
+          "name": "Editorial live 1",
+          "type": "video",
+          "sourceSlot": "footage",
+          "sourceStartTime": 0,
+          "startTime": 0,
+          "duration": 8,
+          "x": 50,
+          "y": 50,
+          "width": 27,
+          "height": 79,
+          "scale": 1,
+          "rotation": 3,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "cover",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "Editorial sheet 2",
+          "name": "Editorial sheet 2",
+          "type": "image",
+          "vectorShape": {
+            "version": 1,
+            "closed": true,
+            "nodes": [
+              {
+                "x": 0,
+                "y": 0,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 100,
+                "y": 0,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 100,
+                "y": 100,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 0,
+                "y": 100,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "fill": {
+              "kind": "solid",
+              "color": "#fffcf5",
+              "endColor": "#fffcf5",
+              "start": [
+                0,
+                0
+              ],
+              "end": [
+                100,
+                100
+              ]
+            },
+            "stroke": {
+              "color": "#fffcf5",
+              "width": 0
+            }
+          },
+          "startTime": 0,
+          "duration": 8,
+          "x": 76,
+          "y": 50,
+          "width": 29,
+          "height": 86,
+          "scale": 1,
+          "rotation": 12,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "stretch",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "Editorial live 2",
+          "name": "Editorial live 2",
+          "type": "video",
+          "sourceSlot": "footage",
+          "sourceStartTime": 0,
+          "startTime": 0,
+          "duration": 8,
+          "x": 76,
+          "y": 50,
+          "width": 27,
+          "height": 79,
+          "scale": 1,
+          "rotation": 12,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "cover",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "Editorial final",
+          "name": "Editorial final",
+          "type": "video",
+          "sourceSlot": "footage",
+          "sourceStartTime": 0,
+          "startTime": 6.4,
+          "duration": 1.5999999999999996,
+          "x": 50,
+          "y": 50,
+          "width": 100,
+          "height": 100,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "cover",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(0% 0%,0% 0%,0% 100%,0% 100%)",
+            "feather": 0,
+            "inverted": false
+          }
+        }
+      ],
+      "keys": [
+        {
+          "targetId": "Editorial sheet 0",
+          "property": "y",
+          "time": 0,
+          "value": 150,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 0",
+          "property": "y",
+          "time": 0.65,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 0",
+          "property": "y",
+          "time": 2.7,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 0",
+          "property": "y",
+          "time": 3.8,
+          "value": 49,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 0",
+          "property": "y",
+          "time": 5.3,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 0",
+          "property": "y",
+          "time": 7.4,
+          "value": -110,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 0",
+          "property": "rotation",
+          "time": 0,
+          "value": 19,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 0",
+          "property": "rotation",
+          "time": 0.9,
+          "value": -11,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 0",
+          "property": "rotation",
+          "time": 2.7,
+          "value": -11,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 0",
+          "property": "rotation",
+          "time": 4.4,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 0",
+          "property": "rotation",
+          "time": 6.3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 0",
+          "property": "rotation",
+          "time": 7.4,
+          "value": 11,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 0",
+          "property": "x",
+          "time": 0,
+          "value": 24,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 0",
+          "property": "x",
+          "time": 3,
+          "value": 24,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 0",
+          "property": "x",
+          "time": 4.4,
+          "value": 18,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 0",
+          "property": "x",
+          "time": 6.3,
+          "value": 18,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 0",
+          "property": "x",
+          "time": 7.4,
+          "value": 18,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 0",
+          "property": "y",
+          "time": 0,
+          "value": 150,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 0",
+          "property": "y",
+          "time": 0.65,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 0",
+          "property": "y",
+          "time": 2.7,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 0",
+          "property": "y",
+          "time": 3.8,
+          "value": 49,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 0",
+          "property": "y",
+          "time": 5.3,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 0",
+          "property": "y",
+          "time": 7.4,
+          "value": -110,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 0",
+          "property": "rotation",
+          "time": 0,
+          "value": 19,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 0",
+          "property": "rotation",
+          "time": 0.9,
+          "value": -11,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 0",
+          "property": "rotation",
+          "time": 2.7,
+          "value": -11,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 0",
+          "property": "rotation",
+          "time": 4.4,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 0",
+          "property": "rotation",
+          "time": 6.3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 0",
+          "property": "rotation",
+          "time": 7.4,
+          "value": 11,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 0",
+          "property": "x",
+          "time": 0,
+          "value": 24,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 0",
+          "property": "x",
+          "time": 3,
+          "value": 24,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 0",
+          "property": "x",
+          "time": 4.4,
+          "value": 18,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 0",
+          "property": "x",
+          "time": 6.3,
+          "value": 18,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 0",
+          "property": "x",
+          "time": 7.4,
+          "value": 18,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 1",
+          "property": "y",
+          "time": 0,
+          "value": 150,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 1",
+          "property": "y",
+          "time": 0.8,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 1",
+          "property": "y",
+          "time": 2.7,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 1",
+          "property": "y",
+          "time": 3.8,
+          "value": 52,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 1",
+          "property": "y",
+          "time": 5.3,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 1",
+          "property": "y",
+          "time": 7.4,
+          "value": -110,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 1",
+          "property": "rotation",
+          "time": 0,
+          "value": 33,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 1",
+          "property": "rotation",
+          "time": 1.05,
+          "value": 3,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 1",
+          "property": "rotation",
+          "time": 2.7,
+          "value": 3,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 1",
+          "property": "rotation",
+          "time": 4.4,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 1",
+          "property": "rotation",
+          "time": 6.3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 1",
+          "property": "rotation",
+          "time": 7.4,
+          "value": -3,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 1",
+          "property": "x",
+          "time": 0,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 1",
+          "property": "x",
+          "time": 3,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 1",
+          "property": "x",
+          "time": 4.4,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 1",
+          "property": "x",
+          "time": 6.3,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 1",
+          "property": "x",
+          "time": 7.4,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 1",
+          "property": "y",
+          "time": 0,
+          "value": 150,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 1",
+          "property": "y",
+          "time": 0.8,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 1",
+          "property": "y",
+          "time": 2.7,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 1",
+          "property": "y",
+          "time": 3.8,
+          "value": 52,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 1",
+          "property": "y",
+          "time": 5.3,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 1",
+          "property": "y",
+          "time": 7.4,
+          "value": -110,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 1",
+          "property": "rotation",
+          "time": 0,
+          "value": 33,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 1",
+          "property": "rotation",
+          "time": 1.05,
+          "value": 3,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 1",
+          "property": "rotation",
+          "time": 2.7,
+          "value": 3,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 1",
+          "property": "rotation",
+          "time": 4.4,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 1",
+          "property": "rotation",
+          "time": 6.3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 1",
+          "property": "rotation",
+          "time": 7.4,
+          "value": -3,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 1",
+          "property": "x",
+          "time": 0,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 1",
+          "property": "x",
+          "time": 3,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 1",
+          "property": "x",
+          "time": 4.4,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 1",
+          "property": "x",
+          "time": 6.3,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 1",
+          "property": "x",
+          "time": 7.4,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 2",
+          "property": "y",
+          "time": 0,
+          "value": 150,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 2",
+          "property": "y",
+          "time": 0.95,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 2",
+          "property": "y",
+          "time": 2.7,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 2",
+          "property": "y",
+          "time": 3.8,
+          "value": 55,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 2",
+          "property": "y",
+          "time": 5.3,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 2",
+          "property": "y",
+          "time": 7.4,
+          "value": -110,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 2",
+          "property": "rotation",
+          "time": 0,
+          "value": 42,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 2",
+          "property": "rotation",
+          "time": 1.2,
+          "value": 12,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 2",
+          "property": "rotation",
+          "time": 2.7,
+          "value": 12,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 2",
+          "property": "rotation",
+          "time": 4.4,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 2",
+          "property": "rotation",
+          "time": 6.3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 2",
+          "property": "rotation",
+          "time": 7.4,
+          "value": -12,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 2",
+          "property": "x",
+          "time": 0,
+          "value": 76,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 2",
+          "property": "x",
+          "time": 3,
+          "value": 76,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 2",
+          "property": "x",
+          "time": 4.4,
+          "value": 82,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 2",
+          "property": "x",
+          "time": 6.3,
+          "value": 82,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial sheet 2",
+          "property": "x",
+          "time": 7.4,
+          "value": 82,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 2",
+          "property": "y",
+          "time": 0,
+          "value": 150,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 2",
+          "property": "y",
+          "time": 0.95,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 2",
+          "property": "y",
+          "time": 2.7,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 2",
+          "property": "y",
+          "time": 3.8,
+          "value": 55,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 2",
+          "property": "y",
+          "time": 5.3,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 2",
+          "property": "y",
+          "time": 7.4,
+          "value": -110,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 2",
+          "property": "rotation",
+          "time": 0,
+          "value": 42,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 2",
+          "property": "rotation",
+          "time": 1.2,
+          "value": 12,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 2",
+          "property": "rotation",
+          "time": 2.7,
+          "value": 12,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 2",
+          "property": "rotation",
+          "time": 4.4,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 2",
+          "property": "rotation",
+          "time": 6.3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 2",
+          "property": "rotation",
+          "time": 7.4,
+          "value": -12,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 2",
+          "property": "x",
+          "time": 0,
+          "value": 76,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 2",
+          "property": "x",
+          "time": 3,
+          "value": 76,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 2",
+          "property": "x",
+          "time": 4.4,
+          "value": 82,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 2",
+          "property": "x",
+          "time": 6.3,
+          "value": 82,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial live 2",
+          "property": "x",
+          "time": 7.4,
+          "value": 82,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial final",
+          "property": "maskPoint1X",
+          "time": 6.4,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial final",
+          "property": "maskPoint1X",
+          "time": 7.2,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial final",
+          "property": "maskPoint1X",
+          "time": 8,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial final",
+          "property": "maskPoint2X",
+          "time": 6.4,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial final",
+          "property": "maskPoint2X",
+          "time": 7.2,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Editorial final",
+          "property": "maskPoint2X",
+          "time": 8,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "main-video",
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "targetId": "main-video",
+          "property": "opacity",
+          "time": 8,
+          "value": 0,
+          "easing": "hold"
+        }
+      ],
+      "groups": [],
+      "order": [
+        "Backdrop",
+        "Editorial sheet 0",
+        "Editorial live 0",
+        "Editorial sheet 1",
+        "Editorial live 1",
+        "Editorial sheet 2",
+        "Editorial live 2",
+        "Editorial final"
+      ]
+    }
+  }
+}

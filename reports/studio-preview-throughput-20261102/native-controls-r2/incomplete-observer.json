@@ -1,0 +1,6 @@
+{
+  "complete": false,
+  "error": "The screen-capture acknowledgment raced a closing CDP session and became an unhandled rejection. The capture helper now guards shutdown acknowledgments. Root cause of the original page/observer closure remains unverified; this run is not a complete native-authoring pass.",
+  "lastSavedState": "undone",
+  "nativeEditableBackupPreserved": true
+}

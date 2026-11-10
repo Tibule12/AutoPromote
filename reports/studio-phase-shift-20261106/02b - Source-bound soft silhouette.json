@@ -1,0 +1,47 @@
+{
+  "name": "02b - Source-bound soft silhouette",
+  "actions": [
+    {
+      "type": "media_plane",
+      "id": "World / decoded source-bound silhouette",
+      "name": "World / decoded source-bound silhouette",
+      "sourceMediaId": "City - source-bound luma matte",
+      "sourceStart": 0,
+      "startTime": 5,
+      "duration": 4,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      },
+      "mask": {
+        "enabled": false
+      }
+    },
+    {
+      "type": "media_plane",
+      "id": "World / ocean within a moving person",
+      "name": "World / ocean within a moving person",
+      "sourceMediaId": "Coast",
+      "sourceStart": 0,
+      "startTime": 5,
+      "duration": 4,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      },
+      "mask": {
+        "enabled": false
+      }
+    },
+    {
+      "type": "matte",
+      "targetId": "World / ocean within a moving person",
+      "matteSourceId": "World / decoded source-bound silhouette",
+      "mode": "luma"
+    }
+  ]
+}

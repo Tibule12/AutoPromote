@@ -1,0 +1,14 @@
+{
+  "cases": 39,
+  "accepted": 25,
+  "rejected": 14,
+  "identicalAcceptanceAndErrorMessages": true,
+  "keysUnmodified": true,
+  "benchmark": {
+    "runs": 3,
+    "planes": 20,
+    "beforeMs": 1531.2090340000002,
+    "afterMs": 279.5811779999999
+  },
+  "scope": "Local validator only. Real Studio throughput and picture checks remain separate."
+}

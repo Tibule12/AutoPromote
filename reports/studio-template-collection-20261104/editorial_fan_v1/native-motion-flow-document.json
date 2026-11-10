@@ -1,0 +1,3192 @@
+{
+  "schemaVersion": 1,
+  "projectId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f",
+  "revision": 11,
+  "clock": {
+    "ticksPerSecond": 90000,
+    "interval": "half_open"
+  },
+  "output": {
+    "aspectRatio": "16:9",
+    "requestedResolution": "720p",
+    "frameRate": {
+      "numerator": 24,
+      "denominator": 1
+    },
+    "codec": "h264",
+    "audioCodec": "aac",
+    "audioSampleRate": null,
+    "audioSampleRatePolicy": "worker_selected"
+  },
+  "assets": [
+    {
+      "assetId": "source:launch-9366befc8264e2d6e000859f:sha256:9366befc8264e2d6e000859f101f8033915df4f953a04b50360a1f8a8e58e307",
+      "sourceId": "launch-9366befc8264e2d6e000859f",
+      "storagePath": "studio/sources/demo-pilot-alice/8bbf862677df8b031208bac2_fashion-camaro.mp4",
+      "contentHash": "9366befc8264e2d6e000859f101f8033915df4f953a04b50360a1f8a8e58e307",
+      "identityState": "hash_verified"
+    }
+  ],
+  "clipOccurrences": [
+    {
+      "occurrenceId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:shot:1",
+      "assetId": "source:launch-9366befc8264e2d6e000859f:sha256:9366befc8264e2d6e000859f101f8033915df4f953a04b50360a1f8a8e58e307",
+      "sourceRange": {
+        "space": "source",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "timeMapId": "map:viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:shot:1",
+      "parameterSchemaVersion": 1,
+      "parameters": {
+        "name": "fashion-camaro.mp4",
+        "duration": 8,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      "playback": {
+        "direction": "forward",
+        "freeze": false,
+        "rate": {
+          "numerator": 1,
+          "denominator": 1
+        }
+      }
+    }
+  ],
+  "timeMaps": [
+    {
+      "timeMapId": "map:viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:shot:1",
+      "occurrenceId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:shot:1",
+      "segments": [
+        {
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 720000
+          },
+          "clipLocalRange": {
+            "space": "clip_local",
+            "startTick": 0,
+            "endTick": 720000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 0,
+            "endTick": 720000
+          },
+          "rate": {
+            "numerator": 1,
+            "denominator": 1
+          },
+          "direction": "forward",
+          "freeze": false
+        }
+      ]
+    }
+  ],
+  "layers": [
+    {
+      "layerId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Backdrop",
+      "type": "b_roll",
+      "legacyType": "image",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Backdrop",
+        "sourceStoragePath": "uploads/images/demo-pilot-alice/dc2faa2f-d5e9-4df0-b2ef-23a10eed4402_overlay-181854ee-0f25-40c5-a26d-409e35efb802.png",
+        "contentHash": "3f42aa743152bcaafdf68c7e50c077e26f19c48cefdc2808db4c231560eaa3c3",
+        "anchorX": 50,
+        "anchorY": 50,
+        "layerShadow": {
+          "enabled": false
+        },
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "stretch",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "height": 100,
+        "rotation": 0,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 8,
+        "bRollMode": "pip",
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "vectorShape": {
+          "version": 1,
+          "closed": true,
+          "nodes": [
+            {
+              "x": 0,
+              "y": 0,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            },
+            {
+              "x": 100,
+              "y": 0,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            },
+            {
+              "x": 100,
+              "y": 100,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            },
+            {
+              "x": 0,
+              "y": 100,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            }
+          ],
+          "fill": {
+            "kind": "solid",
+            "color": "#eee6d8",
+            "endColor": "#eee6d8",
+            "start": [
+              0,
+              0
+            ],
+            "end": [
+              100,
+              100
+            ]
+          },
+          "stroke": {
+            "color": "#eee6d8",
+            "width": 0
+          }
+        }
+      }
+    },
+    {
+      "layerId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 0",
+      "type": "b_roll",
+      "legacyType": "image",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Editorial sheet 0",
+        "sourceStoragePath": "uploads/images/demo-pilot-alice/c0c75d39-9a31-407b-9b76-9fb30ef2efcb_overlay-a152b01e-be0f-4e47-8eaa-6c6ef872656f.png",
+        "contentHash": "8dc122ecf481c287072d773aebdcc2a304b153021ec26a1a5ec2ad9cce08c82f",
+        "anchorX": 50,
+        "anchorY": 50,
+        "layerShadow": {
+          "enabled": false
+        },
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "stretch",
+        "opacity": 1,
+        "x": 24,
+        "y": 50,
+        "width": 29,
+        "height": 86,
+        "rotation": -11,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 8,
+        "bRollMode": "pip",
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "vectorShape": {
+          "version": 1,
+          "closed": true,
+          "nodes": [
+            {
+              "x": 0,
+              "y": 0,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            },
+            {
+              "x": 100,
+              "y": 0,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            },
+            {
+              "x": 100,
+              "y": 100,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            },
+            {
+              "x": 0,
+              "y": 100,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            }
+          ],
+          "fill": {
+            "kind": "solid",
+            "color": "#fffcf5",
+            "endColor": "#fffcf5",
+            "start": [
+              0,
+              0
+            ],
+            "end": [
+              100,
+              100
+            ]
+          },
+          "stroke": {
+            "color": "#fffcf5",
+            "width": 0
+          }
+        }
+      }
+    },
+    {
+      "layerId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 0",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Editorial live 0",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/8bbf862677df8b031208bac2_fashion-camaro.mp4",
+        "contentHash": "9366befc8264e2d6e000859f101f8033915df4f953a04b50360a1f8a8e58e307",
+        "anchorX": 50,
+        "anchorY": 50,
+        "layerShadow": {
+          "enabled": false
+        },
+        "sourceDuration": 9.050708,
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "cover",
+        "opacity": 1,
+        "x": 24,
+        "y": 50,
+        "width": 27,
+        "height": 79,
+        "rotation": -11,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 8,
+        "sourceStartTime": 0,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "launch-9366befc8264e2d6e000859f"
+      }
+    },
+    {
+      "layerId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 1",
+      "type": "b_roll",
+      "legacyType": "image",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Editorial sheet 1",
+        "sourceStoragePath": "uploads/images/demo-pilot-alice/dfed52f0-bad7-4ab1-814c-936be144420b_overlay-4b7d8b20-6275-4ee3-8382-53635bddb5d1.png",
+        "contentHash": "8dc122ecf481c287072d773aebdcc2a304b153021ec26a1a5ec2ad9cce08c82f",
+        "anchorX": 50,
+        "anchorY": 50,
+        "layerShadow": {
+          "enabled": false
+        },
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "stretch",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 29,
+        "height": 86,
+        "rotation": 3,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 8,
+        "bRollMode": "pip",
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "vectorShape": {
+          "version": 1,
+          "closed": true,
+          "nodes": [
+            {
+              "x": 0,
+              "y": 0,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            },
+            {
+              "x": 100,
+              "y": 0,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            },
+            {
+              "x": 100,
+              "y": 100,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            },
+            {
+              "x": 0,
+              "y": 100,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            }
+          ],
+          "fill": {
+            "kind": "solid",
+            "color": "#fffcf5",
+            "endColor": "#fffcf5",
+            "start": [
+              0,
+              0
+            ],
+            "end": [
+              100,
+              100
+            ]
+          },
+          "stroke": {
+            "color": "#fffcf5",
+            "width": 0
+          }
+        }
+      }
+    },
+    {
+      "layerId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 1",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Editorial live 1",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/8bbf862677df8b031208bac2_fashion-camaro.mp4",
+        "contentHash": "9366befc8264e2d6e000859f101f8033915df4f953a04b50360a1f8a8e58e307",
+        "anchorX": 50,
+        "anchorY": 50,
+        "layerShadow": {
+          "enabled": false
+        },
+        "sourceDuration": 9.050708,
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "cover",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 27,
+        "height": 79,
+        "rotation": 3,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 8,
+        "sourceStartTime": 0,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "launch-9366befc8264e2d6e000859f"
+      }
+    },
+    {
+      "layerId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 2",
+      "type": "b_roll",
+      "legacyType": "image",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Editorial sheet 2",
+        "sourceStoragePath": "uploads/images/demo-pilot-alice/52bbfa98-371f-44f3-9456-2ce5cc0c7f56_overlay-5465c11b-a048-4c84-8dad-ac38733482a7.png",
+        "contentHash": "8dc122ecf481c287072d773aebdcc2a304b153021ec26a1a5ec2ad9cce08c82f",
+        "anchorX": 50,
+        "anchorY": 50,
+        "layerShadow": {
+          "enabled": false
+        },
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "stretch",
+        "opacity": 1,
+        "x": 76,
+        "y": 50,
+        "width": 29,
+        "height": 86,
+        "rotation": 12,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 8,
+        "bRollMode": "pip",
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "vectorShape": {
+          "version": 1,
+          "closed": true,
+          "nodes": [
+            {
+              "x": 0,
+              "y": 0,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            },
+            {
+              "x": 100,
+              "y": 0,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            },
+            {
+              "x": 100,
+              "y": 100,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            },
+            {
+              "x": 0,
+              "y": 100,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            }
+          ],
+          "fill": {
+            "kind": "solid",
+            "color": "#fffcf5",
+            "endColor": "#fffcf5",
+            "start": [
+              0,
+              0
+            ],
+            "end": [
+              100,
+              100
+            ]
+          },
+          "stroke": {
+            "color": "#fffcf5",
+            "width": 0
+          }
+        }
+      }
+    },
+    {
+      "layerId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 2",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Editorial live 2",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/8bbf862677df8b031208bac2_fashion-camaro.mp4",
+        "contentHash": "9366befc8264e2d6e000859f101f8033915df4f953a04b50360a1f8a8e58e307",
+        "anchorX": 50,
+        "anchorY": 50,
+        "layerShadow": {
+          "enabled": false
+        },
+        "sourceDuration": 9.050708,
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "cover",
+        "opacity": 1,
+        "x": 76,
+        "y": 50,
+        "width": 27,
+        "height": 79,
+        "rotation": 12,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 8,
+        "sourceStartTime": 0,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "launch-9366befc8264e2d6e000859f"
+      }
+    },
+    {
+      "layerId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial final",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 576000,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Editorial final",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/8bbf862677df8b031208bac2_fashion-camaro.mp4",
+        "contentHash": "9366befc8264e2d6e000859f101f8033915df4f953a04b50360a1f8a8e58e307",
+        "anchorX": 50,
+        "anchorY": 50,
+        "layerShadow": {
+          "enabled": false
+        },
+        "sourceDuration": 9.050708,
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "contain",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "height": 100,
+        "rotation": 0,
+        "scale": 1,
+        "startTime": 6.4,
+        "duration": 1.5999999999999996,
+        "sourceStartTime": 0,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "mask": {
+          "enabled": true,
+          "shape": "polygon",
+          "path": "polygon(0% 0%,0% 0%,0% 100%,0% 100%)",
+          "feather": 0,
+          "inverted": false
+        },
+        "sourceMediaId": "launch-9366befc8264e2d6e000859f"
+      }
+    }
+  ],
+  "linkedTiming": {
+    "cues": {
+      "soundEffects": [
+        {
+          "cueId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:sound:0",
+          "type": null,
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "enabled": true,
+            "builtIn": true,
+            "kind": "sfx",
+            "tone": "airy_whoosh",
+            "name": "airy_whoosh",
+            "volume": 0.2,
+            "fadeIn": 0.01,
+            "fadeOut": 0.04
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 0,
+            "endTick": 54000
+          }
+        },
+        {
+          "cueId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:sound:1",
+          "type": null,
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "enabled": true,
+            "builtIn": true,
+            "kind": "sfx",
+            "tone": "airy_whoosh",
+            "name": "airy_whoosh",
+            "volume": 0.16,
+            "fadeIn": 0.01,
+            "fadeOut": 0.04
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 297000,
+            "endTick": 342000
+          }
+        },
+        {
+          "cueId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:sound:2",
+          "type": null,
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "enabled": true,
+            "builtIn": true,
+            "kind": "sfx",
+            "tone": "airy_whoosh",
+            "name": "airy_whoosh",
+            "volume": 0.18,
+            "fadeIn": 0.01,
+            "fadeOut": 0.04
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 576000,
+            "endTick": 630000
+          }
+        }
+      ],
+      "voiceovers": [],
+      "adjustmentLayers": []
+    },
+    "keys": {
+      "motionKeyframes": [
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 0",
+            "property": "y",
+            "value": 150,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:0"
+          }
+        },
+        {
+          "atProgrammeTick": 58500,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 0",
+            "property": "y",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:1"
+          }
+        },
+        {
+          "atProgrammeTick": 243000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 0",
+            "property": "y",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:2"
+          }
+        },
+        {
+          "atProgrammeTick": 342000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 0",
+            "property": "y",
+            "value": 49,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:3"
+          }
+        },
+        {
+          "atProgrammeTick": 477000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 0",
+            "property": "y",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:4"
+          }
+        },
+        {
+          "atProgrammeTick": 576000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 0",
+            "property": "y",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:5"
+          }
+        },
+        {
+          "atProgrammeTick": 666000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 0",
+            "property": "y",
+            "value": -110,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:6"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 0",
+            "property": "rotation",
+            "value": 19,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:7"
+          }
+        },
+        {
+          "atProgrammeTick": 81000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 0",
+            "property": "rotation",
+            "value": -11,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:8"
+          }
+        },
+        {
+          "atProgrammeTick": 243000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 0",
+            "property": "rotation",
+            "value": -11,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:9"
+          }
+        },
+        {
+          "atProgrammeTick": 396000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 0",
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:10"
+          }
+        },
+        {
+          "atProgrammeTick": 567000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 0",
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:11"
+          }
+        },
+        {
+          "atProgrammeTick": 666000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 0",
+            "property": "rotation",
+            "value": 11,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:12"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 0",
+            "property": "x",
+            "value": 24,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:13"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 0",
+            "property": "x",
+            "value": 24,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:14"
+          }
+        },
+        {
+          "atProgrammeTick": 396000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 0",
+            "property": "x",
+            "value": 18,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:15"
+          }
+        },
+        {
+          "atProgrammeTick": 567000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 0",
+            "property": "x",
+            "value": 18,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:16"
+          }
+        },
+        {
+          "atProgrammeTick": 666000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 0",
+            "property": "x",
+            "value": 18,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:17"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 0",
+            "property": "y",
+            "value": 150,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:18"
+          }
+        },
+        {
+          "atProgrammeTick": 58500,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 0",
+            "property": "y",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:19"
+          }
+        },
+        {
+          "atProgrammeTick": 243000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 0",
+            "property": "y",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:20"
+          }
+        },
+        {
+          "atProgrammeTick": 342000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 0",
+            "property": "y",
+            "value": 49,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:21"
+          }
+        },
+        {
+          "atProgrammeTick": 477000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 0",
+            "property": "y",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:22"
+          }
+        },
+        {
+          "atProgrammeTick": 576000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 0",
+            "property": "y",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:23"
+          }
+        },
+        {
+          "atProgrammeTick": 666000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 0",
+            "property": "y",
+            "value": -110,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:24"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 0",
+            "property": "rotation",
+            "value": 19,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:25"
+          }
+        },
+        {
+          "atProgrammeTick": 81000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 0",
+            "property": "rotation",
+            "value": -11,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:26"
+          }
+        },
+        {
+          "atProgrammeTick": 243000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 0",
+            "property": "rotation",
+            "value": -11,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:27"
+          }
+        },
+        {
+          "atProgrammeTick": 396000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 0",
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:28"
+          }
+        },
+        {
+          "atProgrammeTick": 567000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 0",
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:29"
+          }
+        },
+        {
+          "atProgrammeTick": 666000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 0",
+            "property": "rotation",
+            "value": 11,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:30"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 0",
+            "property": "x",
+            "value": 24,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:31"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 0",
+            "property": "x",
+            "value": 24,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:32"
+          }
+        },
+        {
+          "atProgrammeTick": 396000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 0",
+            "property": "x",
+            "value": 18,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:33"
+          }
+        },
+        {
+          "atProgrammeTick": 567000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 0",
+            "property": "x",
+            "value": 18,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:34"
+          }
+        },
+        {
+          "atProgrammeTick": 666000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 0",
+            "property": "x",
+            "value": 18,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:35"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 1",
+            "property": "y",
+            "value": 150,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:36"
+          }
+        },
+        {
+          "atProgrammeTick": 72000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 1",
+            "property": "y",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:37"
+          }
+        },
+        {
+          "atProgrammeTick": 243000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 1",
+            "property": "y",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:38"
+          }
+        },
+        {
+          "atProgrammeTick": 342000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 1",
+            "property": "y",
+            "value": 52,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:39"
+          }
+        },
+        {
+          "atProgrammeTick": 477000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 1",
+            "property": "y",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:40"
+          }
+        },
+        {
+          "atProgrammeTick": 576000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 1",
+            "property": "y",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:41"
+          }
+        },
+        {
+          "atProgrammeTick": 666000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 1",
+            "property": "y",
+            "value": -110,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:42"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 1",
+            "property": "rotation",
+            "value": 33,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:43"
+          }
+        },
+        {
+          "atProgrammeTick": 94500,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 1",
+            "property": "rotation",
+            "value": 3,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:44"
+          }
+        },
+        {
+          "atProgrammeTick": 243000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 1",
+            "property": "rotation",
+            "value": 3,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:45"
+          }
+        },
+        {
+          "atProgrammeTick": 396000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 1",
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:46"
+          }
+        },
+        {
+          "atProgrammeTick": 567000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 1",
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:47"
+          }
+        },
+        {
+          "atProgrammeTick": 666000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 1",
+            "property": "rotation",
+            "value": -3,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:48"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 1",
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:49"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 1",
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:50"
+          }
+        },
+        {
+          "atProgrammeTick": 396000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 1",
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:51"
+          }
+        },
+        {
+          "atProgrammeTick": 567000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 1",
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:52"
+          }
+        },
+        {
+          "atProgrammeTick": 666000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 1",
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:53"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 1",
+            "property": "y",
+            "value": 150,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:54"
+          }
+        },
+        {
+          "atProgrammeTick": 72000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 1",
+            "property": "y",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:55"
+          }
+        },
+        {
+          "atProgrammeTick": 243000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 1",
+            "property": "y",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:56"
+          }
+        },
+        {
+          "atProgrammeTick": 342000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 1",
+            "property": "y",
+            "value": 52,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:57"
+          }
+        },
+        {
+          "atProgrammeTick": 477000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 1",
+            "property": "y",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:58"
+          }
+        },
+        {
+          "atProgrammeTick": 576000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 1",
+            "property": "y",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:59"
+          }
+        },
+        {
+          "atProgrammeTick": 666000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 1",
+            "property": "y",
+            "value": -110,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:60"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 1",
+            "property": "rotation",
+            "value": 33,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:61"
+          }
+        },
+        {
+          "atProgrammeTick": 94500,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 1",
+            "property": "rotation",
+            "value": 3,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:62"
+          }
+        },
+        {
+          "atProgrammeTick": 243000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 1",
+            "property": "rotation",
+            "value": 3,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:63"
+          }
+        },
+        {
+          "atProgrammeTick": 396000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 1",
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:64"
+          }
+        },
+        {
+          "atProgrammeTick": 567000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 1",
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:65"
+          }
+        },
+        {
+          "atProgrammeTick": 666000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 1",
+            "property": "rotation",
+            "value": -3,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:66"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 1",
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:67"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 1",
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:68"
+          }
+        },
+        {
+          "atProgrammeTick": 396000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 1",
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:69"
+          }
+        },
+        {
+          "atProgrammeTick": 567000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 1",
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:70"
+          }
+        },
+        {
+          "atProgrammeTick": 666000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 1",
+            "property": "x",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:71"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 2",
+            "property": "y",
+            "value": 150,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:72"
+          }
+        },
+        {
+          "atProgrammeTick": 85500,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 2",
+            "property": "y",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:73"
+          }
+        },
+        {
+          "atProgrammeTick": 243000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 2",
+            "property": "y",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:74"
+          }
+        },
+        {
+          "atProgrammeTick": 342000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 2",
+            "property": "y",
+            "value": 55,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:75"
+          }
+        },
+        {
+          "atProgrammeTick": 477000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 2",
+            "property": "y",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:76"
+          }
+        },
+        {
+          "atProgrammeTick": 576000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 2",
+            "property": "y",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:77"
+          }
+        },
+        {
+          "atProgrammeTick": 666000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 2",
+            "property": "y",
+            "value": -110,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:78"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 2",
+            "property": "rotation",
+            "value": 42,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:79"
+          }
+        },
+        {
+          "atProgrammeTick": 108000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 2",
+            "property": "rotation",
+            "value": 12,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:80"
+          }
+        },
+        {
+          "atProgrammeTick": 243000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 2",
+            "property": "rotation",
+            "value": 12,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:81"
+          }
+        },
+        {
+          "atProgrammeTick": 396000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 2",
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:82"
+          }
+        },
+        {
+          "atProgrammeTick": 567000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 2",
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:83"
+          }
+        },
+        {
+          "atProgrammeTick": 666000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 2",
+            "property": "rotation",
+            "value": -12,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:84"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 2",
+            "property": "x",
+            "value": 76,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:85"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 2",
+            "property": "x",
+            "value": 76,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:86"
+          }
+        },
+        {
+          "atProgrammeTick": 396000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 2",
+            "property": "x",
+            "value": 82,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:87"
+          }
+        },
+        {
+          "atProgrammeTick": 567000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 2",
+            "property": "x",
+            "value": 82,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:88"
+          }
+        },
+        {
+          "atProgrammeTick": 666000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial sheet 2",
+            "property": "x",
+            "value": 82,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:89"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 2",
+            "property": "y",
+            "value": 150,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:90"
+          }
+        },
+        {
+          "atProgrammeTick": 85500,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 2",
+            "property": "y",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:91"
+          }
+        },
+        {
+          "atProgrammeTick": 243000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 2",
+            "property": "y",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:92"
+          }
+        },
+        {
+          "atProgrammeTick": 342000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 2",
+            "property": "y",
+            "value": 55,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:93"
+          }
+        },
+        {
+          "atProgrammeTick": 477000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 2",
+            "property": "y",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:94"
+          }
+        },
+        {
+          "atProgrammeTick": 576000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 2",
+            "property": "y",
+            "value": 50,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:95"
+          }
+        },
+        {
+          "atProgrammeTick": 666000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 2",
+            "property": "y",
+            "value": -110,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:96"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 2",
+            "property": "rotation",
+            "value": 42,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:97"
+          }
+        },
+        {
+          "atProgrammeTick": 108000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 2",
+            "property": "rotation",
+            "value": 12,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:98"
+          }
+        },
+        {
+          "atProgrammeTick": 243000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 2",
+            "property": "rotation",
+            "value": 12,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:99"
+          }
+        },
+        {
+          "atProgrammeTick": 396000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 2",
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:100"
+          }
+        },
+        {
+          "atProgrammeTick": 567000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 2",
+            "property": "rotation",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:101"
+          }
+        },
+        {
+          "atProgrammeTick": 666000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 2",
+            "property": "rotation",
+            "value": -12,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:102"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 2",
+            "property": "x",
+            "value": 76,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:103"
+          }
+        },
+        {
+          "atProgrammeTick": 270000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 2",
+            "property": "x",
+            "value": 76,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:104"
+          }
+        },
+        {
+          "atProgrammeTick": 396000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 2",
+            "property": "x",
+            "value": 82,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:105"
+          }
+        },
+        {
+          "atProgrammeTick": 567000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 2",
+            "property": "x",
+            "value": 82,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:106"
+          }
+        },
+        {
+          "atProgrammeTick": 666000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial live 2",
+            "property": "x",
+            "value": 82,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:107"
+          }
+        },
+        {
+          "atProgrammeTick": 576000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial final",
+            "property": "maskPoint1X",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:108"
+          }
+        },
+        {
+          "atProgrammeTick": 648000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial final",
+            "property": "maskPoint1X",
+            "value": 100,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:109"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial final",
+            "property": "maskPoint1X",
+            "value": 100,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:110"
+          }
+        },
+        {
+          "atProgrammeTick": 576000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial final",
+            "property": "maskPoint2X",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:111"
+          }
+        },
+        {
+          "atProgrammeTick": 648000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial final",
+            "property": "maskPoint2X",
+            "value": 100,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:112"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:Editorial final",
+            "property": "maskPoint2X",
+            "value": 100,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:113"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "main-video",
+            "property": "opacity",
+            "value": 0,
+            "easing": "hold",
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:114"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "main-video",
+            "property": "opacity",
+            "value": 0,
+            "easing": "hold",
+            "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:look:key:115"
+          }
+        }
+      ],
+      "finishKeyframes": [],
+      "reframeKeyframes": [],
+      "reframeModeCuts": [],
+      "speakerFocusCuts": [],
+      "audioKeyframes.originalAudio": [],
+      "audioKeyframes.masterPodcast": [],
+      "audioKeyframes.voiceover": [],
+      "audioKeyframes.music": [],
+      "audioKeyframes.broll": [],
+      "audioKeyframes.sfx": []
+    }
+  },
+  "audioGraph": {
+    "legacySnapshotRef": "audioRemix",
+    "parameterSchemaVersion": 1,
+    "settings": {
+      "addMusic": true,
+      "musicSelection": "upbeat_pop.mp3",
+      "musicSearchMode": false,
+      "safeSearch": true,
+      "musicVolume": 55,
+      "musicDucking": false,
+      "musicDuckingStrength": 0,
+      "muteOriginalAudio": true,
+      "audioRemix": {
+        "version": 1,
+        "enabled": false,
+        "preset": "slowed_reverb",
+        "speed": 0.82,
+        "pitch": -3,
+        "bass": 8,
+        "clarity": 2,
+        "air": 1,
+        "reverb": 68,
+        "intensity": 75,
+        "keepPitch": false,
+        "contentType": "auto",
+        "target": "master",
+        "outputGain": 0,
+        "levelMatch": true,
+        "quality": "studio"
+      },
+      "audioRestoration": {
+        "preset": "natural",
+        "voiceIsolation": false,
+        "denoise": 22,
+        "deEsser": 18,
+        "humFrequency": 50,
+        "compressor": 35,
+        "limiter": -1,
+        "loudness": -14,
+        "eq": {
+          "low": 0,
+          "mid": 0,
+          "high": 0
+        },
+        "enabled": false
+      },
+      "audioAutomationSource": "originalAudio"
+    },
+    "music": {
+      "id": "launch-f3cade09fcb727c24508179f",
+      "name": "Make your move - original score.wav",
+      "storagePath": "uploads/audios/demo-pilot-alice/46d3c2c6-3b7f-48ea-9b3f-381dddff659a_Make your move - original score.wav",
+      "contentHash": "f3cade09fcb727c24508179fa1c0e7914cfe162c9fee098a8eabe6c6d3ea44a6",
+      "volume": 55,
+      "fadeIn": 0.1,
+      "fadeOut": 0.5,
+      "loop": false,
+      "duration": 24
+    },
+    "routes": [
+      {
+        "trackId": "video",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "adjustment",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "graphics",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "broll",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "captions",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "originalAudio",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "voiceover",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "music",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "sfx",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      }
+    ],
+    "routing": {
+      "muteOriginalAudio": true,
+      "musicDucking": false,
+      "musicDuckingStrength": 0,
+      "musicTrackId": "launch-f3cade09fcb727c24508179f"
+    }
+  },
+  "visualGraph": {
+    "parameterSchemaVersion": 1,
+    "settings": {
+      "mainTransform": {
+        "id": "main-video",
+        "name": "Main video",
+        "type": "video",
+        "x": 50,
+        "y": 50,
+        "scale": 1,
+        "rotation": 0,
+        "opacity": 1,
+        "cropX": 0,
+        "cropY": 0
+      },
+      "finishFx": {
+        "precisionGrade": false,
+        "exposureStops": 0,
+        "lift": 0,
+        "gamma": 1,
+        "gain": 1,
+        "tint": 0,
+        "preset": null,
+        "brightness": 1,
+        "contrast": 1,
+        "saturation": 1,
+        "temperature": 0,
+        "sharpness": 0,
+        "vignette": 0,
+        "blur": 0,
+        "blurMode": "edge",
+        "blurStart": -1,
+        "blurEnd": -1,
+        "zoom": 1,
+        "zoomAnchor": "center",
+        "overlayType": "",
+        "overlayOpacity": 0.4,
+        "overlayColor": "#000000",
+        "filmGrain": 0,
+        "chromaticAberration": 0,
+        "vhsTracking": 0,
+        "lightLeak": 0,
+        "letterbox": 0,
+        "fadeIn": 0,
+        "fadeOut": 0
+      },
+      "mainFrame": {
+        "insetPercent": 3,
+        "radiusPercent": 8,
+        "background": "studio_black",
+        "enabled": false
+      },
+      "advancedColor": {
+        "lutName": "",
+        "lutFile": null,
+        "lutIntensity": 100,
+        "curve": {
+          "shadows": 0,
+          "midtones": 0,
+          "highlights": 0
+        },
+        "hsl": {
+          "hue": 0,
+          "saturation": 0,
+          "luminance": 0
+        }
+      },
+      "podcastVisualizer": {
+        "enabled": false,
+        "mode": "wave",
+        "color": "#72f7ff",
+        "intensity": 0.75,
+        "position": "bottom"
+      },
+      "videoFit": "contain",
+      "safeFaceFraming": false,
+      "faceAnchorPreset": "center",
+      "autoCaptions": false,
+      "captionStyle": "bold_pop",
+      "captionPosition": "bottom_center",
+      "captionScale": 1,
+      "captionTextOverride": "",
+      "translateCaptionsToEnglish": false,
+      "smartCrop": true,
+      "smartCropMode": "off",
+      "reframeAspect": "16:9",
+      "speakerTrackZoom": 1,
+      "speakerStackFraming": {
+        "dividerPercent": 50,
+        "gapPercent": 1.2,
+        "cardGapPercent": 2.5,
+        "roundedCards": true,
+        "cardInsetPercent": 2.5,
+        "cardRadiusPercent": 8,
+        "secondaryXPercent": 80,
+        "secondaryYPercent": 20,
+        "secondarySizePercent": 30,
+        "top": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        },
+        "bottom": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        },
+        "third": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        },
+        "fourth": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        }
+      },
+      "speakerStackSourceIds": {
+        "top": null,
+        "bottom": null,
+        "third": null,
+        "fourth": null
+      },
+      "speakerStackOffsets": {
+        "top": 0,
+        "bottom": 0,
+        "third": 0,
+        "fourth": 0
+      },
+      "speakerStackCameraCount": 2,
+      "speakerStackLayout": "stack_2",
+      "speakerStackSyncConfirmed": false,
+      "exportSettings": {
+        "resolution": "720p",
+        "fps": "24",
+        "codec": "h264",
+        "quality": "high",
+        "videoBitrate": "auto",
+        "targetFileSizeMb": "",
+        "audioCodec": "aac",
+        "audioBitrate": "256",
+        "colorSpace": "rec709"
+      },
+      "stabilization": {
+        "enabled": false,
+        "strength": 35,
+        "crop": "adaptive",
+        "rollingShutter": false
+      },
+      "enhanceQuality": false,
+      "beatSnapEnabled": true,
+      "creativeIntent": "energy",
+      "creativeEffectsEnabled": false,
+      "creativePreset": "auto_story",
+      "creativeIntensity": "bold",
+      "pacingLevel": "balanced",
+      "nodeFlow": {
+        "version": 1,
+        "viewerA": "MediaOut",
+        "viewerB": null,
+        "splitPosition": 50,
+        "positions": {},
+        "bypassed": {}
+      },
+      "hideShyLayers": false
+    },
+    "cameraSources": []
+  },
+  "editGraph": {
+    "parameterSchemaVersion": 1,
+    "settings": {
+      "creativeTemplateInstance": {
+        "schemaVersion": 1,
+        "templateRef": {
+          "templateId": "editorial_fan_v1",
+          "version": "1.0.1",
+          "definitionHash": "9db56864f45ec81d6217904ef1edac7ba5eccc5c8ff02e14a2efad47dfd735c5"
+        },
+        "ownerUid": "demo-pilot-alice",
+        "instantiatedBy": "director",
+        "bindings": {
+          "footage": {
+            "assetId": "launch-9366befc8264e2d6e000859f",
+            "contentHash": "9366befc8264e2d6e000859f101f8033915df4f953a04b50360a1f8a8e58e307",
+            "storagePath": "studio/sources/demo-pilot-alice/8bbf862677df8b031208bac2_fashion-camaro.mp4",
+            "trimStart": 0
+          },
+          "music": {
+            "assetId": "launch-f3cade09fcb727c24508179f",
+            "contentHash": "f3cade09fcb727c24508179fa1c0e7914cfe162c9fee098a8eabe6c6d3ea44a6",
+            "storagePath": "uploads/audios/demo-pilot-alice/46d3c2c6-3b7f-48ea-9b3f-381dddff659a_Make your move - original score.wav",
+            "trimStart": 0
+          }
+        },
+        "intensity": 1,
+        "aspect": "16:9",
+        "qualified": false
+      },
+      "captionCoverageMode": "full",
+      "contentProfile": "auto",
+      "joinTransition": "auto",
+      "joinTransitionDuration": 0.18,
+      "silenceRemoval": false,
+      "silenceThreshold": -35,
+      "minSilenceDuration": 0.75,
+      "silencePreview": null,
+      "removeWatermark": false,
+      "watermarkMode": "adaptive",
+      "brandWatermark": false,
+      "manualWatermarkRegions": [],
+      "addHook": false,
+      "hookText": "THIS CHANGES FAST",
+      "hookTemplate": "blur_reveal",
+      "hookIntroSeconds": 3,
+      "hookStartTime": 0.8,
+      "hookEndTime": 3.8,
+      "hookBlurBackground": true,
+      "hookDarkOverlay": true,
+      "hookFreezeFrame": false,
+      "hookZoomScale": 1.08,
+      "hookTextAnimation": "slide-up",
+      "hookFocusPoint": {
+        "x": 50,
+        "y": 42
+      },
+      "bRollCadence": "balanced",
+      "bRollGenerationJobId": "",
+      "compoundClips": [],
+      "creatorPreview": {
+        "enabled": true,
+        "section": "reactions",
+        "activeDemo": "",
+        "intensity": 62,
+        "duration": 0.8,
+        "zoom": 1.34,
+        "x": 78,
+        "y": 68,
+        "color": "#ffcb67",
+        "accent": "#7457ff",
+        "text": "THIS CHANGED EVERYTHING",
+        "name": "",
+        "role": "",
+        "entity": "",
+        "emoji": "🤯",
+        "rank": 3,
+        "tracking": false,
+        "maskShape": "person",
+        "transition": "whip",
+        "introStyle": "cinematic",
+        "reactionMode": "instant",
+        "comparisonLeft": "",
+        "comparisonRight": ""
+      },
+      "splitExportEnabled": false,
+      "splitExportHooks": [],
+      "proxySettings": {
+        "enabled": true,
+        "resolution": "720p",
+        "codec": "h264",
+        "status": "source_ready"
+      }
+    },
+    "media": [
+      {
+        "id": "launch-9366befc8264e2d6e000859f",
+        "name": "fashion-camaro.mp4",
+        "duration": 9.050708,
+        "storagePath": "studio/sources/demo-pilot-alice/8bbf862677df8b031208bac2_fashion-camaro.mp4",
+        "contentHash": "9366befc8264e2d6e000859f101f8033915df4f953a04b50360a1f8a8e58e307",
+        "mediaType": "video"
+      },
+      {
+        "id": "launch-f3cade09fcb727c24508179f",
+        "name": "Make your move - original score.wav",
+        "duration": 24,
+        "storagePath": "uploads/audios/demo-pilot-alice/46d3c2c6-3b7f-48ea-9b3f-381dddff659a_Make your move - original score.wav",
+        "contentHash": "f3cade09fcb727c24508179fa1c0e7914cfe162c9fee098a8eabe6c6d3ea44a6",
+        "mediaType": "audio"
+      }
+    ],
+    "sources": [
+      {
+        "id": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:shot:1",
+        "name": "fashion-camaro.mp4",
+        "duration": 8,
+        "sourceClipId": "launch-9366befc8264e2d6e000859f",
+        "storagePath": "studio/sources/demo-pilot-alice/8bbf862677df8b031208bac2_fashion-camaro.mp4",
+        "contentHash": "9366befc8264e2d6e000859f101f8033915df4f953a04b50360a1f8a8e58e307"
+      }
+    ],
+    "musicMix": {},
+    "hookBinding": null,
+    "angleGroups": [],
+    "extractedAudio": null
+  },
+  "constraints": {
+    "locks": []
+  },
+  "styleRef": null,
+  "analysisRefs": [],
+  "projectIntelligenceRefs": [],
+  "programmeSpeedKeys": [],
+  "fallbackSpeed": 1,
+  "outputTimeMap": [
+    {
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "outputRange": {
+        "space": "output",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "rateNumerator": 1000000,
+      "rateDenominator": 1000000
+    }
+  ],
+  "journal": [
+    {
+      "journalId": "revision:5",
+      "baseRevision": 4,
+      "newRevision": 5,
+      "actor": {
+        "type": "human",
+        "id": "viral-studio-history"
+      },
+      "operations": [
+        {
+          "type": "history_restore"
+        }
+      ],
+      "affectedNodes": [
+        "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:shot:1"
+      ],
+      "inverse": null
+    },
+    {
+      "journalId": "revision:6",
+      "baseRevision": 5,
+      "newRevision": 6,
+      "actor": {
+        "type": "human",
+        "id": "viral-studio-history"
+      },
+      "operations": [
+        {
+          "type": "history_restore"
+        }
+      ],
+      "affectedNodes": [
+        "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:shot:1"
+      ],
+      "inverse": null
+    },
+    {
+      "journalId": "revision:7",
+      "baseRevision": 6,
+      "newRevision": 7,
+      "actor": {
+        "type": "human",
+        "id": "viral-studio-history"
+      },
+      "operations": [
+        {
+          "type": "history_restore"
+        }
+      ],
+      "affectedNodes": [
+        "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f:shot:1"
+      ],
+      "inverse": null
+    }
+  ],
+  "idempotency": {},
+  "directorReviewJournal": [],
+  "compatibility": {
+    "legacySnapshotVersion": 1,
+    "projection": "clip_occurrences_canonical_other_fields_legacy",
+    "editableStateVersion": 1,
+    "visualStateVersion": 1,
+    "editStateVersion": 1,
+    "layerComposition": "ordered_flat_layers"
+  }
+}

@@ -54,6 +54,9 @@ async function range(input, value) {
   }, value);
 }
 async function save(p, name) {
+  // Diagnostic history snapshots can be large too; apply the same reserve as
+  // render/capture QA before allocating them on the destination filesystem.
+  require('../creative-templates/proof-storage').requireProofSpace(folder);
   const show = p.getByRole('button', { name: 'Show media', exact: true });
   if (await show.isVisible()) await show.click();
   const head = p.locator('.studio-project-rail__head');

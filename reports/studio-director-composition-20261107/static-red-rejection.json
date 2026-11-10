@@ -1,0 +1,8 @@
+{
+  "ownerApproval": false,
+  "agentRejected": true,
+  "reason": "Structurally valid proposal omitted all footage and motion; eight static red fields do not meet the brief.",
+  "nativeHistoryAndRestoreEvidenceRetained": true,
+  "nativeExportStarted": false,
+  "evidence": "private/rejected-static-red"
+}

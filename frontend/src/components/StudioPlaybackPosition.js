@@ -29,8 +29,11 @@ export function StudioPlaybackRange({ clock, value, ...props }) {
     // Keep a user's seek target until the decoder acknowledges it. Rebinding
     // the clock can publish an older frame between rapid keyboard gestures.
     // It must not become the starting point of the next requested frame step.
+    // Once verified playback resumes, its first sampled position can already
+    // be past the requested tick. Keeping that target then freezes the thumb
+    // forever, even while the timecode/timeline and actual media advance.
     if (pendingSeek.current !== null &&
-        Math.abs(actual - pendingSeek.current) > 2 / 90000) return;
+        Math.abs(actual - pendingSeek.current) > 2 / 90000 && !clock.isAdvancing?.()) return;
     pendingSeek.current = null;
     ref.current.value = String(actual);
   });

@@ -42,15 +42,18 @@ def frame(path, index=0):
 def normalize(source, request, target, *, max_size=(1280, 720)):
     r=request['sourceRange']; count=math.floor((r['endTick']-r['startTick'])/3750+.5)
     if not 1 <= count <= 720: raise ValueError('Bounded source range required')
-    # Same derivative is used by analysis, segmentation, editing and composition.
+    # Subject derivatives also supply the actual composite pixels. A lossy
+    # proxy permanently changes hair/skin/rig edges before mask inference.
+    # Other analysis derivatives retain their existing compression policy.
     # Native source hash/range remain authoritative in the parent artifact.
     if max_size not in ((1280, 720), (1920, 1080)):
         raise ValueError('Unsupported normalization bounds')
     max_width, max_height = max_size
+    crf='0' if request.get('capability')=='segment_subject' else '17'
     run(['ffmpeg','-nostdin','-v','error','-ss',str(r['startTick']/90000),'-i',str(source),
          '-frames:v',str(count),'-map','0:v:0','-an','-vf',
          f"scale='min({max_width},iw)':'min({max_height},ih)':force_original_aspect_ratio=decrease:force_divisible_by=2,fps=24,setsar=1",
-         '-c:v','libx264','-threads','1','-preset','fast','-crf','17','-pix_fmt','yuv420p','-movflags','+faststart',str(target)])
+         '-c:v','libx264','-threads','1','-preset','fast','-crf',crf,'-pix_fmt','yuv420p','-movflags','+faststart',str(target)])
     geometry=probe(target)
     if int(geometry['nb_read_frames'])!=count: raise ValueError('Source has insufficient frames for requested range')
     return target, geometry

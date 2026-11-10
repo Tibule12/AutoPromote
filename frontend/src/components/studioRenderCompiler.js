@@ -1,3 +1,5 @@
+import { validateStudioMatteSurface } from './studioMatteSurface';
+import { validateStudioMediaColorize } from './studioMediaColorize';
 import { compileStudioAdjustmentStack } from './studioAdjustmentGrade';
 import { validateStudioTextAnimation } from "./studioTextAnimator";
 import { createOutputTimeMap, createTimeRange, secondsToTicks, ticksToSeconds } from "./studioTime";
@@ -220,6 +222,10 @@ export const compileStudioCompositionForRender = document => {
     }) } : {}),
     layers: [{ id: "main-video", type: "video", ...(state.mainTransform || {}) },
       ...state.overlays.filter(overlay => !overlay.isCaption && !overlay.isNullRig)].map(layer => {
+      const colorize = validateStudioMediaColorize(layer.colorize);
+      const matteSurface=validateStudioMatteSurface(layer.matteSurface);
+      if(matteSurface?.enabled&&(!layer.trackMatte||layer.trackMatte.mode==='none'||!['image','video'].includes(layer.type)))throw Error('Surface effects require isolated ordinary media.');
+      if (colorize?.enabled && (layer.id === 'main-video' || !['image','video'].includes(layer.type))) throw Error('Photographic tint needs an ordinary media layer.');
       const needsBake = layerRequiresWorldBake(layer, state.overlays, state.mainTransform);
       const baked = needsBake
         ? bakeLayerMotionToKeyframes({
@@ -258,6 +264,8 @@ export const compileStudioCompositionForRender = document => {
         blend_mode: layer.blendMode || "normal",
         base_transform: compileBaseTransform(effectiveBaseLayer), anchor_x: Number(layer.anchorX ?? 50),
         anchor_y: Number(layer.anchorY ?? 50), effects: {
+          ...(colorize?.enabled ? { colorize } : {}),
+          ...(matteSurface?.enabled?{matte_surface:matteSurface}:{}),
           mask: layer.mask ? JSON.parse(JSON.stringify(layer.mask)) : { enabled: false },
           blur: Number(layer.blur || 0),
           glow: { enabled: !!layer.glow?.enabled, color: layer.glow?.color || "#8b5cf6",

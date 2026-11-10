@@ -84,7 +84,7 @@ const LAYER_PARAMETER_FIELDS = [
   "hold", "intensity", "audioReactiveIntensity", "cameraMotion", "focalLength",
   "lightDirection", "lightColor", "lightIntensity", "shadows", "reflections",
   "bloom", "background",
-  "bg", "anchorX", "anchorY", "blendMode", "glow", "layerShadow", "motionBlur",
+  "bg", "anchorX", "anchorY", "blendMode", "matteSurface", "colorize", "glow", "layerShadow", "motionBlur",
   "cropX", "cropY", "blur", "sourceDuration", "aspectRatio",
   "perspective", "perspectiveProgress",
   "isCaption",
@@ -246,6 +246,8 @@ export const buildStudioLayersFromSnapshot = snapshot => {
       ...(item.maskBox ? { maskBox: [...item.maskBox] } : {}),
       ...(item.maskComponents?.length ? { maskComponents: JSON.parse(JSON.stringify(item.maskComponents)) } : {}),
       ...(Array.isArray(item.maskColourComponentIds) ? { maskColourComponentIds: [...item.maskColourComponentIds] } : {}),
+      ...(Number.isInteger(item.maskRefinementRadius) && item.maskRefinementRadius >= 2 && item.maskRefinementRadius <= 24
+        ? { maskRefinementRadius: item.maskRefinementRadius } : {}),
       ...(item.maskJob ? { maskJob: cloneStudioDecisionFields(item.maskJob,
         ["requestId", "selectionJson", "projectRevision", "projectId", "mode", "jobId", "finished", "reusedAtRevision"]) } : {}),
       ...(item.modelArtifactRef ? { modelArtifactRef: createModelArtifactReference(item.modelArtifactRef) } : {}),
@@ -495,6 +497,8 @@ export const projectStudioEditableStateToSnapshot = (document, transportSnapshot
         if (Object.prototype.hasOwnProperty.call(item, "maskComponents"))
           restored.maskComponents = JSON.parse(JSON.stringify(item.maskComponents));
         if (Array.isArray(item.maskColourComponentIds))restored.maskColourComponentIds=[...item.maskColourComponentIds];
+        if (Number.isInteger(item.maskRefinementRadius) && item.maskRefinementRadius >= 2 && item.maskRefinementRadius <= 24)
+          restored.maskRefinementRadius=item.maskRefinementRadius;
         if (item.maskBox) restored.maskBox = [...item.maskBox];
         if (item.maskJob) restored.maskJob = JSON.parse(JSON.stringify(item.maskJob));
         for (const field of ["preview", "pending"]) {

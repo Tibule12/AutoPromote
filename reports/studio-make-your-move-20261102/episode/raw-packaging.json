@@ -1,0 +1,30 @@
+{
+  "scope": "Utility cut assembly of exact original ranges for raw comparison only. All evaluated graphics remain in the native Studio export.",
+  "seconds": 30,
+  "edl": [
+    [
+      "City",
+      0,
+      8
+    ],
+    [
+      "Footsteps",
+      0,
+      6
+    ],
+    [
+      "Summit",
+      0,
+      6
+    ],
+    [
+      "Coast",
+      0,
+      10
+    ]
+  ],
+  "effects": false,
+  "sourceAudio": false,
+  "synchronizedComparison": "Raw vs Studio.mp4",
+  "comparisonScope": "Packaging of exact source cut assembly and verified native final, with final soundtrack. No evaluated effects constructed here."
+}

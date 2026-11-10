@@ -1,0 +1,67 @@
+{
+  "movie": "/home/tibule12/Videos/Unmuted - Shot Correction - 20261031/Background Replacement - Shot Review.mp4",
+  "sha256": "1b662f7139cf07f32b538e43622ec4c64b23fa205b08ca17ca1854dcf1b020d8",
+  "frames": 72,
+  "fps": 24,
+  "duration": 3,
+  "fullDecodePassed": true,
+  "previousAudioBytesPreserved": true,
+  "sourceInterval": [
+    22.458333333333332,
+    25.458333333333332
+  ],
+  "programmeInterval": [
+    4,
+    7
+  ],
+  "actualEncodedAuditFrames": 72,
+  "auditRegions": [
+    "equipment",
+    "edges",
+    "gesture"
+  ],
+  "matte": "Temporal SAM2 body + source-specific protected interior/equipment + source-resolution ViTMatte head + native foreground recovery",
+  "framing": "Presenter moved to right; real boom exits right edge. Occluded original post is outside frame, not reconstructed.",
+  "inventedMicrophoneSupport": false,
+  "authoredLocalBlenderShot": true,
+  "authenticatedStudioVfxJob": false,
+  "professionalQualification": false,
+  "creativeApproval": false,
+  "wholeVideoRendered": false,
+  "cloudJobs": 0,
+  "productionDataAccess": false,
+  "visualReview": "OWNER REJECTED on 1 November: the person still reads as a cutout, replacement room match is unconvincing, and moving the stand out of frame did not repair it. Earlier technical/pixel observations do not establish visual acceptance.",
+  "status": "OWNER_REJECTED_COMPOSITING_QUALITY",
+  "remaining": [
+    "Source-soft face/jewellery/clothing edges at magnification",
+    "Full plant-occluded post is outside frame, not reconstructed",
+    "Recorded 2D foreground cannot establish a new side view or physical body relighting"
+  ],
+  "completeAudibleStudioPlayback": {
+    "headless": true,
+    "mutedDevice": true,
+    "screenFrames": 148,
+    "maximumMediaTime": 3,
+    "mediaEnded": true,
+    "duration": 6.940081834793091,
+    "external": [],
+    "errors": [],
+    "output": "/home/tibule12/Videos/Unmuted - Shot Correction - 20261031/Studio Shot Review Playback with Sound.mp4",
+    "bootstrap": "Existing Studio, one actual flattened movie; loopback media/bootstrap adapters, native checkpoint and complete playback. No native 3D editing/export claim.",
+    "audio": "Actual HTMLMediaElement.captureStream monitor audio; no disk soundtrack substitution"
+  },
+  "ownerReviewDate": "2026-11-01",
+  "ownerRejectionReasons": [
+    "Person reads as a cutout against a synthetic slatted room",
+    "Source and replacement lighting/texture/detail do not convincingly belong together",
+    "Shoulder and jewellery edges remain visibly processed",
+    "Moving the original stand outside frame avoided rather than completed its repair"
+  ],
+  "visualGatePassed": false,
+  "technicalReverification": {
+    "fullDecodePassed": true,
+    "sourceUnchanged": true,
+    "all72SourceCropsIdentical": true,
+    "creativeAssessmentPerformedByThisVerifier": false
+  }
+}

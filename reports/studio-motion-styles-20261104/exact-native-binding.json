@@ -1,0 +1,12 @@
+{
+  "projectId": "viral-project-ab5f9476-bbbc-42b2-8694-ace94aeea327",
+  "projectHash": "ed00c29895f4bd278be50a8a9eaa3db30e1b9d3914ce22ffe14d4b05deb14d22",
+  "movieSha256": "a1cd420454fe8b07eb865a1f91194420ade63ed99bec4f2fdb048833eef2a457",
+  "submittedJobId": "viral_7f9711ffa7bd52f5f44a4fbc3955bf3e34b67bb8f0ef0d8f0f50bd61c88c55e8",
+  "executionId": "9619e66e01816ff8d860a5af4b17d5561e3e8e7c9efa92d29b7461a15ce0e0df",
+  "nativeBackupMatchesRenderedDocument": true,
+  "compiledCompositionMatchesSubmitted": true,
+  "actualNativeDownload": true,
+  "workerArtifactMatchesDownload": true,
+  "olderPinnedDefinitionPreserved": true
+}

@@ -1,0 +1,30 @@
+{
+  "projectId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6",
+  "templateRef": {
+    "templateId": "living_infinity_v1",
+    "version": "1.0.1",
+    "definitionHash": "6a41ada3809a2ec45a3b70756a7a86d9a64ac0eb1759a0be22f5fe67fd0ed966"
+  },
+  "decisions": "51b6847e41d172014a620f85f93b1d19744a22eb97fceae418114cf8c5f03e8b",
+  "layers": 4,
+  "keys": 24,
+  "seconds": 8,
+  "source": {
+    "name": "cinema",
+    "title": "Silhouette of a dancer on a red background",
+    "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/reports/studio-template-collection-20261104/sources/cinema.mp4",
+    "sha256": "e8d2f87ddd67166c0bf5559db74fed069911766337bf8889d6213d0126acbc6b",
+    "page": "https://mixkit.co/free-stock-video/silhouette-of-a-dancer-on-a-red-background-51757/",
+    "downloadUrl": "https://assets.mixkit.co/videos/51757/51757-720.mp4",
+    "license": "https://mixkit.co/license/modal/videoFree/",
+    "sourceHtmlSha256": "79f1507957a16fde19e040a7c47247bb1f03798caae7a027c9ff64e3069c71c7",
+    "bytes": 6704995,
+    "seconds": 16.641625,
+    "width": 1280,
+    "height": 720,
+    "fps": "24000/1001",
+    "fullDecode": true
+  },
+  "normalFrontend": true,
+  "paidCalls": 0
+}

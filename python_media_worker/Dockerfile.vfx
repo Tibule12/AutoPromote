@@ -12,9 +12,9 @@ ENV PATH=/opt/vfx/bin:$PATH NVIDIA_DRIVER_CAPABILITIES=compute,utility,video
 RUN pip install --no-cache-dir torch==2.7.1 torchvision==0.22.1 --index-url ${TORCH_INDEX_URL} \
     && pip install --no-cache-dir transformers==4.56.2 accelerate==1.10.1 \
        numpy==1.26.4 Pillow==13.0.0 opencv-python-headless==4.11.0.86 lm-format-enforcer==0.11.3 \
-       fastapi==0.116.1 uvicorn==0.35.0 requests==2.34.2
+       fastapi==0.116.1 uvicorn==0.35.0 requests==2.34.2 scipy==1.15.3 pymatting==1.1.16
 WORKDIR /app
-COPY studio_subject_matte.py studio_vfx_plan.py ./
+COPY studio_subject_matte.py studio_vfx_plan.py studio_vfx_foreground_cache.py studio_source_background.py ./
 COPY studio_subject_vfx_job.py studio_subject_vfx_server.py ./
 ENV HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
 CMD ["python3", "studio_subject_matte.py", "--help"]

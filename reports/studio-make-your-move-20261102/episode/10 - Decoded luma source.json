@@ -1,0 +1,20 @@
+{
+  "name": "10 - Decoded luma source",
+  "actions": [
+    {
+      "type": "media_plane",
+      "id": "02 / smooth matte",
+      "name": "02 / smooth matte",
+      "sourceMediaId": "City - source-bound luma matte",
+      "sourceStart": 0,
+      "startTime": 4,
+      "duration": 4,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      }
+    }
+  ]
+}

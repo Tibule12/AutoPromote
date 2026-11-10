@@ -1,0 +1,27 @@
+{
+  "status": "REVIEW_CANDIDATE_NOT_PROFESSIONAL_READINESS",
+  "observation": "The full moving result uses independent letter choreography, footage mattes, foreground emergence, kinetic word animation, source-strip construction and a parented closing poster. It replaces the rejected bending direction with a typography-led edit.",
+  "strengths": [
+    "The source-bound figure breaks out of the moving typography against negative space.",
+    "The closing poster has independent editable letters and shared rig motion.",
+    "Footage and input pixels remain moving; graphics are native layers and compositing decisions."
+  ],
+  "limitations": [
+    "This is one thirty-second creative production, not After Effects/Fusion feature parity.",
+    "The source-bound luma input was prepared using a pinned local CPU analysis model, not a completed Studio automatic-rotoscoping integration.",
+    "The rejected wrist callout was removed from the visible edit because it did not convincingly attach to the action.",
+    "No true 3D camera/light system, particle system, general displacement or animated contour reconstruction is demonstrated.",
+    "Live preview still runs slower than programme time. Screen capture has fewer distinct updates than the 24fps final file.",
+    "At the 3.5-second opening zoom, paused live preview lacks MAKE while the export retains it. The figure reveal geometry is repaired, but this separate preview discrepancy remains. Paired pictures also have residual glyph/raster/colour/edge differences. There is no whole-picture parity or professional-quality pass.",
+    "Browser QA is muted. Human soundtrack/listening and owner creative approval remain unqualified."
+  ],
+  "nativeMovieSha256": "fa98445c6188a96f55efc46deba2cb55a65afcf031991769cd5dd13c600eb555",
+  "fullMovieInspected": true,
+  "inspectionFrameCount": 81,
+  "pairs": 14,
+  "minimumSsim": 0.8578377182639767,
+  "minimumPsnr": 19.96878235607051,
+  "liveProgrammeSeconds": 30,
+  "liveWallSeconds": 36.104,
+  "finishedWallSeconds": 32.816
+}

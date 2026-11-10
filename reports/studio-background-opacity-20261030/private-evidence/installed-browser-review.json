@@ -1,0 +1,10 @@
+{
+  "headless": true,
+  "muted": true,
+  "localReviewMovieAndTimelineBytesExact": true,
+  "fullMoviePlayback": true,
+  "installedCurrentStudioLoads": true,
+  "ownedSavedProjectOpens": true,
+  "opacityControlValueRetained": true,
+  "pageErrors": []
+}

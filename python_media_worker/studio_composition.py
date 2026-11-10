@@ -1,3 +1,12 @@
+try:
+    from .studio_matte_surface import validate_surface,surface_filters
+except ImportError:
+    from studio_matte_surface import validate_surface,surface_filters
+try:
+    from .studio_media_colorize import validate_colorize
+except ImportError:
+    from studio_media_colorize import validate_colorize
+
 """Deterministic RGB/alpha composition for the canonical Studio stack."""
 import math
 import re
@@ -30,6 +39,13 @@ def validate_track_mattes(plan, order=None):
     layers = (plan or {}).get("layers") or []
     by_id = {str(layer.get("id")): layer for layer in layers if isinstance(layer, dict) and layer.get("id")}
     active = {}
+    for item in layers:
+        effect = (item.get("effects") or {}).get("colorize")
+        validate_colorize(effect)
+        surface=validate_surface((item.get("effects")or{}).get("matte_surface"))
+        if surface and surface["enabled"]and(not item.get("track_matte")or item["track_matte"].get("mode")=="none"or item.get("type")not in("image","video")):raise ValueError("Surface effects require isolated ordinary media")
+        if effect and effect["enabled"] and (item.get("id") == "main-video" or item.get("type") not in ("image","video")):
+            raise ValueError("Photographic tint needs an ordinary media layer")
     for layer in layers:
         if not isinstance(layer, dict):
             continue
@@ -57,6 +73,8 @@ def validate_track_mattes(plan, order=None):
             raise ValueError(f"Track matte source {source_id!r} is missing from composition layers")
         if layer_id not in order or source_id not in order:
             raise ValueError("Track matte layers must exist in the canonical layer order")
+        if ((by_id[source_id].get("effects") or {}).get("colorize") or {}).get("enabled"):
+            raise ValueError("A video matte source must retain its uncoloured alpha/luma pixels")
         source_matte = by_id[source_id].get("track_matte") or {}
         if isinstance(source_matte, dict) and source_matte.get("mode", "none") != "none":
             raise ValueError("Chained track mattes are unsupported")
@@ -385,7 +403,9 @@ def connect_grouped_layer_blocks(blocks, base_label, order, plan, width, height,
                     f"[{tm_prefix}_alpha][{tm_prefix}_mask]blend=all_mode=multiply[{tm_prefix}_masked_alpha];",
                     f"[{tm_prefix}_color][{tm_prefix}_masked_alpha]alphamerge[{tm_prefix}_masked_rgba];",
                 ])
-                raw_overlay = [f"[{backdrop}][{tm_prefix}_masked_rgba]overlay=0:0:eof_action=pass:repeatlast=0:format=auto[{out_label}];"]
+                surface_parts,surface_pad=surface_filters(f"{tm_prefix}_masked_rgba",(layers_by_id.get(identity,{}).get("effects")or{}).get("matte_surface"),int(width),int(height),float(duration),fps,tm_prefix+"_surface")
+                filters.extend(surface_parts)
+                raw_overlay = [f"[{backdrop}][{surface_pad}]overlay=0:0:eof_action=pass:repeatlast=0:format=auto[{out_label}];"]
                 filters.extend(blend_layer_block(
                     raw_overlay, backdrop, out_label,
                     layers_by_id.get(identity, {}).get("blend_mode", "normal"),

@@ -1,0 +1,6 @@
+{
+  "backupSha256": "cab2224b603f9e1e390a088000c15ee4d4716895be145978022e97e08e0f7f4e",
+  "source": "reports/studio-preview-throughput-20261102/native-controls-r3/Verified native project.autopromote.json",
+  "normalIndependentBrowserRestore": true,
+  "status": "PASSED_NATIVE_INSPECTION_OF_RESTORED_BACKUP"
+}

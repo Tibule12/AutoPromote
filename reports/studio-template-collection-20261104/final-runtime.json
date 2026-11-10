@@ -1,0 +1,256 @@
+{
+  "build": "/dev/shm/autopromote-template-collection-20261104-r3-build",
+  "origin": "http://127.0.0.1:43927",
+  "demoProject": "demo-autopromote-credits",
+  "welcomeFlag": "true",
+  "mainAsset": "/static/js/main.59c99216.js",
+  "mainSha256": "af6339a55633ed309190e95eec36ea240f45b64b9d2ea5556ff851dfdc1ee943",
+  "sources": {
+    "frontend/src/components/studioCreativeTemplate.js": "9e1d1b8091effa8bdadc6190230a9d74f48b4983a9ad7009028a147a35600245",
+    "frontend/src/components/studioMotionRecipe.js": "2f79d080beedabdbfea768993f172bb4c9e54738ca1af7d810045c564ad0e077",
+    "frontend/src/components/StudioLaunchTemplatePanel.js": "5ac5865b575a1989f99cfaed8acc7eb724727919fd9a9d4cbde271829b8a8597",
+    "frontend/src/templates/aperture_product_v1.json": "e3f5179f667b8f827083e48d2a468e69c73fda58a828a86cba17481f488c1d82",
+    "frontend/src/templates/editorial_fan_v1.json": "40a228e24f753661689735d3bbdc36ba74497250489ef2e04b07030fe32b4a1b",
+    "frontend/src/templates/split_impact_v1.json": "7f764e7cb88f01274369ddc182cee278191f1f275a4406543e24c5c0e5cddca9",
+    "frontend/src/templates/coastal_postcards_v1.json": "900fbb3ebd31c2a9e23ffaaf1da107661a941e58e2ee9096228fa886eaf7f705",
+    "frontend/src/templates/vinyl_pulse_v1.json": "205addbfe89e425bbac4034ec6fd962c9833e85cd7905c444bca564bba9cf998",
+    "frontend/src/templates/living_infinity_v1.json": "cf6ffb43a913356ab7e14f7f5f6d2d4b05a0f73bdd5dea944575b8925a00c461",
+    "config/creative-templates/registry.v1.json": "d549c50b92c525dc3ae4dc9f6d9b4fc1ba36f2028cc363501890ecd5c6e2abb0",
+    "src/generated/studioDirectorReplayKernel.cjs": "3a8edb459c336aad4ec7b2e212b78b12dee2ecb009a12ae9434e48996564006f",
+    "frontend/src/templates/living_infinity_v1.0.0.json": "b012860afc6734cebb9186a2441324ec1cf7bc0388518356c985fb434a6f39a5",
+    "frontend/src/templates/editorial_fan_v1.0.0.json": "f2e140fa7e7a9f96404b3b1c68677304878dd6ae5c475e0e3fe356f56d5602b9"
+  },
+  "sourceHashes": {
+    "python_media_worker/main_media_server.py": "ea92bbefa960c47621bb4a2d0cb7fe089f531b7745e5b6022ea7fb4ed1c71b07",
+    "python_media_worker/studio_layer_cache.py": "c01f6fb690f0e1e296743fff0fc30f32e518ea822fa01a2d35d6fdcb3361b76f",
+    "frontend/src/components/ViralClipStudio.js": "8637a26d592ee495afa032620940c2a0a19013363ee54a4dfe4d185b6e5cba48",
+    "frontend/src/utils/sourceUpload.js": "d24ac3b0fe303fbee8d2b3110f84ef14330df606b7a23e6a379e809efdac8b57"
+  },
+  "workerPid": 454290,
+  "workerCwd": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031",
+  "priorBuildPreserved": "/dev/shm/autopromote-template-collection-20261104-build",
+  "api": {
+    "previousPid": 1237103,
+    "pid": 1243580,
+    "origin": "http://127.0.0.1:43927"
+  },
+  "activeOperationsBefore": 0,
+  "welcomeChecks": 8,
+  "normalSignIn": true,
+  "paidCalls": 0,
+  "localHarnessSourceHashes": {
+    "src/services/unifiedCredits/sourceGateway.js": "747809094b256e55bb07b86cfafd31bcef26014f15ffbeaa00459df17cfd9aa9",
+    "src/services/unifiedCredits/localStorageRead.js": "510bb6517cf24447e3da2e22a24ef0ac7de0f262263b69fb1a19b3aafda10c3f",
+    "scripts/monetization/application-host.cjs": "a3ecc57426c8452fdbba33cbbb63507e129314c718d53d978817f980875d6156"
+  },
+  "priorExecutionTerminalCode": 1,
+  "activeOperations": 0,
+  "availableCredits": 2,
+  "refundReused": true,
+  "newGrant": false,
+  "reason": "Renew owned admitted audio immediately before verified worker dispatch; unchanged content/generation and 30-minute TTL.",
+  "priorExecutionId": "2716b4373bb6cb89a5eab568668312436f819abc83128b1f52b5367626358a1e",
+  "verifiedAt": "2026-11-04T08:25:01.160Z",
+  "originalSpendingWindowRestored": true,
+  "spendingEndsAt": 1793707200000,
+  "previewOrigins": [],
+  "stoppedOwnedCandidatePids": [
+    1218280
+  ],
+  "selectedNativeFilms": [
+    {
+      "id": "aperture_product_v1",
+      "version": "1.0.0",
+      "projectId": "viral-project-70f2a9ed-f8ad-4950-a14d-dbbbd8a16066",
+      "projectHash": "acb68fb95267388014409ae68f186f101977716893f5bf8c6fd171f4ce62720a",
+      "movieSha256": "8a18343dda06b931e48be36036f2902826067c83a3385a6afe0efe3eb856e47e",
+      "jobId": "viral_542cacbf8bc4dd2afcfc7ad6eb1c9a4dc279ae91f456790d4272cd0f7aef4476",
+      "executionId": "6f3affadb710f3994e4669f3d01c0abc563081fa49287ac1826c638d58aa547f",
+      "nativeBackupMatchesRenderedDocument": true,
+      "compiledCompositionMatchesSubmitted": true,
+      "workerArtifactMatchesNativeDownload": true,
+      "templateRef": {
+        "templateId": "aperture_product_v1",
+        "version": "1.0.0",
+        "definitionHash": "ded9e27d439d17058f80b5054f76a73ddf1f747bc15188d722bc41a2ca88adbc"
+      },
+      "actualNativeDownload": true,
+      "resource": {
+        "executionId": "6f3affadb710f3994e4669f3d01c0abc563081fa49287ac1826c638d58aa547f",
+        "wallSeconds": 219.58229979802854,
+        "cpuSeconds": 325.90887999999995,
+        "peakRssKiB": 265788,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null,
+        "termination": {
+          "code": 0,
+          "signal": null,
+          "startedAt": "2026-11-04T07:17:55.497Z",
+          "finishedAt": "2026-11-04T07:21:36.572Z"
+        }
+      }
+    },
+    {
+      "id": "editorial_fan_v1",
+      "version": "1.0.1",
+      "projectId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f",
+      "projectHash": "73af29298fe68f48432c5278111daa2a1252d63c73c1ede52c3cc0a06c212cb4",
+      "movieSha256": "b415639d9d43b47fba0f6f4019728100653e9744c898da770e5cf87cd63af48f",
+      "jobId": "viral_c45f5982b3722585c3f4ae2792d68ac8f158d45e45fe48951c8f63788e7a743f",
+      "executionId": "481521160bf149e94b00e46d0d1b31043caaf93aacf6aa3457ecf613bac2c61a",
+      "nativeBackupMatchesRenderedDocument": true,
+      "compiledCompositionMatchesSubmitted": true,
+      "workerArtifactMatchesNativeDownload": true,
+      "templateRef": {
+        "templateId": "editorial_fan_v1",
+        "version": "1.0.1",
+        "definitionHash": "9db56864f45ec81d6217904ef1edac7ba5eccc5c8ff02e14a2efad47dfd735c5"
+      },
+      "actualNativeDownload": true,
+      "resource": {
+        "executionId": "481521160bf149e94b00e46d0d1b31043caaf93aacf6aa3457ecf613bac2c61a",
+        "wallSeconds": 103.17630280798767,
+        "cpuSeconds": 247.13390500000003,
+        "peakRssKiB": 296380,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null,
+        "termination": {
+          "code": 0,
+          "signal": null,
+          "startedAt": "2026-11-04T07:39:16.952Z",
+          "finishedAt": "2026-11-04T07:41:00.397Z"
+        }
+      }
+    },
+    {
+      "id": "split_impact_v1",
+      "version": "1.0.0",
+      "projectId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f",
+      "projectHash": "d8eba717a6781938c522881bc9d084c815028aa641d2e1e89625c004a4405ed2",
+      "movieSha256": "26aac4622e8341cf66ae2a72558987ba39bbed6ea3a4d8bcbd206f253d575b37",
+      "jobId": "viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+      "executionId": "ea1566a1b7e5940b66ad901528bd4d376b6da7eddd832359909cea4671f549eb",
+      "nativeBackupMatchesRenderedDocument": true,
+      "compiledCompositionMatchesSubmitted": true,
+      "workerArtifactMatchesNativeDownload": true,
+      "templateRef": {
+        "templateId": "split_impact_v1",
+        "version": "1.0.0",
+        "definitionHash": "f0faa9813d876fa52abcf0aecd7249a0b7b52b9c45356cf1759b13c254d1437b"
+      },
+      "actualNativeDownload": true,
+      "resource": {
+        "executionId": "ea1566a1b7e5940b66ad901528bd4d376b6da7eddd832359909cea4671f549eb",
+        "wallSeconds": 125.50104944797931,
+        "cpuSeconds": 253.15439800000001,
+        "peakRssKiB": 299048,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null,
+        "termination": {
+          "code": 0,
+          "signal": null,
+          "startedAt": "2026-11-04T07:28:50.700Z",
+          "finishedAt": "2026-11-04T07:30:57.456Z"
+        }
+      }
+    },
+    {
+      "id": "coastal_postcards_v1",
+      "version": "1.0.0",
+      "projectId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58",
+      "projectHash": "b1cdffdab5cea352a3acd5a2ed977ceed60f48a509d20a4cfa717330cf913875",
+      "movieSha256": "145c23a171e9f11f8933263f9eddf2a42d7218ad55ba5866fd3f78b469e76859",
+      "jobId": "viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+      "executionId": "bf3d420df119f481992c2f8976b603b66721efd7d9c5f27e24767a6239bdd646",
+      "nativeBackupMatchesRenderedDocument": true,
+      "compiledCompositionMatchesSubmitted": true,
+      "workerArtifactMatchesNativeDownload": true,
+      "templateRef": {
+        "templateId": "coastal_postcards_v1",
+        "version": "1.0.0",
+        "definitionHash": "27260c19a11d56aab1eb14d3654654660b94109b5aea28dc86393355d7340985"
+      },
+      "actualNativeDownload": true,
+      "resource": {
+        "executionId": "bf3d420df119f481992c2f8976b603b66721efd7d9c5f27e24767a6239bdd646",
+        "wallSeconds": 156.87210187799064,
+        "cpuSeconds": 260.01125199999996,
+        "peakRssKiB": 365336,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null,
+        "termination": {
+          "code": 0,
+          "signal": null,
+          "startedAt": "2026-11-04T07:31:51.750Z",
+          "finishedAt": "2026-11-04T07:34:28.882Z"
+        }
+      }
+    },
+    {
+      "id": "vinyl_pulse_v1",
+      "version": "1.0.0",
+      "projectId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060",
+      "projectHash": "6decc811351d6a88bc595482c71d717b123b3989bd8acd64af19e2d5a0e4952b",
+      "movieSha256": "7028e16cb01253bfe1d3c26856dbf44b16adb2ce090e14f6db0d1c97500f664f",
+      "jobId": "viral_a927fc95ed7b0c71d156cc5740a817187cad842314bdf82dbe78553e69279b5c",
+      "executionId": "ba8a500cafb4208d6bb3c576aa191914bcbf3a6bd52ee8a63841b3891a7fc09f",
+      "nativeBackupMatchesRenderedDocument": true,
+      "compiledCompositionMatchesSubmitted": true,
+      "workerArtifactMatchesNativeDownload": true,
+      "templateRef": {
+        "templateId": "vinyl_pulse_v1",
+        "version": "1.0.0",
+        "definitionHash": "ff1bdcbe6c98477a92bb1d8d75853c0a12b44b655d5d5c5459b3962a6fca9214"
+      },
+      "actualNativeDownload": true,
+      "resource": {
+        "executionId": "ba8a500cafb4208d6bb3c576aa191914bcbf3a6bd52ee8a63841b3891a7fc09f",
+        "wallSeconds": 179.70647142000962,
+        "cpuSeconds": 311.414982,
+        "peakRssKiB": 296756,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null,
+        "termination": {
+          "code": 0,
+          "signal": null,
+          "startedAt": "2026-11-04T07:35:04.690Z",
+          "finishedAt": "2026-11-04T07:38:04.672Z"
+        }
+      }
+    },
+    {
+      "id": "living_infinity_v1",
+      "version": "1.0.1",
+      "projectId": "viral-project-1243af65-5de3-4281-9a97-25835c6e03d6",
+      "projectHash": "905d11868d8497e2e21492737b21a0eea020becb669c5c264f67a7dc6e1632a0",
+      "movieSha256": "bb19c3c3db0b9eeee99260d2f0e2ecf0b16379acc35cc6c76b85245ecd7db602",
+      "jobId": "viral_c43aaf1920f6c508b1ef3c892a3cc1fbb2f6a41dbb4ae8c797b5589195c7863c",
+      "executionId": "92f037a4d9035ad8075e5444208a070473f8af827078db38b7b0d37a114b54fb",
+      "nativeBackupMatchesRenderedDocument": true,
+      "compiledCompositionMatchesSubmitted": true,
+      "workerArtifactMatchesNativeDownload": true,
+      "templateRef": {
+        "templateId": "living_infinity_v1",
+        "version": "1.0.1",
+        "definitionHash": "6a41ada3809a2ec45a3b70756a7a86d9a64ac0eb1759a0be22f5fe67fd0ed966"
+      },
+      "actualNativeDownload": true,
+      "resource": {
+        "executionId": "92f037a4d9035ad8075e5444208a070473f8af827078db38b7b0d37a114b54fb",
+        "wallSeconds": 573.9934847530094,
+        "cpuSeconds": 662.315394,
+        "peakRssKiB": 1569596,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null,
+        "termination": {
+          "code": 0,
+          "signal": null,
+          "startedAt": "2026-11-04T08:14:18.717Z",
+          "finishedAt": "2026-11-04T08:23:53.144Z"
+        }
+      }
+    }
+  ],
+  "productionWrites": 0,
+  "productionDeployment": false
+}

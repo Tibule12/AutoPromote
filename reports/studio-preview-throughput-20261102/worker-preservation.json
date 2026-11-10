@@ -1,0 +1,13 @@
+{
+  "canonicalWorkerSourcesUnchanged": true,
+  "sources": [
+    {
+      "file": "python_media_worker/studio_layer_motion.py",
+      "sha256": "c41f1612342c2ad71c592de5fd0293448d0254355f49d3ad78a6dc4023b12258"
+    },
+    {
+      "file": "python_media_worker/studio_perspective.py",
+      "sha256": "e997bee217274abadb545f90cf8698bb4eddbdbb9df48b9d6444abbd003270e2"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "projectId": "viral-project-77cbd98c-3131-4197-b7a5-9781f12bac58",
+  "projectHash": "b1cdffdab5cea352a3acd5a2ed977ceed60f48a509d20a4cfa717330cf913875",
+  "movieSha256": "145c23a171e9f11f8933263f9eddf2a42d7218ad55ba5866fd3f78b469e76859",
+  "jobId": "viral_ac45e8d0d234f08c6a4e845c746fc976bca66204267a341257561d42d2a9335a",
+  "executionId": "bf3d420df119f481992c2f8976b603b66721efd7d9c5f27e24767a6239bdd646",
+  "nativeBackupMatchesRenderedDocument": true,
+  "compiledCompositionMatchesSubmitted": true,
+  "workerArtifactMatchesNativeDownload": true,
+  "templateRef": {
+    "templateId": "coastal_postcards_v1",
+    "version": "1.0.0",
+    "definitionHash": "27260c19a11d56aab1eb14d3654654660b94109b5aea28dc86393355d7340985"
+  },
+  "actualNativeDownload": true
+}

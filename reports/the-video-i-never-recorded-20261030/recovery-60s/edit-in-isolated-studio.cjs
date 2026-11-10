@@ -20,19 +20,33 @@ assert.equal(new URL(config.origin).hostname,'127.0.0.1');
 const stateFile=path.join(folder,'session.private.json'),progressFile=path.join(folder,'edit-progress.json');
 const progress=fs.existsSync(progressFile)?JSON.parse(fs.readFileSync(progressFile)):{};
 const title=process.env.AUTOPROMOTE_EDIT_TITLE||'THE VIDEO I NEVER RECORDED — native motion opening';
-const source=path.resolve(__dirname,'edit-assets/presenter-source-proxy.mp4');
+const source=process.env.AUTOPROMOTE_EDIT_SOURCE_PATH?path.resolve(process.env.AUTOPROMOTE_EDIT_SOURCE_PATH):path.resolve(__dirname,'edit-assets/presenter-source-proxy.mp4');
 const done=(key,value=true)=>{progress[key]=value;fs.writeFileSync(progressFile,JSON.stringify(progress,null,2)+'\n')};
 const decisions=d=>{const{revision,journal,idempotency,...v}=d;return hash(v)};
 async function entry(p){
+  for(let attempt=0;attempt<60;attempt++){
+    try{if((await fetch(config.origin,{signal:AbortSignal.timeout(500)})).ok)break}catch{}
+    await new Promise(resolve=>setTimeout(resolve,250));
+  }
   await p.goto(config.origin,{waitUntil:'domcontentloaded'});
   const signin=p.getByRole('button',{name:'Sign In',exact:true});
   await signin.or(p.getByTestId('shared-credit-balance')).first().waitFor({timeout:45000});
   if(await signin.isVisible()){
-    await signin.click();await p.locator('#login-email').fill(login.email);
+    await signin.click({timeout:5000}).catch(async error=>{if(!await p.getByTestId('shared-credit-balance').isVisible())throw error});
+    if(await p.locator('#login-email').count()){
+    await p.locator('#login-email').fill(login.email);
     await p.locator('#login-password').fill(login.password);
     await p.locator('form input[type=checkbox]').check();await p.locator('form button[type=submit]').click();
+    }
   }
   await p.getByTestId('shared-credit-balance').waitFor({timeout:45000});
+  if(process.env.AUTOPROMOTE_VERIFY_HELP==='1'){
+    await p.getByRole('button',{name:'Ask AutoPromote',exact:true}).click();
+    const help=p.getByRole('dialog',{name:'Ask AutoPromote'});await help.waitFor();
+    await help.screenshot({path:path.join(folder,'signed-in-help-panel.png')});
+    await p.getByRole('button',{name:'Close product help',exact:true}).click();
+    fs.writeFileSync(path.join(folder,'signed-in-help-panel.json'),JSON.stringify({normalDemoSignIn:true,panelOpened:true,questionsSubmitted:0},null,2));
+  }
   const script=await p.locator('script[src*="/static/js/main."]').getAttribute('src');
   const expected=fs.readdirSync(path.join(config.build,'static/js')).find(x=>/^main\..*\.js$/.test(x));
   assert(script.endsWith(expected));
@@ -54,7 +68,7 @@ async function backup(p,label){
 }
 async function number(p,label,value){
   const input=p.getByRole('spinbutton',{name:label,exact:true});
-  if(Math.abs(Number(await input.inputValue())-value)<.00001)await input.fill(String(value===0?.01:value-.01));
+  if(Math.abs(Number(await input.inputValue())-value)<.00001)await input.fill(String(value===0?1:value-1));
   await input.fill(String(value));await input.blur();
 }
 async function author(p){
@@ -125,11 +139,12 @@ async function render(p){
   await p.getByLabel('Export frame rate',{exact:true}).selectOption('24');
   await h.save(p,'before-export');
   await p.getByRole('button',{name:/^Render (Final Clip|Again)$/}).click();
-  const consent=p.getByRole('dialog',{name:'Studio export',exact:true});await consent.waitFor({timeout:30000});
+  const consent=p.getByRole('dialog',{name:'Studio export',exact:true});
+  await Promise.race([consent.waitFor({timeout:45000}),p.getByTestId('studio-export-error').waitFor({timeout:45000}).then(async()=>{throw Error(await p.getByTestId('studio-export-error').innerText())})]);
   await p.screenshot({path:path.join(folder,'local-export-consent.png')});
   await consent.getByRole('button',{name:/^Approve /}).click();
   const download=p.getByRole('button',{name:'Download Rendered Clip',exact:true});
-  await Promise.race([download.waitFor({timeout:210000}),failure]);
+  await Promise.race([download.waitFor({timeout:360000}),failure]);
   assert(submitted,'Expected ordinary owned render acknowledgment.');
   const result=p.waitForEvent('download');await download.click();await(await result).saveAs(path.join(folder,'final.mp4'));
   const saved=await h.save(p,'exported');await backup(p,'NATIVE-OPENING-FINAL');
@@ -252,6 +267,84 @@ async function projectedEdit(p){
     }
   }finally{await stop()}
 }
+async function editorialEdit(p){
+  assert(!progress.authored,'Retain this authored native revision.');
+  await p.locator('.creator-studio-dropzone input[type=file]').setInputFiles(source);
+  await p.getByRole('button',{name:'Open Creator Studio',exact:true}).click({timeout:180000});
+  await h.rail(p);await pause(p);await p.getByLabel('Project name',{exact:true}).fill(title);
+  await q.tool(p,'Reframe');await p.getByTestId('reframe-aspect-16-9').click();await p.getByTestId('reframe-preserve-frame').click();
+  const rounded=p.getByLabel('Rounded main footage',{exact:true});if(await rounded.count()&&await rounded.isChecked())await rounded.uncheck();
+  await q.tool(p,'Sound');await p.getByLabel('Use voice repair on export',{exact:true}).uncheck();
+  await q.tool(p,'Cut');await p.getByTestId('pro-video-clip-1').click();await seek(p,16);await p.getByTestId('inspector-cut-trim-end').click();
+  await h.save(p,'raw-assembly');await backup(p,'RAW-EDITABLE');
+  const stop=await recording(p),planes=[];
+  try{
+    await importGraphics(p,'editorial-v3-background.graphics.json');
+    for(const[index,start,end,left]of[[0,2.5,7.5,true],[1,8.25,14.65,false]]){
+      await h.rail(p);await p.getByRole('tab',{name:'Media',exact:true}).click();await seek(p,start);
+      const card=p.getByTestId('project-media-library').locator('article').filter({has:p.getByRole('button',{name:`Preview ${path.basename(source)}`,exact:true})});
+      await card.getByRole('button',{name:`Preview ${path.basename(source)}`,exact:true}).click();await card.getByRole('button',{name:'Add as B-roll',exact:true}).click();
+      await pause(p);const added=await h.save(p,`plane-${index}-added`),id=added.snapshot.overlays.at(-1).id;planes.push(id);
+      await q.tool(p,'B-roll');await p.getByRole('button',{name:'Picture-in-picture',exact:true}).click();
+      await range(p.getByLabel('B-roll source start',{exact:true}),start);
+      await range(p.getByRole('slider',{name:'Frame corner curve',exact:true}),0);
+      await motionTarget(p,id);
+      for(const[label,value]of[['Motion layer in point',start],['Motion layer duration',end-start],['Motion layer width',100],['Motion layer height',100]]){
+        await p.getByLabel(label,{exact:true}).fill(String(value));await p.getByLabel(label,{exact:true}).blur();
+      }
+      await q.tool(p,'Composite');await p.getByText('Composite target',{exact:true}).locator('..').locator('select').selectOption(id);
+      const panel=p.getByTestId('studio-perspective-inspector');if(!await panel.evaluate(e=>e.open))await panel.locator('summary').click();
+      await panel.getByRole('button',{name:left?'Tilt plane left':'Tilt plane right',exact:true}).click();
+      await motionTarget(p,id);
+      const shadow=p.getByLabel('Enable layer shadow',{exact:true});await shadow.check();
+      await range(p.getByRole('slider',{name:/^Shadow blur/}),24);await range(p.getByRole('slider',{name:/^Shadow opacity/}),.45);
+      await motionTarget(p,id);
+      const poses=[[start,50,50,1,0],[start+.8,65,46,.62,75],[end-.65,65,46,.64,75],[end-1/24,50,50,1,0]];
+      for(const[t,x,y,scaleValue,projection]of poses){
+        await seek(p,t);await p.getByRole('button',{name:/^◆ Add transform keyframe at/}).click();
+        for(const[label,value]of[['X',x],['Y',y],['Scale',scaleValue],['Rotate',0],['Perspective progress',projection]])await number(p,label,value);
+        await range(p.getByRole('slider',{name:/^Opacity/}),1);
+      }
+    }
+    await importGraphics(p,'editorial-v3-titles.graphics.json');
+    const saved=await h.save(p,'editorial-authored');await backup(p,'NATIVE-OPENING');
+    done('authored',{projectId:saved.id,projectHash:hash(saved.snapshot.studioDocument),planes});
+  }finally{await stop()}
+  await editorialStills(p);
+}
+async function editorialStills(p){
+  await q.tool(p,'Cut');const samples=[];
+  for(const t of [0,1.3,3.6,5.4,6.4,7.8,9.3,11.4,13.8,15.6]){
+    await seek(p,t);
+    await p.waitForFunction(time=>{const v=document.querySelector('[data-testid="studio-after-video"]');return v&&!v.seeking&&Math.abs(v.currentTime-time)<.06},t,{timeout:20000});
+    await p.waitForTimeout(350);
+    await p.getByTestId('hook-preview-frame').screenshot({path:path.join(folder,`live-${t}.png`)});
+    samples.push({time:t,...await p.getByTestId('hook-preview-frame').evaluate(frame=>({sourceTime:frame.querySelector('[data-testid="studio-after-video"]')?.currentTime,
+      canvasTime:frame.querySelector('[data-testid="studio-program-canvas"]')?.dataset.programmeTime,
+      layers:[...frame.querySelectorAll('[data-studio-layer-id]')].map(e=>({id:e.dataset.studioLayerId,text:e.textContent.slice(0,80),time:e.dataset.programmeTime,visibility:getComputedStyle(e).visibility,opacity:getComputedStyle(e).opacity,zIndex:getComputedStyle(e).zIndex,
+        sourceTime:e.querySelector('video')?.currentTime,left:e.style.left,top:e.style.top,scale:e.style.getPropertyValue('--title-scale'),planeMatrix:e.querySelector('[data-testid="studio-perspective-surface"]')?.style.transform}))}))});
+  }
+  fs.writeFileSync(path.join(folder,'settled-live-stills.json'),JSON.stringify(samples,null,2));
+  console.log('Settled native composition stills saved for visual review.');
+}
+async function editorialPolish(p){
+  const saved=await h.save(p,'before-polish'),planes=saved.snapshot.overlays.filter(o=>o.type==='video'&&o.perspective);
+  for(const plane of planes){
+    await motionTarget(p,plane.id);
+    const middle=saved.snapshot.motionKeyframes.filter(k=>k.targetId===plane.id&&k.property==='x'&&k.value===69);
+    for(const key of middle){await seek(p,key.time);await number(p,'X',65)}
+  }
+  const rules=saved.snapshot.overlays.filter(o=>o.name?.startsWith('Evidence-rule-'));
+  await q.tool(p,'Motion');
+  await p.getByRole('button',{name:'Logo & layers',exact:true}).click();
+  for(const rule of rules){
+    await p.getByRole('button',{name:`Delete ${rule.name}`,exact:true}).click();
+  }
+  await importGraphics(p,'editorial-v3-rules.graphics.json');
+  const after=await h.save(p,'polished');await backup(p,'NATIVE-OPENING-POLISHED');
+  done('polished',{projectHash:hash(after.snapshot.studioDocument),videoPlanesWithinFrame:true});
+  await editorialStills(p);
+}
 async function gridEdit(p){
   assert(!progress.authored);
   await p.locator('.creator-studio-dropzone input[type=file]').setInputFiles(source);
@@ -313,7 +406,11 @@ async function frameClockReview(p){
   fs.writeFileSync(path.join(folder,'frame-clock-playback.json'),JSON.stringify({results,renderRequests,
     canonicalHash:hash(after.snapshot.studioDocument),headlessMuted:true,creativeApproval:false,
     scope:'Actual native live composition clocks, with and without timeline capture; no new render or creative-quality qualification.'},null,2));
-  await seek(p,6.4);await p.screenshot({path:path.join(folder,'current-studio.png')});
+  await seek(p,6.4);
+  await p.waitForFunction(()=>{const v=document.querySelector('[data-testid="studio-after-video"]');return v&&!v.seeking&&Math.abs(v.currentTime-6.4)<1/24},null,{timeout:20000});
+  await p.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+  await p.screenshot({path:path.join(folder,'current-studio.png')});
+  if(action==='frame-clock-playback')return;
   await p.goto(config.origin,{waitUntil:'domcontentloaded'});
   await p.getByTestId('shared-credit-balance').waitFor({timeout:30000});
   await p.getByRole('button',{name:'Ask AutoPromote',exact:true}).click();
@@ -328,22 +425,57 @@ async function frameClockReview(p){
 }
 async function main(){
   const browser=await chromium.launch({channel:'chromium',headless:true,args:['--mute-audio']});
-  const context=await browser.newContext({viewport:{width:1920,height:1200},acceptDownloads:true,
-    ...(!['revision-render','repair-render','perspective-author-render','projected-render','optimize-projection-render','bounded-background-render','recover-finished','repeat-export'].includes(action)&&fs.existsSync(stateFile)?{storageState:stateFile}:{})});
+  const context=await browser.newContext({viewport:{width:Number(process.env.AUTOPROMOTE_EDIT_VIEWPORT_WIDTH||1920),height:Number(process.env.AUTOPROMOTE_EDIT_VIEWPORT_HEIGHT||1200)},acceptDownloads:true,
+    ...(!['revision-render','repair-render','perspective-author-render','projected-render','optimize-projection-render','bounded-background-render','recover-finished','repeat-export','editorial-render','editorial-finalize'].includes(action)&&fs.existsSync(stateFile)?{storageState:stateFile}:{})});
   const denied=[];
   await context.route('**/*',route=>{const u=new URL(route.request().url());
     if(u.hostname==='127.0.0.1'||['data:','blob:'].includes(u.protocol))return route.continue();
     denied.push({origin:u.origin,path:u.pathname});return route.abort();});
-  const p=await context.newPage();p.setDefaultTimeout(45000);p.on('dialog',d=>void d.accept());
+  const p=await context.newPage();p.setDefaultTimeout(45000);p.on('dialog',d=>{fs.appendFileSync(path.join(folder,'native-dialogs.txt'),d.type()+': '+d.message()+'\n');void d.accept()});
   p.on('pageerror',e=>fs.appendFileSync(path.join(folder,'browser-errors.txt'),e.message+'\n'));
   try{
     await entry(p);
     if(action==='author-render'){await author(p);await render(p)}
     else if(action==='perspective-author-render'){await projectedEdit(p);await render(p)}
+    else if(action==='editorial-author'){await editorialEdit(p)}
+    else if(action==='editorial-stills'){await open(p);await editorialStills(p)}
+    else if(action==='editorial-polish'){await open(p);await editorialPolish(p)}
+    else if(action==='editorial-render'){
+      // Playwright's JSON storageState cannot carry native File/Blob bytes.
+      // Restore the actual native backup, including its packaged artwork,
+      // rather than treating that diagnostic session dump as a media backup.
+      await p.getByLabel('Restore project backup',{exact:true}).setInputFiles(path.join(folder,'NATIVE-OPENING.autopromote.json'));
+      await p.getByRole('button',{name:title,exact:true}).waitFor();await open(p);await render(p);
+    }
+    else if(action==='editorial-finalize'){
+      const file=path.join(folder,'NATIVE-OPENING.autopromote.json');
+      await p.getByLabel('Restore project backup',{exact:true}).setInputFiles(file);
+      await p.getByRole('button',{name:title,exact:true}).waitFor();await open(p);
+      const before=await h.save(p,'before-exact-zero'),planes=before.snapshot.overlays.filter(o=>o.perspective&&o.type==='video');
+      const stop=await recording(p);
+      try{
+        for(const plane of planes){
+          await motionTarget(p,plane.id);
+          const rotations=before.snapshot.motionKeyframes.filter(k=>k.targetId===plane.id&&k.property==='rotation');
+          for(const key of rotations){await seek(p,key.time);await number(p,'Rotate',0)}
+        }
+      }finally{await stop()}
+      const exact=await h.save(p,'exact-zero-rotation');
+      assert(exact.snapshot.motionKeyframes.filter(k=>planes.some(o=>o.id===k.targetId)&&k.property==='rotation').every(k=>k.value===0));
+      await backup(p,'NATIVE-OPENING-EXACT');await editorialStills(p);await render(p);
+    }
     else if(action==='grid-author-render'){await gridEdit(p);await render(p)}
-    else if(action==='frame-clock-review'){
+    else if(action==='frame-clock-review'||action==='frame-clock-playback'){
       if(progress.authored)await open(p);else await projectedEdit(p);
       await frameClockReview(p);
+    }
+    else if(action==='frame-clock-stills'){
+      await open(p);await q.tool(p,'Cut');await seek(p,6.4);
+      await p.waitForFunction(()=>{const v=document.querySelector('[data-testid="studio-after-video"]');return v&&!v.seeking&&Math.abs(v.currentTime-6.4)<1/24},null,{timeout:20000});
+      await p.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+      await p.screenshot({path:path.join(folder,'current-studio.png')});
+      const state=await p.getByTestId('hook-preview-frame').evaluate(frame=>[...frame.querySelectorAll('[data-studio-layer-id]')].map(e=>({id:e.dataset.studioLayerId,time:e.dataset.programmeTime,text:e.textContent.slice(0,80),visibility:e.style.visibility,opacity:e.style.opacity})));
+      fs.writeFileSync(path.join(folder,'paused-cue-state.json'),JSON.stringify(state,null,2));
     }
     else if(action==='projected-render'){
       assert(progress.authored&&!progress.renderSubmitted,'Recover the native project without duplicating a job.');
@@ -481,10 +613,12 @@ async function main(){
     }
     else if(action==='inspect'){console.log((await p.locator('body').innerText()).slice(-2200))}
   }catch(e){
+    fs.writeFileSync(path.join(folder,'failure-body.txt'),await p.locator('body').innerText().catch(()=>''));
     fs.writeFileSync(path.join(folder,'last-error.json'),JSON.stringify({error:e.stack},null,2));
     await p.screenshot({path:path.join(folder,`failure-${Date.now()}.png`)}).catch(()=>{});throw e;
   }finally{
-    fs.writeFileSync(stateFile,JSON.stringify(await context.storageState({indexedDB:true})),{mode:0o600});
+    const retainedState=await context.storageState({indexedDB:true}).catch(()=>null);
+    if(retainedState)fs.writeFileSync(stateFile,JSON.stringify(retainedState),{mode:0o600});
     fs.writeFileSync(path.join(folder,'denied-external-requests.json'),JSON.stringify(denied,null,2));
     await context.close();await browser.close();
   }
