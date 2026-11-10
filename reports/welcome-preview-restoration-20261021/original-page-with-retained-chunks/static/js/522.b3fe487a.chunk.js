@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkautopromote_frontend=globalThis.webpackChunkautopromote_frontend||[]).push([[522],{6522(t,o,e){e.r(o),e.d(o,{default:()=>r});e(8230);var n=e(1583),a=e(614);function r(){return(0,a.jsx)(n.A,{page:"integrations"})}}}]);

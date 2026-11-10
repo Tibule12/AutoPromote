@@ -1,0 +1,12 @@
+{
+  "apiPort": 5145,
+  "askStatus": 200,
+  "guideStatus": 200,
+  "newBehaviorVerified": "studio.cut",
+  "servedApp": "http://localhost:5006",
+  "servedPath": "reports/footer-pages-20261021/site-build",
+  "newBuild": "/home/tibule12/Projects/AutoPromte/AutoPromote-main-integration-20261013/reports/product-assistance-questions-20261021/site-build",
+  "priorBuild": "reports/footer-pages-20261021/site-build.before-question-coverage-20261021",
+  "priorIndexSha256": "a36f8166842e8eef99e959830c72aed2399d5e85b1f1e7d5836f0eb96dbc511a",
+  "oldHashedChunksRetained": true
+}

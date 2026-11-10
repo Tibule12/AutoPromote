@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkautopromote_frontend=globalThis.webpackChunkautopromote_frontend||[]).push([[986],{6986(e,t,o){o.r(t),o.d(t,{default:()=>u});o(8230);var a=o(1583),r=o(614);function u(){return(0,r.jsx)(a.A,{page:"features"})}}}]);

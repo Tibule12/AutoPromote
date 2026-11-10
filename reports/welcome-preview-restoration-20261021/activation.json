@@ -1,0 +1,27 @@
+{
+  "servedApp": "http://localhost:5006",
+  "activeBuild": "/home/tibule12/Projects/AutoPromte/AutoPromote-main-integration-20261013/reports/welcome-preview-restoration-20261021/corrected-build",
+  "apiOrigin": "http://127.0.0.1:5145",
+  "welcomeStudioPreview": true,
+  "comparison": [
+    {
+      "width": 1440,
+      "identicalScreenshotPixels": true
+    },
+    {
+      "width": 390,
+      "identicalScreenshotPixels": true
+    },
+    {
+      "width": 360,
+      "identicalScreenshotPixels": true
+    },
+    {
+      "width": 1200,
+      "identicalScreenshotPixels": true
+    }
+  ],
+  "anonymousContentAndMediaMatch": true,
+  "chatbotFixRetained": true,
+  "allPriorBuildsAndHashedChunksRetained": true
+}

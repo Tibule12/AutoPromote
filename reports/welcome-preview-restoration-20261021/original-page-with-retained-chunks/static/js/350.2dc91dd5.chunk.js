@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkautopromote_frontend=globalThis.webpackChunkautopromote_frontend||[]).push([[350],{9350(o,e,t){t.r(e),t.d(e,{default:()=>r});t(8230);var a=t(1583),n=t(614);function r(){return(0,n.jsx)(a.A,{page:"cookies"})}}}]);
