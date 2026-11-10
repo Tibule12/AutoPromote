@@ -1,0 +1,6 @@
+{
+  "nativeCancelBeforeJob": true,
+  "renderRequestSubmitted": false,
+  "charge": false,
+  "reason": "Artwork SDK upload/download-URL preparation stalled; Studio small-asset route repaired. Duplicate QA dialog acceptors caused observer exit during cancellation; helper now reuses an existing acceptor."
+}

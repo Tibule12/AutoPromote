@@ -1,0 +1,11 @@
+{
+  "complete": true,
+  "programmeSeconds": 24,
+  "elapsedMs": 24466,
+  "mediaTime": 3.208333,
+  "quality": {
+    "total": 217,
+    "dropped": 102,
+    "corrupted": 0
+  }
+}

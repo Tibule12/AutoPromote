@@ -1,0 +1,32 @@
+{
+  "passed": true,
+  "sha256": "5bbc59b9fcd9292c033784d91ff0b1559ed9d48d8e18bf17cebc4c2f2505972f",
+  "bytes": 8159152,
+  "seconds": 30,
+  "video": {
+    "width": 1280,
+    "height": 720,
+    "codec": "h264",
+    "fps": "24/1",
+    "duration": "30.000000",
+    "frameCount": 720,
+    "pixelFormat": "yuv420p",
+    "encoder": "Lavc60.31.102 libx264"
+  },
+  "audio": {
+    "codec": "aac",
+    "channels": 2,
+    "sampleRate": "48000",
+    "duration": "30.000000"
+  },
+  "independentFullDecode": true,
+  "decodedAudio": {
+    "samples": 1440768,
+    "sampleRate": 48000,
+    "seconds": 30.016,
+    "toleranceSeconds": 0.04466666666666667,
+    "passed": true
+  },
+  "contactSheet": "reports/studio-make-your-move-20261102/episode/native-motion-flow/final.mp4.frames.jpg",
+  "scope": "Technical only. Pixel and listening review are separate required evidence."
+}

@@ -1,0 +1,22 @@
+{
+  "stopped": [
+    {
+      "pid": 327773,
+      "script": "flowing-ribbon-candidate-server.cjs"
+    },
+    {
+      "pid": 331470,
+      "script": "flowing-ribbon-final-candidate-server.cjs"
+    },
+    {
+      "pid": 346926,
+      "script": "secondary-clock-candidate-server.cjs"
+    },
+    {
+      "pid": 363573,
+      "script": "plane-guard-candidate-server.cjs"
+    }
+  ],
+  "isolatedAppAndWorkerLeftRunning": true,
+  "otherProcessesUntouched": true
+}

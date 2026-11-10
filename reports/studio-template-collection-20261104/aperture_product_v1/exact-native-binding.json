@@ -1,0 +1,16 @@
+{
+  "projectId": "viral-project-70f2a9ed-f8ad-4950-a14d-dbbbd8a16066",
+  "projectHash": "acb68fb95267388014409ae68f186f101977716893f5bf8c6fd171f4ce62720a",
+  "movieSha256": "8a18343dda06b931e48be36036f2902826067c83a3385a6afe0efe3eb856e47e",
+  "jobId": "viral_542cacbf8bc4dd2afcfc7ad6eb1c9a4dc279ae91f456790d4272cd0f7aef4476",
+  "executionId": "6f3affadb710f3994e4669f3d01c0abc563081fa49287ac1826c638d58aa547f",
+  "nativeBackupMatchesRenderedDocument": true,
+  "compiledCompositionMatchesSubmitted": true,
+  "workerArtifactMatchesNativeDownload": true,
+  "templateRef": {
+    "templateId": "aperture_product_v1",
+    "version": "1.0.0",
+    "definitionHash": "ded9e27d439d17058f80b5054f76a73ddf1f747bc15188d722bc41a2ca88adbc"
+  },
+  "actualNativeDownload": true
+}

@@ -1,0 +1,347 @@
+{
+  "complete": true,
+  "elapsedSeconds": 65.592,
+  "terminal": {
+    "ms": 67325.70000000298,
+    "programme": 36,
+    "videos": [
+      {
+        "slot": "studio-after-video",
+        "source": "/api/credit-pilot/object/770b2eafad2beb7649d2802e2376a27dd449ae213c9a713695c8eb5890fcd7e0",
+        "time": 0,
+        "paused": true,
+        "seeking": false,
+        "ready": 0,
+        "ended": false,
+        "rate": 1,
+        "decoded": 0,
+        "dropped": 0
+      },
+      {
+        "slot": "studio-next-video",
+        "source": "/",
+        "time": 0,
+        "paused": true,
+        "seeking": false,
+        "ready": 0,
+        "ended": false,
+        "rate": 1,
+        "decoded": 0,
+        "dropped": 0
+      },
+      {
+        "slot": "studio-later-video",
+        "source": "/",
+        "time": 0,
+        "paused": true,
+        "seeking": false,
+        "ready": 0,
+        "ended": false,
+        "rate": 1,
+        "decoded": 0,
+        "dropped": 0
+      }
+    ]
+  },
+  "longTasks": {
+    "count": 135,
+    "seconds": 23.23,
+    "longestMs": 1803
+  },
+  "functions": [
+    {
+      "seconds": 21.259759,
+      "name": "(idle)",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 8.862452,
+      "name": "(program)",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 5.567297,
+      "name": "drawImage",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 1.979238,
+      "name": "drawImage",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 1.721667,
+      "name": "drawImage",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 1.6757,
+      "name": "",
+      "column": 1732716,
+      "snippet": "e.transform}))],Mt=_t.filter(e=>!K||e.id===K).map(e=>({id:e.id,layer:e,keys:(V||[]).filter(t=>t.targetId===e.id)})),It=(V||[]).filter(e=>yt.has(e.id)),Bt=(V||[]).find(e=>e.id===gt)||It.at(-1),Rt=_t.find(e=>e.id===(null===Bt||void 0===Bt?void 0:Bt.targetId)),Lt"
+    },
+    {
+      "seconds": 1.607657,
+      "name": "drawImage",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 1.578682,
+      "name": "drawImage",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 0.849742,
+      "name": "",
+      "column": 2429235,
+      "snippet": "ve||e>=Number(n)&&e<Number(n)+qE(t)));var r}).map((t,n)=>{var r,i,a,o,s,l,c,d,u,h,p,m;const A=\"text\"!==t.type||t.isCaption||t.bRollMode?Dj(t.text):gA(t.text),f=\"fullscreen\"===t.bRollMode,g=[\"video\",\"image\"].includes(t.type),v=Zj(t.frameShape,t.bRollMode),y=(e="
+    },
+    {
+      "seconds": 0.770105,
+      "name": "(garbage collector)",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 0.529493,
+      "name": "",
+      "column": 2429739,
+      "snippet": "0$/,\"\")}%`:\"0\"})(t),b=t.animation||{},x=Ao.filter(e=>String(e.targetId)===String(t.id)),Q=Boolean(t.parentId)||cf(t),w=g&&(x.length>0||Q),S=!b.enter||w||Q?\"\":`broll-anim-${b.enter}`,k=Q?sf(t,Nt,Ao,e,Oo):LA(x,e,t),C=t.vectorShape?ng(t.vectorShape,k):(0,Im.HI)(t"
+    },
+    {
+      "seconds": 0.503694,
+      "name": "",
+      "column": 1732757,
+      "snippet": "==K).map(e=>({id:e.id,layer:e,keys:(V||[]).filter(t=>t.targetId===e.id)})),It=(V||[]).filter(e=>yt.has(e.id)),Bt=(V||[]).find(e=>e.id===gt)||It.at(-1),Rt=_t.find(e=>e.id===(null===Bt||void 0===Bt?void 0:Bt.targetId)),Lt=e=>{if(\"main-video\"===e.targetId)return\""
+    },
+    {
+      "seconds": 0.500481,
+      "name": "",
+      "column": 2428431,
+      "snippet": "ong\",{children:\"Smart pacing\"})]}):null,Nt.filter(t=>{if(!function(e,t){let n=arguments.length>2&&void 0!==arguments[2]?arguments[2]:[];return!(!e.bRollMode&&e.clipId)||!!t&&(e.clipId===t.id||!n.some(t=>t.id===e.clipId)&&e.clipId===t.sourceClipId)}(t,Ld[Fd],Ld"
+    },
+    {
+      "seconds": 0.477339,
+      "name": "get clientWidth",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 0.349052,
+      "name": "dp",
+      "column": 2099370,
+      "snippet": "tries(e).map(e=>{let[t,n]=e;return[t,cp(n)]})),dp=e=>JSON.stringify(e,(e,t)=>\"undefined\"!==typeof Blob&&t instanceof Blob?{__mediaType:\"undefined\"!==typeof File&&t instanceof File?\"File\":\"Blob\",name:t.name||\"\",size:t.size,type:t.type,lastModified:t.lastModifie"
+    },
+    {
+      "seconds": 0.323823,
+      "name": "",
+      "column": 2429045,
+      "snippet": "!==(r=t.animation)&&void 0!==r&&r.enter&&!Ao.some(e=>String(e.targetId)===String(t.id))?e>=Number(n)&&e<Number(n)+qE(t):\"video\"!==t.type||e>=Number(n)-.5&&e<Number(n)+qE(t)+.25:!!t.perspective||e>=Number(n)&&e<Number(n)+qE(t)));var r}).map((t,n)=>{var r,i,a,o,"
+    },
+    {
+      "seconds": 0.318228,
+      "name": "querySelectorAll",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 0.315555,
+      "name": "drawImage",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 0.252421,
+      "name": "dp",
+      "column": 2099370,
+      "snippet": "tries(e).map(e=>{let[t,n]=e;return[t,cp(n)]})),dp=e=>JSON.stringify(e,(e,t)=>\"undefined\"!==typeof Blob&&t instanceof Blob?{__mediaType:\"undefined\"!==typeof File&&t instanceof File?\"File\":\"Blob\",name:t.name||\"\",size:t.size,type:t.type,lastModified:t.lastModifie"
+    },
+    {
+      "seconds": 0.244913,
+      "name": "xg",
+      "column": 1092865,
+      "snippet": "return{...r,...JSON.parse(JSON.stringify(e))}},xg=e=>JSON.stringify(e,(e,t)=>t&&\"object\"===typeof t&&!Array.isArray(t)?Object.fromEntries(Object.keys(t).sort().map(e=>[e,t[e]])):t),Qg=(e,t)=>{const n=new Error(t);throw n.code=e,n},wg=[\"version\",\"name\",\"seconda"
+    },
+    {
+      "seconds": 0.23903,
+      "name": "",
+      "column": 1119815,
+      "snippet": "Zm)(e.atProgrammeTick)}))];(e.layers||[]).forEach(t=>{var n,r,i;kA({...t.parameters,type:t.legacyType},y.filter(e=>e.targetId===t.layerId)),yf({...t.parameters,id:t.layerId,type:t.legacyType},y.filter(e=>e.targetId===t.layerId),((null===(n=e.editGraph)||void 0"
+    },
+    {
+      "seconds": 0.231965,
+      "name": "",
+      "column": 1119815,
+      "snippet": "Zm)(e.atProgrammeTick)}))];(e.layers||[]).forEach(t=>{var n,r,i;kA({...t.parameters,type:t.legacyType},y.filter(e=>e.targetId===t.layerId)),yf({...t.parameters,id:t.layerId,type:t.legacyType},y.filter(e=>e.targetId===t.layerId),((null===(n=e.editGraph)||void 0"
+    },
+    {
+      "seconds": 0.221677,
+      "name": "",
+      "column": 1119815,
+      "snippet": "Zm)(e.atProgrammeTick)}))];(e.layers||[]).forEach(t=>{var n,r,i;kA({...t.parameters,type:t.legacyType},y.filter(e=>e.targetId===t.layerId)),yf({...t.parameters,id:t.layerId,type:t.legacyType},y.filter(e=>e.targetId===t.layerId),((null===(n=e.editGraph)||void 0"
+    },
+    {
+      "seconds": 0.219364,
+      "name": "",
+      "column": 1732716,
+      "snippet": "e.transform}))],Mt=_t.filter(e=>!K||e.id===K).map(e=>({id:e.id,layer:e,keys:(V||[]).filter(t=>t.targetId===e.id)})),It=(V||[]).filter(e=>yt.has(e.id)),Bt=(V||[]).find(e=>e.id===gt)||It.at(-1),Rt=_t.find(e=>e.id===(null===Bt||void 0===Bt?void 0:Bt.targetId)),Lt"
+    },
+    {
+      "seconds": 0.215712,
+      "name": "",
+      "column": 1119815,
+      "snippet": "Zm)(e.atProgrammeTick)}))];(e.layers||[]).forEach(t=>{var n,r,i;kA({...t.parameters,type:t.legacyType},y.filter(e=>e.targetId===t.layerId)),yf({...t.parameters,id:t.layerId,type:t.legacyType},y.filter(e=>e.targetId===t.layerId),((null===(n=e.editGraph)||void 0"
+    },
+    {
+      "seconds": 0.209666,
+      "name": "",
+      "column": 1119815,
+      "snippet": "Zm)(e.atProgrammeTick)}))];(e.layers||[]).forEach(t=>{var n,r,i;kA({...t.parameters,type:t.legacyType},y.filter(e=>e.targetId===t.layerId)),yf({...t.parameters,id:t.layerId,type:t.legacyType},y.filter(e=>e.targetId===t.layerId),((null===(n=e.editGraph)||void 0"
+    },
+    {
+      "seconds": 0.199025,
+      "name": "xg",
+      "column": 1092865,
+      "snippet": "return{...r,...JSON.parse(JSON.stringify(e))}},xg=e=>JSON.stringify(e,(e,t)=>t&&\"object\"===typeof t&&!Array.isArray(t)?Object.fromEntries(Object.keys(t).sort().map(e=>[e,t[e]])):t),Qg=(e,t)=>{const n=new Error(t);throw n.code=e,n},wg=[\"version\",\"name\",\"seconda"
+    },
+    {
+      "seconds": 0.185723,
+      "name": "",
+      "column": 1119815,
+      "snippet": "Zm)(e.atProgrammeTick)}))];(e.layers||[]).forEach(t=>{var n,r,i;kA({...t.parameters,type:t.legacyType},y.filter(e=>e.targetId===t.layerId)),yf({...t.parameters,id:t.layerId,type:t.legacyType},y.filter(e=>e.targetId===t.layerId),((null===(n=e.editGraph)||void 0"
+    },
+    {
+      "seconds": 0.173062,
+      "name": "",
+      "column": 1119815,
+      "snippet": "Zm)(e.atProgrammeTick)}))];(e.layers||[]).forEach(t=>{var n,r,i;kA({...t.parameters,type:t.legacyType},y.filter(e=>e.targetId===t.layerId)),yf({...t.parameters,id:t.layerId,type:t.legacyType},y.filter(e=>e.targetId===t.layerId),((null===(n=e.editGraph)||void 0"
+    },
+    {
+      "seconds": 0.16835,
+      "name": "",
+      "column": 1092885,
+      "snippet": "parse(JSON.stringify(e))}},xg=e=>JSON.stringify(e,(e,t)=>t&&\"object\"===typeof t&&!Array.isArray(t)?Object.fromEntries(Object.keys(t).sort().map(e=>[e,t[e]])):t),Qg=(e,t)=>{const n=new Error(t);throw n.code=e,n},wg=[\"version\",\"name\",\"secondary\",\"endTime\",\"asset"
+    }
+  ],
+  "transitions": [
+    {
+      "seconds": 1.0655,
+      "programme": null,
+      "slot": "studio-after-video",
+      "source": "/api/credit-pilot/object/b9996a7c60201de4eacc13bfb03a3d34f8e3592384a973b036d32cb6bed486de",
+      "time": 0,
+      "paused": true,
+      "seeking": false,
+      "ready": 0,
+      "ended": false,
+      "rate": 1,
+      "decoded": 0,
+      "dropped": 0
+    },
+    {
+      "seconds": 14.3255,
+      "programme": 3.958333,
+      "slot": "studio-after-video",
+      "source": "/api/credit-pilot/object/5436e92ef71040bceee4cf2d34198da811cc52984c210a75b53eef9ccb60c6ab",
+      "time": 0,
+      "paused": true,
+      "seeking": false,
+      "ready": 0,
+      "ended": false,
+      "rate": 1,
+      "decoded": 0,
+      "dropped": 0
+    },
+    {
+      "seconds": 17.722400000005962,
+      "programme": 6,
+      "slot": "studio-after-video",
+      "source": "/api/credit-pilot/object/b9996a7c60201de4eacc13bfb03a3d34f8e3592384a973b036d32cb6bed486de",
+      "time": 4,
+      "paused": true,
+      "seeking": false,
+      "ready": 0,
+      "ended": false,
+      "rate": 1,
+      "decoded": 0,
+      "dropped": 0
+    },
+    {
+      "seconds": 22.78729999999702,
+      "programme": 10,
+      "slot": "studio-after-video",
+      "source": "/api/credit-pilot/object/597ee9c989bddb021346c2ed41abe15b214f1669d7ba866d5478f48acb77a7ef",
+      "time": 0,
+      "paused": true,
+      "seeking": false,
+      "ready": 0,
+      "ended": false,
+      "rate": 1,
+      "decoded": 0,
+      "dropped": 0
+    },
+    {
+      "seconds": 29.654,
+      "programme": 16,
+      "slot": "studio-after-video",
+      "source": "/api/credit-pilot/object/b9129f6fff0bf3b15d83a452ce6452d18d7417f71d7df4e377698d6a82bb22a9",
+      "time": 0,
+      "paused": true,
+      "seeking": false,
+      "ready": 0,
+      "ended": false,
+      "rate": 1,
+      "decoded": 0,
+      "dropped": 0
+    },
+    {
+      "seconds": 36.24410000000894,
+      "programme": 19.958333,
+      "slot": "studio-after-video",
+      "source": "/api/credit-pilot/object/4cd8e4267da97d886ffb0d28ba27723b661c35a58d98be09e2993cbd95734174",
+      "time": 0,
+      "paused": true,
+      "seeking": false,
+      "ready": 0,
+      "ended": false,
+      "rate": 1,
+      "decoded": 0,
+      "dropped": 0
+    },
+    {
+      "seconds": 45.3965,
+      "programme": 23.916667,
+      "slot": "studio-after-video",
+      "source": "/api/credit-pilot/object/b9129f6fff0bf3b15d83a452ce6452d18d7417f71d7df4e377698d6a82bb22a9",
+      "time": 4,
+      "paused": true,
+      "seeking": false,
+      "ready": 0,
+      "ended": false,
+      "rate": 1,
+      "decoded": 0,
+      "dropped": 0
+    },
+    {
+      "seconds": 57.50260000000894,
+      "programme": 28,
+      "slot": "studio-after-video",
+      "source": "/api/credit-pilot/object/770b2eafad2beb7649d2802e2376a27dd449ae213c9a713695c8eb5890fcd7e0",
+      "time": 4,
+      "paused": true,
+      "seeking": false,
+      "ready": 0,
+      "ended": false,
+      "rate": 1,
+      "decoded": 0,
+      "dropped": 0
+    }
+  ]
+}

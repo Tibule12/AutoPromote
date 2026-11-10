@@ -811,3 +811,68 @@ export const buildTrackMatteStageSvgDataUri = ({
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${vw} ${vh}" preserveAspectRatio="none"><defs>${filterDef}</defs><g${filterDef ? ' filter="url(#tm-op)"' : ""}>${baseBackdrop}<g transform="translate(${cx.toFixed(2)} ${cy.toFixed(2)}) rotate(${rot.toFixed(2)})" opacity="${opacity.toFixed(4)}">${shapeMarkup}</g></g></svg>`;
   return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
 };
+
+export const removeStudioLayerSafely = (
+  {
+    overlays = [],
+    compositionOrder = [],
+    motionKeyframes = [],
+    mainTransform = null,
+  } = {},
+  targetLayerId,
+  currentTime = 0
+) => {
+  const targetId = String(targetLayerId ?? "");
+  if (!targetId || targetId === "main-video") {
+    return {
+      overlays,
+      compositionOrder,
+      motionKeyframes,
+      detachedMatteLayerIds: [],
+      unparentedChildIds: [],
+    };
+  }
+
+  const detachedMatteLayerIds = [];
+  const unparentedChildIds = [];
+
+  const nextOverlays = (overlays || [])
+    .filter(item => item && String(item.id) !== targetId)
+    .map(item => {
+      let updated = item;
+      if (String(updated.parentId) === targetId) {
+        unparentedChildIds.push(String(updated.id));
+        updated = reparentStudioLayerPreservingWorldPose(
+          updated,
+          null,
+          overlays,
+          motionKeyframes,
+          currentTime,
+          mainTransform
+        );
+      }
+      if (String(updated.trackMatte?.sourceLayerId) === targetId) {
+        detachedMatteLayerIds.push(String(updated.id));
+        updated = {
+          ...updated,
+          trackMatte: { mode: "none", sourceLayerId: null },
+        };
+      }
+      return updated;
+    });
+
+  const nextCompositionOrder = (compositionOrder || []).filter(
+    id => String(id) !== targetId
+  );
+  const nextMotionKeyframes = (motionKeyframes || []).filter(
+    k => String(k?.targetId) !== targetId
+  );
+
+  return {
+    overlays: nextOverlays,
+    compositionOrder: nextCompositionOrder,
+    motionKeyframes: nextMotionKeyframes,
+    detachedMatteLayerIds,
+    unparentedChildIds,
+  };
+};

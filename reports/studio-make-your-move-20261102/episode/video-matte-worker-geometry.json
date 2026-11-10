@@ -1,0 +1,17 @@
+{
+  "scope": "Actual shared CPU rasterizer, exact source frame132/matte36 at programme5.5; diagnostic geometry only, not a native export or whole-picture pass.",
+  "rows": [
+    {
+      "name": "02 / moving foreground",
+      "maximumChannelError": 0.0,
+      "fullCanvas": true,
+      "canonicalAdmission": true
+    },
+    {
+      "name": "02 / smooth matte",
+      "maximumChannelError": 0.0,
+      "fullCanvas": true,
+      "canonicalAdmission": true
+    }
+  ]
+}

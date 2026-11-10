@@ -1,0 +1,32 @@
+{
+  "passed": true,
+  "sha256": "8a9f58566415b8ea1120c9b474b173c827247e551e3aede4b92190a0e0e89e50",
+  "bytes": 4806224,
+  "seconds": 24,
+  "video": {
+    "width": 1280,
+    "height": 720,
+    "codec": "h264",
+    "fps": "24/1",
+    "duration": "24.000000",
+    "frameCount": 576,
+    "pixelFormat": "yuv420p",
+    "encoder": "Lavc60.31.102 libx264"
+  },
+  "audio": {
+    "codec": "aac",
+    "channels": 2,
+    "sampleRate": "48000",
+    "duration": "24.000000"
+  },
+  "independentFullDecode": true,
+  "decodedAudio": {
+    "samples": 1152000,
+    "sampleRate": 48000,
+    "seconds": 24,
+    "toleranceSeconds": 0.04466666666666667,
+    "passed": true
+  },
+  "contactSheet": "reports/studio-whatsapp-director-20261103/revision-2/native-motion-flow/final.mp4.frames.jpg",
+  "scope": "Technical only. Pixel and listening review are separate required evidence."
+}

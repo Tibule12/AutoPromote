@@ -1,0 +1,139 @@
+{
+  "name": "Portrait contrast",
+  "actions": [
+    {
+      "type": "remove_keys",
+      "targetId": "W / opening colour",
+      "property": "opacity"
+    },
+    {
+      "type": "keys",
+      "targetId": "W / opening colour",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0,
+          "value": 0.85,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 0.35,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 3,
+          "value": 1,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "W / opening code",
+      "property": "opacity"
+    },
+    {
+      "type": "keys",
+      "targetId": "W / opening code",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0,
+          "value": 0.45,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 0.7,
+          "value": 0.34,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 1.5,
+          "value": 0.5,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 3,
+          "value": 0.05,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "W / return colour",
+      "property": "opacity"
+    },
+    {
+      "type": "keys",
+      "targetId": "W / return colour",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 21,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 23.4,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 24,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "W / return code",
+      "property": "opacity"
+    },
+    {
+      "type": "keys",
+      "targetId": "W / return code",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 21,
+          "value": 0.3,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 21.7,
+          "value": 0.45,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 22.5,
+          "value": 0.38,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 23.4,
+          "value": 0.5,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 24,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    }
+  ]
+}

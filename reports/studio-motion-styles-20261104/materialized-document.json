@@ -1,0 +1,5 @@
+{
+  "beforeDecisions": "2a2f2f7beb2b7011d8e0c7bae6fe52dd8a77e59d09d8603de3620c7da6a6c487",
+  "afterDecisions": "3c3d3450f8eb003b8a960178f71f6419e99b0622c956c1438c32e055072015b4",
+  "reason": "The first native export materialized editable vector artwork into owned local Storage; geometry and video input bytes are preserved."
+}

@@ -1,0 +1,1318 @@
+{
+  "schemaVersion": 1,
+  "templateId": "split_impact_v1",
+  "version": "1.0.0",
+  "label": "Split impact \u2014 sports motion",
+  "status": "draft",
+  "canonicalContractVersion": 1,
+  "compiler": "studioRenderCompiler",
+  "renderer": "render_viral_clip_impl",
+  "surfaces": [
+    "studio",
+    "director",
+    "welcome"
+  ],
+  "workflow": "studio",
+  "categoryIds": [
+    "motion_graphics"
+  ],
+  "inputSlots": [
+    {
+      "id": "footage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "music",
+      "type": "audio",
+      "required": false
+    }
+  ],
+  "supportedAspects": [
+    "16:9"
+  ],
+  "durationTicks": 720000,
+  "qualification": {
+    "studioLifecycle": "unverified",
+    "directorInstantiation": "unverified",
+    "creativeQuality": "unapproved",
+    "previewFinalParity": "unverified"
+  },
+  "executionDefinition": {
+    "clock": 90000,
+    "defaultAspect": "16:9",
+    "sequence": [
+      {
+        "slot": "footage",
+        "offset": 0,
+        "duration": 8,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      }
+    ],
+    "titles": [],
+    "logo": {},
+    "animation": {
+      "enterSeconds": 0.2,
+      "settleSeconds": 0.45,
+      "exitSeconds": 0.12,
+      "curve": [
+        0.16,
+        1,
+        0.3,
+        1
+      ]
+    },
+    "music": {
+      "volume": 55,
+      "fadeIn": 0.1,
+      "fadeOut": 0.5
+    },
+    "soundCues": [
+      {
+        "tone": "airy_whoosh",
+        "time": 0,
+        "duration": 0.6,
+        "volume": 0.2
+      },
+      {
+        "tone": "airy_whoosh",
+        "time": 3.3,
+        "duration": 0.5,
+        "volume": 0.16
+      },
+      {
+        "tone": "airy_whoosh",
+        "time": 6.4,
+        "duration": 0.6,
+        "volume": 0.18
+      }
+    ],
+    "sourceKeyframes": [],
+    "sceneActions": [],
+    "directorDescription": "Two genuine action moments split across a travelling diagonal with timed vector strike trajectories. Uses one saved source and ordinary editable Studio layers. No model job.",
+    "defaultCopy": {},
+    "muteOriginalAudio": true,
+    "framing": {
+      "forceAspect": true,
+      "mode": "off",
+      "positions": []
+    },
+    "videoFit": "contain",
+    "ordinaryMotion": {
+      "version": 1,
+      "layers": [
+        {
+          "id": "Backdrop",
+          "name": "Backdrop",
+          "type": "image",
+          "vectorShape": {
+            "version": 1,
+            "closed": true,
+            "nodes": [
+              {
+                "x": 0,
+                "y": 0,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 100,
+                "y": 0,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 100,
+                "y": 100,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 0,
+                "y": 100,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "fill": {
+              "kind": "solid",
+              "color": "#d9fc32",
+              "endColor": "#d9fc32",
+              "start": [
+                0,
+                0
+              ],
+              "end": [
+                100,
+                100
+              ]
+            },
+            "stroke": {
+              "color": "#d9fc32",
+              "width": 0
+            }
+          },
+          "startTime": 0,
+          "duration": 8,
+          "x": 50,
+          "y": 50,
+          "width": 100,
+          "height": 100,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "stretch",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "Action base",
+          "name": "Action base",
+          "type": "video",
+          "sourceSlot": "footage",
+          "sourceStartTime": 0,
+          "startTime": 0,
+          "duration": 8,
+          "x": 50,
+          "y": 50,
+          "width": 100,
+          "height": 100,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "cover",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "Delayed strike",
+          "name": "Delayed strike",
+          "type": "video",
+          "sourceSlot": "footage",
+          "sourceStartTime": 2,
+          "startTime": 0,
+          "duration": 8,
+          "x": 50,
+          "y": 50,
+          "width": 100,
+          "height": 100,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "cover",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(52% 0%,100% 0%,100% 100%,30% 100%)",
+            "feather": 0,
+            "inverted": false
+          }
+        },
+        {
+          "id": "Strike slash 0",
+          "name": "Strike slash 0",
+          "type": "image",
+          "vectorShape": {
+            "version": 1,
+            "closed": false,
+            "nodes": [
+              {
+                "x": 5,
+                "y": 93,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 95,
+                "y": 7,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "fill": {
+              "kind": "none",
+              "color": "#d9fc32",
+              "endColor": "#d9fc32",
+              "start": [
+                0,
+                0
+              ],
+              "end": [
+                100,
+                100
+              ]
+            },
+            "stroke": {
+              "color": "#d9fc32",
+              "width": 1.8
+            }
+          },
+          "startTime": 0,
+          "duration": 8,
+          "x": 33,
+          "y": 50,
+          "width": 16,
+          "height": 35,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "stretch",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "Strike slash 1",
+          "name": "Strike slash 1",
+          "type": "image",
+          "vectorShape": {
+            "version": 1,
+            "closed": false,
+            "nodes": [
+              {
+                "x": 5,
+                "y": 93,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 95,
+                "y": 7,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "fill": {
+              "kind": "none",
+              "color": "#d9fc32",
+              "endColor": "#d9fc32",
+              "start": [
+                0,
+                0
+              ],
+              "end": [
+                100,
+                100
+              ]
+            },
+            "stroke": {
+              "color": "#d9fc32",
+              "width": 1.8
+            }
+          },
+          "startTime": 0,
+          "duration": 8,
+          "x": 52,
+          "y": 50,
+          "width": 19,
+          "height": 40,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "stretch",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "Strike slash 2",
+          "name": "Strike slash 2",
+          "type": "image",
+          "vectorShape": {
+            "version": 1,
+            "closed": false,
+            "nodes": [
+              {
+                "x": 5,
+                "y": 93,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 95,
+                "y": 7,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "fill": {
+              "kind": "none",
+              "color": "#d9fc32",
+              "endColor": "#d9fc32",
+              "start": [
+                0,
+                0
+              ],
+              "end": [
+                100,
+                100
+              ]
+            },
+            "stroke": {
+              "color": "#d9fc32",
+              "width": 1.8
+            }
+          },
+          "startTime": 0,
+          "duration": 8,
+          "x": 71,
+          "y": 50,
+          "width": 22,
+          "height": 45,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "stretch",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        }
+      ],
+      "keys": [
+        {
+          "targetId": "Action base",
+          "property": "scale",
+          "time": 0,
+          "value": 1.2,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Action base",
+          "property": "scale",
+          "time": 1,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Action base",
+          "property": "scale",
+          "time": 2.9,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Action base",
+          "property": "scale",
+          "time": 3.5,
+          "value": 1.1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Action base",
+          "property": "scale",
+          "time": 5.3,
+          "value": 1.1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Action base",
+          "property": "scale",
+          "time": 6.1,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Action base",
+          "property": "scale",
+          "time": 8,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Delayed strike",
+          "property": "maskPoint0X",
+          "time": 0,
+          "value": 105,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Delayed strike",
+          "property": "maskPoint0X",
+          "time": 0.8,
+          "value": 52,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Delayed strike",
+          "property": "maskPoint0X",
+          "time": 2.8,
+          "value": 52,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Delayed strike",
+          "property": "maskPoint0X",
+          "time": 3.5,
+          "value": 35,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Delayed strike",
+          "property": "maskPoint0X",
+          "time": 5.2,
+          "value": 35,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Delayed strike",
+          "property": "maskPoint0X",
+          "time": 6.5,
+          "value": 105,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Delayed strike",
+          "property": "maskPoint0X",
+          "time": 8,
+          "value": 105,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Delayed strike",
+          "property": "maskPoint3X",
+          "time": 0,
+          "value": 105,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Delayed strike",
+          "property": "maskPoint3X",
+          "time": 0.8,
+          "value": 30,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Delayed strike",
+          "property": "maskPoint3X",
+          "time": 2.8,
+          "value": 30,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Delayed strike",
+          "property": "maskPoint3X",
+          "time": 3.5,
+          "value": 13,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Delayed strike",
+          "property": "maskPoint3X",
+          "time": 5.2,
+          "value": 13,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Delayed strike",
+          "property": "maskPoint3X",
+          "time": 6.5,
+          "value": 105,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Delayed strike",
+          "property": "maskPoint3X",
+          "time": 8,
+          "value": 105,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Delayed strike",
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Delayed strike",
+          "property": "opacity",
+          "time": 0.7,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Delayed strike",
+          "property": "opacity",
+          "time": 6.4,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Delayed strike",
+          "property": "opacity",
+          "time": 6.6,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 0",
+          "property": "strokeEnd",
+          "time": 0,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 0",
+          "property": "strokeEnd",
+          "time": 1.1,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 0",
+          "property": "strokeEnd",
+          "time": 2.1,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 0",
+          "property": "strokeEnd",
+          "time": 2.5,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 0",
+          "property": "strokeEnd",
+          "time": 4.4,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 0",
+          "property": "strokeEnd",
+          "time": 4.8,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 0",
+          "property": "strokeEnd",
+          "time": 5.8,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 0",
+          "property": "strokeEnd",
+          "time": 6.3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 0",
+          "property": "x",
+          "time": 0,
+          "value": 25,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 0",
+          "property": "x",
+          "time": 2.5,
+          "value": 42,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 0",
+          "property": "x",
+          "time": 4.4,
+          "value": 42,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 0",
+          "property": "x",
+          "time": 6.3,
+          "value": 60,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 1",
+          "property": "strokeEnd",
+          "time": 0,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 1",
+          "property": "strokeEnd",
+          "time": 1.2,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 1",
+          "property": "strokeEnd",
+          "time": 2.1,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 1",
+          "property": "strokeEnd",
+          "time": 2.5,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 1",
+          "property": "strokeEnd",
+          "time": 4.4,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 1",
+          "property": "strokeEnd",
+          "time": 4.8,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 1",
+          "property": "strokeEnd",
+          "time": 5.8,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 1",
+          "property": "strokeEnd",
+          "time": 6.3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 1",
+          "property": "x",
+          "time": 0,
+          "value": 41,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 1",
+          "property": "x",
+          "time": 2.5,
+          "value": 58,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 1",
+          "property": "x",
+          "time": 4.4,
+          "value": 58,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 1",
+          "property": "x",
+          "time": 6.3,
+          "value": 76,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 2",
+          "property": "strokeEnd",
+          "time": 0,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 2",
+          "property": "strokeEnd",
+          "time": 1.3,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 2",
+          "property": "strokeEnd",
+          "time": 2.1,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 2",
+          "property": "strokeEnd",
+          "time": 2.5,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 2",
+          "property": "strokeEnd",
+          "time": 4.4,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 2",
+          "property": "strokeEnd",
+          "time": 4.8,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 2",
+          "property": "strokeEnd",
+          "time": 5.8,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 2",
+          "property": "strokeEnd",
+          "time": 6.3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 2",
+          "property": "x",
+          "time": 0,
+          "value": 57,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 2",
+          "property": "x",
+          "time": 2.5,
+          "value": 74,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 2",
+          "property": "x",
+          "time": 4.4,
+          "value": 74,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Strike slash 2",
+          "property": "x",
+          "time": 6.3,
+          "value": 92,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "main-video",
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "targetId": "main-video",
+          "property": "opacity",
+          "time": 8,
+          "value": 0,
+          "easing": "hold"
+        }
+      ],
+      "groups": [],
+      "order": [
+        "Backdrop",
+        "Action base",
+        "Delayed strike",
+        "Strike slash 0",
+        "Strike slash 1",
+        "Strike slash 2"
+      ]
+    }
+  }
+}

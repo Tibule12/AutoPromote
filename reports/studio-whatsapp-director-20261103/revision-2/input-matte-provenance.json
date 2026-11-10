@@ -1,0 +1,46 @@
+[
+  {
+    "name": "Portrait mask",
+    "source": "/home/tibule12/Videos/WhatsApp Video 2026-11-03 at 04.58.10 (1).mp4",
+    "sourceSha256": "5217554acdae6f4623c8d9bbb1c7070c2918eea81975e2cf255a1f59afa14315",
+    "sourceRange": [
+      0.25,
+      3.25
+    ],
+    "frames": 72,
+    "fps": 24,
+    "size": [
+      360,
+      646
+    ],
+    "matteSha256": "f77fe8cedbd074c359c3990cef471bc4a9cfa972b4c24d059b48654af4cc402e",
+    "modelSha256": "88d4531297118f595bf2fd60f6f566aec2e559393802d1f436c380f0cbbd2828",
+    "elapsedSeconds": 4.89265614701435,
+    "CPUOnly": true,
+    "paidCalls": 0,
+    "productSegmentationIntegration": false,
+    "scope": "Grayscale input alpha; no composed RGB effects movie"
+  },
+  {
+    "name": "Seated mask",
+    "source": "/home/tibule12/Videos/WhatsApp Video 2026-11-03 at 04.58.10.mp4",
+    "sourceSha256": "f845b91a06ef40d16ae43d846bb888337fc7f11814acec9e508a33f188ea6ca7",
+    "sourceRange": [
+      7,
+      14
+    ],
+    "frames": 168,
+    "fps": 24,
+    "size": [
+      360,
+      640
+    ],
+    "matteSha256": "78823cd24b096479fdb6b5de333226702041235e365c750f4b756eec187b939d",
+    "modelSha256": "88d4531297118f595bf2fd60f6f566aec2e559393802d1f436c380f0cbbd2828",
+    "elapsedSeconds": 10.135931961005554,
+    "CPUOnly": true,
+    "paidCalls": 0,
+    "productSegmentationIntegration": false,
+    "scope": "Grayscale input alpha; no composed RGB effects movie"
+  }
+]

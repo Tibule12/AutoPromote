@@ -1,0 +1,26 @@
+{
+  "lossless": true,
+  "records": [
+    {
+      "original": "cold-reopened-project.private.json",
+      "archive": "cold-reopened-project.private.json.gz",
+      "sha256": "ef7b9db7af71827497145f8d56cc09f8b5ad759d7c3c5ced0020a6d56e7c2078",
+      "originalBytes": 16174909,
+      "compressedBytes": 1956988
+    },
+    {
+      "original": "undone-project.private.json",
+      "archive": "undone-project.private.json.gz",
+      "sha256": "3c04e7fc56f78bf78fabfddeeb0b40663ca51d807dc64ae6c54a919e2ae46f75",
+      "originalBytes": 33181437,
+      "compressedBytes": 3947657
+    },
+    {
+      "original": "edited-project.private.json",
+      "archive": "edited-project.private.json.gz",
+      "sha256": "df5d764703a30abe1583568b13bac7b7d00d5b43ff5a045d02076bd763047a8a",
+      "originalBytes": 24677771,
+      "compressedBytes": 2946692
+    }
+  ]
+}

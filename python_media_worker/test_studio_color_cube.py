@@ -30,6 +30,28 @@ class StudioColorCubeTests(unittest.TestCase):
         self.assertLessEqual(delta.max(), 1)
         self.assertLess(delta.mean(), .8)
 
+    def test_procedural_cinema_3d_lut_and_fractional_curve_match_ffmpeg(self):
+        source = np.random.default_rng(42).integers(0, 256, (16, 32, 4), dtype=np.uint8)
+        source[:, :, 3] = 255
+        module = Path(__file__).resolve().parents[1] / "frontend/src/components/studioColorCube.js"
+        script = """const fs=require('fs');(async()=>{
+          const m=await import('data:text/javascript;base64,'+fs.readFileSync(process.argv[1]).toString('base64'));
+          const p=new Uint8ClampedArray(JSON.parse(fs.readFileSync(0,'utf8')));
+          const lut=m.buildProceduralColorCube('kodak_2383', 17);
+          const cube=m.buildAdvancedColorCube({curve:{shadows:-0.1,midtones:0.06,highlights:0.08},hsl:{hue:8,saturation:1.08,luminance:0.03},lut,lutIntensity:0.85});
+          m.applyColorCube(p,cube);process.stdout.write(JSON.stringify({cube,pixels:[...p]}));})();"""
+        browser = json.loads(subprocess.run(["node", "-e", script, str(module)],
+            input=json.dumps(source.flatten().tolist()).encode(), capture_output=True, check=True).stdout)
+        with tempfile.TemporaryDirectory(prefix="studio-proc-cube-") as temp:
+            path = write_color_cube(browser["cube"], Path(temp)/"kodak_2383.cube")
+            result = subprocess.run(["ffmpeg", "-v", "error", "-f", "rawvideo", "-pixel_format", "rgba",
+                "-video_size", "32x16", "-i", "pipe:0", "-vf", f"lut3d=file='{path}':interp=trilinear",
+                "-filter_threads", "1", "-frames:v", "1", "-f", "rawvideo", "-pix_fmt", "rgba", "pipe:1"],
+                input=source.tobytes(), capture_output=True, check=True).stdout
+        delta = np.abs(np.array(browser["pixels"])-np.frombuffer(result, np.uint8).astype(int))
+        self.assertLessEqual(delta.max(), 1)
+        self.assertLess(delta.mean(), .8)
+
     def test_invalid_cube_rejected_without_creating_output(self):
         with tempfile.TemporaryDirectory(prefix="studio-invalid-cube-") as temp:
             path = Path(temp)/"invalid.cube"

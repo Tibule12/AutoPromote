@@ -1,0 +1,9 @@
+{
+  "observerExitCode": 143,
+  "signal": "SIGTERM",
+  "cause": "Unknown external termination; worker continued independently",
+  "backupHash": "779aae7d9c5c3c4de8c7e67bafaf560883c099d565d3fa8bf7133e02e69031a4",
+  "exactSubmittedComposition": true,
+  "workerWasNotCancelled": true,
+  "resubmitted": false
+}

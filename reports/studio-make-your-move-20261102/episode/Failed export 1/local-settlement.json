@@ -1,0 +1,109 @@
+{
+  "account": {
+    "sandbox": true,
+    "balance": 2,
+    "reserved": 0,
+    "tier": "free",
+    "cycle": "2026-11",
+    "renewsAt": "2026-12-01T00:00:00.000Z",
+    "monthlyAllowance": 15,
+    "maxBalance": 10000,
+    "totals": {
+      "opening": 0,
+      "granted": 30,
+      "earned": 0,
+      "purchased": 7,
+      "consumed": 22,
+      "refunded": 18,
+      "expired": 13
+    },
+    "rewardCredits": 1,
+    "adsRemaining": 20,
+    "activeReward": null,
+    "adFree": false,
+    "pricingRevision": "975594d94929a0b6497ffe3533629b0900f210698259b7616fb6b99fd9e416ea"
+  },
+  "operation": {
+    "operationId": "e9afab766d5866c4bf147bed0a960fdb413ea299692e9168e8ad0bbb6ca55000",
+    "userId": "demo-pilot-alice",
+    "requestId": "6a4a0bb1-92b3-400e-bc95-4cc50babaaa0",
+    "fingerprint": "b012db7d9f48df89792ab1ba3e8747b9f3addda4ca6d0e00247d6f0f184d594e",
+    "sourceFingerprint": "9c7eeb0c6fd47034e6b938ed5a4a55c895e816aed9acaa00a98e6b910826e0f1",
+    "sourceDescriptor": {
+      "sourceId": "app-9bc9d4f5f9829c05f62ff807b127c49a5ae2486220d3528f352cca6bd808bc6a",
+      "contentHash": "09f2b8bfcf899d174ecf53f6a9c5358b9d19ca7b7d8ba0b1c508abfc2a2bf15d",
+      "objectGeneration": "1793467767588",
+      "enforcedMaxSeconds": 120,
+      "resourceClass": "media-cpu",
+      "destinations": [],
+      "workflowInput": {
+        "route": "/api/media/process",
+        "sources": [
+          {
+            "userId": "demo-pilot-alice",
+            "storagePath": "studio/sources/demo-pilot-alice/dfc532837d7bea6044dc63cf_City.mp4",
+            "objectGeneration": "1793467767588",
+            "contentHash": "09f2b8bfcf899d174ecf53f6a9c5358b9d19ca7b7d8ba0b1c508abfc2a2bf15d",
+            "size": 5306461,
+            "gatewayPath": "/api/credit-pilot/object/b9996a7c60201de4eacc13bfb03a3d34f8e3592384a973b036d32cb6bed486de",
+            "contentType": "video/mp4"
+          },
+          {
+            "userId": "demo-pilot-alice",
+            "storagePath": "studio/sources/demo-pilot-alice/f2d7897ff0ec22ee9f7f71bf_Footsteps.mp4",
+            "objectGeneration": "1793467770666",
+            "contentHash": "459c13e384b1819b2e3d0bc8eae287d10e58c96d266a0b4bbf1553c98969bbac",
+            "size": 3862122,
+            "gatewayPath": "/api/credit-pilot/object/5436e92ef71040bceee4cf2d34198da811cc52984c210a75b53eef9ccb60c6ab",
+            "contentType": "video/mp4"
+          },
+          {
+            "userId": "demo-pilot-alice",
+            "storagePath": "studio/sources/demo-pilot-alice/66561ed03273d7cd7d38f289_Summit.mp4",
+            "objectGeneration": "1793467775855",
+            "contentHash": "96056be98b025809b72e38baebc1ea0827fbc30d9a02cfd8844c35a371a3fe00",
+            "size": 4988927,
+            "gatewayPath": "/api/credit-pilot/object/770b2eafad2beb7649d2802e2376a27dd449ae213c9a713695c8eb5890fcd7e0",
+            "contentType": "video/mp4"
+          },
+          {
+            "userId": "demo-pilot-alice",
+            "storagePath": "studio/sources/demo-pilot-alice/4c16f9a3130650c78c52b9b3_Coast.mp4",
+            "objectGeneration": "1793467774295",
+            "contentHash": "dd6037bc87dc9c93b84fb506b04355fe12d1f4bda0e942aec8da7e83d3c3e86c",
+            "size": 6646172,
+            "gatewayPath": "/api/credit-pilot/object/b9129f6fff0bf3b15d83a452ce6452d18d7417f71d7df4e377698d6a82bb22a9",
+            "contentType": "video/mp4"
+          },
+          {
+            "userId": "demo-pilot-alice",
+            "storagePath": "studio/sources/demo-pilot-alice/ddfcd04f24111a69f8edc724_City_-_source-bound_luma_matte.mp4",
+            "objectGeneration": "1793586583743",
+            "contentHash": "dd5eb646c37f88771d63fbbbacc4550717f4bd925aec6cd397d1fd34c8ed9571",
+            "size": 202075,
+            "gatewayPath": "/api/credit-pilot/object/106f942788a59630b6cc0c86378b9e03dc6f991aa8b288afddd04d485cefe65b",
+            "contentType": "video/mp4"
+          }
+        ],
+        "duration": 10,
+        "expectedExecutions": 1,
+        "requestBodyHash": "f25cd240faddf7e83983f89996e55c160e3b08773da89a60874d76afde11954b"
+      }
+    },
+    "operation": "studio.render",
+    "units": 120,
+    "unit": "seconds",
+    "maxCostMicros": 1200,
+    "credits": 2,
+    "pricingVersion": "actual-ui-local-test-v1",
+    "pricingRevision": "975594d94929a0b6497ffe3533629b0900f210698259b7616fb6b99fd9e416ea",
+    "fromExpiring": 0,
+    "fromPermanent": 2,
+    "cycle": "2026-11",
+    "createdAt": 1793588435968,
+    "startedAt": 1793588438054,
+    "executionId": "application-e9afab766d5866c4bf147bed0a960fdb413ea299692e9168e8ad0bbb6ca55000",
+    "settledAt": 1793589184070,
+    "state": "failed"
+  }
+}

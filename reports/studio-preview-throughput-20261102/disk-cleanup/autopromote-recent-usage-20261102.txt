@@ -1,0 +1,8 @@
+8536064	/home/tibule12/Projects/AutoPromte/AutoPromote-background-replacement-20261101/reports/background-replacement-20261101/private/long-podcast-r7
+24576	/home/tibule12/.local/share/Trash/info
+4096	/home/tibule12/.local/share/Trash/expunged
+16384	/home/tibule12/.local/share/Trash/files
+49152	/home/tibule12/.local/share/Trash
+8192	/home/tibule12/.cache/pip/selfcheck
+157265920	/home/tibule12/.cache/pip/http-v2
+157278208	/home/tibule12/.cache/pip

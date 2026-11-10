@@ -1,0 +1,7 @@
+{
+  "pid": 1617140,
+  "script": "scripts/studio-professional/whatsapp-prism-proof.cjs",
+  "phase": "render",
+  "detached": true,
+  "reason": "Keep the native UI observer alive independently of the shell session; worker remains under its existing resource limits."
+}

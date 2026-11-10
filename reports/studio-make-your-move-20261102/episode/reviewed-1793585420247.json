@@ -1,0 +1,1726 @@
+{
+  "format": "autopromote-scene-actions",
+  "version": 1,
+  "projectId": "viral-project-fa5921d4-7d4c-44bb-955d-dc65ef0c1360",
+  "baseRevision": 30,
+  "name": "07 - Kinetic poster rig",
+  "actions": [
+    {
+      "type": "null",
+      "id": "05 / kinetic poster rig",
+      "name": "05 / kinetic poster rig",
+      "startTime": 24.4,
+      "duration": 5.600000000000001,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1,
+        "opacity": 1
+      }
+    },
+    {
+      "type": "parent",
+      "targetId": "graphic-7c1a0198-ad79-492c-9c85-4a8fc1db0e8a",
+      "parentId": "05 / kinetic poster rig"
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "graphic-7c1a0198-ad79-492c-9c85-4a8fc1db0e8a",
+      "property": "scale"
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-7c1a0198-ad79-492c-9c85-4a8fc1db0e8a",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 24.4,
+          "value": 0.4,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 24.95,
+          "value": 3.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 26.3,
+          "value": 3.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 27.4,
+          "value": 4.2,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 30,
+          "value": 4.2,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-7c1a0198-ad79-492c-9c85-4a8fc1db0e8a",
+      "keys": [
+        {
+          "property": "x",
+          "time": 24.4,
+          "value": 24.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 26.3,
+          "value": 24.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 27.4,
+          "value": 32.45,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 30,
+          "value": 32.45,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "parent",
+      "targetId": "graphic-5579bb43-12dd-4492-89e3-244bdacb5798",
+      "parentId": "05 / kinetic poster rig"
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "graphic-5579bb43-12dd-4492-89e3-244bdacb5798",
+      "property": "scale"
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-5579bb43-12dd-4492-89e3-244bdacb5798",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 24.4,
+          "value": 0.4,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 24.95,
+          "value": 3.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 26.3,
+          "value": 3.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 27.4,
+          "value": 4.2,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 30,
+          "value": 4.2,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-5579bb43-12dd-4492-89e3-244bdacb5798",
+      "keys": [
+        {
+          "property": "x",
+          "time": 24.4,
+          "value": 41.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 26.3,
+          "value": 41.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 27.4,
+          "value": 44.15,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 30,
+          "value": 44.15,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "parent",
+      "targetId": "graphic-99b10396-9020-4d18-a4c3-ee170fb0b7ad",
+      "parentId": "05 / kinetic poster rig"
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "graphic-99b10396-9020-4d18-a4c3-ee170fb0b7ad",
+      "property": "scale"
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-99b10396-9020-4d18-a4c3-ee170fb0b7ad",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 24.4,
+          "value": 0.4,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 24.95,
+          "value": 3.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 26.3,
+          "value": 3.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 27.4,
+          "value": 4.2,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 30,
+          "value": 4.2,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-99b10396-9020-4d18-a4c3-ee170fb0b7ad",
+      "keys": [
+        {
+          "property": "x",
+          "time": 24.4,
+          "value": 58.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 26.3,
+          "value": 58.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 27.4,
+          "value": 55.85,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 30,
+          "value": 55.85,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "parent",
+      "targetId": "graphic-e58dc351-6daf-4d14-935b-6a49379dd3b5",
+      "parentId": "05 / kinetic poster rig"
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "graphic-e58dc351-6daf-4d14-935b-6a49379dd3b5",
+      "property": "scale"
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-e58dc351-6daf-4d14-935b-6a49379dd3b5",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 24.4,
+          "value": 0.4,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 24.95,
+          "value": 3.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 26.3,
+          "value": 3.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 27.4,
+          "value": 4.2,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 30,
+          "value": 4.2,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-e58dc351-6daf-4d14-935b-6a49379dd3b5",
+      "keys": [
+        {
+          "property": "x",
+          "time": 24.4,
+          "value": 75.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 26.3,
+          "value": 75.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 27.4,
+          "value": 67.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 30,
+          "value": 67.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "parent",
+      "targetId": "graphic-d18a3418-4074-4862-984c-37afc7ca5811",
+      "parentId": "05 / kinetic poster rig"
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "graphic-d18a3418-4074-4862-984c-37afc7ca5811",
+      "property": "scale"
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-d18a3418-4074-4862-984c-37afc7ca5811",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 24.6,
+          "value": 0.4,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 25.15,
+          "value": 3.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 26.3,
+          "value": 3.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 27.4,
+          "value": 4.2,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 30,
+          "value": 4.2,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-d18a3418-4074-4862-984c-37afc7ca5811",
+      "keys": [
+        {
+          "property": "x",
+          "time": 24.6,
+          "value": 24.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 26.3,
+          "value": 24.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 27.4,
+          "value": 32.45,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 30,
+          "value": 32.45,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "parent",
+      "targetId": "graphic-86cdcfac-3051-487f-bb92-4e727ec84948",
+      "parentId": "05 / kinetic poster rig"
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "graphic-86cdcfac-3051-487f-bb92-4e727ec84948",
+      "property": "scale"
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-86cdcfac-3051-487f-bb92-4e727ec84948",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 24.6,
+          "value": 0.4,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 25.15,
+          "value": 3.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 26.3,
+          "value": 3.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 27.4,
+          "value": 4.2,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 30,
+          "value": 4.2,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-86cdcfac-3051-487f-bb92-4e727ec84948",
+      "keys": [
+        {
+          "property": "x",
+          "time": 24.6,
+          "value": 41.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 26.3,
+          "value": 41.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 27.4,
+          "value": 44.15,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 30,
+          "value": 44.15,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "parent",
+      "targetId": "graphic-c09b6816-d84d-4897-92ea-0a7b7bda0e5a",
+      "parentId": "05 / kinetic poster rig"
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "graphic-c09b6816-d84d-4897-92ea-0a7b7bda0e5a",
+      "property": "scale"
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-c09b6816-d84d-4897-92ea-0a7b7bda0e5a",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 24.6,
+          "value": 0.4,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 25.15,
+          "value": 3.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 26.3,
+          "value": 3.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 27.4,
+          "value": 4.2,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 30,
+          "value": 4.2,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-c09b6816-d84d-4897-92ea-0a7b7bda0e5a",
+      "keys": [
+        {
+          "property": "x",
+          "time": 24.6,
+          "value": 58.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 26.3,
+          "value": 58.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 27.4,
+          "value": 55.85,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 30,
+          "value": 55.85,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "parent",
+      "targetId": "graphic-f7fe9358-b1ad-4a2d-833a-dcf5a018d61a",
+      "parentId": "05 / kinetic poster rig"
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "graphic-f7fe9358-b1ad-4a2d-833a-dcf5a018d61a",
+      "property": "scale"
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-f7fe9358-b1ad-4a2d-833a-dcf5a018d61a",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 24.6,
+          "value": 0.4,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 25.15,
+          "value": 3.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 26.3,
+          "value": 3.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 27.4,
+          "value": 4.2,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 30,
+          "value": 4.2,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-f7fe9358-b1ad-4a2d-833a-dcf5a018d61a",
+      "keys": [
+        {
+          "property": "x",
+          "time": 24.6,
+          "value": 75.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 26.3,
+          "value": 75.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 27.4,
+          "value": 67.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 30,
+          "value": 67.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "parent",
+      "targetId": "graphic-40b442ce-5d27-4675-b2e0-d75bca1964db",
+      "parentId": "05 / kinetic poster rig"
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "graphic-40b442ce-5d27-4675-b2e0-d75bca1964db",
+      "property": "scale"
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-40b442ce-5d27-4675-b2e0-d75bca1964db",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 24.8,
+          "value": 0.4,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 25.35,
+          "value": 3.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 26.3,
+          "value": 3.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 27.4,
+          "value": 4.2,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 30,
+          "value": 4.2,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-40b442ce-5d27-4675-b2e0-d75bca1964db",
+      "keys": [
+        {
+          "property": "x",
+          "time": 24.8,
+          "value": 24.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 26.3,
+          "value": 24.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 27.4,
+          "value": 32.45,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 30,
+          "value": 32.45,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "parent",
+      "targetId": "graphic-17d17cef-c202-4650-9c5a-6b2cec492bf1",
+      "parentId": "05 / kinetic poster rig"
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "graphic-17d17cef-c202-4650-9c5a-6b2cec492bf1",
+      "property": "scale"
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-17d17cef-c202-4650-9c5a-6b2cec492bf1",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 24.8,
+          "value": 0.4,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 25.35,
+          "value": 3.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 26.3,
+          "value": 3.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 27.4,
+          "value": 4.2,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 30,
+          "value": 4.2,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-17d17cef-c202-4650-9c5a-6b2cec492bf1",
+      "keys": [
+        {
+          "property": "x",
+          "time": 24.8,
+          "value": 41.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 26.3,
+          "value": 41.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 27.4,
+          "value": 44.15,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 30,
+          "value": 44.15,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "parent",
+      "targetId": "graphic-1528653e-3318-4b6d-b19c-a68019fceb53",
+      "parentId": "05 / kinetic poster rig"
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "graphic-1528653e-3318-4b6d-b19c-a68019fceb53",
+      "property": "scale"
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-1528653e-3318-4b6d-b19c-a68019fceb53",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 24.8,
+          "value": 0.4,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 25.35,
+          "value": 3.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 26.3,
+          "value": 3.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 27.4,
+          "value": 4.2,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 30,
+          "value": 4.2,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-1528653e-3318-4b6d-b19c-a68019fceb53",
+      "keys": [
+        {
+          "property": "x",
+          "time": 24.8,
+          "value": 58.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 26.3,
+          "value": 58.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 27.4,
+          "value": 55.85,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 30,
+          "value": 55.85,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "parent",
+      "targetId": "graphic-8b3e77d6-99f3-4da5-8253-d4d0f4cbe387",
+      "parentId": "05 / kinetic poster rig"
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "graphic-8b3e77d6-99f3-4da5-8253-d4d0f4cbe387",
+      "property": "scale"
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-8b3e77d6-99f3-4da5-8253-d4d0f4cbe387",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 24.8,
+          "value": 0.4,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 25.35,
+          "value": 3.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 26.3,
+          "value": 3.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 27.4,
+          "value": 4.2,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 30,
+          "value": 4.2,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "graphic-8b3e77d6-99f3-4da5-8253-d4d0f4cbe387",
+      "keys": [
+        {
+          "property": "x",
+          "time": 24.8,
+          "value": 75.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 26.3,
+          "value": 75.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 27.4,
+          "value": 67.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 30,
+          "value": 67.55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "05 / kinetic poster rig",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 24.4,
+          "value": -9,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 25.7,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 26.3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 27.4,
+          "value": 2,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 28,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 30,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "05 / kinetic poster rig",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 24.4,
+          "value": 0.8,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 25.7,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 26.3,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 27.4,
+          "value": 1.08,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 30,
+          "value": 1.08,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    }
+  ]
+}

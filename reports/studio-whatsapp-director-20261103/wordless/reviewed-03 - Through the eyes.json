@@ -1,0 +1,883 @@
+{
+  "format": "autopromote-scene-actions",
+  "version": 1,
+  "projectId": "viral-project-b3c8d7e9-cdff-4bdd-87dd-23b2297b83a6",
+  "baseRevision": 40,
+  "name": "03 - Through the eyes",
+  "actions": [
+    {
+      "type": "media_plane",
+      "id": "W / tunnel base",
+      "name": "W / tunnel base",
+      "sourceMediaId": "launch-83b6bbc4008603d9dbccddcc",
+      "sourceStart": 0,
+      "startTime": 3,
+      "duration": 6,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.43,
+        "opacity": 1
+      },
+      "mediaFit": "cover"
+    },
+    {
+      "type": "keys",
+      "targetId": "W / tunnel base",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 3.3,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.75,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 9,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "media_plane",
+      "id": "W / temporal window 0",
+      "name": "W / temporal window 0",
+      "sourceMediaId": "launch-83b6bbc4008603d9dbccddcc",
+      "sourceStart": 0.4,
+      "startTime": 3,
+      "duration": 6,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 0.87,
+        "opacity": 1
+      },
+      "mediaFit": "cover"
+    },
+    {
+      "type": "keys",
+      "targetId": "W / temporal window 0",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 3,
+          "value": 0.02,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3.8,
+          "value": 0.87,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 5.25,
+          "value": 0.87,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.5,
+          "value": 1.15,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 7.5,
+          "value": 1.15,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 8.9,
+          "value": 2.7,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / temporal window 0",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 3,
+          "value": 25,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 4.2,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 6.3,
+          "value": 7,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 8.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / temporal window 0",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 3.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.45,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.95,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / temporal window 0",
+      "keys": [
+        {
+          "property": "x",
+          "time": 3,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.25,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 6.2,
+          "value": 59,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 7.1,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 9,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "media_plane",
+      "id": "W / temporal window 1",
+      "name": "W / temporal window 1",
+      "sourceMediaId": "launch-83b6bbc4008603d9dbccddcc",
+      "sourceStart": 0.8,
+      "startTime": 3,
+      "duration": 6,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 0.69,
+        "opacity": 1
+      },
+      "mediaFit": "cover"
+    },
+    {
+      "type": "keys",
+      "targetId": "W / temporal window 1",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 3,
+          "value": 0.02,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3.96,
+          "value": 0.69,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 5.25,
+          "value": 0.69,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.5,
+          "value": 0.9299999999999999,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 7.5,
+          "value": 0.9299999999999999,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 8.9,
+          "value": 2.3000000000000003,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / temporal window 1",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 3,
+          "value": -25,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 4.2,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 6.3,
+          "value": -7,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 8.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / temporal window 1",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 3.68,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.45,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.95,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / temporal window 1",
+      "keys": [
+        {
+          "property": "x",
+          "time": 3,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.25,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 6.2,
+          "value": 41,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 7.1,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 9,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "media_plane",
+      "id": "W / temporal window 2",
+      "name": "W / temporal window 2",
+      "sourceMediaId": "launch-83b6bbc4008603d9dbccddcc",
+      "sourceStart": 1.2000000000000002,
+      "startTime": 3,
+      "duration": 6,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 0.51,
+        "opacity": 1
+      },
+      "mediaFit": "cover"
+    },
+    {
+      "type": "keys",
+      "targetId": "W / temporal window 2",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 3,
+          "value": 0.02,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 4.12,
+          "value": 0.51,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 5.25,
+          "value": 0.51,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.5,
+          "value": 0.71,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 7.5,
+          "value": 0.71,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 8.9,
+          "value": 1.9000000000000001,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / temporal window 2",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 3,
+          "value": 25,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 4.2,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 6.3,
+          "value": 7,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 8.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / temporal window 2",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 3.86,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.45,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.95,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "W / temporal window 2",
+      "keys": [
+        {
+          "property": "x",
+          "time": 3,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.25,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 6.2,
+          "value": 59,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 7.1,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 9,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.9,
+            0.25,
+            1
+          ]
+        }
+      ]
+    }
+  ]
+}

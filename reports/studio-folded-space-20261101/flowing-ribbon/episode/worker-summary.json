@@ -1,0 +1,21 @@
+{
+  "jobId": "viral_9ab45bc4e0c82da566c8a081eaefce06cc5d10eb40e3f58becba01858334d6f7",
+  "workerBinding": "12f3af2185982782ace2cab84e2d140b06fbd20029d70bc8af3ed7b7af030322",
+  "movieSha256": "b02b6605a7d843541a6bd6d209bdfc2143ff10a6c4e69ab1825f0549e0ef4734",
+  "resource": {
+    "wallSeconds": 640.501781161991,
+    "cpuSeconds": 1030.058174,
+    "peakRssKiB": 1446904,
+    "providerChargesStarted": false,
+    "invoiceCostMicros": null
+  },
+  "termination": {
+    "code": 0,
+    "signal": null,
+    "startedAt": "2026-11-01T22:19:02.824Z",
+    "finishedAt": "2026-11-01T22:29:43.632Z"
+  },
+  "newAcceptedNativeExports": 1,
+  "paidCalls": 0,
+  "productionWrites": false
+}

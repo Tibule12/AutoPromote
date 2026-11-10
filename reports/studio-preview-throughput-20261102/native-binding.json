@@ -1,0 +1,10 @@
+{
+  "verifiedNativeBackupSha256": "cab2224b603f9e1e390a088000c15ee4d4716895be145978022e97e08e0f7f4e",
+  "canonicalCompositionMatchesOriginalAcceptedWorker": true,
+  "layers": 50,
+  "editableOverlays": 49,
+  "editableKeys": 10968,
+  "unchangedMovieSha256": "b02b6605a7d843541a6bd6d209bdfc2143ff10a6c4e69ab1825f0549e0ef4734",
+  "newExports": 0,
+  "independentNativeRestore": true
+}

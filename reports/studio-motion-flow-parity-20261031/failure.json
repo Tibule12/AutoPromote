@@ -1,0 +1,133 @@
+{
+  "passed": false,
+  "stage": "compile-and-cpu-ffmpeg-parity",
+  "message": "CPU FFmpeg parity runner failed (exit 1):\nSTDOUT: {\"min_measured_iou\": 0.976585, \"max_measured_boundary_p95_px\": 1.4142, \"frames_checked\": 4, \"color_grade_psnr_db\": 47.73, \"color_grade_max_delta\": 5}\n\nSTDERR: Parity check failed thresholds: [\n  {\n    \"time_seconds\": 0.5,\n    \"frame_index\": 12,\n    \"preview_raw_size\": [\n      534,\n      946\n    ],\n    \"final_size\": [\n      360,\n      640\n    ],\n    \"iou\": 0.976585,\n    \"boundary_p95_px\": 1.4142,\n    \"boundary_mean_px\": 0.8101,\n    \"boundary_max_px\": 2.0,\n    \"preview_area_px\": 13862,\n    \"final_area_px\": 13911,\n    \"centroid_delta_px\": [\n      1.058,\n      0.447\n    ],\n    \"passed\": true,\n    \"preview_sha256\": \"e4602b8d5faca8c2ae649de9342eac089ee6f254b7cbce4ab35809da7afc3ea7\",\n    \"final_sha256\": \"fb68ae114b34c1cd81408ef58440d0d9f99d210c2162d7b023116a9f34300d1f\",\n    \"diff_sha256\": \"0affa3e7380583a897070f28f0b5e8f1fdd61f452ae0f0e9f322103681d46670\"\n  },\n  {\n    \"time_seconds\": 1.5,\n    \"frame_index\": 36,\n    \"preview_raw_size\": [\n      534,\n      946\n    ],\n    \"final_size\": [\n      360,\n      640\n    ],\n    \"iou\": 0.980351,\n    \"boundary_p95_px\": 1.4142,\n    \"boundary_mean_px\": 0.7659,\n    \"boundary_max_px\": 2.2361,\n    \"preview_area_px\": 17677,\n    \"final_area_px\": 17599,\n    \"centroid_delta_px\": [\n      1.079,\n      -0.492\n    ],\n    \"passed\": true,\n    \"preview_sha256\": \"7b983256d475efd55fde90be52f1d576806fb6723436f7fa8bc15cada3c368f1\",\n    \"final_sha256\": \"3d17b1b71e03810a447e708155968ba16ca97458ee9a48359e19f23073dbe9e6\",\n    \"diff_sha256\": \"e9b30f8fe4c0473a7222f5d81a9ac370f6c40a152c16723c705c6d927a946427\"\n  },\n  {\n    \"time_seconds\": 2.5,\n    \"frame_index\": 60,\n    \"preview_raw_size\": [\n      534,\n      946\n    ],\n    \"final_size\": [\n      360,\n      640\n    ],\n    \"iou\": 0.983891,\n    \"boundary_p95_px\": 1.0,\n    \"boundary_mean_px\": 0.6671,\n    \"boundary_max_px\": 2.0,\n    \"preview_area_px\": 18288,\n    \"final_area_px\": 18289,\n    \"centroid_delta_px\": [\n      0.048,\n      0.934\n    ],\n    \"passed\": true,\n    \"preview_sha256\": \"4ff9f6409f7bd682f3aede52d8a9c0374c178f6f916dd2a372cd0eace976f6a3\",\n    \"final_sha256\": \"179d78984b584f7f84236fd6617bc7d0a6392df5ed45be546fae79821ce14495\",\n    \"diff_sha256\": \"1db2e74cda35eb320aaa8e87f6eb175c2c02ce9a2177d7f586d54b49cef8b8dd\"\n  },\n  {\n    \"time_seconds\": 3.5,\n    \"frame_index\": 84,\n    \"preview_raw_size\": [\n      534,\n      946\n    ],\n    \"final_size\": [\n      360,\n      640\n    ],\n    \"iou\": 0.992552,\n    \"boundary_p95_px\": 1.0,\n    \"boundary_mean_px\": 0.3078,\n    \"boundary_max_px\": 1.4142,\n    \"preview_area_px\": 18353,\n    \"final_area_px\": 18298,\n    \"centroid_delta_px\": [\n      0.38,\n      -0.024\n    ],\n    \"passed\": true,\n    \"preview_sha256\": \"2a8350b525d4bab75c647c967e90048d9c1364b57a526523201b5fecfb701ba4\",\n    \"final_sha256\": \"aa68722c9ee190e2db1013bba0b854201d5498013bc78b47eb751804396f19e6\",\n    \"diff_sha256\": \"7b0d8b9cb4af73d489d367549cac5b6d49b3aa30bbc8cf91745c19970e6ea60d\"\n  }\n]\n",
+  "pageErrors": [],
+  "consoleErrors": [],
+  "apiRequests": [],
+  "checks": [
+    {
+      "label": "Verified HeadlessChrome & muted browser launch via CDP",
+      "product": "HeadlessChrome/147.0.7727.15"
+    },
+    {
+      "label": "Verified AutoPromote Motion & Flow dual workbench + node graph layout across 1440x1000, 1280x860, and 1024x820 with zero competitor brand labels",
+      "viewports": [
+        {
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "stage": {
+            "x": 462,
+            "y": 176,
+            "width": 266,
+            "height": 473,
+            "right": 729,
+            "bottom": 649
+          },
+          "compWorkbench": {
+            "x": 0,
+            "y": 764,
+            "width": 1440,
+            "height": 236,
+            "right": 1440,
+            "bottom": 1000
+          },
+          "nodeFlow": {
+            "x": 1145,
+            "y": 485,
+            "width": 262,
+            "height": 416,
+            "right": 1407,
+            "bottom": 902
+          }
+        },
+        {
+          "viewport": {
+            "width": 1280,
+            "height": 860
+          },
+          "stage": {
+            "x": 422,
+            "y": 176,
+            "width": 187,
+            "height": 333,
+            "right": 609,
+            "bottom": 509
+          },
+          "compWorkbench": {
+            "x": 0,
+            "y": 624,
+            "width": 1280,
+            "height": 236,
+            "right": 1280,
+            "bottom": 860
+          },
+          "nodeFlow": {
+            "x": 985,
+            "y": 485,
+            "width": 262,
+            "height": 416,
+            "right": 1247,
+            "bottom": 902
+          }
+        },
+        {
+          "viewport": {
+            "width": 1024,
+            "height": 820
+          },
+          "stage": {
+            "x": 313,
+            "y": 192,
+            "width": 150,
+            "height": 267,
+            "right": 463,
+            "bottom": 459
+          },
+          "compWorkbench": {
+            "x": 0,
+            "y": 584,
+            "width": 1024,
+            "height": 236,
+            "right": 1024,
+            "bottom": 820
+          },
+          "nodeFlow": {
+            "x": 727,
+            "y": 477,
+            "width": 274,
+            "height": 416,
+            "right": 1001,
+            "bottom": 894
+          }
+        }
+      ]
+    },
+    {
+      "label": "Authored Null Rig, Parenting, Alpha Track Matte, loop/wiggle/spin Drivers, Whip Snap Bezier Curve, and Signal Node Flow [1]/[2] wipe",
+      "nullRigId": "null-rig-1794039890677"
+    },
+    {
+      "label": "Verified keyboard Undo and Redo across canonical AutoPromote Motion & Flow edit history"
+    },
+    {
+      "label": "Verified IndexedDB save & cold reload reopen with identical studioDocument SHA-256",
+      "studioDocumentSha256": "0173893ba73c617c7f61311d7bb7d72556dcffcd2c1e1193048578b9de03eec8",
+      "revision": 22
+    },
+    {
+      "label": "Verified signed-out Export -> Render Final Clip enforces 'Please login first' with zero API calls"
+    },
+    {
+      "label": "Captured 4 clean pre-final stage frames after ordinary selection dismissal",
+      "times": [
+        0.5,
+        1.5,
+        2.5,
+        3.5
+      ]
+    }
+  ]
+}

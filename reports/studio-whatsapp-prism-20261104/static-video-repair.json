@@ -1,0 +1,11 @@
+{
+  "beforeWorkerHelperSha256": "55b76352894db0a31948ed35644c792581924727c9baafdcba896281aebe2c07",
+  "afterWorkerHelperSha256": "5189246e5f40b32afc09e73a39a63e26d69732d9b6bff5b8d0e3a20004958c93",
+  "beforeRegression": "8 failed / 1 passed",
+  "afterRegression": "46 passed",
+  "frontendBuildUnchanged": true,
+  "parametersAndSourceCutsUnchanged": true,
+  "rejectedNativeMovieSha256": "9c735e8dc05befeadedbd33355eacc01d4948eb85fbdd098182f801a15468cd1",
+  "firstPairMinimumPsnrDb": 9.096299816420604,
+  "firstScreenClipFraming": "Native export 70% canvas, preview full canvas; held nonidentity scale bypassed canonical rendering."
+}

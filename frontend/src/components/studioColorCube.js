@@ -1,5 +1,79 @@
 const clamp = (value, low = 0, high = 1) => Math.max(low, Math.min(high, value));
 
+export const CINEMA_3D_LUT_PRESETS = [
+  { id: "kodak_2383", label: "Film Print 2383 (Warm High-Contrast)" },
+  { id: "teal_amber", label: "Teal & Amber Blockbuster" },
+  { id: "bleach_bypass", label: "Silver Bleach Bypass" },
+  { id: "neon_nocturne", label: "Cyber Nocturne (Magenta/Cyan)" },
+  { id: "golden_hour", label: "Luminous Golden Hour" },
+  { id: "crisp_rec709", label: "Studio Rec.709 Crisp" },
+];
+
+export function buildProceduralColorCube(presetId, size = 17) {
+  const preset = CINEMA_3D_LUT_PRESETS.find(item => item.id === presetId);
+  if (!preset) return null;
+  const n = Math.max(2, Math.min(33, Number(size) || 17));
+  const data = [];
+  const sCurve = (x, amount = 1.2) => {
+    const v = clamp(x);
+    return clamp(0.5 + Math.tanh((v - 0.5) * amount * 2) / (2 * Math.tanh(amount)));
+  };
+  for (let bIdx = 0; bIdx < n; bIdx += 1) {
+    for (let gIdx = 0; gIdx < n; gIdx += 1) {
+      for (let rIdx = 0; rIdx < n; rIdx += 1) {
+        let r = rIdx / (n - 1);
+        let g = gIdx / (n - 1);
+        let b = bIdx / (n - 1);
+        const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        const shadowWeight = Math.pow(1 - luma, 1.6);
+        const highlightWeight = Math.pow(luma, 1.4);
+
+        if (presetId === "kodak_2383") {
+          r = sCurve(r, 1.35) + highlightWeight * 0.045 - shadowWeight * 0.025;
+          g = sCurve(g, 1.32) + highlightWeight * 0.015;
+          b = sCurve(b, 1.28) + shadowWeight * 0.04 - highlightWeight * 0.03;
+        } else if (presetId === "teal_amber") {
+          r = sCurve(r, 1.22) + highlightWeight * 0.06 - shadowWeight * 0.045;
+          g = sCurve(g, 1.18) + shadowWeight * 0.015 + highlightWeight * 0.01;
+          b = sCurve(b, 1.2) + shadowWeight * 0.065 - highlightWeight * 0.05;
+        } else if (presetId === "bleach_bypass") {
+          const contrastedLuma = sCurve(luma, 1.55);
+          r = sCurve(r, 1.45) * 0.48 + contrastedLuma * 0.52;
+          g = sCurve(g, 1.45) * 0.48 + contrastedLuma * 0.52;
+          b = sCurve(b, 1.48) * 0.52 + contrastedLuma * 0.48 + shadowWeight * 0.02;
+        } else if (presetId === "neon_nocturne") {
+          r = sCurve(r, 1.25) + highlightWeight * 0.055 + shadowWeight * 0.02;
+          g = sCurve(g, 1.18) - shadowWeight * 0.03 + highlightWeight * 0.01;
+          b = sCurve(b, 1.32) + shadowWeight * 0.075 + highlightWeight * 0.04;
+        } else if (presetId === "golden_hour") {
+          r = sCurve(r, 1.15) + highlightWeight * 0.07 + 0.02;
+          g = sCurve(g, 1.12) + highlightWeight * 0.035 + 0.008;
+          b = sCurve(b, 1.1) - highlightWeight * 0.04 - shadowWeight * 0.015;
+        } else if (presetId === "crisp_rec709") {
+          const satBoost = 1.16;
+          r = sCurve(luma + (r - luma) * satBoost, 1.2);
+          g = sCurve(luma + (g - luma) * satBoost, 1.2);
+          b = sCurve(luma + (b - luma) * satBoost, 1.2);
+        }
+
+        data.push(
+          Number(clamp(r).toFixed(6)),
+          Number(clamp(g).toFixed(6)),
+          Number(clamp(b).toFixed(6))
+        );
+      }
+    }
+  }
+  return {
+    size: n,
+    data,
+    domainMin: [0, 0, 0],
+    domainMax: [1, 1, 1],
+    presetId,
+    title: preset.label,
+  };
+}
+
 export function parseColorCube(text) {
   let size = 0;
   const data = [];
@@ -47,15 +121,21 @@ export function sampleColorCube(cube, r, g, b, output = [0, 0, 0]) {
 }
 
 export function hasAdvancedGrade(advanced = {}) {
-  return (!!advanced.lutData && advanced.lutIntensity > 0) ||
+  const lutObj = advanced.lutData || advanced.lut;
+  const intensity = Number(advanced.lutIntensity ?? 100);
+  return (!!lutObj && intensity > 0) ||
     [...Object.values(advanced.curve || {}), ...Object.values(advanced.hsl || {})].some(value => Number(value) !== 0);
 }
 
 export function buildAdvancedColorCube(advanced = {}, size = 33) {
   if (!hasAdvancedGrade(advanced)) return null;
   const c = advanced.curve || {}, hsl = advanced.hsl || {};
-  const knots = [0, clamp(.25 + Number(c.shadows || 0)/500), clamp(.5 + Number(c.midtones || 0)/500),
-    clamp(.75 + Number(c.highlights || 0)/500), 1];
+  const normCurveVal = v => {
+    const num = Number(v || 0);
+    return Math.abs(num) > 0 && Math.abs(num) <= 1 ? num * 100 : num;
+  };
+  const knots = [0, clamp(.25 + normCurveVal(c.shadows)/500), clamp(.5 + normCurveVal(c.midtones)/500),
+    clamp(.75 + normCurveVal(c.highlights)/500), 1];
   const curve = value => {
     const position = clamp(value)*4, lo = Math.min(3, Math.floor(position)), mix = position-lo;
     return knots[lo]*(1-mix)+knots[lo+1]*mix;
@@ -63,8 +143,9 @@ export function buildAdvancedColorCube(advanced = {}, size = 33) {
   const hue = Number(hsl.hue || 0)/200; // -180 to +180 degrees
   const saturation = 1+Number(hsl.saturation || 0)/100;
   const luminance = Number(hsl.luminance || 0)/200;
-  const cube = { size, data: [] }, imported = advanced.lutData;
-  const strength = imported ? clamp(Number(advanced.lutIntensity ?? 100)/100) : 0;
+  const cube = { size, data: [] }, imported = advanced.lutData || advanced.lut;
+  const rawIntensity = Number(advanced.lutIntensity ?? 100);
+  const strength = imported ? clamp(rawIntensity > 0 && rawIntensity <= 1 ? rawIntensity : rawIntensity/100) : 0;
   for (let blue = 0; blue < size; blue++) for (let green = 0; green < size; green++) for (let red = 0; red < size; red++) {
     let rgb = [curve(red/(size-1)), curve(green/(size-1)), curve(blue/(size-1))];
     const high = Math.max(...rgb), low = Math.min(...rgb), delta = high-low;

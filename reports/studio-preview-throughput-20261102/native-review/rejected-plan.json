@@ -1,0 +1,21 @@
+{
+  "format": "autopromote-scene-actions",
+  "version": 1,
+  "projectId": "viral-project-93f04c77-7a41-4c69-b546-f19182f3749d",
+  "baseRevision": 42,
+  "name": "Reject invalid corner-progress combination",
+  "actions": [
+    {
+      "type": "keys",
+      "targetId": "scene-3c5fc6dc-0e77-4015-862c-02d57957df76",
+      "keys": [
+        {
+          "property": "perspectiveProgress",
+          "time": 22.5,
+          "value": 50,
+          "easing": "linear"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,875 @@
+{
+  "schemaVersion": 1,
+  "templateId": "aperture_product_v1",
+  "version": "1.0.0",
+  "label": "Aperture \u2014 mechanical product",
+  "status": "draft",
+  "canonicalContractVersion": 1,
+  "compiler": "studioRenderCompiler",
+  "renderer": "render_viral_clip_impl",
+  "surfaces": [
+    "studio",
+    "director",
+    "welcome"
+  ],
+  "workflow": "studio",
+  "categoryIds": [
+    "motion_graphics"
+  ],
+  "inputSlots": [
+    {
+      "id": "footage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "music",
+      "type": "audio",
+      "required": false
+    }
+  ],
+  "supportedAspects": [
+    "16:9"
+  ],
+  "durationTicks": 720000,
+  "qualification": {
+    "studioLifecycle": "unverified",
+    "directorInstantiation": "unverified",
+    "creativeQuality": "unapproved",
+    "previewFinalParity": "unverified"
+  },
+  "executionDefinition": {
+    "clock": 90000,
+    "defaultAspect": "16:9",
+    "sequence": [
+      {
+        "slot": "footage",
+        "offset": 0,
+        "duration": 8,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      }
+    ],
+    "titles": [],
+    "logo": {},
+    "animation": {
+      "enterSeconds": 0.2,
+      "settleSeconds": 0.45,
+      "exitSeconds": 0.12,
+      "curve": [
+        0.16,
+        1,
+        0.3,
+        1
+      ]
+    },
+    "music": {
+      "volume": 55,
+      "fadeIn": 0.1,
+      "fadeOut": 0.5
+    },
+    "soundCues": [
+      {
+        "tone": "airy_whoosh",
+        "time": 0,
+        "duration": 0.6,
+        "volume": 0.2
+      },
+      {
+        "tone": "airy_whoosh",
+        "time": 3.3,
+        "duration": 0.5,
+        "volume": 0.16
+      },
+      {
+        "tone": "airy_whoosh",
+        "time": 6.4,
+        "duration": 0.6,
+        "volume": 0.18
+      }
+    ],
+    "sourceKeyframes": [],
+    "sceneActions": [],
+    "directorDescription": "A mechanical live-video aperture, calibrated vector traces and a full-frame macro payoff. Uses one saved source and ordinary editable Studio layers. No model job.",
+    "defaultCopy": {},
+    "muteOriginalAudio": true,
+    "framing": {
+      "forceAspect": true,
+      "mode": "off",
+      "positions": []
+    },
+    "videoFit": "contain",
+    "ordinaryMotion": {
+      "version": 1,
+      "layers": [
+        {
+          "id": "Backdrop",
+          "name": "Backdrop",
+          "type": "image",
+          "vectorShape": {
+            "version": 1,
+            "closed": true,
+            "nodes": [
+              {
+                "x": 0,
+                "y": 0,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 100,
+                "y": 0,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 100,
+                "y": 100,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 0,
+                "y": 100,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "fill": {
+              "kind": "solid",
+              "color": "#090d12",
+              "endColor": "#090d12",
+              "start": [
+                0,
+                0
+              ],
+              "end": [
+                100,
+                100
+              ]
+            },
+            "stroke": {
+              "color": "#090d12",
+              "width": 0
+            }
+          },
+          "startTime": 0,
+          "duration": 8,
+          "x": 50,
+          "y": 50,
+          "width": 100,
+          "height": 100,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "stretch",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "Watch atmosphere",
+          "name": "Watch atmosphere",
+          "type": "video",
+          "sourceSlot": "footage",
+          "sourceStartTime": 0,
+          "startTime": 0,
+          "duration": 8,
+          "x": 50,
+          "y": 50,
+          "width": 100,
+          "height": 100,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 0.2,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "cover",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "Mechanical aperture",
+          "name": "Mechanical aperture",
+          "type": "video",
+          "sourceSlot": "footage",
+          "sourceStartTime": 0,
+          "startTime": 0,
+          "duration": 8,
+          "x": 50,
+          "y": 50,
+          "width": 44,
+          "height": 78.2222,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "cover",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "ellipse",
+            "feather": 0,
+            "inverted": false
+          }
+        },
+        {
+          "id": "Calibration trace 0",
+          "name": "Calibration trace 0",
+          "type": "image",
+          "vectorShape": {
+            "version": 1,
+            "closed": true,
+            "nodes": [
+              {
+                "x": 50,
+                "y": 1,
+                "in": [
+                  -27,
+                  0
+                ],
+                "out": [
+                  27,
+                  0
+                ]
+              },
+              {
+                "x": 99,
+                "y": 50,
+                "in": [
+                  0,
+                  -27
+                ],
+                "out": [
+                  0,
+                  27
+                ]
+              },
+              {
+                "x": 50,
+                "y": 99,
+                "in": [
+                  27,
+                  0
+                ],
+                "out": [
+                  -27,
+                  0
+                ]
+              },
+              {
+                "x": 1,
+                "y": 50,
+                "in": [
+                  0,
+                  27
+                ],
+                "out": [
+                  0,
+                  -27
+                ]
+              }
+            ],
+            "fill": {
+              "kind": "none",
+              "color": "#b8d6df",
+              "endColor": "#b8d6df",
+              "start": [
+                0,
+                0
+              ],
+              "end": [
+                100,
+                100
+              ]
+            },
+            "stroke": {
+              "color": "#b8d6df",
+              "width": 0.65
+            }
+          },
+          "startTime": 0,
+          "duration": 8,
+          "x": 50,
+          "y": 50,
+          "width": 47,
+          "height": 83.55555555555556,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "stretch",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "Calibration trace 1",
+          "name": "Calibration trace 1",
+          "type": "image",
+          "vectorShape": {
+            "version": 1,
+            "closed": true,
+            "nodes": [
+              {
+                "x": 50,
+                "y": 1,
+                "in": [
+                  -27,
+                  0
+                ],
+                "out": [
+                  27,
+                  0
+                ]
+              },
+              {
+                "x": 99,
+                "y": 50,
+                "in": [
+                  0,
+                  -27
+                ],
+                "out": [
+                  0,
+                  27
+                ]
+              },
+              {
+                "x": 50,
+                "y": 99,
+                "in": [
+                  27,
+                  0
+                ],
+                "out": [
+                  -27,
+                  0
+                ]
+              },
+              {
+                "x": 1,
+                "y": 50,
+                "in": [
+                  0,
+                  27
+                ],
+                "out": [
+                  0,
+                  -27
+                ]
+              }
+            ],
+            "fill": {
+              "kind": "none",
+              "color": "#334b5b",
+              "endColor": "#334b5b",
+              "start": [
+                0,
+                0
+              ],
+              "end": [
+                100,
+                100
+              ]
+            },
+            "stroke": {
+              "color": "#334b5b",
+              "width": 0.35
+            }
+          },
+          "startTime": 0,
+          "duration": 8,
+          "x": 50,
+          "y": 50,
+          "width": 53,
+          "height": 94.22222222222223,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "stretch",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        }
+      ],
+      "keys": [
+        {
+          "targetId": "Mechanical aperture",
+          "property": "scale",
+          "time": 0,
+          "value": 0.04,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Mechanical aperture",
+          "property": "scale",
+          "time": 0.9,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Mechanical aperture",
+          "property": "scale",
+          "time": 2.8,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Mechanical aperture",
+          "property": "scale",
+          "time": 4.4,
+          "value": 1.34,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Mechanical aperture",
+          "property": "scale",
+          "time": 5.5,
+          "value": 1.34,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Mechanical aperture",
+          "property": "scale",
+          "time": 6.8,
+          "value": 2.8,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Mechanical aperture",
+          "property": "scale",
+          "time": 8,
+          "value": 3.4,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Mechanical aperture",
+          "property": "rotation",
+          "time": 0,
+          "value": -32,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Mechanical aperture",
+          "property": "rotation",
+          "time": 1.5,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Mechanical aperture",
+          "property": "rotation",
+          "time": 5.5,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Mechanical aperture",
+          "property": "rotation",
+          "time": 8,
+          "value": 15,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Calibration trace 0",
+          "property": "strokeEnd",
+          "time": 0,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Calibration trace 0",
+          "property": "strokeEnd",
+          "time": 0.9,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Calibration trace 0",
+          "property": "strokeEnd",
+          "time": 5.5,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Calibration trace 0",
+          "property": "strokeEnd",
+          "time": 6.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Calibration trace 0",
+          "property": "rotation",
+          "time": 0,
+          "value": -80,
+          "easing": "linear"
+        },
+        {
+          "targetId": "Calibration trace 0",
+          "property": "rotation",
+          "time": 6.8,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "targetId": "Calibration trace 0",
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Calibration trace 0",
+          "property": "opacity",
+          "time": 0.6,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Calibration trace 0",
+          "property": "opacity",
+          "time": 5.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Calibration trace 0",
+          "property": "opacity",
+          "time": 6.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Calibration trace 1",
+          "property": "strokeEnd",
+          "time": 0,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Calibration trace 1",
+          "property": "strokeEnd",
+          "time": 1.1,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Calibration trace 1",
+          "property": "strokeEnd",
+          "time": 5.5,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Calibration trace 1",
+          "property": "strokeEnd",
+          "time": 6.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Calibration trace 1",
+          "property": "rotation",
+          "time": 0,
+          "value": 10,
+          "easing": "linear"
+        },
+        {
+          "targetId": "Calibration trace 1",
+          "property": "rotation",
+          "time": 6.8,
+          "value": 190,
+          "easing": "linear"
+        },
+        {
+          "targetId": "Calibration trace 1",
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Calibration trace 1",
+          "property": "opacity",
+          "time": 0.6,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Calibration trace 1",
+          "property": "opacity",
+          "time": 5.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Calibration trace 1",
+          "property": "opacity",
+          "time": 6.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "main-video",
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "targetId": "main-video",
+          "property": "opacity",
+          "time": 8,
+          "value": 0,
+          "easing": "hold"
+        }
+      ],
+      "groups": [],
+      "order": [
+        "Backdrop",
+        "Watch atmosphere",
+        "Mechanical aperture",
+        "Calibration trace 0",
+        "Calibration trace 1"
+      ]
+    }
+  }
+}

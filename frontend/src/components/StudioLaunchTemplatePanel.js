@@ -41,6 +41,7 @@ function KnownStudioLaunchTemplatePanel({ projectId, media, instance, onApply, i
   recipe = { ...recipe, sequence: recipe.sequence || [] };
   const plannedSeconds = recipe.sequence.reduce((sum, shot) => sum + shot.duration, 0);
   const copyLabel = key => recipe.inputPresentation?.[key]?.label || ({ headline: 'Launch headline', featureOne: 'Feature one', featureTwo: 'Feature two', callToAction: 'Launch CTA', brandColour: 'Launch colour' })[key] || key;
+  const isMotionStyle = !!template.executionDefinition.ordinaryMotion;
   const [status, setStatus] = useState('');
   const [busy, setBusy] = useState(false);
   const [proposal, setProposal] = useState(null);
@@ -138,7 +139,7 @@ function KnownStudioLaunchTemplatePanel({ projectId, media, instance, onApply, i
       }
       const result = await instantiateStudioCreativeTemplate(options);
       onApply(result.snapshot);
-      setStatus(hook ? 'Hook template applied. Cuts, captions, source focus, motion and sound remain editable.' : 'Launch template applied. Clips, titles, keys and sound remain editable.');
+      setStatus(isMotionStyle ? 'Motion style applied. Footage, artwork, motion and sound remain editable.' : hook ? 'Hook template applied. Cuts, captions, source focus, motion and sound remain editable.' : 'Launch template applied. Clips, titles, keys and sound remain editable.');
     } catch (error) { setStatus(error.message); } finally { setBusy(false); }
   };
   return <details ref={libraryRef} className="studio-template-library studio-authored-templates" data-testid="launch-template-panel">
@@ -151,6 +152,8 @@ function KnownStudioLaunchTemplatePanel({ projectId, media, instance, onApply, i
         setTemplateId(e.target.value); setAspect(next.executionDefinition.defaultAspect || '16:9'); setProposal(null);
         setVariationId(next.executionDefinition.defaultVariation || 'signature'); setTranscripts({});
         setCopy(current => ({ ...current, ...Object.fromEntries(Object.entries(next.executionDefinition.inputPresentation || {}).map(([key, value]) => [key, value.default])) }));
+        if (next.executionDefinition.defaultCopy) setCopy(current => ({ ...current, ...next.executionDefinition.defaultCopy }));
+        setSlots({});
       }}>{STUDIO_CREATIVE_TEMPLATES.map(item => <option key={`${item.templateId}@${item.version}`} value={`${item.templateId}@${item.version}`}>{item.label} · {item.version}</option>)}</select>
     </label>
     <label style={{ display: 'block', marginTop: 8 }}>Aspect ratio
@@ -210,8 +213,8 @@ function KnownStudioLaunchTemplatePanel({ projectId, media, instance, onApply, i
       </details>}
     </fieldset>;
     })}
-    <button type="button" disabled={busy} onClick={() => apply('manual')}>{hook ? 'Apply hook template' : 'Apply launch template'}</button>
-    <button type="button" disabled={busy} onClick={() => apply('director')}>{hook ? 'Director: prepare hook' : 'Director: select launch edit'}</button>
+    <button type="button" disabled={busy} onClick={() => apply('manual')}>{isMotionStyle ? 'Apply motion style' : hook ? 'Apply hook template' : 'Apply launch template'}</button>
+    <button type="button" disabled={busy} onClick={() => apply('director')}>{isMotionStyle ? 'Director: select motion style' : hook ? 'Director: prepare hook' : 'Director: select launch edit'}</button>
     {proposal && <div role="region" aria-label="Director launch selection">
       <strong>{template.label}</strong>
       <p>{proposal.selectionReason}</p>

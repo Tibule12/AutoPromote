@@ -1,0 +1,9 @@
+{
+  "path": "tmp/viral_152fdecfe2885aecb61335b8eb095b0e56b15ffeef42afc2d0ea1e01069e9835_video_motion_15.mov",
+  "width": 1280,
+  "height": 720,
+  "frames": 120,
+  "firstFrameNonzeroAlphaFraction": 1.0,
+  "firstFrameAlpha255Fraction": 1.0,
+  "scope": "Actual corrected worker intermediate; final export paired picture check remains required."
+}

@@ -7,10 +7,24 @@ import refinedEditorialLaunch from "../templates/product_launch_cinematic_v1.1.1
 import composedEditorialLaunch from "../templates/product_launch_cinematic_v1.1.2.json";
 import hookDefinitions from "../templates/hooks.v1.json";
 import { resolveStudioTemplateRecipe, studioTemplateCaptions, studioTemplateVoiceClips, studioTemplateFraming, materializeStudioHookRanges } from "./studioHookTemplate";
+import creatorIdentity from "../templates/creator_identity_v1.json";
+import prismCuts from "../templates/prism_cuts_v1.json";
+import momentum from "../templates/momentum_v1.json";
+import initialMomentum from "../templates/momentum_v1.0.0.json";
+import apertureProduct from "../templates/aperture_product_v1.json";
+import editorialFan from "../templates/editorial_fan_v1.json";
+import initialEditorialFan from "../templates/editorial_fan_v1.0.0.json";
+import splitImpact from "../templates/split_impact_v1.json";
+import coastalPostcards from "../templates/coastal_postcards_v1.json";
+import vinylPulse from "../templates/vinyl_pulse_v1.json";
+import livingInfinity from "../templates/living_infinity_v1.json";
+import initialLivingInfinity from "../templates/living_infinity_v1.0.0.json";
+import { bindStudioMotionRecipe } from './studioMotionRecipe';
 import { adaptStudioSnapshotToDocument, projectStudioEditableStateToSnapshot } from "./studioProjectDocument";
+import { executeStudioSceneActions } from "./studioSceneActions";
 
 export const PRODUCT_LAUNCH_TEMPLATE = definition;
-export const STUDIO_CREATIVE_TEMPLATES = [definition, composedEditorialLaunch, refinedEditorialLaunch, editorialLaunch, cyclingDefinition, cyclingSecondDefinition, cyclingInitialDefinition, ...hookDefinitions];
+export const STUDIO_CREATIVE_TEMPLATES = [definition, apertureProduct, editorialFan, initialEditorialFan, splitImpact, coastalPostcards, vinylPulse, livingInfinity, initialLivingInfinity, prismCuts, momentum, initialMomentum, creatorIdentity, composedEditorialLaunch, refinedEditorialLaunch, editorialLaunch, cyclingDefinition, cyclingSecondDefinition, cyclingInitialDefinition, ...hookDefinitions];
 export const stableTemplateJson = value => JSON.stringify(value, (_key, item) =>
   item && typeof item === "object" && !Array.isArray(item)
     ? Object.fromEntries(Object.keys(item).sort().map(key => [key, item[key]])) : item);
@@ -31,7 +45,7 @@ export async function proposeStudioDirectorTemplate({ intent, ...options }) {
   if (!selected.categoryIds.includes(intent)) fail("TEMPLATE_INTENT_UNSUPPORTED", "Choose a brief supported by this template.");
   const result = await instantiateStudioCreativeTemplate({ ...options, actor: "director" });
   return { templateRef: result.templateRef,
-    selectionReason: selected.executionDefinition.hook?.selectionReason || (selected.templateId === "cycling_rhythm_v1"
+    selectionReason: selected.executionDefinition.hook?.selectionReason || selected.executionDefinition.directorDescription || (selected.templateId === "cycling_rhythm_v1"
       ? "Cycling brief: continuous source shots, authored rhythm cuts, animated type and a brand ending in 20 seconds."
       : "Product-launch brief: hook, product action, two benefits and a brand ending in 20 seconds."),
     sourceEvidence: result.document.assets.map(asset => ({ assetId: asset.assetId, contentHash: asset.contentHash })),
@@ -74,7 +88,7 @@ export async function instantiateStudioCreativeTemplate({ template = definition,
       fail("TEMPLATE_OWNED_MEDIA_REQUIRED", `Save an owned ${slot.type} asset for ${slot.id} first.`);
     }
   }
-  if (!recipe.hook && bindings.headline.split("\n").length !== 2)
+  if (!recipe.hook && template.inputSlots.some(slot => slot.id === "headline") && bindings.headline.split("\n").length !== 2)
     fail("TEMPLATE_COPY_INVALID", "The launch headline needs two lines.");
   const timeline = recipe.sequence.map((shot, index) => {
     const asset = bindings[shot.slot];
@@ -158,7 +172,7 @@ export async function instantiateStudioCreativeTemplate({ template = definition,
     start: clip.startRequest, end: clip.endRequest })), selectedClipId: timeline[0].id,
     reframeAspect: aspect, smartCrop: !!recipe.framing && (portrait || !!recipe.framing.forceAspect),
     smartCropMode: recipe.framing && (portrait || recipe.framing.forceAspect) ? recipe.framing.mode : "off",
-    ...(recipe.framing && (portrait || recipe.framing.forceAspect) ? { reframeKeyframes: studioTemplateFraming(recipe, bindings, projectId) } : {}), videoFit: "cover",
+    ...(recipe.framing && (portrait || recipe.framing.forceAspect) ? { reframeKeyframes: studioTemplateFraming(recipe, bindings, projectId) } : {}), videoFit: recipe.videoFit || "cover",
     mainTransform: { id: "main-video", type: "video", x: 50, y: 50, scale: 1, rotation: 0, opacity: 1 },
     mainFrame: { enabled: false }, overlays, motionKeyframes, motionScenes: [], threeDScenes: [],
     ...(recipe.finish ? { finishFx: copy(recipe.finish) } : {}),
@@ -167,7 +181,7 @@ export async function instantiateStudioCreativeTemplate({ template = definition,
     captionSegments: studioTemplateCaptions(transcripts, bindings, template, projectId),
     ...(recipe.hook ? { captionStyle: recipe.captionStyle || "editorial", captionSize: 1,
       voiceovers: studioTemplateVoiceClips(recipe, bindings, projectId) } : {}),
-    addHook: false, brandWatermark: false, muteOriginalAudio: recipe.keepOriginalAudio !== true,
+    addHook: false, brandWatermark: false, muteOriginalAudio: recipe.muteOriginalAudio ?? (recipe.keepOriginalAudio !== true),
     addMusic: !!bindings.music, musicTrack: bindings.music ? { ...copy(bindings.music), volume: recipe.music.volume,
       fadeIn: recipe.music.fadeIn, fadeOut: recipe.music.fadeOut, loop: false } : null, musicVolume: recipe.music.volume,
     musicLoop: false, musicFadeIn: recipe.music.fadeIn, musicFadeOut: recipe.music.fadeOut,
@@ -183,7 +197,24 @@ export async function instantiateStudioCreativeTemplate({ template = definition,
     }),
     audioKeyframes: copy(recipe.audioKeyframes || {}), trackStates: {}, creativeTemplateInstance: metadata,
     exportSettings: { resolution, fps: 24, codec: "h264", audioCodec: "aac", audioBitrate: "256" } };
-  const document = adaptStudioSnapshotToDocument({ snapshot, projectId });
+  Object.assign(snapshot, bindStudioMotionRecipe(snapshot, recipe, bindings, projectId));
+  let document = adaptStudioSnapshotToDocument({ snapshot, projectId });
+  if (recipe.sceneActions?.length) {
+    // Versioned recipes share the reviewed native action executor. Slot aliases
+    // resolve to this owner's exact inputs; no arbitrary scripts or model claim.
+    const aliases = new Map(overlays.map(layer => [layer.name, layer.id]));
+    const actions = recipe.sceneActions.map(action => ({ ...copy(action),
+      ...(action.sourceSlot ? { sourceMediaId: bindings[action.sourceSlot]?.id } : {}),
+      ...Object.fromEntries(['targetId', 'parentId', 'matteSourceId', 'beforeId']
+        .filter(field => action[field]).map(field => [field, aliases.get(action[field]) || action[field]])),
+    }));
+    actions.forEach(action => { delete action.sourceSlot; });
+    let serial = 0;
+    Object.assign(snapshot, executeStudioSceneActions({ format: 'autopromote-scene-actions', version: 1,
+      name: template.label, projectId, baseRevision: document.revision, actions },
+    { ...snapshot, studioDocument: document }, prefix => `${projectId}:${prefix}:${++serial}`));
+    document = snapshot.studioDocument;
+  }
   return { projectId, ownerUid, templateRef: copy(templateRef), document,
     snapshot: { ...projectStudioEditableStateToSnapshot(document, snapshot), studioDocument: document } };
 }

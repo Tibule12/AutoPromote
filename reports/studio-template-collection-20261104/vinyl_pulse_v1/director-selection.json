@@ -1,0 +1,7 @@
+{
+  "template": "vinyl_pulse_v1",
+  "review": "vinyl_pulse_v1 · 1.0.0\n\nMoving footage becomes a live vinyl disc, with independent coloured vector orbits and timed scale pulses. Uses one saved source and ordinary editable Studio layers. No model job.\n\nUses your saved inputs. No model job is started.Apply Director launchDismiss selection",
+  "normalFrontend": true,
+  "visualInference": false,
+  "modelCalls": 0
+}

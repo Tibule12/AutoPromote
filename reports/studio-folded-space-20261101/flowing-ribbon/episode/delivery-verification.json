@@ -1,0 +1,17 @@
+{
+  "at": "2026-11-02T00:42:12.121536+02:00",
+  "newReviewFilesVerified": 50,
+  "previousFilesVerifiedUnchanged": 163,
+  "extendedParentManifestFiles": 214,
+  "nativeMovieSha256": "b02b6605a7d843541a6bd6d209bdfc2143ff10a6c4e69ab1825f0549e0ef4734",
+  "comparisonFrames": 864,
+  "comparisonFullDecode": true,
+  "completeLiveProgrammeEnd": 36,
+  "completeFinishedMediaEnd": 36,
+  "studioContractValid": true,
+  "professionalCreativeStandardMet": false,
+  "liveRealtimeQualified": false,
+  "wholePictureParityQualified": false,
+  "paidCalls": 0,
+  "productionWrites": false
+}

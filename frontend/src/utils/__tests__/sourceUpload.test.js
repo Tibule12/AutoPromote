@@ -163,3 +163,24 @@ describe("temporary source uploads", () => {
     expect(uploadBytesResumable).not.toHaveBeenCalled();
   });
 });
+
+describe('small authored Studio assets',()=>{
+ beforeEach(()=>{jest.clearAllMocks();auth.currentUser={uid:'secure-user'};});
+ it.each(['image','audio'])('uses bounded authenticated upload and byte identity for Studio %s assets',async mediaType=>{
+  const file=new File(['native authored asset'],mediaType==='image'?'art.png':'music.wav',{type:mediaType==='image'?'image/png':'audio/wav'});
+  const fetchSpy=jest.spyOn(global,'fetch').mockResolvedValue({ok:true,status:201,json:async()=>({url:'http://127.0.0.1/owned',storagePath:`uploads/${mediaType}s/secure-user/asset`,size:file.size})});
+  try{const result=await uploadSourceFileViaBackend({file,token:'signed-owner-token',mediaType,purpose:'studio_project'});expect(result).toMatchObject({ownerUid:'secure-user',contentHash:createHash('sha256').update('native authored asset').digest('hex')});expect(fetchSpy).toHaveBeenCalledWith(expect.any(String),expect.objectContaining({method:'POST',headers:expect.objectContaining({Authorization:'Bearer signed-owner-token'}),body:file,signal:expect.anything()}));expect(uploadBytesResumable).not.toHaveBeenCalled();expect(getDownloadURL).not.toHaveBeenCalled();}finally{fetchSpy.mockRestore();}
+ });
+ it('refuses a switched owner after a Studio artwork request completes',async()=>{
+  const fetchSpy=jest.spyOn(global,'fetch').mockImplementation(async()=>{auth.currentUser={uid:'different-owner'};return{ok:true,status:201,json:async()=>({url:'http://127.0.0.1/owned'})};});
+  try{await expect(uploadSourceFileViaBackend({file:new File(['art'],'art.png',{type:'image/png'}),token:'token',mediaType:'image',purpose:'studio_project'})).rejects.toThrow('sign-in changed');expect(uploadBytesResumable).not.toHaveBeenCalled();}finally{fetchSpy.mockRestore();}
+ });
+ it('retains the SDK path for an existing larger Studio asset',async()=>{
+  const file=new File(['large'],'large.wav',{type:'audio/wav'});Object.defineProperty(file,'size',{value:16*1024*1024+1});getDownloadURL.mockResolvedValue('http://127.0.0.1/large');uploadBytesResumable.mockImplementation(()=>({snapshot:{metadata:{size:file.size}},on:(_e,_p,_r,done)=>done()}));
+  await uploadSourceFileViaBackend({file,token:'token',mediaType:'audio',purpose:'studio_project'});expect(uploadBytesResumable).toHaveBeenCalled();expect(getDownloadURL).toHaveBeenCalled();
+ });
+ it('keeps an authenticated backend refusal terminal without trying a second transport',async()=>{
+  const fetchSpy=jest.spyOn(global,'fetch').mockResolvedValue({ok:false,status:403,json:async()=>({error:'Not allowed',code:'FORBIDDEN'})});
+  try{await expect(uploadSourceFileViaBackend({file:new File(['art'],'art.png',{type:'image/png'}),token:'token',mediaType:'image',purpose:'studio_project'})).rejects.toMatchObject({code:'FORBIDDEN',httpStatus:403});expect(uploadBytesResumable).not.toHaveBeenCalled();}finally{fetchSpy.mockRestore();}
+ });
+});

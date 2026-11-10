@@ -1,0 +1,113 @@
+{
+  "name": "Crossing panels",
+  "actions": [
+    {
+      "type": "keys",
+      "targetId": "P / medium panel",
+      "keys": [
+        {
+          "property": "x",
+          "time": 14,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 17.0,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 17.65,
+          "value": 98,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 21,
+          "value": 98,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / detail panel",
+      "keys": [
+        {
+          "property": "x",
+          "time": 14,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 17.0,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 17.65,
+          "value": 2,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 21,
+          "value": 2,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        }
+      ]
+    }
+  ]
+}

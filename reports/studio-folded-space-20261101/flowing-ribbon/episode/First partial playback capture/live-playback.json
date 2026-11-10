@@ -1,0 +1,66 @@
+{
+  "complete": true,
+  "programmeSeconds": 36,
+  "elapsedMs": 54039,
+  "events": [
+    {
+      "type": "waiting",
+      "time": 0
+    },
+    {
+      "type": "stalled",
+      "time": 0
+    },
+    {
+      "type": "waiting",
+      "time": 0
+    },
+    {
+      "type": "ended",
+      "time": 0
+    },
+    {
+      "type": "waiting",
+      "time": 0
+    },
+    {
+      "type": "waiting",
+      "time": 4
+    },
+    {
+      "type": "waiting",
+      "time": 8.76273
+    }
+  ],
+  "frames": [
+    {
+      "ms": 64823.9,
+      "sourceTime": 5.875,
+      "presented": 64
+    },
+    {
+      "ms": 68207.1,
+      "sourceTime": 1.583333,
+      "presented": 92
+    },
+    {
+      "ms": 68323.7,
+      "sourceTime": 3.5,
+      "presented": 122
+    },
+    {
+      "ms": 76623.4,
+      "sourceTime": 7.291667,
+      "presented": 56
+    },
+    {
+      "ms": 81906.5,
+      "sourceTime": 8.5,
+      "presented": 81
+    }
+  ],
+  "quality": {
+    "decoded": 211,
+    "dropped": 77
+  }
+}

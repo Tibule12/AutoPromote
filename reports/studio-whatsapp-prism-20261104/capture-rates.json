@@ -1,0 +1,28 @@
+{
+  "live": {
+    "programmeSeconds": 24,
+    "wallSeconds": 32.837,
+    "captureWallSeconds": 32.801000118255615,
+    "captureFrames": 590,
+    "observedCaptureFps": 17.98725642123429,
+    "selectedDecoderQuality": {
+      "total": 204,
+      "dropped": 72,
+      "corrupted": 0
+    },
+    "scope": "Recorded frames per wall second; decoder counters are not total rendered overlay frames."
+  },
+  "finished": {
+    "programmeSeconds": 24,
+    "wallSeconds": 27.004,
+    "captureWallSeconds": 26.960000038146973,
+    "captureFrames": 275,
+    "observedCaptureFps": 10.200296721472165,
+    "selectedDecoderQuality": {
+      "total": 576,
+      "dropped": 0,
+      "corrupted": 0
+    },
+    "scope": "Recorded frames per wall second; decoder counters are not total rendered overlay frames."
+  }
+}

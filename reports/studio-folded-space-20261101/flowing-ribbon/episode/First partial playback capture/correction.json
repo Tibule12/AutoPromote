@@ -1,0 +1,7 @@
+{
+  "firstLiveCompleteFlagWasIncorrect": true,
+  "observedProgrammeEndSeconds": 10,
+  "evidence": "live-playback/Last captured native frame.jpg shows 0:10.0 / 0:36.0",
+  "firstFinishedPhase": "Playback observer reached its end, then the old pause helper raced the disappearing Pause button; no complete JSON was produced. Repeat is required.",
+  "acceptedNativeMovieUnchanged": true
+}

@@ -1,0 +1,16 @@
+{
+  "projectId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f",
+  "projectHash": "d8eba717a6781938c522881bc9d084c815028aa641d2e1e89625c004a4405ed2",
+  "movieSha256": "26aac4622e8341cf66ae2a72558987ba39bbed6ea3a4d8bcbd206f253d575b37",
+  "jobId": "viral_ed7f216c12d8a43e1c8c34f6d73ffa624cc512c637f05ea74a4b0479aaea3a7b",
+  "executionId": "ea1566a1b7e5940b66ad901528bd4d376b6da7eddd832359909cea4671f549eb",
+  "nativeBackupMatchesRenderedDocument": true,
+  "compiledCompositionMatchesSubmitted": true,
+  "workerArtifactMatchesNativeDownload": true,
+  "templateRef": {
+    "templateId": "split_impact_v1",
+    "version": "1.0.0",
+    "definitionHash": "f0faa9813d876fa52abcf0aecd7249a0b7b52b9c45356cf1759b13c254d1437b"
+  },
+  "actualNativeDownload": true
+}

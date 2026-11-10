@@ -1,0 +1,405 @@
+61440	/home/tibule12/.config/Code/Session Storage
+16384	/home/tibule12/.config/Code/Shared Dictionary/cache
+65536	/home/tibule12/.config/Code/Shared Dictionary
+2160762880	/home/tibule12/.config/Code/User/workspaceStorage
+4096	/home/tibule12/.config/Code/User/snippets
+97087488	/home/tibule12/.config/Code/User/History
+21946368	/home/tibule12/.config/Code/User/globalStorage
+2279813120	/home/tibule12/.config/Code/User
+12288	/home/tibule12/.config/Code/CachedConfigurations/defaults
+16384	/home/tibule12/.config/Code/CachedConfigurations
+110592	/home/tibule12/.config/Code/agentSessionData/65f9994c-901b-48b7-9176-8a88e913f7b1
+110592	/home/tibule12/.config/Code/agentSessionData/6d52997d-9e24-4619-8c60-96344a9392df
+110592	/home/tibule12/.config/Code/agentSessionData/default-Y29waWxvdGNsaTovMmNjOWY2MjItYWYwYS00ZDViLWI1MzktNmZlZTJhMjliYTcw
+110592	/home/tibule12/.config/Code/agentSessionData/393480bc-9984-4815-bbcd-55d5203e0028
+110592	/home/tibule12/.config/Code/agentSessionData/f64ef7c5-752e-4e47-ac40-2a6b459639ff
+110592	/home/tibule12/.config/Code/agentSessionData/fa0d2975-bf98-4b5f-ace3-881a9856e5e7
+110592	/home/tibule12/.config/Code/agentSessionData/2cc9f622-af0a-4d5b-b539-6fee2a29ba70
+110592	/home/tibule12/.config/Code/agentSessionData/df1caf55-5830-40d8-883f-faf6a7dabb4b
+888832	/home/tibule12/.config/Code/agentSessionData
+20480	/home/tibule12/.config/Code/CachedExtensionVSIXs/.trash
+432877568	/home/tibule12/.config/Code/CachedExtensionVSIXs
+2543616	/home/tibule12/.config/Code/CachedProfilesData/__default__profile__
+2547712	/home/tibule12/.config/Code/CachedProfilesData
+458752	/home/tibule12/.config/Code/Dictionaries
+307200	/home/tibule12/.config/Code/GPUCache
+14503936	/home/tibule12/.config/Code/CachedData/e646868227c3e3a9e3f24277c8c7220be42c0be7
+31985664	/home/tibule12/.config/Code/CachedData/2c33b50b16c472efe58357d1d2a8a5414bc23fbf
+24576	/home/tibule12/.config/Code/CachedData/2a59476c9bfcb90b3ddc372c36762471b7dfad1c
+24576	/home/tibule12/.config/Code/CachedData/6d62b1d5dace93a33b3a6d3eca1317bd5e15bcb1
+46542848	/home/tibule12/.config/Code/CachedData
+4096	/home/tibule12/.config/Code/VideoDecodeStats
+278528	/home/tibule12/.config/Code/logs/20261031T191840
+331776	/home/tibule12/.config/Code/logs/20261031T191248
+1970176	/home/tibule12/.config/Code/logs/20261031T191938
+315392	/home/tibule12/.config/Code/logs/20261031T191718
+294912	/home/tibule12/.config/Code/logs/20261031T191442
+319488	/home/tibule12/.config/Code/logs/20261031T191135
+434176	/home/tibule12/.config/Code/logs/20261102T015901
+20598784	/home/tibule12/.config/Code/logs/20261031T121011
+1662976	/home/tibule12/.config/Code/logs/20261101T140243
+282624	/home/tibule12/.config/Code/logs/20261031T191038
+26492928	/home/tibule12/.config/Code/logs
+589824	/home/tibule12/.config/Code/Service Worker/ScriptCache
+102400	/home/tibule12/.config/Code/Service Worker/Database
+696320	/home/tibule12/.config/Code/Service Worker
+307200	/home/tibule12/.config/Code/DawnWebGPUCache
+573440	/home/tibule12/.config/Code/agentPlugins/vscode-synced-customization-agent-host-copilotcli-1825127134
+581632	/home/tibule12/.config/Code/agentPlugins
+106496	/home/tibule12/.config/Code/copilot-terminal-output
+16384	/home/tibule12/.config/Code/Code Cache/wasm
+16384	/home/tibule12/.config/Code/Code Cache/js
+20480	/home/tibule12/.config/Code/Code Cache/electron-preload
+57344	/home/tibule12/.config/Code/Code Cache
+138694656	/home/tibule12/.config/Code/Partitions/vscode-browser
+138698752	/home/tibule12/.config/Code/Partitions
+4096	/home/tibule12/.config/Code/Crashpad/pending
+4096	/home/tibule12/.config/Code/Crashpad/attachments
+12288	/home/tibule12/.config/Code/Crashpad/completed
+4096	/home/tibule12/.config/Code/Crashpad/new
+36864	/home/tibule12/.config/Code/Crashpad
+307200	/home/tibule12/.config/Code/DawnGraphiteCache
+18755584	/home/tibule12/.config/Code/Cache/Cache_Data
+12288	/home/tibule12/.config/Code/Cache/No_Vary_Search
+18771968	/home/tibule12/.config/Code/Cache
+24576	/home/tibule12/.config/Code/shared_proto_db/metadata
+49152	/home/tibule12/.config/Code/shared_proto_db
+4096	/home/tibule12/.config/Code/blob_storage/92d71028-bac4-4245-9e6d-b90af8e1ce33
+8192	/home/tibule12/.config/Code/blob_storage
+9060352	/home/tibule12/.config/Code/Local Storage/leveldb
+9064448	/home/tibule12/.config/Code/Local Storage
+8192	/home/tibule12/.config/Code/agent-host/sdk-cache
+270336	/home/tibule12/.config/Code/agent-host/local-endpoint
+282624	/home/tibule12/.config/Code/agent-host
+3674112	/home/tibule12/.config/Code/WebStorage/5
+272625664	/home/tibule12/.config/Code/WebStorage/7
+6332416	/home/tibule12/.config/Code/WebStorage/31
+3465216	/home/tibule12/.config/Code/WebStorage/35
+12611584	/home/tibule12/.config/Code/WebStorage/23
+11890688	/home/tibule12/.config/Code/WebStorage/27
+10530816	/home/tibule12/.config/Code/WebStorage/8
+23216128	/home/tibule12/.config/Code/WebStorage/33
+14696448	/home/tibule12/.config/Code/WebStorage/24
+20869120	/home/tibule12/.config/Code/WebStorage/22
+1511796736	/home/tibule12/.config/Code/WebStorage/6
+2097152	/home/tibule12/.config/Code/WebStorage/26
+8658944	/home/tibule12/.config/Code/WebStorage/34
+3923968	/home/tibule12/.config/Code/WebStorage/4
+40960	/home/tibule12/.config/Code/WebStorage/32
+3923968	/home/tibule12/.config/Code/WebStorage/3
+1910407168	/home/tibule12/.config/Code/WebStorage
+4096	/home/tibule12/.config/Code/Backups
+4870205440	/home/tibule12/.config/Code
+28672	/home/tibule12/.config/google-chrome/MEIPreload/1.1.0.3
+32768	/home/tibule12/.config/google-chrome/MEIPreload
+24576	/home/tibule12/.config/google-chrome/PrivacySandboxAttestationsPreloaded/2025.6.16.0
+28672	/home/tibule12/.config/google-chrome/PrivacySandboxAttestationsPreloaded
+1810432	/home/tibule12/.config/google-chrome/segmentation_platform
+20480	/home/tibule12/.config/google-chrome/CaptchaProviders/8.5419.4434
+24576	/home/tibule12/.config/google-chrome/CaptchaProviders
+4096	/home/tibule12/.config/google-chrome/Crash Reports/pending
+4096	/home/tibule12/.config/google-chrome/Crash Reports/attachments
+237568	/home/tibule12/.config/google-chrome/Crash Reports/completed
+4096	/home/tibule12/.config/google-chrome/Crash Reports/new
+258048	/home/tibule12/.config/google-chrome/Crash Reports
+20221952	/home/tibule12/.config/google-chrome/Safe Browsing
+172032	/home/tibule12/.config/google-chrome/extensions_crx_cache
+4096	/home/tibule12/.config/google-chrome/OriginTrials
+4269961216	/home/tibule12/.config/google-chrome/OptGuideOnDeviceModel/2025.8.8.1141
+4269965312	/home/tibule12/.config/google-chrome/OptGuideOnDeviceModel
+65536	/home/tibule12/.config/google-chrome/System Profile/Shared Dictionary
+8192	/home/tibule12/.config/google-chrome/System Profile/blob_storage
+28672	/home/tibule12/.config/google-chrome/System Profile/Local Storage
+155648	/home/tibule12/.config/google-chrome/System Profile
+913408	/home/tibule12/.config/google-chrome/Dictionaries
+2072576	/home/tibule12/.config/google-chrome/CertificateRevocation/10876
+2076672	/home/tibule12/.config/google-chrome/CertificateRevocation/10874
+2072576	/home/tibule12/.config/google-chrome/CertificateRevocation/10877
+2080768	/home/tibule12/.config/google-chrome/CertificateRevocation/10875
+8306688	/home/tibule12/.config/google-chrome/CertificateRevocation
+8192	/home/tibule12/.config/google-chrome/WidevineCdm
+61440	/home/tibule12/.config/google-chrome/OptGuidePredictionModels/GeolocationPermissions
+65536	/home/tibule12/.config/google-chrome/OptGuidePredictionModels
+356352	/home/tibule12/.config/google-chrome/Crowd Deny/2026.10.29.188
+360448	/home/tibule12/.config/google-chrome/Crowd Deny
+49152	/home/tibule12/.config/google-chrome/Profile 1/GCM Store
+20480	/home/tibule12/.config/google-chrome/Profile 1/Session Storage
+65536	/home/tibule12/.config/google-chrome/Profile 1/Shared Dictionary
+4096	/home/tibule12/.config/google-chrome/Profile 1/commerce_subscription_db
+4096	/home/tibule12/.config/google-chrome/Profile 1/discount_infos_db
+20480	/home/tibule12/.config/google-chrome/Profile 1/Extension Scripts
+49152	/home/tibule12/.config/google-chrome/Profile 1/Sync Data
+24576	/home/tibule12/.config/google-chrome/Profile 1/DataSharing
+307200	/home/tibule12/.config/google-chrome/Profile 1/GPUCache
+585728	/home/tibule12/.config/google-chrome/Profile 1/Service Worker
+307200	/home/tibule12/.config/google-chrome/Profile 1/DawnWebGPUCache
+24576	/home/tibule12/.config/google-chrome/Profile 1/Extension State
+4096	/home/tibule12/.config/google-chrome/Profile 1/discounts_db
+4096	/home/tibule12/.config/google-chrome/Profile 1/ClientCertificates
+53248	/home/tibule12/.config/google-chrome/Profile 1/Sessions_Encrypted
+61440	/home/tibule12/.config/google-chrome/Profile 1/Sessions
+307200	/home/tibule12/.config/google-chrome/Profile 1/DawnGraphiteCache
+12288	/home/tibule12/.config/google-chrome/Profile 1/Accounts
+1122304	/home/tibule12/.config/google-chrome/Profile 1/Storage
+4096	/home/tibule12/.config/google-chrome/Profile 1/parcel_tracking_db
+20480	/home/tibule12/.config/google-chrome/Profile 1/Extension Rules
+4096	/home/tibule12/.config/google-chrome/Profile 1/AutofillAiModelCache
+4096	/home/tibule12/.config/google-chrome/Profile 1/PersistentOriginTrials
+86016	/home/tibule12/.config/google-chrome/Profile 1/shared_proto_db
+16384	/home/tibule12/.config/google-chrome/Profile 1/Segmentation Platform
+8192	/home/tibule12/.config/google-chrome/Profile 1/blob_storage
+24576	/home/tibule12/.config/google-chrome/Profile 1/Site Characteristics Database
+188416	/home/tibule12/.config/google-chrome/Profile 1/Local Storage
+4096	/home/tibule12/.config/google-chrome/Profile 1/BudgetDatabase
+4096	/home/tibule12/.config/google-chrome/Profile 1/AutofillStrikeDatabase
+12288	/home/tibule12/.config/google-chrome/Profile 1/Feature Engagement Tracker
+45056	/home/tibule12/.config/google-chrome/Profile 1/WebStorage
+4096	/home/tibule12/.config/google-chrome/Profile 1/optimization_guide_hint_cache_store
+24576	/home/tibule12/.config/google-chrome/Profile 1/Collaboration
+2310144	/home/tibule12/.config/google-chrome/Profile 1/Extensions
+28672	/home/tibule12/.config/google-chrome/Profile 1/Local Extension Settings
+4096	/home/tibule12/.config/google-chrome/Profile 1/chrome_cart_db
+1216512	/home/tibule12/.config/google-chrome/Profile 1/Web Applications
+8032256	/home/tibule12/.config/google-chrome/Profile 1
+25505792	/home/tibule12/.config/google-chrome/WasmTtsEngine/20261016.1
+25509888	/home/tibule12/.config/google-chrome/WasmTtsEngine
+32768	/home/tibule12/.config/google-chrome/FirstPartySetsPreloaded/2025.7.24.0
+36864	/home/tibule12/.config/google-chrome/FirstPartySetsPreloaded
+7946240	/home/tibule12/.config/google-chrome/OnDeviceHeadSuggestModel/20251024.824731831.14
+7950336	/home/tibule12/.config/google-chrome/OnDeviceHeadSuggestModel
+208896	/home/tibule12/.config/google-chrome/Subresource Filter/Unindexed Rules
+266240	/home/tibule12/.config/google-chrome/Subresource Filter/Indexed Rules
+479232	/home/tibule12/.config/google-chrome/Subresource Filter
+462848	/home/tibule12/.config/google-chrome/PKIMetadata/1820
+458752	/home/tibule12/.config/google-chrome/PKIMetadata/1825
+925696	/home/tibule12/.config/google-chrome/PKIMetadata
+145723392	/home/tibule12/.config/google-chrome/component_crx_cache
+49152	/home/tibule12/.config/google-chrome/Profile 2/GCM Store
+20480	/home/tibule12/.config/google-chrome/Profile 2/Session Storage
+1376256	/home/tibule12/.config/google-chrome/Profile 2/Shared Dictionary
+4096	/home/tibule12/.config/google-chrome/Profile 2/commerce_subscription_db
+4096	/home/tibule12/.config/google-chrome/Profile 2/discount_infos_db
+24576	/home/tibule12/.config/google-chrome/Profile 2/Extension Scripts
+299008	/home/tibule12/.config/google-chrome/Profile 2/Sync Data
+24576	/home/tibule12/.config/google-chrome/Profile 2/DataSharing
+348160	/home/tibule12/.config/google-chrome/Profile 2/GPUCache
+4096	/home/tibule12/.config/google-chrome/Profile 2/VideoDecodeStats
+589824	/home/tibule12/.config/google-chrome/Profile 2/Service Worker
+307200	/home/tibule12/.config/google-chrome/Profile 2/DawnWebGPUCache
+24576	/home/tibule12/.config/google-chrome/Profile 2/Extension State
+4096	/home/tibule12/.config/google-chrome/Profile 2/discounts_db
+4096	/home/tibule12/.config/google-chrome/Profile 2/ClientCertificates
+176128	/home/tibule12/.config/google-chrome/Profile 2/Sessions_Encrypted
+176128	/home/tibule12/.config/google-chrome/Profile 2/Sessions
+307200	/home/tibule12/.config/google-chrome/Profile 2/DawnGraphiteCache
+12288	/home/tibule12/.config/google-chrome/Profile 2/Download Service
+12288	/home/tibule12/.config/google-chrome/Profile 2/Accounts
+1122304	/home/tibule12/.config/google-chrome/Profile 2/Storage
+4096	/home/tibule12/.config/google-chrome/Profile 2/parcel_tracking_db
+24576	/home/tibule12/.config/google-chrome/Profile 2/Extension Rules
+4096	/home/tibule12/.config/google-chrome/Profile 2/AutofillAiModelCache
+4096	/home/tibule12/.config/google-chrome/Profile 2/PersistentOriginTrials
+98304	/home/tibule12/.config/google-chrome/Profile 2/shared_proto_db
+16384	/home/tibule12/.config/google-chrome/Profile 2/Segmentation Platform
+8192	/home/tibule12/.config/google-chrome/Profile 2/blob_storage
+24576	/home/tibule12/.config/google-chrome/Profile 2/Site Characteristics Database
+573440	/home/tibule12/.config/google-chrome/Profile 2/Local Storage
+4096	/home/tibule12/.config/google-chrome/Profile 2/BudgetDatabase
+4096	/home/tibule12/.config/google-chrome/Profile 2/AutofillStrikeDatabase
+12288	/home/tibule12/.config/google-chrome/Profile 2/Feature Engagement Tracker
+2121728	/home/tibule12/.config/google-chrome/Profile 2/WebStorage
+32768	/home/tibule12/.config/google-chrome/Profile 2/IndexedDB
+4096	/home/tibule12/.config/google-chrome/Profile 2/optimization_guide_hint_cache_store
+24576	/home/tibule12/.config/google-chrome/Profile 2/Collaboration
+2306048	/home/tibule12/.config/google-chrome/Profile 2/Extensions
+28672	/home/tibule12/.config/google-chrome/Profile 2/Local Extension Settings
+4096	/home/tibule12/.config/google-chrome/Profile 2/chrome_cart_db
+1216512	/home/tibule12/.config/google-chrome/Profile 2/Web Applications
+12746752	/home/tibule12/.config/google-chrome/Profile 2
+4096	/home/tibule12/.config/google-chrome/DeferredBrowserMetrics
+217088	/home/tibule12/.config/google-chrome/optimization_guide_model_store/58
+8192	/home/tibule12/.config/google-chrome/optimization_guide_model_store/55
+49152	/home/tibule12/.config/google-chrome/optimization_guide_model_store/9
+37593088	/home/tibule12/.config/google-chrome/optimization_guide_model_store/43
+6799360	/home/tibule12/.config/google-chrome/optimization_guide_model_store/30
+8192	/home/tibule12/.config/google-chrome/optimization_guide_model_store/20
+409600	/home/tibule12/.config/google-chrome/optimization_guide_model_store/2
+22396928	/home/tibule12/.config/google-chrome/optimization_guide_model_store/53
+4632576	/home/tibule12/.config/google-chrome/optimization_guide_model_store/24
+8192	/home/tibule12/.config/google-chrome/optimization_guide_model_store/40
+1236992	/home/tibule12/.config/google-chrome/optimization_guide_model_store/13
+24576	/home/tibule12/.config/google-chrome/optimization_guide_model_store/26
+3653632	/home/tibule12/.config/google-chrome/optimization_guide_model_store/25
+155648	/home/tibule12/.config/google-chrome/optimization_guide_model_store/45
+3231744	/home/tibule12/.config/google-chrome/optimization_guide_model_store/15
+8192	/home/tibule12/.config/google-chrome/optimization_guide_model_store/67
+80437248	/home/tibule12/.config/google-chrome/optimization_guide_model_store
+9646080	/home/tibule12/.config/google-chrome/GPUPersistentCache/GPUCache
+9650176	/home/tibule12/.config/google-chrome/GPUPersistentCache
+180224	/home/tibule12/.config/google-chrome/OptimizationGuideModelsManifest/1.20261018.2
+184320	/home/tibule12/.config/google-chrome/OptimizationGuideModelsManifest
+203096064	/home/tibule12/.config/google-chrome/SODALanguagePacks/en-US
+203100160	/home/tibule12/.config/google-chrome/SODALanguagePacks
+4096	/home/tibule12/.config/google-chrome/NativeMessagingHosts
+20480	/home/tibule12/.config/google-chrome/SSLErrorAssistant/7
+24576	/home/tibule12/.config/google-chrome/SSLErrorAssistant
+24576	/home/tibule12/.config/google-chrome/TrustTokenKeyCommitments/2026.10.12.1
+28672	/home/tibule12/.config/google-chrome/TrustTokenKeyCommitments
+8392704	/home/tibule12/.config/google-chrome/BrowserMetrics
+24576	/home/tibule12/.config/google-chrome/FileTypePolicies/145.0.7584.0
+28672	/home/tibule12/.config/google-chrome/FileTypePolicies
+20480	/home/tibule12/.config/google-chrome/AmountExtractionHeuristicRegexes/4
+24576	/home/tibule12/.config/google-chrome/AmountExtractionHeuristicRegexes
+1712128	/home/tibule12/.config/google-chrome/ZxcvbnData/3
+1716224	/home/tibule12/.config/google-chrome/ZxcvbnData
+1892352	/home/tibule12/.config/google-chrome/hyphen-data/120.0.6050.0
+1896448	/home/tibule12/.config/google-chrome/hyphen-data
+184320	/home/tibule12/.config/google-chrome/Default/GCM Store
+475136	/home/tibule12/.config/google-chrome/Default/Session Storage
+1581056	/home/tibule12/.config/google-chrome/Default/Shared Dictionary
+4096	/home/tibule12/.config/google-chrome/Default/commerce_subscription_db
+4096	/home/tibule12/.config/google-chrome/Default/discount_infos_db
+24576	/home/tibule12/.config/google-chrome/Default/Extension Scripts
+8192	/home/tibule12/.config/google-chrome/Default/CRXTelemetry
+1310720	/home/tibule12/.config/google-chrome/Default/Sync Data
+4096	/home/tibule12/.config/google-chrome/Default/WebrtcVideoStats
+24576	/home/tibule12/.config/google-chrome/Default/DataSharing
+11685888	/home/tibule12/.config/google-chrome/Default/GPUCache
+4096	/home/tibule12/.config/google-chrome/Default/VideoDecodeStats
+233586688	/home/tibule12/.config/google-chrome/Default/Service Worker
+307200	/home/tibule12/.config/google-chrome/Default/DawnWebGPUCache
+24576	/home/tibule12/.config/google-chrome/Default/Extension State
+4096	/home/tibule12/.config/google-chrome/Default/discounts_db
+4096	/home/tibule12/.config/google-chrome/Default/ClientCertificates
+2990080	/home/tibule12/.config/google-chrome/Default/Sessions_Encrypted
+2969600	/home/tibule12/.config/google-chrome/Default/Sessions
+8192	/home/tibule12/.config/google-chrome/Default/SafeBrowsing
+307200	/home/tibule12/.config/google-chrome/Default/DawnGraphiteCache
+12288	/home/tibule12/.config/google-chrome/Default/Download Service
+28672	/home/tibule12/.config/google-chrome/Default/Accounts
+1093632	/home/tibule12/.config/google-chrome/Default/Storage
+4096	/home/tibule12/.config/google-chrome/Default/parcel_tracking_db
+28672	/home/tibule12/.config/google-chrome/Default/Platform Notifications
+24576	/home/tibule12/.config/google-chrome/Default/Extension Rules
+4096	/home/tibule12/.config/google-chrome/Default/Search Logos
+4096	/home/tibule12/.config/google-chrome/Default/AutofillAiModelCache
+4096	/home/tibule12/.config/google-chrome/Default/PersistentOriginTrials
+598016	/home/tibule12/.config/google-chrome/Default/shared_proto_db
+16384	/home/tibule12/.config/google-chrome/Default/Segmentation Platform
+8192	/home/tibule12/.config/google-chrome/Default/blob_storage
+86016	/home/tibule12/.config/google-chrome/Default/Site Characteristics Database
+2170880	/home/tibule12/.config/google-chrome/Default/Local Storage
+4096	/home/tibule12/.config/google-chrome/Default/BudgetDatabase
+4096	/home/tibule12/.config/google-chrome/Default/AutofillStrikeDatabase
+12288	/home/tibule12/.config/google-chrome/Default/Feature Engagement Tracker
+4796416	/home/tibule12/.config/google-chrome/Default/WebStorage
+9994240	/home/tibule12/.config/google-chrome/Default/IndexedDB
+4096	/home/tibule12/.config/google-chrome/Default/optimization_guide_hint_cache_store
+24576	/home/tibule12/.config/google-chrome/Default/Collaboration
+2306048	/home/tibule12/.config/google-chrome/Default/Extensions
+28672	/home/tibule12/.config/google-chrome/Default/Local Extension Settings
+4096	/home/tibule12/.config/google-chrome/Default/chrome_cart_db
+57344	/home/tibule12/.config/google-chrome/Default/File System
+589824	/home/tibule12/.config/google-chrome/Default/Web Applications
+314142720	/home/tibule12/.config/google-chrome/Default
+116600832	/home/tibule12/.config/google-chrome/SODA/1.2.12
+116604928	/home/tibule12/.config/google-chrome/SODA
+2654208	/home/tibule12/.config/google-chrome/ActorSafetyLists/9.8200.9609
+2658304	/home/tibule12/.config/google-chrome/ActorSafetyLists
+4096	/home/tibule12/.config/google-chrome/OptGuideOnDeviceClassifierModel
+585728	/home/tibule12/.config/google-chrome/OptimizationHints/770
+589824	/home/tibule12/.config/google-chrome/OptimizationHints
+307200	/home/tibule12/.config/google-chrome/GraphiteDawnCache
+196608	/home/tibule12/.config/google-chrome/SafetyTips/3092
+200704	/home/tibule12/.config/google-chrome/SafetyTips
+5246074880	/home/tibule12/.config/google-chrome
+36864	/home/tibule12/.cache/google-chrome/System Profile/Code Cache
+40960	/home/tibule12/.cache/google-chrome/System Profile
+69632	/home/tibule12/.cache/google-chrome/Profile 1/Storage
+73728	/home/tibule12/.cache/google-chrome/Profile 1
+69632	/home/tibule12/.cache/google-chrome/Profile 2/Storage
+73728	/home/tibule12/.cache/google-chrome/Profile 2
+124944384	/home/tibule12/.cache/google-chrome/Default/Code Cache
+303050752	/home/tibule12/.cache/google-chrome/Default/Cache
+20480	/home/tibule12/.cache/google-chrome/Default/image_cache
+428019712	/home/tibule12/.cache/google-chrome/Default
+428212224	/home/tibule12/.cache/google-chrome
+24576	/home/tibule12/.codex/cache/codex_apps_server_info
+160890880	/home/tibule12/.codex/cache/remote_plugin_catalog
+22589440	/home/tibule12/.codex/cache/codex_app_directory
+5951488	/home/tibule12/.codex/cache/codex_apps_tools
+189460480	/home/tibule12/.codex/cache
+80302080	/home/tibule12/.codex/.tmp/plugins/plugins
+98304	/home/tibule12/.codex/.tmp/plugins/.agents
+26775552	/home/tibule12/.codex/.tmp/plugins/.git
+107188224	/home/tibule12/.codex/.tmp/plugins
+107200512	/home/tibule12/.codex/.tmp
+4096	/var/cache/colord
+4096	/var/cache/debconf/tmp.ci
+5038080	/var/cache/debconf
+4096	/var/cache/PackageKit/downloads
+8192	/var/cache/PackageKit
+12288	/var/cache/apparmor/f6da0254.0
+4096	/var/cache/apparmor/8eeb6286.0
+12288	/var/cache/apparmor/70b6ca72.0
+12288	/var/cache/apparmor/ae1a4050.0
+45056	/var/cache/apparmor
+4096	/var/cache/man/cat8
+45056	/var/cache/man/uk
+49152	/var/cache/man/nl
+28672	/var/cache/man/fi
+40960	/var/cache/man/it
+69632	/var/cache/man/fr
+4096	/var/cache/man/cat4
+32768	/var/cache/man/sl
+40960	/var/cache/man/ja
+69632	/var/cache/man/de
+32768	/var/cache/man/fr.UTF-8
+36864	/var/cache/man/ko
+45056	/var/cache/man/ro
+40960	/var/cache/man/pt_BR
+49152	/var/cache/man/sv
+45056	/var/cache/man/pl
+45056	/var/cache/man/ru
+65536	/var/cache/man/pt
+4096	/var/cache/man/cat3
+40960	/var/cache/man/es
+4096	/var/cache/man/cat1
+36864	/var/cache/man/hu
+36864	/var/cache/man/sr
+36864	/var/cache/man/zh_CN
+4096	/var/cache/man/cat5
+32768	/var/cache/man/vi
+36864	/var/cache/man/id
+40960	/var/cache/man/cs
+4096	/var/cache/man/cat2
+28672	/var/cache/man/hr
+36864	/var/cache/man/tr
+4096	/var/cache/man/cat6
+32768	/var/cache/man/fr.ISO8859-1
+4096	/var/cache/man/cat7
+36864	/var/cache/man/zh_TW
+36864	/var/cache/man/da
+2408448	/var/cache/man
+24649728	/var/cache/fwupd
+475136	/var/cache/cracklib
+98304	/var/cache/snapd/aux
+593920	/var/cache/snapd/icons-pool
+4096	/var/cache/snapd/icons
+5419008	/var/cache/snapd
+4096	/var/cache/cups-browsed
+4096	/var/cache/fwupdmgr
+4096	/var/cache/google-android-emulator-installer
+4096	/var/cache/private
+4096	/var/cache/ldconfig
+1548546048	/var/cache/apt/archives
+1679798272	/var/cache/apt
+1531904	/var/cache/fontconfig
+40960	/var/cache/dictionaries-common
+4096	/var/cache/adduser
+4096	/var/cache/cups
+4096	/var/cache/app-info/xmls
+8192	/var/cache/app-info
+8781824	/var/cache/swcatalog/cache
+8785920	/var/cache/swcatalog
+1728245760	/var/cache

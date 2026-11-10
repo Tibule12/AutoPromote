@@ -2,7 +2,7 @@
   "projectId": "motionflow-seed-project",
   "projectName": "AutoPromote Motion Flow Parity 20261031",
   "revision": 22,
-  "studioDocumentSha256": "c6d184b9eae1ecff15baf618645fc31676ee17d4794ad2d3da9ed376b1bebc7c",
+  "studioDocumentSha256": "a7bc1ab61167863f253d2d520736b866110c2b371127a3cefc035f87aa5deae0",
   "renderRequest": {
     "video_url": "http://127.0.0.1:5027/motionflow-source.mp4",
     "start_time": 0,
@@ -33,7 +33,7 @@
           "feather": 0,
           "invert": false
         },
-        "parentId": "null-rig-1793445808952",
+        "parentId": "null-rig-1794040045971",
         "start_time": 0
       },
       {
@@ -55,7 +55,7 @@
         "startTime": 0,
         "duration": 6,
         "bRollMode": "pip",
-        "parentId": "null-rig-1793445808952",
+        "parentId": "null-rig-1794040045971",
         "trackMatte": {
           "mode": "alpha",
           "sourceLayerId": "matte-plate"
@@ -80,6 +80,7 @@
     "professional_cleanup": false,
     "finish_plan": {
       "color_cube": null,
+      "adjustment_layers": [],
       "main_frame": {
         "enabled": false,
         "shape": "round",

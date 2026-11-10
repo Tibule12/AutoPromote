@@ -1,0 +1,47 @@
+{
+  "apiPid": 436812,
+  "workerPid": 288261,
+  "origin": "http://127.0.0.1:43927",
+  "demoProject": "demo-autopromote-credits",
+  "build": "/tmp/autopromote-application-demo-5izIlF/build-video-matte-20261102",
+  "mainAsset": "/static/js/main.3e5afe6a.js",
+  "mainSha256": "be8a6bd3d57314e9332befaced5ab830465c2c886db1ef7c338ee89d2b26447a",
+  "sources": [
+    {
+      "file": "frontend/src/components/ViralClipStudio.js",
+      "sha256": "303e632c5facd7e68129633dc4df524d88f1680fc5c64e000ee9db2308335204"
+    },
+    {
+      "file": "frontend/src/components/StudioProgrammeFrame.js",
+      "sha256": "a84524646519401dca2186dd0f0e5d60dc862db7c1877c00745cf5c187b2c3c9"
+    },
+    {
+      "file": "frontend/src/components/studioCompRigging.js",
+      "sha256": "fee827c06422c937113ccbbda8d5c40544095e46a74f99bae9d71074b90ca023"
+    },
+    {
+      "file": "frontend/src/components/studioVideoMatte.js",
+      "sha256": "2ff4fe1681032c1698cfd08a3727a4538370058ffa0e40db1a373988de0b8217"
+    },
+    {
+      "file": "src/generated/studioDirectorReplayKernel.cjs",
+      "sha256": "3cf9b00974895cde9c0f7f6d172755ada199d23ff33acd6ee30c78ef562a18b4"
+    },
+    {
+      "file": "python_media_worker/main_media_server.py",
+      "sha256": "891dc7e8d5399d312b0e8ebcf61c3210fb0e46c748b74b1841d201dea069dd9b"
+    },
+    {
+      "file": "python_media_worker/studio_composition.py",
+      "sha256": "b474b171c6227fecbf9f27cf8b277d3adc31304dde42de0d5476bda54e98527e"
+    },
+    {
+      "file": "python_media_worker/studio_layer_motion.py",
+      "sha256": "c41f1612342c2ad71c592de5fd0293448d0254355f49d3ad78a6dc4023b12258"
+    }
+  ],
+  "welcomeChecks": 8,
+  "normalCandidateAuth": true,
+  "paidCalls": 0,
+  "productionWrites": false
+}

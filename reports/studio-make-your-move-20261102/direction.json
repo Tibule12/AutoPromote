@@ -1,0 +1,64 @@
+{
+  "name": "Make your move",
+  "seconds": 24,
+  "style": "Bold kinetic typography, moving picture mattes, source-bound occlusion and native drawn accents. No bending planes.",
+  "plans": [
+    {
+      "name": "01 - Type opens the shot",
+      "layers": 13,
+      "actions": 8
+    },
+    {
+      "name": "02 - Person crosses the type",
+      "layers": 2,
+      "actions": 35
+    },
+    {
+      "name": "02a - Source-bound moving callout",
+      "layers": 2,
+      "actions": 6
+    },
+    {
+      "name": "03a - Step accent",
+      "layers": 1,
+      "actions": 2
+    },
+    {
+      "name": "03b - Step accent",
+      "layers": 1,
+      "actions": 2
+    },
+    {
+      "name": "03c - Step accent",
+      "layers": 1,
+      "actions": 2
+    },
+    {
+      "name": "03d - Step accent",
+      "layers": 1,
+      "actions": 2
+    },
+    {
+      "name": "03e - Step accent",
+      "layers": 1,
+      "actions": 2
+    },
+    {
+      "name": "03 - Rhythm typography",
+      "layers": 4,
+      "actions": 1
+    },
+    {
+      "name": "04 - Live subject occlusion",
+      "layers": 9,
+      "actions": 24
+    },
+    {
+      "name": "05 - Make your move",
+      "layers": 15,
+      "actions": 1
+    }
+  ],
+  "retainedCitySourceHash": "09f2b8bfcf899d174ecf53f6a9c5358b9d19ca7b7d8ba0b1c508abfc2a2bf15d",
+  "paidCalls": 0
+}

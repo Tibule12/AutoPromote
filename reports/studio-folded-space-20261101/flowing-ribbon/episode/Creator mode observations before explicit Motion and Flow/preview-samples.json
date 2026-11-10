@@ -1,0 +1,4087 @@
+[
+  {
+    "requested": 0.25,
+    "testid": "studio-program-canvas",
+    "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+    "programmeTime": "0.25",
+    "programmeSource": "source",
+    "sourceSampling": "accurate-paused",
+    "sourceContentHash": "09f2b8bfcf899d174ecf53f6a9c5358b9d19ca7b7d8ba0b1c508abfc2a2bf15d",
+    "sourceFrameIndex": "6",
+    "sourceGeneration": "1793467767588",
+    "joinTransition": "",
+    "joinOpacity": "0",
+    "planes": [
+      {
+        "id": "scene-3c5fc6dc-0e77-4015-862c-02d57957df76",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-490d1c93-51c2-41c7-8ca5-bfff92211a65",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 70.6023, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-29ab67d1-9da0-4567-bbff-9fa7088860cc",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 141.702, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-1e66b464-1448-470a-b143-550e49ccc791",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 212.802, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-4bea056a-cdbb-41db-b988-f01a10ca9351",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 283.902, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef6c9cb5-307c-452c-a176-6d2fc22cf284",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 355.002, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-9afc0952-30e5-4629-a36b-17d30e202b06",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 426.102, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6bccfd27-6de2-48e8-b44b-20f6c2b07573",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 497.202, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-970c41b0-5654-4726-9fbd-51844bf01b65",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 568.302, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-b2990333-b320-4985-aaf5-84e86b0381bc",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 639.402, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-3a135a31-7d0e-433a-bc1a-bbe02b4a5b1e",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-aaf378e2-a6b6-4a70-8e0f-d75ebb3bd542",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 70.6023, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6ee31ce9-39b8-4f9f-8dd0-891319dcfbce",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 141.702, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-0fbafcae-1a88-4793-8beb-0c25a319f986",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 212.802, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-a238a848-0593-40bb-858f-2e6b57ee71a0",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 283.902, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-8b1e0e67-6d0f-4e2b-bd65-52eba7bb94ac",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 355.002, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-178cb54c-aa44-49c9-87f6-6c45c45e90f3",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 426.102, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef8c36f3-5392-4055-b781-2f06a3e68d4a",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 497.202, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-670a4a5a-7606-47f4-b6b9-80010e45e5f0",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 568.302, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-28522668-11ad-4d32-8b1d-69c40c952766",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 639.402, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      }
+    ]
+  },
+  {
+    "requested": 3,
+    "testid": "studio-program-canvas",
+    "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+    "programmeTime": "3",
+    "programmeSource": "source",
+    "sourceSampling": "accurate-paused",
+    "sourceContentHash": "09f2b8bfcf899d174ecf53f6a9c5358b9d19ca7b7d8ba0b1c508abfc2a2bf15d",
+    "sourceFrameIndex": "72",
+    "sourceGeneration": "1793467767588",
+    "joinTransition": "",
+    "joinOpacity": "0",
+    "planes": [
+      {
+        "id": "scene-3c5fc6dc-0e77-4015-862c-02d57957df76",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-490d1c93-51c2-41c7-8ca5-bfff92211a65",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 70.6023, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-29ab67d1-9da0-4567-bbff-9fa7088860cc",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 141.702, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-1e66b464-1448-470a-b143-550e49ccc791",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 212.802, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-4bea056a-cdbb-41db-b988-f01a10ca9351",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 283.902, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef6c9cb5-307c-452c-a176-6d2fc22cf284",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 355.002, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-9afc0952-30e5-4629-a36b-17d30e202b06",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 426.102, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6bccfd27-6de2-48e8-b44b-20f6c2b07573",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 497.202, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-970c41b0-5654-4726-9fbd-51844bf01b65",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 568.302, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-b2990333-b320-4985-aaf5-84e86b0381bc",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 639.402, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-3a135a31-7d0e-433a-bc1a-bbe02b4a5b1e",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-aaf378e2-a6b6-4a70-8e0f-d75ebb3bd542",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 70.6023, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6ee31ce9-39b8-4f9f-8dd0-891319dcfbce",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 141.702, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-0fbafcae-1a88-4793-8beb-0c25a319f986",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 212.802, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-a238a848-0593-40bb-858f-2e6b57ee71a0",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 283.902, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-8b1e0e67-6d0f-4e2b-bd65-52eba7bb94ac",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 355.002, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-178cb54c-aa44-49c9-87f6-6c45c45e90f3",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 426.102, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef8c36f3-5392-4055-b781-2f06a3e68d4a",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 497.202, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-670a4a5a-7606-47f4-b6b9-80010e45e5f0",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 568.302, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-28522668-11ad-4d32-8b1d-69c40c952766",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 639.402, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      }
+    ]
+  },
+  {
+    "requested": 6,
+    "testid": "studio-program-canvas",
+    "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+    "programmeTime": "6",
+    "programmeSource": "source",
+    "sourceSampling": "accurate-paused",
+    "sourceContentHash": "09f2b8bfcf899d174ecf53f6a9c5358b9d19ca7b7d8ba0b1c508abfc2a2bf15d",
+    "sourceFrameIndex": "0",
+    "sourceGeneration": "1793467767588",
+    "joinTransition": "",
+    "joinOpacity": "0",
+    "planes": [
+      {
+        "id": "scene-3c5fc6dc-0e77-4015-862c-02d57957df76",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-490d1c93-51c2-41c7-8ca5-bfff92211a65",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 70.6023, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-29ab67d1-9da0-4567-bbff-9fa7088860cc",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 141.702, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-1e66b464-1448-470a-b143-550e49ccc791",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 212.802, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-4bea056a-cdbb-41db-b988-f01a10ca9351",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 283.902, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef6c9cb5-307c-452c-a176-6d2fc22cf284",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 355.002, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-9afc0952-30e5-4629-a36b-17d30e202b06",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 426.102, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6bccfd27-6de2-48e8-b44b-20f6c2b07573",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 497.202, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-970c41b0-5654-4726-9fbd-51844bf01b65",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 568.302, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-b2990333-b320-4985-aaf5-84e86b0381bc",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 639.402, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-3a135a31-7d0e-433a-bc1a-bbe02b4a5b1e",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-aaf378e2-a6b6-4a70-8e0f-d75ebb3bd542",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 70.6023, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6ee31ce9-39b8-4f9f-8dd0-891319dcfbce",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 141.702, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-0fbafcae-1a88-4793-8beb-0c25a319f986",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 212.802, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-a238a848-0593-40bb-858f-2e6b57ee71a0",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 283.902, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-8b1e0e67-6d0f-4e2b-bd65-52eba7bb94ac",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 355.002, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-178cb54c-aa44-49c9-87f6-6c45c45e90f3",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 426.102, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef8c36f3-5392-4055-b781-2f06a3e68d4a",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 497.202, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-670a4a5a-7606-47f4-b6b9-80010e45e5f0",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 568.302, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-28522668-11ad-4d32-8b1d-69c40c952766",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 639.402, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      }
+    ]
+  },
+  {
+    "requested": 11.5,
+    "testid": "studio-program-canvas",
+    "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+    "programmeTime": "11.5",
+    "programmeSource": "source",
+    "sourceSampling": "accurate-paused",
+    "sourceContentHash": "b5406236fe04617468a712d3353b37845149a16a25afb6b1b9f38e72801acc96",
+    "sourceFrameIndex": "36",
+    "sourceGeneration": "1793467771815",
+    "joinTransition": "",
+    "joinOpacity": "0",
+    "planes": [
+      {
+        "id": "scene-3c5fc6dc-0e77-4015-862c-02d57957df76",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-490d1c93-51c2-41c7-8ca5-bfff92211a65",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 70.6023, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-29ab67d1-9da0-4567-bbff-9fa7088860cc",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 141.702, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-1e66b464-1448-470a-b143-550e49ccc791",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 212.802, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-4bea056a-cdbb-41db-b988-f01a10ca9351",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 283.902, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef6c9cb5-307c-452c-a176-6d2fc22cf284",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 355.002, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-9afc0952-30e5-4629-a36b-17d30e202b06",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 426.102, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6bccfd27-6de2-48e8-b44b-20f6c2b07573",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 497.202, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-970c41b0-5654-4726-9fbd-51844bf01b65",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 568.302, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-b2990333-b320-4985-aaf5-84e86b0381bc",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 639.402, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-3a135a31-7d0e-433a-bc1a-bbe02b4a5b1e",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-aaf378e2-a6b6-4a70-8e0f-d75ebb3bd542",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 70.6023, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6ee31ce9-39b8-4f9f-8dd0-891319dcfbce",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 141.702, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-0fbafcae-1a88-4793-8beb-0c25a319f986",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 212.802, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-a238a848-0593-40bb-858f-2e6b57ee71a0",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 283.902, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-8b1e0e67-6d0f-4e2b-bd65-52eba7bb94ac",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 355.002, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-178cb54c-aa44-49c9-87f6-6c45c45e90f3",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 426.102, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef8c36f3-5392-4055-b781-2f06a3e68d4a",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 497.202, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-670a4a5a-7606-47f4-b6b9-80010e45e5f0",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 568.302, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-28522668-11ad-4d32-8b1d-69c40c952766",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 639.402, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      }
+    ]
+  },
+  {
+    "requested": 17,
+    "testid": "studio-program-canvas",
+    "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+    "programmeTime": "17",
+    "programmeSource": "source",
+    "sourceSampling": "accurate-paused",
+    "sourceContentHash": "dd6037bc87dc9c93b84fb506b04355fe12d1f4bda0e942aec8da7e83d3c3e86c",
+    "sourceFrameIndex": "24",
+    "sourceGeneration": "1793467774295",
+    "joinTransition": "",
+    "joinOpacity": "0",
+    "planes": [
+      {
+        "id": "scene-3c5fc6dc-0e77-4015-862c-02d57957df76",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-490d1c93-51c2-41c7-8ca5-bfff92211a65",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 70.6023, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-29ab67d1-9da0-4567-bbff-9fa7088860cc",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 141.702, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-1e66b464-1448-470a-b143-550e49ccc791",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 212.802, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-4bea056a-cdbb-41db-b988-f01a10ca9351",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 283.902, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef6c9cb5-307c-452c-a176-6d2fc22cf284",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 355.002, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-9afc0952-30e5-4629-a36b-17d30e202b06",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 426.102, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6bccfd27-6de2-48e8-b44b-20f6c2b07573",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 497.202, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-970c41b0-5654-4726-9fbd-51844bf01b65",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 568.302, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-b2990333-b320-4985-aaf5-84e86b0381bc",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 639.402, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-3a135a31-7d0e-433a-bc1a-bbe02b4a5b1e",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-aaf378e2-a6b6-4a70-8e0f-d75ebb3bd542",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 70.6023, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6ee31ce9-39b8-4f9f-8dd0-891319dcfbce",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 141.702, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-0fbafcae-1a88-4793-8beb-0c25a319f986",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 212.802, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-a238a848-0593-40bb-858f-2e6b57ee71a0",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 283.902, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-8b1e0e67-6d0f-4e2b-bd65-52eba7bb94ac",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 355.002, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-178cb54c-aa44-49c9-87f6-6c45c45e90f3",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 426.102, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef8c36f3-5392-4055-b781-2f06a3e68d4a",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 497.202, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-670a4a5a-7606-47f4-b6b9-80010e45e5f0",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 568.302, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-28522668-11ad-4d32-8b1d-69c40c952766",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 639.402, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      }
+    ]
+  },
+  {
+    "requested": 20.25,
+    "testid": "studio-program-canvas",
+    "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+    "programmeTime": "20.25",
+    "programmeSource": "source",
+    "sourceSampling": "accurate-paused",
+    "sourceContentHash": "01258817091b10d7639169d3fc9885229ea5fbad787ee1ac674b72c25f9ef468",
+    "sourceFrameIndex": "6",
+    "sourceGeneration": "1793467773076",
+    "joinTransition": "",
+    "joinOpacity": "0",
+    "planes": [
+      {
+        "id": "scene-3c5fc6dc-0e77-4015-862c-02d57957df76",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+        "sourceTime": 0.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-490d1c93-51c2-41c7-8ca5-bfff92211a65",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 70.6023, 0, 0, 1)",
+        "sourceTime": 0.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-29ab67d1-9da0-4567-bbff-9fa7088860cc",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 141.702, 0, 0, 1)",
+        "sourceTime": 0.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-1e66b464-1448-470a-b143-550e49ccc791",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 212.802, 0, 0, 1)",
+        "sourceTime": 0.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-4bea056a-cdbb-41db-b988-f01a10ca9351",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 283.902, 0, 0, 1)",
+        "sourceTime": 0.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef6c9cb5-307c-452c-a176-6d2fc22cf284",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 355.002, 0, 0, 1)",
+        "sourceTime": 0.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-9afc0952-30e5-4629-a36b-17d30e202b06",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 426.102, 0, 0, 1)",
+        "sourceTime": 0.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6bccfd27-6de2-48e8-b44b-20f6c2b07573",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 497.202, 0, 0, 1)",
+        "sourceTime": 0.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": true
+      },
+      {
+        "id": "scene-970c41b0-5654-4726-9fbd-51844bf01b65",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 568.302, 0, 0, 1)",
+        "sourceTime": 0.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-b2990333-b320-4985-aaf5-84e86b0381bc",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 639.402, 0, 0, 1)",
+        "sourceTime": 0.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": true
+      },
+      {
+        "id": "scene-3a135a31-7d0e-433a-bc1a-bbe02b4a5b1e",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-aaf378e2-a6b6-4a70-8e0f-d75ebb3bd542",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 70.6023, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6ee31ce9-39b8-4f9f-8dd0-891319dcfbce",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 141.702, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-0fbafcae-1a88-4793-8beb-0c25a319f986",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 212.802, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-a238a848-0593-40bb-858f-2e6b57ee71a0",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 283.902, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-8b1e0e67-6d0f-4e2b-bd65-52eba7bb94ac",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 355.002, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-178cb54c-aa44-49c9-87f6-6c45c45e90f3",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 426.102, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef8c36f3-5392-4055-b781-2f06a3e68d4a",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 497.202, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-670a4a5a-7606-47f4-b6b9-80010e45e5f0",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 568.302, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-28522668-11ad-4d32-8b1d-69c40c952766",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 639.402, 0, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      }
+    ]
+  },
+  {
+    "requested": 21,
+    "testid": "studio-program-canvas",
+    "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+    "programmeTime": "21",
+    "programmeSource": "source",
+    "sourceSampling": "accurate-paused",
+    "sourceContentHash": "01258817091b10d7639169d3fc9885229ea5fbad787ee1ac674b72c25f9ef468",
+    "sourceFrameIndex": "24",
+    "sourceGeneration": "1793467773076",
+    "joinTransition": "",
+    "joinOpacity": "0",
+    "planes": [
+      {
+        "id": "scene-3c5fc6dc-0e77-4015-862c-02d57957df76",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0896101, 0.0060252, 0, -8.3e-06, -0.014651, 0.919628, 0, -1.9e-06, 0, 0, 1, 0, 31.0957, 19.9763, 0, 1)",
+        "sourceTime": 1,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-490d1c93-51c2-41c7-8ca5-bfff92211a65",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0871447, -0.000385, 0, -1.45e-05, -0.0222805, 0.891612, 0, -8.64e-05, 0, 0, 1, 0, 94.4923, 24.3716, 0, 1)",
+        "sourceTime": 1,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-29ab67d1-9da0-4567-bbff-9fa7088860cc",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0873932, -0.0067729, 0, -1.56e-05, -0.0246948, 0.89513, 0, -0.0001014, 0, 0, 1, 0, 157.202, 24.3828, 0, 1)",
+        "sourceTime": 1,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-1e66b464-1448-470a-b143-550e49ccc791",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0911096, -0.0106172, 0, -1.02e-05, -0.0144692, 0.924087, 0, -5.49e-05, 0, 0, 1, 0, 220.906, 19.877, 0, 1)",
+        "sourceTime": 1,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-4bea056a-cdbb-41db-b988-f01a10ca9351",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0965658, -0.0105369, 0, -8.33083e-07, 0.00522002, 0.957905, 0, 1.34116e-05, 0, 0, 1, 0, 286.851, 12.5293, 0, 1)",
+        "sourceTime": 1,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef6c9cb5-307c-452c-a176-6d2fc22cf284",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.100627, -0.0066028, 0, 7.6e-06, 0.0195987, 0.974129, 0, 5.38e-05, 0, 0, 1, 0, 354.762, 5.13037, 0, 1)",
+        "sourceTime": 1,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-9afc0952-30e5-4629-a36b-17d30e202b06",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.101245, -0.0002585, 0, 1.19e-05, 0.0115049, 0.961776, 0, 3.46e-05, 0, 0, 1, 0, 423.058, 0.469256, 0, 1)",
+        "sourceTime": 1,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6bccfd27-6de2-48e8-b44b-20f6c2b07573",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0991542, 0.0061398, 0, 1.22e-05, -0.022657, 0.927516, 0, -3.54e-05, 0, 0, 1, 0, 489.953, 0.252328, 0, 1)",
+        "sourceTime": 1,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-970c41b0-5654-4726-9fbd-51844bf01b65",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0961668, 0.0101665, 0, 9.2e-06, -0.0646026, 0.890852, 0, -0.0001112, 0, 0, 1, 0, 554.7, 4.49292, 0, 1)",
+        "sourceTime": 1,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-b2990333-b320-4985-aaf5-84e86b0381bc",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0923335, 0.0101488, 0, 2.2e-06, -0.0833351, 0.873289, 0, -0.0001413, 0, 0, 1, 0, 618.121, 11.5386, 0, 1)",
+        "sourceTime": 1,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-3a135a31-7d0e-433a-bc1a-bbe02b4a5b1e",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0896101, 0.0060252, 0, -8.3e-06, -0.014651, 0.919628, 0, -1.9e-06, 0, 0, 1, 0, 31.0957, 19.9763, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-aaf378e2-a6b6-4a70-8e0f-d75ebb3bd542",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0871447, -0.000385, 0, -1.45e-05, -0.0222805, 0.891612, 0, -8.64e-05, 0, 0, 1, 0, 94.4923, 24.3716, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6ee31ce9-39b8-4f9f-8dd0-891319dcfbce",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0873932, -0.0067729, 0, -1.56e-05, -0.0246948, 0.89513, 0, -0.0001014, 0, 0, 1, 0, 157.202, 24.3828, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-0fbafcae-1a88-4793-8beb-0c25a319f986",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0911096, -0.0106172, 0, -1.02e-05, -0.0144692, 0.924087, 0, -5.49e-05, 0, 0, 1, 0, 220.906, 19.877, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-a238a848-0593-40bb-858f-2e6b57ee71a0",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0965658, -0.0105369, 0, -8.33083e-07, 0.00522002, 0.957905, 0, 1.34116e-05, 0, 0, 1, 0, 286.851, 12.5293, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-8b1e0e67-6d0f-4e2b-bd65-52eba7bb94ac",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.100627, -0.0066028, 0, 7.6e-06, 0.0195987, 0.974129, 0, 5.38e-05, 0, 0, 1, 0, 354.762, 5.13037, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-178cb54c-aa44-49c9-87f6-6c45c45e90f3",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.101245, -0.0002585, 0, 1.19e-05, 0.0115049, 0.961776, 0, 3.46e-05, 0, 0, 1, 0, 423.058, 0.469256, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef8c36f3-5392-4055-b781-2f06a3e68d4a",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0991542, 0.0061398, 0, 1.22e-05, -0.022657, 0.927516, 0, -3.54e-05, 0, 0, 1, 0, 489.953, 0.252328, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-670a4a5a-7606-47f4-b6b9-80010e45e5f0",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0961668, 0.0101665, 0, 9.2e-06, -0.0646026, 0.890852, 0, -0.0001112, 0, 0, 1, 0, 554.7, 4.49292, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-28522668-11ad-4d32-8b1d-69c40c952766",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0923335, 0.0101488, 0, 2.2e-06, -0.0833351, 0.873289, 0, -0.0001413, 0, 0, 1, 0, 618.121, 11.5386, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      }
+    ]
+  },
+  {
+    "requested": 21.75,
+    "testid": "studio-program-canvas",
+    "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+    "programmeTime": "21.75",
+    "programmeSource": "source",
+    "sourceSampling": "accurate-paused",
+    "sourceContentHash": "01258817091b10d7639169d3fc9885229ea5fbad787ee1ac674b72c25f9ef468",
+    "sourceFrameIndex": "42",
+    "sourceGeneration": "1793467773076",
+    "joinTransition": "",
+    "joinOpacity": "0",
+    "planes": [
+      {
+        "id": "scene-3c5fc6dc-0e77-4015-862c-02d57957df76",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0744692, 0.0383046, 0, 1.16e-05, 0.0267618, 0.782819, 0, 0.0003768, 0, 0, 1, 0, 121.195, 57.0129, 0, 1)",
+        "sourceTime": 1.75,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-490d1c93-51c2-41c7-8ca5-bfff92211a65",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0576028, 0.0223164, 0, -2.19e-05, -0.042956, 0.626784, 0, -6.27e-05, 0, 0, 1, 0, 172.064, 83.231, 0, 1)",
+        "sourceTime": 1.75,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-29ab67d1-9da0-4567-bbff-9fa7088860cc",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0430582, -0.0048902, 0, -6.59e-05, -0.0938601, 0.546645, 0, -0.00031, 0, 0, 1, 0, 215.817, 100.533, 0, 1)",
+        "sourceTime": 1.75,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-1e66b464-1448-470a-b143-550e49ccc791",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0413012, -0.0290106, 0, -8e-05, -0.0858928, 0.592012, 0, -0.0002752, 0, 0, 1, 0, 257.942, 101.934, 0, 1)",
+        "sourceTime": 1.75,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-4bea056a-cdbb-41db-b988-f01a10ca9351",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0623068, -0.0395287, 0, -3.73e-05, -0.0075962, 0.732388, 0, -1.65e-05, 0, 0, 1, 0, 303.952, 86.5271, 0, 1)",
+        "sourceTime": 1.75,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef6c9cb5-307c-452c-a176-6d2fc22cf284",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0967382, -0.0358132, 0, 3.52e-05, 0.106499, 0.868891, 0, 0.0003034, 0, 0, 1, 0, 356.969, 60.409, 0, 1)",
+        "sourceTime": 1.75,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-9afc0952-30e5-4629-a36b-17d30e202b06",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.109235, -0.0209359, 0, 6.79e-05, 0.14352, 0.880452, 0, 0.0003929, 0, 0, 1, 0, 414.535, 34.4012, 0, 1)",
+        "sourceTime": 1.75,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6bccfd27-6de2-48e8-b44b-20f6c2b07573",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0913732, 0.0011601, 0, 5.37e-05, -0.0033546, 0.745344, 0, 6.69e-05, 0, 0, 1, 0, 468.829, 18.7304, 0, 1)",
+        "sourceTime": 1.75,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-970c41b0-5654-4726-9fbd-51844bf01b65",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0825019, 0.023858, 0, 5.68e-05, -0.250251, 0.570782, 0, -0.0004298, 0, 0, 1, 0, 513.595, 18.7201, 0, 1)",
+        "sourceTime": 1.75,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-b2990333-b320-4985-aaf5-84e86b0381bc",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.091837, 0.0401679, 0, 7.68e-05, -0.426255, 0.445182, 0, -0.0007549, 0, 0, 1, 0, 549.549, 33.9947, 0, 1)",
+        "sourceTime": 1.75,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-3a135a31-7d0e-433a-bc1a-bbe02b4a5b1e",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0744692, 0.0383046, 0, 1.16e-05, 0.0267618, 0.782819, 0, 0.0003768, 0, 0, 1, 0, 121.195, 57.0129, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-aaf378e2-a6b6-4a70-8e0f-d75ebb3bd542",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0576028, 0.0223164, 0, -2.19e-05, -0.042956, 0.626784, 0, -6.27e-05, 0, 0, 1, 0, 172.064, 83.231, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6ee31ce9-39b8-4f9f-8dd0-891319dcfbce",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0430582, -0.0048902, 0, -6.59e-05, -0.0938601, 0.546645, 0, -0.00031, 0, 0, 1, 0, 215.817, 100.533, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-0fbafcae-1a88-4793-8beb-0c25a319f986",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0413012, -0.0290106, 0, -8e-05, -0.0858928, 0.592012, 0, -0.0002752, 0, 0, 1, 0, 257.942, 101.934, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-a238a848-0593-40bb-858f-2e6b57ee71a0",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0623068, -0.0395287, 0, -3.73e-05, -0.0075962, 0.732388, 0, -1.65e-05, 0, 0, 1, 0, 303.952, 86.5271, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-8b1e0e67-6d0f-4e2b-bd65-52eba7bb94ac",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0967382, -0.0358132, 0, 3.52e-05, 0.106499, 0.868891, 0, 0.0003034, 0, 0, 1, 0, 356.969, 60.409, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-178cb54c-aa44-49c9-87f6-6c45c45e90f3",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.109235, -0.0209359, 0, 6.79e-05, 0.14352, 0.880452, 0, 0.0003929, 0, 0, 1, 0, 414.535, 34.4012, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef8c36f3-5392-4055-b781-2f06a3e68d4a",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0913732, 0.0011601, 0, 5.37e-05, -0.0033546, 0.745344, 0, 6.69e-05, 0, 0, 1, 0, 468.829, 18.7304, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-670a4a5a-7606-47f4-b6b9-80010e45e5f0",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0825019, 0.023858, 0, 5.68e-05, -0.250251, 0.570782, 0, -0.0004298, 0, 0, 1, 0, 513.595, 18.7201, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-28522668-11ad-4d32-8b1d-69c40c952766",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.091837, 0.0401679, 0, 7.68e-05, -0.426255, 0.445182, 0, -0.0007549, 0, 0, 1, 0, 549.549, 33.9947, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      }
+    ]
+  },
+  {
+    "requested": 22.5,
+    "testid": "studio-program-canvas",
+    "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+    "programmeTime": "22.5",
+    "programmeSource": "source",
+    "sourceSampling": "accurate-paused",
+    "sourceContentHash": "01258817091b10d7639169d3fc9885229ea5fbad787ee1ac674b72c25f9ef468",
+    "sourceFrameIndex": "60",
+    "sourceGeneration": "1793467773076",
+    "joinTransition": "",
+    "joinOpacity": "0",
+    "planes": [
+      {
+        "id": "scene-3c5fc6dc-0e77-4015-862c-02d57957df76",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0835164, 0.0500156, 0, 6.14e-05, 0.0957994, 0.736499, 0, 0.0005503, 0, 0, 1, 0, 142.49, 45.4409, 0, 1)",
+        "sourceTime": 2.5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-490d1c93-51c2-41c7-8ca5-bfff92211a65",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0721533, 0.0525562, 0, 6e-05, 0.0062318, 0.572107, 0, 7.64e-05, 0, 0, 1, 0, 192.791, 77.1329, 0, 1)",
+        "sourceTime": 2.5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-29ab67d1-9da0-4567-bbff-9fa7088860cc",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0519001, 0.0296858, 0, -4.4e-06, -0.0678082, 0.446112, 0, -0.000248, 0, 0, 1, 0, 233.574, 109.417, 0, 1)",
+        "sourceTime": 2.5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-1e66b464-1448-470a-b143-550e49ccc791",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0274662, -0.0092433, 0, -9.47e-05, -0.07014, 0.44459, 0, -0.0002565, 0, 0, 1, 0, 270.811, 130.763, 0, 1)",
+        "sourceTime": 2.5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-4bea056a-cdbb-41db-b988-f01a10ca9351",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0269991, -0.0380767, 0, -0.0001133, 0.0249859, 0.591472, 0, 4.24e-05, 0, 0, 1, 0, 310.701, 133.272, 0, 1)",
+        "sourceTime": 2.5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef6c9cb5-307c-452c-a176-6d2fc22cf284",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0756984, -0.0432246, 0, -7.8e-06, 0.229556, 0.847179, 0, 0.0006043, 0, 0, 1, 0, 358.085, 115.867, 0, 1)",
+        "sourceTime": 2.5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-9afc0952-30e5-4629-a36b-17d30e202b06",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.149967, -0.0325531, 0, 0.0001535, 0.487262, 1.06858, 0, 0.0012373, 0, 0, 1, 0, 413.428, 86.0584, 0, 1)",
+        "sourceTime": 2.5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6bccfd27-6de2-48e8-b44b-20f6c2b07573",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.138943, -0.0173077, 0, 0.0001581, 0.398281, 0.936251, 0, 0.0010234, 0, 0, 1, 0, 468.18, 57.0601, 0, 1)",
+        "sourceTime": 2.5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-970c41b0-5654-4726-9fbd-51844bf01b65",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0666861, 0.0035966, 0, 6.32e-05, -0.234885, 0.499567, 0, -0.0003228, 0, 0, 1, 0, 509.205, 40.3449, 0, 1)",
+        "sourceTime": 2.5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-b2990333-b320-4985-aaf5-84e86b0381bc",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0686405, 0.0299226, 0, 9.23e-05, -0.748613, 0.203544, 0, -0.001346, 0, 0, 1, 0, 532.454, 40.9234, 0, 1)",
+        "sourceTime": 2.5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-3a135a31-7d0e-433a-bc1a-bbe02b4a5b1e",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0835164, 0.0500156, 0, 6.14e-05, 0.0957994, 0.736499, 0, 0.0005503, 0, 0, 1, 0, 142.49, 45.4409, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-aaf378e2-a6b6-4a70-8e0f-d75ebb3bd542",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0721533, 0.0525562, 0, 6e-05, 0.0062318, 0.572107, 0, 7.64e-05, 0, 0, 1, 0, 192.791, 77.1329, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6ee31ce9-39b8-4f9f-8dd0-891319dcfbce",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0519001, 0.0296858, 0, -4.4e-06, -0.0678082, 0.446112, 0, -0.000248, 0, 0, 1, 0, 233.574, 109.417, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-0fbafcae-1a88-4793-8beb-0c25a319f986",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0274662, -0.0092433, 0, -9.47e-05, -0.07014, 0.44459, 0, -0.0002565, 0, 0, 1, 0, 270.811, 130.763, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-a238a848-0593-40bb-858f-2e6b57ee71a0",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0269991, -0.0380767, 0, -0.0001133, 0.0249859, 0.591472, 0, 4.24e-05, 0, 0, 1, 0, 310.701, 133.272, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-8b1e0e67-6d0f-4e2b-bd65-52eba7bb94ac",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0756984, -0.0432246, 0, -7.8e-06, 0.229556, 0.847179, 0, 0.0006043, 0, 0, 1, 0, 358.085, 115.867, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-178cb54c-aa44-49c9-87f6-6c45c45e90f3",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.149967, -0.0325531, 0, 0.0001535, 0.487262, 1.06858, 0, 0.0012373, 0, 0, 1, 0, 413.428, 86.0584, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef8c36f3-5392-4055-b781-2f06a3e68d4a",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.138943, -0.0173077, 0, 0.0001581, 0.398281, 0.936251, 0, 0.0010234, 0, 0, 1, 0, 468.18, 57.0601, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-670a4a5a-7606-47f4-b6b9-80010e45e5f0",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0666861, 0.0035966, 0, 6.32e-05, -0.234885, 0.499567, 0, -0.0003228, 0, 0, 1, 0, 509.205, 40.3449, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-28522668-11ad-4d32-8b1d-69c40c952766",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0686405, 0.0299226, 0, 9.23e-05, -0.748613, 0.203544, 0, -0.001346, 0, 0, 1, 0, 532.454, 40.9234, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      }
+    ]
+  },
+  {
+    "requested": 23.5,
+    "testid": "studio-program-canvas",
+    "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+    "programmeTime": "23.5",
+    "programmeSource": "source",
+    "sourceSampling": "accurate-paused",
+    "sourceContentHash": "01258817091b10d7639169d3fc9885229ea5fbad787ee1ac674b72c25f9ef468",
+    "sourceFrameIndex": "84",
+    "sourceGeneration": "1793467773076",
+    "joinTransition": "",
+    "joinOpacity": "0",
+    "planes": [
+      {
+        "id": "scene-3c5fc6dc-0e77-4015-862c-02d57957df76",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0960384, 0.0258738, 0, 8.52e-05, 0.105887, 0.7827, 0, 0.0005313, 0, 0, 1, 0, 124.519, 18.7263, 0, 1)",
+        "sourceTime": 3.5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-490d1c93-51c2-41c7-8ca5-bfff92211a65",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0840025, 0.0483902, 0, 8.64e-05, 0.0393332, 0.648153, 0, 0.0001727, 0, 0, 1, 0, 181.076, 34.6601, 0, 1)",
+        "sourceTime": 3.5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-29ab67d1-9da0-4567-bbff-9fa7088860cc",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.080732, 0.0585748, 0, 0.0001008, -0.0535498, 0.495104, 0, -0.000237, 0, 0, 1, 0, 226.292, 64.5913, 0, 1)",
+        "sourceTime": 3.5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-1e66b464-1448-470a-b143-550e49ccc791",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.067739, 0.0441131, 0, 4.89e-05, -0.101238, 0.402939, 0, -0.0004122, 0, 0, 1, 0, 264.209, 98.6819, 0, 1)",
+        "sourceTime": 3.5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-4bea056a-cdbb-41db-b988-f01a10ca9351",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0395114, 0.0059052, 0, -6.04e-05, -0.0509291, 0.43967, 0, -0.000248, 0, 0, 1, 0, 301.326, 125.402, 0, 1)",
+        "sourceTime": 3.5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef6c9cb5-307c-452c-a176-6d2fc22cf284",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0272835, -0.0293288, 0, -0.0001174, 0.109856, 0.620166, 0, 0.000194, 0, 0, 1, 0, 343.569, 135.428, 0, 1)",
+        "sourceTime": 3.5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-9afc0952-30e5-4629-a36b-17d30e202b06",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0730012, -0.0393956, 0, -3.05e-05, 0.407178, 0.932419, 0, 0.0009143, 0, 0, 1, 0, 395.253, 125.29, 0, 1)",
+        "sourceTime": 3.5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6bccfd27-6de2-48e8-b44b-20f6c2b07573",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.183129, -0.0279768, 0, 0.0001882, 0.892373, 1.32107, 0, 0.0019844, 0, 0, 1, 0, 456.189, 99.8506, 0, 1)",
+        "sourceTime": 3.5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-970c41b0-5654-4726-9fbd-51844bf01b65",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.219936, -0.0146752, 0, 0.0002836, 1.07911, 1.35524, 0, 0.0023474, 0, 0, 1, 0, 516.402, 70.8858, 0, 1)",
+        "sourceTime": 3.5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-b2990333-b320-4985-aaf5-84e86b0381bc",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.073459, -0.0036613, 0, 8.01e-05, -0.11784, 0.573904, 0, -1.6e-05, 0, 0, 1, 0, 559.422, 50.4906, 0, 1)",
+        "sourceTime": 3.5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-3a135a31-7d0e-433a-bc1a-bbe02b4a5b1e",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0960384, 0.0258738, 0, 8.52e-05, 0.105887, 0.7827, 0, 0.0005313, 0, 0, 1, 0, 124.519, 18.7263, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-aaf378e2-a6b6-4a70-8e0f-d75ebb3bd542",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0840025, 0.0483902, 0, 8.64e-05, 0.0393332, 0.648153, 0, 0.0001727, 0, 0, 1, 0, 181.076, 34.6601, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6ee31ce9-39b8-4f9f-8dd0-891319dcfbce",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.080732, 0.0585748, 0, 0.0001008, -0.0535498, 0.495104, 0, -0.000237, 0, 0, 1, 0, 226.292, 64.5913, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-0fbafcae-1a88-4793-8beb-0c25a319f986",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.067739, 0.0441131, 0, 4.89e-05, -0.101238, 0.402939, 0, -0.0004122, 0, 0, 1, 0, 264.209, 98.6819, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-a238a848-0593-40bb-858f-2e6b57ee71a0",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0395114, 0.0059052, 0, -6.04e-05, -0.0509291, 0.43967, 0, -0.000248, 0, 0, 1, 0, 301.326, 125.402, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-8b1e0e67-6d0f-4e2b-bd65-52eba7bb94ac",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0272835, -0.0293288, 0, -0.0001174, 0.109856, 0.620166, 0, 0.000194, 0, 0, 1, 0, 343.569, 135.428, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-178cb54c-aa44-49c9-87f6-6c45c45e90f3",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.0730012, -0.0393956, 0, -3.05e-05, 0.407178, 0.932419, 0, 0.0009143, 0, 0, 1, 0, 395.253, 125.29, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef8c36f3-5392-4055-b781-2f06a3e68d4a",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.183129, -0.0279768, 0, 0.0001882, 0.892373, 1.32107, 0, 0.0019844, 0, 0, 1, 0, 456.189, 99.8506, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-670a4a5a-7606-47f4-b6b9-80010e45e5f0",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.219936, -0.0146752, 0, 0.0002836, 1.07911, 1.35524, 0, 0.0023474, 0, 0, 1, 0, 516.402, 70.8858, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-28522668-11ad-4d32-8b1d-69c40c952766",
+        "visibility": "hidden",
+        "opacity": "0",
+        "matrix": "matrix3d(0.073459, -0.0036613, 0, 8.01e-05, -0.11784, 0.573904, 0, -1.6e-05, 0, 0, 1, 0, 559.422, 50.4906, 0, 1)",
+        "sourceTime": 0,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      }
+    ]
+  },
+  {
+    "requested": 24.25,
+    "testid": "studio-program-canvas",
+    "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+    "programmeTime": "24.25",
+    "programmeSource": "source",
+    "sourceSampling": "accurate-paused",
+    "sourceContentHash": "dd6037bc87dc9c93b84fb506b04355fe12d1f4bda0e942aec8da7e83d3c3e86c",
+    "sourceFrameIndex": "6",
+    "sourceGeneration": "1793467774295",
+    "joinTransition": "",
+    "joinOpacity": "0",
+    "planes": [
+      {
+        "id": "scene-3c5fc6dc-0e77-4015-862c-02d57957df76",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.105081, -0.0030117, 0, 0.0001172, 0.0984916, 0.803402, 0, 0.0004526, 0, 0, 1, 0, 117.385, 25.7411, 0, 1)",
+        "sourceTime": 4.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": true
+      },
+      {
+        "id": "scene-490d1c93-51c2-41c7-8ca5-bfff92211a65",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.090622, 0.0249166, 0, 8.47e-05, 0.0798875, 0.725582, 0, 0.0003571, 0, 0, 1, 0, 176.53, 21.6969, 0, 1)",
+        "sourceTime": 4.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-29ab67d1-9da0-4567-bbff-9fa7088860cc",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0816888, 0.047787, 0, 9.35e-05, -0.0138445, 0.576945, 0, -5.68e-05, 0, 0, 1, 0, 226.645, 36.8435, 0, 1)",
+        "sourceTime": 4.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-1e66b464-1448-470a-b143-550e49ccc791",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0830697, 0.0588497, 0, 0.0001111, -0.11291, 0.433539, 0, -0.0004272, 0, 0, 1, 0, 266.466, 65.9395, 0, 1)",
+        "sourceTime": 4.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-4bea056a-cdbb-41db-b988-f01a10ca9351",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0706474, 0.0447874, 0, 5.64e-05, -0.138536, 0.368284, 0, -0.0005058, 0, 0, 1, 0, 301.214, 99.4452, 0, 1)",
+        "sourceTime": 4.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef6c9cb5-307c-452c-a176-6d2fc22cf284",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.039155, 0.0063644, 0, -5.86e-05, -0.0444526, 0.437635, 0, -0.0002348, 0, 0, 1, 0, 337.329, 125.947, 0, 1)",
+        "sourceTime": 4.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-9afc0952-30e5-4629-a36b-17d30e202b06",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0254078, -0.0288014, 0, -0.0001181, 0.170056, 0.646601, 0, 0.0002942, 0, 0, 1, 0, 380.378, 136.146, 0, 1)",
+        "sourceTime": 4.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6bccfd27-6de2-48e8-b44b-20f6c2b07573",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0779437, -0.03784, 0, -2.49e-05, 0.542333, 0.991803, 0, 0.0011123, 0, 0, 1, 0, 434.149, 126.538, 0, 1)",
+        "sourceTime": 4.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-970c41b0-5654-4726-9fbd-51844bf01b65",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.210154, -0.0243302, 0, 0.0002192, 1.18389, 1.45462, 0, 0.0024094, 0, 0, 1, 0, 497.487, 101.834, 0, 1)",
+        "sourceTime": 4.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-b2990333-b320-4985-aaf5-84e86b0381bc",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.263002, -0.010511, 0, 0.0003389, 1.53009, 1.56147, 0, 0.003042, 0, 0, 1, 0, 558.915, 73.4973, 0, 1)",
+        "sourceTime": 4.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-3a135a31-7d0e-433a-bc1a-bbe02b4a5b1e",
+        "visibility": "visible",
+        "opacity": "0.3125",
+        "matrix": "matrix3d(0.105081, -0.0030117, 0, 0.0001172, 0.0984916, 0.803402, 0, 0.0004526, 0, 0, 1, 0, 117.385, 25.7411, 0, 1)",
+        "sourceTime": 0.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-aaf378e2-a6b6-4a70-8e0f-d75ebb3bd542",
+        "visibility": "visible",
+        "opacity": "0.3125",
+        "matrix": "matrix3d(0.090622, 0.0249166, 0, 8.47e-05, 0.0798875, 0.725582, 0, 0.0003571, 0, 0, 1, 0, 176.53, 21.6969, 0, 1)",
+        "sourceTime": 0.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6ee31ce9-39b8-4f9f-8dd0-891319dcfbce",
+        "visibility": "visible",
+        "opacity": "0.3125",
+        "matrix": "matrix3d(0.0816888, 0.047787, 0, 9.35e-05, -0.0138445, 0.576945, 0, -5.68e-05, 0, 0, 1, 0, 226.645, 36.8435, 0, 1)",
+        "sourceTime": 0.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-0fbafcae-1a88-4793-8beb-0c25a319f986",
+        "visibility": "visible",
+        "opacity": "0.3125",
+        "matrix": "matrix3d(0.0830697, 0.0588497, 0, 0.0001111, -0.11291, 0.433539, 0, -0.0004272, 0, 0, 1, 0, 266.466, 65.9395, 0, 1)",
+        "sourceTime": 0.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-a238a848-0593-40bb-858f-2e6b57ee71a0",
+        "visibility": "visible",
+        "opacity": "0.3125",
+        "matrix": "matrix3d(0.0706474, 0.0447874, 0, 5.64e-05, -0.138536, 0.368284, 0, -0.0005058, 0, 0, 1, 0, 301.214, 99.4452, 0, 1)",
+        "sourceTime": 0.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-8b1e0e67-6d0f-4e2b-bd65-52eba7bb94ac",
+        "visibility": "visible",
+        "opacity": "0.3125",
+        "matrix": "matrix3d(0.039155, 0.0063644, 0, -5.86e-05, -0.0444526, 0.437635, 0, -0.0002348, 0, 0, 1, 0, 337.329, 125.947, 0, 1)",
+        "sourceTime": 0.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-178cb54c-aa44-49c9-87f6-6c45c45e90f3",
+        "visibility": "visible",
+        "opacity": "0.3125",
+        "matrix": "matrix3d(0.0254078, -0.0288014, 0, -0.0001181, 0.170056, 0.646601, 0, 0.0002942, 0, 0, 1, 0, 380.378, 136.146, 0, 1)",
+        "sourceTime": 0.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef8c36f3-5392-4055-b781-2f06a3e68d4a",
+        "visibility": "visible",
+        "opacity": "0.3125",
+        "matrix": "matrix3d(0.0779437, -0.03784, 0, -2.49e-05, 0.542333, 0.991803, 0, 0.0011123, 0, 0, 1, 0, 434.149, 126.538, 0, 1)",
+        "sourceTime": 0.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-670a4a5a-7606-47f4-b6b9-80010e45e5f0",
+        "visibility": "visible",
+        "opacity": "0.3125",
+        "matrix": "matrix3d(0.210154, -0.0243302, 0, 0.0002192, 1.18389, 1.45462, 0, 0.0024094, 0, 0, 1, 0, 497.487, 101.834, 0, 1)",
+        "sourceTime": 0.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-28522668-11ad-4d32-8b1d-69c40c952766",
+        "visibility": "visible",
+        "opacity": "0.3125",
+        "matrix": "matrix3d(0.263002, -0.010511, 0, 0.0003389, 1.53009, 1.56147, 0, 0.003042, 0, 0, 1, 0, 558.915, 73.4973, 0, 1)",
+        "sourceTime": 0.25,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      }
+    ]
+  },
+  {
+    "requested": 25,
+    "testid": "studio-program-canvas",
+    "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+    "programmeTime": "25",
+    "programmeSource": "source",
+    "sourceSampling": "accurate-paused",
+    "sourceContentHash": "dd6037bc87dc9c93b84fb506b04355fe12d1f4bda0e942aec8da7e83d3c3e86c",
+    "sourceFrameIndex": "24",
+    "sourceGeneration": "1793467774295",
+    "joinTransition": "",
+    "joinOpacity": "0",
+    "planes": [
+      {
+        "id": "scene-3c5fc6dc-0e77-4015-862c-02d57957df76",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0926909, -0.0306401, 0, 8.82e-05, 0.044684, 0.711587, 0, 7.18e-05, 0, 0, 1, 0, 113.855, 55.0997, 0, 1)",
+        "sourceTime": 5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-490d1c93-51c2-41c7-8ca5-bfff92211a65",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.10387, -0.0044689, 0, 0.0001097, 0.10855, 0.777413, 0, 0.0004351, 0, 0, 1, 0, 168.34, 31.558, 0, 1)",
+        "sourceTime": 5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-29ab67d1-9da0-4567-bbff-9fa7088860cc",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0874921, 0.0227599, 0, 7.72e-05, 0.0771089, 0.693536, 0, 0.0002999, 0, 0, 1, 0, 223.936, 26.2605, 0, 1)",
+        "sourceTime": 5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-1e66b464-1448-470a-b143-550e49ccc791",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0810878, 0.0459003, 0, 9e-05, -0.0375879, 0.546063, 0, -0.0001264, 0, 0, 1, 0, 270.662, 39.9238, 0, 1)",
+        "sourceTime": 5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-4bea056a-cdbb-41db-b988-f01a10ca9351",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.08523, 0.0577383, 0, 0.0001105, -0.14796, 0.409096, 0, -0.0004834, 0, 0, 1, 0, 308.075, 67.7419, 0, 1)",
+        "sourceTime": 5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef6c9cb5-307c-452c-a176-6d2fc22cf284",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0717919, 0.0443281, 0, 5.63e-05, -0.167859, 0.352744, 0, -0.000536, 0, 0, 1, 0, 341.335, 100.426, 0, 1)",
+        "sourceTime": 5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-9afc0952-30e5-4629-a36b-17d30e202b06",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0356376, 0.0059855, 0, -6.12e-05, -0.0524739, 0.430637, 0, -0.0002385, 0, 0, 1, 0, 376.72, 126.589, 0, 1)",
+        "sourceTime": 5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6bccfd27-6de2-48e8-b44b-20f6c2b07573",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0186531, -0.0295313, 0, -0.0001242, 0.192505, 0.646544, 0, 0.0003101, 0, 0, 1, 0, 419.697, 136.802, 0, 1)",
+        "sourceTime": 5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-970c41b0-5654-4726-9fbd-51844bf01b65",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0748759, -0.0388458, 0, -3.22e-05, 0.610233, 1.00184, 0, 0.0011514, 0, 0, 1, 0, 474.07, 127.291, 0, 1)",
+        "sourceTime": 5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-b2990333-b320-4985-aaf5-84e86b0381bc",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.219853, -0.0250727, 0, 0.0002164, 1.34207, 1.49186, 0, 0.0025164, 0, 0, 1, 0, 538.763, 102.422, 0, 1)",
+        "sourceTime": 5,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-3a135a31-7d0e-433a-bc1a-bbe02b4a5b1e",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0926909, -0.0306401, 0, 8.82e-05, 0.044684, 0.711587, 0, 7.18e-05, 0, 0, 1, 0, 113.855, 55.0997, 0, 1)",
+        "sourceTime": 1,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-aaf378e2-a6b6-4a70-8e0f-d75ebb3bd542",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.10387, -0.0044689, 0, 0.0001097, 0.10855, 0.777413, 0, 0.0004351, 0, 0, 1, 0, 168.34, 31.558, 0, 1)",
+        "sourceTime": 1,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6ee31ce9-39b8-4f9f-8dd0-891319dcfbce",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0874921, 0.0227599, 0, 7.72e-05, 0.0771089, 0.693536, 0, 0.0002999, 0, 0, 1, 0, 223.936, 26.2605, 0, 1)",
+        "sourceTime": 1,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-0fbafcae-1a88-4793-8beb-0c25a319f986",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0810878, 0.0459003, 0, 9e-05, -0.0375879, 0.546063, 0, -0.0001264, 0, 0, 1, 0, 270.662, 39.9238, 0, 1)",
+        "sourceTime": 1,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-a238a848-0593-40bb-858f-2e6b57ee71a0",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.08523, 0.0577383, 0, 0.0001105, -0.14796, 0.409096, 0, -0.0004834, 0, 0, 1, 0, 308.075, 67.7419, 0, 1)",
+        "sourceTime": 1,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-8b1e0e67-6d0f-4e2b-bd65-52eba7bb94ac",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0717919, 0.0443281, 0, 5.63e-05, -0.167859, 0.352744, 0, -0.000536, 0, 0, 1, 0, 341.335, 100.426, 0, 1)",
+        "sourceTime": 1,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-178cb54c-aa44-49c9-87f6-6c45c45e90f3",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0356376, 0.0059855, 0, -6.12e-05, -0.0524739, 0.430637, 0, -0.0002385, 0, 0, 1, 0, 376.72, 126.589, 0, 1)",
+        "sourceTime": 1,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef8c36f3-5392-4055-b781-2f06a3e68d4a",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0186531, -0.0295313, 0, -0.0001242, 0.192505, 0.646544, 0, 0.0003101, 0, 0, 1, 0, 419.697, 136.802, 0, 1)",
+        "sourceTime": 1,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-670a4a5a-7606-47f4-b6b9-80010e45e5f0",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0748759, -0.0388458, 0, -3.22e-05, 0.610233, 1.00184, 0, 0.0011514, 0, 0, 1, 0, 474.07, 127.291, 0, 1)",
+        "sourceTime": 1,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-28522668-11ad-4d32-8b1d-69c40c952766",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.219853, -0.0250727, 0, 0.0002164, 1.34207, 1.49186, 0, 0.0025164, 0, 0, 1, 0, 538.763, 102.422, 0, 1)",
+        "sourceTime": 1,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      }
+    ]
+  },
+  {
+    "requested": 26,
+    "testid": "studio-program-canvas",
+    "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+    "programmeTime": "26",
+    "programmeSource": "source",
+    "sourceSampling": "accurate-paused",
+    "sourceContentHash": "dd6037bc87dc9c93b84fb506b04355fe12d1f4bda0e942aec8da7e83d3c3e86c",
+    "sourceFrameIndex": "48",
+    "sourceGeneration": "1793467774295",
+    "joinTransition": "",
+    "joinOpacity": "0",
+    "planes": [
+      {
+        "id": "scene-3c5fc6dc-0e77-4015-862c-02d57957df76",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0461273, -0.0456972, 0, -5.62e-05, -0.0803636, 0.457655, 0, -0.0006902, 0, 0, 1, 0, 104.839, 89.3117, 0, 1)",
+        "sourceTime": 6,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-490d1c93-51c2-41c7-8ca5-bfff92211a65",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0781182, -0.0366556, 0, 2.5e-05, -0.0013458, 0.664503, 0, -0.0001836, 0, 0, 1, 0, 142.737, 59.6098, 0, 1)",
+        "sourceTime": 6,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-29ab67d1-9da0-4567-bbff-9fa7088860cc",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.101595, -0.0164794, 0, 7.36e-05, 0.090649, 0.79277, 0, 0.0002593, 0, 0, 1, 0, 194.014, 33.2491, 0, 1)",
+        "sourceTime": 6,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-1e66b464-1448-470a-b143-550e49ccc791",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0975795, 0.008607, 0, 6.29e-05, 0.116874, 0.788181, 0, 0.0003638, 0, 0, 1, 0, 252.189, 20.5163, 0, 1)",
+        "sourceTime": 6,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-4bea056a-cdbb-41db-b988-f01a10ca9351",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0869314, 0.0316557, 0, 5.69e-05, 0.0410996, 0.688965, 0, 0.0001192, 0, 0, 1, 0, 307.071, 25.3061, 0, 1)",
+        "sourceTime": 6,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef6c9cb5-307c-452c-a176-6d2fc22cf284",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0856201, 0.0460844, 0, 6.93e-05, -0.0798785, 0.562293, 0, -0.0002228, 0, 0, 1, 0, 353.918, 45.5871, 0, 1)",
+        "sourceTime": 6,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-9afc0952-30e5-4629-a36b-17d30e202b06",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0779086, 0.0428204, 0, 4.73e-05, -0.153704, 0.474785, 0, -0.000407, 0, 0, 1, 0, 394.744, 74.2569, 0, 1)",
+        "sourceTime": 6,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6bccfd27-6de2-48e8-b44b-20f6c2b07573",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0507496, 0.0175674, 0, -2.87e-05, -0.111208, 0.487835, 0, -0.0003096, 0, 0, 1, 0, 434.88, 100.98, 0, 1)",
+        "sourceTime": 6,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-970c41b0-5654-4726-9fbd-51844bf01b65",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0260317, -0.015685, 0, -9.81e-05, 0.0650898, 0.626922, 0, 4.26e-05, 0, 0, 1, 0, 480.112, 115.755, 0, 1)",
+        "sourceTime": 6,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-b2990333-b320-4985-aaf5-84e86b0381bc",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0464352, -0.0358633, 0, -7.92e-05, 0.374927, 0.87998, 0, 0.0005969, 0, 0, 1, 0, 535.19, 112.63, 0, 1)",
+        "sourceTime": 6,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-3a135a31-7d0e-433a-bc1a-bbe02b4a5b1e",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0461273, -0.0456972, 0, -5.62e-05, -0.0803636, 0.457655, 0, -0.0006902, 0, 0, 1, 0, 104.839, 89.3117, 0, 1)",
+        "sourceTime": 2,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-aaf378e2-a6b6-4a70-8e0f-d75ebb3bd542",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0781182, -0.0366556, 0, 2.5e-05, -0.0013458, 0.664503, 0, -0.0001836, 0, 0, 1, 0, 142.737, 59.6098, 0, 1)",
+        "sourceTime": 2,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6ee31ce9-39b8-4f9f-8dd0-891319dcfbce",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.101595, -0.0164794, 0, 7.36e-05, 0.090649, 0.79277, 0, 0.0002593, 0, 0, 1, 0, 194.014, 33.2491, 0, 1)",
+        "sourceTime": 2,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-0fbafcae-1a88-4793-8beb-0c25a319f986",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0975795, 0.008607, 0, 6.29e-05, 0.116874, 0.788181, 0, 0.0003638, 0, 0, 1, 0, 252.189, 20.5163, 0, 1)",
+        "sourceTime": 2,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-a238a848-0593-40bb-858f-2e6b57ee71a0",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0869314, 0.0316557, 0, 5.69e-05, 0.0410996, 0.688965, 0, 0.0001192, 0, 0, 1, 0, 307.071, 25.3061, 0, 1)",
+        "sourceTime": 2,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-8b1e0e67-6d0f-4e2b-bd65-52eba7bb94ac",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0856201, 0.0460844, 0, 6.93e-05, -0.0798785, 0.562293, 0, -0.0002228, 0, 0, 1, 0, 353.918, 45.5871, 0, 1)",
+        "sourceTime": 2,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-178cb54c-aa44-49c9-87f6-6c45c45e90f3",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0779086, 0.0428204, 0, 4.73e-05, -0.153704, 0.474785, 0, -0.000407, 0, 0, 1, 0, 394.744, 74.2569, 0, 1)",
+        "sourceTime": 2,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef8c36f3-5392-4055-b781-2f06a3e68d4a",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0507496, 0.0175674, 0, -2.87e-05, -0.111208, 0.487835, 0, -0.0003096, 0, 0, 1, 0, 434.88, 100.98, 0, 1)",
+        "sourceTime": 2,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-670a4a5a-7606-47f4-b6b9-80010e45e5f0",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0260317, -0.015685, 0, -9.81e-05, 0.0650898, 0.626922, 0, 4.26e-05, 0, 0, 1, 0, 480.112, 115.755, 0, 1)",
+        "sourceTime": 2,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-28522668-11ad-4d32-8b1d-69c40c952766",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0464352, -0.0358633, 0, -7.92e-05, 0.374927, 0.87998, 0, 0.0005969, 0, 0, 1, 0, 535.19, 112.63, 0, 1)",
+        "sourceTime": 2,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      }
+    ]
+  },
+  {
+    "requested": 27,
+    "testid": "studio-program-canvas",
+    "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+    "programmeTime": "27",
+    "programmeSource": "source",
+    "sourceSampling": "accurate-paused",
+    "sourceContentHash": "dd6037bc87dc9c93b84fb506b04355fe12d1f4bda0e942aec8da7e83d3c3e86c",
+    "sourceFrameIndex": "72",
+    "sourceGeneration": "1793467774295",
+    "joinTransition": "",
+    "joinOpacity": "0",
+    "planes": [
+      {
+        "id": "scene-3c5fc6dc-0e77-4015-862c-02d57957df76",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0819178, -0.0075154, 0, -1.98e-05, -0.0238735, 0.840785, 0, -0.000191, 0, 0, 1, 0, 33.1909, 30.5098, 0, 1)",
+        "sourceTime": 7,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-490d1c93-51c2-41c7-8ca5-bfff92211a65",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0859892, -0.0126284, 0, -1.48e-05, -0.0210627, 0.866695, 0, -0.0001584, 0, 0, 1, 0, 91.9006, 25.6284, 0, 1)",
+        "sourceTime": 7,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-29ab67d1-9da0-4567-bbff-9fa7088860cc",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0926376, -0.0130696, 0, -3.4e-06, -0.0060179, 0.914337, 0, -6.19e-05, 0, 0, 1, 0, 153.777, 16.9604, 0, 1)",
+        "sourceTime": 7,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-1e66b464-1448-470a-b143-550e49ccc791",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0989727, -0.0087882, 0, 7.8e-06, 0.0152468, 0.953262, 0, 3.33e-05, 0, 0, 1, 0, 219.245, 7.80116, 0, 1)",
+        "sourceTime": 7,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-4bea056a-cdbb-41db-b988-f01a10ca9351",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.101571, -0.0013415, 0, 1.39e-05, 0.0259835, 0.962088, 0, 7.04e-05, 0, 0, 1, 0, 287.05, 1.59702, 0, 1)",
+        "sourceTime": 7,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef6c9cb5-307c-452c-a176-6d2fc22cf284",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.100038, 0.0065369, 0, 1.45e-05, 0.0124654, 0.938919, 0, 3.24e-05, 0, 0, 1, 0, 354.802, 0.609808, 0, 1)",
+        "sourceTime": 7,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-9afc0952-30e5-4629-a36b-17d30e202b06",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0964125, 0.0118749, 0, 1.11e-05, -0.0209074, 0.900009, 0, -4.69e-05, 0, 0, 1, 0, 420.66, 5.10819, 0, 1)",
+        "sourceTime": 7,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6bccfd27-6de2-48e8-b44b-20f6c2b07573",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0921474, 0.0125425, 0, 3.4e-06, -0.050506, 0.86985, 0, -0.0001078, 0, 0, 1, 0, 484.468, 13.3173, 0, 1)",
+        "sourceTime": 7,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-970c41b0-5654-4726-9fbd-51844bf01b65",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.087844, 0.0081225, 0, -8e-06, -0.0476885, 0.869576, 0, -0.0001026, 0, 0, 1, 0, 547.735, 22.0707, 0, 1)",
+        "sourceTime": 7,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-b2990333-b320-4985-aaf5-84e86b0381bc",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0848954, 0.0003594, 0, -1.81e-05, 0.0039057, 0.907423, 0, -1.95e-05, 0, 0, 1, 0, 612.753, 27.9567, 0, 1)",
+        "sourceTime": 7,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-3a135a31-7d0e-433a-bc1a-bbe02b4a5b1e",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0819178, -0.0075154, 0, -1.98e-05, -0.0238735, 0.840785, 0, -0.000191, 0, 0, 1, 0, 33.1909, 30.5098, 0, 1)",
+        "sourceTime": 3,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-aaf378e2-a6b6-4a70-8e0f-d75ebb3bd542",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0859892, -0.0126284, 0, -1.48e-05, -0.0210627, 0.866695, 0, -0.0001584, 0, 0, 1, 0, 91.9006, 25.6284, 0, 1)",
+        "sourceTime": 3,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6ee31ce9-39b8-4f9f-8dd0-891319dcfbce",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0926376, -0.0130696, 0, -3.4e-06, -0.0060179, 0.914337, 0, -6.19e-05, 0, 0, 1, 0, 153.777, 16.9604, 0, 1)",
+        "sourceTime": 3,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-0fbafcae-1a88-4793-8beb-0c25a319f986",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0989727, -0.0087882, 0, 7.8e-06, 0.0152468, 0.953262, 0, 3.33e-05, 0, 0, 1, 0, 219.245, 7.80116, 0, 1)",
+        "sourceTime": 3,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-a238a848-0593-40bb-858f-2e6b57ee71a0",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.101571, -0.0013415, 0, 1.39e-05, 0.0259835, 0.962088, 0, 7.04e-05, 0, 0, 1, 0, 287.05, 1.59702, 0, 1)",
+        "sourceTime": 3,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-8b1e0e67-6d0f-4e2b-bd65-52eba7bb94ac",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.100038, 0.0065369, 0, 1.45e-05, 0.0124654, 0.938919, 0, 3.24e-05, 0, 0, 1, 0, 354.802, 0.609808, 0, 1)",
+        "sourceTime": 3,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-178cb54c-aa44-49c9-87f6-6c45c45e90f3",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0964125, 0.0118749, 0, 1.11e-05, -0.0209074, 0.900009, 0, -4.69e-05, 0, 0, 1, 0, 420.66, 5.10819, 0, 1)",
+        "sourceTime": 3,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef8c36f3-5392-4055-b781-2f06a3e68d4a",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0921474, 0.0125425, 0, 3.4e-06, -0.050506, 0.86985, 0, -0.0001078, 0, 0, 1, 0, 484.468, 13.3173, 0, 1)",
+        "sourceTime": 3,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-670a4a5a-7606-47f4-b6b9-80010e45e5f0",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.087844, 0.0081225, 0, -8e-06, -0.0476885, 0.869576, 0, -0.0001026, 0, 0, 1, 0, 547.735, 22.0707, 0, 1)",
+        "sourceTime": 3,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-28522668-11ad-4d32-8b1d-69c40c952766",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.0848954, 0.0003594, 0, -1.81e-05, 0.0039057, 0.907423, 0, -1.95e-05, 0, 0, 1, 0, 612.753, 27.9567, 0, 1)",
+        "sourceTime": 3,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      }
+    ]
+  },
+  {
+    "requested": 27.9,
+    "testid": "studio-program-canvas",
+    "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+    "programmeTime": "27.916666666666664",
+    "programmeSource": "source",
+    "sourceSampling": "accurate-paused",
+    "sourceContentHash": "dd6037bc87dc9c93b84fb506b04355fe12d1f4bda0e942aec8da7e83d3c3e86c",
+    "sourceFrameIndex": "94",
+    "sourceGeneration": "1793467774295",
+    "joinTransition": "",
+    "joinOpacity": "0",
+    "planes": [
+      {
+        "id": "scene-3c5fc6dc-0e77-4015-862c-02d57957df76",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-490d1c93-51c2-41c7-8ca5-bfff92211a65",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 70.6023, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-29ab67d1-9da0-4567-bbff-9fa7088860cc",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 141.702, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-1e66b464-1448-470a-b143-550e49ccc791",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 212.802, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-4bea056a-cdbb-41db-b988-f01a10ca9351",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 283.902, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef6c9cb5-307c-452c-a176-6d2fc22cf284",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 355.002, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-9afc0952-30e5-4629-a36b-17d30e202b06",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 426.102, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6bccfd27-6de2-48e8-b44b-20f6c2b07573",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 497.202, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-970c41b0-5654-4726-9fbd-51844bf01b65",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 568.302, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-b2990333-b320-4985-aaf5-84e86b0381bc",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 639.402, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-3a135a31-7d0e-433a-bc1a-bbe02b4a5b1e",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-aaf378e2-a6b6-4a70-8e0f-d75ebb3bd542",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 70.6023, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6ee31ce9-39b8-4f9f-8dd0-891319dcfbce",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 141.702, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-0fbafcae-1a88-4793-8beb-0c25a319f986",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 212.802, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-a238a848-0593-40bb-858f-2e6b57ee71a0",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 283.902, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-8b1e0e67-6d0f-4e2b-bd65-52eba7bb94ac",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 355.002, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-178cb54c-aa44-49c9-87f6-6c45c45e90f3",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 426.102, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef8c36f3-5392-4055-b781-2f06a3e68d4a",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 497.202, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-670a4a5a-7606-47f4-b6b9-80010e45e5f0",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 568.302, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-28522668-11ad-4d32-8b1d-69c40c952766",
+        "visibility": "visible",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 639.402, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      }
+    ]
+  },
+  {
+    "requested": 28,
+    "testid": "studio-program-canvas",
+    "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+    "programmeTime": "28",
+    "programmeSource": "source",
+    "sourceSampling": "accurate-paused",
+    "sourceContentHash": "96056be98b025809b72e38baebc1ea0827fbc30d9a02cfd8844c35a371a3fe00",
+    "sourceFrameIndex": "0",
+    "sourceGeneration": "1793467775855",
+    "joinTransition": "",
+    "joinOpacity": "0",
+    "planes": [
+      {
+        "id": "scene-3c5fc6dc-0e77-4015-862c-02d57957df76",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-490d1c93-51c2-41c7-8ca5-bfff92211a65",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 70.6023, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-29ab67d1-9da0-4567-bbff-9fa7088860cc",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 141.702, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-1e66b464-1448-470a-b143-550e49ccc791",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 212.802, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-4bea056a-cdbb-41db-b988-f01a10ca9351",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 283.902, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef6c9cb5-307c-452c-a176-6d2fc22cf284",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 355.002, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-9afc0952-30e5-4629-a36b-17d30e202b06",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 426.102, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6bccfd27-6de2-48e8-b44b-20f6c2b07573",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 497.202, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-970c41b0-5654-4726-9fbd-51844bf01b65",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 568.302, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-b2990333-b320-4985-aaf5-84e86b0381bc",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 639.402, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-3a135a31-7d0e-433a-bc1a-bbe02b4a5b1e",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-aaf378e2-a6b6-4a70-8e0f-d75ebb3bd542",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 70.6023, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6ee31ce9-39b8-4f9f-8dd0-891319dcfbce",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 141.702, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-0fbafcae-1a88-4793-8beb-0c25a319f986",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 212.802, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-a238a848-0593-40bb-858f-2e6b57ee71a0",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 283.902, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-8b1e0e67-6d0f-4e2b-bd65-52eba7bb94ac",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 355.002, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-178cb54c-aa44-49c9-87f6-6c45c45e90f3",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 426.102, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef8c36f3-5392-4055-b781-2f06a3e68d4a",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 497.202, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-670a4a5a-7606-47f4-b6b9-80010e45e5f0",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 568.302, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-28522668-11ad-4d32-8b1d-69c40c952766",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 639.402, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      }
+    ]
+  },
+  {
+    "requested": 28.1,
+    "testid": "studio-program-canvas",
+    "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+    "programmeTime": "28.083333333333332",
+    "programmeSource": "source",
+    "sourceSampling": "accurate-paused",
+    "sourceContentHash": "96056be98b025809b72e38baebc1ea0827fbc30d9a02cfd8844c35a371a3fe00",
+    "sourceFrameIndex": "2",
+    "sourceGeneration": "1793467775855",
+    "joinTransition": "",
+    "joinOpacity": "0",
+    "planes": [
+      {
+        "id": "scene-3c5fc6dc-0e77-4015-862c-02d57957df76",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-490d1c93-51c2-41c7-8ca5-bfff92211a65",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 70.6023, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-29ab67d1-9da0-4567-bbff-9fa7088860cc",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 141.702, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-1e66b464-1448-470a-b143-550e49ccc791",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 212.802, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-4bea056a-cdbb-41db-b988-f01a10ca9351",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 283.902, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef6c9cb5-307c-452c-a176-6d2fc22cf284",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 355.002, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-9afc0952-30e5-4629-a36b-17d30e202b06",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 426.102, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6bccfd27-6de2-48e8-b44b-20f6c2b07573",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 497.202, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-970c41b0-5654-4726-9fbd-51844bf01b65",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 568.302, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-b2990333-b320-4985-aaf5-84e86b0381bc",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 639.402, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-3a135a31-7d0e-433a-bc1a-bbe02b4a5b1e",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-aaf378e2-a6b6-4a70-8e0f-d75ebb3bd542",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 70.6023, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6ee31ce9-39b8-4f9f-8dd0-891319dcfbce",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 141.702, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-0fbafcae-1a88-4793-8beb-0c25a319f986",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 212.802, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-a238a848-0593-40bb-858f-2e6b57ee71a0",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 283.902, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-8b1e0e67-6d0f-4e2b-bd65-52eba7bb94ac",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 355.002, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-178cb54c-aa44-49c9-87f6-6c45c45e90f3",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 426.102, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef8c36f3-5392-4055-b781-2f06a3e68d4a",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 497.202, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-670a4a5a-7606-47f4-b6b9-80010e45e5f0",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 568.302, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-28522668-11ad-4d32-8b1d-69c40c952766",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 639.402, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      }
+    ]
+  },
+  {
+    "requested": 31.5,
+    "testid": "studio-program-canvas",
+    "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+    "programmeTime": "31.5",
+    "programmeSource": "source",
+    "sourceSampling": "accurate-paused",
+    "sourceContentHash": "96056be98b025809b72e38baebc1ea0827fbc30d9a02cfd8844c35a371a3fe00",
+    "sourceFrameIndex": "84",
+    "sourceGeneration": "1793467775855",
+    "joinTransition": "",
+    "joinOpacity": "0",
+    "planes": [
+      {
+        "id": "scene-3c5fc6dc-0e77-4015-862c-02d57957df76",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-490d1c93-51c2-41c7-8ca5-bfff92211a65",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 70.6023, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-29ab67d1-9da0-4567-bbff-9fa7088860cc",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 141.702, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-1e66b464-1448-470a-b143-550e49ccc791",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 212.802, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-4bea056a-cdbb-41db-b988-f01a10ca9351",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 283.902, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef6c9cb5-307c-452c-a176-6d2fc22cf284",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 355.002, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-9afc0952-30e5-4629-a36b-17d30e202b06",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 426.102, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6bccfd27-6de2-48e8-b44b-20f6c2b07573",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 497.202, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-970c41b0-5654-4726-9fbd-51844bf01b65",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 568.302, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-b2990333-b320-4985-aaf5-84e86b0381bc",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 639.402, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-3a135a31-7d0e-433a-bc1a-bbe02b4a5b1e",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-aaf378e2-a6b6-4a70-8e0f-d75ebb3bd542",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 70.6023, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6ee31ce9-39b8-4f9f-8dd0-891319dcfbce",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 141.702, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-0fbafcae-1a88-4793-8beb-0c25a319f986",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 212.802, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-a238a848-0593-40bb-858f-2e6b57ee71a0",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 283.902, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-8b1e0e67-6d0f-4e2b-bd65-52eba7bb94ac",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 355.002, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-178cb54c-aa44-49c9-87f6-6c45c45e90f3",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 426.102, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef8c36f3-5392-4055-b781-2f06a3e68d4a",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 497.202, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-670a4a5a-7606-47f4-b6b9-80010e45e5f0",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 568.302, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-28522668-11ad-4d32-8b1d-69c40c952766",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 639.402, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      }
+    ]
+  },
+  {
+    "requested": 35.9,
+    "testid": "studio-program-canvas",
+    "programmeFilter": "blur(0.00px) brightness(1.000) contrast(1.000) saturate(1.000)",
+    "programmeTime": "35.91666666666667",
+    "programmeSource": "source",
+    "sourceSampling": "accurate-paused",
+    "sourceContentHash": "96056be98b025809b72e38baebc1ea0827fbc30d9a02cfd8844c35a371a3fe00",
+    "sourceFrameIndex": "190",
+    "sourceGeneration": "1793467775855",
+    "joinTransition": "",
+    "joinOpacity": "0",
+    "planes": [
+      {
+        "id": "scene-3c5fc6dc-0e77-4015-862c-02d57957df76",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-490d1c93-51c2-41c7-8ca5-bfff92211a65",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 70.6023, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-29ab67d1-9da0-4567-bbff-9fa7088860cc",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 141.702, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-1e66b464-1448-470a-b143-550e49ccc791",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 212.802, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-4bea056a-cdbb-41db-b988-f01a10ca9351",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 283.902, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef6c9cb5-307c-452c-a176-6d2fc22cf284",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 355.002, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-9afc0952-30e5-4629-a36b-17d30e202b06",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 426.102, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6bccfd27-6de2-48e8-b44b-20f6c2b07573",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 497.202, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-970c41b0-5654-4726-9fbd-51844bf01b65",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 568.302, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-b2990333-b320-4985-aaf5-84e86b0381bc",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 639.402, 0, 0, 1)",
+        "sourceTime": 7.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-3a135a31-7d0e-433a-bc1a-bbe02b4a5b1e",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-aaf378e2-a6b6-4a70-8e0f-d75ebb3bd542",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 70.6023, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-6ee31ce9-39b8-4f9f-8dd0-891319dcfbce",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 141.702, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-0fbafcae-1a88-4793-8beb-0c25a319f986",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 212.802, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-a238a848-0593-40bb-858f-2e6b57ee71a0",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 283.902, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-8b1e0e67-6d0f-4e2b-bd65-52eba7bb94ac",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 355.002, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-178cb54c-aa44-49c9-87f6-6c45c45e90f3",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 426.102, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-ef8c36f3-5392-4055-b781-2f06a3e68d4a",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 497.202, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-670a4a5a-7606-47f4-b6b9-80010e45e5f0",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1014, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 568.302, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      },
+      {
+        "id": "scene-28522668-11ad-4d32-8b1d-69c40c952766",
+        "visibility": "hidden",
+        "opacity": "1",
+        "matrix": "matrix3d(0.1007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 639.402, 0, 0, 1)",
+        "sourceTime": 3.916666,
+        "canvasWidth": 300,
+        "paused": true,
+        "seeking": false
+      }
+    ]
+  }
+]

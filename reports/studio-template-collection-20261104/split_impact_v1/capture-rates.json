@@ -1,0 +1,26 @@
+{
+  "live": {
+    "complete": true,
+    "programmeSeconds": 8,
+    "elapsedMs": 11845,
+    "mediaTime": 7.958333,
+    "total": 210,
+    "dropped": 70,
+    "corrupted": 0,
+    "captureSeconds": 11.76799988746643,
+    "captureFrames": 114,
+    "captureFps": 9.687287652119736
+  },
+  "finished": {
+    "complete": true,
+    "programmeSeconds": 8,
+    "elapsedMs": 8115,
+    "mediaTime": 7.99366,
+    "total": 192,
+    "dropped": 1,
+    "corrupted": 0,
+    "captureSeconds": 8.289999961853027,
+    "captureFrames": 92,
+    "captureFps": 11.097708133093361
+  }
+}

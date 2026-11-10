@@ -140,6 +140,11 @@ gateway = createSourceGateway({
   service,
 });
 const verifier = createLocalProcessVerifier({ db, ...config.worker });
+const prepareVerifiedWorker = verifier.prepare.bind(verifier);
+verifier.prepare = async (ctx, target, body) => {
+  await gateway.refreshWorkerAudio(ctx.uid, body, ctx.op.sourceDescriptor.workflowInput.sources);
+  return prepareVerifiedWorker(ctx, target, body);
+};
 async function afterResponse(ctx, operation, req, body) {
   if (!["publisher.publish", "queue.dispatch"].includes(operation)) return;
   const source = ctx.op.sourceDescriptor.workflowInput.sources[0];

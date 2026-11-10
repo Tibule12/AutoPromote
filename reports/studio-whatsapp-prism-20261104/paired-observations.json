@@ -1,0 +1,160 @@
+{
+  "pairs": [
+    {
+      "requested": 0.25,
+      "measuredProgrammeTime": 0.25,
+      "exportFrameIndex": 6,
+      "psnrDb": 30.66446130734927,
+      "passClaimed": false
+    },
+    {
+      "requested": 0.75,
+      "measuredProgrammeTime": 0.75,
+      "exportFrameIndex": 18,
+      "psnrDb": 30.011271072007084,
+      "passClaimed": false
+    },
+    {
+      "requested": 1.5,
+      "measuredProgrammeTime": 1.5,
+      "exportFrameIndex": 36,
+      "psnrDb": 30.423835047451885,
+      "passClaimed": false
+    },
+    {
+      "requested": 2.5,
+      "measuredProgrammeTime": 2.5,
+      "exportFrameIndex": 60,
+      "psnrDb": 29.77415935369525,
+      "passClaimed": false
+    },
+    {
+      "requested": 3.5,
+      "measuredProgrammeTime": 3.5,
+      "exportFrameIndex": 84,
+      "psnrDb": 34.11709749665865,
+      "passClaimed": false
+    },
+    {
+      "requested": 4.5,
+      "measuredProgrammeTime": 4.5,
+      "exportFrameIndex": 108,
+      "psnrDb": 34.91114578272792,
+      "passClaimed": false
+    },
+    {
+      "requested": 5.7,
+      "measuredProgrammeTime": 5.708333,
+      "exportFrameIndex": 137,
+      "psnrDb": 34.800420670326616,
+      "passClaimed": false
+    },
+    {
+      "requested": 6.7,
+      "measuredProgrammeTime": 6.708333,
+      "exportFrameIndex": 161,
+      "psnrDb": 34.615966201923385,
+      "passClaimed": false
+    },
+    {
+      "requested": 8.2,
+      "measuredProgrammeTime": 8.208333,
+      "exportFrameIndex": 197,
+      "psnrDb": 37.012634908939994,
+      "passClaimed": false
+    },
+    {
+      "requested": 9.3,
+      "measuredProgrammeTime": 9.291666,
+      "exportFrameIndex": 223,
+      "psnrDb": 28.248627811885708,
+      "passClaimed": false
+    },
+    {
+      "requested": 10.3,
+      "measuredProgrammeTime": 10.291666,
+      "exportFrameIndex": 247,
+      "psnrDb": 28.86670303181056,
+      "passClaimed": false
+    },
+    {
+      "requested": 11.5,
+      "measuredProgrammeTime": 11.5,
+      "exportFrameIndex": 276,
+      "psnrDb": 25.088826495968934,
+      "passClaimed": false
+    },
+    {
+      "requested": 12.7,
+      "measuredProgrammeTime": 12.708333,
+      "exportFrameIndex": 305,
+      "psnrDb": 25.29649449738105,
+      "passClaimed": false
+    },
+    {
+      "requested": 13.7,
+      "measuredProgrammeTime": 13.708333,
+      "exportFrameIndex": 329,
+      "psnrDb": 25.057868975143727,
+      "passClaimed": false
+    },
+    {
+      "requested": 14.8,
+      "measuredProgrammeTime": 14.791666,
+      "exportFrameIndex": 355,
+      "psnrDb": 28.674668283074226,
+      "passClaimed": false
+    },
+    {
+      "requested": 16,
+      "measuredProgrammeTime": 16.0,
+      "exportFrameIndex": 384,
+      "psnrDb": 28.48963940943748,
+      "passClaimed": false
+    },
+    {
+      "requested": 17.5,
+      "measuredProgrammeTime": 17.5,
+      "exportFrameIndex": 420,
+      "psnrDb": 27.92010403051566,
+      "passClaimed": false
+    },
+    {
+      "requested": 18.6,
+      "measuredProgrammeTime": 18.583333,
+      "exportFrameIndex": 446,
+      "psnrDb": 28.285244945275743,
+      "passClaimed": false
+    },
+    {
+      "requested": 20,
+      "measuredProgrammeTime": 20.0,
+      "exportFrameIndex": 480,
+      "psnrDb": 28.259767472576304,
+      "passClaimed": false
+    },
+    {
+      "requested": 21.5,
+      "measuredProgrammeTime": 21.5,
+      "exportFrameIndex": 516,
+      "psnrDb": 31.750255330075944,
+      "passClaimed": false
+    },
+    {
+      "requested": 22.6,
+      "measuredProgrammeTime": 22.583333,
+      "exportFrameIndex": 542,
+      "psnrDb": 33.31444885065518,
+      "passClaimed": false
+    },
+    {
+      "requested": 23.5,
+      "measuredProgrammeTime": 23.5,
+      "exportFrameIndex": 564,
+      "psnrDb": 34.79774201384357,
+      "passClaimed": false
+    }
+  ],
+  "minimumPsnrDb": 25.057868975143727,
+  "scope": "Diagnostics only. Whole picture, source alpha edge/time and colour parity remain unqualified."
+}

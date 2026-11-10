@@ -15,6 +15,7 @@ import {
   evaluateMotionDriverValue,
   evaluateWorldLayerPose,
   isHiddenTrackMatteSource,
+  removeStudioLayerSafely,
   reparentStudioLayerPreservingWorldPose,
   validateStudioMotionDrivers,
   validateStudioParentGraph,
@@ -295,5 +296,57 @@ describe("studioCompRigging — AutoPromote Parenting, Track Mattes, Motion Driv
       mode: "alpha",
       source_layer_id: "stencil-title",
     });
+  });
+
+  test("removeStudioLayerSafely atomically detaches bound trackMatte consumers and preserves child world poses on parent deletion", () => {
+    const matteParent = {
+      id: "matte-parent",
+      type: "text",
+      text: "MASK",
+      x: 40,
+      y: 30,
+      scale: 1.5,
+      rotation: 0,
+      opacity: 1,
+    };
+    const fillChild = {
+      id: "fill-child",
+      type: "image",
+      parentId: "matte-parent",
+      trackMatte: { mode: "alpha", sourceLayerId: "matte-parent" },
+      x: 60,
+      y: 50,
+      scale: 0.8,
+      rotation: 0,
+      opacity: 1,
+    };
+    const overlays = [matteParent, fillChild];
+    const worldBefore = evaluateWorldLayerPose(fillChild, overlays, [], 1.0);
+
+    const cleaned = removeStudioLayerSafely(
+      {
+        overlays,
+        compositionOrder: ["matte-parent", "fill-child"],
+        motionKeyframes: [
+          { id: "k1", targetId: "matte-parent", property: "x", time: 0, value: 40 },
+          { id: "k2", targetId: "fill-child", property: "opacity", time: 0, value: 1 },
+        ],
+      },
+      "matte-parent",
+      1.0
+    );
+
+    expect(cleaned.overlays).toHaveLength(1);
+    const survivor = cleaned.overlays[0];
+    expect(survivor.id).toBe("fill-child");
+    expect(survivor.parentId).toBeUndefined();
+    expect(survivor.trackMatte).toEqual({ mode: "none", sourceLayerId: null });
+    expect(survivor.x).toBeCloseTo(worldBefore.x, 3);
+    expect(survivor.y).toBeCloseTo(worldBefore.y, 3);
+    expect(survivor.scale).toBeCloseTo(worldBefore.scale, 3);
+    expect(validateStudioParentGraph(cleaned.overlays)).toBe(true);
+    expect(validateStudioTrackMattes(cleaned.overlays)).toBe(true);
+    expect(cleaned.compositionOrder).toEqual(["fill-child"]);
+    expect(cleaned.motionKeyframes.map(k => k.targetId)).toEqual(["fill-child"]);
   });
 });

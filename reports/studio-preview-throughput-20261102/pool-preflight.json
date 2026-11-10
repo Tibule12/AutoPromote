@@ -1,0 +1,43 @@
+{
+  "previousApiPid": 389017,
+  "apiPid": 393299,
+  "workerPid": 288261,
+  "origin": "http://127.0.0.1:43927",
+  "demoProject": "demo-autopromote-credits",
+  "build": "/tmp/autopromote-application-demo-5izIlF/build-preview-pool-20261102",
+  "mainSha256": "4bee6cdf9c0736227960c8b6569df742deb20afca08f56a7358b9e8bb4b0b7a5",
+  "mainAsset": "/static/js/main.f2088047.js",
+  "sources": [
+    {
+      "file": "frontend/src/components/ViralClipStudio.js",
+      "sha256": "e37d52343f93c4979ccd54cbdfdb8679cf7f369a66ed39f73c2a6a7d3612f249"
+    },
+    {
+      "file": "frontend/src/components/studioPerspective.js",
+      "sha256": "977f5e8deda7e1fc40bb22fdc8b7c871d62bb74ae92347e8d5742b9ef79cd095"
+    },
+    {
+      "file": "frontend/src/components/StudioSceneActionsPanel.js",
+      "sha256": "4d831bdecca7f65955097b0a6976e82701246c09964a363b7d6b0264eceb88fe"
+    },
+    {
+      "file": "frontend/src/components/StudioProgrammeFrame.js",
+      "sha256": "6fb1445a7e4777bc6915274130baa94fcb3518bfb33f0e247b71765b1fc9cb76"
+    },
+    {
+      "file": "frontend/src/components/studioSharedOverlayFrame.js",
+      "sha256": "581c7ed0459eeee9838d9108aeca5e646ce53f8069807ae161cafb4bf73c45fe"
+    },
+    {
+      "file": "frontend/src/components/audio/audioRemixPreview.js",
+      "sha256": "24f2ab2f5fa315f66bac818561f9c6daca788caf9a9bbb78f0479bd0fd73b5c4"
+    },
+    {
+      "file": "src/generated/studioDirectorReplayKernel.cjs",
+      "sha256": "b01bed952b330192eaf62e96b78de778005aaf02b347d4192d5a9de83333b493"
+    }
+  ],
+  "welcomeChecks": 8,
+  "productionWrites": false,
+  "paidCalls": 0
+}

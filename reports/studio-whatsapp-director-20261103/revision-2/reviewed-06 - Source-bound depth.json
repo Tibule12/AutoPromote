@@ -1,0 +1,27 @@
+{
+  "format": "autopromote-scene-actions",
+  "version": 1,
+  "projectId": "viral-project-bafcf805-f86e-4ec4-a2f4-6530a5c653ff",
+  "baseRevision": 34,
+  "name": "06 - Source-bound depth",
+  "actions": [
+    {
+      "type": "matte",
+      "targetId": "scene-186b266b-1d6c-4de7-ad79-01c862e5b99f",
+      "matteSourceId": "scene-d8d54be3-0c34-4ebf-89ac-ace66bbd6a0e",
+      "mode": "luma"
+    },
+    {
+      "type": "matte",
+      "targetId": "scene-26ba7f02-0296-4d67-b05f-c551f355cd45",
+      "matteSourceId": "scene-8a5bf7c3-4d55-481d-9629-40cf8f4a9443",
+      "mode": "luma"
+    },
+    {
+      "type": "matte",
+      "targetId": "scene-2879ec0b-f04a-4571-a05e-dc7c06df9c82",
+      "matteSourceId": "scene-803bfe23-ac7f-4697-bfee-8801ba8c5087",
+      "mode": "luma"
+    }
+  ]
+}

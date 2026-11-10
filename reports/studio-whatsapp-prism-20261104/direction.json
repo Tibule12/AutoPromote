@@ -1,0 +1,21 @@
+{
+  "seconds": 24,
+  "plans": [
+    "01 - Cobalt ground",
+    "02 - Portrait bridge",
+    "03 - Live fragments row 1",
+    "03 - Live fragments row 2",
+    "03 - Live fragments row 3",
+    "03 - Live fragments row 4",
+    "04 - Rotating prism",
+    "05 - Diagonal cut",
+    "06 - Two moving moments",
+    "07 - Closing iris",
+    "08 - Prism alpha bindings"
+  ],
+  "addedTextLayers": 0,
+  "sourceSpeechMuted": true,
+  "treatment": "Live fragments, rotating video prism, diagonal cut, moving photographic diptych, polygon iris",
+  "providerCalls": 0,
+  "externalEffectsComposites": 0
+}

@@ -94,3 +94,12 @@ test.each(['typography','tracked','composite'])('the %s composition uses the ord
   expect(result.snapshot.overlays.length).toBeGreaterThan(template.graphics.layers.length);
   if(variant==='typography')expect(result.snapshot.motionKeyframes.filter(k=>k.property.startsWith('maskPoint'))).toHaveLength(2940);
 });
+
+test.each(['contain','cover'])('scene media fit %s remains ordinary editable media geometry',fit=>{
+ const state=snapshot(),plan=buildStudioEvidenceScenePlan(state,'media',2);plan.actions[0].mediaFit=fit;
+ const result=executeStudioSceneActions(plan,state,factory());expect(result.overlays[0].mediaFit).toBe(fit);
+});
+test('unsupported scene media fit rejects without partial mutation',()=>{
+ const state=snapshot(),before=JSON.stringify(state),plan=buildStudioEvidenceScenePlan(state,'media',2);plan.actions[0].mediaFit='stretch';
+ expect(()=>executeStudioSceneActions(plan,state,factory())).toThrow('Scene media fit');expect(JSON.stringify(state)).toBe(before);
+});

@@ -1,0 +1,24 @@
+{
+  "format": "autopromote-scene-actions",
+  "version": 1,
+  "projectId": "viral-project-fa5921d4-7d4c-44bb-955d-dc65ef0c1360",
+  "baseRevision": 72,
+  "name": "10 - Decoded luma source",
+  "actions": [
+    {
+      "type": "media_plane",
+      "id": "02 / smooth matte",
+      "name": "02 / smooth matte",
+      "sourceMediaId": "project-media-d656ebe1-a058-4492-94b2-7343fa2f7e03",
+      "sourceStart": 0,
+      "startTime": 4,
+      "duration": 4,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      }
+    }
+  ]
+}

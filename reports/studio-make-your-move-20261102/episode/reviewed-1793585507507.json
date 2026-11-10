@@ -1,0 +1,1247 @@
+{
+  "format": "autopromote-scene-actions",
+  "version": 1,
+  "projectId": "viral-project-fa5921d4-7d4c-44bb-955d-dc65ef0c1360",
+  "baseRevision": 32,
+  "name": "09 - Cut through the frame",
+  "actions": [
+    {
+      "type": "media_plane",
+      "id": "04b / live strip 1",
+      "name": "04b / live strip 1",
+      "sourceMediaId": "project-media-22232b6f-2e9b-4252-b4b1-ae9284263cb8",
+      "sourceStart": 0,
+      "startTime": 14,
+      "duration": 2.75,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      },
+      "mask": {
+        "enabled": true,
+        "shape": "polygon",
+        "path": "polygon(0% 0%, 16.746666666666666% 0%, 16.746666666666666% 100%, 0% 100%)",
+        "feather": 0,
+        "inverted": false
+      }
+    },
+    {
+      "type": "keys",
+      "targetId": "04b / live strip 1",
+      "keys": [
+        {
+          "property": "y",
+          "time": 14,
+          "value": -30,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 14.75,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 16.75,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "04b / live strip 1",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 14,
+          "value": 12,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 14.75,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 16.75,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "04b / live strip 1",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 14,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.1,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 16.4,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 16.75,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "media_plane",
+      "id": "04b / live strip 2",
+      "name": "04b / live strip 2",
+      "sourceMediaId": "project-media-22232b6f-2e9b-4252-b4b1-ae9284263cb8",
+      "sourceStart": 0,
+      "startTime": 14,
+      "duration": 2.75,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      },
+      "mask": {
+        "enabled": true,
+        "shape": "polygon",
+        "path": "polygon(16.58666666666667% 0%, 33.413333333333334% 0%, 33.413333333333334% 100%, 16.58666666666667% 100%)",
+        "feather": 0,
+        "inverted": false
+      }
+    },
+    {
+      "type": "keys",
+      "targetId": "04b / live strip 2",
+      "keys": [
+        {
+          "property": "y",
+          "time": 14,
+          "value": 130,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 14.83,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 16.75,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "04b / live strip 2",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 14,
+          "value": -12,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 14.83,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 16.75,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "04b / live strip 2",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 14,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.18,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 16.4,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 16.75,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "media_plane",
+      "id": "04b / live strip 3",
+      "name": "04b / live strip 3",
+      "sourceMediaId": "project-media-22232b6f-2e9b-4252-b4b1-ae9284263cb8",
+      "sourceStart": 0,
+      "startTime": 14,
+      "duration": 2.75,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      },
+      "mask": {
+        "enabled": true,
+        "shape": "polygon",
+        "path": "polygon(33.25333333333334% 0%, 50.08% 0%, 50.08% 100%, 33.25333333333334% 100%)",
+        "feather": 0,
+        "inverted": false
+      }
+    },
+    {
+      "type": "keys",
+      "targetId": "04b / live strip 3",
+      "keys": [
+        {
+          "property": "y",
+          "time": 14,
+          "value": -30,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 14.91,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 16.75,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "04b / live strip 3",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 14,
+          "value": 12,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 14.91,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 16.75,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "04b / live strip 3",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 14,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.26,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 16.4,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 16.75,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "media_plane",
+      "id": "04b / live strip 4",
+      "name": "04b / live strip 4",
+      "sourceMediaId": "project-media-22232b6f-2e9b-4252-b4b1-ae9284263cb8",
+      "sourceStart": 0,
+      "startTime": 14,
+      "duration": 2.75,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      },
+      "mask": {
+        "enabled": true,
+        "shape": "polygon",
+        "path": "polygon(49.92% 0%, 66.74666666666667% 0%, 66.74666666666667% 100%, 49.92% 100%)",
+        "feather": 0,
+        "inverted": false
+      }
+    },
+    {
+      "type": "keys",
+      "targetId": "04b / live strip 4",
+      "keys": [
+        {
+          "property": "y",
+          "time": 14,
+          "value": 130,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 14.99,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 16.75,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "04b / live strip 4",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 14,
+          "value": -12,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 14.99,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 16.75,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "04b / live strip 4",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 14,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.34,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 16.4,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 16.75,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "media_plane",
+      "id": "04b / live strip 5",
+      "name": "04b / live strip 5",
+      "sourceMediaId": "project-media-22232b6f-2e9b-4252-b4b1-ae9284263cb8",
+      "sourceStart": 0,
+      "startTime": 14,
+      "duration": 2.75,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      },
+      "mask": {
+        "enabled": true,
+        "shape": "polygon",
+        "path": "polygon(66.58666666666667% 0%, 83.41333333333333% 0%, 83.41333333333333% 100%, 66.58666666666667% 100%)",
+        "feather": 0,
+        "inverted": false
+      }
+    },
+    {
+      "type": "keys",
+      "targetId": "04b / live strip 5",
+      "keys": [
+        {
+          "property": "y",
+          "time": 14,
+          "value": -30,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 15.07,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 16.75,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "04b / live strip 5",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 14,
+          "value": 12,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 15.07,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 16.75,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "04b / live strip 5",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 14,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.42,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 16.4,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 16.75,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "media_plane",
+      "id": "04b / live strip 6",
+      "name": "04b / live strip 6",
+      "sourceMediaId": "project-media-22232b6f-2e9b-4252-b4b1-ae9284263cb8",
+      "sourceStart": 0,
+      "startTime": 14,
+      "duration": 2.75,
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      },
+      "mask": {
+        "enabled": true,
+        "shape": "polygon",
+        "path": "polygon(83.25333333333333% 0%, 100% 0%, 100% 100%, 83.25333333333333% 100%)",
+        "feather": 0,
+        "inverted": false
+      }
+    },
+    {
+      "type": "keys",
+      "targetId": "04b / live strip 6",
+      "keys": [
+        {
+          "property": "y",
+          "time": 14,
+          "value": 130,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 15.15,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 16.75,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "04b / live strip 6",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 14,
+          "value": -12,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 15.15,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 16.75,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "04b / live strip 6",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 14,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 16.4,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 16.75,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    }
+  ],
+  "graphics": {
+    "format": "autopromote-graphics",
+    "version": 1,
+    "name": "09 - Cut through the frame",
+    "width": 1280,
+    "height": 720,
+    "duration": 30,
+    "layers": [
+      {
+        "id": "04b / transition ink",
+        "name": "04b / transition ink",
+        "type": "artwork",
+        "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\"><rect width=\"1280\" height=\"720\" fill=\"#101114\"/></svg>",
+        "startTime": 14,
+        "duration": 2.6999999999999993,
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "height": 100,
+        "scale": 1,
+        "rotation": 0,
+        "opacity": 1,
+        "keys": [
+          {
+            "property": "opacity",
+            "time": 14,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 16.25,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 16.7,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "id": "04b / BEYOND",
+        "name": "04b / BEYOND",
+        "type": "text",
+        "text": "BEYOND",
+        "startTime": 16.75,
+        "duration": 3.1499999999999986,
+        "x": 50,
+        "y": 34,
+        "width": 95,
+        "scale": 4.95,
+        "rotation": 0,
+        "opacity": 1,
+        "color": "#f5f2e9",
+        "fontWeight": 900,
+        "textAlign": "center",
+        "keys": [
+          {
+            "property": "textProgress",
+            "time": 16.75,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "textProgress",
+            "time": 17.55,
+            "value": 100,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 16.75,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 16.87,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 19.7,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 19.9,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          }
+        ],
+        "textAnimator": {
+          "version": 1,
+          "unit": "character",
+          "order": "center_out",
+          "stagger": 55,
+          "fromX": 0,
+          "fromY": 1.8,
+          "fromScale": 0.5,
+          "fromRotation": -25,
+          "fromOpacity": 0,
+          "tracking": 0.025,
+          "rangeStart": 0,
+          "rangeEnd": 100,
+          "easing": "back_out"
+        },
+        "textProgress": 0
+      },
+      {
+        "id": "04b / THE FRAME",
+        "name": "04b / THE FRAME",
+        "type": "text",
+        "text": "THE FRAME",
+        "startTime": 17.05,
+        "duration": 2.849999999999998,
+        "x": 50,
+        "y": 66,
+        "width": 95,
+        "scale": 3.8,
+        "rotation": 0,
+        "opacity": 1,
+        "color": "#d7ff43",
+        "fontWeight": 900,
+        "textAlign": "center",
+        "keys": [
+          {
+            "property": "textProgress",
+            "time": 17.05,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "textProgress",
+            "time": 17.85,
+            "value": 100,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 17.05,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 17.17,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 19.7,
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "property": "opacity",
+            "time": 19.9,
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.16,
+              1,
+              0.3,
+              1
+            ]
+          }
+        ],
+        "textAnimator": {
+          "version": 1,
+          "unit": "character",
+          "order": "center_out",
+          "stagger": 55,
+          "fromX": 0,
+          "fromY": 1.8,
+          "fromScale": 0.5,
+          "fromRotation": -25,
+          "fromOpacity": 0,
+          "tracking": 0.025,
+          "rangeStart": 0,
+          "rangeEnd": 100,
+          "easing": "back_out"
+        },
+        "textProgress": 0
+      }
+    ],
+    "groups": []
+  }
+}

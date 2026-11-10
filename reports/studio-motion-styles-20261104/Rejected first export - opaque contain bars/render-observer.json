@@ -1,0 +1,7 @@
+{
+  "pid": 1170496,
+  "detached": true,
+  "phase": "render",
+  "nativeUiOnly": true,
+  "reason": "Observe a single accepted native job independently of the shell lifetime."
+}

@@ -1,0 +1,1359 @@
+{
+  "schemaVersion": 1,
+  "templateId": "vinyl_pulse_v1",
+  "version": "1.0.0",
+  "label": "Vinyl pulse \u2014 music artwork",
+  "status": "draft",
+  "canonicalContractVersion": 1,
+  "compiler": "studioRenderCompiler",
+  "renderer": "render_viral_clip_impl",
+  "surfaces": [
+    "studio",
+    "director",
+    "welcome"
+  ],
+  "workflow": "studio",
+  "categoryIds": [
+    "motion_graphics"
+  ],
+  "inputSlots": [
+    {
+      "id": "footage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "music",
+      "type": "audio",
+      "required": false
+    }
+  ],
+  "supportedAspects": [
+    "16:9"
+  ],
+  "durationTicks": 720000,
+  "qualification": {
+    "studioLifecycle": "unverified",
+    "directorInstantiation": "unverified",
+    "creativeQuality": "unapproved",
+    "previewFinalParity": "unverified"
+  },
+  "executionDefinition": {
+    "clock": 90000,
+    "defaultAspect": "16:9",
+    "sequence": [
+      {
+        "slot": "footage",
+        "offset": 0,
+        "duration": 8,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      }
+    ],
+    "titles": [],
+    "logo": {},
+    "animation": {
+      "enterSeconds": 0.2,
+      "settleSeconds": 0.45,
+      "exitSeconds": 0.12,
+      "curve": [
+        0.16,
+        1,
+        0.3,
+        1
+      ]
+    },
+    "music": {
+      "volume": 55,
+      "fadeIn": 0.1,
+      "fadeOut": 0.5
+    },
+    "soundCues": [
+      {
+        "tone": "airy_whoosh",
+        "time": 0,
+        "duration": 0.6,
+        "volume": 0.2
+      },
+      {
+        "tone": "airy_whoosh",
+        "time": 3.3,
+        "duration": 0.5,
+        "volume": 0.16
+      },
+      {
+        "tone": "airy_whoosh",
+        "time": 6.4,
+        "duration": 0.6,
+        "volume": 0.18
+      }
+    ],
+    "sourceKeyframes": [],
+    "sceneActions": [],
+    "directorDescription": "Moving footage becomes a live vinyl disc, with independent coloured vector orbits and timed scale pulses. Uses one saved source and ordinary editable Studio layers. No model job.",
+    "defaultCopy": {},
+    "muteOriginalAudio": true,
+    "framing": {
+      "forceAspect": true,
+      "mode": "off",
+      "positions": []
+    },
+    "videoFit": "contain",
+    "ordinaryMotion": {
+      "version": 1,
+      "layers": [
+        {
+          "id": "Backdrop",
+          "name": "Backdrop",
+          "type": "image",
+          "vectorShape": {
+            "version": 1,
+            "closed": true,
+            "nodes": [
+              {
+                "x": 0,
+                "y": 0,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 100,
+                "y": 0,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 100,
+                "y": 100,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 0,
+                "y": 100,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "fill": {
+              "kind": "solid",
+              "color": "#060514",
+              "endColor": "#060514",
+              "start": [
+                0,
+                0
+              ],
+              "end": [
+                100,
+                100
+              ]
+            },
+            "stroke": {
+              "color": "#060514",
+              "width": 0
+            }
+          },
+          "startTime": 0,
+          "duration": 8,
+          "x": 50,
+          "y": 50,
+          "width": 100,
+          "height": 100,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "stretch",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "Concert haze",
+          "name": "Concert haze",
+          "type": "video",
+          "sourceSlot": "footage",
+          "sourceStartTime": 0,
+          "startTime": 0,
+          "duration": 8,
+          "x": 50,
+          "y": 50,
+          "width": 100,
+          "height": 100,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 0.32,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "cover",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "Live disc",
+          "name": "Live disc",
+          "type": "video",
+          "sourceSlot": "footage",
+          "sourceStartTime": 0,
+          "startTime": 0,
+          "duration": 8,
+          "x": 50,
+          "y": 50,
+          "width": 43,
+          "height": 76.4444,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "cover",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "ellipse",
+            "feather": 0,
+            "inverted": false
+          }
+        },
+        {
+          "id": "Sound orbit 0",
+          "name": "Sound orbit 0",
+          "type": "image",
+          "vectorShape": {
+            "version": 1,
+            "closed": true,
+            "nodes": [
+              {
+                "x": 50,
+                "y": 1,
+                "in": [
+                  -27,
+                  0
+                ],
+                "out": [
+                  27,
+                  0
+                ]
+              },
+              {
+                "x": 99,
+                "y": 50,
+                "in": [
+                  0,
+                  -27
+                ],
+                "out": [
+                  0,
+                  27
+                ]
+              },
+              {
+                "x": 50,
+                "y": 99,
+                "in": [
+                  27,
+                  0
+                ],
+                "out": [
+                  -27,
+                  0
+                ]
+              },
+              {
+                "x": 1,
+                "y": 50,
+                "in": [
+                  0,
+                  27
+                ],
+                "out": [
+                  0,
+                  -27
+                ]
+              }
+            ],
+            "fill": {
+              "kind": "none",
+              "color": "#b6ff33",
+              "endColor": "#b6ff33",
+              "start": [
+                0,
+                0
+              ],
+              "end": [
+                100,
+                100
+              ]
+            },
+            "stroke": {
+              "color": "#b6ff33",
+              "width": 0.6
+            }
+          },
+          "startTime": 0,
+          "duration": 8,
+          "x": 50,
+          "y": 50,
+          "width": 48,
+          "height": 85.33333333333333,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "stretch",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "Sound orbit 1",
+          "name": "Sound orbit 1",
+          "type": "image",
+          "vectorShape": {
+            "version": 1,
+            "closed": true,
+            "nodes": [
+              {
+                "x": 50,
+                "y": 1,
+                "in": [
+                  -27,
+                  0
+                ],
+                "out": [
+                  27,
+                  0
+                ]
+              },
+              {
+                "x": 99,
+                "y": 50,
+                "in": [
+                  0,
+                  -27
+                ],
+                "out": [
+                  0,
+                  27
+                ]
+              },
+              {
+                "x": 50,
+                "y": 99,
+                "in": [
+                  27,
+                  0
+                ],
+                "out": [
+                  -27,
+                  0
+                ]
+              },
+              {
+                "x": 1,
+                "y": 50,
+                "in": [
+                  0,
+                  27
+                ],
+                "out": [
+                  0,
+                  -27
+                ]
+              }
+            ],
+            "fill": {
+              "kind": "none",
+              "color": "#7c38ef",
+              "endColor": "#7c38ef",
+              "start": [
+                0,
+                0
+              ],
+              "end": [
+                100,
+                100
+              ]
+            },
+            "stroke": {
+              "color": "#7c38ef",
+              "width": 0.6
+            }
+          },
+          "startTime": 0,
+          "duration": 8,
+          "x": 50,
+          "y": 50,
+          "width": 56,
+          "height": 99.55555555555556,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "stretch",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "Sound orbit 2",
+          "name": "Sound orbit 2",
+          "type": "image",
+          "vectorShape": {
+            "version": 1,
+            "closed": true,
+            "nodes": [
+              {
+                "x": 50,
+                "y": 1,
+                "in": [
+                  -27,
+                  0
+                ],
+                "out": [
+                  27,
+                  0
+                ]
+              },
+              {
+                "x": 99,
+                "y": 50,
+                "in": [
+                  0,
+                  -27
+                ],
+                "out": [
+                  0,
+                  27
+                ]
+              },
+              {
+                "x": 50,
+                "y": 99,
+                "in": [
+                  27,
+                  0
+                ],
+                "out": [
+                  -27,
+                  0
+                ]
+              },
+              {
+                "x": 1,
+                "y": 50,
+                "in": [
+                  0,
+                  27
+                ],
+                "out": [
+                  0,
+                  -27
+                ]
+              }
+            ],
+            "fill": {
+              "kind": "none",
+              "color": "#ff53a2",
+              "endColor": "#ff53a2",
+              "start": [
+                0,
+                0
+              ],
+              "end": [
+                100,
+                100
+              ]
+            },
+            "stroke": {
+              "color": "#ff53a2",
+              "width": 0.6
+            }
+          },
+          "startTime": 0,
+          "duration": 8,
+          "x": 50,
+          "y": 50,
+          "width": 64,
+          "height": 113.77777777777777,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "stretch",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        }
+      ],
+      "keys": [
+        {
+          "targetId": "Live disc",
+          "property": "scale",
+          "time": 0,
+          "value": 0.05,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Live disc",
+          "property": "scale",
+          "time": 0.9,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Live disc",
+          "property": "scale",
+          "time": 2.4,
+          "value": 1.12,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Live disc",
+          "property": "scale",
+          "time": 3.4,
+          "value": 0.9,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Live disc",
+          "property": "scale",
+          "time": 4.4,
+          "value": 1.15,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Live disc",
+          "property": "scale",
+          "time": 5.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Live disc",
+          "property": "scale",
+          "time": 7.1,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Live disc",
+          "property": "scale",
+          "time": 8,
+          "value": 0.05,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Live disc",
+          "property": "rotation",
+          "time": 0,
+          "value": -15,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Live disc",
+          "property": "rotation",
+          "time": 3.5,
+          "value": 14,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Live disc",
+          "property": "rotation",
+          "time": 5,
+          "value": -12,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Live disc",
+          "property": "rotation",
+          "time": 7.2,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Live disc",
+          "property": "rotation",
+          "time": 8,
+          "value": 45,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 0",
+          "property": "scale",
+          "time": 0,
+          "value": 0.2,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 0",
+          "property": "scale",
+          "time": 0.8,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 0",
+          "property": "scale",
+          "time": 3,
+          "value": 1.06,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 0",
+          "property": "scale",
+          "time": 4,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 0",
+          "property": "scale",
+          "time": 5,
+          "value": 1.08,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 0",
+          "property": "scale",
+          "time": 6,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 0",
+          "property": "scale",
+          "time": 7.3,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 0",
+          "property": "scale",
+          "time": 8,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 0",
+          "property": "strokeStart",
+          "time": 0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "targetId": "Sound orbit 0",
+          "property": "strokeStart",
+          "time": 8,
+          "value": 25,
+          "easing": "linear"
+        },
+        {
+          "targetId": "Sound orbit 0",
+          "property": "strokeEnd",
+          "time": 0,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 0",
+          "property": "strokeEnd",
+          "time": 1.2,
+          "value": 80,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 0",
+          "property": "strokeEnd",
+          "time": 6.8,
+          "value": 80,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 0",
+          "property": "strokeEnd",
+          "time": 8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 0",
+          "property": "strokeOffset",
+          "time": 0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "targetId": "Sound orbit 0",
+          "property": "strokeOffset",
+          "time": 8,
+          "value": 180,
+          "easing": "linear"
+        },
+        {
+          "targetId": "Sound orbit 0",
+          "property": "rotation",
+          "time": 0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "targetId": "Sound orbit 0",
+          "property": "rotation",
+          "time": 8,
+          "value": 120,
+          "easing": "linear"
+        },
+        {
+          "targetId": "Sound orbit 1",
+          "property": "scale",
+          "time": 0,
+          "value": 0.2,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 1",
+          "property": "scale",
+          "time": 0.94,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 1",
+          "property": "scale",
+          "time": 3,
+          "value": 1.06,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 1",
+          "property": "scale",
+          "time": 4,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 1",
+          "property": "scale",
+          "time": 5,
+          "value": 1.08,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 1",
+          "property": "scale",
+          "time": 6,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 1",
+          "property": "scale",
+          "time": 7.3,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 1",
+          "property": "scale",
+          "time": 8,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 1",
+          "property": "strokeStart",
+          "time": 0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "targetId": "Sound orbit 1",
+          "property": "strokeStart",
+          "time": 8,
+          "value": 40,
+          "easing": "linear"
+        },
+        {
+          "targetId": "Sound orbit 1",
+          "property": "strokeEnd",
+          "time": 0,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 1",
+          "property": "strokeEnd",
+          "time": 1.2,
+          "value": 70,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 1",
+          "property": "strokeEnd",
+          "time": 6.8,
+          "value": 70,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 1",
+          "property": "strokeEnd",
+          "time": 8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 1",
+          "property": "strokeOffset",
+          "time": 0,
+          "value": 25,
+          "easing": "linear"
+        },
+        {
+          "targetId": "Sound orbit 1",
+          "property": "strokeOffset",
+          "time": 8,
+          "value": 205,
+          "easing": "linear"
+        },
+        {
+          "targetId": "Sound orbit 1",
+          "property": "rotation",
+          "time": 0,
+          "value": 60,
+          "easing": "linear"
+        },
+        {
+          "targetId": "Sound orbit 1",
+          "property": "rotation",
+          "time": 8,
+          "value": 180,
+          "easing": "linear"
+        },
+        {
+          "targetId": "Sound orbit 2",
+          "property": "scale",
+          "time": 0,
+          "value": 0.2,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 2",
+          "property": "scale",
+          "time": 1.08,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 2",
+          "property": "scale",
+          "time": 3,
+          "value": 1.06,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 2",
+          "property": "scale",
+          "time": 4,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 2",
+          "property": "scale",
+          "time": 5,
+          "value": 1.08,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 2",
+          "property": "scale",
+          "time": 6,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 2",
+          "property": "scale",
+          "time": 7.3,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 2",
+          "property": "scale",
+          "time": 8,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 2",
+          "property": "strokeStart",
+          "time": 0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "targetId": "Sound orbit 2",
+          "property": "strokeStart",
+          "time": 8,
+          "value": 55,
+          "easing": "linear"
+        },
+        {
+          "targetId": "Sound orbit 2",
+          "property": "strokeEnd",
+          "time": 0,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 2",
+          "property": "strokeEnd",
+          "time": 1.2,
+          "value": 60,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 2",
+          "property": "strokeEnd",
+          "time": 6.8,
+          "value": 60,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 2",
+          "property": "strokeEnd",
+          "time": 8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.86,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "Sound orbit 2",
+          "property": "strokeOffset",
+          "time": 0,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "targetId": "Sound orbit 2",
+          "property": "strokeOffset",
+          "time": 8,
+          "value": 230,
+          "easing": "linear"
+        },
+        {
+          "targetId": "Sound orbit 2",
+          "property": "rotation",
+          "time": 0,
+          "value": 120,
+          "easing": "linear"
+        },
+        {
+          "targetId": "Sound orbit 2",
+          "property": "rotation",
+          "time": 8,
+          "value": 240,
+          "easing": "linear"
+        },
+        {
+          "targetId": "main-video",
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "targetId": "main-video",
+          "property": "opacity",
+          "time": 8,
+          "value": 0,
+          "easing": "hold"
+        }
+      ],
+      "groups": [],
+      "order": [
+        "Backdrop",
+        "Concert haze",
+        "Live disc",
+        "Sound orbit 0",
+        "Sound orbit 1",
+        "Sound orbit 2"
+      ]
+    }
+  }
+}

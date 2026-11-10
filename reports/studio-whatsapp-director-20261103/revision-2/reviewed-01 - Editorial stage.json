@@ -1,0 +1,99 @@
+{
+  "format": "autopromote-scene-actions",
+  "version": 1,
+  "projectId": "viral-project-bafcf805-f86e-4ec4-a2f4-6530a5c653ff",
+  "baseRevision": 22,
+  "name": "01 - Editorial stage",
+  "actions": [
+    {
+      "type": "remove_keys",
+      "targetId": "main-video",
+      "property": "opacity"
+    },
+    {
+      "type": "keys",
+      "targetId": "main-video",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "opacity",
+          "time": 24,
+          "value": 0,
+          "easing": "hold"
+        }
+      ]
+    }
+  ],
+  "graphics": {
+    "format": "autopromote-graphics",
+    "version": 1,
+    "name": "01 - Editorial stage",
+    "width": 1280,
+    "height": 720,
+    "duration": 24,
+    "layers": [
+      {
+        "id": "R2 / paper",
+        "name": "R2 / paper",
+        "type": "artwork",
+        "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\"><rect width=\"1280\" height=\"720\" fill=\"#ece8dc\"/><path d=\"M48 56H180M48 56V188M1232 664H1100M1232 664V532\" stroke=\"#15191a\" stroke-width=\"2\" fill=\"none\"/><path d=\"M48 684H1232\" stroke=\"#15191a\" stroke-opacity=\".18\"/></svg>",
+        "startTime": 0,
+        "duration": 24,
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "height": 100,
+        "scale": 1,
+        "rotation": 0,
+        "opacity": 1,
+        "keys": []
+      },
+      {
+        "id": "R2 / corner label",
+        "name": "R2 / corner label",
+        "type": "text",
+        "text": "OFF SCRIPT / 01",
+        "startTime": 0,
+        "duration": 24,
+        "x": 17,
+        "y": 7,
+        "width": 30,
+        "scale": 0.36,
+        "rotation": 0,
+        "opacity": 1,
+        "color": "#15191a",
+        "fontWeight": 900,
+        "textAlign": "center",
+        "strokeWidth": 0,
+        "strokeColor": "#15191a",
+        "keys": []
+      },
+      {
+        "id": "R2 / folio",
+        "name": "R2 / folio",
+        "type": "text",
+        "text": "A STUDY IN MOTION",
+        "startTime": 0,
+        "duration": 24,
+        "x": 80,
+        "y": 94,
+        "width": 35,
+        "scale": 0.3,
+        "rotation": 0,
+        "opacity": 1,
+        "color": "#15191a",
+        "fontWeight": 900,
+        "textAlign": "center",
+        "strokeWidth": 0,
+        "strokeColor": "#15191a",
+        "keys": []
+      }
+    ],
+    "groups": []
+  }
+}

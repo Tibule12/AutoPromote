@@ -1,0 +1,16 @@
+{
+  "projectId": "viral-project-95972437-4782-4932-a3de-1b5d2def5060",
+  "projectHash": "6decc811351d6a88bc595482c71d717b123b3989bd8acd64af19e2d5a0e4952b",
+  "movieSha256": "7028e16cb01253bfe1d3c26856dbf44b16adb2ce090e14f6db0d1c97500f664f",
+  "jobId": "viral_a927fc95ed7b0c71d156cc5740a817187cad842314bdf82dbe78553e69279b5c",
+  "executionId": "ba8a500cafb4208d6bb3c576aa191914bcbf3a6bd52ee8a63841b3891a7fc09f",
+  "nativeBackupMatchesRenderedDocument": true,
+  "compiledCompositionMatchesSubmitted": true,
+  "workerArtifactMatchesNativeDownload": true,
+  "templateRef": {
+    "templateId": "vinyl_pulse_v1",
+    "version": "1.0.0",
+    "definitionHash": "ff1bdcbe6c98477a92bb1d8d75853c0a12b44b655d5d5c5459b3962a6fca9214"
+  },
+  "actualNativeDownload": true
+}

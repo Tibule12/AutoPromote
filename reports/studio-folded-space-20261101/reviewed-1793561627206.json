@@ -1,0 +1,7353 @@
+{
+  "format": "autopromote-scene-actions",
+  "version": 1,
+  "projectId": "viral-project-dcaf31ef-b89c-4779-aec4-b02cfb9d9717",
+  "baseRevision": 8,
+  "name": "Folded moving world 2",
+  "actions": [
+    {
+      "type": "media_plane",
+      "id": "Fold / Summit / surface 4",
+      "name": "Fold / Summit / surface 4",
+      "sourceMediaId": "project-media-d12f314e-400a-43f6-a2b4-dcffd1eef5a5",
+      "sourceStart": 0,
+      "startTime": 0,
+      "duration": 8,
+      "perspective": {
+        "version": 1,
+        "corners": [
+          [
+            50,
+            0
+          ],
+          [
+            66.66666666666666,
+            0
+          ],
+          [
+            66.66666666666666,
+            100
+          ],
+          [
+            50,
+            100
+          ]
+        ],
+        "sourceRect": [
+          50,
+          0,
+          66.66666666666666,
+          100
+        ]
+      },
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      }
+    },
+    {
+      "type": "keys",
+      "targetId": "Fold / Summit / surface 4",
+      "keys": [
+        {
+          "property": "planeCorner0X",
+          "time": 0,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 0,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 0,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 0,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 0,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 0,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 0.166667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 0.166667,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 0.166667,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 0.166667,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 0.166667,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 0.166667,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 0.166667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 0.166667,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 0.333333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 0.333333,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 0.333333,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 0.333333,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 0.333333,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 0.333333,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 0.333333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 0.333333,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 0.5,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 0.5,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 0.5,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 0.5,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 0.5,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 0.5,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 0.5,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 0.5,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 0.666667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 0.666667,
+          "value": 0.003007,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 0.666667,
+          "value": 66.666609,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 0.666667,
+          "value": 0.005296,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 0.666667,
+          "value": 66.666609,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 0.666667,
+          "value": 99.998936,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 0.666667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 0.666667,
+          "value": 99.996993,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 0.833333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 0.833333,
+          "value": 0.344543,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 0.833333,
+          "value": 66.659992,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 0.833333,
+          "value": 0.606575,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 0.833333,
+          "value": 66.659992,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 0.833333,
+          "value": 99.878297,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 0.833333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 0.833333,
+          "value": 99.655457,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 1,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 1,
+          "value": 1.185185,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 1,
+          "value": 66.642913,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 1,
+          "value": 2.085335,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 1,
+          "value": 66.642913,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 1,
+          "value": 99.582566,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 1,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 1,
+          "value": 98.814815,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 1.166667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 1.166667,
+          "value": 2.428951,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 1.166667,
+          "value": 66.615588,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 1.166667,
+          "value": 4.270084,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 1.166667,
+          "value": 66.615588,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 1.166667,
+          "value": 99.148158,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 1.166667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 1.166667,
+          "value": 97.571049,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 1.333333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 1.333333,
+          "value": 3.97986,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 1.333333,
+          "value": 66.578101,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 1.333333,
+          "value": 6.989101,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 1.333333,
+          "value": 66.578101,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 1.333333,
+          "value": 98.611721,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 1.333333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 1.333333,
+          "value": 96.02014,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 1.5,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 1.5,
+          "value": 5.741929,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 1.5,
+          "value": 66.530952,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 1.5,
+          "value": 10.071262,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 1.5,
+          "value": 66.530952,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 1.5,
+          "value": 98.009304,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 1.5,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 1.5,
+          "value": 94.258071,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 1.666667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 1.666667,
+          "value": 7.619176,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 1.666667,
+          "value": 66.475441,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 1.666667,
+          "value": 13.346651,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 1.666667,
+          "value": 66.475441,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 1.666667,
+          "value": 97.375748,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 1.666667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 1.666667,
+          "value": 92.380824,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 1.833333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 1.833333,
+          "value": 9.515619,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 1.833333,
+          "value": 66.413897,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 1.833333,
+          "value": 16.646934,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 1.833333,
+          "value": 66.413897,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 1.833333,
+          "value": 96.744314,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 1.833333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 1.833333,
+          "value": 90.484381,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 2,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 2,
+          "value": 11.335277,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 2,
+          "value": 66.349746,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 2,
+          "value": 19.805501,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 2,
+          "value": 66.349746,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 2,
+          "value": 96.146536,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 2,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 2,
+          "value": 88.664723,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 2.166667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 2.166667,
+          "value": 12.982167,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 2.166667,
+          "value": 66.287434,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 2.166667,
+          "value": 22.657382,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 2.166667,
+          "value": 66.287434,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 2.166667,
+          "value": 95.612309,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 2.166667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 2.166667,
+          "value": 87.017833,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 2.333333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 2.333333,
+          "value": 14.360308,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 2.333333,
+          "value": 66.232222,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 2.333333,
+          "value": 25.038941,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 2.333333,
+          "value": 66.232222,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 2.333333,
+          "value": 95.170195,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 2.333333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 2.333333,
+          "value": 85.639692,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 2.5,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 2.5,
+          "value": 15.373718,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 2.5,
+          "value": 66.189856,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 2.5,
+          "value": 26.787355,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 2.5,
+          "value": 66.189856,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 2.5,
+          "value": 94.847943,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 2.5,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 2.5,
+          "value": 84.626282,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "Fold / Summit / surface 4",
+      "keys": [
+        {
+          "property": "planeCorner0X",
+          "time": 2.666667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 2.666667,
+          "value": 15.926414,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 2.666667,
+          "value": 66.166125,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 2.666667,
+          "value": 27.739895,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 2.666667,
+          "value": 66.166125,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 2.666667,
+          "value": 94.673208,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 2.666667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 2.666667,
+          "value": 84.073586,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 2.833333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 2.833333,
+          "value": 16,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 2.833333,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 2.833333,
+          "value": 27.866663,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 2.833333,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 2.833333,
+          "value": 94.649998,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 2.833333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 2.833333,
+          "value": 84,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 3,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 3,
+          "value": 16,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 3,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 3,
+          "value": 27.866663,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 3,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 3,
+          "value": 94.649998,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 3,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 3,
+          "value": 84,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 3.166667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 3.166667,
+          "value": 16,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 3.166667,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 3.166667,
+          "value": 27.866663,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 3.166667,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 3.166667,
+          "value": 94.649998,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 3.166667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 3.166667,
+          "value": 84,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 3.333333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 3.333333,
+          "value": 16,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 3.333333,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 3.333333,
+          "value": 27.866663,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 3.333333,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 3.333333,
+          "value": 94.649998,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 3.333333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 3.333333,
+          "value": 84,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 3.5,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 3.5,
+          "value": 16,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 3.5,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 3.5,
+          "value": 27.866663,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 3.5,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 3.5,
+          "value": 94.649998,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 3.5,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 3.5,
+          "value": 84,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 3.666667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 3.666667,
+          "value": 16,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 3.666667,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 3.666667,
+          "value": 27.866663,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 3.666667,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 3.666667,
+          "value": 94.649998,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 3.666667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 3.666667,
+          "value": 84,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 3.833333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 3.833333,
+          "value": 16,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 3.833333,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 3.833333,
+          "value": 27.866663,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 3.833333,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 3.833333,
+          "value": 94.649998,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 3.833333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 3.833333,
+          "value": 84,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 4,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 4,
+          "value": 16,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 4,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 4,
+          "value": 27.866663,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 4,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 4,
+          "value": 94.649998,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 4,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 4,
+          "value": 84,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 4.166667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 4.166667,
+          "value": 16,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 4.166667,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 4.166667,
+          "value": 27.866663,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 4.166667,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 4.166667,
+          "value": 94.649998,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 4.166667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 4.166667,
+          "value": 84,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 4.333333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 4.333333,
+          "value": 16,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 4.333333,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 4.333333,
+          "value": 27.866663,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 4.333333,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 4.333333,
+          "value": 94.649998,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 4.333333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 4.333333,
+          "value": 84,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 4.5,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 4.5,
+          "value": 16,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 4.5,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 4.5,
+          "value": 27.866663,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 4.5,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 4.5,
+          "value": 94.649998,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 4.5,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 4.5,
+          "value": 84,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 4.666667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 4.666667,
+          "value": 16,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 4.666667,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 4.666667,
+          "value": 27.866663,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 4.666667,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 4.666667,
+          "value": 94.649998,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 4.666667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 4.666667,
+          "value": 84,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 4.833333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 4.833333,
+          "value": 15.99187,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 4.833333,
+          "value": 66.163286,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 4.833333,
+          "value": 27.852657,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 4.833333,
+          "value": 66.163286,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 4.833333,
+          "value": 94.652562,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 4.833333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 4.833333,
+          "value": 84.00813,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 5,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 5,
+          "value": 15.720168,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 5,
+          "value": 66.175032,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 5,
+          "value": 27.384526,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 5,
+          "value": 66.175032,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 5,
+          "value": 94.738329,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 5,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 5,
+          "value": 84.279832,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 5.166667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 5.166667,
+          "value": 15.102697,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 5.166667,
+          "value": 66.201332,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 5.166667,
+          "value": 26.320005,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 5.166667,
+          "value": 66.201332,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 5.166667,
+          "value": 94.933888,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 5.166667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 5.166667,
+          "value": 84.897303,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "Fold / Summit / surface 4",
+      "keys": [
+        {
+          "property": "planeCorner0X",
+          "time": 5.333333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 5.333333,
+          "value": 14.193064,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 5.333333,
+          "value": 66.23907,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 5.333333,
+          "value": 24.750166,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 5.333333,
+          "value": 66.23907,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 5.333333,
+          "value": 95.223609,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 5.333333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 5.333333,
+          "value": 85.806936,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 5.5,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 5.5,
+          "value": 13.044877,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 5.5,
+          "value": 66.284982,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 5.5,
+          "value": 22.765848,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 5.5,
+          "value": 66.284982,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 5.5,
+          "value": 95.592094,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 5.5,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 5.5,
+          "value": 86.955123,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 5.666667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 5.666667,
+          "value": 11.711744,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 5.666667,
+          "value": 66.335856,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 5.666667,
+          "value": 20.457987,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 5.666667,
+          "value": 66.335856,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 5.666667,
+          "value": 96.023848,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 5.666667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 5.666667,
+          "value": 88.288256,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 5.833333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 5.833333,
+          "value": 10.247272,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 5.833333,
+          "value": 66.3887,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 5.833333,
+          "value": 17.917888,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 5.833333,
+          "value": 66.3887,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 5.833333,
+          "value": 96.503008,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 5.833333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 5.833333,
+          "value": 89.752728,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 6,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 6,
+          "value": 8.705068,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 6,
+          "value": 66.440869,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 6,
+          "value": 15.237429,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 6,
+          "value": 66.440869,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 6,
+          "value": 97.013137,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 6,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 6,
+          "value": 91.294932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 6.166667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 6.166667,
+          "value": 7.138741,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 6.166667,
+          "value": 66.490163,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 6.166667,
+          "value": 12.509205,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 6.166667,
+          "value": 66.490163,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 6.166667,
+          "value": 97.537083,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 6.166667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 6.166667,
+          "value": 92.861259,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 6.333333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 6.333333,
+          "value": 5.601899,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 6.333333,
+          "value": 66.534875,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 6.333333,
+          "value": 9.8266,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 6.333333,
+          "value": 66.534875,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 6.333333,
+          "value": 98.056903,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 6.333333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 6.333333,
+          "value": 94.398101,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 6.5,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 6.5,
+          "value": 4.148148,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 6.5,
+          "value": 66.573807,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 6.5,
+          "value": 7.28379,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 6.5,
+          "value": 66.573807,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 6.5,
+          "value": 98.553863,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 6.5,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 6.5,
+          "value": 95.851852,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 6.666667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 6.666667,
+          "value": 2.831097,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 6.666667,
+          "value": 66.606231,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 6.666667,
+          "value": 4.975676,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 6.666667,
+          "value": 66.606231,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 6.666667,
+          "value": 99.008503,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 6.666667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 6.666667,
+          "value": 97.168903,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 6.833333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 6.833333,
+          "value": 1.704353,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 6.833333,
+          "value": 66.631805,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 6.833333,
+          "value": 2.99774,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 6.833333,
+          "value": 66.631805,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 6.833333,
+          "value": 99.400781,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 6.833333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 6.833333,
+          "value": 98.295647,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 7,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 7,
+          "value": 0.821524,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 7,
+          "value": 66.65044,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 7,
+          "value": 1.445835,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 7,
+          "value": 66.65044,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 7,
+          "value": 99.710289,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 7,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 7,
+          "value": 99.178476,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 7.166667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 7.166667,
+          "value": 0.236218,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 7.166667,
+          "value": 66.662111,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 7.166667,
+          "value": 0.415897,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 7.166667,
+          "value": 66.662111,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 7.166667,
+          "value": 99.91653,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 7.166667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 7.166667,
+          "value": 99.763782,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 7.333333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 7.333333,
+          "value": 0.002042,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 7.333333,
+          "value": 66.666628,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 7.333333,
+          "value": 0.003595,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 7.333333,
+          "value": 66.666628,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 7.333333,
+          "value": 99.999278,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 7.333333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 7.333333,
+          "value": 99.997958,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 7.5,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 7.5,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 7.5,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 7.5,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 7.5,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 7.5,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 7.5,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 7.5,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 7.666667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 7.666667,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 7.666667,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 7.666667,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 7.666667,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 7.666667,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 7.666667,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 7.666667,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 7.833333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 7.833333,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 7.833333,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 7.833333,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 7.833333,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 7.833333,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 7.833333,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 7.833333,
+          "value": 100,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "Fold / Summit / surface 4",
+      "keys": [
+        {
+          "property": "planeCorner0X",
+          "time": 8,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 8,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 8,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 8,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 8,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 8,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 8,
+          "value": 50,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 8,
+          "value": 100,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "Fold / Summit / surface 4",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 3.1,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 4.25,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 8,
+          "value": 1,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "media_plane",
+      "id": "Fold / Summit / surface 5",
+      "name": "Fold / Summit / surface 5",
+      "sourceMediaId": "project-media-d12f314e-400a-43f6-a2b4-dcffd1eef5a5",
+      "sourceStart": 0,
+      "startTime": 0,
+      "duration": 8,
+      "perspective": {
+        "version": 1,
+        "corners": [
+          [
+            66.66666666666666,
+            0
+          ],
+          [
+            83.33333333333334,
+            0
+          ],
+          [
+            83.33333333333334,
+            100
+          ],
+          [
+            66.66666666666666,
+            100
+          ]
+        ],
+        "sourceRect": [
+          66.66666666666666,
+          0,
+          83.33333333333334,
+          100
+        ]
+      },
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      }
+    },
+    {
+      "type": "keys",
+      "targetId": "Fold / Summit / surface 5",
+      "keys": [
+        {
+          "property": "planeCorner0X",
+          "time": 0,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 0,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 0,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 0,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 0,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 0,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 0.166667,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 0.166667,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 0.166667,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 0.166667,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 0.166667,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 0.166667,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 0.166667,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 0.166667,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 0.333333,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 0.333333,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 0.333333,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 0.333333,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 0.333333,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 0.333333,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 0.333333,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 0.333333,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 0.5,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 0.5,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 0.5,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 0.5,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 0.5,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 0.5,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 0.5,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 0.5,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 0.666667,
+          "value": 66.666609,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 0.666667,
+          "value": 0.005296,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 0.666667,
+          "value": 83.332874,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 0.666667,
+          "value": 0.005813,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 0.666667,
+          "value": 83.332874,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 0.666667,
+          "value": 99.99842,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 0.666667,
+          "value": 66.666609,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 0.666667,
+          "value": 99.998936,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 0.833333,
+          "value": 66.659992,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 0.833333,
+          "value": 0.606575,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 0.833333,
+          "value": 83.28,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 0.833333,
+          "value": 0.665269,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 0.833333,
+          "value": 83.28,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 0.833333,
+          "value": 99.819604,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 0.833333,
+          "value": 66.659992,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 0.833333,
+          "value": 99.878297,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 1,
+          "value": 66.642913,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 1,
+          "value": 2.085335,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 1,
+          "value": 83.144096,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 1,
+          "value": 2.282834,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 1,
+          "value": 83.144096,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 1,
+          "value": 99.385067,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 1,
+          "value": 66.642913,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 1,
+          "value": 99.582566,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 1.166667,
+          "value": 66.615588,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 1.166667,
+          "value": 4.270084,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 1.166667,
+          "value": 82.928249,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 1.166667,
+          "value": 4.661535,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 1.166667,
+          "value": 82.928249,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 1.166667,
+          "value": 98.756708,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 1.166667,
+          "value": 66.615588,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 1.166667,
+          "value": 99.148158,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 1.333333,
+          "value": 66.578101,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 1.333333,
+          "value": 6.989101,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 1.333333,
+          "value": 82.635082,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 1.333333,
+          "value": 7.603425,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 1.333333,
+          "value": 82.635082,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 1.333333,
+          "value": 97.997397,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 1.333333,
+          "value": 66.578101,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 1.333333,
+          "value": 98.611721,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 1.5,
+          "value": 66.530952,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 1.5,
+          "value": 10.071262,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 1.5,
+          "value": 82.270797,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 1.5,
+          "value": 10.913506,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 1.5,
+          "value": 82.270797,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 1.5,
+          "value": 97.16706,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 1.5,
+          "value": 66.530952,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 1.5,
+          "value": 98.009304,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 1.666667,
+          "value": 66.475441,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 1.666667,
+          "value": 13.346651,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 1.666667,
+          "value": 81.847729,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 1.666667,
+          "value": 14.402544,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 1.666667,
+          "value": 81.847729,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 1.666667,
+          "value": 96.319855,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 1.666667,
+          "value": 66.475441,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 1.666667,
+          "value": 97.375748,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 1.833333,
+          "value": 66.413897,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 1.833333,
+          "value": 16.646934,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 1.833333,
+          "value": 81.385434,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 1.833333,
+          "value": 17.888702,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 1.833333,
+          "value": 81.385434,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 1.833333,
+          "value": 95.502546,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 1.833333,
+          "value": 66.413897,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 1.833333,
+          "value": 96.744314,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 2,
+          "value": 66.349746,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 2,
+          "value": 19.805501,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 2,
+          "value": 80.910538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 2,
+          "value": 21.197984,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 2,
+          "value": 80.910538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 2,
+          "value": 94.754052,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 2,
+          "value": 66.349746,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 2,
+          "value": 96.146536,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 2.166667,
+          "value": 66.287434,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 2.166667,
+          "value": 22.657382,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 2.166667,
+          "value": 80.455627,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 2.166667,
+          "value": 24.163556,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 2.166667,
+          "value": 80.455627,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 2.166667,
+          "value": 94.106135,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 2.166667,
+          "value": 66.287434,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 2.166667,
+          "value": 95.612309,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 2.333333,
+          "value": 66.232222,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 2.333333,
+          "value": 25.038941,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 2.333333,
+          "value": 80.057497,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 2.333333,
+          "value": 26.62411,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 2.333333,
+          "value": 80.057497,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 2.333333,
+          "value": 93.585026,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 2.333333,
+          "value": 66.232222,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 2.333333,
+          "value": 95.170195,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 2.5,
+          "value": 66.189856,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 2.5,
+          "value": 26.787355,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 2.5,
+          "value": 79.755009,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 2.5,
+          "value": 28.421461,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 2.5,
+          "value": 79.755009,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 2.5,
+          "value": 93.213838,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 2.5,
+          "value": 66.189856,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 2.5,
+          "value": 94.847943,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "Fold / Summit / surface 5",
+      "keys": [
+        {
+          "property": "planeCorner0X",
+          "time": 2.666667,
+          "value": 66.166125,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 2.666667,
+          "value": 27.739895,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 2.666667,
+          "value": 79.586673,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 2.666667,
+          "value": 29.397484,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 2.666667,
+          "value": 79.586673,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 2.666667,
+          "value": 93.01562,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 2.666667,
+          "value": 66.166125,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 2.666667,
+          "value": 94.673208,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 2.833333,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 2.833333,
+          "value": 27.866663,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 2.833333,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 2.833333,
+          "value": 29.527209,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 2.833333,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 2.833333,
+          "value": 92.989452,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 2.833333,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 2.833333,
+          "value": 94.649998,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 3,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 3,
+          "value": 27.866663,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 3,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 3,
+          "value": 29.527209,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 3,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 3,
+          "value": 92.989452,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 3,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 3,
+          "value": 94.649998,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 3.166667,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 3.166667,
+          "value": 27.866663,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 3.166667,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 3.166667,
+          "value": 29.527209,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 3.166667,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 3.166667,
+          "value": 92.989452,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 3.166667,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 3.166667,
+          "value": 94.649998,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 3.333333,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 3.333333,
+          "value": 27.866663,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 3.333333,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 3.333333,
+          "value": 29.527209,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 3.333333,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 3.333333,
+          "value": 92.989452,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 3.333333,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 3.333333,
+          "value": 94.649998,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 3.5,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 3.5,
+          "value": 27.866663,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 3.5,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 3.5,
+          "value": 29.527209,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 3.5,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 3.5,
+          "value": 92.989452,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 3.5,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 3.5,
+          "value": 94.649998,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 3.666667,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 3.666667,
+          "value": 27.866663,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 3.666667,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 3.666667,
+          "value": 29.527209,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 3.666667,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 3.666667,
+          "value": 92.989452,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 3.666667,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 3.666667,
+          "value": 94.649998,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 3.833333,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 3.833333,
+          "value": 27.866663,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 3.833333,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 3.833333,
+          "value": 29.527209,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 3.833333,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 3.833333,
+          "value": 92.989452,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 3.833333,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 3.833333,
+          "value": 94.649998,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 4,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 4,
+          "value": 27.866663,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 4,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 4,
+          "value": 29.527209,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 4,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 4,
+          "value": 92.989452,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 4,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 4,
+          "value": 94.649998,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 4.166667,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 4.166667,
+          "value": 27.866663,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 4.166667,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 4.166667,
+          "value": 29.527209,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 4.166667,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 4.166667,
+          "value": 92.989452,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 4.166667,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 4.166667,
+          "value": 94.649998,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 4.333333,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 4.333333,
+          "value": 27.866663,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 4.333333,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 4.333333,
+          "value": 29.527209,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 4.333333,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 4.333333,
+          "value": 92.989452,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 4.333333,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 4.333333,
+          "value": 94.649998,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 4.5,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 4.5,
+          "value": 27.866663,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 4.5,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 4.5,
+          "value": 29.527209,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 4.5,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 4.5,
+          "value": 92.989452,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 4.5,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 4.5,
+          "value": 94.649998,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 4.666667,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 4.666667,
+          "value": 27.866663,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 4.666667,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 4.666667,
+          "value": 29.527209,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 4.666667,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 4.666667,
+          "value": 92.989452,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 4.666667,
+          "value": 66.162932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 4.666667,
+          "value": 94.649998,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 4.833333,
+          "value": 66.163286,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 4.833333,
+          "value": 27.852657,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 4.833333,
+          "value": 79.566583,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 4.833333,
+          "value": 29.512878,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 4.833333,
+          "value": 79.566583,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 4.833333,
+          "value": 92.99234,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 4.833333,
+          "value": 66.163286,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 4.833333,
+          "value": 94.652562,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 5,
+          "value": 66.175032,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 5,
+          "value": 27.384526,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 5,
+          "value": 79.649764,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 5,
+          "value": 29.033614,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 5,
+          "value": 79.649764,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 5,
+          "value": 93.089242,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 5,
+          "value": 66.175032,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 5,
+          "value": 94.738329,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 5.166667,
+          "value": 66.201332,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 5.166667,
+          "value": 26.320005,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 5.166667,
+          "value": 79.836694,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 5.166667,
+          "value": 27.941773,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 5.166667,
+          "value": 79.836694,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 5.166667,
+          "value": 93.312121,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 5.166667,
+          "value": 66.201332,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 5.166667,
+          "value": 94.933888,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "Fold / Summit / surface 5",
+      "keys": [
+        {
+          "property": "planeCorner0X",
+          "time": 5.333333,
+          "value": 66.23907,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 5.333333,
+          "value": 24.750166,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 5.333333,
+          "value": 80.106635,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 5.333333,
+          "value": 26.32652,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 5.333333,
+          "value": 80.106635,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 5.333333,
+          "value": 93.647256,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 5.333333,
+          "value": 66.23907,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 5.333333,
+          "value": 95.223609,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 5.5,
+          "value": 66.284982,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 5.5,
+          "value": 22.765848,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 5.5,
+          "value": 80.43785,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 5.5,
+          "value": 24.275932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 5.5,
+          "value": 80.43785,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 5.5,
+          "value": 94.08201,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 5.5,
+          "value": 66.284982,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 5.5,
+          "value": 95.592094,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 5.666667,
+          "value": 66.335856,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 5.666667,
+          "value": 20.457987,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 5.666667,
+          "value": 80.808607,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 5.666667,
+          "value": 21.87834,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 5.666667,
+          "value": 80.808607,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 5.666667,
+          "value": 94.603495,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 5.666667,
+          "value": 66.335856,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 5.666667,
+          "value": 96.023848,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 5.833333,
+          "value": 66.3887,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 5.833333,
+          "value": 17.917888,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 5.833333,
+          "value": 81.198082,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 5.833333,
+          "value": 19.223469,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 5.833333,
+          "value": 81.198082,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 5.833333,
+          "value": 95.197427,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 5.833333,
+          "value": 66.3887,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 5.833333,
+          "value": 96.503008,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 6,
+          "value": 66.440869,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 6,
+          "value": 15.237429,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 6,
+          "value": 81.587199,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 6,
+          "value": 16.403394,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 6,
+          "value": 81.587199,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 6,
+          "value": 95.847173,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 6,
+          "value": 66.440869,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 6,
+          "value": 97.013137,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 6.166667,
+          "value": 66.490163,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 6.166667,
+          "value": 12.509205,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 6.166667,
+          "value": 81.959345,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 6.166667,
+          "value": 13.513255,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 6.166667,
+          "value": 81.959345,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 6.166667,
+          "value": 96.533033,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 6.166667,
+          "value": 66.490163,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 6.166667,
+          "value": 97.537083,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 6.333333,
+          "value": 66.534875,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 6.333333,
+          "value": 9.8266,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 6.333333,
+          "value": 82.300929,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 6.333333,
+          "value": 10.651708,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 6.333333,
+          "value": 82.300929,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 6.333333,
+          "value": 97.231795,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 6.333333,
+          "value": 66.534875,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 6.333333,
+          "value": 98.056903,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 6.5,
+          "value": 66.573807,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 6.5,
+          "value": 7.28379,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 6.5,
+          "value": 82.601704,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 6.5,
+          "value": 7.921039,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 6.5,
+          "value": 82.601704,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 6.5,
+          "value": 97.916613,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 6.5,
+          "value": 66.573807,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 6.5,
+          "value": 98.553863,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 6.666667,
+          "value": 66.606231,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 6.666667,
+          "value": 4.975676,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 6.666667,
+          "value": 82.854759,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 6.666667,
+          "value": 5.426932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 6.666667,
+          "value": 82.854759,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 6.666667,
+          "value": 98.557246,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 6.666667,
+          "value": 66.606231,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 6.666667,
+          "value": 99.008503,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 6.833333,
+          "value": 66.631805,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 6.833333,
+          "value": 2.99774,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 6.833333,
+          "value": 83.056119,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 6.833333,
+          "value": 3.277851,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 6.833333,
+          "value": 83.056119,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 6.833333,
+          "value": 99.120671,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 6.833333,
+          "value": 66.631805,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 6.833333,
+          "value": 99.400781,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 7,
+          "value": 66.65044,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 7,
+          "value": 1.445835,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 7,
+          "value": 83.203888,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 7,
+          "value": 1.584052,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 7,
+          "value": 83.203888,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 7,
+          "value": 99.572072,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 7,
+          "value": 66.65044,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 7,
+          "value": 99.710289,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 7.166667,
+          "value": 66.662111,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 7.166667,
+          "value": 0.415897,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 7.166667,
+          "value": 83.296918,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 7.166667,
+          "value": 0.45625,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 7.166667,
+          "value": 83.296918,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 7.166667,
+          "value": 99.876177,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 7.166667,
+          "value": 66.662111,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 7.166667,
+          "value": 99.91653,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 7.333333,
+          "value": 66.666628,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 7.333333,
+          "value": 0.003595,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 7.333333,
+          "value": 83.333021,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 7.333333,
+          "value": 0.003946,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 7.333333,
+          "value": 83.333021,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 7.333333,
+          "value": 99.998927,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 7.333333,
+          "value": 66.666628,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 7.333333,
+          "value": 99.999278,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 7.5,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 7.5,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 7.5,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 7.5,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 7.5,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 7.5,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 7.5,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 7.5,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 7.666667,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 7.666667,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 7.666667,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 7.666667,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 7.666667,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 7.666667,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 7.666667,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 7.666667,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 7.833333,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 7.833333,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 7.833333,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 7.833333,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 7.833333,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 7.833333,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 7.833333,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 7.833333,
+          "value": 100,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "Fold / Summit / surface 5",
+      "keys": [
+        {
+          "property": "planeCorner0X",
+          "time": 8,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 8,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 8,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 8,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 8,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 8,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 8,
+          "value": 66.666667,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 8,
+          "value": 100,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "Fold / Summit / surface 5",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 3.1,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 4.25,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 8,
+          "value": 1,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "media_plane",
+      "id": "Fold / Summit / surface 6",
+      "name": "Fold / Summit / surface 6",
+      "sourceMediaId": "project-media-d12f314e-400a-43f6-a2b4-dcffd1eef5a5",
+      "sourceStart": 0,
+      "startTime": 0,
+      "duration": 8,
+      "perspective": {
+        "version": 1,
+        "corners": [
+          [
+            83.33333333333334,
+            0
+          ],
+          [
+            100,
+            0
+          ],
+          [
+            100,
+            100
+          ],
+          [
+            83.33333333333334,
+            100
+          ]
+        ],
+        "sourceRect": [
+          83.33333333333334,
+          0,
+          100,
+          100
+        ]
+      },
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      }
+    },
+    {
+      "type": "keys",
+      "targetId": "Fold / Summit / surface 6",
+      "keys": [
+        {
+          "property": "planeCorner0X",
+          "time": 0,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 0,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 0,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 0,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 0,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 0,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 0.166667,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 0.166667,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 0.166667,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 0.166667,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 0.166667,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 0.166667,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 0.166667,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 0.166667,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 0.333333,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 0.333333,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 0.333333,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 0.333333,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 0.333333,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 0.333333,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 0.333333,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 0.333333,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 0.5,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 0.5,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 0.5,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 0.5,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 0.5,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 0.5,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 0.5,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 0.5,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 0.666667,
+          "value": 83.332874,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 0.666667,
+          "value": 0.005813,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 0.666667,
+          "value": 99.998449,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 0.666667,
+          "value": 0.004558,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 0.666667,
+          "value": 99.998449,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 0.666667,
+          "value": 99.995442,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 0.666667,
+          "value": 83.332874,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 0.666667,
+          "value": 99.99842,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 0.833333,
+          "value": 83.28,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 0.833333,
+          "value": 0.665269,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 0.833333,
+          "value": 99.820358,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 0.833333,
+          "value": 0.520345,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 0.833333,
+          "value": 99.820358,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 0.833333,
+          "value": 99.479655,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 0.833333,
+          "value": 83.28,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 0.833333,
+          "value": 99.819604,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 1,
+          "value": 83.144096,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 1,
+          "value": 2.282834,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 1,
+          "value": 99.365713,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 1,
+          "value": 1.774425,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 1,
+          "value": 99.365713,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 1,
+          "value": 98.225575,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 1,
+          "value": 83.144096,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 1,
+          "value": 99.385067,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 1.166667,
+          "value": 82.928249,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 1.166667,
+          "value": 4.661535,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 1.166667,
+          "value": 98.65231,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 1.166667,
+          "value": 3.589938,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 1.166667,
+          "value": 98.65231,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 1.166667,
+          "value": 96.410062,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 1.166667,
+          "value": 82.928249,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 1.166667,
+          "value": 98.756708,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 1.333333,
+          "value": 82.635082,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 1.333333,
+          "value": 7.603425,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 1.333333,
+          "value": 97.698991,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 1.333333,
+          "value": 5.788061,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 1.333333,
+          "value": 97.698991,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 1.333333,
+          "value": 94.211939,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 1.333333,
+          "value": 82.635082,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 1.333333,
+          "value": 97.997397,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 1.5,
+          "value": 82.270797,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 1.5,
+          "value": 10.913506,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 1.5,
+          "value": 96.537161,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 1.5,
+          "value": 8.199085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 1.5,
+          "value": 96.537161,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 1.5,
+          "value": 91.800915,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 1.5,
+          "value": 82.270797,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 1.5,
+          "value": 97.16706,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 1.666667,
+          "value": 81.847729,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 1.666667,
+          "value": 14.402544,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 1.666667,
+          "value": 95.216391,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 1.666667,
+          "value": 10.669906,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 1.666667,
+          "value": 95.216391,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 1.666667,
+          "value": 89.330094,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 1.666667,
+          "value": 81.847729,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 1.666667,
+          "value": 96.319855,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 1.833333,
+          "value": 81.385434,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 1.833333,
+          "value": 17.888702,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 1.833333,
+          "value": 93.804855,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 1.833333,
+          "value": 13.067658,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 1.833333,
+          "value": 93.804855,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 1.833333,
+          "value": 86.932342,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 1.833333,
+          "value": 81.385434,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 1.833333,
+          "value": 95.502546,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 2,
+          "value": 80.910538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 2,
+          "value": 21.197984,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 2,
+          "value": 92.386188,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 2,
+          "value": 15.279679,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 2,
+          "value": 92.386188,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 2,
+          "value": 84.720321,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 2,
+          "value": 80.910538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 2,
+          "value": 94.754052,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 2.166667,
+          "value": 80.455627,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 2.166667,
+          "value": 24.163556,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 2.166667,
+          "value": 91.054579,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 2.166667,
+          "value": 17.210492,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 2.166667,
+          "value": 91.054579,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 2.166667,
+          "value": 82.789508,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 2.166667,
+          "value": 80.455627,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 2.166667,
+          "value": 94.106135,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 2.333333,
+          "value": 80.057497,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 2.333333,
+          "value": 26.62411,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 2.333333,
+          "value": 89.909608,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 2.333333,
+          "value": 18.776744,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 2.333333,
+          "value": 89.909608,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 2.333333,
+          "value": 81.223256,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 2.333333,
+          "value": 80.057497,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 2.333333,
+          "value": 93.585026,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 2.5,
+          "value": 79.755009,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 2.5,
+          "value": 28.421461,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 2.5,
+          "value": 89.051725,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 2.5,
+          "value": 19.900955,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 2.5,
+          "value": 89.051725,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 2.5,
+          "value": 80.099045,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 2.5,
+          "value": 79.755009,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 2.5,
+          "value": 93.213838,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "Fold / Summit / surface 6",
+      "keys": [
+        {
+          "property": "planeCorner0X",
+          "time": 2.666667,
+          "value": 79.586673,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 2.666667,
+          "value": 29.397484,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 2.666667,
+          "value": 88.578632,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 2.666667,
+          "value": 20.504578,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 2.666667,
+          "value": 88.578632,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 2.666667,
+          "value": 79.495422,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 2.666667,
+          "value": 79.586673,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 2.666667,
+          "value": 93.01562,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 2.833333,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 2.833333,
+          "value": 29.527209,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 2.833333,
+          "value": 88.51538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 2.833333,
+          "value": 20.584448,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 2.833333,
+          "value": 88.51538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 2.833333,
+          "value": 79.415552,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 2.833333,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 2.833333,
+          "value": 92.989452,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 3,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 3,
+          "value": 29.527209,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 3,
+          "value": 88.51538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 3,
+          "value": 20.584448,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 3,
+          "value": 88.51538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 3,
+          "value": 79.415552,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 3,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 3,
+          "value": 92.989452,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 3.166667,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 3.166667,
+          "value": 29.527209,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 3.166667,
+          "value": 88.51538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 3.166667,
+          "value": 20.584448,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 3.166667,
+          "value": 88.51538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 3.166667,
+          "value": 79.415552,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 3.166667,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 3.166667,
+          "value": 92.989452,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 3.333333,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 3.333333,
+          "value": 29.527209,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 3.333333,
+          "value": 88.51538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 3.333333,
+          "value": 20.584448,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 3.333333,
+          "value": 88.51538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 3.333333,
+          "value": 79.415552,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 3.333333,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 3.333333,
+          "value": 92.989452,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 3.5,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 3.5,
+          "value": 29.527209,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 3.5,
+          "value": 88.51538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 3.5,
+          "value": 20.584448,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 3.5,
+          "value": 88.51538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 3.5,
+          "value": 79.415552,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 3.5,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 3.5,
+          "value": 92.989452,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 3.666667,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 3.666667,
+          "value": 29.527209,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 3.666667,
+          "value": 88.51538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 3.666667,
+          "value": 20.584448,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 3.666667,
+          "value": 88.51538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 3.666667,
+          "value": 79.415552,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 3.666667,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 3.666667,
+          "value": 92.989452,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 3.833333,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 3.833333,
+          "value": 29.527209,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 3.833333,
+          "value": 88.51538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 3.833333,
+          "value": 20.584448,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 3.833333,
+          "value": 88.51538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 3.833333,
+          "value": 79.415552,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 3.833333,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 3.833333,
+          "value": 92.989452,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 4,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 4,
+          "value": 29.527209,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 4,
+          "value": 88.51538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 4,
+          "value": 20.584448,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 4,
+          "value": 88.51538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 4,
+          "value": 79.415552,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 4,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 4,
+          "value": 92.989452,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 4.166667,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 4.166667,
+          "value": 29.527209,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 4.166667,
+          "value": 88.51538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 4.166667,
+          "value": 20.584448,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 4.166667,
+          "value": 88.51538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 4.166667,
+          "value": 79.415552,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 4.166667,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 4.166667,
+          "value": 92.989452,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 4.333333,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 4.333333,
+          "value": 29.527209,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 4.333333,
+          "value": 88.51538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 4.333333,
+          "value": 20.584448,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 4.333333,
+          "value": 88.51538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 4.333333,
+          "value": 79.415552,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 4.333333,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 4.333333,
+          "value": 92.989452,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 4.5,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 4.5,
+          "value": 29.527209,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 4.5,
+          "value": 88.51538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 4.5,
+          "value": 20.584448,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 4.5,
+          "value": 88.51538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 4.5,
+          "value": 79.415552,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 4.5,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 4.5,
+          "value": 92.989452,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 4.666667,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 4.666667,
+          "value": 29.527209,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 4.666667,
+          "value": 88.51538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 4.666667,
+          "value": 20.584448,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 4.666667,
+          "value": 88.51538,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 4.666667,
+          "value": 79.415552,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 4.666667,
+          "value": 79.564085,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 4.666667,
+          "value": 92.989452,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 4.833333,
+          "value": 79.566583,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 4.833333,
+          "value": 29.512878,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 4.833333,
+          "value": 88.522372,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 4.833333,
+          "value": 20.575629,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 4.833333,
+          "value": 88.522372,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 4.833333,
+          "value": 79.424371,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 4.833333,
+          "value": 79.566583,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 4.833333,
+          "value": 92.99234,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 5,
+          "value": 79.649764,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 5,
+          "value": 29.033614,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 5,
+          "value": 88.755586,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 5,
+          "value": 20.2801,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 5,
+          "value": 88.755586,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 5,
+          "value": 79.7199,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 5,
+          "value": 79.649764,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 5,
+          "value": 93.089242,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 5.166667,
+          "value": 79.836694,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 5.166667,
+          "value": 27.941773,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 5.166667,
+          "value": 89.282396,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 5.166667,
+          "value": 19.602532,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 5.166667,
+          "value": 89.282396,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 5.166667,
+          "value": 80.397468,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 5.166667,
+          "value": 79.836694,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 5.166667,
+          "value": 93.312121,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "Fold / Summit / surface 6",
+      "keys": [
+        {
+          "property": "planeCorner0X",
+          "time": 5.333333,
+          "value": 80.106635,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 5.333333,
+          "value": 26.32652,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 5.333333,
+          "value": 90.049932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 5.333333,
+          "value": 18.589002,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 5.333333,
+          "value": 90.049932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 5.333333,
+          "value": 81.410998,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 5.333333,
+          "value": 80.106635,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 5.333333,
+          "value": 93.647256,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 5.5,
+          "value": 80.43785,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 5.5,
+          "value": 24.275932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 5.5,
+          "value": 91.003058,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 5.5,
+          "value": 17.282722,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 5.5,
+          "value": 91.003058,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 5.5,
+          "value": 82.717278,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 5.5,
+          "value": 80.43785,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 5.5,
+          "value": 94.08201,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 5.666667,
+          "value": 80.808607,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 5.666667,
+          "value": 21.87834,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 5.666667,
+          "value": 92.085563,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 5.666667,
+          "value": 15.726883,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 5.666667,
+          "value": 92.085563,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 5.666667,
+          "value": 84.273117,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 5.666667,
+          "value": 80.808607,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 5.666667,
+          "value": 94.603495,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 5.833333,
+          "value": 81.198082,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 5.833333,
+          "value": 19.223469,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 5.833333,
+          "value": 93.241537,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 5.833333,
+          "value": 13.967263,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 5.833333,
+          "value": 93.241537,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 5.833333,
+          "value": 86.032737,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 5.833333,
+          "value": 81.198082,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 5.833333,
+          "value": 95.197427,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 6,
+          "value": 81.587199,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 6,
+          "value": 16.403394,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 6,
+          "value": 94.417042,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 6,
+          "value": 12.054653,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 6,
+          "value": 94.417042,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 6,
+          "value": 87.945347,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 6,
+          "value": 81.587199,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 6,
+          "value": 95.847173,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 6.166667,
+          "value": 81.959345,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 6.166667,
+          "value": 13.513255,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 6.166667,
+          "value": 95.562034,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 6.166667,
+          "value": 10.046955,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 6.166667,
+          "value": 95.562034,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 6.166667,
+          "value": 89.953045,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 6.166667,
+          "value": 81.959345,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 6.166667,
+          "value": 96.533033,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 6.333333,
+          "value": 82.300929,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 6.333333,
+          "value": 10.651708,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 6.333333,
+          "value": 96.632365,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 6.333333,
+          "value": 8.01078,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 6.333333,
+          "value": 96.632365,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 6.333333,
+          "value": 91.98922,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 6.333333,
+          "value": 82.300929,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 6.333333,
+          "value": 97.231795,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 6.5,
+          "value": 82.601704,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 6.5,
+          "value": 7.921039,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 6.5,
+          "value": 97.591524,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 6.5,
+          "value": 6.022257,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 6.5,
+          "value": 97.591524,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 6.5,
+          "value": 93.977743,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 6.5,
+          "value": 82.601704,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 6.5,
+          "value": 97.916613,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 6.666667,
+          "value": 82.854759,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 6.666667,
+          "value": 5.426932,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 6.666667,
+          "value": 98.411703,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 6.666667,
+          "value": 4.166853,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 6.666667,
+          "value": 98.411703,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 6.666667,
+          "value": 95.833147,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 6.666667,
+          "value": 82.854759,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 6.666667,
+          "value": 98.557246,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 6.833333,
+          "value": 83.056119,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 6.833333,
+          "value": 3.277851,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 6.833333,
+          "value": 99.073695,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 6.833333,
+          "value": 2.538015,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 6.833333,
+          "value": 99.073695,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 6.833333,
+          "value": 97.461985,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 6.833333,
+          "value": 83.056119,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 6.833333,
+          "value": 99.120671,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 7,
+          "value": 83.203888,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 7,
+          "value": 1.584052,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 7,
+          "value": 99.565196,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 7,
+          "value": 1.234601,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 7,
+          "value": 99.565196,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 7,
+          "value": 98.765399,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 7,
+          "value": 83.203888,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 7,
+          "value": 99.572072,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 7.166667,
+          "value": 83.296918,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 7.166667,
+          "value": 0.45625,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 7.166667,
+          "value": 99.877264,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 7.166667,
+          "value": 0.357146,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 7.166667,
+          "value": 99.877264,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 7.166667,
+          "value": 99.642854,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 7.166667,
+          "value": 83.296918,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 7.166667,
+          "value": 99.876177,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 7.333333,
+          "value": 83.333021,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 7.333333,
+          "value": 0.003946,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 7.333333,
+          "value": 99.998947,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 7.333333,
+          "value": 0.003094,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 7.333333,
+          "value": 99.998947,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 7.333333,
+          "value": 99.996906,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 7.333333,
+          "value": 83.333021,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 7.333333,
+          "value": 99.998927,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 7.5,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 7.5,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 7.5,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 7.5,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 7.5,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 7.5,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 7.5,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 7.5,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 7.666667,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 7.666667,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 7.666667,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 7.666667,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 7.666667,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 7.666667,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 7.666667,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 7.666667,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0X",
+          "time": 7.833333,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 7.833333,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 7.833333,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 7.833333,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 7.833333,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 7.833333,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 7.833333,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 7.833333,
+          "value": 100,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "Fold / Summit / surface 6",
+      "keys": [
+        {
+          "property": "planeCorner0X",
+          "time": 8,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner0Y",
+          "time": 8,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1X",
+          "time": 8,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner1Y",
+          "time": 8,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2X",
+          "time": 8,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner2Y",
+          "time": 8,
+          "value": 100,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3X",
+          "time": 8,
+          "value": 83.333333,
+          "easing": "linear"
+        },
+        {
+          "property": "planeCorner3Y",
+          "time": 8,
+          "value": 100,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "Fold / Summit / surface 6",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 3.1,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 4.25,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 8,
+          "value": 1,
+          "easing": "linear"
+        }
+      ]
+    }
+  ]
+}

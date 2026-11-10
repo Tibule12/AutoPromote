@@ -33179,7 +33179,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     from .studio_layer_cache import video_layer_uses_canonical_raster
                 except ImportError:
                     from studio_layer_cache import video_layer_uses_canonical_raster
-                if video_layer_uses_canonical_raster(ov.id, layer_plan, request.composition_plan):
+                if video_layer_uses_canonical_raster(ov.id, layer_plan, request.composition_plan, ov):
                     # A moving video uses the same canonical pose/alpha
                     # compositor as images, after ordinary B-roll preparation.
                     suffix = 'mkv' if layer_plan.get('perspective') else 'mov'

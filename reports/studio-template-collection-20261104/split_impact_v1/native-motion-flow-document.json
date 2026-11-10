@@ -1,0 +1,2182 @@
+{
+  "schemaVersion": 1,
+  "projectId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f",
+  "revision": 11,
+  "clock": {
+    "ticksPerSecond": 90000,
+    "interval": "half_open"
+  },
+  "output": {
+    "aspectRatio": "16:9",
+    "requestedResolution": "720p",
+    "frameRate": {
+      "numerator": 24,
+      "denominator": 1
+    },
+    "codec": "h264",
+    "audioCodec": "aac",
+    "audioSampleRate": null,
+    "audioSampleRatePolicy": "worker_selected"
+  },
+  "assets": [
+    {
+      "assetId": "source:launch-3380242bd668ab74a46adb4e:sha256:3380242bd668ab74a46adb4e3acbd85a1774fbb40fce1ad91e814e9bcadbfaba",
+      "sourceId": "launch-3380242bd668ab74a46adb4e",
+      "storagePath": "studio/sources/demo-pilot-alice/be1b4a4fccbc613473e5af5f_sports.mp4",
+      "contentHash": "3380242bd668ab74a46adb4e3acbd85a1774fbb40fce1ad91e814e9bcadbfaba",
+      "identityState": "hash_verified"
+    }
+  ],
+  "clipOccurrences": [
+    {
+      "occurrenceId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:shot:1",
+      "assetId": "source:launch-3380242bd668ab74a46adb4e:sha256:3380242bd668ab74a46adb4e3acbd85a1774fbb40fce1ad91e814e9bcadbfaba",
+      "sourceRange": {
+        "space": "source",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "timeMapId": "map:viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:shot:1",
+      "parameterSchemaVersion": 1,
+      "parameters": {
+        "name": "sports.mp4",
+        "duration": 8,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      "playback": {
+        "direction": "forward",
+        "freeze": false,
+        "rate": {
+          "numerator": 1,
+          "denominator": 1
+        }
+      }
+    }
+  ],
+  "timeMaps": [
+    {
+      "timeMapId": "map:viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:shot:1",
+      "occurrenceId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:shot:1",
+      "segments": [
+        {
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 720000
+          },
+          "clipLocalRange": {
+            "space": "clip_local",
+            "startTick": 0,
+            "endTick": 720000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 0,
+            "endTick": 720000
+          },
+          "rate": {
+            "numerator": 1,
+            "denominator": 1
+          },
+          "direction": "forward",
+          "freeze": false
+        }
+      ]
+    }
+  ],
+  "layers": [
+    {
+      "layerId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Backdrop",
+      "type": "b_roll",
+      "legacyType": "image",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Backdrop",
+        "sourceStoragePath": "uploads/images/demo-pilot-alice/9c9e3909-ccc2-4128-bcc6-e34abe6d723a_overlay-7b8874c4-627a-4d59-a3f5-db066a85b928.png",
+        "contentHash": "52e50d725ca81c8e4bfb4b12ecf7b9fd1a02502c0f62b479b8c0db24a8771400",
+        "anchorX": 50,
+        "anchorY": 50,
+        "layerShadow": {
+          "enabled": false
+        },
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "stretch",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "height": 100,
+        "rotation": 0,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 8,
+        "bRollMode": "pip",
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "vectorShape": {
+          "version": 1,
+          "closed": true,
+          "nodes": [
+            {
+              "x": 0,
+              "y": 0,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            },
+            {
+              "x": 100,
+              "y": 0,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            },
+            {
+              "x": 100,
+              "y": 100,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            },
+            {
+              "x": 0,
+              "y": 100,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            }
+          ],
+          "fill": {
+            "kind": "solid",
+            "color": "#d9fc32",
+            "endColor": "#d9fc32",
+            "start": [
+              0,
+              0
+            ],
+            "end": [
+              100,
+              100
+            ]
+          },
+          "stroke": {
+            "color": "#d9fc32",
+            "width": 0
+          }
+        }
+      }
+    },
+    {
+      "layerId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Action base",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Action base",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/be1b4a4fccbc613473e5af5f_sports.mp4",
+        "contentHash": "3380242bd668ab74a46adb4e3acbd85a1774fbb40fce1ad91e814e9bcadbfaba",
+        "anchorX": 50,
+        "anchorY": 50,
+        "layerShadow": {
+          "enabled": false
+        },
+        "sourceDuration": 13.013,
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "cover",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "height": 100,
+        "rotation": 0,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 8,
+        "sourceStartTime": 0,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "sourceMediaId": "launch-3380242bd668ab74a46adb4e"
+      }
+    },
+    {
+      "layerId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Delayed strike",
+      "type": "b_roll",
+      "legacyType": "video",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Delayed strike",
+        "sourceStoragePath": "studio/sources/demo-pilot-alice/be1b4a4fccbc613473e5af5f_sports.mp4",
+        "contentHash": "3380242bd668ab74a46adb4e3acbd85a1774fbb40fce1ad91e814e9bcadbfaba",
+        "anchorX": 50,
+        "anchorY": 50,
+        "layerShadow": {
+          "enabled": false
+        },
+        "sourceDuration": 13.013,
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "cover",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "height": 100,
+        "rotation": 0,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 8,
+        "sourceStartTime": 2,
+        "bRollMode": "pip",
+        "volume": 0,
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "mask": {
+          "enabled": true,
+          "shape": "polygon",
+          "path": "polygon(52% 0%,100% 0%,100% 100%,30% 100%)",
+          "feather": 0,
+          "inverted": false
+        },
+        "sourceMediaId": "launch-3380242bd668ab74a46adb4e"
+      }
+    },
+    {
+      "layerId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 0",
+      "type": "b_roll",
+      "legacyType": "image",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Strike slash 0",
+        "sourceStoragePath": "uploads/images/demo-pilot-alice/3879e0b5-1532-4c1b-9119-4c05a3d2425f_overlay-09702e2e-bc1e-4e35-abbb-07fbe5633a64.png",
+        "contentHash": "053e24c2091a9bd2a6dff6bef195b30e2dd1677f06b5664d286e0acbeb7a2886",
+        "anchorX": 50,
+        "anchorY": 50,
+        "layerShadow": {
+          "enabled": false
+        },
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "stretch",
+        "opacity": 1,
+        "x": 33,
+        "y": 50,
+        "width": 16,
+        "height": 35,
+        "rotation": 0,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 8,
+        "bRollMode": "pip",
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "vectorShape": {
+          "version": 1,
+          "closed": false,
+          "nodes": [
+            {
+              "x": 5,
+              "y": 93,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            },
+            {
+              "x": 95,
+              "y": 7,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            }
+          ],
+          "fill": {
+            "kind": "none",
+            "color": "#d9fc32",
+            "endColor": "#d9fc32",
+            "start": [
+              0,
+              0
+            ],
+            "end": [
+              100,
+              100
+            ]
+          },
+          "stroke": {
+            "color": "#d9fc32",
+            "width": 1.8
+          }
+        }
+      }
+    },
+    {
+      "layerId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 1",
+      "type": "b_roll",
+      "legacyType": "image",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Strike slash 1",
+        "sourceStoragePath": "uploads/images/demo-pilot-alice/ee487994-0d75-4007-85d0-196fd48c58a3_overlay-5b722609-6e28-4b17-ad0b-21d0c2fcbb7d.png",
+        "contentHash": "053e24c2091a9bd2a6dff6bef195b30e2dd1677f06b5664d286e0acbeb7a2886",
+        "anchorX": 50,
+        "anchorY": 50,
+        "layerShadow": {
+          "enabled": false
+        },
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "stretch",
+        "opacity": 1,
+        "x": 52,
+        "y": 50,
+        "width": 19,
+        "height": 40,
+        "rotation": 0,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 8,
+        "bRollMode": "pip",
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "vectorShape": {
+          "version": 1,
+          "closed": false,
+          "nodes": [
+            {
+              "x": 5,
+              "y": 93,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            },
+            {
+              "x": 95,
+              "y": 7,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            }
+          ],
+          "fill": {
+            "kind": "none",
+            "color": "#d9fc32",
+            "endColor": "#d9fc32",
+            "start": [
+              0,
+              0
+            ],
+            "end": [
+              100,
+              100
+            ]
+          },
+          "stroke": {
+            "color": "#d9fc32",
+            "width": 1.8
+          }
+        }
+      }
+    },
+    {
+      "layerId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 2",
+      "type": "b_roll",
+      "legacyType": "image",
+      "legacyCollection": "overlays",
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "compositionStage": "worker_overlay",
+      "parameterSchemaVersion": 3,
+      "parameters": {
+        "name": "Strike slash 2",
+        "sourceStoragePath": "uploads/images/demo-pilot-alice/3a140133-d5c3-4cf3-a108-3664c7169d6b_overlay-12585618-ae9c-48be-8606-b4f421d4aa4e.png",
+        "contentHash": "053e24c2091a9bd2a6dff6bef195b30e2dd1677f06b5664d286e0acbeb7a2886",
+        "anchorX": 50,
+        "anchorY": 50,
+        "layerShadow": {
+          "enabled": false
+        },
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "stretch",
+        "opacity": 1,
+        "x": 71,
+        "y": 50,
+        "width": 22,
+        "height": 45,
+        "rotation": 0,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 8,
+        "bRollMode": "pip",
+        "animation": {
+          "enter": "none",
+          "exit": "none"
+        },
+        "vectorShape": {
+          "version": 1,
+          "closed": false,
+          "nodes": [
+            {
+              "x": 5,
+              "y": 93,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            },
+            {
+              "x": 95,
+              "y": 7,
+              "in": [
+                0,
+                0
+              ],
+              "out": [
+                0,
+                0
+              ]
+            }
+          ],
+          "fill": {
+            "kind": "none",
+            "color": "#d9fc32",
+            "endColor": "#d9fc32",
+            "start": [
+              0,
+              0
+            ],
+            "end": [
+              100,
+              100
+            ]
+          },
+          "stroke": {
+            "color": "#d9fc32",
+            "width": 1.8
+          }
+        }
+      }
+    }
+  ],
+  "linkedTiming": {
+    "cues": {
+      "soundEffects": [
+        {
+          "cueId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:sound:0",
+          "type": null,
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "enabled": true,
+            "builtIn": true,
+            "kind": "sfx",
+            "tone": "airy_whoosh",
+            "name": "airy_whoosh",
+            "volume": 0.2,
+            "fadeIn": 0.01,
+            "fadeOut": 0.04
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 0,
+            "endTick": 54000
+          }
+        },
+        {
+          "cueId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:sound:1",
+          "type": null,
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "enabled": true,
+            "builtIn": true,
+            "kind": "sfx",
+            "tone": "airy_whoosh",
+            "name": "airy_whoosh",
+            "volume": 0.16,
+            "fadeIn": 0.01,
+            "fadeOut": 0.04
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 297000,
+            "endTick": 342000
+          }
+        },
+        {
+          "cueId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:sound:2",
+          "type": null,
+          "parameterSchemaVersion": 1,
+          "parameters": {
+            "enabled": true,
+            "builtIn": true,
+            "kind": "sfx",
+            "tone": "airy_whoosh",
+            "name": "airy_whoosh",
+            "volume": 0.18,
+            "fadeIn": 0.01,
+            "fadeOut": 0.04
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 576000,
+            "endTick": 630000
+          }
+        }
+      ],
+      "voiceovers": [],
+      "adjustmentLayers": []
+    },
+    "keys": {
+      "motionKeyframes": [
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Action base",
+            "property": "scale",
+            "value": 1.2,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:0"
+          }
+        },
+        {
+          "atProgrammeTick": 90000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Action base",
+            "property": "scale",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:1"
+          }
+        },
+        {
+          "atProgrammeTick": 261000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Action base",
+            "property": "scale",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:2"
+          }
+        },
+        {
+          "atProgrammeTick": 315000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Action base",
+            "property": "scale",
+            "value": 1.1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:3"
+          }
+        },
+        {
+          "atProgrammeTick": 477000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Action base",
+            "property": "scale",
+            "value": 1.1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:4"
+          }
+        },
+        {
+          "atProgrammeTick": 549000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Action base",
+            "property": "scale",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:5"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Action base",
+            "property": "scale",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:6"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Delayed strike",
+            "property": "maskPoint0X",
+            "value": 105,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:7"
+          }
+        },
+        {
+          "atProgrammeTick": 72000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Delayed strike",
+            "property": "maskPoint0X",
+            "value": 52,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:8"
+          }
+        },
+        {
+          "atProgrammeTick": 252000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Delayed strike",
+            "property": "maskPoint0X",
+            "value": 52,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:9"
+          }
+        },
+        {
+          "atProgrammeTick": 315000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Delayed strike",
+            "property": "maskPoint0X",
+            "value": 35,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:10"
+          }
+        },
+        {
+          "atProgrammeTick": 468000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Delayed strike",
+            "property": "maskPoint0X",
+            "value": 35,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:11"
+          }
+        },
+        {
+          "atProgrammeTick": 585000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Delayed strike",
+            "property": "maskPoint0X",
+            "value": 105,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:12"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Delayed strike",
+            "property": "maskPoint0X",
+            "value": 105,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:13"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Delayed strike",
+            "property": "maskPoint3X",
+            "value": 105,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:14"
+          }
+        },
+        {
+          "atProgrammeTick": 72000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Delayed strike",
+            "property": "maskPoint3X",
+            "value": 30,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:15"
+          }
+        },
+        {
+          "atProgrammeTick": 252000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Delayed strike",
+            "property": "maskPoint3X",
+            "value": 30,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:16"
+          }
+        },
+        {
+          "atProgrammeTick": 315000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Delayed strike",
+            "property": "maskPoint3X",
+            "value": 13,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:17"
+          }
+        },
+        {
+          "atProgrammeTick": 468000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Delayed strike",
+            "property": "maskPoint3X",
+            "value": 13,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:18"
+          }
+        },
+        {
+          "atProgrammeTick": 585000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Delayed strike",
+            "property": "maskPoint3X",
+            "value": 105,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:19"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Delayed strike",
+            "property": "maskPoint3X",
+            "value": 105,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:20"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Delayed strike",
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:21"
+          }
+        },
+        {
+          "atProgrammeTick": 63000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Delayed strike",
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:22"
+          }
+        },
+        {
+          "atProgrammeTick": 576000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Delayed strike",
+            "property": "opacity",
+            "value": 1,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:23"
+          }
+        },
+        {
+          "atProgrammeTick": 594000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Delayed strike",
+            "property": "opacity",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:24"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 0",
+            "property": "strokeEnd",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:25"
+          }
+        },
+        {
+          "atProgrammeTick": 99000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 0",
+            "property": "strokeEnd",
+            "value": 100,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:26"
+          }
+        },
+        {
+          "atProgrammeTick": 189000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 0",
+            "property": "strokeEnd",
+            "value": 100,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:27"
+          }
+        },
+        {
+          "atProgrammeTick": 225000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 0",
+            "property": "strokeEnd",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:28"
+          }
+        },
+        {
+          "atProgrammeTick": 396000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 0",
+            "property": "strokeEnd",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:29"
+          }
+        },
+        {
+          "atProgrammeTick": 432000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 0",
+            "property": "strokeEnd",
+            "value": 100,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:30"
+          }
+        },
+        {
+          "atProgrammeTick": 522000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 0",
+            "property": "strokeEnd",
+            "value": 100,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:31"
+          }
+        },
+        {
+          "atProgrammeTick": 567000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 0",
+            "property": "strokeEnd",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:32"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 0",
+            "property": "x",
+            "value": 25,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:33"
+          }
+        },
+        {
+          "atProgrammeTick": 225000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 0",
+            "property": "x",
+            "value": 42,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:34"
+          }
+        },
+        {
+          "atProgrammeTick": 396000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 0",
+            "property": "x",
+            "value": 42,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:35"
+          }
+        },
+        {
+          "atProgrammeTick": 567000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 0",
+            "property": "x",
+            "value": 60,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:36"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 1",
+            "property": "strokeEnd",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:37"
+          }
+        },
+        {
+          "atProgrammeTick": 108000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 1",
+            "property": "strokeEnd",
+            "value": 100,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:38"
+          }
+        },
+        {
+          "atProgrammeTick": 189000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 1",
+            "property": "strokeEnd",
+            "value": 100,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:39"
+          }
+        },
+        {
+          "atProgrammeTick": 225000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 1",
+            "property": "strokeEnd",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:40"
+          }
+        },
+        {
+          "atProgrammeTick": 396000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 1",
+            "property": "strokeEnd",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:41"
+          }
+        },
+        {
+          "atProgrammeTick": 432000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 1",
+            "property": "strokeEnd",
+            "value": 100,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:42"
+          }
+        },
+        {
+          "atProgrammeTick": 522000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 1",
+            "property": "strokeEnd",
+            "value": 100,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:43"
+          }
+        },
+        {
+          "atProgrammeTick": 567000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 1",
+            "property": "strokeEnd",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:44"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 1",
+            "property": "x",
+            "value": 41,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:45"
+          }
+        },
+        {
+          "atProgrammeTick": 225000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 1",
+            "property": "x",
+            "value": 58,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:46"
+          }
+        },
+        {
+          "atProgrammeTick": 396000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 1",
+            "property": "x",
+            "value": 58,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:47"
+          }
+        },
+        {
+          "atProgrammeTick": 567000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 1",
+            "property": "x",
+            "value": 76,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:48"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 2",
+            "property": "strokeEnd",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:49"
+          }
+        },
+        {
+          "atProgrammeTick": 117000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 2",
+            "property": "strokeEnd",
+            "value": 100,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:50"
+          }
+        },
+        {
+          "atProgrammeTick": 189000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 2",
+            "property": "strokeEnd",
+            "value": 100,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:51"
+          }
+        },
+        {
+          "atProgrammeTick": 225000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 2",
+            "property": "strokeEnd",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:52"
+          }
+        },
+        {
+          "atProgrammeTick": 396000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 2",
+            "property": "strokeEnd",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:53"
+          }
+        },
+        {
+          "atProgrammeTick": 432000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 2",
+            "property": "strokeEnd",
+            "value": 100,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:54"
+          }
+        },
+        {
+          "atProgrammeTick": 522000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 2",
+            "property": "strokeEnd",
+            "value": 100,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:55"
+          }
+        },
+        {
+          "atProgrammeTick": 567000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 2",
+            "property": "strokeEnd",
+            "value": 0,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:56"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 2",
+            "property": "x",
+            "value": 57,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:57"
+          }
+        },
+        {
+          "atProgrammeTick": 225000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 2",
+            "property": "x",
+            "value": 74,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:58"
+          }
+        },
+        {
+          "atProgrammeTick": 396000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 2",
+            "property": "x",
+            "value": 74,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:59"
+          }
+        },
+        {
+          "atProgrammeTick": 567000,
+          "parameters": {
+            "targetId": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:Strike slash 2",
+            "property": "x",
+            "value": 92,
+            "easing": "bezier",
+            "curve": [
+              0.18,
+              0.86,
+              0.25,
+              1
+            ],
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:60"
+          }
+        },
+        {
+          "atProgrammeTick": 0,
+          "parameters": {
+            "targetId": "main-video",
+            "property": "opacity",
+            "value": 0,
+            "easing": "hold",
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:61"
+          }
+        },
+        {
+          "atProgrammeTick": 720000,
+          "parameters": {
+            "targetId": "main-video",
+            "property": "opacity",
+            "value": 0,
+            "easing": "hold",
+            "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:look:key:62"
+          }
+        }
+      ],
+      "finishKeyframes": [],
+      "reframeKeyframes": [],
+      "reframeModeCuts": [],
+      "speakerFocusCuts": [],
+      "audioKeyframes.originalAudio": [],
+      "audioKeyframes.masterPodcast": [],
+      "audioKeyframes.voiceover": [],
+      "audioKeyframes.music": [],
+      "audioKeyframes.broll": [],
+      "audioKeyframes.sfx": []
+    }
+  },
+  "audioGraph": {
+    "legacySnapshotRef": "audioRemix",
+    "parameterSchemaVersion": 1,
+    "settings": {
+      "addMusic": true,
+      "musicSelection": "upbeat_pop.mp3",
+      "musicSearchMode": false,
+      "safeSearch": true,
+      "musicVolume": 55,
+      "musicDucking": false,
+      "musicDuckingStrength": 0,
+      "muteOriginalAudio": true,
+      "audioRemix": {
+        "version": 1,
+        "enabled": false,
+        "preset": "slowed_reverb",
+        "speed": 0.82,
+        "pitch": -3,
+        "bass": 8,
+        "clarity": 2,
+        "air": 1,
+        "reverb": 68,
+        "intensity": 75,
+        "keepPitch": false,
+        "contentType": "auto",
+        "target": "master",
+        "outputGain": 0,
+        "levelMatch": true,
+        "quality": "studio"
+      },
+      "audioRestoration": {
+        "preset": "natural",
+        "voiceIsolation": false,
+        "denoise": 22,
+        "deEsser": 18,
+        "humFrequency": 50,
+        "compressor": 35,
+        "limiter": -1,
+        "loudness": -14,
+        "eq": {
+          "low": 0,
+          "mid": 0,
+          "high": 0
+        },
+        "enabled": false
+      },
+      "audioAutomationSource": "originalAudio"
+    },
+    "music": {
+      "id": "launch-f3cade09fcb727c24508179f",
+      "name": "Make your move - original score.wav",
+      "storagePath": "uploads/audios/demo-pilot-alice/4d013298-853d-4b28-81e5-c4732f9d6b74_Make your move - original score.wav",
+      "contentHash": "f3cade09fcb727c24508179fa1c0e7914cfe162c9fee098a8eabe6c6d3ea44a6",
+      "volume": 55,
+      "fadeIn": 0.1,
+      "fadeOut": 0.5,
+      "loop": false,
+      "duration": 24
+    },
+    "routes": [
+      {
+        "trackId": "video",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "adjustment",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "graphics",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "broll",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "captions",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "originalAudio",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "voiceover",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "music",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      {
+        "trackId": "sfx",
+        "state": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      }
+    ],
+    "routing": {
+      "muteOriginalAudio": true,
+      "musicDucking": false,
+      "musicDuckingStrength": 0,
+      "musicTrackId": "launch-f3cade09fcb727c24508179f"
+    }
+  },
+  "visualGraph": {
+    "parameterSchemaVersion": 1,
+    "settings": {
+      "mainTransform": {
+        "id": "main-video",
+        "name": "Main video",
+        "type": "video",
+        "x": 50,
+        "y": 50,
+        "scale": 1,
+        "rotation": 0,
+        "opacity": 1,
+        "cropX": 0,
+        "cropY": 0
+      },
+      "finishFx": {
+        "precisionGrade": false,
+        "exposureStops": 0,
+        "lift": 0,
+        "gamma": 1,
+        "gain": 1,
+        "tint": 0,
+        "preset": null,
+        "brightness": 1,
+        "contrast": 1,
+        "saturation": 1,
+        "temperature": 0,
+        "sharpness": 0,
+        "vignette": 0,
+        "blur": 0,
+        "blurMode": "edge",
+        "blurStart": -1,
+        "blurEnd": -1,
+        "zoom": 1,
+        "zoomAnchor": "center",
+        "overlayType": "",
+        "overlayOpacity": 0.4,
+        "overlayColor": "#000000",
+        "filmGrain": 0,
+        "chromaticAberration": 0,
+        "vhsTracking": 0,
+        "lightLeak": 0,
+        "letterbox": 0,
+        "fadeIn": 0,
+        "fadeOut": 0
+      },
+      "mainFrame": {
+        "insetPercent": 3,
+        "radiusPercent": 8,
+        "background": "studio_black",
+        "enabled": false
+      },
+      "advancedColor": {
+        "lutName": "",
+        "lutFile": null,
+        "lutIntensity": 100,
+        "curve": {
+          "shadows": 0,
+          "midtones": 0,
+          "highlights": 0
+        },
+        "hsl": {
+          "hue": 0,
+          "saturation": 0,
+          "luminance": 0
+        }
+      },
+      "podcastVisualizer": {
+        "enabled": false,
+        "mode": "wave",
+        "color": "#72f7ff",
+        "intensity": 0.75,
+        "position": "bottom"
+      },
+      "videoFit": "contain",
+      "safeFaceFraming": false,
+      "faceAnchorPreset": "center",
+      "autoCaptions": false,
+      "captionStyle": "bold_pop",
+      "captionPosition": "bottom_center",
+      "captionScale": 1,
+      "captionTextOverride": "",
+      "translateCaptionsToEnglish": false,
+      "smartCrop": true,
+      "smartCropMode": "off",
+      "reframeAspect": "16:9",
+      "speakerTrackZoom": 1,
+      "speakerStackFraming": {
+        "dividerPercent": 50,
+        "gapPercent": 1.2,
+        "cardGapPercent": 2.5,
+        "roundedCards": true,
+        "cardInsetPercent": 2.5,
+        "cardRadiusPercent": 8,
+        "secondaryXPercent": 80,
+        "secondaryYPercent": 20,
+        "secondarySizePercent": 30,
+        "top": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        },
+        "bottom": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        },
+        "third": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        },
+        "fourth": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        }
+      },
+      "speakerStackSourceIds": {
+        "top": null,
+        "bottom": null,
+        "third": null,
+        "fourth": null
+      },
+      "speakerStackOffsets": {
+        "top": 0,
+        "bottom": 0,
+        "third": 0,
+        "fourth": 0
+      },
+      "speakerStackCameraCount": 2,
+      "speakerStackLayout": "stack_2",
+      "speakerStackSyncConfirmed": false,
+      "exportSettings": {
+        "resolution": "720p",
+        "fps": "24",
+        "codec": "h264",
+        "quality": "high",
+        "videoBitrate": "auto",
+        "targetFileSizeMb": "",
+        "audioCodec": "aac",
+        "audioBitrate": "256",
+        "colorSpace": "rec709"
+      },
+      "stabilization": {
+        "enabled": false,
+        "strength": 35,
+        "crop": "adaptive",
+        "rollingShutter": false
+      },
+      "enhanceQuality": false,
+      "beatSnapEnabled": true,
+      "creativeIntent": "energy",
+      "creativeEffectsEnabled": false,
+      "creativePreset": "auto_story",
+      "creativeIntensity": "bold",
+      "pacingLevel": "balanced",
+      "nodeFlow": {
+        "version": 1,
+        "viewerA": "MediaOut",
+        "viewerB": null,
+        "splitPosition": 50,
+        "positions": {},
+        "bypassed": {}
+      },
+      "hideShyLayers": false
+    },
+    "cameraSources": []
+  },
+  "editGraph": {
+    "parameterSchemaVersion": 1,
+    "settings": {
+      "creativeTemplateInstance": {
+        "schemaVersion": 1,
+        "templateRef": {
+          "templateId": "split_impact_v1",
+          "version": "1.0.0",
+          "definitionHash": "f0faa9813d876fa52abcf0aecd7249a0b7b52b9c45356cf1759b13c254d1437b"
+        },
+        "ownerUid": "demo-pilot-alice",
+        "instantiatedBy": "director",
+        "bindings": {
+          "footage": {
+            "assetId": "launch-3380242bd668ab74a46adb4e",
+            "contentHash": "3380242bd668ab74a46adb4e3acbd85a1774fbb40fce1ad91e814e9bcadbfaba",
+            "storagePath": "studio/sources/demo-pilot-alice/be1b4a4fccbc613473e5af5f_sports.mp4",
+            "trimStart": 0
+          },
+          "music": {
+            "assetId": "launch-f3cade09fcb727c24508179f",
+            "contentHash": "f3cade09fcb727c24508179fa1c0e7914cfe162c9fee098a8eabe6c6d3ea44a6",
+            "storagePath": "uploads/audios/demo-pilot-alice/4d013298-853d-4b28-81e5-c4732f9d6b74_Make your move - original score.wav",
+            "trimStart": 0
+          }
+        },
+        "intensity": 1,
+        "aspect": "16:9",
+        "qualified": false
+      },
+      "captionCoverageMode": "full",
+      "contentProfile": "auto",
+      "joinTransition": "auto",
+      "joinTransitionDuration": 0.18,
+      "silenceRemoval": false,
+      "silenceThreshold": -35,
+      "minSilenceDuration": 0.75,
+      "silencePreview": null,
+      "removeWatermark": false,
+      "watermarkMode": "adaptive",
+      "brandWatermark": false,
+      "manualWatermarkRegions": [],
+      "addHook": false,
+      "hookText": "THIS CHANGES FAST",
+      "hookTemplate": "blur_reveal",
+      "hookIntroSeconds": 3,
+      "hookStartTime": 0.8,
+      "hookEndTime": 3.8,
+      "hookBlurBackground": true,
+      "hookDarkOverlay": true,
+      "hookFreezeFrame": false,
+      "hookZoomScale": 1.08,
+      "hookTextAnimation": "slide-up",
+      "hookFocusPoint": {
+        "x": 50,
+        "y": 42
+      },
+      "bRollCadence": "balanced",
+      "bRollGenerationJobId": "",
+      "compoundClips": [],
+      "creatorPreview": {
+        "enabled": true,
+        "section": "reactions",
+        "activeDemo": "",
+        "intensity": 62,
+        "duration": 0.8,
+        "zoom": 1.34,
+        "x": 78,
+        "y": 68,
+        "color": "#ffcb67",
+        "accent": "#7457ff",
+        "text": "THIS CHANGED EVERYTHING",
+        "name": "",
+        "role": "",
+        "entity": "",
+        "emoji": "🤯",
+        "rank": 3,
+        "tracking": false,
+        "maskShape": "person",
+        "transition": "whip",
+        "introStyle": "cinematic",
+        "reactionMode": "instant",
+        "comparisonLeft": "",
+        "comparisonRight": ""
+      },
+      "splitExportEnabled": false,
+      "splitExportHooks": [],
+      "proxySettings": {
+        "enabled": true,
+        "resolution": "720p",
+        "codec": "h264",
+        "status": "source_ready"
+      }
+    },
+    "media": [
+      {
+        "id": "launch-3380242bd668ab74a46adb4e",
+        "name": "sports.mp4",
+        "duration": 13.013,
+        "storagePath": "studio/sources/demo-pilot-alice/be1b4a4fccbc613473e5af5f_sports.mp4",
+        "contentHash": "3380242bd668ab74a46adb4e3acbd85a1774fbb40fce1ad91e814e9bcadbfaba",
+        "mediaType": "video"
+      },
+      {
+        "id": "launch-f3cade09fcb727c24508179f",
+        "name": "Make your move - original score.wav",
+        "duration": 24,
+        "storagePath": "uploads/audios/demo-pilot-alice/4d013298-853d-4b28-81e5-c4732f9d6b74_Make your move - original score.wav",
+        "contentHash": "f3cade09fcb727c24508179fa1c0e7914cfe162c9fee098a8eabe6c6d3ea44a6",
+        "mediaType": "audio"
+      }
+    ],
+    "sources": [
+      {
+        "id": "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:shot:1",
+        "name": "sports.mp4",
+        "duration": 8,
+        "sourceClipId": "launch-3380242bd668ab74a46adb4e",
+        "storagePath": "studio/sources/demo-pilot-alice/be1b4a4fccbc613473e5af5f_sports.mp4",
+        "contentHash": "3380242bd668ab74a46adb4e3acbd85a1774fbb40fce1ad91e814e9bcadbfaba"
+      }
+    ],
+    "musicMix": {},
+    "hookBinding": null,
+    "angleGroups": [],
+    "extractedAudio": null
+  },
+  "constraints": {
+    "locks": []
+  },
+  "styleRef": null,
+  "analysisRefs": [],
+  "projectIntelligenceRefs": [],
+  "programmeSpeedKeys": [],
+  "fallbackSpeed": 1,
+  "outputTimeMap": [
+    {
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "outputRange": {
+        "space": "output",
+        "startTick": 0,
+        "endTick": 720000
+      },
+      "rateNumerator": 1000000,
+      "rateDenominator": 1000000
+    }
+  ],
+  "journal": [
+    {
+      "journalId": "revision:5",
+      "baseRevision": 4,
+      "newRevision": 5,
+      "actor": {
+        "type": "human",
+        "id": "viral-studio-history"
+      },
+      "operations": [
+        {
+          "type": "history_restore"
+        }
+      ],
+      "affectedNodes": [
+        "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:shot:1"
+      ],
+      "inverse": null
+    },
+    {
+      "journalId": "revision:6",
+      "baseRevision": 5,
+      "newRevision": 6,
+      "actor": {
+        "type": "human",
+        "id": "viral-studio-history"
+      },
+      "operations": [
+        {
+          "type": "history_restore"
+        }
+      ],
+      "affectedNodes": [
+        "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:shot:1"
+      ],
+      "inverse": null
+    },
+    {
+      "journalId": "revision:7",
+      "baseRevision": 6,
+      "newRevision": 7,
+      "actor": {
+        "type": "human",
+        "id": "viral-studio-history"
+      },
+      "operations": [
+        {
+          "type": "history_restore"
+        }
+      ],
+      "affectedNodes": [
+        "viral-project-169d286e-8ae2-4013-9b70-49347fc66c1f:shot:1"
+      ],
+      "inverse": null
+    }
+  ],
+  "idempotency": {},
+  "directorReviewJournal": [],
+  "compatibility": {
+    "legacySnapshotVersion": 1,
+    "projection": "clip_occurrences_canonical_other_fields_legacy",
+    "editableStateVersion": 1,
+    "visualStateVersion": 1,
+    "editStateVersion": 1,
+    "layerComposition": "ordered_flat_layers"
+  }
+}

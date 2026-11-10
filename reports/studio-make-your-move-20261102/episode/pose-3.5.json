@@ -1,0 +1,587 @@
+[
+  {
+    "id": "graphic-a465c5f1-1737-41c6-9c13-1131347fc1e3",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 50%; left: 50%; width: 100%; max-width: none; height: 100%; background-color: transparent; --title-scale: 1; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 100; opacity: 0.0552772; --layer-opacity: 0.05527715002170219; mix-blend-mode: normal; pointer-events: auto; filter: none; border-radius: 0px; animation: auto ease 0s 1 normal none running none; transition: none; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: visible;",
+    "computedMask": "none",
+    "opacity": "0.0552772",
+    "visibility": "visible"
+  },
+  {
+    "id": "graphic-a12e37a1-ea55-4a56-9cb3-bb078905a015",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "M",
+    "style": "top: 17.9745%; left: 26%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(245, 242, 233); --title-scale: 3.7; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 101; opacity: 1; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: visible;",
+    "computedMask": "none",
+    "opacity": "1",
+    "visibility": "visible"
+  },
+  {
+    "id": "graphic-2b5978ab-76f3-43ec-8511-3921a93c85a9",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "A",
+    "style": "top: 17.9745%; left: 42%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(245, 242, 233); --title-scale: 3.7; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 102; opacity: 1; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: visible;",
+    "computedMask": "none",
+    "opacity": "1",
+    "visibility": "visible"
+  },
+  {
+    "id": "graphic-4a4d26f9-006e-4c5c-8845-02c18464d429",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "K",
+    "style": "top: 17.9745%; left: 58%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(245, 242, 233); --title-scale: 3.7; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 103; opacity: 1; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: visible;",
+    "computedMask": "none",
+    "opacity": "1",
+    "visibility": "visible"
+  },
+  {
+    "id": "graphic-fd16dbc8-c363-4756-9416-fe301c0c71c7",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "E",
+    "style": "top: 17.9745%; left: 74%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(245, 242, 233); --title-scale: 3.7; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 104; opacity: 1; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: visible;",
+    "computedMask": "none",
+    "opacity": "1",
+    "visibility": "visible"
+  },
+  {
+    "id": "graphic-42a07e3b-fbb4-4781-91c7-3c271d658cbb",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "IT",
+    "style": "top: 48%; left: 50%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(215, 255, 67); --title-scale: 0.78; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 105; opacity: 0.0971296; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: visible;",
+    "computedMask": "none",
+    "opacity": "0.0971296",
+    "visibility": "visible"
+  },
+  {
+    "id": "graphic-f8a2b0c1-882c-4f17-a0a7-37af806a0078",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 50%; left: 50%; width: 100%; max-width: none; height: 100%; background-color: transparent; --title-scale: 1; --title-rotation: 25deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 110; opacity: 0; --layer-opacity: 0; mix-blend-mode: normal; pointer-events: auto; filter: none; border-radius: 0px; animation: auto ease 0s 1 normal none running none; transition: none; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: visible;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "visible"
+  },
+  {
+    "id": "graphic-746aef61-103f-4460-8dff-5ae0ff563539",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 50%; left: 50%; width: 100%; max-width: none; height: 100%; background-color: transparent; --title-scale: 1; --title-rotation: 25deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 111; opacity: 0; --layer-opacity: 0; mix-blend-mode: normal; pointer-events: auto; filter: none; border-radius: 0px; animation: auto ease 0s 1 normal none running none; transition: none; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: visible;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "visible"
+  },
+  {
+    "id": "graphic-ddd7fb64-b772-4295-b608-f4ad0b9d38f6",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 94%; left: 50%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(215, 255, 67); --title-scale: 0.36; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 112; opacity: 1; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "1",
+    "visibility": "hidden"
+  },
+  {
+    "id": "scene-6a162d9d-7c1a-4cb6-8c98-8b49135dc8f2",
+    "wrapper": true,
+    "text": "",
+    "style": "position: absolute; inset: 0px; pointer-events: none; z-index: 113; mix-blend-mode: normal; mask-image: url(\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201000%20563%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3C%2Fdefs%3E%3Cg%3E%3Crect%20width%3D%221000%22%20height%3D%22563%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220%22%2F%3E%3Cg%20transform%3D%22translate(-220.29%20281.96)%20rotate(0.00)%22%20opacity%3D%221.0000%22%3E%3Cg%20transform%3D%22scale(0.7819444444444444)%22%3E%3Cg%20fill%3D%22%23ffffff%22%20transform%3D%22scale(8)%22%20opacity%3D%221%22%3E%3Cpath%20d%3D%22M96%200V1490H734L868%201024Q884%20969%20903.5%20881.0Q923%20793%20943.0%20691.0Q963%20589%20980%20491Q997%20589%201017.0%20691.0Q1037%20793%201056.5%20881.0Q1076%20969%201091%201024L1223%201490H1862V0H1454V576Q1454%20633%201457.0%20731.5Q1460%20830%201463.5%20945.5Q1467%201061%201469%201170Q1445%201057%201417.5%20943.0Q1390%20829%201364.5%20733.0Q1339%20637%201321%20576L1148%200H812L636%20576Q618%20634%20593.0%20726.0Q568%20818%20541.0%20926.5Q514%201035%20490%201145Q492%201039%20495.0%20928.5Q498%20818%20501.0%20724.5Q504%20631%20504%20576V0Z%22%20transform%3D%22translate(-17.208984375%2013)%20scale(0.017578125%20-0.017578125)%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E\"); mask-size: 100% 100%; mask-repeat: no-repeat;",
+    "computedMask": "url(\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201000%20563%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3C%2Fdefs%3E%3Cg%3E%3Crect%20width%3D%221000%22%20height%3D%22563%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220%22%2F%3E%3Cg%20transform%3D%22translate(-220.29%20281.96)%20rotate(0.00)%22%20opacity%3D%221.0000%22%3E%3Cg%20transform%3D%22scale(0.7819444444444444)%22%3E%3Cg%20fill%3D%22%23ffffff%22%20transform%3D%22scale(8)%22%20opacity%3D%221%22%3E%3Cpath%20d%3D%22M96%200V1490H734L868%201024Q884%20969%20903.5%20881.0Q923%20793%20943.0%20691.0Q963%20589%20980%20491Q997%20589%201017.0%20691.0Q1037%20793%201056.5%20881.0Q1076%20969%201091%201024L1223%201490H1862V0H1454V576Q1454%20633%201457.0%20731.5Q1460%20830%201463.5%20945.5Q1467%201061%201469%201170Q1445%201057%201417.5%20943.0Q1390%20829%201364.5%20733.0Q1339%20637%201321%20576L1148%200H812L636%20576Q618%20634%20593.0%20726.0Q568%20818%20541.0%20926.5Q514%201035%20490%201145Q492%201039%20495.0%20928.5Q498%20818%20501.0%20724.5Q504%20631%20504%20576V0Z%22%20transform%3D%22translate(-17.208984375%2013)%20scale(0.017578125%20-0.017578125)%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E\")",
+    "opacity": "1",
+    "visibility": "visible"
+  },
+  {
+    "id": "scene-6a162d9d-7c1a-4cb6-8c98-8b49135dc8f2",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 50%; left: 50%; width: 70%; max-width: none; height: 70%; background-color: transparent; --title-scale: 1.4285714285714286; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; opacity: 1; mix-blend-mode: normal; pointer-events: auto; filter: none; border-radius: 0px; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: visible;",
+    "computedMask": "none",
+    "opacity": "1",
+    "visibility": "visible"
+  },
+  {
+    "id": "scene-d650219c-170c-4c4d-8f59-9e3a1aa1e6a3",
+    "wrapper": true,
+    "text": "",
+    "style": "position: absolute; inset: 0px; pointer-events: none; z-index: 114; mix-blend-mode: normal; mask-image: url(\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201000%20563%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3C%2Fdefs%3E%3Cg%3E%3Crect%20width%3D%221000%22%20height%3D%22563%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220%22%2F%3E%3Cg%20transform%3D%22translate(499.63%20281.96)%20rotate(0.00)%22%20opacity%3D%221.0000%22%3E%3Cg%20transform%3D%22scale(0.7819444444444444)%22%3E%3Cg%20fill%3D%22%23ffffff%22%20transform%3D%22scale(8)%22%20opacity%3D%221%22%3E%3Cpath%20d%3D%22M794%20-20Q591%20-20%20426.5%2068.0Q262%20156%20166.0%20326.5Q70%20497%2070%20744Q70%20993%20166.0%201164.0Q262%201335%20426.5%201422.5Q591%201510%20794%201510Q997%201510%201161.0%201422.5Q1325%201335%201421.5%201164.0Q1518%20993%201518%20744Q1518%20496%201421.5%20325.5Q1325%20155%201161.0%2067.5Q997%20-20%20794%20-20ZM794%20332Q945%20332%201023.5%20438.0Q1102%20544%201102%20744Q1102%20945%201023.5%201051.5Q945%201158%20794%201158Q644%201158%20565.0%201051.5Q486%20945%20486%20744Q486%20544%20565.0%20438.0Q644%20332%20794%20332Z%22%20transform%3D%22translate(-13.95703125%2013)%20scale(0.017578125%20-0.017578125)%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E\"); mask-size: 100% 100%; mask-repeat: no-repeat;",
+    "computedMask": "url(\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201000%20563%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3C%2Fdefs%3E%3Cg%3E%3Crect%20width%3D%221000%22%20height%3D%22563%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220%22%2F%3E%3Cg%20transform%3D%22translate(499.63%20281.96)%20rotate(0.00)%22%20opacity%3D%221.0000%22%3E%3Cg%20transform%3D%22scale(0.7819444444444444)%22%3E%3Cg%20fill%3D%22%23ffffff%22%20transform%3D%22scale(8)%22%20opacity%3D%221%22%3E%3Cpath%20d%3D%22M794%20-20Q591%20-20%20426.5%2068.0Q262%20156%20166.0%20326.5Q70%20497%2070%20744Q70%20993%20166.0%201164.0Q262%201335%20426.5%201422.5Q591%201510%20794%201510Q997%201510%201161.0%201422.5Q1325%201335%201421.5%201164.0Q1518%20993%201518%20744Q1518%20496%201421.5%20325.5Q1325%20155%201161.0%2067.5Q997%20-20%20794%20-20ZM794%20332Q945%20332%201023.5%20438.0Q1102%20544%201102%20744Q1102%20945%201023.5%201051.5Q945%201158%20794%201158Q644%201158%20565.0%201051.5Q486%20945%20486%20744Q486%20544%20565.0%20438.0Q644%20332%20794%20332Z%22%20transform%3D%22translate(-13.95703125%2013)%20scale(0.017578125%20-0.017578125)%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E\")",
+    "opacity": "1",
+    "visibility": "visible"
+  },
+  {
+    "id": "scene-d650219c-170c-4c4d-8f59-9e3a1aa1e6a3",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 50%; left: 50%; width: 70%; max-width: none; height: 70%; background-color: transparent; --title-scale: 1.4285714285714286; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; opacity: 1; mix-blend-mode: normal; pointer-events: auto; filter: none; border-radius: 0px; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: visible;",
+    "computedMask": "none",
+    "opacity": "1",
+    "visibility": "visible"
+  },
+  {
+    "id": "scene-4664a934-9dff-4545-b4ab-81c6d62faa86",
+    "wrapper": true,
+    "text": "",
+    "style": "position: absolute; inset: 0px; pointer-events: none; z-index: 115; mix-blend-mode: normal; mask-image: url(\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201000%20563%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3C%2Fdefs%3E%3Cg%3E%3Crect%20width%3D%221000%22%20height%3D%22563%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220%22%2F%3E%3Cg%20transform%3D%22translate(1219.54%20281.96)%20rotate(0.00)%22%20opacity%3D%221.0000%22%3E%3Cg%20transform%3D%22scale(0.7819444444444444)%22%3E%3Cg%20fill%3D%22%23ffffff%22%20transform%3D%22scale(8)%22%20opacity%3D%221%22%3E%3Cpath%20d%3D%22M546%200%2046%201490H504L677%20912Q719%20772%20755.0%20629.5Q791%20487%20825%20341Q856%20487%20890.5%20629.5Q925%20772%20965%20912L1130%201490H1582L1098%200Z%22%20transform%3D%22translate(-14.30859375%2013)%20scale(0.017578125%20-0.017578125)%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E\"); mask-size: 100% 100%; mask-repeat: no-repeat;",
+    "computedMask": "url(\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201000%20563%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3C%2Fdefs%3E%3Cg%3E%3Crect%20width%3D%221000%22%20height%3D%22563%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220%22%2F%3E%3Cg%20transform%3D%22translate(1219.54%20281.96)%20rotate(0.00)%22%20opacity%3D%221.0000%22%3E%3Cg%20transform%3D%22scale(0.7819444444444444)%22%3E%3Cg%20fill%3D%22%23ffffff%22%20transform%3D%22scale(8)%22%20opacity%3D%221%22%3E%3Cpath%20d%3D%22M546%200%2046%201490H504L677%20912Q719%20772%20755.0%20629.5Q791%20487%20825%20341Q856%20487%20890.5%20629.5Q925%20772%20965%20912L1130%201490H1582L1098%200Z%22%20transform%3D%22translate(-14.30859375%2013)%20scale(0.017578125%20-0.017578125)%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E\")",
+    "opacity": "1",
+    "visibility": "visible"
+  },
+  {
+    "id": "scene-4664a934-9dff-4545-b4ab-81c6d62faa86",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 50%; left: 50%; width: 70%; max-width: none; height: 70%; background-color: transparent; --title-scale: 1.4285714285714286; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; opacity: 1; mix-blend-mode: normal; pointer-events: auto; filter: none; border-radius: 0px; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: visible;",
+    "computedMask": "none",
+    "opacity": "1",
+    "visibility": "visible"
+  },
+  {
+    "id": "scene-cb5c396b-ed8a-4814-a84a-9e086748f924",
+    "wrapper": true,
+    "text": "",
+    "style": "position: absolute; inset: 0px; pointer-events: none; z-index: 116; mix-blend-mode: normal; mask-image: url(\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201000%20563%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3C%2Fdefs%3E%3Cg%3E%3Crect%20width%3D%221000%22%20height%3D%22563%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220%22%2F%3E%3Cg%20transform%3D%22translate(1939.45%20281.96)%20rotate(0.00)%22%20opacity%3D%221.0000%22%3E%3Cg%20transform%3D%22scale(0.7819444444444444)%22%3E%3Cg%20fill%3D%22%23ffffff%22%20transform%3D%22scale(8)%22%20opacity%3D%221%22%3E%3Cpath%20d%3D%22M96%200V1490H1170V1164H500V912H1114V594H500V326H1166V0Z%22%20transform%3D%22translate(-11.0302734375%2013)%20scale(0.017578125%20-0.017578125)%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E\"); mask-size: 100% 100%; mask-repeat: no-repeat;",
+    "computedMask": "url(\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201000%20563%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3C%2Fdefs%3E%3Cg%3E%3Crect%20width%3D%221000%22%20height%3D%22563%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220%22%2F%3E%3Cg%20transform%3D%22translate(1939.45%20281.96)%20rotate(0.00)%22%20opacity%3D%221.0000%22%3E%3Cg%20transform%3D%22scale(0.7819444444444444)%22%3E%3Cg%20fill%3D%22%23ffffff%22%20transform%3D%22scale(8)%22%20opacity%3D%221%22%3E%3Cpath%20d%3D%22M96%200V1490H1170V1164H500V912H1114V594H500V326H1166V0Z%22%20transform%3D%22translate(-11.0302734375%2013)%20scale(0.017578125%20-0.017578125)%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E\")",
+    "opacity": "1",
+    "visibility": "visible"
+  },
+  {
+    "id": "scene-cb5c396b-ed8a-4814-a84a-9e086748f924",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 50%; left: 50%; width: 70%; max-width: none; height: 70%; background-color: transparent; --title-scale: 1.4285714285714286; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; opacity: 1; mix-blend-mode: normal; pointer-events: auto; filter: none; border-radius: 0px; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: visible;",
+    "computedMask": "none",
+    "opacity": "1",
+    "visibility": "visible"
+  },
+  {
+    "id": "graphic-50ac8bb2-d03b-48ba-8dff-a7c7172e06e4",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 31%; left: 20%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(245, 242, 233); --title-scale: 0.8; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 118; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-6d2544e0-714a-4bd4-9e95-45b059be4bbc",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 64%; left: 80%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(245, 242, 233); --title-scale: 0.8; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 119; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "scene-db1c8afb-3bb2-45f9-8239-44cf0365a419",
+    "wrapper": true,
+    "text": "",
+    "style": "position: absolute; inset: 0px; pointer-events: none; z-index: 126; mix-blend-mode: normal; mask-image: url(\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%221%22%20height%3D%221%22%2F%3E\"); mask-size: 100% 100%; mask-repeat: no-repeat;",
+    "computedMask": "url(\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%221%22%20height%3D%221%22%2F%3E\")",
+    "opacity": "1",
+    "visibility": "visible"
+  },
+  {
+    "id": "scene-db1c8afb-3bb2-45f9-8239-44cf0365a419",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 50%; left: 50%; width: 70%; max-width: none; height: 70%; background-color: transparent; --title-scale: 1.4285714285714286; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; opacity: 1; mix-blend-mode: normal; pointer-events: auto; filter: none; border-radius: 0px; animation: auto ease 0s 1 normal none running none; transition: none; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "1",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-8750b918-2176-4a23-b77a-3bbfe3b70e3e",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 12.0556%; left: 76.4062%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(215, 255, 67); --title-scale: 0.45; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 127; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-3983b4ac-4242-4d5f-bc7f-c23fc12199e1",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 33.0556%; left: 56.4062%; width: 100%; max-width: none; height: 100%; background-color: transparent; --title-scale: 1; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 128; opacity: 0; --layer-opacity: 0; mix-blend-mode: normal; pointer-events: auto; filter: none; border-radius: 0px; animation: auto ease 0s 1 normal none running none; transition: none; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-ec373d5e-4010-4355-882b-35569307d31e",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 50%; left: 50%; width: 100%; max-width: none; height: 100%; background-color: transparent; --title-scale: 1; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 130; opacity: 0; --layer-opacity: 0; mix-blend-mode: normal; pointer-events: auto; filter: none; border-radius: 0px; animation: auto ease 0s 1 normal none running none; transition: none; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-381e1965-17bf-4591-9c42-450c41248429",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 50%; left: 50%; width: 100%; max-width: none; height: 100%; background-color: transparent; --title-scale: 1; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 131; opacity: 0; --layer-opacity: 0; mix-blend-mode: normal; pointer-events: auto; filter: none; border-radius: 0px; animation: auto ease 0s 1 normal none running none; transition: none; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-be33b927-30b6-45cf-9dee-f10af201da5a",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 50%; left: 50%; width: 100%; max-width: none; height: 100%; background-color: transparent; --title-scale: 1; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 132; opacity: 0; --layer-opacity: 0; mix-blend-mode: normal; pointer-events: auto; filter: none; border-radius: 0px; animation: auto ease 0s 1 normal none running none; transition: none; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-8af28852-99ab-4385-a45d-de7227ce2416",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 50%; left: 50%; width: 100%; max-width: none; height: 100%; background-color: transparent; --title-scale: 1; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 133; opacity: 0; --layer-opacity: 0; mix-blend-mode: normal; pointer-events: auto; filter: none; border-radius: 0px; animation: auto ease 0s 1 normal none running none; transition: none; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-c2b8d26a-0be2-4245-b66d-f6f38f764df5",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 50%; left: 50%; width: 100%; max-width: none; height: 100%; background-color: transparent; --title-scale: 1; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 134; opacity: 0; --layer-opacity: 0; mix-blend-mode: normal; pointer-events: auto; filter: none; border-radius: 0px; animation: auto ease 0s 1 normal none running none; transition: none; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-d2647410-8ccb-497f-9097-aea667b0abf4",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 25%; left: 50%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(245, 242, 233); --title-scale: 0.8; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 136; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-f8961e7c-cda5-40fd-badc-6b5a3c07547b",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 46%; left: 50%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(215, 255, 67); --title-scale: 0.8; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 137; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-b899ea52-63db-46c6-b255-c6a4580c2e4c",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 72%; left: 50%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(245, 242, 233); --title-scale: 0.8; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 138; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-81bc499b-0383-4057-aa45-b6aa8e746f42",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 87%; left: 12.2%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(245, 242, 233); --title-scale: 0.4; --title-rotation: 26deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 139; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-0d5db7df-793d-4c4f-a79b-e9bcf3fc6855",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 87%; left: 23%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(245, 242, 233); --title-scale: 0.4; --title-rotation: -26deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 140; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-4d005cad-9b23-493c-aa68-f72b16a0eb36",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 87%; left: 33.8%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(245, 242, 233); --title-scale: 0.4; --title-rotation: 26deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 141; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-b2078548-7b45-40ca-9e1a-3c5c4a33bfbf",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 87%; left: 44.6%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(245, 242, 233); --title-scale: 0.4; --title-rotation: -26deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 142; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-315778fd-ff1c-47a6-9e4f-bbab8d997d77",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 87%; left: 55.4%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(245, 242, 233); --title-scale: 0.4; --title-rotation: 26deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 143; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-25e8bb05-d6f4-4a95-881b-1e4a2869f02e",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 87%; left: 66.2%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(245, 242, 233); --title-scale: 0.4; --title-rotation: -26deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 144; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-157d9fcd-9a31-49d7-8e01-dfd6bd993e17",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 87%; left: 77%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(245, 242, 233); --title-scale: 0.4; --title-rotation: 26deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 145; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-3da83e74-482f-465c-8ef0-fe15403ba24f",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 87%; left: 87.8%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(245, 242, 233); --title-scale: 0.4; --title-rotation: -26deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 146; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-a4a19497-e872-42cb-b4e6-e52207d2ff96",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 86%; left: 50%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(215, 255, 67); --title-scale: 0.41; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 147; opacity: 1; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "1",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-97591ff1-6770-47b4-8b80-ab9a558fecf3",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 50%; left: 100%; width: 100%; max-width: none; height: 100%; background-color: transparent; --title-scale: 1; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 149; opacity: 1; --layer-opacity: 1; mix-blend-mode: normal; pointer-events: auto; filter: none; border-radius: 0px; animation: auto ease 0s 1 normal none running none; transition: none; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "1",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-7c1a0198-ad79-492c-9c85-4a8fc1db0e8a",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 61.0928%; left: 31.1026%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(245, 242, 233); --title-scale: 0.32000000000000006; --title-rotation: 17deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 150; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-5579bb43-12dd-4492-89e3-244bdacb5798",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 58.9653%; left: 44.5352%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(245, 242, 233); --title-scale: 0.32000000000000006; --title-rotation: -35deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 151; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-99b10396-9020-4d18-a4c3-ee170fb0b7ad",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 56.8378%; left: 57.9678%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(245, 242, 233); --title-scale: 0.32000000000000006; --title-rotation: 17deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 152; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-e58dc351-6daf-4d14-935b-6a49379dd3b5",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 54.7102%; left: 71.4003%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(245, 242, 233); --title-scale: 0.32000000000000006; --title-rotation: -35deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 153; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-d18a3418-4074-4862-984c-37afc7ca5811",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 80.8465%; left: 34.2313%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(215, 255, 67); --title-scale: 0.32000000000000006; --title-rotation: 17deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 154; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-86cdcfac-3051-487f-bb92-4e727ec84948",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 78.719%; left: 47.6639%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(215, 255, 67); --title-scale: 0.32000000000000006; --title-rotation: -35deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 155; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-c09b6816-d84d-4897-92ea-0a7b7bda0e5a",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 76.5915%; left: 61.0964%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(215, 255, 67); --title-scale: 0.32000000000000006; --title-rotation: 17deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 156; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-f7fe9358-b1ad-4a2d-833a-dcf5a018d61a",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 74.464%; left: 74.529%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(215, 255, 67); --title-scale: 0.32000000000000006; --title-rotation: -35deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 157; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-40b442ce-5d27-4675-b2e0-d75bca1964db",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 89.5382%; left: 35.6079%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(245, 242, 233); --title-scale: 0.32000000000000006; --title-rotation: 17deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 158; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-17d17cef-c202-4650-9c5a-6b2cec492bf1",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 87.4107%; left: 49.0405%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(245, 242, 233); --title-scale: 0.32000000000000006; --title-rotation: -35deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 159; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-1528653e-3318-4b6d-b19c-a68019fceb53",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 85.2832%; left: 62.4731%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(245, 242, 233); --title-scale: 0.32000000000000006; --title-rotation: 17deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 160; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-8b3e77d6-99f3-4da5-8253-d4d0f4cbe387",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 83.1557%; left: 75.9056%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(245, 242, 233); --title-scale: 0.32000000000000006; --title-rotation: -35deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 161; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-dba1c433-fbcc-484a-aea9-47f85ab902fe",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 94%; left: 50%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(245, 242, 233); --title-scale: 0.32; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 162; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-094dca46-9592-4291-8333-577e8d2cd3ec",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 50%; left: 50%; width: 100%; max-width: none; height: 100%; background-color: transparent; --title-scale: 1; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 163; opacity: 1; --layer-opacity: 1; mix-blend-mode: normal; pointer-events: auto; filter: none; border-radius: 0px; animation: auto ease 0s 1 normal none running none; transition: none; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "1",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-71608a84-e48a-4e16-8506-fc2c8bdab619",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 14%; left: 19%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(215, 255, 67); --title-scale: 0.58; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 166; opacity: 1; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "1",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-dc2e9883-08bf-4e26-ba7a-b05ef2dc4ea7",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 50%; left: 50%; width: 100%; max-width: none; height: 100%; background-color: transparent; --title-scale: 1; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 173; opacity: 1; --layer-opacity: 1; mix-blend-mode: normal; pointer-events: auto; filter: none; border-radius: 0px; animation: auto ease 0s 1 normal none running none; transition: none; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "1",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-15af7e6d-8828-42e1-a556-90079e74ff52",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 34%; left: 50%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(245, 242, 233); --title-scale: 4.95; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 174; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  },
+  {
+    "id": "graphic-95796722-3f5c-43cf-83cf-6bb9a4220707",
+    "wrapper": false,
+    "time": "3.5",
+    "text": "",
+    "style": "top: 66%; left: 50%; width: max-content; max-width: calc(var(--title-layout-width, 576px) * 0.9); height: auto; background-color: transparent; color: rgb(215, 255, 67); --title-scale: 3.8; --title-rotation: 0deg; --layer-translate-x: -50%; --layer-translate-y: -50%; --layer-anchor-x: 50%; --layer-anchor-y: 50%; --title-stroke: 0px; --title-stroke-color: rgba(0,0,0,0.92); text-align: center; font-weight: 900; font-family: \"Studio Inter\", sans-serif; text-shadow: none; z-index: 175; opacity: 0; mix-blend-mode: normal; pointer-events: auto; border-radius: 7%; mask-size: 100% 100%; mask-repeat: no-repeat; mask-mode: alpha; visibility: hidden;",
+    "computedMask": "none",
+    "opacity": "0",
+    "visibility": "hidden"
+  }
+]

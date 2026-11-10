@@ -1,0 +1,16 @@
+{
+  "deliveryDirectory": "/home/tibule12/Videos/Studio Template Collection - 2026-11-04",
+  "files": 154,
+  "bytes": 43180655,
+  "manifestSha256": "f40ad20af1e73017e0aa31dc7f4fdb46f13f9352d495f12f84e587b14690b4af",
+  "reelSha256": "49e2c84a60118dbaccb4149767fae04d79e1c6e2ec1f7b8f904773a930a56b70",
+  "nativeFilms": 6,
+  "nativeBackups": 6,
+  "completeFinishedStudioRecordings": 6,
+  "priorFilesUnchanged": 240,
+  "allOriginalsVerified": 11,
+  "freeGiB": 6.700176239013672,
+  "fiveStudioAuthoritiesUpdated": true,
+  "contractValid": true,
+  "activeOperations": 0
+}

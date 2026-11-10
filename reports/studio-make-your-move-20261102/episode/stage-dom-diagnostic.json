@@ -1,0 +1,3026 @@
+[
+  {
+    "id": "graphic-a465c5f1-1737-41c6-9c13-1131347fc1e3",
+    "text": "",
+    "rect": {
+      "x": 88,
+      "y": 171.25,
+      "width": 1016,
+      "height": 571.5
+    },
+    "style": "",
+    "transform": "matrix(1, 0, 0, 1, -508, -285.75)",
+    "font": "900 16px / 22.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay    is-media-overlay frame-shape-edge   ",
+        "z": "100",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0.0552772"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-a12e37a1-ea55-4a56-9cb3-bb078905a015",
+    "text": "M",
+    "rect": {
+      "x": 255.15457153320312,
+      "y": 176.39297485351562,
+      "width": 194.00332641601562,
+      "height": 195.15155029296875
+    },
+    "style": "",
+    "transform": "matrix(2.93944, 0, 0, 2.93944, -33, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "101",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-2b5978ab-76f3-43ec-8511-3921a93c85a9",
+    "text": "A",
+    "rect": {
+      "x": 425.065673828125,
+      "y": 176.39297485351562,
+      "width": 179.30615234375,
+      "height": 195.15155029296875
+    },
+    "style": "",
+    "transform": "matrix(2.93944, 0, 0, 2.93944, -30.5, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "102",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-4a4d26f9-006e-4c5c-8845-02c18464d429",
+    "text": "K",
+    "rect": {
+      "x": 590.552001953125,
+      "y": 176.39297485351562,
+      "width": 173.42724609375,
+      "height": 195.15155029296875
+    },
+    "style": "",
+    "transform": "matrix(2.93944, 0, 0, 2.93944, -29.5, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "103",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-fd16dbc8-c363-4756-9416-fe301c0c71c7",
+    "text": "E",
+    "rect": {
+      "x": 760.463134765625,
+      "y": 176.39297485351562,
+      "width": 158.72998046875,
+      "height": 195.15155029296875
+    },
+    "style": "",
+    "transform": "matrix(2.93944, 0, 0, 2.93944, -27, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "104",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-42a07e3b-fbb4-4781-91c7-3c271d658cbb",
+    "text": "IT",
+    "rect": {
+      "x": 575.2411499023438,
+      "y": 424.9924621582031,
+      "width": 41.51763916015625,
+      "height": 41.140045166015625
+    },
+    "style": "",
+    "transform": "matrix(0.619667, 0, 0, 0.619667, -33.5, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "105",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0.0971296"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-f8a2b0c1-882c-4f17-a0a7-37af806a0078",
+    "text": "",
+    "rect": {
+      "x": 14.832473754882812,
+      "y": -16.667526245117188,
+      "width": 1162.3349609375,
+      "height": 947.3350830078125
+    },
+    "style": "",
+    "transform": "matrix(0.906308, 0.422618, -0.422618, 0.906308, -508, -285.75)",
+    "font": "900 16px / 22.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay    is-media-overlay frame-shape-edge   ",
+        "z": "110",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-746aef61-103f-4460-8dff-5ae0ff563539",
+    "text": "",
+    "rect": {
+      "x": 14.832473754882812,
+      "y": -16.667526245117188,
+      "width": 1162.3349609375,
+      "height": 947.3350830078125
+    },
+    "style": "",
+    "transform": "matrix(0.906308, 0.422618, -0.422618, 0.906308, -508, -285.75)",
+    "font": "900 16px / 22.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay    is-media-overlay frame-shape-edge   ",
+        "z": "111",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-ddd7fb64-b772-4295-b608-f4ad0b9d38f6",
+    "text": "01  /  MAKE YOUR MOVE",
+    "rect": {
+      "x": 530.5059814453125,
+      "y": 698.9592895507812,
+      "width": 130.988037109375,
+      "height": 18.98773193359375
+    },
+    "style": "",
+    "transform": "matrix(0.286, 0, 0, 0.286, -229, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "112",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "scene-6a162d9d-7c1a-4cb6-8c98-8b49135dc8f2",
+    "text": "",
+    "rect": {
+      "x": 88.0089111328125,
+      "y": 171.25222778320312,
+      "width": 1015.982177734375,
+      "height": 571.49560546875
+    },
+    "style": "",
+    "transform": "matrix(1.42857, 0, 0, 1.42857, -355.594, -200.023)",
+    "font": "900 16px / 22.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay    is-media-overlay frame-shape-edge   broll-anim-none",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "studio-track-matte-stage",
+        "z": "113",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "scene-d650219c-170c-4c4d-8f59-9e3a1aa1e6a3",
+    "text": "",
+    "rect": {
+      "x": 88.0089111328125,
+      "y": 171.25222778320312,
+      "width": 1015.982177734375,
+      "height": 571.49560546875
+    },
+    "style": "",
+    "transform": "matrix(1.42857, 0, 0, 1.42857, -355.594, -200.023)",
+    "font": "900 16px / 22.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay    is-media-overlay frame-shape-edge   broll-anim-none",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "studio-track-matte-stage",
+        "z": "114",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "scene-4664a934-9dff-4545-b4ab-81c6d62faa86",
+    "text": "",
+    "rect": {
+      "x": 88.0089111328125,
+      "y": 171.25222778320312,
+      "width": 1015.982177734375,
+      "height": 571.49560546875
+    },
+    "style": "",
+    "transform": "matrix(1.42857, 0, 0, 1.42857, -355.594, -200.023)",
+    "font": "900 16px / 22.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay    is-media-overlay frame-shape-edge   broll-anim-none",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "studio-track-matte-stage",
+        "z": "115",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "scene-cb5c396b-ed8a-4814-a84a-9e086748f924",
+    "text": "",
+    "rect": {
+      "x": 88.0089111328125,
+      "y": 171.25222778320312,
+      "width": 1015.982177734375,
+      "height": 571.49560546875
+    },
+    "style": "",
+    "transform": "matrix(1.42857, 0, 0, 1.42857, -355.594, -200.023)",
+    "font": "900 16px / 22.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay    is-media-overlay frame-shape-edge   broll-anim-none",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "studio-track-matte-stage",
+        "z": "116",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-50ac8bb2-d03b-48ba-8dff-a7c7172e06e4",
+    "text": "BREAK",
+    "rect": {
+      "x": 240.97860717773438,
+      "y": 327.30877685546875,
+      "width": 100.41778564453125,
+      "height": 42.1949462890625
+    },
+    "style": "",
+    "transform": "matrix(0.635556, 0, 0, 0.635556, -79, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "118",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-6d2544e0-714a-4bd4-9e95-45b059be4bbc",
+    "text": "THE GRID",
+    "rect": {
+      "x": 837.2413330078125,
+      "y": 515.9025268554688,
+      "width": 127.111083984375,
+      "height": 42.1949462890625
+    },
+    "style": "",
+    "transform": "matrix(0.635556, 0, 0, 0.635556, -100, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "119",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "scene-db1c8afb-3bb2-45f9-8239-44cf0365a419",
+    "text": "",
+    "rect": {
+      "x": 88.0089111328125,
+      "y": 171.25222778320312,
+      "width": 1015.982177734375,
+      "height": 571.49560546875
+    },
+    "style": "",
+    "transform": "matrix(1.42857, 0, 0, 1.42857, -355.594, -200.023)",
+    "font": "900 16px / 22.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay    is-media-overlay frame-shape-edge   ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "studio-track-matte-stage",
+        "z": "126",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-8750b918-2176-4a23-b77a-3bbfe3b70e3e",
+    "text": "MOMENTUM",
+    "rect": {
+      "x": 817.27001953125,
+      "y": 228.27330017089844,
+      "width": 94.02252197265625,
+      "height": 23.734649658203125
+    },
+    "style": "",
+    "transform": "matrix(0.3575, 0, 0, 0.3575, -131.5, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "127",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-3983b4ac-4242-4d5f-bc7f-c23fc12199e1",
+    "text": "",
+    "rect": {
+      "x": 153.078125,
+      "y": 74.40625,
+      "width": 1016,
+      "height": 571.5
+    },
+    "style": "",
+    "transform": "matrix(1, 0, 0, 1, -508, -285.75)",
+    "font": "900 16px / 22.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay    is-media-overlay frame-shape-edge   ",
+        "z": "128",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-ec373d5e-4010-4355-882b-35569307d31e",
+    "text": "",
+    "rect": {
+      "x": 88,
+      "y": 171.25,
+      "width": 1016,
+      "height": 571.5
+    },
+    "style": "",
+    "transform": "matrix(1, 0, 0, 1, -508, -285.75)",
+    "font": "900 16px / 22.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay    is-media-overlay frame-shape-edge   ",
+        "z": "130",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-381e1965-17bf-4591-9c42-450c41248429",
+    "text": "",
+    "rect": {
+      "x": 88,
+      "y": 171.25,
+      "width": 1016,
+      "height": 571.5
+    },
+    "style": "",
+    "transform": "matrix(1, 0, 0, 1, -508, -285.75)",
+    "font": "900 16px / 22.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay    is-media-overlay frame-shape-edge   ",
+        "z": "131",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-be33b927-30b6-45cf-9dee-f10af201da5a",
+    "text": "",
+    "rect": {
+      "x": 88,
+      "y": 171.25,
+      "width": 1016,
+      "height": 571.5
+    },
+    "style": "",
+    "transform": "matrix(1, 0, 0, 1, -508, -285.75)",
+    "font": "900 16px / 22.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay    is-media-overlay frame-shape-edge   ",
+        "z": "132",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-8af28852-99ab-4385-a45d-de7227ce2416",
+    "text": "",
+    "rect": {
+      "x": 88,
+      "y": 171.25,
+      "width": 1016,
+      "height": 571.5
+    },
+    "style": "",
+    "transform": "matrix(1, 0, 0, 1, -508, -285.75)",
+    "font": "900 16px / 22.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay    is-media-overlay frame-shape-edge   ",
+        "z": "133",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-c2b8d26a-0be2-4245-b66d-f6f38f764df5",
+    "text": "",
+    "rect": {
+      "x": 88,
+      "y": 171.25,
+      "width": 1016,
+      "height": 571.5
+    },
+    "style": "",
+    "transform": "matrix(1, 0, 0, 1, -508, -285.75)",
+    "font": "900 16px / 22.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay    is-media-overlay frame-shape-edge   ",
+        "z": "134",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-d2647410-8ccb-497f-9097-aea667b0abf4",
+    "text": "F\nE\nE\nL",
+    "rect": {
+      "x": 558.6611328125,
+      "y": 293.02752685546875,
+      "width": 74.677734375,
+      "height": 42.1949462890625
+    },
+    "style": "",
+    "transform": "matrix(0.635556, 0, 0, 0.635556, -58.75, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "136",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-f8961e7c-cda5-40fd-badc-6b5a3c07547b",
+    "text": "T\nH\nE",
+    "rect": {
+      "x": 562.3900146484375,
+      "y": 413.02752685546875,
+      "width": 67.219970703125,
+      "height": 42.1949462890625
+    },
+    "style": "",
+    "transform": "matrix(0.635556, 0, 0, 0.635556, -52.8828, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "137",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-b899ea52-63db-46c6-b255-c6a4580c2e4c",
+    "text": "R\nH\nY\nT\nH\nM",
+    "rect": {
+      "x": 533.3679809570312,
+      "y": 561.6212768554688,
+      "width": 125.2640380859375,
+      "height": 42.1949462890625
+    },
+    "style": "",
+    "transform": "matrix(0.635556, 0, 0, 0.635556, -98.5469, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "138",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-81bc499b-0383-4057-aa45-b6aa8e746f42",
+    "text": "F",
+    "rect": {
+      "x": 199.744384765625,
+      "y": 655.2803955078125,
+      "width": 24.386215209960938,
+      "height": 26.345458984375
+    },
+    "style": "",
+    "transform": "matrix(0.285617, 0.139305, -0.139305, 0.285617, -26.5, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "139",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-0d5db7df-793d-4c4f-a79b-e9bcf3fc6855",
+    "text": "E",
+    "rect": {
+      "x": 309.3359680175781,
+      "y": 655.2107543945312,
+      "width": 24.67181396484375,
+      "height": 26.4847412109375
+    },
+    "style": "",
+    "transform": "matrix(0.285617, -0.139305, 0.139305, 0.285617, -27, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "140",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-4d005cad-9b23-493c-aa68-f72b16a0eb36",
+    "text": "A",
+    "rect": {
+      "x": 418.0706787109375,
+      "y": 654.7232055664062,
+      "width": 26.671142578125,
+      "height": 27.4598388671875
+    },
+    "style": "",
+    "transform": "matrix(0.285617, 0.139305, -0.139305, 0.285617, -30.5, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "141",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-b2078548-7b45-40ca-9e1a-3c5c4a33bfbf",
+    "text": "R",
+    "rect": {
+      "x": 528.5034790039062,
+      "y": 655.0714721679688,
+      "width": 25.2430419921875,
+      "height": 26.7633056640625
+    },
+    "style": "",
+    "transform": "matrix(0.285617, -0.139305, 0.139305, 0.285617, -28, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "142",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-315778fd-ff1c-47a6-9e4f-bbab8d997d77",
+    "text": "L",
+    "rect": {
+      "x": 638.80908203125,
+      "y": 655.35009765625,
+      "width": 24.1005859375,
+      "height": 26.2060546875
+    },
+    "style": "",
+    "transform": "matrix(0.285617, 0.139305, -0.139305, 0.285617, -26, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "143",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-25e8bb05-d6f4-4a95-881b-1e4a2869f02e",
+    "text": "E",
+    "rect": {
+      "x": 748.2421875,
+      "y": 655.2107543945312,
+      "width": 24.671875,
+      "height": 26.4847412109375
+    },
+    "style": "",
+    "transform": "matrix(0.285617, -0.139305, 0.139305, 0.285617, -27, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "144",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-157d9fcd-9a31-49d7-8e01-dfd6bd993e17",
+    "text": "S",
+    "rect": {
+      "x": 857.6909790039062,
+      "y": 655.0714721679688,
+      "width": 25.2430419921875,
+      "height": 26.7633056640625
+    },
+    "style": "",
+    "transform": "matrix(0.285617, 0.139305, -0.139305, 0.285617, -28, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "145",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-3da83e74-482f-465c-8ef0-fe15403ba24f",
+    "text": "S",
+    "rect": {
+      "x": 967.4253540039062,
+      "y": 655.0714721679688,
+      "width": 25.2430419921875,
+      "height": 26.7633056640625
+    },
+    "style": "",
+    "transform": "matrix(0.285617, -0.139305, 0.139305, 0.285617, -28, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "146",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-a4a19497-e872-42cb-b4e6-e52207d2ff96",
+    "text": "BECAUSE AN IDEA SHOULD NEVER STAND STILL.",
+    "rect": {
+      "x": 448.28497314453125,
+      "y": 651.9219360351562,
+      "width": 295.4300537109375,
+      "height": 21.62493896484375
+    },
+    "style": "",
+    "transform": "matrix(0.325722, 0, 0, 0.325722, -453.5, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "147",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-97591ff1-6770-47b4-8b80-ab9a558fecf3",
+    "text": "",
+    "rect": {
+      "x": 596,
+      "y": 171.25,
+      "width": 1016,
+      "height": 571.5
+    },
+    "style": "",
+    "transform": "matrix(1, 0, 0, 1, -508, -285.75)",
+    "font": "900 16px / 22.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay    is-media-overlay frame-shape-edge   ",
+        "z": "149",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-7c1a0198-ad79-492c-9c85-4a8fc1db0e8a",
+    "text": "M",
+    "rect": {
+      "x": 393.5099182128906,
+      "y": 509.8675842285156,
+      "width": 20.98016357421875,
+      "height": 21.046112060546875
+    },
+    "style": "",
+    "transform": "matrix(0.243114, 0.0743274, -0.0743274, 0.243114, -33, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "150",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-5579bb43-12dd-4492-89e3-244bdacb5798",
+    "text": "A",
+    "rect": {
+      "x": 529.27685546875,
+      "y": 496.8741760253906,
+      "width": 22.3837890625,
+      "height": 22.720428466796875
+    },
+    "style": "",
+    "transform": "matrix(0.208247, -0.145816, 0.145816, 0.208247, -30.5, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "151",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-99b10396-9020-4d18-a4c3-ee170fb0b7ad",
+    "text": "K",
+    "rect": {
+      "x": 667.29833984375,
+      "y": 485.7995910644531,
+      "width": 19.2783203125,
+      "height": 20.52581787109375
+    },
+    "style": "",
+    "transform": "matrix(0.243114, 0.0743274, -0.0743274, 0.243114, -29.5, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "152",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-e58dc351-6daf-4d14-935b-6a49379dd3b5",
+    "text": "E",
+    "rect": {
+      "x": 802.9588012695312,
+      "y": 473.056396484375,
+      "width": 20.9261474609375,
+      "height": 21.69970703125
+    },
+    "style": "",
+    "transform": "matrix(0.208247, -0.145816, 0.145816, 0.208247, -27, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "153",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-d18a3418-4074-4862-984c-37afc7ca5811",
+    "text": "Y",
+    "rect": {
+      "x": 426.0205078125,
+      "y": 622.981201171875,
+      "width": 19.521484375,
+      "height": 20.60009765625
+    },
+    "style": "",
+    "transform": "matrix(0.243114, 0.0743274, -0.0743274, 0.243114, -30, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "154",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-86cdcfac-3051-487f-bb92-4e727ec84948",
+    "text": "O",
+    "rect": {
+      "x": 561.1622314453125,
+      "y": 609.8377075195312,
+      "width": 22.175537109375,
+      "height": 22.5745849609375
+    },
+    "style": "",
+    "transform": "matrix(0.208247, -0.145816, 0.145816, 0.208247, -30, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "155",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-c09b6816-d84d-4897-92ea-0a7b7bda0e5a",
+    "text": "U",
+    "rect": {
+      "x": 699.2167358398438,
+      "y": 598.7430419921875,
+      "width": 19.0352783203125,
+      "height": 20.451416015625
+    },
+    "style": "",
+    "transform": "matrix(0.243114, 0.0743274, -0.0743274, 0.243114, -29, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "156",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-f7fe9358-b1ad-4a2d-833a-dcf5a018d61a",
+    "text": "R",
+    "rect": {
+      "x": 834.5317993164062,
+      "y": 585.8012084960938,
+      "width": 21.3426513671875,
+      "height": 21.9913330078125
+    },
+    "style": "",
+    "transform": "matrix(0.208247, -0.145816, 0.145816, 0.208247, -28, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "157",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-40b442ce-5d27-4675-b2e0-d75bca1964db",
+    "text": "M",
+    "rect": {
+      "x": 439.2755432128906,
+      "y": 672.4300537109375,
+      "width": 20.98016357421875,
+      "height": 21.046142578125
+    },
+    "style": "",
+    "transform": "matrix(0.243114, 0.0743274, -0.0743274, 0.243114, -33, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "158",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-17d17cef-c202-4650-9c5a-6b2cec492bf1",
+    "text": "O",
+    "rect": {
+      "x": 575.1622314453125,
+      "y": 659.5095825195312,
+      "width": 22.175537109375,
+      "height": 22.5745849609375
+    },
+    "style": "",
+    "transform": "matrix(0.208247, -0.145816, 0.145816, 0.208247, -30, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "159",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-1528653e-3318-4b6d-b19c-a68019fceb53",
+    "text": "V",
+    "rect": {
+      "x": 712.83642578125,
+      "y": 648.3034057617188,
+      "width": 19.7646484375,
+      "height": 20.6744384765625
+    },
+    "style": "",
+    "transform": "matrix(0.243114, 0.0743274, -0.0743274, 0.243114, -30.5, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "160",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-8b3e77d6-99f3-4da5-8253-d4d0f4cbe387",
+    "text": "E",
+    "rect": {
+      "x": 848.7244262695312,
+      "y": 635.634521484375,
+      "width": 20.9261474609375,
+      "height": 21.69970703125
+    },
+    "style": "",
+    "transform": "matrix(0.208247, -0.145816, 0.145816, 0.208247, -27, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "161",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-dba1c433-fbcc-484a-aea9-47f85ab902fe",
+    "text": "AUTOPROMOTE  /  MOTION & FLOW",
+    "rect": {
+      "x": 511.97955322265625,
+      "y": 700.01416015625,
+      "width": 168.0408935546875,
+      "height": 16.87799072265625
+    },
+    "style": "",
+    "transform": "matrix(0.254222, 0, 0, 0.254222, -330.5, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "162",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-094dca46-9592-4291-8333-577e8d2cd3ec",
+    "text": "",
+    "rect": {
+      "x": 88,
+      "y": 171.25,
+      "width": 1016,
+      "height": 571.5
+    },
+    "style": "",
+    "transform": "matrix(1, 0, 0, 1, -508, -285.75)",
+    "font": "900 16px / 22.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay    is-media-overlay frame-shape-edge   ",
+        "z": "163",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-71608a84-e48a-4e16-8506-fc2c8bdab619",
+    "text": "BREAK THE GRID",
+    "rect": {
+      "x": 204.31173706054688,
+      "y": 235.954345703125,
+      "width": 153.43902587890625,
+      "height": 30.59130859375
+    },
+    "style": "",
+    "transform": "matrix(0.460778, 0, 0, 0.460778, -166.5, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "166",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-dc2e9883-08bf-4e26-ba7a-b05ef2dc4ea7",
+    "text": "",
+    "rect": {
+      "x": 88,
+      "y": 171.25,
+      "width": 1016,
+      "height": 571.5
+    },
+    "style": "",
+    "transform": "matrix(1, 0, 0, 1, -508, -285.75)",
+    "font": "900 16px / 22.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay    is-media-overlay frame-shape-edge   ",
+        "z": "173",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-15af7e6d-8828-42e1-a556-90079e74ff52",
+    "text": "B\nE\nY\nO\nN\nD",
+    "rect": {
+      "x": 227.0516357421875,
+      "y": 235.00631713867188,
+      "width": 737.896728515625,
+      "height": 261.08111572265625
+    },
+    "style": "",
+    "transform": "matrix(3.9325, 0, 0, 3.9325, -93.8203, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "174",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  },
+  {
+    "id": "graphic-95796722-3f5c-43cf-83cf-6bb9a4220707",
+    "text": "T\nH\nE\nF\nR\nA\nM\nE",
+    "rect": {
+      "x": 229.03988647460938,
+      "y": 448.22454833984375,
+      "width": 733.920166015625,
+      "height": 200.4259033203125
+    },
+    "style": "",
+    "transform": "matrix(3.01889, 0, 0, 3.01889, -121.555, -33.1953)",
+    "font": "900 36px / 50.4px \"Studio Inter\", sans-serif",
+    "display": "block",
+    "parents": [
+      {
+        "tag": "DIV",
+        "class": "draggable-overlay      is-text-overlay  ",
+        "z": "175",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "0"
+      },
+      {
+        "tag": "DIV",
+        "class": "overlays-layer",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "block",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "phone-frame reframe-aspect-16-9    ",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-player-shell comparison-after",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "grid",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "class": "preview-device-column",
+        "z": "auto",
+        "visibility": "visible",
+        "display": "flex",
+        "opacity": "1"
+      }
+    ]
+  }
+]

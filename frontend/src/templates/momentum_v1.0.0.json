@@ -1,0 +1,4736 @@
+{
+  "schemaVersion": 1,
+  "templateId": "momentum_v1",
+  "version": "1.0.0",
+  "label": "Momentum \u2014 orbit, slits & lenses",
+  "status": "draft",
+  "canonicalContractVersion": 1,
+  "compiler": "studioRenderCompiler",
+  "renderer": "render_viral_clip_impl",
+  "surfaces": [
+    "studio",
+    "director",
+    "welcome"
+  ],
+  "workflow": "studio",
+  "categoryIds": [
+    "motion_graphics"
+  ],
+  "inputSlots": [
+    {
+      "id": "hookFootage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "productFootage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "detailFootage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "screenFootage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "music",
+      "type": "audio",
+      "required": false
+    }
+  ],
+  "supportedAspects": [
+    "16:9"
+  ],
+  "durationTicks": 2160000,
+  "qualification": {
+    "studioLifecycle": "unverified",
+    "directorInstantiation": "unverified",
+    "creativeQuality": "unapproved",
+    "previewFinalParity": "unverified"
+  },
+  "executionDefinition": {
+    "clock": 90000,
+    "defaultAspect": "16:9",
+    "sequence": [
+      {
+        "slot": "hookFootage",
+        "offset": 0.25,
+        "duration": 3,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      {
+        "slot": "detailFootage",
+        "offset": 0,
+        "duration": 6,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      {
+        "slot": "screenFootage",
+        "offset": 2,
+        "duration": 5,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      {
+        "slot": "productFootage",
+        "offset": 7,
+        "duration": 7,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      {
+        "slot": "hookFootage",
+        "offset": 0.25,
+        "duration": 3,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      }
+    ],
+    "titles": [],
+    "logo": {},
+    "animation": {
+      "enterSeconds": 0.2,
+      "settleSeconds": 0.45,
+      "exitSeconds": 0.12,
+      "curve": [
+        0.16,
+        1,
+        0.3,
+        1
+      ]
+    },
+    "music": {
+      "volume": 60,
+      "fadeIn": 0.1,
+      "fadeOut": 0.8
+    },
+    "soundCues": [
+      {
+        "tone": "airy_whoosh",
+        "time": 2.8,
+        "duration": 0.4,
+        "volume": 0.13
+      },
+      {
+        "tone": "airy_whoosh",
+        "time": 8.8,
+        "duration": 0.4,
+        "volume": 0.13
+      },
+      {
+        "tone": "airy_whoosh",
+        "time": 13.8,
+        "duration": 0.4,
+        "volume": 0.13
+      },
+      {
+        "tone": "airy_whoosh",
+        "time": 20.8,
+        "duration": 0.4,
+        "volume": 0.13
+      }
+    ],
+    "sourceKeyframes": [],
+    "sceneActions": [],
+    "directorDescription": "Momentum \u2014 orbit, slits & lenses: a wordless authored motion style using your four saved clips. All layers, masks, groups and motion stay editable. No model job.",
+    "defaultCopy": {},
+    "muteOriginalAudio": true,
+    "framing": {
+      "forceAspect": true,
+      "mode": "off",
+      "positions": []
+    },
+    "videoFit": "contain",
+    "ordinaryMotion": {
+      "version": 1,
+      "layers": [
+        {
+          "id": "M / paper",
+          "name": "M / paper",
+          "type": "image",
+          "vectorShape": {
+            "version": 1,
+            "closed": true,
+            "nodes": [
+              {
+                "x": 0,
+                "y": 0,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 100,
+                "y": 0,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 100,
+                "y": 100,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 0,
+                "y": 100,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "fill": {
+              "kind": "solid",
+              "color": "#eee9df",
+              "endColor": "#eee9df",
+              "start": [
+                0,
+                0
+              ],
+              "end": [
+                100,
+                100
+              ]
+            },
+            "stroke": {
+              "color": "#eee9df",
+              "width": 0
+            }
+          },
+          "startTime": 0,
+          "duration": 24,
+          "x": 50,
+          "y": 50,
+          "width": 100,
+          "height": 100,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "stretch",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "motionBlur": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "M / orbit card 0",
+          "name": "M / orbit card 0",
+          "type": "video",
+          "sourceSlot": "productFootage",
+          "sourceStartTime": 0,
+          "startTime": 0,
+          "duration": 8,
+          "x": 50,
+          "y": 50,
+          "width": 100,
+          "height": 100,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "contain",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "motionBlur": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "perspective": {
+            "version": 1,
+            "corners": [
+              [
+                6,
+                29
+              ],
+              [
+                28,
+                17
+              ],
+              [
+                28,
+                83
+              ],
+              [
+                6,
+                72
+              ]
+            ]
+          }
+        },
+        {
+          "id": "M / orbit card 1",
+          "name": "M / orbit card 1",
+          "type": "video",
+          "sourceSlot": "detailFootage",
+          "sourceStartTime": 3,
+          "startTime": 0,
+          "duration": 8,
+          "x": 50,
+          "y": 50,
+          "width": 100,
+          "height": 100,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "contain",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "motionBlur": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "perspective": {
+            "version": 1,
+            "corners": [
+              [
+                72,
+                17
+              ],
+              [
+                94,
+                29
+              ],
+              [
+                94,
+                72
+              ],
+              [
+                72,
+                83
+              ]
+            ]
+          }
+        },
+        {
+          "id": "M / orbit card 2",
+          "name": "M / orbit card 2",
+          "type": "video",
+          "sourceSlot": "detailFootage",
+          "sourceStartTime": 0,
+          "startTime": 0,
+          "duration": 8,
+          "x": 50,
+          "y": 50,
+          "width": 100,
+          "height": 100,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "contain",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "motionBlur": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "perspective": {
+            "version": 1,
+            "corners": [
+              [
+                34,
+                9
+              ],
+              [
+                66,
+                13
+              ],
+              [
+                66,
+                91
+              ],
+              [
+                34,
+                87
+              ]
+            ]
+          }
+        },
+        {
+          "id": "M / red sweep",
+          "name": "M / red sweep",
+          "type": "image",
+          "vectorShape": {
+            "version": 1,
+            "closed": false,
+            "nodes": [
+              {
+                "x": 5,
+                "y": 65,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 20,
+                "y": 22,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 50,
+                "y": 12,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 80,
+                "y": 22,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 95,
+                "y": 65,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "fill": {
+              "kind": "none",
+              "color": "#e53b33",
+              "endColor": "#e53b33",
+              "start": [
+                0,
+                0
+              ],
+              "end": [
+                100,
+                100
+              ]
+            },
+            "stroke": {
+              "color": "#e53b33",
+              "width": 1.3
+            }
+          },
+          "startTime": 0,
+          "duration": 8,
+          "x": 50,
+          "y": 55,
+          "width": 100,
+          "height": 73,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "stretch",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "motionBlur": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "M / time slit 0",
+          "name": "M / time slit 0",
+          "type": "video",
+          "sourceSlot": "screenFootage",
+          "sourceStartTime": 0.0,
+          "startTime": 8,
+          "duration": 7,
+          "x": 50,
+          "y": 50,
+          "width": 100,
+          "height": 100,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "cover",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "motionBlur": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(-0.06% 0%,16.726666666666667% 0%,16.726666666666667% 100%,-0.06% 100%)",
+            "feather": 0,
+            "inverted": false
+          }
+        },
+        {
+          "id": "M / time slit 1",
+          "name": "M / time slit 1",
+          "type": "video",
+          "sourceSlot": "screenFootage",
+          "sourceStartTime": 0.25,
+          "startTime": 8,
+          "duration": 7,
+          "x": 50,
+          "y": 50,
+          "width": 100,
+          "height": 100,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "cover",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "motionBlur": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(16.60666666666667% 0%,33.39333333333334% 0%,33.39333333333334% 100%,16.60666666666667% 100%)",
+            "feather": 0,
+            "inverted": false
+          }
+        },
+        {
+          "id": "M / time slit 2",
+          "name": "M / time slit 2",
+          "type": "video",
+          "sourceSlot": "screenFootage",
+          "sourceStartTime": 0.5,
+          "startTime": 8,
+          "duration": 7,
+          "x": 50,
+          "y": 50,
+          "width": 100,
+          "height": 100,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "cover",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "motionBlur": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(33.27333333333333% 0%,50.06% 0%,50.06% 100%,33.27333333333333% 100%)",
+            "feather": 0,
+            "inverted": false
+          }
+        },
+        {
+          "id": "M / time slit 3",
+          "name": "M / time slit 3",
+          "type": "video",
+          "sourceSlot": "screenFootage",
+          "sourceStartTime": 0.75,
+          "startTime": 8,
+          "duration": 7,
+          "x": 50,
+          "y": 50,
+          "width": 100,
+          "height": 100,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "cover",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "motionBlur": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(49.94% 0%,66.72666666666667% 0%,66.72666666666667% 100%,49.94% 100%)",
+            "feather": 0,
+            "inverted": false
+          }
+        },
+        {
+          "id": "M / time slit 4",
+          "name": "M / time slit 4",
+          "type": "video",
+          "sourceSlot": "screenFootage",
+          "sourceStartTime": 1.0,
+          "startTime": 8,
+          "duration": 7,
+          "x": 50,
+          "y": 50,
+          "width": 100,
+          "height": 100,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "cover",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "motionBlur": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(66.60666666666667% 0%,83.39333333333333% 0%,83.39333333333333% 100%,66.60666666666667% 100%)",
+            "feather": 0,
+            "inverted": false
+          }
+        },
+        {
+          "id": "M / time slit 5",
+          "name": "M / time slit 5",
+          "type": "video",
+          "sourceSlot": "screenFootage",
+          "sourceStartTime": 1.25,
+          "startTime": 8,
+          "duration": 7,
+          "x": 50,
+          "y": 50,
+          "width": 100,
+          "height": 100,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "cover",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "motionBlur": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(83.27333333333333% 0%,100.06% 0%,100.06% 100%,83.27333333333333% 100%)",
+            "feather": 0,
+            "inverted": false
+          }
+        },
+        {
+          "id": "M / seated field",
+          "name": "M / seated field",
+          "type": "video",
+          "sourceSlot": "productFootage",
+          "sourceStartTime": 8,
+          "startTime": 15,
+          "duration": 6,
+          "x": 50,
+          "y": 50,
+          "width": 100,
+          "height": 100,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "contain",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "motionBlur": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "M / temporal lens 0",
+          "name": "M / temporal lens 0",
+          "type": "video",
+          "sourceSlot": "detailFootage",
+          "sourceStartTime": 10,
+          "startTime": 15,
+          "duration": 6,
+          "x": 28,
+          "y": 36,
+          "width": 28,
+          "height": 49.77777777777778,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "cover",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "motionBlur": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "ellipse",
+            "feather": 0,
+            "inverted": false
+          }
+        },
+        {
+          "id": "M / temporal lens 0 ring",
+          "name": "M / temporal lens 0 ring",
+          "type": "image",
+          "vectorShape": {
+            "version": 1,
+            "closed": true,
+            "nodes": [
+              {
+                "x": 50,
+                "y": 1,
+                "in": [
+                  -27.06,
+                  0
+                ],
+                "out": [
+                  27.06,
+                  0
+                ]
+              },
+              {
+                "x": 99,
+                "y": 50,
+                "in": [
+                  0,
+                  -27.06
+                ],
+                "out": [
+                  0,
+                  27.06
+                ]
+              },
+              {
+                "x": 50,
+                "y": 99,
+                "in": [
+                  27.06,
+                  0
+                ],
+                "out": [
+                  -27.06,
+                  0
+                ]
+              },
+              {
+                "x": 1,
+                "y": 50,
+                "in": [
+                  0,
+                  27.06
+                ],
+                "out": [
+                  0,
+                  -27.06
+                ]
+              }
+            ],
+            "fill": {
+              "kind": "none",
+              "color": "#e53b33",
+              "endColor": "#e53b33",
+              "start": [
+                0,
+                0
+              ],
+              "end": [
+                100,
+                100
+              ]
+            },
+            "stroke": {
+              "color": "#e53b33",
+              "width": 1.4
+            }
+          },
+          "startTime": 15,
+          "duration": 6,
+          "x": 28,
+          "y": 36,
+          "width": 28,
+          "height": 49.77777777777778,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "stretch",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "motionBlur": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "M / temporal lens 1",
+          "name": "M / temporal lens 1",
+          "type": "video",
+          "sourceSlot": "screenFootage",
+          "sourceStartTime": 3,
+          "startTime": 15,
+          "duration": 6,
+          "x": 74,
+          "y": 63,
+          "width": 24,
+          "height": 42.666666666666664,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "cover",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "motionBlur": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          },
+          "mask": {
+            "enabled": true,
+            "shape": "ellipse",
+            "feather": 0,
+            "inverted": false
+          }
+        },
+        {
+          "id": "M / temporal lens 1 ring",
+          "name": "M / temporal lens 1 ring",
+          "type": "image",
+          "vectorShape": {
+            "version": 1,
+            "closed": true,
+            "nodes": [
+              {
+                "x": 50,
+                "y": 1,
+                "in": [
+                  -27.06,
+                  0
+                ],
+                "out": [
+                  27.06,
+                  0
+                ]
+              },
+              {
+                "x": 99,
+                "y": 50,
+                "in": [
+                  0,
+                  -27.06
+                ],
+                "out": [
+                  0,
+                  27.06
+                ]
+              },
+              {
+                "x": 50,
+                "y": 99,
+                "in": [
+                  27.06,
+                  0
+                ],
+                "out": [
+                  -27.06,
+                  0
+                ]
+              },
+              {
+                "x": 1,
+                "y": 50,
+                "in": [
+                  0,
+                  27.06
+                ],
+                "out": [
+                  0,
+                  -27.06
+                ]
+              }
+            ],
+            "fill": {
+              "kind": "none",
+              "color": "#e53b33",
+              "endColor": "#e53b33",
+              "start": [
+                0,
+                0
+              ],
+              "end": [
+                100,
+                100
+              ]
+            },
+            "stroke": {
+              "color": "#e53b33",
+              "width": 1.4
+            }
+          },
+          "startTime": 15,
+          "duration": 6,
+          "x": 74,
+          "y": 63,
+          "width": 24,
+          "height": 42.666666666666664,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "stretch",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "motionBlur": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "M / contact 0",
+          "name": "M / contact 0",
+          "type": "video",
+          "sourceSlot": "hookFootage",
+          "sourceStartTime": 0.25,
+          "startTime": 21,
+          "duration": 3,
+          "x": 25,
+          "y": 25,
+          "width": 48,
+          "height": 47,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "cover",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "motionBlur": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "M / contact 1",
+          "name": "M / contact 1",
+          "type": "video",
+          "sourceSlot": "detailFootage",
+          "sourceStartTime": 7,
+          "startTime": 21,
+          "duration": 3,
+          "x": 75,
+          "y": 25,
+          "width": 48,
+          "height": 47,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "cover",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "motionBlur": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "M / contact 2",
+          "name": "M / contact 2",
+          "type": "video",
+          "sourceSlot": "productFootage",
+          "sourceStartTime": 7,
+          "startTime": 21,
+          "duration": 3,
+          "x": 25,
+          "y": 75,
+          "width": 48,
+          "height": 47,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "cover",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "motionBlur": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        },
+        {
+          "id": "M / contact 3",
+          "name": "M / contact 3",
+          "type": "video",
+          "sourceSlot": "screenFootage",
+          "sourceStartTime": 6,
+          "startTime": 21,
+          "duration": 3,
+          "x": 75,
+          "y": 75,
+          "width": 48,
+          "height": 47,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "anchorX": 50,
+          "anchorY": 50,
+          "mediaFit": "cover",
+          "bRollMode": "pip",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "shadow": "none",
+          "layerShadow": {
+            "enabled": false
+          },
+          "motionBlur": {
+            "enabled": false
+          },
+          "animation": {
+            "enter": "none",
+            "exit": "none"
+          }
+        }
+      ],
+      "keys": [
+        {
+          "targetId": "main-video",
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "targetId": "main-video",
+          "property": "opacity",
+          "time": 24,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "y",
+          "time": 0,
+          "value": 125,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "y",
+          "time": 0.7,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "y",
+          "time": 2.6,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "y",
+          "time": 4.6,
+          "value": 45,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "y",
+          "time": 6.5,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "y",
+          "time": 7.7,
+          "value": -75,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "y",
+          "time": 8,
+          "value": -75,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "rotation",
+          "time": 0,
+          "value": -14,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "rotation",
+          "time": 1.1,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "rotation",
+          "time": 3.7,
+          "value": 5,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "rotation",
+          "time": 6.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "rotation",
+          "time": 8,
+          "value": 12,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "planeCorner0X",
+          "time": 0,
+          "value": 6,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "planeCorner0X",
+          "time": 2,
+          "value": 6,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "planeCorner0X",
+          "time": 4.3,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "planeCorner0X",
+          "time": 6.5,
+          "value": 6,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "planeCorner1X",
+          "time": 0,
+          "value": 28,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "planeCorner1X",
+          "time": 2,
+          "value": 28,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "planeCorner1X",
+          "time": 4.3,
+          "value": 33,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "planeCorner1X",
+          "time": 6.5,
+          "value": 28,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "planeCorner2X",
+          "time": 0,
+          "value": 28,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "planeCorner2X",
+          "time": 2,
+          "value": 28,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "planeCorner2X",
+          "time": 4.3,
+          "value": 33,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "planeCorner2X",
+          "time": 6.5,
+          "value": 28,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "planeCorner3X",
+          "time": 0,
+          "value": 6,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "planeCorner3X",
+          "time": 2,
+          "value": 6,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "planeCorner3X",
+          "time": 4.3,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "planeCorner3X",
+          "time": 6.5,
+          "value": 6,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "opacity",
+          "time": 0.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "opacity",
+          "time": 7.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 0",
+          "property": "opacity",
+          "time": 8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "y",
+          "time": 0,
+          "value": 137,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "y",
+          "time": 0.86,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "y",
+          "time": 2.6,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "y",
+          "time": 4.6,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "y",
+          "time": 6.5,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "y",
+          "time": 7.7,
+          "value": -85,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "y",
+          "time": 8,
+          "value": -85,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "rotation",
+          "time": 0,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "rotation",
+          "time": 1.1,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "rotation",
+          "time": 3.7,
+          "value": -5,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "rotation",
+          "time": 6.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "rotation",
+          "time": 8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "planeCorner0X",
+          "time": 0,
+          "value": 72,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "planeCorner0X",
+          "time": 2,
+          "value": 72,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "planeCorner0X",
+          "time": 4.3,
+          "value": 67,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "planeCorner0X",
+          "time": 6.5,
+          "value": 72,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "planeCorner1X",
+          "time": 0,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "planeCorner1X",
+          "time": 2,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "planeCorner1X",
+          "time": 4.3,
+          "value": 99,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "planeCorner1X",
+          "time": 6.5,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "planeCorner2X",
+          "time": 0,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "planeCorner2X",
+          "time": 2,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "planeCorner2X",
+          "time": 4.3,
+          "value": 99,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "planeCorner2X",
+          "time": 6.5,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "planeCorner3X",
+          "time": 0,
+          "value": 72,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "planeCorner3X",
+          "time": 2,
+          "value": 72,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "planeCorner3X",
+          "time": 4.3,
+          "value": 67,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "planeCorner3X",
+          "time": 6.5,
+          "value": 72,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "opacity",
+          "time": 0.64,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "opacity",
+          "time": 7.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 1",
+          "property": "opacity",
+          "time": 8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "y",
+          "time": 0,
+          "value": 149,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "y",
+          "time": 1.02,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "y",
+          "time": 2.6,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "y",
+          "time": 4.6,
+          "value": 55,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "y",
+          "time": 6.5,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "y",
+          "time": 7.7,
+          "value": -95,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "y",
+          "time": 8,
+          "value": -95,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "rotation",
+          "time": 0,
+          "value": 14,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "rotation",
+          "time": 1.1,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "rotation",
+          "time": 3.7,
+          "value": 5,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "rotation",
+          "time": 6.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "rotation",
+          "time": 8,
+          "value": -12,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "planeCorner0X",
+          "time": 0,
+          "value": 34,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "planeCorner0X",
+          "time": 2,
+          "value": 34,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "planeCorner0X",
+          "time": 4.3,
+          "value": 29,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "planeCorner0X",
+          "time": 6.5,
+          "value": 34,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "planeCorner1X",
+          "time": 0,
+          "value": 66,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "planeCorner1X",
+          "time": 2,
+          "value": 66,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "planeCorner1X",
+          "time": 4.3,
+          "value": 71,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "planeCorner1X",
+          "time": 6.5,
+          "value": 66,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "planeCorner2X",
+          "time": 0,
+          "value": 66,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "planeCorner2X",
+          "time": 2,
+          "value": 66,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "planeCorner2X",
+          "time": 4.3,
+          "value": 71,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "planeCorner2X",
+          "time": 6.5,
+          "value": 66,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "planeCorner3X",
+          "time": 0,
+          "value": 34,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "planeCorner3X",
+          "time": 2,
+          "value": 34,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "planeCorner3X",
+          "time": 4.3,
+          "value": 29,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "planeCorner3X",
+          "time": 6.5,
+          "value": 34,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "opacity",
+          "time": 0.78,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "opacity",
+          "time": 7.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / orbit card 2",
+          "property": "opacity",
+          "time": 8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / red sweep",
+          "property": "strokeEnd",
+          "time": 0,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / red sweep",
+          "property": "strokeEnd",
+          "time": 1.3,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / red sweep",
+          "property": "strokeEnd",
+          "time": 6.5,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / red sweep",
+          "property": "strokeEnd",
+          "time": 8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / red sweep",
+          "property": "strokeOffset",
+          "time": 0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / red sweep",
+          "property": "strokeOffset",
+          "time": 8,
+          "value": 45,
+          "easing": "linear"
+        },
+        {
+          "targetId": "M / time slit 0",
+          "property": "y",
+          "time": 8,
+          "value": 160,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 0",
+          "property": "y",
+          "time": 8.65,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 0",
+          "property": "y",
+          "time": 10.1,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 0",
+          "property": "y",
+          "time": 11.3,
+          "value": 57,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 0",
+          "property": "y",
+          "time": 12.6,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 0",
+          "property": "y",
+          "time": 14.2,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 0",
+          "property": "y",
+          "time": 15,
+          "value": -60,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 0",
+          "property": "x",
+          "time": 8,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 0",
+          "property": "x",
+          "time": 10.1,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 0",
+          "property": "x",
+          "time": 11.3,
+          "value": 52.4,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 0",
+          "property": "x",
+          "time": 12.6,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 0",
+          "property": "x",
+          "time": 15,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 1",
+          "property": "y",
+          "time": 8,
+          "value": -60,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 1",
+          "property": "y",
+          "time": 8.74,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 1",
+          "property": "y",
+          "time": 10.1,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 1",
+          "property": "y",
+          "time": 11.37,
+          "value": 43,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 1",
+          "property": "y",
+          "time": 12.6,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 1",
+          "property": "y",
+          "time": 14.2,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 1",
+          "property": "y",
+          "time": 15,
+          "value": 160,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 1",
+          "property": "x",
+          "time": 8,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 1",
+          "property": "x",
+          "time": 10.1,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 1",
+          "property": "x",
+          "time": 11.37,
+          "value": 47.6,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 1",
+          "property": "x",
+          "time": 12.6,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 1",
+          "property": "x",
+          "time": 15,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 2",
+          "property": "y",
+          "time": 8,
+          "value": 160,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 2",
+          "property": "y",
+          "time": 8.83,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 2",
+          "property": "y",
+          "time": 10.1,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 2",
+          "property": "y",
+          "time": 11.44,
+          "value": 57,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 2",
+          "property": "y",
+          "time": 12.6,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 2",
+          "property": "y",
+          "time": 14.2,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 2",
+          "property": "y",
+          "time": 15,
+          "value": -60,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 2",
+          "property": "x",
+          "time": 8,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 2",
+          "property": "x",
+          "time": 10.1,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 2",
+          "property": "x",
+          "time": 11.44,
+          "value": 52.4,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 2",
+          "property": "x",
+          "time": 12.6,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 2",
+          "property": "x",
+          "time": 15,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 3",
+          "property": "y",
+          "time": 8,
+          "value": -60,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 3",
+          "property": "y",
+          "time": 8.92,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 3",
+          "property": "y",
+          "time": 10.1,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 3",
+          "property": "y",
+          "time": 11.51,
+          "value": 43,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 3",
+          "property": "y",
+          "time": 12.6,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 3",
+          "property": "y",
+          "time": 14.2,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 3",
+          "property": "y",
+          "time": 15,
+          "value": 160,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 3",
+          "property": "x",
+          "time": 8,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 3",
+          "property": "x",
+          "time": 10.1,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 3",
+          "property": "x",
+          "time": 11.51,
+          "value": 47.6,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 3",
+          "property": "x",
+          "time": 12.6,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 3",
+          "property": "x",
+          "time": 15,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 4",
+          "property": "y",
+          "time": 8,
+          "value": 160,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 4",
+          "property": "y",
+          "time": 9.01,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 4",
+          "property": "y",
+          "time": 10.1,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 4",
+          "property": "y",
+          "time": 11.58,
+          "value": 57,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 4",
+          "property": "y",
+          "time": 12.6,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 4",
+          "property": "y",
+          "time": 14.2,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 4",
+          "property": "y",
+          "time": 15,
+          "value": -60,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 4",
+          "property": "x",
+          "time": 8,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 4",
+          "property": "x",
+          "time": 10.1,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 4",
+          "property": "x",
+          "time": 11.58,
+          "value": 52.4,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 4",
+          "property": "x",
+          "time": 12.6,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 4",
+          "property": "x",
+          "time": 15,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 5",
+          "property": "y",
+          "time": 8,
+          "value": -60,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 5",
+          "property": "y",
+          "time": 9.1,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 5",
+          "property": "y",
+          "time": 10.1,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 5",
+          "property": "y",
+          "time": 11.65,
+          "value": 43,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 5",
+          "property": "y",
+          "time": 12.6,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 5",
+          "property": "y",
+          "time": 14.2,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 5",
+          "property": "y",
+          "time": 15,
+          "value": 160,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 5",
+          "property": "x",
+          "time": 8,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 5",
+          "property": "x",
+          "time": 10.1,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 5",
+          "property": "x",
+          "time": 11.65,
+          "value": 47.6,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 5",
+          "property": "x",
+          "time": 12.6,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / time slit 5",
+          "property": "x",
+          "time": 15,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0",
+          "property": "x",
+          "time": 15,
+          "value": 16,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0",
+          "property": "x",
+          "time": 15.8,
+          "value": 28,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0",
+          "property": "x",
+          "time": 17.7,
+          "value": 72,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0",
+          "property": "x",
+          "time": 19.4,
+          "value": 33,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0",
+          "property": "x",
+          "time": 21,
+          "value": 33,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0",
+          "property": "y",
+          "time": 15,
+          "value": 51,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0",
+          "property": "y",
+          "time": 15.8,
+          "value": 36,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0",
+          "property": "y",
+          "time": 17.7,
+          "value": 64,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0",
+          "property": "y",
+          "time": 19.4,
+          "value": 32,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0",
+          "property": "y",
+          "time": 21,
+          "value": 32,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0",
+          "property": "scale",
+          "time": 15,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0",
+          "property": "scale",
+          "time": 15.8,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0",
+          "property": "scale",
+          "time": 19.4,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0",
+          "property": "scale",
+          "time": 21,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0 ring",
+          "property": "x",
+          "time": 15,
+          "value": 16,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0 ring",
+          "property": "x",
+          "time": 15.8,
+          "value": 28,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0 ring",
+          "property": "x",
+          "time": 17.7,
+          "value": 72,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0 ring",
+          "property": "x",
+          "time": 19.4,
+          "value": 33,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0 ring",
+          "property": "x",
+          "time": 21,
+          "value": 33,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0 ring",
+          "property": "y",
+          "time": 15,
+          "value": 51,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0 ring",
+          "property": "y",
+          "time": 15.8,
+          "value": 36,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0 ring",
+          "property": "y",
+          "time": 17.7,
+          "value": 64,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0 ring",
+          "property": "y",
+          "time": 19.4,
+          "value": 32,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0 ring",
+          "property": "y",
+          "time": 21,
+          "value": 32,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0 ring",
+          "property": "scale",
+          "time": 15,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0 ring",
+          "property": "scale",
+          "time": 15.8,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0 ring",
+          "property": "scale",
+          "time": 19.4,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0 ring",
+          "property": "scale",
+          "time": 21,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0 ring",
+          "property": "strokeEnd",
+          "time": 15,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0 ring",
+          "property": "strokeEnd",
+          "time": 15.8,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0 ring",
+          "property": "strokeEnd",
+          "time": 20,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 0 ring",
+          "property": "strokeEnd",
+          "time": 21,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1",
+          "property": "x",
+          "time": 15,
+          "value": 62,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1",
+          "property": "x",
+          "time": 15.8,
+          "value": 74,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1",
+          "property": "x",
+          "time": 17.7,
+          "value": 26,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1",
+          "property": "x",
+          "time": 19.4,
+          "value": 79,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1",
+          "property": "x",
+          "time": 21,
+          "value": 79,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1",
+          "property": "y",
+          "time": 15,
+          "value": 78,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1",
+          "property": "y",
+          "time": 15.8,
+          "value": 63,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1",
+          "property": "y",
+          "time": 17.7,
+          "value": 37,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1",
+          "property": "y",
+          "time": 19.4,
+          "value": 59,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1",
+          "property": "y",
+          "time": 21,
+          "value": 59,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1",
+          "property": "scale",
+          "time": 15,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1",
+          "property": "scale",
+          "time": 15.8,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1",
+          "property": "scale",
+          "time": 19.4,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1",
+          "property": "scale",
+          "time": 21,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1 ring",
+          "property": "x",
+          "time": 15,
+          "value": 62,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1 ring",
+          "property": "x",
+          "time": 15.8,
+          "value": 74,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1 ring",
+          "property": "x",
+          "time": 17.7,
+          "value": 26,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1 ring",
+          "property": "x",
+          "time": 19.4,
+          "value": 79,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1 ring",
+          "property": "x",
+          "time": 21,
+          "value": 79,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1 ring",
+          "property": "y",
+          "time": 15,
+          "value": 78,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1 ring",
+          "property": "y",
+          "time": 15.8,
+          "value": 63,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1 ring",
+          "property": "y",
+          "time": 17.7,
+          "value": 37,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1 ring",
+          "property": "y",
+          "time": 19.4,
+          "value": 59,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1 ring",
+          "property": "y",
+          "time": 21,
+          "value": 59,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1 ring",
+          "property": "scale",
+          "time": 15,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1 ring",
+          "property": "scale",
+          "time": 15.8,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1 ring",
+          "property": "scale",
+          "time": 19.4,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1 ring",
+          "property": "scale",
+          "time": 21,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1 ring",
+          "property": "strokeEnd",
+          "time": 15,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1 ring",
+          "property": "strokeEnd",
+          "time": 15.8,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1 ring",
+          "property": "strokeEnd",
+          "time": 20,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / temporal lens 1 ring",
+          "property": "strokeEnd",
+          "time": 21,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 0",
+          "property": "scale",
+          "time": 21,
+          "value": 0.05,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 0",
+          "property": "scale",
+          "time": 21.4,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 0",
+          "property": "scale",
+          "time": 22.8,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 0",
+          "property": "scale",
+          "time": 23.4,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 0",
+          "property": "scale",
+          "time": 24,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 0",
+          "property": "rotation",
+          "time": 21,
+          "value": 25,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 0",
+          "property": "rotation",
+          "time": 21.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 0",
+          "property": "rotation",
+          "time": 23.2,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 0",
+          "property": "rotation",
+          "time": 24,
+          "value": 35,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 0",
+          "property": "opacity",
+          "time": 21,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 0",
+          "property": "opacity",
+          "time": 21.3,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 0",
+          "property": "opacity",
+          "time": 23.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 0",
+          "property": "opacity",
+          "time": 24,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 1",
+          "property": "scale",
+          "time": 21,
+          "value": 0.05,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 1",
+          "property": "scale",
+          "time": 21.52,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 1",
+          "property": "scale",
+          "time": 22.8,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 1",
+          "property": "scale",
+          "time": 23.4,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 1",
+          "property": "scale",
+          "time": 24,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 1",
+          "property": "rotation",
+          "time": 21,
+          "value": -25,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 1",
+          "property": "rotation",
+          "time": 21.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 1",
+          "property": "rotation",
+          "time": 23.2,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 1",
+          "property": "rotation",
+          "time": 24,
+          "value": -35,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 1",
+          "property": "opacity",
+          "time": 21,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 1",
+          "property": "opacity",
+          "time": 21.42,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 1",
+          "property": "opacity",
+          "time": 23.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 1",
+          "property": "opacity",
+          "time": 24,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 2",
+          "property": "scale",
+          "time": 21,
+          "value": 0.05,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 2",
+          "property": "scale",
+          "time": 21.64,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 2",
+          "property": "scale",
+          "time": 22.8,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 2",
+          "property": "scale",
+          "time": 23.4,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 2",
+          "property": "scale",
+          "time": 24,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 2",
+          "property": "rotation",
+          "time": 21,
+          "value": 25,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 2",
+          "property": "rotation",
+          "time": 21.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 2",
+          "property": "rotation",
+          "time": 23.2,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 2",
+          "property": "rotation",
+          "time": 24,
+          "value": 35,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 2",
+          "property": "opacity",
+          "time": 21,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 2",
+          "property": "opacity",
+          "time": 21.54,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 2",
+          "property": "opacity",
+          "time": 23.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 2",
+          "property": "opacity",
+          "time": 24,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 3",
+          "property": "scale",
+          "time": 21,
+          "value": 0.05,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 3",
+          "property": "scale",
+          "time": 21.76,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 3",
+          "property": "scale",
+          "time": 22.8,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 3",
+          "property": "scale",
+          "time": 23.4,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 3",
+          "property": "scale",
+          "time": 24,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 3",
+          "property": "rotation",
+          "time": 21,
+          "value": -25,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 3",
+          "property": "rotation",
+          "time": 21.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 3",
+          "property": "rotation",
+          "time": 23.2,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 3",
+          "property": "rotation",
+          "time": 24,
+          "value": -35,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 3",
+          "property": "opacity",
+          "time": 21,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 3",
+          "property": "opacity",
+          "time": 21.66,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 3",
+          "property": "opacity",
+          "time": 23.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        },
+        {
+          "targetId": "M / contact 3",
+          "property": "opacity",
+          "time": 24,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.2,
+            0.88,
+            0.25,
+            1
+          ]
+        }
+      ],
+      "groups": [],
+      "order": [
+        "M / paper",
+        "M / orbit card 0",
+        "M / orbit card 1",
+        "M / orbit card 2",
+        "M / red sweep",
+        "M / time slit 0",
+        "M / time slit 1",
+        "M / time slit 2",
+        "M / time slit 3",
+        "M / time slit 4",
+        "M / time slit 5",
+        "M / seated field",
+        "M / temporal lens 0",
+        "M / temporal lens 0 ring",
+        "M / temporal lens 1",
+        "M / temporal lens 1 ring",
+        "M / contact 0",
+        "M / contact 1",
+        "M / contact 2",
+        "M / contact 3"
+      ]
+    }
+  }
+}

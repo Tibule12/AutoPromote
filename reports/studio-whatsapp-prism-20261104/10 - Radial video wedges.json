@@ -1,0 +1,985 @@
+{
+  "name": "Radial video wedges",
+  "actions": [
+    {
+      "type": "media_plane",
+      "id": "P / prism image 0",
+      "name": "P / prism image 0",
+      "sourceMediaId": "Close",
+      "sourceStart": 0,
+      "startTime": 3,
+      "duration": 6,
+      "mediaFit": "cover",
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      },
+      "mask": {
+        "enabled": true,
+        "shape": "polygon",
+        "path": "polygon(21.875% 0%,78.125% 0%,50% 50%)",
+        "feather": 0,
+        "inverted": false
+      }
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 0",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 3,
+          "value": 38,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 3.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 5.6,
+          "value": 22,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 7.3,
+          "value": -16,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 8.6,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 9,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 0",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 3,
+          "value": 0.6428571,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3.8,
+          "value": 1.4285714,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.2,
+          "value": 1.5714286,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 7.3,
+          "value": 1.4285714,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 8.6,
+          "value": 2.3571429,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 9,
+          "value": 2.3571429,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 0",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 3.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 7.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.65,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 9,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "media_plane",
+      "id": "P / prism image 1",
+      "name": "P / prism image 1",
+      "sourceMediaId": "Close",
+      "sourceStart": 0,
+      "startTime": 3,
+      "duration": 6,
+      "mediaFit": "cover",
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      },
+      "mask": {
+        "enabled": true,
+        "shape": "polygon",
+        "path": "polygon(21.875% 0%,78.125% 0%,50% 50%)",
+        "feather": 0,
+        "inverted": false
+      }
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 1",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 3,
+          "value": 128,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 3.8,
+          "value": 90,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 5.6,
+          "value": 112,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 7.3,
+          "value": 74,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 8.6,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 9,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 1",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 3,
+          "value": 0.6428571,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3.8,
+          "value": 1.4285714,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.2,
+          "value": 1.5714286,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 7.3,
+          "value": 1.4285714,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 8.6,
+          "value": 2.3571429,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 9,
+          "value": 2.3571429,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 1",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 3.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 7.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.65,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 9,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "media_plane",
+      "id": "P / prism image 2",
+      "name": "P / prism image 2",
+      "sourceMediaId": "Close",
+      "sourceStart": 0,
+      "startTime": 3,
+      "duration": 6,
+      "mediaFit": "cover",
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      },
+      "mask": {
+        "enabled": true,
+        "shape": "polygon",
+        "path": "polygon(21.875% 0%,78.125% 0%,50% 50%)",
+        "feather": 0,
+        "inverted": false
+      }
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 2",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 3,
+          "value": 218,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 3.8,
+          "value": 180,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 5.6,
+          "value": 202,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 7.3,
+          "value": 164,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 8.6,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 9,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 2",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 3,
+          "value": 0.6428571,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3.8,
+          "value": 1.4285714,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.2,
+          "value": 1.5714286,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 7.3,
+          "value": 1.4285714,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 8.6,
+          "value": 2.3571429,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 9,
+          "value": 2.3571429,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 2",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 3.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 7.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.65,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 9,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "media_plane",
+      "id": "P / prism image 3",
+      "name": "P / prism image 3",
+      "sourceMediaId": "Close",
+      "sourceStart": 0,
+      "startTime": 3,
+      "duration": 6,
+      "mediaFit": "cover",
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      },
+      "mask": {
+        "enabled": true,
+        "shape": "polygon",
+        "path": "polygon(21.875% 0%,78.125% 0%,50% 50%)",
+        "feather": 0,
+        "inverted": false
+      }
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 3",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 3,
+          "value": 308,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 3.8,
+          "value": 270,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 5.6,
+          "value": 292,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 7.3,
+          "value": 254,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 8.6,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 9,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 3",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 3,
+          "value": 0.6428571,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3.8,
+          "value": 1.4285714,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.2,
+          "value": 1.5714286,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 7.3,
+          "value": 1.4285714,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 8.6,
+          "value": 2.3571429,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 9,
+          "value": 2.3571429,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "P / prism image 3",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 3.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 7.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.65,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 9,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.85,
+            0.24,
+            1
+          ]
+        }
+      ]
+    }
+  ]
+}

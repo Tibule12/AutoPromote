@@ -1,0 +1,13 @@
+{
+  "addedTextLayers": 0,
+  "captionSegments": 0,
+  "originalSpeechMutedInNativeProject": true,
+  "nativeWatermark": false,
+  "sourceWriting": "Computer screen and clothing retain writing already present in the original footage.",
+  "cachedInputMaskSha256": {
+    "Portrait mask.mp4": "f77fe8cedbd074c359c3990cef471bc4a9cfa972b4c24d059b48654af4cc402e",
+    "Seated mask.mp4": "78823cd24b096479fdb6b5de333226702041235e365c750f4b756eec187b939d"
+  },
+  "screenFitCorrectedInNativeUi": true,
+  "paidCalls": 0
+}

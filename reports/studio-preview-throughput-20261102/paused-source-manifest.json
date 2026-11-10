@@ -1,0 +1,35 @@
+{
+  "build": "/tmp/autopromote-application-demo-5izIlF/build-paused-presenter-20261102",
+  "mainAsset": "/static/js/main.1168fc9c.js",
+  "mainSha256": "0de7fb5b650919ae8aafab6de1047ac48ab209e81b0f863bf0eb5b2ca7c0ecc3",
+  "sources": [
+    {
+      "file": "frontend/src/components/ViralClipStudio.js",
+      "sha256": "e37d52343f93c4979ccd54cbdfdb8679cf7f369a66ed39f73c2a6a7d3612f249"
+    },
+    {
+      "file": "frontend/src/components/studioPerspective.js",
+      "sha256": "977f5e8deda7e1fc40bb22fdc8b7c871d62bb74ae92347e8d5742b9ef79cd095"
+    },
+    {
+      "file": "frontend/src/components/StudioSceneActionsPanel.js",
+      "sha256": "4d831bdecca7f65955097b0a6976e82701246c09964a363b7d6b0264eceb88fe"
+    },
+    {
+      "file": "frontend/src/components/StudioProgrammeFrame.js",
+      "sha256": "4410ef3a018db563a4f03259b4c192ac24b6c16402d5f7c9df12a9e57e61667f"
+    },
+    {
+      "file": "frontend/src/components/studioSharedOverlayFrame.js",
+      "sha256": "581c7ed0459eeee9838d9108aeca5e646ce53f8069807ae161cafb4bf73c45fe"
+    },
+    {
+      "file": "frontend/src/components/audio/audioRemixPreview.js",
+      "sha256": "24f2ab2f5fa315f66bac818561f9c6daca788caf9a9bbb78f0479bd0fd73b5c4"
+    },
+    {
+      "file": "src/generated/studioDirectorReplayKernel.cjs",
+      "sha256": "b01bed952b330192eaf62e96b78de778005aaf02b347d4192d5a9de83333b493"
+    }
+  ]
+}

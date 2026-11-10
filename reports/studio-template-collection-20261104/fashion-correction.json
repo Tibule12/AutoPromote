@@ -1,0 +1,7 @@
+{
+  "issue": "Outgoing cards leave the canvas before the incoming portrait is sufficiently revealed.",
+  "firstNativeMovieRetained": true,
+  "repair": "Hold the cards until the final reveal begins; preserve full portrait in the final shot.",
+  "additionalLocalCorrectiveExport": 1,
+  "paidCalls": 0
+}

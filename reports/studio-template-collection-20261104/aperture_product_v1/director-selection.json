@@ -1,0 +1,7 @@
+{
+  "template": "aperture_product_v1",
+  "review": "aperture_product_v1 · 1.0.0\n\nA mechanical live-video aperture, calibrated vector traces and a full-frame macro payoff. Uses one saved source and ordinary editable Studio layers. No model job.\n\nUses your saved inputs. No model job is started.Apply Director launchDismiss selection",
+  "normalFrontend": true,
+  "visualInference": false,
+  "modelCalls": 0
+}

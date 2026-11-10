@@ -1,0 +1,16 @@
+{
+  "projectId": "viral-project-6e10e9c7-d552-45a6-8265-c02ba11c914f",
+  "projectHash": "73af29298fe68f48432c5278111daa2a1252d63c73c1ede52c3cc0a06c212cb4",
+  "movieSha256": "b415639d9d43b47fba0f6f4019728100653e9744c898da770e5cf87cd63af48f",
+  "jobId": "viral_c45f5982b3722585c3f4ae2792d68ac8f158d45e45fe48951c8f63788e7a743f",
+  "executionId": "481521160bf149e94b00e46d0d1b31043caaf93aacf6aa3457ecf613bac2c61a",
+  "nativeBackupMatchesRenderedDocument": true,
+  "compiledCompositionMatchesSubmitted": true,
+  "workerArtifactMatchesNativeDownload": true,
+  "templateRef": {
+    "templateId": "editorial_fan_v1",
+    "version": "1.0.1",
+    "definitionHash": "9db56864f45ec81d6217904ef1edac7ba5eccc5c8ff02e14a2efad47dfd735c5"
+  },
+  "actualNativeDownload": true
+}

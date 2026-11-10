@@ -1,0 +1,15 @@
+{
+  "executionId": "2a167af04ef0233d056905039a8d80107e8f161312a2b73e0b0e999c238f0de4",
+  "wallSeconds": 531.7979587780137,
+  "cpuSeconds": 981.518362,
+  "peakRssKiB": 637884,
+  "providerChargesStarted": false,
+  "invoiceCostMicros": null,
+  "termination": {
+    "code": 0,
+    "signal": null,
+    "startedAt": "2026-11-03T16:59:43.458Z",
+    "finishedAt": "2026-11-03T17:08:35.613Z"
+  },
+  "artifactMatchesNativeMovie": true
+}
