@@ -1,0 +1,14 @@
+{
+  "playback": {
+    "duration": 12.417,
+    "time": 12.417,
+    "ended": true,
+    "width": 1920,
+    "height": 1080,
+    "playbackRate": 1,
+    "decodedFrames": 309
+  },
+  "recordedFrames": 409,
+  "playingAt": 1793351442.45,
+  "decodedBefore": 15
+}

@@ -1,0 +1,34 @@
+[
+  {
+    "file": "python_media_worker/studio_vfx_plan.py",
+    "sha256": "f0e1fa00ab9e5215cbc71085d8e939f0426eaf50d457967c85f8aed37c5502b6"
+  },
+  {
+    "file": "python_media_worker/test_studio_vfx_plan.py",
+    "sha256": "7b191d42c7d0d09bb139a32d17fb1aaf59df6a43a23da55140a79a1d2f50f297"
+  },
+  {
+    "file": "frontend/src/components/studioSubjectVfxContract.js",
+    "sha256": "2714359836c692c8eecf879e914b62fc84a0ec475db9621ef034b095cc37d261"
+  },
+  {
+    "file": "frontend/src/components/StudioSubjectVfxPanel.js",
+    "sha256": "02cd33d5a966e648f6be341c35911ebf95915831dfe421f126c0899b29cabcc9"
+  },
+  {
+    "file": "frontend/src/components/VideoEditor.js",
+    "sha256": "42fc35124a42363f97e7d55b22c69601ae4da0c31f5f689fc2763f2d9e378916"
+  },
+  {
+    "file": "frontend/src/components/__tests__/studioSubjectVfxContract.test.js",
+    "sha256": "8033607ad5da926b8fdbc25471dbe04d4a55d22ffb54ee180ca614ccf43638f9"
+  },
+  {
+    "file": "frontend/src/components/__tests__/StudioSubjectVfxPanel.test.js",
+    "sha256": "92674ceeec6f3098210aab05a17ed6e6e45f3d8d782a1d7f03f5733b898b5aa1"
+  },
+  {
+    "file": "frontend/src/components/__tests__/VideoEditor.viralRenderRecovery.test.js",
+    "sha256": "69d9cfa59fa6409b1ebf4e06fdca1a421f44d3d33afaba0ec2f3951c94343211"
+  }
+]

@@ -1,0 +1,419 @@
+{
+  "date": "2026-10-31",
+  "timezone": "Africa/Johannesburg",
+  "account": "Owner-authenticated AutoPromote account; same identity independently confirmed against live profile",
+  "service": "https://api.autopromote.org",
+  "method": "Normal authenticated Publisher review/submit and ordinary Queue with All schedules. No direct database mutation or API schedule seeding.",
+  "confirmedDestinationSchedules": 35,
+  "confirmedVideos": 7,
+  "platforms": ["tiktok", "facebook", "youtube", "reddit", "linkedin"],
+  "instagramScheduled": false,
+  "releases": [
+    {
+      "kind": "studio",
+      "title": "One podcast. Three backgrounds. Here is the Studio edit.",
+      "localTime": "2026-11-02 18:00 SAST",
+      "scheduledAt": "2026-11-02T16:00:00.000Z",
+      "contentId": "YOw2tY2s6lCsBM8JtFtJ",
+      "mediaSha256": "c237f18b03925b1cf17b7ae54d9a2d2bd14b5b2c8c9a7b5c8ccd058ed3134383",
+      "copyVerifiedInReview": true,
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "schedules": [
+        {
+          "id": "VXD2fzbYpokbD7NVsI0C",
+          "contentId": "YOw2tY2s6lCsBM8JtFtJ",
+          "platform": "tiktok",
+          "startTime": "2026-11-02T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "Uw4RcEYCkWhhO9IKpibm",
+          "contentId": "YOw2tY2s6lCsBM8JtFtJ",
+          "platform": "linkedin",
+          "startTime": "2026-11-02T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "ROY42aYWvd26hAHwxxI4",
+          "contentId": "YOw2tY2s6lCsBM8JtFtJ",
+          "platform": "facebook",
+          "startTime": "2026-11-02T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "PaPwhOsl4ynX6sGV9xi1",
+          "contentId": "YOw2tY2s6lCsBM8JtFtJ",
+          "platform": "reddit",
+          "startTime": "2026-11-02T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "7VIvxHW9uvyFqWm9JCDG",
+          "contentId": "YOw2tY2s6lCsBM8JtFtJ",
+          "platform": "youtube",
+          "startTime": "2026-11-02T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ]
+    },
+    {
+      "kind": "cool-acoustic.compare",
+      "title": "Same podcast, a different setting | Cool Acoustic before and after",
+      "localTime": "2026-11-03 18:00 SAST",
+      "scheduledAt": "2026-11-03T16:00:00.000Z",
+      "contentId": "TpYqJ6ouydBImT3Ac5LT",
+      "mediaSha256": "f6deab475b83c2f0ff5a26d655491c6e3947a3267db662092646a191bd7173e4",
+      "copyVerifiedInReview": true,
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "schedules": [
+        {
+          "id": "mVYg6q4ijMoKs1D1ohiF",
+          "contentId": "TpYqJ6ouydBImT3Ac5LT",
+          "platform": "tiktok",
+          "startTime": "2026-11-03T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "haHiqZy1juSR8airseF8",
+          "contentId": "TpYqJ6ouydBImT3Ac5LT",
+          "platform": "linkedin",
+          "startTime": "2026-11-03T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "c7ItprpKgGT64TpGZZsg",
+          "contentId": "TpYqJ6ouydBImT3Ac5LT",
+          "platform": "reddit",
+          "startTime": "2026-11-03T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "NWfuSfv7V1CvaBzORFLQ",
+          "contentId": "TpYqJ6ouydBImT3Ac5LT",
+          "platform": "youtube",
+          "startTime": "2026-11-03T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "Ix5wXuWDpFC6BqUbDjeS",
+          "contentId": "TpYqJ6ouydBImT3Ac5LT",
+          "platform": "facebook",
+          "startTime": "2026-11-03T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ]
+    },
+    {
+      "kind": "cool-acoustic.after",
+      "title": "Change the room. Keep the conversation. | Cool Acoustic",
+      "localTime": "2026-11-04 18:00 SAST",
+      "scheduledAt": "2026-11-04T16:00:00.000Z",
+      "contentId": "k9MejBrT6zMqCjfOrPbM",
+      "mediaSha256": "a888cc61e3463d1fa5c0b434384ffd4ca41a71981d06a56a0c8b6f062ef4a38b",
+      "copyVerifiedInReview": true,
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "schedules": [
+        {
+          "id": "O6oJvsH1lelos08XYsaF",
+          "contentId": "k9MejBrT6zMqCjfOrPbM",
+          "platform": "tiktok",
+          "startTime": "2026-11-04T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "KvNQVoK3OosvUfE4teKm",
+          "contentId": "k9MejBrT6zMqCjfOrPbM",
+          "platform": "facebook",
+          "startTime": "2026-11-04T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "JDRwgyv6dS8jlWz4w7Vk",
+          "contentId": "k9MejBrT6zMqCjfOrPbM",
+          "platform": "linkedin",
+          "startTime": "2026-11-04T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "CJE5Kb6r7yS1ndhIcIVV",
+          "contentId": "k9MejBrT6zMqCjfOrPbM",
+          "platform": "youtube",
+          "startTime": "2026-11-04T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "9xMrb6lTsnGBX1dhAsEu",
+          "contentId": "k9MejBrT6zMqCjfOrPbM",
+          "platform": "reddit",
+          "startTime": "2026-11-04T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ]
+    },
+    {
+      "kind": "warm-walnut.compare",
+      "title": "Same podcast, a different setting | Warm Walnut before and after",
+      "localTime": "2026-11-05 18:00 SAST",
+      "scheduledAt": "2026-11-05T16:00:00.000Z",
+      "contentId": "jxH8ReVcfRd5C79P6rp4",
+      "mediaSha256": "397b84aa31966b5fac9a1f0dced3babd2e61cfbef8dbc4c9277a9a624ad07836",
+      "copyVerifiedInReview": true,
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "schedules": [
+        {
+          "id": "wH55jAvPAdRPYOq7VozI",
+          "contentId": "jxH8ReVcfRd5C79P6rp4",
+          "platform": "reddit",
+          "startTime": "2026-11-05T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "TplA5oSzOQoT431FaEAu",
+          "contentId": "jxH8ReVcfRd5C79P6rp4",
+          "platform": "facebook",
+          "startTime": "2026-11-05T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "SDMfBHJDPhx5CPcYcj0U",
+          "contentId": "jxH8ReVcfRd5C79P6rp4",
+          "platform": "linkedin",
+          "startTime": "2026-11-05T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "RlprGRL8q46Af285lNqj",
+          "contentId": "jxH8ReVcfRd5C79P6rp4",
+          "platform": "tiktok",
+          "startTime": "2026-11-05T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "9VqKrFHTVdAozylbmDXs",
+          "contentId": "jxH8ReVcfRd5C79P6rp4",
+          "platform": "youtube",
+          "startTime": "2026-11-05T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ]
+    },
+    {
+      "kind": "warm-walnut.after",
+      "title": "Change the room. Keep the conversation. | Warm Walnut",
+      "localTime": "2026-11-06 18:00 SAST",
+      "scheduledAt": "2026-11-06T16:00:00.000Z",
+      "contentId": "UB0yt8wrl3dPFY0syNsJ",
+      "mediaSha256": "e4afff5a3e79771daf38aba9c3712d5e59cc2000e838003b83e57914347eefce",
+      "copyVerifiedInReview": true,
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "schedules": [
+        {
+          "id": "Wn8Sa8og140wVXQScEYx",
+          "contentId": "UB0yt8wrl3dPFY0syNsJ",
+          "platform": "tiktok",
+          "startTime": "2026-11-06T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "P6K2SKh9MnY9yS3iVIMW",
+          "contentId": "UB0yt8wrl3dPFY0syNsJ",
+          "platform": "linkedin",
+          "startTime": "2026-11-06T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "LX5qFpaR8iMWu9hS8qvA",
+          "contentId": "UB0yt8wrl3dPFY0syNsJ",
+          "platform": "facebook",
+          "startTime": "2026-11-06T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "JbjYUKxEZW9v8mmAMdqI",
+          "contentId": "UB0yt8wrl3dPFY0syNsJ",
+          "platform": "youtube",
+          "startTime": "2026-11-06T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "2HRGqsqThnfn5j6KYW5O",
+          "contentId": "UB0yt8wrl3dPFY0syNsJ",
+          "platform": "reddit",
+          "startTime": "2026-11-06T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ]
+    },
+    {
+      "kind": "neutral-gallery.compare",
+      "title": "Same podcast, a different setting | Neutral Gallery before and after",
+      "localTime": "2026-11-07 18:00 SAST",
+      "scheduledAt": "2026-11-07T16:00:00.000Z",
+      "contentId": "Dya6VHwijup7rE74s9Rc",
+      "mediaSha256": "47f32bf396639fde08229af04d8335bf25d54cfcbeba0db51f0ae55556261f47",
+      "copyVerifiedInReview": true,
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "schedules": [
+        {
+          "id": "vr5qDlv19o62QK6KNmKG",
+          "contentId": "Dya6VHwijup7rE74s9Rc",
+          "platform": "tiktok",
+          "startTime": "2026-11-07T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "c1YAGOF3K002lnOqNY1U",
+          "contentId": "Dya6VHwijup7rE74s9Rc",
+          "platform": "youtube",
+          "startTime": "2026-11-07T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "ZrqFFAaprHPMJCIUTDdT",
+          "contentId": "Dya6VHwijup7rE74s9Rc",
+          "platform": "facebook",
+          "startTime": "2026-11-07T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "CZw5qL9Hc8foq9lQsLuo",
+          "contentId": "Dya6VHwijup7rE74s9Rc",
+          "platform": "linkedin",
+          "startTime": "2026-11-07T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "6UojBkc61x3RQNxTRzOR",
+          "contentId": "Dya6VHwijup7rE74s9Rc",
+          "platform": "reddit",
+          "startTime": "2026-11-07T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ]
+    },
+    {
+      "kind": "neutral-gallery.after",
+      "title": "Change the room. Keep the conversation. | Neutral Gallery",
+      "localTime": "2026-11-08 18:00 SAST",
+      "scheduledAt": "2026-11-08T16:00:00.000Z",
+      "contentId": "daeAD1x2ZbALsFK3EAZf",
+      "mediaSha256": "da2d54e0e576f01feb698a146c35230ba59ff70da7582408398e56d732424d45",
+      "copyVerifiedInReview": true,
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "schedules": [
+        {
+          "id": "fYmCazYjc1WuGYi59DJ4",
+          "contentId": "daeAD1x2ZbALsFK3EAZf",
+          "platform": "youtube",
+          "startTime": "2026-11-08T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "MHxMLf1kVsydv2aWaQT2",
+          "contentId": "daeAD1x2ZbALsFK3EAZf",
+          "platform": "reddit",
+          "startTime": "2026-11-08T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "ChTf0x8C50BTBsxWjsce",
+          "contentId": "daeAD1x2ZbALsFK3EAZf",
+          "platform": "tiktok",
+          "startTime": "2026-11-08T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "9ZGlptp6DB1aNzWJ2uoY",
+          "contentId": "daeAD1x2ZbALsFK3EAZf",
+          "platform": "linkedin",
+          "startTime": "2026-11-08T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        },
+        {
+          "id": "43P3G5uo319VeuMDgZqp",
+          "contentId": "daeAD1x2ZbALsFK3EAZf",
+          "platform": "facebook",
+          "startTime": "2026-11-08T16:00:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ]
+    }
+  ],
+  "duplicateSchedules": 0,
+  "publicationConfirmed": false,
+  "liveReadinessAllowed": true,
+  "initialLocalLimitDenialResolved": true,
+  "subscriptionOrCreditChange": false,
+  "productionDeployment": false,
+  "mainMerge": false
+}

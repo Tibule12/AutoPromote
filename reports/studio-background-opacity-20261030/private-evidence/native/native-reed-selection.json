@@ -1,0 +1,12 @@
+{
+  "projectId": "viral-project-22f0e2ba-14fd-4309-a097-f1adef3b0abd",
+  "retainedSourcePatches": 4,
+  "changedHostPatches": [
+    2,
+    3
+  ],
+  "removedProtectedReedPathsPerPatch": 3,
+  "sourceTargetGeometryPreserved": true,
+  "guestSceneExact": true,
+  "immutableMaskRefExact": true
+}

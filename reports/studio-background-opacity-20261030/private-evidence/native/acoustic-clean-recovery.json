@@ -1,0 +1,15 @@
+{
+  "createdAt": "2026-10-30T09:10:31.566Z",
+  "projectId": "viral-project-22f0e2ba-14fd-4309-a097-f1adef3b0abd",
+  "canonicalHash": "5ac7b7be4214970e79825fd2042053d383bce0b1b68dc7208bc62a0360a0eb18",
+  "nativeColdReopen": true,
+  "clips": 2,
+  "graphics": 5,
+  "soundCues": 2,
+  "templateRef": {
+    "templateId": "podcast_set_dialogue_v1",
+    "version": "1.2.0",
+    "definitionHash": "fb92757f2f7a47d1030e1bef74a880bcfbacd9bd80b7b5356b30603015fed1e5"
+  },
+  "noMocks": true
+}

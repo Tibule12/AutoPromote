@@ -1,0 +1,13 @@
+{
+  "changedFields": [
+    "orderedClips/0/url",
+    "orderedClips/1/url",
+    "soundEffects/0/url",
+    "soundEffects/1/url",
+    "musicTrack/url",
+    "timeline/0/url",
+    "timeline/1/url"
+  ],
+  "onlyMediaAccessAddressesChanged": true,
+  "programmeEditsRetained": true
+}

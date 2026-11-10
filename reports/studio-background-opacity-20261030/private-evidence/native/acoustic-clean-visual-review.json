@@ -1,0 +1,14 @@
+{
+  "canonicalHash": "5ac7b7be4214970e79825fd2042053d383bce0b1b68dc7208bc62a0360a0eb18",
+  "shots": [
+    "ece24adb7aa2d6acd0e05059284562c10b3f5dc97932a7a1497047696b8820ba",
+    "2b86fd71323c2c616a9bdbb318f8643fbd77e2283d4c49390e1c5f5e0fcd42b7"
+  ],
+  "acceptedForPrivateExport": true,
+  "reviewScope": "All 208 corrected host rig frames, prior all-frame full-shot review and unchanged 90-frame guest sequence. Complete master review follows export.",
+  "changesObserved": "Pale reed protection fragment removed; both rods remain continuous, with table/couch/people and guest unchanged by this object repair.",
+  "professionalQualification": false,
+  "ownerCreativeApproval": false,
+  "priorCanonicalHash": "53ea35101378a2aefcb0e9bebc8097553ea196b4525eaa28ed2078d479005d8d",
+  "reboundForOwnedMediaAccessRefresh": true
+}

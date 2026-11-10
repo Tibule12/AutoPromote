@@ -1,0 +1,146 @@
+[
+  {
+    "time": 0.021999,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 3,
+    "error": null
+  },
+  {
+    "time": 0.794563,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 1.31517,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 1.823976,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 2.339251,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 2.861314,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 3.373071,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 3.885069,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 4.395188,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 4.90699,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 5.418604,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 5.93331,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 6.443946,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 6.958357,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 7.468364,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 7.982125,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 8.495951,
+    "duration": 8.666667,
+    "ended": false,
+    "paused": false,
+    "ready": 4,
+    "error": null
+  },
+  {
+    "time": 8.666667,
+    "duration": 8.666667,
+    "ended": true,
+    "paused": true,
+    "ready": 4,
+    "error": null
+  }
+]

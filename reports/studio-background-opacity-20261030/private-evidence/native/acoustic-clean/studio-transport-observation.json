@@ -1,0 +1,1346 @@
+[
+  {
+    "type": "initial",
+    "wallMs": 18682.099999964237,
+    "time": 0,
+    "paused": true,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 0,
+    "playbackRate": 1,
+    "totalFrames": 15,
+    "droppedFrames": 1,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 18932.399999976158,
+    "time": 0,
+    "paused": true,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 0,
+    "playbackRate": 1,
+    "totalFrames": 15,
+    "droppedFrames": 1,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "playing",
+    "wallMs": 19058.80000001192,
+    "time": 0.016146,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 0.015915,
+    "playbackRate": 1,
+    "totalFrames": 15,
+    "droppedFrames": 1,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 19192.599999964237,
+    "time": 0.075615,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 0.075132,
+    "playbackRate": 1,
+    "totalFrames": 17,
+    "droppedFrames": 1,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 19436.69999998808,
+    "time": 0.319495,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 0.31919,
+    "playbackRate": 1,
+    "totalFrames": 22,
+    "droppedFrames": 2,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 19698.30000001192,
+    "time": 0.580901,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 0.580402,
+    "playbackRate": 1,
+    "totalFrames": 28,
+    "droppedFrames": 3,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 19935.19999998808,
+    "time": 0.817467,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 0.817171,
+    "playbackRate": 1,
+    "totalFrames": 34,
+    "droppedFrames": 4,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 20191.30000001192,
+    "time": 1.073496,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 1.073222,
+    "playbackRate": 1,
+    "totalFrames": 40,
+    "droppedFrames": 4,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 20465,
+    "time": 1.350905,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 1.345791,
+    "playbackRate": 1,
+    "totalFrames": 47,
+    "droppedFrames": 6,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 20682.399999976158,
+    "time": 1.568532,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 1.562225,
+    "playbackRate": 1,
+    "totalFrames": 52,
+    "droppedFrames": 7,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 20964.599999964237,
+    "time": 1.850569,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 1.838185,
+    "playbackRate": 1,
+    "totalFrames": 59,
+    "droppedFrames": 8,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 21189.899999976158,
+    "time": 2.075874,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 2.07568,
+    "playbackRate": 1,
+    "totalFrames": 64,
+    "droppedFrames": 9,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 21436.19999998808,
+    "time": 2.321982,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 2.321787,
+    "playbackRate": 1,
+    "totalFrames": 70,
+    "droppedFrames": 9,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 21691.19999998808,
+    "time": 2.576883,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 2.576616,
+    "playbackRate": 1,
+    "totalFrames": 76,
+    "droppedFrames": 9,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 21932.399999976158,
+    "time": 2.81697,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 2.810787,
+    "playbackRate": 1,
+    "totalFrames": 82,
+    "droppedFrames": 12,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 22187.399999976158,
+    "time": 3.071798,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 3.071479,
+    "playbackRate": 1,
+    "totalFrames": 88,
+    "droppedFrames": 14,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 22434.5,
+    "time": 3.318917,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 3.318573,
+    "playbackRate": 1,
+    "totalFrames": 94,
+    "droppedFrames": 15,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 22774.5,
+    "time": 3.658794,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 3.658576,
+    "playbackRate": 1,
+    "totalFrames": 102,
+    "droppedFrames": 18,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 22998.599999964237,
+    "time": 3.88285,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 3.882565,
+    "playbackRate": 1,
+    "totalFrames": 108,
+    "droppedFrames": 21,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 23186.80000001192,
+    "time": 4.070883,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 4.070536,
+    "playbackRate": 1,
+    "totalFrames": 112,
+    "droppedFrames": 21,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 23452.80000001192,
+    "time": 4.337648,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 4.330893,
+    "playbackRate": 1,
+    "totalFrames": 118,
+    "droppedFrames": 23,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 23765.80000001192,
+    "time": 4.650739,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 4.644917,
+    "playbackRate": 1,
+    "totalFrames": 127,
+    "droppedFrames": 28,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 23961.899999976158,
+    "time": 4.846743,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 4.840852,
+    "playbackRate": 1,
+    "totalFrames": 131,
+    "droppedFrames": 28,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 24223,
+    "time": 5.107706,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 5.099188,
+    "playbackRate": 1,
+    "totalFrames": 137,
+    "droppedFrames": 29,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 24441.19999998808,
+    "time": 5.325933,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 5.325756,
+    "playbackRate": 1,
+    "totalFrames": 142,
+    "droppedFrames": 30,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 24682.30000001192,
+    "time": 5.566976,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 5.564187,
+    "playbackRate": 1,
+    "totalFrames": 148,
+    "droppedFrames": 30,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 24932.30000001192,
+    "time": 5.819152,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 5.812316,
+    "playbackRate": 1,
+    "totalFrames": 154,
+    "droppedFrames": 31,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 25182.5,
+    "time": 6.069354,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 6.0526,
+    "playbackRate": 1,
+    "totalFrames": 160,
+    "droppedFrames": 33,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 25469.399999976158,
+    "time": 6.356277,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 6.348194,
+    "playbackRate": 1,
+    "totalFrames": 167,
+    "droppedFrames": 35,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 25727.099999964237,
+    "time": 6.61404,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 6.605932,
+    "playbackRate": 1,
+    "totalFrames": 173,
+    "droppedFrames": 36,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 25976.80000001192,
+    "time": 6.863045,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 6.858529,
+    "playbackRate": 1,
+    "totalFrames": 179,
+    "droppedFrames": 37,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 26190.69999998808,
+    "time": 7.077478,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 7.071309,
+    "playbackRate": 1,
+    "totalFrames": 184,
+    "droppedFrames": 38,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 26468.899999976158,
+    "time": 7.353719,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 7.343394,
+    "playbackRate": 1,
+    "totalFrames": 191,
+    "droppedFrames": 39,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 26718.399999976158,
+    "time": 7.602907,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 7.59473,
+    "playbackRate": 1,
+    "totalFrames": 196,
+    "droppedFrames": 40,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 26937.099999964237,
+    "time": 7.821785,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 7.821509,
+    "playbackRate": 1,
+    "totalFrames": 202,
+    "droppedFrames": 42,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 27207.19999998808,
+    "time": 8.091942,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 8.086377,
+    "playbackRate": 1,
+    "totalFrames": 209,
+    "droppedFrames": 42,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 27432.399999976158,
+    "time": 8.31697,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 8.303251,
+    "playbackRate": 1,
+    "totalFrames": 214,
+    "droppedFrames": 42,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 27730,
+    "time": 8.614543,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 8.609558,
+    "playbackRate": 1,
+    "totalFrames": 221,
+    "droppedFrames": 45,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 27932.399999976158,
+    "time": 8.817065,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 8.812669,
+    "playbackRate": 1,
+    "totalFrames": 226,
+    "droppedFrames": 47,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 28182.399999976158,
+    "time": 9.066944,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 9.06171,
+    "playbackRate": 1,
+    "totalFrames": 232,
+    "droppedFrames": 49,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 28554.30000001192,
+    "time": 9.438828,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 9.373732,
+    "playbackRate": 1,
+    "totalFrames": 241,
+    "droppedFrames": 52,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 28724.599999964237,
+    "time": 9.609039,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 9.603432,
+    "playbackRate": 1,
+    "totalFrames": 245,
+    "droppedFrames": 54,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 28944.399999976158,
+    "time": 9.828818,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 9.823089,
+    "playbackRate": 1,
+    "totalFrames": 250,
+    "droppedFrames": 56,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 29186.30000001192,
+    "time": 10.07057,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 10.070248,
+    "playbackRate": 1,
+    "totalFrames": 256,
+    "droppedFrames": 58,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 29474.099999964237,
+    "time": 10.360241,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 10.356064,
+    "playbackRate": 1,
+    "totalFrames": 263,
+    "droppedFrames": 59,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 29682.399999976158,
+    "time": 10.568574,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 10.560302,
+    "playbackRate": 1,
+    "totalFrames": 268,
+    "droppedFrames": 60,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 29935.599999964237,
+    "time": 10.821733,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 10.821054,
+    "playbackRate": 1,
+    "totalFrames": 274,
+    "droppedFrames": 61,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 30182.399999976158,
+    "time": 11.068521,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 11.057738,
+    "playbackRate": 1,
+    "totalFrames": 280,
+    "droppedFrames": 63,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 30432.399999976158,
+    "time": 11.318479,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 11.315786,
+    "playbackRate": 1,
+    "totalFrames": 286,
+    "droppedFrames": 65,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 30686.099999964237,
+    "time": 11.572232,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 11.571962,
+    "playbackRate": 1,
+    "totalFrames": 292,
+    "droppedFrames": 65,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 30932.399999976158,
+    "time": 11.816321,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 11.806838,
+    "playbackRate": 1,
+    "totalFrames": 298,
+    "droppedFrames": 67,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 31182.399999976158,
+    "time": 12.066236,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 12.055976,
+    "playbackRate": 1,
+    "totalFrames": 304,
+    "droppedFrames": 69,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "clock",
+    "wallMs": 31447.899999976158,
+    "time": 12.33173,
+    "paused": false,
+    "ended": false,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 12.331554,
+    "playbackRate": 1,
+    "totalFrames": 309,
+    "droppedFrames": 70,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "pause",
+    "wallMs": 31580.69999998808,
+    "time": 12.417,
+    "paused": true,
+    "ended": true,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 12.4166666666667,
+    "playbackRate": 1,
+    "totalFrames": 309,
+    "droppedFrames": 70,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "ended",
+    "wallMs": 31581.5,
+    "time": 12.417,
+    "paused": true,
+    "ended": true,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 12.4166666666667,
+    "playbackRate": 1,
+    "totalFrames": 309,
+    "droppedFrames": 70,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  },
+  {
+    "type": "final",
+    "wallMs": 31587.5,
+    "time": 12.417,
+    "paused": true,
+    "ended": true,
+    "seeking": false,
+    "readyState": 4,
+    "networkState": 1,
+    "errorCode": null,
+    "sourceChanged": false,
+    "isActiveDecoder": true,
+    "renderedOutputVisible": true,
+    "programmeTime": 12.4166666666667,
+    "playbackRate": 1,
+    "totalFrames": 309,
+    "droppedFrames": 70,
+    "buffered": [
+      [
+        0,
+        12.417
+      ]
+    ]
+  }
+]

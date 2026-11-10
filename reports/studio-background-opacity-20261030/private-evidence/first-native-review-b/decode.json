@@ -1,0 +1,8 @@
+{
+  "camera": "b",
+  "frames": 90,
+  "outputSha256": "2b86fd71323c2c616a9bdbb318f8643fbd77e2283d4c49390e1c5f5e0fcd42b7",
+  "cpuOnly": true,
+  "everyFrameInContactSheets": true,
+  "professionalQualification": false
+}

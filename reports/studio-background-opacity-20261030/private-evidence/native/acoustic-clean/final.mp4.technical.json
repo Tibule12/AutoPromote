@@ -1,0 +1,32 @@
+{
+  "passed": true,
+  "sha256": "597c9dc99f249cc1494cedbec53dbd48f36fa952824ec08c646b7990151da9c2",
+  "bytes": 7066401,
+  "seconds": 12.417,
+  "video": {
+    "width": 1920,
+    "height": 1080,
+    "codec": "h264",
+    "fps": "24/1",
+    "duration": "12.416667",
+    "frameCount": 298,
+    "pixelFormat": "yuv420p",
+    "encoder": "Lavc60.31.102 libx264"
+  },
+  "audio": {
+    "codec": "aac",
+    "channels": 2,
+    "sampleRate": "48000",
+    "duration": "12.417000"
+  },
+  "independentFullDecode": true,
+  "decodedAudio": {
+    "samples": 596992,
+    "sampleRate": 48000,
+    "seconds": 12.437333333333333,
+    "toleranceSeconds": 0.04466666666666667,
+    "passed": true
+  },
+  "contactSheet": "../../../../../dev/shm/autopromote-background-finish-20261030/native/acoustic-clean/final.mp4.frames.jpg",
+  "scope": "Technical only. Pixel and listening review are separate required evidence."
+}
