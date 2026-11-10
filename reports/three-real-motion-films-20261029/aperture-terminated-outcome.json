@@ -1,0 +1,6 @@
+{
+  "jobId": "eef15ead-9de3-4e86-9192-38361a46615b",
+  "status": "failed",
+  "errorCode": "LOCAL_RENDER_FAILED",
+  "capacityReconciledThroughOwnedEndpoint": true
+}

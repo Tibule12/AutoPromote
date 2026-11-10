@@ -1,0 +1,34 @@
+{
+  "folder": "/home/tibule12/Videos/AutoPromote-Cinematic-Abstract-2026-10-30",
+  "films": [
+    {
+      "identity": "current",
+      "file": "01-CURRENT.mp4",
+      "durationSeconds": 24,
+      "sha256": "d83e2dfc6dfdf492520f2335a9eca0353317c2e688f93fc3d17e05ec6ee6f4e7",
+      "walkthroughDuration": 121.41666666666666,
+      "walkthroughSha256": "31370440dfa239f5fb8d41cc2ed193376bfc0a4afa5d7c4d6c41304443d694ca",
+      "thumbnailSha256": "5b83675208e2eea19261cbdd99970f1457c62487b3dc5c166812bf7c49abde23",
+      "nativeProjectHash": "c3afacd136f8998cb07812b2b86109b927e392e17a2cbaf6f07a5d95407245f6",
+      "completeMatchingPlayback": true,
+      "independentExactRestore": true,
+      "ownerApproved": false,
+      "scheduled": false
+    },
+    {
+      "identity": "prism",
+      "file": "02-PRISM.mp4",
+      "durationSeconds": 24,
+      "sha256": "cb65c829e76b1c83560ba4e93183b9d3a2eed21c7fa55c68fd9da4242e0e531f",
+      "walkthroughDuration": 119.375,
+      "walkthroughSha256": "8bf493346538b257b43b1f97e7682eab02ebe86078ca3239ebc344df477b1d3b",
+      "thumbnailSha256": "9a0cca677812466bff358ef3a3f41100d5775c40eee79e42a0cf07a67fe7eac7",
+      "nativeProjectHash": "86998e9269fab48d4803dcb3a2d7d872a561ec7c845626324cfaccd72188a36a",
+      "completeMatchingPlayback": true,
+      "independentExactRestore": true,
+      "ownerApproved": false,
+      "scheduled": false
+    }
+  ],
+  "exactCopies": 44
+}

@@ -1,0 +1,31 @@
+{
+  "archive": "motion-study-source-art.zip",
+  "sha256": "59875e56f76408cce55a3a8aa703f2049deadb53f936bf328a44392143a7eef3",
+  "files": [
+    {
+      "file": "product/source-art.graphics.json",
+      "sha256": "9734b4a884d0222fde45891321c434b9d73c44257d3f6efdd6e50e20057f7a55"
+    },
+    {
+      "file": "transition/source-art.graphics.json",
+      "sha256": "bbc8a46944e072de80ed8bce53231044435e01a0304b78528de59c44aa66bdcf"
+    },
+    {
+      "file": "logo/AutoPromote-Gradient-Tech-Logo.png",
+      "sha256": "062f560550e591c86a1636c5da200cb9a236978c695f16fb7e958f75ad76b397"
+    },
+    {
+      "file": "product/blank-stage.mp4",
+      "sha256": "48427cd4a04969a899804c132aa54abdd794c2a069b63c261e9bcfa664fcc1b7"
+    },
+    {
+      "file": "transition/blank-stage.mp4",
+      "sha256": "d5292d8e4adbed7ba821da3e4a3311b6616fce72a8ba320ede615d7135980533"
+    },
+    {
+      "file": "logo/blank-stage.mp4",
+      "sha256": "102e9e85aa1398bff4e84e665525727aa5f91dd326e14957e111771e03829ab8"
+    }
+  ],
+  "credentialsOrCapabilitiesIncluded": false
+}

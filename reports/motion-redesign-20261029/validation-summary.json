@@ -1,0 +1,100 @@
+{
+  "state": "PRIVATE_NATIVE_REVIEW_CANDIDATE",
+  "date": "2026-10-29",
+  "report": "reports/motion-redesign-20261029/README.md",
+  "ownerDirection": "Keep the complete Studio workspace, tools, preview and editable timeline visible. Teach the actual edit with narration and show its result.",
+  "durationSeconds": 161.5,
+  "dimensions": [
+    1600,
+    900
+  ],
+  "frames": 3876,
+  "fps": 24,
+  "nativeMovieSha256": "6d4b731f8503e10d928e285b4fad783c35117d4bb6479e756f08dd87d30ade16",
+  "thumbnailSha256": "67167efbc72854b3b41453255cad0adef8aa1a3108becdd87969070a5d3fb462",
+  "portraitResultSha256": "2ebb0b104f60fa5ff2a1e4d0cc4eb79706b0c66fff736bc210c8b67b88e7416f",
+  "wholeWorkspaceChapters": 11,
+  "renderedResultShots": 5,
+  "sourceScreenCropping": false,
+  "nativeMainSequence": true,
+  "graphInjection": false,
+  "nativeCoreWholePlaybackAndExactRestore": true,
+  "nativeGuideWholePlaybackAndExactRestore": true,
+  "narration": "Cached synthetic Kokoro bf_emma preset; no cloned voice or music bed.",
+  "zeroOffsetSpeechCorrelation": 0.9999055258373931,
+  "loudness": {
+    "input_i": "-14.28",
+    "input_tp": "-1.77",
+    "input_lra": "3.70",
+    "input_thresh": "-24.58",
+    "output_i": "-16.95",
+    "output_tp": "-4.28",
+    "output_lra": "3.40",
+    "output_thresh": "-27.24",
+    "normalization_type": "dynamic",
+    "target_offset": "-0.05"
+  },
+  "originalProtectedFilesByteIdentical": 25,
+  "earlierBatch": "Rejected and retained; generated speech and browser observation supplements retained in verified lossless private archives.",
+  "ownerApproved": false,
+  "scheduled": false,
+  "schedulingHeld": true,
+  "physicalIPhoneVerified": false,
+  "allStudioFeaturesQualified": false,
+  "wholePredictiveParityQualified": false,
+  "formalReadinessCountsUnchanged": true,
+  "sharedRemaining": [
+    "S02 whole picture/audio/colour/edge/low-alpha/latency and long-job reconciliation",
+    "S04 motion/vector/glyph depth",
+    "S03 occurrence/group/source ownership"
+  ],
+  "nextTask": "Owner review of the exact finished movie and thumbnail before any scheduling; retain the rejected batch and five Queue holds. Continue the shared precision backlog.",
+  "videosDirectory": "/home/tibule12/Videos/AutoPromote-Whole-Studio-2026-10-29",
+  "delivered": [
+    {
+      "file": "01-Whole-Studio-Walkthrough.mp4",
+      "sha256": "6d4b731f8503e10d928e285b4fad783c35117d4bb6479e756f08dd87d30ade16",
+      "bytes": 10630799
+    },
+    {
+      "file": "02-ZEST-Portrait-Motion-Result.mp4",
+      "sha256": "2ebb0b104f60fa5ff2a1e4d0cc4eb79706b0c66fff736bc210c8b67b88e7416f",
+      "bytes": 855515
+    },
+    {
+      "file": "01-Whole-Studio-Thumbnail.png",
+      "sha256": "67167efbc72854b3b41453255cad0adef8aa1a3108becdd87969070a5d3fb462",
+      "bytes": 370279
+    },
+    {
+      "file": "Studio-recordings/Actual-Motion-Authoring.mp4",
+      "sha256": "6decf1e9b7835658ffef9eeb1b392cff28254133f7bc521545eab8a2b1b8d380",
+      "bytes": 5177130
+    },
+    {
+      "file": "Studio-recordings/Motion-Result-With-Editable-Timeline.mp4",
+      "sha256": "67bf582d60deee7115afc1eceaa3158ef29ce4a58bdac2e5a8b78d22b6253e8e",
+      "bytes": 214303
+    },
+    {
+      "file": "Studio-recordings/Whole-Walkthrough-With-Editable-Timeline.mp4",
+      "sha256": "0c6672c263da9f5d08ef99d1c04f0c12a921e0c4b5ca4a97ab50b94043b68345",
+      "bytes": 8462242
+    },
+    {
+      "file": "Editable-projects/PRODUCT-MOTION.autopromote.json",
+      "sha256": "78d8e64428834e4f32c0ed82b19bb44f122fed53814377d32680a43b446e4f5e",
+      "bytes": 213844
+    },
+    {
+      "file": "Editable-projects/WHOLE-STUDIO-LESSON.autopromote.json",
+      "sha256": "003b2d75fbcec0e76ae2548e9b2e4aa372b7a27bf97c5939cbd2ffb4dc5f331e",
+      "bytes": 583774
+    },
+    {
+      "file": "Starter-artwork/ZEST-SEPARATE-ARTWORK.graphics.json",
+      "sha256": "6da7a8e17b0e6c270fe26f1d83dc8623365422d0121caf58c21253e34a534830",
+      "bytes": 7382
+    }
+  ]
+}

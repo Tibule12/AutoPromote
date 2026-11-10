@@ -1,0 +1,188 @@
+{
+  "observedAt": "2026-10-30T08:42:24.577Z",
+  "cpu": [
+    {
+      "executionId": "85f2febbd7952da7922f6aa7b6f27d9415dadb95938968a18614078b2dbd00f4",
+      "operationId": "e8a09efe3948147495c1f39e8d11b7d804df15f18db1ae53c62d22069989fc85",
+      "endpoint": "/render-viral-clip",
+      "state": "succeeded",
+      "processTerminated": true,
+      "sourceHash": "bdd820d67aa171d98bbccf85009c1ab318b4d25a9383064f1d2c7f1f4b4aa7d5",
+      "outputHash": "4ec5548fd0dda4cefae3cf2360c7675f799b7948bee06e0d01f87081d2e8909e",
+      "outputBytes": 894951,
+      "resource": {
+        "wallSeconds": 80.0757939319592,
+        "cpuSeconds": 22.521805999999998,
+        "peakRssKiB": 867104,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      }
+    },
+    {
+      "executionId": "a007c81e053c3f219c435890a1601ed1d6e0423280cad5ba4d79aa25db02f8c5",
+      "operationId": "08d02e4f080ce6e27e9a9b1feea9923e2d75fcf41007fbee1c382d111571b546",
+      "endpoint": "/render-viral-clip",
+      "state": "succeeded",
+      "processTerminated": true,
+      "sourceHash": "b7ba3e54b28dc46c8ace5b0b9b7af0ba735c60e207de8be35310a31c6f6dfa6c",
+      "outputHash": "4c3354dbd660333c6ab4cd0e99de561fb6cc3a5a450e04a4880a7da926275574",
+      "outputBytes": 1801971,
+      "resource": {
+        "wallSeconds": 16.757119670975953,
+        "cpuSeconds": 24.745597000000004,
+        "peakRssKiB": 737512,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      }
+    },
+    {
+      "executionId": "eadac9dce9f436f8e3bcc897f1c8db5293cc22e3bbea826177e1c5a82e96a7de",
+      "operationId": "3254638ae25c70d4166726fe5729335adc6abcf5038f42caeca5d287a63b6bff",
+      "endpoint": "/render-viral-clip",
+      "state": "succeeded",
+      "processTerminated": true,
+      "sourceHash": "9a148d30f3b54ce111b7e7be3c892e61c102b033227a55763927b124319c86a9",
+      "outputHash": "49075ab4c725e7791f50c3980459cec0c71abe1a6d6d15ad789c7dca33485f0b",
+      "outputBytes": 1975558,
+      "resource": {
+        "wallSeconds": 31.936533873027656,
+        "cpuSeconds": 24.084149,
+        "peakRssKiB": 911864,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      }
+    }
+  ],
+  "gpu": [
+    {
+      "jobId": "346b4181-7db9-4aa7-bb67-3890f4122235",
+      "status": "completed",
+      "ownerUid": "demo-pilot-alice",
+      "inputSha256": "12d60bc5fc089c08d7073141e972bc555b1925fc8ad9a4d07b05d56877c576d7",
+      "sceneHash": "2349d2078a06ef4bf4ac3b909df62929e5e69737a0e22a54e42c45816fd56c7a",
+      "runtime": {
+        "device": "cuda",
+        "samples": 32,
+        "threads": 8,
+        "deadlineSeconds": 1800
+      },
+      "receipt": {
+        "artifacts": {
+          "overlay.mov": {
+            "bytes": 138715386,
+            "sha256": "8c40ed5ad94d211052f2c7f86157902a11a995c86025a33c2518fe6df3a22e65"
+          },
+          "preview.mp4": {
+            "bytes": 1799761,
+            "sha256": "7cda9fb3e7e86f79fbd4eae0aa626b651b5640970a384539ad57d2a1266a9ff8"
+          }
+        },
+        "device": {
+          "backend": "CUDA",
+          "denoiser": "OPENIMAGEDENOISE",
+          "devices": [
+            "Quadro M1200 (Display)"
+          ],
+          "engine": "CYCLES",
+          "event": "render_device",
+          "gpu_verified": true
+        },
+        "version": 1
+      },
+      "failedAttemptRemainsFailed": false
+    },
+    {
+      "jobId": "78388abe-f152-4701-ac24-3e8a8c716767",
+      "status": "failed",
+      "ownerUid": "demo-pilot-alice",
+      "inputSha256": "b2ca6f8f04f2f0c6d9690b0978c963ed3f6b908026b340a903ed54c412db092f",
+      "sceneHash": "6ae2c4ba42dd2c396bcd5b1147496282a002201343f4122c0fded81ba0d54e15",
+      "runtime": {
+        "device": "cuda",
+        "samples": 32,
+        "threads": 8,
+        "deadlineSeconds": 1800
+      },
+      "failedAttemptRemainsFailed": true
+    },
+    {
+      "jobId": "a078c46d-dc9e-404c-9e44-ca307d8e0ed4",
+      "status": "completed",
+      "ownerUid": "demo-pilot-alice",
+      "inputSha256": "7a577d4e5497bcd9033a3ab5e6c057123261d041bdbdfc8f14420d4e5b362ccd",
+      "sceneHash": "4fa5d939b89480d64d3ca1fad806cf617e5f309b004f7f034440b35634ff0d45",
+      "runtime": {
+        "device": "cuda",
+        "samples": 16,
+        "threads": 8,
+        "deadlineSeconds": 1800
+      },
+      "receipt": {
+        "artifacts": {
+          "overlay.mov": {
+            "bytes": 166660058,
+            "sha256": "320439c26c3a126a554882513dd7ff05ff5d74ff77f22d968d13ec1fea004300"
+          },
+          "preview.mp4": {
+            "bytes": 1997600,
+            "sha256": "d5e465f8dfceda44bf6728ff1348ab86c5e23e669444889ad91c155be0913539"
+          }
+        },
+        "device": {
+          "backend": "CUDA",
+          "denoiser": "OPENIMAGEDENOISE",
+          "devices": [
+            "Quadro M1200 (Display)"
+          ],
+          "engine": "CYCLES",
+          "event": "render_device",
+          "gpu_verified": true
+        },
+        "version": 1
+      },
+      "failedAttemptRemainsFailed": false
+    },
+    {
+      "jobId": "c9533b31-293c-4f2e-b9d2-a2d794390c5d",
+      "status": "completed",
+      "ownerUid": "demo-pilot-bob",
+      "inputSha256": "094008082afbd2a35468c282c53d455f0b18cbbd0348ea1980ba87ed39d5afc5",
+      "sceneHash": "78cf83ab779c07c19b0ab63f45aa57bb0d63615feb09a31368c3c2d923021631",
+      "runtime": {
+        "device": "cuda",
+        "samples": 16,
+        "threads": 8,
+        "deadlineSeconds": 1800
+      },
+      "receipt": {
+        "artifacts": {
+          "overlay.mov": {
+            "bytes": 121147201,
+            "sha256": "18985474b0e411565f2bb36e06df8182004c419fdf7fa39d8591ce2b52b7bd23"
+          },
+          "preview.mp4": {
+            "bytes": 891774,
+            "sha256": "1c6073910bc68065f9f8cb52aed11226612912a494dc5f6e41ce0ea820f79664"
+          }
+        },
+        "device": {
+          "backend": "CUDA",
+          "denoiser": "OPENIMAGEDENOISE",
+          "devices": [
+            "Quadro M1200 (Display)"
+          ],
+          "engine": "CYCLES",
+          "event": "render_device",
+          "gpu_verified": true
+        },
+        "version": 1
+      },
+      "failedAttemptRemainsFailed": false
+    }
+  ],
+  "originalFirestoreSnapshotAvailable": false,
+  "emulatorReplayQualified": false,
+  "retention": "Actual Storage files/metadata, signed CPU evidence, CUDA inputs/outcomes/artifacts, native backups and recordings retained privately. No reconstructed financial state or invented terminal result.",
+  "ownerApproved": false,
+  "scheduled": false
+}

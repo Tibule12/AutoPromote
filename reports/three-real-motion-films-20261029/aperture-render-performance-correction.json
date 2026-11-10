@@ -1,0 +1,7 @@
+{
+  "jobId": "eef15ead-9de3-4e86-9192-38361a46615b",
+  "workerPid": 1713073,
+  "renderPid": 1713084,
+  "reason": "Measured per-frame denoising/runtime exceeds the admitted deadline. Terminate this exact local process group before a corrected native scene/quality attempt; preserve its failed outcome and frames.",
+  "terminalResultInvented": false
+}

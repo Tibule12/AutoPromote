@@ -1,0 +1,78 @@
+{
+  "jobs": [
+    {
+      "jobId": "1be25df7-1fb2-4dd7-9d61-33ea473517a6",
+      "status": "completed",
+      "sceneHash": "7205de176c11784ffc64da5b5b17fdb0f668ebdcadc511391dca453aeb7231c2",
+      "executionName": "local-blender/1be25df7-1fb2-4dd7-9d61-33ea473517a6",
+      "localInputSha256": "398efd481203ecaabafaa4ae7725a9f42a9bc6b6b200a8e128443aa20e7f4d1b",
+      "bytes": {
+        "preview": 29569,
+        "overlay": 5879788
+      },
+      "receipt": {
+        "artifacts": {
+          "overlay.mov": {
+            "bytes": 5879788,
+            "sha256": "29a6beedb8ee314651a0b69d0b4a1fa55b806a21050b5e2957fa6612ed55e2f2"
+          },
+          "preview.mp4": {
+            "bytes": 29569,
+            "sha256": "919963cefd6556a22e22a22712e93ee3604ad081cc02959a060ac058df0fc677"
+          }
+        },
+        "device": {
+          "backend": "CPU",
+          "devices": [],
+          "engine": "CYCLES",
+          "event": "render_device",
+          "fallback_reasons": [],
+          "gpu_verified": false
+        },
+        "version": 1
+      }
+    },
+    {
+      "jobId": "d37cc0a5-d188-4138-8240-ea3bab284f91",
+      "status": "completed",
+      "sceneHash": "c74b51409fa2bd71ea0b1c77f4c7116682bf9a3f696e9c0e0e5660b716a557aa",
+      "executionName": "local-blender/d37cc0a5-d188-4138-8240-ea3bab284f91",
+      "localInputSha256": "da331584b04aa28eaec9f82e5aaecbe3cb426da4603d23d1c26685245517abda",
+      "bytes": {
+        "preview": 29561,
+        "overlay": 5879784
+      },
+      "receipt": {
+        "artifacts": {
+          "overlay.mov": {
+            "bytes": 5879784,
+            "sha256": "ab3b5b13ace649a270747633f5fbbaabb5b79b18ffddfceb70ef439d898b3840"
+          },
+          "preview.mp4": {
+            "bytes": 29561,
+            "sha256": "815224d0c1faa6b105b29724b5383380414040a8dfb0297fa91f7002c4cdf48c"
+          }
+        },
+        "device": {
+          "backend": "CPU",
+          "devices": [],
+          "engine": "CYCLES",
+          "event": "render_device",
+          "fallback_reasons": [],
+          "gpu_verified": false
+        },
+        "version": 1
+      }
+    }
+  ],
+  "usage": [
+    {
+      "id": "2026-10-29_demo-pilot-alice",
+      "count": 2
+    },
+    {
+      "id": "2026-10-29_global",
+      "count": 2
+    }
+  ]
+}

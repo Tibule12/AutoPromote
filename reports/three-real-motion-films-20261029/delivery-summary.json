@@ -1,0 +1,109 @@
+{
+  "date": "2026-10-29",
+  "state": "PRIVATE_FILMS_DELIVERED_FOR_OWNER_REVIEW",
+  "report": "reports/three-real-motion-films-20261029/README.md",
+  "deliveryFolder": "/home/tibule12/Videos/AutoPromote-Real-Motion-2026-10-29",
+  "films": [
+    {
+      "identity": "aperture",
+      "file": "01-APERTURE.mp4",
+      "durationSeconds": 110.33333333333334,
+      "sha256": "61d937608f48209b96766ef0f3b1182e752fc4208c115e666a66e46d41d04275",
+      "thumbnailSha256": "7df4fe2976b28e275eccb97c18b5ef31326e5c17c2d8d29b8d3ba9c2df343806",
+      "nativeProjectHash": "cd9255592f8dc395dd1aaccb38ccd8ba40f4906212258b02da0937f7439ae680",
+      "completeMatchingPlayback": true,
+      "independentExactRestore": true,
+      "ownerApproved": false,
+      "scheduled": false
+    },
+    {
+      "identity": "city",
+      "file": "02-BLOCK-LIGHT.mp4",
+      "durationSeconds": 110.25,
+      "sha256": "293b95984eac8620b7134c55987f5ea89a5ce80a8765cf648fc1dc998ea71384",
+      "thumbnailSha256": "c101fd669f8d005af45e3f8e58dc1d8a4afa3466cf24098ebb56c8f46d86c06c",
+      "nativeProjectHash": "e1878c0b1375d131bae9b76acb63f80fbf5aea3f4ffae1a3f824d10d670b5c77",
+      "completeMatchingPlayback": true,
+      "independentExactRestore": true,
+      "ownerApproved": false,
+      "scheduled": false
+    },
+    {
+      "identity": "chrono",
+      "file": "03-CHRONO.mp4",
+      "durationSeconds": 110,
+      "sha256": "2070d6e329b15fb0226bb92482bf9e0b2a87585376d1054d13173dc128aa7241",
+      "thumbnailSha256": "6022350c85ea641907e1f134ca7f793788dc54df93802727173fea13247c43fc",
+      "nativeProjectHash": "f854304a4867f058d55196ed406bf80706660ef7c16cd4a5f20184c555030525",
+      "completeMatchingPlayback": true,
+      "independentExactRestore": true,
+      "ownerApproved": false,
+      "scheduled": false
+    }
+  ],
+  "objectCounts": {
+    "aperture": 21,
+    "city": 22,
+    "chrono": 22
+  },
+  "actualWorkflow": "Ordinary signed-in object authoring in fresh local emulators; exact saved scene inputs through the canonical local CUDA Blender renderer; ordinary signed-in result import, native main sequence/graphics/narration/score and final CPU export in Studio.",
+  "profile": {
+    "core": [
+      1280,
+      720,
+      24,
+      8
+    ],
+    "lesson": [
+      1600,
+      1000,
+      24
+    ],
+    "localGpu": "Quadro M1200",
+    "cloudGpuAllocated": false
+  },
+  "newSurfaceWork": [
+    "Per-object surface and bounded box/cylinder bevel",
+    "Object-only clear glass, fine bump and architecture window grid",
+    "Object-scene broad fill and browser environment reflections",
+    "Opaque backing objects now participate in browser glass transmission; scene fades and legacy transparency are retained",
+    "Optional explicit nonproduction CUDA/720p profile and accepted-runtime binding"
+  ],
+  "tests": {
+    "backend": 55,
+    "frontend": 29,
+    "python": 46,
+    "totalFocused": 130,
+    "priorProductKnowledgeAndHelp": 51,
+    "anonymousFinalClientViewports": 8,
+    "finalGlassCandidateOrdinarySignedInWorkspaceAndHelp": true
+  },
+  "clientBuild": "Exact separately checked glass candidate adopted only in the task-owned local demo. Active API origin/UI flags, old build and hashed assets retained.",
+  "failedAppPreviews": {
+    "jobIds": [
+      "eef15ead-9de3-4e86-9192-38361a46615b",
+      "5a59dafa-0559-42ff-9448-03fc9b86a927"
+    ],
+    "first": "Supervisor termination after observed denoise cost",
+    "second": "Original Python840-second limit",
+    "remainFailed": true,
+    "directCanonicalRenderIsNotRecovery": true
+  },
+  "recordings": "Actual full workspace/controls/authoring and complete matching final playback retained; 5\u20136fps observation does not qualify playback smoothness.",
+  "materialAndLightingPixelParityQualified": false,
+  "wholePredictiveParityQualified": false,
+  "ownerApproved": false,
+  "scheduled": false,
+  "paidCloudExecution": false,
+  "mainMerge": false,
+  "deployed": false,
+  "formalReadinessCountsUnchanged": true,
+  "remaining": [
+    "S02 full picture/processed sound/colour/edges/low-alpha/material/lighting parity, latency and long-job reconciliation; typography13/16 strict failures remain",
+    "Normal App full720p/optional CUDA end-to-end success and longer-job recovery remain unqualified after two actual failures; new longer bounds are source/test evidence only",
+    "S04 contour morphs/procedural operators/richer motion; object keys across cuts, retiming and trimmed boundaries",
+    "S03 occurrence/group/source ownership",
+    "Owner creative/listening approval and real phone/platform presentation"
+  ],
+  "nextTask": "Owner watches exact films/thumbnails; keep all five Queue holds. Continue failed long-job reconciliation and bounded normal App720p qualification, alongside shared S02/S04/S03. Do not schedule or promote the showroom without exact owner approval."
+}

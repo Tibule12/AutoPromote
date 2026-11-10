@@ -1,0 +1,39 @@
+{
+  "taskOwnedServicesStopped": [
+    {
+      "pid": 1693752,
+      "ownedService": "fresh-demo-supervisor",
+      "signal": "SIGTERM"
+    },
+    {
+      "pid": 1709165,
+      "ownedService": "fresh-demo-supervisor",
+      "signal": "SIGTERM"
+    },
+    {
+      "pid": 1712214,
+      "ownedService": "isolated-client-candidate",
+      "port": 33533,
+      "signal": "SIGTERM"
+    },
+    {
+      "pid": 1718888,
+      "ownedService": "isolated-client-candidate",
+      "port": 45403,
+      "signal": "SIGTERM"
+    },
+    {
+      "pid": 1737196,
+      "ownedService": "isolated-client-candidate",
+      "port": 43421,
+      "signal": "SIGTERM"
+    }
+  ],
+  "existingApiAndCpuServicesPreserved": [
+    1463664,
+    1509772,
+    1537721
+  ],
+  "sourceMediaAndAllBuildsRetained": true,
+  "sourceEmulatorRuntimeRetainedPrivately": true
+}
