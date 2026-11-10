@@ -1,4 +1,3 @@
- 
 // Lightweight test bypass: when CI_ROUTE_IMPORTS=1 (route import tests) or FIREBASE_ADMIN_BYPASS=1
 // we avoid real Firebase initialization and return in-memory stubs.
 // When running under jest/CI or with bypass envs, avoid initializing actual Firebase Admin
@@ -40,6 +39,10 @@ if (bypass) {
   };
   QueryStub.prototype.limit = function (n) {
     this._limit = n;
+    return this;
+  };
+  QueryStub.prototype.select = function (...fields) {
+    this._projection = fields;
     return this;
   };
   QueryStub.prototype.count = function () {
@@ -107,6 +110,18 @@ if (bypass) {
       });
     }
     if (this._limit) docs.splice(this._limit);
+    // Match Firestore's projection without modifying stored documents or refs.
+    if (this._projection) {
+      for (const doc of docs) {
+        const original = doc.data();
+        const projected = Object.fromEntries(
+          this._projection
+            .filter(field => Object.prototype.hasOwnProperty.call(original, field))
+            .map(field => [field, original[field]])
+        );
+        doc.data = () => projected;
+      }
+    }
     return {
       empty: docs.length === 0,
       docs,

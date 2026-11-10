@@ -803,11 +803,14 @@ test("proves new motion studio editing, linked audio, timeline seeking and local
   await page.getByTestId("reframe-aspect-9-16").click();
   await page.screenshot({ path: testInfo.outputPath("show-everyone-with-tracking.png") });
   await page.getByTestId("analyze-speaker-faces").click();
-  await expect(page.getByRole("status").filter({ hasText: "A face was missing" })).toBeVisible();
+  const faceFollowStatus = page.getByTestId("analyze-speaker-faces").locator("..").getByRole("status");
+  await expect(faceFollowStatus).toContainText("A face was missing");
+  await expect(faceFollowStatus).toBeVisible();
   await expect(page.getByLabel("top split horizontal")).toHaveValue("36");
   state.faceTrackingResult.tracks.bottom.coverage = .9;
   await page.getByTestId("analyze-speaker-faces").click();
-  await expect(page.getByRole("status").filter({ hasText: "Face-follow draft applied" })).toBeVisible();
+  await expect(faceFollowStatus).toContainText("Face-follow draft applied");
+  await expect(faceFollowStatus).toBeVisible();
   await expect(page.getByLabel("Track both speakers")).toBeChecked();
   await expect(page.getByTestId("reframe-preserve-frame")).toHaveAttribute("aria-pressed", "true");
   expect(state.faceTrackingRequests).toBe(2);

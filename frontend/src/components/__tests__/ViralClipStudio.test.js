@@ -7654,16 +7654,16 @@ describe("ViralClipStudio timeline sequencing", () => {
     fireEvent.click(screen.getByTestId("dock-tab-node_flow"));
     const flowSurface = screen.getByTestId("studio-node-flow");
     expect(flowSurface).toBeInTheDocument();
-    expect(within(flowSurface).getByText("Null Rig 1")).toBeInTheDocument();
+    expect(within(flowSurface).getByTitle("Null Rig 1")).toBeInTheDocument();
 
     // Undo removes Null Rig from stage and graph; Redo restores it
     fireEvent.keyDown(window, { key: "z", ctrlKey: true });
     await waitFor(() => {
-      expect(within(flowSurface).queryByText("Null Rig 1")).not.toBeInTheDocument();
+      expect(within(flowSurface).queryByTitle("Null Rig 1")).not.toBeInTheDocument();
     });
     fireEvent.keyDown(window, { key: "y", ctrlKey: true });
     await waitFor(() => {
-      expect(within(flowSurface).getByText("Null Rig 1")).toBeInTheDocument();
+      expect(within(flowSurface).getByTitle("Null Rig 1")).toBeInTheDocument();
     });
   });
   test('source-dialogue preview candidate can open the real editor without forward state references', () => {

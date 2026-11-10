@@ -1,1 +1,0 @@
-"use strict";(globalThis.webpackChunkautopromote_frontend=globalThis.webpackChunkautopromote_frontend||[]).push([[940],{3940(o,t,a){a.r(t),a.d(t,{default:()=>n});a(8230);var e=a(1583),u=a(614);function n(){return(0,u.jsx)(e.A,{page:"about"})}}}]);
