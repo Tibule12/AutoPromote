@@ -1,0 +1,6 @@
+{
+  "url": "https://thulani-api-jddzncgt2a-uc.a.run.app",
+  "method": "GET",
+  "path": "/api/version",
+  "httpStatus": 403
+}

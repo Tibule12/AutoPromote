@@ -1,0 +1,14 @@
+{
+  "accountLookupSucceeded": true,
+  "adminProjectionCount": 1,
+  "privateEvidence": "/tmp/autopromote-security-private-20261027/authority-provenance.json",
+  "authEmailVerified": [
+    false
+  ],
+  "accountMetadataDates": [
+    {
+      "createdAtMillis": "1759990883532",
+      "lastLoginAtMillis": "1793022066058"
+    }
+  ]
+}

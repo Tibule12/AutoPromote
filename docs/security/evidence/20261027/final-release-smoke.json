@@ -1,0 +1,21 @@
+{
+  "capturedAtUtc": "2026-10-27T12:10:13.005659+00:00",
+  "verifiedRuntimeCommit": "88bef8ff4c9f12c78abac88b644e3b60d4ffa428",
+  "unauthenticatedChecks": [
+    {
+      "method": "GET",
+      "path": "/api/users/profile",
+      "httpStatus": 401,
+      "passed": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/users",
+      "httpStatus": 401,
+      "passed": true
+    }
+  ],
+  "homepageAccountMetaTagCount": 0,
+  "homepageAdServingScriptCount": 0,
+  "adsenseChangeHeldForApproval": true
+}

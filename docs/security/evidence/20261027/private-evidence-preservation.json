@@ -1,0 +1,9 @@
+{
+  "preservedAtUtc": "2026-10-27T12:10:52.465311+00:00",
+  "privateEvidenceDirectory": "/home/tibule12/.local/share/autopromote-security/incident-20261027",
+  "filesCopiedAndHashVerified": 8,
+  "bytes": 1127996,
+  "directoryMode": "0700",
+  "fileMode": "0600",
+  "scope": "Local incident evidence preservation only; no production or credential changes; not committed to Git"
+}

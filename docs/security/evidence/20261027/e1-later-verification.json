@@ -1,0 +1,16 @@
+{
+  "checkedAtUtc": "2026-10-27T03:57:06.375441+00:00",
+  "rows": [
+    {
+      "release": "projects/autopromote-cc6d3/releases/cloud.firestore",
+      "ruleset": "projects/autopromote-cc6d3/rulesets/2115bff8-a189-4179-9ecc-516c895d132a",
+      "stillMatchesApprovedE1": true
+    },
+    {
+      "release": "projects/autopromote-cc6d3/releases/firebase.storage/autopromote-cc6d3.firebasestorage.app",
+      "ruleset": "projects/autopromote-cc6d3/rulesets/7d9cee7f-2189-492d-9d46-9bf7b0bf1200",
+      "stillMatchesApprovedE1": true
+    }
+  ],
+  "scope": "Control-plane release stability check after publication; no live-user or exploit probe"
+}

@@ -1,0 +1,40 @@
+{
+  "mainSha": "900872157ee67aaedfc114a017299a769fced147",
+  "files": [
+    {
+      "path": "firestore.rules",
+      "sha256": "001c560c915404e7fa21f96d3fdc861d7a9fefbbea6b9620a306b5380a081478",
+      "matchesSecurityBase": false
+    },
+    {
+      "path": "src/authMiddleware.js",
+      "sha256": "d8bd99ed3de25844d7770ad6477da3304130cb73782aa198d22954811752469f",
+      "matchesSecurityBase": true
+    },
+    {
+      "path": "src/authRoutes.js",
+      "sha256": "364c5925b46ceadac30e8a04be4604c703959883e569fbd8eaeb027039062668",
+      "matchesSecurityBase": true
+    },
+    {
+      "path": "src/userRoutes.js",
+      "sha256": "46165a8a9f202dcb83e4e7d07e0ccd30b56ae23b79deb0410fa46daaca59dfe8",
+      "matchesSecurityBase": true
+    },
+    {
+      "path": "src/userController.js",
+      "sha256": "0f0466f9f09e72425002e258a802065e1371ca54c4a29f7a85942b24b5cac51a",
+      "matchesSecurityBase": true
+    },
+    {
+      "path": "src/server.js",
+      "sha256": "0400631a6a62e7097d19ac1e94eb0906e6e10ab9815c98058630ac0b4ccc0e09",
+      "matchesSecurityBase": false
+    },
+    {
+      "path": "storage.rules",
+      "sha256": "4f3cd576748a744e0025f087c192516be35fb6f1f9229f82f266c445bd5d9107",
+      "matchesSecurityBase": false
+    }
+  ]
+}

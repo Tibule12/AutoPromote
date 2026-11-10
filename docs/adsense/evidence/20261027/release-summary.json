@@ -1,0 +1,17 @@
+{
+  "verifiedAtUtc": "2026-10-27T12:31:50.996964+00:00",
+  "revision": "593bbcdf86e7ca6e3acc16eac5b52b168f3a45ca",
+  "pullRequest": 503,
+  "publicRootTagCount": 1,
+  "publicHeadTagCount": 1,
+  "exactTag": "<meta name=\"google-adsense-account\" content=\"ca-pub-4802692424152812\">",
+  "sourceChange": "One added line in frontend/public/index.html; security base 88bef8ff retained",
+  "rulesUnchanged": true,
+  "sevenTrackedTestDocumentsUnchanged": true,
+  "alternateApiHttpStatus": 403,
+  "apiPolicy": "security-owner-bootstrap-20261027",
+  "adsOrAutoAdsActivated": false,
+  "rewardedCreditsOrBillingOrSubscriptionsChanged": false,
+  "historicalBalanceSessionRisks": "Open; no reconciliation/correction/session revocation in this release",
+  "ci": "Production frontend build, backend/security/Storage/publisher guards, CodeQL, Semgrep, emulator smoke and PR browser E2E passed. Repeated broad CI/CPU prerequisite jobs remained in progress."
+}

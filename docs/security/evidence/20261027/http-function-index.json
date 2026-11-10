@@ -1,0 +1,224 @@
+[
+  {
+    "name": "getYouTubeAuthUrl",
+    "version": "39",
+    "updated": "2026-02-12T16:53:27.459Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/getYouTubeAuthUrl"
+  },
+  {
+    "name": "snapchatOAuthCallback",
+    "version": "21",
+    "updated": "2026-02-12T16:53:25.098Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/snapchatOAuthCallback"
+  },
+  {
+    "name": "getFacebookAuthUrl",
+    "version": "42",
+    "updated": "2026-02-12T16:53:27.114Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/getFacebookAuthUrl"
+  },
+  {
+    "name": "tiktokOAuthCallback",
+    "version": "21",
+    "updated": "2026-02-12T16:53:27.857Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/tiktokOAuthCallback"
+  },
+  {
+    "name": "discordOAuthCallback",
+    "version": "21",
+    "updated": "2026-02-12T16:53:24.599Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/discordOAuthCallback"
+  },
+  {
+    "name": "autoPromoteContent",
+    "version": "48",
+    "updated": "2026-02-12T16:53:24.321Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/autoPromoteContent"
+  },
+  {
+    "name": "logMonetizationEvent",
+    "version": "27",
+    "updated": "2025-11-23T21:17:27.417Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/logMonetizationEvent"
+  },
+  {
+    "name": "twitterOAuthCallback",
+    "version": "21",
+    "updated": "2026-02-12T16:53:27.285Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/twitterOAuthCallback"
+  },
+  {
+    "name": "listPromotionTemplates",
+    "version": "45",
+    "updated": "2026-02-12T16:53:28.043Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/listPromotionTemplates"
+  },
+  {
+    "name": "generateSmartLink",
+    "version": "25",
+    "updated": "2026-02-12T16:53:27.145Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/generateSmartLink"
+  },
+  {
+    "name": "getLinkedInAuthUrl",
+    "version": "21",
+    "updated": "2026-02-12T16:53:31.349Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/getLinkedInAuthUrl"
+  },
+  {
+    "name": "getDiscordAuthUrl",
+    "version": "21",
+    "updated": "2026-02-12T16:53:26.303Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/getDiscordAuthUrl"
+  },
+  {
+    "name": "getRedditAuthUrl",
+    "version": "21",
+    "updated": "2026-02-12T16:53:27.617Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/getRedditAuthUrl"
+  },
+  {
+    "name": "pinterestOAuthCallback",
+    "version": "21",
+    "updated": "2026-02-12T16:53:21.235Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/pinterestOAuthCallback"
+  },
+  {
+    "name": "smartLinkRedirect",
+    "version": "25",
+    "updated": "2026-02-12T16:53:30.983Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/smartLinkRedirect"
+  },
+  {
+    "name": "getTikTokAuthUrl",
+    "version": "21",
+    "updated": "2026-02-12T16:53:30.402Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/getTikTokAuthUrl"
+  },
+  {
+    "name": "createPromotionTemplate",
+    "version": "45",
+    "updated": "2026-02-12T16:53:26.458Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/createPromotionTemplate"
+  },
+  {
+    "name": "telegramWebhook",
+    "version": "21",
+    "updated": "2026-02-12T16:53:24.382Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/telegramWebhook"
+  },
+  {
+    "name": "spotifyOAuthCallback",
+    "version": "21",
+    "updated": "2026-02-12T16:53:27.976Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/spotifyOAuthCallback"
+  },
+  {
+    "name": "uploadVideoToYouTube",
+    "version": "38",
+    "updated": "2026-02-12T16:53:21.966Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/uploadVideoToYouTube"
+  },
+  {
+    "name": "instagramOAuthCallback",
+    "version": "21",
+    "updated": "2026-02-12T16:53:24.337Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/instagramOAuthCallback"
+  },
+  {
+    "name": "getSpotifyAuthUrl",
+    "version": "21",
+    "updated": "2026-02-12T16:53:27.782Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/getSpotifyAuthUrl"
+  },
+  {
+    "name": "getTwitterAuthUrl",
+    "version": "21",
+    "updated": "2026-02-12T16:53:30.999Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/getTwitterAuthUrl"
+  },
+  {
+    "name": "getSnapchatAuthUrl",
+    "version": "21",
+    "updated": "2026-02-12T16:53:24.906Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/getSnapchatAuthUrl"
+  },
+  {
+    "name": "attachTemplateToContent",
+    "version": "45",
+    "updated": "2026-02-12T16:53:27.566Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/attachTemplateToContent"
+  },
+  {
+    "name": "linkedinOAuthCallback",
+    "version": "21",
+    "updated": "2026-02-12T16:53:21.199Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/linkedinOAuthCallback"
+  },
+  {
+    "name": "getReferralStats",
+    "version": "25",
+    "updated": "2025-11-23T21:17:27.209Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/getReferralStats"
+  },
+  {
+    "name": "getInstagramAuthUrl",
+    "version": "21",
+    "updated": "2026-02-12T16:53:31.394Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/getInstagramAuthUrl"
+  },
+  {
+    "name": "helloWorld",
+    "version": "39",
+    "updated": "2026-02-12T16:53:21.209Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/helloWorld"
+  },
+  {
+    "name": "getRevenueSummary",
+    "version": "27",
+    "updated": "2025-11-23T21:17:25.987Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/getRevenueSummary"
+  },
+  {
+    "name": "api",
+    "version": "23",
+    "updated": "2026-02-12T16:53:31.021Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/api"
+  },
+  {
+    "name": "redditOAuthCallback",
+    "version": "21",
+    "updated": "2026-02-12T16:53:27.376Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/redditOAuthCallback"
+  },
+  {
+    "name": "facebookOAuthCallback",
+    "version": "42",
+    "updated": "2026-02-12T16:53:28.272Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/facebookOAuthCallback"
+  },
+  {
+    "name": "getPinterestAuthUrl",
+    "version": "21",
+    "updated": "2026-02-12T16:53:30.415Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/getPinterestAuthUrl"
+  },
+  {
+    "name": "generateMonetizedLandingPage",
+    "version": "25",
+    "updated": "2026-02-12T16:53:26.948Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/generateMonetizedLandingPage"
+  },
+  {
+    "name": "addReferrerToContent",
+    "version": "25",
+    "updated": "2025-11-23T21:17:26.928Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/addReferrerToContent"
+  },
+  {
+    "name": "youtubeOAuthCallback",
+    "version": "39",
+    "updated": "2026-02-12T16:53:21.360Z",
+    "url": "https://us-central1-autopromote-cc6d3.cloudfunctions.net/youtubeOAuthCallback"
+  }
+]

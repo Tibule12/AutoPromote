@@ -1,0 +1,5 @@
+{
+  "readSucceeded": false,
+  "outcome": "Timed out after 30 seconds; no claim-provisioning conclusion",
+  "scope": "400-day targeted Auth authority-write query; not rerun"
+}

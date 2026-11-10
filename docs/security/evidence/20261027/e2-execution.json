@@ -1,0 +1,23 @@
+{
+  "approval": "Explicit user approval: Approve E2 credential revocation",
+  "account": "tmtshwelo21@gmail.com",
+  "refreshSha256": "c24fd8f8d91878e4cecf55eadf7d185f27147be9a1b1fa78f9bbac084daa5db1",
+  "startedAtUtc": "2026-10-27T03:56:20.071345+00:00",
+  "scope": "Firebase CLI Google OAuth grant and matching invalid local CLI cache only; no Firebase Auth user-session operation",
+  "providerResult": {
+    "account": "tmtshwelo21@gmail.com",
+    "oauthClientId": "563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com",
+    "refreshSha256": "c24fd8f8d91878e4cecf55eadf7d185f27147be9a1b1fa78f9bbac084daa5db1",
+    "httpStatus": 200,
+    "providerAcknowledged": true,
+    "note": "Propagation may take time; this is a provider acknowledgement, not proof of immediate global token invalidation. Local cache unchanged."
+  },
+  "oldRefreshVerification": {
+    "status": 400,
+    "rejected": true,
+    "error": "invalid_grant"
+  },
+  "matchingLocalLoginCleared": true,
+  "finishedAtUtc": "2026-10-27T03:56:21.800489+00:00",
+  "status": "E2_PROVIDER_ACKNOWLEDGED"
+}

@@ -1,0 +1,31 @@
+{
+  "verifiedAtUtc": "2026-10-27T12:22:39.515447+00:00",
+  "approvedScope": "Only ownership verification meta tag; no advertisements, billing, subscriptions or rewarded credits",
+  "baseSecurityRevision": "88bef8ff4c9f12c78abac88b644e3b60d4ffa428",
+  "head": "bfe4f566538cc7027b025ecf0ae365b939563592",
+  "pullRequest": 503,
+  "changedFiles": [
+    "frontend/public/index.html"
+  ],
+  "frontendSourceUnchangedBetweenPreparedBuildBaseAndSecurityBase": true,
+  "checks": [
+    {
+      "file": "frontend/public/index.html",
+      "sha256": "23b679390b003ef069b67c9bb4fb3cb939b8c4c5f2685a442dac518d6d62cd46",
+      "tag": {
+        "inHead": true,
+        "content": "ca-pub-4802692424152812",
+        "raw": "<meta name=\"google-adsense-account\" content=\"ca-pub-4802692424152812\">"
+      }
+    },
+    {
+      "file": "frontend/build/index.html",
+      "sha256": "e886a1db6d90827dc853fc6a4f9e9f6ffa85399f1cd6524056d6f52277cbf3f3",
+      "tag": {
+        "inHead": true,
+        "content": "ca-pub-4802692424152812",
+        "raw": "<meta name=\"google-adsense-account\" content=\"ca-pub-4802692424152812\">"
+      }
+    }
+  ]
+}

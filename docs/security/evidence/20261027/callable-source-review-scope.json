@@ -1,0 +1,74 @@
+{
+  "scope": "Candidate source modules from api version-23 bundle; other Function versions may differ. No function invoked.",
+  "wrapperReferences": [
+    {
+      "line": 153,
+      "signal": "lazyNoopExport"
+    },
+    {
+      "line": 193,
+      "signal": "lazyNoopExport"
+    },
+    {
+      "line": 194,
+      "signal": "lazyNoopExport"
+    },
+    {
+      "line": 195,
+      "signal": "createPromotionTemplate"
+    },
+    {
+      "line": 198,
+      "signal": "logMonetizationEvent"
+    },
+    {
+      "line": 199,
+      "signal": "getRevenueSummary"
+    },
+    {
+      "line": 200,
+      "signal": "autoPromoteContent"
+    }
+  ],
+  "modules": [
+    {
+      "path": "promotionTemplates.js",
+      "sha256": "019c664b8c3190c9a8509a9591e709f0bf452cb0d7d741a72273c0677c0c84ef",
+      "authGuardLines": [
+        11,
+        28,
+        39,
+        47,
+        59,
+        69
+      ]
+    },
+    {
+      "path": "revenueAttribution.js",
+      "sha256": "0d06f926b19e846b76b73f153b4d77dda907628c5f169a13dab22d07ccdcfa4b",
+      "authGuardLines": [
+        13,
+        59,
+        78
+      ]
+    },
+    {
+      "path": "socialAutoPromotion.js",
+      "sha256": "02b59e97d8337b0d0af17d66e5e1268e9840f2ba0b4529223668f33dc165f88c",
+      "authGuardLines": [
+        186,
+        195,
+        199,
+        206,
+        213,
+        217,
+        221,
+        225,
+        232,
+        236,
+        239,
+        262
+      ]
+    }
+  ]
+}
