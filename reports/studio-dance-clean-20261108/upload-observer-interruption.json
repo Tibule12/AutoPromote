@@ -1,0 +1,11 @@
+{
+  "at": "2026-11-08T14:22:41.948Z",
+  "pid": 38196,
+  "exactOwnedBrowserRunner": true,
+  "activeOperations": 0,
+  "priorOperations": 12,
+  "mediaPostSubmitted": false,
+  "renderRequestFileExists": false,
+  "reason": "Existing upload was stuck on the stopped Rules VM. Same-rule VM responsiveness recovered, but that original upload promise did not resolve.",
+  "noAcceptedRenderDuplicated": true
+}

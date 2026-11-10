@@ -1,0 +1,17 @@
+{
+  "completePriorExportRestored": true,
+  "source": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105/reports/studio-subject-echo-20261108/private/emulator-final-export",
+  "oldestLostOctoberHistoryRecovered": false,
+  "priorFreshCohortBalancePreserved": 1,
+  "reserved": 0,
+  "operations": 6,
+  "activeOperations": 0,
+  "auth": true,
+  "firestore": true,
+  "storage": true,
+  "newVideoObjects": 8,
+  "newVideoSignedGenerationsPreserved": true,
+  "pid": 12574,
+  "firestorePid": 12581,
+  "productionChange": false
+}

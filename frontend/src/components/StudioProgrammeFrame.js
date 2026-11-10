@@ -1,3 +1,4 @@
+import {studioMatteSurfaceStyle} from './studioMatteSurface';
 import { studioSharedOverlayFrame, studioOverlayDecodeKey, studioSecondaryOverlayFrame } from './studioSharedOverlayFrame';
 import React, { useLayoutEffect, useRef } from 'react';
 import { watchStudioProgrammeFrames, studioPresentedSourceTime } from './studioSourcePreview';
@@ -20,8 +21,10 @@ const variable = (node, name, value) => { if (node.style.getPropertyValue(name) 
 export default function StudioProgrammeFrame({ clockRef, mapTime, time, enabled = true,
   layers = [], keyframes = [], groups = [], mainTransform = null, programmeWidth = 720, getDuration,
   getClipPath, getSourceFrame, soloPreviewOverlayId, children }) {
+  const loadingMarker = useRef(null);
   const marker = useRef(null), binding = useRef(null), latest = useRef(null);
   const overlayBindings=useRef(new Map());
+  const imageBindings=useRef(new Map());
   const layerKeys = new Map();
   for (const key of keyframes) {
     if (!layerKeys.has(String(key.targetId))) layerKeys.set(String(key.targetId), []);
@@ -37,6 +40,7 @@ export default function StudioProgrammeFrame({ clockRef, mapTime, time, enabled 
     if (!stage || !Number.isFinite(programmeTime)) return;
     const samePose=current.lastPoseTime===programmeTime;
     const nodes=current.nodes ||= [...stage.querySelectorAll('[data-studio-layer-id]')];
+    let pendingLayers = 0;
     const owners=new Map();
     for(const node of nodes){
       const layer=current.layers.get(node.dataset.studioLayerId);
@@ -82,6 +86,7 @@ export default function StudioProgrammeFrame({ clockRef, mapTime, time, enabled 
           }
         }
       }
+      if (active && video && video.dataset.sharedProgrammeFrame !== 'true' && (video.readyState < 2 || video.seeking)) pendingLayers++;
       if (!active||samePose) continue;
       const pose = (layer.parentId || layer.motionDrivers)
         ? evaluateWorldLayerPose(layer, current.allLayers, current.keyframes, programmeTime, current.mainTransform)
@@ -130,15 +135,23 @@ export default function StudioProgrammeFrame({ clockRef, mapTime, time, enabled 
       const fillLayer = current.layers.get(wrap.dataset.studioMatteWrap);
       const matteLayer = fillLayer?.trackMatte?.sourceLayerId ? current.layers.get(String(fillLayer.trackMatte.sourceLayerId)) : null;
       if (matteLayer && fillLayer?.trackMatte?.mode && fillLayer.trackMatte.mode !== 'none') {
-        if (matteLayer.type === 'video') {
+        if (matteLayer.type === 'video' || (matteLayer.type === 'image' && !matteLayer.mask?.enabled && !matteLayer.vectorShape)) {
           const sourceNode = nodes.find(node => node.dataset.studioLayerId === String(matteLayer.id));
           const video = sourceNode?.querySelector('[data-studio-overlay-decoder]');
+          // The colour leaf and its matte must read the same validated pixels.
+          // A shared leaf's own decoder is paused/hidden and may hold an older
+          // decoded picture even after its requested currentTime has settled.
+          const shared = sourceNode?.querySelector('[data-studio-shared-video]');
+          const bitmap = matteLayer.type==='image'?sourceNode?.querySelector('img'):null;
+          const picture = bitmap?.complete&&bitmap.naturalWidth>0?bitmap:video?.dataset.sharedProgrammeFrame === 'true' &&
+            shared?.dataset.sourceTime !== undefined ? shared : undefined;
+          if(bitmap&&(!bitmap.complete||!bitmap.naturalWidth)&&programmeTime>=Number(matteLayer.startTime||0)&&programmeTime<Number(matteLayer.startTime||0)+Number(matteLayer.duration||0))pendingLayers++;
           const pose = evaluateWorldLayerPose(matteLayer, current.allLayers, current.keyframes, programmeTime, current.mainTransform);
           const canvas = wrap.__studioVideoMatteCanvas ||= document.createElement('canvas');
-          const painted = studioVideoMatteUri({ video, layer: matteLayer, pose, time: programmeTime, aspect: stageAspect, canvas });
+          const painted = studioVideoMatteUri({ video, picture, layer: matteLayer, pose, time: programmeTime, aspect: stageAspect, canvas });
           if (painted) {
             const uri = studioVideoMatteAlpha(painted, fillLayer.trackMatte.mode);
-            if (uri) { wrap.style.maskImage = uri; wrap.style.webkitMaskImage = uri; wrap.dataset.videoMatteTime = String(studioPresentedSourceTime(video)); }
+            if (uri) { wrap.style.maskImage = uri; wrap.style.webkitMaskImage = uri; wrap.dataset.videoMatteTime = bitmap?'static':picture ? shared.dataset.sourceTime : String(studioPresentedSourceTime(video)); }
           }
           continue;
         }
@@ -147,6 +160,9 @@ export default function StudioProgrammeFrame({ clockRef, mapTime, time, enabled 
         wrap.style.maskImage = uri; wrap.style.webkitMaskImage = uri;
       }
     }
+    for(const surface of stage.querySelectorAll('[data-studio-surface-wrap]')){const layer=current.layers.get(surface.dataset.studioSurfaceWrap);const css=studioMatteSurfaceStyle(layer?.matteSurface,stage.clientHeight||720);for(const [key,value]of Object.entries(css))style(surface,key==='WebkitBoxReflect'?'webkitBoxReflect':key,value);}
+    stage.dataset.layerPendingCount = String(pendingLayers);
+    if (loadingMarker.current) loadingMarker.current.hidden = pendingLayers === 0;
     if(samePose)return;
     current.lastPoseTime=programmeTime;
     for (const node of stage.querySelectorAll('[data-studio-group-id]')) {
@@ -193,6 +209,8 @@ export default function StudioProgrammeFrame({ clockRef, mapTime, time, enabled 
     const update=()=>{const main=clockRef?.current;if(main&&!main.seeking&&main.readyState>=2)paintRef.current(studioPresentedSourceTime(main));};
     if(enabled)for(const node of stage?.querySelectorAll('[data-studio-layer-id]')||[]){
       const video=node.querySelector('[data-studio-overlay-decoder]');
+      // Every independent decoder can settle after the programme seek. Source
+      // identity permits pixel reuse; it must never determine readiness updates.
       if(!video)continue;wanted.add(video);
       if(!overlayBindings.current.has(video)){
         let stop,pausedFrame;
@@ -216,12 +234,19 @@ export default function StudioProgrammeFrame({ clockRef, mapTime, time, enabled 
       }
     }
     for(const [video,stop]of overlayBindings.current)if(!wanted.has(video)){stop();overlayBindings.current.delete(video);}
+    const pictures=new Set();
+    if(enabled)for(const node of stage?.querySelectorAll('[data-studio-matte-source-only]')||[]){
+      const picture=node.querySelector('img');if(!picture)continue;pictures.add(picture);
+      if(!imageBindings.current.has(picture)){picture.addEventListener('load',update);imageBindings.current.set(picture,()=>picture.removeEventListener('load',update));if(picture.complete)update();}
+    }
+    for(const [picture,stop]of imageBindings.current)if(!pictures.has(picture)){stop();imageBindings.current.delete(picture);}
   });
   useLayoutEffect(() => {
     const stage = marker.current?.parentElement;
     return () => {
       binding.current?.dispose();
       for(const stop of overlayBindings.current.values())stop();overlayBindings.current.clear();
+      for(const stop of imageBindings.current.values())stop();imageBindings.current.clear();
       // Release before the live subtree is removed. Detached media can keep
       // decoding/playing, including overlay audio, while the final file plays.
       for (const video of stage?.querySelectorAll('[data-studio-overlay-decoder]') || []) {
@@ -231,5 +256,5 @@ export default function StudioProgrammeFrame({ clockRef, mapTime, time, enabled 
       }
     };
   }, []);
-  return <><span ref={marker} hidden aria-hidden="true" />{children(time)}</>;
+  return <><span ref={marker} hidden aria-hidden="true" /><span ref={loadingMarker} hidden className="studio-layer-loading" data-testid="studio-layer-loading" role="status" aria-live="polite">Preparing preview layers…</span>{children(time)}</>;
 }

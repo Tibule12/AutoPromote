@@ -1,0 +1,18 @@
+{
+  "isolatedControllerOnly": true,
+  "ruleRuntimeAlive": true,
+  "jsResponseObservation": [],
+  "sdkUploadsTimedOut": true,
+  "normalBackendFallbackObserved": true,
+  "backendUploads201": 10,
+  "rateLimit429Observed": true,
+  "securityRulesUnchanged": true,
+  "inspectorWasLoopbackOnly": true,
+  "inspectorClosed": true,
+  "noProductionAccess": true,
+  "normalSignedInMetadataBeforeMs": 12002,
+  "normalSignedInMetadataBefore": "timeout",
+  "normalSignedInMetadataAfterStatus": 200,
+  "normalSignedInMetadataAfterMs": 151,
+  "sameRulesRestartEvidence": "rules-runtime-recovery.json"
+}

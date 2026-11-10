@@ -1,186 +1,58 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import {render,screen,fireEvent,waitFor} from '@testing-library/react';
 import StudioDirectorCreativePanel from '../StudioDirectorCreativePanel';
-import { studioCreativePlannerStatus, requestStudioCreativePlan } from '../studioDirectorCreativeClient';
-import { measureDirectorSources } from '../studioDirectorComposition';
-import { getAuth } from 'firebase/auth';
+import {studioCreativePlannerStatus,requestStudioCreativePlan,reviseDirectorFragment,reviseDirectorPoster} from '../studioDirectorCreativeClient';
+import {measureDirectorSources} from '../studioDirectorComposition';
+import {getAuth} from 'firebase/auth';
+jest.mock('../studioDirectorComposition',()=>({...jest.requireActual('../studioDirectorComposition'),measureDirectorSources:jest.fn(async context=>context)}));
+jest.mock('../studioDirectorCreativeClient',()=>({studioCreativePlannerStatus:jest.fn(),requestStudioCreativePlan:jest.fn(),reviseDirectorFragment:jest.fn(),reviseDirectorPoster:jest.fn()}));
+jest.mock('firebase/auth',()=>({getAuth:jest.fn()}));
+const state=()=>({studioDocument:{projectId:'project',revision:2,outputTimeMap:[{outputRange:{endTick:1080000}}]},projectMedia:[{id:'city',name:'City.mp4',duration:15,status:'ready',storagePath:'owned/source',contentHash:'a'.repeat(64),url:'http://localhost/source.mp4'}]});
+const proposal=()=>({version:1,projectId:'project',baseRevision:2,brief:'Make it move.',duration:12,sourceEvidence:[{id:'city',contentHash:'a'.repeat(64)}],fingerprint:'a'.repeat(64),provenance:{automaticModelPlanning:true},storyboard:{name:'Motion study',shots:[{sourceMediaId:'city',sourceStart:0,duration:12,treatment:'time_weave',reason:'Build a visual rhythm.'}]}});
+beforeEach(()=>{jest.clearAllMocks();measureDirectorSources.mockImplementation(async context=>context);getAuth.mockReturnValue({currentUser:{uid:'owner',getIdToken:async()=> 'emulator-token'}});studioCreativePlannerStatus.mockResolvedValue({available:true});requestStudioCreativePlan.mockResolvedValue(proposal());});
+async function prepare(){fireEvent.change(screen.getByLabelText('Director creative brief'),{target:{value:'Make it move.'}});await waitFor(()=>expect(screen.getByRole('button',{name:'Create my motion edit'}).disabled).toBe(false));fireEvent.click(screen.getByRole('button',{name:'Create my motion edit'}));}
+test('brief creates a reviewable storyboard and only explicit Apply changes the ordinary editor',async()=>{
+ const getSnapshot=jest.fn(state),onApply=jest.fn().mockResolvedValue();render(<StudioDirectorCreativePanel getSnapshot={getSnapshot} onApply={onApply}/>);
+ expect(getSnapshot).not.toHaveBeenCalled();await prepare();await screen.findByRole('button',{name:'Apply Director edit'});expect(onApply).not.toHaveBeenCalled();expect(screen.getByLabelText('Director storyboard').textContent).toMatch(/City.mp4/);
+ fireEvent.click(screen.getByRole('button',{name:'Apply Director edit'}));await waitFor(()=>expect(onApply).toHaveBeenCalledTimes(1));expect(onApply.mock.calls[0][0].actions.filter(a=>a.type==='media_plane')).toHaveLength(6);
+});
+test('Discard preserves the timeline',async()=>{const onApply=jest.fn();render(<StudioDirectorCreativePanel getSnapshot={state} onApply={onApply}/>);await prepare();await screen.findByRole('button',{name:'Discard plan'});fireEvent.click(screen.getByRole('button',{name:'Discard plan'}));expect(onApply).not.toHaveBeenCalled();expect(screen.queryByRole('button',{name:'Apply Director edit'})).toBeNull();});
+test('a changed revision or sign-in refuses Apply',async()=>{const current=state(),onApply=jest.fn();render(<StudioDirectorCreativePanel getSnapshot={()=>current} onApply={onApply}/>);await prepare();await screen.findByRole('button',{name:'Apply Director edit'});current.studioDocument.revision=3;fireEvent.click(screen.getByRole('button',{name:'Apply Director edit'}));await waitFor(()=>expect(screen.getByRole('status').textContent).toMatch(/project changed/));expect(onApply).not.toHaveBeenCalled();});
+test('an unavailable planner does not pretend to plan or silently fall back to a recipe',async()=>{studioCreativePlannerStatus.mockResolvedValue({available:false});render(<StudioDirectorCreativePanel getSnapshot={state} onApply={jest.fn()}/>);await screen.findByText('Director planning is not enabled in this environment.');expect(screen.getByRole('button',{name:'Create my motion edit'}).disabled).toBe(true);expect(requestStudioCreativePlan).not.toHaveBeenCalled();});
 
-jest.mock('../studioDirectorComposition', () => ({
-  ...jest.requireActual('../studioDirectorComposition'),
-  measureDirectorSources: jest.fn(async context => ({
-    ...context,
-    pixelEvidence: context.media.map(m => ({
-      id: m.id,
-      contentHash: m.contentHash,
-      method: 'decoded_rgb_96x54_three_samples_v1',
-      samples: [1, 4, 7].map(time => ({
-        time,
-        meanRgb: [108, 92, 74],
-        luma: 95,
-        tonalEntropy: 2.9,
-        frameDifference: 22,
-        motionCentroid: [52, 46],
-      })),
-    })),
-  })),
-}));
-jest.mock('../studioDirectorCreativeClient', () => ({
-  studioCreativePlannerStatus: jest.fn(),
-  requestStudioCreativePlan: jest.fn(),
-}));
-jest.mock('firebase/auth', () => ({ getAuth: jest.fn() }));
 
-const state = () => ({
-  studioDocument: {
-    projectId: 'project',
-    revision: 2,
-    outputTimeMap: [{ outputRange: { endTick: 1080000 } }],
-  },
-  projectMedia: [
-    {
-      id: 'city',
-      name: 'City.mp4',
-      duration: 15,
-      status: 'ready',
-      storagePath: 'owned/source',
-      contentHash: 'a'.repeat(64),
-      url: 'http://localhost/source.mp4',
-    },
-  ],
+test('changing the signed-in owner after review refuses Apply',async()=>{
+ const onApply=jest.fn();render(<StudioDirectorCreativePanel getSnapshot={state} onApply={onApply}/>);await prepare();await screen.findByRole('button',{name:'Apply Director edit'});
+ getAuth.mockReturnValue({currentUser:{uid:'different-owner',getIdToken:async()=> 'different'}});fireEvent.click(screen.getByRole('button',{name:'Apply Director edit'}));
+ await waitFor(()=>expect(screen.getByRole('status').textContent).toMatch(/sign-in changed/));expect(onApply).not.toHaveBeenCalled();
 });
 
-const proposal = () => ({
-  version: 1,
-  projectId: 'project',
-  baseRevision: 2,
-  brief: 'Make it move.',
-  duration: 12,
-  sourceEvidence: [{ id: 'city', contentHash: 'a'.repeat(64) }],
-  fingerprint: 'a'.repeat(64),
-  provenance: { automaticModelPlanning: true },
-  storyboard: {
-    name: 'Motion study',
-    shots: [
-      {
-        sourceMediaId: 'city',
-        sourceStart: 0,
-        duration: 12,
-        treatment: 'time_weave',
-        reason: 'Build a visual rhythm.',
-      },
-    ],
-  },
+test('a reviewed Director node plan opens the actual node workspace only after native Apply succeeds',async()=>{
+ const p={version:3,projectId:'project',baseRevision:2,brief:'Make it move.',duration:12,sourceEvidence:[{id:'city',contentHash:'a'.repeat(64)}],fingerprint:'b'.repeat(64),provenance:{automaticModelPlanning:true},nodePlan:{name:'Node portals',concept:'A controller moves a picture window.',nodes:[{id:'paper',kind:'solid',color:'#102030',poses:[[0,50,50,1,0,1]]},{id:'controller',kind:'rig',poses:[[0,50,50,1,0,1]]},{id:'window',kind:'ellipse',color:'#ffffff',poses:[[0,70,50,.6,0,1]]},{id:'city',kind:'video',source:1,poses:[[0,50,50,1,0,1]]}],links:[{from:'controller',to:'window',port:'Parent'},{from:'window',to:'city',port:'Mask',mode:'alpha'}],drivers:[{target:'controller',property:'rotation',type:'spin',rate:12}]}};
+ requestStudioCreativePlan.mockResolvedValue(p);const onApply=jest.fn(async()=>{}),onOpenNodes=jest.fn();render(<StudioDirectorCreativePanel getSnapshot={state} onApply={onApply} onOpenNodes={onOpenNodes}/>);await prepare();await screen.findByRole('button',{name:'Apply Director edit'});expect(screen.getByText('4 nodes · 2 connections · 1 motion drivers')).toBeInTheDocument();expect(onOpenNodes).not.toHaveBeenCalled();fireEvent.click(screen.getByRole('button',{name:'Apply Director edit'}));await waitFor(()=>expect(onOpenNodes).toHaveBeenCalledTimes(1));expect(onApply.mock.calls[0][0].actions).toEqual(expect.arrayContaining([expect.objectContaining({type:'node_connect',port:'Mask'}),expect.objectContaining({type:'motion_driver'})]));
 });
 
-beforeEach(() => {
-  jest.clearAllMocks();
-  measureDirectorSources.mockImplementation(async context => ({
-    ...context,
-    pixelEvidence: context.media.map(m => ({
-      id: m.id,
-      contentHash: m.contentHash,
-      method: 'decoded_rgb_96x54_three_samples_v1',
-      samples: [1, 4, 7].map(time => ({
-        time,
-        meanRgb: [108, 92, 74],
-        luma: 95,
-        tonalEntropy: 2.9,
-        frameDifference: 22,
-        motionCentroid: [52, 46],
-      })),
-    })),
-  }));
-  getAuth.mockReturnValue({ currentUser: { uid: 'owner', getIdToken: async () => 'emulator-token' } });
-  studioCreativePlannerStatus.mockResolvedValue({ available: true });
-  requestStudioCreativePlan.mockResolvedValue(proposal());
+test('editing fragment defaults requires explicit Update and retains the normal stale-project guard',async()=>{
+ const current=state();current.projectMedia.push({...current.projectMedia[0],id:'coast',name:'Coast.mp4',contentHash:'b'.repeat(64)});
+ const f={outgoing:1,incoming:2,count:3,axis:'x',background:'#123dff',holdSeconds:1,fanSeconds:3,switchSeconds:5,resolveSeconds:9,scale:.75,spread:4,fanDegrees:5,staggerSeconds:.05,direction:'up'};
+ const expand=require('../studioFragmentTransition').expandFragmentTransition;
+ const p={version:3,projectId:'project',baseRevision:2,brief:'Make it move.',duration:12,sourceEvidence:current.projectMedia.map(m=>({id:m.id,contentHash:m.contentHash})),fingerprint:'a'.repeat(64),provenance:{automaticModelPlanning:true,fragmentIntent:f},nodePlan:expand({name:'Cut',concept:'A field of moving footage.',fragment:f},12)};
+ requestStudioCreativePlan.mockResolvedValue(p);reviseDirectorFragment.mockImplementation(async(plan,fragment)=>({...plan,fingerprint:'b'.repeat(64),provenance:{...plan.provenance,fragmentIntent:fragment,manualOperatorRevision:true},nodePlan:expand({name:'Cut',concept:'A field of moving footage.',fragment},12)}));
+ const onApply=jest.fn();render(<StudioDirectorCreativePanel getSnapshot={()=>current} onApply={onApply}/>);await prepare();await screen.findByRole('button',{name:'Apply Director edit'});
+ fireEvent.change(screen.getByLabelText('Picture settles (s)'),{target:{value:'10'}});expect(screen.getByRole('button',{name:'Apply Director edit'})).toBeDisabled();expect(onApply).not.toHaveBeenCalled();
+ fireEvent.click(screen.getByRole('button',{name:'Update motion settings'}));await waitFor(()=>expect(screen.getByRole('button',{name:'Apply Director edit'})).not.toBeDisabled());expect(reviseDirectorFragment).toHaveBeenCalledWith(p,expect.objectContaining({resolveSeconds:10}));expect(requestStudioCreativePlan).toHaveBeenCalledTimes(1);
+ current.studioDocument.revision=3;fireEvent.click(screen.getByRole('button',{name:'Apply Director edit'}));await waitFor(()=>expect(screen.getByRole('status').textContent).toMatch(/project changed/));expect(onApply).not.toHaveBeenCalled();
 });
 
-async function prepare() {
-  fireEvent.change(screen.getByLabelText('Director creative brief'), {
-    target: { value: 'Make it move.' },
-  });
-  await waitFor(() =>
-    expect(screen.getByRole('button', { name: 'Create my motion edit' }).disabled).toBe(false)
-  );
-  fireEvent.click(screen.getByRole('button', { name: 'Create my motion edit' }));
-}
-
-test('brief creates a reviewable storyboard and only explicit Apply changes the ordinary editor', async () => {
-  const getSnapshot = jest.fn(state);
-  const onApply = jest.fn().mockResolvedValue();
-  render(<StudioDirectorCreativePanel getSnapshot={getSnapshot} onApply={onApply} />);
-  expect(getSnapshot).not.toHaveBeenCalled();
-  await prepare();
-  await screen.findByRole('button', { name: 'Apply Director edit' });
-  expect(onApply).not.toHaveBeenCalled();
-  expect(screen.getByLabelText('Director storyboard').textContent).toMatch(/City.mp4/);
-  fireEvent.click(screen.getByRole('button', { name: 'Apply Director edit' }));
-  await waitFor(() => expect(onApply).toHaveBeenCalledTimes(1));
-  expect(onApply.mock.calls[0][0].actions.filter(a => a.type === 'media_plane')).toHaveLength(6);
+test('kinetic motion graphics is a distinct native authoring approach without footage inspection',async()=>{
+ const p={version:4,projectId:'project',baseRevision:2,brief:'Make it move.',duration:12,sourceEvidence:[{id:'city',contentHash:'a'.repeat(64)}],fingerprint:'c'.repeat(64),provenance:{automaticModelPlanning:true,authoredMotionOperator:true},poster:{name:'Make it move',words:['MAKE','IT','MOVE'],palette:'orange_ink',energy:.9}};
+ requestStudioCreativePlan.mockResolvedValue(p);const onApply=jest.fn(async()=>{}),onOpenNodes=jest.fn();render(<StudioDirectorCreativePanel getSnapshot={state} onApply={onApply} onOpenNodes={onOpenNodes}/>);expect(screen.getByLabelText('Director design approach')).toHaveValue('poster');await prepare();await screen.findByRole('button',{name:'Apply Director edit'});expect(measureDirectorSources).not.toHaveBeenCalled();expect(requestStudioCreativePlan.mock.calls[0][0].compositionVersion).toBe(4);fireEvent.click(screen.getByRole('button',{name:'Apply Director edit'}));await waitFor(()=>expect(onOpenNodes).toHaveBeenCalledTimes(1));const plan=onApply.mock.calls[0][0];expect(plan.graphics.layers.some(l=>l.vectorShape&&l.mask)).toBe(true);expect(plan.actions.some(a=>a.type==='keys'&&a.keys.some(k=>k.property==='strokeEnd'))).toBe(true);
 });
 
-test('Discard preserves the timeline', async () => {
-  const onApply = jest.fn();
-  render(<StudioDirectorCreativePanel getSnapshot={state} onApply={onApply} />);
-  await prepare();
-  await screen.findByRole('button', { name: 'Discard plan' });
-  fireEvent.click(screen.getByRole('button', { name: 'Discard plan' }));
-  expect(onApply).not.toHaveBeenCalled();
-  expect(screen.queryByRole('button', { name: 'Apply Director edit' })).toBeNull();
-});
+test('footage fragments remain selectable and retain source inspection',async()=>{render(<StudioDirectorCreativePanel getSnapshot={state} onApply={jest.fn()}/>);fireEvent.change(screen.getByLabelText('Director design approach'),{target:{value:'fragments'}});await prepare();await screen.findByRole('button',{name:'Apply Director edit'});expect(measureDirectorSources).toHaveBeenCalledTimes(1);expect(requestStudioCreativePlan.mock.calls[0][0].compositionVersion).toBe(3);});
 
-test('a changed revision or sign-in refuses Apply', async () => {
-  const current = state();
-  const onApply = jest.fn();
-  render(<StudioDirectorCreativePanel getSnapshot={() => current} onApply={onApply} />);
-  await prepare();
-  await screen.findByRole('button', { name: 'Apply Director edit' });
-  current.studioDocument.revision = 3;
-  fireEvent.click(screen.getByRole('button', { name: 'Apply Director edit' }));
-  await waitFor(() => expect(screen.getByRole('status').textContent).toMatch(/project changed/));
-  expect(onApply).not.toHaveBeenCalled();
-});
-
-test('an unavailable planner does not pretend to plan or silently fall back to a recipe', async () => {
-  studioCreativePlannerStatus.mockResolvedValue({ available: false });
-  render(<StudioDirectorCreativePanel getSnapshot={state} onApply={jest.fn()} />);
-  await screen.findByText('Director planning is not enabled in this environment.');
-  expect(screen.getByRole('button', { name: 'Create my motion edit' }).disabled).toBe(true);
-  expect(requestStudioCreativePlan).not.toHaveBeenCalled();
-});
-
-test('changing the signed-in owner after review refuses Apply', async () => {
-  const onApply = jest.fn();
-  render(<StudioDirectorCreativePanel getSnapshot={state} onApply={onApply} />);
-  await prepare();
-  await screen.findByRole('button', { name: 'Apply Director edit' });
-  getAuth.mockReturnValue({
-    currentUser: { uid: 'different-owner', getIdToken: async () => 'different' },
-  });
-  fireEvent.click(screen.getByRole('button', { name: 'Apply Director edit' }));
-  await waitFor(() => expect(screen.getByRole('status').textContent).toMatch(/sign-in changed/));
-  expect(onApply).not.toHaveBeenCalled();
-});
-
-test('Choreograph Source-Bound Cinema Graph builds Null Rigs, Track Mattes, Motion Drivers, animated mask keys and 3D LUT Color Grade from measured clip telemetry', async () => {
-  const onApply = jest.fn().mockResolvedValue();
-  render(<StudioDirectorCreativePanel getSnapshot={state} onApply={onApply} />);
-  fireEvent.change(screen.getByLabelText('Director creative brief'), {
-    target: { value: 'Neon cyberpunk portal with whip pan and beat grade pulses' },
-  });
-  fireEvent.change(screen.getByTestId('director-look-select'), {
-    target: { value: 'neon_cyber' },
-  });
-  fireEvent.click(screen.getByTestId('director-choreograph-btn'));
-  await screen.findByRole('button', { name: 'Apply Director edit' });
-  const topology = screen.getByTestId('director-topology-summary');
-  expect(topology.textContent).toMatch(/Rigs: 1/);
-  expect(topology.textContent).toMatch(/Mattes: 1/);
-  expect(topology.textContent).toMatch(/Drivers: 2/);
-  expect(topology.textContent).toMatch(/Look: Neon Cyberpunk/);
-  fireEvent.click(screen.getByRole('button', { name: 'Apply Director edit' }));
-  await waitFor(() => expect(onApply).toHaveBeenCalledTimes(1));
-  const appliedPlan = onApply.mock.calls[0][0];
-  expect(appliedPlan.actions.some(a => a.type === 'null' && a.motionDrivers)).toBe(true);
-  expect(appliedPlan.actions.some(a => a.type === 'finish_grade')).toBe(true);
-});
+ test('poster wording changes remain pending until explicit Update and stale Apply stays guarded',async()=>{
+ const p={version:4,projectId:'project',baseRevision:2,brief:'Make it move.',duration:12,sourceEvidence:[{id:'city',contentHash:'a'.repeat(64)}],fingerprint:'c'.repeat(64),provenance:{automaticModelPlanning:true},poster:{name:'Draft',words:['EXACT','MOVE','ORANGE'],palette:'orange_ink',energy:.9}};
+ requestStudioCreativePlan.mockResolvedValue(p);reviseDirectorPoster.mockImplementation(async(plan,poster)=>({...plan,poster,fingerprint:'d'.repeat(64),provenance:{...plan.provenance,manualOperatorRevision:true}}));const current=state(),onApply=jest.fn();render(<StudioDirectorCreativePanel getSnapshot={()=>current} onApply={onApply}/>);await prepare();await screen.findByLabelText('Motion design word 1');
+ for(const [i,w]of ['MAKE','IT','MOVE'].entries())fireEvent.change(screen.getByLabelText(`Motion design word ${i+1}`),{target:{value:w}});expect(screen.getByRole('button',{name:'Apply Director edit'})).toBeDisabled();fireEvent.click(screen.getByRole('button',{name:'Update motion design'}));await waitFor(()=>expect(screen.getByRole('button',{name:'Apply Director edit'})).not.toBeDisabled());expect(reviseDirectorPoster).toHaveBeenCalledWith(p,expect.objectContaining({words:['MAKE','IT','MOVE']}));expect(requestStudioCreativePlan).toHaveBeenCalledTimes(1);current.studioDocument.revision=3;fireEvent.click(screen.getByRole('button',{name:'Apply Director edit'}));await waitFor(()=>expect(screen.getByRole('status').textContent).toMatch(/project changed/));expect(onApply).not.toHaveBeenCalled();
+ });

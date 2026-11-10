@@ -1,0 +1,14 @@
+{
+  "recordedAt": "2026-11-07T08:20:28.151840+00:00",
+  "status": "OWNER_REJECTED_VERY_POOR",
+  "movieSha256": "75c183d75d6c3719902f0c23ab5911b4934518ce588c1aa538ba7dbc931b518d",
+  "technicalEvidencePreserved": true,
+  "creativeApproval": false,
+  "ownerFeedback": "very poor",
+  "findings": [
+    "The four-treatment selector constrains creative freedom contrary to the existing request.",
+    "Two floating cards, a strip effect and a plain cut do not form a compelling cinematic composition.",
+    "Metadata-only decisions do not ground scene design in real footage or subject motion."
+  ],
+  "next": "Replace primitive recipe selection with a bounded, reviewed composition graph using existing masks/mattes/rigs/keys and real source-bound evidence. Preserve all rejected movies/projects."
+}

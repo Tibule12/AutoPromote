@@ -54,7 +54,6 @@ import StudioAdjustmentControls from "./StudioAdjustmentControls";
 import "./StudioMotionFlow.css";
 
 const NODE_WIDTH = 166;
-const NODE_HEIGHT = 82;
 
 const PORT_OFFSETS = {
   in: {
@@ -386,7 +385,7 @@ export default function StudioNodeFlow({
       const wrapH = wrapEl?.clientHeight || 200;
       const scaleX = (wrapW - 24) / Math.max(240, targetBounds.width);
       const scaleY = (wrapH - 20) / Math.max(150, targetBounds.height);
-      const nextZoom = Number(Math.max(0.45, Math.min(1.15, Math.min(scaleX, scaleY))).toFixed(2));
+      const nextZoom = Number(Math.max(0.08, Math.min(1.15, Math.min(scaleX, scaleY))).toFixed(2));
       const nextPan = {
         x: Math.round(Math.max(4, (wrapW - targetBounds.width * nextZoom) * 0.5)),
         y: Math.round(Math.max(4, (wrapH - targetBounds.height * nextZoom) * 0.5)),
@@ -912,6 +911,12 @@ export default function StudioNodeFlow({
         </div>
 
         <div className="ap-node-flow-view-controls">
+          <label className="ap-comp-field"><span>Inspect node</span>
+            <select className="ap-comp-select" aria-label="Inspect node" value={selectedNode?.id || ''}
+              onChange={event => { const node = nodeMap.get(event.target.value); handleSelectNode(node); handleFitView(); }}>
+              {graph.nodes.map(node => <option key={node.id} value={node.id}>{node.label || node.id}</option>)}
+            </select>
+          </label>
           <button
             type="button"
             className={`ap-flow-ctrl-btn ${isSplitActive ? "is-active" : ""}`}
@@ -931,6 +936,7 @@ export default function StudioNodeFlow({
             type="button"
             className="ap-flow-ctrl-btn"
             data-testid="flow-fit-view"
+            aria-label="Fit graph"
             onClick={() => handleFitView()}
             title="Fit entire node graph into viewport"
           >
@@ -948,9 +954,9 @@ export default function StudioNodeFlow({
           <div className="ap-flow-zoom-pill">
             <button
               type="button"
-              aria-label="Zoom out node graph"
+              aria-label="Zoom node graph out"
               onClick={() => {
-                const next = Math.max(0.45, Number((zoom - 0.1).toFixed(2)));
+                const next = Math.max(0.08, Number((zoom - 0.1).toFixed(2)));
                 setZoom(next);
               }}
             >

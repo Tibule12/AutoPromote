@@ -1,0 +1,13 @@
+{
+  "nativeBrowserVsCpu": true,
+  "size": [
+    64,
+    128
+  ],
+  "reflectionContactY": 70,
+  "sameDeclaredReflectionAndFade": true,
+  "alphaMaxByteDifference": 14.0,
+  "overBlackMaxByteDifference": 14.0,
+  "overBlackMeanByteDifference": 0.4732476128472222,
+  "strictLowAlphaPixelParity": false
+}

@@ -100,7 +100,7 @@ Edit property keys, spatial position handles and value/velocity graphs on the sa
 
 **Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Modify Director edits manually](../task-guides/task-director_manual.md), [Edit a video in your own style](../task-guides/task-own_style.md)
 
-**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
+**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2, creator_identity_v1@1.0.0, prism_cuts_v1@1.0.0, momentum_v1@1.0.0, momentum_v1@1.0.1, aperture_product_v1@1.0.0, editorial_fan_v1@1.0.0, editorial_fan_v1@1.0.1, split_impact_v1@1.0.0, coastal_postcards_v1@1.0.0, vinyl_pulse_v1@1.0.0, living_infinity_v1@1.0.0, living_infinity_v1@1.0.1
 
 ## Motion easing
 

@@ -1,0 +1,18 @@
+{
+  "origin": "http://127.0.0.1:45109",
+  "build": "/dev/shm/autopromote-phase-shift-controls-20261106-r3-build",
+  "mainAsset": "/static/js/main.cc753e58.js",
+  "mainSha256": "d225e96fb3d6baa016849ed4f6997c74ff1e43556f3db4682967549aab13d27a",
+  "activeOperations": 0,
+  "demoProject": "demo-autopromote-credits",
+  "workerPid": 400768,
+  "workerCwd": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105",
+  "previewOrigins": [],
+  "stoppedOwnedCandidates": [
+    412846
+  ],
+  "temporaryDependencyLinkRemoved": true,
+  "otherProcessesUntouched": true,
+  "paidCalls": 0,
+  "productionWrites": 0
+}

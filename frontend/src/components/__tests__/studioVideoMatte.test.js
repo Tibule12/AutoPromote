@@ -26,6 +26,12 @@ test('pending/absent decoders do not produce a fake rectangular matte',()=>{
  const uri=buildTrackMatteStageSvgDataUri({matteLayer:{...layer,id:'m'},overlays:[],time:5,stageAspect:16/9});
  expect(decodeURIComponent(uri)).not.toContain('<rect');expect(decodeURIComponent(uri)).not.toContain('<text');
 });
+test('an owned shared picture supplies matte pixels while the unused clone decoder is pending',()=>{
+ const {canvas,ctx}=drawing(),picture={width:1280,height:720};
+ expect(studioVideoMatteUri({video:{readyState:0,seeking:true},picture,layer,pose,time:5,aspect:16/9,canvas})).toBe(canvas);
+ expect(ctx.drawImage).toHaveBeenCalledWith(picture,-320,-180,640,360);
+ expect(studioVideoMatteUri({video,picture:{width:0,height:0},layer,pose,time:5,aspect:16/9,canvas})).toBeNull();
+});
 test('cover clips to its transformed rectangle and portrait work stays bounded',()=>{
  const {canvas,ctx}=drawing();studioVideoMatteUri({video,layer:{...layer,mediaFit:'cover',anchorX:0,anchorY:0},pose:{...pose,rotation:90,opacity:.5},time:5,aspect:9/16,canvas});
  expect([canvas.width,canvas.height]).toEqual([360,640]);expect(ctx.rotate).toHaveBeenCalledWith(Math.PI/2);expect(ctx.clip).toHaveBeenCalled();expect(ctx.globalAlpha).toBe(.5);
@@ -40,4 +46,11 @@ test('shared authoring validation accepts a silent 2D video matte and refuses un
  const source={id:'matte',type:'video'},fill={id:'fill',type:'video',trackMatte:{mode:'luma',sourceLayerId:'matte'}};
  expect(validateStudioTrackMattes([source,fill])).toBe(true);
  for(const effect of [{perspective:{}},{mask:{enabled:true}},{motionBlur:{enabled:true}},{layerShadow:{enabled:true}},{glow:{enabled:true}},{useOverlayAudio:true},{bRollMode:'fullscreen'}])expect(()=>validateStudioTrackMattes([{...source,...effect},fill])).toThrow(/Video matte sources/);
+});
+
+test('an ordinary transparent bitmap matte begins transparent until its actual pixels are available',()=>{
+ const uri=buildTrackMatteStageSvgDataUri({matteLayer:{id:'circle',type:'image',src:'blob:circle',width:100,height:100,startTime:0,duration:6},overlays:[],time:2,stageAspect:16/9});
+ expect(decodeURIComponent(uri)).not.toContain('<rect');expect(decodeURIComponent(uri)).not.toContain('<ellipse');
+ const {canvas,ctx}=drawing(),picture={naturalWidth:1280,naturalHeight:720};
+ expect(studioVideoMatteUri({picture,layer,pose,time:5,aspect:16/9,canvas})).toBe(canvas);expect(ctx.drawImage).toHaveBeenCalledWith(picture,-320,-180,640,360);
 });

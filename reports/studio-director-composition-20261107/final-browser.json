@@ -1,0 +1,36 @@
+{
+  "headless": true,
+  "muted": true,
+  "anonymousViewports": [
+    {
+      "width": 1440,
+      "scroll": 1440,
+      "bodyText": 2953
+    },
+    {
+      "width": 1280,
+      "scroll": 1280,
+      "bodyText": 2953
+    },
+    {
+      "width": 768,
+      "scroll": 768,
+      "bodyText": 2614
+    },
+    {
+      "width": 390,
+      "scroll": 390,
+      "bodyText": 2584
+    }
+  ],
+  "normalSignIn": true,
+  "actualHelpRequest": true,
+  "helpStatus": 200,
+  "browserErrors": [],
+  "nonLoopbackRequestsContinued": false,
+  "mainAsset": "/static/js/main.e641e25e.js",
+  "mainSha256": "9150fdbb6f8ccad440680e88ffebdce938dfc1aca160a6ceea44b50e02ecd160",
+  "build": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105/reports/studio-director-composition-20261107/private/runtime/autopromote-application-demo-6YGcoz/build",
+  "oldParallelWelcomeBuildLostWithRuntime": true,
+  "earlierPairedWelcomeChecksRetained": 16
+}

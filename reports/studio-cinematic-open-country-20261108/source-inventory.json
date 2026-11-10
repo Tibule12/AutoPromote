@@ -1,0 +1,82 @@
+[
+  {
+    "file": "/home/tibule12/Videos/WhatsApp Video 2026-11-03 at 04.58.10 (1).mp4",
+    "seconds": 4.633333,
+    "width": 464,
+    "height": 832,
+    "fps": "60/1",
+    "audio": true
+  },
+  {
+    "file": "/home/tibule12/Videos/WhatsApp Video 2026-11-03 at 04.58.10 (2).mp4",
+    "seconds": 19.635,
+    "width": 464,
+    "height": 832,
+    "fps": "60/1",
+    "audio": true
+  },
+  {
+    "file": "/home/tibule12/Videos/WhatsApp Video 2026-11-03 at 04.58.10.mp4",
+    "seconds": 19.166667,
+    "width": 1024,
+    "height": 576,
+    "fps": "30/1",
+    "audio": true
+  },
+  {
+    "file": "/home/tibule12/Videos/WhatsApp Video 2026-11-03 at 04.58.11.mp4",
+    "seconds": 13.408333,
+    "width": 832,
+    "height": 464,
+    "fps": "60000/1001",
+    "audio": true
+  },
+  {
+    "file": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/reports/studio-motion-flow-takeover-20261031/video-texture/open-world-sources/Coast.mp4",
+    "seconds": 12.0,
+    "width": 1280,
+    "height": 720,
+    "fps": "24/1",
+    "audio": false
+  },
+  {
+    "file": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/reports/studio-motion-flow-takeover-20261031/video-texture/open-world-sources/Autumn.mp4",
+    "seconds": 12.0,
+    "width": 1280,
+    "height": 720,
+    "fps": "24/1",
+    "audio": false
+  },
+  {
+    "file": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/reports/studio-motion-flow-takeover-20261031/video-texture/open-world-sources/City.mp4",
+    "seconds": 10.0,
+    "width": 1280,
+    "height": 720,
+    "fps": "24/1",
+    "audio": false
+  },
+  {
+    "file": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/reports/studio-motion-flow-takeover-20261031/video-texture/open-world-sources/Open trail.mp4",
+    "seconds": 8.0,
+    "width": 1280,
+    "height": 720,
+    "fps": "24/1",
+    "audio": false
+  },
+  {
+    "file": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/reports/studio-motion-flow-takeover-20261031/video-texture/open-world-sources/Summit.mp4",
+    "seconds": 12.0,
+    "width": 1280,
+    "height": 720,
+    "fps": "24/1",
+    "audio": false
+  },
+  {
+    "file": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/reports/studio-motion-flow-takeover-20261031/video-texture/open-world-sources/Footsteps.mp4",
+    "seconds": 6.0,
+    "width": 1280,
+    "height": 720,
+    "fps": "24/1",
+    "audio": false
+  }
+]

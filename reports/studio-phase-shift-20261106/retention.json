@@ -1,0 +1,10 @@
+{
+  "archive": "reports/studio-phase-shift-20261106/private/native-proof-and-demo-evidence.tar.gz",
+  "archiveSha256": "36534fe4b820386d95654c6c762b56b8d47c3afe9bd473002aa4b0b0f8f1013a",
+  "files": 220,
+  "bytes": 71693581,
+  "roundTripHashesVerified": true,
+  "demoOnly": true,
+  "authSessionsIncluded": false,
+  "replayOfCompleteOriginalEmulatorClaimed": false
+}

@@ -1,0 +1,17 @@
+{
+  "completePriorExportRestored": true,
+  "source": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105/reports/studio-dance-realism-20261108/private/emulator-final-export",
+  "oldestLostOctoberHistoryRecovered": false,
+  "priorFreshCohortBalancePreserved": 7,
+  "reserved": 0,
+  "operations": 27,
+  "activeOperations": 0,
+  "auth": true,
+  "firestore": true,
+  "storage": true,
+  "newVideoObjects": 9,
+  "newVideoSignedGenerationsPreserved": true,
+  "pid": 147799,
+  "firestorePid": 147836,
+  "productionChange": false
+}

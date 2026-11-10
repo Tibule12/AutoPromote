@@ -1,0 +1,147 @@
+{
+  "recordedDate": "2026-11-08",
+  "movieSha256": "b047ad2171665b41242451ad8468b8fd0d4d031a37df099698726e72eb339966",
+  "nativeJobId": "viral_87018777759d0e861bf3fb87a616645d328309195f39bd8b879a4e4cd5eab28e",
+  "verdict": "HOLD_PUBLICATION_FOR_PICTURE_AND_AUDIO_CORRECTION",
+  "all144FramesRepresentedInInspectedContactSheets": true,
+  "inspectedSheetGroups": [
+    "full",
+    "faces-hands",
+    "feet",
+    "cleanup"
+  ],
+  "inspectedPagesPerGroup": 6,
+  "pictureFindings": [
+    {
+      "area": "masked corner reconstruction",
+      "severity": "release blocker",
+      "timesSeconds": [
+        1.1667,
+        1.375,
+        4.0,
+        5.75,
+        5.7917,
+        5.9583
+      ],
+      "observation": "Soft rectangular floor/backdrop texture and a hard transition remain; red shoe/lower-leg detail is clipped or displaced at the closing crossing. See labelled original/export crops."
+    },
+    {
+      "area": "echo mattes and grounding",
+      "severity": "quality blocker for realism claim",
+      "timesSeconds": [
+        1.2,
+        1.5,
+        3,
+        4.5,
+        5.4
+      ],
+      "observation": "Soft subject edges, overlapping silhouettes and mismatched contact still read as a designed compositing effect, not independently lit physical dancers."
+    },
+    {
+      "area": "ending",
+      "severity": "editorial limitation",
+      "observation": "The last and first poses do not match; do not describe this as a seamless loop."
+    }
+  ],
+  "colour": {
+    "sourceMatrix": "bt709",
+    "exportMatrixTag": null,
+    "exportPrimariesAndTransfer": "bt709",
+    "finding": "Export lacks an explicit matrix tag retained by the source. Cross-player colour consistency remains unqualified; this alone does not prove a visible colour shift."
+  },
+  "audio": {
+    "source": {
+      "integratedLufs": -6.1,
+      "truePeakDbtp": 1.9,
+      "samplesPerChannel": 288000
+    },
+    "final": {
+      "integratedLufs": -7.1,
+      "truePeakDbtp": 0.7,
+      "samplesPerChannel": 288000
+    },
+    "sourceCorrelation": 0.9952974173843818,
+    "bestMeasuredLagMilliseconds": 0,
+    "humanListeningQualified": false,
+    "finding": "Source already overshoots; final is lower but still above full scale. This is measured overshoot and clipping risk, not proof of audible distortion.",
+    "correction": "Set conservative native output headroom, then remeasure the encoded result and listen to the entire final. Do not replace or stretch the original music."
+  },
+  "native": {
+    "backupCompilerWorkerDownloadBindingVerified": true,
+    "independentExactRestore": true,
+    "freshNormalSignIn": true,
+    "browserErrors": [],
+    "headlessAndMuted": true,
+    "loopbackOnly": true,
+    "freshPlayback": {
+      "live": {
+        "complete": true,
+        "wallMilliseconds": 6180,
+        "capturedFrames": 66,
+        "captureSeconds": 6.085000038146973,
+        "observedCaptureFps": 10.84634339954722,
+        "captureHasAudio": false,
+        "smooth24fpsDisplayQualified": false
+      },
+      "finished": {
+        "complete": true,
+        "wallMilliseconds": 6190,
+        "capturedFrames": 160,
+        "captureSeconds": 6.0899999141693115,
+        "observedCaptureFps": 26.272578366994004,
+        "captureHasAudio": false,
+        "smooth24fpsDisplayQualified": false
+      }
+    },
+    "pausedSelectedTimesInspected": [
+      0,
+      0.5,
+      0.8,
+      0.92,
+      1.05,
+      1.2,
+      1.5,
+      3,
+      4.5,
+      5.4,
+      5.65,
+      5.875,
+      5.958333333333333
+    ],
+    "strictPreviewExportParityQualified": false,
+    "limitations": [
+      "Cleanup in live preview is a placement guide, not the finished reconstructed picture.",
+      "Some paused screenshots include native cleanup handles; they are not baked into the movie.",
+      "A selected UI timestamp and a resized diagnostic image do not by themselves establish exact decoded-source-frame equality."
+    ]
+  },
+  "copy": {
+    "title": "One Clip. Three Moments at Once.",
+    "hook": "Watch what happens behind the dancers.",
+    "description": "The dancers move forward. Earlier versions stay behind. A dance edit exploring colour, timing and motion echoes in AutoPromote Studio.\n\nWould you try this on your footage?\n#AutoPromote #MotionGraphics #DanceEdit #VideoEditing",
+    "titleAccurate": true,
+    "maximumTemporalStatesDuringEffect": 3,
+    "hookPlacement": "Proposed opening of post caption; not burned in or spoken in this movie.",
+    "studioClaimScope": "Native editable layer/keyframe compositing and canonical CPU export; supplied foreground/alpha were prepared inputs.",
+    "doNotClaim": [
+      "fully automatic Director isolation",
+      "one-click result",
+      "photoreal duplication",
+      "seamless loop",
+      "pixel-identical live preview"
+    ]
+  },
+  "reviewLimits": [
+    "No human listening qualification.",
+    "No provider-transcoded upload, destination-specific crop or published-page check.",
+    "No selected thumbnail has been approved in this review."
+  ],
+  "movieChanged": false,
+  "productSourceChangedByReview": false,
+  "newRenderSubmitted": false,
+  "paidExecutionStarted": false,
+  "published": false,
+  "scheduled": false,
+  "readinessPromotion": false,
+  "nextTask": "Correct the corner/body boundary and output headroom through the native project; recheck exact new bytes, temporal mattes, listening and thumbnail before publication."
+}

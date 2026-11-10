@@ -1,0 +1,28 @@
+{
+  "actualBrowserFilterVsCanonicalCpu": true,
+  "greySteps": 64,
+  "colours": 3,
+  "predeclaredMaximumChannelDifference": 3,
+  "passed": true,
+  "records": [
+    {
+      "color": "#20cfff",
+      "maximumChannelDifference": 1,
+      "meanChannelDifference": 0.2760416666666667,
+      "distinctBrowserGreenValues": 64
+    },
+    {
+      "color": "#f02bc7",
+      "maximumChannelDifference": 1,
+      "meanChannelDifference": 0.2864583333333333,
+      "distinctBrowserGreenValues": 39
+    },
+    {
+      "color": "#ff9b30",
+      "maximumChannelDifference": 1,
+      "meanChannelDifference": 0.2604166666666667,
+      "distinctBrowserGreenValues": 64
+    }
+  ],
+  "wholePictureParity": false
+}

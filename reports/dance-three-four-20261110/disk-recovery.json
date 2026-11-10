@@ -1,0 +1,21 @@
+{
+  "beforeAvailableBytes": 13760790528,
+  "beforeAvailableGB": 13.760790528,
+  "afterAvailableBytes": 37050232832,
+  "afterAvailableGB": 37.050232832,
+  "netAvailableIncreaseBytes": 23289442304,
+  "netAvailableIncreaseGB": 23.289442304,
+  "allFourOriginalDanceHashesExact": true,
+  "priorFinalDeliveryHashesExact": 62,
+  "originalProjectsAndSourceCodeDeleted": false,
+  "browserLoginsDeleted": false,
+  "runtimeRestoreArchivesRetained": true,
+  "method": [
+    "Share storage between SHA256-identical immutable media, preserving pathname and bytes",
+    "Remove unused browser/model/build/download caches after checking open/mapped files",
+    "Remove an unused redownloadable ASR model cache; retain required dance RVM/LaMa runtimes"
+  ],
+  "auditLimit": "The first deduplication pass stopped on a root-owned historical fixture after its progress log reached 15,300 files; its per-file final ledger was not written. The corrected user-owned-only pass completed. Final filesystem availability and protected byte hashes are measured directly.",
+  "frozenStorageSnapshotsDeduplicatedBytes": 2826199040,
+  "allOriginalAndPriorDeliveryHashesRechecked": true
+}

@@ -1,0 +1,34 @@
+[
+  {
+    "name": "music",
+    "title": "Young woman dances and moves slowly underneath neon lights",
+    "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/reports/studio-template-collection-20261104/sources/music.mp4",
+    "sha256": "db78c0e58e101addc8e50cf2e4131de3650dd5ca5619c69d4dd8d5e85a598145",
+    "page": "https://mixkit.co/free-stock-video/young-woman-dances-and-moves-slowly-underneath-neon-lights-50440/",
+    "downloadUrl": "https://assets.mixkit.co/videos/50440/50440-720.mp4",
+    "license": "https://mixkit.co/license/modal/videoFree/",
+    "sourceHtmlSha256": "ab81c1d7f05e5e3942f0ef3eb940d54cc4ea400fc310a16efbebc795a48d6d3f",
+    "bytes": 4611917,
+    "seconds": 11.636625,
+    "width": 720,
+    "height": 1280,
+    "fps": "24000/1001",
+    "fullDecode": true
+  },
+  {
+    "name": "cinema",
+    "title": "Silhouette of a dancer on a red background",
+    "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/reports/studio-template-collection-20261104/sources/cinema.mp4",
+    "sha256": "e8d2f87ddd67166c0bf5559db74fed069911766337bf8889d6213d0126acbc6b",
+    "page": "https://mixkit.co/free-stock-video/silhouette-of-a-dancer-on-a-red-background-51757/",
+    "downloadUrl": "https://assets.mixkit.co/videos/51757/51757-720.mp4",
+    "license": "https://mixkit.co/license/modal/videoFree/",
+    "sourceHtmlSha256": "79f1507957a16fde19e040a7c47247bb1f03798caae7a027c9ff64e3069c71c7",
+    "bytes": 6704995,
+    "seconds": 16.641625,
+    "width": 1280,
+    "height": 720,
+    "fps": "24000/1001",
+    "fullDecode": true
+  }
+]

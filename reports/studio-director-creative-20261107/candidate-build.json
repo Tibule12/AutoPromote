@@ -1,0 +1,25 @@
+{
+  "build": "/dev/shm/autopromote-director-creative-20261107-r2-build",
+  "origin": "http://127.0.0.1:45109",
+  "demoProject": "demo-autopromote-credits",
+  "welcomeFlag": "true",
+  "directorMotionFlag": "true",
+  "mainAsset": "/static/js/main.a03d1cb0.js",
+  "mainSha256": "debc8c56690fc1e97ad2a5a05650480d5e3422637a97e1e6e10edd91dd8cb284",
+  "sources": {
+    "frontend/src/components/ViralClipStudio.js": "3f9d8253efdd84421672a4ca9b01ac2522af71e3cb635002caf74a6a78388141",
+    "frontend/src/components/ViralClipStudio.css": "0e40cfd977bd4b3a04dcb03155ec6c19c32a76d53dde528972b362fcb77261c2",
+    "frontend/src/components/studioFeatureControls.css": "bf69a3b2f62f3e4067fcddf0ff0d5cb47a679a78c393433c1a50ec4b7078f39b",
+    "frontend/src/components/StudioProgrammeFrame.js": "134e4695b2b0d9c2ee2db2be594303bdf6a5e1eb945cc1c0b35f7b154f0f3115",
+    "frontend/src/components/StudioDirectorCreativePanel.js": "d90e80ea984cd50da1f71a525c6b567435182ae9225cb4c8e838705d0faab41e",
+    "frontend/src/components/studioDirectorCreativePlan.js": "8e7cda866b61bba0e3c7e3317d74f61503df6ce8800887155b074dc8b1bb4ca4",
+    "frontend/src/components/studioDirectorCreativeClient.js": "229621d386e9ce2a526a494427f667b1ae069055001067e8ce31e2712ae8a5b6",
+    "src/services/studioDirectorCreativePlanner.js": "8c01028aef8be2f070f3db9a6a7786a9c20b6c7bc6fc15738f20dd61b80e6688",
+    "src/routes/studioDirectorCreativeRoutes.js": "569797930cb373c72e3b6395990e06cc513e28fd815dc585cc7e601beb4362f1",
+    "src/server.js": "ef20adf22d7093c208640787a5a5d0e344d99adfaa916f3a953b8ab78a19e1c9",
+    "scripts/monetization/application-host.cjs": "26feebedb7226ea284dd77c319e9f1321110576c51a035be3e61e030f0cb0e4d",
+    "frontend/src/components/studioSceneActions.js": "633a6317f8b0a5f3069c810d53ebd145ae5aa114f4812aaba9b486ac625ff4c1",
+    "src/generated/studioDirectorReplayKernel.cjs": "2c89c123c59b7297fff4bf1fd7373860aeeec4138d7b8c105fdf46407fc61c08",
+    "python_media_worker/main_media_server.py": "0afacd9efed66dbb00a53c9fc1a2b461b0da5d3fe5dbc3cf6fe07910cb0b6f64"
+  }
+}

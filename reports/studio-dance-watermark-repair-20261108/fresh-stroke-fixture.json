@@ -1,0 +1,14 @@
+{
+  "uid": "demo-pilot-stroke-dance-20261108",
+  "normalDemoAllowance": true,
+  "existingWalletsReset": false,
+  "productionAccount": false,
+  "api": {
+    "previousPid": 93825,
+    "pid": 117443,
+    "origin": "http://127.0.0.1:34899"
+  },
+  "originalWallets": 5,
+  "priorOperations": 25,
+  "activeOperations": 0
+}

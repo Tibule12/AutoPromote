@@ -1,0 +1,14 @@
+{
+  "files": 49,
+  "bytes": 31754957,
+  "movieSha256": "f120949d5b66e41e6bc70bfeace2d49e49d8e8f9e6a52a5acb018786c081bf04",
+  "nativeBackups": 1,
+  "completeFinishedStudioRecordings": 1,
+  "frameCount": 360,
+  "actualUiChecks": 19,
+  "automatedTests": 20,
+  "priorCollectionFilesUnchanged": 154,
+  "allDeliveryHashesVerified": true,
+  "rootFreeGiB": 2.672149658203125,
+  "ramScratchFreeGiB": 5.647800445556641
+}

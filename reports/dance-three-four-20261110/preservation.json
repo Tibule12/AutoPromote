@@ -1,0 +1,19 @@
+{
+  "deliveryManifests": [
+    {
+      "manifest": "studio-neon-circle-20261109",
+      "files": 35,
+      "allExact": true
+    },
+    {
+      "manifest": "studio-dance-finish-20261108",
+      "files": 27,
+      "allExact": true
+    }
+  ],
+  "fourOriginalDanceFilesExact": true,
+  "originalsDeleted": 0,
+  "projectsDeleted": 0,
+  "sourceCodeDeleted": 0,
+  "signInDataDeleted": 0
+}

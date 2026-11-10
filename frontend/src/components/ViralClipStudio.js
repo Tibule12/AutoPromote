@@ -1,6 +1,9 @@
+import {studioMatteSurfaceStyle} from './studioMatteSurface';
+import StudioDirectorCreativePanel from './StudioDirectorCreativePanel';
+import StudioSubjectEchoControls from './StudioSubjectEchoControls';
+import StudioWatermarkControls from './StudioWatermarkControls';
 import { bindStudioOverlayMedia, prepareStudioOverlayMedia } from './studioOverlayMedia';
 import StudioSceneActionsPanel from './StudioSceneActionsPanel';
-import StudioDirectorCreativePanel from './StudioDirectorCreativePanel';
 import { prepareStudioSceneActions } from './studioSceneActions';
 import { compileStudioAdjustmentStack } from './studioAdjustmentGrade';
 /* eslint-disable no-unused-vars, no-control-regex */
@@ -30,6 +33,7 @@ import { uploadSourceFileViaBackend } from "../utils/sourceUpload";
 import StudioLaunchTemplatePanel from "./StudioLaunchTemplatePanel";
 import ProductHelpButton from "./ProductHelpButton";
 import StudioLayerMask from "./StudioLayerMask";
+import StudioMediaColorizeFilters from "./StudioMediaColorizeFilters";
 import { studioMediaEffectFilter } from "./studioMediaEffects";
 import { studioLayerEntries, moveStudioLayer, orderStudioCollection } from "./studioLayerOrder";
 import { studioGroupTree, createStudioGroup, moveStudioGroupNode, removeStudioGroup, removeStudioGroupMembers, studioGroupLocalPoint, studioGroupProgrammePoint, GROUP_TRANSFORM, evaluateStudioGroupTransform, validateStudioGroupKeyframes, pruneRemovedStudioGroupKeys } from "./studioGroups";
@@ -237,6 +241,7 @@ import {
   normalizeAudioRemix,
 } from "./audio/audioRemixModel";
 import {
+  applyStudioMediaGain,
   ensureAudioRemixPreview,
   disposeAudioRemixPreview,
   unlockAudioRemixContext,
@@ -245,6 +250,7 @@ import {
 import "./audio/audioRemixTimeline.css";
 import "./ViralClipStudio.css";
 import "./StudioControls.css";
+import "./studioFeatureControls.css";
 import TimelineSourceFilmstrip from "./TimelineSourceFilmstrip";
 import StudioControlMenu from "./StudioControlMenu";
 
@@ -7181,9 +7187,12 @@ const ViralClipStudio = ({
     return Math.min(1, energy);
   };
 
-  // Broader frame-driven composition remains a local diagnostic candidate
-  // until native throughput and moving picture/sound qualification pass.
-  const presentedFramePreview = workspaceMode === 'fxflow' || process.env.REACT_APP_STUDIO_PRESENTED_FRAME_PREVIEW === 'true';
+  // Video mattes need decoded pixels in every workspace, including a cold
+  // Quick reopen. Their transparent initial SVG is replaced by this painter.
+  const hasVideoTrackMatte = useMemo(() => overlays.some(layer =>
+    layer.trackMatte?.mode && layer.trackMatte.mode !== 'none' && overlays.some(source =>
+      String(source.id) === String(layer.trackMatte.sourceLayerId) && ['image','video'].includes(source.type))), [overlays]);
+  const presentedFramePreview = hasVideoTrackMatte || workspaceMode === 'fxflow' || process.env.REACT_APP_STUDIO_PRESENTED_FRAME_PREVIEW === 'true';
   const currentTimelineClip = timeline[activeTimelineIndex] || null;
   const subjectProgrammePreview = useMemo(() => renderedOutputUrl ? null :
     resolveSubjectVfxProgrammePreview(subjectVfxScenes,
@@ -7405,6 +7414,7 @@ const ViralClipStudio = ({
           audio = document.createElement("audio");
           audio.preload = "auto";
           applySafeMediaSource(audio, proxy.url);
+          remixPreviewMediaRef.current.add(audio);
           timelineAudioPoolRef.current.set(proxy.id, audio);
         }
         if (Math.abs(audio.currentTime - proxy.sourceSeekTime) > 0.15) {
@@ -7412,8 +7422,8 @@ const ViralClipStudio = ({
         }
         audio.playbackRate = video.playbackRate || 1;
         audio.preservesPitch = true;
-        audio.volume = clampNumber(previewVolume * proxy.volume * interpolateAutomationValue({
-          keyframes: audioKeyframes.originalAudio, property: 'volume', time: globalTime, fallback: 100 }) / 100, 0, 1, 0);
+        applyStudioMediaGain(audio, previewVolume * proxy.volume * interpolateAutomationValue({
+          keyframes: audioKeyframes.originalAudio, property: 'volume', time: globalTime, fallback: 100 }) / 100);
         if (audio.paused) {
           safePlayMediaElement(audio);
         }
@@ -7701,11 +7711,11 @@ const ViralClipStudio = ({
   const hookTransformOrigin = `${hookVisualFocusPoint.x}% ${hookVisualFocusPoint.y}%`;
   const finishPreviewIsLive = comparisonMode !== "before" && !renderedOutputUrl;
   const compiledAdjustmentGrades = useMemo(() => compileStudioAdjustmentStack(adjustmentLayers), [adjustmentLayers]);
-  const effectiveFinishFx = interpolateFinishKeyframes(
+  const effectiveFinishFx = useMemo(() => interpolateFinishKeyframes(
     finishFx,
     finishKeyframes,
     previewTimelineTime
-  );
+  ), [finishFx, finishKeyframes, previewTimelineTime]);
   const finishFilter = finishPreviewIsLive && !effectiveFinishFx.precisionGrade ? buildCinematicCssFilter(effectiveFinishFx) : "";
   const precisionPreviewGrade = useMemo(() => finishPreviewIsLive && effectiveFinishFx.precisionGrade
     ? buildPrecisionGrade(effectiveFinishFx) : null, [finishPreviewIsLive, effectiveFinishFx]);
@@ -10149,6 +10159,7 @@ const ViralClipStudio = ({
     });
     if (
       [
+        "director",
         "moments",
         "director",
         "cut",
@@ -13285,11 +13296,16 @@ const ViralClipStudio = ({
       redoStackRef.current = [];
       lastSnapshotRef.current = snapshot;
       lastSnapshotSignatureRef.current = serializedSnapshot;
-      if (cutHistoryTransactionRef.current) {
+      if (cutHistoryTransactionRef.current &&
+          serializeSnapshot(getHistoryRelevantSnapshot(cutHistoryTransactionRef.current.baseline)) === baselineSignature) {
         cutHistoryTransactionRef.current.appliedSignature = serializedSnapshot;
         cutHistoryTransactionRef.current.appliedTimelineSignature = serializeSnapshot(
           snapshot.timeline || []
         );
+      } else {
+        // A separate scene/graphics transaction must not inherit an earlier
+        // cut's baseline. Otherwise its Undo also removes later sound/settings.
+        cutHistoryTransactionRef.current = null;
       }
       syncHistoryAvailability();
       scheduleProjectAutosave(snapshot);
@@ -15059,7 +15075,7 @@ const ViralClipStudio = ({
 
     const applyAudio = (muted, vol) => {
       if (video.muted !== muted) video.muted = muted;
-      if (Math.abs(video.volume - vol) > 0.005) video.volume = vol;
+      applyStudioMediaGain(video, vol);
     };
 
     if (anyMuteMain) {
@@ -18378,6 +18394,7 @@ const ViralClipStudio = ({
         volume={previewVolume} renderedOutputUrl={renderedOutputUrl} onError={setStudioActionMessage}
         onPreparation={status=>{if(status==='loading'&&previewPlaybackIntentRef.current)pauseSynchronizedPreview();}}
       /> : null}
+      <StudioMediaColorizeFilters layers={overlays} />
       <StudioVoiceoverPreview ref={preparedVoiceBusRef} takes={voiceovers} videoRef={videoRef}
         getTimelineTime={getSoundEffectProgrammeTime} activeClip={activeTimelineIndex}
         getAudioContext={ensureSoundEffectAudioContext}
@@ -20164,7 +20181,7 @@ const ViralClipStudio = ({
                           if (o.enabled === false) return false;
                           // Hidden video mattes still need their ordinary source
                           // decoder and programme-clock transport, never a visible leaf.
-                          if (isHiddenTrackMatteSource(o, overlays) && o.type !== 'video') return false;
+                          if (isHiddenTrackMatteSource(o, overlays) && !['image','video'].includes(o.type)) return false;
                           if (o.isNullRig && (comparisonMode === "split" || activeOverlayId !== o.id)) return false;
                           const anySolo = overlays.some(cand => cand && !cand.isCaption && cand.solo);
                           if (anySolo && !o.isCaption && !o.solo) return false;
@@ -20255,7 +20272,7 @@ const ViralClipStudio = ({
                             <div
                               key={overlay.id}
                               data-studio-layer-id={overlay.id}
-                              data-studio-matte-source-only={isHiddenTrackMatteSource(overlay, overlays) && overlay.type === 'video' ? 'true' : undefined}
+                              data-studio-matte-source-only={isHiddenTrackMatteSource(overlay, overlays) && ['image','video'].includes(overlay.type) ? 'true' : undefined}
                               data-programme-time={compositionTime}
                               className={`draggable-overlay ${
                                 activeOverlayId === overlay.id && isPreviewPaused && !isPreviewFullscreen && comparisonMode !== "split"
@@ -20416,6 +20433,7 @@ const ViralClipStudio = ({
                                 )
                               ) : overlay.type === "image" && safeOverlaySrc ? (
                                 <img
+                                  crossOrigin="anonymous"
                                   ref={element => {
                                     applySafeMediaSource(element, safeOverlaySrc);
                                   }}
@@ -20439,7 +20457,7 @@ const ViralClipStudio = ({
                               ) : safeOverlaySrc ? (
                                 <><canvas data-studio-shared-video="true" aria-hidden="true"
                                   style={{display:'none',width:'100%',height:'100%',objectFit:overlay.perspective?.sourceRect||overlay.mediaFit==='stretch'?'fill':overlay.mediaFit||'contain',pointerEvents:'none'}} />
-                                <video data-studio-overlay-decoder="true"
+                                <video data-studio-overlay-decoder="true" preload="auto"
                                   data-testid={`broll-preview-${overlay.id}`}
                                   poster={overlay.poster || undefined}
                                   ref={element => {
@@ -20630,7 +20648,7 @@ const ViralClipStudio = ({
                             </div>
                           );
                           if (!trackMatteUri) return overlayElement;
-                          return (
+                          const matteElement = (
                             <div
                               key={overlay.id}
                               data-studio-matte-wrap={overlay.id}
@@ -20641,7 +20659,7 @@ const ViralClipStudio = ({
                                 inset: 0,
                                 pointerEvents: "none",
                                 zIndex: compositionRank.get(overlay.id) ?? 100 + index,
-                                mixBlendMode: overlay.blendMode || "normal",
+                                mixBlendMode: overlay.matteSurface?.enabled?"normal":overlay.blendMode || "normal",
                                 maskImage: trackMatteUri,
                                 WebkitMaskImage: trackMatteUri,
                                 maskSize: "100% 100%",
@@ -20653,6 +20671,7 @@ const ViralClipStudio = ({
                               {overlayElement}
                             </div>
                           );
+                          return overlay.matteSurface?.enabled ? <div data-studio-surface-wrap={overlay.id} key={overlay.id} style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:compositionRank.get(overlay.id) ?? 100+index,mixBlendMode:overlay.blendMode||"normal",...studioMatteSurfaceStyle(overlay.matteSurface,phoneFrameRef.current?.clientHeight||720)}}>{matteElement}</div> : matteElement;
                         })}
                       </StudioGroupPreview>
                         )}
@@ -22253,7 +22272,17 @@ const ViralClipStudio = ({
                 activeCreativeTool === "export" ? "is-export-hidden" : ""
               }`}
               data-testid="clip-studio-inspector"
+              aria-label="Studio feature controls"
+              data-active-tool={activeCreativeTool}
             >
+              {studioInspectorTab === "director" ? (
+                <div className="clip-inspector-body" role="tabpanel" data-testid="studio-director-inspector">
+                  <StudioDirectorCreativePanel getSnapshot={getEditorSnapshot} onApply={applyReviewedScenePlan}
+                    onOpenNodes={()=>{setWorkspaceMode('fxflow');selectCreativeTool('flow');}}
+                    locked={!!(trackStates.graphics?.locked || trackStates.broll?.locked || trackStates.video?.locked)} />
+                </div>
+              ) : null}
+
               {studioInspectorTab === "moments" ? (
                 <div className="clip-inspector-body" role="tabpanel" aria-label="Moment selection" data-testid="studio-moments-inspector">
                   <div className="inspector-heading-row">
@@ -22280,12 +22309,6 @@ const ViralClipStudio = ({
                 </div>
               ) : null}
 
-              {studioInspectorTab === "director" ? (
-                <div className="clip-inspector-body" role="tabpanel" data-testid="studio-director-inspector">
-                  <StudioDirectorCreativePanel getSnapshot={getEditorSnapshot} onApply={applyReviewedScenePlan}
-                    locked={!!(trackStates.graphics?.locked || trackStates.broll?.locked || trackStates.video?.locked)} />
-                </div>
-              ) : null}
               <div
                 className={`creative-director-panel ${
                   activeCreativeTool === "moments" ? "is-expanded" : "is-compact"
@@ -23918,6 +23941,11 @@ const ViralClipStudio = ({
                   >
                     ▶ Preview {reframeAspect} Framing
                   </button>
+                  <StudioWatermarkControls enabled={removeWatermark} onEnabledChange={setRemoveWatermark}
+                    mode={watermarkMode} onModeChange={setWatermarkMode} regions={manualWatermarkRegions}
+                    activeId={activeWatermarkRegionId} onSelect={setActiveWatermarkRegionId}
+                    onAdd={addManualWatermarkRegion} onRemove={deleteManualWatermarkRegion}
+                    onRegionChange={updateManualWatermarkRegion} />
                 </div>
               ) : null}
 
@@ -25802,6 +25830,12 @@ const ViralClipStudio = ({
                     locked={!!(trackStates.graphics?.locked || trackStates.broll?.locked || trackStates.video?.locked)} onApply={async plan => {
                     await applyReviewedScenePlan(plan);
                   }} />
+                  <StudioSubjectEchoControls getSnapshot={getEditorSnapshot} projectMedia={projectMedia} time={previewTimelineTime}
+                    getSize={() => { const stage = phoneFrameRef.current;
+                      const aspect = (stage?.clientWidth || 1280) / (stage?.clientHeight || 720);
+                      return { width: Math.round(720 * aspect), height: 720 }; }}
+                    locked={!!(trackStates.graphics?.locked || trackStates.broll?.locked || trackStates.video?.locked)}
+                    onApply={applyReviewedScenePlan} />
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
                     <button
                       type="button"

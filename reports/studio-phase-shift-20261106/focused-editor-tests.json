@@ -1,0 +1,8 @@
+{
+  "runner": "Jest actual ViralClipStudio component",
+  "passed": 5,
+  "unselected": 164,
+  "failed": 0,
+  "selection": "Paused transform source frame; source-time caption/preview preservation; Reframe transport; editable speaker cuts; native SFX placement/edit/history",
+  "broadSuiteClaimed": false
+}

@@ -43,6 +43,7 @@ def video_layer_uses_canonical_raster(identity, layer, composition, overlay=None
                 or (effects.get('motion_blur') or {}).get('enabled')
                 or (effects.get('shadow') or {}).get('enabled')
                 or (effects.get('glow') or {}).get('enabled')
+                or (effects.get('colorize') or {}).get('enabled')
                 or float(effects.get('blur') or 0) > 0)
 
 

@@ -1,0 +1,98 @@
+[
+  {
+    "sourceTime": 4.8,
+    "meanRingDifference": 36.37131215038192
+  },
+  {
+    "sourceTime": 3.2,
+    "meanRingDifference": 42.281880909787894
+  },
+  {
+    "sourceTime": 3.0,
+    "meanRingDifference": 42.46329897492688
+  },
+  {
+    "sourceTime": 2.4,
+    "meanRingDifference": 42.75959053866031
+  },
+  {
+    "sourceTime": 2.8,
+    "meanRingDifference": 44.196822557287675
+  },
+  {
+    "sourceTime": 4.6,
+    "meanRingDifference": 44.558821023937305
+  },
+  {
+    "sourceTime": 2.6,
+    "meanRingDifference": 45.290882244370614
+  },
+  {
+    "sourceTime": 3.4,
+    "meanRingDifference": 46.229448845727916
+  },
+  {
+    "sourceTime": 3.6,
+    "meanRingDifference": 51.14617940199335
+  },
+  {
+    "sourceTime": 4.4,
+    "meanRingDifference": 52.18465513814351
+  },
+  {
+    "sourceTime": 2.0,
+    "meanRingDifference": 53.10856972484879
+  },
+  {
+    "sourceTime": 0.2,
+    "meanRingDifference": 58.303887327143144
+  },
+  {
+    "sourceTime": 1.8,
+    "meanRingDifference": 58.30576142204049
+  },
+  {
+    "sourceTime": 3.8,
+    "meanRingDifference": 59.185918732430366
+  },
+  {
+    "sourceTime": 4.2,
+    "meanRingDifference": 59.546568418661444
+  },
+  {
+    "sourceTime": 0.4,
+    "meanRingDifference": 60.59946900644574
+  },
+  {
+    "sourceTime": 4.0,
+    "meanRingDifference": 62.38220177755062
+  },
+  {
+    "sourceTime": 1.6,
+    "meanRingDifference": 62.95340318596132
+  },
+  {
+    "sourceTime": 0.6,
+    "meanRingDifference": 64.37973137973138
+  },
+  {
+    "sourceTime": 1.4,
+    "meanRingDifference": 67.93349802652129
+  },
+  {
+    "sourceTime": 0.8,
+    "meanRingDifference": 68.45502172246358
+  },
+  {
+    "sourceTime": 1.2,
+    "meanRingDifference": 71.53654485049834
+  },
+  {
+    "sourceTime": 1.0,
+    "meanRingDifference": 71.84787176647642
+  },
+  {
+    "sourceTime": 2.2,
+    "meanRingDifference": 104.68784961808218
+  }
+]

@@ -1,0 +1,184 @@
+{
+  "verifiedAt": "2026-11-09T02:18:37.724Z",
+  "nativePublisher": true,
+  "normalProductionSignIn": true,
+  "independentReadOnlyQueueReload": true,
+  "allSchedulePagesLoaded": true,
+  "mutations": 0,
+  "finalMovies": 2,
+  "verifiedDestinationSchedules": 12,
+  "distinctDances": true,
+  "onceOnly": true,
+  "date": "2026-11-09",
+  "timezone": "Africa/Johannesburg",
+  "releases": [
+    {
+      "key": "neon",
+      "contentIds": [
+        "5kt2rjDLlAQvXJ4xvYsS"
+      ],
+      "title": "Neon Circle | One dancer, seven moving versions",
+      "localTime": "18:00",
+      "timezone": "Africa/Johannesburg",
+      "sha256": "00e7cdc19104f267e619868247c26ffa6d5015fedb36be3b00c0cd61f08a5d42"
+    },
+    {
+      "key": "grounded",
+      "contentIds": [
+        "kEAFY3AQLosLjai2xvvF"
+      ],
+      "title": "Grounded Doubles | One move, a moving echo",
+      "localTime": "20:00",
+      "timezone": "Africa/Johannesburg",
+      "sha256": "4d4ac1f433aadd9b422b2acd3cd5e858e8fc775b750e19a397f34fc0c1f282e5"
+    }
+  ],
+  "checked": [
+    {
+      "movie": "neon",
+      "scheduleId": "ms8PNl1t8WIOEfYaZwlu",
+      "contentId": "5kt2rjDLlAQvXJ4xvYsS",
+      "platform": "youtube",
+      "startTime": "2026-11-09T16:00:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once",
+      "mediaSha256": "00e7cdc19104f267e619868247c26ffa6d5015fedb36be3b00c0cd61f08a5d42",
+      "copyMatches": true
+    },
+    {
+      "movie": "neon",
+      "scheduleId": "lYhHVhoZfQcwFzufZtBS",
+      "contentId": "5kt2rjDLlAQvXJ4xvYsS",
+      "platform": "tiktok",
+      "startTime": "2026-11-09T16:00:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once",
+      "mediaSha256": "00e7cdc19104f267e619868247c26ffa6d5015fedb36be3b00c0cd61f08a5d42",
+      "copyMatches": true
+    },
+    {
+      "movie": "neon",
+      "scheduleId": "eMUIxqGdHrOYzVZKyD2g",
+      "contentId": "5kt2rjDLlAQvXJ4xvYsS",
+      "platform": "reddit",
+      "startTime": "2026-11-09T16:00:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once",
+      "mediaSha256": "00e7cdc19104f267e619868247c26ffa6d5015fedb36be3b00c0cd61f08a5d42",
+      "copyMatches": true
+    },
+    {
+      "movie": "neon",
+      "scheduleId": "YkTgg4sKv3TcIYoyfAmd",
+      "contentId": "5kt2rjDLlAQvXJ4xvYsS",
+      "platform": "instagram",
+      "startTime": "2026-11-09T16:00:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once",
+      "mediaSha256": "00e7cdc19104f267e619868247c26ffa6d5015fedb36be3b00c0cd61f08a5d42",
+      "copyMatches": true
+    },
+    {
+      "movie": "neon",
+      "scheduleId": "KaY72k7CyKOc4R9UMBhD",
+      "contentId": "5kt2rjDLlAQvXJ4xvYsS",
+      "platform": "facebook",
+      "startTime": "2026-11-09T16:00:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once",
+      "mediaSha256": "00e7cdc19104f267e619868247c26ffa6d5015fedb36be3b00c0cd61f08a5d42",
+      "copyMatches": true
+    },
+    {
+      "movie": "neon",
+      "scheduleId": "6e5OzxJolfeBrTyHjPk6",
+      "contentId": "5kt2rjDLlAQvXJ4xvYsS",
+      "platform": "linkedin",
+      "startTime": "2026-11-09T16:00:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once",
+      "mediaSha256": "00e7cdc19104f267e619868247c26ffa6d5015fedb36be3b00c0cd61f08a5d42",
+      "copyMatches": true
+    },
+    {
+      "movie": "grounded",
+      "scheduleId": "isSrwU1X1R9Fu0GqDsvn",
+      "contentId": "kEAFY3AQLosLjai2xvvF",
+      "platform": "facebook",
+      "startTime": "2026-11-09T18:00:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once",
+      "mediaSha256": "4d4ac1f433aadd9b422b2acd3cd5e858e8fc775b750e19a397f34fc0c1f282e5",
+      "copyMatches": true
+    },
+    {
+      "movie": "grounded",
+      "scheduleId": "hEgPPdg8rg4jP41Mds0v",
+      "contentId": "kEAFY3AQLosLjai2xvvF",
+      "platform": "tiktok",
+      "startTime": "2026-11-09T18:00:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once",
+      "mediaSha256": "4d4ac1f433aadd9b422b2acd3cd5e858e8fc775b750e19a397f34fc0c1f282e5",
+      "copyMatches": true
+    },
+    {
+      "movie": "grounded",
+      "scheduleId": "gyjLopAfffhkyywkWlzG",
+      "contentId": "kEAFY3AQLosLjai2xvvF",
+      "platform": "linkedin",
+      "startTime": "2026-11-09T18:00:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once",
+      "mediaSha256": "4d4ac1f433aadd9b422b2acd3cd5e858e8fc775b750e19a397f34fc0c1f282e5",
+      "copyMatches": true
+    },
+    {
+      "movie": "grounded",
+      "scheduleId": "XFW6Zj9ABJ6Ok0xFNZMI",
+      "contentId": "kEAFY3AQLosLjai2xvvF",
+      "platform": "instagram",
+      "startTime": "2026-11-09T18:00:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once",
+      "mediaSha256": "4d4ac1f433aadd9b422b2acd3cd5e858e8fc775b750e19a397f34fc0c1f282e5",
+      "copyMatches": true
+    },
+    {
+      "movie": "grounded",
+      "scheduleId": "4iAwkt4RRRtIESGyCHeS",
+      "contentId": "kEAFY3AQLosLjai2xvvF",
+      "platform": "youtube",
+      "startTime": "2026-11-09T18:00:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once",
+      "mediaSha256": "4d4ac1f433aadd9b422b2acd3cd5e858e8fc775b750e19a397f34fc0c1f282e5",
+      "copyMatches": true
+    },
+    {
+      "movie": "grounded",
+      "scheduleId": "3QV5nKKILr05Gkl6L9eD",
+      "contentId": "kEAFY3AQLosLjai2xvvF",
+      "platform": "reddit",
+      "startTime": "2026-11-09T18:00:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once",
+      "mediaSha256": "4d4ac1f433aadd9b422b2acd3cd5e858e8fc775b750e19a397f34fc0c1f282e5",
+      "copyMatches": true
+    }
+  ],
+  "previousSchedulesPreserved": 6914,
+  "providerPublicationVerified": false
+}

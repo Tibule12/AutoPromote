@@ -1,0 +1,13 @@
+{
+  "allUnrelatedWalletsExact": true,
+  "previousHistoryPreserved": true,
+  "noWalletReset": true,
+  "noDirectWalletWrite": true,
+  "newNativeOperations": 3,
+  "failedOperations": 1,
+  "successfulOperations": 2,
+  "earlierMissingFromSnapshotFailureRetainedSeparately": true,
+  "symbolicCredits": 4,
+  "activeOperations": 0,
+  "productionWrite": false
+}

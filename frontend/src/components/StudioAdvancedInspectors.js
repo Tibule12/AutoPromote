@@ -1,4 +1,6 @@
+import StudioMatteSurfaceControls from './StudioMatteSurfaceControls';
 import React from "react";
+import StudioMediaColorizeControls from "./StudioMediaColorizeControls";
 import { STUDIO_EASINGS, groupMotionKeyframesByTime, buildMotionAutomationStyle } from "./studioAutomation";
 import { studioMotionPropertiesForTarget, motionKeyAtPlayhead, motionKeyframeTolerance } from './studioMotionProperties';
 import StudioKeyframeCurveEditor from "./StudioKeyframeCurveEditor";
@@ -627,6 +629,9 @@ export function CompositeInspector({
             </select>
           </label>
 
+          {activeOverlay.id !== 'main-video' && ['image','video'].includes(activeOverlay.type) &&
+            <StudioMediaColorizeControls layer={activeOverlay} onChange={value=>onUpdateOverlay('colorize',value)} />}
+          {activeOverlay.id!=='main-video'&&['image','video'].includes(activeOverlay.type)&&activeOverlay.trackMatte?.mode&&activeOverlay.trackMatte.mode!=='none'&&<StudioMatteSurfaceControls layer={activeOverlay} onChange={value=>onUpdateOverlay('matteSurface',value)} />}
           {activeOverlay.id !== 'main-video' && ['image','video'].includes(activeOverlay.type) &&
             <StudioPerspectiveInspector layer={activeOverlay} onChange={value=>onUpdateOverlay('perspective',value)} />}
 

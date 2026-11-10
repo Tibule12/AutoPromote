@@ -1,0 +1,110 @@
+{
+  "verifiedAt": "2026-11-05T16:57:46.639Z",
+  "site": "https://autopromote.org",
+  "deployedRevision": "f369520746c1d7a312c901e0f604067958f99501",
+  "initialCredits": 189,
+  "finalCredits": 174,
+  "creditsConsumed": 15,
+  "normalCostPerRender": 5,
+  "normalBillingEnabled": true,
+  "originalSavedLoginUnchanged": true,
+  "existingProjectsImportedOrModified": false,
+  "renderCount": 3,
+  "adsOrSubscriptionsChanged": false,
+  "productionCodeChanged": false,
+  "headlessMuted": true,
+  "source": {
+    "type": "Generated moving six-second colour test pattern with 440 Hz tone",
+    "sha256": "36d4aa43ad5bce292fbffb84870afedd977f0e9a88188fd6e919f398a7858ca6",
+    "durationSeconds": 6,
+    "width": 640,
+    "height": 360,
+    "fps": 24
+  },
+  "steps": [
+    "Owner saved login → live source upload → separate named QA project",
+    "Live Reframe aspect, left/right positions, smooth framing and Undo/Redo",
+    "Live native video, position, counter and timeline advance together; Pause works",
+    "Live Reframe save → reload → reopen preserves authored controls",
+    "reframe → normal live render → owned download → complete picture/audio decode",
+    "Live Moments trim → named interval → Undo/Redo → switch moments → native preview",
+    "Live Moments save → reload → reopen preserves named intervals, selected range and identical owned source; refreshed access query excluded",
+    "moments → normal live render → owned download → complete picture/audio decode",
+    "Explicit live-edit Moments trim changes the saved source interval before any additional export",
+    "Actual trimmed interval → new named moment → select → save → reload/reopen retains exact source boundaries",
+    "moments-trimmed → normal live render → owned download → complete picture/audio decode",
+    "Live trimmed Moments export duration matches its saved source interval within one output frame",
+    "Actual Studio finished-output controls play the trimmed Moments movie through its final frame",
+    "Both scoped live account lifecycles complete"
+  ],
+  "exports": [
+    {
+      "label": "reframe",
+      "bytes": 1526676,
+      "sha256": "2c0c318dae752f8b3560093127599e14f36153bcf90d8a80089e2d4dc28c527d",
+      "width": 720,
+      "height": 900,
+      "duration": 6,
+      "audio": true,
+      "fullDecode": true
+    },
+    {
+      "label": "moments",
+      "bytes": 1526676,
+      "sha256": "2c0c318dae752f8b3560093127599e14f36153bcf90d8a80089e2d4dc28c527d",
+      "width": 720,
+      "height": 900,
+      "duration": 6,
+      "audio": true,
+      "fullDecode": true
+    },
+    {
+      "label": "moments-trimmed",
+      "bytes": 1614978,
+      "sha256": "7b30641b70b8fedb6c5f4b6a23bd9b516d86cf0ade8078f0c1f807fb989726ea",
+      "width": 720,
+      "height": 900,
+      "duration": 5.602,
+      "audio": true,
+      "fullDecode": true
+    }
+  ],
+  "trimmedInterval": {
+    "start": 0.39803333333333335,
+    "end": 6,
+    "duration": 5.601966666666667
+  },
+  "finishedPlayback": {
+    "start": {
+      "source": 0,
+      "output": 0,
+      "marker": 0,
+      "text": "0:0.00 / 0:5.60",
+      "paused": false
+    },
+    "mid": {
+      "source": 0.911231,
+      "output": 0.904898,
+      "marker": 16.1533,
+      "text": "0:0.90 / 0:5.60",
+      "paused": false
+    },
+    "final": {
+      "source": 5.602,
+      "output": 5.60196666666667,
+      "marker": 100,
+      "text": "0:5.60 / 0:5.60",
+      "paused": true
+    }
+  },
+  "browserExceptions": [],
+  "limits": [
+    "Single owner account; independent free/subscriber account coverage not established here.",
+    "Generated test footage; no real speaker/face identity, transcript accuracy, human listening or broad footage qualification.",
+    "The first Moments export used the complete source; corrected explicit trim and a third normal export were required.",
+    "Initial hidden-panel and signed-access-query QA assertions failed; their corrected runs and private failures are retained."
+  ],
+  "privateEvidence": "~/.local/share/autopromote-qa/live-studio-20261105/",
+  "pushMergeDeploy": false,
+  "readinessPromotion": false
+}

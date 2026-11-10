@@ -1,0 +1,21 @@
+{
+  "name": "CitytoCoastTransition",
+  "concept": "A dynamic eight-second transition from a bustling cityscape to a serene coastal scene, emphasizing a sense of escape and natural beauty.",
+  "fragment": {
+    "outgoing": 1,
+    "incoming": 2,
+    "count": 5,
+    "axis": "x",
+    "background": "#123DFF",
+    "holdSeconds": 1,
+    "fanSeconds": 3,
+    "switchSeconds": 5,
+    "resolveSeconds": 7,
+    "scale": 0.75,
+    "spread": 5,
+    "fanDegrees": 4,
+    "staggerSeconds": 0.05,
+    "direction": "up"
+  },
+  "provenance": "model draft with explicit manual review refinement through native controls; bounded operator supplies motion geometry"
+}

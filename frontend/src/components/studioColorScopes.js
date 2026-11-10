@@ -75,7 +75,6 @@ export function computeColorScopesFromRgba(
   { columns = 32, bins = 24, vectorBins = 24 } = {}
 ) {
   const w = Math.max(1, Math.floor(Number(width) || 48));
-  const h = Math.max(1, Math.floor(Number(height) || 27));
   const cols = Math.max(8, Math.floor(Number(columns) || 32));
   const numBins = Math.max(8, Math.floor(Number(bins) || 24));
   const vBins = Math.max(8, Math.floor(Number(vectorBins) || 24));

@@ -1,0 +1,268 @@
+{
+  "nativeBackupMatchesRenderedDocument": true,
+  "compiledFinishFieldsMatchSubmittedAndWorker": true,
+  "compiledCompositionMatchesSubmitted": true,
+  "workerCompositionMatchesNativeGraph": true,
+  "actualNativeDownload": true,
+  "movieSha256": "7dec6ac69dea06920dce4d318e29e761032b2871226b7b8bfeeae37cf8918969",
+  "projectHash": "05d170d4e497cef9ec0fd75d010c6514ea5a570b6a5865f5d17cf15ef888634e",
+  "requestBytesSha256": "d5d7a4502087a51526bed72853de985bc0185dc9ca90c10d74de383cf3fd206d",
+  "nativeJobId": "viral_32e4c9662ced4839d374866462af21b5ac8b69fb0680cfe0527641975e43cbdc",
+  "workerExecutionId": "82ba5bd5afab3896b2546f37778a2cc9021f524cfdd5c3346677aedafd58338e",
+  "ordinaryOverlays": 32,
+  "motionKeys": 76,
+  "worker": {
+    "wallSeconds": 557.5215634820051,
+    "cpuSeconds": 915.5381699999999,
+    "peakRssKiB": 2781892,
+    "cpuCeilingSeconds": 1200,
+    "localFileCeilingBytes": 402653184,
+    "providerChargesStarted": false,
+    "invoiceCostMicros": null
+  },
+  "workerReceipt": {
+    "provider": "local-process",
+    "payload": {
+      "endpoint": "/render-viral-clip",
+      "executionId": "82ba5bd5afab3896b2546f37778a2cc9021f524cfdd5c3346677aedafd58338e",
+      "fingerprint": "5962cfb5c90dee040eb0bf81aae00dd78d812f1153ebb4ee0dc1d1ec311c14b6",
+      "operationId": "992974cfc48cc5e350d33ea3c5afb44e896896c37569c12c25dd452952ba37b8",
+      "requestDigest": "fb8f9faaffc10615dff56127724e065e5258f557337a4c26e8c5b7291b00ae53",
+      "sourceGeneration": "1794139724126",
+      "sourceHash": "09f2b8bfcf899d174ecf53f6a9c5358b9d19ca7b7d8ba0b1c508abfc2a2bf15d",
+      "sources": [
+        {
+          "contentHash": "09f2b8bfcf899d174ecf53f6a9c5358b9d19ca7b7d8ba0b1c508abfc2a2bf15d",
+          "contentType": "video/mp4",
+          "gatewayPath": "/api/credit-pilot/object/98788a18c25212f23df5fe52c1792e820dc914ebea115fcd8212e34696360801",
+          "objectGeneration": "1794139724126",
+          "size": 5306461,
+          "storagePath": "studio/sources/demo-pilot-echo-20261108/1273d2e3254d9eff566cc61a_City.mp4",
+          "userId": "demo-pilot-echo-20261108"
+        },
+        {
+          "contentHash": "dd5eb646c37f88771d63fbbbacc4550717f4bd925aec6cd397d1fd34c8ed9571",
+          "contentType": "video/mp4",
+          "gatewayPath": "/api/credit-pilot/object/44feaede4c9cf9ee33d4e8df58a73a12afddb541f1059103e9d36c83e601b581",
+          "objectGeneration": "1794139730878",
+          "size": 202075,
+          "storagePath": "studio/sources/demo-pilot-echo-20261108/3fa0ccff8bf5110e15237989_City_-_source-bound_luma_matte.mp4",
+          "userId": "demo-pilot-echo-20261108"
+        }
+      ],
+      "stage": "studio.render",
+      "userId": "demo-pilot-echo-20261108",
+      "state": "succeeded",
+      "exitCode": 0,
+      "signal": null,
+      "processTerminated": true,
+      "startedAt": "2026-11-08T12:23:39.288Z",
+      "finishedAt": "2026-11-08T12:32:57.447Z",
+      "resultDigest": "92099b460d231c927a2447cd968adfe95618b3cc0ea081e76e74660157a15796",
+      "result": {
+        "status": "completed",
+        "progress": 100,
+        "detail": "Render complete",
+        "job_id": "viral_32e4c9662ced4839d374866462af21b5ac8b69fb0680cfe0527641975e43cbdc",
+        "output_path": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105/tmp/viral_32e4c9662ced4839d374866462af21b5ac8b69fb0680cfe0527641975e43cbdc_viral.mp4",
+        "output_url": "http://127.0.0.1/local-worker-output",
+        "output_sha256": "7dec6ac69dea06920dce4d318e29e761032b2871226b7b8bfeeae37cf8918969",
+        "output_bytes": 4464108,
+        "thumbnail_url": null,
+        "cover_frame": null,
+        "thumbnail_frame": null,
+        "brand_watermark": false,
+        "caption_review_copy": false,
+        "brand_watermark_receipt": {
+          "enabled": false,
+          "status": "disabled_for_studio"
+        },
+        "caption_review_receipt": null,
+        "output_settings": {
+          "resolution": "720p",
+          "width": 1280,
+          "height": 720,
+          "fps": 24,
+          "codec": "h264",
+          "encoder": "libx264",
+          "quality": "high",
+          "crf": 19,
+          "preset": "veryfast"
+        },
+        "watermark_text": null,
+        "audio_proof": {
+          "expected": true,
+          "verified": true,
+          "codec": "aac",
+          "channels": 2,
+          "sample_rate": 48000,
+          "duration_seconds": 8
+        },
+        "media_validation": {
+          "duration": 8,
+          "size": 4464108,
+          "video": {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_type": "video",
+            "width": 1280,
+            "height": 720,
+            "avg_frame_rate": "24/1"
+          },
+          "audio": {
+            "index": 1,
+            "codec_name": "aac",
+            "codec_type": "audio",
+            "avg_frame_rate": "0/0"
+          }
+        },
+        "final_quality_gate": {
+          "status": "passed",
+          "media": {
+            "duration": 8,
+            "size": 4464108,
+            "video": {
+              "index": 0,
+              "codec_name": "h264",
+              "codec_type": "video",
+              "width": 1280,
+              "height": 720,
+              "avg_frame_rate": "24/1"
+            },
+            "audio": {
+              "index": 1,
+              "codec_name": "aac",
+              "codec_type": "audio",
+              "avg_frame_rate": "0/0"
+            }
+          },
+          "duration": {
+            "expected": 8,
+            "actual": 8,
+            "delta": 0,
+            "tolerance": 0.45
+          },
+          "audio_expected": true,
+          "picture_timing": {
+            "duration": 8,
+            "container_duration": 8,
+            "delta": 0,
+            "tolerance": 0.042
+          },
+          "black_ranges": [],
+          "planned_black_ranges": [],
+          "browser_delivery": "h264_yuv420p_faststart"
+        },
+        "duration": 8,
+        "speed_plan": [
+          {
+            "start_time": 0,
+            "end_time": 8,
+            "rate": 1
+          }
+        ],
+        "creative_receipt": {
+          "status": "not_requested",
+          "fallback": "clean",
+          "effects": []
+        },
+        "creative_template_instance": null,
+        "professional_cleanup": {
+          "status": "disabled"
+        },
+        "audio_restoration": null,
+        "audio_automation": {},
+        "audio_track_states": {
+          "video": {
+            "visible": true,
+            "locked": false,
+            "muted": false,
+            "solo": false
+          },
+          "adjustment": {
+            "visible": true,
+            "locked": false,
+            "muted": false,
+            "solo": false
+          },
+          "graphics": {
+            "visible": true,
+            "locked": false,
+            "muted": false,
+            "solo": false
+          },
+          "broll": {
+            "visible": true,
+            "locked": false,
+            "muted": false,
+            "solo": false
+          },
+          "captions": {
+            "visible": true,
+            "locked": false,
+            "muted": false,
+            "solo": false
+          },
+          "originalAudio": {
+            "visible": true,
+            "locked": false,
+            "muted": false,
+            "solo": false
+          },
+          "voiceover": {
+            "visible": true,
+            "locked": false,
+            "muted": false,
+            "solo": false
+          },
+          "music": {
+            "visible": true,
+            "locked": false,
+            "muted": false,
+            "solo": false
+          },
+          "sfx": {
+            "visible": true,
+            "locked": false,
+            "muted": false,
+            "solo": false
+          }
+        },
+        "audio_remix_receipt": {
+          "version": 1,
+          "enabled": false,
+          "status": "not_requested"
+        },
+        "studio_plan_validation": {
+          "valid": false,
+          "errors": [
+            "legacy_request_without_plan"
+          ]
+        }
+      },
+      "resource": {
+        "wallSeconds": 557.5215634820051,
+        "cpuSeconds": 915.5381699999999,
+        "peakRssKiB": 2781892,
+        "cpuCeilingSeconds": 1200,
+        "localFileCeilingBytes": 402653184,
+        "providerChargesStarted": false,
+        "invoiceCostMicros": null
+      },
+      "output": {
+        "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105/reports/studio-director-composition-20261107/private/runtime/autopromote-application-demo-6YGcoz/worker/82ba5bd5afab3896b2546f37778a2cc9021f524cfdd5c3346677aedafd58338e/artifact.mp4",
+        "bytes": 4464108,
+        "sha256": "7dec6ac69dea06920dce4d318e29e761032b2871226b7b8bfeeae37cf8918969"
+      }
+    },
+    "signature": "XP/cu81j8O1jdFZ2AoVb9EcUnFjiOp70deOl/sLjw4cRn7cNS9T8/lrpFOnp/iCsPyQZhHD8VlOgJD8ALnt3AQ=="
+  },
+  "workerDirectory": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105/reports/studio-director-composition-20261107/private/runtime/autopromote-application-demo-6YGcoz/worker/82ba5bd5afab3896b2546f37778a2cc9021f524cfdd5c3346677aedafd58338e",
+  "submittedFieldNames": [
+    "fileUrl",
+    "sourceStoragePath",
+    "renderJobId",
+    "renderRequestId",
+    "options"
+  ]
+}

@@ -1,3 +1,8 @@
+try:
+    from .studio_media_colorize import colorize_media
+except ImportError:
+    from studio_media_colorize import colorize_media
+
 """Pixel-accurate image/logo layer motion for Viral Clip Studio.
 
 The browser stores edit-clock keyframes in composition_plan. This renderer
@@ -260,7 +265,7 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1, *, 
     # transparent letterbox and box-relative anchor/mask, not shrink the box.
     box = Image.new("RGBA", (box_width, box_height))
     box.alpha_composite(artwork, ((box_width - artwork.width) // 2, (box_height - artwork.height) // 2))
-    artwork = box
+    artwork = colorize_media(box, ((layer or {}).get("effects") or {}).get("colorize"))
     bounded_title = _bounded_text_pose(artwork, overlay, layer, pose, canvas_size, sample_opacity)
     if bounded_title is not None:
         return bounded_title

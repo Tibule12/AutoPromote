@@ -296,3 +296,9 @@ describe("StudioCompWorkbench & StudioNodeFlow UI Integration", () => {
     expect(stateAfterDelete.plateMatte).toBe("none");
   });
 });
+
+test('Fit graph reveals the full node network without mutating the canonical edit',()=>{
+ render(<Harness/>);const panel=screen.getByTestId('studio-node-flow'),before=screen.getByTestId('state-readout').textContent;fireEvent.click(within(panel).getByRole('button',{name:'Fit graph'}));expect(screen.getByTestId('state-readout').textContent).toBe(before);expect(within(panel).getByRole('button',{name:'Zoom node graph out'})).toBeInTheDocument();
+});
+
+test('Inspect node selects an off-canvas branch and keeps its canonical pose intact',()=>{render(<Harness/>);const panel=screen.getByTestId('studio-node-flow'),before=screen.getByTestId('state-readout').textContent;fireEvent.change(within(panel).getByLabelText('Inspect node'),{target:{value:'Transform:plate-1'}});expect(screen.getByTestId('state-readout').textContent).toBe(before);expect(screen.getByTestId('flow-node-inspector')).toHaveTextContent('Transform');});

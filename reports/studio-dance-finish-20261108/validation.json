@@ -1,0 +1,11 @@
+{
+  "deliveryFilesExact": 27,
+  "movieSha256": "4d4ac1f433aadd9b422b2acd3cd5e858e8fc775b750e19a397f34fc0c1f282e5",
+  "contract": true,
+  "knowledge": true,
+  "diffCheck": true,
+  "workerTests": 22,
+  "fullDecode": true,
+  "frames": 144,
+  "published": false
+}

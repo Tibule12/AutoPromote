@@ -1,0 +1,13 @@
+{
+  "activeOperations": 0,
+  "completeEmulatorExportRetained": true,
+  "onlyExactOwnedProcessesSignalled": [
+    244572,
+    245207,
+    270082,
+    268875,
+    262193
+  ],
+  "otherProcessesUntouched": true,
+  "allOwnedProcessesExited": true
+}

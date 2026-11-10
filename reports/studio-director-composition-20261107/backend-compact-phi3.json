@@ -1,0 +1,13 @@
+{
+  "model": "phi3:latest",
+  "threads": 4,
+  "gpu": 0,
+  "requestTimeoutSeconds": 300,
+  "noAutomaticRetry": true,
+  "frontendBuildUnchanged": true,
+  "sources": {
+    "src/services/studioDirectorCreativePlanner.js": "98af3c645a38605bf52660ae120e24eb3858eb01818d8f64ef001d81a8ea2d6c",
+    "src/services/studioDirectorCompositionPlanner.js": "ddc0f7a02df54b75b49220d6f51b4384b2cda675abb63aefcab79d4ff7dea0e4",
+    "src/routes/studioDirectorCreativeRoutes.js": "569797930cb373c72e3b6395990e06cc513e28fd815dc585cc7e601beb4362f1"
+  }
+}

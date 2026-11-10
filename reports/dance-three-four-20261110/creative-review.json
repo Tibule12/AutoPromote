@@ -1,0 +1,37 @@
+{
+  "three": {
+    "allDecodedFramesInspected": 180,
+    "fullFrameContactSheets": 8,
+    "openingPanelEntrancesAndShotTransitionsInspected": true,
+    "foregroundRevealAndClosingFramesInspected": true,
+    "framingCorrection": "Reduced foreground scale; source bounds centre the group with a 10 percent horizontal placement margin at authored samples.",
+    "audioCorrection": "Original audio 200 percent plus 6 dB native neutral mastering; speed 1, pitch 0, EQ/reverb zero.",
+    "limits": [
+      "Prepared RVM edges soften some dark clothing and hair.",
+      "The fading floor reflection is a vertical mirror, not reconstructed floor lighting.",
+      "Blank graphic opening/closing holds are under 0.1 seconds."
+    ],
+    "verdict": "Accepted as a stylised native motion edit for the requested schedule. Reference-level realism and perfection remain unqualified."
+  },
+  "four": {
+    "allDecodedFramesInspected": 192,
+    "fullFrameContactSheets": 8,
+    "revealAndClosingFramesInspected": true,
+    "firstClippedLayoutExcluded": true,
+    "framingCorrection": "Reduced crew/echo scale, bounded placement, smoothed source foot anchors and restrained glow.",
+    "limits": [
+      "Original compression, fractional edges and small foot-adjacent matte residue remain visible at enlarged inspection.",
+      "Copies reuse the source viewpoint; glow/reflection are authored graphic effects."
+    ],
+    "verdict": "Accepted as a stylised native colour-echo edit for the requested schedule. Physical relighting and perfect mattes remain unqualified."
+  },
+  "shared": {
+    "normalSpeedSourceMusicRetained": true,
+    "humanListeningQualified": false,
+    "completeNativeLiveAndFinishedPlaybackRecorded": true,
+    "preparedInputNotProductAutomaticSegmentation": true,
+    "autonomousDirector": false,
+    "noExternalFinalCompositor": true,
+    "strictPredictivePictureAudioParity": false
+  }
+}

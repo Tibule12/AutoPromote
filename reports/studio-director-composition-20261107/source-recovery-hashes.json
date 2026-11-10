@@ -1,0 +1,55 @@
+{
+  "exactInputObjects": [
+    {
+      "name": "studio/sources/demo-pilot-alice/1a7d69242aae52735c93ef4d_cinema.mp4",
+      "sha256": "e8d2f87ddd67166c0bf5559db74fed069911766337bf8889d6213d0126acbc6b",
+      "bytes": 6704995,
+      "contentType": "video/mp4"
+    },
+    {
+      "name": "studio/sources/demo-pilot-alice/4c16f9a3130650c78c52b9b3_Coast.mp4",
+      "sha256": "dd6037bc87dc9c93b84fb506b04355fe12d1f4bda0e942aec8da7e83d3c3e86c",
+      "bytes": 6646172,
+      "contentType": "video/mp4"
+    },
+    {
+      "name": "studio/sources/demo-pilot-alice/a924b66ba8b93d9c57e14638_City.mp4",
+      "sha256": "09f2b8bfcf899d174ecf53f6a9c5358b9d19ca7b7d8ba0b1c508abfc2a2bf15d",
+      "bytes": 5306461,
+      "contentType": "video/mp4"
+    },
+    {
+      "name": "studio/sources/demo-pilot-alice/ddfcd04f24111a69f8edc724_City_-_source-bound_luma_matte.mp4",
+      "sha256": "dd5eb646c37f88771d63fbbbacc4550717f4bd925aec6cd397d1fd34c8ed9571",
+      "bytes": 202075,
+      "contentType": "video/mp4"
+    },
+    {
+      "name": "uploads/images/demo-pilot-alice/1794043824893_overlay-b9b40a4f-042d-4125-803a-4608754c84be.png",
+      "sha256": "0d738b082536615eb6a1d4b8718922501c20d5bc217e8bd04f793e54fc3063d3",
+      "bytes": 20863,
+      "contentType": "image/png"
+    },
+    {
+      "name": "uploads/images/demo-pilot-alice/1794043824895_overlay-8a1c7881-9ec5-4e91-8568-13a8a3893f8d.png",
+      "sha256": "f6ada3141a6d48f79ed72f36fb1cf09a39a85fd6a268ca93882d9c5f35788d69",
+      "bytes": 39398,
+      "contentType": "image/png"
+    },
+    {
+      "name": "uploads/images/demo-pilot-alice/1794043824895_overlay-9a0584f2-e94e-4d5c-b060-751baa67b109.png",
+      "sha256": "e1be89cf1590daca8a962b440b3cde4aaab6b9ed4f0498ad761565961748a5e8",
+      "bytes": 20863,
+      "contentType": "image/png"
+    },
+    {
+      "name": "uploads/audios/demo-pilot-alice/1794043825969_music-3ec88e79-4b75-4270-8ffa-d436b4eacb1b.wav",
+      "sha256": "f3cade09fcb727c24508179fa1c0e7914cfe162c9fee098a8eabe6c6d3ea44a6",
+      "bytes": 4608044,
+      "contentType": "audio/wav"
+    }
+  ],
+  "oldRuntimeUnavailable": true,
+  "oldWalletAndJobHistoryRestored": false,
+  "regeneratedArtworkHashMatchesRequired": true
+}

@@ -1,0 +1,10 @@
+{
+  "normalSignIn": true,
+  "actualApp": true,
+  "realHelpRequest": true,
+  "status": 200,
+  "headless": true,
+  "muted": true,
+  "loopbackOnly": true,
+  "errors": []
+}

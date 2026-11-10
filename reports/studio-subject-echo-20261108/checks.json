@@ -1,0 +1,21 @@
+{
+  "focusedTests": {
+    "passed": 54,
+    "suites": 5,
+    "log": "private/focused-tests-upload-r2.log"
+  },
+  "candidateBuilds": 2,
+  "finalAnonymousWelcomeComparisons": 8,
+  "signedInHelp": true,
+  "nativeAuthoringUndoRedoReopen": true,
+  "nativeCpuRenderExecutions": 1,
+  "exactBindings": true,
+  "decodedFrames": 192,
+  "deliveredManifestFiles": 40,
+  "preservedPriorDeliveryFiles": 416,
+  "contractRecordValidation": true,
+  "knowledgeCheck": true,
+  "diffCheck": true,
+  "creativeApproval": false,
+  "productionDeployment": false
+}

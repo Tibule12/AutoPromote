@@ -1,0 +1,55 @@
+{
+  "actualNativeUi": true,
+  "exportSha256": "f120949d5b66e41e6bc70bfeace2d49e49d8e8f9e6a52a5acb018786c081bf04",
+  "comparisons": [
+    {
+      "requestedTime": 5.5,
+      "measuredProgrammeTime": "5.5",
+      "readyWaitMs": 5288,
+      "allActiveVideosDecoded": true,
+      "beforeDiagnosticPsnr": 1.5428742649979752,
+      "readyDiagnosticPsnr": 38.12829788982472,
+      "wholePictureParityQualified": false
+    },
+    {
+      "requestedTime": 6.5,
+      "measuredProgrammeTime": "6.5",
+      "readyWaitMs": 687,
+      "allActiveVideosDecoded": true,
+      "beforeDiagnosticPsnr": 1.5394440573772221,
+      "readyDiagnosticPsnr": 38.290536108188114,
+      "wholePictureParityQualified": false
+    },
+    {
+      "requestedTime": 9.5,
+      "measuredProgrammeTime": "9.5",
+      "readyWaitMs": 5500,
+      "allActiveVideosDecoded": true,
+      "beforeDiagnosticPsnr": 7.3512447678349435,
+      "readyDiagnosticPsnr": 31.159024457489153,
+      "wholePictureParityQualified": false
+    },
+    {
+      "requestedTime": 11,
+      "measuredProgrammeTime": "11",
+      "readyWaitMs": 1205,
+      "allActiveVideosDecoded": true,
+      "beforeDiagnosticPsnr": 7.9635378614057135,
+      "readyDiagnosticPsnr": 30.437288131462243,
+      "wholePictureParityQualified": false
+    },
+    {
+      "requestedTime": 14.5,
+      "measuredProgrammeTime": "14.5",
+      "readyWaitMs": 1548,
+      "allActiveVideosDecoded": true,
+      "beforeDiagnosticPsnr": 5.783598962370449,
+      "readyDiagnosticPsnr": 32.372591291091496,
+      "wholePictureParityQualified": false
+    }
+  ],
+  "minimumReadyDiagnosticPsnr": 30.437288131462243,
+  "fixedDelayVersusReadySamplingDistinguished": true,
+  "instantSeekQualified": false,
+  "wholePictureParityQualified": false
+}

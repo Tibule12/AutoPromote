@@ -57,6 +57,49 @@ describe("temporary source uploads", () => {
     } finally { fetchSpy.mockRestore(); }
   });
 
+  it('falls back once when bytes finish but the Storage URL lookup stalls, and ignores a late lookup failure', async () => {
+    jest.useFakeTimers();
+    let rejectLookup;
+    getDownloadURL.mockImplementation(() => new Promise((_resolve, reject) => { rejectLookup = reject; }));
+    const fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue({ ok: true,
+      json: async () => ({ url: 'http://localhost/owned/image.png', storagePath: 'owned/image.png' }) });
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      const pending = uploadSourceFileViaBackend({ file: new File(['image'], 'image.png', { type: 'image/png' }), token: 'owner-token', timeoutMs: 60000 });
+      await Promise.resolve();
+      jest.advanceTimersByTime(14999);
+      expect(fetchSpy).not.toHaveBeenCalled();
+      jest.advanceTimersByTime(1);
+      await expect(pending).resolves.toMatchObject({ storagePath: 'owned/image.png' });
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy.mock.calls[0][1].headers.Authorization).toBe('Bearer owner-token');
+      rejectLookup(Error('late metadata failure'));
+      await Promise.resolve();
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(jest.getTimerCount()).toBe(0);
+    } finally { fetchSpy.mockRestore(); warn.mockRestore(); jest.useRealTimers(); }
+  });
+
+  it('honours a shorter caller deadline during URL lookup and clears its timer on success', async () => {
+    jest.useFakeTimers();
+    getDownloadURL.mockImplementationOnce(() => new Promise(() => {}));
+    const fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue({ ok: true,
+      json: async () => ({ url: 'http://localhost/owned/image.png' }) });
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      const file = new File(['image'], 'image.png', { type: 'image/png' });
+      const pending = uploadSourceFileViaBackend({ file, token: 'owner-token', timeoutMs: 1000 });
+      await Promise.resolve();
+      jest.advanceTimersByTime(999); expect(fetchSpy).not.toHaveBeenCalled();
+      jest.advanceTimersByTime(1); await pending;
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      getDownloadURL.mockResolvedValueOnce('http://localhost/firebase/image.png');
+      await expect(uploadSourceFileViaBackend({ file, token: 'owner-token' })).resolves.toMatchObject({ uploadMode: 'firebase_resumable' });
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(jest.getTimerCount()).toBe(0);
+    } finally { fetchSpy.mockRestore(); warn.mockRestore(); jest.useRealTimers(); }
+  });
+
   it("uploads a viral scan to the signed-in user's temporary path with owner metadata", async () => {
     const file = new File(["secure-video"], "My clip.mp4", { type: "video/mp4" });
     const onProgress = jest.fn();

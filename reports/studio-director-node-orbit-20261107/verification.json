@@ -1,0 +1,584 @@
+{
+  "recordedAt": "2026-11-07T13:12:04.814175+00:00",
+  "state": "DIRECTOR_NATIVE_NODE_CREATIVE_DELIVERED_WITH_LIMITS",
+  "delivery": "/home/tibule12/Videos/Studio - Landscape Constellation - 2026-11-07",
+  "movieSha256": "5eeb48e8300cfb3c25480fc7fc5728466098d410ef3e3b292431de8206679a66",
+  "seconds": 6,
+  "frames": 144,
+  "fps": 24,
+  "size": [
+    1280,
+    720
+  ],
+  "actualStudioFrontend": true,
+  "normalEmulatorSignIn": true,
+  "model": {
+    "provider": "ollama",
+    "model": "llama3:latest",
+    "generatedAt": "2026-11-07T12:48:34.540Z",
+    "elapsedMs": 145244,
+    "automaticModelPlanning": true,
+    "sourceUnderstanding": "client_hash_bound_colour_and_frame_difference_only",
+    "authoring": "ordinary_node_connections_and_motion_drivers",
+    "planningRepresentation": "model_media_windows_lowered_to_native_graph",
+    "terminalOperator": "fill",
+    "modelWireSha256": "9d9d2bf9ee1aa6b642d0d4fea8debb60fa809d6a4cfe7791ae8dce14e5f0779d",
+    "modelCalls": 1,
+    "validationRevisionPasses": 0,
+    "attempts": [
+      {
+        "index": 1,
+        "model": "llama3:latest",
+        "generatedAt": "2026-11-07T12:48:34.536Z",
+        "elapsedMs": 145240,
+        "generatedTokens": 301,
+        "valid": true
+      }
+    ],
+    "paidProviderCalls": 0
+  },
+  "noPreparedPlanImport": true,
+  "nativeAuthoring": {
+    "normalSignIn": true,
+    "actualModelInference": true,
+    "noPreparedPlanImport": true,
+    "nativeApplyUndoRedo": true,
+    "projectId": "viral-project-24561ffe-133f-419a-a67b-fbd80c1823f9",
+    "layers": 8,
+    "keys": 80,
+    "model": "llama3:latest",
+    "nodes": 8,
+    "connections": 6,
+    "drivers": 2,
+    "planFingerprint": "80736ca644b83e3e247d2cad49e8fa0a661bc7f9584fd4b80bd842912f9b803f",
+    "manuallySelectedExistingMusic": true
+  },
+  "manualNodeEdit": {
+    "normalUi": true,
+    "layerId": "scene-51b9c78a-1cfa-44cb-acc3-490aa0a6cb4e",
+    "originalSpeed": 30,
+    "changedSpeed": 35,
+    "undoRedoRestoreExact": true
+  },
+  "independentRestore": {
+    "exactDecisions": true,
+    "normalSignIn": true
+  },
+  "binding": {
+    "nativeBackupMatchesRenderedDocument": true,
+    "compiledCompositionMatchesSubmitted": true,
+    "workerCompositionMatchesNativeGraph": true,
+    "actualNativeDownload": true,
+    "movieSha256": "5eeb48e8300cfb3c25480fc7fc5728466098d410ef3e3b292431de8206679a66",
+    "projectHash": "b3b4725d2069ac9b7d99f0a607a0cea6db1997d85bc967b7f0bf1564345bff45",
+    "requestBytesSha256": "f1fa7bc9e72c43de879c2164d25ac8fa775ae6faf70d6538f3cf0ebe83fc39b2",
+    "nativeJobId": "viral_40958ba24ced162608ec6d517d132d4f4e4ec528d3f183ab0e3c900eb3fdc317",
+    "workerExecutionId": "863e496b19cdbcf21948e556ce38f46590fd425a402134c8f3358c4d442b6a85",
+    "ordinaryOverlays": 8,
+    "motionKeys": 80,
+    "worker": {
+      "wallSeconds": 145.23832642100024,
+      "cpuSeconds": 257.589326,
+      "peakRssKiB": 743940,
+      "cpuCeilingSeconds": 600,
+      "localFileCeilingBytes": 402653184,
+      "providerChargesStarted": false,
+      "invoiceCostMicros": null
+    },
+    "workerReceipt": {
+      "provider": "local-process",
+      "payload": {
+        "endpoint": "/render-viral-clip",
+        "executionId": "863e496b19cdbcf21948e556ce38f46590fd425a402134c8f3358c4d442b6a85",
+        "fingerprint": "3d5be829eb8bd75043448591a83f64cabecd4e43710f7fc0a0e426a217ab480f",
+        "operationId": "7bf5a273470d8f893bb939adb07ef6570a48709cf887ccddbe18509296657d03",
+        "requestDigest": "fd0dd9f4d4a62f09e0dc835e881eb95313435286fb81921c3dca56813c257245",
+        "sourceGeneration": "1794053780918",
+        "sourceHash": "96056be98b025809b72e38baebc1ea0827fbc30d9a02cfd8844c35a371a3fe00",
+        "sources": [
+          {
+            "contentHash": "96056be98b025809b72e38baebc1ea0827fbc30d9a02cfd8844c35a371a3fe00",
+            "contentType": "video/mp4",
+            "gatewayPath": "/api/credit-pilot/object/2c17ecdf2f9f21b973d2a344047e4e9f62774100478b42cb80914d2c64d2f6b6",
+            "objectGeneration": "1794053780918",
+            "size": 4988927,
+            "storagePath": "studio/sources/demo-pilot-alice/ad4090a02e9a9fcd6a723219_Summit.mp4",
+            "userId": "demo-pilot-alice"
+          },
+          {
+            "contentHash": "dd6037bc87dc9c93b84fb506b04355fe12d1f4bda0e942aec8da7e83d3c3e86c",
+            "contentType": "video/mp4",
+            "gatewayPath": "/api/credit-pilot/object/7158105985e2c6b1ae0b27bdb3061a0c111b88ba1bb5b8092df767e23498b889",
+            "objectGeneration": "1794053785528",
+            "size": 6646172,
+            "storagePath": "studio/sources/demo-pilot-alice/4c16f9a3130650c78c52b9b3_Coast.mp4",
+            "userId": "demo-pilot-alice"
+          },
+          {
+            "contentHash": "01258817091b10d7639169d3fc9885229ea5fbad787ee1ac674b72c25f9ef468",
+            "contentType": "video/mp4",
+            "gatewayPath": "/api/credit-pilot/object/4371138ebbefc7f0df83507a267bda2022e43f9671353060691b1114c2a25e4c",
+            "objectGeneration": "1794053787079",
+            "size": 5354075,
+            "storagePath": "studio/sources/demo-pilot-alice/2dc939ed7e27f2c5d308c8f5_Autumn.mp4",
+            "userId": "demo-pilot-alice"
+          }
+        ],
+        "stage": "studio.render",
+        "userId": "demo-pilot-alice",
+        "state": "succeeded",
+        "exitCode": 0,
+        "signal": null,
+        "processTerminated": true,
+        "startedAt": "2026-11-07T13:04:53.073Z",
+        "finishedAt": "2026-11-07T13:07:18.668Z",
+        "resultDigest": "a66e5ba84d41474ae5f1008b7495cb6dc954e0f72a55bbf8d8e49660b7e06473",
+        "result": {
+          "status": "completed",
+          "progress": 100,
+          "detail": "Render complete",
+          "job_id": "viral_40958ba24ced162608ec6d517d132d4f4e4ec528d3f183ab0e3c900eb3fdc317",
+          "output_path": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105/tmp/viral_40958ba24ced162608ec6d517d132d4f4e4ec528d3f183ab0e3c900eb3fdc317_viral.mp4",
+          "output_url": "http://127.0.0.1/local-worker-output",
+          "output_sha256": "5eeb48e8300cfb3c25480fc7fc5728466098d410ef3e3b292431de8206679a66",
+          "output_bytes": 3294041,
+          "thumbnail_url": null,
+          "cover_frame": null,
+          "thumbnail_frame": null,
+          "brand_watermark": false,
+          "caption_review_copy": false,
+          "brand_watermark_receipt": {
+            "enabled": false,
+            "status": "disabled_for_studio"
+          },
+          "caption_review_receipt": null,
+          "output_settings": {
+            "resolution": "720p",
+            "width": 1280,
+            "height": 720,
+            "fps": 24,
+            "codec": "h264",
+            "encoder": "libx264",
+            "quality": "high",
+            "crf": 19,
+            "preset": "veryfast"
+          },
+          "watermark_text": null,
+          "audio_proof": {
+            "expected": true,
+            "verified": true,
+            "codec": "aac",
+            "channels": 2,
+            "sample_rate": 48000,
+            "duration_seconds": 6
+          },
+          "media_validation": {
+            "duration": 6,
+            "size": 3294041,
+            "video": {
+              "index": 0,
+              "codec_name": "h264",
+              "codec_type": "video",
+              "width": 1280,
+              "height": 720,
+              "avg_frame_rate": "24/1"
+            },
+            "audio": {
+              "index": 1,
+              "codec_name": "aac",
+              "codec_type": "audio",
+              "avg_frame_rate": "0/0"
+            }
+          },
+          "final_quality_gate": {
+            "status": "passed",
+            "media": {
+              "duration": 6,
+              "size": 3294041,
+              "video": {
+                "index": 0,
+                "codec_name": "h264",
+                "codec_type": "video",
+                "width": 1280,
+                "height": 720,
+                "avg_frame_rate": "24/1"
+              },
+              "audio": {
+                "index": 1,
+                "codec_name": "aac",
+                "codec_type": "audio",
+                "avg_frame_rate": "0/0"
+              }
+            },
+            "duration": {
+              "expected": 6,
+              "actual": 6,
+              "delta": 0,
+              "tolerance": 0.45
+            },
+            "audio_expected": true,
+            "picture_timing": {
+              "duration": 6,
+              "container_duration": 6,
+              "delta": 0,
+              "tolerance": 0.042
+            },
+            "black_ranges": [],
+            "planned_black_ranges": [],
+            "browser_delivery": "h264_yuv420p_faststart"
+          },
+          "duration": 6,
+          "speed_plan": [
+            {
+              "start_time": 0,
+              "end_time": 6,
+              "rate": 1
+            }
+          ],
+          "creative_receipt": {
+            "status": "not_requested",
+            "fallback": "clean",
+            "effects": []
+          },
+          "creative_template_instance": null,
+          "professional_cleanup": {
+            "status": "disabled"
+          },
+          "audio_restoration": null,
+          "audio_automation": {},
+          "audio_track_states": {
+            "video": {
+              "visible": true,
+              "locked": false,
+              "muted": false,
+              "solo": false
+            },
+            "adjustment": {
+              "visible": true,
+              "locked": false,
+              "muted": false,
+              "solo": false
+            },
+            "graphics": {
+              "visible": true,
+              "locked": false,
+              "muted": false,
+              "solo": false
+            },
+            "broll": {
+              "visible": true,
+              "locked": false,
+              "muted": false,
+              "solo": false
+            },
+            "captions": {
+              "visible": true,
+              "locked": false,
+              "muted": false,
+              "solo": false
+            },
+            "originalAudio": {
+              "visible": true,
+              "locked": false,
+              "muted": false,
+              "solo": false
+            },
+            "voiceover": {
+              "visible": true,
+              "locked": false,
+              "muted": false,
+              "solo": false
+            },
+            "music": {
+              "visible": true,
+              "locked": false,
+              "muted": false,
+              "solo": false
+            },
+            "sfx": {
+              "visible": true,
+              "locked": false,
+              "muted": false,
+              "solo": false
+            }
+          },
+          "audio_remix_receipt": {
+            "version": 1,
+            "enabled": false,
+            "status": "not_requested"
+          },
+          "studio_plan_validation": {
+            "valid": false,
+            "errors": [
+              "legacy_request_without_plan"
+            ]
+          }
+        },
+        "resource": {
+          "wallSeconds": 145.23832642100024,
+          "cpuSeconds": 257.589326,
+          "peakRssKiB": 743940,
+          "cpuCeilingSeconds": 600,
+          "localFileCeilingBytes": 402653184,
+          "providerChargesStarted": false,
+          "invoiceCostMicros": null
+        },
+        "output": {
+          "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105/reports/studio-director-composition-20261107/private/runtime/autopromote-application-demo-6YGcoz/worker/863e496b19cdbcf21948e556ce38f46590fd425a402134c8f3358c4d442b6a85/artifact.mp4",
+          "bytes": 3294041,
+          "sha256": "5eeb48e8300cfb3c25480fc7fc5728466098d410ef3e3b292431de8206679a66"
+        }
+      },
+      "signature": "01bRiTUH7fF4C8eY9vzPzt+5lW/Gf+6eeqnPPtl1EnyVHT8xaL7eiedjMTDXqyACRsT7dPgNUvk1mmcxH0JGAA=="
+    },
+    "workerDirectory": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105/reports/studio-director-composition-20261107/private/runtime/autopromote-application-demo-6YGcoz/worker/863e496b19cdbcf21948e556ce38f46590fd425a402134c8f3358c4d442b6a85",
+    "submittedFieldNames": [
+      "fileUrl",
+      "sourceStoragePath",
+      "renderJobId",
+      "renderRequestId",
+      "options"
+    ]
+  },
+  "nativeRenderExecutions": 2,
+  "firstRenderFailedAndRefunded": true,
+  "successfulExecutions": 1,
+  "previewCORSFailureBeforeAnyDispatch": true,
+  "boundedLocalWorker": {
+    "pid": 39373,
+    "cwd": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105",
+    "beforeOrigin": "http://127.0.0.1:37447",
+    "origin": "http://127.0.0.1:45541",
+    "perFileMiB": 384,
+    "cpuSeconds": 600,
+    "wallSeconds": 600,
+    "artifactMiB": 128,
+    "productionChange": false,
+    "activeOperationsAtSwitch": 0
+  },
+  "largestObservedIntermediateBytes": 210572584,
+  "priorFileCeilingBytes": 134217728,
+  "fileCeilingDiagnosisSupported": true,
+  "previewSamples": 13,
+  "effectiveSourceTimestampSamples": 39,
+  "maximumSourceTimeDelta": 3.3330000004383464e-07,
+  "livePlayback": {
+    "complete": true,
+    "programmeSeconds": 6,
+    "wallMs": 6067,
+    "decoder": {
+      "time": 5.958333,
+      "decoded": 1141,
+      "dropped": 51
+    }
+  },
+  "finishedPlayback": {
+    "complete": true,
+    "programmeSeconds": 6,
+    "wallMs": 5992,
+    "decoder": {
+      "time": 5.962667,
+      "decoded": 144,
+      "dropped": 14
+    }
+  },
+  "capture": {
+    "Director planning and native apply": {
+      "seconds": 150.63700008392334,
+      "frames": 12,
+      "rawBytes": 1754273,
+      "nativeControlsOnly": true,
+      "setupExcluded": true,
+      "audio": "Silent native editing capture",
+      "observedCaptureFps": 0.07966170325560469
+    },
+    "Native node driver adjustment": {
+      "seconds": 2.2340002059936523,
+      "frames": 44,
+      "rawBytes": 4996974,
+      "nativeControlsOnly": true,
+      "setupExcluded": true,
+      "audio": "Silent native editing capture",
+      "observedCaptureFps": 19.695611433674603
+    },
+    "Live Studio playback": {
+      "seconds": 5.930000066757202,
+      "frames": 53,
+      "rawBytes": 8146474,
+      "nativeControlsOnly": true,
+      "setupExcluded": true,
+      "audio": "Silent native editing capture",
+      "observedCaptureFps": 8.937605295674617
+    },
+    "Finished movie in Studio": {
+      "seconds": 5.885999917984009,
+      "frames": 143,
+      "rawBytes": 21578101,
+      "nativeControlsOnly": true,
+      "setupExcluded": true,
+      "audio": "Silent native editing capture",
+      "observedCaptureFps": 24.294937477501424
+    }
+  },
+  "pictureReview": {
+    "fullDecode": true,
+    "frames": 144,
+    "seconds": 6,
+    "fps": 24,
+    "poseBoundaries": [
+      0,
+      3.0,
+      6
+    ],
+    "sampledFrameIndices": [
+      0,
+      1,
+      12,
+      24,
+      36,
+      48,
+      60,
+      71,
+      72,
+      73,
+      84,
+      96,
+      108,
+      120,
+      132,
+      143
+    ],
+    "pairedDiagnosticSamples": [
+      {
+        "programmeTime": 0,
+        "exportFrame": 0,
+        "diagnosticPsnrDb": 34.93049622359856,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 0.5,
+        "exportFrame": 12,
+        "diagnosticPsnrDb": 32.335702963631846,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 1,
+        "exportFrame": 24,
+        "diagnosticPsnrDb": 33.735091131077446,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 1.5,
+        "exportFrame": 36,
+        "diagnosticPsnrDb": 34.12552161256636,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 2,
+        "exportFrame": 48,
+        "diagnosticPsnrDb": 33.58961871052684,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 2.5,
+        "exportFrame": 60,
+        "diagnosticPsnrDb": 33.20813634843974,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 3,
+        "exportFrame": 72,
+        "diagnosticPsnrDb": 33.41355639175014,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 3.5,
+        "exportFrame": 84,
+        "diagnosticPsnrDb": 33.30575227513627,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 4,
+        "exportFrame": 96,
+        "diagnosticPsnrDb": 31.13368454075537,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 4.5,
+        "exportFrame": 108,
+        "diagnosticPsnrDb": 33.5810020395104,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 5,
+        "exportFrame": 120,
+        "diagnosticPsnrDb": 33.143437708286086,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 5.5,
+        "exportFrame": 132,
+        "diagnosticPsnrDb": 33.45723580114621,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 5.9583333333,
+        "exportFrame": 143,
+        "diagnosticPsnrDb": 29.508704941632942,
+        "strictPassClaimed": false
+      }
+    ],
+    "minimumDiagnosticPsnrDb": 29.508704941632942,
+    "wholePictureParityQualified": false,
+    "humanListeningQualified": false,
+    "creativeApproval": false
+  },
+  "tests": {
+    "frontend": 63,
+    "backend": 28,
+    "selectedFullEditor": 3,
+    "distinctTotal": 94,
+    "fullEditorSuiteRun": false
+  },
+  "welcomeComparisons": 8,
+  "normalSignedInHelp": true,
+  "productionDeployment": false,
+  "paidProviderCalls": 0,
+  "cloudGpuJobs": 0,
+  "productionWrites": 0,
+  "publishingScheduling": false,
+  "creativeApproval": false,
+  "wholePictureAudioParityQualified": false,
+  "realtimeSmoothnessQualified": false,
+  "humanListeningQualified": false,
+  "readinessPromotion": false,
+  "protectedDeliveries": [
+    {
+      "directory": "/home/tibule12/Videos/Studio - Director Creates the Edit - 2026-11-07",
+      "unchangedFiles": 47
+    },
+    {
+      "directory": "/home/tibule12/Videos/Studio - Phase Shift - 2026-11-06",
+      "unchangedFiles": 49
+    },
+    {
+      "directory": "/home/tibule12/Videos/Studio Template Collection - 2026-11-04",
+      "unchangedFiles": 154
+    },
+    {
+      "directory": "/home/tibule12/Videos/Studio - City into Sea - 2026-11-07",
+      "unchangedFiles": 42
+    }
+  ],
+  "limits": [
+    "The model selects bounded media-window intent or validated explicit nodes; it is not unrestricted AE/Fusion planning.",
+    "Window authoring geometry is qualified here only for landscape16:9.",
+    "finish:fill calculates explicit terminal coverage and companion fade keys; earlier travel poses, colours and controller settings are model choices.",
+    "Source measurements are hash-bound colours and frame differences, not semantic vision, transcript or beat understanding.",
+    "The original score was selected manually.",
+    "Native recordings are silent QA captures; listen to the separate finished movie.",
+    "Paused pairs and exact clocks do not establish whole colour/edge/audio parity or real-time smoothness.",
+    "The Director flags are enabled in this isolated demo only; no ordinary-account or production release is claimed."
+  ],
+  "nextTask": "Improve general composition reliability and scene/audio grounding, then S02 pixel/edge/audio throughput with native node editing and shared S04/S03 preservation."
+}

@@ -1,0 +1,5 @@
+from pathlib import Path
+import cv2,numpy as np,onnxruntime as ort,time
+r=Path(__file__).resolve().parent;p=r/'private';im=cv2.imread(str(p/'glyph-source.png'));x0,y0,x1,y1=300,650,576,926;roi=im[y0:y1,x0:x1];mask=np.zeros(im.shape[:2],np.uint8);mask[778:874,467:572]=255;m=mask[y0:y1,x0:x1];opts=ort.SessionOptions();opts.intra_op_num_threads=2;opts.inter_op_num_threads=1;session=ort.InferenceSession('/home/tibule12/.cache/autopromote-model-runtime/lama-badge-cpu-v1/lama_fp32.onnx',sess_options=opts,providers=['CPUExecutionProvider']);print([(s.name,s.shape)for s in session.get_inputs()],flush=True)
+a=cv2.resize(cv2.cvtColor(roi,cv2.COLOR_BGR2RGB),(512,512)).transpose(2,0,1)[None].astype('float32')/255;b=cv2.resize(m,(512,512),interpolation=cv2.INTER_NEAREST)[None,None].astype('float32')/255
+start=time.monotonic();out=session.run(None,{'image':a,'mask':b})[0][0].transpose(1,2,0);print(out.min(),out.max(),time.monotonic()-start,flush=True);out=cv2.resize(out,(roi.shape[1],roi.shape[0]));out=cv2.cvtColor(np.clip(out,0,255).astype('uint8'),cv2.COLOR_RGB2BGR);im[y0:y1,x0:x1]=np.where(m[:,:,None]>0,out,roi);cv2.imwrite(str(p/'lama-clean.png'),im)

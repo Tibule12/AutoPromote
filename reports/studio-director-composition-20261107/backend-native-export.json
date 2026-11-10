@@ -1,0 +1,15 @@
+{
+  "model": "llama3:latest",
+  "threads": 6,
+  "gpu": 0,
+  "requestTimeoutSeconds": 450,
+  "format": "json",
+  "noAutomaticRetry": true,
+  "frontendBuildUnchanged": true,
+  "sources": {
+    "src/services/studioDirectorCreativePlanner.js": "76a48bc211c63acabc0db82dbf5a3d594464f48a547a740d7a2a11f0a8c70b9c",
+    "src/services/studioDirectorCompositionPlanner.js": "a8326414f3e33a5f35edfab63f52445817f3de051991ab9c6eef24c6048cfe3d",
+    "src/services/studioLocalModelTransport.js": "fb91edd59f1e8377a9ed77a8df065d969c1295460822ea058a6de109b1f9bbcf",
+    "src/routes/studioDirectorCreativeRoutes.js": "6192e442a299f677b426509999744244cd789d9ec264a4399c6b945914e4f41f"
+  }
+}

@@ -1,0 +1,6900 @@
+{
+  "recordedAt": "2026-11-08T02:00:10.455974+00:00",
+  "state": "NATIVE_CINEMATIC_EDIT_DELIVERED_FOR_OWNER_REVIEW",
+  "delivery": "/home/tibule12/Videos/Studio - Open Country - Cinematic Edit - 2026-11-08",
+  "movieSha256": "6bff3506f0da87db0c9f3eba3644e15454830ea14fe17f911dbd15a8e96b7b05",
+  "seconds": 24,
+  "frames": 576,
+  "fps": 24,
+  "size": [
+    1280,
+    720
+  ],
+  "actualStudioFrontend": true,
+  "normalEmulatorSignIn": true,
+  "manuallyArtDirected": true,
+  "automaticModelPlanning": false,
+  "nativeLayers": 8,
+  "motionKeys": 44,
+  "adjustmentGrades": 6,
+  "nativeSourceClips": 6,
+  "nativeRenderExecutions": 1,
+  "successfulExecutions": 1,
+  "authoring": {
+    "normalSignIn": true,
+    "nativeSceneActions": true,
+    "nativeApplyUndoRedo": true,
+    "manuallyArtDirected": true,
+    "automaticModelPlanning": false,
+    "projectId": "viral-project-2822ea46-3378-411c-a678-e23828be06d5",
+    "layers": 8,
+    "keys": 44,
+    "adjustments": 6,
+    "timelineClips": 6,
+    "frames": 576,
+    "seconds": 24
+  },
+  "manualCameraAndAudio": {
+    "meaningfulCameraKeyEdit": true,
+    "originalValue": 50,
+    "editedValue": 52,
+    "undoRedoRestoreExact": true,
+    "musicVolume": 0.6,
+    "musicDucking": false,
+    "normalNativeSoundControls": true,
+    "manuallyArtDirected": true
+  },
+  "independentRestore": {
+    "exactDecisions": true,
+    "normalSignIn": true
+  },
+  "binding": {
+    "nativeBackupMatchesRenderedDocument": true,
+    "compiledCompositionMatchesSubmitted": true,
+    "workerCompositionMatchesNativeGraph": true,
+    "actualNativeDownload": true,
+    "movieSha256": "6bff3506f0da87db0c9f3eba3644e15454830ea14fe17f911dbd15a8e96b7b05",
+    "projectHash": "8edd829cf8ce073651683059be9ef6881858c5979f9eda470c1d6a0185064347",
+    "requestBytesSha256": "9c37c204d1d06e68e87d8d223ebed125a749b8ae5757e05d35bf93b6809c63f3",
+    "nativeJobId": "viral_29e1a80439edc0d61900befd8e3853a90eabcf466da48609c1869f203f406083",
+    "workerExecutionId": "70d1d5610ac9c1410f9429ec35bfac1fdb03fae24e29b360aaaf9083ced1771f",
+    "ordinaryOverlays": 8,
+    "motionKeys": 44,
+    "worker": {
+      "wallSeconds": 73.00563906200114,
+      "cpuSeconds": 198.355007,
+      "peakRssKiB": 603100,
+      "cpuCeilingSeconds": 1200,
+      "localFileCeilingBytes": 402653184,
+      "providerChargesStarted": false,
+      "invoiceCostMicros": null
+    },
+    "workerReceipt": {
+      "provider": "local-process",
+      "payload": {
+        "endpoint": "/render-viral-clip",
+        "executionId": "70d1d5610ac9c1410f9429ec35bfac1fdb03fae24e29b360aaaf9083ced1771f",
+        "fingerprint": "ea5e857dd8c75c1ebcfe060eb8d52f649f9a7d72b142391720e0820c7964c1d3",
+        "operationId": "6c050ac69af534a2413193cad17407eabb702db470ea6627a2b7fab56fd0aadf",
+        "requestDigest": "a0b7755fb9e4473aa917bb665eb3c603ce57374e9b513ba617ee0445a0d90faa",
+        "sourceGeneration": "1794102627274",
+        "sourceHash": "459c13e384b1819b2e3d0bc8eae287d10e58c96d266a0b4bbf1553c98969bbac",
+        "sources": [
+          {
+            "contentHash": "459c13e384b1819b2e3d0bc8eae287d10e58c96d266a0b4bbf1553c98969bbac",
+            "contentType": "video/mp4",
+            "gatewayPath": "/api/credit-pilot/object/e69485543296f4894f1c50c7c522eec4b69a8136ba70276892739af866c44e11",
+            "objectGeneration": "1794102627274",
+            "size": 3862122,
+            "storagePath": "studio/sources/demo-pilot-alice/4569b519ac0b2db2ee220423_Footsteps.mp4",
+            "userId": "demo-pilot-alice"
+          },
+          {
+            "contentHash": "09f2b8bfcf899d174ecf53f6a9c5358b9d19ca7b7d8ba0b1c508abfc2a2bf15d",
+            "contentType": "video/mp4",
+            "gatewayPath": "/api/credit-pilot/object/095a284c8c25f211ffd78be29444a83faaf069e38dcc3c452d3d7db5ec8c61a5",
+            "objectGeneration": "1794102627315",
+            "size": 5306461,
+            "storagePath": "studio/sources/demo-pilot-alice/a924b66ba8b93d9c57e14638_City.mp4",
+            "userId": "demo-pilot-alice"
+          },
+          {
+            "contentHash": "01258817091b10d7639169d3fc9885229ea5fbad787ee1ac674b72c25f9ef468",
+            "contentType": "video/mp4",
+            "gatewayPath": "/api/credit-pilot/object/cd50275b9223036df969f3023cf00e9ac3fc8d41418bb062c263938d8fe1e53b",
+            "objectGeneration": "1794102627358",
+            "size": 5354075,
+            "storagePath": "studio/sources/demo-pilot-alice/2dc939ed7e27f2c5d308c8f5_Autumn.mp4",
+            "userId": "demo-pilot-alice"
+          },
+          {
+            "contentHash": "b5406236fe04617468a712d3353b37845149a16a25afb6b1b9f38e72801acc96",
+            "contentType": "video/mp4",
+            "gatewayPath": "/api/credit-pilot/object/d2ff2e65c9a83b560fea0c5721c48d42e135303440c5989a5139ea1e4434a98c",
+            "objectGeneration": "1794102627403",
+            "size": 4666850,
+            "storagePath": "studio/sources/demo-pilot-alice/c4b4ec52d705a685f668df25_Open_trail.mp4",
+            "userId": "demo-pilot-alice"
+          },
+          {
+            "contentHash": "96056be98b025809b72e38baebc1ea0827fbc30d9a02cfd8844c35a371a3fe00",
+            "contentType": "video/mp4",
+            "gatewayPath": "/api/credit-pilot/object/3096767aad1938f3d34aad29d5106115d1f8ff3cab9058999916139115163bee",
+            "objectGeneration": "1794102627442",
+            "size": 4988927,
+            "storagePath": "studio/sources/demo-pilot-alice/66561ed03273d7cd7d38f289_Summit.mp4",
+            "userId": "demo-pilot-alice"
+          },
+          {
+            "contentHash": "dd6037bc87dc9c93b84fb506b04355fe12d1f4bda0e942aec8da7e83d3c3e86c",
+            "contentType": "video/mp4",
+            "gatewayPath": "/api/credit-pilot/object/15265161805dd9cf58185f7bf6782d1386a4890f1447fcdb99faec529df1d0e3",
+            "objectGeneration": "1794102627488",
+            "size": 6646172,
+            "storagePath": "studio/sources/demo-pilot-alice/4c16f9a3130650c78c52b9b3_Coast.mp4",
+            "userId": "demo-pilot-alice"
+          }
+        ],
+        "stage": "studio.render",
+        "userId": "demo-pilot-alice",
+        "state": "succeeded",
+        "exitCode": 0,
+        "signal": null,
+        "processTerminated": true,
+        "startedAt": "2026-11-08T01:52:56.866Z",
+        "finishedAt": "2026-11-08T01:54:10.156Z",
+        "resultDigest": "70e8385ebcf61065f088c9b54bdbb6ac23dc6b4ad746de7f2ff676d8d0c80243",
+        "result": {
+          "status": "completed",
+          "progress": 100,
+          "detail": "Render complete",
+          "job_id": "viral_29e1a80439edc0d61900befd8e3853a90eabcf466da48609c1869f203f406083",
+          "output_path": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105/tmp/viral_29e1a80439edc0d61900befd8e3853a90eabcf466da48609c1869f203f406083_viral.mp4",
+          "output_url": "http://127.0.0.1/local-worker-output",
+          "output_sha256": "6bff3506f0da87db0c9f3eba3644e15454830ea14fe17f911dbd15a8e96b7b05",
+          "output_bytes": 9074583,
+          "thumbnail_url": null,
+          "cover_frame": null,
+          "thumbnail_frame": null,
+          "brand_watermark": false,
+          "caption_review_copy": false,
+          "brand_watermark_receipt": {
+            "enabled": false,
+            "status": "disabled_for_studio"
+          },
+          "caption_review_receipt": null,
+          "output_settings": {
+            "resolution": "720p",
+            "width": 1280,
+            "height": 720,
+            "fps": 24,
+            "codec": "h264",
+            "encoder": "libx264",
+            "quality": "high",
+            "crf": 19,
+            "preset": "veryfast"
+          },
+          "watermark_text": null,
+          "audio_proof": {
+            "expected": true,
+            "verified": true,
+            "codec": "aac",
+            "channels": 2,
+            "sample_rate": 48000,
+            "duration_seconds": 24
+          },
+          "media_validation": {
+            "duration": 24,
+            "size": 9074583,
+            "video": {
+              "index": 0,
+              "codec_name": "h264",
+              "codec_type": "video",
+              "width": 1280,
+              "height": 720,
+              "avg_frame_rate": "24/1"
+            },
+            "audio": {
+              "index": 1,
+              "codec_name": "aac",
+              "codec_type": "audio",
+              "avg_frame_rate": "0/0"
+            }
+          },
+          "final_quality_gate": {
+            "status": "passed",
+            "media": {
+              "duration": 24,
+              "size": 9074583,
+              "video": {
+                "index": 0,
+                "codec_name": "h264",
+                "codec_type": "video",
+                "width": 1280,
+                "height": 720,
+                "avg_frame_rate": "24/1"
+              },
+              "audio": {
+                "index": 1,
+                "codec_name": "aac",
+                "codec_type": "audio",
+                "avg_frame_rate": "0/0"
+              }
+            },
+            "duration": {
+              "expected": 24,
+              "actual": 24,
+              "delta": 0,
+              "tolerance": 0.84
+            },
+            "audio_expected": true,
+            "picture_timing": {
+              "duration": 24,
+              "container_duration": 24,
+              "delta": 0,
+              "tolerance": 0.042
+            },
+            "black_ranges": [],
+            "planned_black_ranges": [],
+            "browser_delivery": "h264_yuv420p_faststart"
+          },
+          "duration": 24,
+          "speed_plan": [
+            {
+              "start_time": 0,
+              "end_time": 24,
+              "rate": 1
+            }
+          ],
+          "creative_receipt": {
+            "status": "not_requested",
+            "fallback": "clean",
+            "effects": []
+          },
+          "creative_template_instance": null,
+          "professional_cleanup": {
+            "status": "disabled"
+          },
+          "audio_restoration": null,
+          "audio_automation": {},
+          "audio_track_states": {
+            "video": {
+              "visible": true,
+              "locked": false,
+              "muted": false,
+              "solo": false
+            },
+            "adjustment": {
+              "visible": true,
+              "locked": false,
+              "muted": false,
+              "solo": false
+            },
+            "graphics": {
+              "visible": true,
+              "locked": false,
+              "muted": false,
+              "solo": false
+            },
+            "broll": {
+              "visible": true,
+              "locked": false,
+              "muted": false,
+              "solo": false
+            },
+            "captions": {
+              "visible": true,
+              "locked": false,
+              "muted": false,
+              "solo": false
+            },
+            "originalAudio": {
+              "visible": true,
+              "locked": false,
+              "muted": false,
+              "solo": false
+            },
+            "voiceover": {
+              "visible": true,
+              "locked": false,
+              "muted": false,
+              "solo": false
+            },
+            "music": {
+              "visible": true,
+              "locked": false,
+              "muted": false,
+              "solo": false
+            },
+            "sfx": {
+              "visible": true,
+              "locked": false,
+              "muted": false,
+              "solo": false
+            }
+          },
+          "audio_remix_receipt": {
+            "version": 1,
+            "enabled": false,
+            "status": "not_requested"
+          },
+          "studio_plan_validation": {
+            "valid": false,
+            "errors": [
+              "legacy_request_without_plan"
+            ]
+          }
+        },
+        "resource": {
+          "wallSeconds": 73.00563906200114,
+          "cpuSeconds": 198.355007,
+          "peakRssKiB": 603100,
+          "cpuCeilingSeconds": 1200,
+          "localFileCeilingBytes": 402653184,
+          "providerChargesStarted": false,
+          "invoiceCostMicros": null
+        },
+        "output": {
+          "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105/reports/studio-director-composition-20261107/private/runtime/autopromote-application-demo-6YGcoz/worker/70d1d5610ac9c1410f9429ec35bfac1fdb03fae24e29b360aaaf9083ced1771f/artifact.mp4",
+          "bytes": 9074583,
+          "sha256": "6bff3506f0da87db0c9f3eba3644e15454830ea14fe17f911dbd15a8e96b7b05"
+        }
+      },
+      "signature": "WJOY4vpRe5vPuiPicjwkGT3nhr6NF5mjW3voU3jkeQYL0RjvXawuHNg9lUwo8TLlUbkhUAEtH28//qqm6lBnBQ=="
+    },
+    "workerDirectory": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105/reports/studio-director-composition-20261107/private/runtime/autopromote-application-demo-6YGcoz/worker/70d1d5610ac9c1410f9429ec35bfac1fdb03fae24e29b360aaaf9083ced1771f",
+    "submittedFieldNames": [
+      "fileUrl",
+      "sourceStoragePath",
+      "renderJobId",
+      "renderRequestId",
+      "options"
+    ]
+  },
+  "pictureReview": {
+    "fullDecode": true,
+    "frames": 576,
+    "seconds": 24,
+    "fps": 24,
+    "appliedNativeBoundaries": [
+      0,
+      0.6,
+      2.3583333333333334,
+      2.4,
+      4.758333333333334,
+      4.8,
+      8.358333333333333,
+      8.4,
+      12,
+      12.558333333333334,
+      12.6,
+      16.8,
+      17.358333333333334,
+      17.4,
+      23.1,
+      23.958333333333332,
+      24
+    ],
+    "sampledFrameIndices": [
+      0,
+      1,
+      13,
+      14,
+      15,
+      29,
+      56,
+      57,
+      58,
+      59,
+      86,
+      113,
+      114,
+      115,
+      116,
+      158,
+      200,
+      201,
+      202,
+      203,
+      259,
+      287,
+      288,
+      289,
+      295,
+      300,
+      301,
+      302,
+      303,
+      360,
+      402,
+      403,
+      404,
+      410,
+      416,
+      417,
+      418,
+      419,
+      475,
+      533,
+      553,
+      554,
+      555,
+      574,
+      575
+    ],
+    "pairedDiagnosticSamples": [
+      {
+        "programmeTime": 0,
+        "exportFrame": 0,
+        "diagnosticPsnrDb": 43.35834657130839,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 0.5833333333333334,
+        "exportFrame": 14,
+        "diagnosticPsnrDb": 19.421469138138082,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 1.2083333333333333,
+        "exportFrame": 29,
+        "diagnosticPsnrDb": 20.54007718211792,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 2.375,
+        "exportFrame": 57,
+        "diagnosticPsnrDb": 23.821805953677565,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 2.4166666666666665,
+        "exportFrame": 58,
+        "diagnosticPsnrDb": 25.094065550213788,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 3.5833333333333335,
+        "exportFrame": 86,
+        "diagnosticPsnrDb": 24.931455952737508,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 4.75,
+        "exportFrame": 114,
+        "diagnosticPsnrDb": 18.690028583964654,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 4.791666666666667,
+        "exportFrame": 115,
+        "diagnosticPsnrDb": 17.285265625652826,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 6.583333333333333,
+        "exportFrame": 158,
+        "diagnosticPsnrDb": 28.61437070829293,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 8.375,
+        "exportFrame": 201,
+        "diagnosticPsnrDb": 21.038059170924708,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 8.416666666666666,
+        "exportFrame": 202,
+        "diagnosticPsnrDb": 26.68249213676088,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 10.791666666666666,
+        "exportFrame": 259,
+        "diagnosticPsnrDb": 31.47165079682699,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 12,
+        "exportFrame": 288,
+        "diagnosticPsnrDb": 31.99306247282896,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 12.291666666666666,
+        "exportFrame": 295,
+        "diagnosticPsnrDb": 34.67606039391703,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 12.541666666666666,
+        "exportFrame": 301,
+        "diagnosticPsnrDb": 32.671442129923925,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 12.583333333333334,
+        "exportFrame": 302,
+        "diagnosticPsnrDb": 32.647642526060224,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 15,
+        "exportFrame": 360,
+        "diagnosticPsnrDb": 33.61192086287865,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 16.791666666666668,
+        "exportFrame": 403,
+        "diagnosticPsnrDb": 34.27759977712574,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 17.083333333333332,
+        "exportFrame": 410,
+        "diagnosticPsnrDb": 33.11920560421125,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 17.375,
+        "exportFrame": 417,
+        "diagnosticPsnrDb": 35.781963321012555,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 17.416666666666668,
+        "exportFrame": 418,
+        "diagnosticPsnrDb": 31.52065741226384,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 19.791666666666668,
+        "exportFrame": 475,
+        "diagnosticPsnrDb": 33.631517042108165,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 22.208333333333332,
+        "exportFrame": 533,
+        "diagnosticPsnrDb": 35.06051136383408,
+        "strictPassClaimed": false
+      },
+      {
+        "programmeTime": 23.958333333333332,
+        "exportFrame": 575,
+        "diagnosticPsnrDb": 43.162385285466705,
+        "strictPassClaimed": false
+      }
+    ],
+    "minimumDiagnosticPsnrDb": 17.285265625652826,
+    "wholePictureParityQualified": false,
+    "humanListeningQualified": false,
+    "creativeApproval": false
+  },
+  "captures": {
+    "Native sequence construction": {
+      "seconds": 21.19700002670288,
+      "frames": 205,
+      "rawBytes": 26206449,
+      "nativeControlsOnly": true,
+      "setupExcluded": true,
+      "audio": "Silent native editing capture",
+      "observedCaptureFps": 9.671179871762591
+    },
+    "Native cinematic design and controls": {
+      "seconds": 6.629000186920166,
+      "frames": 48,
+      "rawBytes": 7544240,
+      "nativeControlsOnly": true,
+      "setupExcluded": true,
+      "audio": "Silent native editing capture",
+      "observedCaptureFps": 7.240910943811695
+    },
+    "Native camera and sound controls": {
+      "seconds": 5.331999778747559,
+      "frames": 66,
+      "rawBytes": 10342237,
+      "nativeControlsOnly": true,
+      "setupExcluded": true,
+      "audio": "Silent native editing capture",
+      "observedCaptureFps": 12.378095037262518
+    },
+    "Live Studio playback": {
+      "seconds": 24.127000093460083,
+      "frames": 213,
+      "rawBytes": 27829544,
+      "nativeControlsOnly": true,
+      "setupExcluded": true,
+      "audio": "Silent native editing capture",
+      "observedCaptureFps": 8.828283631404977
+    },
+    "Finished movie in Studio": {
+      "seconds": 24.10099983215332,
+      "frames": 318,
+      "rawBytes": 39834679,
+      "nativeControlsOnly": true,
+      "setupExcluded": true,
+      "audio": "Silent native editing capture",
+      "observedCaptureFps": 13.19447335026134
+    }
+  },
+  "livePlayback": {
+    "complete": true,
+    "endedThroughNativeUi": true,
+    "programmeSeconds": 24,
+    "wallMs": 24292,
+    "maximumObservedProgramme": 23.983333000000002,
+    "maximumObservedVideo": 10.60367,
+    "samples": [
+      {
+        "wall": 40990.5,
+        "programme": 0,
+        "video": 0.6,
+        "paused": true,
+        "ready": 4
+      },
+      {
+        "wall": 41124.19999999553,
+        "programme": 0.09464600000000001,
+        "video": 0.727993,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 41207.09999999404,
+        "programme": 0.15000000000000002,
+        "video": 0.810826,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 41278.29999999702,
+        "programme": 0.233333,
+        "video": 0.882121,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 41319.89999999851,
+        "programme": 0.275,
+        "video": 0.923656,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 41372.39999999851,
+        "programme": 0.275,
+        "video": 0.976182,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 41480,
+        "programme": 0.4,
+        "video": 1.083786,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 41545.19999999553,
+        "programme": 0.4833330000000001,
+        "video": 1.148991,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 41625.89999999851,
+        "programme": 0.5666669999999999,
+        "video": 1.229646,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 41736.39999999851,
+        "programme": 0.6916669999999999,
+        "video": 1.340163,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 41855.79999999702,
+        "programme": 0.775,
+        "video": 1.459558,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 41920.5,
+        "programme": 0.8583330000000001,
+        "video": 1.524201,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 42039.5,
+        "programme": 0.9833330000000001,
+        "video": 1.64328,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 42211.89999999851,
+        "programme": 1.108333,
+        "video": 1.815655,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 42294.19999999553,
+        "programme": 1.233333,
+        "video": 1.89795,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 42375,
+        "programme": 1.3166669999999998,
+        "video": 1.978777,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 42458.59999999404,
+        "programme": 1.3166669999999998,
+        "video": 2.062462,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 42522.79999999702,
+        "programme": 1.483333,
+        "video": 2.126608,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 42572.69999999553,
+        "programme": 1.483333,
+        "video": 2.176472,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 42677.39999999851,
+        "programme": 1.608333,
+        "video": 2.281096,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 42754.39999999851,
+        "programme": 1.6916669999999998,
+        "video": 2.358146,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 42835.59999999404,
+        "programme": 1.775,
+        "video": 2.439292,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 42945.29999999702,
+        "programme": 1.858333,
+        "video": 2.549078,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 43053.5,
+        "programme": 1.983333,
+        "video": 2.657255,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 43123.09999999404,
+        "programme": 2.066667,
+        "video": 2.72683,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 43199.79999999702,
+        "programme": 2.108333,
+        "video": 2.803603,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 43337.59999999404,
+        "programme": 2.233333,
+        "video": 2.941321,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 43380.29999999702,
+        "programme": 2.316667,
+        "video": 2.984051,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 43420.39999999851,
+        "programme": 2.316667,
+        "video": 3.024238,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 43583.09999999404,
+        "programme": 2.536442,
+        "video": 2.162241,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 43675.19999999553,
+        "programme": 2.608333,
+        "video": 2.254366,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 43766,
+        "programme": 2.691667,
+        "video": 2.3451,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 43865.5,
+        "programme": 2.816667,
+        "video": 2.444575,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 44000.69999999553,
+        "programme": 2.941667,
+        "video": 2.579846,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 44089.5,
+        "programme": 3.025,
+        "video": 2.668676,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 44196.39999999851,
+        "programme": 3.15,
+        "video": 2.775567,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 44341.39999999851,
+        "programme": 3.275,
+        "video": 2.920548,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 44411,
+        "programme": 3.358333,
+        "video": 2.990126,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 44500.59999999404,
+        "programme": 3.441667,
+        "video": 3.0797,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 44593.5,
+        "programme": 3.483333,
+        "video": 3.172589,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 44700.19999999553,
+        "programme": 3.65,
+        "video": 3.279405,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 44770.5,
+        "programme": 3.691667,
+        "video": 3.349617,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 44907,
+        "programme": 3.733333,
+        "video": 3.486186,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 44990.59999999404,
+        "programme": 3.9,
+        "video": 3.569762,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 45068.59999999404,
+        "programme": 3.983333,
+        "video": 3.647763,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 45187.89999999851,
+        "programme": 4.108333,
+        "video": 3.767092,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 45324.89999999851,
+        "programme": 4.233333,
+        "video": 3.904055,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 45398.29999999702,
+        "programme": 4.316667,
+        "video": 3.97738,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 45497.59999999404,
+        "programme": 4.4,
+        "video": 4.076756,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 45638.19999999553,
+        "programme": 4.525,
+        "video": 4.217322,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 45685.29999999702,
+        "programme": 4.608333,
+        "video": 4.264395,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 45737.29999999702,
+        "programme": 4.608333,
+        "video": 4.316413,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 45843.89999999851,
+        "programme": 4.733333,
+        "video": 4.423057,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 46015.69999999553,
+        "programme": 4.925000000000001,
+        "video": 7.170636,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 46069.39999999851,
+        "programme": 4.966667000000001,
+        "video": 7.224387,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 46189.5,
+        "programme": 5.091667000000001,
+        "video": 7.344548,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 46253.89999999851,
+        "programme": 5.133333,
+        "video": 7.408856,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 46435.59999999404,
+        "programme": 5.341667000000001,
+        "video": 7.590556,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 46522.59999999404,
+        "programme": 5.425000000000001,
+        "video": 7.677593,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 46634.29999999702,
+        "programme": 5.550000000000001,
+        "video": 7.789307,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 46759.89999999851,
+        "programme": 5.633333,
+        "video": 7.91495,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 46821.39999999851,
+        "programme": 5.716667000000001,
+        "video": 7.976337,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 46874.19999999553,
+        "programme": 5.716667000000001,
+        "video": 8.029101,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 46978.09999999404,
+        "programme": 5.841667000000001,
+        "video": 8.133107,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 47054.39999999851,
+        "programme": 5.925000000000001,
+        "video": 8.209384,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 47129.89999999851,
+        "programme": 6.008333,
+        "video": 8.284819,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 47233.79999999702,
+        "programme": 6.133333,
+        "video": 8.388759,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 47330.59999999404,
+        "programme": 6.133333,
+        "video": 8.485605,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 47400.39999999851,
+        "programme": 6.300000000000001,
+        "video": 8.555405,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 47480.59999999404,
+        "programme": 6.383333,
+        "video": 8.635551,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 47565.39999999851,
+        "programme": 6.383333,
+        "video": 8.720343,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 47630.5,
+        "programme": 6.508333,
+        "video": 8.785371,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 47704.39999999851,
+        "programme": 6.591667000000001,
+        "video": 8.85938,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 47783.79999999702,
+        "programme": 6.633333,
+        "video": 8.938749,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 47891,
+        "programme": 6.716667000000001,
+        "video": 9.045948,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 47975.69999999553,
+        "programme": 6.883333,
+        "video": 9.130682,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 48039.69999999553,
+        "programme": 6.883333,
+        "video": 9.194632,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 48157.29999999702,
+        "programme": 7.008333,
+        "video": 9.312246,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 48227.09999999404,
+        "programme": 7.133333,
+        "video": 9.382009,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 48237,
+        "programme": 7.133333,
+        "video": 9.391928,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 48335.39999999851,
+        "programme": 7.133333,
+        "video": 9.490329,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 48427.09999999404,
+        "programme": 7.300000000000001,
+        "video": 9.58201,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 48512.5,
+        "programme": 7.383333,
+        "video": 9.667464,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 48593,
+        "programme": 7.466667000000001,
+        "video": 9.747915,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 48706.29999999702,
+        "programme": 7.591667000000001,
+        "video": 9.861267,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 48815.59999999404,
+        "programme": 7.675000000000001,
+        "video": 9.970604,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 48851,
+        "programme": 7.716667000000001,
+        "video": 10.005922,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 48937.69999999553,
+        "programme": 7.800000000000001,
+        "video": 10.092582,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 49077.19999999553,
+        "programme": 7.966667000000001,
+        "video": 10.232122,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 49127.59999999404,
+        "programme": 8.05,
+        "video": 10.28248,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 49175.29999999702,
+        "programme": 8.05,
+        "video": 10.330259,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 49279.29999999702,
+        "programme": 8.175,
+        "video": 10.434204,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 49382.69999999553,
+        "programme": 8.3,
+        "video": 10.537667,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 49448.79999999702,
+        "programme": 8.383333,
+        "video": 10.60367,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 49569.89999999851,
+        "programme": 8.488249,
+        "video": 1.120376,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 49611.09999999404,
+        "programme": 8.483333,
+        "video": 1.161599,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 49657.09999999404,
+        "programme": 8.525,
+        "video": 1.20766,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 49715.39999999851,
+        "programme": 8.566667,
+        "video": 1.265903,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 49833.09999999404,
+        "programme": 8.733333,
+        "video": 1.38362,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 50004.39999999851,
+        "programme": 8.858333,
+        "video": 1.554865,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 50088.39999999851,
+        "programme": 8.983333,
+        "video": 1.63894,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 50199.89999999851,
+        "programme": 9.066667,
+        "video": 1.750355,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 50332.69999999553,
+        "programme": 9.191667,
+        "video": 1.883189,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 50419.29999999702,
+        "programme": 9.316667,
+        "video": 1.96972,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 50473.09999999404,
+        "programme": 9.316667,
+        "video": 2.023564,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 50614.09999999404,
+        "programme": 9.483333,
+        "video": 2.164588,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 50679,
+        "programme": 9.566667,
+        "video": 2.229496,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 50743.09999999404,
+        "programme": 9.65,
+        "video": 2.29355,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 50785.69999999553,
+        "programme": 9.65,
+        "video": 2.336262,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 50871.09999999404,
+        "programme": 9.691667,
+        "video": 2.421575,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 50968.5,
+        "programme": 9.858333,
+        "video": 2.519043,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 51011.39999999851,
+        "programme": 9.9,
+        "video": 2.561885,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 51071.29999999702,
+        "programme": 9.9,
+        "video": 2.621834,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 51177.29999999702,
+        "programme": 10.066667,
+        "video": 2.727804,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 51250.5,
+        "programme": 10.15,
+        "video": 2.800963,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 51280,
+        "programme": 10.15,
+        "video": 2.830556,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 51407.89999999851,
+        "programme": 10.233333,
+        "video": 2.958367,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 51502.79999999702,
+        "programme": 10.4,
+        "video": 3.053303,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 51511,
+        "programme": 10.4,
+        "video": 3.061397,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 51609.79999999702,
+        "programme": 10.483333,
+        "video": 3.160276,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 51713.29999999702,
+        "programme": 10.566667,
+        "video": 3.26373,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 51758,
+        "programme": 10.65,
+        "video": 3.308557,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 51841.89999999851,
+        "programme": 10.733333,
+        "video": 3.392451,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 51934.89999999851,
+        "programme": 10.816667,
+        "video": 3.485467,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 52037.19999999553,
+        "programme": 10.9,
+        "video": 3.587638,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 52150,
+        "programme": 11.025,
+        "video": 3.700485,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 52256.29999999702,
+        "programme": 11.15,
+        "video": 3.806871,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 52300.79999999702,
+        "programme": 11.15,
+        "video": 3.851299,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 52421.19999999553,
+        "programme": 11.275,
+        "video": 3.971626,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 52506.29999999702,
+        "programme": 11.4,
+        "video": 4.056818,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 52589.09999999404,
+        "programme": 11.483333,
+        "video": 4.139602,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 52696.39999999851,
+        "programme": 11.566667,
+        "video": 4.246924,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 52837.09999999404,
+        "programme": 11.691667,
+        "video": 4.387568,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 52966.19999999553,
+        "programme": 11.858333,
+        "video": 4.516718,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 53086.39999999851,
+        "programme": 11.9,
+        "video": 4.636823,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 53196.5,
+        "programme": 12.066667,
+        "video": 4.747008,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 53311.79999999702,
+        "programme": 12.191667,
+        "video": 4.862278,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 53426.69999999553,
+        "programme": 12.233333,
+        "video": 4.977124,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 53498.69999999553,
+        "programme": 12.358333,
+        "video": 5.049212,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 53572,
+        "programme": 12.483333,
+        "video": 5.122467,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 53655.19999999553,
+        "programme": 12.483333,
+        "video": 5.205733,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 53769.69999999553,
+        "programme": 12.684164,
+        "video": 1.113387,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 53831.39999999851,
+        "programme": 12.725000000000001,
+        "video": 1.17508,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 53877.09999999404,
+        "programme": 12.725000000000001,
+        "video": 1.220698,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 53979.09999999404,
+        "programme": 12.850000000000001,
+        "video": 1.322838,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 54073,
+        "programme": 12.975000000000001,
+        "video": 1.416664,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 54227.39999999851,
+        "programme": 13.058333000000001,
+        "video": 1.571041,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 54316.39999999851,
+        "programme": 13.183333000000001,
+        "video": 1.660041,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 54474.19999999553,
+        "programme": 13.308333000000001,
+        "video": 1.817867,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 54638.79999999702,
+        "programme": 13.475000000000001,
+        "video": 1.982461,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 54749.69999999553,
+        "programme": 13.641667000000002,
+        "video": 2.093407,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 54871.89999999851,
+        "programme": 13.725000000000001,
+        "video": 2.215557,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 54924.79999999702,
+        "programme": 13.808333000000001,
+        "video": 2.268528,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 54995.09999999404,
+        "programme": 13.891667000000002,
+        "video": 2.338706,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 55116.19999999553,
+        "programme": 13.975000000000001,
+        "video": 2.459917,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 55198,
+        "programme": 14.058333000000001,
+        "video": 2.541662,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 55265.69999999553,
+        "programme": 14.141667000000002,
+        "video": 2.609408,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 55347.79999999702,
+        "programme": 14.225000000000001,
+        "video": 2.691418,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 55490.69999999553,
+        "programme": 14.350000000000001,
+        "video": 2.834378,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 55553.69999999553,
+        "programme": 14.433333000000001,
+        "video": 2.897301,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 55651.79999999702,
+        "programme": 14.516667000000002,
+        "video": 2.99548,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 55761.5,
+        "programme": 14.641667000000002,
+        "video": 3.105189,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 55841.09999999404,
+        "programme": 14.725000000000001,
+        "video": 3.184833,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 55941.69999999553,
+        "programme": 14.808333000000001,
+        "video": 3.285354,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 56047.19999999553,
+        "programme": 14.850000000000001,
+        "video": 3.390919,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 56147.39999999851,
+        "programme": 15.016667000000002,
+        "video": 3.491073,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 56246.5,
+        "programme": 15.141667000000002,
+        "video": 3.590116,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 56377,
+        "programme": 15.225000000000001,
+        "video": 3.720672,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 56464.19999999553,
+        "programme": 15.350000000000001,
+        "video": 3.807813,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 56549.19999999553,
+        "programme": 15.391667000000002,
+        "video": 3.892882,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 56708.79999999702,
+        "programme": 15.558333000000001,
+        "video": 4.052551,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 56759.19999999553,
+        "programme": 15.641667000000002,
+        "video": 4.102925,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 56806.79999999702,
+        "programme": 15.641667000000002,
+        "video": 4.150511,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 56908.5,
+        "programme": 15.766667000000002,
+        "video": 4.252087,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 57010.39999999851,
+        "programme": 15.891667000000002,
+        "video": 4.354061,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 57078.19999999553,
+        "programme": 15.975000000000001,
+        "video": 4.421795,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 57129.39999999851,
+        "programme": 15.975000000000001,
+        "video": 4.473086,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 57259.09999999404,
+        "programme": 16.1,
+        "video": 4.602768,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 57348.5,
+        "programme": 16.225,
+        "video": 4.692181,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 57451.5,
+        "programme": 16.308333,
+        "video": 4.795126,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 57557.89999999851,
+        "programme": 16.391667,
+        "video": 4.901563,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 57691.89999999851,
+        "programme": 16.558333,
+        "video": 5.035603,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 57796.89999999851,
+        "programme": 16.683333,
+        "video": 5.140571,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 57999.5,
+        "programme": 16.85,
+        "video": 5.343157,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 58086.19999999553,
+        "programme": 16.975,
+        "video": 5.429868,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 58149.5,
+        "programme": 16.975,
+        "video": 5.493185,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 58283.39999999851,
+        "programme": 17.1,
+        "video": 5.627113,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 58377,
+        "programme": 17.225,
+        "video": 5.720641,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 58469.09999999404,
+        "programme": 17.35,
+        "video": 5.812779,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 58691.39999999851,
+        "programme": 17.521402000000002,
+        "video": 3.146025,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 58739.19999999553,
+        "programme": 17.566667000000002,
+        "video": 3.193928,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 58773.29999999702,
+        "programme": 17.566667000000002,
+        "video": 3.228024,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 58825.5,
+        "programme": 17.650000000000002,
+        "video": 3.280209,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 58961.09999999404,
+        "programme": 17.650000000000002,
+        "video": 3.415708,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 59049.19999999553,
+        "programme": 17.858333000000002,
+        "video": 3.503872,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 59114.59999999404,
+        "programme": 17.941667000000002,
+        "video": 3.569287,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 59181,
+        "programme": 17.983333000000002,
+        "video": 3.635653,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 59249.79999999702,
+        "programme": 17.983333000000002,
+        "video": 3.704457,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 59347.09999999404,
+        "programme": 18.150000000000002,
+        "video": 3.801762,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 59417.89999999851,
+        "programme": 18.233333000000002,
+        "video": 3.872608,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 59431.09999999404,
+        "programme": 18.233333000000002,
+        "video": 3.885777,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 59519.09999999404,
+        "programme": 18.316667000000002,
+        "video": 3.973843,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 59621.79999999702,
+        "programme": 18.400000000000002,
+        "video": 4.076561,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 59679.59999999404,
+        "programme": 18.483333000000002,
+        "video": 4.134267,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 59768.39999999851,
+        "programme": 18.566667000000002,
+        "video": 4.223104,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 59868.59999999404,
+        "programme": 18.691667000000002,
+        "video": 4.32334,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 59990.89999999851,
+        "programme": 18.775000000000002,
+        "video": 4.445641,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 60066,
+        "programme": 18.858333000000002,
+        "video": 4.520744,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 60129.5,
+        "programme": 18.900000000000002,
+        "video": 4.584221,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 60269.69999999553,
+        "programme": 19.066667000000002,
+        "video": 4.724393,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 60346.5,
+        "programme": 19.150000000000002,
+        "video": 4.801155,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 60429.69999999553,
+        "programme": 19.233333000000002,
+        "video": 4.884366,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 60526.29999999702,
+        "programme": 19.316667000000002,
+        "video": 4.981026,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 60647.19999999553,
+        "programme": 19.400000000000002,
+        "video": 5.101837,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 60695.29999999702,
+        "programme": 19.483333000000002,
+        "video": 5.150087,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 60771.5,
+        "programme": 19.566667000000002,
+        "video": 5.226137,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 60857.29999999702,
+        "programme": 19.566667000000002,
+        "video": 5.311914,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 60926.79999999702,
+        "programme": 19.733333000000002,
+        "video": 5.38156,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 60997.19999999553,
+        "programme": 19.733333000000002,
+        "video": 5.451869,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 61107.79999999702,
+        "programme": 19.858333000000002,
+        "video": 5.562498,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 61179.69999999553,
+        "programme": 19.983333000000002,
+        "video": 5.634391,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 61193,
+        "programme": 19.983333000000002,
+        "video": 5.647682,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 61296.69999999553,
+        "programme": 20.066667000000002,
+        "video": 5.75142,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 61411.79999999702,
+        "programme": 20.191667000000002,
+        "video": 5.866506,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 61493.89999999851,
+        "programme": 20.316667000000002,
+        "video": 5.948562,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 61561.59999999404,
+        "programme": 20.400000000000002,
+        "video": 6.016347,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 61644.79999999702,
+        "programme": 20.441667000000002,
+        "video": 6.099449,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 61747.29999999702,
+        "programme": 20.566667000000002,
+        "video": 6.201938,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 61814.09999999404,
+        "programme": 20.650000000000002,
+        "video": 6.268854,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 61879.39999999851,
+        "programme": 20.650000000000002,
+        "video": 6.334065,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 61991.69999999553,
+        "programme": 20.775000000000002,
+        "video": 6.446444,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 62068.19999999553,
+        "programme": 20.858333000000002,
+        "video": 6.522867,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 62187.89999999851,
+        "programme": 20.983333000000002,
+        "video": 6.642582,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 62268.69999999553,
+        "programme": 21.066667000000002,
+        "video": 6.723379,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 62411,
+        "programme": 21.191667000000002,
+        "video": 6.865707,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 62477.69999999553,
+        "programme": 21.275000000000002,
+        "video": 6.932354,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 62571.09999999404,
+        "programme": 21.358333000000002,
+        "video": 7.025859,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 62713.29999999702,
+        "programme": 21.483333000000002,
+        "video": 7.167968,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 62761.59999999404,
+        "programme": 21.566667000000002,
+        "video": 7.216285,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 62814.19999999553,
+        "programme": 21.566667000000002,
+        "video": 7.26883,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 62918.19999999553,
+        "programme": 21.691667000000002,
+        "video": 7.372892,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 63021.69999999553,
+        "programme": 21.816667000000002,
+        "video": 7.476397,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 63088.59999999404,
+        "programme": 21.900000000000002,
+        "video": 7.543331,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 63182.5,
+        "programme": 21.983333000000002,
+        "video": 7.63719,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 63302.39999999851,
+        "programme": 22.066667000000002,
+        "video": 7.75706,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 63382.19999999553,
+        "programme": 22.191667000000002,
+        "video": 7.836911,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 63451.39999999851,
+        "programme": 22.233333000000002,
+        "video": 7.90611,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 63609.89999999851,
+        "programme": 22.400000000000002,
+        "video": 8.064688,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 63676.59999999404,
+        "programme": 22.483333000000002,
+        "video": 8.131269,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 63732.09999999404,
+        "programme": 22.483333000000002,
+        "video": 8.186795,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 63848.89999999851,
+        "programme": 22.608333000000002,
+        "video": 8.303568,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 63915.79999999702,
+        "programme": 22.691667000000002,
+        "video": 8.370481,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 63995.79999999702,
+        "programme": 22.775000000000002,
+        "video": 8.450502,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 64096.59999999404,
+        "programme": 22.900000000000002,
+        "video": 8.55125,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 64167.5,
+        "programme": 22.900000000000002,
+        "video": 8.622164,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 64235.39999999851,
+        "programme": 23.066667000000002,
+        "video": 8.69012,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 64291.29999999702,
+        "programme": 23.066667000000002,
+        "video": 8.746005,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 64407.5,
+        "programme": 23.191667000000002,
+        "video": 8.862202,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 64495.59999999404,
+        "programme": 23.275000000000002,
+        "video": 8.950325,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 64568.19999999553,
+        "programme": 23.358333000000002,
+        "video": 9.022908,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 64695.19999999553,
+        "programme": 23.483333000000002,
+        "video": 9.149989,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 64821.19999999553,
+        "programme": 23.525000000000002,
+        "video": 9.275917,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 64924,
+        "programme": 23.733333000000002,
+        "video": 9.378691,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 64997.79999999702,
+        "programme": 23.775000000000002,
+        "video": 9.452455,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 65136.69999999553,
+        "programme": 23.900000000000002,
+        "video": 9.591377,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 65179.09999999404,
+        "programme": 23.983333000000002,
+        "video": 9.566666,
+        "paused": true,
+        "ready": 1
+      },
+      {
+        "wall": 65208,
+        "programme": 23.983333000000002,
+        "video": 9.566666,
+        "paused": true,
+        "ready": 1
+      }
+    ]
+  },
+  "finishedPlayback": {
+    "complete": true,
+    "endedThroughNativeUi": true,
+    "programmeSeconds": 24,
+    "wallMs": 24256,
+    "maximumObservedProgramme": 0,
+    "maximumObservedVideo": 24,
+    "samples": [
+      {
+        "wall": 10269.70000000298,
+        "programme": 0,
+        "video": 0,
+        "paused": true,
+        "ready": 4
+      },
+      {
+        "wall": 10302.60000000149,
+        "programme": 0,
+        "video": 0,
+        "paused": true,
+        "ready": 4
+      },
+      {
+        "wall": 10341.30000000447,
+        "programme": 0,
+        "video": 0.01076,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 10383,
+        "programme": 0,
+        "video": 0.01076,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 10422.5,
+        "programme": 0,
+        "video": 0.022264,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 10482.70000000298,
+        "programme": 0,
+        "video": 0.082007,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 10501.30000000447,
+        "programme": 0,
+        "video": 0.100602,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 10546.20000000298,
+        "programme": 0,
+        "video": 0.145342,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 10600,
+        "programme": 0,
+        "video": 0.19918,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 10630.90000000596,
+        "programme": 0,
+        "video": 0.230075,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 10675.80000000447,
+        "programme": 0,
+        "video": 0.274829,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 10701.5,
+        "programme": 0,
+        "video": 0.300465,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 10741.30000000447,
+        "programme": 0,
+        "video": 0.340343,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 10781.30000000447,
+        "programme": 0,
+        "video": 0.380317,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 10825.80000000447,
+        "programme": 0,
+        "video": 0.424769,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 10878.30000000447,
+        "programme": 0,
+        "video": 0.477158,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 10907.80000000447,
+        "programme": 0,
+        "video": 0.506636,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 10947.40000000596,
+        "programme": 0,
+        "video": 0.546261,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 10981.40000000596,
+        "programme": 0,
+        "video": 0.580199,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 11021.30000000447,
+        "programme": 0,
+        "video": 0.620009,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 11076.5,
+        "programme": 0,
+        "video": 0.675186,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 11125.20000000298,
+        "programme": 0,
+        "video": 0.722754,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 11172.5,
+        "programme": 0,
+        "video": 0.769972,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 11193.30000000447,
+        "programme": 0,
+        "video": 0.790872,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 11235.5,
+        "programme": 0,
+        "video": 0.832791,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 11291,
+        "programme": 0,
+        "video": 0.888221,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 11332.20000000298,
+        "programme": 0,
+        "video": 0.929437,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 11345.10000000149,
+        "programme": 0,
+        "video": 0.941673,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 11390.5,
+        "programme": 0,
+        "video": 0.987578,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 11470.40000000596,
+        "programme": 0,
+        "video": 1.067334,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 11509.70000000298,
+        "programme": 0,
+        "video": 1.106597,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 11541.30000000447,
+        "programme": 0,
+        "video": 1.138169,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 11581.30000000447,
+        "programme": 0,
+        "video": 1.17811,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 11641.20000000298,
+        "programme": 0,
+        "video": 1.237852,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 11679.80000000447,
+        "programme": 0,
+        "video": 1.276325,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 11719.80000000447,
+        "programme": 0,
+        "video": 1.316329,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 11742.40000000596,
+        "programme": 0,
+        "video": 1.338799,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 11782,
+        "programme": 0,
+        "video": 1.378362,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 11836.20000000298,
+        "programme": 0,
+        "video": 1.432488,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 11864.30000000447,
+        "programme": 0,
+        "video": 1.460626,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 11901.30000000447,
+        "programme": 0,
+        "video": 1.497503,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 11946.90000000596,
+        "programme": 0,
+        "video": 1.54299,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 11981.30000000447,
+        "programme": 0,
+        "video": 1.577407,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 12030.30000000447,
+        "programme": 0,
+        "video": 1.626255,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 12061.60000000149,
+        "programme": 0,
+        "video": 1.657568,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 12102,
+        "programme": 0,
+        "video": 1.697838,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 12141.30000000447,
+        "programme": 0,
+        "video": 1.737069,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 12221.20000000298,
+        "programme": 0,
+        "video": 1.816758,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 12270.40000000596,
+        "programme": 0,
+        "video": 1.865909,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 12301.70000000298,
+        "programme": 0,
+        "video": 1.897183,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 12350.40000000596,
+        "programme": 0,
+        "video": 1.945869,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 12406.80000000447,
+        "programme": 0,
+        "video": 2.0012,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 12421.30000000447,
+        "programme": 0,
+        "video": 2.015758,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 12508.20000000298,
+        "programme": 0,
+        "video": 2.102413,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 12545.40000000596,
+        "programme": 0,
+        "video": 2.139324,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 12581.30000000447,
+        "programme": 0,
+        "video": 2.175416,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 12635.80000000447,
+        "programme": 0,
+        "video": 2.229726,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 12676.5,
+        "programme": 0,
+        "video": 2.26678,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 12701.40000000596,
+        "programme": 0,
+        "video": 2.29518,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 12741.30000000447,
+        "programme": 0,
+        "video": 2.335016,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 12784.90000000596,
+        "programme": 0,
+        "video": 2.378567,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 12833.10000000149,
+        "programme": 0,
+        "video": 2.426633,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 12879.10000000149,
+        "programme": 0,
+        "video": 2.472514,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 12901.40000000596,
+        "programme": 0,
+        "video": 2.49472,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 12947.70000000298,
+        "programme": 0,
+        "video": 2.540988,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 12987.80000000447,
+        "programme": 0,
+        "video": 2.581031,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 13037.60000000149,
+        "programme": 0,
+        "video": 2.630661,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 13107.90000000596,
+        "programme": 0,
+        "video": 2.700822,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 13224.60000000149,
+        "programme": 0,
+        "video": 2.817293,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 13297.40000000596,
+        "programme": 0,
+        "video": 2.889913,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 13303.30000000447,
+        "programme": 0,
+        "video": 2.895869,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 13359.30000000447,
+        "programme": 0,
+        "video": 2.951795,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 13381.40000000596,
+        "programme": 0,
+        "video": 2.973749,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 13421.40000000596,
+        "programme": 0,
+        "video": 3.013689,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 13470,
+        "programme": 0,
+        "video": 3.062046,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 13506.5,
+        "programme": 0,
+        "video": 3.098712,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 13541.40000000596,
+        "programme": 0,
+        "video": 3.133364,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 13586.60000000149,
+        "programme": 0,
+        "video": 3.178587,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 13621.30000000447,
+        "programme": 0,
+        "video": 3.213154,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 13685,
+        "programme": 0,
+        "video": 3.27681,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 13705.10000000149,
+        "programme": 0,
+        "video": 3.296734,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 13745.5,
+        "programme": 0,
+        "video": 3.336333,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 13783.70000000298,
+        "programme": 0,
+        "video": 3.375203,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 13834.10000000149,
+        "programme": 0,
+        "video": 3.425452,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 13868.40000000596,
+        "programme": 0,
+        "video": 3.459787,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 13901.80000000447,
+        "programme": 0,
+        "video": 3.494158,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 13959.90000000596,
+        "programme": 0,
+        "video": 3.552326,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 13981.30000000447,
+        "programme": 0,
+        "video": 3.573603,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 14021.30000000447,
+        "programme": 0,
+        "video": 3.613533,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 14061.40000000596,
+        "programme": 0,
+        "video": 3.653571,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 14111.30000000447,
+        "programme": 0,
+        "video": 3.703186,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 14152.5,
+        "programme": 0,
+        "video": 3.744623,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 14181.40000000596,
+        "programme": 0,
+        "video": 3.773409,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 14272.80000000447,
+        "programme": 0,
+        "video": 3.863823,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 14315.70000000298,
+        "programme": 0,
+        "video": 3.906402,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 14341.30000000447,
+        "programme": 0,
+        "video": 3.932986,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 14386.60000000149,
+        "programme": 0,
+        "video": 3.978279,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 14430.70000000298,
+        "programme": 0,
+        "video": 4.02212,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 14508.80000000447,
+        "programme": 0,
+        "video": 4.100145,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 14548.30000000447,
+        "programme": 0,
+        "video": 4.13959,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 14581.30000000447,
+        "programme": 0,
+        "video": 4.172386,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 14638.70000000298,
+        "programme": 0,
+        "video": 4.229844,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 14661.60000000149,
+        "programme": 0,
+        "video": 4.252506,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 14704.40000000596,
+        "programme": 0,
+        "video": 4.295426,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 14761.20000000298,
+        "programme": 0,
+        "video": 4.352073,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 14788.30000000447,
+        "programme": 0,
+        "video": 4.379128,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 14830.80000000447,
+        "programme": 0,
+        "video": 4.421541,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 14863.30000000447,
+        "programme": 0,
+        "video": 4.454059,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 14902.60000000149,
+        "programme": 0,
+        "video": 4.493231,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 14941.30000000447,
+        "programme": 0,
+        "video": 4.531941,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 15005,
+        "programme": 0,
+        "video": 4.595258,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 15021.80000000447,
+        "programme": 0,
+        "video": 4.612123,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 15064.40000000596,
+        "programme": 0,
+        "video": 4.653876,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 15160.40000000596,
+        "programme": 0,
+        "video": 4.750624,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 15189.70000000298,
+        "programme": 0,
+        "video": 4.779877,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 15229.5,
+        "programme": 0,
+        "video": 4.819562,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 15282.5,
+        "programme": 0,
+        "video": 4.872459,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 15302.20000000298,
+        "programme": 0,
+        "video": 4.892093,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 15342.30000000447,
+        "programme": 0,
+        "video": 4.931653,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 15416,
+        "programme": 0,
+        "video": 5.010237,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 15421.40000000596,
+        "programme": 0,
+        "video": 5.015592,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 15461.30000000447,
+        "programme": 0,
+        "video": 5.055462,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 15501.30000000447,
+        "programme": 0,
+        "video": 5.093507,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 15541.30000000447,
+        "programme": 0,
+        "video": 5.13541,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 15588.40000000596,
+        "programme": 0,
+        "video": 5.182325,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 15622.30000000447,
+        "programme": 0,
+        "video": 5.216284,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 15672,
+        "programme": 0,
+        "video": 5.265945,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 15701.40000000596,
+        "programme": 0,
+        "video": 5.295351,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 15741.30000000447,
+        "programme": 0,
+        "video": 5.335171,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 15783.5,
+        "programme": 0,
+        "video": 5.377233,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 15821.5,
+        "programme": 0,
+        "video": 5.415277,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 15861.30000000447,
+        "programme": 0,
+        "video": 5.454461,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 15909.60000000149,
+        "programme": 0,
+        "video": 5.503157,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 15941.30000000447,
+        "programme": 0,
+        "video": 5.534897,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 15989.10000000149,
+        "programme": 0,
+        "video": 5.582515,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 16028.40000000596,
+        "programme": 0,
+        "video": 5.621623,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 16073.20000000298,
+        "programme": 0,
+        "video": 5.666618,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 16114.90000000596,
+        "programme": 0,
+        "video": 5.708288,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 16141.30000000447,
+        "programme": 0,
+        "video": 5.734626,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 16200.60000000149,
+        "programme": 0,
+        "video": 5.79386,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 16221.20000000298,
+        "programme": 0,
+        "video": 5.814489,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 16261.90000000596,
+        "programme": 0,
+        "video": 5.855009,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 16301.30000000447,
+        "programme": 0,
+        "video": 5.894407,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 16341.30000000447,
+        "programme": 0,
+        "video": 5.933688,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 16381.80000000447,
+        "programme": 0,
+        "video": 5.974769,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 16421.30000000447,
+        "programme": 0,
+        "video": 6.014206,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 16471,
+        "programme": 0,
+        "video": 6.063897,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 16502.30000000447,
+        "programme": 0,
+        "video": 6.095134,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 16545.10000000149,
+        "programme": 0,
+        "video": 6.137574,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 16589.10000000149,
+        "programme": 0,
+        "video": 6.181788,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 16633.60000000149,
+        "programme": 0,
+        "video": 6.226249,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 16670.5,
+        "programme": 0,
+        "video": 6.263112,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 16702.20000000298,
+        "programme": 0,
+        "video": 6.294766,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 16741.60000000149,
+        "programme": 0,
+        "video": 6.334065,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 16786.30000000447,
+        "programme": 0,
+        "video": 6.378784,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 16826.5,
+        "programme": 0,
+        "video": 6.41896,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 16861.30000000447,
+        "programme": 0,
+        "video": 6.453637,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 16901.90000000596,
+        "programme": 0,
+        "video": 6.500035,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 16941.30000000447,
+        "programme": 0,
+        "video": 6.539268,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 17000.20000000298,
+        "programme": 0,
+        "video": 6.598253,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 17033.40000000596,
+        "programme": 0,
+        "video": 6.631346,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 17061.30000000447,
+        "programme": 0,
+        "video": 6.659241,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 17101.5,
+        "programme": 0,
+        "video": 6.69941,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 17142.10000000149,
+        "programme": 0,
+        "video": 6.739977,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 17215.40000000596,
+        "programme": 0,
+        "video": 6.813324,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 17221.30000000447,
+        "programme": 0,
+        "video": 6.819201,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 17273.30000000447,
+        "programme": 0,
+        "video": 6.871137,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 17313.20000000298,
+        "programme": 0,
+        "video": 6.910972,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 17342,
+        "programme": 0,
+        "video": 6.939821,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 17393.70000000298,
+        "programme": 0,
+        "video": 6.991491,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 17423.10000000149,
+        "programme": 0,
+        "video": 7.020637,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 17499.30000000447,
+        "programme": 0,
+        "video": 7.097022,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 17525.5,
+        "programme": 0,
+        "video": 7.123158,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 17547.5,
+        "programme": 0,
+        "video": 7.145077,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 17599.70000000298,
+        "programme": 0,
+        "video": 7.197363,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 17624.60000000149,
+        "programme": 0,
+        "video": 7.222195,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 17673.10000000149,
+        "programme": 0,
+        "video": 7.27074,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 17708.60000000149,
+        "programme": 0,
+        "video": 7.306169,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 17741.40000000596,
+        "programme": 0,
+        "video": 7.338877,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 17785.80000000447,
+        "programme": 0,
+        "video": 7.383304,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 17821.30000000447,
+        "programme": 0,
+        "video": 7.418806,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 17874.90000000596,
+        "programme": 0,
+        "video": 7.472243,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 17945.80000000447,
+        "programme": 0,
+        "video": 7.543006,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 17985.70000000298,
+        "programme": 0,
+        "video": 7.582892,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 18026.5,
+        "programme": 0,
+        "video": 7.623826,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 18062.90000000596,
+        "programme": 0,
+        "video": 7.660179,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 18113.5,
+        "programme": 0,
+        "video": 7.710735,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 18157.30000000447,
+        "programme": 0,
+        "video": 7.754593,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 18214.70000000298,
+        "programme": 0,
+        "video": 7.811848,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 18221.40000000596,
+        "programme": 0,
+        "video": 7.818458,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 18261.40000000596,
+        "programme": 0,
+        "video": 7.85654,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 18302.40000000596,
+        "programme": 0,
+        "video": 7.899608,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 18363.30000000447,
+        "programme": 0,
+        "video": 7.960406,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 18383.60000000149,
+        "programme": 0,
+        "video": 7.980561,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 18460.5,
+        "programme": 0,
+        "video": 8.056469,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 18524.5,
+        "programme": 0,
+        "video": 8.121342,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 18552.10000000149,
+        "programme": 0,
+        "video": 8.148924,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 18600.30000000447,
+        "programme": 0,
+        "video": 8.193044,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 18659.90000000596,
+        "programme": 0,
+        "video": 8.256663,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 18709.20000000298,
+        "programme": 0,
+        "video": 8.305607,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 18761.20000000298,
+        "programme": 0,
+        "video": 8.357661,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 18781.20000000298,
+        "programme": 0,
+        "video": 8.377995,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 18834.60000000149,
+        "programme": 0,
+        "video": 8.430396,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 18861.30000000447,
+        "programme": 0,
+        "video": 8.456965,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 18901.40000000596,
+        "programme": 0,
+        "video": 8.494066,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 18941.30000000447,
+        "programme": 0,
+        "video": 8.537972,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 19011.80000000447,
+        "programme": 0,
+        "video": 8.608388,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 19022.70000000298,
+        "programme": 0,
+        "video": 8.619178,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 19068.90000000596,
+        "programme": 0,
+        "video": 8.665467,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 19102.60000000149,
+        "programme": 0,
+        "video": 8.699105,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 19141.20000000298,
+        "programme": 0,
+        "video": 8.737775,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 19181.30000000447,
+        "programme": 0,
+        "video": 8.777824,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 19221.30000000447,
+        "programme": 0,
+        "video": 8.817737,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 19261.40000000596,
+        "programme": 0,
+        "video": 8.857784,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 19303,
+        "programme": 0,
+        "video": 8.899157,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 19344.80000000447,
+        "programme": 0,
+        "video": 8.941245,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 19393.30000000447,
+        "programme": 0,
+        "video": 8.989376,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 19430.90000000596,
+        "programme": 0,
+        "video": 9.027173,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 19461.40000000596,
+        "programme": 0,
+        "video": 9.057544,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 19505.20000000298,
+        "programme": 0,
+        "video": 9.101417,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 19541.30000000447,
+        "programme": 0,
+        "video": 9.137576,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 19585.80000000447,
+        "programme": 0,
+        "video": 9.181984,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 19648.80000000447,
+        "programme": 0,
+        "video": 9.244761,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 19685.90000000596,
+        "programme": 0,
+        "video": 9.282122,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 19701.30000000447,
+        "programme": 0,
+        "video": 9.297409,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 19741.80000000447,
+        "programme": 0,
+        "video": 9.337896,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 19786.5,
+        "programme": 0,
+        "video": 9.380817,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 19821.30000000447,
+        "programme": 0,
+        "video": 9.417449,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 19861.40000000596,
+        "programme": 0,
+        "video": 9.457396,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 19927.40000000596,
+        "programme": 0,
+        "video": 9.524656,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 19981.5,
+        "programme": 0,
+        "video": 9.578681,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 20029.40000000596,
+        "programme": 0,
+        "video": 9.626628,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 20061.30000000447,
+        "programme": 0,
+        "video": 9.658198,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 20106.90000000596,
+        "programme": 0,
+        "video": 9.704011,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 20147.80000000447,
+        "programme": 0,
+        "video": 9.744892,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 20189.60000000149,
+        "programme": 0,
+        "video": 9.786775,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 20221.30000000447,
+        "programme": 0,
+        "video": 9.818437,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 20266.20000000298,
+        "programme": 0,
+        "video": 9.863376,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 20311.5,
+        "programme": 0,
+        "video": 9.908611,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 20353.30000000447,
+        "programme": 0,
+        "video": 9.950467,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 20381.90000000596,
+        "programme": 0,
+        "video": 9.979029,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 20421.30000000447,
+        "programme": 0,
+        "video": 10.018371,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 20472.20000000298,
+        "programme": 0,
+        "video": 10.068471,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 20501.5,
+        "programme": 0,
+        "video": 10.098465,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 20546.40000000596,
+        "programme": 0,
+        "video": 10.143464,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 20589.90000000596,
+        "programme": 0,
+        "video": 10.185234,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 20621.40000000596,
+        "programme": 0,
+        "video": 10.218369,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 20662.60000000149,
+        "programme": 0,
+        "video": 10.259495,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 20703.5,
+        "programme": 0,
+        "video": 10.3004,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 20753.20000000298,
+        "programme": 0,
+        "video": 10.350215,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 20792,
+        "programme": 0,
+        "video": 10.388785,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 20831.20000000298,
+        "programme": 0,
+        "video": 10.427432,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 20861.40000000596,
+        "programme": 0,
+        "video": 10.457348,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 20911.80000000447,
+        "programme": 0,
+        "video": 10.508678,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 20941.30000000447,
+        "programme": 0,
+        "video": 10.538174,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 20987.40000000596,
+        "programme": 0,
+        "video": 10.584133,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 21030.60000000149,
+        "programme": 0,
+        "video": 10.627373,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 21072.70000000298,
+        "programme": 0,
+        "video": 10.669324,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 21125.10000000149,
+        "programme": 0,
+        "video": 10.718497,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 21147,
+        "programme": 0,
+        "video": 10.743701,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 21181.30000000447,
+        "programme": 0,
+        "video": 10.777341,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 21226.10000000149,
+        "programme": 0,
+        "video": 10.822744,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 21320.10000000149,
+        "programme": 0,
+        "video": 10.916751,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 21362.40000000596,
+        "programme": 0,
+        "video": 10.959015,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 21388.5,
+        "programme": 0,
+        "video": 10.987795,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 21436.20000000298,
+        "programme": 0,
+        "video": 11.03562,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 21484.80000000447,
+        "programme": 0,
+        "video": 11.084206,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 21504.30000000447,
+        "programme": 0,
+        "video": 11.103725,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 21541.40000000596,
+        "programme": 0,
+        "video": 11.140806,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 21598.70000000298,
+        "programme": 0,
+        "video": 11.198134,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 21621.60000000149,
+        "programme": 0,
+        "video": 11.22098,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 21661.40000000596,
+        "programme": 0,
+        "video": 11.260575,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 21733.5,
+        "programme": 0,
+        "video": 11.332797,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 21742.30000000447,
+        "programme": 0,
+        "video": 11.341604,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 21795.40000000596,
+        "programme": 0,
+        "video": 11.394753,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 21827.20000000298,
+        "programme": 0,
+        "video": 11.426592,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 21866.20000000298,
+        "programme": 0,
+        "video": 11.46563,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 21906.70000000298,
+        "programme": 0,
+        "video": 11.506046,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 21963,
+        "programme": 0,
+        "video": 11.56229,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 21982.10000000149,
+        "programme": 0,
+        "video": 11.581428,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 22024.90000000596,
+        "programme": 0,
+        "video": 11.624254,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 22061.40000000596,
+        "programme": 0,
+        "video": 11.660591,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 22112,
+        "programme": 0,
+        "video": 11.711299,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 22145.80000000447,
+        "programme": 0,
+        "video": 11.745154,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 22181.30000000447,
+        "programme": 0,
+        "video": 11.780637,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 22222.70000000298,
+        "programme": 0,
+        "video": 11.822004,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 22267.70000000298,
+        "programme": 0,
+        "video": 11.867085,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 22301.30000000447,
+        "programme": 0,
+        "video": 11.900596,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 22341.80000000447,
+        "programme": 0,
+        "video": 11.941105,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 22395.5,
+        "programme": 0,
+        "video": 11.994814,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 22437.80000000447,
+        "programme": 0,
+        "video": 12.037082,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 22461.5,
+        "programme": 0,
+        "video": 12.060756,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 22505.80000000447,
+        "programme": 0,
+        "video": 12.105021,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 22549.30000000447,
+        "programme": 0,
+        "video": 12.148357,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 22582.40000000596,
+        "programme": 0,
+        "video": 12.181749,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 22636.70000000298,
+        "programme": 0,
+        "video": 12.235138,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 22671.60000000149,
+        "programme": 0,
+        "video": 12.270909,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 22709.40000000596,
+        "programme": 0,
+        "video": 12.308673,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 22742.40000000596,
+        "programme": 0,
+        "video": 12.341256,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 22791,
+        "programme": 0,
+        "video": 12.389965,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 22821.30000000447,
+        "programme": 0,
+        "video": 12.420529,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 22861.30000000447,
+        "programme": 0,
+        "video": 12.460537,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 22901.30000000447,
+        "programme": 0,
+        "video": 12.503973,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 22954.60000000149,
+        "programme": 0,
+        "video": 12.557152,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 22995,
+        "programme": 0,
+        "video": 12.597715,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 23021.30000000447,
+        "programme": 0,
+        "video": 12.624022,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 23083.60000000149,
+        "programme": 0,
+        "video": 12.686235,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 23101.40000000596,
+        "programme": 0,
+        "video": 12.704028,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 23141.30000000447,
+        "programme": 0,
+        "video": 12.743999,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 23183.70000000298,
+        "programme": 0,
+        "video": 12.786374,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 23233.40000000596,
+        "programme": 0,
+        "video": 12.836191,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 23261.90000000596,
+        "programme": 0,
+        "video": 12.86465,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 23301.30000000447,
+        "programme": 0,
+        "video": 12.904092,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 23341.30000000447,
+        "programme": 0,
+        "video": 12.944069,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 23398.10000000149,
+        "programme": 0,
+        "video": 13.000842,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 23421.30000000447,
+        "programme": 0,
+        "video": 13.023928,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 23465.5,
+        "programme": 0,
+        "video": 13.068205,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 23502.60000000149,
+        "programme": 0,
+        "video": 13.105412,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 23541.90000000596,
+        "programme": 0,
+        "video": 13.144661,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 23593.10000000149,
+        "programme": 0,
+        "video": 13.192902,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 23635.80000000447,
+        "programme": 0,
+        "video": 13.238394,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 23661.30000000447,
+        "programme": 0,
+        "video": 13.261425,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 23715.90000000596,
+        "programme": 0,
+        "video": 13.318619,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 23741.30000000447,
+        "programme": 0,
+        "video": 13.344159,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 23807.70000000298,
+        "programme": 0,
+        "video": 13.410523,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 23821.30000000447,
+        "programme": 0,
+        "video": 13.42395,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 23861.30000000447,
+        "programme": 0,
+        "video": 13.464219,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 23905,
+        "programme": 0,
+        "video": 13.507877,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 23942,
+        "programme": 0,
+        "video": 13.544871,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 23981.30000000447,
+        "programme": 0,
+        "video": 13.584057,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 24029.10000000149,
+        "programme": 0,
+        "video": 13.632086,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 24062.30000000447,
+        "programme": 0,
+        "video": 13.665301,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 24107.60000000149,
+        "programme": 0,
+        "video": 13.710628,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 24147.20000000298,
+        "programme": 0,
+        "video": 13.750162,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 24201.5,
+        "programme": 0,
+        "video": 13.804484,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 24223,
+        "programme": 0,
+        "video": 13.825883,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 24263.10000000149,
+        "programme": 0,
+        "video": 13.866104,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 24301.90000000596,
+        "programme": 0,
+        "video": 13.904858,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 24363.10000000149,
+        "programme": 0,
+        "video": 13.966053,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 24381.30000000447,
+        "programme": 0,
+        "video": 13.982522,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 24441.20000000298,
+        "programme": 0,
+        "video": 14.042382,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 24462.5,
+        "programme": 0,
+        "video": 14.062811,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 24519.70000000298,
+        "programme": 0,
+        "video": 14.120933,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 24547.70000000298,
+        "programme": 0,
+        "video": 14.148912,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 24583.60000000149,
+        "programme": 0,
+        "video": 14.184749,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 24652.30000000447,
+        "programme": 0,
+        "video": 14.253261,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 24664.40000000596,
+        "programme": 0,
+        "video": 14.265389,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 24714.30000000447,
+        "programme": 0,
+        "video": 14.31505,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 24743,
+        "programme": 0,
+        "video": 14.344084,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 24797.40000000596,
+        "programme": 0,
+        "video": 14.398665,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 24825.10000000149,
+        "programme": 0,
+        "video": 14.426408,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 24861.30000000447,
+        "programme": 0,
+        "video": 14.462557,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 24901.30000000447,
+        "programme": 0,
+        "video": 14.502646,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 24941.30000000447,
+        "programme": 0,
+        "video": 14.542605,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 24981.20000000298,
+        "programme": 0,
+        "video": 14.582618,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 25021.40000000596,
+        "programme": 0,
+        "video": 14.622461,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 25088.40000000596,
+        "programme": 0,
+        "video": 14.688955,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 25114,
+        "programme": 0,
+        "video": 14.715344,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 25152.5,
+        "programme": 0,
+        "video": 14.753898,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 25193,
+        "programme": 0,
+        "video": 14.79407,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 25223.20000000298,
+        "programme": 0,
+        "video": 14.82459,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 25261.30000000447,
+        "programme": 0,
+        "video": 14.862441,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 25311.30000000447,
+        "programme": 0,
+        "video": 14.912558,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 25345.5,
+        "programme": 0,
+        "video": 14.946901,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 25381.40000000596,
+        "programme": 0,
+        "video": 14.98272,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 25421.40000000596,
+        "programme": 0,
+        "video": 15.022498,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 25462.90000000596,
+        "programme": 0,
+        "video": 15.064196,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 25513.30000000447,
+        "programme": 0,
+        "video": 15.114664,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 25541.40000000596,
+        "programme": 0,
+        "video": 15.142544,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 25593.20000000298,
+        "programme": 0,
+        "video": 15.193228,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 25627.80000000447,
+        "programme": 0,
+        "video": 15.229191,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 25690.60000000149,
+        "programme": 0,
+        "video": 15.292046,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 25701.60000000149,
+        "programme": 0,
+        "video": 15.302981,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 25757.10000000149,
+        "programme": 0,
+        "video": 15.358453,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 25781.30000000447,
+        "programme": 0,
+        "video": 15.382713,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 25821.30000000447,
+        "programme": 0,
+        "video": 15.422721,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 25861.30000000447,
+        "programme": 0,
+        "video": 15.462707,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 25909.60000000149,
+        "programme": 0,
+        "video": 15.511324,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 25946.70000000298,
+        "programme": 0,
+        "video": 15.548535,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 25981.30000000447,
+        "programme": 0,
+        "video": 15.583073,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 26021.30000000447,
+        "programme": 0,
+        "video": 15.622775,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 26062.30000000447,
+        "programme": 0,
+        "video": 15.664119,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 26124.90000000596,
+        "programme": 0,
+        "video": 15.726717,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 26144.40000000596,
+        "programme": 0,
+        "video": 15.745353,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 26208.10000000149,
+        "programme": 0,
+        "video": 15.809917,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 26245.90000000596,
+        "programme": 0,
+        "video": 15.847728,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 26270,
+        "programme": 0,
+        "video": 15.871891,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 26301.30000000447,
+        "programme": 0,
+        "video": 15.903134,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 26341.40000000596,
+        "programme": 0,
+        "video": 15.943202,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 26381.30000000447,
+        "programme": 0,
+        "video": 15.983189,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 26423.70000000298,
+        "programme": 0,
+        "video": 16.025608,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 26464.5,
+        "programme": 0,
+        "video": 16.066381,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 26516,
+        "programme": 0,
+        "video": 16.117753,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 26542.5,
+        "programme": 0,
+        "video": 16.14351,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 26581.70000000298,
+        "programme": 0,
+        "video": 16.183651,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 26628.10000000149,
+        "programme": 0,
+        "video": 16.230043,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 26661.30000000447,
+        "programme": 0,
+        "video": 16.263226,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 26702.30000000447,
+        "programme": 0,
+        "video": 16.304236,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 26741.30000000447,
+        "programme": 0,
+        "video": 16.343231,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 26781.30000000447,
+        "programme": 0,
+        "video": 16.383224,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 26823,
+        "programme": 0,
+        "video": 16.424874,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 26874,
+        "programme": 0,
+        "video": 16.475904,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 26902.20000000298,
+        "programme": 0,
+        "video": 16.504156,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 26941.30000000447,
+        "programme": 0,
+        "video": 16.543268,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 26981.30000000447,
+        "programme": 0,
+        "video": 16.583277,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 27021.5,
+        "programme": 0,
+        "video": 16.62336,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 27078.40000000596,
+        "programme": 0,
+        "video": 16.680385,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 27101.30000000447,
+        "programme": 0,
+        "video": 16.703068,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 27141.40000000596,
+        "programme": 0,
+        "video": 16.743305,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 27181.30000000447,
+        "programme": 0,
+        "video": 16.783323,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 27228.90000000596,
+        "programme": 0,
+        "video": 16.830852,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 27292.40000000596,
+        "programme": 0,
+        "video": 16.894364,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 27313.30000000447,
+        "programme": 0,
+        "video": 16.914311,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 27349.60000000149,
+        "programme": 0,
+        "video": 16.951652,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 27381.30000000447,
+        "programme": 0,
+        "video": 16.980254,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 27425.30000000447,
+        "programme": 0,
+        "video": 17.024204,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 27461.30000000447,
+        "programme": 0,
+        "video": 17.060148,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 27515.40000000596,
+        "programme": 0,
+        "video": 17.114344,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 27547.5,
+        "programme": 0,
+        "video": 17.146416,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 27583.20000000298,
+        "programme": 0,
+        "video": 17.181974,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 27632.80000000447,
+        "programme": 0,
+        "video": 17.231531,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 27661.40000000596,
+        "programme": 0,
+        "video": 17.260214,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 27701.80000000447,
+        "programme": 0,
+        "video": 17.300614,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 27757,
+        "programme": 0,
+        "video": 17.355863,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 27808.40000000596,
+        "programme": 0,
+        "video": 17.407244,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 27821.5,
+        "programme": 0,
+        "video": 17.42027,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 27866.10000000149,
+        "programme": 0,
+        "video": 17.464837,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 27901.30000000447,
+        "programme": 0,
+        "video": 17.500104,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 27942.30000000447,
+        "programme": 0,
+        "video": 17.540928,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 27981.40000000596,
+        "programme": 0,
+        "video": 17.580083,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 28037.20000000298,
+        "programme": 0,
+        "video": 17.636029,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 28061.30000000447,
+        "programme": 0,
+        "video": 17.660056,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 28108.90000000596,
+        "programme": 0,
+        "video": 17.707697,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 28150.80000000447,
+        "programme": 0,
+        "video": 17.74952,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 28182.80000000447,
+        "programme": 0,
+        "video": 17.781507,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 28241.90000000596,
+        "programme": 0,
+        "video": 17.840076,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 28261.80000000447,
+        "programme": 0,
+        "video": 17.860607,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 28306.20000000298,
+        "programme": 0,
+        "video": 17.904868,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 28341.30000000447,
+        "programme": 0,
+        "video": 17.940049,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 28381.30000000447,
+        "programme": 0,
+        "video": 17.980016,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 28430.40000000596,
+        "programme": 0,
+        "video": 18.029133,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 28462.60000000149,
+        "programme": 0,
+        "video": 18.061323,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 28510.40000000596,
+        "programme": 0,
+        "video": 18.107995,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 28541.30000000447,
+        "programme": 0,
+        "video": 18.139956,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 28584.90000000596,
+        "programme": 0,
+        "video": 18.183523,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 28621.20000000298,
+        "programme": 0,
+        "video": 18.2199,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 28663.30000000447,
+        "programme": 0,
+        "video": 18.261946,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 28701.30000000447,
+        "programme": 0,
+        "video": 18.300003,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 28741.30000000447,
+        "programme": 0,
+        "video": 18.339925,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 28782.20000000298,
+        "programme": 0,
+        "video": 18.380889,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 28840.60000000149,
+        "programme": 0,
+        "video": 18.439282,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 28897.10000000149,
+        "programme": 0,
+        "video": 18.494416,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 28931,
+        "programme": 0,
+        "video": 18.528361,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 28941.30000000447,
+        "programme": 0,
+        "video": 18.538619,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 28981.40000000596,
+        "programme": 0,
+        "video": 18.578669,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 29022.90000000596,
+        "programme": 0,
+        "video": 18.620234,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 29071.60000000149,
+        "programme": 0,
+        "video": 18.668928,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 29117.40000000596,
+        "programme": 0,
+        "video": 18.714577,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 29143.40000000596,
+        "programme": 0,
+        "video": 18.740568,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 29181.30000000447,
+        "programme": 0,
+        "video": 18.77856,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 29221.30000000447,
+        "programme": 0,
+        "video": 18.818511,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 29263.80000000447,
+        "programme": 0,
+        "video": 18.860962,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 29301.30000000447,
+        "programme": 0,
+        "video": 18.898461,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 29341.30000000447,
+        "programme": 0,
+        "video": 18.938478,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 29387,
+        "programme": 0,
+        "video": 18.984216,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 29421.30000000447,
+        "programme": 0,
+        "video": 19.018482,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 29472.30000000447,
+        "programme": 0,
+        "video": 19.069422,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 29510.40000000596,
+        "programme": 0,
+        "video": 19.10751,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 29541.30000000447,
+        "programme": 0,
+        "video": 19.138445,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 29581.30000000447,
+        "programme": 0,
+        "video": 19.178358,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 29630.80000000447,
+        "programme": 0,
+        "video": 19.227834,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 29673.80000000447,
+        "programme": 0,
+        "video": 19.270768,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 29701.60000000149,
+        "programme": 0,
+        "video": 19.298665,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 29741.30000000447,
+        "programme": 0,
+        "video": 19.338399,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 29787.30000000447,
+        "programme": 0,
+        "video": 19.384361,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 29821.30000000447,
+        "programme": 0,
+        "video": 19.41828,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 29867.60000000149,
+        "programme": 0,
+        "video": 19.464569,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 29905.5,
+        "programme": 0,
+        "video": 19.502502,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 29941.30000000447,
+        "programme": 0,
+        "video": 19.538222,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 29996.70000000298,
+        "programme": 0,
+        "video": 19.59365,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 30021.60000000149,
+        "programme": 0,
+        "video": 19.618523,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 30061.30000000447,
+        "programme": 0,
+        "video": 19.658218,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 30104.60000000149,
+        "programme": 0,
+        "video": 19.701519,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 30141.30000000447,
+        "programme": 0,
+        "video": 19.738244,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 30188.80000000447,
+        "programme": 0,
+        "video": 19.785634,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 30221.30000000447,
+        "programme": 0,
+        "video": 19.818247,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 30264.20000000298,
+        "programme": 0,
+        "video": 19.861027,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 30301.30000000447,
+        "programme": 0,
+        "video": 19.897272,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 30341.30000000447,
+        "programme": 0,
+        "video": 19.938136,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 30392.40000000596,
+        "programme": 0,
+        "video": 19.990521,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 30421.30000000447,
+        "programme": 0,
+        "video": 20.018154,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 30461.70000000298,
+        "programme": 0,
+        "video": 20.05984,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 30506.20000000298,
+        "programme": 0,
+        "video": 20.104356,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 30541.30000000447,
+        "programme": 0,
+        "video": 20.139375,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 30581.30000000447,
+        "programme": 0,
+        "video": 20.179416,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 30622.90000000596,
+        "programme": 0,
+        "video": 20.220978,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 30670.70000000298,
+        "programme": 0,
+        "video": 20.26882,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 30703,
+        "programme": 0,
+        "video": 20.301051,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 30742.60000000149,
+        "programme": 0,
+        "video": 20.340649,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 30782.30000000447,
+        "programme": 0,
+        "video": 20.379586,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 30822,
+        "programme": 0,
+        "video": 20.420026,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 30870.30000000447,
+        "programme": 0,
+        "video": 20.468334,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 30901.30000000447,
+        "programme": 0,
+        "video": 20.49934,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 30949.5,
+        "programme": 0,
+        "video": 20.547464,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 30984.5,
+        "programme": 0,
+        "video": 20.582489,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 31029.20000000298,
+        "programme": 0,
+        "video": 20.627158,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 31061.30000000447,
+        "programme": 0,
+        "video": 20.659262,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 31101.40000000596,
+        "programme": 0,
+        "video": 20.699397,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 31147.80000000447,
+        "programme": 0,
+        "video": 20.743749,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 31193.30000000447,
+        "programme": 0,
+        "video": 20.79129,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 31221.30000000447,
+        "programme": 0,
+        "video": 20.81931,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 31261.30000000447,
+        "programme": 0,
+        "video": 20.859229,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 31309.80000000447,
+        "programme": 0,
+        "video": 20.907702,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 31341.40000000596,
+        "programme": 0,
+        "video": 20.939233,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 31381.30000000447,
+        "programme": 0,
+        "video": 20.979232,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 31427.20000000298,
+        "programme": 0,
+        "video": 21.025131,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 31461.40000000596,
+        "programme": 0,
+        "video": 21.059323,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 31507.70000000298,
+        "programme": 0,
+        "video": 21.105595,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 31546.60000000149,
+        "programme": 0,
+        "video": 21.144507,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 31588.60000000149,
+        "programme": 0,
+        "video": 21.186445,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 31628.20000000298,
+        "programme": 0,
+        "video": 21.225978,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 31661.30000000447,
+        "programme": 0,
+        "video": 21.259161,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 31716.70000000298,
+        "programme": 0,
+        "video": 21.314301,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 31741.90000000596,
+        "programme": 0,
+        "video": 21.339684,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 31783,
+        "programme": 0,
+        "video": 21.380771,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 31826.5,
+        "programme": 0,
+        "video": 21.42423,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 31861.30000000447,
+        "programme": 0,
+        "video": 21.459147,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 31901.40000000596,
+        "programme": 0,
+        "video": 21.501084,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 31948,
+        "programme": 0,
+        "video": 21.547726,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 31981.30000000447,
+        "programme": 0,
+        "video": 21.581011,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 32021.30000000447,
+        "programme": 0,
+        "video": 21.621045,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 32067.30000000447,
+        "programme": 0,
+        "video": 21.666944,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 32101.40000000596,
+        "programme": 0,
+        "video": 21.701102,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 32142.80000000447,
+        "programme": 0,
+        "video": 21.742429,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 32190,
+        "programme": 0,
+        "video": 21.789649,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 32221.30000000447,
+        "programme": 0,
+        "video": 21.820975,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 32261.30000000447,
+        "programme": 0,
+        "video": 21.861035,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 32303.10000000149,
+        "programme": 0,
+        "video": 21.902787,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 32341.90000000596,
+        "programme": 0,
+        "video": 21.941646,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 32385.40000000596,
+        "programme": 0,
+        "video": 21.985087,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 32428.60000000149,
+        "programme": 0,
+        "video": 22.028301,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 32465.60000000149,
+        "programme": 0,
+        "video": 22.065283,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 32506.80000000447,
+        "programme": 0,
+        "video": 22.106536,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 32541.40000000596,
+        "programme": 0,
+        "video": 22.141,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 32589.40000000596,
+        "programme": 0,
+        "video": 22.189111,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 32627,
+        "programme": 0,
+        "video": 22.226696,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 32661.30000000447,
+        "programme": 0,
+        "video": 22.260966,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 32703.10000000149,
+        "programme": 0,
+        "video": 22.302829,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 32741.30000000447,
+        "programme": 0,
+        "video": 22.340959,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 32789.5,
+        "programme": 0,
+        "video": 22.389204,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 32826.70000000298,
+        "programme": 0,
+        "video": 22.426353,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 32861.30000000447,
+        "programme": 0,
+        "video": 22.460991,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 32901.40000000596,
+        "programme": 0,
+        "video": 22.501024,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 32941.30000000447,
+        "programme": 0,
+        "video": 22.541024,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 32989.10000000149,
+        "programme": 0,
+        "video": 22.58884,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 33021.30000000447,
+        "programme": 0,
+        "video": 22.620943,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 33062.70000000298,
+        "programme": 0,
+        "video": 22.662361,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 33109.60000000149,
+        "programme": 0,
+        "video": 22.709254,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 33141.30000000447,
+        "programme": 0,
+        "video": 22.740994,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 33181.40000000596,
+        "programme": 0,
+        "video": 22.780947,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 33226.30000000447,
+        "programme": 0,
+        "video": 22.825881,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 33261.30000000447,
+        "programme": 0,
+        "video": 22.861018,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 33308.40000000596,
+        "programme": 0,
+        "video": 22.907992,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 33345.90000000596,
+        "programme": 0,
+        "video": 22.945517,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 33387.5,
+        "programme": 0,
+        "video": 22.987087,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 33425.60000000149,
+        "programme": 0,
+        "video": 23.027724,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 33470.10000000149,
+        "programme": 0,
+        "video": 23.071874,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 33501.30000000447,
+        "programme": 0,
+        "video": 23.103508,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 33541.30000000447,
+        "programme": 0,
+        "video": 23.143504,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 33587.90000000596,
+        "programme": 0,
+        "video": 23.190092,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 33621.30000000447,
+        "programme": 0,
+        "video": 23.223368,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 33661.40000000596,
+        "programme": 0,
+        "video": 23.263554,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 33701.30000000447,
+        "programme": 0,
+        "video": 23.303645,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 33741.30000000447,
+        "programme": 0,
+        "video": 23.343621,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 33781.30000000447,
+        "programme": 0,
+        "video": 23.383581,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 33821.30000000447,
+        "programme": 0,
+        "video": 23.423623,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 33864.10000000149,
+        "programme": 0,
+        "video": 23.466092,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 33916.30000000447,
+        "programme": 0,
+        "video": 23.518529,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 33941.30000000447,
+        "programme": 0,
+        "video": 23.543605,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 33981.70000000298,
+        "programme": 0,
+        "video": 23.584023,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 34021.30000000447,
+        "programme": 0,
+        "video": 23.623618,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 34067.80000000447,
+        "programme": 0,
+        "video": 23.670199,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 34101.30000000447,
+        "programme": 0,
+        "video": 23.703652,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 34142.40000000596,
+        "programme": 0,
+        "video": 23.744848,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 34181.30000000447,
+        "programme": 0,
+        "video": 23.78368,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 34221.40000000596,
+        "programme": 0,
+        "video": 23.823785,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 34261.30000000447,
+        "programme": 0,
+        "video": 23.86375,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 34304.10000000149,
+        "programme": 0,
+        "video": 23.906481,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 34347.30000000447,
+        "programme": 0,
+        "video": 23.949594,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 34381.30000000447,
+        "programme": 0,
+        "video": 23.98378,
+        "paused": false,
+        "ready": 4
+      },
+      {
+        "wall": 34423.5,
+        "programme": 0,
+        "video": 24,
+        "paused": true,
+        "ready": 4
+      }
+    ]
+  },
+  "welcomeComparisons": 8,
+  "normalSignInAndHelp": true,
+  "demoWallet": {
+    "activeOperations": 0,
+    "wallet": {
+      "userId": "demo-pilot-alice",
+      "tier": "free",
+      "cycle": "2026-11",
+      "balance": 9,
+      "permanent": 0,
+      "expiring": 9,
+      "reserved": 0,
+      "activeOperations": 0,
+      "activeReward": null,
+      "adsAwarded": 0,
+      "pendingRewardCredits": 0,
+      "totals": {
+        "opening": 0,
+        "granted": 11,
+        "earned": 0,
+        "purchased": 0,
+        "consumed": 2,
+        "refunded": 0,
+        "expired": 0
+      }
+    },
+    "operations": [
+      {
+        "id": "6c050ac69af534a2413193cad17407eabb702db470ea6627a2b7fab56fd0aadf",
+        "state": "succeeded",
+        "credits": 2,
+        "requestId": "b4ba426c-1533-4359-b1a5-89e8d44c95d9",
+        "executionId": "application-6c050ac69af534a2413193cad17407eabb702db470ea6627a2b7fab56fd0aadf"
+      }
+    ],
+    "freshIndependentTestCohort": true,
+    "oldWalletHistoryRecovered": false
+  },
+  "protectedDeliveries": [
+    {
+      "directory": "/home/tibule12/Videos/Studio - Director Creates the Edit - 2026-11-07",
+      "unchangedFiles": 47
+    },
+    {
+      "directory": "/home/tibule12/Videos/Studio - Phase Shift - 2026-11-06",
+      "unchangedFiles": 49
+    },
+    {
+      "directory": "/home/tibule12/Videos/Studio Template Collection - 2026-11-04",
+      "unchangedFiles": 154
+    },
+    {
+      "directory": "/home/tibule12/Videos/Studio - City into Sea - 2026-11-07",
+      "unchangedFiles": 42
+    },
+    {
+      "directory": "/home/tibule12/Videos/Studio - Landscape Constellation - 2026-11-07",
+      "unchangedFiles": 41
+    },
+    {
+      "directory": "/home/tibule12/Videos/Studio - Cut Through - 2026-11-08",
+      "unchangedFiles": 41
+    }
+  ],
+  "productionWrites": 0,
+  "productionDeployment": false,
+  "paidProviderCalls": 0,
+  "cloudGpuJobs": 0,
+  "publishingScheduling": false,
+  "creativeApproval": false,
+  "wholePictureAudioParityQualified": false,
+  "realtimeSmoothnessQualified": false,
+  "humanListeningQualified": false,
+  "readinessPromotion": false,
+  "limits": [
+    "This film is manually art-directed with native Studio tools. It is not autonomous Director composition or full After Effects/Fusion equivalence.",
+    "The earlier kinetic type-poster direction missed the owner request and is set aside without export. Both model wording failures and review corrections remain retained.",
+    "Early cut observers used a zero-based timeline index and then exposed one missed trim; the source intervals were corrected through normal controls.",
+    "The first picture review rejected clipped heads and geometric wipes. The later autumn interval, city reframing and short dissolves replace them.",
+    "A composition-stack correction keeps the aperture above both video dissolves.",
+    "Paired stills and full playback do not qualify strict picture/audio parity, real-time smoothness or human listening.",
+    "The source clips are licensed stock with different people; the sequence is a conceptual journey, not a claim of one person travelling.",
+    "Current Studio S02/S04/S03, broad Director composition and typography13/16 failures remain open. No public creative/readiness promotion.",
+    "Paused preview/export inspection shows differing footstep/city poses near cuts and colour/edge differences. Worst diagnostic PSNR17.285dB at4.792s; exact source-frame parity remains open.",
+    "The verification Storage export initially omitted its destination folder and stopped local Auth/Storage. Exact Auth, source/artwork/audio/output hashes and retained signed generations were recovered; current Firestore/job/wallet stayed intact. Final normal sign-in/cold reopen and private full emulator export pass.",
+    "The final movie is an understated travel montage, not a completed complex VFX demonstration or full autonomous Director deliverable."
+  ],
+  "nextTask": "Owner picture/listening review of exact cinematic edit; continue reusable cinematic motion/compositing and general Director integration with S02/S04/S03 constraints.",
+  "finalColdReopen": {
+    "normalSignIn": true,
+    "actualNativeBackup": true,
+    "exactDocumentDecisions": true,
+    "sixSourcesReady": true,
+    "afterExactAuthStorageRecovery": true
+  },
+  "emulatorInputRecovery": {
+    "pid": 123678,
+    "firestorePid": 123685,
+    "checkedAt": "2026-11-08T01:50:27.534Z",
+    "demoProject": "demo-autopromote-credits",
+    "portsWereUnbound": true,
+    "originalRuntimePreserved": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105/reports/studio-director-composition-20261107/private/runtime/autopromote-application-demo-6YGcoz",
+    "inputs": [
+      {
+        "storagePath": "studio/sources/demo-pilot-alice/4569b519ac0b2db2ee220423_Footsteps.mp4",
+        "sha256": "459c13e384b1819b2e3d0bc8eae287d10e58c96d266a0b4bbf1553c98969bbac",
+        "bytes": 3862122,
+        "newGeneration": "1794102627274"
+      },
+      {
+        "storagePath": "studio/sources/demo-pilot-alice/a924b66ba8b93d9c57e14638_City.mp4",
+        "sha256": "09f2b8bfcf899d174ecf53f6a9c5358b9d19ca7b7d8ba0b1c508abfc2a2bf15d",
+        "bytes": 5306461,
+        "newGeneration": "1794102627315"
+      },
+      {
+        "storagePath": "studio/sources/demo-pilot-alice/2dc939ed7e27f2c5d308c8f5_Autumn.mp4",
+        "sha256": "01258817091b10d7639169d3fc9885229ea5fbad787ee1ac674b72c25f9ef468",
+        "bytes": 5354075,
+        "newGeneration": "1794102627358"
+      },
+      {
+        "storagePath": "studio/sources/demo-pilot-alice/c4b4ec52d705a685f668df25_Open_trail.mp4",
+        "sha256": "b5406236fe04617468a712d3353b37845149a16a25afb6b1b9f38e72801acc96",
+        "bytes": 4666850,
+        "newGeneration": "1794102627403"
+      },
+      {
+        "storagePath": "studio/sources/demo-pilot-alice/66561ed03273d7cd7d38f289_Summit.mp4",
+        "sha256": "96056be98b025809b72e38baebc1ea0827fbc30d9a02cfd8844c35a371a3fe00",
+        "bytes": 4988927,
+        "newGeneration": "1794102627442"
+      },
+      {
+        "storagePath": "studio/sources/demo-pilot-alice/4c16f9a3130650c78c52b9b3_Coast.mp4",
+        "sha256": "dd6037bc87dc9c93b84fb506b04355fe12d1f4bda0e942aec8da7e83d3c3e86c",
+        "bytes": 6646172,
+        "newGeneration": "1794102627488"
+      }
+    ],
+    "freshIndependentTestCohort": true,
+    "sameLocalUidForOwnedInputPaths": true,
+    "priorWalletHistoryRecovered": false,
+    "priorJobHistoryRecovered": false,
+    "symbolicFixtureAllowance": 11,
+    "productionChange": false
+  },
+  "emulatorFinalSnapshot": {
+    "freshCohortExported": true,
+    "auth": true,
+    "firestore": true,
+    "storage": true,
+    "activeOperations": 0,
+    "priorLostSessionRecovered": false,
+    "privateDirectory": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105/reports/studio-cinematic-open-country-20261108/private/emulator-final-export"
+  },
+  "authStorageRecovery": {
+    "pid": 133690,
+    "authImportedFromActualExport": true,
+    "firestoreAndWalletUnchanged": true,
+    "activeOperations": 0,
+    "restoredObjects": [
+      {
+        "storagePath": "studio/sources/demo-pilot-alice/4569b519ac0b2db2ee220423_Footsteps.mp4",
+        "sha256": "459c13e384b1819b2e3d0bc8eae287d10e58c96d266a0b4bbf1553c98969bbac",
+        "generation": "1794102627274",
+        "bytes": 3862122
+      },
+      {
+        "storagePath": "studio/sources/demo-pilot-alice/a924b66ba8b93d9c57e14638_City.mp4",
+        "sha256": "09f2b8bfcf899d174ecf53f6a9c5358b9d19ca7b7d8ba0b1c508abfc2a2bf15d",
+        "generation": "1794102627315",
+        "bytes": 5306461
+      },
+      {
+        "storagePath": "studio/sources/demo-pilot-alice/2dc939ed7e27f2c5d308c8f5_Autumn.mp4",
+        "sha256": "01258817091b10d7639169d3fc9885229ea5fbad787ee1ac674b72c25f9ef468",
+        "generation": "1794102627358",
+        "bytes": 5354075
+      },
+      {
+        "storagePath": "studio/sources/demo-pilot-alice/c4b4ec52d705a685f668df25_Open_trail.mp4",
+        "sha256": "b5406236fe04617468a712d3353b37845149a16a25afb6b1b9f38e72801acc96",
+        "generation": "1794102627403",
+        "bytes": 4666850
+      },
+      {
+        "storagePath": "studio/sources/demo-pilot-alice/66561ed03273d7cd7d38f289_Summit.mp4",
+        "sha256": "96056be98b025809b72e38baebc1ea0827fbc30d9a02cfd8844c35a371a3fe00",
+        "generation": "1794102627442",
+        "bytes": 4988927
+      },
+      {
+        "storagePath": "studio/sources/demo-pilot-alice/4c16f9a3130650c78c52b9b3_Coast.mp4",
+        "sha256": "dd6037bc87dc9c93b84fb506b04355fe12d1f4bda0e942aec8da7e83d3c3e86c",
+        "generation": "1794102627488",
+        "bytes": 6646172
+      },
+      {
+        "storagePath": "uploads/images/demo-pilot-alice/1794102770694_overlay-5209e47f-d98b-4e6d-8eac-b458d8e5513d.png",
+        "sha256": "609d8bc38f41e1b7adee685990d879ef7c1f73727803c5d617b03b99d8eb9942",
+        "generation": "1794102770758",
+        "bytes": 136649
+      },
+      {
+        "storagePath": "uploads/images/demo-pilot-alice/1794102770696_overlay-6ad1096a-9d4a-4a4e-b418-8aa46523ef9e.png",
+        "sha256": "ffb276354b6929ef8371a71ff96c77c1336b598d00e4b07434a2dc1dc688bce0",
+        "generation": "1794102770753",
+        "bytes": 20916
+      },
+      {
+        "storagePath": "uploads/images/demo-pilot-alice/1794102770696_overlay-8cf048a1-b2b5-41fb-b698-20e444079c7d.png",
+        "sha256": "a5015ad5b2b60d2383d9d45eb106f9e1adfcb104622a4c3c11151becc8ed51d7",
+        "generation": "1794102770761",
+        "bytes": 20861
+      },
+      {
+        "storagePath": "uploads/images/demo-pilot-alice/1794102770696_overlay-3c8ea5e6-c106-4402-9f3e-af624533d46a.png",
+        "sha256": "a5015ad5b2b60d2383d9d45eb106f9e1adfcb104622a4c3c11151becc8ed51d7",
+        "generation": "1794102770762",
+        "bytes": 20861
+      },
+      {
+        "storagePath": "uploads/audios/demo-pilot-alice/1794102771755_music-e1dc7b8f-cf1f-4b44-a221-90c90c6ec3d2.wav",
+        "sha256": "8ae43a4a8fdbd079a4fb8ecb886f4667113de30124cb1c84e6d450253d0afd32",
+        "generation": "1794102772268",
+        "bytes": 4233644
+      },
+      {
+        "storagePath": "studio/exports/demo-pilot-alice/viral_29e1a80439edc0d61900befd8e3853a90eabcf466da48609c1869f203f406083/render.mp4",
+        "sha256": "6bff3506f0da87db0c9f3eba3644e15454830ea14fe17f911dbd15a8e96b7b05",
+        "generation": "1794102850396",
+        "bytes": 9074583
+      }
+    ],
+    "signedVideoCapabilitiesAndAllHashesVerified": true,
+    "staticAssetReplacementGenerations": [],
+    "reason": "Verification storage export destination was absent; corrected before retry.",
+    "productionChange": false
+  },
+  "sourcePlaybackLimits": {
+    "previewExportMinimumDiagnosticPsnrDb": 17.285265625652826,
+    "worstProgrammeTime": 4.791666666666667,
+    "visibleDifferences": "Footstep/city poses differ in paused preview/export pairs near cuts; colour/edge differences remain. Exact source-frame parity is not established.",
+    "sourceSamplingRepairComplete": false
+  },
+  "audioLevels": {
+    "meanDb": -21.8,
+    "peakDb": -6.9,
+    "humanListeningQualified": false
+  }
+}

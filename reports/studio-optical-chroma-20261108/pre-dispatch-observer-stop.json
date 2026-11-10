@@ -1,0 +1,10 @@
+{
+  "stopped": [
+    116191
+  ],
+  "activeOperations": 0,
+  "operationCount": 3,
+  "noMediaProcessRequest": true,
+  "workerExecutionCancelled": false,
+  "reason": "Native artwork upload stall. Reopen the exact saved project in Before view to avoid rendering live lens decoders during upload."
+}

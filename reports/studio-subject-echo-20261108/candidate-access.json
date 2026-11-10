@@ -1,0 +1,13 @@
+{
+  "candidate": "http://127.0.0.1:46339",
+  "previous": [
+    "http://127.0.0.1:33983"
+  ],
+  "api": {
+    "previousPid": 115707,
+    "pid": 155949,
+    "origin": "http://127.0.0.1:34899"
+  },
+  "loopbackOnly": true,
+  "productionChange": false
+}

@@ -1,0 +1,24 @@
+{
+  "all192DecodedFramesInspectedAsContactSheets": true,
+  "enlargedRevealAndClosingEdgesInspected": true,
+  "threeMeasuredLiveAndExportPairsInspected": true,
+  "rejectedFirstRenderForClippedLeftArm": true,
+  "revisedNineSilhouettesInsideFrameAtAllActiveOutputFrames": true,
+  "finalPoseFreeOfRingAndCopiesBySeconds": 7.75,
+  "visibleImprovements": [
+    "Copies are close to the original lead size, rather than miniature figures.",
+    "The new rows separate in depth and show cyan/blue at left, purple/pink behind, warm orange/yellow at right.",
+    "Photographic detail contrast restores clothing folds and headphone/hat structure.",
+    "The broad stage light and ring read together; final fade has a clear natural-colour lead hold.",
+    "Outer wide-arm poses no longer leave the frame."
+  ],
+  "remainingLimits": [
+    "Source compression and matte softness are visible around hands, headphone/hat edges and shoes.",
+    "Foot stabilisation and a framing guard modify the copies spatially; these are stylised repeated same-view performances, not physically reconstructed people.",
+    "Floor light and shadows are designed artwork, not a physical relighting of a real warehouse.",
+    "Rear copies still overlap; the result does not equal the reference photograph's sharpness, complex detail or realism.",
+    "Live preview is slow and full predictive picture/audio parity and human listening remain unqualified."
+  ],
+  "verdict": "Substantially stronger native stylised circle revision, delivered for review. Exact-reference photorealism and owner creative approval are not claimed.",
+  "perfectionClaimed": false
+}

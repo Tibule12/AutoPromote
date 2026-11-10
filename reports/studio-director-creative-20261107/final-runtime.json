@@ -1,0 +1,23 @@
+{
+  "origin": "http://127.0.0.1:45109",
+  "build": "/dev/shm/autopromote-director-creative-20261107-r2-build",
+  "mainAsset": "/static/js/main.a03d1cb0.js",
+  "mainSha256": "debc8c56690fc1e97ad2a5a05650480d5e3422637a97e1e6e10edd91dd8cb284",
+  "demoProject": "demo-autopromote-credits",
+  "api": {
+    "previousPid": 543756,
+    "pid": 547072,
+    "origin": "http://127.0.0.1:45109"
+  },
+  "previewOrigins": [],
+  "activeOperations": 0,
+  "temporaryCandidateServersStopped": [
+    532043,
+    537181
+  ],
+  "temporaryDependencyLinkRemoved": true,
+  "allRuntimeBuildSourceHashesMatch": true,
+  "otherProcessesUntouched": true,
+  "productionDeployment": false,
+  "paidCalls": 0
+}

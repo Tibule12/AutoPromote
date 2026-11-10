@@ -1,0 +1,10 @@
+{
+  "existingValidatedSetting": true,
+  "previousBytes": 1048576,
+  "configuredBytes": 4194304,
+  "maximumImplementedBytes": 4194304,
+  "reason": "The native41-layer/2736-key project exceeds1MiB. Use the existing bounded local authoring setting.",
+  "activeOperations": 0,
+  "noWalletReset": true,
+  "productionChange": false
+}

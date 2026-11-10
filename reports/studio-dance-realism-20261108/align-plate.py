@@ -1,0 +1,8 @@
+from pathlib import Path
+import cv2,numpy as np,json
+r=Path(__file__).resolve().parent;ref=cv2.imread(str(r/'private/early-source.png'));sift=cv2.SIFT_create(nfeatures=2500);mask=np.ones(ref.shape[:2],np.uint8)*255;mask[240:950,:455]=0;kp,des=sift.detectAndCompute(cv2.cvtColor(ref,cv2.COLOR_BGR2GRAY),mask);out=[];board=[]
+for t in [8,9,10,11,12,13,14]:
+ cap=cv2.VideoCapture('/home/tibule12/Videos/number two dance.mp4');cap.set(cv2.CAP_PROP_POS_MSEC,t*1000);ok,im=cap.read();cap.release();assert ok
+ kp2,des2=sift.detectAndCompute(cv2.cvtColor(im,cv2.COLOR_BGR2GRAY),None);matches=cv2.BFMatcher().knnMatch(des,des2,k=2);good=[a for a,b in matches if a.distance<.68*b.distance];p=np.float32([kp[m.queryIdx].pt for m in good]);q=np.float32([kp2[m.trainIdx].pt for m in good]);h,inlier=cv2.findHomography(p,q,cv2.RANSAC,2.5);warp=cv2.warpPerspective(ref,h,(576,1024));count=int(inlier.sum());inside=p[inlier.ravel()>0];pred=cv2.perspectiveTransform(inside[:,None],h)[:,0];err=np.linalg.norm(pred-q[inlier.ravel()>0],axis=1);box=np.float32([[0,0],[576,0],[576,1024],[0,1024]]);corners=cv2.perspectiveTransform(box[:,None],h)[:,0];out.append({'sourceTime':t,'h':h.tolist(),'corners':corners.tolist(),'inliers':count,'medianErrorPx':float(np.median(err))});print(t,count,np.median(err),flush=True)
+ mask=np.zeros((1024,576),np.uint8);mask[766:885,448:576]=255;mask=cv2.GaussianBlur(mask,(13,13),0).astype(float)/255;paint=(warp*mask[:,:,None]+im*(1-mask[:,:,None])).astype('uint8');cv2.imwrite(str(r/'private'/f'plate-aligned-{t}.png'),paint)
+(r/'plate-registration.json').write_text(json.dumps(out,indent=2))

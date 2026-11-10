@@ -1,0 +1,130 @@
+{
+  "deliveredAt": "2026-11-08T15:15:28.663783+00:00",
+  "delivery": "/home/tibule12/Videos/Studio - Textured Colour Echoes - 2026-11-08",
+  "movieSha256": "418da19eca7088c08456280c79b22044df6e262f1ca48fcf52c1ff8e77374d98",
+  "nativeJobId": "viral_507a5587b2168480277a217d4b453974e728990fe0d2063e0e8fa4b9686c422c",
+  "seconds": 8,
+  "frames": 192,
+  "fps": 24,
+  "size": [
+    576,
+    1024
+  ],
+  "ordinaryVideoLayers": 8,
+  "photographicTintedVideoCopies": 3,
+  "keys": 36,
+  "ordinaryNativeMediaColourFeature": true,
+  "sourceTexturePreservedByLumaGammaTint": true,
+  "nativeEchoModeControlsApplied": true,
+  "individualColourEditUndoRedoExact": true,
+  "nativeSceneRefinementUndoRedoExact": true,
+  "independentNativeRestore": true,
+  "exactBackupCompilerSubmittedWorkerDownloadBinding": true,
+  "fullMatchingLiveAndFinishedStudioRecordings": true,
+  "focusedFrontendTests": 27,
+  "frontendRegressions": 32,
+  "workerTests": 141,
+  "pixelFixture": {
+    "actualBrowserFilterVsCanonicalCpu": true,
+    "greySteps": 64,
+    "colours": 3,
+    "predeclaredMaximumChannelDifference": 3,
+    "passed": true,
+    "records": [
+      {
+        "color": "#20cfff",
+        "maximumChannelDifference": 1,
+        "meanChannelDifference": 0.2760416666666667,
+        "distinctBrowserGreenValues": 64
+      },
+      {
+        "color": "#f02bc7",
+        "maximumChannelDifference": 1,
+        "meanChannelDifference": 0.2864583333333333,
+        "distinctBrowserGreenValues": 39
+      },
+      {
+        "color": "#ff9b30",
+        "maximumChannelDifference": 1,
+        "meanChannelDifference": 0.2604166666666667,
+        "distinctBrowserGreenValues": 64
+      }
+    ],
+    "wholePictureParity": false
+  },
+  "minimumMovingPictureDiagnosticPsnrDb": 29.043514988630506,
+  "strictPredictivePictureAudioParityQualified": false,
+  "music": {
+    "source": "original video soundtrack",
+    "durationSeconds": 8.0,
+    "bestLagSamplesAt16k": 0,
+    "bestLagMilliseconds": 0.0,
+    "waveformCorrelation": 0.9953254961520749,
+    "fittedGain": 0.8876621149989447,
+    "humanListeningQualified": false,
+    "musicReplacement": false,
+    "speedChange": false
+  },
+  "noAddedLines": true,
+  "sourceRange": [
+    8,
+    16
+  ],
+  "sourceName": "number two dance.mp4",
+  "sourceMatte": "Previously prepared cached CPU RVM input; not new automatic product segmentation.",
+  "nativeCpuExecutions": 1,
+  "newPaidProviderOrGpuExecutions": 0,
+  "productionDeployment": false,
+  "ownerCreativeApproval": false,
+  "sameCanonicalNativePreviewCompilerCpu": true,
+  "priorFilesPreserved": 721,
+  "nativeResource": {
+    "wallSeconds": 125.46175539100022,
+    "cpuSeconds": 232.17979300000002,
+    "peakRssKiB": 700432,
+    "cpuCeilingSeconds": 1200,
+    "localFileCeilingBytes": 402653184,
+    "providerChargesStarted": false,
+    "invoiceCostMicros": null
+  },
+  "capture": {
+    "Studio authoring": {
+      "captureSeconds": 2.5380001068115234,
+      "capturedUpdates": 20,
+      "observedCaptureUpdatesPerSecond": 7.880220314539662,
+      "audio": "muted headless native capture"
+    },
+    "Photographic tint controls and history": {
+      "captureSeconds": 6.215000152587891,
+      "capturedUpdates": 75,
+      "observedCaptureUpdatesPerSecond": 12.067578142982093,
+      "audio": "muted headless native capture"
+    },
+    "Studio photographic refinement": {
+      "captureSeconds": 1.6770000457763672,
+      "capturedUpdates": 39,
+      "observedCaptureUpdatesPerSecond": 23.25581331868417,
+      "audio": "muted headless native capture"
+    },
+    "Complete live Studio playback": {
+      "captureSeconds": 8.204999923706055,
+      "capturedUpdates": 86,
+      "observedCaptureUpdatesPerSecond": 10.4814138695513,
+      "audio": "muted headless native capture",
+      "playbackWallMs": 8296
+    },
+    "Complete finished playback in Studio": {
+      "captureSeconds": 8.09500002861023,
+      "capturedUpdates": 186,
+      "observedCaptureUpdatesPerSecond": 22.977146305450102,
+      "audio": "muted headless native capture",
+      "playbackWallMs": 8202
+    }
+  },
+  "remaining": [
+    "This does not exactly reconstruct the supplied reference image or its energetic ribbons/physical lighting.",
+    "Person isolation still requires a matching matte; source edges and moving multi-person overlap remain limited.",
+    "No autonomous Director planning, whole-editor parity, display smoothness or human listening qualification.",
+    "Shared S02/S04/S03 and strict typography13/16 failures remain open."
+  ]
+}

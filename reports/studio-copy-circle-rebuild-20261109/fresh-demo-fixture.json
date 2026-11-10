@@ -1,0 +1,14 @@
+{
+  "uid": "demo-pilot-circle-rebuild-20261109",
+  "normalDemoAllowance": true,
+  "existingWalletsReset": false,
+  "productionAccount": false,
+  "api": {
+    "previousPid": 165434,
+    "pid": 199022,
+    "origin": "http://127.0.0.1:34899"
+  },
+  "originalWallets": 6,
+  "priorOperations": 31,
+  "activeOperations": 0
+}

@@ -1,0 +1,50 @@
+{
+  "checkedAt": "2026-11-07T09:30:16.821Z",
+  "demoOnly": true,
+  "loopbackApi": "http://127.0.0.1:45109",
+  "build": "/dev/shm/autopromote-director-composition-20261107-build",
+  "mainAsset": "/static/js/main.52a85ff7.js",
+  "mainSha256": "c9f238efb231410ba05ae32158cc598abdd3934240c12ff870de684fecee66e6",
+  "frontendSourcesUnchangedSinceCandidateChecks": true,
+  "backendAuthoringRevision": {
+    "model": "llama3:latest",
+    "threads": 6,
+    "gpu": 0,
+    "requestTimeoutSeconds": 450,
+    "format": "json",
+    "noAutomaticRetry": true,
+    "frontendBuildUnchanged": true,
+    "sources": {
+      "src/services/studioDirectorCreativePlanner.js": "76a48bc211c63acabc0db82dbf5a3d594464f48a547a740d7a2a11f0a8c70b9c",
+      "src/services/studioDirectorCompositionPlanner.js": "a8326414f3e33a5f35edfab63f52445817f3de051991ab9c6eef24c6048cfe3d",
+      "src/services/studioLocalModelTransport.js": "fb91edd59f1e8377a9ed77a8df065d969c1295460822ea058a6de109b1f9bbcf",
+      "src/routes/studioDirectorCreativeRoutes.js": "6192e442a299f677b426509999744244cd789d9ec264a4399c6b945914e4f41f"
+    }
+  },
+  "sources": {
+    "frontend/src/components/ViralClipStudio.js": "3f9d8253efdd84421672a4ca9b01ac2522af71e3cb635002caf74a6a78388141",
+    "frontend/src/components/ViralClipStudio.css": "0e40cfd977bd4b3a04dcb03155ec6c19c32a76d53dde528972b362fcb77261c2",
+    "frontend/src/components/studioFeatureControls.css": "bf69a3b2f62f3e4067fcddf0ff0d5cb47a679a78c393433c1a50ec4b7078f39b",
+    "frontend/src/components/StudioProgrammeFrame.js": "134e4695b2b0d9c2ee2db2be594303bdf6a5e1eb945cc1c0b35f7b154f0f3115",
+    "frontend/src/components/StudioDirectorCreativePanel.js": "a50eb20bbc80a938396a0bf53c6038d383f8b817d2d621914b7d97264efeb071",
+    "frontend/src/components/studioDirectorCreativePlan.js": "6c4700aa3ab3240d332fee60ea46348e7202faa9c975c6b256a335248de36377",
+    "frontend/src/components/studioDirectorCreativeClient.js": "63331aaf4e248acdeafc85749a99a1c6e951009c226717c0ec093ae536589f96",
+    "src/services/studioDirectorCreativePlanner.js": "76a48bc211c63acabc0db82dbf5a3d594464f48a547a740d7a2a11f0a8c70b9c",
+    "src/routes/studioDirectorCreativeRoutes.js": "6192e442a299f677b426509999744244cd789d9ec264a4399c6b945914e4f41f",
+    "src/server.js": "ef20adf22d7093c208640787a5a5d0e344d99adfaa916f3a953b8ab78a19e1c9",
+    "scripts/monetization/application-host.cjs": "26feebedb7226ea284dd77c319e9f1321110576c51a035be3e61e030f0cb0e4d",
+    "frontend/src/components/studioDirectorComposition.js": "2a9db9b8270bc8890b156d2706b73460530b0ae1af3cbb49d7c5edf807d5227d",
+    "src/services/studioDirectorCompositionPlanner.js": "a8326414f3e33a5f35edfab63f52445817f3de051991ab9c6eef24c6048cfe3d",
+    "frontend/src/components/studioSceneActions.js": "633a6317f8b0a5f3069c810d53ebd145ae5aa114f4812aaba9b486ac625ff4c1",
+    "src/generated/studioDirectorReplayKernel.cjs": "2c89c123c59b7297fff4bf1fd7373860aeeec4138d7b8c105fdf46407fc61c08",
+    "python_media_worker/main_media_server.py": "0afacd9efed66dbb00a53c9fc1a2b461b0da5d3fe5dbc3cf6fe07910cb0b6f64",
+    "src/services/studioLocalModelTransport.js": "fb91edd59f1e8377a9ed77a8df065d969c1295460822ea058a6de109b1f9bbcf"
+  },
+  "apiPid": 568263,
+  "workerParentPid": 400768,
+  "apiAndWorkerParentCwd": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105",
+  "workerOrigin": "http://127.0.0.1:40855",
+  "workerExecutionAdapterSha256": "ec7a2548b4481438a2be57191b4c85e9b7510c08dbefd89ddefa571d7220aa59",
+  "canonicalRendererSha256": "0afacd9efed66dbb00a53c9fc1a2b461b0da5d3fe5dbc3cf6fe07910cb0b6f64",
+  "noProductionOrPaidOperation": true
+}

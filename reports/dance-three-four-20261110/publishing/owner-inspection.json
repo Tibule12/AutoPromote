@@ -1,0 +1,18 @@
+{
+  "normalProductionSignIn": true,
+  "site": "https://autopromote.org",
+  "headless": true,
+  "muted": true,
+  "contentMutationsBlocked": true,
+  "errors": [],
+  "readEndpoints": [
+    "/api/users/profile",
+    "/api/auth/verify",
+    "/api/content/my-content",
+    "/api/content/my-promotion-schedules",
+    "/api/health",
+    "/api/platform/status",
+    "/api/notifications",
+    "/api/users/me"
+  ]
+}

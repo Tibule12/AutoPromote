@@ -116,6 +116,7 @@ async function uploadSourceFileViaFirebase({
   timeoutMs,
   contentHash,
 }) {
+  const deadline = Date.now() + timeoutMs;
   const user = auth.currentUser;
   if (!user?.uid) {
     throw new Error("Please sign in again before uploading.");
@@ -162,7 +163,22 @@ async function uploadSourceFileViaFirebase({
     );
   });
 
-  const url = await getDownloadURL(snapshot.ref);
+  // Byte completion is not URL availability. Storage can accept the file and
+  // then stall its metadata request; keep that phase inside the upload budget
+  // and let the existing authenticated backend fallback handle a timeout.
+  let urlTimer;
+  let url;
+  try {
+    const remainingMs = Math.max(0, Math.min(15000, deadline - Date.now()));
+    url = await Promise.race([
+      getDownloadURL(snapshot.ref),
+      new Promise((_resolve, reject) => {
+        urlTimer = setTimeout(() => reject(new Error('Uploaded media URL timed out.')), remainingMs);
+      }),
+    ]);
+  } finally {
+    clearTimeout(urlTimer);
+  }
   const size = snapshot.metadata?.size ? Number(snapshot.metadata.size) : file.size || 0;
   return {
     ok: true,

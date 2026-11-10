@@ -1,0 +1,90 @@
+{
+  "key": "four",
+  "mediaSha256": "5c8555cb8b0dfbbd6d6b2598effc02dccddec8330771f8de20c54cf6725e5be2",
+  "finalResultOnly": true,
+  "ownerInstruction": "work on the other two and schedule them",
+  "ownerClarification": "The remaining supplied dances are number three and number four.",
+  "reuseContentId": "BhwXCRMdDOPycMCvSASF",
+  "redditDestination": "u_Tibule12",
+  "status": "QUEUE_VERIFIED",
+  "reviewedAt": "2026-11-10T00:13:17.080Z",
+  "title": "Mirror Pulse | The crew leaves a colour echo",
+  "caption": "The crew leaves a colour echo.\n\nCyan and amber motion echoes with a fading floor reflection, edited in AutoPromote Studio. Original dance music retained. Dance footage supplied; visual edit by AutoPromote.\n\nCyan or amber? #DanceEdit #MotionGraphics #AutoPromote",
+  "scheduledAt": "2026-11-10T18:00:00.000Z",
+  "localDate": "2026-11-10",
+  "localTime": "20:00",
+  "timezone": "Africa/Johannesburg",
+  "frequency": "once",
+  "destinations": [
+    "reddit"
+  ],
+  "nativePublisher": true,
+  "submittedAt": "2026-11-10T00:13:17.097Z",
+  "contentId": "BhwXCRMdDOPycMCvSASF",
+  "acknowledgedAt": "2026-11-10T00:13:19.273Z",
+  "observedDestinations": [
+    {
+      "id": "jCwBC9RhP7SiOMdHGDBX",
+      "platform": "instagram",
+      "status": "pending",
+      "isActive": true,
+      "startTime": "2026-11-10T18:00:00.000Z",
+      "contentId": "BhwXCRMdDOPycMCvSASF",
+      "frequency": "once"
+    },
+    {
+      "id": "g5Cbg4XfJpRIjCtsIw0f",
+      "platform": "youtube",
+      "status": "pending",
+      "isActive": true,
+      "startTime": "2026-11-10T18:00:00.000Z",
+      "contentId": "BhwXCRMdDOPycMCvSASF",
+      "frequency": "once"
+    },
+    {
+      "id": "Oyv0jltzvevNptxWOxNG",
+      "platform": "facebook",
+      "status": "pending",
+      "isActive": true,
+      "startTime": "2026-11-10T18:00:00.000Z",
+      "contentId": "BhwXCRMdDOPycMCvSASF",
+      "frequency": "once"
+    },
+    {
+      "id": "LTJHhrYdvLwYKYGVRtdJ",
+      "platform": "linkedin",
+      "status": "pending",
+      "isActive": true,
+      "startTime": "2026-11-10T18:00:00.000Z",
+      "contentId": "BhwXCRMdDOPycMCvSASF",
+      "frequency": "once"
+    },
+    {
+      "id": "EpUbKWQPzkVh5k7qvbKi",
+      "platform": "tiktok",
+      "status": "pending",
+      "isActive": true,
+      "startTime": "2026-11-10T18:00:00.000Z",
+      "contentId": "BhwXCRMdDOPycMCvSASF",
+      "frequency": "once"
+    }
+  ],
+  "observedAt": "2026-11-10T00:13:21.928Z",
+  "verifiedAt": "2026-11-10T00:51:50.912Z",
+  "queueVerified": true,
+  "providerPublicationVerified": false,
+  "verifiedDestinations": [
+    {
+      "movie": "four",
+      "scheduleId": "JAUNpRQO4Qa9vz7VA12o",
+      "contentId": "BhwXCRMdDOPycMCvSASF",
+      "platform": "reddit",
+      "startTime": "2026-11-10T18:00:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once",
+      "mediaSha256": "5c8555cb8b0dfbbd6d6b2598effc02dccddec8330771f8de20c54cf6725e5be2",
+      "copyMatches": true
+    }
+  ]
+}
