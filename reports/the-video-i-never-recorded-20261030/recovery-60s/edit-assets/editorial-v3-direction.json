@@ -1,0 +1,19 @@
+{
+  "seconds": 16,
+  "nativeGraphics": 22,
+  "clock": false,
+  "sourceTriggers": {
+    "video": 2.5,
+    "never": 5.62,
+    "said": 5.88,
+    "face": 8.36,
+    "voice": 10.34,
+    "room": 12.68
+  },
+  "palette": [
+    "#101318",
+    "#F1EDE4",
+    "#D5AA68"
+  ],
+  "design": "Editorial reconstruction with restrained amber evidence typography and actual perspective video. Original speech unchanged."
+}

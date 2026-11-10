@@ -1,0 +1,278 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "The Video I Never Recorded / Editorial V3",
+  "width": 1920,
+  "height": 1080,
+  "duration": 16,
+  "layers": [
+    {
+      "id": "Evidence-rule-0",
+      "name": "Evidence-rule-0",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1920\" height=\"24\" viewBox=\"0 0 1920 24\"><path d=\"M0 12H1920\" stroke=\"#D5AA68\" stroke-width=\"4\"/></svg>",
+      "startTime": 8.9,
+      "duration": 5.65,
+      "x": 20,
+      "y": 43.5,
+      "width": 25,
+      "height": 1,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 8.9,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.78,
+            0.2,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 9.200000000000001,
+          "value": 0.55,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.78,
+            0.2,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.3,
+          "value": 0.55,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.78,
+            0.2,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.508333333333335,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.78,
+            0.2,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 8.9,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.78,
+            0.2,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 9.38,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.78,
+            0.2,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Evidence-rule-1",
+      "name": "Evidence-rule-1",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1920\" height=\"24\" viewBox=\"0 0 1920 24\"><path d=\"M0 12H1920\" stroke=\"#D5AA68\" stroke-width=\"4\"/></svg>",
+      "startTime": 10.9,
+      "duration": 3.6500000000000004,
+      "x": 20,
+      "y": 62.5,
+      "width": 25,
+      "height": 1,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 10.9,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.78,
+            0.2,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 11.200000000000001,
+          "value": 0.55,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.78,
+            0.2,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.3,
+          "value": 0.55,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.78,
+            0.2,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.508333333333335,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.78,
+            0.2,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 10.9,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.78,
+            0.2,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 11.38,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.78,
+            0.2,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Evidence-rule-2",
+      "name": "Evidence-rule-2",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1920\" height=\"24\" viewBox=\"0 0 1920 24\"><path d=\"M0 12H1920\" stroke=\"#D5AA68\" stroke-width=\"4\"/></svg>",
+      "startTime": 13.2,
+      "duration": 1.3500000000000014,
+      "x": 20,
+      "y": 81.5,
+      "width": 25,
+      "height": 1,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 13.2,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.78,
+            0.2,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 13.5,
+          "value": 0.55,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.78,
+            0.2,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.3,
+          "value": 0.55,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.78,
+            0.2,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.508333333333335,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.78,
+            0.2,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 13.2,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.78,
+            0.2,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 13.68,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            0.78,
+            0.2,
+            1
+          ]
+        }
+      ]
+    }
+  ],
+  "groups": []
+}

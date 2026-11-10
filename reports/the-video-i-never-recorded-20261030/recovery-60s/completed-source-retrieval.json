@@ -1,0 +1,18 @@
+{
+  "retrievedExistingResultsOnly": true,
+  "newGenerationRequests": 0,
+  "results": [
+    {
+      "take": 1,
+      "sameCompletedOperation": true,
+      "sha256": "7011e9e110f31ba82211ecdafc9f6391e28261431429463614409f31bed2b864",
+      "bytes": 9412547
+    },
+    {
+      "take": 2,
+      "sameCompletedOperation": true,
+      "sha256": "739f1e2239b6105a9527d113e5a197946128bb7786eb556ecbc238928f5723bb",
+      "bytes": 10206437
+    }
+  ]
+}

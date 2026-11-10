@@ -1,0 +1,43 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "The Video I Never Recorded / Editorial V3",
+  "width": 1920,
+  "height": 1080,
+  "duration": 16,
+  "layers": [
+    {
+      "id": "Recording-stage",
+      "name": "Recording-stage",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1920\" height=\"1080\" viewBox=\"0 0 1920 1080\"><rect width=\"1920\" height=\"1080\" fill=\"#101318\"/></svg>",
+      "startTime": 2.5,
+      "duration": 5.0,
+      "x": 50,
+      "y": 50,
+      "width": 100,
+      "height": 100,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": []
+    },
+    {
+      "id": "Identity-stage",
+      "name": "Identity-stage",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1920\" height=\"1080\" viewBox=\"0 0 1920 1080\"><rect width=\"1920\" height=\"1080\" fill=\"#101318\"/></svg>",
+      "startTime": 8.25,
+      "duration": 6.4,
+      "x": 50,
+      "y": 50,
+      "width": 100,
+      "height": 100,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": []
+    }
+  ],
+  "groups": []
+}
