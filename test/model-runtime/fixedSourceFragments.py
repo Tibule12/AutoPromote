@@ -110,6 +110,61 @@ class FixedSourceFragments(unittest.TestCase):
             expected[30:34,140:142] = 0
             self.assertTrue(np.array_equal(result, expected))
 
+    def test_old_set_colour_change_cannot_reintroduce_an_unsupported_island_in_a_known_gap(self):
+        with tempfile.TemporaryDirectory() as directory:
+            rgb, alpha, guidance = self.fixture(directory)
+            first, _ = prune_unsupported_fixed_islands(rgb, alpha, guidance, 0, ['prop'])
+            self.assertEqual(int(first[31,140]), 0)
+            for component in guidance[1]['components']:
+                component['frames'] *= 2
+            current = rgb.copy()
+            current[30:34,140:142] = 200
+            result, _ = prune_unsupported_fixed_islands(current, alpha, guidance, 1, ['prop'])
+            self.assertTrue(np.array_equal(result, first))
+
+    def test_current_tracked_hand_over_a_known_background_gap_remains_exact(self):
+        with tempfile.TemporaryDirectory() as directory:
+            rgb, alpha, guidance = self.fixture(directory)
+            first, _ = prune_unsupported_fixed_islands(rgb, alpha, guidance, 0, ['prop'])
+            hand = np.zeros_like(alpha)
+            hand[25:45,130:155] = 255
+            Image.fromarray(hand).save(Path(directory)/'hand.png')
+            for component in guidance[1]['components']:
+                component['frames'] *= 2
+            guidance[1]['components'][0]['frames'][1] = {'file':'hand.png'}
+            current = rgb.copy()
+            current[25:45,130:155] = 200
+            incoming = first.copy()
+            incoming[25:45,130:155] = 230
+            result, _ = prune_unsupported_fixed_islands(current, incoming, guidance, 1, ['prop'])
+            self.assertTrue(np.array_equal(result, incoming))
+
+    def test_a_thin_connection_cannot_make_old_background_growth_authoritative(self):
+        with tempfile.TemporaryDirectory() as directory:
+            rgb, alpha, guidance = self.fixture(directory)
+            first, _ = prune_unsupported_fixed_islands(rgb, alpha, guidance, 0, ['prop'])
+            for component in guidance[1]['components']:
+                component['frames'] *= 2
+            incoming = first.copy()
+            incoming[32,104:142] = 180
+            incoming[30:34,140:142] = 255
+            current = rgb.copy()
+            current[30:34,105:142] = 200
+            result, _ = prune_unsupported_fixed_islands(current, incoming, guidance, 1, ['prop'])
+            self.assertFalse(result[30:34,140:142].any())
+            self.assertTrue(np.array_equal(result[60,104:150], first[60,104:150]))
+            self.assertTrue(np.array_equal(result[:,100:104], first[:,100:104]))
+
+    def test_a_long_weak_logit_bridge_cannot_give_background_the_persons_ownership(self):
+        with tempfile.TemporaryDirectory() as directory:
+            rgb, alpha, guidance = self.fixture(directory)
+            person = np.asarray(Image.open(Path(directory)/'person.png')).copy()
+            person[31,25:143] = 25
+            Image.fromarray(person).save(Path(directory)/'person.png')
+            result, _ = prune_unsupported_fixed_islands(rgb, alpha, guidance, 0, ['prop'])
+            self.assertFalse(result[30:34,140:142].any())
+            self.assertTrue(np.array_equal(result[:,5:30], alpha[:,5:30]))
+
 
 if __name__ == '__main__':
     unittest.main()

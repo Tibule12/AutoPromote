@@ -15,8 +15,9 @@ def prune_unsupported_fixed_islands(rgb, alpha, guidance, index, component_ids):
     """Remove small detached prop fragments lacking current/reference support.
 
     This is deliberately narrower than a mask opening or size filter: real
-    thin connected parts, any independently supported island, authored FG,
-    changed photographed pixels and every moving foreground stay exact.
+    thin connected parts, independently supported islands, authored FG and
+    current moving foreground stay exact. Changed source pixels are protected
+    unless a source-qualified reference already establishes an empty gap.
     A crop boundary cannot establish that a component is detached.
     """
     if (rgb.dtype != np.uint8 or alpha.dtype != np.uint8 or alpha.ndim != 2
@@ -42,20 +43,29 @@ def prune_unsupported_fixed_islands(rgb, alpha, guidance, index, component_ids):
             binary = (plane >= 128).astype(np.uint8)
             if binary.any():
                 cv2.fillConvexPoly(moving, cv2.convexHull(cv2.findNonZero(binary)), 1)
-                # Weak logits disconnected from every strong moving pixel can
-                # describe the old TV, rather than another observed limb.
-                # Keep the connected soft boundary; actual hands have their
-                # own current tracks and authored/current-RGB protections.
-                _, labels = cv2.connectedComponents((plane >= 24).astype(np.uint8), 8)
-                anchors = np.unique(labels[binary > 0])
-                moving |= np.isin(labels, anchors[anchors != 0]).astype(np.uint8)
+                # A long low-logit bridge can connect the old TV to the body.
+                # Bound uncertainty to the current strong silhouette rather
+                # than giving every connected weak pixel person ownership.
+                # Each real hand retains its own current track/envelope.
+                near = cv2.dilate(binary, np.ones((31, 31), np.uint8)) > 0
+                moving |= ((plane >= 24) & near).astype(np.uint8)
     if not moving.any():
         return alpha.copy(), []
     protected = cv2.dilate(moving, np.ones((31, 31), np.uint8)) > 0
-    protected |= np.max(np.abs(rgb.astype(np.int16) - reference.astype(np.int16)), axis=2) > 24
+    changed = np.max(np.abs(rgb.astype(np.int16) - reference.astype(np.int16)), axis=2) > 24
     # Use the same source/frame/colour ownership checks as actual matting.
     protected |= condition_trimap_clicks(np.zeros_like(alpha), rgb, reference,
         [(c['selection'], p) for c, p in zip(components, planes)], index) > 0
+    moving_and_clicks = protected.copy()
+    known_background = manifest.get('_source_fragment_reference_background')
+    if known_background is not None and (
+            known_background.shape != alpha.shape or known_background.dtype != bool):
+        raise ValueError('Fixed-fragment background reference differs')
+    # The old TV can change colour without becoming foreground. A small,
+    # unsupported island must not return inside a source-qualified empty gap.
+    # This can only subtract detached islands, never hold a foreground pose;
+    # every current person/hand and authored FG still wins above.
+    protected |= changed if index == 0 or known_background is None else changed & ~known_background
     result, records = alpha.copy(), []
     h, w = alpha.shape
     for number, component in enumerate(components):
@@ -77,8 +87,17 @@ def prune_unsupported_fixed_islands(rgb, alpha, guidance, index, component_ids):
                                       np.ones((7, 7), np.uint8)) > 0
         support = cv2.dilate(np.maximum(planes[number][region], first[number][region]),
                              np.ones((3, 3), np.uint8)) >= 24
+        # A one-pixel bridge to the stand does not turn a previously empty TV
+        # gap into selected foreground. Revoke only source-qualified empty
+        # pixels with no current/reference support and no current occlusion.
+        # Real photographed wires remain outside the learned empty region.
+        new_growth = np.zeros(blocked.shape, bool)
+        if index > 0 and known_background is not None:
+            new_growth = (known_background[region] & ~blocked & ~support
+                          & (result[region] > 0))
+            result[region][new_growth] = 0
         count, labels, stats, _ = cv2.connectedComponentsWithStats(
-            (alpha[region] > 8).astype(np.uint8), 8)
+            (result[region] > 8).astype(np.uint8), 8)
         removed, pixels = 0, 0
         for label in range(1, count):
             x, y, width, height, area = stats[label]
@@ -92,7 +111,13 @@ def prune_unsupported_fixed_islands(rgb, alpha, guidance, index, component_ids):
             removed += 1
             pixels += int(area)
         records.append({'componentId': selection['id'], 'removedIslands': removed,
-                        'changedPixels': pixels, 'roi': list(roi)})
+                        'changedPixels': pixels + int(new_growth.sum()),
+                        'rejectedBackgroundGrowthPixels': int(new_growth.sum()),
+                        'roi': list(roi)})
+    if index == 0:
+        manifest['_source_fragment_reference_background'] = (
+            (cv2.erode((result == 0).astype(np.uint8), np.ones((3, 3), np.uint8)) > 0)
+            & ~changed & ~moving_and_clicks)
     return result, records
 
 

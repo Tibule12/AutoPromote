@@ -161,5 +161,38 @@ class PhotographedOpacity(unittest.TestCase):
             self.assertTrue(np.all(first[holdout]==255));self.assertTrue(np.all(second[holdout]==255))
             self.assertTrue(detail['authoredClicksAndHoldoutsRestored'])
 
+    def test_two_frame_workers_preserve_moving_gaps_click_frames_and_every_output_byte(self):
+        image,prior,bg,observed,primary,parts,_=self.fixture();h,w=prior.shape
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);rgb=root/'rgb';guides=root/'guides'
+            serial=root/'serial';parallel=root/'parallel'
+            for p in [rgb,guides,serial,parallel]:p.mkdir()
+            manifest={'_reference_rgb':image,'components':[]}
+            for number,plane in enumerate([primary,parts[0]]):
+                selection={'propagate':True,
+                    'points':[{'position':[103/w,34/h],'label':1}],
+                    'shotPrompts':[{'frameIndex':2,'points':[
+                        {'position':[121/w,34/h],'label':1}]}]}
+                component={'selection':selection,'frames':[]}
+                for index,shift in enumerate([0,9,18]):
+                    name=f'component-{number}-{index}.png'
+                    Image.fromarray(np.roll(plane,shift,axis=1)).save(guides/name)
+                    component['frames'].append({'file':name})
+                manifest['components'].append(component)
+            for index,shift in enumerate([0,9,18]):
+                Image.fromarray(np.roll(image,shift,axis=1)).save(rgb/f'rgb_{index:04d}.png')
+                for destination in [serial,parallel]:
+                    Image.fromarray(np.roll(prior,shift,axis=1)).save(destination/f'matte_{index:04d}.png')
+            holdout=np.zeros(prior.shape,bool);holdout[3:6,3:6]=True
+            a=refine_photographed_sequence(rgb,serial,(guides,manifest),bg,observed,holdout,count=3)
+            b=refine_photographed_sequence(rgb,parallel,(guides,manifest),bg,observed,holdout,count=3,workers=2)
+            self.assertEqual(a,b)
+            for index in range(3):
+                self.assertEqual((serial/f'matte_{index:04d}.png').read_bytes(),
+                    (parallel/f'matte_{index:04d}.png').read_bytes())
+            self.assertEqual(int(np.array(Image.open(parallel/'matte_0000.png'))[34,103]),255)
+            self.assertLess(int(np.array(Image.open(parallel/'matte_0001.png'))[34,112]),40)
+            self.assertEqual(int(np.array(Image.open(parallel/'matte_0002.png'))[34,121]),255)
+
 
 if __name__=='__main__':unittest.main()

@@ -16,7 +16,47 @@ from unittest.mock import patch
 import numpy as np
 import torch
 
-from model_workers.adapters.component_segmentation import ComponentVideoTracker
+from model_workers.adapters.component_segmentation import ComponentVideoTracker, retain_source_reference_guidance
+
+
+class SourceReferenceGuidanceTests(unittest.TestCase):
+    def test_thin_stand_survives_but_changed_surface_and_weak_scenery_do_not_return(self):
+        reference = np.zeros((80, 100), np.uint8)
+        reference[10:70, 70:73] = 220
+        reference[45:55, 75:85] = 90
+        rgb = np.full((80, 100, 3), 80, np.uint8)
+        rgb[10:70, 70:73] = 25
+        current_rgb = rgb.copy()
+        current_rgb[40:50, 70:73] = 160
+        current = np.zeros_like(reference)
+        moving = np.zeros_like(reference)
+        result = retain_source_reference_guidance(current, reference, current_rgb,
+                                                  rgb, moving, moving)
+        self.assertTrue((result[15:35, 70:73] == 220).all())
+        self.assertFalse(result[40:50, 70:73].any())
+        self.assertFalse(result[45:55, 75:85].any())
+        self.assertTrue(np.array_equal(current, np.zeros_like(current)))
+
+    def test_current_and_departed_hands_cannot_be_held_even_with_matching_colours(self):
+        reference = np.full((80, 100), 210, np.uint8)
+        rgb = np.full((80, 100, 3), 40, np.uint8)
+        first = np.zeros_like(reference); first[30:35, 25:30] = 250
+        moving = np.zeros_like(reference); moving[30:35, 65:70] = 250
+        current = np.zeros_like(reference); current[32, 66] = 253
+        result = retain_source_reference_guidance(current, reference, rgb, rgb,
+                                                  moving, first)
+        self.assertEqual(int(result[32, 27]), 0)
+        self.assertEqual(int(result[32, 66]), 253)
+        self.assertEqual(int(result[70, 50]), 210)
+
+    def test_neighbourhood_change_blocks_an_accidental_same_colour_pixel(self):
+        reference = np.full((30, 30), 220, np.uint8)
+        first = np.full((30, 30, 3), 40, np.uint8)
+        rgb = first.copy(); rgb[10:20, 10:20] = 190; rgb[15, 15] = 40
+        empty = np.zeros((30, 30), np.uint8)
+        result = retain_source_reference_guidance(empty, reference, rgb, first, empty, empty)
+        self.assertEqual(int(result[15, 15]), 0)
+        self.assertEqual(int(result[5, 5]), 220)
 
 
 class Processor:
@@ -38,27 +78,30 @@ class Processor:
 class ColourSegmenter:
     config = SimpleNamespace(image_size=64, max_object_pointers_in_encoder=1)
     num_maskmem = 1
+    channel = 0
 
     def __init__(self):
         self.inputs = []
         self.pending = []
         self.session_ids = []
+        self.session_kinds = []
         self.frame_indices = []
 
     def __call__(self, *, frame, **kwargs):
         self.inputs.append(frame.clone())
         session=kwargs['inference_session']
         self.session_ids.append(id(session))
+        self.session_kinds.append(bool(getattr(session,'edge_compressed_memory',False)))
         self.frame_indices.append(kwargs.get('frame_idx'))
         self.pending.append(list(session.obj_with_new_inputs))
         session.obj_with_new_inputs.clear()
         # Red source foreground; deliberately independent of selection boxes.
-        logits = (frame[0] - .5) * 20
+        logits = (frame[self.channel] - .5) * 20
         return SimpleNamespace(pred_masks=logits[None, None].repeat(len(session.objects),1,1,1))
 
 
 class MovementTests(unittest.TestCase):
-    def make_tracker(self, *, corrections=True, second_object=False, fixed_object=False, refresh_fixed=None, offload_state=False, registered_refresh=False, registered_stateless=False):
+    def make_tracker(self, *, corrections=True, second_object=False, fixed_object=False, refresh_fixed=None, offload_state=False, registered_refresh=False, registered_stateless=False, edge_session=False, edge_moving=False, fixed_reference=False):
         self.directory = tempfile.TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)
         directory = Path(self.directory.name)
@@ -79,16 +122,108 @@ class MovementTests(unittest.TestCase):
                 'points':[{'position':[.7,.7],'label':1}],
                 'shotPrompts':[{'frameIndex':1,'points':[{'position':[.2,.8],'label':0}]}]}]
         model = ColourSegmenter()
+        if edge_session:
+            model.config = SimpleNamespace(image_size=64,
+                max_object_pointers_in_encoder=1, model_type='edgetam_video')
+        reference_model=None
+        if fixed_reference:
+            reference_model=ColourSegmenter()
+            model.channel=1
+            model.config=SimpleNamespace(image_size=64,
+                max_object_pointers_in_encoder=1,model_type='edgetam_video')
+        moving_model = None
+        if edge_moving:
+            moving_model = ColourSegmenter()
+            moving_model.channel = 1
+            moving_model.config = SimpleNamespace(image_size=64,
+                max_object_pointers_in_encoder=1, model_type='edgetam_video')
         Processor.prompts = []
         Processor.sessions = []
         module = SimpleNamespace(Sam2VideoModel=None, Sam2VideoProcessor=Processor)
-        with patch.dict(sys.modules, {'transformers': module}):
+        modules = {'transformers': module}
+        if edge_session or edge_moving or fixed_reference:
+            def edge_factory(**kwargs):
+                session = Processor().init_video_session(**kwargs)
+                session.edge_compressed_memory = True
+                return session
+            modules['transformers.models.edgetam_video.modeling_edgetam_video'] = SimpleNamespace(
+                EdgeTamVideoInferenceSession=edge_factory)
+        with patch.dict(sys.modules, modules):
             tracker = ComponentVideoTracker({
                 'model': {'limits': {'refreshFixedSourceFrames': registered_refresh, 'statelessFixedSourceFrames': registered_stateless}, 'weights': [{'path': 'model.safetensors',
                                       'sha256': hashlib.sha256(b'test-only').hexdigest()}]},
                 'request': {'parameters': parameters}}, {'width': 64, 'height': 64}, directory,
-                model=model,refresh_fixed=refresh_fixed,offload_state=offload_state)
+                model=model,refresh_fixed=refresh_fixed,offload_state=offload_state,
+                moving_model=moving_model,fixed_reference_model=reference_model)
         return tracker, model
+
+    def test_edge_memory_session_stays_local_and_survives_fixed_image_resets(self):
+        normal, normal_model = self.make_tracker(corrections=False)
+        edge, edge_model = self.make_tracker(corrections=False, fixed_object=True,
+            registered_refresh=True, registered_stateless=True, edge_session=True)
+        first = np.zeros((64,64,3),np.uint8)
+        first[10:20,10:20,0] = 255
+        moved = np.zeros_like(first)
+        moved[45:56,47:58,0] = 255
+        edge.frame(first,0)
+        result,_ = edge.frame(moved,1)
+        normal.frame(first,0)
+        self.assertTrue((result[47:54,49:56] > 250).all())
+        self.assertTrue(edge.fixed_roi_diagnostics[0]['session'].edge_compressed_memory)
+        self.assertTrue(edge.fixed_roi_diagnostics[1]['session'].edge_compressed_memory)
+        self.assertFalse(hasattr(normal.fixed_roi_diagnostics[0]['session'], 'edge_compressed_memory'))
+        self.assertEqual(edge_model.frame_indices,[0,0,1,0])
+        self.assertEqual(normal_model.frame_indices,[0])
+
+    def test_faster_moving_tracker_cannot_replace_fixed_equipment_model_or_memory(self):
+        tracker,fixed = self.make_tracker(corrections=False,fixed_object=True,
+            registered_refresh=True,registered_stateless=True,edge_moving=True)
+        first=np.zeros((64,64,3),np.uint8)
+        first[10:20,10:20,1]=255
+        first[40:52,40:52,0]=255
+        moved=np.zeros_like(first)
+        moved[20:30,10:20,1]=255
+        moved[45:58,47:60,0]=255
+        a,_=tracker.frame(first,0)
+        b,_=tracker.frame(moved,1)
+        self.assertGreater(int(a[15,15]),250)
+        self.assertGreater(int(a[45,45]),250)
+        self.assertGreater(int(b[25,15]),250)
+        self.assertGreater(int(b[50,50]),250)
+        self.assertLess(int(b[15,15]),5)
+        self.assertLess(int(b[42,42]),5)
+        self.assertEqual(fixed.frame_indices,[0,0])
+        self.assertEqual(tracker.moving_model.frame_indices,[0,1])
+        self.assertTrue(tracker.fixed_roi_diagnostics[0]['session'].edge_compressed_memory)
+        self.assertFalse(hasattr(tracker.fixed_roi_diagnostics[1]['session'],'edge_compressed_memory'))
+
+    def test_fixed_reference_initializes_once_and_current_image_tracking_resolves_reveal(self):
+        for stateless in (False,True):
+            with self.subTest(stateless=stateless):
+                self.check_reference_reveal(stateless)
+
+    def check_reference_reveal(self, stateless):
+        tracker,current=self.make_tracker(corrections=False,fixed_object=True,
+            registered_refresh=True,registered_stateless=stateless,fixed_reference=True)
+        first=np.zeros((64,64,3),np.uint8)
+        first[10:20,10:20,1]=255
+        first[40:52,40:52,0]=255
+        changed=np.zeros_like(first)
+        changed[20:30,10:20,1]=255
+        changed[45:58,47:60,1]=255
+        a,_=tracker.frame(first,0)
+        b,_=tracker.frame(changed,1)
+        self.assertGreater(int(a[15,15]),250)
+        self.assertGreater(int(a[45,45]),250)
+        self.assertGreater(int(b[25,15]),250)
+        self.assertGreater(int(b[50,50]),250)
+        self.assertLess(int(b[42,42]),5)
+        self.assertEqual(tracker.fixed_reference_model.frame_indices,[0])
+        self.assertEqual(tracker.fixed_reference_model.session_kinds,[False])
+        self.assertTrue(all(current.session_kinds))
+        self.assertEqual(current.frame_indices,[0,0,1,0 if stateless else 1])
+        self.assertEqual(tracker.fixed_roi_diagnostics[1]['reference_model_frames'],1)
+        self.assertTrue(tracker.fixed_roi_diagnostics[1]['session'].edge_compressed_memory)
 
     def test_moving_hand_can_leave_initial_selection_without_being_clipped(self):
         tracker, model = self.make_tracker(corrections=False)

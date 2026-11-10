@@ -4093,6 +4093,1626 @@
             "providerUpload": false,
             "deployment": false,
             "unrelatedWorktreesChanged": false
+          },
+          "fixedSourceOwnershipContinuation20261109": {
+            "updatedAt": "2026-11-09T23:51:29.782995+00:00",
+            "currentAlphaVersion": "2.5.33",
+            "samePinnedWeightsAndSourceClock": true,
+            "newManualStudioClicks": false,
+            "newFeatureOrEditorRedesign": false,
+            "sharedChanges": [
+              "Source-classified reference support retains original independent model codes instead of promoting opacity to255.",
+              "Small unsupported fixed fragments cannot borrow person ownership from a distant weak-logit bridge.",
+              "A source-qualified empty fixed-prop gap cannot regrow unsupported background through a thin mask connection; current moving foreground and real photographed wires remain protected.",
+              "Source-frame CPU solves run with two bounded workers only in explicit local CUDA evaluation; the reference frame runs first and the default CPU path remains serial."
+            ],
+            "tests": {
+              "distinctScopedPythonPassed": 177,
+              "distinctScopedNodePassed": 45,
+              "assertionsWeakened": false,
+              "sourceHelperNativeInputRegressionPassed": 3
+            },
+            "specificCpuComparison": {
+              "frames": [
+                0,
+                1,
+                8,
+                23,
+                36,
+                47
+              ],
+              "sourceEdgeThenIndependentFixedOutputBytesExact": true,
+              "sequentialSeconds": 21.604064126004232,
+              "twoWorkerSeconds": 14.776217788996291,
+              "inputWasActualPublishedAlphaNotClaimedAsNativePreStage": true,
+              "generalSpeedClaim": false
+            },
+            "actualNative32": {
+              "directory": "reports/background-replacement-20261101/private/native-fixed-source-neural-r482-20261109",
+              "packaging": {
+                "jobId": "f97afc3e5b5c9277974b61f6d5b49082eeb72491358c9271ea93b2b613ec7fdf",
+                "attemptToken": "REDACTED_LOCAL_DIAGNOSTIC_TOKEN",
+                "alphaVersion": "2.5.32",
+                "newHelperInFrozenExecutionBundle": true,
+                "allFrozenSourceFilesVerified": true,
+                "sourceSha256": "fa482a8aa45d13bebf6fc433be86a12bba3e99c137ebe6d4ad3701e72294e8a6",
+                "sourceClock": {
+                  "endTick": 180000,
+                  "space": "source",
+                  "startTick": 0
+                },
+                "sourceUnchanged": true,
+                "explicitLocalCpuFrameWorkers": 2,
+                "nativeVisualQualificationPending": true,
+                "fourMinuteProof": false,
+                "paidInference": false
+              },
+              "previewAndColdRecovery": {
+                "actualMaskBackedScene": true,
+                "personSelectionUnchanged": true,
+                "allForegroundObjectSelectionsUnchanged": true,
+                "sceneEffectsUnchanged": true,
+                "canonicalDocumentColdReopenExact": true,
+                "subjectSceneColdReopenExact": true,
+                "previewBytesAfterColdReopenExact": true,
+                "previewSha256": "f869b7aa9afd57b3c5505ef778d2505d44194513cf7affe663c722587f98e57b",
+                "browserExceptions": [],
+                "finalExport": false,
+                "soundListeningReview": false,
+                "cleanShotVisualPass": false,
+                "fourMinuteProof": false,
+                "paidCloudInference": false
+              },
+              "actualPreviewSha256": "f869b7aa9afd57b3c5505ef778d2505d44194513cf7affe663c722587f98e57b",
+              "runtimeSeconds": 968.6323439209955,
+              "publishedAlphaComparison31to32": {
+                "frames": 48,
+                "changedPixelFrames": 623266,
+                "headChanges": 0,
+                "currentMovingDetailEnvelopeChanges": 0,
+                "sourceAndIndependentGuidanceBytesExact": true
+              },
+              "actualVisualReview": {
+                "wholeFrames": [
+                  24
+                ],
+                "rigFrames": [
+                  20,
+                  21,
+                  22,
+                  23,
+                  36,
+                  37,
+                  38,
+                  39
+                ],
+                "rightHandFrames": [
+                  16,
+                  17,
+                  18,
+                  19
+                ],
+                "sourceAndPublishedStandAlphaFrames": [
+                  0,
+                  8,
+                  23,
+                  36,
+                  47
+                ],
+                "result": "Rejected as a clean shot: connected old-set fragments remain in the stand gap, despite reduced detached fragments. Fine foliage and mixed-colour fast fingers remain unqualified."
+              },
+              "finalExport": false,
+              "firstColdRecoveryCheck": "Checker lacked its declared before-refinement baseline file; failure retained. Retry uses the actual saved baseline and reads/reopens the completed preview without another inference or preview submission."
+            },
+            "privateOwnershipCandidate": {
+              "directory": "reports/background-replacement-20261101/private/current-stand-ownership-r480-20261109/actual32-known-gap-bounded-ownership",
+              "all48ActualMovingEnvelopesExact": true,
+              "changedPixelFrames": 63472,
+              "actualSourceActualNativeAndPrivateRigPairsReviewed": [
+                0,
+                8,
+                23,
+                36,
+                47
+              ],
+              "result": "The visible stand-gap ghost is removed in the checked moving frames; this private post-stage is not native admission or whole-clip visual acceptance.",
+              "rejectedPredecessors": [
+                "Additional private BG points without fresh SAM inference reintroduce old set patches; not authored in Studio.",
+                "Stationary median/flow post-filters leave the visible fragments.",
+                "Detached-only known-background rule changes zero actual pixels and leaves the ghost.",
+                "Connected-gap rule with unbounded weak-moving ownership still protects the ghost; source-pixel tracing identifies the low-logit bridge."
+              ]
+            },
+            "actualNative33": {
+              "directory": "reports/background-replacement-20261101/private/native-fixed-background-ownership-r483-20261109",
+              "controller": {
+                "pid": 275966,
+                "normalControls": true,
+                "modelOnlyController": true,
+                "alphaVersion": "2.5.33",
+                "noNewManualClicks": true,
+                "paidInference": false
+              },
+              "completionObserver": {
+                "pid": 275967,
+                "deadlineSeconds": 4800,
+                "singlePreviewSubmission": true,
+                "visualApproval": false
+              },
+              "packaging": {
+                "jobId": "d24681692a79ce41f0a003dae3ecda74eb5a585d88845fd340103a34bb59872a",
+                "attempt": "8d437017-14e0-418c-9cb5-b68880f4f81b",
+                "modelVersion": "2.5.33",
+                "allFrozenSourceFilesVerified": true,
+                "sourceSha256": "fa482a8aa45d13bebf6fc433be86a12bba3e99c137ebe6d4ad3701e72294e8a6",
+                "sourceClock": {
+                  "endTick": 180000,
+                  "space": "source",
+                  "startTick": 0
+                },
+                "localSourceFrameParallelism": 2,
+                "sourceAndPromptsUnchanged": true,
+                "nativeVisualQualificationPending": true,
+                "fourMinuteProof": false
+              },
+              "singlePreviewSubmission": true,
+              "actualVisualReviewPending": false,
+              "visualReview": {
+                "previewSha256": "45ebdb06fae598256af3ef6b74edf2de79c1da98b849ca9b50ac001e1be07624",
+                "actualSourceAndDecodedPreviewReviewed": true,
+                "rigFrames": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7,
+                  8,
+                  9,
+                  10,
+                  11,
+                  12,
+                  13,
+                  14,
+                  15,
+                  16,
+                  17,
+                  18,
+                  19,
+                  20,
+                  21,
+                  22,
+                  23,
+                  24,
+                  25,
+                  26,
+                  27,
+                  28,
+                  29,
+                  30,
+                  31,
+                  32,
+                  33,
+                  34,
+                  35,
+                  36,
+                  37,
+                  38,
+                  39,
+                  40,
+                  41,
+                  42,
+                  43,
+                  44,
+                  45,
+                  46,
+                  47
+                ],
+                "headFrames": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  16,
+                  17,
+                  18,
+                  19,
+                  32,
+                  33,
+                  34,
+                  35,
+                  44,
+                  45,
+                  46,
+                  47
+                ],
+                "leftHandFrames": [
+                  16,
+                  17,
+                  18,
+                  19,
+                  36,
+                  37,
+                  38,
+                  39
+                ],
+                "rightHandFrames": [
+                  16,
+                  17,
+                  18,
+                  19
+                ],
+                "wholeFrames": [
+                  36
+                ],
+                "publishedMask32to33Changes": 63472,
+                "currentHeadAndMovingDetailMaskChanges": 0,
+                "specificStandGapPixelsMatchReplacementWithinMaxRgbCodes": 4,
+                "canonicalSourceAndPromptsAndEffectsPreserved": true,
+                "findings": [
+                  "The corrected stand-gap pixels remain background through the checked movement. An apparent line was checked against the actual replacement pixels: published/prepared alpha is0 and the encoded output differs by at most4 RGB codes from the replacement.",
+                  "The current head, clothing, hands, microphone and primary stand parts remain present in the reviewed frames.",
+                  "Fine foliage, soft mixed-colour fast fingers and broader temporal/physical integration remain unqualified."
+                ],
+                "allowEngineeringExport": true,
+                "allowCurrentFullSourceProcessing": true,
+                "cleanShotPass": false,
+                "cleanFourMinuteProof": false,
+                "professionalQuality": false,
+                "soundListeningApproval": false,
+                "reviewedAt": "2026-11-09T16:40:09.649796+00:00"
+              },
+              "previewAndColdRecovery": {
+                "actualMaskBackedScene": true,
+                "personSelectionUnchanged": true,
+                "allForegroundObjectSelectionsUnchanged": true,
+                "sceneEffectsUnchanged": true,
+                "canonicalDocumentColdReopenExact": true,
+                "subjectSceneColdReopenExact": true,
+                "previewBytesAfterColdReopenExact": true,
+                "previewSha256": "45ebdb06fae598256af3ef6b74edf2de79c1da98b849ca9b50ac001e1be07624",
+                "browserExceptions": [],
+                "finalExport": false,
+                "soundListeningReview": false,
+                "cleanShotVisualPass": false,
+                "fourMinuteProof": false,
+                "paidCloudInference": false
+              },
+              "actualPreviewSha256": "45ebdb06fae598256af3ef6b74edf2de79c1da98b849ca9b50ac001e1be07624",
+              "runtimeSeconds": 844.820137125,
+              "ordinaryExport": false,
+              "exportInterruption": "Host restart cleared the isolated RAM demo. The export checker failed before dispatch; no current33 export was submitted.",
+              "actualMasksMatchPrivateCandidateAll48": true
+            },
+            "olderFullBaseline": {
+              "directory": "reports/background-replacement-20261101/private/current-full-rate-r473-20261109",
+              "version": "2.5.30",
+              "archivedFrames": 864,
+              "targetFrames": 5760,
+              "currentRepairsAppliedToWholeMovie": false,
+              "progress": {
+                "camera": 0,
+                "completedFrames": 864,
+                "phase": "CURRENT_SOURCE_TRACKING",
+                "runtimeSeconds": 51369.270847821,
+                "sourceFrame": 912,
+                "sourceSeconds": 38.0,
+                "totalFrames": 5760,
+                "visualPass": false
+              },
+              "processActive": false,
+              "completedArchivesRetained": true,
+              "ramScratchLostOnRestart": true
+            },
+            "currentFullRuntime": {
+              "directory": "reports/background-replacement-20261101/private/current-full-rate-r484-20261109",
+              "version": "2.5.33",
+              "frozenTextFiles": 150,
+              "alphaProfile": "vitmatte-small-temporal-local-cuda-v2",
+              "localSourceFrameWorkers": 2,
+              "started": true,
+              "launchGate": "Satisfied by actual native33 source/preview motion review; this authorizes private longer processing, not creative acceptance.",
+              "nativeLongFormAdmission": false,
+              "process": {
+                "pid": 11642,
+                "startedAt": "2026-11-09T16:52:44.883962+00:00",
+                "command": [
+                  "/home/tibule12/Projects/AutoPromte/AutoPromote/.venv/bin/python",
+                  "/home/tibule12/Projects/AutoPromte/AutoPromote-background-replacement-20261101/reports/background-replacement-20261101/private/current-full-rate-r484-20261109/runtime/scripts/background-replacement/process-full-rate-podcast.py",
+                  "/home/tibule12/Projects/AutoPromte/AutoPromote-background-replacement-20261101/reports/background-replacement-20261101/private/current-full-rate-r484-20261109/output",
+                  "--scratch",
+                  "/dev/shm/autopromote-current-full-r484-20261109",
+                  "--chunk-frames",
+                  "48",
+                  "--bounded-attention",
+                  "--registered-alpha-limits",
+                  "--archive-soft-guidance",
+                  "--current-source-scenes",
+                  "/home/tibule12/Projects/AutoPromte/AutoPromote-background-replacement-20261101/reports/background-replacement-20261101/private/native-person-input-repair-r471-20261109/current-source-scene-inputs.json",
+                  "--gesture-corrections",
+                  "/home/tibule12/Projects/AutoPromte/AutoPromote-background-replacement-20261101/reports/background-replacement-20261101/private/native-person-input-repair-r471-20261109/current-corrective-gesture.json",
+                  "--attention-query-rows",
+                  "32"
+                ],
+                "cwd": "/home/tibule12/Projects/AutoPromte/AutoPromote-background-replacement-20261101/reports/background-replacement-20261101/private/current-full-rate-r484-20261109/runtime",
+                "targetFrames": 5760,
+                "targetSeconds": 240,
+                "alphaVersion": "2.5.33",
+                "samVersion": "2.0.4",
+                "localSourceFrameParallelism": 2,
+                "actualSourceEveryFrame": true,
+                "currentNativePersonInputs": true,
+                "softGuidanceLosslesslyArchived": true,
+                "minimumRootReserveGiB": 5,
+                "privateReviewOnly": true,
+                "nativeModelAdmission": false,
+                "visualPass": false,
+                "paidInference": false,
+                "providerUpload": false,
+                "originalMathQueryRows": 32,
+                "verificationThresholdsUnchanged": true,
+                "native33VisualReview": "/home/tibule12/Projects/AutoPromte/AutoPromote-background-replacement-20261101/reports/background-replacement-20261101/private/native-fixed-background-ownership-r483-20261109/visual-review.json",
+                "runtimeRecoverySealFilesExact": 34
+              },
+              "progress": {
+                "camera": 0,
+                "completedFrames": 384,
+                "phase": "CURRENT_SOURCE_TRACKING",
+                "runtimeSeconds": 24158.067203596,
+                "sourceFrame": 432,
+                "sourceSeconds": 18.0,
+                "totalFrames": 5760,
+                "visualPass": false
+              },
+              "pausedForOwnedReplacement": true,
+              "archivedFrames": 384,
+              "activeProcessing": false,
+              "outputAndInMemoryTrackerPreserved": true
+            },
+            "lastActualEngineeringExport": {
+              "version": "2.5.31",
+              "sha256": "20336dd2145607a4854b7018f991ca79082ace8f940f84473cbf15bd850312f9",
+              "actualSaveReopenExport": true,
+              "completeFinalStudioPlaybackCapturedFrames": 55,
+              "minPreviewExportPsnrDb": 43.01797593292498,
+              "sourceExportAudioCorrelation": 0.9954645970571399,
+              "soundListeningApproval": false,
+              "cleanShotPass": false
+            },
+            "storage": {
+              "newExactGeneratedDuplicateAllocatedBytesReleased": 481173504,
+              "consolidatedGeneratedMediaPaths": 174,
+              "allPathsAndContentPreserved": true,
+              "openWritersExcluded": true,
+              "originalMediaModelsAndProjectsRemoved": false,
+              "activeJobStagingChanged": false,
+              "priorExactDuplicateReductionBytes": 109907968,
+              "priorFirstCompletedChunkMaskReductionBytes": 20910080,
+              "rootFreeBytes": 28507648000,
+              "rootReserveBytes": 5368709120,
+              "globalFreeSpaceChangeClaimedAsCleanup": false,
+              "completedMaskLosslessObserver": "reports/background-replacement-20261101/private/lossless-mask-storage-r486-20261109/process.json",
+              "ownerRequestedCleanup20261109": {
+                "duplicateFilesConsolidated": 758,
+                "oldDerivedRgbFramesRemoved": 9846,
+                "confirmedExclusiveAllocatedBytesReleased": 5265154048,
+                "sourceProjectsModelsMasksExportsRecordingsAndActiveFilesDeleted": false,
+                "journalDirectory": "reports/background-replacement-20261101/private/disk-recovery-r487-20261109"
+              },
+              "oldCompletedMaskCompactionAllocatedBytesReleased": 352514048
+            },
+            "exactRemaining": [
+              "The active guarded all-SAM run has not finished5760 source frames or assembled/reviewed the requested four-minute movie.",
+              "The hybrid48-frame movie is rejected for worse palm/joint holes and is stopped; its masks/movie remain.",
+              "Fine foliage ownership/boundaries, small rig fragments, fast mixed-colour fingers and physical integration are still unresolved visual defects, including in the baseline.",
+              "Inspect actual guarded-run encoded frames against original and retained SAM reference; numerical/render success alone cannot qualify them.",
+              "Native current33 final export was interrupted before dispatch by the earlier host restart; genuine long-form Save/cold reopen/export/full playback remain unqualified."
+            ],
+            "nextTask": "Continue the active guarded all-SAM source run with two CPU workers and inspect its real first archived motion frames. Use retained source/guidance to fix observed foreground ownership, foliage and stand remnants without presenting rejected short trials or claiming a clean four-minute result. Preserve the original384-frame baseline and5GiB reserve; finish actual visual and native export/recovery qualification.",
+            "cleanFourMinuteProof": false,
+            "professionalQuality": false,
+            "readinessPromotion": false,
+            "paidCloudInference": false,
+            "providerUpload": false,
+            "deployment": false,
+            "unrelatedWorktreesChanged": false,
+            "postRestartRecovery": {
+              "hostRestartObserved": true,
+              "volatileDemoAndWorkersWereCleared": true,
+              "sourceMasksAndPublishedPreviewRetainedOnDisk": true,
+              "runtimeReceipt": "restored-runtime-receipt.json",
+              "all34SealedFilesExact": true,
+              "gpuProbe": {
+                "torch": "2.5.1+cu118",
+                "cuda": "11.8",
+                "device": "Quadro M1200",
+                "capability": [
+                  5,
+                  0
+                ],
+                "matmulPassed": true
+              },
+              "systemDriversOrApplicationPythonChanged": false,
+              "paidInference": false
+            },
+            "speedEngineering20261109": {
+              "acceptedCpuChanges": {
+                "independentPersonBoundaryAndPhotographedOpacityWorkers": 2,
+                "canonicalCpuCompositeWorkers": 2,
+                "actualSixFramePersonAndBoundaryPixelsAndCountsExact": true,
+                "sixFrameComparison": "edgetam-current-matte-r491-20261109/actual-six-frame-parallel-person-comparison-complete.json",
+                "actual48FrameCompositeEveryRgbByteAndSourceOrderExact": true,
+                "compositorComparison": {
+                  "actualSourceFrames": 48,
+                  "workers": 2,
+                  "elapsedSeconds": 102.76316306599983,
+                  "pixelSha256": "266220f520cfc1813d2e856fbbc08a14ca347c7c74fbeb632d94a43fca2bcd83",
+                  "canonicalSerialPixelSha256": "266220f520cfc1813d2e856fbbc08a14ca347c7c74fbeb632d94a43fca2bcd83",
+                  "everyPixelAndSourceOrderExact": true,
+                  "priorSerialRenderAndEncodeSeconds": 129.11851592499988,
+                  "parallelTimingExcludesEncodingAndRunsAlongsideActualMatting": true,
+                  "sameSourceAndMatteAndEffects": true,
+                  "nativeAdmission": false,
+                  "wholeVideoOrVisualQualityClaim": false,
+                  "paidInference": false,
+                  "parentPeakRssKiB": 82712
+                }
+              },
+              "freeLocalModel": {
+                "model": "facebook/EdgeTAM",
+                "revision": "14d7ecc48c656b94e5184519f698cd5386c5a2bf",
+                "publisherLicense": "Apache-2.0 code and checkpoints",
+                "conversionProof": "edgetam-local-speed-r490-20261109/converted-model-proof.json",
+                "applicationPythonOrSystemDriversChanged": false,
+                "productionRegistrationChanged": false
+              },
+              "rejectedActualEncodedFixedEquipmentCandidates": {
+                "edgetam-current-matte-r491-20261109": {
+                  "sourceAndActualEncodedMovieReviewed": true,
+                  "reviewDirectory": "actual-source-and-prior-comparison",
+                  "wholeFrames": [
+                    0,
+                    36
+                  ],
+                  "headFrames": [
+                    20,
+                    21,
+                    22,
+                    23
+                  ],
+                  "leftHandFrames": [
+                    20,
+                    21,
+                    22,
+                    23
+                  ],
+                  "rigFrames": [
+                    20,
+                    21,
+                    22,
+                    23
+                  ],
+                  "wholePipelineSeconds": 974.8336481710012,
+                  "trackerSeconds": 203.73971031499968,
+                  "trackerSpeedRatioAgainstSameActualSourceSam": 3.5880205362016824,
+                  "findings": [
+                    "The head, cap, face and reviewed hands stay present in the checked movement.",
+                    "The all-object lighter tracker removes real lower stand pixels and foliage detail that the prior native33 result preserves. This visible regression rejects it as an all-object replacement.",
+                    "Fine fast-finger exposures and physical integration remain unqualified."
+                  ],
+                  "allObjectTrackerAccepted": false,
+                  "cleanShotPass": false,
+                  "fourMinuteProof": false,
+                  "nativeAdmission": false,
+                  "nextCandidate": "Keep SAM2 for fixed equipment, use lighter current-source tracking for moving selections; apply pixel-exact bounded CPU phase concurrency; inspect the same real frames before long-form selection."
+                },
+                "source-reference-fast-matte-r493-20261109": {
+                  "sourceAndActualEncodedMovieReviewed": true,
+                  "reviewDirectory": "actual-source-and-prior-comparison",
+                  "headFrames": [
+                    20,
+                    21,
+                    22,
+                    23
+                  ],
+                  "rigFrames": [
+                    20,
+                    21,
+                    22,
+                    23
+                  ],
+                  "wholeFrames": [
+                    36
+                  ],
+                  "alphaSeconds": 495.705538339,
+                  "cachedGuideExperimentNotFreshTrackingBenchmark": true,
+                  "findings": [
+                    "Initial SAM reference alone does not retain the thin lower stand in later exposures; clear chopped pole and detached pixels remain.",
+                    "Reviewed cap/head remain present; this is not whole-motion or creative approval."
+                  ],
+                  "candidateAccepted": false,
+                  "cleanShotPass": false,
+                  "fourMinuteProof": false,
+                  "nativeAdmission": false
+                },
+                "source-qualified-guidance-r494-20261109": {
+                  "actualEncodedSourcePairsReviewed": true,
+                  "reviewDirectory": "actual-source-and-prior-comparison",
+                  "rigFrames": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    20,
+                    21,
+                    22,
+                    23,
+                    44,
+                    45,
+                    46,
+                    47
+                  ],
+                  "headFrames": [
+                    36,
+                    37,
+                    38,
+                    39
+                  ],
+                  "leftHandFrames": [
+                    20,
+                    21,
+                    22,
+                    23
+                  ],
+                  "rightHandFrames": [
+                    24,
+                    25,
+                    26,
+                    27
+                  ],
+                  "wholeFrames": [
+                    36
+                  ],
+                  "candidateAcceptedForLongerPrivateEvaluation": false,
+                  "findings": [
+                    "Source-qualified reference guidance restores the lower stand length lost by all-object EdgeTAM.",
+                    "Visible holes, clipped stand edges and small detached foreground remnants persist compared with the actual native33 reference. This rejects it as the faster fixed-equipment replacement.",
+                    "Checked moving head and both hands remain; this is not a whole-motion/creative approval."
+                  ],
+                  "cleanShotPass": false,
+                  "fourMinuteProof": false,
+                  "nativeAdmission": false,
+                  "nextPath": "Retain SAM on every current equipment exposure; apply pixel-exact bounded CPU changes and evaluate EdgeTAM on moving subjects only."
+                }
+              },
+              "selectedPrivateLongerEvaluation": "SAM every current equipment exposure; EdgeTAM moving subjects only; bounded CPU phases/composition.",
+              "sameActualTwoFrameFixedGuideComparison": {
+                "rows": [
+                  {
+                    "plane": "f0p2",
+                    "differentPixels": 0,
+                    "maximumCodeDifference": 0
+                  },
+                  {
+                    "plane": "f0p3",
+                    "differentPixels": 0,
+                    "maximumCodeDifference": 0
+                  },
+                  {
+                    "plane": "f0p4",
+                    "differentPixels": 0,
+                    "maximumCodeDifference": 0
+                  },
+                  {
+                    "plane": "f0p5",
+                    "differentPixels": 0,
+                    "maximumCodeDifference": 0
+                  },
+                  {
+                    "plane": "f0p6",
+                    "differentPixels": 0,
+                    "maximumCodeDifference": 0
+                  },
+                  {
+                    "plane": "f0p7",
+                    "differentPixels": 0,
+                    "maximumCodeDifference": 0
+                  },
+                  {
+                    "plane": "f0p8",
+                    "differentPixels": 0,
+                    "maximumCodeDifference": 0
+                  },
+                  {
+                    "plane": "f1p2",
+                    "differentPixels": 0,
+                    "maximumCodeDifference": 0
+                  },
+                  {
+                    "plane": "f1p3",
+                    "differentPixels": 0,
+                    "maximumCodeDifference": 0
+                  },
+                  {
+                    "plane": "f1p4",
+                    "differentPixels": 0,
+                    "maximumCodeDifference": 0
+                  },
+                  {
+                    "plane": "f1p5",
+                    "differentPixels": 0,
+                    "maximumCodeDifference": 0
+                  },
+                  {
+                    "plane": "f1p6",
+                    "differentPixels": 0,
+                    "maximumCodeDifference": 0
+                  },
+                  {
+                    "plane": "f1p7",
+                    "differentPixels": 0,
+                    "maximumCodeDifference": 0
+                  },
+                  {
+                    "plane": "f1p8",
+                    "differentPixels": 0,
+                    "maximumCodeDifference": 0
+                  }
+                ],
+                "allFixedEquipmentGuideBytesExact": true,
+                "sameSourceAndSelectedEquipment": true
+              },
+              "sameActualTwoFrameTrackingSeconds": 22.34627,
+              "sameActualSamTrackingSeconds": 24.6319,
+              "generalOrFourMinuteSpeedRatioClaim": false,
+              "freshScopedPythonTests": 175,
+              "newRealPixelAndOrderCompositorTests": 2,
+              "canonicalCompositorTests": 47,
+              "currentDistinctAutomatedTests": 222,
+              "earlier45NodeTestsRerunInSpeedSession": false,
+              "statelessEquipmentEvaluationNotAdmitted": {
+                "actualSourceAndBothEquipmentGuideImagesInspected": true,
+                "sourceFrames": [
+                  0,
+                  1
+                ],
+                "sameCurrentImageSamWeightsAndDetailedRois": true,
+                "timingSeconds": [
+                  9.812347807999686,
+                  9.235808161000023
+                ],
+                "findings": [
+                  "The second actual current-image equipment guide differs substantially from temporal SAM. One equipment component loses9010 selected pixels (selected IoU0.5500).",
+                  "Raw guidance only has been reviewed; there is no alpha/composite or movement qualification. The speed result does not justify switching the full producer."
+                ],
+                "admittedToFullProducer": false,
+                "cleanOrVisualQualityPass": false,
+                "currentFullProducerResumed": true
+              },
+              "differentGuideFullMatteTimingsAreNotAnIsolatedCpuBenchmark": true,
+              "paidInference": false,
+              "providerUpload": false,
+              "dotenvRead": false
+            },
+            "currentFasterFullRuntime": {
+              "process": {
+                "pid": 118054,
+                "command": [
+                  "/home/tibule12/Projects/AutoPromte/AutoPromote/.venv/bin/python",
+                  "/home/tibule12/Projects/AutoPromte/AutoPromote-background-replacement-20261101/reports/background-replacement-20261101/private/hybrid-full-rate-r499-20261109/runtime/scripts/background-replacement/process-full-rate-podcast.py",
+                  "/home/tibule12/Projects/AutoPromte/AutoPromote-background-replacement-20261101/reports/background-replacement-20261101/private/hybrid-full-rate-r499-20261109/output",
+                  "--scratch",
+                  "/dev/shm/autopromote-hybrid-full-r499-20261109",
+                  "--chunk-frames",
+                  "48",
+                  "--bounded-attention",
+                  "--registered-alpha-limits",
+                  "--archive-soft-guidance",
+                  "--current-source-scenes",
+                  "/home/tibule12/Projects/AutoPromte/AutoPromote-background-replacement-20261101/reports/background-replacement-20261101/private/native-person-input-repair-r471-20261109/current-source-scene-inputs.json",
+                  "--gesture-corrections",
+                  "/home/tibule12/Projects/AutoPromte/AutoPromote-background-replacement-20261101/reports/background-replacement-20261101/private/native-person-input-repair-r471-20261109/current-corrective-gesture.json",
+                  "--attention-query-rows",
+                  "32",
+                  "--source-reference-tracker",
+                  "hybrid",
+                  "--composite-workers",
+                  "2"
+                ],
+                "cwd": "/home/tibule12/Projects/AutoPromte/AutoPromote-background-replacement-20261101/reports/background-replacement-20261101/private/hybrid-full-rate-r499-20261109/runtime",
+                "startedAt": "2026-11-09T20:00:02.264522+00:00",
+                "targetFrames": 5760,
+                "targetSeconds": 240,
+                "alphaVersion": "2.5.33",
+                "tracker": "SAM current fixed equipment + EdgeTAM moving subjects",
+                "localSourceFrameParallelism": 2,
+                "localCompositeWorkers": 2,
+                "actualSourceAndCurrentModelEveryFrame": true,
+                "rootReserveBytes": 5368709120,
+                "nativeModelAdmission": false,
+                "wholeVideoVisualPass": false,
+                "paidInference": false,
+                "providerUpload": false
+              },
+              "progress": {
+                "camera": 0,
+                "completedFrames": 0,
+                "phase": "CURRENT_SOURCE_TRACKING",
+                "runtimeSeconds": 508.63369548399896,
+                "sourceFrame": 24,
+                "sourceSeconds": 1.0,
+                "totalFrames": 5760,
+                "visualPass": false
+              },
+              "boundedFirstCameraGate": {
+                "producerPid": 11642,
+                "maximumPauseSeconds": 2700,
+                "resumed": false,
+                "reason": "Qualify first complete actual-source chunk of the faster four-minute pipeline; preserve prior run and auto-resume it",
+                "startedAt": "2026-11-09T20:00:02.263495+00:00",
+                "paidInference": false
+              },
+              "firstCameraVisualReview": {
+                "reviewedAt": "2026-11-09T23:43:20.571423+00:00",
+                "actualDecodedSourceAndMovieFrames": 48,
+                "personallyInspectedHeadFrames": [
+                  0,
+                  1,
+                  2,
+                  3
+                ],
+                "personallyInspectedHandFrames": [
+                  36,
+                  37,
+                  38,
+                  39
+                ],
+                "personallyInspectedRigFrames": [
+                  20,
+                  21,
+                  22,
+                  23
+                ],
+                "wholeFrames": [
+                  24
+                ],
+                "baselineActualMovieCompared": true,
+                "candidateAccepted": false,
+                "findings": [
+                  "Whole subject, face/head and main equipment remain in checked frames.",
+                  "Small palm/joint holes in the checked moving-hand exposures are visibly worse than the original SAM33 result.",
+                  "Fine rig/foliage boundaries remain unqualified in both trial and baseline. The small blue flower is explicitly selected foreground in the source project; colour alone does not establish TV contamination."
+                ],
+                "fasterMovingModelAccepted": false,
+                "cleanFourMinuteProof": false,
+                "nativeAdmission": false,
+                "nextAction": "Preserve this complete chunk; resume original all-SAM tracking, retain verified independent CPU work and investigate guarded larger attention blocks.",
+                "blueFlowerSourceCheck": {
+                  "registeredSourcePixel": [
+                    1205,
+                    575
+                  ],
+                  "authoredLabel": 1,
+                  "actualSourceRgb": [
+                    15,
+                    151,
+                    224
+                  ],
+                  "existingSourceReview": "native-fixed-evidence-r435-20261108/visual-review.json",
+                  "inferredTvContaminationClaimWithdrawn": true,
+                  "sourceOrSelectionChanged": false
+                }
+              },
+              "nativeAdmission": false,
+              "fourMinuteProof": false,
+              "visualPass": false,
+              "candidateStoppedForVisualRegression": true,
+              "activeProcessing": false,
+              "wholeVideoProof": false
+            },
+            "speedEngineering20261110": {
+              "hybridActualEncodedOpeningReview": {
+                "reviewedAt": "2026-11-09T23:43:20.571423+00:00",
+                "actualDecodedSourceAndMovieFrames": 48,
+                "personallyInspectedHeadFrames": [
+                  0,
+                  1,
+                  2,
+                  3
+                ],
+                "personallyInspectedHandFrames": [
+                  36,
+                  37,
+                  38,
+                  39
+                ],
+                "personallyInspectedRigFrames": [
+                  20,
+                  21,
+                  22,
+                  23
+                ],
+                "wholeFrames": [
+                  24
+                ],
+                "baselineActualMovieCompared": true,
+                "candidateAccepted": false,
+                "findings": [
+                  "Whole subject, face/head and main equipment remain in checked frames.",
+                  "Small palm/joint holes in the checked moving-hand exposures are visibly worse than the original SAM33 result.",
+                  "Fine rig/foliage boundaries remain unqualified in both trial and baseline. The small blue flower is explicitly selected foreground in the source project; colour alone does not establish TV contamination."
+                ],
+                "fasterMovingModelAccepted": false,
+                "cleanFourMinuteProof": false,
+                "nativeAdmission": false,
+                "nextAction": "Preserve this complete chunk; resume original all-SAM tracking, retain verified independent CPU work and investigate guarded larger attention blocks.",
+                "blueFlowerSourceCheck": {
+                  "registeredSourcePixel": [
+                    1205,
+                    575
+                  ],
+                  "authoredLabel": 1,
+                  "actualSourceRgb": [
+                    15,
+                    151,
+                    224
+                  ],
+                  "existingSourceReview": "native-fixed-evidence-r435-20261108/visual-review.json",
+                  "inferredTvContaminationClaimWithdrawn": true,
+                  "sourceOrSelectionChanged": false
+                }
+              },
+              "hybridFirstChunkSeconds": 2079.7812962299995,
+              "hybridAccepted": false,
+              "reason": "Moving-hand/joint alpha holes are worse than the retained all-SAM reference; fine rig/foliage boundaries remain unqualified; the authored blue flower is real foreground, not established TV contamination.",
+              "selectedModel": "Existing pinned SAM2.1 small for every person and equipment selection; same ViTMatte2.5.33/1024 profile.",
+              "guardedAttentionBenchmark": {
+                "rows": [
+                  {
+                    "queryRows": 32,
+                    "actualSourceFrames": [
+                      0,
+                      1
+                    ],
+                    "samePinnedFloat32Model": true,
+                    "allKeyContextPreserved": true,
+                    "secondsPerFrame": [
+                      10.342134602000442,
+                      14.343083412000851
+                    ],
+                    "totalSeconds": 24.685218014001293,
+                    "peakVramBytes": 657924096,
+                    "allEightComponentAndUnionCodeBytesExact": true,
+                    "differences": [
+                      {
+                        "frame": 0,
+                        "plane": 0,
+                        "differentPixels": 0,
+                        "maxCodeDifference": 0
+                      },
+                      {
+                        "frame": 0,
+                        "plane": 1,
+                        "differentPixels": 0,
+                        "maxCodeDifference": 0
+                      },
+                      {
+                        "frame": 0,
+                        "plane": 2,
+                        "differentPixels": 0,
+                        "maxCodeDifference": 0
+                      },
+                      {
+                        "frame": 0,
+                        "plane": 3,
+                        "differentPixels": 0,
+                        "maxCodeDifference": 0
+                      },
+                      {
+                        "frame": 0,
+                        "plane": 4,
+                        "differentPixels": 0,
+                        "maxCodeDifference": 0
+                      },
+                      {
+                        "frame": 0,
+                        "plane": 5,
+                        "differentPixels": 0,
+                        "maxCodeDifference": 0
+                      },
+                      {
+                        "frame": 0,
+                        "plane": 6,
+                        "differentPixels": 0,
+                        "maxCodeDifference": 0
+                      },
+                      {
+                        "frame": 0,
+                        "plane": 7,
+                        "differentPixels": 0,
+                        "maxCodeDifference": 0
+                      },
+                      {
+                        "frame": 0,
+                        "plane": 8,
+                        "differentPixels": 0,
+                        "maxCodeDifference": 0
+                      },
+                      {
+                        "frame": 1,
+                        "plane": 0,
+                        "differentPixels": 0,
+                        "maxCodeDifference": 0
+                      },
+                      {
+                        "frame": 1,
+                        "plane": 1,
+                        "differentPixels": 0,
+                        "maxCodeDifference": 0
+                      },
+                      {
+                        "frame": 1,
+                        "plane": 2,
+                        "differentPixels": 0,
+                        "maxCodeDifference": 0
+                      },
+                      {
+                        "frame": 1,
+                        "plane": 3,
+                        "differentPixels": 0,
+                        "maxCodeDifference": 0
+                      },
+                      {
+                        "frame": 1,
+                        "plane": 4,
+                        "differentPixels": 0,
+                        "maxCodeDifference": 0
+                      },
+                      {
+                        "frame": 1,
+                        "plane": 5,
+                        "differentPixels": 0,
+                        "maxCodeDifference": 0
+                      },
+                      {
+                        "frame": 1,
+                        "plane": 6,
+                        "differentPixels": 0,
+                        "maxCodeDifference": 0
+                      },
+                      {
+                        "frame": 1,
+                        "plane": 7,
+                        "differentPixels": 0,
+                        "maxCodeDifference": 0
+                      },
+                      {
+                        "frame": 1,
+                        "plane": 8,
+                        "differentPixels": 0,
+                        "maxCodeDifference": 0
+                      }
+                    ],
+                    "actualShapeProbes": [
+                      {
+                        "queryShape": [
+                          1024,
+                          1,
+                          64,
+                          96
+                        ],
+                        "keyShape": [
+                          1024,
+                          1,
+                          64,
+                          96
+                        ],
+                        "queryRowsPerChunk": 32,
+                        "fullKeyContextRetained": true
+                      },
+                      {
+                        "queryShape": [
+                          25,
+                          4,
+                          196,
+                          96
+                        ],
+                        "keyShape": [
+                          25,
+                          4,
+                          196,
+                          96
+                        ],
+                        "queryRowsPerChunk": 32,
+                        "fullKeyContextRetained": true
+                      },
+                      {
+                        "queryShape": [
+                          1,
+                          4,
+                          4096,
+                          96
+                        ],
+                        "keyShape": [
+                          1,
+                          4,
+                          4096,
+                          96
+                        ],
+                        "queryRowsPerChunk": 32,
+                        "fullKeyContextRetained": true
+                      },
+                      {
+                        "queryShape": [
+                          25,
+                          8,
+                          49,
+                          96
+                        ],
+                        "keyShape": [
+                          25,
+                          8,
+                          196,
+                          96
+                        ],
+                        "queryRowsPerChunk": 32,
+                        "fullKeyContextRetained": true
+                      },
+                      {
+                        "queryShape": [
+                          25,
+                          8,
+                          49,
+                          96
+                        ],
+                        "keyShape": [
+                          25,
+                          8,
+                          49,
+                          96
+                        ],
+                        "queryRowsPerChunk": 32,
+                        "fullKeyContextRetained": true
+                      },
+                      {
+                        "queryShape": [
+                          1,
+                          8,
+                          4096,
+                          16
+                        ],
+                        "keyShape": [
+                          1,
+                          8,
+                          25,
+                          16
+                        ],
+                        "queryRowsPerChunk": 32,
+                        "fullKeyContextRetained": true
+                      },
+                      {
+                        "queryShape": [
+                          1,
+                          8,
+                          4096,
+                          16
+                        ],
+                        "keyShape": [
+                          1,
+                          8,
+                          20,
+                          16
+                        ],
+                        "queryRowsPerChunk": 32,
+                        "fullKeyContextRetained": true
+                      },
+                      {
+                        "queryShape": [
+                          1,
+                          8,
+                          4096,
+                          16
+                        ],
+                        "keyShape": [
+                          1,
+                          8,
+                          14,
+                          16
+                        ],
+                        "queryRowsPerChunk": 32,
+                        "fullKeyContextRetained": true
+                      },
+                      {
+                        "queryShape": [
+                          1,
+                          8,
+                          4096,
+                          16
+                        ],
+                        "keyShape": [
+                          1,
+                          8,
+                          13,
+                          16
+                        ],
+                        "queryRowsPerChunk": 32,
+                        "fullKeyContextRetained": true
+                      },
+                      {
+                        "queryShape": [
+                          1,
+                          8,
+                          4096,
+                          16
+                        ],
+                        "keyShape": [
+                          1,
+                          8,
+                          15,
+                          16
+                        ],
+                        "queryRowsPerChunk": 32,
+                        "fullKeyContextRetained": true
+                      },
+                      {
+                        "queryShape": [
+                          1,
+                          1,
+                          4096,
+                          256
+                        ],
+                        "keyShape": [
+                          1,
+                          1,
+                          4096,
+                          256
+                        ],
+                        "queryRowsPerChunk": 32,
+                        "fullKeyContextRetained": true
+                      },
+                      {
+                        "queryShape": [
+                          1,
+                          1,
+                          4096,
+                          256
+                        ],
+                        "keyShape": [
+                          1,
+                          1,
+                          4100,
+                          256
+                        ],
+                        "queryRowsPerChunk": 32,
+                        "fullKeyContextRetained": true
+                      },
+                      {
+                        "queryShape": [
+                          1,
+                          8,
+                          4096,
+                          16
+                        ],
+                        "keyShape": [
+                          1,
+                          8,
+                          8,
+                          16
+                        ],
+                        "queryRowsPerChunk": 32,
+                        "fullKeyContextRetained": true
+                      }
+                    ],
+                    "generalThroughputQualification": false
+                  },
+                  {
+                    "queryRows": 128,
+                    "actualSourceFrames": [
+                      0,
+                      1
+                    ],
+                    "samePinnedFloat32Model": true,
+                    "allKeyContextPreserved": true,
+                    "secondsPerFrame": [
+                      7.924136416000692,
+                      10.98626974400031
+                    ],
+                    "totalSeconds": 18.910406160001003,
+                    "peakVramBytes": 658968064,
+                    "allEightComponentAndUnionCodeBytesExact": false,
+                    "differences": [
+                      {
+                        "frame": 0,
+                        "plane": 0,
+                        "differentPixels": 20,
+                        "maxCodeDifference": 1
+                      },
+                      {
+                        "frame": 0,
+                        "plane": 1,
+                        "differentPixels": 16,
+                        "maxCodeDifference": 1
+                      },
+                      {
+                        "frame": 0,
+                        "plane": 2,
+                        "differentPixels": 6,
+                        "maxCodeDifference": 1
+                      },
+                      {
+                        "frame": 0,
+                        "plane": 3,
+                        "differentPixels": 2,
+                        "maxCodeDifference": 1
+                      },
+                      {
+                        "frame": 0,
+                        "plane": 4,
+                        "differentPixels": 1,
+                        "maxCodeDifference": 1
+                      },
+                      {
+                        "frame": 0,
+                        "plane": 5,
+                        "differentPixels": 6,
+                        "maxCodeDifference": 1
+                      },
+                      {
+                        "frame": 0,
+                        "plane": 6,
+                        "differentPixels": 2,
+                        "maxCodeDifference": 1
+                      },
+                      {
+                        "frame": 0,
+                        "plane": 7,
+                        "differentPixels": 5,
+                        "maxCodeDifference": 1
+                      },
+                      {
+                        "frame": 0,
+                        "plane": 8,
+                        "differentPixels": 0,
+                        "maxCodeDifference": 0
+                      },
+                      {
+                        "frame": 1,
+                        "plane": 0,
+                        "differentPixels": 36,
+                        "maxCodeDifference": 1
+                      },
+                      {
+                        "frame": 1,
+                        "plane": 1,
+                        "differentPixels": 10,
+                        "maxCodeDifference": 1
+                      },
+                      {
+                        "frame": 1,
+                        "plane": 2,
+                        "differentPixels": 3,
+                        "maxCodeDifference": 1
+                      },
+                      {
+                        "frame": 1,
+                        "plane": 3,
+                        "differentPixels": 3,
+                        "maxCodeDifference": 1
+                      },
+                      {
+                        "frame": 1,
+                        "plane": 4,
+                        "differentPixels": 3,
+                        "maxCodeDifference": 1
+                      },
+                      {
+                        "frame": 1,
+                        "plane": 5,
+                        "differentPixels": 12,
+                        "maxCodeDifference": 1
+                      },
+                      {
+                        "frame": 1,
+                        "plane": 6,
+                        "differentPixels": 15,
+                        "maxCodeDifference": 1
+                      },
+                      {
+                        "frame": 1,
+                        "plane": 7,
+                        "differentPixels": 10,
+                        "maxCodeDifference": 1
+                      },
+                      {
+                        "frame": 1,
+                        "plane": 8,
+                        "differentPixels": 1,
+                        "maxCodeDifference": 1
+                      }
+                    ],
+                    "actualShapeProbes": [
+                      {
+                        "queryShape": [
+                          25,
+                          4,
+                          196,
+                          96
+                        ],
+                        "keyShape": [
+                          25,
+                          4,
+                          196,
+                          96
+                        ],
+                        "queryRowsPerChunk": 128,
+                        "fullKeyContextRetained": true,
+                        "actualSourceProbeMaximumDifference": 0.0,
+                        "actualSourceProbeQueries": 32
+                      },
+                      {
+                        "queryShape": [
+                          1,
+                          4,
+                          4096,
+                          96
+                        ],
+                        "keyShape": [
+                          1,
+                          4,
+                          4096,
+                          96
+                        ],
+                        "queryRowsPerChunk": 128,
+                        "fullKeyContextRetained": true,
+                        "actualSourceProbeMaximumDifference": 0.0,
+                        "actualSourceProbeQueries": 32
+                      },
+                      {
+                        "queryShape": [
+                          1,
+                          8,
+                          4096,
+                          16
+                        ],
+                        "keyShape": [
+                          1,
+                          8,
+                          25,
+                          16
+                        ],
+                        "queryRowsPerChunk": 128,
+                        "fullKeyContextRetained": true,
+                        "actualSourceProbeMaximumDifference": 0.0,
+                        "actualSourceProbeQueries": 32
+                      },
+                      {
+                        "queryShape": [
+                          1,
+                          8,
+                          4096,
+                          16
+                        ],
+                        "keyShape": [
+                          1,
+                          8,
+                          20,
+                          16
+                        ],
+                        "queryRowsPerChunk": 128,
+                        "fullKeyContextRetained": true,
+                        "actualSourceProbeMaximumDifference": 0.0,
+                        "actualSourceProbeQueries": 32
+                      },
+                      {
+                        "queryShape": [
+                          1,
+                          8,
+                          4096,
+                          16
+                        ],
+                        "keyShape": [
+                          1,
+                          8,
+                          14,
+                          16
+                        ],
+                        "queryRowsPerChunk": 128,
+                        "fullKeyContextRetained": true,
+                        "actualSourceProbeMaximumDifference": 0.0,
+                        "actualSourceProbeQueries": 32
+                      },
+                      {
+                        "queryShape": [
+                          1,
+                          8,
+                          4096,
+                          16
+                        ],
+                        "keyShape": [
+                          1,
+                          8,
+                          13,
+                          16
+                        ],
+                        "queryRowsPerChunk": 128,
+                        "fullKeyContextRetained": true,
+                        "actualSourceProbeMaximumDifference": 0.0,
+                        "actualSourceProbeQueries": 32
+                      },
+                      {
+                        "queryShape": [
+                          1,
+                          8,
+                          4096,
+                          16
+                        ],
+                        "keyShape": [
+                          1,
+                          8,
+                          15,
+                          16
+                        ],
+                        "queryRowsPerChunk": 128,
+                        "fullKeyContextRetained": true,
+                        "actualSourceProbeMaximumDifference": 0.0,
+                        "actualSourceProbeQueries": 32
+                      },
+                      {
+                        "queryShape": [
+                          1,
+                          1,
+                          4096,
+                          256
+                        ],
+                        "keyShape": [
+                          1,
+                          1,
+                          4096,
+                          256
+                        ],
+                        "queryRowsPerChunk": 128,
+                        "fullKeyContextRetained": true,
+                        "actualSourceProbeMaximumDifference": 2.384185791015625e-07,
+                        "actualSourceProbeQueries": 32
+                      },
+                      {
+                        "queryShape": [
+                          1,
+                          1,
+                          4096,
+                          256
+                        ],
+                        "keyShape": [
+                          1,
+                          1,
+                          4100,
+                          256
+                        ],
+                        "queryRowsPerChunk": 128,
+                        "fullKeyContextRetained": true,
+                        "actualSourceProbeMaximumDifference": 1.1175870895385742e-07,
+                        "actualSourceProbeQueries": 32
+                      },
+                      {
+                        "queryShape": [
+                          1,
+                          8,
+                          4096,
+                          16
+                        ],
+                        "keyShape": [
+                          1,
+                          8,
+                          8,
+                          16
+                        ],
+                        "queryRowsPerChunk": 128,
+                        "fullKeyContextRetained": true,
+                        "actualSourceProbeMaximumDifference": 0.0,
+                        "actualSourceProbeQueries": 32
+                      }
+                    ],
+                    "generalThroughputQualification": false
+                  }
+                ],
+                "nativeAdmission": false,
+                "visualPass": false,
+                "productionLimitsChanged": false
+              },
+              "sameActualTwoFrameSecondsBefore": 24.685218014001293,
+              "sameActualTwoFrameSecondsAfter": 18.910406160001003,
+              "trackingTimeReductionPercentForTheseTwoFramesOnly": 23.3937973,
+              "changedMaskCodeValuesAcrossBothFramesAndAllPlanes": 151,
+              "maximumMaskCodeDifference": 1,
+              "wholePipelineSpeedClaim": false,
+              "everyAttentionInvocationProbed": true,
+              "unchangedNumericalGuard": {
+                "rtol": 2e-05,
+                "atol": 2e-06
+              },
+              "requestedQueryRows": 128,
+              "fallbackQueryRows": 32,
+              "failedFallbackStillRaises": true,
+              "fullKeyContextPreserved": true,
+              "boundedCpuChangesAnd48FrameCanonicalPixelProofRetained": true,
+              "tests": {
+                "scopedPython": 177,
+                "canonicalCompositor": 47,
+                "distinctCurrentTotal": 224,
+                "previousNodeCasesNotRerun": 45
+              },
+              "paidInference": false,
+              "providerUpload": false,
+              "dotenvRead": false,
+              "productionRegistrationOrApplicationDeployment": false
+            },
+            "guardedAllSamFullRuntime20261110": {
+              "process": {
+                "pid": 238623,
+                "command": [
+                  "/home/tibule12/Projects/AutoPromte/AutoPromote/.venv/bin/python",
+                  "/home/tibule12/Projects/AutoPromte/AutoPromote-background-replacement-20261101/reports/background-replacement-20261101/private/guarded-sam-full-rate-r503-20261110/runtime/scripts/background-replacement/process-full-rate-podcast.py",
+                  "/home/tibule12/Projects/AutoPromte/AutoPromote-background-replacement-20261101/reports/background-replacement-20261101/private/guarded-sam-full-rate-r503-20261110/output",
+                  "--scratch",
+                  "/dev/shm/autopromote-guarded-sam-full-r503-20261110",
+                  "--chunk-frames",
+                  "48",
+                  "--bounded-attention",
+                  "--registered-alpha-limits",
+                  "--archive-soft-guidance",
+                  "--current-source-scenes",
+                  "/home/tibule12/Projects/AutoPromte/AutoPromote-background-replacement-20261101/reports/background-replacement-20261101/private/native-person-input-repair-r471-20261109/current-source-scene-inputs.json",
+                  "--gesture-corrections",
+                  "/home/tibule12/Projects/AutoPromte/AutoPromote-background-replacement-20261101/reports/background-replacement-20261101/private/native-person-input-repair-r471-20261109/current-corrective-gesture.json",
+                  "--attention-query-rows",
+                  "128",
+                  "--attention-fallback-rows",
+                  "32",
+                  "--composite-workers",
+                  "2"
+                ],
+                "cwd": "/home/tibule12/Projects/AutoPromte/AutoPromote-background-replacement-20261101/reports/background-replacement-20261101/private/guarded-sam-full-rate-r503-20261110/runtime",
+                "startedAt": "2026-11-09T23:47:34.074017+00:00",
+                "targetFrames": 5760,
+                "targetSeconds": 240,
+                "alphaVersion": "2.5.33",
+                "tracker": "SAM2 all subjects/equipment; guarded128-row full-key math with32-row fallback",
+                "localSourceFrameParallelism": 2,
+                "localCompositeWorkers": 2,
+                "actualSourceAndCurrentModelEveryFrame": true,
+                "rootReserveBytes": 5368709120,
+                "nativeModelAdmission": false,
+                "wholeVideoVisualPass": false,
+                "paidInference": false,
+                "providerUpload": false
+              },
+              "progress": {
+                "camera": 0,
+                "completedFrames": 0,
+                "phase": "CURRENT_SOURCE_TRACKING",
+                "runtimeSeconds": 202.99408908700207,
+                "sourceFrame": 12,
+                "sourceSeconds": 0.5,
+                "totalFrames": 5760,
+                "visualPass": false
+              },
+              "supervisor": {
+                "producerPid": 11642,
+                "olderProcessPreservedInMemoryDuringOwnedReplacementRun": true,
+                "resumed": false,
+                "reason": "Same all-SAM four-minute source using guarded faster attention and pixel-exact bounded CPU phases; original run retained and resumed if this owned process fails",
+                "startedAt": "2026-11-09T23:47:34.073146+00:00",
+                "paidInference": false
+              },
+              "activeProcessing": true,
+              "notPausedAfterFirstChunk": true,
+              "privateProcessingContinuesWithoutCreativeAcceptance": true,
+              "nativeAdmission": false,
+              "fourMinuteProof": false,
+              "cleanMotionApproval": false
+            }
           }
         }
       }

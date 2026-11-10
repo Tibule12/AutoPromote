@@ -80,18 +80,18 @@ def segment(spec, source, geometry, model_dir, output):
 
 
 def refine(spec, source, geometry, model_dir, output, cache, artifact, *, device='cpu'):
+    if device not in ('cpu','cuda'):raise ValueError('Explicit local inference device must be cpu or cuda')
+    source_workers=spec['model'].get('limits',{}).get('localSourceFrameParallelism',1)
+    if type(source_workers)is not int or source_workers not in(1,2) or (source_workers!=1 and device!='cuda'):
+        raise ValueError('Source frame parallelism requires explicit local CUDA evaluation')
     import cv2
     import torch
     from transformers import VitMatteForImageMatting
     from python_media_worker.studio_subject_matte import mask_geometry
     from model_workers.adapters.temporal_alpha import make_trimap, stabilize, polish_trimap, stabilize_stationary_source, source_motion_radius, condition_trimap_clicks, independent_selection_evidence
-    if device not in ('cpu','cuda'):raise ValueError('Explicit local inference device must be cpu or cuda')
     request=spec['request'];params=request['parameters'];settings=params['refinement']
     count=int(geometry['nb_read_frames']);width,height=int(geometry['width']),int(geometry['height'])
     temporal=spec['model'].get('limits',{}).get('temporalAlpha',False)
-    source_workers=spec['model'].get('limits',{}).get('localSourceFrameParallelism',1)
-    if type(source_workers)is not int or source_workers not in(1,2) or (source_workers!=1 and device!='cuda'):
-        raise ValueError('Source frame parallelism requires explicit local CUDA evaluation')
     if source_workers==2:cv2.setNumThreads(1)
     torch.set_num_threads(4)
     if torch.get_num_interop_threads()!=1:torch.set_num_interop_threads(1)
@@ -300,13 +300,13 @@ def refine(spec, source, geometry, model_dir, output, cache, artifact, *, device
             background=np.asarray(Image.open(evidence_dir/'photographed-reference.png').convert('RGB'))
             observed=np.asarray(Image.open(evidence_dir/'observed-support.png').convert('L'))>0
             diagnostics['photographedMaterialOpacity']=refine_photographed_sequence(
-                rgb_dir,masks,guidance,background,observed,holdout,count=count)
+                rgb_dir,masks,guidance,background,observed,holdout,count=count,workers=source_workers)
         if guidance and spec['model'].get('limits',{}).get('restoreSourcePersonInteriors',False):
             from model_workers.adapters.person_material_alpha import restore_person_interiors
             directory,manifest=guidance
             primary=manifest['components'][0]
             restored=0
-            for index in range(count):
+            def solve_person_interior_frame(index):
                 rgb=np.asarray(Image.open(rgb_dir/f'rgb_{index:04d}.png'))
                 target=masks/f'matte_{index:04d}.png'
                 prior=np.asarray(Image.open(target))
@@ -324,12 +324,15 @@ def refine(spec, source, geometry, model_dir, output, cache, artifact, *, device
                 points=selection.get('points',[]) if index==0 else next((
                     p['points'] for p in selection.get('shotPrompts',[]) if p['frameIndex']==index),[])
                 values=restore_person_interiors(rgb,prior,evidence,points,preserve=preserve_detail)
-                restored+=int(np.count_nonzero(values!=prior))
+                restored_pixels=int(np.count_nonzero(values!=prior))
                 components=[(c['selection'],np.asarray(Image.open(directory/c['frames'][index]['file'])))
                             for c in manifest['components']]
                 values=condition_trimap_clicks(values,rgb,manifest['_reference_rgb'],components,index)
                 values[holdout]=255
-                Image.fromarray(values).save(target)
+                return values,restored_pixels
+            for index,(values,restored_pixels) in source_frame_results(count,solve_person_interior_frame,source_workers):
+                restored+=restored_pixels
+                Image.fromarray(values).save(masks/f'matte_{index:04d}.png')
                 if index%12==0:print(json.dumps({'event':'source_person_interiors','index':index,'total':count}),flush=True)
             diagnostics['sourcePersonInteriors']={'algorithm':'current_source_connected_material_core_v1',
                 'changedPixelFrames':restored,'sourceRgbAlwaysCurrent':True,'outerMatteReplaced':False,
@@ -342,7 +345,7 @@ def refine(spec, source, geometry, model_dir, output, cache, artifact, *, device
             from model_workers.adapters.person_material_alpha import refine_person_source_boundaries
             directory,manifest=guidance
             changed=0
-            for index in range(count):
+            def solve_person_boundary_frame(index):
                 rgb=np.asarray(Image.open(rgb_dir/f'rgb_{index:04d}.png'))
                 target=masks/f'matte_{index:04d}.png'
                 prior=np.asarray(Image.open(target))
@@ -357,8 +360,11 @@ def refine(spec, source, geometry, model_dir, output, cache, artifact, *, device
                 fixed=[plane for selection,plane in components[1:] if not selection.get('propagate',True)]
                 values=refine_person_source_boundaries(rgb,prior,components[0][1],motion,moving,fixed)
                 values=condition_trimap_clicks(values,rgb,manifest['_reference_rgb'],components,index)
-                values[holdout]=255;changed+=int(np.count_nonzero(values!=prior))
-                Image.fromarray(values).save(target)
+                values[holdout]=255
+                return values,int(np.count_nonzero(values!=prior))
+            for index,(values,changed_pixels) in source_frame_results(count,solve_person_boundary_frame,source_workers):
+                changed+=changed_pixels
+                Image.fromarray(values).save(masks/f'matte_{index:04d}.png')
                 if index%12==0:print(json.dumps({'event':'motion_aware_person_source_edges','index':index,'total':count}),flush=True)
             diagnostics['motionAwarePersonSourceEdges']={
                 'algorithm':'current_person_source_band_with_measured_motion_v1',
@@ -450,10 +456,11 @@ def refine(spec, source, geometry, model_dir, output, cache, artifact, *, device
                 values[holdout]=255;Image.fromarray(values).save(target)
                 records.append({'index':index,'objects':objects})
                 if index%12==0:print(json.dumps({'event':'unsupported_fixed_fragments','index':index,'total':count}),flush=True)
-            diagnostics['unsupportedFixedFragments']={'algorithm':'detached_small_source_unsupported_v1',
+            diagnostics['unsupportedFixedFragments']={'algorithm':'source_qualified_empty_gap_and_bounded_moving_ownership_v2',
                 'frames':records,'currentMovingForegroundProtected':True,
                 'independentCurrentAndReferenceSupportPreserved':True,
-                'authoredForegroundPreserved':True,'visualQualification':False}
+                'authoredForegroundPreserved':True,'referenceBackgroundCannotCreateForeground':True,
+                'weakMovingLogitsHaveBoundedSpatialOwnership':True,'visualQualification':False}
         if source_workers!=1:
             diagnostics['localSourceFrameParallelism']={'workers':source_workers,
                 'firstReferenceFrameSequential':True,'gpuAndTemporalStagesParallelized':False}

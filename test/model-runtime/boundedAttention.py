@@ -1,5 +1,6 @@
 """Compare actual SDPA outputs; no model weights, cloud calls or test doubles."""
 import unittest
+from unittest.mock import patch
 import torch
 from torch.nn import functional as F
 from model_workers.adapters.bounded_attention import bounded_attention
@@ -39,6 +40,32 @@ class BoundedAttention(unittest.TestCase):
         with bounded_attention(73,cuda_only=False,record=records.append):
             actual=F.scaled_dot_product_attention(q,k,v,is_causal=True)
         torch.testing.assert_close(actual,expected,rtol=0,atol=0);self.assertEqual(records,[])
+
+    def test_actual_numerical_failure_retries_smaller_blocks_without_relaxing_bounds(self):
+        q,k,v=self.inputs();original=F.scaled_dot_product_attention
+        # Reproduce a backend that rounds larger GEMMs outside the real guard.
+        def rounded(query,key,value,**kwargs):
+            result=original(query,key,value,**kwargs)
+            return result+.01 if query.shape[-2]>32 else result
+        records=[]
+        with patch.object(F,'scaled_dot_product_attention',rounded):
+            with bounded_attention(128,cuda_only=False,verify_actual=True,
+                                   fallback_query_rows=32,record=records.append):
+                actual=F.scaled_dot_product_attention(q,k,v)
+        with bounded_attention(32,cuda_only=False):
+            expected=F.scaled_dot_product_attention(q,k,v)
+        torch.testing.assert_close(actual,expected,rtol=0,atol=0)
+        self.assertTrue(records[0]['numericalFallbackUsed'])
+        self.assertEqual(records[0]['queryRowsPerChunk'],32)
+        self.assertGreater(records[0]['candidateProbeMaximumDifference'],.009)
+        self.assertLessEqual(records[0]['actualSourceProbeMaximumDifference'],2e-6)
+
+    def test_fallback_is_bounded_and_requires_actual_verification(self):
+        for kwargs in [dict(fallback_query_rows=32),
+                       dict(fallback_query_rows=128,verify_actual=True),
+                       dict(fallback_query_rows=True,verify_actual=True)]:
+            with self.assertRaises(ValueError):
+                with bounded_attention(128,**kwargs):pass
 
 
 if __name__=='__main__':unittest.main()

@@ -197,15 +197,26 @@ def main():
         help='Reviewed source-coordinate gesture selections for the same master')
     parser.add_argument('--archive-soft-guidance', action='store_true')
     parser.add_argument('--sam-large-evaluation', action='store_true')
+    parser.add_argument('--source-reference-tracker', choices=['sam21','edgetam','hybrid'], default='sam21',
+        help='Private local evaluation: hybrid keeps SAM equipment tracking and uses EdgeTAM only for moving subjects')
+    parser.add_argument('--composite-workers', type=int, choices=[1,2], default=1,
+        help='Bounded local CPU composition; canonical pixel operations stay unchanged')
+    parser.add_argument('--stateless-equipment', action='store_true',
+        help='Private evaluation of the existing current-image mode for fixed equipment; moving tracks keep temporal memory')
     parser.add_argument('--bounded-attention', action='store_true',
         help='Use verified full-key query chunking on the local GPU')
     parser.add_argument('--attention-query-rows', type=int, choices=[32,64,128], default=128,
         help='Original float32 math query block size; full key context and verification bounds stay unchanged')
+    parser.add_argument('--attention-fallback-rows', type=int, choices=[32],
+        help='Verify every attention call and retry with32 rows if the unchanged actual numerical guard fails')
     parser.add_argument('--efficient-attention', action='store_true',
         help='Private float32 CUDA kernel; verify actual queries against math')
     parser.add_argument('--registered-alpha-limits', action='store_true',
         help='Retain the current registered alpha inference size')
     args = parser.parse_args()
+    if args.attention_fallback_rows is not None and (not args.bounded_attention or
+            args.attention_fallback_rows>=args.attention_query_rows):
+        parser.error('Numerical fallback requires bounded attention with a larger initial query block')
     if args.bounded_attention and args.efficient_attention:
         parser.error('Choose one explicit attention implementation')
     attention = nullcontext()
@@ -224,12 +235,17 @@ def main():
             if key not in shapes:
                 shapes[key] = row
                 write_json(args.out / 'bounded-attention-shapes.json', list(shapes.values()))
-        attention = bounded_attention(args.attention_query_rows, record=record_shape, verify_actual=True)
+        attention = bounded_attention(args.attention_query_rows, record=record_shape, verify_actual=True,
+                                      fallback_query_rows=args.attention_fallback_rows)
     with attention:
         process(args)
 
 
 def process(args):
+    if args.source_reference_tracker != 'sam21' and (
+            args.sam_large_evaluation or args.recurrent_person_guidance or
+            not args.registered_alpha_limits):
+        raise ValueError('Source-reference tracking requires the existing registered-size local pipeline')
     if args.classify_striped_person and not args.recurrent_person_guidance:
         raise ValueError('Current-source person classification requires independent recurrent guidance')
     def stop(_signal, _frame):
@@ -268,6 +284,81 @@ def process(args):
             'revision':provenance['revision'],'modelVersion':'private-publisher-665f8e2',
             'weights':[{'path':weight['path'],'size':weight['bytes'],'sha256':weight['sha256']}]})
     alpha_model = copy.deepcopy(next(m for m in registry['models'] if m['id'] == 'vitmatte-small-temporal-cpu-v2'))
+    # This review driver already requires the guarded local CUDA runtime.
+    # Use its declared profile, including bounded CPU source-frame work,
+    # rather than silently borrowing the default CPU profile's execution flags.
+    local_registry = json.loads(Path('config/model-runtime/local-cuda-evaluation.v1.json').read_text())
+    local_alpha = next(m for m in local_registry['models']
+                       if m['id'] == 'vitmatte-small-temporal-local-cuda-v2')
+    for key in ['checkpoint', 'revision', 'modelVersion', 'weights']:
+        if local_alpha[key] != alpha_model[key]:
+            raise ValueError('Local alpha profile differs from the pinned current pipeline')
+    alpha_model = copy.deepcopy(local_alpha)
+    source_reference_profile = None
+    source_reference_model = None
+    source_current_model = None
+    source_moving_model = None
+    if args.source_reference_tracker in ('edgetam','hybrid'):
+        from transformers import EdgeTamVideoConfig, EdgeTamVideoModel, Sam2VideoModel
+        from safetensors.torch import load_file
+        folder = Path('/home/tibule12/.cache/autopromote-model-runtime/edgetam-publisher-private-eval-20261109/hf-converted')
+        weight_hash = '8858f8e4757b0b96dab8763f296ecffd845efbbbf698f64163cfa20a63d5fff4'
+        if (sha(folder/'model.safetensors') != weight_hash or
+                sha(folder/'config.json') != '5d3dd467475f78c9f4f2cdc940a98370aaa151cee97a5d11676fb2bbe5f81af0'):
+            raise ValueError('Pinned local source-reference tracker changed')
+        for weight in sam_model['weights']:
+            if sha(sam_dir/weight['path']) != weight['sha256']:
+                raise ValueError('Fixed reference weights changed')
+        left=json.loads((sam_dir/'preprocessor_config.json').read_text())
+        right=json.loads((folder/'preprocessor_config.json').read_text())
+        if any(left[key] != right[key] for key in ['image_mean','image_std','rescale_factor']):
+            raise ValueError('Current and fixed reference source preprocessing differs')
+        source_reference_model=Sam2VideoModel.from_pretrained(sam_dir,local_files_only=True).to('cuda',dtype=torch.float32).eval()
+        source_current_model=EdgeTamVideoModel(EdgeTamVideoConfig.from_json_file(folder/'config.json'))
+        source_current_model.load_state_dict(load_file(folder/'model.safetensors'),strict=True)
+        source_current_model=source_current_model.to('cuda',dtype=torch.float32).eval()
+        source_reference_profile={'currentCheckpoint':'facebook/EdgeTAM',
+            'currentRevision':'14d7ecc48c656b94e5184519f698cd5386c5a2bf',
+            'currentWeightSha256':weight_hash,'currentLicense':'Apache-2.0',
+            'fixedReferenceCheckpoint':sam_model['checkpoint'],
+            'fixedReferenceRevision':sam_model['revision'],
+            'fixedReferenceWeights':copy.deepcopy(sam_model['weights']),
+            'fixedReferenceLicense':sam_model['license'],
+            'fixedReferenceSourceFrame':'First actual exposure at each camera/reseed interval',
+            'referenceAndCurrentSessionsIsolated':True,
+            'currentTemporalModelWarmedOnSameFirstExposure':True,
+            'movingPersonAlwaysCurrent':True,'nativeAdmission':False}
+        source_reference_profile['referenceGuidanceRetention'] = {
+            'strongReferenceCodeAtLeast':128,'maximumCurrentSourceChannelDifference':24,
+            'maximum3x3MeanChannelDifference':12,
+            'currentAndReferenceMovingEnvelopesExcluded':True,
+            'heldAlphaOrSourceRgb':False}
+        sam_model.update(id='private-edgetam-with-sam-fixed-reference',checkpoint='facebook/EdgeTAM',
+            revision=source_reference_profile['currentRevision'],modelFamily='EdgeTAM+SAM2-source-reference',
+            modelVersion='private-source-reference-evaluation-v2',
+            weights=[{'path':'model.safetensors','sha256':weight_hash,
+                      'size':(folder/'model.safetensors').stat().st_size}])
+        sam_dir=folder
+        if args.source_reference_tracker == 'hybrid':
+            source_moving_model=source_current_model
+            source_current_model=source_reference_model
+            source_reference_model=None
+            sam_model=copy.deepcopy(next(m for m in registry['models'] if m['id']=='sam21-multiobject-cpu-v2'))
+            sam_dir=SAM_DIR
+            source_reference_profile={
+                'mode':'SAM2 fixed equipment + EdgeTAM moving subjects',
+                'fixedCheckpoint':sam_model['checkpoint'],'fixedRevision':sam_model['revision'],
+                'fixedWeights':copy.deepcopy(sam_model['weights']),
+                'movingCheckpoint':'facebook/EdgeTAM',
+                'movingRevision':'14d7ecc48c656b94e5184519f698cd5386c5a2bf',
+                'movingWeightSha256':weight_hash,'movingLicense':'Apache-2.0',
+                'actualCurrentSourceForEveryObject':True,
+                'referenceGuidanceRetention':False,
+                'separateModelSessions':True,'nativeAdmission':False}
+    if args.stateless_equipment:
+        sam_model['limits']['statelessFixedSourceFrames']=True
+        if source_reference_profile is not None:
+            source_reference_profile['fixedCurrentImageStateless']=True
     # Preserve source-size head/hair boundaries in this private review. Pinned
     # weights and registered production inference limits are not changed.
     if not args.registered_alpha_limits:
@@ -346,18 +437,24 @@ def process(args):
         'fourMinuteProcessing': target_frames == TOTAL,
         'registrationSha256': sha(PRIVATE / 'full-rate-registration-20261104/smoothed-registration.json'),
         'modelVersions': [sam_model['modelVersion'], alpha_model['modelVersion']],
+        'alphaExecutionProfile': alpha_model['id'],
+        'localSourceFrameParallelism': alpha_model['limits'].get('localSourceFrameParallelism', 1),
         'segmentationCheckpoint':sam_model['checkpoint'],
+        'sourceReferenceTracker':source_reference_profile,
         'segmentationWeightsSha256':sam_model['weights'][0]['sha256'],
         'privateAlphaInferenceMaxSide': alpha_model['limits']['alphaInferenceMaxSide'],
         'registeredLimitsChanged': False,
         'boundedFullKeyAttention': args.bounded_attention,
         'attentionQueryRows':args.attention_query_rows if args.bounded_attention else None,
+        'attentionFallbackQueryRows':args.attention_fallback_rows,
         'efficientFullKeyAttention': args.efficient_attention,
         'trackerHistoryStorage': 'cpu; local GPU still performs every neural frame',
         'recurrentPersonGuidance': {'enabled': bool(recurrent), 'license': 'GPL-3.0; private local evaluation only, not registered or distributed',
             'checkpointSha256': sha(recurrent_checkpoint) if recurrent else None,
             'appliedToCameraAngle': 0, 'currentSourceClassification': args.classify_striped_person},
         'implementationSha256': {name: sha(Path(name)) for name in [
+            'config/model-runtime/registry.v1.json',
+            'config/model-runtime/local-cuda-evaluation.v1.json',
             'scripts/background-replacement/process-full-rate-podcast.py',
             'scripts/background-replacement/bounded_attention.py',
             'scripts/background-replacement/efficient_attention.py',
@@ -369,6 +466,9 @@ def process(args):
             'python_media_worker/studio_source_background.py', 'python_media_worker/studio_vfx_foreground_cache.py']},
         'actualModelInferenceEveryFrame': True, 'sourceRgbEveryFrame': True,
         'refreshFixedRois': True, 'actualCameraIntervals': len(camera_cuts),
+        'fixedEquipmentStatelessCurrentImage':args.stateless_equipment,
+        'localCompositeWorkers':args.composite_workers,
+        'localCompositeImplementationSha256':sha(Path('python_media_worker/studio_vfx_parallel.py')) if args.composite_workers>1 else None,
         'trackerResetPolicy': 'Actual camera cuts plus two explicit reviewed-gesture boundaries',
         'correctiveGestureSha256': sha(gesture_file),
         'currentSourceScenesSha256':sha(args.current_source_scenes)if args.current_source_scenes else None,
@@ -387,7 +487,7 @@ def process(args):
         write_json(identity_file, plan_identity)
     started = time.monotonic()
     records = []
-    shared_sam = None
+    shared_sam = source_current_model
     for interval_index, cut in enumerate(cuts):
         first = cut['frame']
         end = cuts[interval_index + 1]['frame'] if interval_index + 1 < len(cuts) else target_frames
@@ -513,7 +613,8 @@ def process(args):
                                         raise ValueError('Invalid authored fixed-object refinement selection')
                         tracker = ComponentVideoTracker({'model': sam_model, 'request': {'parameters': params}},
                             {'width': width, 'height': height}, sam_dir, device='cuda', model=shared_sam,
-                            refresh_fixed=True, offload_state=True)
+                            refresh_fixed=True, offload_state=True,fixed_reference_model=source_reference_model,
+                            moving_model=source_moving_model)
                         shared_sam = tracker.model
                     union, planes = tracker.frame(rgb, absolute - first)
                     if recurrent is not None and angle == 0:
@@ -584,6 +685,23 @@ def process(args):
                     'quality': 'Private review guidance; no creative approval.'}
                 details = {**common, 'components': [{'selection': c, 'roi': roi, 'frames': frames}
                     for c, roi, frames in zip(selections, tracker.rois, component_rows)]}
+                if source_reference_profile is not None:
+                    diagnostics = [{'components':s['indices'],
+                        'currentModelNeuralFrames':s['neural_frames'],
+                        'samReferenceFrames':s['reference_model_frames'],
+                        'sourceQualifiedRetainedGuidePixels':s['source_reference_retained_pixels'],
+                        'agreeingSourceReuses':s['agreeing_reuses']}
+                        for s in tracker.fixed_roi_diagnostics
+                        if not tracker.components[s['indices'][0]].get('propagate', True)]
+                    for metadata in (manifest, details):
+                        metadata['source_reference_tracker'] = copy.deepcopy(source_reference_profile)
+                        metadata['fixed_roi_evaluation_counts'] = diagnostics
+                    manifest['mask_semantics'] = (('Current-frame SAM 2 equipment tracking and separate EdgeTAM moving-subject tracking; '
+                        'no reference guidance retention. Private evaluation, not native admission.') if args.source_reference_tracker=='hybrid' else
+                        ('Current-frame EdgeTAM moving and fixed guidance; '
+                        'SAM 2 initializes each fixed source reference. Only strong source-agreeing '
+                        'reference evidence outside both moving envelopes may be retained. '
+                        'No held alpha or source picture. Private evaluation, not native admission.'))
                 write_json(union_dir / 'manifest.json', manifest)
                 write_json(components_dir / 'manifest.json', details)
                 scope = {'ownerUid': 'PRIVATE_REVIEW_ONLY', 'projectId': 'PRIVATE_REVIEW_ONLY',
@@ -620,13 +738,22 @@ def process(args):
                     effect['start'], effect['end'] = 0, data_count / FPS
                 plan = {'version': 1, 'source_sha256': source_hash,
                     'matte_sha256': alpha_cache.artifact_sha256, 'effects': effects}
-                renderer = VfxFrameRenderer(plan, alpha_cache, lambda _: PRIVATE / 'replacement.png')
                 picture = archive / 'picture.mp4'
                 video_writer = writer(picture, 1430, 1000)
                 try:
-                    for local in range(chunk_first - data_first, chunk_first + count - data_first):
-                        image = Image.open(outputs / 'rgb' / f'rgb_{local:04d}.png').convert('RGB')
-                        result = renderer.render(image, local)
+                    def source_frames():
+                        for local in range(chunk_first-data_first,chunk_first+count-data_first):
+                            with Image.open(outputs/'rgb'/f'rgb_{local:04d}.png') as image:
+                                yield local,image.convert('RGB')
+                    if args.composite_workers>1:
+                        from python_media_worker.studio_vfx_parallel import compose_frames
+                        assets={e['asset_id']:str(PRIVATE/'replacement.png') for e in effects if 'asset_id' in e}
+                        composed=compose_frames(source_frames(),source_chunk,outputs/'subject_masks',plan,assets,
+                                                workers=args.composite_workers)
+                    else:
+                        renderer=VfxFrameRenderer(plan,alpha_cache,lambda _:PRIVATE/'replacement.png')
+                        composed=((local,renderer.render(image,local))for local,image in source_frames())
+                    for local,result in composed:
                         if width != 1430:
                             result = result.resize((1430, 1000), Image.Resampling.LANCZOS)
                         video_writer.stdin.write(result.tobytes())
@@ -634,7 +761,8 @@ def process(args):
                             sample = archive / 'samples'
                             sample.mkdir(exist_ok=True)
                             result.save(sample / f'replacement-{data_first + local:04d}.jpg', quality=96)
-                            image.save(sample / f'source-{data_first + local:04d}.jpg', quality=96)
+                            with Image.open(outputs/'rgb'/f'rgb_{local:04d}.png') as image:
+                                image.convert('RGB').save(sample / f'source-{data_first + local:04d}.jpg', quality=96)
                     finish(video_writer)
                 finally:
                     if video_writer.poll() is None:

@@ -4,9 +4,19 @@ from unittest.mock import patch
 from pathlib import Path
 
 from model_workers.emulator_cuda import execute
+from model_workers.adapters.cpu_matting import refine
 
 
 class LocalCudaGuards(unittest.TestCase):
+    def test_parallel_source_solves_cannot_change_default_cpu_execution(self):
+        geometry = {'width':96, 'height':80, 'nb_read_frames':4}
+        for workers, device in [(2,'cpu'), (3,'cuda'), (True,'cuda')]:
+            spec = {'request': {'parameters': {}},
+                    'model': {'limits': {'localSourceFrameParallelism':workers}}}
+            with self.assertRaisesRegex(ValueError, 'explicit local CUDA'):
+                refine(spec, Path('/not-used'), geometry, Path('/not-used'),
+                       Path('/not-used'), None, None, device=device)
+
     def test_missing_explicit_demo_environment_cannot_execute(self):
         with patch.dict(os.environ, {}, clear=True):
             with self.assertRaisesRegex(ValueError, 'isolated local CUDA'):

@@ -189,15 +189,16 @@ def refine_photographed_opacity(rgb, prior, background, observed, primary, movin
         'visualQualification':'actual movement and occlusion review required'}
 
 
-def refine_photographed_sequence(rgb_dir,masks,guidance,background,observed,holdout,*,count):
+def refine_photographed_sequence(rgb_dir,masks,guidance,background,observed,holdout,*,count,workers=1):
     """Run the same operation on saved model masks, then restore human intent."""
     from PIL import Image
     from model_workers.adapters.temporal_alpha import condition_trimap_clicks
+    from model_workers.adapters.source_edge_alpha import source_frame_results
     directory,manifest=guidance
     if not 1<=count<=720 or holdout.dtype!=bool or holdout.shape!=observed.shape:
         raise ValueError('Photographed sequence bounds differ')
     rows=[]
-    for index in range(count):
+    def solve_frame(index):
         rgb=np.asarray(Image.open(rgb_dir/f'rgb_{index:04d}.png'))
         parts=[(c['selection'],np.asarray(Image.open(directory/c['frames'][index]['file'])))
                for c in manifest['components']]
@@ -206,6 +207,8 @@ def refine_photographed_sequence(rgb_dir,masks,guidance,background,observed,hold
         values,detail=refine_photographed_opacity(rgb,alpha,background,observed,parts[0][1],moving)
         values=condition_trimap_clicks(values,rgb,manifest['_reference_rgb'],parts,index)
         values[holdout]=255
+        return values,detail
+    for index,(values,detail) in source_frame_results(count,solve_frame,workers):
         Image.fromarray(values).save(masks/f'matte_{index:04d}.png')
         rows.append({'frame':index,**detail})
         if index%12==0:

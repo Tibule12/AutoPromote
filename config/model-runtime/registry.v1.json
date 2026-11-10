@@ -539,7 +539,7 @@
         "uncertainDispatch": "reconcile same execution; never regenerate automatically"
       },
       "fallback": null,
-      "modelVersion": "2.5.32",
+      "modelVersion": "2.5.33",
       "enabled": true,
       "availability": "private_local_visual_qualification_pending",
       "limits": {
