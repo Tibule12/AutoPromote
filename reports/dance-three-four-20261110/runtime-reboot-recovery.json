@@ -1,0 +1,15 @@
+{
+  "completePriorExportRestored": true,
+  "source": "/home/tibule12/Projects/AutoPromte/AutoPromote-studio-live-owner-20261105/reports/studio-neon-circle-20261109/private/emulator-final-export",
+  "oldestLostOctoberHistoryRecovered": false,
+  "priorFreshCohortBalancePreserved": 5,
+  "reserved": 0,
+  "operations": 34,
+  "activeOperations": 0,
+  "auth": true,
+  "firestore": true,
+  "storage": true,
+  "pid": 244572,
+  "firestorePid": 244579,
+  "productionChange": false
+}

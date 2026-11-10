@@ -5869,6 +5869,31 @@ describe("ViralClipStudio timeline sequencing", () => {
     );
   });
 
+  test("original audio 200 percent stays in the editor and restores attenuation through the same bus", async () => {
+    const previousContext = window.AudioContext;
+    const context = require('./fixtures/studioAudioGraph').gainTestContext();
+    window.AudioContext = jest.fn(() => context);
+    let editor;
+    try {
+      editor = mountNativePreview();
+      const inspector = screen.getByTestId('clip-studio-inspector');
+      fireEvent.click(within(inspector).getByRole('tab', { name: /Sound/i }));
+      fireEvent.change(screen.getByLabelText('Automation source'), { target: { value: 'originalAudio' } });
+      fireEvent.click(screen.getByRole('button', { name: /Add volume keyframe at/i }));
+      fireEvent.change(screen.getByRole('slider', { name: /originalAudio volume at/ }), { target: { value: '200' } });
+      await waitFor(() => expect(editor.video.__audioRemixGraph?.trackGain.gain.value).toBe(2));
+      expect(editor.video.volume).toBe(1);
+      expect(screen.getByLabelText('Edited output position')).toBeInTheDocument();
+      fireEvent.change(screen.getByRole('slider', { name: /originalAudio volume at/ }), { target: { value: '40' } });
+      await waitFor(() => expect(editor.video.__audioRemixGraph.trackGain.gain.value).toBe(.4));
+      expect(editor.video.volume).toBe(1);
+      expect(context.createMediaElementSource).toHaveBeenCalledTimes(1);
+    } finally {
+      editor?.unmount();
+      window.AudioContext = previousContext;
+    }
+  });
+
   test.each([false, true])("SFX volume keys preserve the fader and change an already playing cue (audio clock: %s)", async scheduled => {
     const originalAudioContext = window.AudioContext;
     const gains = [], sources = [];

@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Recorded owner-selected Neon Circle and corrected Grounded Doubles final-only scheduling, twelve verified native Queue destinations, exact media and preserved prior records; Studio readiness remains unchanged.",
-  "reviewed_at": "2026-11-09T02:19:48.076Z",
+  "reason": "Final receipts include post-shutdown measured disk recovery of 23.29 GB with 37.05 GB available, twelve exact scheduled destinations and preserved source/project hashes; readiness and creative limits stay unchanged.",
+  "reviewed_at": "2026-11-10T00:54:30.973Z",
   "catalog_sha256": "8870a7d4dd1f007fab2526a92edff811b7fb8505dffb2e049e56ab21583d2459",
   "sources": [
     {
@@ -195,7 +195,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "5b9ae24ff79b592ca46b3b62a0b57a42bf762f4b156c8f9b911ed093556d55d9"
+      "sha256": "c7af397a2d0d5ecc0f6ccfb7c1e5dab06aaa2184a45f0b3e6feb119afbcafe1b"
     },
     {
       "path": "frontend/src/components/landing/StudioWelcomePage.js",
@@ -675,11 +675,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "64bccbf1f5a6ed1dcdd89b43f13d6af146164a0cc264c0d255d7f52fad4cc648"
+      "sha256": "8ec6056a04a27f5cf0c55b840274c8eae6e0772fbfc60f0e1bfae809ae72daa5"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "4c365f1118a4d8bfc3d9d491deed689bb359990e97cb9b516bcf68c79a5d61f0"
+      "sha256": "4372bc488c7af987a1976dbf900d18e85a3639d863cc8fa87000b558782cc7ec"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

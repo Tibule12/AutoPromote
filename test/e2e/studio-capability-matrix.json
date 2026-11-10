@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-11-09T02:18:37.724Z",
+  "updatedAt": "2026-11-10T00:51:51.392Z",
   "sourceOfTruth": "docs/STUDIO-COMPLETION-CONTRACT.md",
   "baseline": {
     "checkpoint": "docs/HANDOFF-studio-reliability-repair-20261008.md",
@@ -26238,5 +26238,62 @@
       "reports/circle-finals-publishing-20261109/README.md",
       "reports/circle-finals-publishing-20261109/queue-verified.json"
     ]
+  },
+  "studioOtherDanceFinals20261110": {
+    "updatedAt": "2026-11-10T00:51:51.392Z",
+    "status": "TWO_OTHER_DANCES_NATIVE_FINALS_AND_TWELVE_SCHEDULES_VERIFIED",
+    "ownerInstruction": "work on the other two and schedule them; recover over 20 GB",
+    "nativeFrontendAuthoringHistoryIndependentRestoreAndCpuExport": true,
+    "finals": {
+      "three": {
+        "sha256": "fe67500d225ddd4ae9dfa938c1d1744e42356a4662deda02c2348456b8c12764",
+        "frames": 180,
+        "seconds": 7.5,
+        "nativeJobId": "viral_d592847fd36dece707c1e4eb9a826be008ab8dae3628ad63376a95e74fbfab37",
+        "layers": 5,
+        "motionKeys": 240
+      },
+      "four": {
+        "sha256": "5c8555cb8b0dfbbd6d6b2598effc02dccddec8330771f8de20c54cf6725e5be2",
+        "frames": 192,
+        "seconds": 8,
+        "nativeJobId": "viral_43979a327b53c27dadff88a1d73395f0c6b9de0aff27631014a543cb9193ef8c",
+        "layers": 8,
+        "motionKeys": 414
+      }
+    },
+    "sourceMusicRetainedAtNormalSpeed": true,
+    "humanListeningQualified": false,
+    "sourceVolume200PercentCrashFixedUsingExistingGainBus": true,
+    "focusedAudioTestsPassed": 12,
+    "targetedEditorRegressionPassed": 1,
+    "otherEditorCasesNotRun": 172,
+    "anonymousWelcomeChecks": 8,
+    "servedAssetsVerified": 58,
+    "normalSignInAndHelp": true,
+    "nativeSchedulesVerified": 12,
+    "date": "2026-11-10",
+    "timezone": "Africa/Johannesburg",
+    "localTimes": {
+      "three": "18:00",
+      "four": "20:00"
+    },
+    "priorQueueRecordsPreserved": 6926,
+    "diskAvailableIncreaseGB": 23.289442304,
+    "freeDiskGB": 37.050232832,
+    "originalsAndPriorDeliveryHashesPreserved": true,
+    "providerPublicationVerified": false,
+    "autonomousDirector": false,
+    "automaticProductIsolation": false,
+    "strictPredictivePictureAudioParity": false,
+    "readinessPromotion": false,
+    "remainingBlockers": "S02 predictive source-frame/colour/edge/audio parity and display throughput; S04 and S03; source-dependent matte/cleanup/contact quality; typography 13/16 failures.",
+    "nextTask": "Preserve exact native projects and twelve publishing receipts; continue shared predictive gain/source/edge/live precision without duplicating schedules.",
+    "evidence": [
+      "reports/dance-three-four-20261110/README.md",
+      "reports/dance-three-four-20261110/publishing/queue-verified.json",
+      "reports/dance-three-four-20261110/disk-recovery.json"
+    ],
+    "ownedReviewServicesStoppedAfterExactSnapshot": true
   }
 }

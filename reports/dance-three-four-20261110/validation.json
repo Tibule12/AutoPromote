@@ -1,0 +1,47 @@
+{
+  "nativeFinals": 2,
+  "queueSchedulesVerified": 12,
+  "previousQueueRecordsUnchanged": 6926,
+  "focusedAudioTestsPassed": 12,
+  "targetedOriginalGainEditorRegressionPassed": 1,
+  "otherEditorTestsNotRun": 172,
+  "studioContract": {
+    "valid": true,
+    "capabilities": 29,
+    "counts": {
+      "UNIMPLEMENTED": 2,
+      "BROKEN": 1,
+      "PARTIAL": 9,
+      "FUNCTIONAL": 17,
+      "PRO-READY": 0,
+      "PRODUCTION-READY": 0
+    },
+    "combinations": 13,
+    "parityChecks": 17,
+    "presentFixtures": 4,
+    "newCapabilityExecutions": 0,
+    "note": "Record validation only; no browser, provider or GPU execution."
+  },
+  "productKnowledgeCheck": {
+    "valid": true,
+    "errors": [],
+    "file_count": 43,
+    "warnings": [
+      "Undocumented product surface: workspace.team",
+      "Undocumented product surface: workspace.rewards",
+      "Undocumented product surface: workspace.notifications",
+      "Undocumented product surface: workspace.profile",
+      "Undocumented product surface: workspace.security",
+      "Undocumented product surface: workspace.earnings",
+      "Undocumented product surface: workspace.mission_control",
+      "Undocumented product surface: workspace.memetic",
+      "Undocumented product surface: assistant.existing_chat"
+    ]
+  },
+  "allOwnedServicesExited": true,
+  "originalAndPriorDeliveryHashesPreserved": true,
+  "diskReturnedGB": 23.289442304,
+  "diskAvailableGB": 37.050232832,
+  "diffCheck": true,
+  "productionDeployment": false
+}

@@ -235,6 +235,7 @@ import {
   normalizeAudioRemix,
 } from "./audio/audioRemixModel";
 import {
+  applyStudioMediaGain,
   ensureAudioRemixPreview,
   disposeAudioRemixPreview,
   unlockAudioRemixContext,
@@ -7318,6 +7319,7 @@ const ViralClipStudio = ({
           audio = document.createElement("audio");
           audio.preload = "auto";
           applySafeMediaSource(audio, proxy.url);
+          remixPreviewMediaRef.current.add(audio);
           timelineAudioPoolRef.current.set(proxy.id, audio);
         }
         if (Math.abs(audio.currentTime - proxy.sourceSeekTime) > 0.15) {
@@ -7325,8 +7327,8 @@ const ViralClipStudio = ({
         }
         audio.playbackRate = video.playbackRate || 1;
         audio.preservesPitch = true;
-        audio.volume = clampNumber(previewVolume * proxy.volume * interpolateAutomationValue({
-          keyframes: audioKeyframes.originalAudio, property: 'volume', time: globalTime, fallback: 100 }) / 100, 0, 1, 0);
+        applyStudioMediaGain(audio, previewVolume * proxy.volume * interpolateAutomationValue({
+          keyframes: audioKeyframes.originalAudio, property: 'volume', time: globalTime, fallback: 100 }) / 100);
         if (audio.paused) {
           safePlayMediaElement(audio);
         }
@@ -14692,7 +14694,7 @@ const ViralClipStudio = ({
 
     const applyAudio = (muted, vol) => {
       if (video.muted !== muted) video.muted = muted;
-      if (Math.abs(video.volume - vol) > 0.005) video.volume = vol;
+      applyStudioMediaGain(video, vol);
     };
 
     if (anyMuteMain) {

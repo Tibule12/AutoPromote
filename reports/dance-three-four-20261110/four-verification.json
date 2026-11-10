@@ -1,0 +1,53 @@
+{
+  "word": "four",
+  "movieSha256": "5c8555cb8b0dfbbd6d6b2598effc02dccddec8330771f8de20c54cf6725e5be2",
+  "sourceSha256": "b8226c899502fc8e257e38b4480cd933ba92e148022ff7aa4446cdfe77cbc884",
+  "sourceInterval": [
+    12,
+    20
+  ],
+  "seconds": 8,
+  "frames": 192,
+  "fps": 24,
+  "size": [
+    576,
+    1024
+  ],
+  "fullDecode": true,
+  "allFrameTimestamps24fps": true,
+  "videoCodec": "h264",
+  "audioCodec": "aac",
+  "colourMatrix": null,
+  "ordinaryLayers": 8,
+  "motionKeys": 414,
+  "audio": {
+    "sourceMusicRetained": true,
+    "speedUnchanged": true,
+    "waveformCorrelation": 0.9990905042783812,
+    "lagSamplesAt48k": 0,
+    "integratedLufs": -19.7,
+    "truePeakDbtp": -6.1,
+    "decodedSamplesAtOrAboveFullScale": 0,
+    "humanListeningQualified": false
+  },
+  "actualLiveExportPairs": [
+    {
+      "time": 1.5,
+      "diagnosticPsnrDb": 27.190915848324217,
+      "strictParity": false
+    },
+    {
+      "time": 4,
+      "diagnosticPsnrDb": 29.59162766012269,
+      "strictParity": false
+    },
+    {
+      "time": 7.5,
+      "diagnosticPsnrDb": 31.146002419403377,
+      "strictParity": false
+    }
+  ],
+  "strictPictureAudioParity": false,
+  "nativeJobId": "viral_43979a327b53c27dadff88a1d73395f0c6b9de0aff27631014a543cb9193ef8c",
+  "pictureApprovalFromNumbers": false
+}

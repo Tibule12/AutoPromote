@@ -1,0 +1,44 @@
+{
+  "directory": "/home/tibule12/Videos/Studio - Dances Three and Four - 2026-11-10",
+  "deliveries": [
+    {
+      "word": "three",
+      "directory": "/home/tibule12/Videos/Studio - Dances Three and Four - 2026-11-10/Prism Relay",
+      "movieSha256": "fe67500d225ddd4ae9dfa938c1d1744e42356a4662deda02c2348456b8c12764",
+      "files": {
+        "Prism relay.mp4": "fe67500d225ddd4ae9dfa938c1d1744e42356a4662deda02c2348456b8c12764",
+        "Editable Project.autopromote.json": "bc0db2b507dc49c0ef258e3bc2cc7a0822d4bd7b0a6793b1209fbba5a73f5164",
+        "Full Studio playback.mp4": "eb876a6514a55e4b882c40e58c3ee8619b964bc852c80540b834e8c376479599",
+        "Live Studio playback.mp4": "fafe14bb84f066ef08221881b61df15b145aad07a79c1847add38570330655d9",
+        "Studio authoring.mp4": "0acb954f47e4dc1b6191dc3c9ef31be48db68e670ba9c542d2678afbea2fcc2c",
+        "verification.json": "06282efe5e418204a69fef38dbac309b6afd3dafb7d2814fa796f74b0ec7455c",
+        "Native binding.json": "0d6ddfa1089a0a3e5bf2b10097464da0afade26a02033543708034d94ec21329",
+        "Film contact.jpg": "6b7ed7df1c9862605655e9531755f39f267bd40dda927540260dc13f01178d55",
+        "Native render receipt.json": "3dddc600fba3112ce373764913fd4ca6a3864c990e8958de312440e118a90d8a",
+        "Original dance.mp4": "91a13d80bffb518c438cf3baf99f6ba37ff3f3f6343cfddfb2127b0fea699725",
+        "Scene action plan.json": "72eb0c4630d63869fcaa4f7a0e6bb4e37ee0b21770467b3e57a0fbbf99c32034",
+        "Music level controls in Studio.mp4": "4ae19ea560daebb784c4ea55b77fe69c958431f031e77e52b761d37d9275b2b4",
+        "Build source and schedule receipts.json": "3daa126a8bce71d5ef2444a193668989578b83f780b6ee14014f0102ad1e9e22"
+      }
+    },
+    {
+      "word": "four",
+      "directory": "/home/tibule12/Videos/Studio - Dances Three and Four - 2026-11-10/Mirror Pulse",
+      "movieSha256": "5c8555cb8b0dfbbd6d6b2598effc02dccddec8330771f8de20c54cf6725e5be2",
+      "files": {
+        "Mirror pulse.mp4": "5c8555cb8b0dfbbd6d6b2598effc02dccddec8330771f8de20c54cf6725e5be2",
+        "Editable Project.autopromote.json": "3bda4487fff20b80f8d62373070baa41c828556e1ca9a1c259439a5b0e447b43",
+        "Full Studio playback.mp4": "4f287ece1c4bc6caa106217b7086e9bd5607229a5628838480fa25bfa6bb4d6b",
+        "Live Studio playback.mp4": "9fabe6d08f95f490a7a4c89e2917040e0a76fc6459dee224277ba245f791c0f2",
+        "Studio authoring.mp4": "e7386f9d74d7bdeb7f32affbc6d96c0bde91c5610abf56ad1e0c03474d877b2f",
+        "verification.json": "3e1cceb3bf5ea04ec33874f7c375db66fa23eee9c2e5b127ba37ed902ff1447c",
+        "Native binding.json": "4e1e9e48705c375fb145c961252c0c98c104f9494d45bd08b94f2228c26805b1",
+        "Film contact.jpg": "be781d473814e878a5a624003a91faaac726366296b3eaf8a58c3122bdfbdb55",
+        "Native render receipt.json": "d759e62e663bda2320df52f49c27075a7da17f881c83d31dff05a22f94dd8494",
+        "Original dance.mp4": "b8226c899502fc8e257e38b4480cd933ba92e148022ff7aa4446cdfe77cbc884",
+        "Scene action plan.json": "3e9d6e592600b875e7edba1e191756ea0e15c767f01f41fcd75f3a1dd75240b9",
+        "Build source and schedule receipts.json": "4c5ca843fdc45052c68df02d8b0685f529355d2e63db19f746d04dc43137f9bd"
+      }
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "ownerInstruction": "work on the other two and schedule them",
+  "ownerClarification": "The remaining supplied dances are number three and number four.",
+  "date": "2026-11-10",
+  "timezone": "Africa/Johannesburg",
+  "frequency": "once",
+  "excluded": "Earlier rejected drafts, first quiet-source export, Studio recordings and raw source.",
+  "movies": [
+    {
+      "key": "three",
+      "media": "/home/tibule12/Videos/Studio - Dances Three and Four - 2026-11-10/Prism Relay/Prism relay.mp4",
+      "sha256": "fe67500d225ddd4ae9dfa938c1d1744e42356a4662deda02c2348456b8c12764",
+      "bytes": 2263336,
+      "finalResultsOnly": true
+    },
+    {
+      "key": "four",
+      "media": "/home/tibule12/Videos/Studio - Dances Three and Four - 2026-11-10/Mirror Pulse/Mirror pulse.mp4",
+      "sha256": "5c8555cb8b0dfbbd6d6b2598effc02dccddec8330771f8de20c54cf6725e5be2",
+      "finalResultsOnly": true,
+      "bytes": 3165305
+    }
+  ]
+}
