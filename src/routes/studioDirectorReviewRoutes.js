@@ -44,6 +44,10 @@ const stableStringify = value =>
 const sha256 = value => crypto.createHash("sha256").update(value).digest("hex");
 
 const validEvidence = (evidence, operation) => {
+  if (operation.type === "reframe") {
+    try { return require("../generated/studioDirectorReplayKernel.cjs").validDirectorReframeEvidence(evidence, operation); }
+    catch (_) { return false; }
+  }
   if (evidence === undefined) return true;
   if (
     operation.type !== "split_clip" ||
@@ -84,7 +88,7 @@ const validEvidence = (evidence, operation) => {
 };
 
 const validOperation = operation => {
-  if (!plainObject(operation) || !["split_clip", "trim_clip"].includes(operation.type))
+  if (!plainObject(operation) || !["split_clip", "trim_clip", "reframe"].includes(operation.type))
     return false;
   if (
     !exactKeys(operation.target, ["occurrenceId"]) ||
@@ -93,6 +97,12 @@ const validOperation = operation => {
     !validSourceRange(operation.preconditions.sourceRange)
   ) return false;
   const source = operation.preconditions.sourceRange;
+  if (operation.type === "reframe") {
+    try {
+      require("../generated/studioDirectorReplayKernel.cjs").validateStudioReframeOperation(operation);
+      return operation.keyframes[0].sourceTick === source.startTick && operation.keyframes.at(-1).sourceTick === source.endTick;
+    } catch (_) { return false; }
+  }
   if (operation.type === "split_clip") {
     return (
       exactKeys(operation, ["type", "target", "at", "newOccurrenceIds", "preconditions"]) &&
@@ -116,7 +126,8 @@ const validOperation = operation => {
   const removedEnd = source.endTick - keep.endTick;
   return (
     removedStart >= 0 && removedEnd >= 0 &&
-    (removedStart > 0) !== (removedEnd > 0) &&
+    (removedStart > 0 || removedEnd > 0) &&
+    [removedStart, removedEnd].every(value => value === 0 || value >= MINIMUM_EDGE_TICKS) &&
     Math.max(removedStart, removedEnd) >= MINIMUM_EDGE_TICKS &&
     keep.endTick - keep.startTick >= MINIMUM_EDGE_TICKS
   );
@@ -270,7 +281,7 @@ const verifiedSourceShotEvidence = async (reviewerUid, proposal) => {
     getOwnedSourceShotArtifact({ uid: reviewerUid, artifactHash: evidence.artifactHash }),
   ]);
   if (!binding || !artifact) return false;
-  return binding.sourceSha256 === evidence.sourceSha256 &&
+  const common = binding.sourceSha256 === evidence.sourceSha256 &&
     artifact.ownerUid === reviewerUid &&
     artifact.projectId === proposal.projectId &&
     artifact.sourceAssetId === evidence.sourceAssetId &&
@@ -285,9 +296,11 @@ const verifiedSourceShotEvidence = async (reviewerUid, proposal) => {
     artifact.sampleCoverage === evidence.sampleCoverage &&
     artifact.analysisRange?.space === evidence.analysisRange.space &&
     artifact.analysisRange?.startTick === evidence.analysisRange.startTick &&
-    artifact.analysisRange?.endTick === evidence.analysisRange.endTick &&
-    Array.isArray(artifact.sceneCutTicks) &&
-    artifact.sceneCutTicks.includes(evidence.boundaryTick);
+    artifact.analysisRange?.endTick === evidence.analysisRange.endTick;
+  if (!common) return false;
+  if (evidence.type === "source_shot_reframe")
+    return artifact.workerResultSha256 === sha256(stableStringify(evidence.workerResult));
+  return Array.isArray(artifact.sceneCutTicks) && artifact.sceneCutTicks.includes(evidence.boundaryTick);
 };
 
 // The registered project document is a browser-supplied owner-scoped snapshot.

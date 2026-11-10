@@ -273,7 +273,7 @@ test("reviewed edge trim retimes speed and cues and keeps source captions indepe
   expect(applied.document.revision).toBe(1);
 });
 
-test("proposal preparation rejects unsupported, no-op, interior and tiny edits", async () => {
+test("proposal preparation permits a bounded interior keep and rejects unsupported, no-op and tiny edits", async () => {
   const document = makeDocument();
   await rejectCode(prepare(document, { type: "remove_range", target: { occurrenceId: "main" } }),
     "UNSUPPORTED_DIRECTOR_OPERATION");
@@ -281,10 +281,12 @@ test("proposal preparation rejects unsupported, no-op, interior and tiny edits",
     type: "trim_clip", target: { occurrenceId: "main" },
     keep: { space: "source", startTick: 0, endTick: secondsToTicks(20) },
   }), "UNSUPPORTED_DIRECTOR_OPERATION");
-  await rejectCode(prepare(document, {
+  const kept = await prepare(document, {
     type: "trim_clip", target: { occurrenceId: "main" },
     keep: { space: "source", startTick: secondsToTicks(2), endTick: secondsToTicks(18) },
-  }), "UNSUPPORTED_DIRECTOR_OPERATION");
+  });
+  expect(kept.preview.previewDocument.clipOccurrences[0].sourceRange).toEqual({
+    space: "source", startTick: secondsToTicks(2), endTick: secondsToTicks(18) });
   await rejectCode(prepare(document, {
     type: "split_clip", target: { occurrenceId: "main" },
     at: { space: "source", ticks: secondsToTicks(0.1) },

@@ -1,7 +1,7 @@
 // Director-facing inventory of executable Viral Clip Studio operations.
 // A UI control or a validated request field alone is not evidence of rendering.
 // Bump the registry version when a capability's contract or support changes.
-export const STUDIO_CAPABILITY_REGISTRY_VERSION = 5;
+export const STUDIO_CAPABILITY_REGISTRY_VERSION = 6;
 
 const objectSchema = (properties, required = []) => ({
   type: "object",
@@ -164,31 +164,38 @@ const entries = [
   },
   {
     id: "reframe",
-    version: 1,
+    version: 2,
     operationType: "reframe",
     parameterSchema: objectSchema(
-      { aspect: { enum: ["9:16", "16:9", "1:1", "4:5"] }, keyframes: { type: "array" } },
-      ["aspect"]
+      { target, aspect: { enum: ["9:16", "16:9", "1:1", "4:5"] },
+        zoom: { type: "number", minimum: 1, maximum: 1.5 }, sourceAspect: { type: "number", minimum: .2, maximum: 5 },
+        keyframes: { type: "array", minItems: 2, maxItems: 128, items: objectSchema({ sourceTick: tick,
+          x: { type: "number", minimum: 0, maximum: 100 }, y: { type: "number", minimum: 0, maximum: 100 }, cut: { type: "boolean" } },
+        ["sourceTick", "x", "y", "cut"]) }, preconditions },
+      ["target", "aspect", "zoom", "sourceAspect", "keyframes"]
     ),
-    requiredEvidence: ["video asset", "reviewed crop/aspect"],
+    requiredEvidence: ["owned source-shot artifact and exact worker-result hash", "reviewed crop/aspect", "full selected-range tracking"],
     readSet: ["occurrences", "videoAsset", "reframeKeyframes"],
-    writeSet: ["reframeKeyframes"],
+    writeSet: ["reframeKeyframes", "reframeModeCuts", "visualGraph", "output", "revision", "journal"],
     previewEngine: "browser CSS transform",
     previewFidelity: "approximate",
     finalRenderEngine: "Python reframe timeline + FFmpeg",
     costClass: "medium",
     resourceClass: "cpu",
-    fallback: "centre crop",
-    releaseState: "legacy",
+    fallback: "reject; retain existing edit",
+    releaseState: "foundation",
     executable: true,
     supportStatus: "approximate",
-    limits: { commandKernelMigrated: false },
-    compatibility: ["aspect-specific coordinates"],
-    conflicts: [],
+    limits: { commandKernelMigrated: true, humanUiRouted: false, maxSourceTrackingPoints: 128,
+      forwardOriginalRateOnly: true, multiClipZoomMustBeUnchanged: true },
+    compatibility: ["aspect-specific source coordinates", "existing manual framing remains editable", "output aspect is a reviewed project setting"],
+    conflicts: ["locked source range", "incomplete or substituted tracking"],
     rendererVersion: "main_media_server/current",
     templateVersion: null,
     evidenceSuite: [
       "frontend/src/components/__tests__/studioReframeInterpolation.test.js",
+      "frontend/src/components/__tests__/studioDirectorWorkspaceProposals.test.js",
+      "test/studioDirectorReviewRoutes.jest.test.js",
       "python_media_worker/test_studio_reframe_cuts.py",
     ],
   },
@@ -506,7 +513,7 @@ const deepFreeze = value => {
 // The registry is data, not a dispatch table. Only migrated commands use it as
 // an authorization gate; legacy entries document real render paths and gaps.
 export const STUDIO_CAPABILITIES = deepFreeze(entries.map(entry => {
-  const reviewedDirectorCommand = ["split_clip", "trim_clip"].includes(entry.id);
+  const reviewedDirectorCommand = ["split_clip", "trim_clip", "reframe"].includes(entry.id);
   return { ...entry, directorPermission: {
     directorCommandSupported: reviewedDirectorCommand,
     serverValidated: reviewedDirectorCommand,

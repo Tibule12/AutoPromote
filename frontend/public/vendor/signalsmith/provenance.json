@@ -1,0 +1,12 @@
+{
+  "package": "signalsmith-stretch",
+  "version": "1.3.2",
+  "license": "MIT",
+  "upstream": "https://github.com/Signalsmith-Audio/signalsmith-stretch",
+  "revision": "88061fd4eda56a2353c5d65c74aa3f4ccf76f9da",
+  "sourcePath": "web/release/SignalsmithStretch.mjs",
+  "upstreamSha256": "97530b11d5bc01015af4cde40d6aa55ff10c40aa1294ca4c8c5762027d517a46",
+  "localSha256": "7db2400797094a69245202dfa12625c2807e8f2969dde136c403ae1ed2eb7b02",
+  "derivation": "Retain official release through end of Emscripten factory, omit generic Web Audio scheduling wrapper and export the factory. No DSP or WASM changes. Add optional precompiled Module.wasmModule synchronous instantiation so Web Audio never waits for an unsupported asynchronous WASM compiler on the audio thread. Extract an identical WASM binary for background compilation. Remove upstream trailing blank-line spaces; no executable change.",
+  "wasmSha256": "83869197b3c5ebf9fc8c517a1586aef1ecf77404842218d62b9c0e82882d8ca3"
+}

@@ -152,3 +152,14 @@ test('the display watchdog rejects a replaced or errored decoder and stops on di
     expect(f.clock.getSnapshot().sourceTime).toBe(11);
   } finally { stop(); expect(jest.getTimerCount()).toBe(0); jest.useRealTimers(); }
 });
+
+test('only a verified playing decoder releases a pending transport seek', () => {
+  const f = fixture(); const stop = f.clock.bind(f.video, f.config);
+  expect(f.clock.isAdvancing()).toBe(true);
+  f.video.paused = true; expect(f.clock.isAdvancing()).toBe(false);
+  f.video.paused = false; f.video.seeking = true; expect(f.clock.isAdvancing()).toBe(false);
+  f.video.seeking = false; f.video.currentSrc = 'https://example.com/old.mp4';
+  expect(f.clock.isAdvancing()).toBe(false);
+  f.video.currentSrc = f.config.url; expect(f.clock.isAdvancing()).toBe(true);
+  stop(); expect(f.clock.isAdvancing()).toBe(false);
+});

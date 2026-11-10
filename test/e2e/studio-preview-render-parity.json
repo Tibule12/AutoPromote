@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-11-06",
+  "updatedAt": "2026-11-08",
   "assessment": "Retained October8 audit plus scoped October9 native NVIDIA podcast delivery/recovery evidence; no full conformance, production or creative promotion.",
   "readinessStates": [
     "UNIMPLEMENTED",
@@ -15360,20 +15360,141 @@
     "workerLiveEvidence": "reports/studio-controls-director-20261105/evidence/deployed-20261106/worker-followup/verified-live-result.json"
   },
   "qualificationContinuation20261106": {
-    "status": "BOUNDED_LOCAL_PICTURE_AUDIO_TRANSPORT_PASS_LIVE_RETEST_PENDING",
+    "status": "BOUNDED_LIVE_CONTROLS_TRACKED_EXPORT_AND_RECOVERY_VERIFIED_FULL_PARITY_PENDING",
     "report": "reports/studio-qualification-20261106/README.md",
     "evidence": "reports/studio-qualification-20261106/evidence/checkpoint.json",
     "realTwoFaceTracking": "VERIFIED_24_KEYS_EACH_COVERAGE_1",
     "twoFaceEditingAndColdRecovery": "VERIFIED",
     "nativePreparedAudioSamples": "VERIFIED_576000_NO_GAPS_OR_DUPLICATES",
     "nativePauseResumeAndFractionalCutPlayback": "VERIFIED",
-    "fullPictureAudioParity": "FULL_MOVING_PICTURE_MIX_AND_DEPLOYED_INTEGRATION_UNQUALIFIED",
+    "fullPictureAudioParity": "FULL_MOVING_PICTURE_MIX_UNQUALIFIED; OWNED_FRAME_HTTP_AND_TRACKED_EXPORT_LIVE_VERIFIED",
     "readinessPromotion": false,
     "pausedNativePicturePairs": "12_OF_12_FIXED_COLOUR_AND_GEOMETRY_LIMITS_PASS",
     "nativeCpuThrottling": "4X_LOCAL_PASS_53_DISTINCT_FINAL_BUILD_POSITIONS; SMOOTHNESS_LIMIT_611MS_OBSERVATION_GAP",
     "realIsolatedPreviewApi": "11_PASS_AUTH_STORAGE_FIRESTORE_NO_AUTH_BYPASS",
     "matchedApiWorkerRuntime": "576000_PREPARED_SAMPLES_IDENTICAL_NONROOT_OFFLINE_IMAGE",
-    "productionPackagingAndActivation": "PENDING",
-    "sourceDialogueActivation": "DEFAULT_OFF_EXPLICIT_ACCOUNT_COHORT_REQUIRED"
+    "productionPackagingAndActivation": "FRONTEND_API_WORKER_RELEASED_SOURCE_DIALOGUE_COHORT_OFF",
+    "sourceDialogueActivation": "DEFAULT_OFF_EXPLICIT_ACCOUNT_COHORT_REQUIRED",
+    "release20261107": {
+      "sourceRevision": "ce82bb907c858896d84a368d2b497dae6c65e746",
+      "report": "reports/studio-qualification-20261106/RELEASE_20261107.md",
+      "evidence": "reports/studio-qualification-20261106/evidence/release-20261107.json",
+      "workerRevision": "media-worker-v1-00131-mab",
+      "mainTests": {
+        "passed": 2366,
+        "skipped": 5,
+        "failed": 0,
+        "passedSuites": 355,
+        "skippedSuites": 4
+      },
+      "mainBrowserTests": {
+        "passed": 30,
+        "skipped": 17,
+        "failed": 0
+      },
+      "normalQaCreditCharge": 5,
+      "newCreditGrants": 0,
+      "sourceDialogueActivated": false,
+      "readinessPromotion": false
+    }
+  },
+  "directorDurableSuggestions20261107": {
+    "date": "2026-11-07",
+    "report": "reports/studio-director-durable-20261107/README.md",
+    "status": "LOCAL_SUGGESTION_SAVE_RECOVERY_AND_CPU_EXPORT_VERIFIED_NOT_DEPLOYED",
+    "scope": "Existing source-cut Director; draft-only snapshot persistence with fresh authenticated review required. No new engine/wallet.",
+    "nativeBrowser": [
+      "save/cold reopen without new analysis or restored approval",
+      "independent exact backup restore",
+      "copy drops original analysis draft",
+      "malformed draft preserves edit",
+      "rejection recovery prunes consumed request",
+      "approved split/Undo/Redo/export compilation with simulated review boundary",
+      "actual CPU final download and complete finished playback"
+    ],
+    "evidenceBoundary": "Recorded analysis and simulated review/completion transports; actual local canonical CPU file. Not new live-provider execution or settlement proof.",
+    "movieSha256": "2f0b726ce6c003745c4a76ff86401e72dd71f1d9c2a635e98eab1589b834b712",
+    "productionChanged": false,
+    "remaining": [
+      "approved exact-revision production verification",
+      "whole-film planning and non-cut commands",
+      "broader media/multi-user/manual layer/audio combinations",
+      "shared S02/S04/S03 and creative/listening qualification"
+    ],
+    "readinessPromoted": false,
+    "targetedTestsPassed": 93,
+    "fullEditorSuite": "Interrupted without completed result; not counted as passing"
+  },
+  "directorReframeMoments20261108": {
+    "date": "2026-11-08",
+    "report": "reports/director-reframe-moments-20261108/README.md",
+    "status": "NATIVE_COMBINED_WORKFLOW_AND_LOCAL_CPU_DELIVERY_VERIFIED_NOT_DEPLOYED",
+    "scope": "Existing Director command/review/history/compiler; bounded source-shot Reframe and ranked existing-source two-edge Moments trim. No second editor.",
+    "nativeBrowser": [
+      "Reframe from Off with no unapproved mutation",
+      "saved draft and fresh review after cold reopen",
+      "tracked framing approval, exact Undo/Redo and cold recovery",
+      "native playback controls advance",
+      "owned native saved moment, reviewed two-edge trim, Undo/Redo and recovery",
+      "combined native export compilation",
+      "independent exact backup restore, identical download and complete actual CPU final playback"
+    ],
+    "evidenceBoundary": "Recorded actual detector result and simulated review/completion transports; local canonical CPU final. No new production review, cloud/provider execution or model-training claim.",
+    "targetedTestsPassed": 153,
+    "fullEditorSuite": "Only two selected editor cases run; other 176 skipped. No whole-suite claim.",
+    "movie": {
+      "sha256": "eee718b2ccd26c70528a0d57c4bd3d11925c9d48501b087be54a5b3915531401",
+      "width": 720,
+      "height": 1280,
+      "fps": 24,
+      "frames": 167,
+      "fullDecode": true
+    },
+    "productionChanged": false,
+    "trainingRunStarted": false,
+    "qaApprovalsAreHumanTrainingLabels": false,
+    "readinessPromoted": false,
+    "remaining": [
+      "approved exact candidate integration/release and fresh account-bound live provider verification",
+      "owner-labelled examples and held-out editorial evaluations; QA approvals excluded from training labels",
+      "whole-film semantic planning and broader layer/audio/effect/retiming commands",
+      "full moving pre-approval picture and continuous picture/sound/colour/edge parity",
+      "shared S02/S04/S03 and creative/listening qualification"
+    ]
+  },
+  "studioAudioRemixClarity20261108": {
+    "date": "2026-11-08",
+    "report": "reports/studio-remix-clarity-20261108/README.md",
+    "status": "LOCAL_LIVE_REMIX_AND_NATIVE_RECOVERY_VERIFIED_NOT_DEPLOYED",
+    "scope": "Existing Live Edit Remix pitch graph and transport seek readout; local stereo Signalsmith WASM processing. Canonical Rubber Band renderer unchanged.",
+    "targetedTestsPassed": 83,
+    "nativeBrowser": [
+      "11 presets with finite, audible speech and no silent captured audio blocks",
+      "actual decoder and visible slider/timecode advance",
+      "Before and Keep Pitch bypass live pitch",
+      "exact saved document/settings cold reopen"
+    ],
+    "evidenceBoundary": "Actual local static frontend, authorised existing source/account reads through a private QA transport. No production writes, render/analysis/provider jobs or deployment.",
+    "diagnosticUnwantedEnergyReductionDb": {
+      "chipmunk": 58.05,
+      "slowedReverbPitch": 26.26,
+      "deepVoicePitch": 25.36
+    },
+    "audioThreadLoad": {
+      "silentBlocks": 0,
+      "nonfiniteSamples": 0,
+      "mainThreadBusyBurstMs": 40,
+      "totalBusyMs": 1680
+    },
+    "livePitchLatencySecondsAt48k": 0.096,
+    "productionChanged": false,
+    "readinessPromoted": false,
+    "remaining": [
+      "explicitly approved isolated audio release against current main; preceding local Director commits require separate scope review",
+      "human listening and fresh deployed source/device verification",
+      "96 ms live pitch latency; full predictive picture/sound and worker PCM parity not qualified",
+      "music/VO/SFX target-isolation and large graphs/browser diversity",
+      "shared S02/S04/S03 and creative/professional gates"
+    ]
   }
 }
