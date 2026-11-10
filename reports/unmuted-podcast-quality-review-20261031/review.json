@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-31",
+  "status": "OWNER_REJECTED_CREATIVE_QUALITY",
+  "reviewedOutput": "Unmuted - We Are Back - landscape / portrait",
+  "ownerFeedback": "The podcast clip editing is too basic for the requested result.",
+  "observedNativeProject": {
+    "sourceCuts": 4,
+    "captionLines": 23,
+    "titles": 4,
+    "motionScenes": 0,
+    "threeDScenes": 0,
+    "motionKeyframes": 0,
+    "soundEffects": 0,
+    "musicEnabled": false,
+    "voiceRepairEnabled": true
+  },
+  "creativeApproval": false,
+  "readinessPromoted": false,
+  "originalMediaAndProjectsPreserved": true,
+  "newRender": false,
+  "productionAccess": false,
+  "paidExecution": false,
+  "pending": "Clarify emphasis for the revision: original cinematic 3D/compositing brief, interview storytelling, or energetic social motion. Do not represent the existing trailer as satisfying the professional creative brief."
+}

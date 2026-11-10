@@ -1,0 +1,18 @@
+{
+  "UNMUTED - Cinematic Set Revision.mp4": {
+    "sha256": "4d2c8d510c0e36d4d2b3e2ad7c9aa461ccf6f3a50ba21e5aba04f608add6eb4f",
+    "bytes": 6610822
+  },
+  "Studio Playback with Sound.mp4": {
+    "sha256": "b8d1b870785b6eb52295492b8b43e877368b158220e01bdec85e4c6d3abd3163",
+    "bytes": 3946554
+  },
+  "Raw vs Cinematic Revision.mp4": {
+    "sha256": "c3aee8d78713d0683e582554582d1df4b4a216cf2b2a34e6721ae74fdce3c598",
+    "bytes": 5105823
+  },
+  "Editable Studio Project.json": {
+    "sha256": "2d672c766919d1add39350af84ea98ab9886b6d34bc79ac1e6b4e961575e6879",
+    "bytes": 193263
+  }
+}

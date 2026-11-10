@@ -1,0 +1,30 @@
+{
+  "date": "2026-11-01",
+  "status": "FIRST_FRAME_PROOFS_VISUALLY_REJECTED",
+  "motionRenderStarted": false,
+  "framesPerProof": 1,
+  "originalSourceUnchanged": true,
+  "sourceRange": [
+    22.458333333333332,
+    22.5
+  ],
+  "actualFindings": [
+    "Initial authored positive points landed on the old television illustration; source pixel/point audit exposed and corrected them",
+    "Even corrected point selections and existing fine-alpha cleanup leave broken fine foliage/support boundaries and residual background fragments",
+    "The new procedural warm room still does not convincingly match the source image",
+    "The source-colour filter multiplied uint8 channels before comparison; float conversion corrects overflow but cannot restore pixels absent from segmentation"
+  ],
+  "remainingTechnicalGap": "Correct source-bound foreground selection/trimaps for thin equipment and foliage. The current narrow alpha-refinement band keeps unselected exterior pixels at zero; colour cleanup cannot recreate those selections.",
+  "remainingCreativeGap": "Convincing source-camera, material/detail and illumination matching. A recorded 2D person alone does not make a fixed-angle replacement impossible.",
+  "noNewMovieDelivered": true,
+  "professionalQualification": false,
+  "creativeApproval": false,
+  "cloudJobs": 0,
+  "productionDataAccess": false,
+  "engineExpansion": false,
+  "evidence": [
+    "private/source-matched-20261101/source-prompt-audit.png",
+    "private/source-matched-20261101/foreground-verified-on-neutral.png",
+    "private/source-matched-20261101/room-proof-verified.png"
+  ]
+}
