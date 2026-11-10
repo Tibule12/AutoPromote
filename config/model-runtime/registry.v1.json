@@ -487,13 +487,14 @@
         "uncertainDispatch": "reconcile same execution; never regenerate automatically"
       },
       "fallback": null,
-      "modelVersion": "2.0.0",
+      "modelVersion": "2.0.4",
       "enabled": true,
       "availability": "private_local_visual_qualification_pending",
       "limits": {
         "noCrossCutPropagation": true,
         "supportsComponents": true,
-        "componentRois": true
+        "componentRois": true,
+        "refreshFixedSourceFrames": true
       }
     },
     {
@@ -538,7 +539,7 @@
         "uncertainDispatch": "reconcile same execution; never regenerate automatically"
       },
       "fallback": null,
-      "modelVersion": "2.5.1",
+      "modelVersion": "2.5.33",
       "enabled": true,
       "availability": "private_local_visual_qualification_pending",
       "limits": {
@@ -551,7 +552,24 @@
         "repairTemporalOutliers": true,
         "stationarySourceConsensus": true,
         "sourceResolutionEdges": true,
-        "correctFixedObjectColours": true
+        "correctFixedObjectColours": true,
+        "observedMovingDetail": true,
+        "measuredMotionDetail": true,
+        "classifyCorrectedFixedObjects": true,
+        "fixedObjectPostConsensus": true,
+        "photographedMaterialOpacity": true,
+        "sourceSeededFixedForeground": true,
+        "boundSourceMaterialGrowth": true,
+        "restoreSourcePersonInteriors": true,
+        "preserveOtherObjectWeakForeground": true,
+        "sourceBoundFixedEvidence": true,
+        "preserveMovingDetailRefinement": true,
+        "freshComponentTrimap": true,
+        "freshComponentBackground": true,
+        "independentFixedObjectAlpha": true,
+        "motionAwarePersonSourceEdges": true,
+        "sourceClassifiedObjectNeuralPolish": true,
+        "pruneUnsupportedFixedFragments": true
       }
     }
   ],

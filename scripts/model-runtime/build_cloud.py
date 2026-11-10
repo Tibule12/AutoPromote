@@ -28,6 +28,7 @@ def main():
         stream=io.BytesIO()
         files=[*(ROOT/'model_workers').rglob('*'),*(ROOT/'contracts').glob('model-capabilities-v1.json'),
                *(ROOT/'config/model-runtime').glob('*.json'),ROOT/'python_media_worker/studio_subject_matte.py',
+               ROOT/'python_media_worker/studio_source_background.py',
                ROOT/'scripts/model-runtime/prepare_model.py']
         with tarfile.open(fileobj=stream,mode='w:gz') as archive:
             for path in sorted(files):

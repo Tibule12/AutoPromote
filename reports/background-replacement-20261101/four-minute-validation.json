@@ -1,0 +1,287 @@
+{
+  "date": "2026-11-02",
+  "source": [
+    {
+      "path": "/home/tibule12/Videos/cam-combiner-5050c706-a6cb-48bc-ac43-8fa54f21bc1a.mp4",
+      "bytes": 2611147007,
+      "sha256": "93ce466b525041df305e839154645bd8fb5b9ec9b621c64d4c2afd5d9badff8a",
+      "hashSeconds": 8.867649111009086
+    },
+    {
+      "path": "/home/tibule12/Videos/AutoPromote Background Replacement - 2026-11-01/Four-minute movement test/Original podcast - first four minutes.mp4",
+      "bytes": 293713235,
+      "sha256": "b14bf07a916e41331f8516d9e00921d9c4fa2a37a492e2998ae9f463df3c280b",
+      "hashSeconds": 0.8949741709948285
+    }
+  ],
+  "actualContinuousReviewFrames": 5760,
+  "actualContinuousReviewSeconds": 240,
+  "cameraIntervals": 51,
+  "sourceCameraFrameChecks": 5760,
+  "cameraIdMismatches": 0,
+  "assembly": {
+    "fullDecodePassed": true,
+    "frames": 5760,
+    "seconds": 240,
+    "fps": 24,
+    "width": 1430,
+    "height": 1000,
+    "sourceMaster": "/home/tibule12/Videos/cam-combiner-5050c706-a6cb-48bc-ac43-8fa54f21bc1a.mp4",
+    "pictureIntervals": [
+      {
+        "file": "/home/tibule12/Projects/AutoPromte/AutoPromote-background-replacement-20261101/reports/background-replacement-20261101/private/long-podcast-r7/retained-first-72s.mp4",
+        "sourceFrameStart": 0,
+        "sourceFrameEnd": 1188,
+        "absoluteStartSeconds": 0,
+        "absoluteEndSeconds": 49.5
+      },
+      {
+        "file": "/home/tibule12/Projects/AutoPromte/AutoPromote-background-replacement-20261101/reports/background-replacement-20261101/private/long-podcast-r7/early-sleeve-repairs/proof-49.5-3/picture.mp4",
+        "sourceFrameStart": 0,
+        "sourceFrameEnd": 72,
+        "absoluteStartSeconds": 49.5,
+        "absoluteEndSeconds": 52.5
+      },
+      {
+        "file": "/home/tibule12/Projects/AutoPromte/AutoPromote-background-replacement-20261101/reports/background-replacement-20261101/private/long-podcast-r7/retained-first-72s.mp4",
+        "sourceFrameStart": 1260,
+        "sourceFrameEnd": 1284,
+        "absoluteStartSeconds": 52.5,
+        "absoluteEndSeconds": 53.5
+      },
+      {
+        "file": "/home/tibule12/Projects/AutoPromte/AutoPromote-background-replacement-20261101/reports/background-replacement-20261101/private/long-podcast-r7/early-sleeve-repairs/proof-53.5-3.75/picture.mp4",
+        "sourceFrameStart": 0,
+        "sourceFrameEnd": 90,
+        "absoluteStartSeconds": 53.5,
+        "absoluteEndSeconds": 57.25
+      },
+      {
+        "file": "/home/tibule12/Projects/AutoPromte/AutoPromote-background-replacement-20261101/reports/background-replacement-20261101/private/long-podcast-r7/retained-first-72s.mp4",
+        "sourceFrameStart": 1374,
+        "sourceFrameEnd": 1512,
+        "absoluteStartSeconds": 57.25,
+        "absoluteEndSeconds": 63
+      },
+      {
+        "file": "/home/tibule12/Projects/AutoPromte/AutoPromote-background-replacement-20261101/reports/background-replacement-20261101/private/long-podcast-r7/early-sleeve-repairs/proof-63-0.5/picture.mp4",
+        "sourceFrameStart": 0,
+        "sourceFrameEnd": 12,
+        "absoluteStartSeconds": 63,
+        "absoluteEndSeconds": 63.5
+      },
+      {
+        "file": "/home/tibule12/Projects/AutoPromte/AutoPromote-background-replacement-20261101/reports/background-replacement-20261101/private/long-podcast-r7/retained-first-72s.mp4",
+        "sourceFrameStart": 1524,
+        "sourceFrameEnd": 1728,
+        "absoluteStartSeconds": 63.5,
+        "absoluteEndSeconds": 72
+      },
+      {
+        "file": "/home/tibule12/Projects/AutoPromte/AutoPromote-background-replacement-20261101/reports/background-replacement-20261101/private/long-podcast-r7/retained-72-84s.mp4",
+        "sourceFrameStart": 0,
+        "sourceFrameEnd": 288,
+        "absoluteStartSeconds": 72,
+        "absoluteEndSeconds": 84
+      },
+      {
+        "file": "/home/tibule12/Projects/AutoPromte/AutoPromote-background-replacement-20261101/reports/background-replacement-20261101/private/long-podcast-r7/final-tail/proof-84-156/picture.mp4",
+        "sourceFrameStart": 0,
+        "sourceFrameEnd": 3744,
+        "absoluteStartSeconds": 84,
+        "absoluteEndSeconds": 240
+      }
+    ],
+    "audio": "Continuous original master 0\u2013240s, AAC 192k; never looped or reordered",
+    "modelRuns": "Actual local GPU SAM/ViTMatte plus private cached CPU RVM guidance; no paid cloud",
+    "nativeStudioQualification": false,
+    "visualGate": false
+  },
+  "nativeImportedReview": {
+    "nativeUploadSourceIsFlattenedReview": true,
+    "longFormModelEditingQualified": false,
+    "canonicalDocumentColdReopenExact": true,
+    "canonicalDocumentAfterExportExact": true,
+    "originalAudioRestorationBypassed": true,
+    "canonicalDocumentSha256": "6aea34af2598e3e2b2a97c3e2b79f94b7da3d6d589e61ba3bcfbdad657c8a2fd",
+    "exportSha256": "714714417f709bae565870df20b211c2be54e9f7f498aa2bbe4354ef95c3015f",
+    "browserExceptions": [],
+    "paidCloudInference": false
+  },
+  "nativeTransport": {
+    "nativeExportSha256": "714714417f709bae565870df20b211c2be54e9f7f498aa2bbe4354ef95c3015f",
+    "fullDecodePassed": true,
+    "frames": 5760,
+    "durationSeconds": 240,
+    "dimensions": [
+      1920,
+      1080
+    ],
+    "audioWindows": [
+      {
+        "start": 0,
+        "end": 30.0,
+        "zeroOffsetCorrelation": 0.9916657889909797,
+        "rmsGain": 0.9932894576699485
+      },
+      {
+        "start": 30,
+        "end": 60.0,
+        "zeroOffsetCorrelation": 0.9922564578231672,
+        "rmsGain": 0.9961211439987523
+      },
+      {
+        "start": 60,
+        "end": 90.0,
+        "zeroOffsetCorrelation": 0.9918014760736475,
+        "rmsGain": 0.9983779674841089
+      },
+      {
+        "start": 90,
+        "end": 120.0,
+        "zeroOffsetCorrelation": 0.9923275334380115,
+        "rmsGain": 0.9978405965034624
+      },
+      {
+        "start": 120,
+        "end": 150.0,
+        "zeroOffsetCorrelation": 0.995605310467504,
+        "rmsGain": 0.9939895415203285
+      },
+      {
+        "start": 150,
+        "end": 180.0,
+        "zeroOffsetCorrelation": 0.9961396987949048,
+        "rmsGain": 0.9929036362750292
+      },
+      {
+        "start": 180,
+        "end": 210.0,
+        "zeroOffsetCorrelation": 0.9944042648137724,
+        "rmsGain": 0.9961136094733114
+      },
+      {
+        "start": 210,
+        "end": 240.0,
+        "zeroOffsetCorrelation": 0.9943722663734317,
+        "rmsGain": 0.9954909127817244
+      }
+    ],
+    "pictureMeasurements": [
+      {
+        "seconds": 0,
+        "fitReferenceMeanAbsoluteRgbDifference": 1.3781703317901235
+      },
+      {
+        "seconds": 15,
+        "fitReferenceMeanAbsoluteRgbDifference": 1.531731288580247
+      },
+      {
+        "seconds": 45,
+        "fitReferenceMeanAbsoluteRgbDifference": 1.677850758744856
+      },
+      {
+        "seconds": 50,
+        "fitReferenceMeanAbsoluteRgbDifference": 1.2723693094135802
+      },
+      {
+        "seconds": 75,
+        "fitReferenceMeanAbsoluteRgbDifference": 1.744314236111111
+      },
+      {
+        "seconds": 100,
+        "fitReferenceMeanAbsoluteRgbDifference": 1.2499183384773662
+      },
+      {
+        "seconds": 115,
+        "fitReferenceMeanAbsoluteRgbDifference": 1.5943606931584362
+      },
+      {
+        "seconds": 125,
+        "fitReferenceMeanAbsoluteRgbDifference": 1.5547511574074073
+      },
+      {
+        "seconds": 145,
+        "fitReferenceMeanAbsoluteRgbDifference": 1.2794667888374485
+      },
+      {
+        "seconds": 165,
+        "fitReferenceMeanAbsoluteRgbDifference": 1.3525948431069958
+      },
+      {
+        "seconds": 198,
+        "fitReferenceMeanAbsoluteRgbDifference": 1.7156285365226338
+      },
+      {
+        "seconds": 225,
+        "fitReferenceMeanAbsoluteRgbDifference": 1.4668161651234568
+      },
+      {
+        "seconds": 239,
+        "fitReferenceMeanAbsoluteRgbDifference": 1.5196182163065843
+      }
+    ],
+    "pixelIdentical": false,
+    "sourceIsFlattenedReview": true,
+    "allMovingEdgesQualified": false,
+    "creativeGate": false,
+    "note": "Fit/reference differences include real native re-encoding. Numerical correspondence is not a visual pass."
+  },
+  "completeNativePlayback": {
+    "nativeFinishedOutput": true,
+    "editableTimelineVisible": true,
+    "exportSha256": "714714417f709bae565870df20b211c2be54e9f7f498aa2bbe4354ef95c3015f",
+    "capturedFrames": 2208,
+    "capturedBytes": 220873208,
+    "captureRateLimit": 12,
+    "audioOffset": 0.13225579261779785,
+    "flattenedReviewSource": true,
+    "editableLongFormMasksQualified": false,
+    "audio": "Exact exported soundtrack muxed at the observed native frame display epoch; QA device muted.",
+    "smoothnessQualified": false,
+    "creativeGate": false,
+    "noRenderSubmitted": true
+  },
+  "playback": {
+    "duration": 240,
+    "ended": true,
+    "quality": {
+      "totalVideoFrames": 5840,
+      "droppedVideoFrames": 134
+    }
+  },
+  "latestShortCorrection": {
+    "sourceRangeSeconds": [
+      115,
+      117
+    ],
+    "all48ActualFramesInspected": true,
+    "repairs": [
+      "forehead original-wall fragment",
+      "missing boom rails",
+      "lost chair segment",
+      "fixed rectangular holdout and selected old-TV remnants"
+    ],
+    "remaining": [
+      "fine plant and spring contamination/edge errors",
+      "source-specific correction not propagated through 51 camera intervals",
+      "editable native long-form masks unqualified"
+    ],
+    "isNativeModelArtifact": false
+  },
+  "tests": {
+    "temporalAlpha": 12,
+    "sourceEdgeAlpha": 4,
+    "workerRegression": 58,
+    "localBounds": 4,
+    "existingHttp": 5,
+    "totalDistinct": 83
+  },
+  "creativeGate": false,
+  "readinessPromotion": false,
+  "paidCloudInference": false,
+  "productionDeployment": false,
+  "currentFreeDiskBytes": 6572687360,
+  "ramRuntimeRemoved": true,
+  "thisRunVerifiedIntermediatesRemovedAllocatedBytes": 504213504
+}

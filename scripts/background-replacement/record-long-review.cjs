@@ -7,8 +7,11 @@ const { clickStudioControl } = require('../../test/e2e/playwright/studio-timelin
 async function main() {
   const directory = path.resolve(process.argv[2]);
   const native = path.resolve(process.argv[3]); const output = path.resolve(process.argv[4]); fs.mkdirSync(output, { recursive: true });
-  const expectedDuration = 240;
+  const expectedDuration = Number(process.env.STUDIO_REVIEW_EXPECTED_SECONDS || 240);
+  const captureRate = Number(process.env.STUDIO_REVIEW_CAPTURE_FPS || 12);
+  const exportFile=path.join(native,process.env.STUDIO_REVIEW_EXPORT_FILE || 'Four-minute native export.mp4');
   assert(Number.isFinite(expectedDuration) && expectedDuration > 0 && expectedDuration <= 240);
+  assert(Number.isFinite(captureRate) && captureRate >= 12 && captureRate <= 24);
   const config = JSON.parse(fs.readFileSync(path.join(directory, 'browser-private.json')));
   const browser = await chromium.launch({ headless: true, args: ['--mute-audio', '--proxy-server=http://127.0.0.1:9', '--proxy-bypass-list=127.0.0.1;localhost'] });
   const context = await browser.newContext({ viewport: { width: 1600, height: 1100 },
@@ -33,7 +36,7 @@ async function main() {
       await page.locator('form button[type=submit]').click();
     }
     await page.getByRole('button', { name: 'Viral Clip Studio', exact: true }).first().click();
-    await page.getByRole('button', { name: 'Four-minute background replacement review', exact: true }).click();
+    await page.getByRole('button', { name: process.env.STUDIO_REVIEW_PROJECT_NAME || 'Four-minute background replacement review', exact: true }).click();
     await clickStudioControl(page, page.getByRole('button', { name: 'Export', exact: true }));
     await page.getByTestId('rendered-output-ready').waitFor({ timeout: 60000 });
     const show = page.getByRole('button', { name: 'Show Finished Video', exact: true });
@@ -48,7 +51,7 @@ async function main() {
     const video = page.getByTestId('studio-after-video');
     const response = await context.request.get(await video.getAttribute('src')); assert(response.ok());
     const hash = b => require('crypto').createHash('sha256').update(b).digest('hex');
-    assert.equal(hash(await response.body()), hash(fs.readFileSync(path.join(native, 'Four-minute native export.mp4'))));
+    assert.equal(hash(await response.body()), hash(fs.readFileSync(exportFile)));
     await page.getByLabel('Edited output position', { exact: true }).evaluate(e => {
       Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(e, '0');
       e.dispatchEvent(new Event('input', { bubbles: true })); e.dispatchEvent(new Event('change', { bubbles: true }));
@@ -68,7 +71,7 @@ async function main() {
     const frames = path.join(output, 'capture-frames'); fs.mkdirSync(frames, { recursive: true });
     const cdp = await context.newCDPSession(page); const captured = []; let bytes = 0; let lastCapture = -Infinity;
     cdp.on('Page.screencastFrame', event => {
-      if (event.metadata.timestamp - lastCapture < 1/12) { void cdp.send('Page.screencastFrameAck', {sessionId:event.sessionId}); return; }
+      if (event.metadata.timestamp - lastCapture < 1/captureRate) { void cdp.send('Page.screencastFrameAck', {sessionId:event.sessionId}); return; }
       lastCapture = event.metadata.timestamp;
       const file = path.join(frames, `${String(captured.length).padStart(6, '0')}.jpg`);
       const data = Buffer.from(event.data, 'base64'); bytes += data.length;
@@ -96,14 +99,15 @@ async function main() {
       `file '${f.file}'\noption framerate 1000\nduration ${Math.max(.001, (captured[i+1]?.time ?? f.time+.1)-f.time)}\n`).join('') +
       `file '${captured.at(-1).file}'\noption framerate 1000\n`);
     execFileSync('ffmpeg', ['-nostdin', '-v', 'error', '-y', '-safe', '0', '-i', concat,
-      '-itsoffset', String(audioOffset), '-i', path.join(native, 'Four-minute native export.mp4'),
+      '-itsoffset', String(audioOffset), '-i', exportFile,
       '-map', '0:v:0', '-map', '1:a:0', '-vf', 'fps=24', '-c:v', 'libx264', '-preset', 'fast', '-crf', '22',
       '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', path.join(output, 'Studio - complete final playback.mp4')]);
     fs.writeFileSync(path.join(output, 'studio-playback.json'), JSON.stringify({ playback,
       nativeFinishedOutput: true, editableTimelineVisible: await timeline.isVisible(),
-      exportSha256: hash(fs.readFileSync(path.join(native, 'Four-minute native export.mp4'))),
-      capturedFrames: captured.length, capturedBytes: bytes, captureRateLimit: 12, audioOffset,
-      flattenedReviewSource: true, editableLongFormMasksQualified: false,
+      exportSha256: hash(fs.readFileSync(exportFile)),
+      capturedFrames: captured.length, capturedBytes: bytes, captureRateLimit: captureRate, audioOffset,
+      flattenedReviewSource: process.env.STUDIO_REVIEW_MASK_BACKED!=='true', editableLongFormMasksQualified: false,
+      editableShortMaskScene:process.env.STUDIO_REVIEW_MASK_BACKED==='true'&&expectedDuration<=10,
       audio: 'Exact exported soundtrack muxed at the observed native frame display epoch; QA device muted.',
       smoothnessQualified: false, creativeGate: false, noRenderSubmitted: true }, null, 2));
     console.log('COMPLETE_NATIVE_PLAYBACK', captured.length, audioOffset);

@@ -1,0 +1,18 @@
+// Bounded continuation of the actual source repair, never creative approval.
+const fs=require('fs'),path=require('path'),crypto=require('crypto'),{spawn}=require('child_process');
+const root=path.resolve('reports/background-replacement-20261101/private/four-minute-r9'),ram='/dev/shm/autopromote-background-four-minute-r9/sleeve-final-v2';
+async function run(command,args,log){const fd=fs.openSync(path.join(root,log),'a',0o600),child=spawn(command,args,{env:{...process.env,PYTHONPATH:'/home/tibule12/.cache/autopromote-model-runtime/source-edge-deps-1.1.16:.',OPENBLAS_NUM_THREADS:'1',NUMBA_NUM_THREADS:'1'},stdio:['ignore',fd,fd]});fs.closeSync(fd);await new Promise((ok,no)=>{child.once('error',no);child.once('exit',code=>code===0?ok():no(Error(`${command} exited ${code}`)));});}
+(async()=>{const deadline=Date.now()+3600000;while(!fs.existsSync(path.join(ram,'assembly-verification.json'))){if(Date.now()>deadline)throw Error('Source repair did not complete within the bounded wait');await new Promise(r=>setTimeout(r,2000));}
+ const receipt=JSON.parse(fs.readFileSync(path.join(ram,'assembly-verification.json')));if(receipt.frames!==5760||!receipt.sourceBoundSleeveCorrection)throw Error('Complete real source correction receipt missing');const movie=fs.readFileSync(path.join(ram,'Four-minute repaired preview.mp4'));if(crypto.createHash('sha256').update(movie).digest('hex')!==receipt.previewSha256)throw Error('Actual corrected movie hash differs');
+ fs.renameSync(path.join(root,'assembled'),path.join(root,'before-sleeve-assembly'));fs.mkdirSync(path.join(root,'assembled'));
+ for(const name of ['Four-minute repaired preview.mp4','Full alpha matte - lossless.mkv','assembly-verification.json'])fs.copyFileSync(path.join(ram,name),path.join(root,'assembled',name));
+ fs.renameSync(path.join(root,'actual-four-minute-review'),path.join(root,'before-sleeve-frame-review'));
+ // Retain all contact sheets/index and the actual named defect frames. Other
+ // old JPEGs are regenerated review intermediates, superseded by final review.
+ const old=path.join(root,'before-sleeve-frame-review'),keep=new Set(['frame-01200.jpg','frame-02136.jpg','frame-04800.jpg','frame-05400.jpg']);const removed=[];
+ for(const name of fs.readdirSync(old)){if(/^frame-\d+\.jpg$/.test(name)&&!keep.has(name)){const file=path.join(old,name);removed.push({name,bytes:fs.statSync(file).size});fs.unlinkSync(file);}}
+ fs.writeFileSync(path.join(root,'superseded-review-cleanup.json'),JSON.stringify({removedFiles:removed.length,removedBytes:removed.reduce((n,v)=>n+v.bytes,0),retained:'All old contact sheets/index and named actual defect frames; original/delivered media preserved'},null,2));
+ fs.renameSync(path.join(root,'native-final'),path.join(root,'native-before-sleeve-attempt'));
+ await run('/home/tibule12/Projects/AutoPromte/AutoPromote/.venv/bin/python',['scripts/background-replacement/review-repaired-four-minutes.py',path.join(root,'assembled/Four-minute repaired preview.mp4'),path.join(root,'actual-four-minute-review')],'actual-final-source-review.log');
+ await run(process.execPath,['scripts/background-replacement/complete-four-minute-review.cjs','--resume-native'],'completion.log');
+})().catch(e=>{fs.writeFileSync(path.join(root,'sleeve-continuation-failure.json'),JSON.stringify({error:e.message,paidCloud:false,visualGate:false}));process.exitCode=1;});

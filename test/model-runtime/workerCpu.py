@@ -20,6 +20,16 @@ class WorkerCpu(unittest.TestCase):
                 '-frames:v','12','-c:v','libx264','-threads','1',str(source)],check=True)
             _,geometry=normalize(source,{'sourceRange':{'startTick':0,'endTick':9375}},root/'derivative.mp4')
             self.assertEqual(int(geometry['nb_read_frames']),3)
+    def test_subject_derivative_preserves_decoded_source_edges_and_source_clock(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);source=root/'source.mp4'
+            subprocess.run(['ffmpeg','-v','error','-f','lavfi','-i','testsrc2=s=128x96:r=24',
+                '-frames:v','12','-c:v','libx264','-crf','0','-threads','1','-pix_fmt','yuv420p',str(source)],check=True)
+            target,geometry=normalize(source,{'capability':'segment_subject','sourceRange':{'startTick':3750,'endTick':18750}},root/'subject.mp4',max_size=(1920,1080))
+            def decode(file):return subprocess.check_output(['ffmpeg','-v','error','-i',str(file),'-map','0:v:0','-threads','1','-pix_fmt','rgb24','-f','rawvideo','pipe:1'])
+            original=decode(source);frame_bytes=128*96*3
+            self.assertEqual(int(geometry['nb_read_frames']),4)
+            self.assertEqual(decode(target),original[frame_bytes:5*frame_bytes])
     def test_opaque_ids_normalize_but_unobserved_facts_do_not(self):
         data={'summary':'CPU fixture','subjects':[{'id':0,'label':'fixture','description':'test','observedFrameIndices':[0]}],
               'observations':[{'frameIndex':0,'sourceTick':0,'description':'test'}]}

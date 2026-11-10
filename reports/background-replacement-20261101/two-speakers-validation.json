@@ -1,0 +1,179 @@
+{
+  "date": "2026-11-01",
+  "scope": "Six-second native two-angle export: same first failed interval plus full main-camera second speaker at 54\u201357s. Existing native interior holdout fills first shirt/boom holes. Second person/three-object tracks, corrective clicks and source-colour-protected TV exclusions preserve movement. No engine feature added.",
+  "delivery": "/home/tibule12/Videos/AutoPromote Background Replacement - 2026-11-01/Two-speaker revision",
+  "movie": {
+    "sha256": "74351648b7385a88c5daed3bceec0acbc80c86ffef7f2f51687986d9ef45eee9",
+    "durationSeconds": 6,
+    "frames": 144,
+    "fps": 24,
+    "dimensions": [
+      1920,
+      1080
+    ],
+    "videoCodec": "h264",
+    "audioCodec": "aac",
+    "audioSampleRate": 48000,
+    "channels": 2,
+    "fullDecodePassed": true
+  },
+  "studioRecording": {
+    "sha256": "24082d471f425ff7672a95dd9a84b0310b7ffe80b379565c148b5df2d9828fb3",
+    "durationSeconds": 6.25,
+    "actualNativeFinishedOutput": true,
+    "editableTimelineVisible": true,
+    "endedPlaybackAtSeconds": 6,
+    "fullDecodePassed": true,
+    "audio": "Actual export soundtrack muxed at observed frame display epoch 0.188076 seconds; QA headless/device muted.",
+    "smoothnessQualified": false
+  },
+  "nativePersistence": {
+    "canonicalDocumentColdReopenExact": true,
+    "subjectScenesColdReopenExact": true,
+    "canonicalDocumentAfterExportExact": true,
+    "subjectScenesAfterExportExact": true,
+    "sceneCount": 2,
+    "canonicalDocumentSha256": "24f496459223574b574bd088d94d8e83a79f1e19c34ae5a4eee2ae17b343b4a0",
+    "exportSha256": "74351648b7385a88c5daed3bceec0acbc80c86ffef7f2f51687986d9ef45eee9"
+  },
+  "sourceProvenance": {
+    "originalSource": "/home/tibule12/Videos/cam-combiner-60sec.mp4",
+    "originalSourceSha256": "7a16b8ba2eba836eac74bcfb1f830313907ac0e19f314e636d4b7f833643578c",
+    "angles": [
+      {
+        "speaker": "striped shirt",
+        "sourceRangeSeconds": [
+          22.4583333333333,
+          25.4583333333333
+        ],
+        "crop": [
+          170,
+          40,
+          1430,
+          1000
+        ],
+        "retainedPriorSource": true
+      },
+      {
+        "speaker": "cream shirt and cap",
+        "sourceRangeSeconds": [
+          54,
+          57
+        ],
+        "crop": [
+          430,
+          40,
+          1440,
+          1000
+        ],
+        "sourceSha256": "834e040279e6f7ca977f4d34625450c2d876628120cb566c35de2e434aa01abb",
+        "frames": 72,
+        "fps": 24,
+        "cameraCuts": []
+      }
+    ],
+    "programme": "Two sequential test angles, 3 seconds each; different source intervals, not claimed simultaneous action.",
+    "failedFirstTrim": {
+      "sourceRangeSeconds": [
+        53,
+        56
+      ],
+      "cameraCutAtFrame": 12,
+      "workerRejectedBeforeInference": true,
+      "retained": true
+    }
+  },
+  "actualVisualReview": {
+    "previewFramesInspected": 144,
+    "finalFramesInspected": 144,
+    "allActualContactSheetsReviewed": true,
+    "sourceMovementRetimedOrFrozen": false,
+    "firstAngle": "Couch, hands and mic retained; shirt/boom interior holes filled.",
+    "secondAngle": "Cap/head turn, shoulders/sleeve, hand, microphone/stands and old TV region reviewed; large TV remnant removed.",
+    "remaining": [
+      "Fine foliage/prop colour contamination and jagged or low-alpha boundary detail remain; supplemental native corrections are source-specific, not a claim that the model alone solves all remnants.",
+      "Longer/arbitrary motion, moving cameras, wispy hair and unseen occlusions remain unqualified.",
+      "Single-view light/perspective matching does not establish physical relighting or reconstructed geometry.",
+      "Local CPU latency, production model transport and universal offline backup recovery remain unqualified."
+    ],
+    "professionalCreativeApproval": false
+  },
+  "effectiveAlphaDiagnostics": {
+    "scope": "Actual effective shared-compositor alpha, diagnostic populations only; not labelled alpha ground truth or a professional score.",
+    "firstAngleTwoPriorHoleSamplesAcross72": {
+      "samples": 144,
+      "minimumAlpha255": 255
+    },
+    "secondAngleTrackedPersonInteriorInExclusion": {
+      "pixelFrames": 7961,
+      "belowAlpha242": 2,
+      "minimumAlpha255": 217
+    },
+    "secondAngleVerifiedBackgroundTvStripCore": {
+      "roi": [
+        250,
+        870,
+        330,
+        930
+      ],
+      "nonzeroAlphaPixelFramesAcross72": 0
+    }
+  },
+  "previewExportComparison": [
+    {
+      "angle": 1,
+      "frames": 72,
+      "meanSSIM": 0.9873151527777778,
+      "minimumSSIM": 0.986292,
+      "geometry": "Exact frozen worker graph: each preview contains into common1430x1000canvas; thatcanvas contains into1920x1080. B has additional vertical padding.",
+      "scope": "Encoding/scaling comparison only; not pixel identity, alpha ground truth or creative approval."
+    },
+    {
+      "angle": 2,
+      "frames": 72,
+      "meanSSIM": 0.9892590972222222,
+      "minimumSSIM": 0.988032,
+      "geometry": "Exact frozen worker graph: each preview contains into common1430x1000canvas; thatcanvas contains into1920x1080. B has additional vertical padding.",
+      "scope": "Encoding/scaling comparison only; not pixel identity, alpha ground truth or creative approval."
+    }
+  ],
+  "modelArtifacts": [
+    {
+      "angle": 1,
+      "alphaArtifactHash": "8685d8d6374ae2ee42e5f8e1a699634d2b3355264ddbf9bdec9fb958f3170507",
+      "reusedThisContinuation": true
+    },
+    {
+      "angle": 2,
+      "alphaArtifactHash": "cdbbae31d29761750f3b223e6739751536264e5738c64f2f164e30ecec08c7f6",
+      "newLocalCpuInference": true,
+      "segmentationJob": "3bff62b3c7e5ce09f8b35564d8c27556a8e5c51452e20c8a0febdb090ae041a7",
+      "alphaJob": "99df7e385154cd45e140cf8d02750cd89b39ba1b9603d8614eec66d424d7232e"
+    }
+  ],
+  "licenseReview": "licenses.md; existing licensed local weights reused, no new weights selected",
+  "supplementalAuthoring": "Native interior holdout and colour-protected background exclusions; saved in ordinary scene effects. No primary manual Blender rotoscoping.",
+  "previousFailuresPreserved": true,
+  "engineFeatureAddedThisContinuation": false,
+  "paidCloudInference": false,
+  "productionDataChanged": false,
+  "deployed": false,
+  "merged": false,
+  "unrelatedBranchesModified": false,
+  "checks": {
+    "nativeTwoAngleSaveColdReopenFinalExport": "passed; exact canonical document and both subject scenes",
+    "actualFrameReview": "144 native preview frames and 144 final frames visually inspected",
+    "fullDecode": "native final, complete Studio recording and source/replacement moving comparison passed",
+    "deliveredFiles": "172 initial files hash verified; final manifest includes validation and recording metadata and is verified again at packaging",
+    "documentationAndAssistanceTests": {
+      "passed": 51,
+      "failed": 0,
+      "skipped": 0
+    },
+    "documentationBuildAndCheck": "passed; nine inherited undocumented workspace surfaces remain warnings",
+    "studioContract": "passed; formal 2/1/9/17/0/0 counts unchanged",
+    "scriptSyntax": "three native JavaScript tools and two Python review/package tools passed",
+    "gitDiffCheck": "passed",
+    "engineUnitTests": "Not rerun this continuation: no adapter, renderer or frontend feature change; earlier engine validation remains historical."
+  }
+}

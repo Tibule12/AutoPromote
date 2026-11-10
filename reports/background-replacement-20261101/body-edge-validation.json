@@ -1,0 +1,155 @@
+{
+  "date": "2026-11-01",
+  "scope": "Same two consecutive three-second source angles; moving speaker body and edge refinement. No general creative or production qualification.",
+  "finalExport": {
+    "sha256": "17167734168f2464ac1900e1973138f861355385c532c6fb6e7de2a3f3aeeb8b",
+    "durationSeconds": 6,
+    "frames": 144,
+    "width": 1920,
+    "height": 1080,
+    "fps": 24,
+    "video": "H.264",
+    "audio": "AAC 48000 Hz stereo",
+    "fullDecodePassed": true
+  },
+  "visualReview": {
+    "nativePreviewFramesInspected": 144,
+    "exportFramesInspected": 144,
+    "headFaceNeckCloseupFramesInspected": 144,
+    "sourcePreviousCurrentMovingBodyComparisons": true,
+    "reviewedAreas": [
+      "cap/hair",
+      "ears",
+      "face/jaw/neck",
+      "shoulders",
+      "clothes",
+      "hands",
+      "microphone overlap",
+      "equipment/plant and moving sleeve boundary"
+    ],
+    "result": "Improved body-edge contour and sleeve retention on these reviewed source intervals. Fine microphone/foliage contamination and jaggedness remain; professional visual gate not passed."
+  },
+  "nativePreviews": [
+    {
+      "angle": 1,
+      "sha256": "ad31c54801e78d0abea6482799d69a5a1d39e6208d66160d9fbb04bc38ab6bd1",
+      "frames": 72
+    },
+    {
+      "angle": 2,
+      "sha256": "a4c77b692b065330cddf93d74a590a5cff6d2e273db420ff8be9a80c1ca4bb48",
+      "frames": 72
+    }
+  ],
+  "changes": [
+    "Retain soft source-conditioned model alpha by using edge detail width zero; preserve foreground-colour recovery.",
+    "Remove hard colour-based sleeve reconstruction; background correction clicks target equipment/plant while retaining the original person prompt.",
+    "Stop supplemental equipment exclusions before the moving sleeve.",
+    "Persist the original person selection box independently of detachable job metadata through canonical save/reopen."
+  ],
+  "persistence": {
+    "canonicalDocumentColdReopenExact": true,
+    "subjectScenesColdReopenExact": true,
+    "canonicalDocumentAfterExportExact": true,
+    "subjectScenesAfterExportExact": true,
+    "sceneCount": 2,
+    "canonicalDocumentSha256": "ce2e8c2165082f3fd4d5453716591b4f7781aa9601518f9c9d4e22709f93078c",
+    "exportSha256": "17167734168f2464ac1900e1973138f861355385c532c6fb6e7de2a3f3aeeb8b",
+    "maskBoxColdReopenExact": true,
+    "maskBoxAfterExportExact": true,
+    "secondSpeakerMaskBox": [
+      0.26,
+      0.06,
+      0.98,
+      1
+    ]
+  },
+  "freshLocalRecovery": {
+    "originalDemo": "/tmp/autopromote-application-demo-UByimw",
+    "recoveredDemo": "/tmp/autopromote-application-demo-cbnYeI",
+    "immutableInputsRestored": true,
+    "exactArtifactHashesVerified": true,
+    "originalArtifactTimestampReconstructedFromRetainedReceiptAndMatchedExistingHash": true,
+    "priorWalletOrJobHistoryReconstructed": false,
+    "freshNormalAuthNativeBackupRestore": true,
+    "nativePreviewsByteIdentical": [
+      true,
+      true
+    ],
+    "nativeExportByteIdentical": true,
+    "exportSha256": "17167734168f2464ac1900e1973138f861355385c532c6fb6e7de2a3f3aeeb8b",
+    "newEffectIdentityForFreshPreviewReceipts": true,
+    "actualPictureAndAudioUnchanged": true,
+    "sourceMediaIndependentlyDelivered": true
+  },
+  "completeStudioRecording": {
+    "sha256": "67977b7eb5e5280f1d74ea46b1f7fdccbb5c374e92e19675788fffcc4f8d232a",
+    "nativeFinishedOutput": true,
+    "editableTimelineVisible": true,
+    "ended": true,
+    "exportSha256": "17167734168f2464ac1900e1973138f861355385c532c6fb6e7de2a3f3aeeb8b",
+    "capturedFrames": 106,
+    "playbackQuality": {
+      "totalVideoFrames": 161,
+      "droppedVideoFrames": 54
+    },
+    "smoothnessQualified": false,
+    "audio": "Exact exported soundtrack muxed at the observed native frame display epoch; QA device muted.",
+    "audioOffsetSeconds": 0.4300849437713623,
+    "fullDecodePassed": true
+  },
+  "previewExportComparison": [
+    {
+      "angle": 1,
+      "frames": 72,
+      "meanSSIM": 0.9874090972222223,
+      "minimumSSIM": 0.986381,
+      "geometry": "Actual native common 1430x1000 canvas followed by Fit full 1920x1080, including second-angle vertical padding.",
+      "scope": "Scaling/encoding comparison, not pixel identity or creative/ground-truth qualification."
+    },
+    {
+      "angle": 2,
+      "frames": 72,
+      "meanSSIM": 0.9893095416666667,
+      "minimumSSIM": 0.988083,
+      "geometry": "Actual native common 1430x1000 canvas followed by Fit full 1920x1080, including second-angle vertical padding.",
+      "scope": "Scaling/encoding comparison, not pixel identity or creative/ground-truth qualification."
+    }
+  ],
+  "diagnosticScope": "Effective-alpha bundles are from the original reviewed native preview requests; fresh equivalent cleanup-layer identities produce byte-identical preview/export movies. Mask/core metrics are not ground truth.",
+  "tests": {
+    "frontendComponents": 45,
+    "frontendProjectAndBackup": 16,
+    "backendProjectAndReplay": 19,
+    "totalTargetedApplicationTests": 80,
+    "documentationTests": 51,
+    "productionModeLocalBuild": true,
+    "anonymousViewportChecks": 8,
+    "normalSignedInCompiledBuildStudioAndHelp": true,
+    "totalApplicationAndDocumentationTests": 131,
+    "studioContractValid": true,
+    "knowledgeBuildAndCheckValid": true,
+    "gitDiffCheckPassed": true
+  },
+  "remainingLimitations": [
+    "Fine microphone and foliage boundaries retain contamination/jagged detail.",
+    "Source compression limits recoverable fine boundaries.",
+    "Replacement lighting/perspective are approximate single-view integration, not physical relighting.",
+    "Longer or arbitrary body/hair/camera/occlusion motion is not qualified.",
+    "ViTMatte is an image matting model with deterministic temporal processing, not a trained video matting network.",
+    "CPU latency and browser capture smoothness remain unqualified."
+  ],
+  "professionalGate": false,
+  "newWeights": false,
+  "paidInference": false,
+  "productionChanges": false,
+  "deployment": false,
+  "merge": false,
+  "delivery": {
+    "filesVerified": 246,
+    "allReviewLinksExist": true,
+    "moviesFullyDecoded": 16,
+    "headlessMutedPlaybackChecks": 7,
+    "browserExceptions": 0
+  }
+}

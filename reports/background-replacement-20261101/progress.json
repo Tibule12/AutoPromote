@@ -1,0 +1,137 @@
+{
+  "status": "BODY_SOFT_EDGES_AND_SELECTION_PERSISTENCE_REPAIRED_REVIEWED_TWO_ANGLE_EXPORT",
+  "source": "/home/tibule12/Videos/cam-combiner-60sec.mp4",
+  "sourceRangeSeconds": [
+    22.458333333333332,
+    25.458333333333332
+  ],
+  "studioCrop": [
+    170,
+    40,
+    1430,
+    1000
+  ],
+  "scope": "Six-second native two-angle export: same first failed interval plus full main-camera second speaker at 54\u201357s. Existing native interior holdout fills first shirt/boom holes. Second person/three-object tracks, corrective clicks and source-colour-protected TV exclusions preserve movement. No engine feature added.",
+  "completed": [
+    "Actual SAM 2.1 person and six foreground-object selections, with native later-frame correction",
+    "72-frame source-conditioned ViTMatte alpha and optical-flow consensus refinement",
+    "Normal native replacement preview and source-bound final CPU export",
+    "Exact subject scene/canonical document Save \u2192 cold reopen; native export FPS changed separately from 30 to 24",
+    "Complete three-second native final playback with editable timeline, audible exported soundtrack and original source/masks/alpha delivered",
+    "All 72 exported frames inspected and preview/export encoding comparison recorded",
+    "243 automated cases passed, including scoped documentation/assistance regressions"
+  ],
+  "rejected": [
+    "Initial segmentation: missing mic mount/stand pixels and TV artwork among foliage",
+    "Early alpha: opaque furniture/equipment became translucent; corrected by retaining selected foreground seeds",
+    "Unbounded full-resolution CPU alpha exceeded practical local window; cancelled using native control after retaining partial diagnostic frames",
+    "RVM + source-guided alpha evaluation: equipment/occlusion loss; GPL checkpoint not integrated"
+  ],
+  "pending": [
+    "Fine foliage/prop colour contamination and boundary detail remain; photographed compression limits recoverable detail.",
+    "Original photographed lighting is retained; no physical relighting, reconstructed geometry or single-view perspective qualification.",
+    "Longer/arbitrary motion, moving cameras, wispy hair and unseen occlusions remain unqualified.",
+    "Local CPU inference latency and production deployment/transport remain unqualified; fresh local input recovery does not reconstruct prior wallet/job history."
+  ],
+  "limitations": [
+    "ViTMatte is an image network plus deterministic source-flow temporal refinement, not a trained video matting network.",
+    "Runtime was an explicit bounded local CPU emulator process, not deployed or qualified as a production GPU/Docker runtime.",
+    "Static component tracks assume this fixed source camera; camera movement needs moving tracks.",
+    "CPU timing is too slow for interactive video inference on this laptop.",
+    "Backup references isolated local demo owned media/artifacts; offline movies and source/mask bundles are delivered separately, without claiming universally portable project recovery."
+  ],
+  "motionRevisionReport": "motion-repair.md",
+  "latestStatus": "BODY_SOFT_EDGES_AND_SELECTION_PERSISTENCE_REPAIRED_REVIEWED_TWO_ANGLE_EXPORT",
+  "latestReport": "reports/background-replacement-20261101/body-edge-repair.md",
+  "latestValidation": "reports/background-replacement-20261101/body-edge-validation.json",
+  "completeNewFinalStudioRecording": true,
+  "professionalCreativeGate": false,
+  "remaining": [
+    "Fine foliage/prop colour contamination and boundary detail remain; photographed compression limits recoverable detail.",
+    "Original photographed lighting is retained; no physical relighting, reconstructed geometry or single-view perspective qualification.",
+    "Longer/arbitrary motion, moving cameras, wispy hair and unseen occlusions remain unqualified.",
+    "Local CPU inference latency and production deployment/transport remain unqualified; fresh local input recovery does not reconstruct prior wallet/job history."
+  ],
+  "pipelineTestsThisContinuation": 122,
+  "documentationTestsThisContinuation": 51,
+  "all72PreviewAndExportFramesInspected": true,
+  "historicalStatusBeforeTwoSpeakers": "MOTION_STABILITY_IMPROVED_PROFESSIONAL_GATE_AND_NEW_FINAL_RECORDING_OPEN",
+  "twoSpeakerContinuation": {
+    "report": "reports/background-replacement-20261101/two-speakers.md",
+    "validation": "reports/background-replacement-20261101/two-speakers-validation.json",
+    "modelVersion": "2.4.1",
+    "scope": "Six-second native two-angle export: same first failed interval plus full main-camera second speaker at 54\u201357s. Existing native interior holdout fills first shirt/boom holes. Second person/three-object tracks, corrective clicks and source-colour-protected TV exclusions preserve movement. No engine feature added.",
+    "nativeSaveColdReopenAndExport": true,
+    "canonicalDocumentAndBothSubjectScenesExact": true,
+    "completeNewFinalStudioRecording": true,
+    "previewFramesInspected": 144,
+    "exportFramesInspected": 144,
+    "neuralInferenceSecondAngle": "local CPU only, reused licensed weights",
+    "readinessPromotion": false,
+    "creativeGate": false,
+    "paidCloudInference": false,
+    "productionDeployment": false,
+    "remainingBlockers": [
+      "Fine foliage/prop colour contamination and jagged or low-alpha boundary detail remain; supplemental native corrections are source-specific, not a claim that the model alone solves all remnants.",
+      "Longer/arbitrary motion, moving cameras, wispy hair and unseen occlusions remain unqualified.",
+      "Single-view light/perspective matching does not establish physical relighting or reconstructed geometry.",
+      "Local CPU latency, production model transport and universal offline backup recovery remain unqualified."
+    ],
+    "nextWork": "Review actual two-angle result and remaining fine foliage/prop boundaries before broader movement qualification; retain S02/S04/S03."
+  },
+  "sourceAngles": [
+    {
+      "speaker": "striped shirt",
+      "sourceRangeSeconds": [
+        22.4583333333333,
+        25.4583333333333
+      ],
+      "crop": [
+        170,
+        40,
+        1430,
+        1000
+      ],
+      "retainedPriorSource": true
+    },
+    {
+      "speaker": "cream shirt and cap",
+      "sourceRangeSeconds": [
+        54,
+        57
+      ],
+      "crop": [
+        430,
+        40,
+        1440,
+        1000
+      ],
+      "sourceSha256": "834e040279e6f7ca977f4d34625450c2d876628120cb566c35de2e434aa01abb",
+      "frames": 72,
+      "fps": 24,
+      "cameraCuts": []
+    }
+  ],
+  "bodyEdgeContinuation": {
+    "report": "reports/background-replacement-20261101/body-edge-repair.md",
+    "validation": "reports/background-replacement-20261101/body-edge-validation.json",
+    "modelVersion": "2.4.1",
+    "scope": "Same two 3s angles; preserve soft body/face/hand edges; fix persisted selection box; targeted equipment corrections and TV exclusions remove sleeve holes without colour-key cloth reconstruction.",
+    "previewFramesInspected": 144,
+    "exportFramesInspected": 144,
+    "actualMovingHeadCloseupsInspected": 144,
+    "originalSecondPersonTrackByteIdenticalFrames": 72,
+    "nativeSaveColdReopenAndExport": true,
+    "readinessPromotion": false,
+    "creativeGate": false,
+    "productionDeployment": false,
+    "paidCloudInference": false,
+    "remainingBlockers": [
+      "Fine foliage/prop colour contamination and boundary detail remain; photographed compression limits recoverable detail.",
+      "Original photographed lighting is retained; no physical relighting, reconstructed geometry or single-view perspective qualification.",
+      "Longer/arbitrary motion, moving cameras, wispy hair and unseen occlusions remain unqualified.",
+      "Local CPU inference latency and production deployment/transport remain unqualified; fresh local input recovery does not reconstruct prior wallet/job history."
+    ],
+    "nextWork": "Review actual moving body close-ups and remaining fine foreground boundaries; preserve S02/S04/S03."
+  }
+}

@@ -8,13 +8,17 @@ const {immutableJson}=require('./stores');
 const root=path.resolve(__dirname,'../..');
 const files=['model_workers/common.py','model_workers/emulator_cpu.py','model_workers/adapters/cpu_segmentation.py',
  'model_workers/adapters/component_segmentation.py','model_workers/adapters/cpu_matting.py','model_workers/adapters/temporal_alpha.py',
- 'model_workers/adapters/segmentation.py','model_workers/adapters/source_edge_alpha.py','python_media_worker/studio_subject_matte.py','config/model-runtime/registry.v1.json','contracts/model-capabilities-v1.json'];
+ 'model_workers/adapters/segmentation.py','model_workers/adapters/source_edge_alpha.py','model_workers/adapters/moving_detail_alpha.py','model_workers/adapters/photographed_opacity.py','model_workers/adapters/person_material_alpha.py','model_workers/adapters/fixed_source_neural.py','python_media_worker/studio_subject_matte.py','python_media_worker/studio_source_background.py','config/model-runtime/registry.v1.json','contracts/model-capabilities-v1.json'];
 class EmulatorCpuWorker {
  static async create(options){
   require('../services/unifiedCredits/runtime').assertSandbox();
   if(process.env.STUDIO_BACKGROUND_DEMO!=='true'||process.env.NODE_ENV!=='test'||options.bucket.name!=='demo-autopromote-credits')throw fail('MODEL_DEMO_OFFLINE',503);
-  const implementationFiles={};for(const name of files)implementationFiles[name]=hash(await fs.readFile(path.join(root,name)));
-  const worker=new EmulatorCpuWorker();Object.assign(worker,options,{implementationFiles,image:`local-emulator-cpu@sha256:${hash(implementationFiles)}`,resultPrefix:'studio/model-runtime/executions'});
+  const cuda=!!options.cudaProfile;
+  if(cuda&&(process.env.STUDIO_BACKGROUND_DEMO_LOCAL_CUDA!=='true'||options.cudaProfile.kind!=='private_local_cuda_host_overlay_v1'))throw fail('MODEL_DEMO_CUDA_OFFLINE',503);
+  const implementationNames=cuda?[...files,'model_workers/emulator_cuda.py','model_workers/adapters/bounded_attention.py','config/model-runtime/local-cuda-evaluation.v1.json']:files;
+  const implementationFiles={};for(const name of implementationNames)implementationFiles[name]=hash(await fs.readFile(path.join(root,name)));
+  const worker=new EmulatorCpuWorker();Object.assign(worker,options,{implementationNames,implementationFiles,
+   image:cuda?`local-emulator-cuda@sha256:${hash({implementationFiles,runtimeOverlay:options.cudaProfile})}`:`local-emulator-cpu@sha256:${hash(implementationFiles)}`,resultPrefix:'studio/model-runtime/executions'});
   return worker;
  }
  prefix(job){return CloudRunCapabilityWorker.prototype.prefix.call(this,job);}
@@ -31,7 +35,7 @@ class EmulatorCpuWorker {
   try {await fs.access(path.join(work,'started.json'));return {name:`local-process:${job.id}:${job.attemptToken}`};}catch(e){if(e.code!=='ENOENT')throw e;}
   let spec;
   try {
-   const implementationFiles={};for(const name of files){const bytes=await fs.readFile(path.join(root,name));if(hash(bytes)!==this.implementationFiles[name])throw fail('MODEL_DEMO_IMPLEMENTATION_CHANGED');const to=path.join(work,'runtime',name);await fs.mkdir(path.dirname(to),{recursive:true});await fs.writeFile(to,bytes,{flag:'wx'});implementationFiles[name]=hash(bytes);}
+   const implementationFiles={};for(const name of this.implementationNames){const bytes=await fs.readFile(path.join(root,name));if(hash(bytes)!==this.implementationFiles[name])throw fail('MODEL_DEMO_IMPLEMENTATION_CHANGED');const to=path.join(work,'runtime',name);await fs.mkdir(path.dirname(to),{recursive:true});await fs.writeFile(to,bytes,{flag:'wx'});implementationFiles[name]=hash(bytes);}
    await this.copy({storagePath:job.source.storagePath,generation:job.source.generation,sha256:job.source.sha256,bytes:job.source.size},path.join(work,'source'),job.ownerUid);
    let maskDependency;
    if(job.request.parameters.refinement){
@@ -43,22 +47,24 @@ class EmulatorCpuWorker {
      if(f?.storagePath!==expected)throw fail('MODEL_DEMO_INPUT_INVALID');await this.copy(f,path.join(work,target),job.ownerUid);
     }
    }
-   const modelDirectory=job.model.id==='vitmatte-small-temporal-cpu-v2'?this.refinementModelDirectory:this.modelDirectory;
+   const modelDirectory=job.model.modelFamily==='ViTMatte'?this.refinementModelDirectory:this.modelDirectory;
    let componentDependency;
    if(maskDependency&&job.model.limits?.sourceResolutionEdges){
     componentDependency=await require('./componentGuidance').componentGuidance(maskDependency,this.artifacts);
     if(componentDependency)await this.copy(componentDependency.file,path.join(work,'component_dependency.tar.gz'),job.ownerUid);
    }
-   spec={...job,implementationFiles,modelDirectory,...(maskDependency?{maskDependency}:{}),...(componentDependency?{componentDependency}:{})};await immutableJson(path.join(work,'spec.json'),spec);
+   if(this.cudaProfile&&job.model.requiredDevice!=='cuda'||!this.cudaProfile&&job.model.requiredDevice!=='cpu')throw fail('MODEL_DEMO_DEVICE_MISMATCH');
+   spec={...job,implementationFiles,modelDirectory,...(this.cudaProfile?{runtimeOverlay:this.cudaProfile}:{}),...(maskDependency?{maskDependency}:{}),...(componentDependency?{componentDependency}:{})};await immutableJson(path.join(work,'spec.json'),spec);
   }catch(e){e.definitelyNotStarted=true;throw e;}
   // Write the attempt marker before launch. An ambiguous acknowledgement never
   // launches another inference process for the same job.
   await immutableJson(path.join(work,'started.json'),{startedAt:Date.now(),requestHash:job.requestHash});
   const log=await fs.open(path.join(work,'process.log'),'a',0o600);
-  const child=spawn(this.python,['-m','model_workers.emulator_cpu','--spec',path.join(work,'spec.json')],{
+  const child=spawn(this.python,['-m',this.cudaProfile?'model_workers.emulator_cuda':'model_workers.emulator_cpu','--spec',path.join(work,'spec.json')],{
    cwd:path.join(work,'runtime'),env:{PATH:process.env.PATH,HOME:process.env.HOME,LANG:'C.UTF-8',
-    GCLOUD_PROJECT:'demo-autopromote-credits',STUDIO_BACKGROUND_DEMO:'true',CUDA_VISIBLE_DEVICES:'',HF_HUB_OFFLINE:'1',
-    OMP_NUM_THREADS:'4',OPENBLAS_NUM_THREADS:'1',PYTHONPATH:`${process.env.STUDIO_MODEL_LOCAL_CPU_EDGE_DEPS_DIR||''}:${this.dependenciesDirectory}:${path.join(work,'runtime')}`},stdio:['ignore',log.fd,log.fd]});
+    GCLOUD_PROJECT:'demo-autopromote-credits',STUDIO_BACKGROUND_DEMO:'true',CUDA_VISIBLE_DEVICES:this.cudaProfile?'0':'',HF_HUB_OFFLINE:'1',
+    ...(this.cudaProfile?{STUDIO_BACKGROUND_DEMO_LOCAL_CUDA:'true',LD_LIBRARY_PATH:this.cudaLibraries}:{}),
+    PYTHONDONTWRITEBYTECODE:'1',OMP_NUM_THREADS:'4',OPENBLAS_NUM_THREADS:'1',PYTHONPATH:`${this.cudaProfile?this.cudaProfile.directory+':':''}${process.env.STUDIO_MODEL_LOCAL_CPU_EDGE_DEPS_DIR||''}:${this.dependenciesDirectory}:${path.join(work,'runtime')}`},stdio:['ignore',log.fd,log.fd]});
   await new Promise((resolve,reject)=>{child.once('spawn',resolve);child.once('error',reject);});
   const command=await fs.readFile(`/proc/${child.pid}/cmdline`,'utf8');await immutableJson(path.join(work,'process.json'),{pid:child.pid,command});
   child.unref();await log.close();return {name:`local-process:${job.id}:${job.attemptToken}`};
@@ -74,8 +80,9 @@ class EmulatorCpuWorker {
   if(await this.process(job))return {terminal:false};
   if(result.status!=='completed')return {terminal:true,executionName,result};
   const retainedSpec=JSON.parse(await fs.readFile(path.join(work,'spec.json'),'utf8'));
-  if(job.workerImage!==`local-emulator-cpu@sha256:${hash(retainedSpec.implementationFiles)}`)throw fail('MODEL_DEMO_IMPLEMENTATION_IDENTITY_INVALID');
-  if(result.jobId!==job.id||result.attemptToken!==job.attemptToken||result.requestHash!==job.requestHash||result.provenance?.runtimeImage!==job.workerImage||result.metrics?.gpuCount!==0||stable(result.provenance.implementationFiles)!==stable(retainedSpec.implementationFiles))throw fail('MODEL_DEMO_RECEIPT_INVALID',502);
+  const expectedImage=this.cudaProfile?`local-emulator-cuda@sha256:${hash({implementationFiles:retainedSpec.implementationFiles,runtimeOverlay:retainedSpec.runtimeOverlay})}`:`local-emulator-cpu@sha256:${hash(retainedSpec.implementationFiles)}`;
+  if(job.workerImage!==expectedImage)throw fail('MODEL_DEMO_IMPLEMENTATION_IDENTITY_INVALID');
+  if(result.jobId!==job.id||result.attemptToken!==job.attemptToken||result.requestHash!==job.requestHash||result.provenance?.runtimeImage!==job.workerImage||result.metrics?.gpuCount!==(this.cudaProfile?1:0)||stable(result.provenance.implementationFiles)!==stable(retainedSpec.implementationFiles)||this.cudaProfile&&(stable(result.provenance.runtimeOverlay)!==stable(retainedSpec.runtimeOverlay)||result.provenance.runtimeKind!=='local_cuda_emulator_process'||result.metrics?.device!=='cuda'))throw fail('MODEL_DEMO_RECEIPT_INVALID',502);
   for(const file of result.files){
    if(!/^[A-Za-z0-9_.-]+$/.test(file.name))throw fail('MODEL_DEMO_OUTPUT_INVALID');
    const local=path.join(work,'outputs',file.name),stat=await fs.lstat(local),bytes=await fs.readFile(local);

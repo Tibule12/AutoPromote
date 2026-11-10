@@ -644,6 +644,14 @@
     {
       "path": "test/e2e/studio-preview-render-parity.json",
       "sha256": "858bb82fec2fd8e086c749e5d3bf28e40fb9baa3aa705641028e8306517cfc6c"
+    },
+    {
+      "path": "frontend/src/components/StudioSubjectMaskControls.js",
+      "sha256": "3574cdfc69aef51e04f48b7a98b905f32d0822d9341829c6b93f9de320efc23a"
+    },
+    {
+      "path": "model_workers/adapters/source_edge_alpha.py",
+      "sha256": "374881f118cb6a290cd612bb2bb5110a54a0e9aecc706e35148917b3c8644e5a"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

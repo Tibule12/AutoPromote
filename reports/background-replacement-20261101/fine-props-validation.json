@@ -1,0 +1,171 @@
+{
+  "date": "2026-11-02",
+  "scope": "Actual original podcast 115\u2013117s, 48 frames, one camera. Same failed footage, editable model-backed native scene.",
+  "modelVersion": "2.5.1",
+  "native": {
+    "flattenedInput": false,
+    "actualMaskBackedScene": true,
+    "canonicalDocumentColdReopenExact": true,
+    "subjectSceneColdReopenExact": true,
+    "canonicalDocumentAfterExportExact": true,
+    "subjectSceneAfterExportExact": true,
+    "previewSha256": "5e413932102398440eadc83a6e47ec679d56d881cd547b26641bba74e572a14e",
+    "exportSha256": "10042f9dec35b2c989395211713312bc7f01a5ccfa514deae2901340b363f3de",
+    "browserExceptions": [],
+    "creativeGate": false,
+    "paidCloudInference": false
+  },
+  "previewExportComparison": {
+    "actualExportFrames": 48,
+    "actualPreviewFrames": 48,
+    "frameClockFps": 24,
+    "fitGeometry": {
+      "contentWidth": 1544,
+      "contentHeight": 1080,
+      "leftPadding": 188
+    },
+    "meanAbsoluteRgbDifferenceExpectedFit": 0.8048778459630058,
+    "maxFrameMae": 0.8740107381687243,
+    "audio": {
+      "sourceSamples": 96967,
+      "exportSamples": 96256,
+      "sampleRate": 48000,
+      "zeroLagCorrelation": 0.9918133309542093,
+      "subjectiveListeningApproval": false
+    },
+    "scope": "Actual decoded comparison. Fit reconstruction and final H.264 encode differ; no pixel identity or creative pass is inferred."
+  },
+  "studioPlayback": {
+    "capturedFrames": 51,
+    "audioOffset": 0.18973588943481445,
+    "ended": true,
+    "editableTimelineVisible": true,
+    "smoothnessQualified": false
+  },
+  "automatedTests": {
+    "sourceEdgePython": 11,
+    "modelRuntimeNode": 16,
+    "frontend": 22,
+    "distinctTotal": 49
+  },
+  "anonymousWelcomeComparison": "Eight baseline/candidate viewport checks pass on final build.",
+  "actualPreviewFramesVisuallyInspected": 48,
+  "sourceHeadPairsVisuallyInspected": 48,
+  "actualFinalFramesVisuallyInspected": 48,
+  "creativeGate": false,
+  "fourMinuteQualification": false,
+  "paidCloudInference": false,
+  "productionDeployment": false,
+  "mergeOrPush": false,
+  "sourceMasksAndAlphaBundled": true,
+  "remainingBlockers": [
+    "Fine plant twigs/leaf boundaries still have isolated rough or fractional pixels; no universal fine-detail qualification.",
+    "Small cropped left furniture boundary retains alpha speckle.",
+    "Physical scene lighting/contact shadows and arbitrary camera/occlusion motion are not qualified."
+  ],
+  "failedAttemptsPreserved": [
+    "Broad object-colour 2.5.0 trial damaged wood; final correction is opt-in to selected fixed object IDs only.",
+    "Stopped emulator recovered from exact original SAM/alpha artifact hashes and retained bytes; fresh demo job/wallet history not invented.",
+    "Recovered preview first failed for missing isolated matting dependency path; existing installed path restored.",
+    "Old local project branch conflicted with a newer revision; source guard preserved and ordinary native edits/Save used.",
+    "First native export inserted Fit full at 0.73s and cropped the opening; corrected by native seek to zero and complete-shot Fit full, then fresh export and matching recording."
+  ],
+  "deliveryViewer": {
+    "actualFrameRegionLoads": 480,
+    "completePlayback": [
+      {
+        "id": "final",
+        "duration": 2,
+        "ended": true,
+        "width": 1920,
+        "height": 1080,
+        "decoded": 52,
+        "dropped": 0
+      },
+      {
+        "id": "source",
+        "duration": 2,
+        "ended": true,
+        "width": 1430,
+        "height": 1000,
+        "decoded": 52,
+        "dropped": 0
+      },
+      {
+        "id": "alpha",
+        "duration": 2,
+        "ended": true,
+        "width": 1430,
+        "height": 1000,
+        "decoded": 52,
+        "dropped": 0
+      },
+      {
+        "id": "preview",
+        "duration": 2,
+        "ended": true,
+        "width": 1430,
+        "height": 1000,
+        "decoded": 48,
+        "dropped": 0
+      },
+      {
+        "id": "studio",
+        "duration": 2.333333,
+        "ended": true,
+        "width": 1600,
+        "height": 1100,
+        "decoded": 60,
+        "dropped": 0
+      }
+    ],
+    "browserExceptions": [],
+    "headless": true,
+    "deviceMuted": true,
+    "scope": "Actual file-backed delivery viewer. Loading/playback checks are not creative or subjective audio approval."
+  },
+  "scopedCacheCleanup": {
+    "removed": [
+      {
+        "path": "/tmp/autopromote-application-demo-wCaKYz/model-jobs/8a31ea619bc2dbb931ca2a295ef0252eb3da9258a6509cfa0a9dcbfc80336235/311566c8-941d-4787-8e49-d95d5143785a/outputs/rgb",
+        "bytes": 67793772,
+        "reason": "Decoded RGB/trimap runtime cache; original source, published masks/bundles, immutable receipts and provenance all verified and retained."
+      },
+      {
+        "path": "/tmp/autopromote-application-demo-wCaKYz/model-jobs/8a31ea619bc2dbb931ca2a295ef0252eb3da9258a6509cfa0a9dcbfc80336235/311566c8-941d-4787-8e49-d95d5143785a/outputs/trimaps",
+        "bytes": 950700,
+        "reason": "Decoded RGB/trimap runtime cache; original source, published masks/bundles, immutable receipts and provenance all verified and retained."
+      },
+      {
+        "path": "/tmp/autopromote-application-demo-wCaKYz/model-jobs/7872ff16226d734f527698c8a15ff56bc17df5330f20afd4a36e731736bbea84/595a5974-cbe9-421e-9ce1-6cdcd9565858/outputs/rgb",
+        "bytes": 67793772,
+        "reason": "Decoded RGB/trimap runtime cache; original source, published masks/bundles, immutable receipts and provenance all verified and retained."
+      },
+      {
+        "path": "/tmp/autopromote-application-demo-wCaKYz/model-jobs/7872ff16226d734f527698c8a15ff56bc17df5330f20afd4a36e731736bbea84/595a5974-cbe9-421e-9ce1-6cdcd9565858/outputs/trimaps",
+        "bytes": 1272217,
+        "reason": "Decoded RGB/trimap runtime cache; original source, published masks/bundles, immutable receipts and provenance all verified and retained."
+      }
+    ],
+    "verifiedRemovedFileBytes": 137810461,
+    "freeBytesBefore": 5372547072,
+    "freeBytesAfter": 5510860800,
+    "scope": "Only task-owned reconstructible runtime/QA caches. No originals, projects, published masks, previous films, model weights, builds or unrelated worktrees removed."
+  },
+  "diskFreeBytesAtReport": 5510475776,
+  "nextWork": "Resolve remaining fine twig/leaf and cropped furniture alpha against original moving frames before propagating corrections across four minutes; retain S02/S04/S03.",
+  "finalArtifactAssertions": {
+    "exportHashMatchesDelivered": true,
+    "selectedSceneUsesRecoveredRealAlpha": true,
+    "nativeFramingOffAcrossWholeShot": true
+  },
+  "finalChecks": {
+    "knowledgeSourceReview": true,
+    "generatedKnowledgeBuildAndCheck": true,
+    "studioContractValidation": true,
+    "gitDiffCheck": true,
+    "fullFinalVideoAudioDecode": true,
+    "qaScriptSyntax": true,
+    "note": "Existing nine deferred knowledge-surface warnings and inherited frontend lint warnings remain; no readiness promotion."
+  }
+}

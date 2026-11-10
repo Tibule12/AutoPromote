@@ -4,8 +4,15 @@ from pathlib import Path
 from urllib.parse import urlparse,parse_qs
 ROOT=Path(__file__).resolve().parents[2];sys.path.insert(0,str(ROOT))
 if os.environ.get('STUDIO_BACKGROUND_DEMO')!='true' or os.environ.get('GCLOUD_PROJECT')!='demo-autopromote-credits':raise ValueError('Demo only')
-if os.environ.get('STUDIO_BACKGROUND_MATTING_DEPS'):sys.path.insert(0,os.environ['STUDIO_BACKGROUND_MATTING_DEPS'])
+# The native model worker and deterministic preview use the same pinned local
+# matting dependency directory. Retain the older demo override for existing runs.
+edge_deps = os.environ.get('STUDIO_BACKGROUND_MATTING_DEPS') or os.environ.get('STUDIO_MODEL_LOCAL_CPU_EDGE_DEPS_DIR')
+if edge_deps:sys.path.insert(0,edge_deps)
 record=json.loads(Path(sys.argv[1]).read_text());work=Path(sys.argv[1]).parent;spec=record['spec'];origin=record['origin']
+# The isolated review uses the existing exact foreground cache across changes
+# to background/grade and native export. It is server-spool controlled, bound
+# to source/alpha/evidence/code, and retains the shared 5GiB write reserve.
+os.environ.setdefault('STUDIO_VFX_FOREGROUND_CACHE_DIR',str(work.parent/'foreground-cache'))
 def access(url):
     parsed=urlparse(url)
     if f'{parsed.scheme}://{parsed.netloc}'!=origin or not parsed.path.startswith('/api/credit-pilot/object/') or not parse_qs(parsed.query).get('cap'):raise ValueError('Owned demo access required')

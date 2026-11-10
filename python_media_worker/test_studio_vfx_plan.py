@@ -10,6 +10,7 @@ import pytest
 
 from python_media_worker.studio_subject_matte import CachedSubjectMatte, canonical_hash, sha256, mask_geometry
 from python_media_worker.studio_vfx_plan import VfxFrameRenderer, render_vfx, validate_plan
+from python_media_worker.studio_vfx_parallel import compose_frames
 
 
 @pytest.fixture
@@ -37,6 +38,42 @@ def source_cache(tmp_path):
 def plan(cache):
     return {"version": 1, "source_sha256": cache.manifest["source_sha256"], "matte_sha256": cache.artifact_sha256,
             "effects": [{"id": "text", "type": "text_behind", "start": 0, "end": 1, "text": "STORIES", "x": 50, "y": 50, "font_size": 30, "color": "#ffffff"}]}
+
+
+def test_bounded_parallel_composition_preserves_actual_soft_edges_and_source_order(source_cache):
+    source, directory, _ = source_cache
+    manifest = json.loads((directory/'manifest.json').read_text())
+    for index, row in enumerate(manifest['frames']):
+        alpha = np.tile(np.arange(128, dtype=np.uint8)*2, (72, 1))
+        alpha[20:40, 15+index*35:25+index*35] = 0
+        Image.fromarray(alpha).save(directory/row['file'])
+        row.update(sha256=sha256(directory/row['file']), **mask_geometry(alpha))
+    (directory/'manifest.json').write_text(json.dumps(manifest))
+    cache = CachedSubjectMatte(directory, source)
+    command = plan(cache)
+    renderer = VfxFrameRenderer(command, cache)
+    originals = [Image.new('RGB', (128,72), colour) for colour in ('navy', 'green')]
+    expected = [renderer.render(frame, index).tobytes() for index,frame in enumerate(originals)]
+    submitted, received = [], []
+    def frames():
+        for index, frame in enumerate(originals):
+            submitted.append(index)
+            assert len(submitted)-len(received) <= 2
+            yield index, frame
+    for index, frame in compose_frames(frames(), source, directory, command, {}, workers=2):
+        assert index == len(received)
+        assert frame.tobytes() == expected[index]
+        received.append(index)
+    assert received == [0, 1]
+
+
+def test_parallel_composition_rejects_invalid_worker_bound_without_consuming_source():
+    def frames():
+        raise AssertionError('Invalid configuration consumed source frames')
+        yield
+    for workers in (0, 3, True, 1.5):
+        with pytest.raises(ValueError, match='one or two'):
+            list(compose_frames(frames(), '', '', {}, {}, workers=workers))
 
 
 @pytest.mark.parametrize('protected_cleanup',[False,True])

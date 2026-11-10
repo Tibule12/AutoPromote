@@ -22,11 +22,12 @@ class ForegroundFrameCache:
         if self.root:
             self.root.mkdir(parents=True,exist_ok=True,mode=0o700)
 
-    def prepare(self, frame, alpha, effects, compute):
+    def prepare(self, frame, alpha, effects, compute, *, evidence_identity=None):
         if not self.root:
             return compute()
         digest=hashlib.sha256()
         digest.update(self.implementation.encode())
+        digest.update(json.dumps(evidence_identity,sort_keys=True,separators=(',',':')).encode())
         digest.update(json.dumps({'size':frame.size,'effects':effects},sort_keys=True,separators=(',',':')).encode())
         digest.update(frame.tobytes())
         digest.update(alpha.tobytes())

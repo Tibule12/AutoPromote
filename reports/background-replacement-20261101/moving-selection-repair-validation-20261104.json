@@ -1,0 +1,111 @@
+{
+  "date": "2026-11-04",
+  "scope": "Original failed podcast 224\u2013226s, cap-wearing speaker, 48 frames at 24fps; actual mask-backed local Studio flow",
+  "status": "SHORT_SHOT_REVISED_VISUAL_GATE_FAILED",
+  "sourceMasterSha256": "93ce466b525041df305e839154645bd8fb5b9ec9b621c64d4c2afd5d9badff8a",
+  "sourceRangeSeconds": [
+    224,
+    226
+  ],
+  "automatedTestsDistinct": 75,
+  "automatedTests": {
+    "componentMovement": 6,
+    "temporalAlpha": 22,
+    "sourceEdges": 11,
+    "runtimeOwnershipAndCorrections": 36
+  },
+  "native": {
+    "flattenedInput": false,
+    "actualMaskBackedScene": true,
+    "canonicalDocumentColdReopenExact": true,
+    "subjectSceneColdReopenExact": true,
+    "canonicalDocumentAfterExportExact": true,
+    "subjectSceneAfterExportExact": true,
+    "previewSha256": "d52a2ccc9d8199872794b16010741c694f4abab2468439d444bb916907991070",
+    "exportSha256": "2b66854a60fe0905adca9996317dd8c53125467b55642a5919527554d5b37322",
+    "browserExceptions": [],
+    "creativeGate": false,
+    "paidCloudInference": false
+  },
+  "actualPreviewFramesReviewedEachRegion": 48,
+  "actualReviewRegions": [
+    "head and face",
+    "left hand and finger gaps",
+    "right hand and finger gaps",
+    "clothes and body",
+    "microphone, rails, bolts, stand, plant"
+  ],
+  "allFinalFramesDecodedAndCompared": 48,
+  "individualFinalComparisonFrames": [
+    0,
+    6,
+    8,
+    12,
+    23,
+    24,
+    36,
+    47
+  ],
+  "finalGeometry": [
+    1544,
+    1080
+  ],
+  "previewExportMeanAbsoluteRgbDifference": 0.8024702352395573,
+  "audio": {
+    "previewSamples": 96967,
+    "exportSamples": 96256,
+    "zeroLagCorrelation": 0.980935889671421,
+    "subjectiveListeningApproval": false
+  },
+  "completeActualStudioPlayback": true,
+  "capturedStudioFrames": 31,
+  "captureSmoothnessQualified": false,
+  "clothingOpacity": {
+    "frames": 48,
+    "nativeEffectiveAlpha": true,
+    "sampledOpaqueInterior": [
+      563,
+      933,
+      1197,
+      989
+    ],
+    "minimumAlphaAcrossAll48Frames": 255,
+    "sourceAll48FramesVisuallyReviewed": true,
+    "scope": "Secondary existing Studio holdout, only the observed two-second solid clothing/cable/hand patch; not inferred opacity or a correction qualified for other footage."
+  },
+  "manualSecondaryCorrections": "Four fixed bolt cores and one photographed opaque clothing/cable interior patch, authored using existing native holdout controls for only 224\u2013226s. Moving person and both hands remain tracked/model-matted. These holdouts are not qualified for later footage.",
+  "visualPass": false,
+  "professionalQuality": false,
+  "bothSpeakersQualification": false,
+  "newFourMinuteMovie": false,
+  "remainingLimitations": [
+    "Fast moving finger boundaries retain visible old orange-TV/blue-curtain colour, for example left-hand frame 23 (224.9583s) and fastest right-hand rotations. The model matte/foreground recovery has not reliably separated those mixed pixels; the frame-8 gap correction alone does not solve all later poses.",
+    "Fine plant/twig and stand boundaries retain rough, fractional or contaminated pixels. Four restored bolt cores do not qualify the entire rig.",
+    "This is one fixed-camera two-second crop of one speaker, not proof of both speakers, all camera cuts, couch occlusions, physical relighting, perspective/contact-shadow integration or a clean four-minute result."
+  ],
+  "exactDuplicateIntermediateBytesReclaimed": 65044480,
+  "localFixtureChanges": [
+    "20 symbolic Firestore-emulator credits through the canonical test wallet service; no real purchase or production account change.",
+    "The isolated local pilot window was extended two hours; spending caps, external/paid operations and production policies unchanged."
+  ],
+  "preservedFailures": [
+    "First native preview missing existing PyMatting search path, then corrected using configured local dependency path.",
+    "Rejected earlier alpha/preview, uncertain fixed-chair selection, cloth seam, bolt and lower-border failures.",
+    "r14 native final remains rejected for translucent jeans; preserved separately.",
+    "First r15 Studio recording retained 20 frames and failed the existing >20 capture assertion. A separate retry raised only the short QA capture cap from 12 to 24fps and retained 31 frames; no assertion was weakened."
+  ],
+  "delivery": "/home/tibule12/Videos/AutoPromote Background Replacement - 2026-11-01/Moving shot repair - 2026-11-04 - revision 2",
+  "readinessPromotion": false,
+  "paidCloudInference": false,
+  "deployment": false,
+  "productionDataChanges": false,
+  "nextWork": "Correct remaining fast moving-finger alpha/foreground-colour misclassification (especially frame 23) and fine equipment/plant edges on this same short interval before another four-minute render; preserve shared S02/S04/S03.",
+  "deliveryViewer": {
+    "actualFrameRegionLoads": 576,
+    "completePlaybackVideos": 5,
+    "browserExceptions": [],
+    "visualApproval": false
+  },
+  "studioContractValid": true,
+  "diffWhitespaceCheckPassed": true
+}

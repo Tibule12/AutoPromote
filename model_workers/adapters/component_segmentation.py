@@ -1,7 +1,8 @@
 """Source-coordinate SAM2 video components, each with its own temporal memory.
 
-Object ROIs preserve small equipment detail before the model's fixed-size image
-transform. All outputs are mapped back onto the same immutable source clock.
+Fixed-object ROIs preserve small equipment detail before the model's fixed-size
+image transform. Moving subjects see the full source, including positions beyond
+their initial selection. Outputs share the same immutable source clock.
 """
 from pathlib import Path
 import json
@@ -13,6 +14,10 @@ from model_workers.adapters.segmentation import sha_json
 
 
 def component_roi(component, width, height):
+    # A selection describes the first pose, not the object's future motion.
+    # Cropping to it irreversibly removes hands/limbs before tracking or matting.
+    if component.get('propagate', True):
+        return (0, 0, width, height)
     box = list(component['box'])
     points = list(component['points'])
     for correction in component.get('shotPrompts', []):
@@ -40,13 +45,46 @@ def component_selections(params):
     return selections
 
 
+def retain_source_reference_guidance(current, reference, rgb, reference_rgb,
+                                     moving, reference_moving):
+    """Retain fixed detail only where its photographed surface still agrees.
+
+    This combines segmentation evidence, never alpha or held source pixels.
+    Both moving exposures exclude reference recovery. Weak reference responses
+    cannot grow into newly selected old scenery when the faster model abstains.
+    """
+    import cv2
+    if (current.dtype != np.uint8 or current.ndim != 2
+            or any(p.shape != current.shape or p.dtype != np.uint8
+                   for p in (reference, moving, reference_moving))
+            or any(p.shape != (*current.shape, 3) or p.dtype != np.uint8
+                   for p in (rgb, reference_rgb))):
+        raise ValueError('Fixed source-reference guidance geometry differs')
+    blocked = np.zeros(current.shape, np.uint8)
+    kernel = np.ones((15, 15), np.uint8)
+    for plane in (moving, reference_moving):
+        strong = (plane >= 128).astype(np.uint8)
+        near = cv2.dilate(strong, kernel) > 0
+        bounded = strong | ((plane >= 24) & near).astype(np.uint8)
+        blocked |= cv2.dilate(bounded, kernel)
+    difference = np.max(np.abs(rgb.astype(np.int16) -
+                               reference_rgb.astype(np.int16)), axis=2)
+    patch_difference = cv2.boxFilter(difference.astype(np.float32), -1,
+                                    (3, 3), normalize=True)
+    eligible = ((reference >= 128) & (difference <= 24)
+                & (patch_difference <= 12) & (blocked == 0))
+    return np.where(eligible, np.maximum(current, reference), current).astype(np.uint8)
+
+
 class ComponentVideoTracker:
     """The shared bounded-memory object tracker; the caller owns cut resets.
 
-    CPU jobs use the default device. Explicit CUDA is for local review callers;
-    it does not alter the registered CPU transports or cloud execution policy.
+    CPU jobs use the default device. Registered refresh keeps the detailed
+    fixed ROI while actual current RGB resolves occlusions. The fixed flag
+    describes equipment position; it does not make the first exposure valid
+    after a person moves. Explicit CUDA remains local review plumbing.
     """
-    def __init__(self, spec, geometry, model_dir, *, device='cpu', model=None):
+    def __init__(self, spec, geometry, model_dir, *, device='cpu', model=None, refresh_fixed=None, offload_state=False, moving_model=None, fixed_reference_model=None):
         import torch
         from transformers import Sam2VideoModel, Sam2VideoProcessor
         if device not in ('cpu','cuda'):raise ValueError('Explicit inference device must be cpu or cuda')
@@ -57,10 +95,31 @@ class ComponentVideoTracker:
         if sha(model_dir / weight['path']) != weight['sha256']:
             raise ValueError('Segmentation checkpoint changed')
         params = spec['request']['parameters']
+        if refresh_fixed is None:
+            refresh_fixed = bool(spec['model'].get('limits', {}).get('refreshFixedSourceFrames', False))
+        stateless_fixed = bool(spec['model'].get('limits', {}).get('statelessFixedSourceFrames', False))
+        if stateless_fixed and not refresh_fixed:
+            raise ValueError('Current-image fixed objects require source RGB refresh')
         components = component_selections(params)
         rois = [component_roi(c, width, height) for c in components]
         model = model if model is not None else Sam2VideoModel.from_pretrained(model_dir, local_files_only=True).to(device, dtype=torch.float32).eval()
         processor = Sam2VideoProcessor.__new__(Sam2VideoProcessor)
+        # EdgeTAM's prompt processor uses the same streaming contract, but
+        # its cache stores compressed memory features. Keep that session
+        # local to this tracker; changing the processor module's global
+        # factory would also change concurrently running SAM 2 trackers.
+        def session_factory_for(selected_model):
+            if getattr(selected_model.config, 'model_type', None) == 'edgetam_video':
+                from transformers.models.edgetam_video.modeling_edgetam_video import EdgeTamVideoInferenceSession
+                return EdgeTamVideoInferenceSession
+            return processor.init_video_session
+        if moving_model is not None and moving_model.config.image_size != model.config.image_size:
+            raise ValueError('Moving and fixed tracker image geometry differs')
+        if fixed_reference_model is not None:
+            if not refresh_fixed:
+                raise ValueError('Fixed reference initialization requires current-image fixed tracking')
+            if fixed_reference_model.config.image_size != model.config.image_size:
+                raise ValueError('Fixed reference tracker image geometry differs')
         config = json.loads((model_dir / 'preprocessor_config.json').read_text())
         processor.target_size = model.config.image_size; processor.point_pad_value = -10
         mean = torch.tensor(config['image_mean'], device=device)[None, :, None, None]
@@ -71,10 +130,20 @@ class ComponentVideoTracker:
         groups=([moving] if moving else [])+[[i] for i,c in enumerate(components) if not c.get('propagate',True)]
         states=[]
         for indices in groups:
+            selected_model = (moving_model if moving_model is not None and
+                              components[indices[0]].get('propagate',True) else model)
+            session_factory = session_factory_for(selected_model)
             roi=(min(rois[i][0] for i in indices),min(rois[i][1] for i in indices),
                  max(rois[i][2] for i in indices),max(rois[i][3] for i in indices))
             for i in indices:rois[i]=roi
-            states.append({'indices':indices,'roi':roi,'session':processor.init_video_session(inference_device=device,dtype=torch.float32),'fixed':None})
+            session_options={'inference_device':device,'dtype':torch.float32}
+            if offload_state:session_options['inference_state_device']='cpu'
+            states.append({'indices':indices,'roi':roi,'session':session_factory(**session_options),
+                'model':selected_model,'session_factory':session_factory,
+                'reference_model_frames':0,'source_reference':None,'source_reference_rgb':None,
+                'source_reference_moving':None,'source_reference_retained_pixels':0,
+                'session_options':session_options,'fixed':None,'fixed_rgb':None,'neural_frames':0,
+                'agreeing_reuses':0,'current_image_frames':0})
 
         def prompt(state, index):
             x0,y0,x1,y1=state['roi']
@@ -90,38 +159,106 @@ class ComponentVideoTracker:
                 component=components[i]
                 correction={'points':component['points']} if index==0 else next((p for p in component.get('shotPrompts',[]) if p['frameIndex']==index),None)
                 if correction is None:continue
-                box=correction.get('box',component['box']);points=correction['points']
+                points=correction['points']
                 kwargs=dict(inference_session=state['session'],frame_idx=index,obj_ids=[obj+1],
-                    input_boxes=[[[box[0]*width-x0,box[1]*height-y0,box[2]*width-x0,box[3]*height-y0]]],original_size=(y1-y0,x1-x0))
+                    original_size=(y1-y0,x1-x0))
+                # Reusing the first pose's box contradicts a corrective click
+                # when the object has moved. Only rebox when explicitly authored.
+                # Primary-subject point corrections carry the unchanged box in
+                # the saved contract too. That is not a newly authored rebox.
+                if 'box' in correction and correction['box'] != component['box']:
+                    box=correction['box']
+                    kwargs['input_boxes']=[[[box[0]*width-x0,box[1]*height-y0,box[2]*width-x0,box[3]*height-y0]]]
                 if points:kwargs.update(input_points=[[[[p['position'][0]*width-x0,p['position'][1]*height-y0] for p in points]]],input_labels=[[[p['label'] for p in points]]])
+                # Upstream replaces obj_with_new_inputs on each call. Retain
+                # every object's correction submitted for this source frame;
+                # otherwise only the last hand's clicks reach the next forward.
+                pending=list(state['session'].obj_with_new_inputs)
                 processor.add_inputs_to_inference_session(**kwargs)
+                state['session'].obj_with_new_inputs=list(dict.fromkeys([*pending,*state['session'].obj_with_new_inputs]))
 
         self.components,self.rois,self.model=components,rois,model
+        self.moving_model=moving_model
+        self.fixed_reference_model=fixed_reference_model
+        self.fixed_roi_diagnostics=states
         def step(rgb,index):
             planes=[None]*len(components)
             union = np.zeros((height,width), np.uint8)
             for state in states:
                 x0,y0,x1,y1=state['roi']
-                if state['fixed'] is not None:
+                agrees=(refresh_fixed and state['fixed_rgb'] is not None and
+                    np.max(np.abs(rgb[y0:y1,x0:x1].astype(np.int16)-state['fixed_rgb'].astype(np.int16)))<=4)
+                if state['fixed'] is not None and (not refresh_fixed or agrees):
                     selections=state['fixed']
+                    if agrees:state['agreeing_reuses']+=1
                 else:
-                    prompt(state,index)
+                    fixed = not components[state['indices'][0]].get('propagate',True)
+                    inference_model = state['model']
+                    model_index = index
+                    if fixed and stateless_fixed:
+                        # A fixed selection describes source coordinates, not
+                        # a video track. Infer its ACTUAL current image with
+                        # the authored prompt, without old occlusion memory.
+                        if state['neural_frames']:
+                            state['session']=state['session_factory'](**state['session_options'])
+                        model_index = 0
+                        state['current_image_frames'] += 1
                     pixels=torch.from_numpy(rgb[y0:y1,x0:x1].copy()).to(device).permute(2,0,1)[None].float()*config['rescale_factor']
                     pixels=torch.nn.functional.interpolate(pixels,(processor.target_size,)*2,mode='bilinear',align_corners=False,antialias=True)
-                    result=model(inference_session=state['session'],frame=((pixels-mean)/std)[0],frame_idx=index)
-                    logits=torch.nn.functional.interpolate(result.pred_masks.float(),(y1-y0,x1-x0),mode='bilinear',align_corners=False)[:,0].cpu().numpy()
-                    if not np.isfinite(logits).all():raise ValueError('Nonfinite component mask')
-                    selections=np.rint(255/(1+np.exp(-np.clip(logits,-30,30)))).astype(np.uint8)
-                    if not components[state['indices'][0]].get('propagate',True):state['fixed']=selections.copy()
-                    state['session'].processed_frames.pop(index,None)
-                    keep=max(model.num_maskmem,model.config.max_object_pointers_in_encoder)
+                    def predict(selected_model, frame_index):
+                        prompt(state,frame_index)
+                        result=selected_model(inference_session=state['session'],frame=((pixels-mean)/std)[0],frame_idx=frame_index)
+                        logits=torch.nn.functional.interpolate(result.pred_masks.float(),(y1-y0,x1-x0),mode='bilinear',align_corners=False)[:,0].cpu().numpy()
+                        if not np.isfinite(logits).all():raise ValueError('Nonfinite component mask')
+                        return np.rint(255/(1+np.exp(-np.clip(logits,-30,30)))).astype(np.uint8)
+                    initialize_reference = fixed and not state['neural_frames'] and fixed_reference_model is not None
+                    if initialize_reference:
+                        # SAM and EdgeTAM memories are incompatible. Obtain the
+                        # SAM reference in its own disposable session, and warm
+                        # the current model on this same real first exposure.
+                        # Later temporal frames therefore follow the tested
+                        # current model rather than inheriting another model's
+                        # state or starting without a conditioning image.
+                        current_session=state['session']
+                        state['session']=session_factory_for(fixed_reference_model)(**state['session_options'])
+                        try:
+                            state['source_reference']=predict(fixed_reference_model,0)
+                        finally:
+                            state['session']=current_session
+                        state['source_reference_rgb']=rgb.copy()
+                        state['reference_model_frames']+=1
+                    selections=predict(inference_model,model_index)
+                    state['neural_frames']+=1
+                    if initialize_reference:
+                        selections=state['source_reference'].copy()
+                    if not components[state['indices'][0]].get('propagate',True):
+                        state['fixed']=selections.copy()
+                        if refresh_fixed:state['fixed_rgb']=rgb[y0:y1,x0:x1].copy()
+                    state['session'].processed_frames.pop(model_index,None)
+                    keep=max(inference_model.num_maskmem,inference_model.config.max_object_pointers_in_encoder)
                     for history in state['session'].output_dict_per_obj.values():
                         for old in list(history['non_cond_frame_outputs']):
-                            if old<index-keep:del history['non_cond_frame_outputs'][old]
+                            if old<model_index-keep:del history['non_cond_frame_outputs'][old]
                 for number,selected in zip(state['indices'],selections):
                     full=np.zeros((height,width),np.uint8);full[y0:y1,x0:x1]=selected
                     union=np.maximum(union,full)
                     planes[number]=full
+            if fixed_reference_model is not None:
+                moving_union = np.maximum.reduce([planes[i] for i in moving]) if moving else np.zeros_like(union)
+                for state in states:
+                    if state['source_reference'] is None:
+                        continue
+                    if state['source_reference_moving'] is None:
+                        state['source_reference_moving'] = moving_union.copy()
+                    x0,y0,x1,y1 = state['roi']
+                    for number,reference_plane in zip(state['indices'],state['source_reference']):
+                        reference = np.zeros_like(union)
+                        reference[y0:y1,x0:x1] = reference_plane
+                        retained = retain_source_reference_guidance(planes[number], reference, rgb,
+                            state['source_reference_rgb'], moving_union, state['source_reference_moving'])
+                        state['source_reference_retained_pixels'] += int(np.count_nonzero(retained != planes[number]))
+                        planes[number] = retained
+                union = np.maximum.reduce(planes)
             return union,planes
         self._step=step
 
@@ -129,12 +266,15 @@ class ComponentVideoTracker:
         import torch
         with torch.inference_mode():return self._step(rgb,index)
 
-def segment(spec, source, geometry, model_dir, output, *, device='cpu'):
+def segment(spec, source, geometry, model_dir, output, *, device='cpu', refresh_fixed=None):
     from python_media_worker.studio_subject_matte import detect_shot_cuts, mask_geometry
     width,height,count=(int(geometry[k]) for k in ('width','height','nb_read_frames'))
     if detect_shot_cuts(source,24):raise ValueError('Select one camera shot before tracking foreground objects')
     params=spec['request']['parameters']
-    tracker=ComponentVideoTracker(spec,geometry,model_dir,device=device)
+    if refresh_fixed is None:
+        refresh_fixed = bool(spec['model'].get('limits', {}).get('refreshFixedSourceFrames', False))
+    tracker=ComponentVideoTracker(spec,geometry,model_dir,device=device,refresh_fixed=refresh_fixed,
+        offload_state=bool(spec['model'].get('limits',{}).get('offloadStateToCpu',False)))
     components,rois=tracker.components,tracker.rois
     weight=next(f for f in spec['model']['weights'] if f['path']=='model.safetensors')
     import torch
@@ -177,7 +317,12 @@ def segment(spec, source, geometry, model_dir, output, *, device='cpu'):
         'model_weights_sha256':weight['sha256'],'prompt':selection_prompt,'prompt_sha256':sha_json(selection_prompt),
         'original_source_sha256':spec['request']['sourceSha256'],'sourceRange':spec['request']['sourceRange'],'shot_cuts':[]}
     manifest = {**common,'frames':rows,'components':components,'inference_rois':rois,
-        'mask_semantics':'Maximum sigmoid-logit evidence of separately prompted SAM2 video tracks in shared moving-object and detailed static-object source ROIs; not calibrated alpha or confidence. Corrections affect their frame and following frames. Explicit fixed objects retain their first-frame outline.',
+        'mask_semantics':'Maximum sigmoid-logit evidence of separately prompted SAM2 video tracks with full-source moving-object inference and detailed fixed-object ROIs; not calibrated alpha or confidence. Later clicks do not reuse the initial pose box. Corrections affect their frame and following frames. '+('Fixed ROIs examine each current RGB frame; a cached prediction is reused only while every ROI channel remains within four code values of its actual inference frame.' if refresh_fixed else 'Explicit fixed objects retain their first-frame outline.'),
+        'fixed_roi_current_frame_evaluation':bool(refresh_fixed),
+        'fixed_roi_stateless_current_images':bool(spec['model'].get('limits',{}).get('statelessFixedSourceFrames',False)),
+        'fixed_roi_evaluation_counts':[{'components':s['indices'],'neuralFrames':s['neural_frames'],'agreeingSourceReuses':s['agreeing_reuses'],
+            **({'currentImageFrames':s['current_image_frames']} if spec['model'].get('limits',{}).get('statelessFixedSourceFrames',False) else {})}
+            for s in tracker.fixed_roi_diagnostics if not components[s['indices'][0]].get('propagate',True)],
         'quality':'Segmentation guidance only; source-conditioned alpha refinement and moving review required'}
     write_json(masks/'manifest.json',manifest);write_json(output/'subject_masks_manifest.json',manifest)
     details = {**common,'components':[{'selection':c,'roi':roi,'frames':frames}
