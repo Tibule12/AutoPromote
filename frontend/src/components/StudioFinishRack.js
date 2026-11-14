@@ -244,16 +244,21 @@ export default function StudioFinishRack({
           <small>Measure, do not guess</small>
         </summary>
         <div className="finish-scope-tabs" role="tablist" aria-label="Video scope mode">
-          {["parade", "luma"].map(mode => (
+          {[
+            { id: "parade", label: "RGB Parade" },
+            { id: "waveform", label: "Waveform" },
+            { id: "vectorscope", label: "Vectorscope" },
+            { id: "luma", label: "Luma" },
+          ].map(({ id, label }) => (
             <button
-              key={mode}
+              key={id}
               type="button"
               role="tab"
-              aria-selected={scopeMode === mode}
-              className={scopeMode === mode ? "is-active" : ""}
-              onClick={() => onScopeModeChange?.(mode)}
+              aria-selected={scopeMode === id}
+              className={scopeMode === id ? "is-active" : ""}
+              onClick={() => onScopeModeChange?.(id)}
             >
-              {mode === "parade" ? "RGB Parade" : "Luma"}
+              {label}
             </button>
           ))}
         </div>
