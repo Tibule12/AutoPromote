@@ -302,3 +302,18 @@ test('Fit graph reveals the full node network without mutating the canonical edi
 });
 
 test('Inspect node selects an off-canvas branch and keeps its canonical pose intact',()=>{render(<Harness/>);const panel=screen.getByTestId('studio-node-flow'),before=screen.getByTestId('state-readout').textContent;fireEvent.change(within(panel).getByLabelText('Inspect node'),{target:{value:'Transform:plate-1'}});expect(screen.getByTestId('state-readout').textContent).toBe(before);expect(screen.getByTestId('flow-node-inspector')).toHaveTextContent('Transform');});
+
+test('ColorCorrector applies Camera CST, Film Emulation, HSL Qualifier, Power Window, and Preset Import/Export',()=>{
+  render(<Harness/>);
+  fireEvent.click(screen.getByTestId('flow-node-ColorCorrector:finish'));
+  fireEvent.change(screen.getByTestId('flow-cst-profile-select'),{target:{value:'apple_log'}});
+  fireEvent.change(screen.getByTestId('flow-film-emulation-select'),{target:{value:'35mm_halation'}});
+  fireEvent.change(screen.getByTestId('flow-hsl-qualifier-select'),{target:{value:'skin_isolate'}});
+  fireEvent.change(screen.getByTestId('flow-power-window-select'),{target:{value:'subject_spotlight'}});
+  const state=JSON.parse(screen.getByTestId('state-readout').textContent);
+  expect(state.lutPresetId).toBe('cst:apple_log->rec709');
+  expect(state.lutSize).toBe(17);
+  expect(screen.getByTestId('flow-capture-shot-ref')).toBeInTheDocument();
+  expect(screen.getByTestId('flow-export-preset')).toBeInTheDocument();
+  expect(screen.getByTestId('flow-import-preset')).toBeInTheDocument();
+});

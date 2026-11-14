@@ -30705,6 +30705,9 @@ class ViralSpeedSegment(BaseModel):
     end_time: float
     rate: float = 1.0
     pitch_preserved: bool = True
+    direction: str = "forward"
+    freeze: bool = False
+    optical_flow: bool = False
 
 class ViralCaptionSegment(BaseModel):
     id: Optional[Union[str, int]] = None
@@ -32449,12 +32452,54 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         )
         rendered_timeline_duration = speed_plan_output_duration(speed_plan)
 
-        if speed_plan_changes_timing(speed_plan):
+        try:
+            from .studio_pro_render_engine import (
+                build_optical_flow_speed_filter,
+                build_reverse_freeze_filter,
+                select_video_encode_profile,
+            )
+        except ImportError:
+            from studio_pro_render_engine import (
+                build_optical_flow_speed_filter,
+                build_reverse_freeze_filter,
+                select_video_encode_profile,
+            )
+
+        requested_fps = int((request.output_settings or {}).get("fps", 30) or 30)
+        requested_speed_segments = request.speed_segments or []
+        has_reverse_or_freeze = any(
+            getattr(seg, "direction", "forward") == "reverse" or bool(getattr(seg, "freeze", False))
+            for seg in requested_speed_segments
+        )
+        has_optical_flow = any(bool(getattr(seg, "optical_flow", False)) for seg in requested_speed_segments)
+
+        if has_reverse_or_freeze or speed_plan_changes_timing(speed_plan):
             speed_adjusted_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_speed.mp4")
             speed_has_audio = has_audio_stream(working_path)
-            speed_filter = build_speed_filter_complex(
-                speed_plan, speed_has_audio, (request.output_settings or {}).get("fps", 30),
+            encode_profile = select_video_encode_profile(
+                prefer_hw=GPU_VIDEO_ENCODER == "h264_nvenc",
+                fps=requested_fps,
+                detected_caps={"h264_nvenc": GPU_VIDEO_ENCODER == "h264_nvenc"},
             )
+            if has_reverse_or_freeze and len(requested_speed_segments) == 1:
+                seg0 = requested_speed_segments[0]
+                rf_mode = "freeze" if getattr(seg0, "freeze", False) else "reverse"
+                hold_sec = max(0.25, float(getattr(seg0, "end_time", 1.5)) - float(getattr(seg0, "start_time", 0.0)))
+                rf = build_reverse_freeze_filter(mode=rf_mode, hold_seconds=hold_sec, has_audio=speed_has_audio)
+                speed_filter = f"[0:v]{rf['video_filter']}[v_speed]"
+                if speed_has_audio and rf["audio_filter"]:
+                    speed_filter += f";[0:a]{rf['audio_filter']}[a_speed]"
+            elif has_optical_flow and len(speed_plan) == 1 and speed_plan[0]["rate"] < 1.0:
+                vf_flow = build_optical_flow_speed_filter(
+                    speed_plan[0]["rate"], target_fps=requested_fps, optical_flow=True
+                )
+                speed_filter = f"[0:v]{vf_flow}[v_speed]"
+                if speed_has_audio:
+                    speed_filter += f";[0:a]atempo={speed_plan[0]['rate']:.6f}[a_speed]"
+            else:
+                speed_filter = build_speed_filter_complex(
+                    speed_plan, speed_has_audio, requested_fps,
+                )
             speed_cmd = [
                 "ffmpeg",
                 "-i",
@@ -32470,12 +32515,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 speed_cmd.append("-an")
             speed_cmd.extend(
                 [
-                    "-c:v",
-                    "libx264",
-                    "-preset",
-                    "veryfast",
-                    "-pix_fmt",
-                    "yuv420p",
+                    *encode_profile["args"],
                     "-movflags",
                     "+faststart",
                     "-y",

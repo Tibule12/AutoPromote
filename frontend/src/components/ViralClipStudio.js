@@ -94,6 +94,9 @@ import useCinematicEffects, { CINEMATIC_PRESETS, buildCinematicCssFilter } from 
 import StudioFinishLayers from "./StudioFinishLayers";
 import StudioFinishRack from "./StudioFinishRack";
 import { buildPrecisionGrade, applyPrecisionGrade, applyPrecisionVignette } from "./studioPrecisionGrade";
+import { createStudioWebGLCompositor } from "./studioWebGLCompositor";
+import { createStudioWebCodecsController } from "./studioMediaFrameCache";
+import { detectAudioTransients } from "./studioAudioDspEngine";
 import { parseColorCube, buildAdvancedColorCube, applyColorCube, hasAdvancedGrade } from "./studioColorCube";
 import { soloTrackingCoordinates, reprojectDetectedReframeKeys } from "./studioTrackingCoordinates";
 import { interpolateReframeKeyframes } from "./studioReframeInterpolation";
@@ -3205,6 +3208,17 @@ const ViralClipStudio = ({
   const programmePaintBudgetRef = useRef({ nextAt: 0, fullCost: 0 });
   const [pausedSourceFrame, setPausedSourceFrame] = useState(null);
   const adjustmentScratchRef = useRef(null);
+  const webglCompositorRef = useRef(null);
+  const frameCacheControllerRef = useRef(null);
+  useEffect(() => {
+    frameCacheControllerRef.current = createStudioWebCodecsController({ maxFrames: 90 });
+    return () => {
+      webglCompositorRef.current?.dispose();
+      webglCompositorRef.current = null;
+      frameCacheControllerRef.current?.destroy();
+      frameCacheControllerRef.current = null;
+    };
+  }, []);
   const beforeVideoRef = useRef(null);
   const beforeCanvasRef = useRef(null);
   const speakerStackTopVideoRef = useRef(null);
@@ -4629,13 +4643,37 @@ const ViralClipStudio = ({
         event.preventDefault();
         studioShortcutActionsRef.current.punch?.();
       }
-      if (!isTypingTarget && !event.metaKey && !event.ctrlKey && event.key.toLowerCase() === "j") {
+      if (!isTypingTarget && !event.metaKey && !event.ctrlKey && event.key.toLowerCase() === "j" && !event.shiftKey) {
         event.preventDefault();
         studioShortcutActionsRef.current.jcut?.();
       }
-      if (!isTypingTarget && !event.metaKey && !event.ctrlKey && event.key.toLowerCase() === "l") {
+      if (!isTypingTarget && !event.metaKey && !event.ctrlKey && event.key.toLowerCase() === "l" && !event.shiftKey) {
         event.preventDefault();
         studioShortcutActionsRef.current.lcut?.();
+      }
+      if (!isTypingTarget && !event.metaKey && !event.ctrlKey && event.key.toLowerCase() === "j" && event.shiftKey) {
+        event.preventDefault();
+        studioShortcutActionsRef.current.shuttleReverse?.();
+      }
+      if (!isTypingTarget && !event.metaKey && !event.ctrlKey && event.key.toLowerCase() === "k" && !event.shiftKey) {
+        event.preventDefault();
+        studioShortcutActionsRef.current.shuttleStop?.();
+      }
+      if (!isTypingTarget && !event.metaKey && !event.ctrlKey && event.key.toLowerCase() === "l" && event.shiftKey) {
+        event.preventDefault();
+        studioShortcutActionsRef.current.shuttleFastForward?.();
+      }
+      if (!isTypingTarget && !event.metaKey && !event.ctrlKey && event.key.toLowerCase() === "i" && !event.shiftKey) {
+        event.preventDefault();
+        studioShortcutActionsRef.current.markIn?.();
+      }
+      if (!isTypingTarget && !event.metaKey && !event.ctrlKey && event.key.toLowerCase() === "o" && !event.shiftKey) {
+        event.preventDefault();
+        studioShortcutActionsRef.current.markOut?.();
+      }
+      if (!isTypingTarget && !event.metaKey && !event.ctrlKey && event.key.toLowerCase() === "x" && event.shiftKey) {
+        event.preventDefault();
+        studioShortcutActionsRef.current.extractMarkedRange?.();
       }
       if (!isTypingTarget && !event.metaKey && !event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "b") {
         event.preventDefault();
@@ -10729,6 +10767,37 @@ const ViralClipStudio = ({
     else setStudioActionMessage('This filler word has no retained source occurrence.');
   };
 
+  Object.assign(studioShortcutActionsRef.current, {
+    markIn: () => markCutBoundary("start"),
+    markOut: () => markCutBoundary("end"),
+    extractMarkedRange: () => {
+      if (cutRangeStart === null || cutRangeEnd === null) return;
+      const clipOffset = getTimelineOffsetForIndex(activeTimelineIndex);
+      const start = clipOffset + Math.min(Number(cutRangeStart), Number(cutRangeEnd));
+      const end = clipOffset + Math.max(Number(cutRangeStart), Number(cutRangeEnd));
+      if (end - start < 0.15) return;
+      commitProgrammeRemoval([{ start, end }], "Three-point range cut");
+    },
+    shuttleStop: () => {
+      pauseSynchronizedPreview();
+      changePreviewSpeed(1);
+    },
+    shuttleReverse: () => {
+      pauseSynchronizedPreview();
+      const target = Math.max(0, Number(previewTimelineTime || 0) - 0.5);
+      jumpToOutputTimelineTime(target);
+    },
+    shuttleFastForward: () => {
+      const nextRate = previewSpeed >= 2 ? 1 : Number((previewSpeed * 2).toFixed(2));
+      changePreviewSpeed(nextRate);
+      if (videoRef.current?.paused) {
+        previewPlaybackIntentRef.current = true;
+        setIsPreviewPaused(false);
+        videoRef.current.play?.().catch(() => {});
+      }
+    },
+  });
+
   const addAudioAutomationKeyframe = () => {
     const source = audioAutomationSource;
     if (!allowTimelineTimingEdit(source)) return;
@@ -11752,11 +11821,15 @@ const ViralClipStudio = ({
         musicPreviewBufferUrlRef.current = beatSourceUrl;
         setDecodedMusicPreviewUrl(beatSourceUrl);
         const rhythmAnalysis = detectAudioBeats(analyzeAudioBufferBeats(decodedBuffer));
-        setMusicBeatMarkers(rhythmAnalysis.beats.slice(0, 160));
+        const resolvedBeats =
+          rhythmAnalysis.beats.length > 0
+            ? rhythmAnalysis.beats
+            : detectAudioTransients(decodedBuffer.getChannelData(0), decodedBuffer.sampleRate);
+        setMusicBeatMarkers(resolvedBeats.slice(0, 160));
         setMusicPreviewStatus("ready");
         setMusicPreviewStatusMessage(
-          rhythmAnalysis.beats.length
-            ? `${rhythmAnalysis.beats.length} magnetic beat points ready for ${currentMusicLabel}.`
+          resolvedBeats.length
+            ? `${resolvedBeats.length} magnetic beat points ready for ${currentMusicLabel}.`
             : `Preview audio ready for ${currentMusicLabel}. Smart timing will stay frame-based.`
         );
       } catch (error) {
@@ -14141,13 +14214,50 @@ const ViralClipStudio = ({
         pausedSourceFrame?.image && pausedSourceFrame.key === pausedStudioFrameKey(
           pausedStudioMappedFrameRequest(currentTimelineClip, Number(programmeVideo.currentTime),
             exportSettings.fps, timeline, previewOutputTimeMap, pausedSourceGeneration, pausedSourceUsesCfr30));
-      canvas.dataset.sourceSampling = pausedFrameIsCurrent ? "accurate-paused" : "native";
+      const cacheController = frameCacheControllerRef.current;
+      const cacheAssetId = String(currentTimelineClip?.sourceClipId || currentTimelineClip?.id || "main");
+      const cacheFps = Number(exportSettings?.fps) || 30;
+      const cacheFrameIndex = Math.max(0, Math.round(sampledSourceTime * cacheFps));
+      const cachedScrubFrame =
+        programmeVideo.seeking &&
+        !pausedFrameIsCurrent &&
+        !subjectIsCurrent &&
+        !renderedOutputUrl &&
+        cacheController
+          ? cacheController.cache.getNearest(cacheAssetId, cacheFrameIndex, { maxDistance: 6 })
+          : null;
+      if (
+        !programmeVideo.seeking &&
+        programmeVideo.readyState >= 2 &&
+        !pausedFrameIsCurrent &&
+        !subjectIsCurrent &&
+        !renderedOutputUrl &&
+        cacheController
+      ) {
+        cacheController.captureVideoElementFrame({
+          video: programmeVideo,
+          assetId: cacheAssetId,
+          frameIndex: cacheFrameIndex,
+          quality: moving ? "proxy" : "hq",
+        });
+      }
+      canvas.dataset.sourceSampling = pausedFrameIsCurrent
+        ? "accurate-paused"
+        : cachedScrubFrame
+          ? "cached-scrub"
+          : "native";
       canvas.dataset.sourceContentHash = pausedFrameIsCurrent ? pausedSourceFrame.receipt.sourceContentHash : "";
       canvas.dataset.sourceFrameIndex = pausedFrameIsCurrent ? String(pausedSourceFrame.receipt.frameIndex) : "";
       canvas.dataset.sourceGeneration = pausedFrameIsCurrent ? pausedSourceFrame.receipt.sourceGeneration : "";
-      const sourceVideo = subjectIsCurrent ? subjectVideo : pausedFrameIsCurrent ? pausedSourceFrame.image : alternateIsCurrent
-        ? alternateVideo
-        : cachedAlternateIsCurrent ? cachedSoloFrame.canvas : programmeVideo;
+      const sourceVideo = subjectIsCurrent
+        ? subjectVideo
+        : pausedFrameIsCurrent
+          ? pausedSourceFrame.image
+          : alternateIsCurrent
+            ? alternateVideo
+            : cachedAlternateIsCurrent
+              ? cachedSoloFrame.canvas
+              : cachedScrubFrame?.frame || programmeVideo;
       const frameProgrammeFit = renderedOutputUrl || activeSideBySideOverlay
         ? previewProgrammeFit
         : frameCropMode === "speaker_track" || frameCropMode === "group_stack"
@@ -14585,14 +14695,57 @@ const ViralClipStudio = ({
         context.fillRect(0, 0, canvasWidth, canvasHeight);
         context.restore();
       }
-      if (precisionPreviewGrade || (finishPreviewIsLive && advancedColorCube)) {
-        const pixels = context.getImageData(0, 0, canvasWidth, canvasHeight);
-        if (precisionPreviewGrade) applyPrecisionGrade(pixels.data, precisionPreviewGrade);
-        if (finishPreviewIsLive && advancedColorCube) applyColorCube(pixels.data, advancedColorCube);
-        if (precisionPreviewGrade && pausedRaster)
-          applyPrecisionVignette(pixels.data,canvasWidth,canvasHeight,effectiveFinishFx.vignette);
-        context.putImageData(pixels, 0, 0);
+      let usedWebGL = false;
+      const needsSecondaryShader =
+        finishPreviewIsLive &&
+        (advancedColor?.powerWindow?.enabled ||
+          advancedColor?.qualifier?.enabled ||
+          Number(effectiveFinishFx?.halation || 0) > 0 ||
+          Number(effectiveFinishFx?.chromaticAberration || 0) > 0 ||
+          Number(effectiveFinishFx?.filmGrain || 0) > 0);
+      if (precisionPreviewGrade || (finishPreviewIsLive && advancedColorCube) || needsSecondaryShader) {
+        if (webglCompositorRef.current === null) {
+          webglCompositorRef.current = createStudioWebGLCompositor() || false;
+        }
+        const compositor = webglCompositorRef.current;
+        if (
+          compositor &&
+          compositor.renderGradedFrame({
+            source: paintCanvas,
+            width: canvasWidth,
+            height: canvasHeight,
+            grade: precisionPreviewGrade ? effectiveFinishFx : null,
+            cube: finishPreviewIsLive ? advancedColorCube : null,
+            lutIntensity: clampNumber(advancedColor?.lutIntensity, 0, 100, 100) / 100,
+            vignetteAmount: precisionPreviewGrade && pausedRaster ? effectiveFinishFx.vignette : 0,
+            powerWindow: finishPreviewIsLive ? advancedColor?.powerWindow : null,
+            qualifier: finishPreviewIsLive ? advancedColor?.qualifier : null,
+            textureEffects: finishPreviewIsLive
+              ? {
+                  filmGrain: Number(effectiveFinishFx?.filmGrain || 0) / 100,
+                  chromaticAberration: Number(effectiveFinishFx?.chromaticAberration || 0) / 100,
+                  halation: Number(effectiveFinishFx?.halation || 0) / 100,
+                  seed: Math.round(frameOutputTime * 30),
+                }
+              : null,
+          })
+        ) {
+          context.save();
+          context.setTransform(1, 0, 0, 1, 0, 0);
+          context.filter = "none";
+          context.drawImage(compositor.surface, 0, 0, canvasWidth, canvasHeight);
+          context.restore();
+          usedWebGL = true;
+        } else if (precisionPreviewGrade || (finishPreviewIsLive && advancedColorCube)) {
+          const pixels = context.getImageData(0, 0, canvasWidth, canvasHeight);
+          if (precisionPreviewGrade) applyPrecisionGrade(pixels.data, precisionPreviewGrade);
+          if (finishPreviewIsLive && advancedColorCube) applyColorCube(pixels.data, advancedColorCube);
+          if (precisionPreviewGrade && pausedRaster)
+            applyPrecisionVignette(pixels.data, canvasWidth, canvasHeight, effectiveFinishFx.vignette);
+          context.putImageData(pixels, 0, 0);
+        }
       }
+      canvas.dataset.previewPipeline = usedWebGL ? "webgl2" : "cpu2d";
       // Use this decoded picture's programme time at grade boundaries. React's
       // transport state can lag behind the frame callback during playback.
       for (const layer of finishPreviewIsLive ? compiledAdjustmentGrades : []) {
@@ -14600,10 +14753,30 @@ const ViralClipStudio = ({
         const adjustment = layer.effects;
         const grade = adjustment.color;
         if (grade.precisionGrade) {
-          const pixels = context.getImageData(0, 0, canvasWidth, canvasHeight);
-          applyPrecisionGrade(pixels.data, buildPrecisionGrade(grade));
-          if (adjustment.color_cube) applyColorCube(pixels.data, adjustment.color_cube);
-          context.putImageData(pixels, 0, 0);
+          const compositor = webglCompositorRef.current;
+          if (
+            usedWebGL &&
+            compositor &&
+            compositor.renderGradedFrame({
+              source: paintCanvas,
+              width: canvasWidth,
+              height: canvasHeight,
+              grade,
+              cube: adjustment.color_cube || null,
+              lutIntensity: 1,
+            })
+          ) {
+            context.save();
+            context.setTransform(1, 0, 0, 1, 0, 0);
+            context.filter = "none";
+            context.drawImage(compositor.surface, 0, 0, canvasWidth, canvasHeight);
+            context.restore();
+          } else {
+            const pixels = context.getImageData(0, 0, canvasWidth, canvasHeight);
+            applyPrecisionGrade(pixels.data, buildPrecisionGrade(grade));
+            if (adjustment.color_cube) applyColorCube(pixels.data, adjustment.color_cube);
+            context.putImageData(pixels, 0, 0);
+          }
         } else {
           const scratch = adjustmentScratchRef.current || document.createElement("canvas");
           adjustmentScratchRef.current = scratch;

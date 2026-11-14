@@ -1,6 +1,12 @@
 import { getStudioCapability, isStudioCapabilityDirectorAllowed } from "./studioCapabilities";
 import { applyStudioReframeOperation, validateStudioReframeOperation } from "./studioReframeCommand";
 import {
+  MIGRATED_PROGRAMME_OPERATIONS,
+  applyMigratedOperation,
+  collectMigratedReadWriteSets,
+  validateMigratedOperation,
+} from "./studioCommandKernelExtensions";
+import {
   applyStudioCommandInverse,
   createStudioCommandInverse,
   latestUndoableStudioCommand,
@@ -135,7 +141,15 @@ export const validateStudioCommandBatch = batch => {
       checkId(operation.target.occurrenceId, "occurrenceId");
       checkId(operation.lockId, "lockId");
       validRange(operation.range, "source");
-    } else {
+    } else if (
+      !validateMigratedOperation(operation, {
+        commandError,
+        expectKeys,
+        validTick,
+        validRange,
+        checkId,
+      })
+    ) {
       commandError("UNSUPPORTED_CAPABILITY", `No command executor for ${operation.type}.`);
     }
     if (operation.preconditions !== undefined) {
@@ -206,9 +220,9 @@ const reflow = document => {
             endTick: occurrence.sourceRange.endTick - occurrence.sourceRange.startTick,
           },
           programmeRange: occurrence.programmeRange,
-          rate: { numerator: 1, denominator: 1 },
-          direction: "forward",
-          freeze: false,
+          rate: occurrence.playback?.rate || { numerator: 1, denominator: 1 },
+          direction: occurrence.playback?.direction === "reverse" ? "reverse" : "forward",
+          freeze: !!occurrence.playback?.freeze,
         },
       ],
     })),
@@ -221,6 +235,15 @@ const reflow = document => {
 };
 
 const applyOne = (document, operation, idempotencyKey) => {
+  if (MIGRATED_PROGRAMME_OPERATIONS.includes(operation.type)) {
+    const migrated = applyMigratedOperation(document, operation, idempotencyKey, {
+      commandError,
+      overlap,
+      assertUnlocked,
+      reflow,
+    });
+    if (migrated) return migrated;
+  }
   const index = document.clipOccurrences.findIndex(
     item => item.occurrenceId === operation.target.occurrenceId
   );
@@ -410,36 +433,54 @@ export const resolveStudioCommandBatch = (document, batch) => {
     }
     candidate = applyOne(candidate, operation, batch.idempotencyKey);
   }
-  const readNodes = [...new Set(batch.operations.map(operation => operation.target.occurrenceId))];
+  const readNodes = [
+    ...new Set(
+      batch.operations
+        .map(operation => operation.target?.occurrenceId)
+        .filter(Boolean)
+    ),
+  ];
   const affected = [
     ...new Set(
       batch.operations.flatMap(operation => [
-        operation.target.occurrenceId,
+        ...(operation.target?.occurrenceId ? [operation.target.occurrenceId] : []),
+        ...(operation.layerId ? [operation.layerId] : []),
         ...(operation.type === "split_clip"
           ? [operation.newOccurrenceIds.left, operation.newOccurrenceIds.right]
           : []),
       ])
     ),
   ];
-  const readSet = readNodes.map(id => `occurrence:${id}`);
+  const migratedSets = batch.operations.map(collectMigratedReadWriteSets);
+  const readSet = [
+    ...new Set([
+      ...readNodes.map(id => `occurrence:${id}`),
+      ...migratedSets.flatMap(item => item.read),
+    ]),
+  ];
   if (batch.operations.some(operation => operation.type === "reframe"))
     readSet.push("programme:framing", "output:aspect");
   if (linkedEdits.length)
     readSet.push("programme:layers", "programme:linked_timing", "programme:speed_keys");
   const writeSet = [
-    ...(batch.operations.some(operation => operation.type === "reframe") ? ["programme:framing", "output:aspect"] : []),
-    ...affected.map(id => `occurrence:${id}`),
-    ...(batch.operations.some(operation => operation.type !== "preserve_range")
-      ? ["programme:timeline", "time_maps"]
-      : []),
-    ...(batch.operations.some(
-      operation => operation.type === "preserve_range" || document.constraints.locks.length
-    )
-      ? ["constraints:locks"]
-      : []),
-    ...(linkedEdits.length
-      ? ["programme:layers", "programme:linked_timing", "programme:speed_keys"]
-      : []),
+    ...new Set([
+      ...(batch.operations.some(operation => operation.type === "reframe")
+        ? ["programme:framing", "output:aspect"]
+        : []),
+      ...affected.map(id => `occurrence:${id}`),
+      ...(batch.operations.some(operation => operation.type !== "preserve_range")
+        ? ["programme:timeline", "time_maps"]
+        : []),
+      ...(batch.operations.some(
+        operation => operation.type === "preserve_range" || document.constraints.locks.length
+      )
+        ? ["constraints:locks"]
+        : []),
+      ...(linkedEdits.length
+        ? ["programme:layers", "programme:linked_timing", "programme:speed_keys"]
+        : []),
+      ...migratedSets.flatMap(item => item.write),
+    ]),
   ];
   return {
     document,
@@ -560,7 +601,12 @@ export const projectStudioCommandResultOnSnapshot = ({ snapshot, projectId, plan
     timeline: projectDocumentToLegacyTimeline(result.document, snapshot.timeline),
     studioDocument: result.document,
   };
-  if (plan.batch.operations.some(operation => operation.type === "reframe"))
+  if (
+    plan.batch.operations.some(
+      operation =>
+        operation.type === "reframe" || MIGRATED_PROGRAMME_OPERATIONS.includes(operation.type)
+    )
+  )
     nextSnapshot = projectStudioEditableStateToSnapshot(result.document, nextSnapshot);
   const reconciled = reconcileStudioDocument({
     snapshot: nextSnapshot,

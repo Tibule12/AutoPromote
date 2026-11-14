@@ -38,6 +38,18 @@ import {
   parseColorCube,
 } from "./studioColorCube";
 import {
+  CAMERA_COLOR_PROFILES,
+  FILM_EMULATION_PRESETS,
+  HSL_QUALIFIER_PRESETS,
+  POWER_WINDOW_PRESETS,
+  buildColorSpaceTransformCube,
+  solveShotMatchGrade,
+} from "./studioColorScience";
+import {
+  parseStudioPresetBundle,
+  serializeStudioPresetBundle,
+} from "./studioPresetExchange";
+import {
   SKIN_TONE_LINE_ANGLE_DEG,
   computeLiveGradeScopes,
 } from "./studioColorScopes";
@@ -185,6 +197,7 @@ export default function StudioNodeFlow({
   const [draggingMaskVertex, setDraggingMaskVertex] = useState(null);
   const [autoKeyMaskVertices, setAutoKeyMaskVertices] = useState(false);
   const [scopeMode, setScopeMode] = useState("waveform");
+  const [shotMatchRefPixels, setShotMatchRefPixels] = useState(null);
   const [draggingNode, setDraggingNode] = useState(null);
   const [panningCanvas, setPanningCanvas] = useState(null);
   const [pendingWire, setPendingWire] = useState(null);
@@ -679,6 +692,22 @@ export default function StudioNodeFlow({
     });
   };
 
+  const sampleCurrentVideoRgba = useCallback(() => {
+    const media = videoRef?.current;
+    if (!media || typeof document === "undefined") return null;
+    try {
+      const probe = document.createElement("canvas");
+      probe.width = 48;
+      probe.height = 27;
+      const ctx = probe.getContext?.("2d", { willReadFrequently: true });
+      if (!ctx) return null;
+      ctx.drawImage(media, 0, 0, 48, 27);
+      return ctx.getImageData(0, 0, 48, 27).data;
+    } catch (_err) {
+      return null;
+    }
+  }, [videoRef]);
+
   const resolvedAdvancedColor = useMemo(() => {
     const raw = advancedColor || finishFx?.advancedColor || {};
     return {
@@ -692,10 +721,16 @@ export default function StudioNodeFlow({
         saturation: Number(raw.hsl?.saturation ?? 1),
         luminance: Number(raw.hsl?.luminance ?? 0),
       },
-      lut: raw.lut || null,
+      lut: raw.lut || raw.lutData || null,
+      lutData: raw.lutData || raw.lut || null,
       lutName: raw.lutName || "",
       lutPresetId: raw.lutPresetId || "",
       lutIntensity: Number(raw.lutIntensity ?? 1),
+      cameraProfile: raw.cameraProfile || "rec709",
+      qualifierPresetId: raw.qualifierPresetId || "",
+      qualifier: raw.qualifier || null,
+      powerWindowPresetId: raw.powerWindowPresetId || "",
+      powerWindow: raw.powerWindow || null,
     };
   }, [advancedColor, finishFx?.advancedColor]);
 
@@ -3112,6 +3147,7 @@ export default function StudioNodeFlow({
                           const presetMeta = CINEMA_3D_LUT_PRESETS.find(p => p.id === presetId);
                           updateAdvancedColorPatch({
                             lut: cube,
+                            lutData: cube,
                             lutPresetId: presetId,
                             lutName: presetMeta ? `${presetMeta.label}.cube` : `${presetId}.cube`,
                             lutIntensity: Number(resolvedAdvancedColor.lutIntensity ?? 1),
@@ -3165,6 +3201,194 @@ export default function StudioNodeFlow({
                               lutIntensity: Number(e.target.value),
                             })
                           }
+                        />
+                      </label>
+                    </div>
+                    <div className="ap-flow-field-row">
+                      <label className="ap-flow-field">
+                        <span>Camera Input CST</span>
+                        <select
+                          aria-label="Camera Input CST"
+                          data-testid="flow-cst-profile-select"
+                          value={resolvedAdvancedColor.cameraProfile || "rec709"}
+                          onChange={e => {
+                            const profileId = e.target.value;
+                            if (!profileId || profileId === "rec709") {
+                              updateAdvancedColorPatch({
+                                cameraProfile: "rec709",
+                                lut: null,
+                                lutData: null,
+                                lutName: "",
+                                lutPresetId: "",
+                              });
+                              return;
+                            }
+                            const cube = buildColorSpaceTransformCube(profileId, "rec709", 17);
+                            updateAdvancedColorPatch({
+                              cameraProfile: profileId,
+                              lut: cube,
+                              lutData: cube,
+                              lutName: `${cube.title}.cube`,
+                              lutPresetId: cube.presetId,
+                            });
+                          }}
+                        >
+                          {CAMERA_COLOR_PROFILES.map(profile => (
+                            <option key={profile.id} value={profile.id}>
+                              {profile.label}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <label className="ap-flow-field">
+                        <span>Film Emulation</span>
+                        <select
+                          aria-label="Film Emulation"
+                          data-testid="flow-film-emulation-select"
+                          value={finishFx?.filmEmulation || "none"}
+                          onChange={e => {
+                            const presetId = e.target.value;
+                            const fx = FILM_EMULATION_PRESETS[presetId] || FILM_EMULATION_PRESETS.none;
+                            emitFinishFx?.({
+                              ...finishFx,
+                              filmEmulation: presetId,
+                              halation: fx.halation,
+                              chromaticAberration: fx.chromaticAberration,
+                              filmGrain: fx.filmGrain,
+                            });
+                          }}
+                        >
+                          <option value="none">None (Clean Digital)</option>
+                          <option value="35mm_halation">35mm Cinema Halation</option>
+                          <option value="16mm_doc">16mm Documentary Grain</option>
+                          <option value="anamorphic_prism">Anamorphic Prism</option>
+                        </select>
+                      </label>
+                    </div>
+                    <div className="ap-flow-field-row">
+                      <label className="ap-flow-field">
+                        <span>HSL Qualifier</span>
+                        <select
+                          aria-label="HSL Qualifier"
+                          data-testid="flow-hsl-qualifier-select"
+                          value={resolvedAdvancedColor.qualifierPresetId || ""}
+                          onChange={e => {
+                            const key = e.target.value;
+                            updateAdvancedColorPatch({
+                              qualifierPresetId: key,
+                              qualifier: key && HSL_QUALIFIER_PRESETS[key] ? { ...HSL_QUALIFIER_PRESETS[key] } : null,
+                            });
+                          }}
+                        >
+                          <option value="">Off</option>
+                          {Object.entries(HSL_QUALIFIER_PRESETS).map(([id, preset]) => (
+                            <option key={id} value={id}>
+                              {preset.label}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <label className="ap-flow-field">
+                        <span>Power Window</span>
+                        <select
+                          aria-label="Power Window"
+                          data-testid="flow-power-window-select"
+                          value={resolvedAdvancedColor.powerWindowPresetId || ""}
+                          onChange={e => {
+                            const key = e.target.value;
+                            updateAdvancedColorPatch({
+                              powerWindowPresetId: key,
+                              powerWindow: key && POWER_WINDOW_PRESETS[key] ? { ...POWER_WINDOW_PRESETS[key] } : null,
+                            });
+                          }}
+                        >
+                          <option value="">Off</option>
+                          {Object.entries(POWER_WINDOW_PRESETS).map(([id, preset]) => (
+                            <option key={id} value={id}>
+                              {preset.label}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
+                    <div className="ap-flow-field-row" data-testid="flow-shot-match-row">
+                      <button
+                        type="button"
+                        className="ap-flow-mini-btn"
+                        data-testid="flow-capture-shot-ref"
+                        onClick={() => {
+                          const pixels = sampleCurrentVideoRgba();
+                          if (pixels) setShotMatchRefPixels(pixels);
+                        }}
+                      >
+                        Capture Shot Ref
+                      </button>
+                      <button
+                        type="button"
+                        className="ap-flow-mini-btn"
+                        data-testid="flow-apply-shot-match"
+                        disabled={!shotMatchRefPixels}
+                        onClick={() => {
+                          const targetPixels = sampleCurrentVideoRgba();
+                          if (!shotMatchRefPixels || !targetPixels) return;
+                          const matched = solveShotMatchGrade(shotMatchRefPixels, targetPixels);
+                          emitFinishFx?.({
+                            ...finishFx,
+                            ...matched,
+                          });
+                        }}
+                      >
+                        Auto Shot Match
+                      </button>
+                      <button
+                        type="button"
+                        className="ap-flow-mini-btn"
+                        data-testid="flow-export-preset"
+                        onClick={() => {
+                          if (typeof document === "undefined" || typeof URL?.createObjectURL !== "function") return;
+                          const json = serializeStudioPresetBundle({
+                            name: resolvedAdvancedColor.lutName || finishFx?.preset || "Studio Look",
+                            finishFx,
+                            advancedColor: resolvedAdvancedColor,
+                          });
+                          const blob = new Blob([json], { type: "application/json" });
+                          const url = URL.createObjectURL(blob);
+                          const link = document.createElement("a");
+                          link.href = url;
+                          link.download = "studio-look-preset.json";
+                          link.click?.();
+                          URL.revokeObjectURL?.(url);
+                        }}
+                      >
+                        Export Look JSON
+                      </button>
+                      <label className="ap-flow-field">
+                        <span>Import Look</span>
+                        <input
+                          type="file"
+                          accept=".json,application/json"
+                          aria-label="Import Look Preset"
+                          data-testid="flow-import-preset"
+                          onChange={async e => {
+                            const file = e.target.files?.[0];
+                            e.target.value = "";
+                            if (!file) return;
+                            try {
+                              const parsed = parseStudioPresetBundle(await file.text());
+                              if (parsed.finishFx) {
+                                emitFinishFx?.({
+                                  ...finishFx,
+                                  ...parsed.finishFx,
+                                  advancedColor: parsed.advancedColor || finishFx?.advancedColor || null,
+                                });
+                              }
+                              if (parsed.advancedColor) {
+                                updateAdvancedColorPatch(parsed.advancedColor);
+                              }
+                            } catch (_err) {
+                              // Ignore invalid preset JSON
+                            }
+                          }}
                         />
                       </label>
                     </div>

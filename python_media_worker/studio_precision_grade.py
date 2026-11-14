@@ -22,4 +22,14 @@ def build_precision_grade_filter(fx):
         for col, weight in enumerate([.2126, .7152, .0722]):
             coefficient = (1-saturation)*weight + (saturation if row == col else 0)
             matrix.append(f"{name}{'rgb'[col]}={coefficient:.8f}")
-    return "format=rgb24,lutrgb=" + ":".join(channels) + ",colorchannelmixer=" + ":".join(matrix)
+    chain = "format=rgb24,lutrgb=" + ":".join(channels) + ",colorchannelmixer=" + ":".join(matrix)
+    has_film = any(float(fx.get(k, 0) or 0) > 1.0 for k in ("halation", "chromaticAberration", "filmGrain"))
+    if has_film:
+        try:
+            from .studio_pro_render_engine import build_film_emulation_filter
+        except ImportError:
+            from studio_pro_render_engine import build_film_emulation_filter
+        film_stage = build_film_emulation_filter(fx)
+        if film_stage:
+            chain += "," + film_stage
+    return chain

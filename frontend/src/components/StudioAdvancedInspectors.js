@@ -10,6 +10,7 @@ import StudioMaskPathEditor from "./StudioMaskPathEditor";
 import StudioLayerStack from "./StudioLayerStack";
 import StudioGroupInspector from "./StudioGroupInspector";
 import StudioPerspectiveInspector from './StudioPerspectiveInspector';
+import { AUDIO_MASTER_PRESETS } from "./studioAudioDspEngine";
 
 const Range = ({ label, valueLabel, ...props }) => (
   <label className="inspector-range">
@@ -987,6 +988,21 @@ export function AudioRestorationPanel({
             onClick={() => applyRepairPreset(preset)}
           >
             {preset.replace(/_/g, " ")}
+          </button>
+        ))}
+      </div>
+      <div className="audio-repair-preset-grid" data-testid="audio-lufs-standard-grid">
+        {Object.entries(AUDIO_MASTER_PRESETS).map(([standardKey, spec]) => (
+          <button
+            key={standardKey}
+            type="button"
+            className={Number(settings.loudness) === spec.targetLufs ? "is-active" : ""}
+            onClick={() => {
+              onUpdate("loudness", spec.targetLufs);
+              onUpdate("limiter", spec.truePeakDbtp);
+            }}
+          >
+            {spec.label}
           </button>
         ))}
       </div>

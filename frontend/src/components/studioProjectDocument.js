@@ -146,6 +146,9 @@ const layerParameterFields = version => version === 3
   ? [...LAYER_PARAMETER_FIELDS, ...STUDIO_ADDITIONAL_LAYER_FIELDS, ...STUDIO_LAYER_BINDING_FIELDS]
   : version === 2 ? [...LAYER_PARAMETER_FIELDS, ...STUDIO_ADDITIONAL_LAYER_FIELDS] : LAYER_PARAMETER_FIELDS;
 
+export const filterStudioLayerParameters = (item, version = 3) =>
+  cloneParameters(item, layerParameterFields(version));
+
 // Access URLs and File/Blob payloads stay in the media store/snapshot. Persist
 // the owned reference and hash (when available), never an expiring URL identity.
 const cloneParameters = (item, fields) => JSON.parse(JSON.stringify(Object.fromEntries(
@@ -608,7 +611,8 @@ const sameOccurrenceProjection = (left, right) =>
       item.sourceRange.startTick === other.sourceRange.startTick &&
       item.sourceRange.endTick === other.sourceRange.endTick &&
       item.programmeRange.startTick === other.programmeRange.startTick &&
-      item.programmeRange.endTick === other.programmeRange.endTick
+      item.programmeRange.endTick === other.programmeRange.endTick &&
+      stableStringify(item.playback || {}) === stableStringify(other.playback || {})
     );
   });
 
@@ -678,7 +682,21 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
       timeMapId: `map:${clip.id}`,
       parameterSchemaVersion: 1,
       parameters: cloneParameters(clip, STUDIO_OCCURRENCE_PARAMETER_FIELDS),
-      playback: { direction: "forward", freeze: false, rate: { numerator: 1, denominator: 1 } },
+      playback: {
+        direction: clip.playback?.direction === "reverse" ? "reverse" : "forward",
+        freeze: !!clip.playback?.freeze,
+        ...(Number.isSafeInteger(clip.playback?.anchorSourceTick)
+          ? { anchorSourceTick: clip.playback.anchorSourceTick }
+          : {}),
+        rate: {
+          numerator: Number.isSafeInteger(clip.playback?.rate?.numerator) && clip.playback.rate.numerator > 0
+            ? clip.playback.rate.numerator
+            : 1,
+          denominator: Number.isSafeInteger(clip.playback?.rate?.denominator) && clip.playback.rate.denominator > 0
+            ? clip.playback.rate.denominator
+            : 1,
+        },
+      },
     };
     // Older native projects stored full-source duration in these parameters.
     // Hydration can supply occurrence duration instead. Preserve the existing
@@ -824,9 +842,9 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
             endTick: occurrence.sourceRange.endTick - occurrence.sourceRange.startTick,
           },
           programmeRange: occurrence.programmeRange,
-          rate: { numerator: 1, denominator: 1 },
-          direction: "forward",
-          freeze: false,
+          rate: occurrence.playback?.rate || { numerator: 1, denominator: 1 },
+          direction: occurrence.playback?.direction === "reverse" ? "reverse" : "forward",
+          freeze: !!occurrence.playback?.freeze,
         },
       ],
     })),
@@ -947,6 +965,13 @@ export const projectDocumentToLegacyTimeline = (document, priorTimeline) => {
       sourceClipId: asset?.sourceId || source.sourceClipId || source.id,
       startRequest: ticksToSeconds(occurrence.sourceRange.startTick),
       endRequest: ticksToSeconds(occurrence.sourceRange.endTick),
+      ...(occurrence.playback &&
+      (occurrence.playback.direction !== "forward" ||
+        occurrence.playback.freeze ||
+        occurrence.playback.rate?.numerator !== 1 ||
+        occurrence.playback.rate?.denominator !== 1)
+        ? { playback: JSON.parse(JSON.stringify(occurrence.playback)) }
+        : {}),
     };
     if (occurrence.parameterSchemaVersion === 1) {
       for (const field of STUDIO_OCCURRENCE_PARAMETER_FIELDS) delete projected[field];
@@ -1176,16 +1201,19 @@ export const validateStudioProjectDocument = document => {
     }
     const segment = maps[0].segments[0];
     const duration = occurrence.sourceRange.endTick - occurrence.sourceRange.startTick;
+    const expectedDirection = occurrence.playback?.direction === "reverse" ? "reverse" : "forward";
+    const expectedFreeze = !!occurrence.playback?.freeze;
+    const expectedRate = occurrence.playback?.rate || { numerator: 1, denominator: 1 };
     if (
       stableStringify(segment.sourceRange) !== stableStringify(occurrence.sourceRange) ||
       stableStringify(segment.programmeRange) !== stableStringify(occurrence.programmeRange) ||
       segment.clipLocalRange?.space !== "clip_local" ||
       segment.clipLocalRange.startTick !== 0 ||
       segment.clipLocalRange.endTick !== duration ||
-      segment.rate?.numerator !== 1 ||
-      segment.rate?.denominator !== 1 ||
-      segment.direction !== "forward" ||
-      segment.freeze !== false
+      segment.rate?.numerator !== expectedRate.numerator ||
+      segment.rate?.denominator !== expectedRate.denominator ||
+      segment.direction !== expectedDirection ||
+      segment.freeze !== expectedFreeze
     ) {
       fail(
         "INVALID_TIME_MAP",
