@@ -6203,6 +6203,11 @@ const ViralClipStudio = ({
 
     return playMediaSafely(mediaElement, {
       onUnexpectedError: error => {
+        if (error?.name === "NotAllowedError" && mediaElement === videoRef.current) {
+          previewPlaybackIntentRef.current = false;
+          setIsPreviewPaused(true);
+          return;
+        }
         if (error?.name === "NotSupportedError") return;
         console.log("Auto-play prevented", error);
       },
