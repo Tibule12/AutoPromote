@@ -14727,9 +14727,15 @@ const ViralClipStudio = ({
             qualifier: finishPreviewIsLive ? advancedColor?.qualifier : null,
             textureEffects: finishPreviewIsLive
               ? {
-                  filmGrain: Number(effectiveFinishFx?.filmGrain || 0) / 100,
-                  chromaticAberration: Number(effectiveFinishFx?.chromaticAberration || 0) / 100,
-                  halation: Number(effectiveFinishFx?.halation || 0) / 100,
+                  filmGrain: Number(effectiveFinishFx?.filmGrain || 0) > 1
+                    ? Number(effectiveFinishFx.filmGrain) / 100
+                    : Math.max(0, Number(effectiveFinishFx?.filmGrain || 0)),
+                  chromaticAberration: Number(effectiveFinishFx?.chromaticAberration || 0) > 1
+                    ? Number(effectiveFinishFx.chromaticAberration) / 100
+                    : Math.max(0, Number(effectiveFinishFx?.chromaticAberration || 0)),
+                  halation: Number(effectiveFinishFx?.halation || 0) > 1
+                    ? Number(effectiveFinishFx.halation) / 100
+                    : Math.max(0, Number(effectiveFinishFx?.halation || 0)),
                   seed: Math.round(frameOutputTime * 30),
                 }
               : null,

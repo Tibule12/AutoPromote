@@ -51,6 +51,13 @@ def test_film_emulation_and_lufs_master_filters():
     assert "gblur=" in film
     assert "noise=alls=" in film
 
+    unit_film = build_film_emulation_filter(
+        {"halation": 0.28, "chromaticAberration": 0.08, "filmGrain": 0.18}
+    )
+    assert "rgbashift=" in unit_film
+    assert "gblur=" in unit_film
+    assert "noise=alls=" in unit_film
+
     assert build_audio_master_loudnorm_filter("social") == "loudnorm=I=-14.0:TP=-1.0:LRA=7"
     assert build_audio_master_loudnorm_filter("podcast") == "loudnorm=I=-16.0:TP=-1.0:LRA=7"
     assert build_audio_master_loudnorm_filter("broadcast") == "loudnorm=I=-23.0:TP=-1.0:LRA=7"

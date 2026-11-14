@@ -30910,6 +30910,14 @@ def build_studio_finish_filter(finish_plan, color_cube_path=None):
             f"rh={light_leak * 0.12:.5f}:gh={light_leak * 0.035:.5f}:"
             f"bh={light_leak * -0.075:.5f}"
         )
+    halation = clamp_float(texture.get("halation", 0.0), 0.0, 1.0)
+    if halation > 0.005:
+        sigma = round(2.0 + halation * 8.0, 2)
+        filters.append(
+            f"split[h_base][h_glow];"
+            f"[h_glow]gblur=sigma={sigma}:steps=2[h_blur];"
+            f"[h_base][h_blur]blend=all_mode=screen:all_opacity={round(halation * 0.45, 3)}"
+        )
     # RGB finish stages explicitly return to the programme YUV matrix/range.
     # Otherwise runtime negotiation can retain incompatible full-range tags.
     filters.extend(["scale=out_color_matrix=bt709:out_range=tv", "format=yuv420p",

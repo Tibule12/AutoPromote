@@ -99,9 +99,9 @@ export const POWER_WINDOW_PRESETS = Object.freeze({
 
 export const FILM_EMULATION_PRESETS = Object.freeze({
   none: { halation: 0, chromaticAberration: 0, filmGrain: 0 },
-  "35mm_halation": { halation: 28, chromaticAberration: 8, filmGrain: 18 },
-  "16mm_doc": { halation: 14, chromaticAberration: 14, filmGrain: 34 },
-  anamorphic_prism: { halation: 36, chromaticAberration: 24, filmGrain: 12 },
+  "35mm_halation": { halation: 0.28, chromaticAberration: 0.08, filmGrain: 0.18 },
+  "16mm_doc": { halation: 0.14, chromaticAberration: 0.14, filmGrain: 0.34 },
+  anamorphic_prism: { halation: 0.36, chromaticAberration: 0.24, filmGrain: 0.12 },
 });
 
 function linearizeLogSignal(x, profile) {

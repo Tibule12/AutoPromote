@@ -145,6 +145,7 @@ export const compileStudioFinishForRender = document => {
       base_transform: resolvedMainBase,
       keyframes: resolvedMainKeys },
     texture: { film_grain: fx.filmGrain, chromatic_aberration: fx.chromaticAberration,
+      halation: fx.halation, film_emulation: fx.filmEmulation,
       vhs_tracking: fx.vhsTracking, light_leak: fx.lightLeak },
     visualizer: { ...state.podcastVisualizer, source: "original_speech" },
     keyframes: (state.finishKeyframes || []).map(key => ({ id: key.id,

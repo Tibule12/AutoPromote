@@ -162,17 +162,28 @@ def build_reverse_freeze_filter(
     raise ValueError(f"Unsupported playback mode: {mode}")
 
 
+def _to_percent_scale(value: Any) -> float:
+    """Normalize texture strength whether passed as unit (0..1) or percentage (0..100)."""
+    try:
+        numeric = float(value or 0.0)
+    except (TypeError, ValueError):
+        return 0.0
+    if numeric <= 0.0:
+        return 0.0
+    return _clamp(numeric * 100.0 if numeric <= 1.0 else numeric, 0.0, 100.0, 0.0)
+
+
 def build_film_emulation_filter(fx: Mapping[str, Any]) -> str:
     """Build secondary halation, chromatic aberration, and film grain filters."""
     if not fx:
         return ""
     stages: List[str] = []
-    chroma = _clamp(fx.get("chromaticAberration", 0), 0.0, 100.0, 0.0)
+    chroma = _to_percent_scale(fx.get("chromaticAberration", 0))
     if chroma > 1.0:
         px = max(1, min(6, round((chroma / 100.0) * 5)))
         stages.append(f"rgbashift=rh={px}:bh=-{px}:edge=smear")
 
-    halation = _clamp(fx.get("halation", 0), 0.0, 100.0, 0.0)
+    halation = _to_percent_scale(fx.get("halation", 0))
     if halation > 1.0:
         sigma = round(2.0 + (halation / 100.0) * 8.0, 2)
         stages.append(
@@ -181,7 +192,7 @@ def build_film_emulation_filter(fx: Mapping[str, Any]) -> str:
             f"[h_base][h_blur]blend=all_mode=screen:all_opacity={round(halation / 220.0, 3)}"
         )
 
-    grain = _clamp(fx.get("filmGrain", 0), 0.0, 100.0, 0.0)
+    grain = _to_percent_scale(fx.get("filmGrain", 0))
     if grain > 1.0:
         strength = max(2, min(28, round((grain / 100.0) * 24)))
         stages.append(f"noise=alls={strength}:allf=t+u")
