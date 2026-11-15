@@ -1,5 +1,8 @@
+import { applySelectiveAndRevitalizerGrade } from "./studioColorScience";
+
 const clamp = (x, lo, hi) => Math.max(lo, Math.min(hi, x));
-export const buildPrecisionGrade = fx => {
+
+export const buildPrecisionGrade = (fx = {}) => {
   const exposure = 2 ** clamp(Number(fx.exposureStops || 0), -2, 2);
   const lift = clamp(Number(fx.lift || 0), -.15, .15);
   const gamma = clamp(Number(fx.gamma ?? 1), .6, 1.6);
@@ -14,10 +17,38 @@ export const buildPrecisionGrade = fx => {
     const linear = Math.max(0, (i/255 * exposure * brightness * gain * wb + lift));
     return clamp((linear ** (1/gamma) - .5)*contrast + .5, 0, 1)*255;
   }));
-  return { tables, saturation };
+
+  const revSource = fx.revitalizer || fx;
+  const revitalizer = {
+    dehaze: clamp(Number(revSource.dehaze || 0), 0, 1),
+    shadowRecovery: clamp(Number(revSource.shadowRecovery || 0), 0, 1),
+    highlightRollOff: clamp(Number(revSource.highlightRollOff || 0), 0, 1),
+    clarity: clamp(Number(revSource.clarity || 0), 0, 1),
+    vibrance: clamp(Number(revSource.vibrance || 0), -1, 1),
+    skinToneProtect: clamp(Number(revSource.skinToneProtect ?? 0.85), 0, 1),
+  };
+  const hasRevitalizer =
+    revitalizer.dehaze !== 0 ||
+    revitalizer.shadowRecovery !== 0 ||
+    revitalizer.highlightRollOff !== 0 ||
+    revitalizer.clarity !== 0 ||
+    revitalizer.vibrance !== 0;
+
+  const qualifier = fx.qualifier || fx.advancedColor?.qualifier || null;
+  const powerWindow = fx.powerWindow || fx.advancedColor?.powerWindow || null;
+  const hasSelective = Boolean(
+    (qualifier && qualifier.enabled) || (powerWindow && powerWindow.enabled)
+  );
+
+  return {
+    tables,
+    saturation,
+    ...(hasRevitalizer ? { revitalizer, hasRevitalizer: true } : {}),
+    ...(hasSelective ? { qualifier, powerWindow, hasSelective: true } : {}),
+  };
 };
 
-export const applyPrecisionGrade = (pixels, grade) => {
+export const applyPrecisionGrade = (pixels, grade, width = 1, height = 1) => {
   const [red, green, blue] = grade.tables;
   for (let i = 0; i < pixels.length; i += 4) {
     const r = red[pixels[i]], g = green[pixels[i+1]], b = blue[pixels[i+2]];
@@ -25,6 +56,13 @@ export const applyPrecisionGrade = (pixels, grade) => {
     pixels[i] = clamp(luma + (r-luma)*grade.saturation, 0, 255);
     pixels[i+1] = clamp(luma + (g-luma)*grade.saturation, 0, 255);
     pixels[i+2] = clamp(luma + (b-luma)*grade.saturation, 0, 255);
+  }
+  if (grade.hasRevitalizer || grade.hasSelective) {
+    applySelectiveAndRevitalizerGrade(pixels, width, height, {
+      revitalizer: grade.revitalizer,
+      qualifier: grade.qualifier,
+      powerWindow: grade.powerWindow,
+    });
   }
   return pixels;
 };

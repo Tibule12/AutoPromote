@@ -1,0 +1,74 @@
+{
+  "date": "2026-11-15",
+  "scope": "Find Viral Clips selection, settings, source preview and canonical Studio handoff/export; thumbnail tools removed",
+  "native": {
+    "sourceSeconds": 29.9,
+    "chosenSourceRange": [
+      0,
+      17.18
+    ],
+    "editorialScore": 89.5,
+    "candidates": 2,
+    "alternateReviewFlags": [
+      "Review the cut boundaries: the final phrase may be incomplete"
+    ],
+    "normalSignIn": true,
+    "normalCreditApproval": true,
+    "matchingSelectedRange": true,
+    "exportAndDownloadedSha256": "a97add857d0cfe0d5e9b94a6724783b154915f80bed3d857bb719e30f1c62a5b",
+    "fullDecode": true,
+    "finishedPlayback": {
+      "reachedEnd": true,
+      "seconds": 17.18,
+      "width": 720,
+      "height": 1280,
+      "decoded": 412
+    },
+    "browserErrors": []
+  },
+  "realSilentSource": {
+    "sourceSeconds": 20,
+    "visualCandidates": 3,
+    "inventedDialogue": false
+  },
+  "checks": {
+    "selector": 13,
+    "frontend": 21,
+    "backendRoutes": 15,
+    "settings": 2,
+    "knowledgeAndHelp": 52,
+    "anonymousViewports": 8
+  },
+  "limits": [
+    "English editorial cues are heuristics; optional existing AI reranker not exercised by this offline proof.",
+    "Multilingual recognition and meaningful visual action still require source review.",
+    "Native 30\u201360/60\u201390 and long-source/concurrency/device coverage remain unqualified.",
+    "The local pilot intentionally rejects cache POST writes; native cache reopen attempt is retained as blocked by OUTSIDE_PILOT_SCOPE. Cache identity/setting isolation tests pass.",
+    "Native recording of the earlier diagnostic run exceeded its capture budget; final revised capture passed.",
+    "Other active-thread caption/VFX changes are outside this frozen candidate proof."
+  ],
+  "thumbnailGeneration": false,
+  "paidCalls": 0,
+  "productionWrites": 0,
+  "deployment": false,
+  "readinessPromotion": false,
+  "terminalState": {
+    "activeOperations": 0,
+    "terminalOperations": 7,
+    "priorOperationsPreserved": 3,
+    "unrelatedWalletUnchanged": true,
+    "wallets": [
+      {
+        "userId": "demo-pilot-empty",
+        "balance": 0,
+        "reserved": 0
+      },
+      {
+        "userId": "demo-pilot-alice",
+        "balance": 3,
+        "reserved": 0
+      }
+    ],
+    "authFirestoreStorageExported": true
+  }
+}

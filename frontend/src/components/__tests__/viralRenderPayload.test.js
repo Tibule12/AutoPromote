@@ -626,4 +626,18 @@ describe("viralRenderPayload", () => {
       { id: "speed-3", start_time: 8, end_time: 12, rate: 0.5, pitch_preserved: true, optical_flow: true },
     ]);
   });
+
+  test("forwards captionSuppressRanges cleanly to python worker payload when behind-subject captions hide foreground overlap", () => {
+    const payload = buildViralRenderData({
+      clip: { startTime: 0, endTime: 6 },
+      duration: 6,
+      extraOptions: {
+        autoCaptions: true,
+        captionStyle: "word_pill",
+        captionSuppressRanges: [{ start_time: 1.5, end_time: 4.5 }],
+      },
+    });
+    expect(payload.caption_style).toBe("word_pill");
+    expect(payload.caption_suppress_ranges).toEqual([{ start_time: 1.5, end_time: 4.5 }]);
+  });
 });

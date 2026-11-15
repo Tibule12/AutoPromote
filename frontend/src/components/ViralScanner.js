@@ -7,7 +7,8 @@ import { applySafeMediaSource, createSecureId } from "../utils/security";
 import { trackClipWorkflowEvent } from "../utils/clipWorkflowAnalytics";
 import { uploadTemporaryVideoSource } from "../utils/sourceUpload";
 import { playMediaSafely } from "../utils/mediaPlayback";
-import { SafeImage, SafeVideo } from "./SafeMedia";
+import { SafeVideo } from "./SafeMedia";
+import {clipSelectionSettings,clipSettingsCacheKey} from '../utils/clipSelectionSettings';
 
 const CLIP_SCANNER_CACHE_TTL_MS = 3 * 24 * 60 * 60 * 1000;
 const CLIP_SCAN_CREDIT_COST = 8;
@@ -82,27 +83,9 @@ const getHookPreviewCopy = clip => {
   return "WATCH WHAT HAPPENS NEXT";
 };
 
-const getClipVisualAssets = clip => {
-  const assets = [
-    ...(Array.isArray(clip?.thumbnailOptions) ? clip.thumbnailOptions : []),
-    ...(Array.isArray(clip?.posterOptions) ? clip.posterOptions : []),
-    ...(Array.isArray(clip?.visualAssets) ? clip.visualAssets : []),
-  ].filter(asset => asset?.url);
-  return Array.from(new Map(assets.map(asset => [asset.id || asset.url, asset])).values());
-};
-
-const getClipIdentity = clip => String(clip?.id ?? `${clip?.start || 0}-${clip?.end || 0}`);
-
-const getVisualCopySourceMeta = asset => {
-  const source = normalizePlainText(asset?.copySource || "").toLowerCase();
-  if (source === "ai_refined") {
-    return { label: "AI Refined", className: "ai-refined" };
-  }
-  return { label: "Fallback Copy", className: "heuristic" };
-};
-
-const getVisualWhyText = asset =>
-  normalizePlainText(asset?.aiWhy || asset?.subtitle || asset?.label || "");
+// Thumbnail/poster generation and selection have been removed from scanning.
+// Old cached assets must not revive retired packaging controls.
+const getClipVisualAssets = () => [];
 
 const scrollElementIntoView = (element, options) => {
   if (!element || typeof element.scrollIntoView !== "function") return;
@@ -217,15 +200,15 @@ const buildSourceFingerprint = file => {
   if (!file) return "";
 
   const renderJobId = getSourceRenderJobId(file);
-  if (renderJobId) return `multicam:${renderJobId}`.slice(0, 180);
+  if (renderJobId) return `multicam:${renderJobId}`;
 
   const remoteUrl = getRemoteSourceUrl(file);
   if (remoteUrl) {
     try {
       const parsedUrl = new URL(remoteUrl, window.location.origin);
-      return `remote:${parsedUrl.origin}${parsedUrl.pathname}`.slice(0, 180);
+      return `remote:${parsedUrl.origin}${parsedUrl.pathname}`;
     } catch (_error) {
-      return `remote:${String(remoteUrl).split("?")[0]}`.slice(0, 180);
+      return `remote:${String(remoteUrl).split("?")[0]}`;
     }
   }
 
@@ -233,7 +216,7 @@ const buildSourceFingerprint = file => {
   const size = Number(file.size || 0);
   const lastModified = Number(file.lastModified || 0);
   const type = normalizePlainText(file.type || "application/octet-stream");
-  return `local:${name}:${size}:${lastModified}:${type}`.slice(0, 180);
+  return `local:${name}:${size}:${lastModified}:${type}`;
 };
 
 const buildStableSourceFingerprint = file => {
@@ -255,7 +238,7 @@ const buildStableSourceFingerprint = file => {
   const name = normalizePlainText(file.name || "scan.mp4");
   const size = Number(file.size || 0);
   const type = normalizePlainText(file.type || "application/octet-stream");
-  return `local-stable:${name}:${size}:${type}`.slice(0, 180);
+  return `local-stable:${name}:${size}:${type}`;
 };
 
 const getSourceFingerprints = file =>
@@ -301,7 +284,7 @@ const applyGuidanceToScenes = scenes =>
       reasons:
         Array.isArray(scene?.reasons) && scene.reasons.length ? scene.reasons : guidance.reasons,
       improvements:
-        Array.isArray(scene?.improvements) && scene.improvements.length
+        scene?.selectorVersion === 'moments-v2' ? (scene.reviewFlags||[]) : Array.isArray(scene?.improvements) && scene.improvements.length
           ? scene.improvements
           : guidance.improvements,
       categories:
@@ -318,15 +301,14 @@ const applyGuidanceToScenes = scenes =>
       signals: scene?.signals || guidance.signals,
       hasAudio: scene?.hasAudio,
       analysisMode: scene?.analysisMode,
+      text: scene?.text || scene?.transcript || '',
+      transcript: scene?.transcript || scene?.text || '',
+      reviewFlags: Array.isArray(scene?.reviewFlags)?scene.reviewFlags:[],
+      selectionSettings: scene?.selectionSettings || null,
       visualAssets: getClipVisualAssets(scene),
-      thumbnailOptions: Array.isArray(scene?.thumbnailOptions) ? scene.thumbnailOptions : [],
-      posterOptions: Array.isArray(scene?.posterOptions) ? scene.posterOptions : [],
-      thumbnailUrl:
-        scene?.thumbnailUrl ||
-        scene?.thumbnail_url ||
-        scene?.thumbnailOptions?.[0]?.url ||
-        scene?.visualAssets?.[0]?.url ||
-        "",
+      thumbnailOptions: [],
+      posterOptions: [],
+      thumbnailUrl: '',
     };
   });
 
@@ -358,8 +340,7 @@ const ClipResultThumbnail = ({
   className = "",
 }) => {
   const previewRef = useRef(null);
-  const visualUrl = clip?.thumbnailUrl || getClipVisualAssets(clip)[0]?.url || "";
-  const shouldUseVideo = Boolean(videoSrc && (preferVideo || !visualUrl));
+  const shouldUseVideo = Boolean(videoSrc);
 
   useEffect(() => {
     const video = previewRef.current;
@@ -423,9 +404,7 @@ const ClipResultThumbnail = ({
 
   return (
     <div className={`scanner-clip-thumbnail ${isActive ? "active" : ""} ${className}`.trim()}>
-      {!shouldUseVideo && visualUrl ? (
-        <SafeImage src={visualUrl} alt={clip?.hookText || "Generated clip visual"} />
-      ) : shouldUseVideo ? (
+      {shouldUseVideo ? (
         <SafeVideo ref={previewRef} src={videoSrc} muted playsInline preload="metadata" />
       ) : (
         <span>No preview</span>
@@ -449,7 +428,10 @@ const ViralScanner = ({
   embedded = false,
   autoStart = false,
   onResults,
+  selectionSettings = null,
 }) => {
+  const settings=selectionSettings||clipSelectionSettings();
+  const settingsKey=JSON.stringify(settings);
   const videoRef = useRef(null);
   const videoSectionRef = useRef(null);
   const previewStopHandlerRef = useRef(null);
@@ -464,6 +446,7 @@ const ViralScanner = ({
   const [isScanning, setIsScanning] = useState(false);
   const [scanProgress, setScanProgress] = useState(0);
   const [results, setResults] = useState([]);
+  const [scanCompleted, setScanCompleted] = useState(false);
   const [previewClip, setPreviewClip] = useState(null);
   const [previewSoundOn, setPreviewSoundOn] = useState(false);
   const [previewRelativeTime, setPreviewRelativeTime] = useState(0);
@@ -496,7 +479,6 @@ const ViralScanner = ({
   const [showCreditShop, setShowCreditShop] = useState(false);
   const [paypalLoaded, setPaypalLoaded] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState(null);
-  const [selectedVisualByClipId, setSelectedVisualByClipId] = useState({});
   const paypalButtonsRef = useRef(null);
 
   const CREDIT_PACKAGES = [
@@ -592,6 +574,7 @@ const ViralScanner = ({
 
     sourceFingerprintRef.current = buildSourceFingerprint(file);
     setCachedResultsReady(false);
+    setScanCompleted(false);
     setCachedScanMeta(null);
     setResults([]);
     setSelectedClip(null);
@@ -665,7 +648,7 @@ const ViralScanner = ({
     const loadCachedScan = async () => {
       try {
         const user = auth.currentUser;
-        const sourceFingerprints = getSourceFingerprints(file);
+        const sourceFingerprints = (await Promise.all(getSourceFingerprints(file).map(key=>clipSettingsCacheKey(key,settings)))).filter(Boolean);
         if (!user || !sourceFingerprints.length) return;
         setCacheLoadPending(true);
 
@@ -690,7 +673,8 @@ const ViralScanner = ({
             candidateCache &&
             Array.isArray(candidateCache.results) &&
             candidateCache.results.length &&
-            Number(candidateCache.expiresAt || 0) > Date.now()
+            Number(candidateCache.expiresAt || 0) > Date.now() &&
+            JSON.stringify(candidateCache.results[0]?.selectionSettings) === settingsKey
           ) {
             cache = candidateCache;
             matchedFingerprint = sourceFingerprint;
@@ -709,6 +693,7 @@ const ViralScanner = ({
         setResults(hydratedResults);
         setSelectedClip(bestCachedClip);
         setCachedResultsReady(true);
+        setScanCompleted(true);
         setCachedScanMeta({
           createdAt: cache.createdAt,
           expiresAt: cache.expiresAt,
@@ -731,7 +716,7 @@ const ViralScanner = ({
     };
 
     void loadCachedScan();
-  }, [file]);
+  }, [file,settingsKey]);
 
   useEffect(() => {
     return () => {
@@ -837,6 +822,7 @@ const ViralScanner = ({
   const startScan = async (options = {}) => {
     if (scanInFlightRef.current || isScanning) return;
     setScanError("");
+    setScanCompleted(false);
     const forceFresh = Boolean(options.forceFresh);
 
     if (!forceFresh && cachedResultsReady && results.length) {
@@ -894,7 +880,7 @@ const ViralScanner = ({
       const token = await user.getIdToken();
 
       let fileUrl = "";
-      const sourceFingerprints = getSourceFingerprints(file);
+      const sourceFingerprints = (await Promise.all(getSourceFingerprints(file).map(key=>clipSettingsCacheKey(key,settings)))).filter(Boolean);
 
       setScanPhase("waking");
       setStatusMessage("Preparing the secure AI analysis service...");
@@ -966,6 +952,7 @@ const ViralScanner = ({
           renderJobId: getSourceRenderJobId(file) || null,
           forceFresh,
           scanNonce,
+          selectionSettings: settings,
         }),
       });
 
@@ -1019,13 +1006,14 @@ const ViralScanner = ({
 
       const data = await response.json();
       scanSucceeded = true;
+      setScanCompleted(true);
       setLearningMeta(data.learning || null);
 
       if (data.remainingCredits !== undefined) {
         setCreditBalance(data.remainingCredits);
       }
 
-      const validScenes = applyGuidanceToScenes(data.scenes || []);
+      const validScenes = applyGuidanceToScenes(data.scenes || []).map(scene=>({...scene,selectionSettings:settings}));
 
       if (validScenes.length === 0) {
         setStatusMessage("No specific viral moments found.");
@@ -1168,55 +1156,15 @@ const ViralScanner = ({
     ? Math.min(100, (previewRelativeTime / activePreviewDuration) * 100)
     : 0;
 
-  const getSelectedVisualForClip = clip => {
-    const clipId = getClipIdentity(clip);
-    return selectedVisualByClipId[clipId] || getClipVisualAssets(clip)[0] || null;
-  };
-  const activePreviewClip = previewClip || selectedClip;
-  const activeSelectedVisual = getSelectedVisualForClip(activePreviewClip);
-
-  const handleSelectVisual = (clip, asset) => {
-    if (!clip || !asset) return;
-    setSelectedVisualByClipId(current => ({
-      ...current,
-      [getClipIdentity(clip)]: asset,
-    }));
-  };
-
-  const handleDownloadVisual = async asset => {
-    if (!asset?.url) return;
-    const safeName =
-      normalizePlainText(asset.hookText || asset.label || asset.type || "promo-visual")
-        .replace(/[^a-zA-Z0-9._-]+/g, "-")
-        .replace(/-+/g, "-")
-        .replace(/^-|-$/g, "") || "promo-visual";
-    try {
-      const response = await fetch(asset.url, { mode: "cors" });
-      if (!response.ok) throw new Error(`Visual fetch failed with ${response.status}`);
-      const blob = await response.blob();
-      const objectUrl = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = objectUrl;
-      link.download = `${safeName}.jpg`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      setTimeout(() => URL.revokeObjectURL(objectUrl), 1200);
-    } catch (_error) {
-      window.open(asset.url, "_blank", "noopener,noreferrer");
-    }
-  };
-
   const handleUseClip = (clip, improvementMode = false) => {
     if (!clip) return;
-    const selectedVisual = getSelectedVisualForClip(clip);
 
     void trackClipWorkflowEvent("clip_package_selected", {
       scanSessionId: scanSessionIdRef.current,
       clipId: String(clip.id),
       score: Number(clip.score || 0),
       improveInEditor: improvementMode,
-      selectedVisualType: selectedVisual?.type || null,
+      selectedVisualType: null,
       rank: rankedResults.findIndex(item => item.id === clip.id) + 1,
     });
 
@@ -1227,8 +1175,8 @@ const ViralScanner = ({
       guidedScore: clip.score,
       improveInEditor: improvementMode,
       openStudio: false,
-      selectedVisual,
-      selectedThumbnailUrl: selectedVisual?.url || clip.thumbnailUrl || null,
+      selectedVisual: null,
+      selectedThumbnailUrl: null,
       scanSessionId: scanSessionIdRef.current,
     });
   };
@@ -1251,15 +1199,15 @@ const ViralScanner = ({
   ]);
 
   useEffect(() => {
-    if (!embedded || isScanning || !results.length || !onResultsRef.current) return;
+    if (!embedded || isScanning || !scanCompleted || !onResultsRef.current) return;
     const signature = results
       .map(clip => `${clip.id}:${clip.start}:${clip.end}:${clip.score}`)
-      .join("|");
+      .join("|") || `empty:${settingsKey}`;
     if (deliveredResultsRef.current === signature) return;
 
     deliveredResultsRef.current = signature;
     onResultsRef.current(results);
-  }, [embedded, isScanning, results]);
+  }, [embedded, isScanning, results,scanCompleted,settingsKey]);
 
   if (embedded) {
     return (
@@ -1466,32 +1414,6 @@ const ViralScanner = ({
             {videoSrc ? (
               <div className="scanner-video-frame">
                 <video ref={videoRef} controls={!selectedClip} />
-                {activeSelectedVisual?.url ? (
-                  <div className="scanner-selected-visual-preview">
-                    <div>
-                      <span>Selected thumbnail/poster</span>
-                      <strong>
-                        {activeSelectedVisual.hookText ||
-                          activeSelectedVisual.label ||
-                          "Promo visual"}
-                      </strong>
-                      <div className="scanner-visual-copy-meta">
-                        <span
-                          className={`scanner-copy-source-pill ${getVisualCopySourceMeta(activeSelectedVisual).className}`}
-                        >
-                          {getVisualCopySourceMeta(activeSelectedVisual).label}
-                        </span>
-                      </div>
-                      {getVisualWhyText(activeSelectedVisual) ? (
-                        <p>{getVisualWhyText(activeSelectedVisual)}</p>
-                      ) : null}
-                    </div>
-                    <SafeImage
-                      src={activeSelectedVisual.url}
-                      alt="Selected thumbnail/poster preview"
-                    />
-                  </div>
-                ) : null}
                 {isScanning ? (
                   <div
                     className="scanner-processing-showcase"
@@ -1955,72 +1877,6 @@ const ViralScanner = ({
                       </div>
                     ))}
                   </div>
-                  {getClipVisualAssets(clip).length > 0 ? (
-                    <div className="scanner-visual-pack">
-                      <div className="scanner-visual-pack-head">
-                        <span>Choose package visual</span>
-                        <small>{getClipVisualAssets(clip).length} visuals</small>
-                      </div>
-                      {getSelectedVisualForClip(clip)?.url ? (
-                        <div className="scanner-visual-pack-summary">
-                          <span
-                            className={`scanner-copy-source-pill ${getVisualCopySourceMeta(getSelectedVisualForClip(clip)).className}`}
-                          >
-                            {getVisualCopySourceMeta(getSelectedVisualForClip(clip)).label}
-                          </span>
-                          {getVisualWhyText(getSelectedVisualForClip(clip)) ? (
-                            <p>{getVisualWhyText(getSelectedVisualForClip(clip))}</p>
-                          ) : null}
-                        </div>
-                      ) : null}
-                      <div className="scanner-visual-strip">
-                        {getClipVisualAssets(clip)
-                          .slice(0, 4)
-                          .map(asset => {
-                            const isSelected = getSelectedVisualForClip(clip)?.url === asset.url;
-                            const copyMeta = getVisualCopySourceMeta(asset);
-                            return (
-                              <button
-                                key={asset.id || asset.url}
-                                type="button"
-                                className={`scanner-visual-option ${isSelected ? "is-selected" : ""}`}
-                                onClick={event => {
-                                  event.stopPropagation();
-                                  handleSelectVisual(clip, asset);
-                                }}
-                                title={asset.label || "Generated visual"}
-                              >
-                                <SafeImage
-                                  src={asset.url}
-                                  alt={asset.label || "Generated visual"}
-                                />
-                                <span
-                                  className={`scanner-visual-option-pill ${copyMeta.className}`}
-                                >
-                                  {copyMeta.label}
-                                </span>
-                                <span className="scanner-visual-option-label">
-                                  {isSelected ? "Selected" : asset.type || "Visual"}
-                                </span>
-                              </button>
-                            );
-                          })}
-                      </div>
-                      {getSelectedVisualForClip(clip)?.url ? (
-                        <div className="scanner-visual-actions">
-                          <button
-                            type="button"
-                            onClick={event => {
-                              event.stopPropagation();
-                              handleDownloadVisual(getSelectedVisualForClip(clip));
-                            }}
-                          >
-                            Download selected visual
-                          </button>
-                        </div>
-                      ) : null}
-                    </div>
-                  ) : null}
                   <div className="scanner-card-actions">
                     <button
                       className="scanner-card-btn"

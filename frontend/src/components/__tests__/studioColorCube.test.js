@@ -47,3 +47,16 @@ test("curve, global HSL and LUT mix produce actual pixel changes", () => {
   expect(mixed[0]).toBe(128); expect(mixed[1]).toBe(128); expect(mixed[2]).toBe(128);
   expect(buildAdvancedColorCube({ curve: { shadows: 0 }, hsl: { hue: 0 } })).toBeNull();
 });
+
+test.each([.5, 1, 2, 25, 100])('LUT mix %s is a percentage across the entire slider range', mix => {
+  const inverted = parseColorCube(identity);
+  inverted.data = inverted.data.map(value => 1 - value);
+  const cube = buildAdvancedColorCube({ lutData: inverted, lutIntensity: mix }, 5);
+  const expected = .25 * (1 - mix / 100) + .75 * mix / 100;
+  expect(sampleColorCube(cube, .25, .25, .25)[0]).toBeCloseTo(expected, 6);
+});
+
+test.each([-2, -1, -.5, .5, 1, 2])('curve adjustment %s retains small-value precision', value => {
+  const cube = buildAdvancedColorCube({ curve: { midtones: value } }, 5);
+  expect(sampleColorCube(cube, .5, .5, .5)[0]).toBeCloseTo(.5 + value / 500, 6);
+});

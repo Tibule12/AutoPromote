@@ -1,0 +1,57 @@
+{
+  "identity": {
+    "input": [
+      64,
+      128,
+      192,
+      255
+    ],
+    "output": [
+      32,
+      129,
+      224,
+      255
+    ],
+    "maxError": 32
+  },
+  "cache": {
+    "before": [
+      129,
+      129,
+      129,
+      255
+    ],
+    "after": [
+      129,
+      129,
+      129,
+      255
+    ],
+    "expected": [
+      128,
+      254,
+      128
+    ],
+    "changed": false
+  },
+  "fractional": {
+    "expected": [
+      96,
+      128,
+      160
+    ],
+    "atOne": [
+      88,
+      128,
+      167,
+      255
+    ],
+    "atCurrentCall": [
+      70,
+      128,
+      186,
+      255
+    ]
+  },
+  "renderer": "Actual production WebGL2 shader in headless Chrome/SwiftShader"
+}

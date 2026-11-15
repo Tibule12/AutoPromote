@@ -306,6 +306,14 @@ export const buildViralRenderData = ({
     extraOptions.captionSegments,
     normalizeCaptionSegmentsForRender
   );
+  if (Array.isArray(extraOptions.captionSuppressRanges) && extraOptions.captionSuppressRanges.length) {
+    payload.caption_suppress_ranges = extraOptions.captionSuppressRanges
+      .map(range => ({
+        start_time: Number(range?.start_time ?? range?.start ?? 0),
+        end_time: Number(range?.end_time ?? range?.end ?? 0),
+      }))
+      .filter(range => Number.isFinite(range.start_time) && Number.isFinite(range.end_time) && range.end_time > range.start_time);
+  }
   addDefined(payload, "caption_coverage_mode", extraOptions.captionCoverageMode, String);
   addDefined(payload, "caption_review_copy", extraOptions.captionReviewCopy, Boolean);
   addDefined(

@@ -1382,7 +1382,8 @@ body.dashboard-mode {
   font-weight: 700;
 }
 
-.ap-dashboard-redesign .viral-settings-card select {
+.ap-dashboard-redesign .viral-settings-card select,
+.ap-dashboard-redesign .viral-settings-card input {
   width: 100%;
   min-height: 43px;
   padding: 0 12px;
@@ -1610,7 +1611,7 @@ body.dashboard-mode {
 
 .ap-dashboard-redesign .viral-moment-list > article {
   display: grid;
-  grid-template-columns: minmax(170px, 0.9fr) minmax(180px, 0.8fr) minmax(115px, 0.55fr) auto;
+  grid-template-columns: 36px minmax(180px, 1fr) minmax(115px, 0.3fr) auto;
   align-items: center;
   gap: 14px;
   padding: 9px;
@@ -1621,6 +1622,24 @@ body.dashboard-mode {
 
 .ap-dashboard-redesign .viral-moment-list > article.selected {
   border-color: rgba(139, 92, 246, 0.34);
+}
+
+.ap-dashboard-redesign .viral-moment-rank {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: #d7c6ff;
+  background: rgba(109, 74, 255, 0.18);
+  font-weight: 700;
+}
+
+.ap-dashboard-redesign .viral-moment-copy p {
+  margin: 7px 0;
+  color: var(--ap-text-soft);
+  line-height: 1.5;
+  font-size: 0.8rem;
 }
 
 .ap-dashboard-redesign .viral-moment-thumbnail {

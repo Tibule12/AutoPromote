@@ -1,5 +1,12 @@
 import {
+  VECTOR_SHAPE_PRIMITIVE_CATALOG,
   createStudioVectorShape,
+  createStudioVectorPrimitive,
+  addStudioVectorCounterHole,
+  smoothStudioVectorContourNodes,
+  scaleStudioVectorContour,
+  studioVectorContour,
+  replaceStudioVectorContour,
   validateStudioVectorShape,
   editStudioVectorNode,
   splitStudioVectorSegment,
@@ -101,4 +108,33 @@ test("vector geometry cannot carry external resources, unbounded numbers or exec
   expect(getSafeMediaSource(studioVectorUri(createStudioVectorShape()))).toBe(
     studioVectorUri(createStudioVectorShape())
   );
+});
+
+test("all 8 parametric vector primitives, compound counter holes, smoothing and scaling validate cleanly", () => {
+  expect(VECTOR_SHAPE_PRIMITIVE_CATALOG).toHaveLength(8);
+  for (const item of VECTOR_SHAPE_PRIMITIVE_CATALOG) {
+    const primitive = createStudioVectorPrimitive(item.id);
+    expect(() => validateStudioVectorShape(primitive)).not.toThrow();
+    expect(studioVectorSvg(primitive)).toContain("<path");
+  }
+
+  const hex = createStudioVectorPrimitive("hexagon_shield");
+  const withHole = addStudioVectorCounterHole(hex, { radius: 14, centerX: 50, centerY: 50 });
+  expect(withHole.version).toBe(2);
+  expect(withHole.contours).toHaveLength(2);
+  expect(() => validateStudioVectorShape(withHole)).not.toThrow();
+
+  const smoothed = replaceStudioVectorContour(
+    withHole,
+    0,
+    smoothStudioVectorContourNodes(studioVectorContour(withHole, 0), 0.2)
+  );
+  expect(() => validateStudioVectorShape(smoothed)).not.toThrow();
+
+  const inset = replaceStudioVectorContour(
+    smoothed,
+    0,
+    scaleStudioVectorContour(studioVectorContour(smoothed, 0), 0.85)
+  );
+  expect(() => validateStudioVectorShape(inset)).not.toThrow();
 });

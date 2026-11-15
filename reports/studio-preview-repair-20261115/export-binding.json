@@ -1,0 +1,9 @@
+{
+  "projectId": "viral-project-f04886fd-163b-4b33-82ed-cc4f914cc379",
+  "exportedLutMix": 50,
+  "canonicalLutExactlyMatchesAcceptedWorker": true,
+  "acceptedJobId": "viral_04c0c1f5d607eae80727679e86db562a7b9c164508c83d28f56d5f77dc8f5e75",
+  "outputSha256": "0c05d06bd32c87ef39382711c500a76e13eff7f6ef61489897a8c595f00e1ce6",
+  "backupSha256": "e3ccea5e936cd6e27b82151fae9a6f8db5a2e5e6e663dafe841876fa5d773c38",
+  "subsequentEditAndColdRecoveryMix": 75
+}

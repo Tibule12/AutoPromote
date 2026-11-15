@@ -112,6 +112,9 @@ export const DEFAULT_CINEMATIC_FX = {
   chromaticAberration: 0, // 0–1
   vhsTracking: 0, // 0–1
   lightLeak: 0, // 0–1
+  dreamGlow: 0, // 0–1
+  anamorphicFlare: 0, // 0–1
+  lensBlur: 0, // 0–1
   // Letterbox (cinematic bars)
   letterbox: 0, // 0–15 (% of height per bar)
   // Fade
@@ -404,6 +407,9 @@ export default function useCinematicEffects({ clockRef } = {}) {
       fx.chromaticAberration > 0 ||
       fx.vhsTracking > 0 ||
       fx.lightLeak > 0 ||
+      fx.dreamGlow > 0 ||
+      fx.anamorphicFlare > 0 ||
+      fx.lensBlur > 0 ||
       fx.letterbox > 0 ||
       fx.fadeIn > 0 ||
       fx.fadeOut > 0,

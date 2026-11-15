@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import StudioSubjectVfxPanel from "../StudioSubjectVfxPanel";
+import StudioSubjectVfxPanel, {
+  SUBJECT_VFX_COMPOSITE_RECIPES,
+  buildSubjectVfxCompositeRecipe,
+} from "../StudioSubjectVfxPanel";
 jest.mock("../../utils/sourceUpload", () => ({ uploadSourceFileViaBackend: jest.fn() }));
 
 const scene = () => ({
@@ -33,7 +36,7 @@ const deferred = () => {
 };
 const response = data => ({ ok: true, json: async () => data });
 let sequence = 0;
-function Harness({modelArtifactRef,media=[],initialScene,onMediaAdded,initialPreview,initialPending}) {
+function Harness({modelArtifactRef,media=[],initialScene,onMediaAdded,initialPreview,initialPending,captions=[]}) {
   const [items, setItems] = useState([{ scene: initialScene || scene(), enabled: true,...(modelArtifactRef?{modelArtifactRef}:{}),
     ...(initialPreview?{preview:initialPreview}:{}),...(initialPending?{pending:initialPending}:{}) }]);
   return (
@@ -51,6 +54,7 @@ function Harness({modelArtifactRef,media=[],initialScene,onMediaAdded,initialPre
             end: 8,
           },
         ]}
+        captions={captions}
         getToken={async () => "local-test-only"}
         apiBase="http://fixture.invalid"
         createId={() => `test-request-${++sequence}`}
@@ -424,4 +428,89 @@ test("edge opacity can be changed and reset without launching work or replacing 
   fireEvent.change(screen.getByLabelText('Transparent edge level'),{target:{value:'0'}});
   fireEvent.change(screen.getByLabelText('Opaque edge level'),{target:{value:'1'}});
   saved=JSON.parse(screen.getByTestId('saved').textContent)[0];expect(saved.scene.effects[0]).not.toHaveProperty('alpha_levels');expect(saved.modelArtifactRef).toEqual(artifact);expect(global.fetch).not.toHaveBeenCalled();
+});
+
+test("all 5 Subject VFX Composite Scene Recipes build validated multi-layer subject composite stacks in one click", () => {
+  expect(SUBJECT_VFX_COMPOSITE_RECIPES).toHaveLength(5);
+  for (const recipe of SUBJECT_VFX_COMPOSITE_RECIPES) {
+    const effects = buildSubjectVfxCompositeRecipe(recipe.id, 6);
+    expect(effects.length).toBeGreaterThanOrEqual(4);
+  }
+  render(<Harness />);
+  fireEvent.click(screen.getByTestId("subject-vfx-recipe-cyberpunk_neon_isolation"));
+  const saved = JSON.parse(screen.getByTestId("saved").textContent)[0];
+  expect(saved.scene.effects.map(e => e.type)).toEqual([
+    "background_grade",
+    "foreground_grade",
+    "glow",
+    "particles",
+    "depth",
+  ]);
+  expect(global.fetch).not.toHaveBeenCalled();
+
+  fireEvent.click(screen.getByTestId("subject-vfx-recipe-behind_subject_captions"));
+  const captionRecipeSaved = JSON.parse(screen.getByTestId("saved").textContent)[0];
+  expect(captionRecipeSaved.scene.effects.find(e => e.type === "text_behind")).toMatchObject({
+    preset: "caption_punch",
+    font: "inter_black",
+    animation: "spring_pop",
+    hide_fg_captions: true,
+  });
+});
+
+test("behind-subject caption controls, preset switching, transcript sync, and foreground suppression remain contract-valid", () => {
+  const {
+    validateSubjectVfxScene,
+    subjectVfxRevision,
+    buildCaptionSuppressTimelineRanges,
+  } = require("../studioSubjectVfxContract");
+  const baseRevision = subjectVfxRevision(scene());
+
+  render(
+    <Harness
+      captions={[
+        {
+          id: "cap-1",
+          start: 2.2,
+          end: 4.8,
+          text: "Put your caption behind the speaker cleanly",
+          captionAccent: "#3ce0d0",
+        },
+      ]}
+    />
+  );
+
+  // Legacy 5-field text_behind revision stays untouched until optional controls change
+  expect(subjectVfxRevision(JSON.parse(screen.getByTestId("saved").textContent)[0].scene)).toBe(baseRevision);
+
+  fireEvent.change(screen.getByLabelText("preset"), { target: { value: "hero_poster" } });
+  let updated = JSON.parse(screen.getByTestId("saved").textContent)[0].scene.effects[0];
+  expect(updated).toMatchObject({
+    preset: "hero_poster",
+    font: "inter_black",
+    animation: "spring_pop",
+  });
+
+  fireEvent.click(screen.getByTestId("sync-behind-captions"));
+  const syncedScene = JSON.parse(screen.getByTestId("saved").textContent)[0].scene;
+  expect(() => validateSubjectVfxScene(syncedScene)).not.toThrow();
+  const syncedBehind = syncedScene.effects.filter(e => String(e.id).startsWith("behind-caption-"));
+  expect(syncedBehind.length).toBeGreaterThanOrEqual(2);
+  expect(syncedBehind[0]).toMatchObject({
+    type: "text_behind",
+    preset: "caption_punch",
+    font: "inter_extrabold",
+    animation: "word_pop",
+    accent_color: "#3ce0d0",
+    hide_fg_captions: true,
+  });
+  expect(syncedBehind[0].words.length).toBeGreaterThanOrEqual(1);
+
+  const suppressRanges = buildCaptionSuppressTimelineRanges(
+    [{ scene: syncedScene, enabled: true }],
+    [{ id: "clip-1", sourceClipId: "source-a", startTime: 2, endTime: 8, duration: 6 }]
+  );
+  expect(suppressRanges.length).toBeGreaterThanOrEqual(1);
+  expect(suppressRanges[0].start_time).toBeGreaterThanOrEqual(0);
+  expect(suppressRanges[0].end_time).toBeLessThanOrEqual(6);
 });

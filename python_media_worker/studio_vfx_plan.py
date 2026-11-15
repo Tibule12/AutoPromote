@@ -19,8 +19,18 @@ from PIL import Image, ImageColor, ImageDraw, ImageEnhance, ImageFilter, ImageFo
 
 try:
     from .studio_subject_matte import CachedSubjectMatte, canonical_hash, sha256, video_geometry
+    from .studio_text_behind_renderer import (
+        TEXT_BEHIND_OPTIONAL_FIELDS,
+        render_text_behind_layer,
+        validate_text_behind_effect,
+    )
 except ImportError:
     from studio_subject_matte import CachedSubjectMatte, canonical_hash, sha256, video_geometry
+    from studio_text_behind_renderer import (
+        TEXT_BEHIND_OPTIONAL_FIELDS,
+        render_text_behind_layer,
+        validate_text_behind_effect,
+    )
 
 FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 FIELDS = {
@@ -118,6 +128,7 @@ def validate_plan(plan, cache):
                 if abs(area)<.000001:raise ValueError("Matte path must have nonzero area")
         if kind == "background_replace" and "reveal_seconds" in effect:base.add("reveal_seconds")
         if kind == "background_replace":base.update(key for key in ("surface_corners","asset_crop") if key in effect)
+        if kind == "text_behind":base.update(key for key in TEXT_BEHIND_OPTIONAL_FIELDS if key in effect)
         if kind == "foreground_refine":
             base.update(key for key in ("alpha_levels", "alpha_polygon", "edge_radius", "decontaminate", "detail_polygon", "edge_polygon", "blue_spill", "after_refine", "after_holdout", "reject_connected") if key in effect)
         if kind not in FIELDS or set(effect) != base | FIELDS[kind] or not isinstance(effect["id"], str) or not 1 <= len(effect["id"]) <= 64 or effect["id"] in ids:
@@ -138,6 +149,8 @@ def validate_plan(plan, cache):
             if field in effect: bounded(effect[field], 0, 100)
         for field in ("offset_x", "offset_y"):
             if field in effect: bounded(effect[field], -500, 500)
+        if kind == "text_behind":
+            validate_text_behind_effect(effect, bounded)
         if kind == "tracked_callout" and not isinstance(effect["avoid_subject"], bool):
             raise ValueError("Callout subject avoidance must be boolean")
         if kind == "kinetic_type":
@@ -802,24 +815,39 @@ class VfxFrameRenderer:
                 if progress < 1: layer = layer.filter(ImageFilter.GaussianBlur((1 - eased) * 8))
                 background.alpha_composite(layer)
             elif effect["type"] == "text_behind":
-                local = time_value - effect["start"]
-                opacity = min(1, local / .25, (effect["end"] - time_value) / .25)
-                x, y = width * effect["x"] / 100, height * effect["y"] / 100
-                draw.text((x, y), effect["text"], font=self.fonts[effect["id"]], anchor="mm",
-                          fill=(*color, round(255 * max(0, opacity))), stroke_width=2, stroke_fill=(10, 8, 25, round(180 * max(0, opacity))))
-                background.alpha_composite(layer)
+                render_text_behind_layer(
+                    background,
+                    effect,
+                    width,
+                    height,
+                    time_value,
+                    legacy_font=self.fonts.get(effect["id"]),
+                )
             elif effect["type"] == "glow":
-                glow = alpha.filter(ImageFilter.GaussianBlur(effect["radius"]))
-                glow = glow.point(lambda value: round(value * effect["strength"]))
+                radius = max(0.0, float(effect["radius"]))
+                strength = max(0.0, float(effect["strength"]))
+                if strength <= 0.0:
+                    continue
+                tight_rim = alpha.filter(ImageFilter.GaussianBlur(radius * 0.4))
+                wide_halo = alpha.filter(ImageFilter.GaussianBlur(radius * 1.6))
+                tight_arr = np.asarray(tight_rim, dtype=np.float32) * (strength * 0.75)
+                wide_arr = np.asarray(wide_halo, dtype=np.float32) * (strength * 0.55)
+                combined_alpha = np.clip(tight_arr + wide_arr, 0.0, 255.0).astype(np.uint8)
+                glow_alpha = Image.fromarray(combined_alpha)
                 layer = Image.new("RGBA", (width, height), (*color, 0))
-                layer.putalpha(glow)
+                layer.putalpha(glow_alpha)
                 background.alpha_composite(layer)
             elif effect["type"] == "particles":
+                elapsed = time_value - effect["start"]
                 for x, y, size in self.particles[effect["id"]]:
-                    px = x * width
-                    py = (y * height - (time_value - effect["start"]) * effect["speed"]) % height
-                    radius = 1 + size * 2
-                    draw.ellipse((px - radius, py - radius, px + radius, py + radius), fill=(*color, round(255 * effect["opacity"])))
+                    drift = math.sin(elapsed * 2.1 + x * 6.283 + size * 1.7) * (6.0 + size * 7.5)
+                    px = (x * width + drift) % width
+                    py = (y * height - elapsed * effect["speed"]) % height
+                    radius = 1.4 + size * 2.8
+                    pulse = 0.72 + 0.28 * math.sin(elapsed * 3.0 + y * 6.283)
+                    alpha_val = max(0, min(255, round(255 * effect["opacity"] * pulse)))
+                    draw.ellipse((px - radius, py - radius, px + radius, py + radius), fill=(*color, alpha_val))
+                layer = layer.filter(ImageFilter.GaussianBlur(0.85))
                 background.alpha_composite(layer)
         # Decontamination belongs to the replacement, including its wipe.
         # Applying cleaned edge RGB over the still-original photograph would

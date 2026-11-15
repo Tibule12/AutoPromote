@@ -79,6 +79,9 @@ uniform float u_halation;
 uniform float u_chromaticAberration;
 uniform float u_grainAmount;
 uniform float u_grainSeed;
+uniform float u_dreamGlow;
+uniform float u_anamorphicFlare;
+uniform float u_lensBlur;
 
 uniform int u_joinMode; // 0=none, 1=black, 2=white
 uniform float u_joinOpacity;
@@ -172,6 +175,27 @@ void main() {
     color.b = texture(u_source, clamp(v_texCoord - dir, 0.0, 1.0)).b;
   }
 
+  if (u_lensBlur > 0.0001) {
+    float edgeMask = smoothstep(0.18, 0.92, length(v_texCoord - 0.5) * 1.45);
+    vec2 blurPx = (vec2(1.0) / max(vec2(1.0), u_resolution)) * (u_lensBlur * 11.0 * edgeMask);
+    vec2 innerPx = blurPx * 0.45;
+    vec3 edgeBlur = (
+      texture(u_source, clamp(v_texCoord + vec2(innerPx.x, 0.0), 0.0, 1.0)).rgb +
+      texture(u_source, clamp(v_texCoord - vec2(innerPx.x, 0.0), 0.0, 1.0)).rgb +
+      texture(u_source, clamp(v_texCoord + vec2(0.0, innerPx.y), 0.0, 1.0)).rgb +
+      texture(u_source, clamp(v_texCoord - vec2(0.0, innerPx.y), 0.0, 1.0)).rgb +
+      texture(u_source, clamp(v_texCoord + vec2(blurPx.x, 0.0), 0.0, 1.0)).rgb +
+      texture(u_source, clamp(v_texCoord - vec2(blurPx.x, 0.0), 0.0, 1.0)).rgb +
+      texture(u_source, clamp(v_texCoord + vec2(0.0, blurPx.y), 0.0, 1.0)).rgb +
+      texture(u_source, clamp(v_texCoord - vec2(0.0, blurPx.y), 0.0, 1.0)).rgb +
+      texture(u_source, clamp(v_texCoord + vec2(blurPx.x * 0.707, blurPx.y * 0.707), 0.0, 1.0)).rgb +
+      texture(u_source, clamp(v_texCoord + vec2(-blurPx.x * 0.707, blurPx.y * 0.707), 0.0, 1.0)).rgb +
+      texture(u_source, clamp(v_texCoord + vec2(blurPx.x * 0.707, -blurPx.y * 0.707), 0.0, 1.0)).rgb +
+      texture(u_source, clamp(v_texCoord + vec2(-blurPx.x * 0.707, -blurPx.y * 0.707), 0.0, 1.0)).rgb
+    ) / 12.0;
+    color = mix(color, edgeBlur, edgeMask * clamp(u_lensBlur, 0.0, 1.0));
+  }
+
   if (u_joinOpacity > 0.0) {
     vec3 joinTarget = u_joinMode == 2 ? vec3(1.0) : vec3(0.0);
     color = mix(color, joinTarget, clamp(u_joinOpacity, 0.0, 1.0));
@@ -184,7 +208,11 @@ void main() {
   if (u_hasLut == 1 && u_lutIntensity > 0.0) {
     vec3 span = max(vec3(1e-5), u_lutDomainMax - u_lutDomainMin);
     vec3 uvw = clamp((color - u_lutDomainMin) / span, 0.0, 1.0);
-    vec3 lutRgb = texture(u_lut3D, uvw).rgb;
+    // LUT values live at grid vertices, represented by texture texel centres.
+    // Direct 0..1 sampling stretches the endpoints and changes even identity.
+    vec3 lutSize = vec3(textureSize(u_lut3D, 0));
+    vec3 lutUv = (uvw * (lutSize - vec3(1.0)) + vec3(0.5)) / lutSize;
+    vec3 lutRgb = texture(u_lut3D, lutUv).rgb;
     color = mix(color, lutRgb, clamp(u_lutIntensity, 0.0, 1.0));
   }
 
@@ -210,15 +238,58 @@ void main() {
   }
 
   if (u_halation > 0.001) {
-    vec2 px = vec2(2.0) / max(vec2(1.0), u_resolution);
+    vec2 px1 = vec2(2.5) / max(vec2(1.0), u_resolution);
+    vec2 px2 = vec2(6.0) / max(vec2(1.0), u_resolution);
     vec3 bloom = (
-      texture(u_source, clamp(v_texCoord + vec2(px.x, 0.0), 0.0, 1.0)).rgb +
-      texture(u_source, clamp(v_texCoord - vec2(px.x, 0.0), 0.0, 1.0)).rgb +
-      texture(u_source, clamp(v_texCoord + vec2(0.0, px.y), 0.0, 1.0)).rgb +
-      texture(u_source, clamp(v_texCoord - vec2(0.0, px.y), 0.0, 1.0)).rgb
-    ) * 0.25;
-    float hi = smoothstep(0.68, 1.0, dot(bloom, vec3(0.2126, 0.7152, 0.0722)));
-    color = clamp(color + vec3(1.0, 0.36, 0.14) * hi * u_halation * 0.45, 0.0, 1.0);
+      texture(u_source, clamp(v_texCoord + vec2(px1.x, 0.0), 0.0, 1.0)).rgb +
+      texture(u_source, clamp(v_texCoord - vec2(px1.x, 0.0), 0.0, 1.0)).rgb +
+      texture(u_source, clamp(v_texCoord + vec2(0.0, px1.y), 0.0, 1.0)).rgb +
+      texture(u_source, clamp(v_texCoord - vec2(0.0, px1.y), 0.0, 1.0)).rgb +
+      texture(u_source, clamp(v_texCoord + vec2(px2.x, px2.y), 0.0, 1.0)).rgb +
+      texture(u_source, clamp(v_texCoord + vec2(-px2.x, px2.y), 0.0, 1.0)).rgb +
+      texture(u_source, clamp(v_texCoord + vec2(px2.x, -px2.y), 0.0, 1.0)).rgb +
+      texture(u_source, clamp(v_texCoord + vec2(-px2.x, -px2.y), 0.0, 1.0)).rgb
+    ) * 0.125;
+    float hi = smoothstep(0.65, 1.0, dot(bloom, vec3(0.2126, 0.7152, 0.0722)));
+    color = clamp(color + vec3(1.0, 0.34, 0.12) * hi * u_halation * 0.48, 0.0, 1.0);
+  }
+
+  if (u_dreamGlow > 0.001) {
+    vec2 d1 = vec2(3.5) / max(vec2(1.0), u_resolution);
+    vec2 d2 = vec2(9.0) / max(vec2(1.0), u_resolution);
+    vec3 mistSample = (
+      texture(u_source, clamp(v_texCoord + vec2(d1.x, 0.0), 0.0, 1.0)).rgb +
+      texture(u_source, clamp(v_texCoord - vec2(d1.x, 0.0), 0.0, 1.0)).rgb +
+      texture(u_source, clamp(v_texCoord + vec2(0.0, d1.y), 0.0, 1.0)).rgb +
+      texture(u_source, clamp(v_texCoord - vec2(0.0, d1.y), 0.0, 1.0)).rgb +
+      texture(u_source, clamp(v_texCoord + vec2(d2.x, d2.y), 0.0, 1.0)).rgb +
+      texture(u_source, clamp(v_texCoord + vec2(-d2.x, d2.y), 0.0, 1.0)).rgb +
+      texture(u_source, clamp(v_texCoord + vec2(d2.x, -d2.y), 0.0, 1.0)).rgb +
+      texture(u_source, clamp(v_texCoord + vec2(-d2.x, -d2.y), 0.0, 1.0)).rgb
+    ) * 0.125;
+    float mistHi = smoothstep(0.50, 0.98, dot(mistSample, vec3(0.2126, 0.7152, 0.0722)));
+    vec3 veil = mistSample * mistHi * u_dreamGlow * 0.62;
+    color = clamp(1.0 - (1.0 - color) * (1.0 - clamp(veil, 0.0, 0.92)), 0.0, 1.0);
+  }
+
+  if (u_anamorphicFlare > 0.001) {
+    float invW = 1.0 / max(1.0, u_resolution.x);
+    vec3 s1 = texture(u_source, clamp(v_texCoord + vec2(10.0 * invW, 0.0), 0.0, 1.0)).rgb +
+              texture(u_source, clamp(v_texCoord - vec2(10.0 * invW, 0.0), 0.0, 1.0)).rgb;
+    vec3 s2 = texture(u_source, clamp(v_texCoord + vec2(26.0 * invW, 0.0), 0.0, 1.0)).rgb +
+              texture(u_source, clamp(v_texCoord - vec2(26.0 * invW, 0.0), 0.0, 1.0)).rgb;
+    vec3 s3 = texture(u_source, clamp(v_texCoord + vec2(48.0 * invW, 0.0), 0.0, 1.0)).rgb +
+              texture(u_source, clamp(v_texCoord - vec2(48.0 * invW, 0.0), 0.0, 1.0)).rgb;
+    vec3 s4 = texture(u_source, clamp(v_texCoord + vec2(80.0 * invW, 0.0), 0.0, 1.0)).rgb +
+              texture(u_source, clamp(v_texCoord - vec2(80.0 * invW, 0.0), 0.0, 1.0)).rgb;
+    float streakEnergy = (
+      smoothstep(0.72, 1.0, dot(s1 * 0.5, vec3(0.2126, 0.7152, 0.0722))) * 0.42 +
+      smoothstep(0.72, 1.0, dot(s2 * 0.5, vec3(0.2126, 0.7152, 0.0722))) * 0.30 +
+      smoothstep(0.72, 1.0, dot(s3 * 0.5, vec3(0.2126, 0.7152, 0.0722))) * 0.18 +
+      smoothstep(0.72, 1.0, dot(s4 * 0.5, vec3(0.2126, 0.7152, 0.0722))) * 0.10
+    );
+    vec3 flare = vec3(0.32, 0.74, 1.0) * streakEnergy * u_anamorphicFlare * 0.72;
+    color = clamp(1.0 - (1.0 - color) * (1.0 - clamp(flare, 0.0, 0.92)), 0.0, 1.0);
   }
 
   if (u_vignetteAmount > 0.005) {
@@ -404,6 +475,12 @@ export function createStudioWebGLCompositor(outputCanvas = null) {
     powerPreference: "high-performance",
   });
   if (!gl) return null;
+  let softwareRenderer = false;
+  try {
+    const debug = gl.getExtension?.('WEBGL_debug_renderer_info');
+    const renderer = debug && gl.getParameter(debug.UNMASKED_RENDERER_WEBGL);
+    softwareRenderer = /SwiftShader|llvmpipe|softpipe|software rasterizer/i.test(String(renderer || ''));
+  } catch (_) { /* Restricted renderer information keeps the normal GL path. */ }
 
   let gradeProgram;
   let compositeProgram;
@@ -466,14 +543,18 @@ export function createStudioWebGLCompositor(outputCanvas = null) {
 
   let scopeCanvas = null;
   let scopeCtx = null;
-  let cachedLutKey = "";
+  let cachedLutCube = null;
+  let cachedLutData = null;
+  let cachedLutDomainKey = "";
   let cachedLutDomain = { min: [0, 0, 0], max: [1, 1, 1] };
   let disposed = false;
 
   const uploadColorCube = cube => {
     if (disposed || !cube) return false;
-    const key = `${cube.size}:${cube.presetId || ""}:${cube.data?.length}:${cube.data?.[0]}:${cube.data?.[cube.data.length - 1]}`;
-    if (key === cachedLutKey) return true;
+    // Canonical colour cubes are immutable. Distinct cubes can share their
+    // dimensions and endpoints while changing every interior colour.
+    const domainKey = JSON.stringify([cube.size, cube.domainMin, cube.domainMax]);
+    if (cube === cachedLutCube && cube.data === cachedLutData && domainKey === cachedLutDomainKey) return true;
     const packed = packColorCubeRgba8(cube);
     if (!packed) return false;
     gl.activeTexture(gl.TEXTURE1);
@@ -490,7 +571,9 @@ export function createStudioWebGLCompositor(outputCanvas = null) {
       gl.UNSIGNED_BYTE,
       packed.data
     );
-    cachedLutKey = key;
+    cachedLutCube = cube;
+    cachedLutData = cube.data;
+    cachedLutDomainKey = domainKey;
     cachedLutDomain = {
       min: Array.isArray(cube.domainMin) && cube.domainMin.length === 3 ? cube.domainMin : [0, 0, 0],
       max: Array.isArray(cube.domainMax) && cube.domainMax.length === 3 ? cube.domainMax : [1, 1, 1],
@@ -582,6 +665,9 @@ export function createStudioWebGLCompositor(outputCanvas = null) {
     gl.uniform1f(gl.getUniformLocation(gradeProgram, "u_chromaticAberration"), clamp(textureEffects?.chromaticAberration ?? 0, 0, 1));
     gl.uniform1f(gl.getUniformLocation(gradeProgram, "u_grainAmount"), clamp(textureEffects?.filmGrain ?? 0, 0, 1));
     gl.uniform1f(gl.getUniformLocation(gradeProgram, "u_grainSeed"), Number(textureEffects?.seed || 1));
+    gl.uniform1f(gl.getUniformLocation(gradeProgram, "u_dreamGlow"), clamp(textureEffects?.dreamGlow ?? 0, 0, 1));
+    gl.uniform1f(gl.getUniformLocation(gradeProgram, "u_anamorphicFlare"), clamp(textureEffects?.anamorphicFlare ?? 0, 0, 1));
+    gl.uniform1f(gl.getUniformLocation(gradeProgram, "u_lensBlur"), clamp(textureEffects?.lensBlur ?? 0, 0, 1));
 
     const joinOpacity = clamp(joinFade?.opacity ?? 0, 0, 1);
     const joinMode = joinOpacity <= 0 ? 0 : joinFade?.mode === "energy_flash" ? 2 : 1;
@@ -621,6 +707,7 @@ export function createStudioWebGLCompositor(outputCanvas = null) {
   return {
     surface,
     gl,
+    softwareRenderer,
     uploadColorCube,
     renderGradedFrame,
     sampleScopes,

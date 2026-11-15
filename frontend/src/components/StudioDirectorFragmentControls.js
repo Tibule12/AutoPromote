@@ -1,5 +1,56 @@
 import React, { useEffect, useState } from "react";
 
+export const DIRECTOR_FRAGMENT_CHOREOGRAPHY_PRESETS = [
+  {
+    id: "accordion_slice",
+    label: "Accordion Slice",
+    axis: "x",
+    direction: "up",
+    count: 5,
+    background: "#1225bb",
+    scale: 0.76,
+    spread: 4.5,
+    fanDegrees: 5,
+    staggerSeconds: 0.04,
+  },
+  {
+    id: "domino_cascade",
+    label: "Domino Cascade",
+    axis: "x",
+    direction: "right",
+    count: 6,
+    background: "#0f172a",
+    scale: 0.72,
+    spread: 5.5,
+    fanDegrees: 7,
+    staggerSeconds: 0.06,
+  },
+  {
+    id: "exploded_prism",
+    label: "Exploded Prism",
+    axis: "y",
+    direction: "down",
+    count: 4,
+    background: "#ff4f1f",
+    scale: 0.68,
+    spread: 6.5,
+    fanDegrees: 8,
+    staggerSeconds: 0.05,
+  },
+  {
+    id: "tight_whip",
+    label: "Tight Whip Cut",
+    axis: "y",
+    direction: "left",
+    count: 3,
+    background: "#111622",
+    scale: 0.82,
+    spread: 3.0,
+    fanDegrees: 3,
+    staggerSeconds: 0.02,
+  },
+];
+
 export default function StudioDirectorFragmentControls({
   value,
   duration,
@@ -11,6 +62,25 @@ export default function StudioDirectorFragmentControls({
   useEffect(() => setDraft(value), [value]);
   const set = (key, val) => {
     setDraft(d => ({ ...d, [key]: val }));
+    onDraftChange();
+  };
+  const applyPreset = preset => {
+    const dur = Math.max(4, Number(duration) || 8);
+    setDraft(d => ({
+      ...d,
+      axis: preset.axis,
+      direction: preset.direction,
+      count: preset.count,
+      background: preset.background,
+      scale: preset.scale,
+      spread: preset.spread,
+      fanDegrees: preset.fanDegrees,
+      staggerSeconds: preset.staggerSeconds,
+      holdSeconds: Number((dur * 0.14).toFixed(1)),
+      fanSeconds: Number((dur * 0.34).toFixed(1)),
+      switchSeconds: Number((dur * 0.54).toFixed(1)),
+      resolveSeconds: Number((dur * 0.82).toFixed(1)),
+    }));
     onDraftChange();
   };
   const numeric = [
@@ -30,6 +100,20 @@ export default function StudioDirectorFragmentControls({
       data-testid="director-fragment-settings"
     >
       <summary>Refine the fragment transition</summary>
+      <div className="studio-director-preset-pills" data-testid="director-fragment-presets">
+        {DIRECTOR_FRAGMENT_CHOREOGRAPHY_PRESETS.map(preset => (
+          <button
+            key={preset.id}
+            type="button"
+            className="studio-director-preset-pill"
+            data-testid={`director-fragment-preset-${preset.id}`}
+            disabled={disabled}
+            onClick={() => applyPreset(preset)}
+          >
+            {preset.label}
+          </button>
+        ))}
+      </div>
       <div
         style={{
           display: "grid",

@@ -1,0 +1,12 @@
+{
+  "realUpload": true,
+  "physicalTrim": {
+    "from": 29.9,
+    "to": 17.2
+  },
+  "layers": 4,
+  "coldReopenEditingFieldsExact": true,
+  "motionKeysExact": true,
+  "expectedTransientBlobUrlsChanged": true,
+  "recordingAtOriginalSpeed": true
+}

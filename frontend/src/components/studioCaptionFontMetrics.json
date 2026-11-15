@@ -26,5 +26,45 @@
       "file": "NotoSansSymbols2-Regular.ttf",
       "sha256": "876598db5f1e3bef2bc77c4d94c5b0d5d2c1620be4878a06f18fb5434e331688"
     }
+  },
+  "Inter Black": {
+    "400": {
+      "unitsPerEm": 2048,
+      "winAscent": 1984,
+      "winDescent": 494,
+      "cssSizePerAssSize": 0.8264729620661824,
+      "file": "Inter-Black.ttf",
+      "sha256": "6342d3ea6dc088b43867f615e807d898adf100c93edb978b8e52c5eb71a264da"
+    }
+  },
+  "Inter ExtraBold": {
+    "400": {
+      "unitsPerEm": 2048,
+      "winAscent": 1984,
+      "winDescent": 494,
+      "cssSizePerAssSize": 0.8264729620661824,
+      "file": "Inter-ExtraBold.ttf",
+      "sha256": "e6756ad5690b77606aa62249a7b420d9902d45cae4b0048a24911fd4324b0a22"
+    }
+  },
+  "Inter SemiBold": {
+    "400": {
+      "unitsPerEm": 2048,
+      "winAscent": 1984,
+      "winDescent": 494,
+      "cssSizePerAssSize": 0.8264729620661824,
+      "file": "Inter-SemiBold.ttf",
+      "sha256": "78a843fade9d4612a5567302fb595b56976eb5fcebf4fea5a5912d638bafcde3"
+    }
+  },
+  "Inter": {
+    "400": {
+      "unitsPerEm": 2048,
+      "winAscent": 1984,
+      "winDescent": 494,
+      "cssSizePerAssSize": 0.8264729620661824,
+      "file": "Inter-Regular.ttf",
+      "sha256": "40d692fce188e4471e2b3cba937be967878f631ad3ebbbdcd587687c7ebe0c82"
+    }
   }
 }

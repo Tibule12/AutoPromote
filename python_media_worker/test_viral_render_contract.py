@@ -1190,6 +1190,7 @@ class ViralRenderContractTests(unittest.TestCase):
                 "rainbow", "watch_me", "wall_type", "story_pop", "bold_pop", "karaoke", "glow", "bounce", "minimal",
                 "headline", "boxed", "comic", "gradient", "typewriter", "editorial",
                 "sticker", "marker", "glass", "newsroom", "luxury", "retro",
+                "word_pill", "spring_slam", "neon_bloom", "editorial_duo", "kinetic_bar",
             ):
                 with self.subTest(style=style_name):
                     ass = generate_ass_captions(transcript, style_name, 1080, 1920)

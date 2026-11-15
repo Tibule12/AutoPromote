@@ -1,0 +1,47 @@
+{
+  "pairs": [
+    {
+      "seconds": 1,
+      "exportFrame": 24,
+      "width": 720,
+      "height": 1280,
+      "mse": 99.06869212962962,
+      "psnrDb": 28.171439312420112,
+      "meanAbsoluteChannelError": 7.72697193287037,
+      "maximumChannelError": 68.0
+    },
+    {
+      "seconds": 3,
+      "exportFrame": 72,
+      "width": 720,
+      "height": 1280,
+      "mse": 95.7689015480324,
+      "psnrDb": 28.31855854698447,
+      "meanAbsoluteChannelError": 7.583756148726851,
+      "maximumChannelError": 64.0
+    },
+    {
+      "seconds": 6,
+      "exportFrame": 144,
+      "width": 720,
+      "height": 1280,
+      "mse": 99.7049880642361,
+      "psnrDb": 28.143634750278252,
+      "meanAbsoluteChannelError": 7.758601345486111,
+      "maximumChannelError": 66.0
+    },
+    {
+      "seconds": 10,
+      "exportFrame": 240,
+      "width": 720,
+      "height": 1280,
+      "mse": 98.95038700810186,
+      "psnrDb": 28.176628637387907,
+      "meanAbsoluteChannelError": 7.70769458912037,
+      "maximumChannelError": 66.0
+    }
+  ],
+  "minimumPsnrDb": 28.143634750278252,
+  "method": "Actual paused Live Edit programme PNG against exact 24fps final frame, same full 720x1280 raster; no alignment, resize or cropped exclusions.",
+  "qualification": "Diagnostic measurements only. Whole moving picture/audio and prior strict typography parity remain unqualified."
+}

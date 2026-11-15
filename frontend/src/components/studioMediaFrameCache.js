@@ -208,6 +208,7 @@ export function createStudioWebCodecsController({
   let activeFps = 30;
   let activeQuality = "proxy";
   let destroyed = false;
+  let capturePending = false;
 
   const ensureDecoder = (config, assetId, fps = 30, quality = "proxy") => {
     if (destroyed || !isWebCodecsSupported() || !config?.codec) return false;
@@ -274,7 +275,10 @@ export function createStudioWebCodecsController({
     if (destroyed || !video || video.readyState < 2) return null;
     const existing = cache.get(assetId, frameIndex, quality);
     if (existing) return existing;
+    // Optional cache work must never queue duplicate bitmap snapshots.
+    if (capturePending) return null;
     if (typeof globalThis.createImageBitmap === "function") {
+      capturePending = true;
       try {
         const bitmap = await globalThis.createImageBitmap(video);
         if (destroyed) {
@@ -293,6 +297,8 @@ export function createStudioWebCodecsController({
         return bitmap;
       } catch (_err) {
         return null;
+      } finally {
+        capturePending = false;
       }
     }
     return null;

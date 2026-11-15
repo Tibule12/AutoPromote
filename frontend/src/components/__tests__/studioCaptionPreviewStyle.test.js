@@ -77,7 +77,7 @@ test("preview definitions match all existing Python renderer styles", () => {
       [path.resolve(__dirname, "../../../../scripts/sync-studio-caption-styles.py"), "--check"],
       { encoding: "utf8" }
     )
-  ).toContain("21 existing caption styles match");
+  ).toContain("26 existing caption styles match");
 });
 
 test("ASS BGR colour and transparency are converted to browser colour", () => {
@@ -170,4 +170,42 @@ test("Story Pop groups never exceed four words and preserve the source cue", () 
     "You know we travelled through the entire journey"
   );
   expect(chunks[chunks.length - 1].end).toBe(8);
+});
+
+test("creative studio styles render distinct pills, bloom, Y-hop, serif duo, kinetic bar, and typewriter slicing", () => {
+  const { sliceTypewriterWord } = require("../studioCaptionPreviewStyle");
+
+  const wordPill = getCaptionPreviewStyles("word_pill", 1, "#3db3ff");
+  expect(wordPill.pill.background).toBe("transparent");
+  expect(wordPill.pill.fontFamily).toContain("Inter ExtraBold");
+  expect(wordPill.activeWord.background).toBe("#3db3ff");
+  expect(wordPill.activeWord.color).toBe("#0b0d13");
+  expect(wordPill.activeWord.borderRadius).not.toBe(0);
+
+  const neonBloom = getCaptionPreviewStyles("neon_bloom", 1, "#d0e03c");
+  expect(neonBloom.pill.fontFamily).toContain("Inter Black");
+  expect(neonBloom.activeWord.textShadow).toContain("#d0e03c");
+
+  const glass = getCaptionPreviewStyles("glass", 1, "#ffb33d");
+  expect(glass.pill.backdropFilter).toContain("blur");
+  expect(glass.pill.background).not.toBe("transparent");
+
+  const kineticBar = getCaptionPreviewStyles("kinetic_bar", 1, "#3ce0d0");
+  expect(kineticBar.activeWord.borderBottom).toContain("#3ce0d0");
+
+  const editorialDuo = getCaptionPreviewStyles("editorial_duo", 1, "#ff5d8f");
+  expect(editorialDuo.pill.fontFamily).toContain("Inter SemiBold");
+  expect(editorialDuo.pill.textTransform).toBe("uppercase");
+  expect(editorialDuo.activeWord.fontFamily).toContain("DejaVu Serif");
+  expect(editorialDuo.activeWord.fontStyle).toBe("italic");
+  expect(editorialDuo.activeWord.textTransform).toBe("none");
+
+  const bounce = getCaptionPreviewStyles("bounce", 1, "#ffb33d", {
+    chunk: { start: 0, end: 2, words: ["Jump", "higher"] },
+    time: 0.15,
+  });
+  expect(bounce.activeWord.transform).toContain("translateY");
+
+  expect(sliceTypewriterWord("Creators", 0.25, false)).toBe("Cr");
+  expect(sliceTypewriterWord("Creators", 0.25, true)).toBe("Creators");
 });

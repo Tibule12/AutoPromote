@@ -1,3 +1,8 @@
+import {
+  evaluatePixelRevitalizer,
+  evaluateSelectiveColorTransform,
+} from "./studioColorScience";
+
 const clamp = (value, low = 0, high = 1) => Math.max(low, Math.min(high, value));
 
 export const CINEMA_3D_LUT_PRESETS = [
@@ -120,20 +125,35 @@ export function sampleColorCube(cube, r, g, b, output = [0, 0, 0]) {
   return output;
 }
 
+export function hasRevitalizerGrade(rev = {}) {
+  if (!rev || typeof rev !== "object") return false;
+  return (
+    Number(rev.dehaze || 0) !== 0 ||
+    Number(rev.shadowRecovery || 0) !== 0 ||
+    Number(rev.highlightRollOff || 0) !== 0 ||
+    Number(rev.clarity || 0) !== 0 ||
+    Number(rev.vibrance || 0) !== 0
+  );
+}
+
 export function hasAdvancedGrade(advanced = {}) {
   const lutObj = advanced.lutData || advanced.lut;
   const intensity = Number(advanced.lutIntensity ?? 100);
-  return (!!lutObj && intensity > 0) ||
-    [...Object.values(advanced.curve || {}), ...Object.values(advanced.hsl || {})].some(value => Number(value) !== 0);
+  return (
+    (!!lutObj && intensity > 0) ||
+    [...Object.values(advanced.curve || {}), ...Object.values(advanced.hsl || {})].some(
+      value => Number(value) !== 0
+    ) ||
+    Boolean(advanced.qualifier?.enabled) ||
+    hasRevitalizerGrade(advanced.revitalizer)
+  );
 }
 
 export function buildAdvancedColorCube(advanced = {}, size = 33) {
   if (!hasAdvancedGrade(advanced)) return null;
   const c = advanced.curve || {}, hsl = advanced.hsl || {};
-  const normCurveVal = v => {
-    const num = Number(v || 0);
-    return Math.abs(num) > 0 && Math.abs(num) <= 1 ? num * 100 : num;
-  };
+  // These controls and saved values use the visible -100..100 scale.
+  const normCurveVal = v => Number(v || 0);
   const knots = [0, clamp(.25 + normCurveVal(c.shadows)/500), clamp(.5 + normCurveVal(c.midtones)/500),
     clamp(.75 + normCurveVal(c.highlights)/500), 1];
   const curve = value => {
@@ -145,7 +165,10 @@ export function buildAdvancedColorCube(advanced = {}, size = 33) {
   const luminance = Number(hsl.luminance || 0)/200;
   const cube = { size, data: [] }, imported = advanced.lutData || advanced.lut;
   const rawIntensity = Number(advanced.lutIntensity ?? 100);
-  const strength = imported ? clamp(rawIntensity > 0 && rawIntensity <= 1 ? rawIntensity : rawIntensity/100) : 0;
+  const strength = imported ? clamp(rawIntensity / 100) : 0;
+  const hasRev = hasRevitalizerGrade(advanced.revitalizer);
+  const hasQual = Boolean(advanced.qualifier?.enabled);
+
   for (let blue = 0; blue < size; blue++) for (let green = 0; green < size; green++) for (let red = 0; red < size; red++) {
     let rgb = [curve(red/(size-1)), curve(green/(size-1)), curve(blue/(size-1))];
     const high = Math.max(...rgb), low = Math.min(...rgb), delta = high-low;
@@ -159,6 +182,14 @@ export function buildAdvancedColorCube(advanced = {}, size = 33) {
       const input = rgb.map((value,i) => (value-(imported.domainMin?.[i] ?? 0))/((imported.domainMax?.[i] ?? 1)-(imported.domainMin?.[i] ?? 0)));
       const mapped = sampleColorCube(imported, ...input);
       rgb = rgb.map((value,i) => value*(1-strength)+mapped[i]*strength);
+    }
+    if (hasRev) {
+      rgb = evaluatePixelRevitalizer(rgb[0], rgb[1], rgb[2], advanced.revitalizer);
+    }
+    if (hasQual) {
+      rgb = evaluateSelectiveColorTransform(rgb[0], rgb[1], rgb[2], 0.5, 0.5, {
+        qualifier: advanced.qualifier,
+      });
     }
     cube.data.push(...rgb.map(value => Number(clamp(value).toFixed(7))));
   }

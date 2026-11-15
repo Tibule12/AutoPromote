@@ -1,17 +1,105 @@
 import React, { useEffect, useRef, useState } from "react";
 import { getAuth } from "firebase/auth";
 import { compileDirectorCreativePlan } from "./studioDirectorCreativePlan";
-import { measureDirectorSources } from "./studioDirectorComposition";
+import {
+  DIRECTOR_CHOREOGRAPHY_ARCHETYPES,
+  DIRECTOR_CINEMA_LOOK_PROFILES,
+  analyzeDirectorClipTelemetry,
+  buildDirectorFinishGradeAction,
+  buildSourceBoundDirectorProposal,
+  directorCompositionContext,
+  measureDirectorSources,
+} from "./studioDirectorComposition";
 import { directorNodeContext } from "./studioDirectorNodePlan";
-import StudioDirectorFragmentControls from "./StudioDirectorFragmentControls";
-import StudioDirectorPosterControls from "./StudioDirectorPosterControls";
 import { directorPosterContext } from "./studioDirectorPosterPlan";
 import {
-  studioCreativePlannerStatus,
   requestStudioCreativePlan,
   reviseDirectorFragment,
   reviseDirectorPoster,
+  studioCreativePlannerStatus,
 } from "./studioDirectorCreativeClient";
+import StudioDirectorFragmentControls from "./StudioDirectorFragmentControls";
+import StudioDirectorPosterControls from "./StudioDirectorPosterControls";
+
+export const DIRECTOR_BRIEF_TEMPLATES = [
+  {
+    id: "kinetic_opener",
+    label: "Kinetic Broadcast Opener",
+    approach: "poster",
+    lookId: "teal_orange",
+    brief:
+      "High-energy kinetic broadcast opener with bold geometric typography, vector trim strokes and an emblem lockup.",
+  },
+  {
+    id: "fragment_reveal",
+    label: "Fragmented City Reveal",
+    approach: "fragments",
+    lookId: "kodak_2383",
+    brief:
+      "Cut through the opening street scene into moving vertical fragments that fan open and rebuild into the second clip.",
+  },
+  {
+    id: "cyber_portal",
+    label: "Cyberpunk Portal & Whip Pan",
+    approach: "composition",
+    lookId: "neon_cyber",
+    archetypeId: "portal_prism",
+    brief:
+      "Neon cyberpunk portal reveal anchored on the moving subject with camera rig whip pan, rotoscope prism and beat-synced grade pulses.",
+  },
+  {
+    id: "kodak_weave",
+    label: "Kodak 2383 Split Diptych",
+    approach: "composition",
+    lookId: "kodak_2383",
+    archetypeId: "split_diptych",
+    brief:
+      "Warm Kodak 2383 cinema film print with architectural split diptych, soft-feathered rotoscope mask and golden halation.",
+  },
+];
+
+function summarizePlanTopology(compiled, forceRecompute = false) {
+  const actions = compiled?.plan?.actions || [];
+  const finishAction = actions.find(a => a.type === "finish_grade");
+  const finishSummary = finishAction
+    ? {
+        id: finishAction.advancedColor?.lutPresetId || "custom",
+        label: finishAction.name || "Cinema Grade",
+        beatSyncPulses: Boolean(finishAction.beatSyncPulses),
+      }
+    : null;
+  if (compiled.topologySummary && !forceRecompute) {
+    return {
+      ...compiled.topologySummary,
+      colorGrade: finishSummary || compiled.topologySummary.colorGrade || null,
+    };
+  }
+  return {
+    videoLayers: actions.filter(a => a.type === "media_plane").length,
+    nullRigs: actions.filter(a => a.type === "null").length,
+    shapeLayers: compiled?.plan?.graphics?.layers?.length || 0,
+    parentLinks: actions.filter(
+      a => a.type === "parent" || (a.type === "node_connect" && a.port === "Parent")
+    ).length,
+    trackMattes: actions.filter(
+      a => a.type === "matte" || (a.type === "node_connect" && a.port === "Mask")
+    ).length,
+    softMasks: actions.filter(a => a.type === "media_plane" && Number(a.mask?.feather) > 0).length,
+    motionDrivers: actions.filter(
+      a =>
+        a.type === "motion_driver" ||
+        (a.motionDrivers && Object.keys(a.motionDrivers).length > 0)
+    ).length,
+    animatedMaskKeys: actions
+      .filter(a => a.type === "keys")
+      .reduce(
+        (sum, a) =>
+          sum + (a.keys || []).filter(k => /^maskPoint\d+[XY]$/.test(k.property)).length,
+        0
+      ),
+    colorGrade: finishSummary,
+  };
+}
 
 export default function StudioDirectorCreativePanel({
   getSnapshot,
@@ -19,18 +107,22 @@ export default function StudioDirectorCreativePanel({
   onOpenNodes,
   locked = false,
 }) {
-  const [brief, setBrief] = useState(""),
-    [duration, setDuration] = useState(12),
-    [available, setAvailable] = useState(null),
-    [busy, setBusy] = useState(false),
-    [review, setReview] = useState(null),
-    [message, setMessage] = useState(""),
-    [operatorDirty, setOperatorDirty] = useState(false);
+  const [brief, setBrief] = useState("");
+  const [duration, setDuration] = useState(12);
   const [approach, setApproach] = useState("poster");
-  const request = useRef(null),
-    mounted = useRef(true),
-    latest = useRef({ getSnapshot, onApply });
+  const [lookId, setLookId] = useState("auto");
+  const [archetypeId, setArchetypeId] = useState("auto");
+  const [beatSyncPulses, setBeatSyncPulses] = useState(true);
+  const [available, setAvailable] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [review, setReview] = useState(null);
+  const [operatorDirty, setOperatorDirty] = useState(false);
+  const [message, setMessage] = useState("");
+  const request = useRef(null);
+  const mounted = useRef(true);
+  const latest = useRef({ getSnapshot, onApply });
   latest.current = { getSnapshot, onApply };
+
   useEffect(() => {
     mounted.current = true;
     const controller = new AbortController();
@@ -51,14 +143,28 @@ export default function StudioDirectorCreativePanel({
       request.current?.abort();
     };
   }, []);
+
   const change = setter => e => {
     setter(e.target.value);
     setReview(null);
+    setOperatorDirty(false);
     setMessage("");
   };
+
+  const applyBriefTemplate = template => {
+    setBrief(template.brief);
+    if (template.approach) setApproach(template.approach);
+    if (template.lookId) setLookId(template.lookId);
+    if (template.archetypeId) setArchetypeId(template.archetypeId);
+    setReview(null);
+    setOperatorDirty(false);
+    setMessage("");
+  };
+
   async function plan() {
     setBusy(true);
     setReview(null);
+    setOperatorDirty(false);
     setMessage("The Director is choosing shots and choreographing the motion…");
     const controller = new AbortController();
     request.current = controller;
@@ -74,24 +180,42 @@ export default function StudioDirectorCreativePanel({
       const context =
         approach === "poster"
           ? directorPosterContext(snapshot, brief, Number(duration))
-          : await measureDirectorSources(
-              directorNodeContext(snapshot, brief, Number(duration)),
-              snapshot,
-              controller.signal
-            );
-      const token = await user.getIdToken(),
-        result = await requestStudioCreativePlan(context, token, controller.signal);
+          : approach === "fragments"
+            ? await measureDirectorSources(
+                directorNodeContext(snapshot, brief, Number(duration)),
+                snapshot,
+                controller.signal
+              )
+            : await measureDirectorSources(
+                directorCompositionContext(snapshot, brief, Number(duration)),
+                snapshot,
+                controller.signal
+              );
+      const token = await user.getIdToken();
+      const result = await requestStudioCreativePlan(context, token, controller.signal);
       if (!mounted.current || controller.signal.aborted) return;
-      if (getAuth().currentUser?.uid !== user.uid)
+      if (getAuth().currentUser?.uid !== user.uid) {
         throw Error("Your sign-in changed. Ask for a new plan.");
+      }
       const next = latest.current.getSnapshot();
       if (
         next.studioDocument.projectId !== context.projectId ||
         next.studioDocument.revision !== context.baseRevision
-      )
+      ) {
         throw Error("The project changed while planning. Ask for a new plan.");
+      }
       const compiled = compileDirectorCreativePlan(result, next);
-      setReview({ ...compiled, result, reviewerUid: user.uid });
+      const telemetry =
+        context.pixelEvidence && Array.isArray(context.media)
+          ? analyzeDirectorClipTelemetry(context)
+          : null;
+      setReview({
+        ...compiled,
+        topologySummary: summarizePlanTopology(compiled),
+        telemetry,
+        result,
+        reviewerUid: user.uid,
+      });
       setOperatorDirty(false);
       setMessage("Review the shots below, then apply the motion to your editable timeline.");
     } catch (error) {
@@ -103,14 +227,167 @@ export default function StudioDirectorCreativePanel({
       }
     }
   }
+
+  async function choreographSourceGraph() {
+    setBusy(true);
+    setReview(null);
+    setOperatorDirty(false);
+    setMessage("Sampling source colour scopes and motion centroids for Cinema Graph…");
+    const controller = new AbortController();
+    request.current = controller;
+    try {
+      const user = getAuth().currentUser;
+      if (!user) throw Error("Sign in before asking the Director.");
+      const snapshot = latest.current.getSnapshot();
+      const baseContext = directorCompositionContext(snapshot, brief, Number(duration));
+      let measuredEvidence = null;
+      try {
+        const measured = await measureDirectorSources(baseContext, snapshot, controller.signal);
+        measuredEvidence = measured?.pixelEvidence || null;
+      } catch {
+        measuredEvidence = null;
+      }
+      if (!mounted.current || controller.signal.aborted) return;
+      if (getAuth().currentUser?.uid !== user.uid) {
+        throw Error("Your sign-in changed. Ask for a new plan.");
+      }
+      const next = latest.current.getSnapshot();
+      if (
+        next.studioDocument.projectId !== baseContext.projectId ||
+        next.studioDocument.revision !== baseContext.baseRevision
+      ) {
+        throw Error("The project changed while planning. Ask for a new plan.");
+      }
+      const result = buildSourceBoundDirectorProposal(next, brief, Number(duration), {
+        lookId,
+        archetypeId,
+        beatSyncPulses,
+        pixelEvidence: measuredEvidence,
+      });
+      const compiled = compileDirectorCreativePlan(result, next);
+      const telemetry = analyzeDirectorClipTelemetry({
+        ...baseContext,
+        pixelEvidence: result.provenance?.pixelEvidence || measuredEvidence || [],
+      });
+      setReview({
+        ...compiled,
+        topologySummary: summarizePlanTopology(compiled),
+        telemetry,
+        result,
+        reviewerUid: user.uid,
+      });
+      setMessage("Review the shots below, then apply the motion to your editable timeline.");
+    } catch (error) {
+      if (mounted.current && !controller.signal.aborted) setMessage(error.message);
+    } finally {
+      if (mounted.current) {
+        setBusy(false);
+        request.current = null;
+      }
+    }
+  }
+
+  async function updateFragment(fragment) {
+    setBusy(true);
+    try {
+      if (getAuth().currentUser?.uid !== review.reviewerUid) {
+        throw Error("Your sign-in changed. Ask for a new plan.");
+      }
+      const result = await reviseDirectorFragment(review.result, fragment);
+      const compiled = compileDirectorCreativePlan(result, latest.current.getSnapshot());
+      if (!mounted.current) return;
+      setReview({
+        ...compiled,
+        topologySummary: summarizePlanTopology(compiled),
+        telemetry: review.telemetry || null,
+        customFinishGrade: review.customFinishGrade || null,
+        result,
+        reviewerUid: review.reviewerUid,
+      });
+      setOperatorDirty(false);
+      setMessage("Motion settings updated. Review and apply the revised edit.");
+    } catch (error) {
+      if (mounted.current) setMessage(error.message);
+    } finally {
+      if (mounted.current) setBusy(false);
+    }
+  }
+
+  async function updatePoster(poster) {
+    setBusy(true);
+    try {
+      if (getAuth().currentUser?.uid !== review.reviewerUid) {
+        throw Error("Your sign-in changed. Ask for a new plan.");
+      }
+      const result = await reviseDirectorPoster(review.result, poster);
+      const compiled = compileDirectorCreativePlan(result, latest.current.getSnapshot());
+      if (!mounted.current) return;
+      setReview({
+        ...compiled,
+        topologySummary: summarizePlanTopology(compiled),
+        telemetry: review.telemetry || null,
+        customFinishGrade: review.customFinishGrade || null,
+        result,
+        reviewerUid: review.reviewerUid,
+      });
+      setOperatorDirty(false);
+      setMessage("Motion design updated. Review and apply the revised edit.");
+    } catch (error) {
+      if (mounted.current) setMessage(error.message);
+    } finally {
+      if (mounted.current) setBusy(false);
+    }
+  }
+
+  function bindFinishGradeToReview() {
+    if (!review) return;
+    const resolvedLook =
+      lookId && lookId !== "auto" && DIRECTOR_CINEMA_LOOK_PROFILES[lookId]
+        ? lookId
+        : review.telemetry?.[0]?.suggestedLookId || "kodak_2383";
+    const gradeAction = buildDirectorFinishGradeAction(resolvedLook, {
+      duration: Number(duration) || 12,
+      beatSyncPulses,
+    });
+    const filteredActions = review.plan.actions.filter(a => a.type !== "finish_grade");
+    if (filteredActions.length >= 64) {
+      setMessage("Scene action budget is full (64 actions); apply as-is or simplify the plan.");
+      return;
+    }
+    const nextPlan = {
+      ...review.plan,
+      actions: [...filteredActions, gradeAction],
+    };
+    const nextReview = {
+      ...review,
+      plan: nextPlan,
+      customFinishGrade: gradeAction,
+    };
+    nextReview.topologySummary = summarizePlanTopology(nextReview);
+    setReview(nextReview);
+    setMessage(
+      `Bound ${gradeAction.name} 3D LUT${beatSyncPulses ? " + Beat-Synced Grade Pulses" : ""} to the reviewed plan.`
+    );
+  }
+
   async function apply() {
     setBusy(true);
     try {
-      if (getAuth().currentUser?.uid !== review.reviewerUid)
+      if (getAuth().currentUser?.uid !== review.reviewerUid) {
         throw Error("Your sign-in changed. Ask for a new plan.");
+      }
       // Recompile against the current document, not the snapshot from the model request.
       const fresh = compileDirectorCreativePlan(review.result, latest.current.getSnapshot());
-      await latest.current.onApply(fresh.plan);
+      const finalPlan =
+        review.customFinishGrade &&
+        !fresh.plan.actions.some(a => a.type === "finish_grade") &&
+        fresh.plan.actions.length < 64
+          ? {
+              ...fresh.plan,
+              actions: [...fresh.plan.actions, review.customFinishGrade],
+            }
+          : fresh.plan;
+      await latest.current.onApply(finalPlan);
       if ([3, 4].includes(review.result.version)) onOpenNodes?.();
       if (mounted.current) {
         setReview(null);
@@ -124,40 +401,12 @@ export default function StudioDirectorCreativePanel({
       if (mounted.current) setBusy(false);
     }
   }
-  async function updateFragment(fragment) {
-    setBusy(true);
-    try {
-      if (getAuth().currentUser?.uid !== review.reviewerUid)
-        throw Error("Your sign-in changed. Ask for a new plan.");
-      const result = await reviseDirectorFragment(review.result, fragment);
-      const compiled = compileDirectorCreativePlan(result, latest.current.getSnapshot());
-      if (!mounted.current) return;
-      setReview({ ...compiled, result, reviewerUid: review.reviewerUid });
-      setOperatorDirty(false);
-      setMessage("Motion settings updated. Review and apply the revised edit.");
-    } catch (error) {
-      if (mounted.current) setMessage(error.message);
-    } finally {
-      if (mounted.current) setBusy(false);
-    }
-  }
-  async function updatePoster(poster) {
-    setBusy(true);
-    try {
-      if (getAuth().currentUser?.uid !== review.reviewerUid)
-        throw Error("Your sign-in changed. Ask for a new plan.");
-      const result = await reviseDirectorPoster(review.result, poster);
-      const compiled = compileDirectorCreativePlan(result, latest.current.getSnapshot());
-      if (!mounted.current) return;
-      setReview({ ...compiled, result, reviewerUid: review.reviewerUid });
-      setOperatorDirty(false);
-      setMessage("Motion design updated. Review and apply the revised edit.");
-    } catch (error) {
-      if (mounted.current) setMessage(error.message);
-    } finally {
-      if (mounted.current) setBusy(false);
-    }
-  }
+
+  const totalReviewDuration = Math.max(
+    1,
+    Number(review?.result?.duration || duration || 12)
+  );
+
   return (
     <section
       className="studio-director-creative"
@@ -172,6 +421,24 @@ export default function StudioDirectorCreativePanel({
           it changes your timeline.
         </p>
       </div>
+      <div
+        className="studio-director-preset-pills"
+        data-testid="director-brief-presets"
+        aria-label="Director brief templates"
+      >
+        {DIRECTOR_BRIEF_TEMPLATES.map(template => (
+          <button
+            key={template.id}
+            type="button"
+            className="studio-director-preset-pill"
+            data-testid={`director-brief-preset-${template.id}`}
+            disabled={busy}
+            onClick={() => applyBriefTemplate(template)}
+          >
+            {template.label}
+          </button>
+        ))}
+      </div>
       <label>
         Design approach
         <select
@@ -182,6 +449,7 @@ export default function StudioDirectorCreativePanel({
         >
           <option value="poster">Kinetic motion graphics</option>
           <option value="fragments">Footage fragments</option>
+          <option value="composition">Cinema composition graph</option>
         </select>
       </label>
       <label>
@@ -215,6 +483,53 @@ export default function StudioDirectorCreativePanel({
           />
           <span>seconds, within the current project</span>
         </label>
+        <label>
+          Cinema Grade &amp; 3D LUT
+          <select
+            aria-label="Director cinema look"
+            data-testid="director-look-select"
+            value={lookId}
+            onChange={change(setLookId)}
+            disabled={busy}
+          >
+            <option value="auto">Auto (From Clip Scopes &amp; Brief)</option>
+            {Object.values(DIRECTOR_CINEMA_LOOK_PROFILES).map(profile => (
+              <option key={profile.id} value={profile.id}>
+                {profile.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Choreography Archetype
+          <select
+            aria-label="Director choreography archetype"
+            data-testid="director-archetype-select"
+            value={archetypeId}
+            onChange={change(setArchetypeId)}
+            disabled={busy}
+          >
+            <option value="auto">Auto (From Brief &amp; Focal Centroid)</option>
+            {Object.values(DIRECTOR_CHOREOGRAPHY_ARCHETYPES).map(arch => (
+              <option key={arch.id} value={arch.id}>
+                {arch.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="inspector-check-row">
+          <input
+            type="checkbox"
+            data-testid="director-beat-pulses-toggle"
+            checked={beatSyncPulses}
+            onChange={e => {
+              setBeatSyncPulses(e.target.checked);
+              setReview(null);
+            }}
+            disabled={busy}
+          />
+          <span>Beat-Synced Grade Pulses</span>
+        </label>
         <button
           className="studio-director-create"
           type="button"
@@ -223,11 +538,20 @@ export default function StudioDirectorCreativePanel({
         >
           {busy ? "Directing…" : "Create my motion edit"}
         </button>
+        <button
+          type="button"
+          className="studio-director-choreograph"
+          data-testid="director-choreograph-btn"
+          onClick={choreographSourceGraph}
+          disabled={busy || locked || !brief.trim()}
+        >
+          Choreograph Source-Bound Cinema Graph
+        </button>
       </div>
       <p className="studio-director-creative__context">
         {approach === "poster"
           ? "Builds a designed type-and-shape sequence with editable vector letters, construction masks, stroke motion and a camera lockup. Director chooses copy, palette and energy within this authored design."
-          : "Builds editable footage fragments and controller connections. Samples clip colours and frame changes; subject recognition and audio analysis are not included."}
+          : "Builds editable footage fragments, Null Rigs, Motion Drivers, and 3D LUT Color Grades. Samples clip colours and frame changes."}
       </p>
       {available === false ? (
         <p role="status">Director planning is not enabled in this environment.</p>
@@ -241,6 +565,83 @@ export default function StudioDirectorCreativePanel({
               {review.nodeSummary.nodes} nodes · {review.nodeSummary.connections} connections ·{" "}
               {review.nodeSummary.drivers} motion drivers
             </p>
+          ) : null}
+          {review.topologySummary ? (
+            <div
+              className="studio-director-creative__topology"
+              data-testid="director-topology-summary"
+            >
+              <span>Rigs: {review.topologySummary.nullRigs}</span>
+              <span>Mattes: {review.topologySummary.trackMattes}</span>
+              <span>Soft Masks: {review.topologySummary.softMasks}</span>
+              <span>Drivers: {review.topologySummary.motionDrivers}</span>
+              <span>Mask Keys: {review.topologySummary.animatedMaskKeys}</span>
+              {review.topologySummary.colorGrade ? (
+                <span>Look: {review.topologySummary.colorGrade.label}</span>
+              ) : null}
+            </div>
+          ) : null}
+          {review.shots?.length ? (
+            <div
+              className="studio-director-creative__timeline-bar"
+              data-testid="director-visual-timeline"
+              aria-label="Director visual timeline"
+            >
+              {review.shots.map((shot, idx) => {
+                const startPct = Math.max(
+                  0,
+                  Math.min(100, (shot.startTime / totalReviewDuration) * 100)
+                );
+                const widthPct = Math.max(
+                  6,
+                  Math.min(
+                    100 - startPct,
+                    ((shot.endTime - shot.startTime) / totalReviewDuration) * 100
+                  )
+                );
+                return (
+                  <div
+                    key={idx}
+                    className="studio-director-creative__timeline-segment"
+                    style={{
+                      left: `${startPct.toFixed(1)}%`,
+                      width: `${widthPct.toFixed(1)}%`,
+                    }}
+                    title={`${shot.sourceName} · ${shot.treatment} (${shot.startTime.toFixed(1)}–${shot.endTime.toFixed(1)}s)`}
+                  >
+                    <strong>{shot.sourceName}</strong>
+                    <span>
+                      {shot.startTime.toFixed(1)}–{shot.endTime.toFixed(1)}s
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          ) : null}
+          {review.telemetry?.length ? (
+            <div
+              className="studio-director-creative__telemetry"
+              data-testid="director-telemetry-strip"
+            >
+              {review.telemetry.map(item => (
+                <div key={item.id} className="studio-director-creative__telemetry-card">
+                  <span
+                    className="studio-director-creative__swatch"
+                    style={{
+                      backgroundColor: `rgb(${(item.meanRgb || [118, 102, 88]).join(",")})`,
+                    }}
+                  />
+                  <strong>{item.name}</strong>
+                  <span>Luma {item.avgLumaIre} IRE</span>
+                  <span>Chroma {item.peakChroma}</span>
+                  <span>Entropy {item.tonalEntropy}</span>
+                  <span>
+                    Focal ({item.focalCentroid?.[0] ?? 50}%, {item.focalCentroid?.[1] ?? 48}%)
+                  </span>
+                  <span>Salience {item.salienceScore}</span>
+                </div>
+              ))}
+            </div>
           ) : null}
           {review.result.provenance?.fragmentIntent ? (
             <StudioDirectorFragmentControls
@@ -259,6 +660,20 @@ export default function StudioDirectorCreativePanel({
               onUpdate={updatePoster}
             />
           ) : null}
+          <div
+            className="studio-director-creative__grade-bar"
+            data-testid="director-finish-grade-bar"
+          >
+            <button
+              type="button"
+              className="studio-director-preset-pill"
+              data-testid="director-bind-grade-btn"
+              disabled={busy || locked}
+              onClick={bindFinishGradeToReview}
+            >
+              Bind 3D LUT Finish Grade to Plan
+            </button>
+          </div>
           <details open={!review.result.provenance?.fragmentIntent}>
             <summary>
               {review.result.version === 4 ? "Motion design sequence" : "Generated footage layers"}
@@ -301,6 +716,7 @@ export default function StudioDirectorCreativePanel({
               disabled={busy}
               onClick={() => {
                 setReview(null);
+                setOperatorDirty(false);
                 setMessage("Plan discarded. Your timeline is unchanged.");
               }}
             >

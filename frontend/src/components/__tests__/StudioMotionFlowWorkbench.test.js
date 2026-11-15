@@ -317,3 +317,42 @@ test('ColorCorrector applies Camera CST, Film Emulation, HSL Qualifier, Power Wi
   expect(screen.getByTestId('flow-export-preset')).toBeInTheDocument();
   expect(screen.getByTestId('flow-import-preset')).toBeInTheDocument();
 });
+
+test('Powerhouse Node Flow: ChromaKeyer, 2.5D CornerPin, CompoundMacro, Boolean Sub-Masks, Masked Grade Port, Parameter Expression Pick-Whip, and Quick Node Search',()=>{
+  render(<Harness/>);
+  // 1. Quick Node Search Launcher (/ button) + Splice ChromaKeyer into active branch
+  fireEvent.click(screen.getByTestId('flow-open-quick-search'));
+  expect(screen.getByTestId('flow-quick-search-modal')).toBeInTheDocument();
+  fireEvent.click(screen.getByTestId('flow-splice-into-branch-add_chroma_keyer'));
+  expect(screen.getByTestId('flow-chroma-keyer-controls')).toBeInTheDocument();
+  fireEvent.change(screen.getByTestId('flow-chroma-mode-select'),{target:{value:'hsl_delta'}});
+
+  // 2. Add 2.5D CornerPin Homography Node & stamp 4 corner keyframes
+  fireEvent.click(screen.getByTestId('flow-palette-add_corner_pin'));
+  expect(screen.getByTestId('flow-corner-pin-editor')).toBeInTheDocument();
+  expect(screen.getByTestId('flow-corner-pin-handle-0')).toBeInTheDocument();
+  fireEvent.click(screen.getByTestId('flow-corner-pin-stamp-keys'));
+  expect(JSON.parse(screen.getByTestId('state-readout').textContent).keyCount).toBe(8);
+
+  // 3. Add Polygon Mask & Multi-Mask Boolean Sub-Mask
+  fireEvent.click(screen.getByTestId('flow-palette-add_polygon_mask'));
+  expect(screen.getByTestId('flow-boolean-mask-stack')).toBeInTheDocument();
+  fireEvent.click(screen.getByTestId('flow-add-boolean-submask'));
+  expect(screen.getByTestId('flow-boolean-submask-row-0')).toBeInTheDocument();
+
+  // 4. Select Transform:plate-1 -> 2.5D Depth Parallax + Bind Cross-Node Parameter Expression
+  fireEvent.click(screen.getByTestId('flow-node-Transform:plate-1'));
+  expect(screen.getByTestId('flow-depth-parallax-controls')).toBeInTheDocument();
+  expect(screen.getByTestId('flow-parameter-link-card')).toBeInTheDocument();
+  fireEvent.click(screen.getByTestId('flow-bind-param-link'));
+  expect(screen.getByTestId('flow-active-param-link-scale')).toBeInTheDocument();
+
+  // 5. Select ColorCorrector:finish -> Route PolygonMask:plate-1 into Mask Port
+  fireEvent.click(screen.getByTestId('flow-node-ColorCorrector:finish'));
+  expect(screen.getByTestId('flow-masked-grade-controls')).toBeInTheDocument();
+  fireEvent.change(screen.getByTestId('flow-grade-mask-source-select'),{target:{value:'PolygonMask:plate-1'}});
+
+  // 6. Add CompoundMacro Group Node
+  fireEvent.click(screen.getByTestId('flow-palette-add_compound_macro'));
+  expect(screen.getByTestId('flow-macro-controls')).toBeInTheDocument();
+});

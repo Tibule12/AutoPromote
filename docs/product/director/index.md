@@ -1,6 +1,6 @@
 # Director
 
-Development documentation • product 1.2.0 • knowledge 1.0.53 • 2026-11-05
+Development documentation • product 1.2.0 • knowledge 1.0.57 • 2026-11-15
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -156,7 +156,9 @@ Selects a pinned shared draft template and applies the same native instantiation
 
 ID: `director.find_viral_clips` • **PARTIAL** • HYBRID
 
-Scans an owned source for candidate clip ranges and recommendations, then sends selected material to editing. A score or suggestion cannot guarantee virality.
+Finds source-bound short-form candidates with requested length, opening/context/payoff, audio and visual evidence, transcript review flags and duplicate filtering. Preview a range and send it into the editable Studio.
+
+**Purpose:** Find useful, complete moments in an owned video and review the evidence before creating a clip.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
@@ -168,8 +170,11 @@ Scans an owned source for candidate clip ranges and recommendations, then sends 
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Choose an owned source video.
+2. Choose target length and destinations; optionally describe the moments you want.
+3. Analyse the source, then read the transcript excerpt, evidence label and review notes.
+4. Preview a candidate; playback stops at its end.
+5. Choose Create clip to edit and export it in Studio.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
@@ -177,7 +182,10 @@ Scans an owned source for candidate clip ranges and recommendations, then sends 
 
 **Limits**
 
-- This dated development snapshot does not establish professional or production readiness.
+- Editorial scores rank source evidence; they are not confidence percentages or predictions of views.
+- Speech recognition and sentence punctuation can need correction, especially with code-switching, music and background sound. Visual-only results do not establish spoken meaning.
+- Short sources and natural sentence edges can produce shorter clips; review notes identify this.
+- No thumbnail/poster generation or selection is part of this flow. Broad media, scale, cancellation/restart and professional readiness remain unqualified.
 
 **Common errors**
 

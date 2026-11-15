@@ -204,3 +204,19 @@ test("compileStudioFinishForRender forwards enabled secondary powerWindow and hs
   expect(finish.power_window).toMatchObject({ enabled: true, x: 0.42, invert: true, rotation: 0.35 });
   expect(finish.hsl_qualifier).toMatchObject({ enabled: true, hueCenter: 0.08, saturation: 1.25 });
 });
+
+test("compileStudioFinishForRender forwards optical VFX texture controls", () => {
+  const snapshot = visualProject();
+  snapshot.finishFx = {
+    ...snapshot.finishFx,
+    dreamGlow: 0.45,
+    anamorphicFlare: 0.6,
+    lensBlur: 0.3,
+  };
+  const finish = compileStudioFinishForRender(makeDocument(snapshot));
+  expect(finish.texture).toMatchObject({
+    dream_glow: 0.45,
+    anamorphic_flare: 0.6,
+    lens_blur: 0.3,
+  });
+});

@@ -6,6 +6,34 @@ import {
 } from "../studioMediaFrameCache";
 
 describe("studioMediaFrameCache", () => {
+  test('overlapping captures are skipped and HQ retains the source size', async () => {
+    const original=globalThis.createImageBitmap;
+    const bitmap={width:640,height:360,close:jest.fn()};
+    let finish;
+    const capture=jest.fn(()=>new Promise(resolve=>{finish=resolve}));
+    globalThis.createImageBitmap=capture;
+    const controller=createStudioWebCodecsController();
+    const video={readyState:4,videoWidth:1920,videoHeight:1080};
+    try {
+      const first=controller.captureVideoElementFrame({video,assetId:'source',frameIndex:1,quality:'proxy'});
+      expect(capture).toHaveBeenCalledWith(video);
+      expect(await controller.captureVideoElementFrame({video,assetId:'source',frameIndex:2,quality:'proxy'})).toBeNull();
+      expect(capture).toHaveBeenCalledTimes(1);finish(bitmap);expect(await first).toBe(bitmap);
+      expect(await controller.captureVideoElementFrame({video,assetId:'source',frameIndex:1,quality:'proxy'})).toBe(bitmap);
+      const hq=controller.captureVideoElementFrame({video,assetId:'source',frameIndex:2,quality:'hq'});
+      expect(capture).toHaveBeenLastCalledWith(video);finish({...bitmap,width:1920,height:1080});await hq;
+    } finally {controller.destroy();globalThis.createImageBitmap=original;}
+  });
+  test('a capture resolving after controller teardown closes its bitmap without caching it', async () => {
+    const original=globalThis.createImageBitmap;let finish;
+    globalThis.createImageBitmap=()=>new Promise(resolve=>{finish=resolve});
+    const controller=createStudioWebCodecsController(),bitmap={width:640,height:360,close:jest.fn()};
+    try {
+      const pending=controller.captureVideoElementFrame({video:{readyState:4,videoWidth:640,videoHeight:360},assetId:'source',frameIndex:1});
+      controller.destroy();finish(bitmap);expect(await pending).toBeNull();
+      expect(bitmap.close).toHaveBeenCalledTimes(1);expect(controller.cache.stats().frames).toBe(0);
+    }finally{controller.destroy();globalThis.createImageBitmap=original;}
+  });
   test("selects intra proxy when scrubbing and full resolution when settled", () => {
     const clip = {
       url: "https://cdn.example.com/master_4k.mp4",

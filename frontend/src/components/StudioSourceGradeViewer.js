@@ -3,6 +3,7 @@ import { watchStudioProgrammeFrames } from './studioSourcePreview';
 import { buildPrecisionGrade, applyPrecisionGrade } from './studioPrecisionGrade';
 import { applyColorCube, buildAdvancedColorCube } from './studioColorCube';
 import { compileStudioAdjustmentStack } from './studioAdjustmentGrade';
+import { applySelectiveAndRevitalizerGrade } from './studioColorScience';
 import { buildCinematicCssFilter, DEFAULT_CINEMATIC_FX } from '../hooks/useCinematicEffects';
 import { computeColorScopesFromRgba } from './studioColorScopes';
 
@@ -13,7 +14,7 @@ export default function StudioSourceGradeViewer({ nodeId, videoRef, mapTime, tim
   const canvas = useRef(null), latest = useRef(null);
   const cube = useMemo(() => buildAdvancedColorCube(advancedColor || {}), [advancedColor]);
   const stack = useMemo(() => compileStudioAdjustmentStack(adjustmentLayers), [adjustmentLayers]);
-  latest.current = { nodeId, mapTime, time, finishFx, cube, stack };
+  latest.current = { nodeId, mapTime, time, finishFx, advancedColor, cube, stack };
   useLayoutEffect(() => {
     const video = videoRef?.current, out = canvas.current;
     if (!video || !out) return undefined;
@@ -25,9 +26,17 @@ export default function StudioSourceGradeViewer({ nodeId, videoRef, mapTime, tim
       const raw = state.nodeId === 'MediaIn:main-video';
       if (!raw) {
         const fx = { ...DEFAULT_CINEMATIC_FX, ...state.finishFx };
-        if (fx.precisionGrade) {
+        const adv = state.advancedColor || fx.advancedColor || {};
+        if (fx.precisionGrade || fx.dehaze || fx.shadowRecovery || fx.vibrance || fx.qualifier?.enabled || fx.powerWindow?.enabled || adv.powerWindow?.enabled || adv.qualifier?.enabled) {
           const pixels = ctx.getImageData(0, 0, out.width, out.height);
-          applyPrecisionGrade(pixels.data, buildPrecisionGrade(fx)); ctx.putImageData(pixels, 0, 0);
+          applyPrecisionGrade(pixels.data, buildPrecisionGrade(fx), out.width, out.height);
+          if (adv.powerWindow?.enabled || adv.qualifier?.showMatte) {
+            applySelectiveAndRevitalizerGrade(pixels.data, out.width, out.height, {
+              qualifier: adv.qualifier?.showMatte ? adv.qualifier : null,
+              powerWindow: adv.powerWindow,
+            });
+          }
+          ctx.putImageData(pixels, 0, 0);
         } else {
           const copy = document.createElement('canvas'); copy.width = out.width; copy.height = out.height;
           copy.getContext('2d').drawImage(out, 0, 0); ctx.filter = buildCinematicCssFilter(fx) || 'none';
@@ -40,7 +49,7 @@ export default function StudioSourceGradeViewer({ nodeId, videoRef, mapTime, tim
           for (const layer of state.stack) {
             if (at >= layer.startTime && at < layer.startTime + layer.duration) {
               const pixels = ctx.getImageData(0, 0, out.width, out.height);
-              applyPrecisionGrade(pixels.data, buildPrecisionGrade(layer.effects.color));
+              applyPrecisionGrade(pixels.data, buildPrecisionGrade(layer.effects.color), out.width, out.height);
               if (layer.effects.color_cube) applyColorCube(pixels.data, layer.effects.color_cube);
               ctx.putImageData(pixels, 0, 0);
               const glow = layer.effects.glow;

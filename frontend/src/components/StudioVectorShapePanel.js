@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from "react";
 import StudioVectorPathEditor from "./StudioVectorPathEditor";
 import {
+  VECTOR_SHAPE_PRIMITIVE_CATALOG,
   createStudioVectorShape,
+  createStudioVectorPrimitive,
+  addStudioVectorCounterHole,
+  smoothStudioVectorContourNodes,
+  scaleStudioVectorContour,
   splitStudioVectorSegment,
   studioVectorUri,
   studioVectorContours,
@@ -20,7 +25,8 @@ export default function StudioVectorShapePanel({
   const [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [point, setPoint] = useState(0),
-    [contourIndex, setContourIndex] = useState(0);
+    [contourIndex, setContourIndex] = useState(0),
+    [primitiveId, setPrimitiveId] = useState("arch_crest");
   const layer = layers.find(l => l.id === selectedId),
     shape = layer?.vectorShape,
     contours = shape ? studioVectorContours(shape) : [],
@@ -36,7 +42,13 @@ export default function StudioVectorShapePanel({
     setBusy(true);
     setError("");
     try {
-      await (next ? onChange(layer.id, next) : onAdd(createStudioVectorShape()));
+      await (next
+        ? onChange(layer.id, next)
+        : onAdd(
+            primitiveId === "arch_crest"
+              ? createStudioVectorShape()
+              : createStudioVectorPrimitive(primitiveId)
+          ));
     } catch (e) {
       setError(e.message);
     } finally {
@@ -59,9 +71,35 @@ export default function StudioVectorShapePanel({
         Use Motion → Stroke start, Stroke end and Stroke offset to draw, erase or loop an outline.
         Set a visible stroke width first. The fill stays in place.
       </p>
-      <button type="button" disabled={busy || locked} onClick={() => apply(null)}>
-        Add vector artwork
-      </button>
+      <div className="motion-position-grid">
+        <label>
+          Shape primitive
+          <select
+            aria-label="Vector shape primitive"
+            value={primitiveId}
+            disabled={busy || locked}
+            onChange={e => setPrimitiveId(e.target.value)}
+          >
+            {VECTOR_SHAPE_PRIMITIVE_CATALOG.map(item => (
+              <option key={item.id} value={item.id}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button type="button" disabled={busy || locked} onClick={() => apply(null)}>
+          Add vector artwork
+        </button>
+        {shape && (
+          <button
+            type="button"
+            disabled={busy || locked}
+            onClick={() => apply(createStudioVectorPrimitive(primitiveId))}
+          >
+            Replace with primitive
+          </button>
+        )}
+      </div>
       {!!layers.length && (
         <label>
           Artwork layer
@@ -193,6 +231,43 @@ export default function StudioVectorShapePanel({
               }}
             >
               Smooth point
+            </button>
+            <button
+              disabled={busy || locked}
+              type="button"
+              onClick={() => applyContour(smoothStudioVectorContourNodes(contour, 0.22))}
+            >
+              Smooth all points
+            </button>
+            <button
+              disabled={busy || locked || contours.length >= 8}
+              type="button"
+              onClick={() => {
+                try {
+                  const next = addStudioVectorCounterHole(shape);
+                  setContourIndex(studioVectorContours(next).length - 1);
+                  setPoint(0);
+                  void apply(next);
+                } catch (e) {
+                  setError(e.message);
+                }
+              }}
+            >
+              Add cutout hole
+            </button>
+            <button
+              disabled={busy || locked}
+              type="button"
+              onClick={() => applyContour(scaleStudioVectorContour(contour, 0.88))}
+            >
+              Inset contour
+            </button>
+            <button
+              disabled={busy || locked}
+              type="button"
+              onClick={() => applyContour(scaleStudioVectorContour(contour, 1.12))}
+            >
+              Expand contour
             </button>
           </div>
           <label>

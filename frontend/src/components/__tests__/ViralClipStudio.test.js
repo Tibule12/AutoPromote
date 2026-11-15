@@ -973,6 +973,7 @@ describe("ViralClipStudio timeline sequencing", () => {
       ]);
     try {
       mountNativePreview({ onSave });
+      fireEvent.click(await screen.findByText(/^Open saved project \(/));
       fireEvent.click(
         await screen.findByRole("button", {
           name: /^Trimmed export checkpoint/,
@@ -3889,16 +3890,17 @@ describe("ViralClipStudio timeline sequencing", () => {
 
   test("uploads a repeated overlay File once and preserves each occurrence when exporting", async () => {
     const shared = new File(["same media"], "repeat.mp4", { type: "video/mp4", lastModified: 12 });
+    const reopenedCopy = new File(["same media"], "repeat.mp4", { type: "video/mp4", lastModified: 12 });
     const distinct = new File(["different!"], "repeat.mp4", { type: "video/mp4", lastModified: 12 });
     const source = { id: "main", name: "Owned source", url: "https://example.com/source.mp4",
       storagePath: "studio/sources/test-user/source.mp4", start: 0, end: 6, duration: 6 };
     const layer = (id, file, startTime) => ({ id, name: id, type: "video", file, src: "blob:local-media",
       isLocal: true, bRollMode: "pip", startTime, duration: 2, sourceDuration: 6,
       sourceStartTime: 0, width: 30, height: 20, x: 50, y: 50, scale: 1, opacity: 1 });
-    const overlays = [layer("first", shared, 0), layer("second", shared, 2), layer("different", distinct, 4)];
+    const overlays = [layer("first", shared, 0), layer("second", shared, 2), layer("reopened", reopenedCopy, 3), layer("different", distinct, 4)];
     uploadSourceFileViaBackend.mockImplementation(({ file }) => Promise.resolve({
-      url: file === shared ? "https://example.com/shared.mp4" : "https://example.com/distinct.mp4",
-      storagePath: file === shared ? "studio/sources/test-user/shared.mp4" : "studio/sources/test-user/distinct.mp4",
+      url: file === distinct ? "https://example.com/distinct.mp4" : "https://example.com/shared.mp4",
+      storagePath: file === distinct ? "studio/sources/test-user/distinct.mp4" : "studio/sources/test-user/shared.mp4",
     }));
     global.fetch.mockResolvedValue({ ok: true, json: async () => ({}) });
     const onSave = jest.fn();
@@ -3913,11 +3915,12 @@ describe("ViralClipStudio timeline sequencing", () => {
     await screen.findByDisplayValue("Repeated source");
     await act(async () => { await clickRenderFinalClip(); });
     await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
-    expect(uploadSourceFileViaBackend.mock.calls.filter(([args]) => args.file === shared)).toHaveLength(1);
+    expect(uploadSourceFileViaBackend.mock.calls.filter(([args]) => (args.file === shared || args.file === reopenedCopy))).toHaveLength(1);
     expect(uploadSourceFileViaBackend.mock.calls.filter(([args]) => args.file === distinct)).toHaveLength(1);
     expect(onSave.mock.calls[0][1]).toEqual(expect.arrayContaining([
       expect.objectContaining({ id: "first", startTime: 0, duration: 2, src: "https://example.com/shared.mp4" }),
       expect.objectContaining({ id: "second", startTime: 2, duration: 2, src: "https://example.com/shared.mp4" }),
+      expect.objectContaining({ id: "reopened", startTime: 3, duration: 2, src: "https://example.com/shared.mp4" }),
       expect.objectContaining({ id: "different", startTime: 4, duration: 2, src: "https://example.com/distinct.mp4" }),
     ]));
   });

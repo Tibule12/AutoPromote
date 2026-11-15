@@ -96,6 +96,12 @@ describe("worker outcome authority contracts (not live provider qualification)",
       workerRequestDigest({ video_url: url.replace(/a$/, "b") + "?cap=x" })
     );
   });
+  it("accepts a signed unstarted failure without inventing a process exit code", () => {
+    const rejected = { noDispatch: true, state: "failed", exitCode: null, startedAt: null };
+    assert.equal(verifyLocalProcessEnvelope(envelope(rejected), binding, pair.publicKey).state, "failed");
+    for (const extra of [{ state: "succeeded" }, { startedAt: new Date().toISOString() }, { exitCode: 0 }, { processTerminated: false }])
+      assert.throws(() => verifyLocalProcessEnvelope(envelope({ ...rejected, ...extra }), binding, pair.publicKey));
+  });
   const project = "autopromote-staging-test",
     job = `projects/${project}/locations/us-central1/jobs/cpu`;
   const imageDigest = "worker@sha256:" + "b".repeat(64),

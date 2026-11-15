@@ -1,4 +1,18 @@
 // Shared by Studio and its server resolver; no browser or cloud dependencies.
+const TEXT_BEHIND_PRESETS = ["classic", "hero_poster", "neon_backlit", "caption_punch", "editorial_depth"];
+const TEXT_BEHIND_FONTS = ["inter_black", "inter_extrabold", "inter_semibold", "dejavu_bold"];
+const TEXT_BEHIND_ANIMATIONS = ["fade", "spring_pop", "rise_reveal", "word_pop"];
+const TEXT_BEHIND_OPTIONAL_FIELDS = [
+  "preset",
+  "font",
+  "animation",
+  "accent_color",
+  "shadow",
+  "glow",
+  "tracking",
+  "words",
+  "hide_fg_captions",
+];
 const EFFECT_FIELDS = {
   text_behind: ["text", "x", "y", "font_size", "color"],
   kinetic_type: ["text", "x", "y", "font_size", "color", "tracking", "travel", "align"],
@@ -119,6 +133,8 @@ function validateSubjectVfxScene(scene) {
     if (effect?.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "color_paths")) fields.push("color_paths");
     if (effect?.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "saturation")) fields.push("saturation");
     if (effect?.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "source_patches")) fields.push("source_patches");
+    if (effect?.type === "text_behind")
+      fields.push(...TEXT_BEHIND_OPTIONAL_FIELDS.filter(key => Object.prototype.hasOwnProperty.call(effect, key)));
     if (effect?.type === "background_replace") fields.push(...["surface_corners", "asset_crop"].filter(key => Object.prototype.hasOwnProperty.call(effect, key)));
     if (
       !fields ||
@@ -135,6 +151,8 @@ function validateSubjectVfxScene(scene) {
     ids.add(effect.id);
     if (fields.includes("color") && !/^#[a-fA-F0-9]{6}$/.test(effect.color))
       fail("Use a hex effect color.");
+    if (fields.includes("accent_color") && !/^#[a-fA-F0-9]{6}$/.test(effect.accent_color))
+      fail("Use a hex accent color for behind-subject captions.");
     if (
       fields.includes("text") &&
       (typeof effect.text !== "string" ||
@@ -149,6 +167,8 @@ function validateSubjectVfxScene(scene) {
       font_size: [12, 320],
       tracking: [0, 40],
       travel: [0, 150],
+      shadow: [0, 1],
+      glow: [0, 1],
       exposure: [-3, 1],
       saturation: [0, 2],
       contrast: [0.5, 2],
@@ -171,6 +191,35 @@ function validateSubjectVfxScene(scene) {
     for (const field of fields)
       if (bounds[field] && !bounded(effect[field], ...bounds[field]))
         fail(`Invalid effect ${field}.`);
+    if (effect.type === "text_behind") {
+      if (fields.includes("preset") && !TEXT_BEHIND_PRESETS.includes(effect.preset))
+        fail("Unsupported behind-subject caption preset.");
+      if (fields.includes("font") && !TEXT_BEHIND_FONTS.includes(effect.font))
+        fail("Unsupported behind-subject font.");
+      if (fields.includes("animation") && !TEXT_BEHIND_ANIMATIONS.includes(effect.animation))
+        fail("Unsupported behind-subject animation.");
+      if (fields.includes("hide_fg_captions") && typeof effect.hide_fg_captions !== "boolean")
+        fail("Choose whether to hide duplicate foreground captions.");
+      if (fields.includes("words")) {
+        if (
+          !Array.isArray(effect.words) ||
+          effect.words.length < 1 ||
+          effect.words.length > 32 ||
+          !effect.words.every(
+            wordItem =>
+              keys(wordItem, ["word", "start", "end"]) &&
+              typeof wordItem.word === "string" &&
+              wordItem.word.length >= 1 &&
+              wordItem.word.length <= 40 &&
+              ![...wordItem.word].some(ch => ch.charCodeAt(0) <= 31) &&
+              bounded(wordItem.start, effect.start, effect.end) &&
+              bounded(wordItem.end, effect.start, effect.end) &&
+              wordItem.end > wordItem.start
+          )
+        )
+          fail("Behind-subject word timing must fit inside the layer duration.");
+      }
+    }
     if (effect.type === "kinetic_type" && !["left", "center", "right"].includes(effect.align))
       fail("Invalid text alignment.");
     if (effect.type === "tracked_callout" && typeof effect.avoid_subject !== "boolean")
@@ -337,11 +386,82 @@ function validateSubjectVfxExport(items, timeline) {
     scene: validateSubjectVfxScene(item.scene),
   }));
 }
+function hasSuppressedForegroundCaptionsAtTime(scene, sourceTime) {
+  if (!scene?.sourceRange || !Number.isFinite(sourceTime)) return false;
+  const localTime = sourceTime - scene.sourceRange.start;
+  if (localTime < 0 || sourceTime >= scene.sourceRange.end) return false;
+  return (scene.effects || []).some(
+    effect =>
+      effect?.type === "text_behind" &&
+      effect.hide_fg_captions === true &&
+      localTime >= effect.start &&
+      localTime < effect.end
+  );
+}
+function buildCaptionSuppressTimelineRanges(items, timelineSegments) {
+  const scenes = (items || []).filter(item => item?.enabled !== false && item?.scene);
+  if (!scenes.length) return [];
+  const sourceWindows = [];
+  for (const item of scenes) {
+    const scene = item.scene;
+    const baseStart = Number(scene.sourceRange?.start || 0);
+    for (const effect of scene.effects || []) {
+      if (effect?.type === "text_behind" && effect.hide_fg_captions === true) {
+        sourceWindows.push({
+          sourceId: String(scene.sourceId),
+          start: baseStart + Number(effect.start || 0),
+          end: baseStart + Number(effect.end || 0),
+        });
+      }
+    }
+  }
+  if (!sourceWindows.length) return [];
+  const timeline = Array.isArray(timelineSegments) && timelineSegments.length ? timelineSegments : null;
+  if (!timeline) {
+    return sourceWindows.map(win => ({
+      start_time: Number(win.start.toFixed(3)),
+      end_time: Number(win.end.toFixed(3)),
+    }));
+  }
+  let outputOffset = 0;
+  const mapped = [];
+  for (const clip of timeline) {
+    const clipStart = Number(clip?.start_time ?? clip?.startTime ?? clip?.start);
+    const clipEnd = Number(clip?.end_time ?? clip?.endTime ?? clip?.end);
+    const clipDuration = Number.isFinite(Number(clip?.duration))
+      ? Number(clip.duration)
+      : Number.isFinite(clipStart) && Number.isFinite(clipEnd)
+        ? Math.max(0, clipEnd - clipStart)
+        : 0;
+    const clipSourceId = clip?.source_clip_id ?? clip?.sourceClipId ?? clip?.id ?? null;
+    if (Number.isFinite(clipStart) && Number.isFinite(clipEnd) && clipEnd > clipStart) {
+      for (const win of sourceWindows) {
+        if (clipSourceId !== null && String(clipSourceId) !== win.sourceId) continue;
+        const visibleStart = Math.max(win.start, clipStart);
+        const visibleEnd = Math.min(win.end, clipEnd);
+        if (visibleEnd > visibleStart + 0.01) {
+          mapped.push({
+            start_time: Number((outputOffset + (visibleStart - clipStart)).toFixed(3)),
+            end_time: Number((outputOffset + (visibleEnd - clipStart)).toFixed(3)),
+          });
+        }
+      }
+    }
+    outputOffset += Math.max(0, clipDuration || 0);
+  }
+  return mapped.sort((a, b) => a.start_time - b.start_time);
+}
 module.exports = {
   EFFECT_FIELDS,
+  TEXT_BEHIND_PRESETS,
+  TEXT_BEHIND_FONTS,
+  TEXT_BEHIND_ANIMATIONS,
+  TEXT_BEHIND_OPTIONAL_FIELDS,
   validateSubjectVfxScene,
   subjectVfxRevision,
   resolveSubjectVfxProgrammePreview,
   validateSubjectVfxExport,
+  hasSuppressedForegroundCaptionsAtTime,
+  buildCaptionSuppressTimelineRanges,
   stable,
 };

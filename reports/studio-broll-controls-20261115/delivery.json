@@ -1,0 +1,17 @@
+{
+  "finishedVideo": "/home/tibule12/Videos/AutoPromote B-roll Studio \u2014 2026-11-15/01 \u2014 Studio B-roll edit with original sound.mp4",
+  "walkthroughVideo": "/home/tibule12/Videos/AutoPromote B-roll Studio \u2014 2026-11-15/02 \u2014 Slow Studio walkthrough with spoken explanations.mp4",
+  "project": "/home/tibule12/Videos/AutoPromote B-roll Studio \u2014 2026-11-15/03 \u2014 Editable Studio project.autopromote.json",
+  "finishedVideoSha256": "7f4f7cbda3219fdba223b301e1854a67f77a405d259a55eb03606cd44b3c0eea",
+  "walkthroughSha256": "654de741138c39822b2ebdaaff1ab5a0de74f38112d1ab82e9678e43f0519e3a",
+  "finishedSeconds": 17.18,
+  "walkthroughSeconds": 746.791667,
+  "nativeDownloadUnchanged": true,
+  "sourceAudioPresent": true,
+  "narrationCues": 46,
+  "completeMovieAudioInWalkthroughAt": 714.283332824707,
+  "fullDecodeBothMovies": true,
+  "noSpeedUp": true,
+  "ordinaryCorrectionAndReExportShown": true,
+  "firstAuthoringSeconds": 592.708333
+}

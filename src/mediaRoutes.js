@@ -3442,7 +3442,11 @@ router.post("/analyze", require("./services/unifiedCredits/application").applica
     renderJobId = null,
     forceFresh = false,
     scanNonce = "",
+    selectionSettings: rawSelectionSettings,
   } = req.body;
+  let selectionSettings;
+  try { selectionSettings = require('./services/clipSelectionSettings').normalizeClipSelectionSettings(rawSelectionSettings); }
+  catch(error) { return res.status(400).json({message:error.message,code:'VIRAL_SCAN_SETTINGS_INVALID'}); }
   const deleteSubmittedTemporaryScan = async () => {
     if (!sourceStoragePath) return;
     await deleteOwnedTemporaryVideoSource({
@@ -3533,6 +3537,7 @@ router.post("/analyze", require("./services/unifiedCredits/application").applica
       forceFresh: Boolean(forceFresh),
       scanNonce: typeof scanNonce === "string" ? scanNonce : "",
       learningProfile,
+      selectionSettings,
     });
     res.json({
       success: true,

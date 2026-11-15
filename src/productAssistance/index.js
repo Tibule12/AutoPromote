@@ -52,6 +52,7 @@ const TOPICS = [
   [/\b(cam combiner|podcast cameras?|switch.*cameras?|multicam|multi.camera)\b|\bcut\b.*\b(person|speaker)\b.*\b(speak|talk)/i, ['cam_combiner.switching', 'cam_combiner.synchronization'], ['task.cam_combiner']],
   [/\bdirector\b/i, ['director.proposals', 'director.review'], ['task.director_manual']],
   [/\b(captions?|subtitles?|transcri)/i, ['studio.captions'], ['task.captions_correct']],
+  [/\b(luts?|(?:colou?r) (?:grading|correction|finishing))\b/i, ['studio.color'], []],
   [/\b(key\s*frames?|transform)\b|\b(?:picture|image)\b.*\bmove\b|\banimat\w*\b.*\b(position|rotation)\b|\bmotion controls\b/i, ['studio.keyframes'], []],
   [/\b(easing|bezier|acceleration)\b/i, ['studio.easing', 'studio.keyframes'], []],
   [/\b(image|photo|picture)\b.*\b(video|moving|motion|animate|animation)|\banimat\w*\b.*\b(image|photo|picture)\b/i, ['generation.image_to_video'], ['task.image_cinematic']],

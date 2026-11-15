@@ -51,7 +51,119 @@ const STORY_RULES = [
       [/\beastern\s+cape\b/i, 4],
     ],
   },
+  {
+    id: "culinary_craft",
+    label: "Culinary & food craft",
+    style: "detail",
+    query: "cinematic close up hands preparing fresh food in a warm kitchen",
+    visual: "Close-up culinary preparation and fresh ingredients",
+    terms: [
+      [/\b(?:bread|bake|baking|dough|flour|oven)\b/i, 4],
+      [/\b(?:cook(?:ing)?|kitchen|chef|recipe|meal|coffee|espresso)\b/i, 4],
+      [/\b(?:ingredient|plate|restaurant|roast)\b/i, 3],
+    ],
+  },
+  {
+    id: "tech_workspace",
+    label: "Product & digital workspace",
+    style: "proof",
+    query: "tight over-the-shoulder shot of software interface and code on a studio monitor",
+    visual: "Active software workspace and live product interface",
+    terms: [
+      [/\b(?:software|code|coding|developer|programming|algorithm)\b/i, 4],
+      [/\b(?:dashboard|analytics|interface|laptop|monitor|workflow)\b/i, 4],
+      [/\b(?:app|application|server|deploy(?:ment)?|automation)\b/i, 3],
+    ],
+  },
+  {
+    id: "financial_growth",
+    label: "Revenue & market momentum",
+    style: "proof",
+    query: "clean macro shot of financial charts and performance metrics rising on screen",
+    visual: "Financial growth charts and live business metrics",
+    terms: [
+      [/\b(?:revenue|profit|margin|roi|valuation|dividend)\b/i, 4],
+      [/\b(?:sales|investor|funding|capital|portfolio|market)\b/i, 4],
+      [/\b(?:quarter(?:ly)?|forecast|budget|growth\s+rate)\b/i, 3],
+    ],
+  },
+  {
+    id: "fitness_athletics",
+    label: "Athletic training & movement",
+    style: "detail",
+    query: "dynamic tracking shot of an athlete training with intensity",
+    visual: "High-energy athletic movement and physical training",
+    terms: [
+      [/\b(?:workout|gym|barbell|dumbbell|sprint(?:ing)?|marathon)\b/i, 4],
+      [/\b(?:athlete|training|cardio|endurance|reps|muscle)\b/i, 4],
+      [/\b(?:coach|stadium|track|fitness)\b/i, 3],
+    ],
+  },
+  {
+    id: "studio_production",
+    label: "Studio & cinema gear",
+    style: "detail",
+    query: "cinematic close up of a cinema camera lens, studio lighting and podcast microphone",
+    visual: "Behind-the-scenes studio camera, lighting and microphone rig",
+    terms: [
+      [/\b(?:camera|lens|aperture|shutter|tripod|gimbal)\b/i, 4],
+      [/\b(?:microphone|podcast|studio|lighting|key\s+light|color\s+grade)\b/i, 4],
+      [/\b(?:filming|recording|director|edit(?:ing)?\s+bay)\b/i, 3],
+    ],
+  },
+  {
+    id: "urban_journey",
+    label: "Street & transit motion",
+    style: "detail",
+    query: "cinematic tracking shot through city streets, transit and urban architecture",
+    visual: "Moving urban street perspective and city transit",
+    terms: [
+      [/\b(?:highway|freeway|traffic|commute|driving|cockpit)\b/i, 4],
+      [/\b(?:airport|runway|flight|train|station|subway)\b/i, 4],
+      [/\b(?:downtown|skyline|avenue|boulevard|street)\b/i, 3],
+    ],
+  },
+  {
+    id: "product_unboxing",
+    label: "Tactile product & hardware proof",
+    style: "proof",
+    query: "clean studio macro shot of hands unboxing and inspecting hardware product details",
+    visual: "Tactile close-up of the physical product and industrial design",
+    terms: [
+      [/\b(?:unbox(?:ing)?|packaging|prototype|hardware|device)\b/i, 4],
+      [/\b(?:chassis|aluminum|glass|texture|craftsmanship|build\s+quality)\b/i, 4],
+      [/\b(?:bottle|gadget|sensor|battery)\b/i, 3],
+    ],
+  },
+  {
+    id: "crowd_stage_event",
+    label: "Live audience & stage energy",
+    style: "detail",
+    query: "wide cinematic shot of a live event stage and engaged audience under spotlights",
+    visual: "Live keynote stage and engaged audience reaction",
+    terms: [
+      [/\b(?:keynote|conference|arena|auditorium|festival|concert)\b/i, 4],
+      [/\b(?:audience|crowd|applause|standing\s+ovation|backstage)\b/i, 4],
+      [/\b(?:spotlight|podium|panel|summit)\b/i, 3],
+    ],
+  },
+  {
+    id: "nature_horizon",
+    label: "Natural horizon & atmosphere",
+    style: "detail",
+    query: "sweeping golden hour aerial view of natural landscape, ocean waves and mountain horizon",
+    visual: "Sweeping natural landscape and atmospheric horizon",
+    terms: [
+      [/\b(?:ocean|waves|coastline|mountain|summit|forest|wilderness)\b/i, 4],
+      [/\b(?:sunrise|sunset|golden\s+hour|storm|thunder|horizon)\b/i, 4],
+      [/\b(?:canyon|desert|glacier|river|valley)\b/i, 3],
+    ],
+  },
 ];
+
+export const STORY_BROLL_RULES = Object.freeze(
+  STORY_RULES.map(rule => Object.freeze({ id: rule.id, label: rule.label, style: rule.style, query: rule.query, visual: rule.visual }))
+);
 
 const SPEAKER_PAYOFF_PATTERN =
   /\b(i can do this|i decided|my decision|no man|angivuke|realised|realized|that changed me)\b/i;

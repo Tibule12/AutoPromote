@@ -8,6 +8,8 @@ import {
   deriveNodeFlowGraph,
   describeNodeViewerSignal,
   disconnectNodeFlowPort,
+  evaluateParameterLinks,
+  spliceNodeIntoWire,
   toggleNodeFlowBypass,
   validateStudioNodeFlow,
 } from "../studioNodeFlow";
@@ -200,6 +202,88 @@ describe("studioNodeFlow — AutoPromote Signal Node Topology & Bidirectional St
     const childAfter = afterDeleteNull.overlays.find(o => o.id === "layer-1");
     expect(childAfter.parentId).toBeUndefined();
     expect(childAfter.x).toBeCloseTo(50, 3);
+  });
+
+  test("supports ChromaKeyer, CornerPin, CompoundMacro, Masked ColorGrade routing, Parameter Expressions, and Pipe Splicing", () => {
+    const baseOverlays = [
+      { id: "plate-1", name: "ForegroundPlate", type: "image", x: 50, y: 50, scale: 1, rotation: 0 },
+    ];
+    const withChroma = createNodePaletteAddition("add_chroma_keyer", {
+      overlays: baseOverlays,
+      activeOverlayId: "plate-1",
+    });
+    expect(withChroma.selectNodeId).toBe("ChromaKeyer:plate-1");
+    expect(withChroma.overlays[0].chromaKey.enabled).toBe(true);
+
+    const withCornerPin = createNodePaletteAddition("add_corner_pin", {
+      overlays: withChroma.overlays,
+      activeOverlayId: "plate-1",
+    });
+    expect(withCornerPin.selectNodeId).toBe("CornerPin:plate-1");
+    expect(withCornerPin.overlays[0].perspective.corners).toHaveLength(4);
+
+    const withMacro = createNodePaletteAddition("add_compound_macro", {
+      overlays: withCornerPin.overlays,
+    });
+    expect(withMacro.selectNodeId).toMatch(/^CompoundMacro:macro-/);
+
+    const graph = deriveNodeFlowGraph({
+      overlays: withMacro.overlays,
+      finishFx: { contrast: 1.1 },
+      adjustmentLayers: [{ id: "adj-1", name: "Grade 1", enabled: true }],
+    });
+    const nodeIds = graph.nodes.map(n => n.id);
+    expect(nodeIds).toEqual(
+      expect.arrayContaining([
+        "ChromaKeyer:plate-1",
+        "CornerPin:plate-1",
+        withMacro.selectNodeId,
+      ])
+    );
+
+    // Wire ChromaKeyer:plate-1 into ColorCorrector:finish.Mask
+    const maskedGrade = connectNodeFlowPorts(
+      {
+        overlays: withMacro.overlays,
+        finishFx: { contrast: 1.1 },
+        adjustmentLayers: [{ id: "adj-1", name: "Grade 1", enabled: true }],
+      },
+      {
+        fromNodeId: "ChromaKeyer:plate-1",
+        toNodeId: "ColorCorrector:finish",
+        toPort: "Mask",
+      }
+    );
+    expect(maskedGrade.finishFx.advancedColor.maskSourceNodeId).toBe("ChromaKeyer:plate-1");
+
+    // Evaluate cross-node parameter expression link
+    const linkedOverlays = evaluateParameterLinks(
+      [
+        {
+          id: "plate-1",
+          scale: 1,
+          parameterLinks: {
+            scale: {
+              enabled: true,
+              sourceLayerId: "main-video",
+              sourceProperty: "scale",
+              multiplier: 1.5,
+              offset: 0.1,
+            },
+          },
+        },
+      ],
+      { scale: 1.2 }
+    );
+    expect(linkedOverlays[0].scale).toBeCloseTo(1.9, 2);
+
+    // Splice a PolygonMask into an active branch wire
+    const spliced = spliceNodeIntoWire(
+      { overlays: baseOverlays, adjustmentLayers: [], activeOverlayId: "plate-1" },
+      { paletteId: "add_polygon_mask", wire: { fromNodeId: "MediaIn:plate-1", toNodeId: "Transform:plate-1" } }
+    );
+    expect(spliced.selectNodeId).toBe("PolygonMask:plate-1");
+    expect(spliced.overlays[0].mask.enabled).toBe(true);
   });
 });
 

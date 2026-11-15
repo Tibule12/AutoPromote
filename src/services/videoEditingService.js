@@ -1380,6 +1380,7 @@ class VideoEditingService {
       scan_nonce: typeof options.scanNonce === "string" ? options.scanNonce : "",
       local_path: options.localPath || null,
       learning_profile: options.learningProfile || null,
+      selection_settings: require('./clipSelectionSettings').normalizeClipSelectionSettings(options.selectionSettings),
     };
     try {
       let response;

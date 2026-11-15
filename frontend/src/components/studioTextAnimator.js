@@ -28,6 +28,129 @@ export const TEXT_ANIMATOR_BOUNDS = {
   rangeStart: [0, 100],
   rangeEnd: [0, 100],
 };
+
+export const TEXT_ANIMATOR_PRESETS = Object.freeze([
+  {
+    id: "cinematic_tracking_expand",
+    label: "Cinematic Tracking Expand",
+    spec: Object.freeze({
+      version: 1,
+      unit: "character",
+      order: "center_out",
+      stagger: 55,
+      fromX: 0,
+      fromY: 0.3,
+      fromScale: 0.75,
+      fromRotation: 0,
+      fromOpacity: 0,
+      tracking: 0.85,
+      rangeStart: 0,
+      rangeEnd: 100,
+      easing: "ease_out",
+    }),
+  },
+  {
+    id: "elastic_wave_cascade",
+    label: "Elastic Wave Cascade",
+    spec: Object.freeze({
+      version: 1,
+      unit: "character",
+      order: "forward",
+      stagger: 70,
+      fromX: 0,
+      fromY: 1.8,
+      fromScale: 0.25,
+      fromRotation: -28,
+      fromOpacity: 0,
+      tracking: 0.2,
+      rangeStart: 0,
+      rangeEnd: 100,
+      easing: "back_out",
+    }),
+  },
+  {
+    id: "vortex_spiral_reveal",
+    label: "Vortex Spiral Reveal",
+    spec: Object.freeze({
+      version: 1,
+      unit: "character",
+      order: "edges_in",
+      stagger: 75,
+      fromX: -1.5,
+      fromY: -1.6,
+      fromScale: 0.1,
+      fromRotation: -180,
+      fromOpacity: 0,
+      tracking: 0.65,
+      rangeStart: 0,
+      rangeEnd: 100,
+      easing: "back_out",
+    }),
+  },
+  {
+    id: "headline_gravity_slam",
+    label: "Headline Gravity Slam",
+    spec: Object.freeze({
+      version: 1,
+      unit: "word",
+      order: "forward",
+      stagger: 60,
+      fromX: 0,
+      fromY: -2.4,
+      fromScale: 1.85,
+      fromRotation: 8,
+      fromOpacity: 0,
+      tracking: 0.15,
+      rangeStart: 0,
+      rangeEnd: 100,
+      easing: "back_out",
+    }),
+  },
+  {
+    id: "reverse_whip_snap",
+    label: "Reverse Whip Snap",
+    spec: Object.freeze({
+      version: 1,
+      unit: "word",
+      order: "reverse",
+      stagger: 65,
+      fromX: 2.6,
+      fromY: 0.2,
+      fromScale: 0.5,
+      fromRotation: 22,
+      fromOpacity: 0,
+      tracking: -0.35,
+      rangeStart: 0,
+      rangeEnd: 100,
+      easing: "ease_out",
+    }),
+  },
+  {
+    id: "whisper_float_drift",
+    label: "Whisper Float Drift",
+    spec: Object.freeze({
+      version: 1,
+      unit: "character",
+      order: "center_out",
+      stagger: 50,
+      fromX: 0,
+      fromY: 0.9,
+      fromScale: 0.9,
+      fromRotation: 0,
+      fromOpacity: 0,
+      tracking: 0.4,
+      rangeStart: 0,
+      rangeEnd: 100,
+      easing: "ease_in_out",
+    }),
+  },
+]);
+
+export function buildStudioTextAnimatorPreset(presetId) {
+  const entry = TEXT_ANIMATOR_PRESETS.find(item => item.id === presetId);
+  if (!entry) throw Error(`Unknown text choreography preset: ${presetId}`);
+  return validateStudioTextAnimator({ ...entry.spec });
+}
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 export function validateStudioTextAnimator(spec) {
   if (

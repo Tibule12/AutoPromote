@@ -8,7 +8,13 @@ import {
   compileStudioOverlaysForRender,
 } from "../studioRenderCompiler";
 import {
+  COMPOSITE_RIG_RECIPES,
+  MOTION_RIG_RECIPES,
+  SPATIAL_MOTION_PATH_PRESETS,
+  applyStudioMotionRigRecipe,
   bakeLayerMotionToKeyframes,
+  buildStudioCompositeRigPreset,
+  buildStudioSpatialPathPresetKeyframes,
   buildTrackMatteStageSvgDataUri,
   createStudioNullRigLayer,
   defaultMotionDriverForProperty,
@@ -17,6 +23,7 @@ import {
   isHiddenTrackMatteSource,
   removeStudioLayerSafely,
   reparentStudioLayerPreservingWorldPose,
+  transformStudioLayerKeyframes,
   validateStudioMotionDrivers,
   validateStudioParentGraph,
   validateStudioTrackMattes,
@@ -348,5 +355,59 @@ describe("studioCompRigging — AutoPromote Parenting, Track Mattes, Motion Driv
     expect(validateStudioTrackMattes(cleaned.overlays)).toBe(true);
     expect(cleaned.compositionOrder).toEqual(["fill-child"]);
     expect(cleaned.motionKeyframes.map(k => k.targetId)).toEqual(["fill-child"]);
+  });
+
+  test("all 5 multi-property Motion Rig Recipes, 4 Spatial Path Presets, Keyframe Retiming, and 3 Composite Rig Recipes validate and evaluate cleanly", () => {
+    expect(MOTION_RIG_RECIPES).toHaveLength(5);
+    const baseLayer = { id: "hero-layer", type: "text", text: "HERO", x: 50, y: 50, scale: 1, rotation: 0, opacity: 1, startTime: 0, duration: 4 };
+    for (const recipe of MOTION_RIG_RECIPES) {
+      const rigged = applyStudioMotionRigRecipe(baseLayer, recipe.id);
+      expect(() => validateStudioMotionDrivers(rigged)).not.toThrow();
+      const pose = evaluateWorldLayerPose(rigged, [rigged], [], 1.25);
+      expect(Number.isFinite(pose.x)).toBe(true);
+      expect(Number.isFinite(pose.scale)).toBe(true);
+    }
+
+    expect(SPATIAL_MOTION_PATH_PRESETS).toHaveLength(4);
+    for (const preset of SPATIAL_MOTION_PATH_PRESETS) {
+      const pathKeys = buildStudioSpatialPathPresetKeyframes({
+        layer: baseLayer,
+        keyframes: [],
+        presetId: preset.id,
+        startTime: 0,
+        duration: 4,
+      });
+      expect(pathKeys.length).toBeGreaterThanOrEqual(4);
+      expect(pathKeys.some(k => Array.isArray(k.spatialCurve))).toBe(true);
+    }
+
+    const sampleKeys = [
+      { id: "k1", targetId: "hero-layer", property: "scale", time: 1, value: 0.5, easing: "linear" },
+      { id: "k2", targetId: "hero-layer", property: "scale", time: 3, value: 1.5, easing: "linear" },
+    ];
+    const reversed = transformStudioLayerKeyframes({ keyframes: sampleKeys, targetId: "hero-layer", operation: "reverse" });
+    expect(reversed[0].value).toBe(1.5);
+    expect(reversed[1].value).toBe(0.5);
+
+    const pingpong = transformStudioLayerKeyframes({ keyframes: sampleKeys, targetId: "hero-layer", operation: "pingpong" });
+    expect(pingpong).toHaveLength(3);
+    expect(pingpong[2]).toMatchObject({ time: 5, value: 0.5 });
+
+    const compressed = transformStudioLayerKeyframes({ keyframes: sampleKeys, targetId: "hero-layer", operation: "scale_time", factor: 0.5 });
+    expect(compressed[1].time).toBe(2);
+
+    expect(COMPOSITE_RIG_RECIPES).toHaveLength(3);
+    for (const recipe of COMPOSITE_RIG_RECIPES) {
+      const built = buildStudioCompositeRigPreset({
+        presetId: recipe.id,
+        selectedLayer: baseLayer,
+        overlays: [baseLayer],
+        motionKeyframes: [],
+        currentTime: 0,
+        programmeDuration: 4,
+      });
+      expect(() => validateStudioParentGraph(built.overlays)).not.toThrow();
+      expect(() => validateStudioTrackMattes(built.overlays)).not.toThrow();
+    }
   });
 });

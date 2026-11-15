@@ -1,6 +1,8 @@
 import {
   buildStudioLogoDesign,
   LOGO_DESIGN_DEFAULT,
+  STUDIO_LOGO_ANIMATION_STYLES,
+  STUDIO_LOGO_COLOR_RECIPES,
   studioLogoMasterSvg,
 } from "../studioLogoDesign";
 import { buildStudioGraphicsPackage } from "../studioGraphicsPackage";
@@ -18,7 +20,7 @@ import {
 } from "../studioProjectDocument";
 import { compileStudioCompositionForRender } from "../studioRenderCompiler";
 
-test.each(["flow", "orbit", "facet"])(
+test.each(["flow", "orbit", "facet", "prism", "crown", "pulse", "infinity"])(
   "%s materializes a grouped design with real editable glyph counters",
   family => {
     const d = buildStudioLogoDesign({ ...LOGO_DESIGN_DEFAULT, name: "APO", family });
@@ -31,6 +33,34 @@ test.each(["flow", "orbit", "facet"])(
     d.layers.forEach(l => expect(validateStudioVectorShape(l.vectorShape)).toBe(l.vectorShape));
   }
 );
+
+test.each(STUDIO_LOGO_ANIMATION_STYLES.map(s => s.id))(
+  "animation choreography %s authors valid bounded keyframes across all vector layers",
+  animationStyle => {
+    const d = buildStudioLogoDesign(
+      { ...LOGO_DESIGN_DEFAULT, name: "APO", family: "prism" },
+      { animate: true, animationStyle, strokeTrace: animationStyle === "laser_trace" }
+    );
+    expect(d.layers.every(l => l.keys.length >= 6)).toBe(true);
+    if (animationStyle === "laser_trace") {
+      expect(d.layers[0].vectorShape.stroke.width).toBeGreaterThan(0);
+    }
+  }
+);
+
+test("brand colour recipes apply valid hex palettes to logo design", () => {
+  for (const recipe of STUDIO_LOGO_COLOR_RECIPES) {
+    const d = buildStudioLogoDesign({
+      ...LOGO_DESIGN_DEFAULT,
+      primary: recipe.primary,
+      secondary: recipe.secondary,
+      lettering: recipe.lettering,
+      gradient: recipe.gradient,
+    });
+    expect(d.layers.length).toBeGreaterThan(3);
+  }
+});
+
 test("editable design and motion survive ordinary import/compiler/project recovery", async () => {
   const input = buildStudioLogoDesign({ ...LOGO_DESIGN_DEFAULT, name: "APO" }, { animate: true });
   let seq = 0;

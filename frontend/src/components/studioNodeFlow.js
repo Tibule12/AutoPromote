@@ -7,6 +7,7 @@ import {
   validateStudioTrackMattes,
 } from "./studioCompRigging";
 import { studioVectorUri, validateStudioVectorShape } from "./studioVectorShape";
+import { PERSPECTIVE_LEFT, validateStudioPerspective } from "./studioPerspective";
 
 export const FLOW_NODE_KINDS = {
   MediaIn: { label: "MediaIn", badge: "IN", color: "#38bdf8", icon: "▶" },
@@ -14,6 +15,9 @@ export const FLOW_NODE_KINDS = {
   ColorCorrector: { label: "ColorCorrector", badge: "CC", color: "#f59e0b", icon: "◐" },
   GlowBlur: { label: "GlowBlur", badge: "FX", color: "#ec4899", icon: "✦" },
   PolygonMask: { label: "PolygonMask", badge: "MSK", color: "#22d3ee", icon: "⬠" },
+  ChromaKeyer: { label: "DeltaKeyer", badge: "KEY", color: "#14b8a6", icon: "◈" },
+  CornerPin: { label: "CornerPin", badge: "PIN", color: "#f97316", icon: "◰" },
+  CompoundMacro: { label: "MacroGroup", badge: "GRP", color: "#6366f1", icon: "❖" },
   NullRig: { label: "NullRig", badge: "RIG", color: "#a855f7", icon: "⊕" },
   Merge: { label: "Merge", badge: "MRG", color: "#10b981", icon: "⨂" },
   Adjustment: { label: "GradeNode", badge: "ADJ", color: "#fbbf24", icon: "◈" },
@@ -57,21 +61,42 @@ export const NODE_FLOW_PALETTE = [
     kind: "PolygonMask",
     label: "Polygon / Ellipse Mask",
     accent: "#38bdf8",
-    description: "Attach a feathered geometric mask to the selected layer",
+    description: "Attach a feathered geometric & boolean mask stack to the selected layer",
+  },
+  {
+    id: "add_chroma_keyer",
+    kind: "ChromaKeyer",
+    label: "Delta Keyer",
+    accent: "#14b8a6",
+    description: "Attach a Chroma / Luma / HSL Delta Keyer with Spill Suppression & Matte Choke",
+  },
+  {
+    id: "add_corner_pin",
+    kind: "CornerPin",
+    label: "2.5D Corner Pin",
+    accent: "#f97316",
+    description: "Attach a 4-Corner Homography Perspective Pin node to the selected media plane",
   },
   {
     id: "add_glow_blur",
     kind: "GlowBlur",
-    label: "Glow & Soft Blur",
+    label: "Glow & Optical FX",
     accent: "#f472b6",
-    description: "Enable luminous glow + drop shadow on the selected layer",
+    description: "Enable luminous glow, halation, anamorphic streak & displacement warp",
   },
   {
     id: "add_adjustment_grade",
     kind: "Adjustment",
     label: "Adjustment Grade",
     accent: "#fbbf24",
-    description: "Insert a timed adjustment grade node before MediaOut",
+    description: "Insert a timed adjustment grade node with optional Power Window Mask before MediaOut",
+  },
+  {
+    id: "add_compound_macro",
+    kind: "CompoundMacro",
+    label: "Macro Pre-Comp",
+    accent: "#6366f1",
+    description: "Package active layers into a reusable Macro Group with published controls",
   },
 ];
 
@@ -105,6 +130,20 @@ export const SMART_FLOW_RIGS = [
     badge: "GRADE",
     summary: "Precision color grade, film grain, subtle chromatic split & top adjustment node",
     description: "Precision color grade, film grain, subtle chromatic split & top adjustment node",
+  },
+  {
+    id: "corner_pin_holo_rig",
+    label: "2.5D Perspective Holo Screen",
+    badge: "2.5D PIN",
+    summary: "Null-driven 2.5D Corner-Pin holo screen with optical glow & spring overshoot",
+    description: "Null-driven 2.5D Corner-Pin holo screen with optical glow & spring overshoot",
+  },
+  {
+    id: "chroma_key_composite_rig",
+    label: "Delta Keyer + Power Window",
+    badge: "KEYER",
+    summary: "Delta Keyer spill-suppressed composite with tracked polygon mask & cinema grade",
+    description: "Delta Keyer spill-suppressed composite with tracked polygon mask & cinema grade",
   },
 ];
 
@@ -254,6 +293,8 @@ export const deriveNodeFlowGraph = (state = {}) => {
   const fx = state.finishFx || {};
   const rawContrast = Number(fx.contrast ?? 1);
   const contrastPct = rawContrast > 10 ? Math.round(rawContrast) : Math.round(rawContrast * 100);
+  const finishMaskSource =
+    fx.advancedColor?.maskSourceNodeId || state.advancedColor?.maskSourceNodeId || null;
   nodes.push({
     id: colorId,
     kind: "ColorCorrector",
@@ -263,11 +304,12 @@ export const deriveNodeFlowGraph = (state = {}) => {
     subtitle:
       fx.preset && fx.preset !== "natural"
         ? String(fx.preset)
-        : `Contrast ${contrastPct}%`,
+        : `Contrast ${contrastPct}%${finishMaskSource ? " · Masked" : ""}`,
     accent: "#f59e0b",
     bypassed: !!bypassed[colorId],
     removable: false,
-    inputs: ["In"],
+    badge: finishMaskSource ? "MASKED" : null,
+    inputs: ["In", "Mask"],
     outputs: ["Out"],
     ...resolvePos(positions, colorId, spineX, spineY),
   });
@@ -318,11 +360,12 @@ export const deriveNodeFlowGraph = (state = {}) => {
       category: "color",
       targetId: String(adj.id || idx),
       label: adj.name || adj.label || `AdjGrade_${idx + 1}`,
-      subtitle: `${adj.preset || "Contrast"} · ${Math.round(Number(adj.opacity ?? 1) * 100)}%`,
+      subtitle: `${adj.preset || "Contrast"} · ${Math.round(Number(adj.opacity ?? 1) * 100)}%${adj.maskSourceNodeId ? " · Masked" : ""}`,
       accent: "#fbbf24",
       bypassed: adj.enabled === false,
       removable: true,
-      inputs: ["In"],
+      badge: adj.maskSourceNodeId || adj.mask?.enabled ? "MASKED" : null,
+      inputs: ["In", "Mask"],
       outputs: ["Out"],
       ...resolvePos(positions, adjNodeId, adjustmentX, spineY),
     });
@@ -365,8 +408,10 @@ export const deriveNodeFlowGraph = (state = {}) => {
     });
   });
 
-  // 2. Null Rig Controllers (positioned in upper rig lane)
-  const nullLayers = orderedOverlays.filter(ov => ov.isNullRig);
+  // 2. Null Rig & Compound Macro Controllers (positioned in upper rig lane)
+  const nullLayers = orderedOverlays.filter(
+    ov => ov.isNullRig && !ov.isMacroGroup && !ov.isCompoundMacro
+  );
   nullLayers.forEach((nullLayer, idx) => {
     const nodeId = `NullRig:${nullLayer.id}`;
     const hasDrivers = Boolean(
@@ -390,8 +435,35 @@ export const deriveNodeFlowGraph = (state = {}) => {
     });
   });
 
+  const macroLayers = orderedOverlays.filter(ov => ov.isMacroGroup || ov.isCompoundMacro);
+  macroLayers.forEach((macroLayer, idx) => {
+    const nodeId = `CompoundMacro:${macroLayer.id}`;
+    const memberCount = Array.isArray(macroLayer.macroMemberIds)
+      ? macroLayer.macroMemberIds.length
+      : Array.isArray(macroLayer.macroGroup?.memberIds)
+        ? macroLayer.macroGroup.memberIds.length
+        : orderedOverlays.filter(o => String(o.parentId) === String(macroLayer.id)).length;
+    nodes.push({
+      id: nodeId,
+      kind: "CompoundMacro",
+      category: "rig",
+      targetId: String(macroLayer.id),
+      label: macroLayer.name || `Macro_${idx + 1}`,
+      subtitle: `Pre-Comp · ${memberCount} Layers`,
+      accent: "#6366f1",
+      bypassed: !!macroLayer.disabled || !!bypassed[nodeId],
+      removable: true,
+      badge: "MACRO",
+      inputs: ["In", "Mask"],
+      outputs: ["Out"],
+      ...resolvePos(positions, nodeId, 580 + idx * 196, 6),
+    });
+  });
+
   // 3. Visual Overlay Branches & Spine Merges
-  const nonNullOverlays = orderedOverlays.filter(ov => !ov.isNullRig);
+  const nonNullOverlays = orderedOverlays.filter(
+    ov => !ov.isNullRig && !ov.isMacroGroup && !ov.isCompoundMacro
+  );
   let mergeIndex = 0;
 
   nonNullOverlays.forEach((ov, idx) => {
@@ -406,6 +478,7 @@ export const deriveNodeFlowGraph = (state = {}) => {
       ov.motionDrivers && Object.values(ov.motionDrivers).some(d => d && d.enabled !== false)
     );
     const hasKeys = (state.motionKeyframes || []).some(k => String(k?.targetId) === ovId);
+    const hasExpr = Array.isArray(ov.parameterLinks) && ov.parameterLinks.some(l => l && l.enabled !== false);
 
     nodes.push({
       id: mediaNodeId,
@@ -425,25 +498,65 @@ export const deriveNodeFlowGraph = (state = {}) => {
 
     let branchUpstreamId = mediaNodeId;
 
+    // Optional Chroma / Luma / HSL Delta Keyer node on branch
+    const keyerNodeId = `ChromaKeyer:${ovId}`;
+    const hasChromaKeyer = Boolean(
+      ov.chromaKey?.enabled || (ov.chromaKey && bypassed[keyerNodeId])
+    );
+    if (hasChromaKeyer) {
+      const keyMode = ov.chromaKey?.mode || "chroma";
+      const spillPct = Math.round(Number(ov.chromaKey?.spillSuppression ?? 0.65) * 100);
+      nodes.push({
+        id: keyerNodeId,
+        kind: "ChromaKeyer",
+        category: "matte",
+        targetId: ovId,
+        label: "DeltaKeyer",
+        subtitle: `${keyMode.toUpperCase()} · Spill ${spillPct}%`,
+        accent: "#14b8a6",
+        bypassed: Boolean(bypassed[keyerNodeId] || ov.chromaKey?.enabled === false),
+        removable: true,
+        badge: "KEY",
+        inputs: ["In"],
+        outputs: ["Out"],
+        ...resolvePos(positions, keyerNodeId, colX - 128, branchBaseY - 36),
+      });
+      wires.push({
+        id: `${branchUpstreamId}->${keyerNodeId}`,
+        fromNodeId: branchUpstreamId,
+        fromPort: "Out",
+        toNodeId: keyerNodeId,
+        toPort: "In",
+      });
+      branchUpstreamId = keyerNodeId;
+    }
+
     const fxNodeId = `GlowBlur:${ovId}`;
     const hasLayerFx = Boolean(
       ov.glow?.enabled ||
         ov.layerShadow?.enabled ||
         Number(ov.blur || 0) > 0 ||
-        ((ov.glow || ov.layerShadow) && bypassed[fxNodeId])
+        Number(ov.opticalFx?.halation || 0) > 0 ||
+        Number(ov.opticalFx?.displacementScale || 0) > 0 ||
+        ((ov.glow || ov.layerShadow || ov.opticalFx) && bypassed[fxNodeId])
     );
     if (hasLayerFx) {
+      const disp = Math.round(Number(ov.opticalFx?.displacementScale || 0));
       nodes.push({
         id: fxNodeId,
         kind: "GlowBlur",
         category: "fx",
         targetId: ovId,
         label: "LayerGlow",
-        subtitle: `Glow ${ov.glow?.enabled ? "On" : "Off"} · Blur ${ov.blur || 0}`,
+        subtitle: `Glow ${ov.glow?.enabled ? "On" : "Off"} · Blur ${ov.blur || 0}${disp > 0 ? ` · Warp ${disp}` : ""}`,
         accent: "#f472b6",
         bypassed: Boolean(
           bypassed[fxNodeId] ||
-            (!ov.glow?.enabled && !ov.layerShadow?.enabled && Number(ov.blur || 0) <= 0)
+            (!ov.glow?.enabled &&
+              !ov.layerShadow?.enabled &&
+              Number(ov.blur || 0) <= 0 &&
+              Number(ov.opticalFx?.halation || 0) <= 0 &&
+              Number(ov.opticalFx?.displacementScale || 0) <= 0)
         ),
         removable: true,
         inputs: ["In"],
@@ -466,11 +579,11 @@ export const deriveNodeFlowGraph = (state = {}) => {
       category: "transform",
       targetId: ovId,
       label: `Xf_${idx + 1}`,
-      subtitle: `${Math.round(Number(ov.x ?? 50))},${Math.round(Number(ov.y ?? 50))}% · ${Number(ov.scale ?? 1).toFixed(2)}x`,
+      subtitle: `${Math.round(Number(ov.x ?? 50))},${Math.round(Number(ov.y ?? 50))}% · ${Number(ov.scale ?? 1).toFixed(2)}x${Number(ov.zDepth || 0) !== 0 ? ` · Z${Math.round(Number(ov.zDepth))}` : ""}`,
       accent: "#8b5cf6",
       bypassed: !!bypassed[xfNodeId],
       removable: true,
-      badge: hasDrivers ? "DRV" : hasKeys ? "KEY" : ov.parentId ? "PAR" : null,
+      badge: hasExpr ? "EXPR" : hasDrivers ? "DRV" : hasKeys ? "KEY" : ov.parentId ? "PAR" : null,
       inputs: ["In", "Mask", "Parent"],
       outputs: ["Out"],
       ...resolvePos(positions, xfNodeId, colX, branchBaseY),
@@ -483,18 +596,54 @@ export const deriveNodeFlowGraph = (state = {}) => {
       toPort: "In",
     });
 
+    let branchMergeSourceId = xfNodeId;
+
+    // Optional 2.5D Homography CornerPin node on branch
+    const cornerPinNodeId = `CornerPin:${ovId}`;
+    const hasCornerPin = Boolean(
+      Array.isArray(ov.perspective?.corners) && ov.perspective.corners.length === 4
+    );
+    if (hasCornerPin) {
+      const pinPct = Math.round(Number(ov.perspectiveProgress ?? 100));
+      nodes.push({
+        id: cornerPinNodeId,
+        kind: "CornerPin",
+        category: "transform",
+        targetId: ovId,
+        label: "CornerPin",
+        subtitle: `Quad Pin · ${pinPct}%`,
+        accent: "#f97316",
+        bypassed: Boolean(bypassed[cornerPinNodeId] || Number(ov.perspectiveProgress ?? 100) <= 0),
+        removable: true,
+        badge: "2.5D",
+        inputs: ["In"],
+        outputs: ["Out"],
+        ...resolvePos(positions, cornerPinNodeId, colX + 88, branchBaseY + 36),
+      });
+      wires.push({
+        id: `${xfNodeId}->${cornerPinNodeId}`,
+        fromNodeId: xfNodeId,
+        fromPort: "Out",
+        toNodeId: cornerPinNodeId,
+        toPort: "In",
+      });
+      branchMergeSourceId = cornerPinNodeId;
+    }
+
     const maskNodeId = `PolygonMask:${ovId}`;
     if (ov.mask?.enabled || (ov.mask && bypassed[maskNodeId])) {
+      const subMaskCount = Array.isArray(ov.mask?.secondaryMasks) ? ov.mask.secondaryMasks.length : 0;
       nodes.push({
         id: maskNodeId,
         kind: "PolygonMask",
         category: "matte",
         targetId: ovId,
         label: ov.mask.shape === "ellipse" ? "EllipseMask" : ov.mask.shape === "polygon" ? "PolyMask" : "RectMask",
-        subtitle: `Feather ${ov.mask.feather || 0}px${ov.mask.inverted ? " · Inv" : ""}`,
+        subtitle: `Feather ${ov.mask.feather || 0}px${ov.mask.inverted ? " · Inv" : ""}${subMaskCount > 0 ? ` · +${subMaskCount} Bool` : ""}`,
         accent: "#22d3ee",
         bypassed: Boolean(bypassed[maskNodeId] || ov.mask.enabled === false),
         removable: true,
+        badge: subMaskCount > 0 ? "BOOL" : null,
         inputs: [],
         outputs: ["Out"],
         ...resolvePos(positions, maskNodeId, colX - 172, branchBaseY + (hiddenMatte ? 78 : 78)),
@@ -535,8 +684,8 @@ export const deriveNodeFlowGraph = (state = {}) => {
         toPort: "BG",
       });
       wires.push({
-        id: `${xfNodeId}->${mergeNodeId}:FG`,
-        fromNodeId: xfNodeId,
+        id: `${branchMergeSourceId}->${mergeNodeId}:FG`,
+        fromNodeId: branchMergeSourceId,
         fromPort: "Out",
         toNodeId: mergeNodeId,
         toPort: "FG",
@@ -546,18 +695,48 @@ export const deriveNodeFlowGraph = (state = {}) => {
     }
   });
 
-  // Wire Parent connections & Track Matte Mask connections now that all Transform/Merge nodes exist
+  // Wire Parent connections, Track Matte Mask connections & Masked Grade connections
   const nodeIds = new Set(nodes.map(n => n.id));
+  if (finishMaskSource && nodeIds.has(finishMaskSource)) {
+    wires.push({
+      id: `${finishMaskSource}->${colorId}:Mask`,
+      fromNodeId: finishMaskSource,
+      fromPort: "Out",
+      toNodeId: colorId,
+      toPort: "Mask",
+      removable: true,
+    });
+  }
+  (state.adjustmentLayers || []).forEach((adj, idx) => {
+    const adjNodeId = `Adjustment:${adj.id || idx}`;
+    if (adj.maskSourceNodeId && nodeIds.has(adj.maskSourceNodeId) && nodeIds.has(adjNodeId)) {
+      wires.push({
+        id: `${adj.maskSourceNodeId}->${adjNodeId}:Mask`,
+        fromNodeId: adj.maskSourceNodeId,
+        fromPort: "Out",
+        toNodeId: adjNodeId,
+        toPort: "Mask",
+        removable: true,
+      });
+    }
+  });
+
   orderedOverlays.forEach(ov => {
     const ovId = String(ov.id);
     if (ov.parentId) {
       const parentSourceId =
         ov.parentId === "main-video"
           ? mainXfId
-          : nodeIds.has(`NullRig:${ov.parentId}`)
-            ? `NullRig:${ov.parentId}`
-            : `Transform:${ov.parentId}`;
-      const childTargetId = ov.isNullRig ? `NullRig:${ovId}` : `Transform:${ovId}`;
+          : nodeIds.has(`CompoundMacro:${ov.parentId}`)
+            ? `CompoundMacro:${ov.parentId}`
+            : nodeIds.has(`NullRig:${ov.parentId}`)
+              ? `NullRig:${ov.parentId}`
+              : `Transform:${ov.parentId}`;
+      const childTargetId = ov.isMacroGroup
+        ? `CompoundMacro:${ovId}`
+        : ov.isNullRig
+          ? `NullRig:${ovId}`
+          : `Transform:${ovId}`;
       if (nodeIds.has(parentSourceId) && nodeIds.has(childTargetId)) {
         wires.push({
           id: `${parentSourceId}->${childTargetId}:Parent`,
@@ -674,10 +853,12 @@ export const connectNodeFlowPorts = (
   { fromNodeId, toNodeId, toPort, currentTime = 0 }
 ) => {
   const overlays = [...(state.overlays || [])];
+  const adjustmentLayers = [...(state.adjustmentLayers || [])];
+  const finishFx = state.finishFx && typeof state.finishFx === "object" ? state.finishFx : {};
   const fromLayerId = extractLayerId(fromNodeId);
   const toLayerId = extractLayerId(toNodeId);
 
-  // Case 1: Wiring into a Transform / NullRig Parent port -> Pick-Whip Parenting!
+  // Case 1: Wiring into a Transform / NullRig / CompoundMacro Parent port -> Pick-Whip Parenting!
   if (toPort === "Parent" && toLayerId && fromLayerId) {
     const nextOverlays = overlays.map(item =>
       String(item.id) === String(toLayerId)
@@ -731,6 +912,81 @@ export const connectNodeFlowPorts = (
     return { ...state, overlays: nextOverlays };
   }
 
+  // Case 3b: Wiring a Mask / Matte / ChromaKeyer into ColorCorrector:finish.Mask -> Masked Primary Grade!
+  if (toNodeId === "ColorCorrector:finish" && toPort === "Mask" && fromNodeId) {
+    const nextAdvancedColor = {
+      ...(finishFx.advancedColor && typeof finishFx.advancedColor === "object"
+        ? finishFx.advancedColor
+        : state.advancedColor && typeof state.advancedColor === "object"
+          ? state.advancedColor
+          : {}),
+      maskSourceNodeId: fromNodeId,
+      powerWindow: {
+        ...(finishFx.advancedColor?.powerWindow || state.advancedColor?.powerWindow || {}),
+        enabled: true,
+        shape: "ellipse",
+        centerX: 0.5,
+        centerY: 0.5,
+        radiusX: 0.36,
+        radiusY: 0.36,
+        feather: 0.22,
+      },
+    };
+    return {
+      ...state,
+      advancedColor: nextAdvancedColor,
+      finishFx: {
+        ...finishFx,
+        advancedColor: nextAdvancedColor,
+        maskSourceNodeId: fromNodeId,
+      },
+    };
+  }
+
+  // Case 3c: Wiring a Mask / Matte / ChromaKeyer into Adjustment:<id>.Mask -> Masked Adjustment Grade!
+  if (toNodeId?.startsWith("Adjustment:") && toPort === "Mask" && toLayerId && fromNodeId) {
+    return {
+      ...state,
+      adjustmentLayers: adjustmentLayers.map(adj =>
+        String(adj.id) === String(toLayerId)
+          ? {
+              ...adj,
+              maskSourceNodeId: fromNodeId,
+              mask: {
+                shape: "ellipse",
+                feather: 14,
+                inverted: false,
+                ...(adj.mask || {}),
+                enabled: true,
+              },
+            }
+          : adj
+      ),
+    };
+  }
+
+  // Case 3d: Wiring a Mask into CompoundMacro:<id>.Mask
+  if (toNodeId?.startsWith("CompoundMacro:") && toPort === "Mask" && toLayerId) {
+    return {
+      ...state,
+      overlays: overlays.map(item =>
+        String(item.id) === String(toLayerId)
+          ? {
+              ...item,
+              mask: {
+                shape: "ellipse",
+                radius: 12,
+                feather: 10,
+                inverted: false,
+                ...(item.mask || {}),
+                enabled: true,
+              },
+            }
+          : item
+      ),
+    };
+  }
+
   // Case 4: Wiring Merge_A.Out -> Merge_B.BG -> Reorder composition stack!
   if (fromNodeId?.startsWith("Merge:") && toNodeId?.startsWith("Merge:") && (toPort === "BG" || toPort === "FG")) {
     if (fromLayerId && toLayerId && fromLayerId !== toLayerId) {
@@ -754,7 +1010,45 @@ export const disconnectNodeFlowPort = (
   { toNodeId, toPort, currentTime = 0 }
 ) => {
   const overlays = [...(state.overlays || [])];
+  const adjustmentLayers = [...(state.adjustmentLayers || [])];
+  const finishFx = state.finishFx && typeof state.finishFx === "object" ? state.finishFx : {};
   const toLayerId = extractLayerId(toNodeId);
+
+  if (toNodeId === "ColorCorrector:finish" && toPort === "Mask") {
+    const nextAdvancedColor = {
+      ...(finishFx.advancedColor && typeof finishFx.advancedColor === "object"
+        ? finishFx.advancedColor
+        : state.advancedColor && typeof state.advancedColor === "object"
+          ? state.advancedColor
+          : {}),
+      maskSourceNodeId: null,
+    };
+    return {
+      ...state,
+      advancedColor: nextAdvancedColor,
+      finishFx: {
+        ...finishFx,
+        advancedColor: nextAdvancedColor,
+        maskSourceNodeId: null,
+      },
+    };
+  }
+
+  if (toNodeId?.startsWith("Adjustment:") && toPort === "Mask" && toLayerId) {
+    return {
+      ...state,
+      adjustmentLayers: adjustmentLayers.map(adj =>
+        String(adj.id) === String(toLayerId)
+          ? {
+              ...adj,
+              maskSourceNodeId: null,
+              mask: adj.mask ? { ...adj.mask, enabled: false } : undefined,
+            }
+          : adj
+      ),
+    };
+  }
+
   if (!toLayerId) return state;
 
   if (toPort === "Parent") {
@@ -786,7 +1080,7 @@ export const disconnectNodeFlowPort = (
     };
   }
 
-  if (toNodeId?.startsWith("Transform:") && toPort === "Mask") {
+  if ((toNodeId?.startsWith("Transform:") || toNodeId?.startsWith("CompoundMacro:")) && toPort === "Mask") {
     return {
       ...state,
       overlays: overlays.map(item =>
@@ -837,6 +1131,42 @@ export const toggleNodeFlowBypass = (state, nodeId) => {
     };
   }
 
+  if (nodeId.startsWith("ChromaKeyer:") && targetId) {
+    const ov = overlays.find(o => String(o.id) === String(targetId));
+    const currentlyBypassed = Boolean(bypassedMap[nodeId] || ov?.chromaKey?.enabled === false);
+    const nextBypassed = !currentlyBypassed;
+    bypassedMap[nodeId] = nextBypassed;
+    return {
+      ...state,
+      overlays: overlays.map(o =>
+        String(o.id) === String(targetId)
+          ? {
+              ...o,
+              chromaKey: {
+                mode: "chroma",
+                keyColor: "#00d455",
+                similarity: 0.32,
+                smoothness: 0.14,
+                spillSuppression: 0.45,
+                ...(o.chromaKey || {}),
+                enabled: !nextBypassed,
+              },
+            }
+          : o
+      ),
+      nodeFlow: { ...nodeFlow, bypassed: bypassedMap },
+    };
+  }
+
+  if (nodeId.startsWith("CornerPin:") && targetId) {
+    const nextBypassed = !bypassedMap[nodeId];
+    bypassedMap[nodeId] = nextBypassed;
+    return {
+      ...state,
+      nodeFlow: { ...nodeFlow, bypassed: bypassedMap },
+    };
+  }
+
   if (nodeId.startsWith("GlowBlur:") && nodeId !== "GlowBlur:finish" && targetId) {
     const ov = overlays.find(o => String(o.id) === String(targetId));
     const currentlyBypassed = Boolean(
@@ -859,7 +1189,7 @@ export const toggleNodeFlowBypass = (state, nodeId) => {
     };
   }
 
-  if ((nodeId.startsWith("Merge:") || nodeId.startsWith("MediaIn:")) && targetId) {
+  if ((nodeId.startsWith("Merge:") || nodeId.startsWith("MediaIn:") || nodeId.startsWith("CompoundMacro:")) && targetId) {
     const ov = overlays.find(o => String(o.id) === String(targetId));
     const currentlyBypassed = Boolean(bypassedMap[nodeId] || ov?.hidden || Number(ov?.opacity ?? 1) <= 0.01);
     const nextBypassed = !currentlyBypassed;
@@ -935,6 +1265,48 @@ export const deleteNodeFromFlow = (state, nodeId, currentTime = 0) => {
     };
   }
 
+  if (nodeId.startsWith("ChromaKeyer:") && targetId) {
+    const nextPositions = { ...(nodeFlow.positions || {}) };
+    const nextBypassed = { ...(nodeFlow.bypassed || {}) };
+    delete nextPositions[nodeId];
+    delete nextBypassed[nodeId];
+    return {
+      ...state,
+      overlays: overlays.map(o =>
+        String(o.id) === String(targetId)
+          ? { ...o, chromaKey: undefined }
+          : o
+      ),
+      nodeFlow: {
+        ...nodeFlow,
+        positions: nextPositions,
+        bypassed: nextBypassed,
+      },
+      selectNodeId: `Transform:${targetId}`,
+    };
+  }
+
+  if (nodeId.startsWith("CornerPin:") && targetId) {
+    const nextPositions = { ...(nodeFlow.positions || {}) };
+    const nextBypassed = { ...(nodeFlow.bypassed || {}) };
+    delete nextPositions[nodeId];
+    delete nextBypassed[nodeId];
+    return {
+      ...state,
+      overlays: overlays.map(o =>
+        String(o.id) === String(targetId)
+          ? { ...o, perspective: undefined, cornerKeys: undefined, perspectiveProgress: undefined }
+          : o
+      ),
+      nodeFlow: {
+        ...nodeFlow,
+        positions: nextPositions,
+        bypassed: nextBypassed,
+      },
+      selectNodeId: `Transform:${targetId}`,
+    };
+  }
+
   if (nodeId.startsWith("GlowBlur:") && nodeId !== "GlowBlur:finish" && targetId) {
     const nextPositions = { ...(nodeFlow.positions || {}) };
     const nextBypassed = { ...(nodeFlow.bypassed || {}) };
@@ -949,6 +1321,8 @@ export const deleteNodeFromFlow = (state, nodeId, currentTime = 0) => {
               blur: 0,
               glow: undefined,
               layerShadow: undefined,
+              opticalFx: undefined,
+              displacementWarp: undefined,
             }
           : o
       ),
@@ -963,6 +1337,7 @@ export const deleteNodeFromFlow = (state, nodeId, currentTime = 0) => {
 
   if (
     (nodeId.startsWith("NullRig:") ||
+      nodeId.startsWith("CompoundMacro:") ||
       nodeId.startsWith("MediaIn:") ||
       nodeId.startsWith("Transform:") ||
       nodeId.startsWith("Merge:")) &&
@@ -1124,12 +1499,130 @@ export const createNodePaletteAddition = (
                 radius: 8,
                 feather: 10,
                 inverted: false,
+                booleanMode: o.mask?.booleanMode || "add",
+                secondaryMasks: Array.isArray(o.mask?.secondaryMasks) ? o.mask.secondaryMasks : [],
               },
             }
           : o
       ),
       selectOverlayId: targetId,
       selectNodeId: `PolygonMask:${targetId}`,
+    };
+  }
+
+  if (paletteId === "add_chroma_keyer") {
+    const targetId = activeOverlayId || overlays.find(o => o && !o.isCaption && !o.isNullRig)?.id;
+    if (!targetId) return null;
+    return {
+      overlays: overlays.map(o =>
+        String(o.id) === String(targetId)
+          ? {
+              ...o,
+              chromaKey: {
+                enabled: true,
+                mode: "chroma",
+                keyColor: "#00d455",
+                similarity: 0.32,
+                smoothness: 0.14,
+                spillSuppression: 0.48,
+                choke: 0,
+                despillTint: 0.12,
+                invert: false,
+                ...(o.chromaKey || {}),
+              },
+            }
+          : o
+      ),
+      selectOverlayId: targetId,
+      selectNodeId: `ChromaKeyer:${targetId}`,
+    };
+  }
+
+  if (paletteId === "add_corner_pin") {
+    const defaultPerspective = validateStudioPerspective({
+      version: 1,
+      corners: PERSPECTIVE_LEFT.map(pt => [...pt]),
+    });
+    const targetId = activeOverlayId || overlays.find(o => o && !o.isCaption && !o.isNullRig)?.id;
+    if (targetId) {
+      return {
+        overlays: overlays.map(o =>
+          String(o.id) === String(targetId)
+            ? {
+                ...o,
+                perspective: o.perspective || defaultPerspective,
+                perspectiveProgress: Number.isFinite(Number(o.perspectiveProgress))
+                  ? Number(o.perspectiveProgress)
+                  : 1,
+              }
+            : o
+        ),
+        selectOverlayId: targetId,
+        selectNodeId: `CornerPin:${targetId}`,
+      };
+    }
+    const holoLayer = {
+      id: `flow-pin-${stamp}`,
+      name: "Holo Screen Plane",
+      type: "image",
+      src: "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='360'%3E%3Crect width='640' height='360' rx='24' fill='%230f172a' stroke='%2338bdf8' stroke-width='6'/%3E%3C/svg%3E",
+      x: 50,
+      y: 48,
+      width: 56,
+      height: 32,
+      scale: 1,
+      rotation: 0,
+      opacity: 0.96,
+      blendMode: "normal",
+      perspective: defaultPerspective,
+      perspectiveProgress: 1,
+      startTime: cueStart,
+      duration: cueDur,
+    };
+    return {
+      overlays: [...overlays, holoLayer],
+      selectOverlayId: holoLayer.id,
+      selectNodeId: `CornerPin:${holoLayer.id}`,
+    };
+  }
+
+  if (paletteId === "add_compound_macro") {
+    const memberIds = overlays
+      .filter(o => o && !o.isCaption && !o.isNullRig && !o.isCompoundMacro)
+      .slice(0, 3)
+      .map(o => String(o.id));
+    const macroId = `macro-${stamp}`;
+    const macroLayer = {
+      ...createStudioNullRigLayer({
+        id: macroId,
+        name: `Macro Group ${overlays.filter(o => o?.isCompoundMacro).length + 1}`,
+        startTime: cueStart,
+        duration: cueDur,
+        x: 50,
+        y: 50,
+      }),
+      isCompoundMacro: true,
+      macroGroup: {
+        id: macroId,
+        memberIds,
+        collapsed: false,
+        publishedControls: {
+          macroScale: 1,
+          macroOpacity: 1,
+          macroGlowBoost: 0.4,
+          macroBlendMode: "normal",
+        },
+      },
+    };
+    const nextOverlays = overlays.map(o =>
+      memberIds.includes(String(o.id)) && !o.parentId
+        ? { ...o, parentId: macroId }
+        : o
+    );
+    return {
+      overlays: [...nextOverlays, macroLayer],
+      selectOverlayId: macroId,
+      selectNodeId: `CompoundMacro:${macroId}`,
     };
   }
 
@@ -1143,6 +1636,19 @@ export const createNodePaletteAddition = (
               ...o,
               glow: { enabled: true, color: "#22d3ee", radius: 20, intensity: 0.8 },
               layerShadow: { enabled: true, color: "#020617", blur: 22, opacity: 0.6, x: 0, y: 10 },
+              opticalFx: {
+                halation: 0.28,
+                anamorphicStreak: 0.22,
+                chromaticSplit: 0.14,
+                ...(o.opticalFx || {}),
+              },
+              displacementWarp: {
+                enabled: false,
+                amountX: 8,
+                amountY: 6,
+                frequency: 2.2,
+                ...(o.displacementWarp || {}),
+              },
             }
           : o
       ),
@@ -1421,7 +1927,150 @@ export const buildSmartFlowRigState = (
     };
   }
 
+  if (rigId === "corner_pin_holo_rig") {
+    const nullId = `holo-null-${stamp}`;
+    const holoNull = {
+      ...createStudioNullRigLayer({
+        id: nullId,
+        name: "Holo Camera Null",
+        startTime: cueStart,
+        duration: cueDur,
+        x: 50,
+        y: 46,
+      }),
+      zDepth: -18,
+      motionDrivers: {
+        y: { type: "wiggle", enabled: true, frequencyHz: 0.9, amplitude: 1.2, octaves: 2, seed: 41 },
+      },
+    };
+    const defaultPerspective = validateStudioPerspective({
+      version: 1,
+      corners: PERSPECTIVE_LEFT.map(pt => [...pt]),
+    });
+    const holoScreen = {
+      id: `holo-screen-${stamp}`,
+      name: "2.5D Holo Screen",
+      type: "image",
+      src: "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='360'%3E%3Crect width='640' height='360' rx='22' fill='%230b132b' stroke='%2322d3ee' stroke-width='6'/%3E%3C/svg%3E",
+      parentId: nullId,
+      x: 50,
+      y: 48,
+      width: 62,
+      height: 36,
+      scale: 1,
+      rotation: 0,
+      opacity: 0.94,
+      blendMode: "screen",
+      perspective: defaultPerspective,
+      perspectiveProgress: 1,
+      glow: { enabled: true, color: "#22d3ee", radius: 22, intensity: 0.82 },
+      opticalFx: { halation: 0.34, anamorphicStreak: 0.28, chromaticSplit: 0.12 },
+      startTime: cueStart,
+      duration: cueDur,
+    };
+    return {
+      overlays: [...overlays, holoNull, holoScreen],
+      selectOverlayId: holoScreen.id,
+      selectNodeId: `CornerPin:${holoScreen.id}`,
+    };
+  }
+
+  if (rigId === "chroma_key_composite_rig") {
+    const keyPlate = {
+      id: `key-plate-${stamp}`,
+      name: "Keyed Foreground Plate",
+      type: "image",
+      src: "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='512' height='512'%3E%3Crect width='512' height='512' fill='%2300d455'/%3E%3Ccircle cx='256' cy='256' r='168' fill='%23f8fafc'/%3E%3C/svg%3E",
+      x: 50,
+      y: 52,
+      width: 54,
+      height: 54,
+      scale: 1,
+      rotation: 0,
+      opacity: 1,
+      blendMode: "normal",
+      chromaKey: {
+        enabled: true,
+        mode: "chroma",
+        keyColor: "#00d455",
+        similarity: 0.34,
+        smoothness: 0.14,
+        spillSuppression: 0.58,
+        choke: -1,
+        despillTint: 0.15,
+        invert: false,
+      },
+      glow: { enabled: true, color: "#38bdf8", radius: 14, intensity: 0.45 },
+      startTime: cueStart,
+      duration: cueDur,
+    };
+    return {
+      overlays: [...overlays, keyPlate],
+      selectOverlayId: keyPlate.id,
+      selectNodeId: `ChromaKeyer:${keyPlate.id}`,
+    };
+  }
+
   return null;
+};
+
+export const evaluateParameterLinks = (overlays = [], mainTransform = null) => {
+  if (!Array.isArray(overlays) || overlays.length === 0) return overlays;
+  const byId = new Map(overlays.map(item => [String(item.id), item]));
+  if (mainTransform && typeof mainTransform === "object") {
+    byId.set("main-video", { id: "main-video", ...mainTransform });
+  }
+  return overlays.map(item => {
+    const links = item?.parameterLinks && typeof item.parameterLinks === "object" ? item.parameterLinks : null;
+    if (!links) return item;
+    let patched = null;
+    for (const [targetProp, spec] of Object.entries(links)) {
+      if (!spec || spec.enabled === false || !spec.sourceLayerId || !spec.sourceProperty) continue;
+      const sourceLayer = byId.get(String(spec.sourceLayerId));
+      if (!sourceLayer) continue;
+      const rawVal = Number(sourceLayer[spec.sourceProperty]);
+      if (!Number.isFinite(rawVal)) continue;
+      const mult = Number.isFinite(Number(spec.multiplier)) ? Number(spec.multiplier) : 1;
+      const offset = Number.isFinite(Number(spec.offset)) ? Number(spec.offset) : 0;
+      const evaluated = rawVal * mult + offset;
+      patched = patched || { ...item };
+      patched[targetProp] = Number(evaluated.toFixed(3));
+    }
+    return patched || item;
+  });
+};
+
+export const spliceNodeIntoWire = (
+  state,
+  {
+    paletteId,
+    wire,
+    currentTime = 0,
+    programmeDuration = 8,
+  } = {}
+) => {
+  if (!state || !paletteId) return state;
+  const targetLayerId =
+    extractLayerId(wire?.fromNodeId) ||
+    extractLayerId(wire?.toNodeId) ||
+    state.activeOverlayId ||
+    state.overlays?.find(o => o && !o.isCaption && !o.isNullRig)?.id ||
+    null;
+  const result = createNodePaletteAddition(paletteId, {
+    overlays: state.overlays || [],
+    adjustmentLayers: state.adjustmentLayers || [],
+    activeOverlayId: targetLayerId,
+    currentTime,
+    programmeDuration,
+  });
+  if (!result) return state;
+  return {
+    ...state,
+    ...(result.overlays ? { overlays: result.overlays } : {}),
+    ...(result.adjustmentLayers ? { adjustmentLayers: result.adjustmentLayers } : {}),
+    ...(result.selectOverlayId ? { activeOverlayId: result.selectOverlayId } : {}),
+    ...(result.selectNodeId ? { selectNodeId: result.selectNodeId } : {}),
+  };
 };
 
 export const describeNodeViewerSignal = (nodeId, graph, state = {}) => {
@@ -1539,21 +2188,37 @@ export const describeNodeViewerSignal = (nodeId, graph, state = {}) => {
   if (
     node.id.startsWith("MediaIn:") ||
     node.id.startsWith("Transform:") ||
+    node.id.startsWith("ChromaKeyer:") ||
+    node.id.startsWith("CornerPin:") ||
     node.id.startsWith("GlowBlur:") ||
     node.id.startsWith("PolygonMask:") ||
-    node.id.startsWith("NullRig:")
+    node.id.startsWith("NullRig:") ||
+    node.id.startsWith("CompoundMacro:")
   ) {
     const layerId = extractLayerId(node.id);
+    const badge =
+      node.kind === "NullRig"
+        ? "RIG GIZMO"
+        : node.kind === "CompoundMacro"
+          ? "MACRO GROUP"
+          : node.kind === "ChromaKeyer"
+            ? "KEYED MATTE"
+            : node.kind === "CornerPin"
+              ? "2.5D HOMOGRAPHY"
+              : "BRANCH SOLO";
     return {
       nodeId: node.id,
       label: node.label,
-      stage: node.id.startsWith("PolygonMask:") ? "matte_alpha" : "layer_isolated",
+      stage:
+        node.id.startsWith("PolygonMask:") || node.id.startsWith("ChromaKeyer:")
+          ? "matte_alpha"
+          : "layer_isolated",
       includeMainTransform: false,
       includeGrade: false,
       includeTexture: false,
       isolatedLayerId: layerId,
       includedOverlayIds: layerId ? [layerId] : [],
-      badge: node.kind === "NullRig" ? "RIG GIZMO" : "BRANCH SOLO",
+      badge,
     };
   }
 
@@ -1571,4 +2236,5 @@ export const describeNodeViewerSignal = (nodeId, graph, state = {}) => {
     badge: "FINAL COMP",
   };
 };
+
 

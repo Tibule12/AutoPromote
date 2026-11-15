@@ -3,10 +3,67 @@
 import { studioGroupTree, GROUP_KIND, GROUP_TRANSFORM } from './studioGroups';
 
 const tick = value => Math.round(value * 90000) / 90000;
+const clampPos = value => Math.max(0, Math.min(100, value));
 const finite = (value, low, high, label) => {
   if (!Number.isFinite(value) || value < low || value > high) throw Error(`${label} must be between ${low} and ${high}.`);
   return value;
 };
+
+export const KINETIC_TYPE_STYLES = Object.freeze([
+  ["rise", "Rise"],
+  ["pop", "Pop"],
+  ["spin", "Spin"],
+  ["wave_cascade", "Wave Cascade"],
+  ["whip_slam", "Whip Slam"],
+  ["elastic_rubber", "Elastic Rubber"],
+  ["glitch_jitter", "Glitch Jitter"],
+  ["spiral_vortex", "Spiral Vortex"],
+  ["stomp_drop", "Stomp Drop"],
+]);
+
+export const KINETIC_TYPE_DIRECTIONS = Object.freeze([
+  ["forward", "First to last"],
+  ["reverse", "Last to first"],
+  ["center", "Center out"],
+  ["edges_in", "Edges in"],
+  ["alternating", "Alternating"],
+]);
+
+export const KINETIC_TYPE_RECIPES = Object.freeze([
+  {
+    id: "hype_word_slam",
+    label: "Hype Word Slam",
+    options: { unit: "word", style: "whip_slam", direction: "forward", stagger: 0.1, entry: 0.35, travel: 12, tilt: 14, exit: 0.25 },
+  },
+  {
+    id: "liquid_letter_wave",
+    label: "Liquid Letter Wave",
+    options: { unit: "letter", style: "wave_cascade", direction: "forward", stagger: 0.05, entry: 0.45, travel: 10, tilt: 12, exit: 0.25 },
+  },
+  {
+    id: "cyber_glitch_decode",
+    label: "Cyber Glitch Decode",
+    options: { unit: "letter", style: "glitch_jitter", direction: "edges_in", stagger: 0.04, entry: 0.3, travel: 6, tilt: 18, exit: 0.2 },
+  },
+  {
+    id: "center_elastic_burst",
+    label: "Center Elastic Burst",
+    options: { unit: "word", style: "elastic_rubber", direction: "center", stagger: 0.08, entry: 0.5, travel: 8, tilt: 10, exit: 0.25 },
+  },
+  {
+    id: "vortex_title_spin",
+    label: "Vortex Title Spin",
+    options: { unit: "letter", style: "spiral_vortex", direction: "center", stagger: 0.05, entry: 0.5, travel: 12, tilt: 45, exit: 0.25 },
+  },
+  {
+    id: "heavy_stomp_impact",
+    label: "Heavy Stomp Impact",
+    options: { unit: "word", style: "stomp_drop", direction: "forward", stagger: 0.12, entry: 0.4, travel: 14, tilt: 8, exit: 0.25 },
+  },
+]);
+
+const SUPPORTED_STYLES = new Set(KINETIC_TYPE_STYLES.map(([id]) => id));
+const SUPPORTED_DIRECTIONS = new Set(KINETIC_TYPE_DIRECTIONS.map(([id]) => id));
 
 export function buildStudioKineticType({ source, overlays, keyframes, compounds, order, width, height,
   measure, createId, unit = 'word', style = 'rise', direction = 'forward', stagger = .12,
@@ -21,7 +78,7 @@ export function buildStudioKineticType({ source, overlays, keyframes, compounds,
     throw Error('Separate a title without a mask, tracking or blend effect. Apply shared effects to its new group.');
   if (keyframes.some(key => key.targetId === source.id))
     throw Error('This title already has motion keys. Duplicate it and reset its transform before separating it.');
-  if (!['word', 'letter'].includes(unit) || !['rise', 'pop', 'spin'].includes(style) || !['forward', 'reverse', 'center'].includes(direction))
+  if (!['word', 'letter'].includes(unit) || !SUPPORTED_STYLES.has(style) || !SUPPORTED_DIRECTIONS.has(direction))
     throw Error('Choose a supported text unit, movement and order.');
   finite(stagger, 0, 1, 'Stagger'); finite(entry, .1, 3, 'Entrance'); finite(travel, 0, 30, 'Travel');
   finite(tilt, 0, 90, 'Rotation'); finite(exit, .1, 3, 'Exit');
@@ -71,13 +128,31 @@ export function buildStudioKineticType({ source, overlays, keyframes, compounds,
   const sequence = fragments.map((_, index) => index);
   if (direction === 'reverse') sequence.reverse();
   if (direction === 'center') sequence.sort((a, b) => Math.abs(a - (fragments.length - 1) / 2) - Math.abs(b - (fragments.length - 1) / 2) || a - b);
+  if (direction === 'edges_in') sequence.sort((a, b) => Math.abs(b - (fragments.length - 1) / 2) - Math.abs(a - (fragments.length - 1) / 2) || a - b);
+  if (direction === 'alternating') sequence.sort((a, b) => (a % 2) - (b % 2) || a - b);
   const rank = new Map(sequence.map((index, position) => [index, position]));
   fragments.forEach((part, index) => {
     const id = createId('type'), dx = (part.x - boxWidth * Number(source.anchorX ?? 50) / 100) * scale;
     const dy = (part.y - boxHeight * Number(source.anchorY ?? 50) / 100) * scale;
     const x = Number(source.x ?? 50) + (dx * Math.cos(radians) - dy * Math.sin(radians)) / layoutWidth * 100;
     const y = Number(source.y ?? 50) + (dx * Math.sin(radians) + dy * Math.cos(radians)) / 720 * 100;
-    const yIn = y + (style === 'pop' ? 0 : travel), yOut = y - (style === 'pop' ? 0 : travel / 2);
+    const signed = index % 2 ? 1 : -1;
+    const yIn =
+      style === 'pop' || style === 'whip_slam'
+        ? y
+        : style === 'stomp_drop'
+          ? y - travel
+          : style === 'wave_cascade'
+            ? clampPos(y + Math.sin(index * 0.9) * travel)
+            : style === 'spiral_vortex'
+              ? clampPos(y + Math.sin(index * 1.2) * travel)
+              : y + travel;
+    const yOut =
+      style === 'pop' || style === 'whip_slam'
+        ? y
+        : style === 'stomp_drop'
+          ? clampPos(y + travel / 2)
+          : y - travel / 2;
     for (const value of [x, y, yIn, yOut]) finite(value, 0, 100, 'Text position (move the title away from the edge)');
     const begin = tick(start + rank.get(index) * stagger), arrive = tick(begin + entry);
     const leave = tick(lastTime - exit);
@@ -92,11 +167,34 @@ export function buildStudioKineticType({ source, overlays, keyframes, compounds,
     }));
     const times = [begin, arrive, leave, lastTime];
     add('opacity', times, [0, opacity, opacity, 0]);
-    add('y', times, [yIn, y, y, yOut]);
-    add('scale', times, [Math.max(.1, scale * (style === 'rise' ? .85 : .4)), scale, scale, Math.max(.1, scale * .9)], style !== 'rise' && scale <= 4);
-    const signedTilt = (index % 2 ? 1 : -1) * tilt;
-    add('rotation', times, [rotation + (style === 'spin' ? signedTilt : 0), rotation, rotation,
-      rotation + (style === 'spin' ? -signedTilt / 2 : 0)], style === 'spin');
+    add('y', times, [yIn, y, y, yOut], style === 'wave_cascade' || style === 'stomp_drop' || style === 'elastic_rubber');
+    const startScaleFactor =
+      style === 'rise'
+        ? .85
+        : style === 'stomp_drop'
+          ? 1.65
+          : style === 'elastic_rubber'
+            ? .25
+            : style === 'spiral_vortex'
+              ? .2
+              : .4;
+    add('scale', times, [Math.max(.1, Math.min(5, scale * startScaleFactor)), scale, scale, Math.max(.1, scale * .9)], style !== 'rise' && scale <= 4);
+    const signedTilt = signed * tilt;
+    const usesTilt = ['spin', 'wave_cascade', 'whip_slam', 'glitch_jitter', 'spiral_vortex', 'stomp_drop'].includes(style);
+    const inTilt = style === 'spiral_vortex' ? signed * Math.max(tilt, 35) : signedTilt;
+    add('rotation', times, [rotation + (usesTilt ? inTilt : 0), rotation, rotation,
+      rotation + (usesTilt ? -inTilt / 2 : 0)], usesTilt);
+    if (['whip_slam', 'wave_cascade', 'glitch_jitter', 'spiral_vortex'].includes(style)) {
+      const xOffset =
+        style === 'whip_slam'
+          ? -travel
+          : style === 'glitch_jitter'
+            ? signed * Math.min(12, Math.max(3, travel * 0.6))
+            : Math.cos(index * 1.1) * (travel * 0.65);
+      const xIn = clampPos(x + xOffset);
+      const xOut = clampPos(x - xOffset * 0.5);
+      add('x', times, [xIn, x, x, xOut], style === 'whip_slam' || style === 'wave_cascade');
+    }
   });
   const group = { id: groupId, name: `Type · ${String(source.text).replace(/\s+/g, ' ').slice(0, 50)}`,
     kind: GROUP_KIND, layerIds: layers.map(layer => layer.id), transform: { ...GROUP_TRANSFORM }, timing: { startTime: start, duration } };

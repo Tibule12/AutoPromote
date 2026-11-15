@@ -1,5 +1,10 @@
 import React from "react";
 import { CINEMATIC_PRESETS } from "../hooks/useCinematicEffects";
+import {
+  DEAD_CONTENT_REVITALIZER_PRESETS,
+  HSL_QUALIFIER_PRESETS,
+  POWER_WINDOW_PRESETS,
+} from "./studioColorScience";
 
 const VISUALIZER_MODES = [
   { id: "wave", label: "Neon wave", icon: "〰" },
@@ -48,6 +53,73 @@ export default function StudioFinishRack({
   mainFrame,
   onUpdateMainFrame,
 }) {
+  const qualifier = fx.qualifier || fx.advancedColor?.qualifier || {};
+  const powerWindow = fx.powerWindow || fx.advancedColor?.powerWindow || {};
+
+  const applyRevitalizerPreset = preset => {
+    onUpdateFx("revitalizerPresetId", preset.id);
+    onUpdateFx("precisionGrade", true);
+    onUpdateFx("dehaze", preset.dehaze);
+    onUpdateFx("clarity", preset.clarity);
+    onUpdateFx("shadowRecovery", preset.shadowRecovery);
+    onUpdateFx("highlightRollOff", preset.highlightRollOff);
+    onUpdateFx("vibrance", preset.vibrance);
+    onUpdateFx("skinToneProtect", preset.skinToneProtect);
+    if (preset.exposureStops !== undefined) onUpdateFx("exposureStops", preset.exposureStops);
+    if (preset.contrast !== undefined) onUpdateFx("contrast", preset.contrast);
+    if (preset.saturation !== undefined) onUpdateFx("saturation", preset.saturation);
+    if (preset.sharpness !== undefined) onUpdateFx("sharpness", preset.sharpness);
+    if (preset.temperature !== undefined) onUpdateFx("temperature", preset.temperature);
+    if (preset.tint !== undefined) onUpdateFx("tint", preset.tint);
+    if (preset.lift !== undefined) onUpdateFx("lift", preset.lift);
+    if (preset.gamma !== undefined) onUpdateFx("gamma", preset.gamma);
+    if (preset.gain !== undefined) onUpdateFx("gain", preset.gain);
+  };
+
+  const updateQualifierField = (field, value) => {
+    const nextQualifier = {
+      enabled: true,
+      hueCenter: 0.075,
+      hueWidth: 0.08,
+      satMin: 0.16,
+      satMax: 0.95,
+      lumMin: 0.1,
+      lumMax: 0.92,
+      softness: 0.24,
+      hueShift: 0,
+      saturation: 1.15,
+      gain: 1.04,
+      exposureStops: 0,
+      desaturateOutside: 0,
+      colorizeColor: "",
+      colorizeStrength: 0,
+      showMatte: false,
+      ...qualifier,
+      [field]: value,
+    };
+    onUpdateFx("qualifier", nextQualifier);
+  };
+
+  const updatePowerWindowField = (field, value) => {
+    const nextWindow = {
+      enabled: true,
+      shape: "ellipse",
+      x: 0.5,
+      y: 0.44,
+      rx: 0.26,
+      ry: 0.34,
+      rotation: 0,
+      feather: 0.28,
+      invert: false,
+      exposureStops: 0.25,
+      saturation: 1.1,
+      gain: 1.06,
+      ...powerWindow,
+      [field]: value,
+    };
+    onUpdateFx("powerWindow", nextWindow);
+  };
+
   return (
     <section className="studio-finish-rack" data-testid="studio-finish-rack">
       <div className="studio-finish-rack__heading">
@@ -198,6 +270,273 @@ export default function StudioFinishRack({
         </div> : null}
       </details>
 
+      <details className="finish-rack-section" data-testid="finish-dead-revitalizer-section" open>
+        <summary>
+          <span>Dead-content revitalizer</span>
+          <small>Bring flat, dark &amp; dull clips to life</small>
+        </summary>
+        <div className="finish-preset-strip" role="group" aria-label="Dead content revitalizer presets">
+          {Object.values(DEAD_CONTENT_REVITALIZER_PRESETS).map(preset => (
+            <button
+              key={preset.id}
+              type="button"
+              className={fx.revitalizerPresetId === preset.id ? "is-active" : ""}
+              onClick={() => applyRevitalizerPreset(preset)}
+              title={preset.description}
+            >
+              <span>{preset.icon}</span>
+              <strong>{preset.label}</strong>
+            </button>
+          ))}
+        </div>
+        <div className="finish-rack-grid">
+          <Slider
+            label="Dehaze & black recovery"
+            value={fx.dehaze ?? 0}
+            min={0}
+            max={1}
+            step={0.02}
+            onChange={value => onUpdateFx("dehaze", value)}
+            format={value => `${Math.round(value * 100)}%`}
+          />
+          <Slider
+            label="Shadow rescue"
+            value={fx.shadowRecovery ?? 0}
+            min={0}
+            max={1}
+            step={0.02}
+            onChange={value => onUpdateFx("shadowRecovery", value)}
+            format={value => `${Math.round(value * 100)}%`}
+          />
+          <Slider
+            label="Highlight roll-off"
+            value={fx.highlightRollOff ?? 0}
+            min={0}
+            max={1}
+            step={0.02}
+            onChange={value => onUpdateFx("highlightRollOff", value)}
+            format={value => `${Math.round(value * 100)}%`}
+          />
+          <Slider
+            label="Midtone micro-contrast"
+            value={fx.clarity ?? 0}
+            min={0}
+            max={1}
+            step={0.02}
+            onChange={value => onUpdateFx("clarity", value)}
+            format={value => `${Math.round(value * 100)}%`}
+          />
+          <Slider
+            label="Smart vibrance"
+            value={fx.vibrance ?? 0}
+            min={-1}
+            max={1}
+            step={0.02}
+            onChange={value => onUpdateFx("vibrance", value)}
+            format={value => `${Math.round(value * 100)}%`}
+          />
+          <Slider
+            label="Skin tone protection"
+            value={fx.skinToneProtect ?? 0.85}
+            min={0}
+            max={1}
+            step={0.02}
+            onChange={value => onUpdateFx("skinToneProtect", value)}
+            format={value => `${Math.round(value * 100)}%`}
+          />
+        </div>
+      </details>
+
+      <details className="finish-rack-section" data-testid="finish-selective-object-section" open>
+        <summary>
+          <span>Selective object &amp; body color</span>
+          <small>Target skin, clothing, objects or regions</small>
+        </summary>
+        <div className="finish-rack-grid">
+          <label className="finish-rack-slider">
+            <span>Target object / body hue</span>
+            <select
+              aria-label="Selective object qualifier preset"
+              value={fx.qualifierPresetId || ""}
+              onChange={event => {
+                const presetId = event.target.value;
+                onUpdateFx("qualifierPresetId", presetId);
+                onUpdateFx(
+                  "qualifier",
+                  presetId && HSL_QUALIFIER_PRESETS[presetId]
+                    ? { ...HSL_QUALIFIER_PRESETS[presetId] }
+                    : null
+                );
+              }}
+            >
+              <option value="">Off (All colours)</option>
+              {Object.entries(HSL_QUALIFIER_PRESETS).map(([id, preset]) => (
+                <option key={id} value={id}>
+                  {preset.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="finish-rack-slider">
+            <span>Body / object spatial zone</span>
+            <select
+              aria-label="Selective spatial power window"
+              value={fx.powerWindowPresetId || ""}
+              onChange={event => {
+                const presetId = event.target.value;
+                onUpdateFx("powerWindowPresetId", presetId);
+                onUpdateFx(
+                  "powerWindow",
+                  presetId && POWER_WINDOW_PRESETS[presetId]
+                    ? { ...POWER_WINDOW_PRESETS[presetId] }
+                    : null
+                );
+              }}
+            >
+              <option value="">Off (Full frame)</option>
+              {Object.entries(POWER_WINDOW_PRESETS).map(([id, preset]) => (
+                <option key={id} value={id}>
+                  {preset.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        {qualifier.enabled ? (
+          <div className="finish-rack-grid">
+            <Slider
+              label="Target hue center"
+              value={qualifier.hueCenter ?? 0.075}
+              min={0}
+              max={1}
+              step={0.01}
+              onChange={value => updateQualifierField("hueCenter", value)}
+              format={value => `${Math.round(value * 360)}°`}
+            />
+            <Slider
+              label="Target hue width"
+              value={qualifier.hueWidth ?? 0.08}
+              min={0.01}
+              max={0.5}
+              step={0.01}
+              onChange={value => updateQualifierField("hueWidth", value)}
+              format={value => `${Math.round(value * 360)}°`}
+            />
+            <Slider
+              label="Target hue shift"
+              value={qualifier.hueShift ?? 0}
+              min={-0.5}
+              max={0.5}
+              step={0.01}
+              onChange={value => updateQualifierField("hueShift", value)}
+              format={value => `${Math.round(value * 360)}°`}
+            />
+            <Slider
+              label="Target saturation"
+              value={qualifier.saturation ?? 1.15}
+              min={0}
+              max={2}
+              step={0.02}
+              onChange={value => updateQualifierField("saturation", value)}
+              format={value => `${Number(value).toFixed(2)}x`}
+            />
+            <Slider
+              label="Object recolor strength"
+              value={qualifier.colorizeStrength ?? 0}
+              min={0}
+              max={1}
+              step={0.02}
+              onChange={value => updateQualifierField("colorizeStrength", value)}
+              format={value => `${Math.round(value * 100)}%`}
+            />
+            <Slider
+              label="Outside B&W splash"
+              value={qualifier.desaturateOutside ?? 0}
+              min={0}
+              max={1}
+              step={0.05}
+              onChange={value => updateQualifierField("desaturateOutside", value)}
+              format={value => `${Math.round(value * 100)}%`}
+            />
+            <label className="finish-rack-slider">
+              <span>Object recolor swatch</span>
+              <input
+                type="color"
+                aria-label="Object recolor swatch"
+                value={qualifier.colorizeColor || "#e11d48"}
+                onChange={event => {
+                  updateQualifierField("colorizeColor", event.target.value);
+                  if (!qualifier.colorizeStrength) updateQualifierField("colorizeStrength", 0.35);
+                }}
+              />
+            </label>
+            <label className="inspector-toggle-row">
+              <span>
+                <b>Isolate matte preview</b>
+                <small>Highlight selected object/body pixels in cyan.</small>
+              </span>
+              <input
+                type="checkbox"
+                aria-label="Isolate matte preview"
+                checked={!!qualifier.showMatte}
+                onChange={event => updateQualifierField("showMatte", event.target.checked)}
+              />
+            </label>
+          </div>
+        ) : null}
+
+        {powerWindow.enabled ? (
+          <div className="finish-rack-grid">
+            <Slider
+              label="Zone center X"
+              value={powerWindow.x ?? 0.5}
+              min={0}
+              max={1}
+              step={0.01}
+              onChange={value => updatePowerWindowField("x", value)}
+              format={value => `${Math.round(value * 100)}%`}
+            />
+            <Slider
+              label="Zone center Y"
+              value={powerWindow.y ?? 0.44}
+              min={0}
+              max={1}
+              step={0.01}
+              onChange={value => updatePowerWindowField("y", value)}
+              format={value => `${Math.round(value * 100)}%`}
+            />
+            <Slider
+              label="Zone radius X"
+              value={powerWindow.rx ?? 0.26}
+              min={0.05}
+              max={0.9}
+              step={0.01}
+              onChange={value => updatePowerWindowField("rx", value)}
+              format={value => `${Math.round(value * 100)}%`}
+            />
+            <Slider
+              label="Zone radius Y"
+              value={powerWindow.ry ?? 0.34}
+              min={0.05}
+              max={0.9}
+              step={0.01}
+              onChange={value => updatePowerWindowField("ry", value)}
+              format={value => `${Math.round(value * 100)}%`}
+            />
+            <Slider
+              label="Zone feather"
+              value={powerWindow.feather ?? 0.28}
+              min={0.02}
+              max={0.8}
+              step={0.02}
+              onChange={value => updatePowerWindowField("feather", value)}
+              format={value => `${Math.round(value * 100)}%`}
+            />
+          </div>
+        ) : null}
+      </details>
+
       <details className="finish-rack-section" open>
         <summary>
           <span>Adjustment layer</span>
@@ -301,6 +640,30 @@ export default function StudioFinishRack({
             min={0}
             max={1}
             onChange={value => onUpdateFx("lightLeak", value)}
+            format={value => `${Math.round(value * 100)}%`}
+          />
+          <Slider
+            label="Pro-Mist bloom"
+            value={fx.dreamGlow ?? 0}
+            min={0}
+            max={1}
+            onChange={value => onUpdateFx("dreamGlow", value)}
+            format={value => `${Math.round(value * 100)}%`}
+          />
+          <Slider
+            label="Anamorphic flare"
+            value={fx.anamorphicFlare ?? 0}
+            min={0}
+            max={1}
+            onChange={value => onUpdateFx("anamorphicFlare", value)}
+            format={value => `${Math.round(value * 100)}%`}
+          />
+          <Slider
+            label="Optical edge blur"
+            value={fx.lensBlur ?? 0}
+            min={0}
+            max={1}
+            onChange={value => onUpdateFx("lensBlur", value)}
             format={value => `${Math.round(value * 100)}%`}
           />
         </div>

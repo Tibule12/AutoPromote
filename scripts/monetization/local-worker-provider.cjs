@@ -12,7 +12,7 @@ const {
 } = require("../../src/services/unifiedCredits/workerVerification");
 const { assertSandbox } = require("../../src/services/unifiedCredits/runtime");
 async function createLocalWorkerProvider({ directory, python, env, apiOrigin, timeoutMs = 120000, maxArtifactBytes = 20 * 1024 * 1024,
-  maxRequestBytes = 512 * 1024, port = 0, analysisTimeoutMs = 120000 }) {
+  maxRequestBytes = 4 * 1024 * 1024, port = 0, analysisTimeoutMs = 120000 }) {
   if (!Number.isSafeInteger(analysisTimeoutMs) || analysisTimeoutMs < 30000 || analysisTimeoutMs > 300000) throw Error("LOCAL_ANALYSIS_DEADLINE_INVALID");
   if (!Number.isInteger(timeoutMs) || timeoutMs < 1000 || timeoutMs > 1800000) throw Error("Local CPU timeout must be 1–1800 seconds.");
   if (!Number.isSafeInteger(maxArtifactBytes) || maxArtifactBytes < 20 * 1024 * 1024 || maxArtifactBytes > 128 * 1024 * 1024) throw Error('Local artifact limit must be 20–128 MiB.');
@@ -112,6 +112,38 @@ async function createLocalWorkerProvider({ directory, python, env, apiOrigin, ti
     return { state: running.has(id) ? "running" : "unknown", creditsHeld: true };
   }
   app.get("/executions/:id", (req, res) => res.json(read(req.params.id)));
+  // Seal an authenticated execution that never acquired a process claim. This
+  // is a durable refusal, not evidence inferred from a timeout or missing PID.
+  // Future dispatches of the same execution read this receipt and cannot spawn.
+  function refuseUndispatched(req, reason) {
+    if (req.get("Authorization") !== `Bearer ${token}`) return null;
+    let expected;
+    try { expected = JSON.parse(Buffer.from(req.get("X-Credits-Execution") || "", "base64url")); }
+    catch { return null; }
+    if (!expected || !["/render-viral-clip", "/render-clip", "/analyze-clips", "/process", "/dispatch"].includes(expected.endpoint) ||
+        typeof expected.operationId !== "string" || typeof expected.stage !== "string" ||
+        !["requestDigest", "fingerprint", "sourceHash"].every(k => /^[a-f0-9]{64}$/.test(expected[k] || "")) ||
+        typeof expected.userId !== "string" || !expected.sources?.length ||
+        expected.executionId !== digest([expected.operationId, expected.stage, expected.endpoint]) ||
+        (req.params.id ? req.params.id !== expected.executionId : req.path !== expected.endpoint)) return null;
+    const dir = folder(expected.executionId);
+    if (running.has(expected.executionId) || fs.existsSync(path.join(dir, "claimed.json"))) return null;
+    if (fs.existsSync(path.join(dir, "receipt.json"))) return read(expected.executionId);
+    const requestFile = path.join(dir, "request.json");
+    if (fs.existsSync(requestFile) && digest(JSON.parse(fs.readFileSync(requestFile)).expected) !== digest(expected)) return null;
+    fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+    const payload = { ...expected, state: "failed", noDispatch: true, exitCode: null,
+      processTerminated: true, startedAt: null, finishedAt: new Date().toISOString(),
+      providerFailure: reason, result: {}, resultDigest: digest({}) };
+    const envelope = { provider: "local-process", payload,
+      signature: crypto.sign(null, Buffer.from(canonical(payload)), key).toString("base64") };
+    fs.writeFileSync(path.join(dir, "receipt.json"), JSON.stringify(envelope), { mode: 0o600, flag: "wx" });
+    return envelope;
+  }
+  app.post("/executions/:id/cancel-undispatched", (req, res) => {
+    const receipt = refuseUndispatched(req, "cancelled_before_dispatch");
+    return receipt ? res.json(receipt) : res.status(409).json({ state: "unknown", creditsHeld: true });
+  });
   function complete(dir, expected, code, signal, startedAt) {
     let result = null;
     try {
@@ -307,9 +339,13 @@ async function createLocalWorkerProvider({ directory, python, env, apiOrigin, ti
       }
     }
   );
-  app.use((error, _req, res, _next) =>
-    res.status(error.status || (error.code === "ENOENT" ? 404 : 500)).json({ error: error.message })
-  );
+  app.use((error, req, res, _next) => {
+    if (error.type === "entity.too.large") {
+      try { refuseUndispatched(req, "request_entity_too_large"); }
+      catch { /* Missing proof must retain the reservation. */ }
+    }
+    res.status(error.status || (error.code === "ENOENT" ? 404 : 500)).json({ error: error.message });
+  });
   const server = app.listen(port, "127.0.0.1");
   await new Promise(resolve => server.once("listening", resolve));
   const workerOrigin = `http://127.0.0.1:${server.address().port}`;

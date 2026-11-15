@@ -1,0 +1,45 @@
+{
+  "before": {
+    "psnrDb": 28.29061447154575,
+    "meanAbsoluteError": 7.581192853009259,
+    "sourceMetadata": {
+      "aspect": [
+        1,
+        1
+      ],
+      "chromaticity": [
+        0.3127,
+        0.329,
+        0.68,
+        0.32,
+        0.265,
+        0.69,
+        0.15,
+        0.06
+      ],
+      "gamma": 0.50994
+    }
+  },
+  "after": {
+    "psnrDb": 36.28395264625436,
+    "meanAbsoluteError": 3.0814579716435184,
+    "sourceMetadata": {
+      "aspect": [
+        1,
+        1
+      ],
+      "srgb": 1,
+      "chromaticity": [
+        0.3127,
+        0.329,
+        0.64,
+        0.33,
+        0.3,
+        0.6,
+        0.15,
+        0.06
+      ],
+      "gamma": 0.45455
+    }
+  }
+}

@@ -91,7 +91,7 @@ const LAYER_PARAMETER_FIELDS = [
   "shadow", "strokeWidth", "strokeColor",
   "frameShape", "frame_shape", "borderRadius", "border_radius", "mediaFit", "media_fit",
   "b_roll_mode", "coverMainVideo", "muteMainAudio", "useOverlayAudio",
-  "overlayAudioVolume", "sourceEndBehavior", "audioDucking", "audioDuckingStrength",
+  "overlayAudioVolume", "sourceEndBehavior", "sourceOffsetTime", "audioDucking", "audioDuckingStrength",
   "kenBurns", "ken_burns", "placementMode", "placement_mode",
   "isRainbow", "rainbowOffset", "bRollPlaceholder", "bRollApprovalStatus",
   "sound", "soundVolume", "value", "prefix", "endX", "endY", "endScale",

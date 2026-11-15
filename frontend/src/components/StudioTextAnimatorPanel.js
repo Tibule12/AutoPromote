@@ -2,6 +2,8 @@ import React from "react";
 import {
   TEXT_ANIMATOR_DEFAULT,
   TEXT_ANIMATOR_BOUNDS,
+  TEXT_ANIMATOR_PRESETS,
+  buildStudioTextAnimatorPreset,
   validateStudioTextAnimation,
 } from "./studioTextAnimator";
 
@@ -73,6 +75,30 @@ export default function StudioTextAnimatorPanel({ layer, locked, onChange, onBui
         timeline property: reverse it, hold it or shape its curve in Motion.
       </p>
       <fieldset disabled={locked} style={{ border: 0, padding: 0, minWidth: 0 }}>
+        <div className="motion-position-grid" data-testid="text-animator-preset-strip">
+          {TEXT_ANIMATOR_PRESETS.map(preset => (
+            <button
+              key={preset.id}
+              type="button"
+              disabled={locked}
+              data-testid={`text-animator-preset-${preset.id}`}
+              onClick={() => {
+                if (locked) return;
+                try {
+                  const next = buildStudioTextAnimatorPreset(preset.id);
+                  validateStudioTextAnimation({ ...layer, textAnimator: next });
+                  if (!spec) onBuild(next);
+                  else onChange(next);
+                  setError("");
+                } catch (e) {
+                  setError(e.message);
+                }
+              }}
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
         {!spec ? (
           <button
             type="button"

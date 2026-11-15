@@ -72,10 +72,14 @@ function sourceFrameArgs(file, { start, end, fps, frameIndex, sampling, programm
   }
   return ['-nostdin', '-hide_banner', '-loglevel', 'error', '-threads', '2',
     '-ss', String(start), ...LOCAL_VIDEO_INPUT, '-i', file, ...(texture ? [] : ['-t', String(end-start)]), '-filter_threads', '1',
-    '-vf', texture
+    '-vf', (texture
       ? `setpts=PTS-STARTPTS,fps=${fps}:start_time=0:round=near,select=eq(n\\,${frameIndex}),scale=1280:720:force_original_aspect_ratio=decrease`
-      : `fps=${fps},setpts=PTS-STARTPTS,select=eq(n\\,${frameIndex}),scale='min(1920,iw)':-2`,
-    '-map', '0:v:0', '-an', '-frames:v', '1', '-threads', '2', '-c:v', 'png', '-f', 'image2pipe', 'pipe:1'];
+      : `fps=${fps},setpts=PTS-STARTPTS,select=eq(n\\,${frameIndex}),scale='min(1920,iw)':-2`) +
+        ',format=rgb24,setparams=range=full:color_primaries=bt709:color_trc=iec61966-2-1:colorspace=gbr',
+    // Every PNG describes the decoded RGB surface, including ordinary and
+    // texture frames. Inherited P3/video transfer tags recolour these bytes.
+    '-map', '0:v:0', '-an', '-frames:v', '1', '-threads', '2', '-c:v', 'png',
+    '-color_primaries', 'bt709', '-color_trc', 'iec61966-2-1', '-f', 'image2pipe', 'pipe:1'];
 }
 
 async function decodeSourceFrame(file, request, signal) {

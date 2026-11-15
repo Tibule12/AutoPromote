@@ -5,6 +5,7 @@ import { ticksToSeconds, secondsToTicks } from "./studioTime";
 import { GROUP_KIND, removeStudioGroupMembers } from "./studioGroups";
 import { rippleStudioGroupTiming } from "./studioGroupTiming";
 import { sliceStudioAutomation, rippleStudioAutomation } from "./studioAutomationSlice";
+import { advanceBRollSource } from './studioBRollTiming';
 
 // Splitting one graphic/video occurrence retains its parent, paint position,
 // source phase and editable animation. No programme time is removed.
@@ -28,7 +29,7 @@ export function splitStudioOverlayAtProgrammeTime(snapshot, layerId, at, rightId
   const keys = (snapshot.motionKeyframes || []).filter(key => key.targetId === layerId);
   const left = { ...overlay, duration: time - start };
   const right = { ...overlay, id: rightId, startTime: time, duration: end - time,
-    ...(overlay.type === "video" ? { sourceStartTime: Number(overlay.sourceStartTime || 0) + time - start } : {}),
+    ...(overlay.type === "video" ? advanceBRollSource(overlay, time - start) : {}),
     ...(overlay.trimStart !== undefined ? { trimStart: Number(overlay.trimStart || 0) + time - start } : {}),
   };
   const replace = ids => ids.flatMap(id => id === layerId ? [layerId, rightId] : [id]);

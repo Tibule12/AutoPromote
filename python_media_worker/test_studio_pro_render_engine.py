@@ -60,6 +60,14 @@ def test_film_emulation_and_lufs_master_filters():
     assert "gblur=" in unit_film
     assert "noise=alls=" in unit_film
 
+    optical_film = build_film_emulation_filter(
+        {"dreamGlow": 0.45, "anamorphicFlare": 0.6, "lensBlur": 0.35}
+    )
+    assert "maskedmerge" in optical_film
+    assert "lutrgb=" in optical_film
+    assert "sigmaV=0.5" in optical_film
+    assert "blend=all_mode=screen" in optical_film
+
     assert build_audio_master_loudnorm_filter("social") == "loudnorm=I=-14.0:TP=-1.0:LRA=7"
     assert build_audio_master_loudnorm_filter("podcast") == "loudnorm=I=-16.0:TP=-1.0:LRA=7"
     assert build_audio_master_loudnorm_filter("broadcast") == "loudnorm=I=-23.0:TP=-1.0:LRA=7"

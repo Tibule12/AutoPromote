@@ -277,3 +277,10 @@ reports/studio-background-visual-review-20261027/*
 # Private Blender background evaluation
 /reports/studio-background-blender-trial-20261030/*
 !/reports/studio-background-blender-trial-20261030/README.md
+
+# Private runtime checkpoints, browser profiles, tokens, and emulator blobs
+reports/**/private/
+reports/**/browser-profile*/
+reports/**/restored-runtime/
+reports/**/checkpoint-*/storage_export/
+**/transport-token

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-11-10",
+  "updatedAt": "2026-11-15T14:52:35.616252+00:00",
   "baseline": "reports/studio-stability-20261008/results.json",
   "readinessStates": [
     "UNIMPLEMENTED",
@@ -13633,7 +13633,7 @@
         "independentExactBackupRestore": true,
         "nativeGeometryPairsPassed": 4,
         "nativeGeometryMinIou": 0.9694525904203324,
-        "nativeGeometryMaxBoundaryP95Pixels": 1.0,
+        "nativeGeometryMaxBoundaryP95Pixels": 1,
         "freshSuccessfulNativeRenderJobs": 1
       },
       "nextSlice": "Continue S02 whole picture/processed sound and strict colour/edge/low-alpha comparisons, cut/fade phase and latency alongside S03 ownership; preserve prior projects, receipts and timers."
@@ -13730,7 +13730,7 @@
       "sampleFrames": 553811,
       "scalarSamples": 1107622,
       "sampleRate": 48000,
-      "maxAbsoluteError": 0.0,
+      "maxAbsoluteError": 0,
       "absoluteTolerance": 4e-05,
       "exactSourceHash": true,
       "actualNativeExportDecisions": true,
@@ -14326,7 +14326,7 @@
         "samples": 286,
         "decoded": 381,
         "dropped": 14,
-        "maximumSampledLayerCanvasClockDifferenceSeconds": 0.0,
+        "maximumSampledLayerCanvasClockDifferenceSeconds": 0,
         "completeCycle": true
       },
       {
@@ -14334,7 +14334,7 @@
         "samples": 215,
         "decoded": 380,
         "dropped": 77,
-        "maximumSampledLayerCanvasClockDifferenceSeconds": 0.0,
+        "maximumSampledLayerCanvasClockDifferenceSeconds": 0,
         "completeCycle": true
       }
     ],
@@ -18047,7 +18047,7 @@
                 "phase": "CURRENT_SOURCE_TRACKING",
                 "runtimeSeconds": 770.7149786980008,
                 "sourceFrame": 48,
-                "sourceSeconds": 2.0,
+                "sourceSeconds": 2,
                 "totalFrames": 5760,
                 "visualPass": false
               }
@@ -18225,7 +18225,7 @@
                 "phase": "CURRENT_SOURCE_TRACKING",
                 "runtimeSeconds": 582.458808288,
                 "sourceFrame": 24,
-                "sourceSeconds": 1.0,
+                "sourceSeconds": 1,
                 "totalFrames": 5760,
                 "visualPass": false
               }
@@ -19205,7 +19205,7 @@
                 "phase": "CURRENT_SOURCE_TRACKING",
                 "runtimeSeconds": 3407.0421225719983,
                 "sourceFrame": 72,
-                "sourceSeconds": 3.0,
+                "sourceSeconds": 3,
                 "totalFrames": 5760,
                 "visualPass": false
               },
@@ -19558,7 +19558,7 @@
                 "phase": "CURRENT_SOURCE_TRACKING",
                 "runtimeSeconds": 51369.270847821,
                 "sourceFrame": 912,
-                "sourceSeconds": 38.0,
+                "sourceSeconds": 38,
                 "totalFrames": 5760,
                 "visualPass": false
               },
@@ -19622,7 +19622,7 @@
                 "phase": "CURRENT_SOURCE_TRACKING",
                 "runtimeSeconds": 24158.067203596,
                 "sourceFrame": 432,
-                "sourceSeconds": 18.0,
+                "sourceSeconds": 18,
                 "totalFrames": 5760,
                 "visualPass": false
               },
@@ -20002,7 +20002,7 @@
                 "phase": "CURRENT_SOURCE_TRACKING",
                 "runtimeSeconds": 508.63369548399896,
                 "sourceFrame": 24,
-                "sourceSeconds": 1.0,
+                "sourceSeconds": 1,
                 "totalFrames": 5760,
                 "visualPass": false
               },
@@ -20608,7 +20608,7 @@
                         ],
                         "queryRowsPerChunk": 128,
                         "fullKeyContextRetained": true,
-                        "actualSourceProbeMaximumDifference": 0.0,
+                        "actualSourceProbeMaximumDifference": 0,
                         "actualSourceProbeQueries": 32
                       },
                       {
@@ -20626,7 +20626,7 @@
                         ],
                         "queryRowsPerChunk": 128,
                         "fullKeyContextRetained": true,
-                        "actualSourceProbeMaximumDifference": 0.0,
+                        "actualSourceProbeMaximumDifference": 0,
                         "actualSourceProbeQueries": 32
                       },
                       {
@@ -20644,7 +20644,7 @@
                         ],
                         "queryRowsPerChunk": 128,
                         "fullKeyContextRetained": true,
-                        "actualSourceProbeMaximumDifference": 0.0,
+                        "actualSourceProbeMaximumDifference": 0,
                         "actualSourceProbeQueries": 32
                       },
                       {
@@ -20662,7 +20662,7 @@
                         ],
                         "queryRowsPerChunk": 128,
                         "fullKeyContextRetained": true,
-                        "actualSourceProbeMaximumDifference": 0.0,
+                        "actualSourceProbeMaximumDifference": 0,
                         "actualSourceProbeQueries": 32
                       },
                       {
@@ -20680,7 +20680,7 @@
                         ],
                         "queryRowsPerChunk": 128,
                         "fullKeyContextRetained": true,
-                        "actualSourceProbeMaximumDifference": 0.0,
+                        "actualSourceProbeMaximumDifference": 0,
                         "actualSourceProbeQueries": 32
                       },
                       {
@@ -20698,7 +20698,7 @@
                         ],
                         "queryRowsPerChunk": 128,
                         "fullKeyContextRetained": true,
-                        "actualSourceProbeMaximumDifference": 0.0,
+                        "actualSourceProbeMaximumDifference": 0,
                         "actualSourceProbeQueries": 32
                       },
                       {
@@ -20716,7 +20716,7 @@
                         ],
                         "queryRowsPerChunk": 128,
                         "fullKeyContextRetained": true,
-                        "actualSourceProbeMaximumDifference": 0.0,
+                        "actualSourceProbeMaximumDifference": 0,
                         "actualSourceProbeQueries": 32
                       },
                       {
@@ -20770,7 +20770,7 @@
                         ],
                         "queryRowsPerChunk": 128,
                         "fullKeyContextRetained": true,
-                        "actualSourceProbeMaximumDifference": 0.0,
+                        "actualSourceProbeMaximumDifference": 0,
                         "actualSourceProbeQueries": 32
                       }
                     ],
@@ -21703,7 +21703,7 @@
     "independentRestoreEditUndoRedo": true,
     "completeLiveAndFinishedPlayback": true,
     "liveWallSeconds": 24.998,
-    "finishedWallSeconds": 24.0,
+    "finishedWallSeconds": 24,
     "liveCaptureFps": 10.258,
     "finishedCaptureFps": 11.418,
     "pausedPairs": 20,
@@ -23469,9 +23469,9 @@
         "originalMusic": true,
         "audio": {
           "source": "original video soundtrack",
-          "durationSeconds": 8.0,
+          "durationSeconds": 8,
           "bestLagSamplesAt16k": 0,
-          "bestLagMilliseconds": 0.0,
+          "bestLagMilliseconds": 0,
           "waveformCorrelation": 0.9988345026152202,
           "fittedGain": 0.9922363578239141,
           "humanListeningQualified": false,
@@ -23545,9 +23545,9 @@
         "originalMusic": true,
         "audio": {
           "source": "original video soundtrack",
-          "durationSeconds": 8.0,
+          "durationSeconds": 8,
           "bestLagSamplesAt16k": 0,
-          "bestLagMilliseconds": 0.0,
+          "bestLagMilliseconds": 0,
           "waveformCorrelation": 0.9953254961520749,
           "fittedGain": 0.8876621149989447,
           "humanListeningQualified": false,
@@ -23621,9 +23621,9 @@
         "originalMusic": true,
         "audio": {
           "source": "original video soundtrack",
-          "durationSeconds": 8.0,
+          "durationSeconds": 8,
           "bestLagSamplesAt16k": 0,
-          "bestLagMilliseconds": 0.0,
+          "bestLagMilliseconds": 0,
           "waveformCorrelation": 0.9988126518531109,
           "fittedGain": 0.9908272026258615,
           "humanListeningQualified": false,
@@ -23697,9 +23697,9 @@
         "originalMusic": true,
         "audio": {
           "source": "original video soundtrack",
-          "durationSeconds": 8.0,
+          "durationSeconds": 8,
           "bestLagSamplesAt16k": 0,
-          "bestLagMilliseconds": 0.0,
+          "bestLagMilliseconds": 0,
           "waveformCorrelation": 0.9991576256358959,
           "fittedGain": 0.9922566072238387,
           "humanListeningQualified": false,
@@ -23809,9 +23809,9 @@
         "originalMusic": true,
         "audio": {
           "source": "original video soundtrack",
-          "durationSeconds": 8.0,
+          "durationSeconds": 8,
           "bestLagSamplesAt16k": 0,
-          "bestLagMilliseconds": 0.0,
+          "bestLagMilliseconds": 0,
           "waveformCorrelation": 0.9988345026152202,
           "fittedGain": 0.9922363578239141,
           "humanListeningQualified": false,
@@ -23886,9 +23886,9 @@
         "originalMusic": true,
         "audio": {
           "source": "original video soundtrack",
-          "durationSeconds": 8.0,
+          "durationSeconds": 8,
           "bestLagSamplesAt16k": 0,
-          "bestLagMilliseconds": 0.0,
+          "bestLagMilliseconds": 0,
           "waveformCorrelation": 0.9953254961520749,
           "fittedGain": 0.8876621149989447,
           "humanListeningQualified": false,
@@ -23963,9 +23963,9 @@
         "originalMusic": true,
         "audio": {
           "source": "original video soundtrack",
-          "durationSeconds": 8.0,
+          "durationSeconds": 8,
           "bestLagSamplesAt16k": 0,
-          "bestLagMilliseconds": 0.0,
+          "bestLagMilliseconds": 0,
           "waveformCorrelation": 0.9988126518531109,
           "fittedGain": 0.9908272026258615,
           "humanListeningQualified": false,
@@ -24040,9 +24040,9 @@
         "originalMusic": true,
         "audio": {
           "source": "original video soundtrack",
-          "durationSeconds": 8.0,
+          "durationSeconds": 8,
           "bestLagSamplesAt16k": 0,
-          "bestLagMilliseconds": 0.0,
+          "bestLagMilliseconds": 0,
           "waveformCorrelation": 0.9991576256358959,
           "fittedGain": 0.9922566072238387,
           "humanListeningQualified": false,
@@ -24187,9 +24187,9 @@
     "strictPredictivePictureAudioParityQualified": false,
     "music": {
       "source": "original video soundtrack",
-      "durationSeconds": 8.0,
+      "durationSeconds": 8,
       "bestLagSamplesAt16k": 0,
-      "bestLagMilliseconds": 0.0,
+      "bestLagMilliseconds": 0,
       "waveformCorrelation": 0.9953254961520749,
       "fittedGain": 0.8876621149989447,
       "humanListeningQualified": false,
@@ -24299,9 +24299,9 @@
         },
         "music": {
           "source": "original video soundtrack",
-          "durationSeconds": 8.0,
+          "durationSeconds": 8,
           "bestLagSamplesAt16k": 0,
-          "bestLagMilliseconds": 0.0,
+          "bestLagMilliseconds": 0,
           "waveformCorrelation": 0.9990693111177505,
           "fittedGain": 0.9924191854518802,
           "humanListeningQualified": false,
@@ -24416,9 +24416,9 @@
         },
         "music": {
           "source": "original video soundtrack",
-          "durationSeconds": 8.0,
+          "durationSeconds": 8,
           "bestLagSamplesAt16k": 0,
-          "bestLagMilliseconds": 0.0,
+          "bestLagMilliseconds": 0,
           "waveformCorrelation": 0.9945482728010976,
           "fittedGain": 0.8852835046289337,
           "humanListeningQualified": false,
@@ -24535,7 +24535,7 @@
           "source": "original video soundtrack",
           "durationSeconds": 7.5,
           "bestLagSamplesAt16k": 0,
-          "bestLagMilliseconds": 0.0,
+          "bestLagMilliseconds": 0,
           "waveformCorrelation": 0.998701639032303,
           "fittedGain": 0.9924622144909307,
           "humanListeningQualified": false,
@@ -24650,9 +24650,9 @@
         },
         "music": {
           "source": "original video soundtrack",
-          "durationSeconds": 8.0,
+          "durationSeconds": 8,
           "bestLagSamplesAt16k": 0,
-          "bestLagMilliseconds": 0.0,
+          "bestLagMilliseconds": 0,
           "waveformCorrelation": 0.9991576256358959,
           "fittedGain": 0.9922566072238387,
           "humanListeningQualified": false,
@@ -25634,9 +25634,9 @@
     "strictPredictivePixelAudioParityQualified": false,
     "music": {
       "source": "original video soundtrack",
-      "durationSeconds": 6.0,
+      "durationSeconds": 6,
       "bestLagSamplesAt16k": 0,
-      "bestLagMilliseconds": 0.0,
+      "bestLagMilliseconds": 0,
       "waveformCorrelation": 0.9954259686223772,
       "fittedGain": 0.8932796268429615,
       "humanListeningQualified": false,
@@ -25904,7 +25904,7 @@
       "lagSamplesAt48k": 0,
       "gainDb": -4.505357015751828,
       "integratedLufs": -19.9,
-      "truePeakDbtp": -6.0,
+      "truePeakDbtp": -6,
       "decodedSamplesAtOrAboveFullScale": 0,
       "humanListeningQualified": false
     },
@@ -26053,7 +26053,7 @@
       "lagSamplesAt48k": 0,
       "gainDb": -4.505357015751828,
       "integratedLufs": -19.9,
-      "truePeakDbtp": -6.0,
+      "truePeakDbtp": -6,
       "decodedSamplesAtOrAboveFullScale": 0,
       "humanListeningQualified": false
     },
@@ -26220,8 +26220,8 @@
       ],
       "reflectionContactY": 70,
       "sameDeclaredReflectionAndFade": true,
-      "alphaMaxByteDifference": 14.0,
-      "overBlackMaxByteDifference": 14.0,
+      "alphaMaxByteDifference": 14,
+      "overBlackMaxByteDifference": 14,
       "overBlackMeanByteDifference": 0.4732476128472222,
       "strictLowAlphaPixelParity": false
     },
@@ -26289,7 +26289,7 @@
       "lagSamplesAt48k": 0,
       "gainDb": -4.505357015751828,
       "integratedLufs": -19.9,
-      "truePeakDbtp": -6.0,
+      "truePeakDbtp": -6,
       "decodedSamplesAtOrAboveFullScale": 0,
       "humanListeningQualified": false
     },
@@ -26491,5 +26491,78 @@
     "liveAdsEnabled": false,
     "productionDataMigration": false,
     "next": "Complete full editor, responsive, CI and deployed-origin verification."
+  },
+  "festivalReliability20261115": {
+    "report": "reports/studio-festival-reliability-20261115/README.md",
+    "scope": "Scoped LUT sampler/cache/strength and percentage/curve controls; bounded optional bitmap cache; bounded local request/no-dispatch recovery; colour-help routing. Successful native export/download/decode/finished playback. Smoothness and whole picture/audio parity remain unqualified.",
+    "readinessPromotion": false,
+    "gpuJobs": 0,
+    "paidProviderCalls": 0,
+    "productionWrites": 0,
+    "wholePreviewFinalParity": "UNVERIFIED",
+    "humanListening": "UNVERIFIED",
+    "creativeApproval": "UNVERIFIED",
+    "captionsIntegration": "Separate worktree; not qualified in this candidate.",
+    "nativeSnapshot": "AutoPromote-festival-readiness-20261115; later concurrent optical-effects changes in the active branch are outside that native proof."
+  },
+  "studioPreviewRepair20261115": {
+    "report": "reports/studio-preview-repair-20261115/README.md",
+    "scope": "All paused PNG sampler RGB profiles; phase-aware adaptive moving-preview scheduling and labelled resolution; bounded exact held-still reuse; existing canonical primary/LUT CPU fallback on detected software GL.",
+    "readinessPromotion": false,
+    "wholeMovingPictureAudioParity": "UNVERIFIED",
+    "priorTypographyFailures": "Retained",
+    "paidCalls": 0,
+    "productionWrites": 0
+  },
+  "viralClipPowerhouse20261115": {
+    "report": "reports/viral-clip-powerhouse-20261115/README.md",
+    "scope": "Find Viral Clips selection, settings, source preview and canonical Studio handoff/export; thumbnail tools removed",
+    "sourceRangeSeconds": [
+      0,
+      17.18
+    ],
+    "nativeSourceSeconds": 29.9,
+    "realUserFlow": true,
+    "sameFileCompletePlayback": true,
+    "nativeCacheReplay": "BLOCKED_BY_LOCAL_PILOT_SCOPE",
+    "wholeMovingPictureAudioParity": "UNVERIFIED",
+    "readinessPromotion": false,
+    "paidCalls": 0,
+    "productionWrites": 0
+  },
+  "studioBRollControls20261115": {
+    "report": "reports/studio-broll-controls-20261115/README.md",
+    "scope": "B-roll timing/source phase/end behaviour/layout/audio/presets/import/locks/canonical insert/persistence/export with actual slow authoring recording",
+    "nativeSourceOccurrences": 1,
+    "nativeVideoLayers": 5,
+    "nativeImageLayers": 1,
+    "nativePresetApplySave": 26,
+    "correctedNativeExportAndCompletePlayback": true,
+    "firstExport": "RETAINED_REJECTED_TIMING_DRAFT",
+    "wholeMovingPictureAudioParity": "UNVERIFIED",
+    "readinessPromotion": false,
+    "paidCalls": 0,
+    "productionWrites": 0
+  },
+  "studioActionWalkthrough20261115": {
+    "report": "reports/studio-action-walkthrough-20261115/README.md",
+    "scope": "Owner-requested visible uploads/clicks/typing/drags with preview results and ordinary export/backup; no engine change",
+    "realSourceUpload": true,
+    "physicalSourceTrim": [
+      29.9,
+      17.2
+    ],
+    "nativeVideoLayers": 3,
+    "nativeImageLayers": 1,
+    "semanticColdReopen": true,
+    "nativeOwnedBackupRestore": true,
+    "nativeExportAndCompletePlayback": true,
+    "nativeMovieSeconds": 17.208333,
+    "decodedPlaybackFrames": 417,
+    "precedingNarrationHeavyWalkthrough": "OWNER_REJECTED_TEACHING_FORMAT_RETAINED",
+    "wholeMovingPictureAudioParity": "UNVERIFIED",
+    "readinessPromotion": false,
+    "paidCalls": 0,
+    "productionWrites": 0
   }
 }

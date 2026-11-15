@@ -63,6 +63,9 @@ describe("studioWebGLCompositor", () => {
   test("includes WebGL2 ES 3.00 primary, 3D LUT, power window, qualifier, and blend shaders", () => {
     expect(VERTEX_SHADER_SOURCE).toContain("#version 300 es");
     expect(GRADE_FRAGMENT_SHADER_SOURCE).toContain("uniform sampler3D u_lut3D;");
+    expect(GRADE_FRAGMENT_SHADER_SOURCE).toContain("uniform float u_dreamGlow;");
+    expect(GRADE_FRAGMENT_SHADER_SOURCE).toContain("uniform float u_anamorphicFlare;");
+    expect(GRADE_FRAGMENT_SHADER_SOURCE).toContain("uniform float u_lensBlur;");
     expect(GRADE_FRAGMENT_SHADER_SOURCE).toContain("computePowerWindowMask");
     expect(GRADE_FRAGMENT_SHADER_SOURCE).toContain("computeQualifierMask");
     expect(COMPOSITE_FRAGMENT_SHADER_SOURCE).toContain("blendChannel");

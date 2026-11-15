@@ -42,6 +42,9 @@ export function serializeStudioPresetBundle({
     halation: Number(finishFx.halation ?? 0),
     chromaticAberration: Number(finishFx.chromaticAberration ?? 0),
     filmGrain: Number(finishFx.filmGrain ?? 0),
+    dreamGlow: Number(finishFx.dreamGlow ?? 0),
+    anamorphicFlare: Number(finishFx.anamorphicFlare ?? 0),
+    lensBlur: Number(finishFx.lensBlur ?? 0),
   };
 
   return JSON.stringify(

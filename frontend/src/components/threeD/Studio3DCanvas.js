@@ -274,10 +274,11 @@ function makeGroup(scene) {
 
 // This canvas is an edit proxy. HQ Blender frames use the same bounded scene
 // model and timeline clock, but not the browser's light/geometry budget.
-export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSourceVideo, playing = false, playbackRate = 1, audioLevel = 0, zIndex }) {
+export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSourceVideo, getAudioLevel, playing = false, playbackRate = 1, audioLevel = 0, zIndex }) {
   const hostRef = useRef(null);
   const clockRef = useRef(getTime);
   const levelRef = useRef(audioLevel);
+  const audioLevelGetterRef = useRef(getAudioLevel);
   const timeRef = useRef(time);
   const playbackRef = useRef({ playing, playbackRate });
   const sourceVideoRef = useRef(getSourceVideo);
@@ -285,6 +286,7 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSour
   const [webglFailed, setWebglFailed] = useState(false);
   clockRef.current = getTime;
   levelRef.current = audioLevel;
+  audioLevelGetterRef.current = getAudioLevel;
   timeRef.current = time;
   playbackRef.current = { playing, playbackRate };
   sourceVideoRef.current = getSourceVideo;
@@ -338,6 +340,8 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSour
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     host.appendChild(renderer.domElement);
     const world = new THREE.Scene();
     let environment;
@@ -346,9 +350,26 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSour
     const ambient = new THREE.AmbientLight("#bfc9ff", 0.8);
     const key = new THREE.DirectionalLight("#ffffff", 1.1);
     key.position.set(-3, 5, 8);
+    key.castShadow = true;
+    key.shadow.mapSize.set(1024, 1024);
+    key.shadow.bias = -0.0005;
+    key.shadow.camera.near = 1;
+    key.shadow.camera.far = 30;
+    key.shadow.camera.left = -7;
+    key.shadow.camera.right = 7;
+    key.shadow.camera.top = 7;
+    key.shadow.camera.bottom = -7;
     const rim = new THREE.DirectionalLight("#8899ff", 0.65);
     rim.position.set(4, -2, -4);
-    world.add(ambient, key, rim);
+    const shadowCatcher = new THREE.Mesh(
+      new THREE.PlaneGeometry(24, 14),
+      new THREE.ShadowMaterial({ opacity: 0.32, transparent: true })
+    );
+    shadowCatcher.rotation.x = -Math.PI / 2;
+    shadowCatcher.position.set(0, -2.25, 0);
+    shadowCatcher.receiveShadow = true;
+    shadowCatcher.visible = false;
+    world.add(ambient, key, rim, shadowCatcher);
     let objects = [], lastSignature, retired = [];
     const disposeGroup = group => group.traverse(object => {
       object.geometry?.dispose?.();
@@ -366,7 +387,9 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSour
         // Reuse the context, reflection environment and shader programmes when
         // editing. Retire old materials after the replacement's first draw.
         for (const { group } of objects) { world.remove(group); retired.push(group); }
-        const needsEnvironment = modelRef.current.scenes.some(scene => scene.template === "object_scene");
+        const needsEnvironment = modelRef.current.scenes.some(
+          scene => scene.reflections !== false || scene.template === "object_scene"
+        );
         if (needsEnvironment && !environment) {
           const pmrem = new THREE.PMREMGenerator(renderer), room = new RoomEnvironment();
           environment = pmrem.fromScene(room, .04); room.dispose(); pmrem.dispose();
@@ -374,6 +397,17 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSour
         world.environment = needsEnvironment ? environment.texture : null;
         objects = modelRef.current.scenes.map(raw => {
           const scene = normalizeStudio3DScene(raw), group = makeGroup(scene);
+          const enableShadows = scene.shadows !== false;
+          const reflIntensity = scene.reflections !== false ? 1.15 : 0.0;
+          group.traverse(child => {
+            if (child.isMesh) {
+              child.castShadow = enableShadows;
+              child.receiveShadow = enableShadows;
+              if (child.material && "envMapIntensity" in child.material) {
+                child.material.envMapIntensity = reflIntensity;
+              }
+            }
+          });
           group.visible = false; world.add(group); return { scene, group };
         });
         lastSignature = modelRef.current.signature;
@@ -462,20 +496,23 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSour
         asset.running=running;asset.lastPlayhead=playhead;
       }
       const reactive = objects.some(({ scene }) => scene.audioReactiveIntensity > 0);
-      const audio = reactive ? levelRef.current : 0;
+      const sampledAudio = reactive ? Math.max(Number(levelRef.current) || 0, Number(audioLevelGetterRef.current?.()) || 0) : 0;
+      const audio = Math.max(0, Math.min(1, sampledAudio));
       if (!resized && !textureChanged && !changed && playhead === lastPlayhead && audio === lastAudioLevel) return;
       lastPlayhead = playhead;
       lastAudioLevel = audio;
+      let anyVisibleShadow = false;
       for (const { scene, group } of objects) {
         const sample = studio3DFrameSample(scene, playhead);
         const pose = sample && studio3DPose(scene, sample.programmeTime);
         group.visible = Boolean(pose);
         if (!pose) continue;
+        if (scene.shadows !== false) anyVisibleShadow = true;
         if (scene.template === "neon_logo") {
           const portrait = height > width;
           animateLogo(group, scene, sample.localTime, portrait);
         }
-        const sound = 1 + Math.min(1, levelRef.current) * scene.audioReactiveIntensity * 0.25;
+        const sound = 1 + audio * scene.audioReactiveIntensity * 0.25;
         group.position.set(pose.x, pose.y, pose.z);
         group.scale.setScalar(pose.scale * sound);
         group.rotation.set(pose.rotationX * Math.PI / 180, pose.rotationY * Math.PI / 180, pose.rotationZ * Math.PI / 180, 'ZYX');
@@ -492,18 +529,27 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSour
           mesh.rotation.set(current.rotationX * Math.PI / 180, current.rotationY * Math.PI / 180, current.rotationZ * Math.PI / 180);
         }
         group.traverse(child => {
-          if (child.isMesh && child.material && (scene.template === "object_scene" || child.material.transparent)) {
-            if (child.material.userData.baseOpacity === undefined) child.material.userData.baseOpacity = child.material.opacity;
-            child.material.opacity = pose.opacity * child.material.userData.baseOpacity;
-            if (scene.template === "object_scene") {
-              const transparent = child.material.opacity < 1;
-              if (child.material.transparent !== transparent) {
-                child.material.transparent = transparent;
-                child.material.needsUpdate = true;
+          if (child.isMesh && child.material) {
+            if ("emissiveIntensity" in child.material && scene.audioReactiveIntensity > 0) {
+              if (child.material.userData.baseEmissive === undefined) {
+                child.material.userData.baseEmissive = child.material.emissiveIntensity || 0;
+              }
+              child.material.emissiveIntensity = child.material.userData.baseEmissive + audio * scene.audioReactiveIntensity * 0.65;
+            }
+            if (scene.template === "object_scene" || child.material.transparent) {
+              if (child.material.userData.baseOpacity === undefined) child.material.userData.baseOpacity = child.material.opacity;
+              child.material.opacity = pose.opacity * child.material.userData.baseOpacity;
+              if (scene.template === "object_scene") {
+                const transparent = child.material.opacity < 1;
+                if (child.material.transparent !== transparent) {
+                  child.material.transparent = transparent;
+                  child.material.needsUpdate = true;
+                }
               }
             }
           }
         });
+        key.castShadow = scene.shadows !== false;
         key.color.set(scene.lightColor);
         key.intensity = scene.lightIntensity / 2;
         key.position.set(Math.sin(scene.lightDirection * Math.PI / 180) * 6, 5, 8);
@@ -512,6 +558,7 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSour
         camera.position.set(projection.x, 0, projection.distance);
         camera.updateProjectionMatrix();
       }
+      shadowCatcher.visible = anyVisibleShadow;
       renderer.render(world, camera);
       retired.forEach(disposeGroup); retired = [];
     };

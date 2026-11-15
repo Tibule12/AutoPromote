@@ -876,3 +876,389 @@ export const removeStudioLayerSafely = (
     unparentedChildIds,
   };
 };
+
+export const MOTION_RIG_RECIPES = Object.freeze([
+  {
+    id: "handheld_cinema_cam",
+    label: "Handheld Cinema Cam",
+    summary: "Organic multi-octave X/Y/Rotation camera drift",
+    drivers: {
+      x: { type: "wiggle", enabled: true, frequencyHz: 1.8, amplitude: 2.6, octaves: 3, seed: 23 },
+      y: { type: "wiggle", enabled: true, frequencyHz: 1.5, amplitude: 2.1, octaves: 3, seed: 41 },
+      rotation: { type: "wiggle", enabled: true, frequencyHz: 1.1, amplitude: 1.8, octaves: 2, seed: 67 },
+    },
+  },
+  {
+    id: "zero_g_hover",
+    label: "Zero-G Hover Drift",
+    summary: "Phase-shifted weightless sine float across X, Y and Rotation",
+    drivers: {
+      x: { type: "pulse", enabled: true, waveform: "sine", frequencyHz: 0.45, amplitude: 3.2, phaseDeg: 0 },
+      y: { type: "pulse", enabled: true, waveform: "sine", frequencyHz: 0.65, amplitude: 4.5, phaseDeg: 90 },
+      rotation: { type: "pulse", enabled: true, waveform: "sine", frequencyHz: 0.35, amplitude: 4.0, phaseDeg: 45 },
+    },
+  },
+  {
+    id: "heartbeat_bass_pump",
+    label: "Heartbeat Bass Pump",
+    summary: "Tempo-synced exponential scale and opacity pulse",
+    drivers: {
+      scale: { type: "beat_pump", enabled: true, bpm: 124, amount: 0.16, decay: 9.0 },
+      opacity: { type: "beat_pump", enabled: true, bpm: 124, amount: 0.12, decay: 10.5 },
+    },
+  },
+  {
+    id: "pendulum_3d_orbit",
+    label: "Pendulum 3D Orbit",
+    summary: "Coupled horizontal sweep, depth scale and banking rotation",
+    drivers: {
+      x: { type: "pulse", enabled: true, waveform: "sine", frequencyHz: 0.8, amplitude: 14, phaseDeg: 0 },
+      scale: { type: "pulse", enabled: true, waveform: "sine", frequencyHz: 0.8, amplitude: 0.14, phaseDeg: 90 },
+      rotation: { type: "pulse", enabled: true, waveform: "sine", frequencyHz: 0.8, amplitude: 8, phaseDeg: 180 },
+    },
+  },
+  {
+    id: "inertial_whip_spring",
+    label: "Inertial Whip Spring",
+    summary: "Velocity-driven spring overshoot on X, Y, Scale and Rotation",
+    drivers: {
+      x: { type: "spring", enabled: true, frequencyHz: 3.4, damping: 5.2, amount: 1.15 },
+      y: { type: "spring", enabled: true, frequencyHz: 3.4, damping: 5.2, amount: 1.15 },
+      scale: { type: "spring", enabled: true, frequencyHz: 3.8, damping: 4.8, amount: 1.2 },
+      rotation: { type: "spring", enabled: true, frequencyHz: 3.2, damping: 5.5, amount: 1.0 },
+    },
+  },
+]);
+
+export const applyStudioMotionRigRecipe = (layer = {}, recipeId = "handheld_cinema_cam") => {
+  const recipe = MOTION_RIG_RECIPES.find(item => item.id === recipeId);
+  if (!recipe) fail("INVALID_MOTION_RIG_RECIPE", `Unknown motion rig recipe: ${recipeId}`);
+  const nextDrivers = {
+    ...(layer.motionDrivers || {}),
+    ...JSON.parse(JSON.stringify(recipe.drivers)),
+  };
+  const updated = { ...layer, motionDrivers: nextDrivers };
+  validateStudioMotionDrivers(updated);
+  return updated;
+};
+
+export const SPATIAL_MOTION_PATH_PRESETS = Object.freeze([
+  { id: "s_curve_sweep", label: "S-Curve Sweep" },
+  { id: "orbital_arc", label: "Orbital Arc" },
+  { id: "parabola_bounce", label: "Parabola Bounce" },
+  { id: "figure_eight_drift", label: "Figure-8 Drift" },
+]);
+
+export const buildStudioSpatialPathPresetKeyframes = ({
+  layer,
+  keyframes = [],
+  presetId = "s_curve_sweep",
+  startTime,
+  duration,
+  createId = prefix => `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+} = {}) => {
+  const targetId = String(layer?.id ?? "main-video");
+  const start = Math.max(0, Number(startTime ?? layer?.startTime ?? 0));
+  const span = Math.max(0.4, Number(duration ?? layer?.duration ?? 4));
+  const t0 = Number(start.toFixed(3));
+  const tMid = Number((start + span * 0.5).toFixed(3));
+  const tEnd = Number((start + span).toFixed(3));
+  const retained = (keyframes || []).filter(
+    k => String(k.targetId) !== targetId || (k.property !== "x" && k.property !== "y")
+  );
+  const generated = [];
+  const pushPair = (time, x, y, spatialX, spatialY) => {
+    const baseCurve = [0.25, 0.1, 0.25, 1];
+    generated.push({
+      id: createId(`kf-${targetId}-x`),
+      targetId,
+      property: "x",
+      time,
+      value: clamp(x, 0, 100),
+      easing: "bezier",
+      curve: [...baseCurve],
+      ...(spatialX ? { spatialCurve: spatialX } : {}),
+    });
+    generated.push({
+      id: createId(`kf-${targetId}-y`),
+      targetId,
+      property: "y",
+      time,
+      value: clamp(y, 0, 100),
+      easing: "bezier",
+      curve: [...baseCurve],
+      ...(spatialY ? { spatialCurve: spatialY } : {}),
+    });
+  };
+
+  if (presetId === "s_curve_sweep") {
+    pushPair(t0, 18, 72);
+    pushPair(tEnd, 82, 28, [26, -26], [-32, 32]);
+  } else if (presetId === "orbital_arc") {
+    pushPair(t0, 20, 62);
+    pushPair(tEnd, 80, 62, [18, -18], [-38, -38]);
+  } else if (presetId === "parabola_bounce") {
+    pushPair(t0, 16, 76);
+    pushPair(tMid, 50, 26, [12, -12], [-24, 0]);
+    pushPair(tEnd, 84, 76, [12, -12], [0, -24]);
+  } else if (presetId === "figure_eight_drift") {
+    pushPair(t0, 24, 50);
+    pushPair(tMid, 76, 50, [18, -18], [-32, 32]);
+    pushPair(tEnd, 24, 50, [-18, 18], [-32, 32]);
+  } else {
+    fail("INVALID_SPATIAL_PATH_PRESET", `Unknown spatial path preset: ${presetId}`);
+  }
+
+  return sortAutomationKeyframes([...retained, ...generated]);
+};
+
+export const transformStudioLayerKeyframes = ({
+  keyframes = [],
+  targetId,
+  operation = "reverse",
+  factor = 0.5,
+  createId = prefix => `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+} = {}) => {
+  const tid = String(targetId ?? "");
+  const layerKeys = sortAutomationKeyframes(
+    (keyframes || []).filter(k => String(k.targetId) === tid)
+  );
+  if (layerKeys.length < 2) return keyframes;
+  const foreignKeys = (keyframes || []).filter(k => String(k.targetId) !== tid);
+  const minTime = Math.min(...layerKeys.map(k => Number(k.time)));
+  const maxTime = Math.max(...layerKeys.map(k => Number(k.time)));
+  const span = maxTime - minTime;
+  if (span <= 0.001) return keyframes;
+
+  if (operation === "reverse") {
+    const byProp = new Map();
+    for (const k of layerKeys) {
+      const list = byProp.get(k.property) || [];
+      list.push(k);
+      byProp.set(k.property, list);
+    }
+    const reversed = [];
+    for (const [, list] of byProp.entries()) {
+      const pMin = Math.min(...list.map(k => Number(k.time)));
+      const pMax = Math.max(...list.map(k => Number(k.time)));
+      for (const k of list) {
+        const nextKey = {
+          ...k,
+          time: Number((pMin + (pMax - Number(k.time))).toFixed(4)),
+        };
+        delete nextKey.spatialCurve;
+        reversed.push(nextKey);
+      }
+    }
+    return sortAutomationKeyframes([...foreignKeys, ...reversed]);
+  }
+
+  if (operation === "pingpong") {
+    const mirrored = [];
+    for (const k of layerKeys) {
+      const dt = maxTime - Number(k.time);
+      if (dt <= 0.001) continue;
+      const copy = {
+        ...k,
+        id: createId(`kf-${tid}-${k.property}`),
+        time: Number((maxTime + dt).toFixed(4)),
+      };
+      delete copy.spatialCurve;
+      mirrored.push(copy);
+    }
+    return sortAutomationKeyframes([...foreignKeys, ...layerKeys, ...mirrored]);
+  }
+
+  if (operation === "scale_time") {
+    const safeFactor = clamp(factor, 0.2, 4);
+    const scaled = layerKeys.map(k => ({
+      ...k,
+      time: Number((minTime + (Number(k.time) - minTime) * safeFactor).toFixed(4)),
+    }));
+    return sortAutomationKeyframes([...foreignKeys, ...scaled]);
+  }
+
+  return keyframes;
+};
+
+export const COMPOSITE_RIG_RECIPES = Object.freeze([
+  { id: "auto_track_matte_reveal", label: "Auto Track-Matte Reveal" },
+  { id: "split_screen_pip", label: "Broadcast PiP + Null Rig" },
+  { id: "neon_echo_trail", label: "Neon Echo + Glow Trail" },
+]);
+
+export const buildStudioCompositeRigPreset = ({
+  presetId = "auto_track_matte_reveal",
+  selectedLayer,
+  overlays = [],
+  motionKeyframes = [],
+  currentTime = 0,
+  programmeDuration = 8,
+  createId = prefix => `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+} = {}) => {
+  if (!selectedLayer || selectedLayer.id === "main-video" || selectedLayer.isNullRig) {
+    fail("INVALID_COMPOSITE_TARGET", "Select a graphic, title, or media overlay layer to rig.");
+  }
+  const targetId = String(selectedLayer.id);
+  const start = Math.max(0, Number(selectedLayer.startTime ?? currentTime ?? 0));
+  const dur = Math.max(0.4, Number(selectedLayer.duration ?? programmeDuration ?? 4));
+
+  if (presetId === "auto_track_matte_reveal") {
+    const matteId = createId("matte-stencil");
+    const matteLayer = {
+      id: matteId,
+      name: `Matte Stencil · ${selectedLayer.name || selectedLayer.text || targetId}`,
+      type: "text",
+      text: "REVEAL",
+      x: Number(selectedLayer.x ?? 50),
+      y: Number(selectedLayer.y ?? 50),
+      width: Math.max(24, Number(selectedLayer.width || 68)),
+      height: Math.max(16, Number(selectedLayer.height || 24)),
+      scale: 1,
+      rotation: 0,
+      opacity: 1,
+      color: "#ffffff",
+      bg: "#ffffff",
+      startTime: start,
+      duration: dur,
+    };
+    const nextOverlays = [
+      matteLayer,
+      ...(overlays || []).map(item =>
+        item && String(item.id) === targetId
+          ? { ...item, trackMatte: { mode: "alpha", sourceLayerId: matteId } }
+          : item
+      ),
+    ];
+    validateStudioTrackMattes(nextOverlays);
+    const t0 = Number(start.toFixed(3));
+    const t1 = Number((start + Math.min(0.8, dur * 0.45)).toFixed(3));
+    const matteKeys = [
+      {
+        id: createId(`kf-${matteId}-scale`),
+        targetId: matteId,
+        property: "scale",
+        time: t0,
+        value: 0.2,
+        easing: "bezier",
+        curve: [0.16, 1, 0.3, 1],
+      },
+      {
+        id: createId(`kf-${matteId}-scale`),
+        targetId: matteId,
+        property: "scale",
+        time: t1,
+        value: 1.15,
+        easing: "bezier",
+        curve: [0.16, 1, 0.3, 1],
+      },
+    ];
+    return {
+      overlays: nextOverlays,
+      motionKeyframes: sortAutomationKeyframes([...(motionKeyframes || []), ...matteKeys]),
+      createdLayerId: matteId,
+    };
+  }
+
+  if (presetId === "split_screen_pip") {
+    const nullId = createId("pip-null");
+    const nullLayer = createStudioNullRigLayer({
+      id: nullId,
+      name: `PiP Rig · ${selectedLayer.name || targetId}`,
+      startTime: start,
+      duration: dur,
+      x: Number(selectedLayer.x ?? 50),
+      y: Number(selectedLayer.y ?? 50),
+    });
+    const nextOverlays = [
+      ...(overlays || []).map(item =>
+        item && String(item.id) === targetId
+          ? {
+              ...item,
+              parentId: nullId,
+              x: 50,
+              y: 50,
+              scale: Math.min(1, Number(item.scale ?? 0.85)),
+              frameShape: "rounded",
+              borderRadius: 28,
+              layerShadow: {
+                enabled: true,
+                color: "#020617",
+                opacity: 0.55,
+                blur: 24,
+                offsetX: 0,
+                offsetY: 12,
+              },
+            }
+          : item
+      ),
+      nullLayer,
+    ];
+    validateStudioParentGraph(nextOverlays);
+    return {
+      overlays: nextOverlays,
+      motionKeyframes: [...(motionKeyframes || [])],
+      createdLayerId: nullId,
+    };
+  }
+
+  if (presetId === "neon_echo_trail") {
+    const ghostId = createId("echo-ghost");
+    const ghostLayer = {
+      ...JSON.parse(JSON.stringify(selectedLayer)),
+      id: ghostId,
+      name: `Echo Trail · ${selectedLayer.name || selectedLayer.text || targetId}`,
+      parentId: targetId,
+      x: 53,
+      y: 52,
+      scale: 0.96,
+      rotation: 0,
+      opacity: Math.max(0.15, Number((Number(selectedLayer.opacity ?? 1) * 0.45).toFixed(2))),
+      blendMode: "screen",
+      glow: {
+        enabled: true,
+        color: "#a855f7",
+        blur: 22,
+        opacity: 0.7,
+      },
+    };
+    delete ghostLayer.trackMatte;
+    const nextOverlays = [
+      ghostLayer,
+      ...(overlays || []).map(item =>
+        item && String(item.id) === targetId
+          ? {
+              ...item,
+              glow: {
+                enabled: true,
+                color: "#22d3ee",
+                blur: 18,
+                opacity: 0.65,
+              },
+              layerShadow: {
+                enabled: true,
+                color: "#a855f7",
+                opacity: 0.55,
+                blur: 22,
+                offsetX: -6,
+                offsetY: 6,
+              },
+              motionBlur: {
+                enabled: true,
+                samples: 5,
+                shutter: 180,
+              },
+            }
+          : item
+      ),
+    ];
+    validateStudioParentGraph(nextOverlays);
+    return {
+      overlays: nextOverlays,
+      motionKeyframes: [...(motionKeyframes || [])],
+      createdLayerId: ghostId,
+    };
+  }
+
+  fail("INVALID_COMPOSITE_RECIPE", `Unknown composite rig recipe: ${presetId}`);
+};

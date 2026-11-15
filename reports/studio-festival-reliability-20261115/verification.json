@@ -1,0 +1,192 @@
+{
+  "checkedAt": "2026-11-15T08:31:34.120Z",
+  "scope": "Targeted local Studio repairs; no whole-product readiness promotion.",
+  "fixes": [
+    "LUT texel-centre sampling",
+    "LUT texture invalidation for changed interior values",
+    "Single application of compiled LUT strength",
+    "Percentage LUT and small curve units",
+    "No optional bitmap snapshots during continuous playback; one paused capture in flight and late cleanup",
+    "Finite full-cube local request allowance",
+    "Signed durable no-dispatch refusal and normal reservation settlement",
+    "Colour/LUT help routing"
+  ],
+  "automatedTests": {
+    "frontend": 41,
+    "workerBoundaryAndReceipt": 14,
+    "knowledgeAndHelp": 52,
+    "isolatedPythonProEngine": 4
+  },
+  "activeBranch": "AutoPromote-pro-studio-20261114",
+  "activeBranchVerification": "The focused frontend, HTTP/receipt, knowledge/help and real shader checks repeat here. Later concurrent optical/VFX changes are outside the isolated native proof.",
+  "native": {
+    "seconds": 12,
+    "width": 720,
+    "height": 1280,
+    "fps": 24,
+    "frames": 288,
+    "codec": "h264",
+    "audio": "aac",
+    "movieSha256": "cb4fa2200c2e39a27bfd56ed70c7b0679b8e1d5455b8bcd8b1ba7383fade33c1",
+    "normalAuthentication": true,
+    "undoRedo": true,
+    "exactCanonicalColdReopen": true,
+    "fullDecode": true,
+    "matchingFinishedFileFullPlayback": true,
+    "finalObserverRenderPosts": 0,
+    "allTwelveGatesInOneAttempt": false
+  },
+  "shader": {
+    "identity": {
+      "input": [
+        64,
+        128,
+        192,
+        255
+      ],
+      "output": [
+        64,
+        128,
+        192,
+        255
+      ],
+      "maxError": 0
+    },
+    "cache": {
+      "before": [
+        128,
+        128,
+        128,
+        255
+      ],
+      "after": [
+        128,
+        254,
+        128,
+        255
+      ],
+      "expected": [
+        128,
+        254,
+        128
+      ],
+      "changed": true
+    },
+    "fractional": {
+      "expected": [
+        96,
+        128,
+        160
+      ],
+      "atOne": [
+        96,
+        128,
+        159,
+        255
+      ],
+      "atCurrentCall": [
+        72,
+        128,
+        184,
+        255
+      ]
+    },
+    "renderer": "Actual production WebGL2 shader in headless Chrome/SwiftShader"
+  },
+  "publicAndHelp": {
+    "anonymousChecks": 8,
+    "matchingWelcome": true,
+    "normalSignedInStudio": true,
+    "contextualHelpHttp200": true
+  },
+  "playback": {
+    "profiled": true,
+    "headless": true,
+    "softwareRendering": true,
+    "elapsedMs": 14410,
+    "decodedFrames": 355,
+    "droppedFrames": 253,
+    "observedPictureUpdates": 96,
+    "bitmapCaptureSelfSecondsBefore": 1.36902,
+    "bitmapCaptureSelfSecondsAfter": 0.006236,
+    "smoothnessQualified": false,
+    "note": "Optional snapshot overhead is removed. High frame drops persist; profile intervals and host load do not qualify general realtime performance."
+  },
+  "pairedFrames": {
+    "pairs": [
+      {
+        "seconds": 1,
+        "exportFrame": 24,
+        "width": 720,
+        "height": 1280,
+        "mse": 99.06869212962962,
+        "psnrDb": 28.171439312420112,
+        "meanAbsoluteChannelError": 7.72697193287037,
+        "maximumChannelError": 68
+      },
+      {
+        "seconds": 3,
+        "exportFrame": 72,
+        "width": 720,
+        "height": 1280,
+        "mse": 95.7689015480324,
+        "psnrDb": 28.31855854698447,
+        "meanAbsoluteChannelError": 7.583756148726851,
+        "maximumChannelError": 64
+      },
+      {
+        "seconds": 6,
+        "exportFrame": 144,
+        "width": 720,
+        "height": 1280,
+        "mse": 99.7049880642361,
+        "psnrDb": 28.143634750278252,
+        "meanAbsoluteChannelError": 7.758601345486111,
+        "maximumChannelError": 66
+      },
+      {
+        "seconds": 10,
+        "exportFrame": 240,
+        "width": 720,
+        "height": 1280,
+        "mse": 98.95038700810186,
+        "psnrDb": 28.176628637387907,
+        "meanAbsoluteChannelError": 7.70769458912037,
+        "maximumChannelError": 66
+      }
+    ],
+    "minimumPsnrDb": 28.143634750278252,
+    "method": "Actual paused Live Edit programme PNG against exact 24fps final frame, same full 720x1280 raster; no alignment, resize or cropped exclusions.",
+    "qualification": "Diagnostic measurements only. Whole moving picture/audio and prior strict typography parity remain unqualified."
+  },
+  "retainedFailure": "Initial HTTP413, temporary capacity refusal, native observer failures, unhelpful channel-table/resized-proxy experiments and their earlier takes are preserved.",
+  "limits": [
+    "Full moving picture/audio equality remains unqualified.",
+    "Strict earlier typography parity failures remain.",
+    "Advanced unsupported 3D controls were already disabled.",
+    "Caption work from the separate live-owner worktree is not yet a verified combined release.",
+    "The festival package is still unfinished."
+  ],
+  "runtime": {
+    "apiOrigin": "http://127.0.0.1:45225",
+    "build": "/tmp/autopromote-application-demo-K9waj1/build-paused-cache",
+    "bundle": "main.003ac8ea.js",
+    "sha256": "92e8af66d0a4cf0b6ec3e1324d330f03cc8ff6334227a592b6231904ec794af8",
+    "originalBuildRetained": true
+  },
+  "sourceHashes": {
+    "frontend/src/components/ViralClipStudio.js": "bc6d366e0f728b1f2b2c6b2f3b8242e264bcafd0a699d84c886e847d56ef1fb5",
+    "frontend/src/components/studioWebGLCompositor.js": "3d17ad66d8707ccf48d72ab9c8ec569e51a6c14a17ae3b090ef0fe73e5171b02",
+    "frontend/src/components/studioColorCube.js": "56c3c0e30e2102ebc6040fb73968d8ef7e01d66c855edf969cffd0101be0742e",
+    "frontend/src/components/studioMediaFrameCache.js": "30029e10c6a4d8e74df9742873b52433a1b56576000382a41b3d1b6161794834",
+    "src/services/unifiedCredits/workerVerification.js": "0197059a5bb53f9835e886b92795a4070617435a6f60b458ad112767d62d00e8",
+    "scripts/monetization/local-worker-provider.cjs": "1793e1bcc100eafa9792f679511bd0ac469eff5375dcb29a14855016f4a2b5e6",
+    "scripts/monetization/application-host.cjs": "68feb65e0d9373b5873698e49b0ecbb58f2c6c09e2f2adf5dde98fe9b42f4273",
+    "scripts/monetization/application-demo.cjs": "da8d1b28b508558ef9c187e8371b524e81c8766b996c541d120de8c21af7c3e7",
+    "src/productAssistance/index.js": "43f76d99dbaf282bee84c4235112c30b62769e61de92a1cd6fd59394255f5d9a"
+  },
+  "productionWrites": 0,
+  "paidProviderCalls": 0,
+  "gpuAllocations": 0,
+  "deployments": 0
+}

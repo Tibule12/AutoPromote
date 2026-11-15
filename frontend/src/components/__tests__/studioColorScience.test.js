@@ -1,15 +1,22 @@
 import {
   CAMERA_COLOR_PROFILES,
+  DEAD_CONTENT_REVITALIZER_PRESETS,
   FILM_EMULATION_PRESETS,
   HSL_QUALIFIER_PRESETS,
   LOUDNESS_STANDARDS,
   POWER_WINDOW_PRESETS,
+  applySelectiveAndRevitalizerGrade,
   buildColorSpaceTransformCube,
+  diagnoseDeadFootageAndSolveRevival,
+  evaluateHslQualifierMatte,
+  evaluatePixelRevitalizer,
+  evaluatePowerWindowMask,
+  evaluateSelectiveColorTransform,
   solveShotMatchGrade,
 } from "../studioColorScience";
 
 describe("studioColorScience", () => {
-  test("exports camera profiles, secondary presets, and loudness standards", () => {
+  test("exports camera profiles, secondary presets, dead-content revitalizers, and loudness standards", () => {
     const ids = CAMERA_COLOR_PROFILES.map(p => p.id);
     expect(ids).toEqual(
       expect.arrayContaining([
@@ -22,7 +29,13 @@ describe("studioColorScience", () => {
       ])
     );
     expect(HSL_QUALIFIER_PRESETS.skin_isolate.enabled).toBe(true);
+    expect(HSL_QUALIFIER_PRESETS.garment_crimson.enabled).toBe(true);
+    expect(HSL_QUALIFIER_PRESETS.sin_city_red_splash.desaturateOutside).toBe(1);
     expect(POWER_WINDOW_PRESETS.subject_spotlight.enabled).toBe(true);
+    expect(POWER_WINDOW_PRESETS.face_upper_body.enabled).toBe(true);
+    expect(POWER_WINDOW_PRESETS.full_body_column.shape).toBe("rectangle");
+    expect(DEAD_CONTENT_REVITALIZER_PRESETS.flat_log_revival.dehaze).toBeGreaterThan(0);
+    expect(DEAD_CONTENT_REVITALIZER_PRESETS.low_light_rescue.shadowRecovery).toBeGreaterThan(0.5);
     expect(FILM_EMULATION_PRESETS["35mm_halation"].halation).toBeGreaterThan(0);
     expect(LOUDNESS_STANDARDS.social.targetLufs).toBe(-14);
   });
@@ -81,5 +94,71 @@ describe("studioColorScience", () => {
     expect(grade.temperature).toBeGreaterThan(0.2);
     expect(grade.contrast).toBeGreaterThanOrEqual(0.75);
     expect(grade.contrast).toBeLessThanOrEqual(1.45);
+  });
+
+  test("selective HSL qualifier isolates and recolors a red object while leaving cyan background untouched or B&W in splash mode", () => {
+    const redQualifier = {
+      ...HSL_QUALIFIER_PRESETS.garment_crimson,
+      colorizeColor: "#2563eb", // Recolor red garment to cobalt blue
+      colorizeStrength: 0.9,
+      desaturateOutside: 1.0, // Turn non-red background B&W
+    };
+    expect(evaluateHslQualifierMatte(0.9, 0.12, 0.15, redQualifier)).toBeGreaterThan(0.85);
+    expect(evaluateHslQualifierMatte(0.1, 0.8, 0.85, redQualifier)).toBeLessThan(0.05);
+
+    // Red garment pixel becomes blue-dominant after selective recolor
+    const recoloredObject = evaluateSelectiveColorTransform(0.9, 0.12, 0.15, 0.5, 0.5, {
+      qualifier: redQualifier,
+    });
+    expect(recoloredObject[2]).toBeGreaterThan(recoloredObject[0]);
+
+    // Cyan background pixel becomes grayscale because desaturateOutside = 1.0
+    const background = evaluateSelectiveColorTransform(0.1, 0.8, 0.85, 0.5, 0.5, {
+      qualifier: redQualifier,
+    });
+    expect(background[0]).toBeCloseTo(background[1], 3);
+    expect(background[1]).toBeCloseTo(background[2], 3);
+  });
+
+  test("spatial power window isolates face/upper-body zone and feathers to zero at frame corners", () => {
+    const faceWindow = POWER_WINDOW_PRESETS.face_upper_body;
+    expect(evaluatePowerWindowMask(0.5, 0.32, faceWindow)).toBe(1);
+    expect(evaluatePowerWindowMask(0.02, 0.96, faceWindow)).toBe(0);
+    expect(evaluatePowerWindowMask(0.5, 0.32, { ...faceWindow, invert: true })).toBe(0);
+  });
+
+  test("dead-content revitalizer lifts dark shadows, clears haze, boosts muted colors, and diagnoses dead frames", () => {
+    // Dark, hazy, dull pixel
+    const [rOut, gOut, bOut] = evaluatePixelRevitalizer(0.16, 0.14, 0.12, {
+      dehaze: 0.4,
+      shadowRecovery: 0.75,
+      highlightRollOff: 0.3,
+      clarity: 0.4,
+      vibrance: 0.6,
+      skinToneProtect: 0.9,
+    });
+    expect(rOut).toBeGreaterThan(0.18);
+    expect(gOut).toBeGreaterThan(0.15);
+
+    // Dead dark muddy frame buffer
+    const deadFrame = new Uint8ClampedArray([
+      42, 40, 38, 255,
+      48, 45, 43, 255,
+      36, 35, 34, 255,
+      44, 42, 40, 255,
+    ]);
+    const diagnosis = diagnoseDeadFootageAndSolveRevival(deadFrame);
+    expect(diagnosis.issues).toEqual(
+      expect.arrayContaining(["underexposed_shadows", "washed_out_flat_contrast", "lifeless_muted_chroma"])
+    );
+    expect(diagnosis.presetId).toBe("low_light_rescue");
+    expect(diagnosis.grade.exposureStops).toBeGreaterThan(0.4);
+    expect(diagnosis.revitalizer.shadowRecovery).toBeGreaterThan(0.5);
+
+    const revived = deadFrame.slice();
+    applySelectiveAndRevitalizerGrade(revived, 2, 2, {
+      revitalizer: diagnosis.revitalizer,
+    });
+    expect(revived[0]).toBeGreaterThan(deadFrame[0]);
   });
 });

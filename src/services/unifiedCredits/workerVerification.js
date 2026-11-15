@@ -54,7 +54,9 @@ function verifyLocalProcessEnvelope(envelope, expected, publicKey) {
   if (
     !["succeeded", "failed"].includes(payload.state) ||
     payload.processTerminated !== true ||
-    !Number.isSafeInteger(payload.exitCode) ||
+    !(payload.noDispatch === true
+      ? payload.state === "failed" && payload.exitCode === null && payload.startedAt === null
+      : Number.isSafeInteger(payload.exitCode)) ||
     (payload.state === "succeeded" && payload.exitCode !== 0) ||
     !Number.isFinite(Date.parse(payload.finishedAt))
   )

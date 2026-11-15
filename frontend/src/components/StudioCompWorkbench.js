@@ -9,16 +9,23 @@ import {
 import { studioMotionPropertiesForTarget } from './studioMotionProperties';
 import {
   COMP_CURVE_PRESETS,
+  COMPOSITE_RIG_RECIPES,
   MOTION_DRIVER_CATALOG,
   MOTION_DRIVER_PROPERTIES,
+  MOTION_RIG_RECIPES,
+  SPATIAL_MOTION_PATH_PRESETS,
   TRACK_MATTE_OPTIONS,
+  applyStudioMotionRigRecipe,
   bakeLayerMotionToKeyframes,
+  buildStudioCompositeRigPreset,
+  buildStudioSpatialPathPresetKeyframes,
   createStudioNullRigLayer,
   defaultMotionDriverForProperty,
   evaluateWorldLayerPose,
   isHiddenTrackMatteSource,
   removeStudioLayerSafely,
   reparentStudioLayerPreservingWorldPose,
+  transformStudioLayerKeyframes,
 } from "./studioCompRigging";
 import "./StudioMotionFlow.css";
 import StudioCurveHandles from './StudioCurveHandles';
@@ -339,6 +346,61 @@ export default function StudioCompWorkbench({
       delete cleaned.parentId;
       return cleaned;
     });
+  };
+
+  const handleApplyMotionRigRecipe = recipeId => {
+    try {
+      const rigged = applyStudioMotionRigRecipe(selectedLayer, recipeId);
+      updateOverlayById(selectedLayer.id, { motionDrivers: rigged.motionDrivers });
+      const firstProp = Object.keys(rigged.motionDrivers || {})[0];
+      if (firstProp) setDriverProp(firstProp);
+    } catch (_err) {
+      // Ignore invalid recipe
+    }
+  };
+
+  const handleApplySpatialPathPreset = presetId => {
+    try {
+      const nextKeys = buildStudioSpatialPathPresetKeyframes({
+        layer: selectedLayer,
+        keyframes: motionKeyframes || [],
+        presetId,
+        startTime: selectedLayer.startTime ?? 0,
+        duration: selectedLayer.duration ?? programmeDuration ?? 4,
+      });
+      onChangeMotionKeyframes?.(nextKeys);
+      setVisibleProps(prev => [...new Set([...prev, "x", "y"])]);
+    } catch (_err) {
+      // Ignore invalid path preset
+    }
+  };
+
+  const handleTransformLayerKeyframes = (operation, factor = 0.5) => {
+    const nextKeys = transformStudioLayerKeyframes({
+      keyframes: motionKeyframes || [],
+      targetId: selectedLayer.id,
+      operation,
+      factor,
+    });
+    onChangeMotionKeyframes?.(nextKeys);
+  };
+
+  const handleApplyCompositeRigRecipe = presetId => {
+    if (!selectedLayer || selectedLayer.id === "main-video" || selectedLayer.isNullRig) return;
+    try {
+      const built = buildStudioCompositeRigPreset({
+        presetId,
+        selectedLayer,
+        overlays: overlays || [],
+        motionKeyframes: motionKeyframes || [],
+        currentTime,
+        programmeDuration,
+      });
+      onChangeOverlays?.(built.overlays);
+      onChangeMotionKeyframes?.(built.motionKeyframes);
+    } catch (_err) {
+      // Ignore invalid composite target
+    }
   };
 
   const durationSafe = Math.max(1, Number(programmeDuration) || 8);
@@ -990,6 +1052,42 @@ export default function StudioCompWorkbench({
                 ) : null}
               </div>
             ) : null}
+
+            {/* 1-Click Multi-Property Motion Rig Recipes */}
+            <div className="ap-comp-preset-strip" data-testid="comp-motion-rig-strip" style={{ marginTop: 6 }}>
+              <span style={{ fontSize: 10.5, color: "#94a3b8", fontWeight: 700 }}>Motion Rigs:</span>
+              {MOTION_RIG_RECIPES.map(recipe => (
+                <button
+                  key={recipe.id}
+                  type="button"
+                  className="ap-mfx-btn"
+                  style={{ padding: "3px 8px", fontSize: 10.5 }}
+                  title={recipe.summary}
+                  data-testid={`comp-motion-rig-${recipe.id}`}
+                  onClick={() => handleApplyMotionRigRecipe(recipe.id)}
+                >
+                  {recipe.label}
+                </button>
+              ))}
+            </div>
+
+            {/* 1-Click Composite Rig Recipes */}
+            <div className="ap-comp-preset-strip" data-testid="comp-composite-recipe-strip" style={{ marginTop: 4 }}>
+              <span style={{ fontSize: 10.5, color: "#94a3b8", fontWeight: 700 }}>Composite Rigs:</span>
+              {COMPOSITE_RIG_RECIPES.map(recipe => (
+                <button
+                  key={recipe.id}
+                  type="button"
+                  className="ap-mfx-btn"
+                  style={{ padding: "3px 8px", fontSize: 10.5 }}
+                  disabled={!selectedLayer || selectedLayer.id === "main-video" || selectedLayer.isNullRig}
+                  data-testid={`comp-composite-recipe-${recipe.id}`}
+                  onClick={() => handleApplyCompositeRigRecipe(recipe.id)}
+                >
+                  {recipe.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -1200,6 +1298,64 @@ export default function StudioCompWorkbench({
                 {preset.label}
               </button>
             ))}
+          </div>
+
+          {/* 1-Click Curved Spatial Motion Path Presets & Batch Keyframe Retiming */}
+          <div className="ap-comp-preset-strip" data-testid="comp-spatial-path-strip" style={{ marginTop: 4 }}>
+            <span style={{ fontSize: 10.5, color: "#94a3b8", fontWeight: 700 }}>Curved Paths:</span>
+            {SPATIAL_MOTION_PATH_PRESETS.map(preset => (
+              <button
+                key={preset.id}
+                type="button"
+                className="ap-mfx-btn"
+                style={{ padding: "3px 8px", fontSize: 10.5 }}
+                onClick={() => handleApplySpatialPathPreset(preset.id)}
+                data-testid={`comp-spatial-path-${preset.id}`}
+              >
+                {preset.label}
+              </button>
+            ))}
+            <span style={{ fontSize: 10.5, color: "#94a3b8", fontWeight: 700, marginLeft: 6 }}>Keys:</span>
+            <button
+              type="button"
+              className="ap-mfx-btn"
+              style={{ padding: "3px 8px", fontSize: 10.5 }}
+              disabled={targetKeyframes.length < 2}
+              onClick={() => handleTransformLayerKeyframes("reverse")}
+              data-testid="comp-keys-reverse"
+            >
+              Reverse
+            </button>
+            <button
+              type="button"
+              className="ap-mfx-btn"
+              style={{ padding: "3px 8px", fontSize: 10.5 }}
+              disabled={targetKeyframes.length < 2}
+              onClick={() => handleTransformLayerKeyframes("pingpong")}
+              data-testid="comp-keys-pingpong"
+            >
+              Ping-Pong Cycle
+            </button>
+            <button
+              type="button"
+              className="ap-mfx-btn"
+              style={{ padding: "3px 8px", fontSize: 10.5 }}
+              disabled={targetKeyframes.length < 2}
+              onClick={() => handleTransformLayerKeyframes("scale_time", 0.5)}
+              data-testid="comp-keys-compress"
+            >
+              Compress 0.5x
+            </button>
+            <button
+              type="button"
+              className="ap-mfx-btn"
+              style={{ padding: "3px 8px", fontSize: 10.5 }}
+              disabled={targetKeyframes.length < 2}
+              onClick={() => handleTransformLayerKeyframes("scale_time", 1.5)}
+              data-testid="comp-keys-stretch"
+            >
+              Stretch 1.5x
+            </button>
           </div>
         </div>
       </div>

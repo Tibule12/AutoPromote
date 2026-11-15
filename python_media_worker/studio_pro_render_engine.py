@@ -198,6 +198,44 @@ def build_film_emulation_filter(fx: Mapping[str, Any]) -> str:
         strength = max(2, min(28, round((grain / 100.0) * 24)))
         stages.append(f"noise=alls={strength}:allf=t+u")
 
+    lens_blur = _to_percent_scale(fx.get("lensBlur", 0))
+    dream_glow = _to_percent_scale(fx.get("dreamGlow", 0))
+    anamorphic = _to_percent_scale(fx.get("anamorphicFlare", 0))
+    if any(value > 1.0 for value in (lens_blur, dream_glow, anamorphic)):
+        stages.append("format=gbrp")
+    if lens_blur > 1.0:
+        sigma = round(1.5 + (lens_blur / 100.0) * 9.5, 2)
+        stages.append(
+            f"split=3[pe_lb_base][pe_lb_src][pe_lb_ref];"
+            f"[pe_lb_src]gblur=sigma={sigma}:steps=2[pe_lb_blur];"
+            f"[pe_lb_ref]scale=64:64,geq="
+            f"r='255*clip((hypot((X-32)/32,(Y-32)/32)-0.25)/0.75,0,1)':"
+            f"g='255*clip((hypot((X-32)/32,(Y-32)/32)-0.25)/0.75,0,1)':"
+            f"b='255*clip((hypot((X-32)/32,(Y-32)/32)-0.25)/0.75,0,1)'[pe_lb_small];"
+            f"[pe_lb_small][pe_lb_base]scale2ref[pe_lb_mask][pe_lb_base2];"
+            f"[pe_lb_base2][pe_lb_blur][pe_lb_mask]maskedmerge"
+        )
+    if dream_glow > 1.0:
+        sigma = round(4.0 + (dream_glow / 100.0) * 12.0, 2)
+        stages.append(
+            f"split[pe_dg_base][pe_dg_hi];"
+            f"[pe_dg_hi]lutrgb=r='if(gt(val,135),(val-135)*1.9,0)':"
+            f"g='if(gt(val,135),(val-135)*1.9,0)':"
+            f"b='if(gt(val,135),(val-135)*1.9,0)',"
+            f"gblur=sigma={sigma}:steps=2[pe_dg_blur];"
+            f"[pe_dg_base][pe_dg_blur]blend=all_mode=screen:all_opacity={round((dream_glow / 100.0) * 0.55, 3)}"
+        )
+    if anamorphic > 1.0:
+        sigma_h = round(14.0 + (anamorphic / 100.0) * 42.0, 2)
+        stages.append(
+            f"split[pe_af_base][pe_af_hi];"
+            f"[pe_af_hi]lutrgb=r='if(gt(val,180),(val-180)*1.1,0)':"
+            f"g='if(gt(val,180),(val-180)*2.4,0)':"
+            f"b='if(gt(val,180),min(255,(val-180)*3.4),0)',"
+            f"gblur=sigma={sigma_h}:sigmaV=0.5:steps=2[pe_af_streak];"
+            f"[pe_af_base][pe_af_streak]blend=all_mode=screen:all_opacity={round((anamorphic / 100.0) * 0.72, 3)}"
+        )
+
     return ",".join(stages)
 
 

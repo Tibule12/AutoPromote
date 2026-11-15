@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import ViralScanner from "../components/ViralScanner";
 import { SafeVideo } from "../components/SafeMedia";
+import {clipSelectionSettings} from '../utils/clipSelectionSettings';
 
 const DESTINATIONS = ["TikTok", "YouTube Shorts", "Instagram Reels"];
 
@@ -22,14 +23,21 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
   const [scannerOpen, setScannerOpen] = useState(false);
   const [selectedClip, setSelectedClip] = useState(null);
   const [suggestedClips, setSuggestedClips] = useState([]);
+  const [hasAnalysed,setHasAnalysed]=useState(false);
   const [targetLength, setTargetLength] = useState("30–60 seconds");
   const [destinations, setDestinations] = useState(DESTINATIONS);
+  const [focus, setFocus] = useState('');
+  const settings=useMemo(()=>clipSelectionSettings(targetLength,destinations,focus),[targetLength,destinations,focus]);
   const sourceVideoRef = useRef(null);
+  const previewRangeRef = useRef(null);
 
   useEffect(() => {
+    previewRangeRef.current=null;
     setSourceFile(initialFile || null);
     setSelectedClip(null);
     setSuggestedClips([]);
+    setHasAnalysed(false);
+    setScannerOpen(false);
   }, [initialFile]);
 
   useEffect(() => {
@@ -66,16 +74,23 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
   const handleFileChange = event => {
     const [file] = Array.from(event.target.files || []);
     if (!file) return;
+    previewRangeRef.current = null;
     setSourceFile(file);
     setSelectedClip(null);
     setSuggestedClips([]);
+    setHasAnalysed(false);
     setScannerOpen(false);
   };
+
+  useEffect(()=>{setSuggestedClips([]);setSelectedClip(null);setHasAnalysed(false);previewRangeRef.current=null;},[settings]);
 
   const previewClip = clip => {
     const video = sourceVideoRef.current;
     if (!video) return;
-    video.currentTime = Math.max(0, Number(clip?.start || 0));
+    const start=Number(clip?.start),end=Number(clip?.end);
+    if(!Number.isFinite(start)||!Number.isFinite(end)||end<=start)return;
+    previewRangeRef.current={start:Math.max(0,start),end};
+    video.currentTime = Math.max(0, start);
     const playback = video.play();
     if (typeof playback?.catch === "function") playback.catch(() => {});
     setSelectedClip(clip);
@@ -92,7 +107,9 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
           <div className="viral-source-media-row">
             <div className={`viral-source-preview ${previewUrl ? "has-video" : ""}`}>
               {previewUrl ? (
-                <SafeVideo ref={sourceVideoRef} src={previewUrl} controls preload="metadata" />
+                <SafeVideo ref={sourceVideoRef} src={previewUrl} controls preload="metadata"
+                  onTimeUpdate={event=>{if(previewRangeRef.current&&event.currentTarget.currentTime>=previewRangeRef.current.end){event.currentTarget.pause();previewRangeRef.current=null;}}}
+                  onSeeked={event=>{const range=previewRangeRef.current;if(range&&(event.currentTarget.currentTime<range.start-.1||event.currentTarget.currentTime>range.end+.1))previewRangeRef.current=null;}} />
               ) : (
                 <div className="viral-source-empty">
                   <span>▶</span>
@@ -114,7 +131,7 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
               </div>
               <label className="btn-secondary viral-file-picker">
                 {sourceFile ? "Choose another video" : "Choose video"}
-                <input type="file" accept="video/*" onChange={handleFileChange} />
+                <input type="file" accept="video/*" disabled={scannerOpen} onChange={handleFileChange} />
               </label>
             </div>
           </div>
@@ -127,7 +144,7 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
 
           <label>
             Target length
-            <select value={targetLength} onChange={event => setTargetLength(event.target.value)}>
+            <select aria-label="Target length" value={targetLength} disabled={scannerOpen} onChange={event => setTargetLength(event.target.value)}>
               <option>15–30 seconds</option>
               <option>30–60 seconds</option>
               <option>60–90 seconds</option>
@@ -143,6 +160,7 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
                   type="button"
                   className={destinations.includes(destination) ? "selected" : ""}
                   aria-pressed={destinations.includes(destination)}
+                  disabled={scannerOpen}
                   onClick={() =>
                     setDestinations(current =>
                       current.includes(destination)
@@ -161,6 +179,11 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
             </div>
           </div>
 
+          <label>
+            What should we look for? (optional)
+            <input aria-label="What should we look for? (optional)" value={focus} maxLength={200} disabled={scannerOpen} placeholder="Useful lessons, funny reactions, surprising answers…"
+              onChange={event=>setFocus(event.target.value)} />
+          </label>
           <div className="viral-caption-language-note" role="note">
             <strong>Multilingual captions</strong>
             <span>Spoken languages and code-switching stay original by default.</span>
@@ -170,7 +193,7 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
           <button
             type="button"
             className="check-quality viral-analyse-button"
-            disabled={!sourceFile}
+            disabled={!sourceFile||!destinations.length||scannerOpen}
             onClick={() => setScannerOpen(true)}
           >
             ✦ Analyse video
@@ -193,6 +216,7 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
         {scannerOpen && sourceFile ? (
           <ViralScanner
             file={sourceFile}
+            selectionSettings={settings}
             embedded
             autoStart
             onClose={() => setScannerOpen(false)}
@@ -201,6 +225,7 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
               onUpgrade?.();
             }}
             onResults={clips => {
+              setHasAnalysed(true);
               setSuggestedClips(clips);
               setSelectedClip(clips[0] || null);
               setScannerOpen(false);
@@ -216,16 +241,13 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
           <div className="viral-moment-list">
             {suggestedClips.map((clip, index) => {
               const score = Math.round(Number(clip.score || clip.guidedScore || 0));
-              const confidence = score >= 75 ? "High confidence" : "Medium confidence";
+              const confidence = clip.scoreConfidenceLabel || 'Review the source evidence';
               return (
                 <article
                   key={clip.id || `${clip.start}-${clip.end}`}
                   className={selectedClip?.id === clip.id ? "selected" : ""}
                 >
-                  <div className="viral-moment-thumbnail" aria-hidden="true">
-                    <span>{index + 1}</span>
-                    <i />
-                  </div>
+                  <span className="viral-moment-rank" aria-label={`Rank ${index+1}`}>{index + 1}</span>
                   <div className="viral-moment-copy">
                     <strong>
                       {clip.hookText || clip.reason || `Suggested moment ${index + 1}`}
@@ -234,10 +256,12 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
                       {Number(clip.start || 0).toFixed(1)}s –{" "}
                       {Number(clip.end || clip.start || 0).toFixed(1)}s
                     </small>
+                    {clip.text||clip.transcript?<p>{String(clip.text||clip.transcript).slice(0,360)}</p>:null}
+                    {Array.isArray(clip.reviewFlags)&&clip.reviewFlags.length?<small>{clip.reviewFlags.join(' · ')}</small>:null}
                   </div>
                   <div className="viral-moment-confidence">
                     <span>{confidence}</span>
-                    <div aria-label={`${score}% confidence`}>
+                    <div aria-label={`Editorial score ${score} out of 100`}>
                       {[20, 40, 60, 75, 90].map(threshold => (
                         <i key={threshold} className={score >= threshold ? "filled" : ""} />
                       ))}
@@ -263,6 +287,8 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
               );
             })}
           </div>
+        ) : hasAnalysed ? (
+          <p role="status">No moments matched this scan. Try a shorter target length or a different brief, or review the source in Studio.</p>
         ) : (
           <div className="viral-suggestion-placeholders" aria-hidden="true">
             {[78, 62, 44].map((width, index) => (

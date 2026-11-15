@@ -2,6 +2,8 @@ import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import {
   TEXT_ANIMATOR_DEFAULT,
+  TEXT_ANIMATOR_PRESETS,
+  buildStudioTextAnimatorPreset,
   layoutStudioAnimatedText,
   studioTextAnimatorPoses,
   validateStudioTextAnimation,
@@ -227,4 +229,29 @@ test("native predictive output renders independent units and updates from key-dr
       e => e.getAttribute("opacity") === "1"
     )
   ).toBe(true);
+});
+
+test("all 6 text choreography presets validate and apply in one click via StudioTextAnimatorPanel", () => {
+  expect(TEXT_ANIMATOR_PRESETS).toHaveLength(6);
+  const baseLayer = title();
+  for (const preset of TEXT_ANIMATOR_PRESETS) {
+    const spec = buildStudioTextAnimatorPreset(preset.id);
+    expect(() => validateStudioTextAnimation({ ...baseLayer, textAnimator: spec })).not.toThrow();
+    const layout = layoutStudioAnimatedText({ ...baseLayer, textAnimator: spec }, 1280);
+    const poses = studioTextAnimatorPoses(spec, 50, layout);
+    expect(poses.length).toBeGreaterThan(0);
+  }
+
+  const onChange = jest.fn();
+  const onBuild = jest.fn();
+  render(
+    <StudioTextAnimatorPanel
+      layer={baseLayer}
+      onChange={onChange}
+      onBuild={onBuild}
+      onDisable={jest.fn()}
+    />
+  );
+  fireEvent.click(screen.getByTestId("text-animator-preset-vortex_spiral_reveal"));
+  expect(onChange).toHaveBeenCalledWith(buildStudioTextAnimatorPreset("vortex_spiral_reveal"));
 });

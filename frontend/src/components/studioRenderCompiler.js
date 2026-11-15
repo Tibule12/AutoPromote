@@ -133,11 +133,26 @@ export const compileStudioFinishForRender = document => {
     : compileBaseTransform(transform);
   const adv = state.advancedColor || {};
   const colorFields = ["preset", "exposureStops", "lift", "gamma", "gain", "tint",
-    "brightness", "contrast", "saturation", "temperature", "sharpness", "vignette"];
+    "brightness", "contrast", "saturation", "temperature", "sharpness", "vignette",
+    "dehaze", "clarity", "shadowRecovery", "highlightRollOff", "vibrance", "skinToneProtect",
+    "revitalizerPresetId"];
+  const activePowerWindow = adv.powerWindow?.enabled
+    ? adv.powerWindow
+    : fx.powerWindow?.enabled
+      ? fx.powerWindow
+      : null;
+  const activeQualifier = adv.qualifier?.enabled
+    ? adv.qualifier
+    : fx.qualifier?.enabled
+      ? fx.qualifier
+      : null;
   return {
-    color_cube: buildAdvancedColorCube(adv),
-    power_window: adv.powerWindow?.enabled ? { ...adv.powerWindow } : null,
-    hsl_qualifier: adv.qualifier?.enabled ? { ...adv.qualifier } : null,
+    color_cube: buildAdvancedColorCube({
+      ...adv,
+      ...(activeQualifier && !adv.qualifier ? { qualifier: activeQualifier } : {}),
+    }),
+    power_window: activePowerWindow ? { ...activePowerWindow } : null,
+    hsl_qualifier: activeQualifier ? { ...activeQualifier } : null,
     adjustment_layers: compileStudioAdjustmentStack(state.adjustmentLayers),
     main_frame: { enabled: frame.enabled !== false, shape: "round", inset_percent: frame.insetPercent,
       border_radius_percent: frame.radiusPercent, background: frame.background },
@@ -149,7 +164,9 @@ export const compileStudioFinishForRender = document => {
       keyframes: resolvedMainKeys },
     texture: { film_grain: fx.filmGrain, chromatic_aberration: fx.chromaticAberration,
       halation: fx.halation, film_emulation: fx.filmEmulation,
-      vhs_tracking: fx.vhsTracking, light_leak: fx.lightLeak },
+      vhs_tracking: fx.vhsTracking, light_leak: fx.lightLeak,
+      dream_glow: fx.dreamGlow ?? 0, anamorphic_flare: fx.anamorphicFlare ?? 0,
+      lens_blur: fx.lensBlur ?? 0 },
     visualizer: { ...state.podcastVisualizer, source: "original_speech" },
     keyframes: (state.finishKeyframes || []).map(key => ({ id: key.id,
       time: Number(key.time || 0), values: { ...key.values }, interpolation: "linear" })),
