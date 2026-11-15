@@ -166,3 +166,41 @@ test("refreshing camera access links leaves the canonical visual revision unchan
   snapshot.speakerStackSources[0].url += "-fresh";
   expect(reconcileStudioDocument({ snapshot, projectId: "visual", storedDocument: document }).revision).toBe(document.revision);
 });
+
+test("compileStudioFinishForRender forwards enabled secondary powerWindow and hsl_qualifier", () => {
+  const snapshot = visualProject();
+  snapshot.advancedColor = {
+    powerWindow: {
+      enabled: true,
+      x: 0.42,
+      y: 0.36,
+      rx: 0.25,
+      ry: 0.3,
+      rotation: 0.35,
+      feather: 0.28,
+      invert: true,
+      exposureStops: 0.4,
+      gain: 1.15,
+      saturation: 1.2,
+    },
+    qualifier: {
+      enabled: true,
+      hueCenter: 0.08,
+      hueWidth: 0.09,
+      satMin: 0.16,
+      satMax: 0.88,
+      lumMin: 0.12,
+      lumMax: 0.9,
+      softness: 0.22,
+      invert: false,
+      showMatte: false,
+      hueShift: 0.05,
+      saturation: 1.25,
+      gain: 1.08,
+    },
+  };
+  const document = makeDocument(snapshot);
+  const finish = compileStudioFinishForRender(document);
+  expect(finish.power_window).toMatchObject({ enabled: true, x: 0.42, invert: true, rotation: 0.35 });
+  expect(finish.hsl_qualifier).toMatchObject({ enabled: true, hueCenter: 0.08, saturation: 1.25 });
+});

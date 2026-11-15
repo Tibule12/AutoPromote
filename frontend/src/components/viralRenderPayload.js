@@ -30,7 +30,8 @@ export const normalizeSpeedSegmentsForRender = speedSegments => {
       return segments;
     }
 
-    segments.push({
+    const holdSeconds = toFiniteNumber(segment?.hold_seconds ?? segment?.holdSeconds);
+    const entry = {
       id: segment?.id || `speed-${index + 1}`,
       start_time: startTime,
       end_time: endTime,
@@ -39,7 +40,20 @@ export const normalizeSpeedSegmentsForRender = speedSegments => {
         segment?.pitch_preserved !== undefined
           ? !!segment.pitch_preserved
           : segment?.pitchPreserved !== false,
-    });
+    };
+    if (segment?.direction === "reverse") {
+      entry.direction = "reverse";
+    }
+    if (segment?.freeze) {
+      entry.freeze = true;
+      if (holdSeconds !== null && holdSeconds > 0) {
+        entry.hold_seconds = holdSeconds;
+      }
+    }
+    if (segment?.optical_flow ?? segment?.opticalFlow) {
+      entry.optical_flow = true;
+    }
+    segments.push(entry);
     return segments;
   }, []);
 };

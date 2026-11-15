@@ -131,10 +131,13 @@ export const compileStudioFinishForRender = document => {
   const resolvedMainBase = mainBaked
     ? compileBaseTransform({ ...transform, ...mainBaked.initialPose })
     : compileBaseTransform(transform);
+  const adv = state.advancedColor || {};
   const colorFields = ["preset", "exposureStops", "lift", "gamma", "gain", "tint",
     "brightness", "contrast", "saturation", "temperature", "sharpness", "vignette"];
   return {
-    color_cube: buildAdvancedColorCube(state.advancedColor),
+    color_cube: buildAdvancedColorCube(adv),
+    power_window: adv.powerWindow?.enabled ? { ...adv.powerWindow } : null,
+    hsl_qualifier: adv.qualifier?.enabled ? { ...adv.qualifier } : null,
     adjustment_layers: compileStudioAdjustmentStack(state.adjustmentLayers),
     main_frame: { enabled: frame.enabled !== false, shape: "round", inset_percent: frame.insetPercent,
       border_radius_percent: frame.radiusPercent, background: frame.background },

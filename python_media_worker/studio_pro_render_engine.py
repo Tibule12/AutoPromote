@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import shutil
 import subprocess
 from typing import Any, Dict, List, Mapping, Optional
@@ -198,6 +199,167 @@ def build_film_emulation_filter(fx: Mapping[str, Any]) -> str:
         stages.append(f"noise=alls={strength}:allf=t+u")
 
     return ",".join(stages)
+
+
+def _smoothstep(edge0: float, edge1: float, x: float) -> float:
+    if edge1 <= edge0:
+        return 1.0 if x >= edge1 else 0.0
+    t = _clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0, 0.0)
+    return t * t * (3.0 - 2.0 * t)
+
+
+def _rgb_to_hsl(r: float, g: float, b: float) -> tuple[float, float, float]:
+    max_c = max(r, g, b)
+    min_c = min(r, g, b)
+    l_val = (max_c + min_c) * 0.5
+    if max_c == min_c:
+        return 0.0, 0.0, l_val
+    d = max_c - min_c
+    s_val = d / max(1e-5, 2.0 - max_c - min_c) if l_val > 0.5 else d / max(1e-5, max_c + min_c)
+    if max_c == r:
+        h_val = (g - b) / d + (6.0 if g < b else 0.0)
+    elif max_c == g:
+        h_val = (b - r) / d + 2.0
+    else:
+        h_val = (r - g) / d + 4.0
+    return h_val / 6.0, s_val, l_val
+
+
+def _hue_to_rgb(p: float, q: float, t: float) -> float:
+    if t < 0.0:
+        t += 1.0
+    if t > 1.0:
+        t -= 1.0
+    if t < 1.0 / 6.0:
+        return p + (q - p) * 6.0 * t
+    if t < 0.5:
+        return q
+    if t < 2.0 / 3.0:
+        return p + (q - p) * (2.0 / 3.0 - t) * 6.0
+    return p
+
+
+def _hsl_to_rgb(h: float, s: float, l_val: float) -> tuple[float, float, float]:
+    if s <= 1e-5:
+        return l_val, l_val, l_val
+    q = l_val * (1.0 + s) if l_val < 0.5 else l_val + s - l_val * s
+    p = 2.0 * l_val - q
+    return (
+        _hue_to_rgb(p, q, h + 1.0 / 3.0),
+        _hue_to_rgb(p, q, h),
+        _hue_to_rgb(p, q, h - 1.0 / 3.0),
+    )
+
+
+def write_hsl_qualifier_cube(
+    qualifier: Mapping[str, Any],
+    destination: str,
+    *,
+    size: int = 17,
+) -> str:
+    """Write a .cube 3D LUT matching studioWebGLCompositor.js computeQualifierMask math."""
+    dim = max(5, min(33, int(size or 17)))
+    hue_center = _clamp(qualifier.get("hueCenter", 0.075), 0.0, 1.0, 0.075)
+    hue_width = _clamp(qualifier.get("hueWidth", 0.08), 0.01, 0.5, 0.08)
+    sat_min = _clamp(qualifier.get("satMin", 0.16), 0.0, 1.0, 0.16)
+    sat_max = _clamp(qualifier.get("satMax", 0.85), 0.0, 1.0, 0.85)
+    lum_min = _clamp(qualifier.get("lumMin", 0.12), 0.0, 1.0, 0.12)
+    lum_max = _clamp(qualifier.get("lumMax", 0.90), 0.0, 1.0, 0.90)
+    soft = max(0.01, _clamp(qualifier.get("softness", 0.24), 0.01, 1.0, 0.24))
+    invert = bool(qualifier.get("invert", False))
+    show_matte = bool(qualifier.get("showMatte", False))
+    hue_shift = _clamp(qualifier.get("hueShift", 0.0), -0.5, 0.5, 0.0)
+    sat_scale = _clamp(qualifier.get("saturation", 1.0), 0.0, 2.5, 1.0)
+    gain_scale = _clamp(qualifier.get("gain", 1.0), 0.2, 2.5, 1.0)
+
+    lines = [
+        f"LUT_3D_SIZE {dim}",
+        "DOMAIN_MIN 0 0 0",
+        "DOMAIN_MAX 1 1 1",
+    ]
+    denom = float(dim - 1)
+    for b_idx in range(dim):
+        b = b_idx / denom
+        for g_idx in range(dim):
+            g = g_idx / denom
+            for r_idx in range(dim):
+                r = r_idx / denom
+                h, s, l_val = _rgb_to_hsl(r, g, b)
+                hue_dist = abs(h - hue_center)
+                hue_dist = min(hue_dist, 1.0 - hue_dist)
+                h_mask = 1.0 - _smoothstep(hue_width, hue_width + soft * 0.5, hue_dist)
+                s_mask = _smoothstep(sat_min - soft * 0.25, sat_min + soft * 0.25, s) * (
+                    1.0 - _smoothstep(sat_max - soft * 0.25, sat_max + soft * 0.25, s)
+                )
+                l_mask = _smoothstep(lum_min - soft * 0.25, lum_min + soft * 0.25, l_val) * (
+                    1.0 - _smoothstep(lum_max - soft * 0.25, lum_max + soft * 0.25, l_val)
+                )
+                mask = _clamp(h_mask * s_mask * l_mask, 0.0, 1.0, 0.0)
+                if invert:
+                    mask = 1.0 - mask
+                if show_matte:
+                    out_r = out_g = out_b = mask
+                else:
+                    sh = (h + hue_shift) % 1.0
+                    ss = _clamp(s * sat_scale, 0.0, 1.0, s)
+                    qr, qg, qb = _hsl_to_rgb(sh, ss, l_val)
+                    qr = _clamp(qr * gain_scale, 0.0, 1.0, qr)
+                    qg = _clamp(qg * gain_scale, 0.0, 1.0, qg)
+                    qb = _clamp(qb * gain_scale, 0.0, 1.0, qb)
+                    out_r = r + (qr - r) * mask
+                    out_g = g + (qg - g) * mask
+                    out_b = b + (qb - b) * mask
+                lines.append(f"{out_r:.7f} {out_g:.7f} {out_b:.7f}")
+
+    with open(destination, "w", encoding="ascii") as handle:
+        handle.write("\n".join(lines) + "\n")
+    return str(destination)
+
+
+def build_power_window_filter(window: Mapping[str, Any]) -> str:
+    """Build elliptical secondary power window FFmpeg filter matching studioWebGLCompositor.js."""
+    if not window or not window.get("enabled"):
+        return ""
+    cx = _clamp(window.get("x", 0.5), 0.0, 1.0, 0.5)
+    cy = _clamp(window.get("y", 0.5), 0.0, 1.0, 0.5)
+    rx = max(0.02, _clamp(window.get("rx", 0.28), 0.02, 1.5, 0.28))
+    ry = max(0.02, _clamp(window.get("ry", 0.34), 0.02, 1.5, 0.34))
+    rot = _clamp(window.get("rotation", 0.0), -6.2832, 6.2832, 0.0)
+    feather = max(0.01, _clamp(window.get("feather", 0.32), 0.01, 1.0, 0.32))
+    invert = bool(window.get("invert", False))
+    exposure = _clamp(window.get("exposureStops", 0.0), -2.0, 2.0, 0.0)
+    gain = _clamp(window.get("gain", 1.0), 0.2, 2.5, 1.0)
+    saturation = _clamp(window.get("saturation", 1.0), 0.0, 2.5, 1.0)
+
+    scale = round((2.0 ** exposure) * gain, 6)
+    cos_r = math.cos(rot)
+    sin_r = math.sin(rot)
+    if abs(rot) < 1e-4:
+        dist_expr = f"hypot((X/W-{cx:.5f})/{rx:.5f},(Y/H-{cy:.5f})/{ry:.5f})"
+    else:
+        dx = f"(X/W-{cx:.5f})"
+        dy = f"(Y/H-{cy:.5f})"
+        dist_expr = (
+            f"hypot((({dx})*{cos_r:.6f}-({dy})*{sin_r:.6f})/{rx:.5f},"
+            f"(({dx})*{sin_r:.6f}+({dy})*{cos_r:.6f})/{ry:.5f})"
+        )
+    lo = 1.0 - feather
+    denom = 2.0 * feather
+    inside_expr = f"(1-clip(({dist_expr}-{lo:.5f})/{denom:.5f},0,1))"
+    mask_expr = f"1-{inside_expr}" if invert else inside_expr
+
+    return (
+        f"split=3[pw_base][pw_fx][pw_mask_src];"
+        f"[pw_fx]format=rgb24,lutrgb=r='clip(val*{scale:.6f},0,255)':"
+        f"g='clip(val*{scale:.6f},0,255)':b='clip(val*{scale:.6f},0,255)',"
+        f"hue=s={saturation:.5f}[pw_graded];"
+        f"[pw_mask_src]trim=end_frame=1,format=gray,"
+        f"geq=lum='255*({mask_expr})':cb=128:cr=128,"
+        f"loop=-1:size=1:start=0[pw_mask];"
+        f"[pw_graded]format=yuva420p[pw_yuva];"
+        f"[pw_yuva][pw_mask]alphamerge[pw_alpha];"
+        f"[pw_base][pw_alpha]overlay=shortest=1:format=auto"
+    )
 
 
 def build_audio_master_loudnorm_filter(

@@ -3019,6 +3019,9 @@ const ViralClipStudio = ({
   const [joinTransitionDuration, setJoinTransitionDuration] = useState(0.18);
   const [pacingLevel, setPacingLevel] = useState("balanced");
   const [previewSpeed, setPreviewSpeed] = useState(1);
+  const [proTimingMode, setProTimingMode] = useState("forward");
+  const [freezeHoldSeconds, setFreezeHoldSeconds] = useState(1.5);
+  const [opticalFlowSlowMo, setOpticalFlowSlowMo] = useState(false);
   const [captionPosition, setCaptionPosition] = useState("bottom_center");
   const [captionScale, setCaptionScale] = useState(1);
   const [captionTextOverride, setCaptionTextOverride] = useState("");
@@ -3646,6 +3649,9 @@ const ViralClipStudio = ({
     translateCaptionsToEnglish,
     captionSourceLanguage,
     previewSpeed,
+    proTimingMode,
+    freezeHoldSeconds,
+    opticalFlowSlowMo,
     pacingLevel,
     creativeIntent,
     creativeEffectsEnabled,
@@ -4311,6 +4317,9 @@ const ViralClipStudio = ({
     setTranslateCaptionsToEnglish(!!snapshot.translateCaptionsToEnglish);
     setCaptionSourceLanguage(snapshot.captionSourceLanguage || "auto");
     setPreviewSpeed(Number(snapshot.previewSpeed ?? 1));
+    setProTimingMode(snapshot.proTimingMode === "reverse" || snapshot.proTimingMode === "freeze" ? snapshot.proTimingMode : "forward");
+    setFreezeHoldSeconds(Math.max(0.2, Math.min(10, Number(snapshot.freezeHoldSeconds ?? 1.5))));
+    setOpticalFlowSlowMo(Boolean(snapshot.opticalFlowSlowMo));
     setPacingLevel(snapshot.pacingLevel || "balanced");
     setCreativeIntent(snapshot.creativeIntent || "energy");
     setCreativeEffectsEnabled(!!snapshot.creativeEffectsEnabled);
@@ -12969,7 +12978,7 @@ const ViralClipStudio = ({
       const speedPlanDuration = speedDocument
         ? ticksToSeconds(speedDocument.clipOccurrences.at(-1)?.programmeRange.endTick || 0)
         : outputTimelineDuration;
-      const exportSpeedSegments = speedKeyframes.length
+      const rawSpeedSegments = speedKeyframes.length
         ? buildSpeedSegmentsFromKeyframes({
             keyframes: speedKeyframes,
             duration: speedPlanDuration,
@@ -12981,6 +12990,12 @@ const ViralClipStudio = ({
             rate: previewSpeed,
             pitchPreserved: true,
           }];
+      const exportSpeedSegments = rawSpeedSegments.map(segment => ({
+        ...segment,
+        ...(proTimingMode === "reverse" ? { direction: "reverse" } : {}),
+        ...(proTimingMode === "freeze" ? { freeze: true, holdSeconds: freezeHoldSeconds } : {}),
+        ...(opticalFlowSlowMo && Number(segment.rate || 1) < 1 ? { opticalFlow: true } : {}),
+      }));
       if (speedDocument) {
         assertStudioSpeedPlanMatchesDocument(speedDocument, exportSpeedSegments);
       }
@@ -13429,6 +13444,9 @@ const ViralClipStudio = ({
     translateCaptionsToEnglish,
     captionSourceLanguage,
     previewSpeed,
+    proTimingMode,
+    freezeHoldSeconds,
+    opticalFlowSlowMo,
     pacingLevel,
     creativeIntent,
     creativeEffectsEnabled,
@@ -14721,7 +14739,9 @@ const ViralClipStudio = ({
             height: canvasHeight,
             grade: precisionPreviewGrade ? effectiveFinishFx : null,
             cube: finishPreviewIsLive ? advancedColorCube : null,
-            lutIntensity: clampNumber(advancedColor?.lutIntensity, 0, 100, 100) / 100,
+            // This canonical cube already includes the imported LUT strength,
+            // curves and HSL. Apply it once, as the final-render compiler does.
+            lutIntensity: 1,
             vignetteAmount: precisionPreviewGrade && pausedRaster ? effectiveFinishFx.vignette : 0,
             powerWindow: finishPreviewIsLive ? advancedColor?.powerWindow : null,
             qualifier: finishPreviewIsLive ? advancedColor?.qualifier : null,
@@ -26259,6 +26279,69 @@ const ViralClipStudio = ({
                       ))}
                     </div>
                   </div>
+
+                  <div className="inspector-field" data-testid="pacing-pro-timing-mode">
+                    <span>Pro timing &amp; frame interpolation</span>
+                    <div className="inspector-choice-grid is-three">
+                      {[
+                        ["forward", "Forward"],
+                        ["reverse", "Reverse"],
+                        ["freeze", "Freeze hold"],
+                      ].map(([mode, label]) => (
+                        <button
+                          key={mode}
+                          type="button"
+                          className={proTimingMode === mode ? "is-active" : ""}
+                          aria-pressed={proTimingMode === mode}
+                          onClick={() => {
+                            setProTimingMode(mode);
+                            setStudioActionMessage(
+                              mode === "forward"
+                                ? "Forward playback restored for export."
+                                : mode === "reverse"
+                                  ? "Reverse clip export enabled (FFmpeg reverse + areverse)."
+                                  : `End freeze-frame hold enabled (${freezeHoldSeconds.toFixed(1)}s on export).`
+                            );
+                          }}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {proTimingMode === "freeze" ? (
+                    <label className="inspector-range">
+                      <span>
+                        <b>Freeze hold duration</b>
+                        <strong>{freezeHoldSeconds.toFixed(1)}s</strong>
+                      </span>
+                      <input
+                        type="range"
+                        min={0.5}
+                        max={5}
+                        step={0.1}
+                        aria-label="Freeze hold duration"
+                        value={freezeHoldSeconds}
+                        onChange={event => setFreezeHoldSeconds(Number(event.target.value))}
+                      />
+                    </label>
+                  ) : null}
+
+                  {previewSpeed < 1 ? (
+                    <label className="inspector-toggle-row">
+                      <span>
+                        <b>Optical Flow slow-motion</b>
+                        <small>Synthesizes intermediate frames on slow-mo exports.</small>
+                      </span>
+                      <input
+                        type="checkbox"
+                        aria-label="Optical Flow slow-motion"
+                        checked={opticalFlowSlowMo}
+                        onChange={event => setOpticalFlowSlowMo(event.target.checked)}
+                      />
+                    </label>
+                  ) : null}
 
                   <label className="inspector-toggle-row">
                     <span>

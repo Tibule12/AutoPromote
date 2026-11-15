@@ -30707,6 +30707,7 @@ class ViralSpeedSegment(BaseModel):
     pitch_preserved: bool = True
     direction: str = "forward"
     freeze: bool = False
+    hold_seconds: Optional[float] = None
     optical_flow: bool = False
 
 class ViralCaptionSegment(BaseModel):
@@ -30832,7 +30833,7 @@ def build_finish_keyframe_expression(finish_plan, field, default_value, transfor
     first_time, first_value, _ = keyframes[0]
     return f"if(lt(t\\,{first_time:.5f})\\,{first_value:.6f}\\,{expression})"
 
-def build_studio_finish_filter(finish_plan, color_cube_path=None):
+def build_studio_finish_filter(finish_plan, color_cube_path=None, qualifier_cube_path=None):
     """Translate the browser Finish Rack into a conservative FFmpeg finishing pass."""
     plan = finish_plan or {}
     if not bool(plan.get("enabled")):
@@ -30880,6 +30881,17 @@ def build_studio_finish_filter(finish_plan, color_cube_path=None):
         )
     if color_cube_path:
         filters.append(f"format=rgb24,lut3d=file='{escape_ffmpeg_filter_path(color_cube_path)}':interp=trilinear")
+    power_window = plan.get("power_window")
+    if isinstance(power_window, dict) and power_window.get("enabled"):
+        try:
+            from .studio_pro_render_engine import build_power_window_filter
+        except ImportError:
+            from studio_pro_render_engine import build_power_window_filter
+        pw_filter = build_power_window_filter(power_window)
+        if pw_filter:
+            filters.append(pw_filter)
+    if qualifier_cube_path:
+        filters.append(f"format=rgb24,lut3d=file='{escape_ffmpeg_filter_path(qualifier_cube_path)}':interp=trilinear")
     # Sharpness/texture negotiate a YUV input. Letting FFmpeg insert that RGB
     # conversion implicitly can use a different matrix while retaining the
     # programme's BT.709 metadata; even a neutral grade then changes colours.
@@ -32385,7 +32397,19 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 from studio_color_cube import write_color_cube
             color_cube_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_grade.cube")
             write_color_cube(request.finish_plan["color_cube"], color_cube_path)
-        finish_filter = build_studio_finish_filter(request.finish_plan, color_cube_path)
+        qualifier_cube_path = None
+        hsl_qualifier = (request.finish_plan or {}).get("hsl_qualifier")
+        if isinstance(hsl_qualifier, dict) and hsl_qualifier.get("enabled"):
+            try:
+                from .studio_pro_render_engine import write_hsl_qualifier_cube
+            except ImportError:
+                from studio_pro_render_engine import write_hsl_qualifier_cube
+            qualifier_cube_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_qualifier.cube")
+            write_hsl_qualifier_cube(hsl_qualifier, qualifier_cube_path)
+            sequence_temp_paths.add(qualifier_cube_path)
+        finish_filter = build_studio_finish_filter(
+            request.finish_plan, color_cube_path, qualifier_cube_path=qualifier_cube_path
+        )
         zoom_filter = build_studio_motion_filter(
             (request.finish_plan or {}).get("motion"), *get_video_dimensions(working_path)
         )
@@ -32492,7 +32516,12 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             if has_reverse_or_freeze and len(requested_speed_segments) == 1:
                 seg0 = requested_speed_segments[0]
                 rf_mode = "freeze" if getattr(seg0, "freeze", False) else "reverse"
-                hold_sec = max(0.25, float(getattr(seg0, "end_time", 1.5)) - float(getattr(seg0, "start_time", 0.0)))
+                explicit_hold = getattr(seg0, "hold_seconds", None)
+                hold_sec = (
+                    max(0.2, min(10.0, float(explicit_hold)))
+                    if explicit_hold is not None
+                    else max(0.25, min(5.0, float(getattr(seg0, "end_time", 1.5)) - float(getattr(seg0, "start_time", 0.0))))
+                )
                 rf = build_reverse_freeze_filter(mode=rf_mode, hold_seconds=hold_sec, has_audio=speed_has_audio)
                 speed_filter = f"[0:v]{rf['video_filter']}[v_speed]"
                 if speed_has_audio and rf["audio_filter"]:
