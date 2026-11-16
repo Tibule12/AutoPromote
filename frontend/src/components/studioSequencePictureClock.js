@@ -1,6 +1,7 @@
 // Mirrors studio_sequence_video.sequence_picture_window. Programme frames, not
 // per-occurrence rounded durations, own the concat budget. No project mutation.
 const SEQUENCE_SAMPLER = "studio-sequence-source-frame-v2";
+const ORIGINAL_SEQUENCE_SAMPLER = "studio-original-sequence-frame-v1";
 function sequencePictureWindow(
   programmeStart,
   duration,
@@ -26,4 +27,4 @@ function sequencePictureWindow(
     programmeStart: first / fps,
   };
 }
-module.exports = { SEQUENCE_SAMPLER, sequencePictureWindow };
+module.exports = { SEQUENCE_SAMPLER, ORIGINAL_SEQUENCE_SAMPLER, sequencePictureWindow };

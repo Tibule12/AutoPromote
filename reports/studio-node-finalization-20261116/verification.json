@@ -1,0 +1,363 @@
+{
+  "status": "PARTIAL — NOT FULLY FINISHED",
+  "fullyFinished": false,
+  "readinessPromotion": false,
+  "report": "reports/studio-node-finalization-20261116/README.md",
+  "frontendBuild": "/tmp/autopromote-node-finalization-build-20261116-r21",
+  "servedAssetCount": 37,
+  "tests": {
+    "frontendFull": 181,
+    "frontendSuites": 18,
+    "subsequentViewerRegressions": 50,
+    "finalCornerPinRegressions": 42,
+    "worker": 325,
+    "workerAdditionalSubtests": 26,
+    "knowledgeHelp": 52
+  },
+  "nativeControlActions": {
+    "actualNativeClickAndKeyboardAuthoring": true,
+    "mediaOutViewerA": true,
+    "keyerViewerB": true,
+    "keyerEditAndUndo": true,
+    "bypassAndEnable": true
+  },
+  "authoredParametersRestored": {
+    "allTwelveLayers": true,
+    "authoredEffectsRestoredAfterControlChecks": true
+  },
+  "nativeSaveColdReopen": true,
+  "responsiveNativeUi": {
+    "normalSignIn": true,
+    "viewports": [
+      {
+        "width": 1600,
+        "height": 1200,
+        "left": 12,
+        "right": 1588,
+        "top": 68,
+        "bottom": 1188,
+        "toolbarOverflow": false,
+        "canvasHeight": 1030,
+        "sidebarHeight": 1030,
+        "stageBottom": 1187,
+        "rootBottom": 1188
+      },
+      {
+        "width": 1280,
+        "height": 900,
+        "left": 12,
+        "right": 1268,
+        "top": 68,
+        "bottom": 888,
+        "toolbarOverflow": false,
+        "canvasHeight": 730,
+        "sidebarHeight": 730,
+        "stageBottom": 887,
+        "rootBottom": 888
+      },
+      {
+        "width": 1024,
+        "height": 820,
+        "left": 12,
+        "right": 1012,
+        "top": 68,
+        "bottom": 808,
+        "toolbarOverflow": false,
+        "canvasHeight": 586,
+        "sidebarHeight": 586,
+        "stageBottom": 807,
+        "rootBottom": 808
+      }
+    ],
+    "mobileDesktopGuard": true,
+    "noUnrelatedCreditPrompt": true,
+    "expandCollapse": true,
+    "escapeReturns": true,
+    "keyboardWipe": true,
+    "deleteOutsideWorkspaceDoesNotDeleteNodes": true,
+    "invalidOperationVisible": true,
+    "errors": []
+  },
+  "signedInHelp": {
+    "normalSignIn": true,
+    "checks": [
+      {
+        "question": "How do I add keyframs?",
+        "feature": "studio.keyframes",
+        "status": 200
+      },
+      {
+        "question": "Where is it?",
+        "feature": "studio.keyframes",
+        "status": 200
+      },
+      {
+        "question": "The voice has background noise",
+        "feature": "studio.audio_restoration",
+        "status": 200
+      }
+    ]
+  },
+  "welcomeViewportChecks": 8,
+  "nativeExport": {
+    "sha256": "1a5ae8a1eae3880287b749ea3d38973d24d99b80d3815147b37d0195b8491154",
+    "size": 1185092,
+    "duration": 4,
+    "width": 720,
+    "height": 1280,
+    "fps": 24,
+    "frames": 96,
+    "audio": "AAC stereo 48000 Hz",
+    "normalNativeApprovalDownload": true,
+    "fullFinishedPlayback": {
+      "duration": 4,
+      "endedEvent": true,
+      "eventTime": 4,
+      "decoded": 92,
+      "mediaPath": "/api/credit-pilot/object/65f95d1c76fcc25272dad635de2efef8b40c93dcfe18c8e0c356aef62ce1a14d",
+      "matchesDownloadedMovieSha256": "1a5ae8a1eae3880287b749ea3d38973d24d99b80d3815147b37d0195b8491154"
+    },
+    "resource": {
+      "wallSeconds": 199.6834035980064,
+      "cpuSeconds": 349.826575,
+      "peakRssKiB": 1335704,
+      "cpuCeilingSeconds": 600,
+      "localFileCeilingBytes": 134217728,
+      "providerChargesStarted": false,
+      "invoiceCostMicros": null
+    }
+  },
+  "finalSixRigFixedPicturePairsPassed": 2,
+  "finalSixRigFixedPicturePairsTotal": 6,
+  "pictureThresholdsUnchanged": {
+    "mae8bitMax": 3,
+    "p95ChannelErrorMax": 12
+  },
+  "fixedPictureChecks": [
+    {
+      "frame": 6,
+      "seconds": 0.25,
+      "width": 399,
+      "height": 710,
+      "mae8bit": 2.847600221210303,
+      "p95ChannelError": 7.0,
+      "psnrDb": 27.765304072551285,
+      "fixedPass": true,
+      "thresholds": {
+        "mae8bitMax": 3,
+        "p95ChannelErrorMax": 12
+      }
+    },
+    {
+      "frame": 18,
+      "seconds": 0.75,
+      "width": 399,
+      "height": 710,
+      "mae8bit": 2.8234059326720558,
+      "p95ChannelError": 8.0,
+      "psnrDb": 29.058325423418133,
+      "fixedPass": true,
+      "thresholds": {
+        "mae8bitMax": 3,
+        "p95ChannelErrorMax": 12
+      }
+    },
+    {
+      "frame": 30,
+      "seconds": 1.25,
+      "width": 399,
+      "height": 710,
+      "mae8bit": 3.369494157930036,
+      "p95ChannelError": 10.0,
+      "psnrDb": 28.164183471503655,
+      "fixedPass": false,
+      "thresholds": {
+        "mae8bitMax": 3,
+        "p95ChannelErrorMax": 12
+      }
+    },
+    {
+      "frame": 48,
+      "seconds": 2.0,
+      "width": 399,
+      "height": 710,
+      "mae8bit": 3.4998317389718427,
+      "p95ChannelError": 11.0,
+      "psnrDb": 28.39860708621536,
+      "fixedPass": false,
+      "thresholds": {
+        "mae8bitMax": 3,
+        "p95ChannelErrorMax": 12
+      }
+    },
+    {
+      "frame": 72,
+      "seconds": 3.0,
+      "width": 399,
+      "height": 710,
+      "mae8bit": 3.3444444444444446,
+      "p95ChannelError": 11.0,
+      "psnrDb": 28.741479769952086,
+      "fixedPass": false,
+      "thresholds": {
+        "mae8bitMax": 3,
+        "p95ChannelErrorMax": 12
+      }
+    },
+    {
+      "frame": 90,
+      "seconds": 3.75,
+      "width": 399,
+      "height": 710,
+      "mae8bit": 3.7407379952227986,
+      "p95ChannelError": 12.0,
+      "psnrDb": 27.83129314075106,
+      "fixedPass": false,
+      "thresholds": {
+        "mae8bitMax": 3,
+        "p95ChannelErrorMax": 12
+      }
+    }
+  ],
+  "finalNativePlayback": {
+    "base": {
+      "wallMs": 4069.6999999955297,
+      "programmeSeconds": 4,
+      "wallTimeRatio": 1.0174249999988825,
+      "decoded": 95,
+      "dropped": 1,
+      "droppedFraction": 0.010526315789473684,
+      "pictureCallbacks": 93,
+      "maxLayerClockDistanceFrames": 0,
+      "stallOrErrorEvents": [],
+      "fixedCriteria": {
+        "maxWallTimeRatio": 1.15,
+        "maxDroppedFraction": 0.05,
+        "maxLayerClockDistanceFrames": 2
+      },
+      "fixedPass": true
+    },
+    "heavy": {
+      "wallMs": 4151.60000000149,
+      "programmeSeconds": 4,
+      "wallTimeRatio": 1.0379000000003726,
+      "decoded": 96,
+      "dropped": 17,
+      "droppedFraction": 0.17708333333333334,
+      "pictureCallbacks": 79,
+      "maxLayerClockDistanceFrames": 0,
+      "stallOrErrorEvents": [],
+      "fixedCriteria": {
+        "maxWallTimeRatio": 1.15,
+        "maxDroppedFraction": 0.05,
+        "maxLayerClockDistanceFrames": 2
+      },
+      "fixedPass": false
+    },
+    "heavy-node": {
+      "wallMs": 4288.89999999851,
+      "programmeSeconds": 4,
+      "wallTimeRatio": 1.0722249999996274,
+      "decoded": 112,
+      "dropped": 21,
+      "droppedFraction": 0.1875,
+      "pictureCallbacks": 78,
+      "maxLayerClockDistanceFrames": 6.841871999999999,
+      "stallOrErrorEvents": [],
+      "fixedCriteria": {
+        "maxWallTimeRatio": 1.15,
+        "maxDroppedFraction": 0.05,
+        "maxLayerClockDistanceFrames": 2
+      },
+      "fixedPass": false
+    }
+  },
+  "finalResizeChecks": [
+    {
+      "width": 1280,
+      "height": 900,
+      "paddedEffectSurfacesFollowMonitor": true
+    },
+    {
+      "width": 1024,
+      "height": 820,
+      "paddedEffectSurfacesFollowMonitor": true
+    },
+    {
+      "width": 1600,
+      "height": 1200,
+      "paddedEffectSurfacesFollowMonitor": true
+    }
+  ],
+  "earlierMaskRoutingCanonicalReplay": {
+    "passed": 6,
+    "total": 6,
+    "evidence": "private/diagnostic-r11-base/comparison.json",
+    "currentFrozenClientProof": false
+  },
+  "optimizedCanonicalReplay": {
+    "normalNativeSubmission": false,
+    "resource": {
+      "wallSeconds": 164.4642334320015,
+      "cpuSeconds": 219.70297100000002,
+      "peakRssKiB": 1285108,
+      "cpuCeilingSeconds": 600,
+      "localFileCeilingBytes": 134217728,
+      "providerChargesStarted": false,
+      "invoiceCostMicros": null
+    },
+    "byteEquivalence": {
+      "nativeSha256": "1a5ae8a1eae3880287b749ea3d38973d24d99b80d3815147b37d0195b8491154",
+      "replaySha256": "78029c55346dca60e368e04a1a3293ffd13813696d9bb20a6b8b2b2b041d4b2f",
+      "identicalMovieBytes": false
+    }
+  },
+  "audio": {
+    "nativeHeavyMatchesNativeBasePcmExactly": true,
+    "fastReplayMatchesNativeHeavyPcmExactly": true,
+    "allDecodedAudioAudible": true
+  },
+  "remainingFailures": [
+    "Heavy six-rig pre-final picture tolerance: four of six fixed pairs fail MAE",
+    "Heavy software playback misses dropped-frame and dual-viewer layer-clock limits"
+  ],
+  "formalStudioCountsUnchanged": {
+    "FUNCTIONAL": 17,
+    "PARTIAL": 9,
+    "BROKEN": 1,
+    "UNIMPLEMENTED": 2,
+    "PRO-READY": 0,
+    "PRODUCTION-READY": 0
+  },
+  "sharedBacklog": [
+    "S02",
+    "S04",
+    "S03",
+    "existing strict typography 13/16 failures"
+  ],
+  "productionWrites": 0,
+  "paidProviderCalls": 0,
+  "creditGrants": 0,
+  "deliveryDirectory": "/home/tibule12/Videos/Studio Node Flow - Final Checks - 2026-11-16",
+  "fullFinalCheckpoint": {
+    "fullAuthFirestoreStorage": true,
+    "originalMetadataPreserved": true,
+    "workerRequestsAndReceipts": true,
+    "terminalSucceededOperations": 7,
+    "terminalFailedOperations": 0,
+    "walletBalances": [
+      0,
+      1
+    ],
+    "allWalletsZeroHeldAndActive": true,
+    "unrelatedEmptyWalletUnchanged": true,
+    "financialWrites": false
+  },
+  "localWindow": {
+    "originalDeadlineRestored": true,
+    "manualFinancialDocumentWrites": 0,
+    "creditGrants": 0,
+    "productionChanges": 0
+  },
+  "completeClientPayloadRetained": true
+}

@@ -1,6 +1,6 @@
 import { applySafeMediaSource, getSafeMediaSource } from '../utils/security';
 import { mapStudioContinuousSeconds } from './studioTime';
-import { SEQUENCE_SAMPLER, sequencePictureWindow } from './studioSequencePictureClock';
+import { SEQUENCE_SAMPLER, ORIGINAL_SEQUENCE_SAMPLER, sequencePictureWindow } from './studioSequencePictureClock';
 
 // This transient identity does not change an edit, source trim or asset. Keep
 // it separate from the native audio clock and from persisted project data.
@@ -32,7 +32,7 @@ export function studioPausedFrameReceiptMatches(request, result) {
       : result.sourceGeneration === request.sourceGeneration) &&
     result.frameIndex === request.frameIndex && result.start === request.start &&
     result.end === request.end && result.fps === request.fps && result.contentType === 'image/png' &&
-    (request.sampling !== SEQUENCE_SAMPLER || (result.sampling === SEQUENCE_SAMPLER &&
+    (![SEQUENCE_SAMPLER,ORIGINAL_SEQUENCE_SAMPLER].includes(request.sampling) || (result.sampling === request.sampling &&
       result.programmeStart === request.programmeStart && result.programmeDuration === request.programmeDuration));
 }
 
@@ -43,11 +43,10 @@ export function studioPausedFrameReceiptMatches(request, result) {
 export function pausedStudioMappedFrameRequest(clip, sourceTime, fps, timeline, timeMap, resolvedGeneration, cfr30Ingest = true) {
   const request = pausedStudioFrameRequest(clip, sourceTime, fps, resolvedGeneration);
   if (!request || !Array.isArray(timeline) || !timeMap?.length) return null;
-  let offset = 0, total = 0, found = false, fractional = false;
+  let offset = 0, total = 0, found = false;
   for (const row of timeline) {
     const length = Number(row.endRequest ?? row.end) - Number(row.startRequest ?? row.start ?? 0);
     if (!(length > 0)) return null;
-    if (Math.abs(length * request.fps - Math.round(length * request.fps)) > .00001) fractional = true;
     if (row.id === clip.id) { offset = total; found = true; }
     total += length;
   }
@@ -71,15 +70,17 @@ export function pausedStudioMappedFrameRequest(clip, sourceTime, fps, timeline, 
   const frameIndex = selected - window.first;
   if (frameIndex < 0 || frameIndex >= window.frames) return null;
   // Ordinary sequence ingest is CFR30. V2 inspects that source clock before
-  // applying the worker's global fractional-cut phase. Keep legacy and texture
-  // profiles stable; long-source decoding stays outside this bounded profile.
-  if (fractional) return cfr30Ingest && request.end <= 90 ? { ...request, frameIndex,
-    sampling: SEQUENCE_SAMPLER, programmeStart: offset, programmeDuration: total } : null;
-  return { ...request, frameIndex };
+  // applying the worker's programme phase, including frame-aligned cuts. An
+  // aligned 24fps edit still passes through CFR30 ingest and round-up delivery;
+  // sampling the original directly can choose the adjacent source picture.
+  if(cfr30Ingest)return request.end<=90?{...request,frameIndex,
+    sampling:SEQUENCE_SAMPLER,programmeStart:offset,programmeDuration:total}:null;
+  return request.end<=90?{...request,frameIndex,sampling:ORIGINAL_SEQUENCE_SAMPLER,
+    programmeStart:offset,programmeDuration:total}:null;
 }
 
 export function studioPausedSampleTime(request) {
-  if (request.sampling !== SEQUENCE_SAMPLER) return request.start + request.frameIndex / request.fps;
+  if (![SEQUENCE_SAMPLER,ORIGINAL_SEQUENCE_SAMPLER].includes(request.sampling)) return request.start + request.frameIndex / request.fps;
   const window = sequencePictureWindow(request.programmeStart, request.end-request.start,
     request.programmeDuration, request.start, 30, request.fps);
   return window.sourceTime + request.frameIndex / request.fps;

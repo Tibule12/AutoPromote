@@ -16,10 +16,13 @@ def build_precision_grade_filter(fx):
         # lutrgb otherwise truncates each channel before saturation. The
         # editor's Uint8ClampedArray rounds at the pixel boundary; systematic
         # truncation also makes a nominally neutral grade darken the image.
-        channels.append(f"{name}='floor(clip((pow(max(0,val/255*{scale:.8f}+{lift:.8f}),{1/gamma:.8f})-0.5)*{contrast:.8f}+0.5,0,1)*255+0.5)'")
+        channels.append(f"{name}='floor(clip((pow(max(0,val/65535*{scale:.8f}+{lift:.8f}),{1/gamma:.8f})-0.5)*{contrast:.8f}+0.5,0,1)*65535+0.5)'")
     matrix = []
     for row, name in enumerate("rgb"):
         for col, weight in enumerate([.2126, .7152, .0722]):
             coefficient = (1-saturation)*weight + (saturation if row == col else 0)
             matrix.append(f"{name}{'rgb'[col]}={coefficient:.8f}")
-    return "format=rgb24,lutrgb=" + ":".join(channels) + ",colorchannelmixer=" + ":".join(matrix)
+    # Keep sub-byte tone precision until saturation, just as the browser's
+    # floating-point tables do. Rounding each channel to8-bit before the mix
+    # compounds edge/colour error when several precision grades are chained.
+    return "format=gbrp16le,lutrgb=" + ":".join(channels) + ",colorchannelmixer=" + ":".join(matrix) + ",format=gbrp"

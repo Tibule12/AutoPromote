@@ -34,7 +34,8 @@ test('mapped sampling retains occurrence trim identity and rejects unqualified c
   const second={id:'second',storagePath:'owned/two',contentHash:'b'.repeat(64),startRequest:.125,endRequest:2.125};
   const map=rampMap();
   const frame=pausedStudioMappedFrameRequest(second,.125+9/24,24,[first,second],map);
-  expect(frame).toEqual({storagePath:'owned/two',sourceContentHash:'b'.repeat(64),start:.125,end:2.125,fps:24,frameIndex:10});
+  expect(frame).toEqual({storagePath:'owned/two',sourceContentHash:'b'.repeat(64),start:.125,end:2.125,fps:24,frameIndex:10,
+    sampling:'studio-sequence-source-frame-v2',programmeStart:1,programmeDuration:3});
   expect(pausedStudioMappedFrameRequest(second,.5,24,[{...first,endRequest:.99},second],map)).toBeNull();
   expect(pausedStudioMappedFrameRequest(second,.5,24,[first,second],createOutputTimeMap(180000))).toBeNull();
   const short={...second,endRequest:.375};
@@ -71,7 +72,13 @@ test('fractional Director cuts use one global frame grid and bind its phase in t
   // silently borrow a neighbouring occurrence's picture.
   const long={...second,startRequest:104.7,endRequest:112};
   expect(pausedStudioMappedFrameRequest(long,105,24,[first,long],map)).toBeNull();
-  expect(pausedStudioMappedFrameRequest(second,125/24,24,[first,second],map,undefined,false)).toBeNull();
+  const original=pausedStudioMappedFrameRequest(second,125/24,24,[first,second],map,undefined,false);
+  expect(original).toMatchObject({sampling:'studio-original-sequence-frame-v1',
+    programmeStart:4.7,programmeDuration:12,frameIndex:12});
+  expect(studioPausedSampleTime(original)).toBeCloseTo(125/24,7);
+  const originalReceipt={...original,contentType:'image/png'};
+  expect(studioPausedFrameReceiptMatches(original,originalReceipt)).toBe(true);
+  expect(studioPausedFrameReceiptMatches(original,{...originalReceipt,sampling:'studio-sequence-source-frame-v2'})).toBe(false);
 });
 
 test('accurate paused frames preserve source/trim identity and do not alter the programme clock', () => {
@@ -91,7 +98,8 @@ test('legacy source sampling binds transient access generation without changing 
   const saved = JSON.stringify(clip);
   const request = pausedStudioMappedFrameRequest(clip, 1.5, 24, [clip], createOutputTimeMap(270000), '1791917104896000');
   expect(request).toEqual({ storagePath: clip.sourceStoragePath, sourceGeneration: '1791917104896000',
-    start: 0, end: 3, fps: 24, frameIndex: 36 });
+    start: 0, end: 3, fps: 24, frameIndex: 36,
+    sampling:'studio-sequence-source-frame-v2',programmeStart:0,programmeDuration:3 });
   expect(JSON.stringify(clip)).toBe(saved);
   for (const generation of [undefined, 12, '0', 'bad'])
     expect(pausedStudioFrameRequest(clip, 1.5, 24, generation)).toBeNull();

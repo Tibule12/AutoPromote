@@ -4,7 +4,7 @@ const bounded = (value, min, max, fallback = 0) => {
   const n = Number(value);
   return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : fallback;
 };
-export const hasSoftStudioMask = mask => !!mask?.enabled && (!!mask.inverted || Number(mask.feather) > 0);
+export const hasSoftStudioMask = mask => !!mask?.enabled && (!!mask.inverted || Number(mask.feather) > 0 || !!mask.secondaryMasks?.length);
 export const DEFAULT_STUDIO_MASK_POLYGON = 'polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)';
 export function parseStudioMaskPolygon(path = DEFAULT_STUDIO_MASK_POLYGON) {
   const match = /^polygon\((.{1,2048})\)$/.exec(String(path).trim());
@@ -20,6 +20,12 @@ export function parseStudioMaskPolygon(path = DEFAULT_STUDIO_MASK_POLYGON) {
 export const studioMaskPointProperty = property => /^maskPoint(\d{1,2})(X|Y)$/.exec(String(property));
 export const studioMaskPolygonPath = points => `polygon(${points.map(p => p.map(n=>Number(n).toFixed(8).replace(/\.?0+$/,'')).join('% ')+'%').join(', ')})`;
 export function validateStudioMaskAnimation(layer, keys = []) {
+  const secondary=layer?.mask?.secondaryMasks||[];
+  if(!Array.isArray(secondary)||secondary.length>8)throw Error('Use at most eight secondary masks.');
+  for(const sub of secondary){
+    if(!sub||typeof sub!=='object'||sub.secondaryMasks?.length||!['ellipse','rectangle','polygon'].includes(sub.shape)||!['add','subtract','intersect','difference'].includes(sub.booleanOp||layer.mask.booleanMode||'add')||!Number.isFinite(Number(sub.feather??0))||Number(sub.feather??0)<0||Number(sub.feather??0)>100)throw Error('Invalid secondary mask shape, feather or operation.');
+    if(sub.shape==='polygon')parseStudioMaskPolygon(sub.path);
+  }
   const animated = keys.filter(key => String(key.property).startsWith('maskPoint'));
   if (!animated.length) return;
   if (layer?.mask?.shape !== 'polygon' || !['image', 'video'].includes(layer.type))
@@ -34,6 +40,18 @@ export function validateStudioMaskAnimation(layer, keys = []) {
 }
 export function studioLayerMaskSvg(mask, cropX, cropY, width, height, programmeScale = 1) {
   if (!mask?.enabled) return null;
+  if(mask.secondaryMasks?.length){
+    if(!Array.isArray(mask.secondaryMasks)||mask.secondaryMasks.length>8)throw Error('Use at most eight secondary masks.');
+    const base=studioLayerMaskSvg({...mask,secondaryMasks:[]},cropX,cropY,width,height,programmeScale);
+    const uri=svg=>`data:image/svg+xml,${encodeURIComponent(svg)}`;let chain='';
+    for(const [i,sub]of mask.secondaryMasks.entries()){
+      const op=sub.booleanOp||mask.booleanMode||'add';if(!['add','subtract','intersect','difference'].includes(op))throw Error('Invalid mask boolean operation.');
+      if(sub.secondaryMasks?.length)throw Error('Nested secondary masks are unsupported.');
+      const shape=studioLayerMaskSvg({...sub,enabled:true,secondaryMasks:[]},0,0,width,height,programmeScale);
+      chain+=`<feImage href="${uri(shape)}" result="sub${i}"/><feComposite in="${i?'step'+(i-1):'SourceGraphic'}" in2="sub${i}" operator="${{add:'over',subtract:'out',intersect:'in',difference:'xor'}[op]}" result="step${i}"/>`;
+    }
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><defs><filter id="boolean" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">${chain}</filter></defs><image href="${uri(base)}" width="100%" height="100%" filter="url(#boolean)"/></svg>`;
+  }
   const w = bounded(width, 1, 16384, 1), h = bounded(height, 1, 16384, 1);
   const x = w * bounded(cropX, 0, 45) / 100, y = h * bounded(cropY, 0, 45) / 100;
   const sigma = bounded(mask.feather, 0, 100) * bounded(programmeScale, .0001, 16, 1);

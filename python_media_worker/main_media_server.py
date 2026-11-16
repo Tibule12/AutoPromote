@@ -1218,6 +1218,7 @@ async def materialize_video_input(video_url, local_path, keep_audio=False, max_l
                     "-i",
                     source,
                     "-c:v", "libx264",
+                    "-threads", "2",
                     "-preset", "ultrafast",
                     "-crf", "23",
                     "-vf", build_cfr_video_filter(max_long_edge),
@@ -1287,6 +1288,7 @@ async def materialize_video_input(video_url, local_path, keep_audio=False, max_l
                         "-fflags", "+genpts",
                         "-i", resolved_local_path,
                         "-c:v", "libx264",
+                        "-threads", "2",
                         "-preset", "ultrafast",
                         "-crf", "23",
                         "-vf", build_cfr_video_filter(max_long_edge),
@@ -1336,6 +1338,7 @@ async def materialize_video_input(video_url, local_path, keep_audio=False, max_l
                 "-fflags", "+genpts",
                 "-i", absolute_source,
                 "-c:v", "libx264",
+                "-threads", "2",
                 "-preset", "ultrafast",
                 "-crf", "23",
                 "-vf", build_cfr_video_filter(max_long_edge),
@@ -8538,6 +8541,12 @@ def preserve_reviewed_video_samples(input_path, duration, reviewed):
             float(numerator) / float(denominator), duration, reviewed)
     except (KeyError, ValueError, TypeError, ZeroDivisionError, StopIteration):
         return False
+
+
+def has_studio_node_grade_masks(plan):
+    plan = plan or {}
+    return bool(plan.get('node_mask') or any((item.get('effects') or {}).get('node_mask')
+        for item in plan.get('adjustment_layers') or []))
 
 
 def build_studio_sequence_encode_args(reviewed_subject=False, fps=None, preserve_samples=False):
@@ -30474,10 +30483,18 @@ def build_studio_finish_filter(finish_plan, color_cube_path=None, qualifier_cube
         filters.append(f"unsharp=5:5:{sharpness * 0.65:.4f}:3:3:{sharpness * 0.18:.4f}")
     if vignette > 0.005:
         filters.append(f"vignette=angle=PI/{max(5.5, 17.0 - vignette * 10.0):.3f}:eval=frame")
-    if grain > 0.005:
+    native_texture=texture.get('pixel_version')==1
+    if native_texture:
+        try:
+            from .studio_finish_texture import finish_texture_filter
+        except ImportError:
+            from studio_finish_texture import finish_texture_filter
+        texture_filter=finish_texture_filter(texture)
+        if texture_filter:filters.append(texture_filter)
+    if grain > 0.005 and not native_texture:
         filters.append(f"noise=alls={grain * 13.0:.3f}:allf=t")
     chromatic = clamp_float(texture.get("chromatic_aberration", 0.0), 0.0, 1.0)
-    if chromatic > 0.005:
+    if chromatic > 0.005 and not native_texture:
         shift = max(1, int(round(chromatic * 9.0)))
         filters.append(f"rgbashift=rh={shift}:bh={-shift}:edge=smear")
     vhs_tracking = clamp_float(texture.get("vhs_tracking", 0.0), 0.0, 1.0)
@@ -31061,6 +31078,13 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         [str(scene.get("id", "")) for scene in (request.motionGraphics or {}).get("scenes") or []],
         [graphic["id"] for graphic in request.threeDGraphics or []], source_overlays=request.overlays)
     validate_graphic_groups(request.composition_plan, explicit_layer_order)
+    try:
+        from .studio_node_mask_grade import validate_node_mask
+    except ImportError:
+        from studio_node_mask_grade import validate_node_mask
+    validate_node_mask((request.finish_plan or {}).get('node_mask'),request.overlays,request.composition_plan)
+    for adjustment in (request.finish_plan or {}).get('adjustment_layers') or []:
+        validate_node_mask((adjustment.get('effects') or {}).get('node_mask'),request.overlays,request.composition_plan)
     logger.info(f"Rendering viral clip for {request.video_url} with {len(request.overlays)} overlays (SmartCrop={request.smart_crop}, AutoCaptions={request.auto_captions})")
 
     unresolved_story_visuals = [
@@ -31206,12 +31230,18 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             and request.smart_crop_mode == "speaker_track" and sequence_framing_keys
             and not sequence_reframe.get("timeline_cuts")
             and float(sequence_reframe.get("zoom", 1)) == 1)
+        # An authored Studio sequence already owns its output frame rate and
+        # sampling. Ingesting it through the analysis CFR30/CRF23 proxy first
+        # changes both source pictures and colour before that sequence runs.
+        # Retain the verified original; the bounded segment pass below still
+        # performs delivery-rate normalization and canvas sizing.
+        studio_sequence_source = bool(request.timeline_segments and request.composition_plan)
         try:
             input_path = await materialize_video_input(
                 request.video_url,
                 input_path,
                 keep_audio=True,
-                preserve_source_bytes=bool(request.subjectVfx) or source_framing,
+                preserve_source_bytes=bool(request.subjectVfx) or source_framing or studio_sequence_source,
             )
         except Exception as e:
              err_msg = f"Failed to load video: {str(e)}"
@@ -31312,7 +31342,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         segment.url,
                         segment_source_path,
                         keep_audio=True,
-                        preserve_source_bytes=bool(request.subjectVfx) or source_framing,
+                        preserve_source_bytes=bool(request.subjectVfx) or source_framing or studio_sequence_source,
                     )
                     sequence_source_paths[segment.url] = segment_source_path
 
@@ -31380,7 +31410,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         # Raw YUV bounds the extra scratch even for noisy media;
                         # long/large sequences retain their existing profile.
                         preserve_samples=preserve_reviewed_sequence_samples(timeline_canvas_width,
-                            timeline_canvas_height,selected_timeline_fps,programme_duration,sequence_framing_keys),
+                            timeline_canvas_height,selected_timeline_fps,programme_duration,
+                            sequence_framing_keys or has_studio_node_grade_masks(request.finish_plan)),
                         fps=selected_timeline_fps),
                     "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-y",
                     segment_video_path,
@@ -31847,7 +31878,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         reviewed_subject=bool(request.subjectVfx),
                         preserve_samples=preserve_reviewed_sequence_samples(reframe_target_width,
                             reframe_target_height,programme_fps or (request.output_settings or {}).get('fps',30),
-                            reframe_duration,manual_reframe_keyframes),
+                            reframe_duration,manual_reframe_keyframes or has_studio_node_grade_masks(request.finish_plan)),
                         multicam_programme_path=multicam_programme_path,
                     )
                     if multicam_programme_path:
@@ -31868,13 +31899,22 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     ], check=True)
                     working_path = cropped_path
                 elif crop_mode == "speaker_track" and (manual_reframe_keyframes or "zoom" in finish_reframe_plan):
+                    try:
+                        from .studio_sequence_video import preserve_reviewed_sequence_samples
+                    except ImportError:
+                        from studio_sequence_video import preserve_reviewed_sequence_samples
+                    preserve_reframe_samples=preserve_reviewed_sequence_samples(
+                        reframe_target_width,reframe_target_height,
+                        resolve_viral_export_profile(request.output_settings,reframe_target_width,reframe_target_height).get('fps') or 30,
+                        get_media_duration(reframe_source_path),manual_reframe_keyframes or has_studio_node_grade_masks(request.finish_plan))
                     await run_subprocess_async([
                         "ffmpeg", "-i", reframe_source_path,
                         "-vf", build_reviewed_reframe_filter(
                             manual_reframe_keyframes or [{"time": 0, "x": 50, "y": 50}],
                             reframe_target_width, reframe_target_height, finish_reframe_plan.get("zoom", 1)),
                         "-map", "0:v:0", "-map", "0:a?",
-                        "-c:v", GPU_VIDEO_ENCODER, "-preset", GPU_PRESET,
+                        *(build_studio_sequence_encode_args(preserve_samples=True) if preserve_reframe_samples else
+                          ["-c:v", GPU_VIDEO_ENCODER, "-preset", GPU_PRESET]),
                         "-c:a", "copy", "-y", cropped_path,
                     ], check=True)
                     working_path = cropped_path
@@ -32039,6 +32079,28 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 write_color_cube(effects["color_cube"], adjustment_cube_path)
                 sequence_temp_paths.add(adjustment_cube_path)
                 effects["_worker_cube_path"] = adjustment_cube_path
+        # Node masks are native branch rasters; grade only their actual coverage.
+        if has_studio_node_grade_masks(request.finish_plan):
+            try:
+                from .studio_node_mask_grade import render_node_masked_finish
+                from .studio_image_sources import materialize_studio_image
+            except ImportError:
+                from studio_node_mask_grade import render_node_masked_finish
+                from studio_image_sources import materialize_studio_image
+            picture = next(s for s in probe_media_stream_summary(working_path)['streams'] if s.get('codec_type') == 'video')
+            numerator, denominator = str(picture.get('avg_frame_rate') or '30/1').split('/')
+            working_path = await render_node_masked_finish(source_path=working_path,
+                output_path=os.path.join(SHARED_TMP_DIR, f'{job_id}_masked_finish.mp4'), request=request,
+                width=get_video_dimensions(working_path)[0], height=get_video_dimensions(working_path)[1],
+                duration=get_media_duration(working_path), fps=float(numerator)/float(denominator),
+                job_id=job_id, directory=SHARED_TMP_DIR, temp_paths=sequence_temp_paths,
+                run=run_subprocess_async, materialize_video=materialize_video_input,
+                materialize_image=materialize_studio_image, build_finish=build_studio_finish_filter,
+                zoom_filter=zoom_filter, probe=get_media_duration,
+                main_grade_filter=build_studio_finish_filter({**request.finish_plan,'texture':{}},
+                    color_cube_path,qualifier_cube_path=qualifier_cube_path))
+            finish_filter = ''
+            adjustment_layers = []
         adjustment_graph = build_studio_adjustment_timeline_filter(
             finish_filter, adjustment_layers, get_media_duration(working_path),
         )
@@ -32996,8 +33058,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         
         for ov in image_overlays:
             ov_path = ""
-            if ov.src.startswith("http"):
-                 ext = ov.src.split('?')[0].split('.')[-1]
+            if ov.src.startswith(("http://","https://","data:image/")):
+                 ext = "png" if ov.src.startswith('data:') else ov.src.split('?')[0].split('.')[-1]
                  if len(ext) > 4: ext = "png"
                  ov_dl_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_img_{input_idx}.{ext}")
                  overlay_temp_paths.append(ov_dl_path)
@@ -33009,7 +33071,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                  except Exception as e:
                      raise RuntimeError(f"Image layer {ov.id} could not be loaded; export stopped") from e
             else:
-                raise ValueError(f"Image layer {ov.id} requires an uploaded HTTP(S) source")
+                raise ValueError(f"Image layer {ov.id} requires an uploaded or self-contained image source")
             
             if ov_path:
                 block_start, block_input = len(filter_chain), current_v_label
@@ -33036,6 +33098,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         or (layer_effects.get("mask") or {}).get("enabled")
                         or float((layer_plan.get("base_transform") or {}).get("crop_x") or 0) > 0
                         or float((layer_plan.get("base_transform") or {}).get("crop_y") or 0) > 0
+                        or layer_effects.get("node")
                         or float(layer_effects.get("blur") or 0) > 0
                         or (layer_effects.get("glow") or {}).get("enabled")
                         or (layer_effects.get("colorize") or {}).get("enabled")
@@ -33724,7 +33787,10 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         delivery_filters = []
         if delivery_profile.get("colorSpace") == "rec709":
             # Frame properties can override encoder flags during negotiation.
-            # Bind the selected SDR delivery on the actual filtered pictures.
+            # Composite branches are RGB. Convert their code values explicitly
+            # before tagging SDR delivery; a metadata tag alone leaves the
+            # automatic RGB/YUV converter free to choose another matrix.
+            delivery_filters.extend(["scale=out_color_matrix=bt709:out_range=tv", "format=yuv420p"])
             delivery_filters.append("setparams=range=limited:color_primaries=bt709:color_trc=bt709:colorspace=bt709")
         if (
             delivery_profile["width"] != int(base_width)

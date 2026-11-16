@@ -94,6 +94,7 @@ function Harness() {
       <output data-testid="state-readout">
         {JSON.stringify({
           overlayCount: overlays.length,
+          overlays,
           plateParent: overlays.find(o => o.id === "plate-1")?.parentId || null,
           plateMatte: overlays.find(o => o.id === "plate-1")?.trackMatte?.mode || "none",
           keyCount: motionKeyframes.length,
@@ -297,6 +298,61 @@ describe("StudioCompWorkbench & StudioNodeFlow UI Integration", () => {
   });
 });
 
+test('a physical down/up/click sequence keeps an output port armed for click-to-wire',()=>{
+  render(<Harness/>);
+  const port=screen.getByTestId('flow-port-out-Transform:plate-1-Out');
+  fireEvent.mouseDown(port);fireEvent.mouseUp(port);fireEvent.click(port);
+  expect(port).toHaveClass('is-wiring-source');
+});
+
+test('a physical input mouse-up followed by click connects once instead of disconnecting the new wire',()=>{
+  render(<Harness/>);fireEvent.click(screen.getByTestId('flow-palette-add_null_rig'));
+  const layers=JSON.parse(screen.getByTestId('state-readout').textContent).overlays;
+  const rig=layers.find(layer=>layer.isNullRig);
+  const output=screen.getByTestId(`flow-port-out-NullRig:${rig.id}-Out`);
+  const input=screen.getByTestId('flow-port-in-Transform:plate-1-Parent');
+  fireEvent.mouseDown(output);fireEvent.mouseUp(output);fireEvent.click(output);
+  fireEvent.mouseDown(input);fireEvent.mouseUp(input);fireEvent.click(input);
+  expect(JSON.parse(screen.getByTestId('state-readout').textContent).plateParent).toBe(rig.id);
+  fireEvent.click(input);
+  expect(JSON.parse(screen.getByTestId('state-readout').textContent).plateParent).toBeNull();
+});
+
+test('published macro scale applies once and preserves child scale and opacity through zero',()=>{
+  render(<Harness/>);
+  fireEvent.click(screen.getByTestId('flow-palette-add_compound_macro'));
+  const read=()=>JSON.parse(screen.getByTestId('state-readout').textContent).overlays;
+  const before=read(),child=before.find(l=>l.id==='plate-1');
+  fireEvent.change(screen.getByTestId('flow-macro-scale-slider'),{target:{value:'1.5'}});
+  expect(read().find(l=>l.id==='plate-1').scale).toBe(child.scale);
+  expect(read().find(l=>l.isCompoundMacro).scale).toBe(1.5);
+  fireEvent.change(screen.getByTestId('flow-macro-opacity-slider'),{target:{value:'0'}});
+  expect(read().find(l=>l.id==='plate-1').opacity).toBe(0);
+  fireEvent.change(screen.getByTestId('flow-macro-opacity-slider'),{target:{value:'1'}});
+  expect(read().find(l=>l.id==='plate-1').opacity).toBe(child.opacity);
+});
+
+test('expanded graph returns with Escape and does not steal Delete from the rest of Studio',()=>{
+  render(<Harness/>);
+  const panel=()=>screen.getByTestId('studio-node-flow'),button=()=>screen.getByTestId('flow-expand-workspace');
+  fireEvent.click(button());expect(button()).toHaveAttribute('aria-pressed','true');
+  fireEvent.keyDown(button(),{key:'Escape'});expect(button()).toHaveAttribute('aria-pressed','false');
+  fireEvent.click(screen.getByTestId('flow-node-Transform:plate-1'));
+  const before=screen.getByTestId('state-readout').textContent;
+  fireEvent.keyDown(document.body,{key:'Delete'});
+  expect(screen.getByTestId('state-readout').textContent).toBe(before);
+  expect(panel()).not.toHaveClass('is-expanded-workspace');
+});
+
+test('A/B divider offers keyboard control with bounded Home and End positions',()=>{
+  render(<Harness/>);fireEvent.click(screen.getByTestId('flow-toggle-ab-wipe'));
+  const handle=screen.getByTestId('flow-viewer-split-handle');
+  fireEvent.keyDown(handle,{key:'End'});expect(handle).toHaveAttribute('aria-valuenow','90');
+  fireEvent.keyDown(handle,{key:'ArrowRight'});expect(handle).toHaveAttribute('aria-valuenow','90');
+  fireEvent.keyDown(handle,{key:'Home'});expect(handle).toHaveAttribute('aria-valuenow','10');
+  fireEvent.keyDown(handle,{key:'ArrowRight',shiftKey:true});expect(handle).toHaveAttribute('aria-valuenow','20');
+});
+
 test('Fit graph reveals the full node network without mutating the canonical edit',()=>{
  render(<Harness/>);const panel=screen.getByTestId('studio-node-flow'),before=screen.getByTestId('state-readout').textContent;fireEvent.click(within(panel).getByRole('button',{name:'Fit graph'}));expect(screen.getByTestId('state-readout').textContent).toBe(before);expect(within(panel).getByRole('button',{name:'Zoom node graph out'})).toBeInTheDocument();
 });
@@ -355,4 +411,14 @@ test('Powerhouse Node Flow: ChromaKeyer, 2.5D CornerPin, CompoundMacro, Boolean 
   // 6. Add CompoundMacro Group Node
   fireEvent.click(screen.getByTestId('flow-palette-add_compound_macro'));
   expect(screen.getByTestId('flow-macro-controls')).toBeInTheDocument();
+});
+test('connected grade mask survives advanced edits and uses its own inversion flag',()=>{
+ render(<Harness/>);fireEvent.click(screen.getByTestId('flow-node-ColorCorrector:finish'));
+ fireEvent.change(screen.getByTestId('flow-grade-mask-source-select'),{target:{value:'Transform:plate-1'}});
+ fireEvent.click(screen.getByTestId('flow-grade-mask-invert'));
+ expect(screen.getByTestId('flow-grade-mask-invert')).toBeChecked();
+ expect(screen.getByTestId('flow-grade-mask-source-select')).toHaveValue('Transform:plate-1');
+ fireEvent.change(screen.getByTestId('flow-hsl-qualifier-select'),{target:{value:'skin_isolate'}});
+ expect(screen.getByTestId('flow-grade-mask-invert')).toBeChecked();
+ expect(screen.getByTestId('flow-grade-mask-source-select')).toHaveValue('Transform:plate-1');
 });

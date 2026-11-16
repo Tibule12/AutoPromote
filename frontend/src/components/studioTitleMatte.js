@@ -1,6 +1,7 @@
 import glyphs from './motion/titleGlyphs.v1.json';
 import metrics from './motion/textMetrics.v1.json';
 import {titleAnimationPose} from './studioTitleLayout';
+let titleMeasure;
 
 // Self-contained SVG paths avoid a data-URL SVG silently falling back to a
 // different system font. These are the same bundled Inter font outlines, not a
@@ -10,7 +11,9 @@ export function studioTitleMatteMarkup(layer,pose,stageAspect,time,fill){
   const text=String(layer.text||'');
   if(!font||!metric||[...text].some(c=>c!=='\n'&&!font.glyphs[c]))return null;
   const maximum=720*stageAspect*Math.max(.15,Math.min(.9,Number(layer.width||90)/100));
-  const length=value=>[...value].reduce((sum,c)=>sum+font.glyphs[c].advance,0);
+  if(typeof document!=='undefined')titleMeasure ||= document.createElement('canvas').getContext('2d');
+  if(titleMeasure)titleMeasure.font=`${weight} 36px "Studio Inter", Inter, sans-serif`;
+  const length=value=>{const measured=titleMeasure?.measureText?.(value)?.width;return Number.isFinite(measured)?measured:[...value].reduce((sum,c)=>sum+font.glyphs[c].advance,0);};
   const lines=[];
   for(const paragraph of text.split('\n')){
     let line='';for(const word of paragraph.split(' ')){
@@ -26,7 +29,8 @@ export function studioTitleMatteMarkup(layer,pose,stageAspect,time,fill){
   lines.forEach((line,index)=>{
     const lineWidth=length(line);let cursor=layer.textAlign==='left'?16:layer.textAlign==='right'?width-16-lineWidth:(width-lineWidth)/2;
     const baseline=8+index*50.4+(50.4-metric.ascent-metric.descent)/2+metric.ascent;
-    for(const char of line){const g=font.glyphs[char];if(g.path)markup+=`<path d="${g.path}" transform="translate(${cursor-width*ax} ${baseline-height*ay}) scale(${unit} ${-unit})"/>`;cursor+=g.advance;}
+    let prefix='';const origin=cursor;
+    for(const char of line){const g=font.glyphs[char];prefix+=char;cursor=origin+length(prefix)-length(char);if(g.path)markup+=`<path d="${g.path}" transform="translate(${cursor-width*ax} ${baseline-height*ay}) scale(${unit} ${-unit})"/>`;}
   });
   return `<g fill="${fill}" transform="scale(${scale})" opacity="${animation.opacity}">${markup}</g>`;
 }

@@ -11,7 +11,7 @@ const { pipeline } = require('node:stream/promises');
 const { createWriteStream } = require('node:fs');
 const { getStudioSourceBucket, resolveOwnedStudioVideoSource, sourceError } = require('./studioSourceService');
 const execute = promisify(execFile);
-const { SEQUENCE_SAMPLER, sequencePictureWindow } = require('../../frontend/src/components/studioSequencePictureClock');
+const { SEQUENCE_SAMPLER, ORIGINAL_SEQUENCE_SAMPLER, sequencePictureWindow } = require('../../frontend/src/components/studioSequencePictureClock');
 const SAMPLER = 'studio-sequence-source-frame-v1';
 const TEXTURE_SAMPLER = 'studio-3d-texture-frame-v1';
 const MAX_SOURCE_BYTES = 128 * 1024 * 1024;
@@ -24,7 +24,7 @@ const activeOwners = new Set();
 function validateFrameRequest(input) {
   const fields = ['storagePath', 'sourceContentHash', 'sourceGeneration', 'start', 'end', 'fps', 'frameIndex', 'sampling',
     'programmeStart', 'programmeDuration'];
-  const sequence = input?.sampling === SEQUENCE_SAMPLER;
+  const sequence = [SEQUENCE_SAMPLER,ORIGINAL_SEQUENCE_SAMPLER].includes(input?.sampling);
   const hasHash = Object.hasOwn(input || {}, 'sourceContentHash');
   const hasGeneration = Object.hasOwn(input || {}, 'sourceGeneration');
   if (!input || Object.keys(input).some(key => !fields.includes(key)) ||
@@ -49,18 +49,21 @@ function validateFrameRequest(input) {
   return input;
 }
 
-function sourceFrameArgs(file, { start, end, fps, frameIndex, sampling, programmeStart, programmeDuration }) {
+function sourceFrameArgs(file, { start, end, fps, frameIndex, sampling, programmeStart, programmeDuration }, sourceFps = 30) {
   // Match prepare_video_texture's PTS reset BEFORE CFR conversion. Sequence
   // sampling deliberately retains its existing, different trim semantics.
   const texture = sampling === TEXTURE_SAMPLER;
-  if (sampling === SEQUENCE_SAMPLER) {
-    const window = sequencePictureWindow(programmeStart, end-start, programmeDuration, start, 30, fps);
+  if ([SEQUENCE_SAMPLER,ORIGINAL_SEQUENCE_SAMPLER].includes(sampling)) {
+    const original = sampling === ORIGINAL_SEQUENCE_SAMPLER;
+    const window = sequencePictureWindow(programmeStart, end-start, programmeDuration, start, original?sourceFps:30, fps);
     // Decode the same CFR30 ingest samples, then apply the canonical sequence
     // phase. Do not seek the original VFR stream to a differently rounded cut.
     // Intermediate lossy encoding is excluded; paired pixel tolerance is
     // measured against actual renderer output, never assumed byte-identical.
-    return ['-nostdin', '-hide_banner', '-loglevel', 'error', '-threads', '2', ...LOCAL_VIDEO_INPUT, '-i', file, '-filter_threads', '1',
-      '-vf', `fps=30,trim=start_frame=${window.sourceFrame},settb=1/90000,setpts=PTS-STARTPTS+(${window.phase.toFixed(9)})/TB,` +
+    return ['-nostdin', '-hide_banner', '-loglevel', 'error', '-threads', '2',
+      ...(original?['-ss',String(Math.floor(window.sourceFrame/sourceFps*1e6)/1e6)]:[]),
+      ...LOCAL_VIDEO_INPUT, '-i', file, '-filter_threads', '1',
+      '-vf', (original?'':`fps=30,trim=start_frame=${window.sourceFrame},`) + `settb=1/90000,setpts=PTS-STARTPTS+(${window.phase.toFixed(9)})/TB,` +
         `fps=${fps}:start_time=0:round=up,tpad=stop_mode=clone:stop_duration=${(1/fps).toFixed(9)},` +
         `setpts=PTS-STARTPTS,select=eq(n\\,${frameIndex}),scale='min(1920,iw)':-2,` +
         'format=rgb24,setparams=range=full:color_primaries=bt709:color_trc=iec61966-2-1:colorspace=gbr',
@@ -83,7 +86,15 @@ function sourceFrameArgs(file, { start, end, fps, frameIndex, sampling, programm
 }
 
 async function decodeSourceFrame(file, request, signal) {
-  const { stdout } = await execute('ffmpeg', sourceFrameArgs(file, request), {
+  let sourceFps=30;
+  if(request.sampling===ORIGINAL_SEQUENCE_SAMPLER){
+    const {stdout}=await execute('ffprobe',['-v','error',...LOCAL_VIDEO_INPUT,'-i',file,'-select_streams','v:0',
+      '-show_entries','stream=avg_frame_rate','-of','json'],{timeout:10000,maxBuffer:65536,signal});
+    const [n,d]=String(JSON.parse(stdout).streams?.[0]?.avg_frame_rate||'0/1').split('/').map(Number);
+    sourceFps=n/d;
+    if(!Number.isFinite(sourceFps)||sourceFps<=0)throw sourceError(422,'STUDIO_FRAME_MISSING','The source picture clock is unavailable');
+  }
+  const { stdout } = await execute('ffmpeg', sourceFrameArgs(file, request, sourceFps), {
     timeout: 30000, maxBuffer: 12 * 1024 * 1024, encoding: 'buffer', killSignal: 'SIGKILL', signal,
   });
   if (!stdout.length || !stdout.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10])))
@@ -169,7 +180,7 @@ async function getOwnedSourceFrame({ ownerUid, input, signal }) {
     }
     const image = await decodeSourceFrame(pictureSource, request, signal);
     return { sampler: request.sampling || SAMPLER, sourceContentHash: cached.hash, sourceGeneration: owned.generation,
-      ...(request.sampling === SEQUENCE_SAMPLER ? { sampling: SEQUENCE_SAMPLER,
+      ...([SEQUENCE_SAMPLER,ORIGINAL_SEQUENCE_SAMPLER].includes(request.sampling) ? { sampling: request.sampling,
         programmeStart: request.programmeStart, programmeDuration: request.programmeDuration } : {}),
       start: request.start, end: request.end, fps: request.fps, frameIndex: request.frameIndex,
       imageContentHash: crypto.createHash('sha256').update(image).digest('hex'),

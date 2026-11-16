@@ -719,7 +719,7 @@ export function compileDirectorComposition(result, snapshot) {
         if (pts.length !== basePts.length) {
           throw Error('Director animated polygon mask poses must preserve vertex topology.');
         }
-        pts.forEach(([px, py], idx) => {
+        for (const [idx, [px, py]] of pts.entries()) {
           keys.push({
             property: `maskPoint${idx}X`,
             time: mp.at,
@@ -735,7 +735,7 @@ export function compileDirectorComposition(result, snapshot) {
             curve: defaultCurve,
           });
           maskKeyCount += 2;
-        });
+        }
       }
     }
 

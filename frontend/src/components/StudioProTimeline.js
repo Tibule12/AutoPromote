@@ -826,6 +826,7 @@ function MotionPropertyValue({ label, property, value, locked, onCommit }) {
 }
 
 export default function StudioProTimeline({
+  playing = false,
   duration,
   playbackRate = 1,
   playhead,
@@ -1767,7 +1768,7 @@ export default function StudioProTimeline({
                   <TrackControls trackId={trackId} state={state} onChange={onTrackStateChange} />
                 </div>
                 <div className="pro-track-lane" onClick={onSeek} role="presentation">
-                  {trackId === "video" ? <TimelineSourceFilmstrip frames={sourceFrames} /> : null}
+                  {trackId === "video" ? <TimelineSourceFilmstrip frames={sourceFrames} playing={playing} /> : null}
                   <b className="pro-playhead" style={{ left: percentAt(playhead, safeDuration) }} />
                   {trackId === "music" && musicBeatMarkers && musicBeatMarkers.length > 0 && (
                     <div

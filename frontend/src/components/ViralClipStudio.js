@@ -1,3 +1,12 @@
+import { blendStudioNodeMask, captureStudioGradeSurface } from './studioNodeMask';
+import {paintStudioNodeSurface,hasStudioNodeSurface} from './studioNodeEffects';
+import {applyStudioFinishTexture} from './studioFinishTexture';
+import {measureStudioTitleBox} from './studioTitleLayout';
+import StudioNodeEffectSurface from './StudioNodeEffectSurface';
+import StudioTitleInspectionSurface from './StudioTitleInspectionSurface';
+import StudioTitleTrackMatte from './StudioTitleTrackMatte';
+import {studioNodeImageSource} from './studioNodeImageSource';
+import { validateStudioNodeFlowEdit } from "./studioNodeFlowEdit";
 import { hashStudioSourceBlob } from '../utils/studioSourceHash';
 import { validateStudioMediaColorize } from './studioMediaColorize';
 import { normalizeBRollEndBehavior, getOverlayAvailableSourceDuration, getOverlayVisibleDuration, getOverlayAudibleDuration, brollSourceWindow, brollSourceTime, advanceBRollSource, retimeBRollLayer, retargetBRollPreset } from './studioBRollTiming';
@@ -56,7 +65,7 @@ import StudioGroupPreview from "./StudioGroupPreview";
 import { hasSoftStudioMask, studioMaskPointProperty, parseStudioMaskPolygon, studioMaskPolygonPath, validateStudioMaskAnimation } from "./studioMaskGeometry";
 import { primeStudioSourceVideo, watchStudioProgrammeFrames, studioPresentedSourceTime, watchStudioClipBoundary, watchStudioAudioClock, studioJoinFade, mapStudioSourceAccess, isStudioSourceClockCurrent, pausedStudioMappedFrameRequest, pausedStudioFrameKey, studioPausedSampleTime, studioFinishedFrameSeekTime } from "./studioSourcePreview";
 import { loadStudioSourceFrame } from "./studioSourceFrameClient";
-import { studioPreviewScale, studioNextPreviewPaint } from './studioPreviewBudget';
+import { studioPreviewScale, studioNextPreviewPaint, studioPreviewFrameDue, studioNextPreviewFrame } from './studioPreviewBudget';
 import { musicBufferNeedsResync, musicBufferPosition, prepareStudioMusicPlayback, studioMusicBufferIdentity, studioPictureRateCorrection } from "./studioMusicBufferClock";
 import { loadStudioVoiceBus, scheduleStudioPreparedDuck, studioDialogueBusRequest } from './studioPreparedVoiceBus';
 import { sourceDialoguePreviewEnabled } from './studioSourceDialoguePolicy';
@@ -7258,7 +7267,7 @@ const ViralClipStudio = ({
   const hasVideoTrackMatte = useMemo(() => overlays.some(layer =>
     layer.trackMatte?.mode && layer.trackMatte.mode !== 'none' && overlays.some(source =>
       String(source.id) === String(layer.trackMatte.sourceLayerId) && ['image','video'].includes(source.type))), [overlays]);
-  const presentedFramePreview = hasVideoTrackMatte || workspaceMode === 'fxflow' || process.env.REACT_APP_STUDIO_PRESENTED_FRAME_PREVIEW === 'true';
+  const presentedFramePreview = overlays.length > 0 || hasVideoTrackMatte || workspaceMode === 'fxflow' || process.env.REACT_APP_STUDIO_PRESENTED_FRAME_PREVIEW === 'true';
   const currentTimelineClip = timeline[activeTimelineIndex] || null;
   const subjectProgrammePreview = useMemo(() => renderedOutputUrl ? null :
     resolveSubjectVfxProgrammePreview(subjectVfxScenes,
@@ -10246,6 +10255,7 @@ const ViralClipStudio = ({
       setStudioInspectorTab(toolId);
     }
     if (toolId === "flow") {
+      setTimelineDockHeight(current => Math.max(current, Math.min(520, timelineHeightLimit)));
       setBottomDockView("node_flow");
       setTimelineDockExpanded(true);
     }
@@ -14109,10 +14119,10 @@ const ViralClipStudio = ({
   const pausedSourceGeneration = sourceAccessGenerations.projectId === projectId
     ? sourceAccessGenerations.byPath[currentTimelineClip?.sourceStoragePath || currentTimelineClip?.storagePath]
     : undefined;
-  // The original-byte solo framing profile skips the ordinary CFR30 ingest.
-  // Do not label its fractional source sampling as that different profile.
-  const pausedSourceUsesCfr30 = !(smartCrop && smartCropMode === "speaker_track" &&
-    reframeKeyframes.length && !reframeModeCuts.length && Number(speakerTrackZoom) === 1);
+  // Studio exports always compile an authored composition/sequence. Its
+  // segment pass samples the original source at the delivery rate; the
+  // analysis CFR30 proxy is not part of this picture clock.
+  const pausedSourceUsesCfr30 = false;
   const pausedFrameRequestKey = !renderedOutputUrl && isPreviewPaused && !projectSourcesRefreshing &&
     !subjectProgrammePreview && !activeSideBySideOverlay && !speakerStackPreviewIsLive &&
     (!smartCrop || ["center", "speaker_track"].includes(smartCropMode))
@@ -14167,6 +14177,7 @@ const ViralClipStudio = ({
     // Repeated decoder/resize notifications need not enqueue the same full
     // raster again. A new effect closure invalidates captured edit settings.
     let lastPausedPaint = null;
+    let programmeBounds = null;
     const paintProgrammeFrame = decodedSourceTime => {
       // CSS effects do not alter drawImage's decoded pixels. Use the actual
       // programme element, not the lagging Before comparison clock: a 100 ms
@@ -14176,9 +14187,17 @@ const ViralClipStudio = ({
       const paintStarted = performance.now(), moving = !programmeVideo.paused && !programmeVideo.seeking;
       const budget = programmePaintBudgetRef.current;
       if (budget.video !== programmeVideo || budget.source !== programmeVideo.currentSrc) {
-        budget.video=programmeVideo;budget.source=programmeVideo.currentSrc;budget.nextAt=0;budget.fullCost=0;
+        budget.video=programmeVideo;budget.source=programmeVideo.currentSrc;budget.nextAt=0;budget.fullCost=0;budget.lastSourceTime=undefined;budget.nextSourceTime=undefined;
       }
-      if (moving && paintStarted < budget.nextAt) return;
+      if(moving&&typeof programmeVideo.requestVideoFrameCallback==='function'){
+        // Moving frames belong to the shared decoder callback. Coarse native
+        // timeupdate and React/resize notifications must not consume its turn.
+        if(!Number.isFinite(decodedSourceTime))return;
+        if(decodedSourceTime<budget.lastSourceTime)budget.nextSourceTime=undefined;
+        if(!studioPreviewFrameDue(decodedSourceTime,budget.nextSourceTime))return;
+        budget.nextSourceTime=studioNextPreviewFrame(decodedSourceTime,exportSettings.fps,budget.nextSourceTime);
+        budget.lastSourceTime=decodedSourceTime;
+      }else if(moving&&paintStarted<budget.nextAt)return;
       // Keep expensive CPU pixel readback from occupying every display turn.
       // A paused authoring frame always retains its full canonical raster.
       const performanceScale = studioPreviewScale(budget.fullCost, moving);
@@ -14192,7 +14211,7 @@ const ViralClipStudio = ({
       // Size the decoded programme to the visible inner frame. Measuring the
       // outer monitor here stretches an inset canvas and makes preview framing
       // diverge from the backend's scale/crop result.
-      const rect = canvas.getBoundingClientRect();
+      const rect = programmeBounds || (programmeBounds = canvas.getBoundingClientRect());
       if (rect.width < 1 || rect.height < 1) return;
       const pixelRatio = Math.min(1.5, Math.max(1, window.devicePixelRatio || 1));
       // A settled exact picture uses the worker's intermediate raster before
@@ -14215,7 +14234,7 @@ const ViralClipStudio = ({
         canvasHeight = pausedRaster ? Math.max(2,Math.round(pausedRaster.height*rasterScale)) : targetHeight;
       if (paintCanvas.width !== canvasWidth) paintCanvas.width = canvasWidth;
       if (paintCanvas.height !== canvasHeight) paintCanvas.height = canvasHeight;
-      const context = paintCanvas.getContext("2d", { alpha: false });
+      const context = paintCanvas.getContext("2d", { alpha: false, willReadFrequently: true });
       if (!context) return;
       context.imageSmoothingQuality = rasterScale === 1 && pausedRaster ? "high" : "low";
       const pausedPaint = !moving && soloFinishRasterEnabled && !overlays.length &&
@@ -14682,10 +14701,13 @@ const ViralClipStudio = ({
           }
         }
       } else {
-        if (pausedRaster && soloProjection) {
+        if (pausedRaster && soloProjection && !moving) {
           // A crop followed by Director zoom has two sampling stages in the
           // worker. One combined draw has equivalent geometry but different
           // fine-edge pixels, especially on the second speaker's close-up.
+          // Moving preview uses the equivalent single projection below: a
+          // second canvas readback costs a display deadline without adding
+          // useful detail to its labelled, adaptive display raster.
           const stage=soloProjection.sourceStage, crop=soloProjection.directorCrop;
           const stageScale=Math.min(1,canvasWidth/stage.width,canvasHeight/stage.height),
             stageWidth=Math.max(2,Math.round(stage.width*stageScale)),
@@ -14762,14 +14784,15 @@ const ViralClipStudio = ({
         context.fillRect(0, 0, canvasWidth, canvasHeight);
         context.restore();
       }
+      const gradeMaskSource=finishPreviewIsLive?(advancedColor?.maskSourceNodeId||effectiveFinishFx?.maskSourceNodeId):null;
+      const gradeMaskOriginal=gradeMaskSource?captureStudioGradeSurface(context):null;
+      const blendNodeGrade=(nodeId,original,invert=false)=>blendStudioNodeMask(context,original,nodeId,{overlays,keys:previewMotionKeyframes,mainTransform,time:frameOutputTime,width:canvasWidth,height:canvasHeight,evaluatePose:evaluateWorldLayerPose,paintSurface:paintStudioNodeSurface,parsePolygon:parseStudioMaskPolygon,invert});
       let usedWebGL = false;
       const needsSecondaryShader =
         finishPreviewIsLive &&
         (advancedColor?.powerWindow?.enabled ||
           advancedColor?.qualifier?.enabled ||
           Number(effectiveFinishFx?.halation || 0) > 0 ||
-          Number(effectiveFinishFx?.chromaticAberration || 0) > 0 ||
-          Number(effectiveFinishFx?.filmGrain || 0) > 0 ||
           Number(effectiveFinishFx?.dreamGlow || 0) > 0 ||
           Number(effectiveFinishFx?.anamorphicFlare || 0) > 0 ||
           Number(effectiveFinishFx?.lensBlur || 0) > 0);
@@ -14823,17 +14846,23 @@ const ViralClipStudio = ({
           context.save();
           context.setTransform(1, 0, 0, 1, 0, 0);
           context.filter = "none";
-          context.drawImage(compositor.surface, 0, 0, canvasWidth, canvasHeight);
+          compositor.copyGradedFrame(context);
           context.restore();
           usedWebGL = true;
         } else if (precisionPreviewGrade || (finishPreviewIsLive && advancedColorCube)) {
           const pixels = context.getImageData(0, 0, canvasWidth, canvasHeight);
-          if (precisionPreviewGrade) applyPrecisionGrade(pixels.data, precisionPreviewGrade);
+          if (precisionPreviewGrade) applyPrecisionGrade(pixels.data, precisionPreviewGrade, canvasWidth, canvasHeight);
           if (finishPreviewIsLive && advancedColorCube) applyColorCube(pixels.data, advancedColorCube);
           if (precisionPreviewGrade && pausedRaster)
             applyPrecisionVignette(pixels.data, canvasWidth, canvasHeight, effectiveFinishFx.vignette);
           context.putImageData(pixels, 0, 0);
         }
+      }
+      if(gradeMaskSource)blendNodeGrade(gradeMaskSource,gradeMaskOriginal,!!advancedColor?.maskInvert);
+      if(finishPreviewIsLive&&!needsSecondaryShader&&(Number(effectiveFinishFx.filmGrain)>.005||Number(effectiveFinishFx.chromaticAberration)>.005)){
+        const pixels=context.getImageData(0,0,canvasWidth,canvasHeight);
+        applyStudioFinishTexture(pixels.data,canvasWidth,canvasHeight,effectiveFinishFx,frameOutputTime,exportSettings.fps,rasterScale);
+        context.putImageData(pixels,0,0);
       }
       canvas.dataset.previewPipeline = usedWebGL ? "webgl2" : "cpu2d";
       // Use this decoded picture's programme time at grade boundaries. React's
@@ -14841,17 +14870,20 @@ const ViralClipStudio = ({
       for (const layer of finishPreviewIsLive ? compiledAdjustmentGrades : []) {
         if (frameOutputTime < layer.startTime || frameOutputTime >= layer.startTime + layer.duration) continue;
         const adjustment = layer.effects;
+        const adjustmentMaskOriginal=layer.maskSourceNodeId?captureStudioGradeSurface(context):null;
         const grade = adjustment.color;
         if (grade.precisionGrade) {
           const compositor = webglCompositorRef.current;
           if (
             usedWebGL &&
             compositor &&
+            !compositor.softwareRenderer &&
             compositor.renderGradedFrame({
               source: paintCanvas,
               width: canvasWidth,
               height: canvasHeight,
               grade,
+              vignetteAmount: grade.vignette || 0,
               cube: adjustment.color_cube || null,
               lutIntensity: 1,
             })
@@ -14863,7 +14895,8 @@ const ViralClipStudio = ({
             context.restore();
           } else {
             const pixels = context.getImageData(0, 0, canvasWidth, canvasHeight);
-            applyPrecisionGrade(pixels.data, buildPrecisionGrade(grade));
+            applyPrecisionGrade(pixels.data, buildPrecisionGrade(grade), canvasWidth, canvasHeight);
+            applyPrecisionVignette(pixels.data, canvasWidth, canvasHeight, grade.vignette);
             if (adjustment.color_cube) applyColorCube(pixels.data, adjustment.color_cube);
             context.putImageData(pixels, 0, 0);
           }
@@ -14890,6 +14923,7 @@ const ViralClipStudio = ({
           context.save(); context.globalCompositeOperation = 'screen';
           context.globalAlpha = adjustment.glow.intensity; context.drawImage(scratch, 0, 0); context.restore();
         }
+        if(layer.maskSourceNodeId)blendNodeGrade(layer.maskSourceNodeId,adjustmentMaskOriginal);
       }
       if (pausedRaster) {
         // Finish precedes the inset frame in the canonical worker. Preserve
@@ -14917,6 +14951,13 @@ const ViralClipStudio = ({
         visible.restore();
       }
       if (pausedPaint) lastPausedPaint = pausedPaint;
+      if (!moving && pausedFrameIsCurrent && pausedRaster) {
+        // Seed the moving raster budget from the frame the user has already
+        // inspected. Starting at an unmeasured full display raster can lose
+        // several pictures while the adaptive budget learns the same cost.
+        const displayScale=Math.min(1,rect.width*pixelRatio/pausedRaster.innerWidth);
+        budget.fullCost=(performance.now()-paintStarted)*displayScale*displayScale;
+      }
       if (moving) {
         const finished=performance.now(),cost=finished-paintStarted;
         const fullCost=cost/(performanceScale*performanceScale);
@@ -14961,6 +15002,7 @@ const ViralClipStudio = ({
     });
     const transport = phoneFrameRef.current?.parentElement?.querySelector(".preview-custom-controls");
     const resizeProgramme = () => {
+      programmeBounds = canvas.getBoundingClientRect();
       if (phoneFrameRef.current) {
         phoneFrameRef.current.style.setProperty("--caption-programme-width",
           `${phoneFrameRef.current.clientWidth}px`);
@@ -14982,7 +15024,7 @@ const ViralClipStudio = ({
     if (phoneFrameRef.current) previewResizeObserver?.observe(phoneFrameRef.current);
     if (transport) previewResizeObserver?.observe(transport);
     resizeProgramme();
-    window.addEventListener("resize", paintProgrammeFrame);
+    window.addEventListener("resize", resizeProgramme);
     paintProgrammeFrame();
     if (!video.paused) startProgrammeLoop();
 
@@ -15000,7 +15042,7 @@ const ViralClipStudio = ({
         stackVideo?.removeEventListener("seeked", paintProgrammeFrame);
       });
       previewResizeObserver?.disconnect();
-      window.removeEventListener("resize", paintProgrammeFrame);
+      window.removeEventListener("resize", resizeProgramme);
       stopProgrammeFrames?.();
     };
   }, [
@@ -15008,6 +15050,7 @@ const ViralClipStudio = ({
     pausedSourceFrame,
     pausedSourceGeneration,
     pausedSourceUsesCfr30,
+    exportSettings.fps,
     exportSettings.resolution,
     timeline,
     previewOutputTimeMap,
@@ -17879,6 +17922,17 @@ const ViralClipStudio = ({
     catch (error) { setStudioActionMessage(error.message); return false; }
     setOverlays(next); return true;
   };
+  const applyNodeFlowChange = patch => {
+    try {
+      validateStudioNodeFlowEdit({overlays,mainTransform,finishFx,advancedColor,finishKeyframes,
+        adjustmentLayers,motionKeyframes,compositionOrder,nodeFlow},patch,trackStates);
+    } catch(error) {setStudioActionMessage(error.message);return false;}
+    const setters={overlays:setOverlays,mainTransform:setMainTransform,finishFx:replaceFinishFx,
+      advancedColor:setAdvancedColor,finishKeyframes:setFinishKeyframes,adjustmentLayers:setAdjustmentLayers,
+      motionKeyframes:setMotionKeyframes,compositionOrder:setCompositionOrder,nodeFlow:setNodeFlow};
+    for(const [field,value]of Object.entries(patch))setters[field]?.(value);
+    setPreviewFinishedFile(false);setComparisonMode("after");return true;
+  };
   const setOverlayStyleOption = (id, key, value) => {
     const target = overlays.find(layer => layer.id === id);
     if(key==='mask'){
@@ -20156,8 +20210,8 @@ const ViralClipStudio = ({
 
                     {finishPreviewIsLive ? (
                       <StudioFinishLayers
-                        fx={precisionPreviewGrade && soloFinishRasterEnabled
-                          ? {...effectiveFinishFx,vignette:0} : effectiveFinishFx}
+                        fx={{...effectiveFinishFx,filmGrain:0,chromaticAberration:0,
+                          ...(precisionPreviewGrade && soloFinishRasterEnabled?{vignette:0}:{})}}
                         edgeBlurStyle={finishEdgeBlurStyle}
                         vignetteStyle={finishVignetteStyle}
                         overlayStyle={finishOverlayStyle}
@@ -20524,7 +20578,7 @@ const ViralClipStudio = ({
                           // Canonical media keys own transform and opacity.
                           // CSS entrance fill otherwise freezes opacity at1 or
                           // replaces the authored scale/rotation after the entry.
-                          const hasRigOrDrivers = Boolean(overlay.parentId) || layerHasActiveMotionDrivers(overlay);
+                          const hasRigOrDrivers = Boolean(overlay.parentId || overlay.parameterLinks || overlay.zDepth) || layerHasActiveMotionDrivers(overlay);
                           const keyedMedia = isMediaOverlay && (overlayKeys.length > 0 || hasRigOrDrivers);
                           const animClass = anim.enter && !keyedMedia && !hasRigOrDrivers ? `broll-anim-${anim.enter}` : "";
                           const overlayMotion = hasRigOrDrivers
@@ -20540,8 +20594,10 @@ const ViralClipStudio = ({
                                 compositionTime,
                                 overlay
                               );
-                          const safeOverlaySrc = overlay.vectorShape ? studioVectorUri(overlay.vectorShape, overlayMotion) : getSafeMediaSource(overlay.src);
+                          const safeOverlaySrc = overlay.vectorShape ? studioVectorUri(overlay.vectorShape, overlayMotion) : getSafeMediaSource(studioNodeImageSource(overlay.src));
                           const isStyledTitle = overlay.type === "text" && !isFullscreen && !overlay.isNullRig;
+                          const measuredTitle=isStyledTitle&&!overlay.textAnimator&&!overlay.bRollPlaceholder&&!overlay.isRainbow
+                            ? measureStudioTitleBox(overlay,720*previewAspectRatio):null;
                           const titlePose = isStyledTitle
                             ? titleAnimationPose(overlay, compositionTime)
                             : { x: 0, y: 0, scale: 1, opacity: 1 };
@@ -20562,6 +20618,7 @@ const ViralClipStudio = ({
                                 mode: overlay.trackMatte.mode,
                                 time: compositionTime,
                                 stageAspect: previewAspectRatio || 9 / 16,
+                                quality: isPreviewPaused ? 'inspection' : 'playback',
                               })
                             : "";
 
@@ -20589,7 +20646,8 @@ const ViralClipStudio = ({
                                     ? "16%"
                                     : overlay.type === "video" || overlay.type === "image"
                                       ? `${overlay.width || 35}%`
-                                      : isStyledTitle ? "max-content" : "auto",
+                                      : measuredTitle ? `${measuredTitle.width}px` : isStyledTitle ? "max-content" : "auto",
+                                ...(measuredTitle?{whiteSpace:'pre',overflowWrap:'normal'}:{}),
                                 maxWidth: isStyledTitle
                                   ? `calc(var(--title-layout-width, 576px) * ${Math.max(15, Math.min(90, Number(overlay.width || 90))) / 100})` : isMediaOverlay ? "none" : undefined,
                                 height: isFullscreen
@@ -20639,7 +20697,7 @@ const ViralClipStudio = ({
                                   ? overlayMotion.opacity * titlePose.opacity : undefined,
                                 mixBlendMode: trackMatteUri ? "normal" : (overlay.blendMode || "normal"),
                                 pointerEvents: overlay.locked ? "none" : "auto",
-                                filter: isMediaOverlay ? studioMediaEffectFilter(overlay) : undefined,
+                                filter: isMediaOverlay&&hasStudioNodeSurface(overlay)?'none':isMediaOverlay || Number(overlay.dofBlur) > 0 ? studioMediaEffectFilter(overlay) : undefined,
                                 clipPath: getOverlayMaskClipPath({
                                   ...overlay,
                                   mask: overlayMotion.mask || overlay.mask,
@@ -20684,6 +20742,7 @@ const ViralClipStudio = ({
                               <StudioLayerMask mask={overlayMotion.mask || overlay.mask} cropX={overlayMotion.cropX}
                                 cropY={overlayMotion.cropY} title={isStyledTitle} stageRef={phoneFrameRef} />
                               <StudioPerspectiveSurface value={overlayMotion.perspective || overlay.perspective} progress={overlayMotion.perspectiveProgress ?? 100}
+                                baked={isMediaOverlay&&hasStudioNodeSurface(overlay)}
                                 clockRef={presentedFramePreview ? undefined : videoRef} mapTime={getPreviewTimelineTime}
                                 layer={overlay} keyframes={overlayKeys}>
                               {overlay.isNullRig ? (
@@ -20726,7 +20785,7 @@ const ViralClipStudio = ({
                                     offset={overlay.rainbowOffset || 0}
                                   />
                                 ) : (
-                                  safeOverlayText
+                                  measuredTitle?<StudioTitleInspectionSurface layer={overlay} programmeWidth={720*previewAspectRatio} enabled={isPreviewPaused}>{measuredTitle.lines.join('\n')}</StudioTitleInspectionSurface>:safeOverlayText
                                 )
                               ) : overlay.type === "image" && safeOverlaySrc ? (
                                 <img
@@ -20793,6 +20852,7 @@ const ViralClipStudio = ({
                                 </>
                               ) : null}
 
+                              {isMediaOverlay && <StudioNodeEffectSurface layer={overlay} videoRef={videoRef} mapTime={getPreviewTimelineTime} time={previewTimelineTime} overlays={overlays} keyframes={previewMotionKeyframes} mainTransform={mainTransform} programmeHeight={studioSoloPictureDimensions({sourceWidth:videoRef.current?.videoWidth,sourceHeight:videoRef.current?.videoHeight,aspect:reframeAspect,resolution:exportSettings.resolution,frame:mainFrame})?.height||720} />}
                               </StudioPerspectiveSurface>
                               {comparisonMode !== "split" &&
                                 activeOverlayId === overlay.id &&
@@ -20945,7 +21005,11 @@ const ViralClipStudio = ({
                             </div>
                           );
                           if (!trackMatteUri) return overlayElement;
-                          const matteElement = (
+                          const matteElement = matteSourceLayer?.type==='text'&&!matteSourceLayer.textAnimator ? <StudioTitleTrackMatte
+                            key={overlay.id} layer={matteSourceLayer} pose={evaluateWorldLayerPose(matteSourceLayer,overlays,previewMotionKeyframes,compositionTime,mainTransform)}
+                            time={compositionTime} aspect={previewAspectRatio||9/16} quality={isPreviewPaused?'inspection':'playback'} fillId={overlay.id} mode={overlay.trackMatte.mode}
+                            style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:compositionRank.get(overlay.id)??100+index,mixBlendMode:overlay.matteSurface?.enabled?'normal':overlay.blendMode||'normal'}}>
+                            {overlayElement}</StudioTitleTrackMatte> : (
                             <div
                               key={overlay.id}
                               data-studio-matte-wrap={overlay.id}
@@ -21310,7 +21374,7 @@ const ViralClipStudio = ({
                       />
                       <span className="compact-source-filmstrip" aria-hidden="true">
                         {!timelineDockExpanded ? (
-                          <TimelineSourceFilmstrip frames={liveTimelineFilmstripFrames} />
+                          <TimelineSourceFilmstrip frames={liveTimelineFilmstripFrames} playing={!isPreviewPaused} />
                         ) : null}
                       </span>
                       <span className="compact-source-scrim" aria-hidden="true" />
@@ -26223,7 +26287,7 @@ const ViralClipStudio = ({
                       onSeek={jumpToOutputTimelineTime}
                     />
                   ) : (
-                    <StudioNodeFlow videoRef={videoRef} mapTime={getPreviewTimelineTime} advancedColor={advancedColor} onChangeAdvancedColor={setAdvancedColor}
+                    <StudioNodeFlow onApplyNodeChange={applyNodeFlowChange} videoRef={videoRef} mapTime={getPreviewTimelineTime} advancedColor={advancedColor} onChangeAdvancedColor={setAdvancedColor}
                       overlays={overlays}
                       mainTransform={mainTransform}
                       finishFx={finishFx}
@@ -31100,7 +31164,7 @@ const ViralClipStudio = ({
                 onSeek={jumpToOutputTimelineTime}
               />
             ) : bottomDockView === "node_flow" ? (
-              <StudioNodeFlow videoRef={videoRef} mapTime={getPreviewTimelineTime} advancedColor={advancedColor} onChangeAdvancedColor={setAdvancedColor}
+              <StudioNodeFlow onApplyNodeChange={applyNodeFlowChange} videoRef={videoRef} mapTime={getPreviewTimelineTime} advancedColor={advancedColor} onChangeAdvancedColor={setAdvancedColor}
                 overlays={overlays}
                 mainTransform={mainTransform}
                 finishFx={finishFx}
@@ -31147,6 +31211,7 @@ const ViralClipStudio = ({
               />
             ) : (
             <StudioProTimeline
+              playing={!isPreviewPaused}
               playbackClock={studioPlaybackClockRef.current}
               duration={liveTimelineDuration}
               playbackRate={previewSpeed}

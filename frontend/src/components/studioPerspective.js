@@ -124,3 +124,28 @@ export function perspectiveCssMatrix(value, progress, width, height) {
   const [a,b,c,d,e,f,g,h] = perspectiveHomography(perspectiveCorners(value, progress));
   return `matrix3d(${[a,d*height/width,0,g/width,b*width/height,e,0,h/height,0,0,1,0,c*width,f*height,0,1].join(',')})`;
 }
+
+// Rasterise the same inverse homography used by the native media plane. The
+// grade mask reads projected alpha rather than the unprojected source box.
+export function projectStudioCanvas(canvas, value, progress=100) {
+  if(!value)return canvas;
+  const h=perspectiveHomography(perspectiveCorners(value,progress));
+  const [a,b,c,d,e,f,g,j,k]=h,det=a*(e*k-f*j)-b*(d*k-f*g)+c*(d*j-e*g);
+  if(!Number.isFinite(det)||Math.abs(det)<1e-10)throw Error('The projected mask is singular.');
+  const inv=[e*k-f*j,c*j-b*k,b*f-c*e,f*g-d*k,a*k-c*g,c*d-a*f,d*j-e*g,b*g-a*j,a*e-b*d].map(n=>n/det);
+  const width=canvas.width,height=canvas.height,ctx=canvas.getContext('2d',{willReadFrequently:true});
+  const input=ctx.getImageData(0,0,width,height),output=ctx.createImageData(width,height);
+  const region=value.sourceRect||[0,0,100,100],rw=(region[2]-region[0])/100,rh=(region[3]-region[1])/100;
+  for(let y=0;y<height;y++)for(let x=0;x<width;x++){
+    const nx=(x+.5)/width,ny=(y+.5)/height,z=inv[6]*nx+inv[7]*ny+inv[8],u=(inv[0]*nx+inv[1]*ny+inv[2])/z,v=(inv[3]*nx+inv[4]*ny+inv[5])/z;
+    if(u<0||u>1||v<0||v>1)continue;
+    const sx=(region[0]/100+u*rw)*width-.5,sy=(region[1]/100+v*rh)*height-.5,x0=Math.floor(sx),y0=Math.floor(sy),fx=sx-x0,fy=sy-y0;let alpha=0;const rgb=[0,0,0];
+    for(let dy=0;dy<2;dy++)for(let dx=0;dx<2;dx++){
+      const xx=x0+dx,yy=y0+dy;if(xx<0||xx>=width||yy<0||yy>=height)continue;
+      const at=(yy*width+xx)*4,weight=(dx?fx:1-fx)*(dy?fy:1-fy),coverage=input.data[at+3]*weight;alpha+=coverage;
+      for(let channel=0;channel<3;channel++)rgb[channel]+=input.data[at+channel]*coverage;
+    }
+    const at=(y*width+x)*4;output.data[at+3]=alpha;for(let channel=0;channel<3;channel++)output.data[at+channel]=alpha?rgb[channel]/alpha:0;
+  }
+  ctx.putImageData(output,0,0);return canvas;
+}

@@ -1,0 +1,98 @@
+{
+  "coreFrontendTests": 85,
+  "cpuCompositionMatteTests": 135,
+  "knowledgeTests": 17,
+  "assistanceTests": 35,
+  "strictProductionBuild": "PASS",
+  "anonymousWelcomeComparisons": 8,
+  "signedInNativeHelpChecks": 3,
+  "nativeUI": {
+    "normalSignIn": true,
+    "viewports": [
+      {
+        "width": 1600,
+        "height": 1200,
+        "left": 12,
+        "right": 1588,
+        "top": 68,
+        "bottom": 1188,
+        "toolbarOverflow": false,
+        "canvasHeight": 1030,
+        "sidebarHeight": 1030,
+        "stageBottom": 1187,
+        "rootBottom": 1188
+      },
+      {
+        "width": 1280,
+        "height": 900,
+        "left": 12,
+        "right": 1268,
+        "top": 68,
+        "bottom": 888,
+        "toolbarOverflow": false,
+        "canvasHeight": 730,
+        "sidebarHeight": 730,
+        "stageBottom": 887,
+        "rootBottom": 888
+      },
+      {
+        "width": 1024,
+        "height": 820,
+        "left": 12,
+        "right": 1012,
+        "top": 68,
+        "bottom": 808,
+        "toolbarOverflow": false,
+        "canvasHeight": 586,
+        "sidebarHeight": 586,
+        "stageBottom": 807,
+        "rootBottom": 808
+      }
+    ],
+    "mobileDesktopGuard": true,
+    "noUnrelatedCreditPrompt": true,
+    "expandCollapse": true,
+    "escapeReturns": true,
+    "keyboardWipe": true,
+    "deleteOutsideWorkspaceDoesNotDeleteNodes": true,
+    "invalidOperationVisible": true,
+    "errors": []
+  },
+  "nativeExport": {
+    "normalSignIn": true,
+    "authoringEvidence": "../native",
+    "wiringSmartRigsAndLockEvidence": "../continuation",
+    "normalOwnedBackupRestore": true,
+    "paletteActions": 9,
+    "smartRigActions": 6,
+    "cornerPinCanonicalBypassRestore": true,
+    "nativeUndoRedo": true,
+    "physicalClickWiring": true,
+    "trackLockRefusal": true,
+    "semanticColdReopen": true,
+    "normalApprovedExport": true,
+    "downloadSha256": "0b7e445df42f67727cce4659e1dfb0d650f14c1c5ea8eec6f6c30fe178fa98c9",
+    "fullDecode": true,
+    "playback": {
+      "duration": 4,
+      "ended": true,
+      "decoded": 97
+    },
+    "errors": [],
+    "paidJobs": 0,
+    "productionWrites": 0
+  },
+  "remainingRenderConsumers": [
+    "ChromaKeyer",
+    "optical/displacement",
+    "depth/rack-focus",
+    "arbitrary effect mask-source routing",
+    "generic node-isolated viewers"
+  ],
+  "allNodesFullyFunctional": false,
+  "readinessPromotion": false,
+  "originalStorageMetadataReplayComplete": false,
+  "sourceSyncConflicts": 0,
+  "productionWrites": 0,
+  "paidCalls": 0
+}

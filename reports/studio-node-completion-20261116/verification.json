@@ -1,0 +1,169 @@
+{
+  "status": "IMPLEMENTED_AND_BOUNDEDLY_VERIFIED",
+  "frontendTests": 107,
+  "workerTests": 208,
+  "knowledgeHelpTests": 52,
+  "strictBuild": "PASS",
+  "finalDesktopMobileUi": {
+    "normalSignIn": true,
+    "normalOwnedBackupRestore": true,
+    "physicalGraphViewerButtonUnobstructed": true,
+    "lumaOnlyControlsDisabled": true,
+    "mainSourceGradeLivePicture": true,
+    "viewports": [
+      {
+        "width": 1600,
+        "height": 1200,
+        "left": 12,
+        "right": 1588,
+        "bottom": 1188,
+        "toolbarOverflow": false
+      },
+      {
+        "width": 1280,
+        "height": 900,
+        "left": 12,
+        "right": 1268,
+        "bottom": 888,
+        "toolbarOverflow": false
+      },
+      {
+        "width": 1024,
+        "height": 820,
+        "left": 12,
+        "right": 1012,
+        "bottom": 808,
+        "toolbarOverflow": false
+      }
+    ],
+    "mobileDesktopGuard": true,
+    "noUnrelatedCreditPrompt": true,
+    "escapeReturns": true,
+    "errors": [],
+    "testedBuild": "/tmp/autopromote-node-completion-build-20261116-r10",
+    "runLog": "ux-final-r10.log"
+  },
+  "anonymousWelcomeComparisons": 8,
+  "signedInHelpChecks": 3,
+  "browserBooleanAlphaChecks": 4,
+  "browserInvertedFeatherCheck": true,
+  "nativeExport": {
+    "normalSignIn": true,
+    "normalBackupRestore": true,
+    "canonicalDepthDefocus": true,
+    "nativeViewers": [
+      {
+        "id": "MediaIn:overlay-80cab168-54ff-483e-9209-e28c5e238780",
+        "pixels": 9,
+        "schematic": 0,
+        "error": null
+      },
+      {
+        "id": "ChromaKeyer:overlay-80cab168-54ff-483e-9209-e28c5e238780",
+        "pixels": 9,
+        "schematic": 0,
+        "error": null
+      }
+    ],
+    "viewports": [
+      {
+        "width": 1600,
+        "height": 1200,
+        "left": 12,
+        "right": 1588,
+        "bottom": 1188,
+        "toolbarOverflow": false
+      },
+      {
+        "width": 1280,
+        "height": 900,
+        "left": 12,
+        "right": 1268,
+        "bottom": 888,
+        "toolbarOverflow": false
+      },
+      {
+        "width": 1024,
+        "height": 820,
+        "left": 12,
+        "right": 1012,
+        "bottom": 808,
+        "toolbarOverflow": false
+      }
+    ],
+    "keyboardWipe": true,
+    "nativeBooleanMaskControls": true,
+    "nativeGradeMaskReference": true,
+    "semanticColdReopen": true,
+    "normalApprovedExport": true,
+    "downloadSha256": "031c3df5b94fd9f91dceb9d8b52a0309acaecc43c1e480b3c9518be89820aabc",
+    "fullDecode": true,
+    "playback": {
+      "duration": 4,
+      "ended": true,
+      "decoded": 96
+    },
+    "errors": [],
+    "paidJobs": 0,
+    "productionWrites": 0
+  },
+  "binding": {
+    "exactNativeDownloadSha256": "031c3df5b94fd9f91dceb9d8b52a0309acaecc43c1e480b3c9518be89820aabc",
+    "compiledNode": {
+      "version": 1,
+      "key": {
+        "enabled": true,
+        "mode": "chroma",
+        "color": "#00d455",
+        "similarity": 0.2,
+        "smoothness": 0.1,
+        "spill": 0.48,
+        "choke": 0,
+        "invert": false
+      },
+      "optical": {
+        "halation": 0.6,
+        "streak": 0.5
+      },
+      "warp": {
+        "enabled": true,
+        "x": 16,
+        "y": 10,
+        "frequency": 2.2
+      },
+      "defocus": 2,
+      "depth": 40
+    },
+    "compiledBaseTransform": {
+      "x": 21,
+      "y": 56,
+      "scale": 1.25,
+      "rotation": 0,
+      "opacity": 1,
+      "crop_x": 0,
+      "crop_y": 0
+    },
+    "gradeMask": {
+      "layer_id": "overlay-80cab168-54ff-483e-9209-e28c5e238780",
+      "operation": "ChromaKeyer"
+    },
+    "gradeContrast": 1.35
+  },
+  "delivery": {
+    "movie": "/home/tibule12/Videos/Studio Node Flow - Completed Effects - 2026-11-16/Node Flow - completed effects.mp4",
+    "sha256": "031c3df5b94fd9f91dceb9d8b52a0309acaecc43c1e480b3c9518be89820aabc"
+  },
+  "all37ServedJsCssAssetsMatchBuild": true,
+  "fullAuthFirestoreStorageCheckpoint": true,
+  "allOwnedServicesStopped": true,
+  "unqualified": [
+    "whole-programme moving picture/audio parity",
+    "unrestricted realtime throughput",
+    "physical 3D camera simulation",
+    "human creative/listening approval",
+    "production deployment/account qualification"
+  ],
+  "readinessPromotion": false,
+  "paidCalls": 0,
+  "productionWrites": 0
+}

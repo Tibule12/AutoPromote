@@ -5,6 +5,29 @@ export const normalizeStudioTitleText = value => String(value ?? '').replace(/\r
   // eslint-disable-next-line no-control-regex
   .replace(/[\u0000-\u0009\u000b-\u001f\u007f]/g, ' ').replace(/[<>]/g, '');
 
+const titleBoxes=new Map();
+let titleMeasure;
+if(typeof document!=='undefined')document.fonts?.addEventListener?.('loadingdone',()=>titleBoxes.clear());
+export function measureStudioTitleBox(layer,programmeWidth) {
+  if(typeof document==='undefined')return null;
+  const font=`${layer.fontWeight||900} 36px "Studio Inter", Inter, sans-serif`;
+  const key=JSON.stringify([layer.text,layer.width,font,programmeWidth,document.fonts?.status]);
+  if(titleBoxes.has(key))return titleBoxes.get(key);
+  titleMeasure ||= document.createElement('canvas').getContext('2d');
+  if(!titleMeasure)return null;
+  titleMeasure.font=font;
+  const maximum=programmeWidth*Math.max(.15,Math.min(.9,Number(layer.width||90)/100));
+  const lines=[];
+  for(const paragraph of normalizeStudioTitleText(layer.text).split('\n')){
+    let line='';for(const word of paragraph.split(' ')){
+      const candidate=line?line+' '+word:word;
+      if(line&&titleMeasure.measureText(candidate).width>maximum-32){lines.push(line);line=word;}else line=candidate;
+    }lines.push(line);
+  }
+  const result={lines,width:Math.min(maximum,Math.max(1,...lines.map(line=>titleMeasure.measureText(line).width))+32),height:lines.length*50.4+16};
+  if(titleBoxes.size>=256)titleBoxes.delete(titleBoxes.keys().next().value);titleBoxes.set(key,result);return result;
+}
+
 // Title animation follows the edit clock, including paused scrubbing and exit.
 export function titleAnimationPose(overlay, time) {
   const start = Number(overlay.startTime ?? overlay.start_time ?? 0);

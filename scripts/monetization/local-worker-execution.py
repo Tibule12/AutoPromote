@@ -99,6 +99,9 @@ sys.modules["studio_3d_overlay"] = studio_3d_overlay
 install_overlay_transport(studio_3d_overlay, record)
 
 
+canonical_materialize_video = worker.materialize_video_input
+
+
 async def materialize(url, target, *args, **kwargs):
     from urllib.parse import urlparse, unquote
     parsed = urlparse(url)
@@ -120,10 +123,23 @@ async def materialize(url, target, *args, **kwargs):
     if len(data) != approved["size"] or hashlib.sha256(data).hexdigest() != approved["contentHash"]:
         raise ValueError("Source generation/hash changed")
     Path(target).parent.mkdir(parents=True, exist_ok=True)
-    Path(target).write_bytes(data)
-    if record['expected']['endpoint'] == '/preview-silence' and worker.get_media_duration(target) > 30:
+    verified = str(target) + '.verified-source.mp4'
+    Path(verified).write_bytes(data)
+    if record['expected']['endpoint'] == '/preview-silence' and worker.get_media_duration(verified) > 30:
+        Path(verified).unlink(missing_ok=True)
         raise ValueError('Local caption coverage source exceeds thirty seconds')
-    return target
+    try:
+        if record['expected']['endpoint'] not in ('/render-viral-clip', '/render-clip', '/process'):
+            # Analysis and simulated destination delivery consume the verified
+            # original object; they are not video-ingest encoding operations.
+            shutil.copyfile(verified, target)
+            return target
+        # Replace only the authenticated download transport. Ordinary ingest
+        # still owns CFR30 conversion, audio policy and original-byte profiles;
+        # copying the upload straight into its output bypasses those semantics.
+        return await canonical_materialize_video(verified, target, *args, **kwargs)
+    finally:
+        Path(verified).unlink(missing_ok=True)
 
 
 worker.materialize_video_input = materialize

@@ -35,9 +35,11 @@ def video_layer_uses_canonical_raster(identity, layer, composition, overlay=None
         or float(layer.get('anchor_y', 50)) != 50
     )
     effects = layer.get('effects') or {}
+    node = effects.get('node') or {}
+    node_active = bool((node.get('key') or {}).get('enabled') or (node.get('warp') or {}).get('enabled') or node.get('defocus') or any((node.get('optical') or {}).values()))
     participants = any(str((candidate.get('track_matte') or {}).get('source_layer_id') or '') == str(identity)
                        for candidate in (composition or {}).get('layers') or [])
-    return bool(transparent_contain or held_geometry or layer.get('motion_keyframes') or layer.get('perspective') or participants
+    return bool(node_active or transparent_contain or held_geometry or layer.get('motion_keyframes') or layer.get('perspective') or participants
                 or (layer.get('track_matte') or {}).get('mode', 'none') != 'none'
                 or (effects.get('mask') or {}).get('enabled')
                 or (effects.get('motion_blur') or {}).get('enabled')

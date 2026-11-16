@@ -53,6 +53,23 @@ def check_real_title_compositor_renders_timed_fades_and_keyframe_position(tmp_pa
 
 
 class StudioTextTests(unittest.TestCase):
+    def test_ordinary_title_preserves_fractional_translation(self):
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / 'title.png'
+            spec = {'type': 'text', 'text': 'I', 'shadow': 'none', 'fontWeight': 900}
+            box = render_title_asset(spec, path, 405, 720)
+            centers = []
+            for offset in (0, .25, .5):
+                pose = {'x': 50 + offset / 405 * 100, 'y': 50, 'scale': 1,
+                        'rotation': 0, 'opacity': 1, 'crop_x': 0, 'crop_y': 0}
+                frame = _render_pose(Image.open(path).convert('RGBA'), {**spec, **box},
+                    {'anchor_x': box['anchorX'], 'anchor_y': box['anchorY']}, pose, (405, 720))
+                alpha = np.asarray(frame)[..., 3].astype(float)
+                centers.append(float((alpha * np.arange(405)).sum() / alpha.sum()))
+            for left, right in zip(centers, centers[1:]):
+                self.assertGreater(right-left, .12)
+                self.assertLess(right-left, .38)
+
     def test_every_importable_title_weight_has_matching_browser_worker_font_and_renders(self):
         import hashlib
         from python_media_worker.studio_text import WEIGHTS

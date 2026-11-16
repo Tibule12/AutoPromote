@@ -5,7 +5,7 @@ const thumbnailCache = new Map();
 
 // One silent decoder for the whole filmstrip. It never seeks the programme
 // monitor and releases its media on cancellation, source changes or unmount.
-export default function TimelineSourceFilmstrip({ frames = [] }) {
+export default function TimelineSourceFilmstrip({ frames = [], playing = false }) {
   const sampled =
     frames.length <= 24
       ? frames
@@ -26,6 +26,9 @@ export default function TimelineSourceFilmstrip({ frames = [] }) {
     }
     if (Object.keys(values).length) setImages({ signature, values: { ...values } });
     if (Object.keys(values).length === requested.length) return undefined;
+    // The programme decoder has priority during playback. Keep completed
+    // thumbnails visible and resume unfinished sampling when editing pauses.
+    if(playing)return undefined;
     const controller = new AbortController();
     const video = document.createElement("video");
     video.muted = true;
@@ -115,7 +118,7 @@ export default function TimelineSourceFilmstrip({ frames = [] }) {
       video.load();
       video.remove();
     };
-  }, [signature]);
+  }, [signature,playing]);
   return (
     <span
       className="pro-source-filmstrip"

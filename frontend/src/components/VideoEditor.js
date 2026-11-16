@@ -2018,7 +2018,7 @@ function VideoEditor({
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ flex: 1 }}>{statusMessage}</span>
-            {creditBalance !== null ? (
+            {needsCredits && creditBalance !== null ? (
               <button
                 onClick={() => {
                   setShowCreditShop(true);

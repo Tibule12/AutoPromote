@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-11-15T14:52:35.616252+00:00",
+  "updatedAt": "2026-11-16T17:28:56.617847+00:00",
   "baseline": "reports/studio-stability-20261008/results.json",
   "readinessStates": [
     "UNIMPLEMENTED",
@@ -1411,7 +1411,7 @@
   ],
   "continuity": {
     "nextHighestPriorityTaskId": "S02",
-    "lastSessionKind": "NATIVE_RESTAURANT_FILM",
+    "lastSessionKind": "NODE_PROJECTED_TITLE_MASK_ROUTING_AND_RESTORE_ALL",
     "lastSessionRealCapabilityRuns": 2,
     "lastSessionGpuJobsStarted": 0,
     "exactBlockersSource": "reports/studio-restaurant-film-20261020/checkpoint.json",
@@ -1421,7 +1421,7 @@
       "result": "VALID",
       "capabilityQualification": "Targeted tests and actual native films/timelines qualify bounded slices. Full live picture/audio, ordinary-account runtime, product and creative/public gates remain open."
     },
-    "lastSessionEvidence": "reports/studio-restaurant-film-20261020/README.md",
+    "lastSessionEvidence": "reports/studio-node-routing-20261116/README.md",
     "lastSessionAutomatedChecks": {
       "nativeSourceCuts": 20,
       "uniqueSourceFiles": 3,
@@ -26564,5 +26564,331 @@
     "readinessPromotion": false,
     "paidCalls": 0,
     "productionWrites": 0
+  },
+  "studioNodeFlowAudit20261115": {
+    "report": "reports/studio-node-flow-audit-20261115/README.md",
+    "scope": "Core Node Flow lifecycle and desktop UI; experimental operators remain partial",
+    "frontendTests": 85,
+    "cpuCompositionMatteTests": 135,
+    "nativePaletteAuthoringActions": 9,
+    "nativeSmartRigAuthoringActions": 6,
+    "physicalPointerWiring": true,
+    "canonicalBypassRestore": true,
+    "nativeHistoryLocksColdReopen": true,
+    "nativeExportSeconds": 4,
+    "nativeExportAudio": true,
+    "nativeDownloadSha256": "0b7e445df42f67727cce4659e1dfb0d650f14c1c5ea8eec6f6c30fe178fa98c9",
+    "completeFinishedPlayback": true,
+    "remainingOperatorConsumers": [
+      "ChromaKeyer",
+      "optical/displacement",
+      "depth/rack-focus",
+      "arbitrary effect mask-source routing",
+      "generic node-isolated viewers"
+    ],
+    "wholeMovingPictureAudioParity": "UNVERIFIED",
+    "readinessPromotion": false,
+    "paidCalls": 0,
+    "productionWrites": 0
+  },
+  "studioNodeFlowCompletion20261116": {
+    "report": "reports/studio-node-completion-20261116/README.md",
+    "scope": "Shared media-node render consumers, actual native pictures, grade-mask routing and lifecycle/UI completion",
+    "frontendTests": 107,
+    "cpuPixelCompositionTests": 208,
+    "knowledgeHelpTests": 52,
+    "browserWorkerNodePixels": "MATCH_WITHIN_ONE_CHANNEL_VALUE",
+    "actualChromiumBooleanAlphaChecks": 4,
+    "invertedFeatherBrowserEdge": true,
+    "nativeSourceUpload": true,
+    "nativeKeyerBypassRestore": true,
+    "canonicalDepthDefocus": true,
+    "nativeGradeMaskSource": true,
+    "nativeBooleanAuthoring": true,
+    "nativeABPictures": true,
+    "nonOverlappingDefaultLayout": true,
+    "semanticColdReopen": true,
+    "nativeExportAndCompletePlayback": true,
+    "movieSeconds": 4,
+    "movieSize": [
+      720,
+      1280
+    ],
+    "movieFps": 24,
+    "audio": "stereo AAC",
+    "downloadSha256": "031c3df5b94fd9f91dceb9d8b52a0309acaecc43c1e480b3c9518be89820aabc",
+    "firstDraft": "RETAINED_SUPERSEDED_CANONICAL_DEPTH_OMISSION",
+    "localRenderOperations": 2,
+    "fullAuthFirestoreStorageCheckpoint": true,
+    "wholeMovingPictureAudioParity": "UNVERIFIED",
+    "readinessPromotion": false,
+    "paidCalls": 0,
+    "productionWrites": 0,
+    "boundaries": [
+      "ordinary media node pixels",
+      "no projected/non-pixel/service grade-mask source",
+      "2.5D scale and layer defocus; no physical camera simulation"
+    ]
+  },
+  "studioNodeRoutingFollowthrough20261116": {
+    "report": "reports/studio-node-routing-20261116/README.md",
+    "scope": "Projected and title grade masks, connected-mask inversion, common programme timestamps and canonical Restore All",
+    "frontendTests": 115,
+    "workerTests": 243,
+    "actualChromiumMaskPixelChecks": 4,
+    "nativeProjectedMediaMask": true,
+    "nativeTitleAdjustmentMask": true,
+    "nativeRestoreAllCanonicalValues": true,
+    "nativeInvalidPaletteRefusal": true,
+    "nativeUndoRedoColdReopen": true,
+    "nativeExportAndCompletePlayback": true,
+    "movieSeconds": 4,
+    "downloadSha256": "d8c620cacdf0316114daef74498d6174832ff2dcc8e3ec6bacaf8d25a7fdefb4",
+    "localRenderOperations": 1,
+    "paidCalls": 0,
+    "productionWrites": 0,
+    "wholeMovingPictureAudioParity": "UNVERIFIED",
+    "readinessPromotion": false,
+    "nativeConnectedMaskInversionSaved": true
+  },
+  "studioNodeConformance20261116": {
+    "report": "reports/studio-node-conformance-20261116/README.md",
+    "scope": "Native six-rig combination, fixed picture thresholds, original-phase audio and software preview throughput",
+    "frontendTests": 130,
+    "frontendSuites": 14,
+    "workerTests": 249,
+    "knowledgeHelpTests": 52,
+    "normalSignInAndBackupRestore": true,
+    "allSixSmartRigsTogether": true,
+    "overlayCount": 12,
+    "adjustmentLayerCount": 2,
+    "nativeExportsCompletedThisContinuation": 4,
+    "nativeExportFailedAndSettledThisContinuation": 1,
+    "moviesSeconds": 4,
+    "movieFrames": 96,
+    "decodedAudioMatchesPriorProgrammeExactly": true,
+    "maskRoutingStrictFinalPicturePairsPassed": 5,
+    "maskRoutingStrictFinalPicturePairsTotal": 6,
+    "maskRoutingLastFrameMae": 3.167193806111523,
+    "sixRigStrictPictureParity": "FAIL",
+    "automaticFrameRateExperiment": "REJECTED_AND_REMOVED",
+    "wholeMovingPictureAudioParity": "NOT_QUALIFIED",
+    "remainingBlockers": [
+      "Combined texture/grade/projected-layout colour and edge fidelity",
+      "Heavy software-device live playback throughput",
+      "Existing strict typography 13/16 failures and shared S02/S04/S03"
+    ],
+    "readinessPromotion": false,
+    "productionWrites": 0,
+    "paidCalls": 0,
+    "exportRunFinalFullEmulatorCheckpointComplete": false,
+    "allTerminalWorkerReceiptsRetained": true,
+    "lastObservedTerminalOperations": {
+      "succeeded": 5,
+      "failed": 1
+    },
+    "lastObservedHeldAndActiveOperations": 0,
+    "finalUiReplay": "Original full single-render checkpoint; no new render or financial reconstruction",
+    "creatorOverlayClockOnDecodedFrames": true,
+    "finalNativePlayback": {
+      "base": {
+        "wallMs": 4125.29999999702,
+        "programmeSeconds": 4,
+        "wallTimeRatio": 1.0313249999992549,
+        "decoded": 96,
+        "dropped": 1,
+        "droppedFraction": 0.010416666666666666,
+        "pictureCallbacks": 95,
+        "programmePaints": 96,
+        "maxLayerClockDistanceFrames": 0,
+        "stallOrErrorEvents": [],
+        "fixedCriteria": {
+          "maxWallTimeRatio": 1.15,
+          "maxDroppedFraction": 0.05,
+          "maxLayerClockDistanceFrames": 2
+        },
+        "fixedCriteriaPass": true,
+        "screenRecordingDisabled": true,
+        "semanticColdReopenPass": true
+      },
+      "heavy": {
+        "wallMs": 4219.0999999940395,
+        "programmeSeconds": 4,
+        "wallTimeRatio": 1.0547749999985099,
+        "decoded": 104,
+        "dropped": 30,
+        "droppedFraction": 0.28846153846153844,
+        "pictureCallbacks": 65,
+        "programmePaints": 66,
+        "maxLayerClockDistanceFrames": 0,
+        "stallOrErrorEvents": [],
+        "fixedCriteria": {
+          "maxWallTimeRatio": 1.15,
+          "maxDroppedFraction": 0.05,
+          "maxLayerClockDistanceFrames": 2
+        },
+        "fixedCriteriaPass": false,
+        "screenRecordingDisabled": true,
+        "semanticColdReopenPass": true
+      },
+      "heavy-node": {
+        "wallMs": 4332.10000000149,
+        "programmeSeconds": 4,
+        "wallTimeRatio": 1.0830250000003725,
+        "decoded": 98,
+        "dropped": 39,
+        "droppedFraction": 0.3979591836734694,
+        "pictureCallbacks": 35,
+        "programmePaints": 36,
+        "maxLayerClockDistanceFrames": 0,
+        "stallOrErrorEvents": [],
+        "fixedCriteria": {
+          "maxWallTimeRatio": 1.15,
+          "maxDroppedFraction": 0.05,
+          "maxLayerClockDistanceFrames": 2
+        },
+        "fixedCriteriaPass": false,
+        "screenRecordingDisabled": true,
+        "semanticColdReopenPass": true
+      }
+    },
+    "finalUiFullEmulatorCheckpointComplete": true,
+    "immutableFrontendBuild": "autopromote-node-conformance-build-20261116-r8"
+  },
+  "studioNodeFinalization20261116": {
+    "status": "PARTIAL \u2014 NOT FULLY FINISHED",
+    "fullyFinished": false,
+    "readinessPromotion": false,
+    "tests": {
+      "frontendFull": 181,
+      "frontendSuites": 18,
+      "subsequentViewerRegressions": 50,
+      "finalCornerPinRegressions": 42,
+      "worker": 325,
+      "workerAdditionalSubtests": 26
+    },
+    "finalSixRigFixedPicturePairsPassed": 2,
+    "finalSixRigFixedPicturePairsTotal": 6,
+    "pictureThresholdsUnchanged": {
+      "mae8bitMax": 3,
+      "p95ChannelErrorMax": 12
+    },
+    "finalNativePlayback": {
+      "base": {
+        "wallMs": 4069.6999999955297,
+        "programmeSeconds": 4,
+        "wallTimeRatio": 1.0174249999988825,
+        "decoded": 95,
+        "dropped": 1,
+        "droppedFraction": 0.010526315789473684,
+        "pictureCallbacks": 93,
+        "maxLayerClockDistanceFrames": 0,
+        "stallOrErrorEvents": [],
+        "fixedCriteria": {
+          "maxWallTimeRatio": 1.15,
+          "maxDroppedFraction": 0.05,
+          "maxLayerClockDistanceFrames": 2
+        },
+        "fixedPass": true
+      },
+      "heavy": {
+        "wallMs": 4151.60000000149,
+        "programmeSeconds": 4,
+        "wallTimeRatio": 1.0379000000003726,
+        "decoded": 96,
+        "dropped": 17,
+        "droppedFraction": 0.17708333333333334,
+        "pictureCallbacks": 79,
+        "maxLayerClockDistanceFrames": 0,
+        "stallOrErrorEvents": [],
+        "fixedCriteria": {
+          "maxWallTimeRatio": 1.15,
+          "maxDroppedFraction": 0.05,
+          "maxLayerClockDistanceFrames": 2
+        },
+        "fixedPass": false
+      },
+      "heavy-node": {
+        "wallMs": 4288.89999999851,
+        "programmeSeconds": 4,
+        "wallTimeRatio": 1.0722249999996274,
+        "decoded": 112,
+        "dropped": 21,
+        "droppedFraction": 0.1875,
+        "pictureCallbacks": 78,
+        "maxLayerClockDistanceFrames": 6.841871999999999,
+        "stallOrErrorEvents": [],
+        "fixedCriteria": {
+          "maxWallTimeRatio": 1.15,
+          "maxDroppedFraction": 0.05,
+          "maxLayerClockDistanceFrames": 2
+        },
+        "fixedPass": false
+      }
+    },
+    "remainingFailures": [
+      "Heavy six-rig pre-final picture tolerance: four of six fixed pairs fail MAE",
+      "Heavy software playback misses dropped-frame and dual-viewer layer-clock limits"
+    ],
+    "formalStudioCountsUnchanged": {
+      "FUNCTIONAL": 17,
+      "PARTIAL": 9,
+      "BROKEN": 1,
+      "UNIMPLEMENTED": 2,
+      "PRO-READY": 0,
+      "PRODUCTION-READY": 0
+    },
+    "productionWrites": 0,
+    "paidProviderCalls": 0,
+    "creditGrants": 0,
+    "deliveryDirectory": "/home/tibule12/Videos/Studio Node Flow - Final Checks - 2026-11-16",
+    "report": "reports/studio-node-finalization-20261116/README.md",
+    "verification": "reports/studio-node-finalization-20261116/verification.json",
+    "nativeMovieSha256": "1a5ae8a1eae3880287b749ea3d38973d24d99b80d3815147b37d0195b8491154",
+    "normalNativeApprovalDownload": true,
+    "allSixSmartRigs": true,
+    "overlayCount": 12,
+    "adjustmentLayerCount": 2,
+    "wholeMovingPictureAudioParity": "NOT_QUALIFIED",
+    "nativeControlRecoveryVerified": true,
+    "sourceCheckpointHistoryPreserved": true
+  },
+  "studioNodeRepair20261116": {
+    "status": "VALIDATED_LOCAL_REPAIR",
+    "scope": "Previously failing six-rig picture and heavy native playback gates",
+    "report": "reports/studio-node-repair-20261116/README.md",
+    "verification": "reports/studio-node-repair-20261116/verification.json",
+    "picturePassed": 6,
+    "pictureTotal": 6,
+    "unchangedPictureLimits": {
+      "mae8bitMax": 3,
+      "p95ChannelErrorMax": 12
+    },
+    "nativePlaybackProfilesPassed": [
+      "base",
+      "six-rig",
+      "six-rig-dual-viewer"
+    ],
+    "unchangedPlaybackLimits": {
+      "wallRatioMax": 1.15,
+      "dropFractionMax": 0.05,
+      "layerLagFramesMax": 2
+    },
+    "actualNativeControlAndColdReopenChecks": true,
+    "freshNativeSubmittedExport": false,
+    "correctedCanonicalDiagnosticWithSound": true,
+    "priorSevenNativeSucceededOperationsRetained": true,
+    "readinessPromotion": false,
+    "creditGrants": false,
+    "productionWrites": false,
+    "paidProviderCalls": false,
+    "deployment": false,
+    "remainingNodeRepairGates": [],
+    "sharedBacklogStillSeparate": [
+      "S02 wider preview/material/audio parity",
+      "S04 motion/glyph depth",
+      "S03 ownership"
+    ],
+    "concurrentLogoAnd3DWorkPreserved": true
   }
 }

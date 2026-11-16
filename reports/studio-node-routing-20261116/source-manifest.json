@@ -1,0 +1,178 @@
+{
+  "workspace": "/home/tibule12/Projects/AutoPromte/AutoPromote-pro-studio-20261114",
+  "files": [
+    {
+      "path": "config/product-knowledge/source-lock.v1.json",
+      "sha256": "0b2286009136f8d01488dc157cce586086b917db7a82024cb04bfec30ff49597"
+    },
+    {
+      "path": "docs/STUDIO-COMPLETION-CONTRACT.md",
+      "sha256": "d9061275697490d3042d905b3439ada21a584201552333cba3b818a128189192"
+    },
+    {
+      "path": "docs/STUDIO-PRODUCT-READINESS.md",
+      "sha256": "74dc9315d4361aa33e29af1998e30f1e8d124193df0bd3e097a6fec3158ed625"
+    },
+    {
+      "path": "frontend/src/components/StudioMotionFlow.css",
+      "sha256": "59b5fa170c9310d4b98ff115178c6bf813caf00325d291af2b38a856e265f1ae"
+    },
+    {
+      "path": "frontend/src/components/StudioNodeFlowPanel.js",
+      "sha256": "41afe1fe95d835fd499f8de8ffecfea1a8a6e2c0793f07d7ea82ae5bebfb69ec"
+    },
+    {
+      "path": "frontend/src/components/StudioProgrammeFrame.js",
+      "sha256": "8a84aa30c2e2087fe470791cebc9a2429b9f0d6cfffd4a8b3e49f552873bfc4a"
+    },
+    {
+      "path": "frontend/src/components/StudioSourceGradeViewer.js",
+      "sha256": "2edd0b66c8ec7422e5a075138e47ecbeec71ec9f78223b63df94f6c7b6b60770"
+    },
+    {
+      "path": "frontend/src/components/VideoEditor.js",
+      "sha256": "dea8516e3518637f78cd4f81342796eb0403c21526ef36cd5955739bdaeda214"
+    },
+    {
+      "path": "frontend/src/components/ViralClipStudio.js",
+      "sha256": "2dd75b08d984cb5af0c7f0626eec04e8970f99c49f26cd0881f6da23392afa17"
+    },
+    {
+      "path": "frontend/src/components/__tests__/StudioMotionFlowWorkbench.test.js",
+      "sha256": "50b0b2d43d9cf049224cfa754921257a961360eac515c8572afd129aa20ca68e"
+    },
+    {
+      "path": "frontend/src/components/__tests__/studioRenderCompiler.test.js",
+      "sha256": "3bcfabf316a11c42b3113e6b8972f868dafb47f3a94095152116683dc7c19eb8"
+    },
+    {
+      "path": "frontend/src/components/studioCompRigging.js",
+      "sha256": "f81ad92f15b8f946e8d3e982586f843fac5465b5f68b0005048de605abb0e808"
+    },
+    {
+      "path": "frontend/src/components/studioDirectorComposition.js",
+      "sha256": "042ff49b2708f75041942f20e7aa757eb61360e230c826faa55648bb54988504"
+    },
+    {
+      "path": "frontend/src/components/studioEditDecisions.js",
+      "sha256": "2a3c8a2639b8de0add29929cb125eb249e23f057137d6f83a6a28917a4cc282e"
+    },
+    {
+      "path": "frontend/src/components/studioMaskGeometry.js",
+      "sha256": "441e5df3d6c10e550619cca5068366cdd227c8af155b2112a006ec4f70ab25c0"
+    },
+    {
+      "path": "frontend/src/components/studioMediaEffects.js",
+      "sha256": "2373ea1bef6d4042a33b22cd98b2d82a91539e02b0a395e6ee8e791b378bf727"
+    },
+    {
+      "path": "frontend/src/components/studioNodeFlow.js",
+      "sha256": "d74010e417487f5b3ce6cb4d1e16fcc1bc78324780291dee62a7ee6fdd96f8aa"
+    },
+    {
+      "path": "frontend/src/components/studioProjectDocument.js",
+      "sha256": "d1e0db8f28e5eaa1808759cc844e847f99e3925f7dc8402ee824d5d7e562fc69"
+    },
+    {
+      "path": "frontend/src/components/studioRenderCompiler.js",
+      "sha256": "9fcd66df9dec50e2d63d69b3f5f4bec3e1c07fa096ea20983b52f7167a974149"
+    },
+    {
+      "path": "python_media_worker/main_media_server.py",
+      "sha256": "5d3c7c58b5d960aaea9f02bb9c25995e67675df2f1dfcb8bac91153533614b63"
+    },
+    {
+      "path": "python_media_worker/studio_composition.py",
+      "sha256": "2f06ff251dc8766153890bcc2ed5e848bd4be56d7ddb7932c8de45c7d7068c1a"
+    },
+    {
+      "path": "python_media_worker/studio_layer_cache.py",
+      "sha256": "ff0ee05a8eb81d8a9158594d61d3decad54424cfc9ba4a2cbd42ad1e82a80ae9"
+    },
+    {
+      "path": "python_media_worker/studio_layer_motion.py",
+      "sha256": "991799056e71acd5ca8f87c9ce74bcddb9464a098998f10399cceac1419fbf14"
+    },
+    {
+      "path": "test/e2e/studio-capability-matrix.json",
+      "sha256": "c19d2084b2220fae732578ffb1eb996610f3548aca19b686248723619ef55b66"
+    },
+    {
+      "path": "test/e2e/studio-combination-matrix.json",
+      "sha256": "31d0858295d5f9c3fdaca896aaa6395f07b920e732a537c3952ae68bbd9006cf"
+    },
+    {
+      "path": "test/e2e/studio-preview-render-parity.json",
+      "sha256": "71faa5d50d8566146b303f9eeba093ad01c6633bd7db2d2742af4d1823dfeea0"
+    },
+    {
+      "path": "frontend/src/components/StudioNodeEffectSurface.js",
+      "sha256": "b79e6ccb2c3f29c4510c38bf572a02798f5d3c0e85ad1361c5afee3578c0738a"
+    },
+    {
+      "path": "frontend/src/components/StudioNodeSignalViewer.js",
+      "sha256": "6ebe8725718e9ec53eeacd87b64b832ed2c79399b84bf164eed1deaa3b31bdfd"
+    },
+    {
+      "path": "frontend/src/components/studioNodeEffects.js",
+      "sha256": "e50d981902fdfe27d318f3f52727dd810333751558361ae8e034ca115d23c616"
+    },
+    {
+      "path": "frontend/src/components/studioNodeMask.js",
+      "sha256": "ca5605a06f04a0b2bc83677246a1c48956bc25bdeb99100dc39f880b8f41b4d2"
+    },
+    {
+      "path": "frontend/src/components/__tests__/studioNodeEffects.test.js",
+      "sha256": "369313a14ad7953f2f196eaeb48e930868332e7c2b7af8320826a3d02f10e5fa"
+    },
+    {
+      "path": "frontend/src/components/__tests__/studioNodeFlowEdit.test.js",
+      "sha256": "67bf6df3573bf517f18d85c2f6d4f5188fb07100151fc9b27c4182c4d988852f"
+    },
+    {
+      "path": "frontend/src/components/__tests__/studioNodeFlowLifecycle.test.js",
+      "sha256": "4a74320cf87191b5c6f59a4bfce91ae83ad42468857ea705dd98b8b6109c1d85"
+    },
+    {
+      "path": "frontend/src/components/studioNodeFlowEdit.js",
+      "sha256": "354ff4576181a3b2f0a21844261774e5e2be3fbe8b3649112ebf83c8f7d8e315"
+    },
+    {
+      "path": "python_media_worker/studio_node_effects.py",
+      "sha256": "ab3f1778bd7e8a3a47c60e03f6880be91e883bf9e9d405cd70359de44544af60"
+    },
+    {
+      "path": "python_media_worker/studio_node_mask_grade.py",
+      "sha256": "340b9e869a97caa0383187706857d83288164ef5de8b3e2d70e2c0ed913584a7"
+    },
+    {
+      "path": "python_media_worker/test_studio_node_effects.py",
+      "sha256": "41bb1cc4318adaab329ce527950daae7af524f47ab00cd52f2b0263b3ec408f2"
+    },
+    {
+      "path": "python_media_worker/test_studio_node_mask_grade.py",
+      "sha256": "17e31aa6993bcc07379376e1a96c3ab9478b9e72444af307b0d7f1c10a094845"
+    },
+    {
+      "path": "frontend/src/components/studioPerspective.js",
+      "sha256": "8f688f51b8b631555c10a8556c5c91df075fbc12e3ecc0d52060ad1c61a6eea2"
+    },
+    {
+      "path": "frontend/src/components/studioNodeTitleMask.js",
+      "sha256": "acbc47113969589b7812a4195df19e91ac5a54c2e41023bb82d549321c980bf1"
+    },
+    {
+      "path": "frontend/src/components/__tests__/studioNodeRouting.test.js",
+      "sha256": "f9d14a0689f239704cd881e234f3630c8956856968b04484bad60e1a88156366"
+    },
+    {
+      "path": "python_media_worker/test_studio_node_routing.py",
+      "sha256": "dc20be8a111aaa2333f3204680793cb90a73933b8e76db39a909bf022d951cbc"
+    }
+  ],
+  "concurrentEditsPreservedAndExcluded": [
+    "frontend/src/components/studioGraphicsPackage.js",
+    "frontend/src/components/studioLogoDesign.js",
+    "frontend/src/components/studioLogoMotion.js"
+  ]
+}

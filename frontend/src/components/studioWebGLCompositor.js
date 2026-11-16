@@ -693,6 +693,23 @@ export function createStudioWebGLCompositor(outputCanvas = null) {
     return computeColorScopesFromRgba(imageData.data, width, height, { columns, bins, vectorBins });
   };
 
+  let readbackPixels=null,readbackImage=null;
+  const copyGradedFrame = context => {
+    const width=surface.width,height=surface.height;
+    if(disposed||!width||!height)return false;
+    if(!softwareRenderer){context.drawImage(surface,0,0,width,height);return true;}
+    // Software GL already stores pixels on the CPU. Crossing the browser's
+    // GPU canvas bridge for drawImage can stall every masked-grade copy.
+    // Read the same shader output directly and invert GL's bottom-up rows.
+    if(!readbackImage||readbackImage.width!==width||readbackImage.height!==height){
+      readbackPixels=new Uint8Array(width*height*4);readbackImage=context.createImageData(width,height);
+    }
+    gl.readPixels(0,0,width,height,gl.RGBA,gl.UNSIGNED_BYTE,readbackPixels);
+    const stride=width*4;
+    for(let y=0;y<height;y++)readbackImage.data.set(readbackPixels.subarray((height-1-y)*stride,(height-y)*stride),y*stride);
+    context.putImageData(readbackImage,0,0);return true;
+  };
+
   const dispose = () => {
     if (disposed) return;
     disposed = true;
@@ -710,6 +727,7 @@ export function createStudioWebGLCompositor(outputCanvas = null) {
     softwareRenderer,
     uploadColorCube,
     renderGradedFrame,
+    copyGradedFrame,
     sampleScopes,
     dispose,
   };

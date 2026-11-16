@@ -1,3 +1,5 @@
+import { compileStudioNodeMask } from './studioNodeMask';
+import { createSecureId } from "../utils/security";
 import {
   createStudioNullRigLayer,
   defaultMotionDriverForProperty,
@@ -5,6 +7,7 @@ import {
   removeStudioLayerSafely,
   reparentStudioLayerPreservingWorldPose,
   validateStudioTrackMattes,
+  validateStudioParameterLinks,
 } from "./studioCompRigging";
 import { studioVectorUri, validateStudioVectorShape } from "./studioVectorShape";
 import { PERSPECTIVE_LEFT, validateStudioPerspective } from "./studioPerspective";
@@ -162,7 +165,7 @@ export const validateStudioNodeFlow = nodeFlow => {
   if (!isPlainObject(nodeFlow)) {
     fail("INVALID_NODE_FLOW", "nodeFlow settings must be an object.");
   }
-  const allowed = ["version", "viewerA", "viewerB", "splitPosition", "positions", "bypassed"];
+  const allowed = ["version", "viewerA", "viewerB", "splitPosition", "positions", "bypassed", "bypassState"];
   for (const key of Object.keys(nodeFlow)) {
     if (!allowed.includes(key)) {
       fail("INVALID_NODE_FLOW", `Unsupported nodeFlow field ${key}.`);
@@ -212,6 +215,22 @@ export const validateStudioNodeFlow = nodeFlow => {
     for (const val of Object.values(nodeFlow.bypassed)) {
       if (typeof val !== "boolean") {
         fail("INVALID_NODE_FLOW", "nodeFlow bypass flag must be boolean.");
+      }
+    }
+  }
+  if (nodeFlow.bypassState !== undefined) {
+    if (!isPlainObject(nodeFlow.bypassState) || Object.keys(nodeFlow.bypassState).length > 512 ||
+        JSON.stringify(nodeFlow.bypassState).length > 2 * 1024 * 1024)
+      fail("INVALID_NODE_FLOW", "Node bypass recovery state is too large or malformed.");
+    for (const [id, entry] of Object.entries(nodeFlow.bypassState)) {
+      if (!id || !isPlainObject(entry) || !isPlainObject(entry.fields) ||
+          !Array.isArray(entry.motionKeys) || !Array.isArray(entry.finishKeys))
+        fail("INVALID_NODE_FLOW", "Invalid node bypass recovery entry.");
+      for (const [scope, saved] of Object.entries(entry.fields)) {
+        if (!['layer', 'mainTransform', 'finishFx', 'advancedColor'].includes(scope) ||
+            !isPlainObject(saved) || !isPlainObject(saved.values) || !Array.isArray(saved.missing) ||
+            [...Object.keys(saved.values), ...saved.missing].some(k => ['__proto__','prototype','constructor'].includes(k)))
+          fail("INVALID_NODE_FLOW", "Invalid node bypass recovery fields.");
       }
     }
   }
@@ -478,7 +497,7 @@ export const deriveNodeFlowGraph = (state = {}) => {
       ov.motionDrivers && Object.values(ov.motionDrivers).some(d => d && d.enabled !== false)
     );
     const hasKeys = (state.motionKeyframes || []).some(k => String(k?.targetId) === ovId);
-    const hasExpr = Array.isArray(ov.parameterLinks) && ov.parameterLinks.some(l => l && l.enabled !== false);
+    const hasExpr = Object.values(ov.parameterLinks || {}).some(l => l && l.enabled !== false);
 
     nodes.push({
       id: mediaNodeId,
@@ -537,6 +556,7 @@ export const deriveNodeFlowGraph = (state = {}) => {
         ov.layerShadow?.enabled ||
         Number(ov.blur || 0) > 0 ||
         Number(ov.opticalFx?.halation || 0) > 0 ||
+        Number(ov.opticalFx?.anamorphicStreak || 0) > 0 || ov.displacementWarp?.enabled ||
         Number(ov.opticalFx?.displacementScale || 0) > 0 ||
         ((ov.glow || ov.layerShadow || ov.opticalFx) && bypassed[fxNodeId])
     );
@@ -556,6 +576,7 @@ export const deriveNodeFlowGraph = (state = {}) => {
               !ov.layerShadow?.enabled &&
               Number(ov.blur || 0) <= 0 &&
               Number(ov.opticalFx?.halation || 0) <= 0 &&
+              Number(ov.opticalFx?.anamorphicStreak || 0) <= 0 && !ov.displacementWarp?.enabled &&
               Number(ov.opticalFx?.displacementScale || 0) <= 0)
         ),
         removable: true,
@@ -603,7 +624,7 @@ export const deriveNodeFlowGraph = (state = {}) => {
     const hasCornerPin = Boolean(
       Array.isArray(ov.perspective?.corners) && ov.perspective.corners.length === 4
     );
-    if (hasCornerPin) {
+    if (hasCornerPin || (bypassed[cornerPinNodeId] && flow.bypassState?.[cornerPinNodeId])) {
       const pinPct = Math.round(Number(ov.perspectiveProgress ?? 100));
       nodes.push({
         id: cornerPinNodeId,
@@ -789,6 +810,20 @@ export const deriveNodeFlowGraph = (state = {}) => {
     toPort: "In",
   });
 
+  // Default placement reserves a complete row for each branch. Additional
+  // keyer/FX/pin nodes must never cover an existing node's ports or buttons.
+  const placed=new Set();
+  const place=(node,x,y)=>{if(!node)return;placed.add(node.id);if(!positions[node.id]){node.x=x;node.y=y;}};
+  const spineNodes=nodes.filter(n=>['MediaIn:main-video','Transform:main-video','ColorCorrector:finish','GlowBlur:finish'].includes(n.id)||['Adjustment','Merge','MediaOut'].includes(n.kind));
+  spineNodes.forEach((n,i)=>place(n,36+i*212,40));
+  nonNullOverlays.forEach((layer,row)=>{
+    const branch=nodes.filter(n=>String(n.targetId)===String(layer.id)&&!['Merge','PolygonMask'].includes(n.kind));
+    branch.sort((a,b)=>['MediaIn','ChromaKeyer','GlowBlur','Transform','CornerPin'].indexOf(a.kind)-['MediaIn','ChromaKeyer','GlowBlur','Transform','CornerPin'].indexOf(b.kind));
+    branch.forEach((n,col)=>place(n,36+col*212,180+row*240));
+    place(nodes.find(n=>n.id===`PolygonMask:${layer.id}`),36+Math.max(0,branch.findIndex(n=>n.kind==='Transform'))*212,300+row*240);
+  });
+  nodes.filter(n=>!placed.has(n.id)).forEach((n,i)=>place(n,36+(i%4)*212,200+nonNullOverlays.length*240+Math.floor(i/4)*120));
+
   const viewerNodeIds = new Set(nodes.map(node => node.id));
   const viewerA = viewerNodeIds.has(flow.viewerA) ? flow.viewerA : "MediaOut";
   const viewerB = flow.viewerB && viewerNodeIds.has(flow.viewerB) ? flow.viewerB : null;
@@ -912,57 +947,14 @@ export const connectNodeFlowPorts = (
     return { ...state, overlays: nextOverlays };
   }
 
-  // Case 3b: Wiring a Mask / Matte / ChromaKeyer into ColorCorrector:finish.Mask -> Masked Primary Grade!
-  if (toNodeId === "ColorCorrector:finish" && toPort === "Mask" && fromNodeId) {
-    const nextAdvancedColor = {
-      ...(finishFx.advancedColor && typeof finishFx.advancedColor === "object"
-        ? finishFx.advancedColor
-        : state.advancedColor && typeof state.advancedColor === "object"
-          ? state.advancedColor
-          : {}),
-      maskSourceNodeId: fromNodeId,
-      powerWindow: {
-        ...(finishFx.advancedColor?.powerWindow || state.advancedColor?.powerWindow || {}),
-        enabled: true,
-        shape: "ellipse",
-        centerX: 0.5,
-        centerY: 0.5,
-        radiusX: 0.36,
-        radiusY: 0.36,
-        feather: 0.22,
-      },
-    };
-    return {
-      ...state,
-      advancedColor: nextAdvancedColor,
-      finishFx: {
-        ...finishFx,
-        advancedColor: nextAdvancedColor,
-        maskSourceNodeId: fromNodeId,
-      },
-    };
-  }
-
-  // Case 3c: Wiring a Mask / Matte / ChromaKeyer into Adjustment:<id>.Mask -> Masked Adjustment Grade!
-  if (toNodeId?.startsWith("Adjustment:") && toPort === "Mask" && toLayerId && fromNodeId) {
-    return {
-      ...state,
-      adjustmentLayers: adjustmentLayers.map(adj =>
-        String(adj.id) === String(toLayerId)
-          ? {
-              ...adj,
-              maskSourceNodeId: fromNodeId,
-              mask: {
-                shape: "ellipse",
-                feather: 14,
-                inverted: false,
-                ...(adj.mask || {}),
-                enabled: true,
-              },
-            }
-          : adj
-      ),
-    };
+  // Effect masks reference actual native branch pixels, never a placeholder ellipse.
+  if ((toNodeId === "ColorCorrector:finish" || toNodeId?.startsWith("Adjustment:")) && toPort === "Mask") {
+    compileStudioNodeMask(fromNodeId,overlays);
+    if(toNodeId === "ColorCorrector:finish") {
+      const advancedColor={...(finishFx.advancedColor||state.advancedColor||{}),maskSourceNodeId:fromNodeId};
+      return {...state,advancedColor,finishFx:{...finishFx,precisionGrade:true,advancedColor,maskSourceNodeId:fromNodeId}};
+    }
+    return {...state,adjustmentLayers:adjustmentLayers.map(adj=>String(adj.id)===String(toLayerId)?{...adj,maskSourceNodeId:fromNodeId}:adj)};
   }
 
   // Case 3d: Wiring a Mask into CompoundMacro:<id>.Mask
@@ -1094,130 +1086,111 @@ export const disconnectNodeFlowPort = (
   return state;
 };
 
+// Bypass writes neutral canonical controls, not merely a coloured graph badge.
+// Only the node's own fields and keys are retained for an exact saved restore.
+const POSE_FIELDS = ['x','y','scale','rotation','parentId','motionDrivers','parameterLinks','zDepth','dofBlur'];
+const GRADE_FIELDS = ['preset','exposureStops','lift','gamma','gain','tint','brightness','contrast',
+  'saturation','temperature','sharpness','vignette','dehaze','clarity','shadowRecovery',
+  'highlightRollOff','vibrance','skinToneProtect','revitalizerPresetId','precisionGrade',
+  'advancedColor','powerWindow','qualifier','maskSourceNodeId'];
+const TEXTURE_FIELDS = ['filmGrain','chromaticAberration','halation','filmEmulation','vhsTracking',
+  'lightLeak','dreamGlow','anamorphicFlare','lensBlur','prismSplit','texturePreset'];
+const captureFields = (value, fields) => ({
+  values: Object.fromEntries(fields.filter(k => value?.[k] !== undefined).map(k => [k, value[k]])),
+  missing: fields.filter(k => value?.[k] === undefined),
+});
+const restoreFields = (current, saved) => {
+  const result = {...current, ...saved.values};
+  for (const field of saved.missing) delete result[field];
+  return result;
+};
 export const toggleNodeFlowBypass = (state, nodeId) => {
-  if (!nodeId || nodeId === "MediaOut" || nodeId === "MediaIn:main-video") return state;
-  const overlays = [...(state.overlays || [])];
-  const adjustmentLayers = [...(state.adjustmentLayers || [])];
-  const nodeFlow = state.nodeFlow && typeof state.nodeFlow === "object" ? state.nodeFlow : {};
-  const bypassedMap = { ...(nodeFlow.bypassed || {}) };
-  const targetId = extractLayerId(nodeId);
-
-  if (nodeId.startsWith("Adjustment:") && targetId) {
-    const adj = adjustmentLayers.find(a => String(a.id) === String(targetId));
-    const nextEnabled = adj ? adj.enabled === false : false;
-    bypassedMap[nodeId] = !nextEnabled;
-    return {
-      ...state,
-      adjustmentLayers: adjustmentLayers.map(a =>
-        String(a.id) === String(targetId) ? { ...a, enabled: nextEnabled } : a
-      ),
-      nodeFlow: { ...nodeFlow, bypassed: bypassedMap },
+  const node = deriveNodeFlowGraph(state).nodes.find(n => n.id === nodeId);
+  if (!node?.bypassable) return state;
+  const flow = state.nodeFlow || {}, backups = {...flow.bypassState};
+  const bypassed = {...flow.bypassed}, previous = backups[nodeId];
+  const visibilityAlias = ['MediaIn','Merge'].includes(node.kind) && node.targetId;
+  const siblings=visibilityAlias?deriveNodeFlowGraph(state).nodes.filter(n=>n.id!==nodeId&&['MediaIn','Merge'].includes(n.kind)&&String(n.targetId)===String(node.targetId)&&bypassed[n.id]):[];
+  // Legacy flags never stored the authored values. Clear the old visual flag
+  // without inventing/restoring values; the next bypass captures real controls.
+  if(bypassed[nodeId]&&!previous)return {...state,nodeFlow:{...flow,bypassed:{...bypassed,[nodeId]:false}}};
+  if(previous&&bypassed[nodeId]&&siblings.length){delete backups[nodeId];bypassed[nodeId]=false;return {...state,nodeFlow:{...flow,bypassed,bypassState:backups}};}
+  let next = {...state};
+  if (previous && bypassed[nodeId]) {
+    for (const [scope, saved] of Object.entries(previous.fields)) {
+      if (scope === 'layer') next.overlays = (state.overlays || []).map(layer =>
+        String(layer.id) === String(node.targetId) ? restoreFields(layer, saved) : layer);
+      else if (scope === 'advancedColor') {
+        if (saved.missing.includes('value')) delete next.advancedColor;
+        else next.advancedColor = saved.values.value;
+      } else next[scope] = restoreFields(state[scope], saved);
+    }
+    for (const [field, saved, order] of [['motionKeyframes', previous.motionKeys, previous.motionOrder],
+      ['finishKeyframes', previous.finishKeys, previous.finishOrder]]) {
+      if (!saved.length) continue;
+      const ids = new Set(saved.map(k => k.id)), rank = new Map((order || []).map((id,i)=>[id,i]));
+      next[field] = [...(state[field] || []).filter(k => !ids.has(k.id)), ...saved]
+        .sort((a,b)=>(rank.get(a.id)??Infinity)-(rank.get(b.id)??Infinity));
+    }
+    delete backups[nodeId];bypassed[nodeId]=false;
+  } else {
+    const entry={fields:{},motionKeys:[],finishKeys:[],motionOrder:(state.motionKeyframes||[]).map(k=>k.id),
+      finishOrder:(state.finishKeyframes||[]).map(k=>k.id)};
+    const patch = (scope, fields, identity) => {
+      const current=scope==='layer'?(state.overlays||[]).find(l=>String(l.id)===String(node.targetId)):state[scope];
+      entry.fields[scope]=captureFields(current,fields);
+      const updated=restoreFields(current,{values:identity,missing:fields.filter(k=>!(k in identity))});
+      if(scope==='layer')next.overlays=(state.overlays||[]).map(l=>String(l.id)===String(node.targetId)?updated:l);
+      else next[scope]=updated;
     };
+    let keyProperties=[];
+    if (node.kind==='Transform'||node.kind==='NullRig'||node.kind==='CompoundMacro') {
+      patch(nodeId==='Transform:main-video'?'mainTransform':'layer',POSE_FIELDS,{x:50,y:50,scale:1,rotation:0,zDepth:0,dofBlur:0});
+      keyProperties=['x','y','scale','rotation'];
+    } else if(node.kind==='ColorCorrector') {
+      patch('finishFx',GRADE_FIELDS,{brightness:1,contrast:1,saturation:1});
+      entry.fields.advancedColor=state.advancedColor===undefined?{values:{},missing:['value']}:{values:{value:state.advancedColor},missing:[]};
+      next.advancedColor={};entry.finishKeys=(state.finishKeyframes||[]).filter(k=>GRADE_FIELDS.includes(k.property));
+      next.finishKeyframes=(state.finishKeyframes||[]).filter(k=>!GRADE_FIELDS.includes(k.property));
+    } else if(nodeId==='GlowBlur:finish') {
+      patch('finishFx',TEXTURE_FIELDS,Object.fromEntries(TEXTURE_FIELDS.map(k=>[k,0])));
+      entry.finishKeys=(state.finishKeyframes||[]).filter(k=>TEXTURE_FIELDS.includes(k.property));
+      next.finishKeyframes=(state.finishKeyframes||[]).filter(k=>!TEXTURE_FIELDS.includes(k.property));
+    } else if(node.kind==='CornerPin') {
+      patch('layer',['perspective','perspectiveProgress','cornerKeys'],{});
+      keyProperties=['perspectiveProgress',...Array.from({length:4},(_,i)=>[`planeCorner${i}X`,`planeCorner${i}Y`]).flat()];
+    } else if(node.kind==='GlowBlur') {
+      const layer=(state.overlays||[]).find(l=>String(l.id)===String(node.targetId));
+      patch('layer',['blur','glow','layerShadow','opticalFx','displacementWarp'],{blur:0,
+        glow:{...layer?.glow,enabled:false},layerShadow:{...layer?.layerShadow,enabled:false},
+        opticalFx:{},displacementWarp:{...layer?.displacementWarp,enabled:false}});
+      keyProperties=['blur','glowRadius','glowIntensity','shadowBlur','shadowOpacity'];
+    } else if(node.kind==='PolygonMask') {
+      const layer=(state.overlays||[]).find(l=>String(l.id)===String(node.targetId));
+      patch('layer',['mask'],{mask:{...layer?.mask,enabled:false}});
+    } else if(node.kind==='ChromaKeyer') {
+      const layer=(state.overlays||[]).find(l=>String(l.id)===String(node.targetId));
+      patch('layer',['chromaKey'],{chromaKey:{...layer?.chromaKey,enabled:false}});
+    } else if(node.kind==='Adjustment') {
+      next.adjustmentLayers=(state.adjustmentLayers||[]).map(a=>String(a.id)===String(node.targetId)?{...a,enabled:a.enabled===false}:a);
+      bypassed[nodeId]=!node.bypassed;
+      return {...next,nodeFlow:{...flow,bypassed}};
+    } else {
+      patch('layer',['hidden','opacity'],{hidden:true,opacity:0});
+      const sibling=siblings.find(n=>backups[n.id]?.fields?.layer);
+      if(sibling){entry.fields.layer=JSON.parse(JSON.stringify(backups[sibling.id].fields.layer));entry.motionKeys=JSON.parse(JSON.stringify(backups[sibling.id].motionKeys||[]));}
+      keyProperties=['opacity'];
+    }
+    if(keyProperties.length){
+      entry.motionKeys=[...entry.motionKeys,...(state.motionKeyframes||[]).filter(k=>String(k.targetId)===String(node.targetId)&&keyProperties.includes(k.property))];
+      next.motionKeyframes=(state.motionKeyframes||[]).filter(k=>!entry.motionKeys.includes(k));
+    }
+    backups[nodeId]=entry;bypassed[nodeId]=true;
   }
-
-  if (nodeId.startsWith("PolygonMask:") && targetId) {
-    const ov = overlays.find(o => String(o.id) === String(targetId));
-    const currentlyBypassed = Boolean(bypassedMap[nodeId] || ov?.mask?.enabled === false);
-    const nextBypassed = !currentlyBypassed;
-    bypassedMap[nodeId] = nextBypassed;
-    return {
-      ...state,
-      overlays: overlays.map(o =>
-        String(o.id) === String(targetId)
-          ? { ...o, mask: { ...(o.mask || { shape: "ellipse", feather: 8, radius: 10 }), enabled: !nextBypassed } }
-          : o
-      ),
-      nodeFlow: { ...nodeFlow, bypassed: bypassedMap },
-    };
-  }
-
-  if (nodeId.startsWith("ChromaKeyer:") && targetId) {
-    const ov = overlays.find(o => String(o.id) === String(targetId));
-    const currentlyBypassed = Boolean(bypassedMap[nodeId] || ov?.chromaKey?.enabled === false);
-    const nextBypassed = !currentlyBypassed;
-    bypassedMap[nodeId] = nextBypassed;
-    return {
-      ...state,
-      overlays: overlays.map(o =>
-        String(o.id) === String(targetId)
-          ? {
-              ...o,
-              chromaKey: {
-                mode: "chroma",
-                keyColor: "#00d455",
-                similarity: 0.32,
-                smoothness: 0.14,
-                spillSuppression: 0.45,
-                ...(o.chromaKey || {}),
-                enabled: !nextBypassed,
-              },
-            }
-          : o
-      ),
-      nodeFlow: { ...nodeFlow, bypassed: bypassedMap },
-    };
-  }
-
-  if (nodeId.startsWith("CornerPin:") && targetId) {
-    const nextBypassed = !bypassedMap[nodeId];
-    bypassedMap[nodeId] = nextBypassed;
-    return {
-      ...state,
-      nodeFlow: { ...nodeFlow, bypassed: bypassedMap },
-    };
-  }
-
-  if (nodeId.startsWith("GlowBlur:") && nodeId !== "GlowBlur:finish" && targetId) {
-    const ov = overlays.find(o => String(o.id) === String(targetId));
-    const currentlyBypassed = Boolean(
-      bypassedMap[nodeId] || (ov?.glow?.enabled === false && ov?.layerShadow?.enabled === false)
-    );
-    const nextBypassed = !currentlyBypassed;
-    bypassedMap[nodeId] = nextBypassed;
-    return {
-      ...state,
-      overlays: overlays.map(o =>
-        String(o.id) === String(targetId)
-          ? {
-              ...o,
-              glow: o.glow ? { ...o.glow, enabled: !nextBypassed } : o.glow,
-              layerShadow: o.layerShadow ? { ...o.layerShadow, enabled: !nextBypassed } : o.layerShadow,
-            }
-          : o
-      ),
-      nodeFlow: { ...nodeFlow, bypassed: bypassedMap },
-    };
-  }
-
-  if ((nodeId.startsWith("Merge:") || nodeId.startsWith("MediaIn:") || nodeId.startsWith("CompoundMacro:")) && targetId) {
-    const ov = overlays.find(o => String(o.id) === String(targetId));
-    const currentlyBypassed = Boolean(bypassedMap[nodeId] || ov?.hidden || Number(ov?.opacity ?? 1) <= 0.01);
-    const nextBypassed = !currentlyBypassed;
-    bypassedMap[nodeId] = nextBypassed;
-    return {
-      ...state,
-      overlays: overlays.map(o => {
-        if (String(o.id) !== String(targetId)) return o;
-        const restoredOpacity = Number(o._prevOpacity) > 0.05 ? Number(o._prevOpacity) : 1;
-        return {
-          ...o,
-          hidden: nextBypassed,
-          _prevOpacity: nextBypassed ? Number(o.opacity ?? 1) : o._prevOpacity,
-          opacity: nextBypassed ? 0 : restoredOpacity,
-        };
-      }),
-      nodeFlow: { ...nodeFlow, bypassed: bypassedMap },
-    };
-  }
-
-  bypassedMap[nodeId] = !bypassedMap[nodeId];
-  return {
-    ...state,
-    nodeFlow: { ...nodeFlow, bypassed: bypassedMap },
-  };
+  return {...next,nodeFlow:{...flow,bypassed,bypassState:backups}};
 };
 
-export const deleteNodeFromFlow = (state, nodeId, currentTime = 0) => {
+const deleteNodeFromFlowInternal = (state, nodeId, currentTime = 0) => {
   if (!nodeId || nodeId === "MediaOut" || nodeId === "MediaIn:main-video" || nodeId === "Transform:main-video") {
     return state;
   }
@@ -1287,12 +1260,14 @@ export const deleteNodeFromFlow = (state, nodeId, currentTime = 0) => {
   }
 
   if (nodeId.startsWith("CornerPin:") && targetId) {
+    const motionKeyframes=(state.motionKeyframes||[]).filter(k=>String(k.targetId)!==String(targetId)||!(k.property==='perspectiveProgress'||/^planeCorner/.test(k.property)));
     const nextPositions = { ...(nodeFlow.positions || {}) };
     const nextBypassed = { ...(nodeFlow.bypassed || {}) };
     delete nextPositions[nodeId];
     delete nextBypassed[nodeId];
     return {
       ...state,
+      motionKeyframes,
       overlays: overlays.map(o =>
         String(o.id) === String(targetId)
           ? { ...o, perspective: undefined, cornerKeys: undefined, perspectiveProgress: undefined }
@@ -1406,7 +1381,7 @@ export const createNodePaletteAddition = (
     programmeDuration = 8,
   } = {}
 ) => {
-  const stamp = Date.now();
+  const stamp = createSecureId("flow");
   const cueStart = Math.max(0, Number(currentTime) || 0);
   const cueDur = Math.max(1.5, Math.min(5, Math.max(2, (Number(programmeDuration) || 8) - cueStart)));
 
@@ -1512,7 +1487,8 @@ export const createNodePaletteAddition = (
 
   if (paletteId === "add_chroma_keyer") {
     const targetId = activeOverlayId || overlays.find(o => o && !o.isCaption && !o.isNullRig)?.id;
-    if (!targetId) return null;
+    if (!targetId) throw new Error("Select an image or video layer for the keyer.");
+    if (!["image","video"].includes(overlays.find(o=>String(o.id)===String(targetId))?.type)) throw new Error("Keying requires an image or video layer.");
     return {
       overlays: overlays.map(o =>
         String(o.id) === String(targetId)
@@ -1553,7 +1529,7 @@ export const createNodePaletteAddition = (
                 perspective: o.perspective || defaultPerspective,
                 perspectiveProgress: Number.isFinite(Number(o.perspectiveProgress))
                   ? Number(o.perspectiveProgress)
-                  : 1,
+                  : 100,
               }
             : o
         ),
@@ -1575,7 +1551,7 @@ export const createNodePaletteAddition = (
       opacity: 0.96,
       blendMode: "normal",
       perspective: defaultPerspective,
-      perspectiveProgress: 1,
+      perspectiveProgress: 100,
       startTime: cueStart,
       duration: cueDur,
     };
@@ -1686,7 +1662,7 @@ export const buildSmartFlowRigState = (
     programmeDuration = 8,
   } = {}
 ) => {
-  const stamp = Date.now();
+  const stamp = createSecureId("flow");
   const cueStart = Math.max(0, Number(currentTime) || 0);
   const cueDur = Math.max(2, Math.min(5, Math.max(2.5, (Number(programmeDuration) || 8) - cueStart)));
 
@@ -1962,7 +1938,7 @@ export const buildSmartFlowRigState = (
       opacity: 0.94,
       blendMode: "screen",
       perspective: defaultPerspective,
-      perspectiveProgress: 1,
+      perspectiveProgress: 100,
       glow: { enabled: true, color: "#22d3ee", radius: 22, intensity: 0.82 },
       opticalFx: { halation: 0.34, anamorphicStreak: 0.28, chromaticSplit: 0.12 },
       startTime: cueStart,
@@ -2016,6 +1992,7 @@ export const buildSmartFlowRigState = (
 
 export const evaluateParameterLinks = (overlays = [], mainTransform = null) => {
   if (!Array.isArray(overlays) || overlays.length === 0) return overlays;
+  validateStudioParameterLinks(overlays, mainTransform);
   const byId = new Map(overlays.map(item => [String(item.id), item]));
   if (mainTransform && typeof mainTransform === "object") {
     byId.set("main-video", { id: "main-video", ...mainTransform });
@@ -2196,6 +2173,10 @@ export const describeNodeViewerSignal = (nodeId, graph, state = {}) => {
     node.id.startsWith("CompoundMacro:")
   ) {
     const layerId = extractLayerId(node.id);
+    const branchIds=new Set(layerId?[layerId]:[]);
+    if(['NullRig','CompoundMacro'].includes(node.kind)){
+      let changed=true;while(changed){changed=false;for(const edge of graph.edges||[]){if(edge.toPort==='Parent'&&branchIds.has(extractLayerId(edge.fromNodeId))&&!branchIds.has(extractLayerId(edge.toNodeId))){branchIds.add(extractLayerId(edge.toNodeId));changed=true;}}}
+    }
     const badge =
       node.kind === "NullRig"
         ? "RIG GIZMO"
@@ -2217,7 +2198,7 @@ export const describeNodeViewerSignal = (nodeId, graph, state = {}) => {
       includeGrade: false,
       includeTexture: false,
       isolatedLayerId: layerId,
-      includedOverlayIds: layerId ? [layerId] : [],
+      includedOverlayIds: [...branchIds],
       badge,
     };
   }
@@ -2238,3 +2219,33 @@ export const describeNodeViewerSignal = (nodeId, graph, state = {}) => {
 };
 
 
+
+// Deletion also detaches effect-mask references whose source node disappeared.
+export const deleteNodeFromFlow = (state,nodeId,currentTime=0)=>{
+  const next=deleteNodeFromFlowInternal(state,nodeId,currentTime);if(next===state)return state;
+  const ids=new Set(deriveNodeFlowGraph(next).nodes.map(n=>n.id));
+  const clean=source=>source&&ids.has(source)?source:null;
+  if(next.finishFx?.maskSourceNodeId||next.finishFx?.advancedColor?.maskSourceNodeId||next.advancedColor?.maskSourceNodeId){
+    next.finishFx={...next.finishFx,maskSourceNodeId:clean(next.finishFx?.maskSourceNodeId),advancedColor:{...next.finishFx?.advancedColor,maskSourceNodeId:clean(next.finishFx?.advancedColor?.maskSourceNodeId)}};
+    next.advancedColor={...next.advancedColor,maskSourceNodeId:clean(next.advancedColor?.maskSourceNodeId)};
+  }
+  next.adjustmentLayers=(next.adjustmentLayers||[]).map(a=>a.maskSourceNodeId?{...a,maskSourceNodeId:clean(a.maskSourceNodeId)}:a);
+  return next;
+};
+
+export const materializeLegacyNodeBypasses = state => {
+  let next=state;
+  for(const [id,off] of Object.entries(state.nodeFlow?.bypassed||{})){
+    if(!off||next.nodeFlow?.bypassState?.[id])continue;
+    if(!deriveNodeFlowGraph(next).nodes.some(node=>node.id===id&&node.bypassable))continue;
+    next=toggleNodeFlowBypass(next,id);next=toggleNodeFlowBypass(next,id);
+  }
+  return next;
+};
+
+export function restoreAllNodeFlowBypasses(state) {
+  let next=state;
+  for(const [id,off] of Object.entries(state.nodeFlow?.bypassed||{}))if(off)next=toggleNodeFlowBypass(next,id);
+  // Earlier documents stored disabled adjustments independently of graph flags.
+  return {...next,adjustmentLayers:(next.adjustmentLayers||[]).map(layer=>({...layer,enabled:true}))};
+}

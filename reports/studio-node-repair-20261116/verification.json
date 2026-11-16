@@ -1,0 +1,268 @@
+{
+  "status": "VALIDATED_LOCAL_REPAIR",
+  "scope": "Remaining Node Flow picture/parity and heavy-playback defects",
+  "globalStudioReadinessPromoted": false,
+  "report": "reports/studio-node-repair-20261116/README.md",
+  "frontendBuild": "/tmp/autopromote-node-repair-build-20261116-r9",
+  "completeRetainedClient": "reports/studio-node-repair-20261116/private/client-r9",
+  "tests": {
+    "frontend": 178,
+    "frontendSuites": 18,
+    "renderer": 258,
+    "rendererAdditionalSubtests": 13,
+    "sourceFrameService": 19,
+    "knowledgeHelp": 45
+  },
+  "welcomeViewportChecks": 8,
+  "signedInNativeHelp": true,
+  "picture": {
+    "thresholds": {
+      "mae8bitMax": 3,
+      "p95ChannelErrorMax": 12
+    },
+    "noAlignmentOrThresholdFitting": true,
+    "preview": "reports/studio-node-repair-20261116/private/preview-r9-heavy",
+    "movie": "reports/studio-node-repair-20261116/private/canonical-original-source/retained-0.mp4",
+    "checks": [
+      {
+        "frame": 6,
+        "mae8bit": 2.65164083918717,
+        "p95ChannelError": 6.0,
+        "fixedPass": true
+      },
+      {
+        "frame": 18,
+        "mae8bit": 2.570531963712097,
+        "p95ChannelError": 6.0,
+        "fixedPass": true
+      },
+      {
+        "frame": 30,
+        "mae8bit": 2.7054467153799995,
+        "p95ChannelError": 7.0,
+        "fixedPass": true
+      },
+      {
+        "frame": 48,
+        "mae8bit": 2.781538352924565,
+        "p95ChannelError": 7.0,
+        "fixedPass": true
+      },
+      {
+        "frame": 72,
+        "mae8bit": 2.611525292103498,
+        "p95ChannelError": 7.0,
+        "fixedPass": true
+      },
+      {
+        "frame": 90,
+        "mae8bit": 2.9707272877028252,
+        "p95ChannelError": 9.0,
+        "fixedPass": true
+      }
+    ]
+  },
+  "playback": {
+    "thresholds": {
+      "wallRatioMax": 1.15,
+      "dropFractionMax": 0.05,
+      "layerLagFramesMax": 2
+    },
+    "noThresholdChanges": true,
+    "cases": {
+      "base": {
+        "wallSeconds": 4.07929999999702,
+        "wallRatio": 1.019824999999255,
+        "totalVideoFrames": 96,
+        "droppedVideoFrames": 1,
+        "dropFraction": 0.010416666666666666,
+        "maxLayerLagFrames": 0,
+        "pass": true,
+        "recordingEnabled": false
+      },
+      "heavy": {
+        "wallSeconds": 4.08779999999702,
+        "wallRatio": 1.021949999999255,
+        "totalVideoFrames": 94,
+        "droppedVideoFrames": 2,
+        "dropFraction": 0.02127659574468085,
+        "maxLayerLagFrames": 0,
+        "pass": true,
+        "recordingEnabled": false
+      },
+      "heavy-node": {
+        "wallSeconds": 4.33729999999702,
+        "wallRatio": 1.084324999999255,
+        "totalVideoFrames": 137,
+        "droppedVideoFrames": 4,
+        "dropFraction": 0.029197080291970802,
+        "maxLayerLagFrames": 0,
+        "pass": true,
+        "recordingEnabled": false
+      }
+    }
+  },
+  "correctedMovie": {
+    "sha256": "c1bb6dea34f2b97048e534c6a9b8cb22b7d64b141df8ca47227bad39a2d4a7e6",
+    "bytes": 3169888,
+    "duration": 4,
+    "width": 720,
+    "height": 1280,
+    "fps": 24,
+    "frames": 96,
+    "audio": "AAC 48000Hz stereo",
+    "independentFullDecode": true,
+    "canonicalDiagnosticRender": true,
+    "normalNativeSubmission": false,
+    "financialWrites": false
+  },
+  "nativeControlChecks": {
+    "actualNativeControlActions": true,
+    "keyerUndoBypassRestored": true,
+    "exactColdReopen": true,
+    "allTwelveAuthoredLayers": true,
+    "canonicalFilmUploadedNormally": true,
+    "completeMatchingFilmPlayback": true,
+    "errors": []
+  },
+  "nativeColdReopen": {
+    "exactAuthoredFields": true,
+    "layers": 12
+  },
+  "renderResource": {
+    "wallSeconds": 80.77865667099832,
+    "cpuSeconds": 172.393087,
+    "peakRssKiB": 1288724,
+    "cpuCeilingSeconds": 600,
+    "localFileCeilingBytes": 134217728,
+    "providerChargesStarted": false,
+    "invoiceCostMicros": null
+  },
+  "originalFailureEvidencePreserved": true,
+  "thresholdsLoosened": false,
+  "productionWrites": false,
+  "paidProviderCalls": false,
+  "creditGrants": false,
+  "deployment": false,
+  "unrelatedLogoAnd3DWorkPreserved": true,
+  "formalStudioCountsUnchanged": true,
+  "sharedStudioBacklog": [
+    "S02 wider preview/material/audio qualification",
+    "S04 motion/glyph depth",
+    "S03 ownership"
+  ],
+  "updatedAt": "2026-11-16T17:27:32.932078+00:00",
+  "correctedFilmNativeImportPlayback": {
+    "duration": 4,
+    "currentTime": 4,
+    "ended": true,
+    "bytes": "c1bb6dea34f2b97048e534c6a9b8cb22b7d64b141df8ca47227bad39a2d4a7e6",
+    "normalStudioImportAndVisibleNativePlayControl": true,
+    "canonicalDiagnosticRender": true,
+    "newNativeExport": false
+  },
+  "fullFinalCheckpoint": {
+    "fullAuthFirestoreStorage": true,
+    "originalMetadataPreserved": true,
+    "workerRequestsAndReceipts": true,
+    "terminalSucceededOperations": 7,
+    "terminalFailedOperations": 0,
+    "walletBalances": [
+      0,
+      1
+    ],
+    "allWalletsZeroHeldAndActive": true,
+    "unrelatedEmptyWalletUnchanged": true,
+    "financialWrites": false
+  },
+  "audioSignal": {
+    "decodedPcmSha256": "7bdf75204a589f0bca7fd0fd81c05806a0ec0fc9708d76667f2dee80cd246487",
+    "rmsDbfs": -15.953376531848075,
+    "peak": 0.9312751293182373,
+    "nonSilent": true,
+    "humanListeningApproval": false
+  },
+  "contractValidation": {
+    "valid": true,
+    "capabilities": 29,
+    "counts": {
+      "UNIMPLEMENTED": 2,
+      "BROKEN": 1,
+      "PARTIAL": 9,
+      "FUNCTIONAL": 17,
+      "PRO-READY": 0,
+      "PRODUCTION-READY": 0
+    },
+    "combinations": 13,
+    "parityChecks": 17,
+    "presentFixtures": 4,
+    "newCapabilityExecutions": 0,
+    "note": "Record validation only; no browser, provider or GPU execution."
+  },
+  "deliveryDirectory": "/home/tibule12/Videos/Studio Node Flow - Repaired - 2026-11-16",
+  "actualStudioRecording": "reports/studio-node-repair-20261116/private/native-controls-final-r4/recording",
+  "ownedRuntimeShutdown": {
+    "allOwnedServicesStopped": true,
+    "fullCheckpointBeforeStop": true,
+    "terminalSucceededOperations": 7,
+    "terminalFailedOperations": 0,
+    "unchangedWalletBalances": [
+      0,
+      1
+    ],
+    "zeroHeldAndActive": true,
+    "financialWrites": false,
+    "states": [
+      {
+        "pid": 424195,
+        "running": false
+      },
+      {
+        "pid": 491718,
+        "running": false
+      },
+      {
+        "pid": 424203,
+        "running": false
+      },
+      {
+        "pid": 424263,
+        "running": false
+      },
+      {
+        "pid": 427078,
+        "running": false
+      },
+      {
+        "pid": 432923,
+        "running": false
+      },
+      {
+        "pid": 444307,
+        "running": false
+      },
+      {
+        "pid": 458071,
+        "running": false
+      },
+      {
+        "pid": 452071,
+        "running": false
+      },
+      {
+        "pid": 463958,
+        "running": false
+      },
+      {
+        "pid": 478246,
+        "running": false
+      },
+      {
+        "pid": 485234,
+        "running": false
+      }
+    ]
+  },
+  "finalProductKnowledgeCheckPassed": true,
+  "actualRecordingMp4IndependentlyDecoded": true
+}

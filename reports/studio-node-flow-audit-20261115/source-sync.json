@@ -1,0 +1,92 @@
+{
+  "files": [
+    {
+      "path": "config/product-knowledge/source-lock.v1.json",
+      "sha256": "3f0cdb51090220ecaefd68ebc99cd66907bac70857893810a421830c8cad2c8b"
+    },
+    {
+      "path": "docs/STUDIO-COMPLETION-CONTRACT.md",
+      "sha256": "c4afa34b156c4adae2058b99565e996a0797bef1d6b719b7f3a1c247e5c0e809"
+    },
+    {
+      "path": "docs/STUDIO-PRODUCT-READINESS.md",
+      "sha256": "314fd4bedaabbc2845580e2307b837b857328a5f4fe8efe7024e632873c37d60"
+    },
+    {
+      "path": "frontend/src/components/StudioMotionFlow.css",
+      "sha256": "72b1ee56fa1462e6afc9c55c1b06077c5e0b6b0f9becd69129f46da63994627e"
+    },
+    {
+      "path": "frontend/src/components/StudioNodeFlowPanel.js",
+      "sha256": "36f1c44f3f24d7fd4cb0d478ea35dc68a890eef22539d9d3709523a8f1ede55a"
+    },
+    {
+      "path": "frontend/src/components/StudioProgrammeFrame.js",
+      "sha256": "3a131db24a207686bb77a8cb8eb59251bff76327b8f8d8e01e7879079806aca3"
+    },
+    {
+      "path": "frontend/src/components/VideoEditor.js",
+      "sha256": "dea8516e3518637f78cd4f81342796eb0403c21526ef36cd5955739bdaeda214"
+    },
+    {
+      "path": "frontend/src/components/ViralClipStudio.js",
+      "sha256": "3074c85f274369ded9496c3f6ec598a950d8f8900ef30b07060b9bf155d7b8b4"
+    },
+    {
+      "path": "frontend/src/components/__tests__/StudioMotionFlowWorkbench.test.js",
+      "sha256": "8054a2b906ccdbd80068858cfabf993b775fe202fd883197854cf09939dbcb9b"
+    },
+    {
+      "path": "frontend/src/components/studioCompRigging.js",
+      "sha256": "cea24aa8fb635566a38253150c3ea9b8a9ac8f7a95557ba80dec282d4faa92cb"
+    },
+    {
+      "path": "frontend/src/components/studioDirectorComposition.js",
+      "sha256": "042ff49b2708f75041942f20e7aa757eb61360e230c826faa55648bb54988504"
+    },
+    {
+      "path": "frontend/src/components/studioEditDecisions.js",
+      "sha256": "88e431099f1e29bd35ec439e6f9e505bca8e379c212000dd4025ff05ca0f9a21"
+    },
+    {
+      "path": "frontend/src/components/studioNodeFlow.js",
+      "sha256": "3a715f73351017485950e65a1a67061b8c7f2d96ea4467b23e07cc76e1654ae0"
+    },
+    {
+      "path": "frontend/src/components/studioProjectDocument.js",
+      "sha256": "459ca6542750cad847b8694fca4dd79321e7be7d0ced99b925b01dfa997e4723"
+    },
+    {
+      "path": "frontend/src/components/studioRenderCompiler.js",
+      "sha256": "852cd0c50f1551ed73abafe27e3c4e57ad4cb7a69afa9d93d387d66b65d3507d"
+    },
+    {
+      "path": "test/e2e/studio-capability-matrix.json",
+      "sha256": "6590793ecc0e3c57984ce47eeefd010d2fdf9cba1be1c63bf90d5f8f59df785b"
+    },
+    {
+      "path": "test/e2e/studio-combination-matrix.json",
+      "sha256": "b46c45f2d802e71f7429a27fbd1f5df7fd9d685a0b66c4a67787557dbbc81bc6"
+    },
+    {
+      "path": "test/e2e/studio-preview-render-parity.json",
+      "sha256": "b5d50b1ffb7430fd210025cca54fe5ce0b2e01b1a680d9c91ccad4e0e0ada699"
+    },
+    {
+      "path": "frontend/src/components/studioNodeFlowEdit.js",
+      "sha256": "5b6bc5eaf6ba760c7d39348d54e91204c88aef643fdab92b0c99df5db23ac31d"
+    },
+    {
+      "path": "frontend/src/components/__tests__/studioNodeFlowEdit.test.js",
+      "sha256": "67bf6df3573bf517f18d85c2f6d4f5188fb07100151fc9b27c4182c4d988852f"
+    },
+    {
+      "path": "frontend/src/components/__tests__/studioNodeFlowLifecycle.test.js",
+      "sha256": "9a9d197c3e27ccd33c9ab8f4e1f0a1af1533d0c422801a26d1e040f298c095fd"
+    }
+  ],
+  "preservedActiveBeforeBytes": true,
+  "concurrentConflicts": 0,
+  "sourceHead": "1eddbf9889496b23ffa81c0d58b3d7a43689547f",
+  "finalSync": true
+}

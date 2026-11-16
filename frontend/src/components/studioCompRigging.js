@@ -1,4 +1,6 @@
+import { studioDepthScale } from './studioNodeEffects';
 import { studioTitleMatteMarkup } from './studioTitleMatte';
+import { studioTitleTrackMatteUri } from './studioNodeTitleMask';
 import {
   buildMotionAutomationStyle,
   interpolateAutomationValue,
@@ -487,6 +489,49 @@ const resolveParentLayer = (parentId, byId, mainTransform) => {
   return byId.get(String(parentId)) || null;
 };
 
+export function validateStudioParameterLinks(overlays = [], mainTransform = null) {
+  const byId=new Map(overlays.map(layer=>[String(layer.id),layer]));
+  byId.set('main-video',{id:'main-video',...mainTransform});
+  const seen=new Set(),visiting=new Set();
+  const visit=id=>{
+    if(visiting.has(id))throw Error('Parameter links cannot contain a cycle.');
+    if(seen.has(id))return;
+    visiting.add(id);
+    for(const [property,link]of Object.entries(byId.get(id)?.parameterLinks||{})) {
+      if(link?.enabled===false)continue;
+      if(!MOTION_DRIVER_PROPERTIES.includes(property)||!MOTION_DRIVER_PROPERTIES.includes(link?.sourceProperty)||
+          !byId.has(String(link?.sourceLayerId))||
+          ['multiplier','offset'].some(k=>link[k]!==undefined&&!Number.isFinite(link[k])))
+        throw Error('Parameter links need an existing source, supported property and finite values.');
+      visit(String(link.sourceLayerId));
+    }
+    visiting.delete(id);seen.add(id);
+  };
+  for(const id of byId.keys())visit(id);
+  return true;
+}
+
+// Resolve links on the sampled programme clock. Both the preview and the
+// existing world-motion baker use this evaluator, including linked animation.
+export function evaluateLinkedLayerPose(layer, overlays=[], keys=[], time=0, mainTransform=null, visited=new Set()) {
+  const id=String(layer?.id||'main-video');
+  if(visited.has(id))throw Error('Parameter links cannot contain a cycle.');
+  const pose=evaluateLocalLayerPose(layer,keys,time);
+  if(!layer?.parameterLinks)return pose;
+  const path=new Set(visited);path.add(id);
+  for(const [property,link]of Object.entries(layer.parameterLinks)) {
+    if(!link||link.enabled===false)continue;
+    const source=link.sourceLayerId==='main-video'?{id:'main-video',...mainTransform}:
+      overlays.find(item=>String(item.id)===String(link.sourceLayerId));
+    if(!source||!MOTION_DRIVER_PROPERTIES.includes(property)||!MOTION_DRIVER_PROPERTIES.includes(link.sourceProperty))continue;
+    const value=evaluateLinkedLayerPose(source,overlays,keys,time,mainTransform,path)[link.sourceProperty];
+    const multiplier=Number.isFinite(link.multiplier)?link.multiplier:1,offset=Number.isFinite(link.offset)?link.offset:0;
+    const [min,max]=PROPERTY_BOUNDS[property];
+    pose[property]=clamp(Number(value)*multiplier+offset,min,max);
+  }
+  return pose;
+}
+
 export const evaluateWorldLayerPose = (
   layer,
   overlays = [],
@@ -494,7 +539,8 @@ export const evaluateWorldLayerPose = (
   time = 0,
   mainTransform = null
 ) => {
-  const local = evaluateLocalLayerPose(layer, motionKeyframes, time);
+  const sampled = evaluateLinkedLayerPose(layer, overlays, motionKeyframes, time, mainTransform);
+  const local = {...sampled, scale: sampled.scale * studioDepthScale(layer)};
   if (!layer?.parentId) return local;
 
   const byId = new Map(
@@ -515,7 +561,8 @@ export const evaluateWorldLayerPose = (
     visited.add(cursorId);
     const parent = resolveParentLayer(cursorId, byId, mainTransform);
     if (!parent) break;
-    const pPose = evaluateLocalLayerPose(parent, motionKeyframes, time);
+    const sampledParent = evaluateLinkedLayerPose(parent, overlays, motionKeyframes, time, mainTransform);
+    const pPose = {...sampledParent, scale: sampledParent.scale * studioDepthScale(parent)};
     const px = Number(pPose.x ?? 50);
     const py = Number(pPose.y ?? 50);
     const pScale = Math.max(0.01, Number(pPose.scale ?? 1));
@@ -557,7 +604,7 @@ export const reparentStudioLayerPreservingWorldPose = (
       ...layer,
       x: Number(world.x.toFixed(4)),
       y: Number(world.y.toFixed(4)),
-      scale: Number(world.scale.toFixed(4)),
+      scale: Number((world.scale / studioDepthScale(layer)).toFixed(4)),
       rotation: Number(world.rotation.toFixed(4)),
     };
     delete updated.parentId;
@@ -598,7 +645,7 @@ export const reparentStudioLayerPreservingWorldPose = (
     parentId: cleanNextParent,
     x: Number(lx.toFixed(4)),
     y: Number(ly.toFixed(4)),
-    scale: Number(Math.max(0.02, world.scale / pScale).toFixed(4)),
+    scale: Number(Math.max(0.02, world.scale / pScale / studioDepthScale(layer)).toFixed(4)),
     rotation: Number((world.rotation - pRot).toFixed(4)),
   };
 };
@@ -614,7 +661,8 @@ export const layerHasActiveMotionDrivers = layer =>
 
 export const layerRequiresWorldBake = (layer, overlays = [], mainTransform = null) => {
   if (!layer) return false;
-  if (layerHasActiveMotionDrivers(layer)) return true;
+  if (layer.zDepth || layerHasActiveMotionDrivers(layer)) return true;
+  if (Object.values(layer.parameterLinks || {}).some(link=>link && link.enabled!==false)) return true;
   if (!layer.parentId) return false;
   return true;
 };
@@ -737,6 +785,7 @@ export const buildTrackMatteStageSvgDataUri = ({
   mode = "alpha",
   time = 0,
   stageAspect = 9 / 16,
+  quality = 'inspection',
 }) => {
   if (!matteLayer || !mode || mode === "none") return "";
   const pose = evaluateWorldLayerPose(matteLayer, overlays, motionKeyframes, time, mainTransform);
@@ -750,6 +799,10 @@ export const buildTrackMatteStageSvgDataUri = ({
   const safeAspect = Number.isFinite(Number(stageAspect)) && Number(stageAspect) > 0.05 ? Number(stageAspect) : 9 / 16;
   const vw = 1000;
   const vh = Math.max(100, Math.round(vw / safeAspect));
+  if(matteLayer.type==='text'&&String(matteLayer.text||'').trim()&&!matteLayer.textAnimator){
+    const uri=studioTitleTrackMatteUri(matteLayer,pose,time,vw,vh,mode,quality);
+    if(uri)return uri;
+  }
   const cx = (Number(pose.x ?? 50) / 100) * vw;
   const cy = (Number(pose.y ?? 50) / 100) * vh;
   const scale = Math.max(0.01, Number(pose.scale ?? 1));
@@ -835,6 +888,7 @@ export const removeStudioLayerSafely = (
 
   const detachedMatteLayerIds = [];
   const unparentedChildIds = [];
+  const detachedLinkChannels = new Set();
 
   const nextOverlays = (overlays || [])
     .filter(item => item && String(item.id) !== targetId)
@@ -858,6 +912,20 @@ export const removeStudioLayerSafely = (
           trackMatte: { mode: "none", sourceLayerId: null },
         };
       }
+      const linked=Object.entries(item.parameterLinks||{}).filter(([,link])=>String(link?.sourceLayerId)===targetId);
+      if(linked.length) {
+        const pose=String(item.parentId)===targetId
+          ? evaluateWorldLayerPose(item,overlays,motionKeyframes,currentTime,mainTransform)
+          : evaluateLinkedLayerPose(item,overlays,motionKeyframes,currentTime,mainTransform);
+        const links={...item.parameterLinks};updated={...updated};
+        for(const [property]of linked) {
+          delete links[property];updated[property]=pose[property];
+          detachedLinkChannels.add(`${item.id}:${property}`);
+        }
+        updated.parameterLinks=Object.keys(links).length?links:undefined;
+      }
+      if(updated.macroGroup?.memberIds?.includes(targetId))updated={...updated,
+        macroGroup:{...updated.macroGroup,memberIds:updated.macroGroup.memberIds.filter(id=>String(id)!==targetId)}};
       return updated;
     });
 
@@ -865,7 +933,7 @@ export const removeStudioLayerSafely = (
     id => String(id) !== targetId
   );
   const nextMotionKeyframes = (motionKeyframes || []).filter(
-    k => String(k?.targetId) !== targetId
+    k => String(k?.targetId) !== targetId && !detachedLinkChannels.has(`${k?.targetId}:${k?.property}`)
   );
 
   return {

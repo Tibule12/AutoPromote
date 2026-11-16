@@ -1,3 +1,5 @@
+import { compileStudioNodeEffects } from './studioNodeEffects';
+import { compileStudioNodeMask } from './studioNodeMask';
 import {
   createOutputTimeMap,
   createTimeRange,
@@ -17,9 +19,10 @@ import { validateStudioMaskAnimation } from './studioMaskGeometry';
 import {
   validateStudioMotionDrivers,
   validateStudioParentGraph,
+  validateStudioParameterLinks,
   validateStudioTrackMattes,
 } from "./studioCompRigging";
-import { validateStudioNodeFlow } from "./studioNodeFlow";
+import { validateStudioNodeFlow, materializeLegacyNodeBypasses } from "./studioNodeFlow";
 
 import {
   STUDIO_EDIT_SETTING_FIELDS, STUDIO_SOURCE_DECISION_FIELDS,
@@ -161,7 +164,7 @@ const AUDIO_CUE_PARAMETER_FIELDS = [
   "muted", "fadeIn", "fadeOut", "fadeOffset", "fadeDuration", "pan", "audioMode", "rate", "pitchPreserved",
 ];
 const cueParameterFields = collection => collection === "adjustmentLayers"
-  ? ["enabled", "name", "label", "preset", "opacity", "finishFx", "effects", "intensity"]
+  ? ["enabled", "name", "label", "preset", "opacity", "finishFx", "effects", "intensity", "maskSourceNodeId", "mask"]
   : AUDIO_CUE_PARAMETER_FIELDS;
 const AUDIO_SETTING_FIELDS = [
   "addMusic", "musicSelection", "musicSearchMode", "safeSearch", "musicVolume",
@@ -646,7 +649,8 @@ export const buildStudioOutputTimeMap = ({
   );
 };
 
-export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDocument = null }) => {
+export const adaptStudioSnapshotToDocument = ({ snapshot: inputSnapshot, projectId, previousDocument = null }) => {
+  const snapshot=materializeLegacyNodeBypasses(inputSnapshot||{});
   if (!snapshot || !Array.isArray(snapshot.timeline))
     fail("INVALID_SNAPSHOT", "A Studio timeline is required.");
   if (previousDocument?.projectId !== projectId) previousDocument = null;
@@ -1030,7 +1034,12 @@ export const validateStudioProjectDocument = document => {
   const docOverlayParams = (document.layers || [])
     .filter(layer => layer.legacyCollection === "overlays" && !layer.parameters?.isCaption)
     .map(layer => ({ ...layer.parameters, id: layer.layerId, type: layer.legacyType }));
+  for(const layer of docOverlayParams)compileStudioNodeEffects(layer);
+  const visualSettings=document.visualGraph?.settings||{};
+  compileStudioNodeMask(visualSettings.advancedColor?.maskSourceNodeId||visualSettings.finishFx?.advancedColor?.maskSourceNodeId||visualSettings.finishFx?.maskSourceNodeId,docOverlayParams);
+  for(const adjustment of visualSettings.adjustmentLayers||[])compileStudioNodeMask(adjustment.maskSourceNodeId,docOverlayParams);
   validateStudioParentGraph(docOverlayParams, document.visualGraph?.settings?.mainTransform || null);
+  validateStudioParameterLinks(docOverlayParams, document.visualGraph?.settings?.mainTransform || null);
   validateStudioTrackMattes(
     docOverlayParams,
     (document.layers || [])

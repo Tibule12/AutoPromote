@@ -11,6 +11,7 @@ import { studioVectorUri } from './studioVectorShape';
 import { hasSoftStudioMask, studioLayerMaskSvg } from './studioMaskGeometry';
 import { buildTrackMatteStageSvgDataUri, evaluateWorldLayerPose } from './studioCompRigging';
 import { studioVideoMatteUri, studioVideoMatteAlpha } from './studioVideoMatte';
+import {paintStudioTitleMattePose} from './studioNodeTitleMask';
 
 const style = (node, field, value) => { if (node.style[field] !== value) node.style[field] = value; };
 const variable = (node, name, value) => { if (node.style.getPropertyValue(name) !== value) node.style.setProperty(name, value); };
@@ -25,6 +26,13 @@ export default function StudioProgrammeFrame({ clockRef, mapTime, time, enabled 
   const marker = useRef(null), binding = useRef(null), latest = useRef(null);
   const overlayBindings=useRef(new Map());
   const imageBindings=useRef(new Map());
+  const stageSize=useRef({width:0,height:720});
+  useLayoutEffect(()=>{
+    const stage=marker.current?.parentElement;if(!stage)return undefined;
+    const measure=()=>{stageSize.current={width:stage.clientWidth,height:stage.clientHeight||720};};
+    measure();const observer=typeof ResizeObserver==='function'?new ResizeObserver(measure):null;observer?.observe(stage);
+    return()=>observer?.disconnect();
+  },[]);
   const layerKeys = new Map();
   for (const key of keyframes) {
     if (!layerKeys.has(String(key.targetId))) layerKeys.set(String(key.targetId), []);
@@ -88,7 +96,7 @@ export default function StudioProgrammeFrame({ clockRef, mapTime, time, enabled 
       }
       if (active && video && video.dataset.sharedProgrammeFrame !== 'true' && (video.readyState < 2 || video.seeking)) pendingLayers++;
       if (!active||samePose) continue;
-      const pose = (layer.parentId || layer.motionDrivers)
+      const pose = (layer.parentId || layer.motionDrivers || layer.parameterLinks || layer.zDepth)
         ? evaluateWorldLayerPose(layer, current.allLayers, current.keyframes, programmeTime, current.mainTransform)
         : buildMotionAutomationStyle(current.layerKeys.get(String(layer.id)), programmeTime, layer);
       const fullscreen = layer.bRollMode === 'fullscreen';
@@ -109,7 +117,7 @@ export default function StudioProgrammeFrame({ clockRef, mapTime, time, enabled 
         node.style.maskImage = mask; node.style.webkitMaskImage = mask;
       }
       const plane = node.querySelector('[data-testid="studio-perspective-surface"]');
-      if (plane && layer.perspective) style(plane, 'transform', perspectiveCssMatrix(pose.perspective || layer.perspective,
+      if (plane && layer.perspective && plane.dataset.projectedPixels!=='true') style(plane, 'transform', perspectiveCssMatrix(pose.perspective || layer.perspective,
         pose.perspectiveProgress, Math.max(1, Number(plane.dataset.planeWidth)), Math.max(1, Number(plane.dataset.planeHeight))));
       if (layer.vectorShape) {
         const picture = node.querySelector('img'), uri = studioVectorUri(layer.vectorShape, pose);
@@ -128,13 +136,18 @@ export default function StudioProgrammeFrame({ clockRef, mapTime, time, enabled 
       }
       node.dataset.programmeTime = String(programmeTime);
     }
-    const stageAspect = stage.clientWidth && stage.clientHeight
-      ? stage.clientWidth / stage.clientHeight
+    const stageAspect = stageSize.current.width && stageSize.current.height
+      ? stageSize.current.width / stageSize.current.height
       : (current.programmeWidth || 405) / 720;
     for (const wrap of stage.querySelectorAll('[data-studio-matte-wrap]')) {
       const fillLayer = current.layers.get(wrap.dataset.studioMatteWrap);
       const matteLayer = fillLayer?.trackMatte?.sourceLayerId ? current.layers.get(String(fillLayer.trackMatte.sourceLayerId)) : null;
       if (matteLayer && fillLayer?.trackMatte?.mode && fillLayer.trackMatte.mode !== 'none') {
+        const titlePose=wrap.querySelector('[data-studio-inline-title-matte] [data-studio-title-matte-pose]');
+        if(titlePose){
+          paintStudioTitleMattePose(titlePose,matteLayer,evaluateWorldLayerPose(matteLayer,current.allLayers,current.keyframes,programmeTime,current.mainTransform),programmeTime,stageAspect);
+          continue;
+        }
         if (matteLayer.type === 'video' || (matteLayer.type === 'image' && !matteLayer.mask?.enabled && !matteLayer.vectorShape)) {
           const sourceNode = nodes.find(node => node.dataset.studioLayerId === String(matteLayer.id));
           const video = sourceNode?.querySelector('[data-studio-overlay-decoder]');
@@ -156,7 +169,13 @@ export default function StudioProgrammeFrame({ clockRef, mapTime, time, enabled 
           continue;
         }
         if (samePose) continue;
-        const uri = buildTrackMatteStageSvgDataUri({ matteLayer, overlays: current.allLayers, motionKeyframes: current.keyframes, mainTransform: current.mainTransform, mode: fillLayer.trackMatte.mode, time: programmeTime, stageAspect });
+        const pose=evaluateWorldLayerPose(matteLayer,current.allLayers,current.keyframes,programmeTime,current.mainTransform);
+        const active=programmeTime>=Number(matteLayer.startTime||0)&&programmeTime<Number(matteLayer.startTime||0)+Number(matteLayer.duration||0);
+        const quality=clockRef?.current?.paused?'inspection':'playback';
+        const identity=JSON.stringify([matteLayer,pose,active,fillLayer.trackMatte.mode,stageAspect,document.fonts?.status,quality]);
+        const cache=current.matteCache ||= new Map(),previous=cache.get(fillLayer.id);
+        const uri=previous?.identity===identity?previous.uri:buildTrackMatteStageSvgDataUri({ matteLayer, overlays: current.allLayers, motionKeyframes: current.keyframes, mainTransform: current.mainTransform, mode: fillLayer.trackMatte.mode, time: programmeTime, stageAspect,quality });
+        cache.set(fillLayer.id,{identity,uri});
         wrap.style.maskImage = uri; wrap.style.webkitMaskImage = uri;
       }
     }
@@ -178,6 +197,21 @@ export default function StudioProgrammeFrame({ clockRef, mapTime, time, enabled 
     }
   };
   const paintRef = useRef(paint); paintRef.current = paint;
+  useLayoutEffect(()=>{
+    const stage=marker.current?.parentElement;if(!stage)return undefined;
+    const observer=new MutationObserver(records=>{
+      const changed=records.some(record=>[...record.addedNodes,...record.removedNodes].some(node=>
+        node.nodeType===Node.ELEMENT_NODE&&(node.matches('[data-studio-layer-id]')||node.querySelector('[data-studio-layer-id]'))));
+      if(!changed)return;
+      // A layer entering its authored cue can mount after the current cached
+      // node list was captured. Bind it on the presented clock immediately,
+      // rather than waiting for another coarse React transport update.
+      latest.current.nodes=null;latest.current.lastPoseTime=undefined;
+      const video=clockRef?.current;
+      if(enabled&&video&&!video.seeking&&video.readyState>=2)paintRef.current(studioPresentedSourceTime(video));
+    });
+    observer.observe(stage,{childList:true,subtree:true});return()=>observer.disconnect();
+  },[clockRef,enabled]);
   useLayoutEffect(() => {
     const video = enabled ? clockRef?.current : null;
     if (binding.current?.video !== video) {

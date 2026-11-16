@@ -81,7 +81,12 @@ export const applyPrecisionVignette = (pixels, width, height, amount) => {
       const radius = Math.hypot(Math.trunc(x - width / 2), Math.trunc(y - height / 2)) / distance;
       factors[y * width + x] = radius > 1 ? 0 : Math.cos(angle * radius) ** 4;
     }
-    if (vignetteMaps.size >= 2) vignetteMaps.delete(vignetteMaps.keys().next().value);
+    // Main, masked and timed grades commonly use three different strengths.
+    // A two-entry cache recalculates every full-frame radial map on every tick.
+    let storedPixels=[...vignetteMaps.values()].reduce((sum,map)=>sum+map.length,0);
+    while(vignetteMaps.size&&(vignetteMaps.size>=8||storedPixels+factors.length>8*1024*1024)){
+      const oldest=vignetteMaps.keys().next().value;storedPixels-=vignetteMaps.get(oldest).length;vignetteMaps.delete(oldest);
+    }
     vignetteMaps.set(key, factors);
   }
   // The canonical filter acts on limited-range BT.709 YUV: Y*f and

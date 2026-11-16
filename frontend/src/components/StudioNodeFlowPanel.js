@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from 'react-dom';
 import {
   FLOW_NODE_KINDS,
   FLOW_NODE_PALETTE,
   SMART_FLOW_RIG_PRESETS,
   buildSmartFlowRigState,
   computeNodeFlowBounds,
-  connectNodeFlowPorts,
+  connectNodeFlowPorts as connectNodeFlowPortsUnsafe,
   createNodePaletteAddition,
   deleteNodeFromFlow,
   deriveNodeFlowGraph,
@@ -14,6 +15,7 @@ import {
   evaluateParameterLinks,
   spliceNodeIntoWire,
   toggleNodeFlowBypass,
+  restoreAllNodeFlowBypasses,
 } from "./studioNodeFlow";
 import {
   defaultMotionDriverForProperty,
@@ -71,7 +73,7 @@ import {
 } from "./studioFinishKeyframes";
 import { upsertAutomationKeyframe } from "./studioAutomation";
 import StudioVectorPathEditor from "./StudioVectorPathEditor";
-import StudioSourceGradeViewer from "./StudioSourceGradeViewer";
+import StudioNodeSignalViewer from "./StudioNodeSignalViewer";
 import StudioAdjustmentControls from "./StudioAdjustmentControls";
 import "./StudioMotionFlow.css";
 
@@ -207,17 +209,22 @@ export default function StudioNodeFlow({
   onSeek,
   onInteractionStart,
   onInteractionEnd,
+  onApplyNodeChange,
 }) {
-  const emitNodeFlow = onChangeNodeFlow || onUpdateNodeFlow;
-  const emitOverlays = onChangeOverlays || onUpdateOverlays;
-  const emitCompositionOrder = onChangeCompositionOrder || onUpdateCompositionOrder;
-  const emitAdjustmentLayers = onChangeAdjustmentLayers || onUpdateAdjustmentLayers;
-  const emitFinishFx = onChangeFinishFx || onUpdateFinishFx;
-  const emitFinishKeyframes = onChangeFinishKeyframes || onUpdateFinishKeyframes;
-  const emitAdvancedColor = onChangeAdvancedColor || onUpdateAdvancedColor;
-  const emitMainTransform = onChangeMainTransform || onUpdateMainTransform;
-  const emitMotionKeyframes = onChangeMotionKeyframes || onUpdateMotionKeyframes;
+  const emitNodeFlow = onApplyNodeChange ? value => onApplyNodeChange({ nodeFlow: value }) : onChangeNodeFlow || onUpdateNodeFlow;
+  const emitOverlays = onApplyNodeChange ? value => onApplyNodeChange({ overlays: value }) : onChangeOverlays || onUpdateOverlays;
+  const emitCompositionOrder = onApplyNodeChange ? value => onApplyNodeChange({ compositionOrder: value }) : onChangeCompositionOrder || onUpdateCompositionOrder;
+  const emitAdjustmentLayers = onApplyNodeChange ? value => onApplyNodeChange({ adjustmentLayers: value }) : onChangeAdjustmentLayers || onUpdateAdjustmentLayers;
+  const emitFinishFx = onApplyNodeChange ? value => onApplyNodeChange({ finishFx: value }) : onChangeFinishFx || onUpdateFinishFx;
+  const emitFinishKeyframes = onApplyNodeChange ? value => onApplyNodeChange({ finishKeyframes: value }) : onChangeFinishKeyframes || onUpdateFinishKeyframes;
+  const emitAdvancedColor = onApplyNodeChange ? value => onApplyNodeChange({ advancedColor: value }) : onChangeAdvancedColor || onUpdateAdvancedColor;
+  const emitMainTransform = onApplyNodeChange ? value => onApplyNodeChange({ mainTransform: value }) : onChangeMainTransform || onUpdateMainTransform;
+  const emitMotionKeyframes = onApplyNodeChange ? value => onApplyNodeChange({ motionKeyframes: value }) : onChangeMotionKeyframes || onUpdateMotionKeyframes;
 
+  const [actionError, setActionError] = useState("");
+  const [expandedWorkspace, setExpandedWorkspace] = useState(false);
+  const rootRef = useRef(null);
+  const completedPortOnMouseUp = useRef(null);
   const [zoom, setZoom] = useState(0.72);
   const [pan, setPan] = useState({ x: 8, y: 6 });
   const [selectedNodeId, setSelectedNodeId] = useState("MediaOut");
@@ -242,6 +249,23 @@ export default function StudioNodeFlow({
   const [draggingSplit, setDraggingSplit] = useState(false);
   const canvasWrapRef = useRef(null);
   const viewerScreenRef = useRef(null);
+
+  useEffect(() => {
+    if (!expandedWorkspace) return undefined;
+    const previous=document.activeElement;
+    const root=rootRef.current;
+    const focusable=()=>[...root.querySelectorAll('button,input,select,[tabindex="0"]')]
+      .filter(element=>!element.disabled&&element.getClientRects().length);
+    const trap=event=>{
+      if(event.key!=='Tab')return;
+      const controls=focusable();if(!controls.length)return;
+      const first=controls[0],last=controls.at(-1);
+      if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}
+      else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}
+    };
+    root.addEventListener('keydown',trap);
+    return ()=>{root.removeEventListener('keydown',trap);previous?.focus?.()};
+  },[expandedWorkspace]);
 
   const graph = useMemo(
     () =>
@@ -302,12 +326,14 @@ export default function StudioNodeFlow({
   );
 
   const isSplitActive = Boolean(graph.viewerB || showSplitCompare);
+  const connectNodeFlowPorts=useCallback((...args)=>{try{return connectNodeFlowPortsUnsafe(...args)}catch(error){setActionError(error.message);return null;}},[]);
 
   const updateFlowPatch = useCallback(
     patch => {
       if (typeof emitNodeFlow === "function") {
         const base = nodeFlow && typeof nodeFlow === "object" ? nodeFlow : {};
         emitNodeFlow({
+          ...base,
           version: 1,
           viewerA: base.viewerA || "MediaOut",
           viewerB: base.viewerB ?? null,
@@ -323,7 +349,20 @@ export default function StudioNodeFlow({
 
   const applyCanonicalGraphResult = useCallback(
     res => {
-      if (!res) return;
+      if (!res) return false;
+      if (typeof onApplyNodeChange === 'function') {
+        const patch={};
+        for(const field of ['overlays','compositionOrder','adjustmentLayers','finishFx','advancedColor',
+          'nodeFlow','mainTransform','motionKeyframes','finishKeyframes'])
+          if(Object.prototype.hasOwnProperty.call(res,field))patch[field]=res[field];
+        if(onApplyNodeChange(patch)===false){setActionError('This change is unavailable for the selected layer or a locked track. Corner Pin needs an ordinary image or video plane without masks or crop.');return false;}
+        setActionError('');
+        if(res.selectNodeId)setSelectedNodeId(res.selectNodeId);
+        return true;
+      }
+      if (res.mainTransform && typeof emitMainTransform === 'function') emitMainTransform(res.mainTransform);
+      if (res.motionKeyframes && typeof emitMotionKeyframes === 'function') emitMotionKeyframes(res.motionKeyframes);
+      if (res.finishKeyframes && typeof emitFinishKeyframes === 'function') emitFinishKeyframes(res.finishKeyframes);
       if (res.overlays && typeof emitOverlays === "function") {
         emitOverlays(res.overlays);
       }
@@ -342,6 +381,7 @@ export default function StudioNodeFlow({
       if (res.nodeFlow && typeof emitNodeFlow === "function") {
         const base = res.nodeFlow;
         emitNodeFlow({
+          ...base,
           version: 1,
           viewerA: base.viewerA || "MediaOut",
           viewerB: base.viewerB ?? null,
@@ -355,6 +395,10 @@ export default function StudioNodeFlow({
       }
     },
     [
+      onApplyNodeChange,
+      emitMainTransform,
+      emitMotionKeyframes,
+      emitFinishKeyframes,
       emitOverlays,
       emitCompositionOrder,
       emitAdjustmentLayers,
@@ -393,12 +437,12 @@ export default function StudioNodeFlow({
     node => {
       if (!node || !node.bypassable) return;
       const res = toggleNodeFlowBypass(
-        { overlays, adjustmentLayers, nodeFlow },
+        { overlays, adjustmentLayers, nodeFlow, mainTransform, finishFx, advancedColor, motionKeyframes, finishKeyframes },
         node.id
       );
       applyCanonicalGraphResult(res);
     },
-    [overlays, adjustmentLayers, nodeFlow, applyCanonicalGraphResult]
+    [overlays, adjustmentLayers, nodeFlow, mainTransform, finishFx, advancedColor, motionKeyframes, finishKeyframes, applyCanonicalGraphResult]
   );
 
   const handleDeleteNode = useCallback(
@@ -412,6 +456,7 @@ export default function StudioNodeFlow({
           motionKeyframes,
           mainTransform,
           nodeFlow,
+          finishFx, advancedColor, finishKeyframes,
         },
         node.id,
         currentTime
@@ -424,7 +469,7 @@ export default function StudioNodeFlow({
       adjustmentLayers,
       motionKeyframes,
       mainTransform,
-      nodeFlow,
+      nodeFlow, finishFx, advancedColor, finishKeyframes,
       currentTime,
       applyCanonicalGraphResult,
     ]
@@ -460,6 +505,7 @@ export default function StudioNodeFlow({
 
   useEffect(() => {
     const onKeyDown = e => {
+      if (!rootRef.current?.contains(e.target)) return;
       if (e.key === "Escape" && quickSearchOpen) {
         e.preventDefault();
         setQuickSearchOpen(false);
@@ -481,6 +527,8 @@ export default function StudioNodeFlow({
         handleAssignViewer("B", selectedNode.id);
       } else if (e.key === "Escape" && pendingWire) {
         setPendingWire(null);
+      } else if (e.key === "Escape" && expandedWorkspace) {
+        setExpandedWorkspace(false);
       } else if ((e.key === "Delete" || e.key === "Backspace") && selectedNode?.removable) {
         e.preventDefault();
         handleDeleteNode(selectedNode);
@@ -488,7 +536,7 @@ export default function StudioNodeFlow({
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [selectedNode, pendingWire, quickSearchOpen, handleAssignViewer, handleDeleteNode]);
+  }, [selectedNode, pendingWire, quickSearchOpen, expandedWorkspace, handleAssignViewer, handleDeleteNode]);
 
   // Node card dragging
   useEffect(() => {
@@ -567,6 +615,8 @@ export default function StudioNodeFlow({
         setPendingWire(null);
         return;
       }
+      try {
+      setActionError("");
       const res = connectNodeFlowPorts(
         {
           overlays,
@@ -585,10 +635,12 @@ export default function StudioNodeFlow({
         }
       );
       applyCanonicalGraphResult(res);
+      } catch(error) { setActionError(error.message); }
       setPendingWire(null);
     },
     [
       pendingWire,
+      connectNodeFlowPorts,
       overlays,
       compositionOrder,
       adjustmentLayers,
@@ -604,15 +656,16 @@ export default function StudioNodeFlow({
   const handlePortClick = (e, node, side, portName) => {
     e.stopPropagation();
     if (side === "out") {
-      setPendingWire(prev =>
-        prev?.fromNodeId === node.id && prev?.fromPort === portName
-          ? null
-          : { fromNodeId: node.id, fromPort: portName }
-      );
+      setPendingWire({ fromNodeId: node.id, fromPort: portName });
       return;
     }
 
     if (side === "in") {
+      const completed=completedPortOnMouseUp.current;
+      if(completed?.nodeId===node.id&&completed.port===portName) {
+        completedPortOnMouseUp.current=null;
+        return;
+      }
       if (!pendingWire) {
         if (portName === "Parent" || portName === "Mask") {
           const res = disconnectNodeFlowPort(
@@ -635,6 +688,7 @@ export default function StudioNodeFlow({
   };
 
   const handlePaletteAdd = paletteId => {
+    try {
     const res = createNodePaletteAddition(paletteId, {
       overlays,
       adjustmentLayers,
@@ -650,6 +704,7 @@ export default function StudioNodeFlow({
     if (res.selectNodeId) {
       setSelectedNodeId(res.selectNodeId);
     }
+    } catch(error) { setActionError(error.message); }
   };
 
   const handleInjectSmartRig = rigId => {
@@ -773,6 +828,9 @@ export default function StudioNodeFlow({
   const resolvedAdvancedColor = useMemo(() => {
     const raw = advancedColor || finishFx?.advancedColor || {};
     return {
+      ...raw,
+      maskSourceNodeId: raw.maskSourceNodeId || finishFx?.advancedColor?.maskSourceNodeId || finishFx?.maskSourceNodeId || null,
+      maskInvert: raw.maskInvert === true,
       curve: {
         shadows: Number(raw.curve?.shadows ?? 0),
         midtones: Number(raw.curve?.midtones ?? 0),
@@ -794,7 +852,7 @@ export default function StudioNodeFlow({
       powerWindowPresetId: raw.powerWindowPresetId || "",
       powerWindow: raw.powerWindow || null,
     };
-  }, [advancedColor, finishFx?.advancedColor]);
+  }, [advancedColor, finishFx?.advancedColor, finishFx?.maskSourceNodeId]);
 
   const updateAdvancedColorPatch = patch => {
     const next = {
@@ -909,64 +967,11 @@ export default function StudioNodeFlow({
     [graph.nodes]
   );
 
-  const renderViewerStagePreview = (signal, slotKey) => {
-    const visibleOverlays = overlays.filter(o => {
-      if (!o || o.isCaption) return false;
-      if (signal.includedOverlayIds === "all") return !o.hidden;
-      if (Array.isArray(signal.includedOverlayIds)) {
-        return signal.includedOverlayIds.includes(String(o.id));
-      }
-      return false;
-    });
-    const contrastPct = signal.includeGrade ? Math.round(Number(finishFx?.contrast ?? 1) * 100) : 100;
-    const satPct = signal.includeGrade ? Math.round(Number(finishFx?.saturation ?? 1) * 100) : 100;
-    const brightPct = signal.includeGrade ? Math.round(Number(finishFx?.brightness ?? 1) * 100) : 100;
-
-    return (
-      <div
-        className={`ap-flow-stage-schematic is-${signal.stage}`}
-        data-testid={`flow-viewer-stage-${slotKey}`}
-        style={{
-          filter: signal.includeGrade
-            ? `brightness(${brightPct}%) contrast(${contrastPct}%) saturate(${satPct}%)`
-            : "none",
-        }}
-      >
-        <div className="ap-flow-stage-grid" />
-        {signal.includeMainTransform && (
-          <div className="ap-flow-stage-frame-box">
-            <span>
-              Primary Plate · {Math.round((Number(mainTransform?.scale) || 1) * 100)}%
-            </span>
-          </div>
-        )}
-        {visibleOverlays.map(ov => {
-          const left = Math.max(10, Math.min(90, Number(ov.x) || 50));
-          const top = Math.max(16, Math.min(84, Number(ov.y) || 50));
-          return (
-            <div
-              key={ov.id}
-              className={`ap-flow-stage-token ${ov.isNullRig ? "is-null" : ov.vectorShape ? "is-vector" : "is-layer"}`}
-              style={{ left: `${left}%`, top: `${top}%` }}
-            >
-              {ov.isNullRig ? "⊕" : ov.vectorShape ? "◆" : "T"}{" "}
-              <span>{(ov.name || ov.text || ov.id).slice(0, 14)}</span>
-            </div>
-          );
-        })}
-        <div className="ap-flow-stage-telemetry">
-          <span>{signal.stage.toUpperCase()}</span>
-          <span>
-            {signal.includeGrade ? `C ${contrastPct}% · S ${satPct}%` : "UNGRADED"}
-          </span>
-          <span>{visibleOverlays.length} LYR</span>
-        </div>
-      </div>
-    );
-  };
-
-  return (
-    <div className="ap-node-flow-root" data-testid="studio-node-flow">
+  const workspace = (
+    <div ref={rootRef} role={expandedWorkspace ? 'dialog' : 'region'} aria-label="Node Flow workspace"
+      aria-modal={expandedWorkspace ? true : undefined}
+      className={`ap-node-flow-root${expandedWorkspace ? ' is-expanded-workspace' : ''}`} data-testid="studio-node-flow">
+      {actionError && <div role="alert" className="ap-flow-action-error">{actionError}</div>}
       {/* Top Toolbar: Node Palette + Smart Flow Rigs + Viewer Controls */}
       <div className="ap-node-flow-toolbar">
         <div className="ap-node-flow-palette" role="toolbar" aria-label="Node Flow Palette">
@@ -1037,6 +1042,11 @@ export default function StudioNodeFlow({
         </div>
 
         <div className="ap-node-flow-view-controls">
+          <button type="button" className="ap-flow-ctrl-btn" data-testid="flow-expand-workspace"
+            aria-pressed={expandedWorkspace}
+            onClick={() => { setExpandedWorkspace(value => !value); requestAnimationFrame(() => handleFitView()); }}>
+            {expandedWorkspace ? 'Return to Studio' : 'Expand workspace'}
+          </button>
           <button
             type="button"
             className={`ap-flow-ctrl-btn ${quickSearchOpen ? "is-active" : ""}`}
@@ -1372,6 +1382,8 @@ export default function StudioNodeFlow({
                 <div
                   key={node.id}
                   role="button"
+                  aria-pressed={isSelected}
+                  aria-label={`${node.label} ${node.kind} node`}
                   tabIndex={0}
                   data-testid={`flow-node-${node.id}`}
                   className={[
@@ -1504,6 +1516,7 @@ export default function StudioNodeFlow({
                         key={`in-${inPort}`}
                         type="button"
                         data-testid={`flow-port-in-${node.id}-${inPort}`}
+                        aria-label={`${node.label} ${inPort} input`}
                         className={[
                           "ap-flow-port",
                           "is-in",
@@ -1527,6 +1540,8 @@ export default function StudioNodeFlow({
                         onMouseUp={e => {
                           if (pendingWire) {
                             e.stopPropagation();
+                            completedPortOnMouseUp.current={nodeId:node.id,port:inPort};
+                            window.setTimeout(()=>{completedPortOnMouseUp.current=null;},0);
                             completePortConnection(node.id, inPort);
                           }
                         }}
@@ -1548,6 +1563,7 @@ export default function StudioNodeFlow({
                         key={`out-${outPort}`}
                         type="button"
                         data-testid={`flow-port-out-${node.id}-${outPort}`}
+                        aria-label={`${node.label} ${outPort} output`}
                         className={[
                           "ap-flow-port",
                           "is-out",
@@ -1609,47 +1625,26 @@ export default function StudioNodeFlow({
               className="ap-flow-viewer-screen"
               data-testid="flow-viewer-screen"
             >
-              {videoRef &&
-              (viewerSignalA.stage === "source" ||
-                viewerSignalB.stage === "graded" ||
-                viewerSignalB.stage === "adjustment_grade") ? (
-                <div className="ap-flow-live-grade-viewer-wrap">
-                  <StudioSourceGradeViewer
-                    nodeId={
-                      viewerSignalB.stage === "graded" ||
-                      viewerSignalB.stage === "adjustment_grade"
-                        ? viewerSignalB.nodeId
-                        : viewerSignalA.nodeId
-                    }
-                    videoRef={videoRef}
-                    mapTime={mapTime}
-                    time={currentTime}
-                    finishFx={finishFx}
-                    advancedColor={advancedColor}
-                    adjustmentLayers={adjustmentLayers}
-                  />
-                </div>
-              ) : null}
               <div
                 className="ap-flow-viewer-pane is-pane-a"
-                style={{ width: `${graph.splitPosition}%` }}
+                style={{ width: "100%", clipPath: `inset(0 ${100-graph.splitPosition}% 0 0)` }}
               >
                 <span className="ap-flow-pane-watermark">
                   [1] {viewerSignalA.label} — {viewerSignalA.badge}
                 </span>
-                {renderViewerStagePreview(viewerSignalA, "a")}
+                <StudioNodeSignalViewer signal={viewerSignalA} videoRef={videoRef} overlays={overlays} time={currentTime} mapTime={mapTime} finishFx={finishFx} advancedColor={advancedColor} adjustmentLayers={adjustmentLayers} mainTransform={mainTransform} motionKeyframes={motionKeyframes} />
               </div>
               <div
                 className="ap-flow-viewer-pane is-pane-b"
                 style={{
-                  left: `${graph.splitPosition}%`,
-                  width: `${100 - graph.splitPosition}%`,
+                  left: 0,
+                  width: "100%", clipPath: `inset(0 0 0 ${graph.splitPosition}%)`,
                 }}
               >
                 <span className="ap-flow-pane-watermark">
                   [2] {viewerSignalB.label} — {viewerSignalB.badge}
                 </span>
-                {renderViewerStagePreview(viewerSignalB, "b")}
+                <StudioNodeSignalViewer signal={viewerSignalB} videoRef={videoRef} overlays={overlays} time={currentTime} mapTime={mapTime} finishFx={finishFx} advancedColor={advancedColor} adjustmentLayers={adjustmentLayers} mainTransform={mainTransform} motionKeyframes={motionKeyframes} />
               </div>
               <div
                 role="slider"
@@ -1665,6 +1660,12 @@ export default function StudioNodeFlow({
                   e.stopPropagation();
                   onInteractionStart?.();
                   setDraggingSplit(true);
+                }}
+                onKeyDown={e => {
+                  if (!['ArrowLeft','ArrowRight','Home','End'].includes(e.key)) return;
+                  e.preventDefault();e.stopPropagation();
+                  const next=e.key==='Home'?10:e.key==='End'?90:Math.max(10,Math.min(90,graph.splitPosition+(e.key==='ArrowRight'?1:-1)*(e.shiftKey?10:1)));
+                  updateFlowPatch({splitPosition:next});
                 }}
               />
             </div>
@@ -2131,8 +2132,9 @@ export default function StudioNodeFlow({
                         className="ap-flow-grade-subcard"
                         data-testid="flow-depth-parallax-controls"
                       >
+                        <p className="ap-flow-empty">Depth changes the layer’s perspective scale; defocus softens its pixels in preview and export.</p>
                         <div className="ap-flow-vector-editor-head">
-                          <span>2.5D Depth Plane &amp; Rack Focus</span>
+                          <span>2.5D Depth &amp; Defocus</span>
                           <span className="ap-flow-node-chip">
                             Z {Math.round(Number(selectedOverlay.zDepth ?? 0))}
                           </span>
@@ -2284,9 +2286,10 @@ export default function StudioNodeFlow({
                                 ? { ...item, parameterLinks: nextLinks }
                                 : item
                             );
-                            emitOverlays?.(
-                              evaluateParameterLinks(updatedOverlays, mainTransform)
-                            );
+                            try {
+                              setActionError("");
+                              emitOverlays?.(evaluateParameterLinks(updatedOverlays, mainTransform));
+                            } catch(error) { setActionError(error.message); }
                           }}
                         >
                           ⛓ Bind Expression ({paramLinkTargetProp} = {paramLinkSourceId}.{paramLinkSourceProp} × {paramLinkMult})
@@ -2512,10 +2515,11 @@ export default function StudioNodeFlow({
                       </label>
 
                       {/* Optical Halation, Anamorphic Streak & Turbulent Displacement Warp */}
-                      <div
+                      {["image","video"].includes(selectedOverlay.type) && <div
                         className="ap-flow-grade-subcard"
                         data-testid="flow-optical-displacement-controls"
                       >
+                        <p className="ap-flow-empty">Highlight bloom, horizontal streaks and animated warp apply before the layer mask.</p>
                         <div className="ap-flow-vector-editor-head">
                           <span>Optical Halation &amp; Displacement Warp</span>
                           <span className="ap-flow-node-chip">OPTICAL</span>
@@ -2631,7 +2635,7 @@ export default function StudioNodeFlow({
                             </label>
                           </div>
                         )}
-                      </div>
+                      </div>}
                     </>
                   ) : null}
                 </div>
@@ -2891,6 +2895,7 @@ export default function StudioNodeFlow({
                         type="button"
                         className="ap-flow-mini-btn"
                         data-testid="flow-add-boolean-submask"
+                        disabled={(selectedOverlay.mask?.secondaryMasks?.length||0)>=8}
                         onClick={() => {
                           const existing = Array.isArray(selectedOverlay.mask?.secondaryMasks)
                             ? selectedOverlay.mask.secondaryMasks
@@ -2924,6 +2929,7 @@ export default function StudioNodeFlow({
                             mask: {
                               ...(selectedOverlay.mask || { enabled: true, shape: "polygon" }),
                               booleanMode: e.target.value,
+                              secondaryMasks: (selectedOverlay.mask?.secondaryMasks||[]).map(sub=>({...sub,booleanOp:e.target.value})),
                             },
                           })
                         }
@@ -3013,6 +3019,7 @@ export default function StudioNodeFlow({
                   className="ap-flow-inspector-controls"
                   data-testid="flow-chroma-keyer-controls"
                 >
+                  <p className="ap-flow-empty">The keyer removes the selected screen colour. Assign this node to a viewer to inspect its alpha matte.</p>
                   <div className="ap-flow-field-row">
                     <label className="ap-flow-field">
                       <span>Keyer Algorithm</span>
@@ -3035,7 +3042,7 @@ export default function StudioNodeFlow({
                       >
                         <option value="chroma">Delta Chroma Key (Green / Blue Screen)</option>
                         <option value="luma">Luminance Matte Keyer</option>
-                        <option value="hsl_delta">HSL Clean-Plate Delta Key</option>
+                        <option value="hsl_delta">Hue / Saturation Screen Key</option>
                       </select>
                     </label>
                     <label className="ap-flow-field is-color">
@@ -3043,6 +3050,7 @@ export default function StudioNodeFlow({
                       <input
                         type="color"
                         data-testid="flow-chroma-color-input"
+                        disabled={selectedOverlay.chromaKey?.mode==='luma'}
                         value={
                           /^#[0-9a-fA-F]{6}$/.test(selectedOverlay.chromaKey?.keyColor || "")
                             ? selectedOverlay.chromaKey.keyColor
@@ -3117,6 +3125,7 @@ export default function StudioNodeFlow({
                         max="1"
                         step="0.02"
                         data-testid="flow-chroma-spill-slider"
+                        disabled={selectedOverlay.chromaKey?.mode==='luma'}
                         value={Number(selectedOverlay.chromaKey?.spillSuppression ?? 0.48)}
                         onChange={e =>
                           updateSelectedOverlayField({
@@ -3333,7 +3342,6 @@ export default function StudioNodeFlow({
                         )}
                         onChange={e => {
                           const nextScale = Number(e.target.value);
-                          const memberIds = selectedOverlay.macroGroup?.memberIds || [];
                           emitOverlays?.(
                             overlays.map(item => {
                               if (String(item.id) === String(selectedOverlay.id)) {
@@ -3348,9 +3356,6 @@ export default function StudioNodeFlow({
                                     },
                                   },
                                 };
-                              }
-                              if (memberIds.includes(String(item.id))) {
-                                return { ...item, scale: nextScale };
                               }
                               return item;
                             })
@@ -3374,6 +3379,10 @@ export default function StudioNodeFlow({
                         onChange={e => {
                           const nextOpacity = Number(e.target.value);
                           const memberIds = selectedOverlay.macroGroup?.memberIds || [];
+                          const previous=Number(selectedOverlay.macroGroup?.publishedControls?.macroOpacity ?? 1);
+                          const original=selectedOverlay.macroGroup?.memberOpacities || Object.fromEntries(
+                            overlays.filter(item=>memberIds.includes(String(item.id))).map(item=>
+                              [String(item.id),previous>0?Number(item.opacity??1)/previous:Number(item.opacity??1)]));
                           emitOverlays?.(
                             overlays.map(item => {
                               if (String(item.id) === String(selectedOverlay.id)) {
@@ -3386,11 +3395,12 @@ export default function StudioNodeFlow({
                                       ...(item.macroGroup?.publishedControls || {}),
                                       macroOpacity: nextOpacity,
                                     },
+                                    memberOpacities: original,
                                   },
                                 };
                               }
                               if (memberIds.includes(String(item.id))) {
-                                return { ...item, opacity: nextOpacity };
+                                return { ...item, opacity: Number(original[String(item.id)]??1)*nextOpacity };
                               }
                               return item;
                             })
@@ -4594,9 +4604,8 @@ export default function StudioNodeFlow({
                           .filter(
                             n =>
                               n.kind === "PolygonMask" ||
-                              n.kind === "SubjectMatte" ||
-                              n.kind === "ChromaKeyer" ||
-                              (n.kind === "Transform" && n.id !== "Transform:main-video")
+                              n.kind === "ChromaKeyer" || n.kind === "CornerPin" || (n.kind === "GlowBlur" && n.targetId!=="finish") ||
+                              (n.kind === "Transform" && n.id !== "Transform:main-video" && overlays.some(layer=>String(layer.id)===String(n.targetId)&&["image","video","text"].includes(layer.type)))
                           )
                           .map(candidate => (
                             <option key={candidate.id} value={candidate.id}>
@@ -4609,24 +4618,12 @@ export default function StudioNodeFlow({
                       <input
                         type="checkbox"
                         data-testid="flow-grade-mask-invert"
-                        checked={Boolean(resolvedAdvancedColor.powerWindow?.invert)}
-                        onChange={e =>
-                          updateAdvancedColorPatch({
-                            powerWindow: {
-                              shape: "ellipse",
-                              centerX: 0.5,
-                              centerY: 0.5,
-                              radiusX: 0.36,
-                              radiusY: 0.36,
-                              feather: 0.22,
-                              ...(resolvedAdvancedColor.powerWindow || {}),
-                              enabled: true,
-                              invert: e.target.checked,
-                            },
-                          })
-                        }
+                        checked={Boolean(resolvedAdvancedColor.maskSourceNodeId?resolvedAdvancedColor.maskInvert:resolvedAdvancedColor.powerWindow?.invert)}
+                        onChange={e => updateAdvancedColorPatch(resolvedAdvancedColor.maskSourceNodeId
+                          ? {maskInvert:e.target.checked}
+                          : {powerWindow:{...(resolvedAdvancedColor.powerWindow||{}),enabled:true,invert:e.target.checked}})}
                       />
-                      <span>Invert Grade Mask (Grade Outside Window)</span>
+                      <span>Invert Grade Mask (Grade Outside Selection)</span>
                     </label>
                   </div>
 
@@ -4728,9 +4725,8 @@ export default function StudioNodeFlow({
                           .filter(
                             n =>
                               n.kind === "PolygonMask" ||
-                              n.kind === "SubjectMatte" ||
-                              n.kind === "ChromaKeyer" ||
-                              (n.kind === "Transform" && n.id !== "Transform:main-video")
+                              n.kind === "ChromaKeyer" || n.kind === "CornerPin" || (n.kind === "GlowBlur" && n.targetId!=="finish") ||
+                              (n.kind === "Transform" && n.id !== "Transform:main-video" && overlays.some(layer=>String(layer.id)===String(n.targetId)&&["image","video","text"].includes(layer.type)))
                           )
                           .map(candidate => (
                             <option key={candidate.id} value={candidate.id}>
@@ -4777,12 +4773,10 @@ export default function StudioNodeFlow({
                       type="button"
                       className="ap-flow-reset-btn"
                       data-testid="flow-clear-bypasses"
-                      onClick={() => {
-                        updateFlowPatch({ bypassed: {} });
-                        emitAdjustmentLayers?.(
-                          adjustmentLayers.map(a => ({ ...a, enabled: true }))
-                        );
-                      }}
+                      onClick={() => applyCanonicalGraphResult(restoreAllNodeFlowBypasses({
+                        overlays,compositionOrder,adjustmentLayers,finishFx,advancedColor,
+                        motionKeyframes,finishKeyframes,mainTransform,nodeFlow,
+                      }))}
                     >
                       Restore All Bypassed Nodes
                     </button>
@@ -4801,4 +4795,5 @@ export default function StudioNodeFlow({
       </div>
     </div>
   );
+  return expandedWorkspace ? createPortal(workspace, document.body) : workspace;
 }

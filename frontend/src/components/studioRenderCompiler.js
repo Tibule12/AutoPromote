@@ -1,3 +1,6 @@
+import { compileStudioNodeMask } from './studioNodeMask';
+import { compileStudioNodeEffects } from './studioNodeEffects';
+import { validateStudioParameterLinks } from "./studioCompRigging";
 import { validateStudioMatteSurface } from './studioMatteSurface';
 import { validateStudioMediaColorize } from './studioMediaColorize';
 import { compileStudioAdjustmentStack } from './studioAdjustmentGrade';
@@ -104,6 +107,7 @@ const visualRenderState = document => {
 // same canonical decisions; this does not assert rasterization/pixel parity.
 export const compileStudioFinishForRender = document => {
   const state = visualRenderState(document);
+  validateStudioParameterLinks(state.overlays || [], state.mainTransform);
   const fx = state.finishFx || {}, transform = state.mainTransform || {}, frame = state.mainFrame || {};
   assertStudioMainBlendMode(transform);
   validateStudioMotionDrivers(transform);
@@ -153,7 +157,8 @@ export const compileStudioFinishForRender = document => {
     }),
     power_window: activePowerWindow ? { ...activePowerWindow } : null,
     hsl_qualifier: activeQualifier ? { ...activeQualifier } : null,
-    adjustment_layers: compileStudioAdjustmentStack(state.adjustmentLayers),
+    node_mask: compileStudioNodeMask(adv.maskSourceNodeId || fx.maskSourceNodeId, state.overlays, adv.maskInvert),
+    adjustment_layers: compileStudioAdjustmentStack(state.adjustmentLayers).map(layer=>({...layer, effects:{...layer.effects, node_mask:compileStudioNodeMask(layer.maskSourceNodeId,state.overlays)}})),
     main_frame: { enabled: frame.enabled !== false, shape: "round", inset_percent: frame.insetPercent,
       border_radius_percent: frame.radiusPercent, background: frame.background },
     color: { ...Object.fromEntries(colorFields.filter(field => fx[field] !== undefined)
@@ -162,7 +167,7 @@ export const compileStudioFinishForRender = document => {
       scale_keyframes: resolvedMainKeys.filter(key => key.property === "scale"),
       base_transform: resolvedMainBase,
       keyframes: resolvedMainKeys },
-    texture: { film_grain: fx.filmGrain, chromatic_aberration: fx.chromaticAberration,
+    texture: { pixel_version: 1, film_grain: fx.filmGrain, chromatic_aberration: fx.chromaticAberration,
       halation: fx.halation, film_emulation: fx.filmEmulation,
       vhs_tracking: fx.vhsTracking, light_leak: fx.lightLeak,
       dream_glow: fx.dreamGlow ?? 0, anamorphic_flare: fx.anamorphicFlare ?? 0,
@@ -185,6 +190,7 @@ const compileBaseTransform = layer => ({
 
 export const compileStudioCompositionForRender = document => {
   const state = visualRenderState(document);
+  validateStudioParameterLinks(state.overlays || [], state.mainTransform);
   const compounds = document.editGraph?.settings?.compoundClips || [];
   validateStudioGroupKeyframes(compounds, state.motionKeyframes);
   if (compounds.some(group => group.kind === GROUP_KIND) && !Array.isArray(state.compositionOrder))
@@ -285,6 +291,7 @@ export const compileStudioCompositionForRender = document => {
         blend_mode: layer.blendMode || "normal",
         base_transform: compileBaseTransform(effectiveBaseLayer), anchor_x: Number(layer.anchorX ?? 50),
         anchor_y: Number(layer.anchorY ?? 50), effects: {
+          node: compileStudioNodeEffects(layer),
           ...(colorize?.enabled ? { colorize } : {}),
           ...(matteSurface?.enabled?{matte_surface:matteSurface}:{}),
           mask: layer.mask ? JSON.parse(JSON.stringify(layer.mask)) : { enabled: false },

@@ -14,6 +14,7 @@ export function compileStudioAdjustmentGrade(layer) {
     ['contrast', 1, .65, 1.75], ['saturation', 1, 0, 1.8],
     ['lift', 0, -.15, .15], ['gamma', 1, .6, 1.6], ['gain', 1, .6, 1.4],
     ['temperature', 0, -1, 1], ['tint', 0, -1, 1],
+    ['vignette', 0, 0, .85],
   ]) {
     let value = input[key];
     // Early node prototypes stored percent colour values; preserve their intent.

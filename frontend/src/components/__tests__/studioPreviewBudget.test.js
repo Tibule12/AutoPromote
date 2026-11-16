@@ -1,4 +1,4 @@
-import {studioPreviewScale,studioNextPreviewPaint} from '../studioPreviewBudget';
+import {studioPreviewScale,studioNextPreviewPaint,studioPreviewFrameDue,studioNextPreviewFrame} from '../studioPreviewBudget';
 
 test('paused inspection remains full resolution after an expensive moving frame',()=>{
   expect(studioPreviewScale(240,false)).toBe(1);
@@ -20,4 +20,13 @@ test('24 fps preview on a 30 fps source retains its phase instead of falling to 
   }
   expect(painted).toBeGreaterThanOrEqual(239);
   expect(painted).toBeLessThanOrEqual(241);
+});
+test.each([[24,24,240],[25,25,250],[30,24,240],[60,30,300]])('decoded %s fps pictures retain %s fps phase', (sourceFps,targetFps,expected)=>{
+  let deadline,painted=0;
+  for(let n=0;n<sourceFps*10;n++){
+    const time=Number((n/sourceFps).toFixed(6));
+    if(!studioPreviewFrameDue(time,deadline))continue;
+    painted++;deadline=studioNextPreviewFrame(time,targetFps,deadline);
+  }
+  expect(Math.abs(painted-expected)).toBeLessThanOrEqual(1);
 });
