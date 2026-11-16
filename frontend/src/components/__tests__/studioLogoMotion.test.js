@@ -34,6 +34,8 @@ test.each(STUDIO_LOGO_CHOREOGRAPHIES.map(c => c.id))('cinema choreography %s bui
   expect(spec.layers.some(l => l.name.startsWith('Optics / anamorphic'))).toBe(true);
   expect(spec.layers.filter(l => l.name.startsWith('Particles / kinetic spark'))).toHaveLength(6);
   expect(spec.layers.some(l => l.text === 'Powerhouse Studio.')).toBe(true);
+  const sweep = spec.layers.find(l => l.name.startsWith('Transition /'));
+  expect(sweep?.svg).toContain('linearGradient');
 });
 
 test.each(STUDIO_CREATIVE_LOGO_SVGS.map(e => [e.id, e.svg]))('creative emblem %s splits into valid editable SVG components', (_id, emblemSvg) => {

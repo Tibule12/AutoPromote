@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { getAuth } from "firebase/auth";
 import { compileDirectorCreativePlan } from "./studioDirectorCreativePlan";
+import { buildDirectorCinema3DProposal, directorCinema3DContext } from "./studioDirector3DPlan";
 import {
   DIRECTOR_CHOREOGRAPHY_ARCHETYPES,
   DIRECTOR_CINEMA_LOOK_PROFILES,
@@ -56,6 +57,39 @@ export const DIRECTOR_BRIEF_TEMPLATES = [
     brief:
       "Warm Kodak 2383 cinema film print with architectural split diptych, soft-feathered rotoscope mask and golden halation.",
   },
+  {
+    id: "brand_3d_vfx",
+    label: "3D Brand VFX Reveal",
+    approach: "cinema_3d",
+    lookId: "teal_orange",
+    brief:
+      "Direct a molten-gold and cyan WebGL2 3D brand reveal for 'APEX NOVA' with vortex particles and optical floor shockwave.",
+  },
+  {
+    id: "ribbon_sculpture_3d",
+    label: "3D Ribbon Sculpture Stage",
+    approach: "cinema_3d",
+    lookId: "ultraviolet_pulse",
+    brief:
+      "Choreograph a 3D iridescent morphing ribbon sculpture and refractive crystal core under studio sculpture lighting.",
+  },
+  {
+    id: "audio_spectrum_3d",
+    label: "3D Audio Spectrum Lyric",
+    approach: "cinema_3d",
+    lookId: "neon_cyber",
+    brief:
+      "Build an audio-reactive 3D chrome title stage 'SONIC HORIZON' with glowing crystal spectrum pylons and beat LUT pulses.",
+  },
+  {
+    id: "hybrid_3d_film",
+    label: "Full-Stack Hybrid Film + 3D",
+    approach: "cinema_3d",
+    lookId: "kodak_2383",
+    archetypeId: "split_diptych",
+    brief:
+      "Direct a hybrid split-diptych video film with Kodak 2383 LUT, 3D glass lower-third callout, and closing 3D brand reveal.",
+  },
 ];
 
 function summarizePlanTopology(compiled, forceRecompute = false) {
@@ -76,6 +110,7 @@ function summarizePlanTopology(compiled, forceRecompute = false) {
   }
   return {
     videoLayers: actions.filter(a => a.type === "media_plane").length,
+    threeDScenes: actions.filter(a => a.type === "three_d_scene").length,
     nullRigs: actions.filter(a => a.type === "null").length,
     shapeLayers: compiled?.plan?.graphics?.layers?.length || 0,
     parentLinks: actions.filter(
@@ -178,19 +213,21 @@ export default function StudioDirectorCreativePanel({
           : "Inspecting saved clip colours and motion, then planning the composition…"
       );
       const context =
-        approach === "poster"
-          ? directorPosterContext(snapshot, brief, Number(duration))
-          : approach === "fragments"
-            ? await measureDirectorSources(
-                directorNodeContext(snapshot, brief, Number(duration)),
-                snapshot,
-                controller.signal
-              )
-            : await measureDirectorSources(
-                directorCompositionContext(snapshot, brief, Number(duration)),
-                snapshot,
-                controller.signal
-              );
+        approach === "cinema_3d"
+          ? directorCinema3DContext(snapshot, brief, Number(duration))
+          : approach === "poster"
+            ? directorPosterContext(snapshot, brief, Number(duration))
+            : approach === "fragments"
+              ? await measureDirectorSources(
+                  directorNodeContext(snapshot, brief, Number(duration)),
+                  snapshot,
+                  controller.signal
+                )
+              : await measureDirectorSources(
+                  directorCompositionContext(snapshot, brief, Number(duration)),
+                  snapshot,
+                  controller.signal
+                );
       const token = await user.getIdToken();
       const result = await requestStudioCreativePlan(context, token, controller.signal);
       if (!mounted.current || controller.signal.aborted) return;
@@ -232,20 +269,29 @@ export default function StudioDirectorCreativePanel({
     setBusy(true);
     setReview(null);
     setOperatorDirty(false);
-    setMessage("Sampling source colour scopes and motion centroids for Cinema Graph…");
+    setMessage(
+      approach === "cinema_3d"
+        ? "Choreographing WebGL2 3D VFX stages, lighting, and colour grades…"
+        : "Sampling source colour scopes and motion centroids for Cinema Graph…"
+    );
     const controller = new AbortController();
     request.current = controller;
     try {
       const user = getAuth().currentUser;
       if (!user) throw Error("Sign in before asking the Director.");
       const snapshot = latest.current.getSnapshot();
-      const baseContext = directorCompositionContext(snapshot, brief, Number(duration));
+      const baseContext =
+        approach === "cinema_3d"
+          ? directorCinema3DContext(snapshot, brief, Number(duration))
+          : directorCompositionContext(snapshot, brief, Number(duration));
       let measuredEvidence = null;
-      try {
-        const measured = await measureDirectorSources(baseContext, snapshot, controller.signal);
-        measuredEvidence = measured?.pixelEvidence || null;
-      } catch {
-        measuredEvidence = null;
+      if (baseContext.media.length > 0) {
+        try {
+          const measured = await measureDirectorSources(baseContext, snapshot, controller.signal);
+          measuredEvidence = measured?.pixelEvidence || null;
+        } catch {
+          measuredEvidence = null;
+        }
       }
       if (!mounted.current || controller.signal.aborted) return;
       if (getAuth().currentUser?.uid !== user.uid) {
@@ -258,12 +304,20 @@ export default function StudioDirectorCreativePanel({
       ) {
         throw Error("The project changed while planning. Ask for a new plan.");
       }
-      const result = buildSourceBoundDirectorProposal(next, brief, Number(duration), {
-        lookId,
-        archetypeId,
-        beatSyncPulses,
-        pixelEvidence: measuredEvidence,
-      });
+      const result =
+        approach === "cinema_3d"
+          ? buildDirectorCinema3DProposal(next, brief, Number(duration), {
+              lookId,
+              archetypeId,
+              beatSyncPulses,
+              pixelEvidence: measuredEvidence,
+            })
+          : buildSourceBoundDirectorProposal(next, brief, Number(duration), {
+              lookId,
+              archetypeId,
+              beatSyncPulses,
+              pixelEvidence: measuredEvidence,
+            });
       const compiled = compileDirectorCreativePlan(result, next);
       const telemetry = analyzeDirectorClipTelemetry({
         ...baseContext,
@@ -450,6 +504,7 @@ export default function StudioDirectorCreativePanel({
           <option value="poster">Kinetic motion graphics</option>
           <option value="fragments">Footage fragments</option>
           <option value="composition">Cinema composition graph</option>
+          <option value="cinema_3d">Cinema 3D VFX + Studio Stage</option>
         </select>
       </label>
       <label>
@@ -551,7 +606,9 @@ export default function StudioDirectorCreativePanel({
       <p className="studio-director-creative__context">
         {approach === "poster"
           ? "Builds a designed type-and-shape sequence with editable vector letters, construction masks, stroke motion and a camera lockup. Director chooses copy, palette and energy within this authored design."
-          : "Builds editable footage fragments, Null Rigs, Motion Drivers, and 3D LUT Color Grades. Samples clip colours and frame changes."}
+          : approach === "cinema_3d"
+            ? "Directs real-time WebGL2 3D VFX scenes (extruded Inter 900 brand logos, morphing parametric ribbons, 22-band crystal audio spectrums, smoked-glass HUD cards) plus optional source footage rotoscope & 3D LUT grades."
+            : "Builds editable footage fragments, Null Rigs, Motion Drivers, and 3D LUT Color Grades. Samples clip colours and frame changes."}
       </p>
       {available === false ? (
         <p role="status">Director planning is not enabled in this environment.</p>
@@ -576,6 +633,9 @@ export default function StudioDirectorCreativePanel({
               <span>Soft Masks: {review.topologySummary.softMasks}</span>
               <span>Drivers: {review.topologySummary.motionDrivers}</span>
               <span>Mask Keys: {review.topologySummary.animatedMaskKeys}</span>
+              {review.topologySummary.threeDScenes > 0 ? (
+                <span>3D Scenes: {review.topologySummary.threeDScenes}</span>
+              ) : null}
               {review.topologySummary.colorGrade ? (
                 <span>Look: {review.topologySummary.colorGrade.label}</span>
               ) : null}
@@ -694,7 +754,9 @@ export default function StudioDirectorCreativePanel({
           <p>
             {review.result.version === 4
               ? `${review.plan.graphics.layers.length} editable graphic layers`
-              : `${review.plan.actions.filter(a => a.type === "media_plane").length} editable video layers`}
+              : review.result.version === 5
+                ? `${review.plan.actions.filter(a => a.type === "three_d_scene").length} editable 3D scenes · ${review.plan.actions.filter(a => a.type === "media_plane").length} video layers`
+                : `${review.plan.actions.filter(a => a.type === "media_plane").length} editable video layers`}
             ·{" "}
             {review.plan.actions
               .filter(a => a.type === "keys")

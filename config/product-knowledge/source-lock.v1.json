@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "reviewer": "Codex",
-  "reason": "Isolated Node release readiness: retain reviewed Node controls, rendering, source sampling and viewer/latency repairs plus scoped continuity. Fix the pre-existing Director polygon-loop no-loop-func error by using for-of with identical per-vertex key output; no Director feature or 3D/logo changes are included. The source-lock matches exactly this release tree, with unchanged public readiness, pricing and provider policy.",
-  "reviewed_at": "2026-11-16T19:09:27.772Z",
+  "reviewer": "Antigravity",
+  "reason": "Add WebGL2/GLSL 3D Studio VFX, Inter Black typography, Logo Motion VFX, and AI Director cinema_3d v5 pipeline on top of Node Flow release 1b68d5c0; unchanged public readiness, pricing, or capability governance.",
+  "reviewed_at": "2026-11-16T19:47:17.755Z",
   "catalog_sha256": "7b68131cbe28f8039be77ae00619b27e584df361e0d7a2ca4a26a54e70f4a783",
   "sources": [
     {
@@ -151,7 +151,7 @@
     },
     {
       "path": "frontend/src/components/StudioLogoDesignPanel.js",
-      "sha256": "3f8c521e1a8eaf390c571d80cf8be27269741555a9423d591a5b6cb53652819f"
+      "sha256": "0c1ffef0a78c6c227fb550d524926d29b584634919044e8204b3fad6c50bd8d5"
     },
     {
       "path": "frontend/src/components/StudioLogoMotionPanel.js",
@@ -199,7 +199,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "12dc3ec453fd3dce3bfd83e79abe715f5cac2e9f3c6c809598fbacbf9baa0717"
+      "sha256": "0a2f7c34c45750d9e998b79c2a3580e820de656fdb1965bf50f876c1862b53d9"
     },
     {
       "path": "frontend/src/components/ViralScanner.js",
@@ -271,7 +271,7 @@
     },
     {
       "path": "frontend/src/components/studioGraphicsPackage.js",
-      "sha256": "a8d2be59246efcf168f5454b0773ba66aad94c62d4868f26f0721da72155383c"
+      "sha256": "dc76cf6e604d2abd1fbafc173ca2bcf6185cb64be64a2bb774e7c1a4b6a15dc9"
     },
     {
       "path": "frontend/src/components/studioGroupTiming.js",
@@ -295,15 +295,15 @@
     },
     {
       "path": "frontend/src/components/studioLogoDesign.js",
-      "sha256": "be9a4ba15d1d1ee2d61bf671ddac8190c32a4cab32f693b53cd7bd02137fb80c"
+      "sha256": "019149a3fa7303b8c3f1f217bc00c95abaa9fb2ed5fb7b792da817d17af727a0"
     },
     {
       "path": "frontend/src/components/studioLogoDiamondMotion.js",
-      "sha256": "088b45846161782c10065213b8127e0bb0d2a90f9edaae8521a188817c4755e7"
+      "sha256": "523fa2de5e533b9b3067bd4dfe704e574f5d380fc5d799cc3451d3ddaa5a7678"
     },
     {
       "path": "frontend/src/components/studioLogoMotion.js",
-      "sha256": "e1fc09465d974dad40fadd035eb216fea59284e5a4888bcc44ec721459b55709"
+      "sha256": "a8b119b5aedb1a561afb883cb402be9b5eee0f3fc3bc156e853fe176a2a39a64"
     },
     {
       "path": "frontend/src/components/studioLogoParts.js",
@@ -379,7 +379,7 @@
     },
     {
       "path": "frontend/src/components/studioVectorShape.js",
-      "sha256": "dc81af18e18d07b2e219cdaeab216a0f6275c1f383c82ae6eaac0dc4de01da89"
+      "sha256": "9b9673612750e68d5f21e49749254ed2f035cf4ff1f8798c7dd472b0ea2a52e7"
     },
     {
       "path": "frontend/src/components/studioVoiceover.js",

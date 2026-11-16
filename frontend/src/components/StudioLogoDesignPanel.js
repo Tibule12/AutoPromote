@@ -292,7 +292,11 @@ export default function StudioLogoDesignPanel({
             <select
               aria-label="Logo animation choreography"
               value={animationStyle}
-              onChange={e => setAnimationStyle(e.target.value)}
+              onChange={e => {
+                const style = e.target.value;
+                setAnimationStyle(style);
+                if (style === "laser_trace") setStrokeTrace(true);
+              }}
             >
               {STUDIO_LOGO_ANIMATION_STYLES.map(style => (
                 <option key={style.id} value={style.id}>

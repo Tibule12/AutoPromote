@@ -13,6 +13,7 @@ import { validateStudioGroupComposite } from './studioGroups';
 import { buildProceduralColorCube } from './studioColorCube';
 import { buildBeatSyncedGradePulses, normalizeFinishKeyframes } from './studioFinishKeyframes';
 import { STUDIO_EXPORT_BLEND_MODES } from './studioBlendModes';
+import { normalizeStudio3DScene } from './threeD/studio3DModel';
 
 const only = (value, fields) => {
   if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).some(k => !fields.includes(k)))
@@ -44,6 +45,8 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
   if (!Array.isArray(plan.actions) || !plan.actions.length || plan.actions.length > 64) throw Error('Use 1–64 supported scene actions.');
   const duration = (doc.outputTimeMap.at(-1)?.outputRange.endTick || 0) / 90000;
   const overlays = [...snapshot.overlays], motionKeyframes = [...(snapshot.motionKeyframes || [])];
+  const threeDScenes = [...(snapshot.threeDScenes || [])];
+  let touchedThreeD = Array.isArray(snapshot.threeDScenes);
   const adjustmentLayers = [...(snapshot.adjustmentLayers || [])];
   const compositionOrder = [...(snapshot.compositionOrder || snapshot.overlays.map(o => o.id))];
   const ids = new Map();
@@ -56,8 +59,25 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
     return legacy[property] || [field.min, field.max];
   };
   for (const action of plan.actions) {
-    only(action, ['type', 'id', 'name', 'startTime', 'duration', 'transform', 'text', 'sourceMediaId', 'sourceStart', 'mediaFit', 'perspective', 'mask', 'motionDrivers', 'targetId', 'parentId', 'matteSourceId', 'mode', 'keys', 'grade', 'advancedColor', 'beatSyncPulses', 'beats', 'beforeId', 'property', 'sourceId', 'port', 'driver', 'style']);
+    only(action, ['type', 'id', 'name', 'startTime', 'duration', 'transform', 'text', 'sourceMediaId', 'sourceStart', 'mediaFit', 'perspective', 'mask', 'motionDrivers', 'targetId', 'parentId', 'matteSourceId', 'mode', 'keys', 'grade', 'advancedColor', 'beatSyncPulses', 'beats', 'beforeId', 'property', 'sourceId', 'port', 'driver', 'style', 'scene']);
     const type = action.type;
+    if (type === 'three_d_scene') {
+      string(action.id); string(action.name, 100);
+      if (!action.scene || typeof action.scene !== 'object' || Array.isArray(action.scene)) {
+        throw Error('3D scene action requires a scene payload.');
+      }
+      if (threeDScenes.length >= 24) throw Error('Scene exceeds the Studio 3D stage budget.');
+      const stageLimit = duration >= 0.5 ? duration : 30;
+      const startTime = finite(action.startTime ?? action.scene.startTime ?? 0, 0, stageLimit);
+      const length = finite(action.duration ?? action.scene.duration ?? 5, 0.5, stageLimit);
+      if (startTime + length > stageLimit + 1 / 90000) throw Error('3D scene extends past the programme.');
+      const scene = normalizeStudio3DScene({ ...action.scene, id: createId('scene-3d'), startTime, duration: length });
+      ids.set(action.id, scene.id);
+      threeDScenes.push(scene);
+      compositionOrder.push(scene.id);
+      touchedThreeD = true;
+      continue;
+    }
     if (type === 'finish_grade') {
       const grade = action.grade || {};
       only(grade, ['preset', 'precisionGrade', 'exposureStops', 'brightness', 'contrast', 'saturation', 'lift', 'gamma', 'gain', 'temperature', 'tint', 'vignette', 'clarity']);
@@ -229,7 +249,14 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
     validateStudioPerspectiveLayer(layer, keys, (snapshot.compoundClips || []).some(g => g.layerIds?.includes(layer.id)));
     validateStudioTextAnimation(layer, keys);
   }
-  const next = { ...snapshot, overlays, motionKeyframes, adjustmentLayers, compositionOrder };
+  const next = {
+    ...snapshot,
+    overlays,
+    ...(touchedThreeD ? { threeDScenes } : {}),
+    motionKeyframes,
+    adjustmentLayers,
+    compositionOrder,
+  };
   const document = reconcileStudioDocument({ snapshot: next, projectId: doc.projectId, storedDocument: doc });
   compileStudioCompositionForRender(document); compileStudioFinishForRender(document);
   return { ...next, studioDocument: document };

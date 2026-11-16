@@ -44,6 +44,8 @@ test.each(STUDIO_LOGO_ANIMATION_STYLES.map(s => s.id))(
     expect(d.layers.every(l => l.keys.length >= 6)).toBe(true);
     if (animationStyle === "laser_trace") {
       expect(d.layers[0].vectorShape.stroke.width).toBeGreaterThan(0);
+      expect(d.layers[0].keys.some(k => k.property === "strokeEnd" && k.value === 0)).toBe(true);
+      expect(d.layers[0].keys.some(k => k.property === "strokeEnd" && k.value === 100)).toBe(true);
     }
   }
 );

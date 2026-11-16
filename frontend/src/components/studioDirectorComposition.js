@@ -232,7 +232,7 @@ const SHA256_K = new Uint32Array([
   0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
 ]);
 
-function sha256HexSync(input) {
+export function sha256HexSync(input) {
   const bytes =
     input instanceof Uint8Array
       ? input

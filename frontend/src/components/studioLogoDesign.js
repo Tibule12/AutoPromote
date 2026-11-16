@@ -424,27 +424,56 @@ function applyLogoLayerAnimation(layers, duration, animationStyle = "cascade", s
     const end = Math.min(duration * 0.65, start + Math.min(1.2, duration * 0.35));
     const mid = start + (end - start) * 0.62;
     const isSymbolPart = layer.name.includes("· symbol ");
+    const hasHoldWindow = duration > end + 0.45;
+    const breatheAt = Math.round((end + (duration - end) * 0.45) * 90000) / 90000;
+    const settleAt = Math.round((duration * 0.94) * 90000) / 90000;
+    const breatheScale = isSymbolPart ? 1.055 : 1.015;
 
     if (animationStyle === "laser_trace") {
-      // Enable vector stroke on the contour geometry and animate precision trace sweep
+      // Enable luminous contour stroke and drive real trim-path drawing before fill ignition
       if (layer.vectorShape?.stroke) {
         layer.vectorShape.stroke = {
           color: isSymbolPart ? spec.secondary : spec.primary,
-          width: isSymbolPart ? 2.5 : 1.8,
+          width: isSymbolPart ? 3.2 : 2.3,
         };
       }
+      layer.strokeStart = 0;
+      layer.strokeEnd = 0;
       const traceCurve = [0.22, 1, 0.36, 1];
+      const traceEnd = Math.min(duration * 0.72, start + Math.min(1.45, duration * 0.42));
+      const ignitionAt = start + (traceEnd - start) * 0.72;
+      const traceHasHold = duration > traceEnd + 0.45;
+      const traceBreatheAt = Math.round((traceEnd + (duration - traceEnd) * 0.42) * 90000) / 90000;
+      const traceSettleAt = Math.round((duration * 0.94) * 90000) / 90000;
+      const yLift = isSymbolPart ? -1.4 : (i % 2 ? -0.9 : 0.9);
       layer.keys = [
+        key("strokeEnd", start, 0),
+        key("strokeEnd", ignitionAt, 100, "bezier", traceCurve),
         key("opacity", start, 0),
-        key("opacity", mid, 0.85),
-        key("opacity", end, 1),
-        key("scale", start, 0.35),
-        key("scale", mid, 1.06, "bezier", traceCurve),
-        key("scale", end, 1, "bezier"),
-        key("x", start, Math.max(2, layer.x - (isSymbolPart ? 8 : 4))),
-        key("x", end, layer.x, "bezier", traceCurve),
-        key("rotation", start, isSymbolPart ? -45 : 15),
-        key("rotation", end, 0, "bezier", traceCurve),
+        key("opacity", start + (ignitionAt - start) * 0.14, 0.94),
+        key("opacity", ignitionAt, 0.96),
+        key("opacity", traceEnd, 1, "bezier", traceCurve),
+        key("scale", start, 0.78),
+        key("scale", traceEnd, isSymbolPart ? 1.06 : 1.03, "bezier", traceCurve),
+        ...(traceHasHold
+          ? [
+              key("scale", traceBreatheAt, isSymbolPart ? 1.1 : 1.045, "ease_in_out"),
+              key("scale", traceSettleAt, 1, "ease_in_out"),
+              key("y", traceEnd, layer.y),
+              key("y", traceBreatheAt, Math.max(4, Math.min(96, layer.y + yLift)), "ease_in_out"),
+              key("y", traceSettleAt, layer.y, "ease_in_out"),
+            ]
+          : []),
+        key("x", start, Math.max(2, layer.x - (isSymbolPart ? 5 : 2.5))),
+        key("x", traceEnd, layer.x, "bezier", traceCurve),
+        key("rotation", start, isSymbolPart ? -24 : 8),
+        key("rotation", traceEnd, isSymbolPart ? 4 : 0, "bezier", traceCurve),
+        ...(traceHasHold && isSymbolPart
+          ? [
+              key("rotation", traceBreatheAt, -3, "ease_in_out"),
+              key("rotation", traceSettleAt, 0, "ease_in_out"),
+            ]
+          : []),
       ];
       return;
     }
@@ -457,6 +486,7 @@ function applyLogoLayerAnimation(layers, duration, animationStyle = "cascade", s
         key("scale", start, 0.12),
         key("scale", mid, 1.24, "bezier", springCurve),
         key("scale", end, 1, "bezier"),
+        ...(hasHoldWindow ? [key("scale", breatheAt, breatheScale, "ease_in_out"), key("scale", settleAt, 1, "ease_in_out")] : []),
         key("rotation", start, isSymbolPart ? -65 : (i % 2 ? 32 : -32)),
         key("rotation", mid, isSymbolPart ? 8 : (i % 2 ? -5 : 5), "bezier", springCurve),
         key("rotation", end, 0, "bezier"),
@@ -479,6 +509,7 @@ function applyLogoLayerAnimation(layers, duration, animationStyle = "cascade", s
         key("y", end, layer.y, "bezier"),
         key("scale", start, 0.18),
         key("scale", end, 1, "bezier"),
+        ...(hasHoldWindow ? [key("scale", breatheAt, breatheScale, "ease_in_out"), key("scale", settleAt, 1, "ease_in_out")] : []),
         key("rotation", start, i % 2 ? 160 : -160),
         key("rotation", end, 0, "bezier"),
       ];
@@ -493,6 +524,7 @@ function applyLogoLayerAnimation(layers, duration, animationStyle = "cascade", s
         key("scale", start, 2.65),
         key("scale", mid, 0.92, "bezier", slamCurve),
         key("scale", end, 1, "bezier"),
+        ...(hasHoldWindow ? [key("scale", breatheAt, breatheScale, "ease_in_out"), key("scale", settleAt, 1, "ease_in_out")] : []),
         key("rotation", start, i % 2 ? -18 : 18),
         key("rotation", end, 0, "bezier", slamCurve),
         key("y", start, Math.max(2, layer.y - 14)),
@@ -511,6 +543,7 @@ function applyLogoLayerAnimation(layers, duration, animationStyle = "cascade", s
         key("opacity", f2, 0.18),
         key("opacity", f3, 1),
         key("opacity", end, 1),
+        ...(hasHoldWindow ? [key("opacity", breatheAt, 0.86, "ease_in_out"), key("opacity", settleAt, 1, "ease_in_out")] : []),
         key("scale", start, 0.86),
         key("scale", f2, 1.06, "bezier"),
         key("scale", end, 1, "bezier"),

@@ -411,18 +411,29 @@ export function studioVectorSvg(
   const d = studioVectorPath(shape),
     f = shape.fill,
     s = shape.stroke;
-  const gradient =
-    f.kind === "linear"
-      ? `<defs><linearGradient id="paint" gradientUnits="userSpaceOnUse" x1="${f.start[0]}" y1="${f.start[1]}" x2="${f.end[0]}" y2="${f.end[1]}"><stop stop-color="${f.color}"/><stop offset="1" stop-color="${f.endColor}"/></linearGradient></defs>`
-      : "";
   number(strokeStart, 0, 100);
   number(strokeEnd, 0, 100);
   number(strokeOffset, -1000, 1000);
   const contours = studioVectorContours(shape);
   const full =
     strokeStart === 0 && strokeEnd === 100 && (contours.every(c => c.closed) || strokeOffset === 0);
+  const traceActive = !full && s.width > 0;
+  const traceFrac = Math.max(0, Math.min(1, (strokeEnd - strokeStart) / 100));
+  const fillAlpha = traceActive ? (0.05 + traceFrac * traceFrac * 0.22).toFixed(3) : "1";
+  const glowFilter = traceActive
+    ? `<filter id="trim-glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`
+    : "";
+  const gradientStop =
+    f.kind === "linear"
+      ? `<linearGradient id="paint" gradientUnits="userSpaceOnUse" x1="${f.start[0]}" y1="${f.start[1]}" x2="${f.end[0]}" y2="${f.end[1]}"><stop stop-color="${f.color}"/><stop offset="1" stop-color="${f.endColor}"/></linearGradient>`
+      : "";
+  const fullStroke = full && s.width > 0 ? Number((s.width * 0.45).toFixed(2)) : 0;
+  const edgeGlow = fullStroke > 0
+    ? `<filter id="trim-glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`
+    : glowFilter;
+  const defsNext = gradientStop || edgeGlow ? `<defs>${gradientStop}${edgeGlow}</defs>` : "";
   const stroke =
-    !full && s.width
+    traceActive
       ? contours
           .map((contour, index) => {
             const points = offsetStudioVectorPoints(
@@ -433,7 +444,7 @@ export function studioVectorSvg(
               contour.closed
             );
             return points.length
-              ? `<polyline points="${points.map(p => p.join(",")).join(" ")}" fill="none" stroke="${s.color}" stroke-width="${s.width}" stroke-linejoin="round" stroke-linecap="round"/>`
+              ? `<polyline points="${points.map(p => p.join(",")).join(" ")}" fill="none" stroke="${s.color}" stroke-width="${s.width}" stroke-linejoin="round" stroke-linecap="round" filter="url(#trim-glow)"/>`
               : "";
           })
           .join("")
@@ -441,7 +452,7 @@ export function studioVectorSvg(
   // The image element owns contain/cover/stretch, matching the CPU raster.
   // SVG's default inner "meet" letterboxes a stretched non-square image a
   // second time, collapsing a wide contour into a small central square.
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 100 100" preserveAspectRatio="none">${gradient}<path d="${d}" fill-rule="evenodd" fill="${f.kind === "none" ? "none" : f.kind === "linear" ? "url(#paint)" : f.color}" stroke="${s.color}" stroke-width="${full ? s.width : 0}" stroke-linejoin="round" stroke-linecap="round"/>${stroke}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 100 100" preserveAspectRatio="none">${defsNext}<path d="${d}" fill-rule="evenodd" fill="${f.kind === "none" ? "none" : f.kind === "linear" ? "url(#paint)" : f.color}"${traceActive ? ` fill-opacity="${fillAlpha}"` : ""}${fullStroke > 0 ? ' filter="url(#trim-glow)"' : ""} stroke="${s.color}" stroke-width="${fullStroke}" stroke-linejoin="round" stroke-linecap="round"/>${stroke}</svg>`;
 }
 export const studioVectorUri = (shape, pose) =>
   `data:image/svg+xml;base64,${btoa(studioVectorSvg(shape, pose))}`;

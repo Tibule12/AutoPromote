@@ -3,8 +3,31 @@ import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
-import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
+import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
+import { Reflector } from "three/examples/jsm/objects/Reflector.js";
 import studioFont from "./helvetiker_bold.typeface.json";
+import { buildMergedInterTextGeometry } from "./studio3DBrandGeometry";
+import {
+  addNeonLogoStageVFX,
+  animateNeonLogoStageVFX,
+  computeLogoCameraPose,
+  resolveLogoArchetype,
+} from "./studio3DLogoVFX";
+import {
+  addStudio3DStageAccentsVFX,
+  animateStudio3DStageAccentsVFX,
+  computeStageCameraPose,
+} from "./studio3DSceneVFX";
+import {
+  CinemaPostShader,
+  createArenaFloorMaterial,
+  createDarkCinemaStudioEnv,
+  createVolumetricBackdropMaterial,
+} from "./studio3DVFXShaders";
 import { normalizeStudio3DScene, studio3DPose } from "./studio3DModel";
 import { studio3DCameraProjection } from "./studio3DProjection";
 import { studio3DFrameSample, studio3DTextureFrameRequest, studio3DCanShareVideo } from "./studio3DSampling";
@@ -14,69 +37,23 @@ import { ribbonMesh } from "./studio3DRibbon";
 import "./studio3D.css";
 
 const font = new FontLoader().parse(studioFont);
-const clamp01 = value => Math.max(0, Math.min(1, value));
-const smooth = value => { const p = clamp01(value); return p * p * (3 - 2 * p); };
-const overshoot = value => { const p = clamp01(value); return 1 + 2.70158 * (p - 1) ** 3 + 1.70158 * (p - 1) ** 2; };
 
-function animateLogo(group, scene, local, portrait) {
-  const mark = group.userData.logoMark;
-  if (!mark) return;
-  const markProgress = Math.max(.001, overshoot(local / .72));
-  const layoutScale = portrait ? 1.38 : .88;
-  mark.position.set(portrait ? 0 : -3.42, portrait ? 2.25 : 0, .18);
-  mark.scale.setScalar(layoutScale * markProgress);
-  mark.rotation.y = THREE.MathUtils.degToRad((1 - smooth(local / .7)) * -72);
-  mark.rotation.z = THREE.MathUtils.degToRad((1 - smooth(local / .6)) * 8);
-  mark.children.forEach(child => {
-    const baseScale = child.userData.baseScale;
-    const basePosition = child.userData.basePosition;
-    if (!baseScale || !basePosition) return;
-    if (child.name.startsWith("Brand glint")) {
-      const index = Number(child.name.slice(-2));
-      const burst = smooth((local - .12 - index * .018) / .45) * (1 - smooth((local - .8) / .6));
-      const travel = 1.45 - .55 * smooth(local / .75);
-      child.position.set(basePosition.x * travel, basePosition.y * travel, basePosition.z);
-      child.scale.copy(baseScale).multiplyScalar(Math.max(.001, burst));
-    } else if (["A left beam", "A right beam", "A crossbar"].includes(child.name)) {
-      child.scale.copy(baseScale);
-      child.scale.y *= Math.max(.001, overshoot((local - .18) / .48));
-    } else if (child.name === "Promotion spark") {
-      child.scale.copy(baseScale).multiplyScalar(Math.max(.001, overshoot((local - .52) / .38)));
-    }
-  });
-  const plateProgress = Math.max(.001, smooth((local - .32) / .66));
-  [group.userData.plate, group.userData.edge].forEach(object => {
-    if (!object?.userData.baseScale) return;
-    object.scale.copy(object.userData.baseScale);
-    object.scale.x *= plateProgress;
-  });
-  if (group.userData.title?.userData.basePosition) {
-    group.userData.title.userData.basePosition.x = portrait ? -2.75 : -2.55;
-  }
-  if (group.userData.promote?.userData.basePosition) {
-    group.userData.promote.userData.basePosition.x = portrait ? -.78 : -.55;
-  }
-  [[group.userData.title, .62, -1], [group.userData.promote, .75, 1]].forEach(([object, delay, direction]) => {
-    if (!object?.userData.baseScale) return;
-    const progress = Math.max(.001, overshoot((local - delay) / .62));
-    const basePosition = object.userData.basePosition;
-    object.position.x = basePosition.x + direction * (1 - smooth((local - delay) / .55)) * .72;
-    object.position.z = basePosition.z + (1 - smooth((local - delay) / .55)) * .8;
-    object.scale.copy(object.userData.baseScale);
-    object.scale.x *= progress;
-  });
-  const subtitle = group.userData.subtitle;
-  if (subtitle?.userData.baseScale) {
-    const progress = Math.max(.001, smooth((local - 1.05) / .55));
-    subtitle.scale.copy(subtitle.userData.baseScale);
-    subtitle.scale.x *= progress;
-    subtitle.position.y = subtitle.userData.basePosition.y - (1 - progress) * .22;
-  }
-  const ring = group.userData.ring;
-  if (ring?.userData.baseScale) {
-    ring.scale.copy(ring.userData.baseScale).multiplyScalar(Math.max(.001, overshoot((local - .5) / .9)));
-    ring.rotation.set(THREE.MathUtils.degToRad(68), local * .22, local * -.38);
-  }
+function createFloorVignetteTexture(hexColor = "#060511") {
+  const canvas = document.createElement("canvas");
+  canvas.width = 256;
+  canvas.height = 256;
+  const ctx = canvas.getContext("2d");
+  const c = new THREE.Color(hexColor);
+  const rgb = `${Math.round(c.r * 255)}, ${Math.round(c.g * 255)}, ${Math.round(c.b * 255)}`;
+  const grad = ctx.createRadialGradient(128, 128, 18, 128, 128, 128);
+  grad.addColorStop(0, `rgba(${rgb}, 0.84)`);
+  grad.addColorStop(0.5, `rgba(${rgb}, 0.92)`);
+  grad.addColorStop(1, `rgba(${rgb}, 1)`);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 256, 256);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
 }
 
 function materialFor(scene) {
@@ -110,80 +87,19 @@ function materialFor(scene) {
 
 function textMesh(text, scene, size, material) {
   if (!String(text || '').trim()) return new THREE.Mesh(new THREE.PlaneGeometry(0,0),material);
-  const geometry = new TextGeometry(text || " ", {
-    font, size, depth: scene.extrusionDepth,
-    curveSegments: 5, bevelEnabled: scene.bevel > 0,
-    bevelThickness: scene.bevel, bevelSize: scene.bevel * 0.6, bevelSegments: 2,
+  const isSubtitle = size < 0.35;
+  const geometry = buildMergedInterTextGeometry(text || " ", {
+    weight: isSubtitle ? "600" : "900",
+    size: size * (isSubtitle ? 1.0 : 1.06),
+    depth: scene.extrusionDepth,
+    bevelSize: isSubtitle ? scene.bevel * 0.25 : scene.bevel * 0.52,
+    bevelThickness: isSubtitle ? scene.bevel * 0.25 : scene.bevel * 0.65,
+    bevelSegments: scene.bevel > 0 ? 3 : 1,
+    letterSpacing: isSubtitle ? 0.22 : 0.11,
+    textAlign: scene.textAlign,
+    fallbackFont: font,
   });
-  geometry.computeBoundingBox();
-  const width = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
-  if (scene.textAlign === "center") geometry.translate(-width / 2, 0, 0);
-  if (scene.textAlign === "right") geometry.translate(-width, 0, 0);
   return new THREE.Mesh(geometry, material);
-}
-
-function addAccent(group, scene) {
-  const accent = new THREE.MeshBasicMaterial({ color: scene.glowColor, transparent: true, opacity: 0.8 });
-  const plateMat = new THREE.MeshPhysicalMaterial({ color: "#090d1c", metalness: 0.12, roughness: 0.42, transparent: true, opacity: 0.95, side: THREE.DoubleSide });
-  const template = scene.template;
-  if (["neon_logo", "floating_callout", "speaker_intro", "comparison_card"].includes(template)) {
-    const plate = new THREE.Mesh(new THREE.BoxGeometry(8.2, template === "comparison_card" ? 3.3 : 2.35, 0.12), plateMat);
-    plate.position.z = -0.34;
-    group.add(plate);
-    group.userData.plate = plate;
-    const edge = new THREE.Mesh(new THREE.BoxGeometry(7.8, 0.022, 0.025), accent);
-    edge.position.set(0, 1.17, -0.25);
-    group.add(edge);
-    group.userData.edge = edge;
-  }
-  if (template === "neon_logo" || template === "audio_reactive_text") {
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(2.02, 0.022, 8, 96), accent);
-    ring.position.z = -0.65;
-    group.add(ring);
-    group.userData.ring = ring;
-  }
-  if (template === "neon_logo") {
-    const mark = new THREE.Group();
-    const tileMat = new THREE.MeshPhysicalMaterial({ color: "#36136f", metalness: .3, roughness: .28 });
-    const beamMat = new THREE.MeshStandardMaterial({ color: "#f6f2ff", emissive: "#5d3188", emissiveIntensity: .12 });
-    const block = (w, h, d, x, y, z, mat, angle = 0, name = "Mark detail") => {
-      const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
-      mesh.name = name;
-      mesh.position.set(x, y, z);
-      mesh.rotation.z = angle;
-      mark.add(mesh);
-    };
-    block(1.35, 1.35, .18, 0, 0, -.08, tileMat, 0, "Signature tile");
-    block(.13, .8, .13, -.19, 0, .06, beamMat, -.43, "A left beam");
-    block(.13, .8, .13, .19, 0, .06, beamMat, .43, "A right beam");
-    block(.55, .12, .12, 0, -.14, .07, accent, 0, "A crossbar");
-    block(.11, .11, .11, .52, .47, .08, accent, 0, "Promotion spark");
-    for (let index = 0; index < 12; index += 1) {
-      const angle = index * Math.PI * 2 / 12;
-      block(.035 + (index % 2) * .025, .035 + ((index + 1) % 2) * .025, .04,
-        Math.cos(angle) * (1.1 + (index % 3) * .18), Math.sin(angle) * (1.1 + (index % 2) * .15), -.02,
-        accent, angle, `Brand glint ${String(index).padStart(2, "0")}`);
-    }
-    mark.children.forEach(child => {
-      child.userData.basePosition = child.position.clone();
-      child.userData.baseScale = child.scale.clone();
-    });
-    group.add(mark);
-    group.userData.logoMark = mark;
-  }
-  if (template === "chrome_lyric" || template === "impact_explosion") {
-    for (let i = 0; i < 9; i += 1) {
-      const ray = new THREE.Mesh(new THREE.BoxGeometry(0.035, 1.4 + (i % 3) * 0.42, 0.06), accent.clone());
-      ray.position.set(Math.cos(i * Math.PI * 2 / 9) * 4.4, Math.sin(i * Math.PI * 2 / 9) * 2.1, -0.55);
-      ray.rotation.z = -i * Math.PI * 2 / 9;
-      group.add(ray);
-    }
-  }
-  if (template === "cinematic_title" || template === "speaker_intro" || template === "comparison_card") {
-    const line = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.035, 0.035), accent);
-    line.position.set(0, -0.8, 0.1);
-    group.add(line);
-  }
 }
 
 function makeGroup(scene) {
@@ -209,44 +125,38 @@ function makeGroup(scene) {
       const mesh = new THREE.Mesh(geometry, materialFor({ ...scene, primaryColor: object.color, glowColor: object.color, material: object.material || scene.material, surfaceRoughness: object.roughness }));
       mesh.name = object.name; group.add(mesh); return { object, mesh };
     });
+    addStudio3DStageAccentsVFX(group, scene);
+    return group;
+  }
+  if (scene.template === "neon_logo") {
+    addNeonLogoStageVFX(group, scene, { fallbackFont: font });
     return group;
   }
   const material = materialFor(scene);
-  let title = textMesh(scene.text, scene, scene.text.length > 22 ? 0.4 : scene.text.length > 13 ? 0.55 : 0.78, material);
-  if (scene.template === "neon_logo" && scene.text.toLowerCase() === "autopromote") {
-    title.geometry.dispose();
-    const pearl = new THREE.MeshPhysicalMaterial({ color: "#f7f8ff", metalness: .38, roughness: .2, transparent: true });
-    title = textMesh("Auto", { ...scene, textAlign: "left" }, .78, pearl);
-    title.position.x = -2.75;
-    const promote = textMesh("Promote", { ...scene, textAlign: "left" }, .78, material);
-    promote.position.set(-.78, scene.secondary ? .05 : -.35, .18);
-    promote.userData.basePosition = promote.position.clone();
-    promote.userData.baseScale = promote.scale.clone();
-    group.add(promote);
-    group.userData.promote = promote;
-  }
+  const title = textMesh(scene.text, scene, scene.text.length > 22 ? 0.4 : scene.text.length > 13 ? 0.55 : 0.78, material);
   title.geometry.computeBoundingBox();
-  const width = title.geometry.boundingBox.max.x - title.geometry.boundingBox.min.x;
-  if (width > 8) title.scale.x = 8 / width;
-  title.position.y = scene.secondary ? 0.05 : -0.35;
+  const width = (title.geometry.boundingBox.max.x - title.geometry.boundingBox.min.x) * title.scale.x;
+  if (width > 8) title.scale.x = 8 / (title.geometry.boundingBox.max.x - title.geometry.boundingBox.min.x);
+  const isSpectrum = scene.template === "audio_reactive_text";
+  title.position.y = isSpectrum ? 0.56 : scene.secondary ? 0.08 : -0.35;
   group.add(title);
   title.userData.basePosition = title.position.clone();
   title.userData.baseScale = title.scale.clone();
   group.userData.title = title;
   if (scene.secondary) {
-    const subMaterial = new THREE.MeshStandardMaterial({ color: scene.secondaryColor, roughness: 0.45, transparent: true });
-    const subtitle = textMesh(scene.secondary, scene, 0.28, subMaterial);
+    const subMaterial = new THREE.MeshStandardMaterial({ color: scene.secondaryColor, roughness: 0.42, transparent: true });
+    const subtitle = textMesh(scene.secondary, scene, 0.22, subMaterial);
     subtitle.geometry.computeBoundingBox();
     const subWidth = subtitle.geometry.boundingBox.max.x - subtitle.geometry.boundingBox.min.x;
     if (subWidth > 7.8) subtitle.scale.x = 7.8 / subWidth;
-    subtitle.position.y = -0.7 * scene.lineSpacing;
+    subtitle.position.y = isSpectrum ? -0.18 : -0.78 * scene.lineSpacing;
     group.add(subtitle);
     subtitle.userData.basePosition = subtitle.position.clone();
     subtitle.userData.baseScale = subtitle.scale.clone();
     group.userData.subtitle = subtitle;
   }
-  addAccent(group, scene);
-  [group.userData.plate, group.userData.edge, group.userData.ring, group.userData.logoMark].forEach(object => {
+  addStudio3DStageAccentsVFX(group, scene);
+  [group.userData.plate, group.userData.edge, group.userData.bottomEdge, group.userData.ring].forEach(object => {
     if (!object) return;
     object.userData.basePosition = object.position.clone();
     object.userData.baseScale = object.scale.clone();
@@ -345,6 +255,8 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSour
     host.appendChild(renderer.domElement);
     const world = new THREE.Scene();
     let environment;
+    let logoEnvironment;
+    let logoEnvKey = "";
     const camera = new THREE.PerspectiveCamera(43, 1, 0.1, 100);
     camera.position.set(0, 0, 13);
     const ambient = new THREE.AmbientLight("#bfc9ff", 0.8);
@@ -361,6 +273,35 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSour
     key.shadow.camera.bottom = -7;
     const rim = new THREE.DirectionalLight("#8899ff", 0.65);
     rim.position.set(4, -2, -4);
+    const backdropMat = createVolumetricBackdropMaterial("#a855f7", "#00e5ff", "cyber");
+    backdropMat.depthTest = false;
+    backdropMat.depthWrite = false;
+    const stageBackdrop = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), backdropMat);
+    stageBackdrop.frustumCulled = false;
+    stageBackdrop.renderOrder = -100;
+    stageBackdrop.visible = false;
+    const reflector = new Reflector(new THREE.CircleGeometry(6.4, 64), {
+      clipBias: 0.003,
+      textureWidth: 1024,
+      textureHeight: 1024,
+      color: 0x0d0b16,
+      multisample: 2,
+    });
+    reflector.rotation.x = -Math.PI / 2;
+    reflector.position.set(0, -1.78, 0);
+    reflector.receiveShadow = false;
+    reflector.visible = false;
+    const arenaFloorMat = createArenaFloorMaterial("#a855f7", "#00e5ff");
+    const lightFloorMat = new THREE.MeshBasicMaterial({
+      map: createFloorVignetteTexture("#eef2ff"),
+      transparent: true,
+      depthWrite: false,
+      fog: true,
+    });
+    const reflectorVeil = new THREE.Mesh(new THREE.CircleGeometry(15, 64), arenaFloorMat);
+    reflectorVeil.rotation.x = -Math.PI / 2;
+    reflectorVeil.position.set(0, -1.774, 0);
+    reflectorVeil.visible = false;
     const shadowCatcher = new THREE.Mesh(
       new THREE.PlaneGeometry(24, 14),
       new THREE.ShadowMaterial({ opacity: 0.32, transparent: true })
@@ -369,7 +310,16 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSour
     shadowCatcher.position.set(0, -2.25, 0);
     shadowCatcher.receiveShadow = true;
     shadowCatcher.visible = false;
-    world.add(ambient, key, rim, shadowCatcher);
+    world.add(ambient, key, rim, stageBackdrop, reflector, reflectorVeil, shadowCatcher);
+    const composer = new EffectComposer(renderer);
+    const renderPass = new RenderPass(world, camera);
+    const bloomPass = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.36, 0.44, 1.08);
+    const outputPass = new OutputPass();
+    const cinemaPass = new ShaderPass(CinemaPostShader);
+    composer.addPass(renderPass);
+    composer.addPass(bloomPass);
+    composer.addPass(outputPass);
+    composer.addPass(cinemaPass);
     let objects = [], lastSignature, retired = [];
     const disposeGroup = group => group.traverse(object => {
       object.geometry?.dispose?.();
@@ -394,11 +344,11 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSour
           const pmrem = new THREE.PMREMGenerator(renderer), room = new RoomEnvironment();
           environment = pmrem.fromScene(room, .04); room.dispose(); pmrem.dispose();
         }
-        world.environment = needsEnvironment ? environment.texture : null;
         objects = modelRef.current.scenes.map(raw => {
           const scene = normalizeStudio3DScene(raw), group = makeGroup(scene);
           const enableShadows = scene.shadows !== false;
-          const reflIntensity = scene.reflections !== false ? 1.15 : 0.0;
+          const isCinemaStage = scene.template === "neon_logo" || scene.background === "dark" || scene.lightingRig === "sculpture";
+          const reflIntensity = scene.reflections !== false ? (isCinemaStage ? 1.42 : 1.15) : 0.0;
           group.traverse(child => {
             if (child.isMesh) {
               child.castShadow = enableShadows;
@@ -410,12 +360,30 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSour
           });
           group.visible = false; world.add(group); return { scene, group };
         });
+        const firstCinema = objects.find(({ scene }) => scene.template === "neon_logo" || scene.background === "dark" || scene.lightingRig === "sculpture")?.scene;
+        if (firstCinema) {
+          const nextEnvKey = `${firstCinema.primaryColor}|${firstCinema.glowColor}`;
+          if (nextEnvKey !== logoEnvKey) {
+            logoEnvironment?.dispose?.();
+            logoEnvironment = createDarkCinemaStudioEnv(renderer, firstCinema.primaryColor, firstCinema.glowColor);
+            logoEnvKey = nextEnvKey;
+          }
+        }
+        world.environment = firstCinema && logoEnvironment
+          ? logoEnvironment.texture
+          : (needsEnvironment ? environment?.texture || null : null);
         lastSignature = modelRef.current.signature;
       }
       const resized = rect.width !== width || rect.height !== height;
       if (rect.width && rect.height && (rect.width !== width || rect.height !== height)) {
         width = rect.width; height = rect.height;
         renderer.setSize(width, height, false);
+        composer.setSize(width, height);
+        bloomPass.setSize(width, height);
+        reflector.getRenderTarget().setSize(
+          Math.max(256, Math.round(width * 0.75)),
+          Math.max(256, Math.round(height * 0.75))
+        );
         camera.aspect = width / height;
         camera.position.z = Math.max(13, (8.5 / 2) / (Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * camera.aspect) * 1.17);
         camera.updateProjectionMatrix();
@@ -502,22 +470,41 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSour
       lastPlayhead = playhead;
       lastAudioLevel = audio;
       let anyVisibleShadow = false;
+      let stageBgMode = "transparent";
+      let anyStageReflect = false;
+      let bloomMax = 0;
+      let activeCinemaScene = null;
+      let activeCinemaGroup = null;
       for (const { scene, group } of objects) {
         const sample = studio3DFrameSample(scene, playhead);
         const pose = sample && studio3DPose(scene, sample.programmeTime);
         group.visible = Boolean(pose);
         if (!pose) continue;
         if (scene.shadows !== false) anyVisibleShadow = true;
+        if (scene.background && scene.background !== "transparent") stageBgMode = scene.background;
+        if ((scene.template === "neon_logo" || scene.background === "dark") && scene.reflections !== false) anyStageReflect = true;
+        bloomMax = Math.max(bloomMax, Number(scene.bloom) || 0);
+        if (group.userData.vfxParticles?.material?.uniforms?.uPixelRatio) {
+          group.userData.vfxParticles.material.uniforms.uPixelRatio.value = renderer.getPixelRatio();
+        }
         if (scene.template === "neon_logo") {
+          activeCinemaScene = scene;
+          activeCinemaGroup = group;
           const portrait = height > width;
-          animateLogo(group, scene, sample.localTime, portrait);
+          animateNeonLogoStageVFX(group, scene, sample.localTime, portrait);
+        } else {
+          if (scene.background === "dark" || scene.lightingRig === "sculpture") {
+            activeCinemaScene = scene;
+            activeCinemaGroup = group;
+          }
+          animateStudio3DStageAccentsVFX(group, scene, sample.localTime, audio);
         }
         const sound = 1 + audio * scene.audioReactiveIntensity * 0.25;
         group.position.set(pose.x, pose.y, pose.z);
         group.scale.setScalar(pose.scale * sound);
         group.rotation.set(pose.rotationX * Math.PI / 180, pose.rotationY * Math.PI / 180, pose.rotationZ * Math.PI / 180, 'ZYX');
-        ambient.intensity = scene.lightingRig === "sculpture" ? .13 : .8;
-        rim.intensity = scene.lightingRig === "sculpture" ? 1.15 : .65;
+        ambient.intensity = scene.template === "neon_logo" ? .32 : scene.lightingRig === "sculpture" ? .18 : scene.background === "dark" ? .36 : .8;
+        rim.intensity = scene.template === "neon_logo" ? 1.25 : scene.lightingRig === "sculpture" ? 1.15 : scene.background === "dark" ? 1.1 : .65;
         for (const { object, mesh } of group.userData.sceneObjects || []) {
           if (object.shape === "ribbon" && object.ribbon.speed !== 0) {
             mesh.geometry.attributes.position.array.set(ribbonMesh(object.ribbon, playhead - scene.startTime).positions);
@@ -555,17 +542,81 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSour
         key.position.set(Math.sin(scene.lightDirection * Math.PI / 180) * 6, 5, 8);
         const projection = studio3DCameraProjection(scene, width / height, sample.localTime);
         camera.fov = projection.verticalFov;
-        camera.position.set(projection.x, 0, projection.distance);
+        if (scene.template === "neon_logo") {
+          const camPose = computeLogoCameraPose(projection, scene, sample.localTime);
+          camera.position.set(camPose.x, camPose.y, camPose.z);
+          camera.lookAt(camPose.lookX, camPose.lookY, camPose.lookZ);
+        } else if (scene.background === "dark" || scene.lightingRig === "sculpture" || (scene.cameraMotion || 0) > 0) {
+          const camPose = computeStageCameraPose(projection, scene, sample.localTime);
+          camera.position.set(camPose.x, camPose.y, camPose.z);
+          camera.lookAt(camPose.lookX, camPose.lookY, camPose.lookZ);
+        } else {
+          camera.position.set(projection.x, 0, projection.distance);
+          camera.lookAt(0, 0, 0);
+        }
         camera.updateProjectionMatrix();
       }
-      shadowCatcher.visible = anyVisibleShadow;
-      renderer.render(world, camera);
+      if (activeCinemaScene && logoEnvironment) {
+        world.environment = logoEnvironment.texture;
+      } else if (environment) {
+        world.environment = environment.texture;
+      }
+      renderer.toneMappingExposure = activeCinemaScene && stageBgMode === "dark" ? 1.12 : 1.0;
+      if (stageBgMode !== "transparent") {
+        const isLight = stageBgMode === "light";
+        world.background = new THREE.Color(isLight ? "#eef2ff" : "#04040a");
+        world.fog = isLight ? null : new THREE.FogExp2("#04040a", 0.036);
+        stageBackdrop.visible = !isLight;
+        const themeScene = activeCinemaScene || objects[0]?.scene;
+        if (stageBackdrop.visible && themeScene) {
+          const arch = activeCinemaGroup?.userData.logoArchetype || resolveLogoArchetype(themeScene);
+          const modeIdx = arch === "forge" ? 1.0 : arch === "monolith" ? 2.0 : arch === "cyber" ? 3.0 : 0.0;
+          backdropMat.uniforms.uTime.value = playhead;
+          backdropMat.uniforms.uMode.value = modeIdx;
+          backdropMat.uniforms.uIntensity.value = activeCinemaScene ? 1.0 : 0.68;
+          backdropMat.uniforms.uPrimary.value.set(themeScene.primaryColor);
+          backdropMat.uniforms.uGlow.value.set(themeScene.glowColor);
+        }
+        reflector.visible = anyStageReflect;
+        reflectorVeil.visible = anyStageReflect;
+        reflectorVeil.material = isLight ? lightFloorMat : arenaFloorMat;
+        if (!isLight && anyStageReflect && themeScene) {
+          arenaFloorMat.uniforms.uTime.value = playhead;
+          arenaFloorMat.uniforms.uPulse.value = activeCinemaGroup?.userData.vfxTelemetry?.arenaPulse ?? 0;
+          arenaFloorMat.uniforms.uPrimary.value.set(themeScene.primaryColor);
+          arenaFloorMat.uniforms.uGlow.value.set(themeScene.glowColor);
+        }
+        if (reflector.material?.uniforms?.color?.value) {
+          reflector.material.uniforms.color.value.set(isLight ? "#cfd7eb" : "#0d0b16");
+        }
+        shadowCatcher.visible = anyVisibleShadow && !reflector.visible;
+        if (bloomMax > 0.04 || activeCinemaScene) {
+          bloomPass.strength = 0.2 + bloomMax * 0.28;
+          bloomPass.radius = 0.46;
+          bloomPass.threshold = 1.08;
+          cinemaPass.uniforms.uTime.value = playhead;
+          cinemaPass.uniforms.uChromatic.value = activeCinemaGroup?.userData.vfxTelemetry?.chromaticPulse ?? 0.0005;
+          composer.render();
+        } else {
+          renderer.render(world, camera);
+        }
+      } else {
+        world.background = null;
+        world.fog = null;
+        stageBackdrop.visible = false;
+        reflector.visible = false;
+        reflectorVeil.visible = false;
+        shadowCatcher.visible = anyVisibleShadow;
+        renderer.render(world, camera);
+      }
       retired.forEach(disposeGroup); retired = [];
     };
     draw();
     return () => {
       cancelAnimationFrame(raf);
       retired.forEach(disposeGroup);
+      world.fog = null;
+      world.background = null;
       world.traverse(object => {
         const asset=object.userData?.videoAsset;
         if(asset){asset.video.pause();asset.video.removeAttribute('src');asset.video.load();asset.texture.dispose();asset.pausedTexture?.dispose();asset.sharedTexture?.dispose();}
@@ -573,8 +624,19 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSour
         const materials = Array.isArray(object.material) ? object.material : [object.material];
         materials.forEach(material => { material?.map?.dispose?.(); material?.dispose?.(); });
       });
+      backdropMat.dispose?.();
+      arenaFloorMat.dispose?.();
+      lightFloorMat.map?.dispose?.();
+      lightFloorMat.dispose?.();
+      reflector.dispose?.();
+      renderPass.dispose?.();
+      bloomPass.dispose?.();
+      outputPass.dispose?.();
+      cinemaPass.dispose?.();
+      composer.dispose?.();
       renderer.dispose();
       environment?.dispose();
+      logoEnvironment?.dispose?.();
       if (renderer.domElement.parentNode === host) host.removeChild(renderer.domElement);
     };
   }, [hasScenes]);

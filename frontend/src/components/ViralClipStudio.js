@@ -9760,6 +9760,7 @@ const ViralClipStudio = ({
     pendingHistoryBaselineRef.current = cloneSnapshot(getEditorSnapshot());
     flushSync(() => {
       setOverlays(next.overlays);
+      if (Array.isArray(next.threeDScenes)) setThreeDScenes(next.threeDScenes);
       setMotionKeyframes(next.motionKeyframes);
       setAdjustmentLayers(next.adjustmentLayers);
       setCompositionOrder(next.compositionOrder);
