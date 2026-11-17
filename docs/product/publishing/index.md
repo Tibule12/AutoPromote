@@ -1,6 +1,6 @@
 # Publishing
 
-Development documentation • product 1.2.0 • knowledge 1.0.58 • 2026-11-15
+Development documentation • product 1.2.0 • knowledge 1.0.59 • 2026-11-17
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -75,7 +75,7 @@ Schedules owned completed media through the existing account-linked pipeline. Sc
 
 - Provider permissions, destination access and account allowance apply.
 - An upload acknowledgement does not prove every schedule was created.
-- A pending schedule needs an operating scheduler and posting worker. Only a successful provider result confirms publication.
+- A pending schedule needs an operating scheduler and posting worker. Requested posts continue when the browser closes; empty queues avoid repeated scans. Only a successful provider result confirms publication.
 - Fresh uploads and edited replacement files still require upload allowance. Reusing stored media for a schedule does not increase new-content upload capacity.
 - If this account has opted into 24-hour published-video retention, its owned publishing copies expire 24 hours after every intended destination confirms publication. Pending, paused, failed, recurring, shared or transforming work keeps its file. Expired copies are not selectable for a new schedule; upload the file again. Publication history remains.
 

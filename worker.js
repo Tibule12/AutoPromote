@@ -6,7 +6,10 @@ const {
   processNextPlatformTask,
   processNextYouTubeTask,
 } = require("./src/services/promotionTaskQueue");
-const promotionService = require("./promotionService");
+const promotionService = require("./src/promotionService");
+const backgroundActivity = require("./src/services/backgroundActivityService");
+const backgroundWork = require("./src/services/backgroundWorkService");
+const { acquireLock } = require("./src/services/workerLockService");
 let dailyRollup;
 try {
   dailyRollup = require("./src/services/dailyRollupService");
@@ -75,6 +78,8 @@ if (!ENABLE) {
   process.exit(0);
 }
 
+backgroundActivity.start();
+
 let lastYouTubePoll = 0;
 let lastPlatformPoll = 0;
 let lastWorkerStatus = 0;
@@ -85,15 +90,19 @@ async function loop() {
   try {
     // Heartbeat
     try {
-      if (Date.now() - lastWorkerStatus >= WORKER_STATUS_INTERVAL_MS) {
+      if (backgroundActivity.active("general") && Date.now() - lastWorkerStatus >= WORKER_STATUS_INTERVAL_MS) {
         lastWorkerStatus = Date.now();
         await setStatus("worker_loop", { ts: Date.now(), loopInterval: LOOP_INTERVAL_MS });
       }
     } catch (_) {}
 
+    // Share the API host's queue lease, but never acquire it for an empty queue.
+    const queueWork = await Promise.all(["platform_post", "youtube_upload"].map(type => backgroundWork.hasTasks(type)));
+    const ownsQueue = queueWork.some(Boolean) && await acquireLock("promotionTasks", LOOP_INTERVAL_MS * 2);
+
     // Process one platform task (if any)
     try {
-      const res = await processNextPlatformTask();
+      const res = ownsQueue ? await processNextPlatformTask({ background: true }) : null;
       if (res) console.log("[worker] platform_task", res);
     } catch (e) {
       console.warn("[worker] platform_task error:", e.message);
@@ -101,7 +110,7 @@ async function loop() {
 
     // Process pending schedules (NEW)
     try {
-      const scheduledCount = await promotionService.processDueSchedules();
+      const scheduledCount = await promotionService.processDueSchedules({ background: true });
       if (scheduledCount > 0) console.log("[worker] scheduled_promotions", scheduledCount);
     } catch (e) {
       console.warn("[worker] promotion_schedule error:", e.message);
@@ -109,14 +118,15 @@ async function loop() {
 
     // Process one YouTube upload task
     try {
-      const res = await processNextYouTubeTask();
+      const res = ownsQueue ? await processNextYouTubeTask({ background: true }) : null;
       if (res) console.log("[worker] youtube_upload_task", res);
     } catch (e) {
       console.warn("[worker] youtube_upload_task error:", e.message);
     }
 
     // Periodic YouTube stats poll
-    if (poller && Date.now() - lastYouTubePoll >= YT_POLL_INTERVAL_MS) {
+    if (backgroundActivity.active("analytics") && poller && Date.now() - lastYouTubePoll >= YT_POLL_INTERVAL_MS &&
+        await acquireLock("statsPoller", YT_POLL_INTERVAL_MS * 2)) {
       lastYouTubePoll = Date.now();
       try {
         const velocityThreshold = parseFloat(process.env.YT_VELOCITY_HIGH_THRESHOLD || "50");
@@ -133,7 +143,8 @@ async function loop() {
     }
 
     // Periodic Platform stats poll
-    if (platformPoller && Date.now() - lastPlatformPoll >= PLATFORM_POLL_INTERVAL_MS) {
+    if (backgroundActivity.active("analytics") && platformPoller && Date.now() - lastPlatformPoll >= PLATFORM_POLL_INTERVAL_MS &&
+        await acquireLock("platformMetrics", PLATFORM_POLL_INTERVAL_MS * 2)) {
       lastPlatformPoll = Date.now();
       try {
         const batch = await platformPoller.pollPlatformPostMetricsBatch({
@@ -147,7 +158,7 @@ async function loop() {
     }
 
     // Engagement ingestion (lightweight) every other stats cycle
-    if (engagementIngestion && randChance(0.3)) {
+    if (backgroundActivity.active("analytics") && engagementIngestion && randChance(0.3)) {
       try {
         const eg = await engagementIngestion.ingestBatch({ limit: 20 });
         if (eg.processed)
@@ -156,7 +167,7 @@ async function loop() {
         console.warn("[worker] engagement_ingest error:", e.message);
       }
     }
-    if (twitterMetrics && randChance(0.25)) {
+    if (backgroundActivity.active("analytics") && twitterMetrics && randChance(0.25)) {
       try {
         const tw = await twitterMetrics.ingestRecentTwitterMetrics({ limit: 40 });
         if (tw.processed)
@@ -166,7 +177,7 @@ async function loop() {
       }
     }
     // Repost scheduling (low frequency)
-    if (repostScheduler && randChance(0.1)) {
+    if (backgroundActivity.active("analytics") && repostScheduler && randChance(0.1)) {
       try {
         const rep = await repostScheduler.analyzeAndScheduleReposts({ limit: 5 });
         if (rep.scheduled) await setStatus("reposts", { ts: Date.now(), scheduled: rep.scheduled });
@@ -175,7 +186,7 @@ async function loop() {
       }
     }
     // Overage billing automation: sample users approaching/exceeding quota and record overage usage lines once per loop slice probabilistically
-    if (usageLedger && randChance(0.15)) {
+    if (backgroundActivity.active("general") && usageLedger && randChance(0.15)) {
       try {
         const planService = require("./src/services/planService");
         const { countUsageRecords } = require("./src/services/usageLedgerService");
@@ -243,7 +254,7 @@ async function loop() {
         const communityEngine = require("./src/services/communityEngine");
         // This function now handles BOTH priority surges (first) and stale tasks (second)
         // It internally prioritizes the surge.
-        const result = await communityEngine.processStaleBounties();
+        const result = await communityEngine.processStaleBounties({ background: true });
         if (result.processed > 0) {
           console.log(`[Worker] Auto-Pilot: ${result.message}`);
         }
@@ -253,7 +264,7 @@ async function loop() {
     }
 
     // Periodic earnings snapshot (simulate accrual) - dev placeholder: store latest provisional balance summary every ~loop with low probability
-    if (balanceService && randChance(0.05)) {
+    if (backgroundActivity.active("general") && balanceService && randChance(0.05)) {
       try {
         const userSampleSnap = await require("./src/firebaseAdmin")
           .db.collection("users")
@@ -277,7 +288,7 @@ async function loop() {
       }
     }
     // Periodic variant pruning (probabilistic trigger)
-    if (randChance(0.05)) {
+    if (backgroundActivity.active("analytics") && randChance(0.05)) {
       try {
         // Sample a high-velocity content doc and prune variants
         const highSnap = await require("./src/firebaseAdmin")

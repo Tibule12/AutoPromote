@@ -1,5 +1,7 @@
 require("dotenv").config(); // Load environment variables from .env file
 const { requestLogPath } = require("./utils/logSanitizer");
+const backgroundActivity = require("./services/backgroundActivityService");
+const backgroundWork = require("./services/backgroundWorkService");
 
 // Render environment values are strings and may acquire whitespace when copied
 // from the dashboard. Canonicalize the flag once so every health check and
@@ -188,7 +190,9 @@ const LAT_SAMPLE_SIZE = parseInt(process.env.LAT_SAMPLE_SIZE || "500", 10); // k
 let __latSamples = new Array(LAT_SAMPLE_SIZE);
 let __latIndex = 0;
 let __latCount = 0;
+let __latVersion = 0;
 function recordLatency(ms) {
+  __latVersion++;
   __latSamples[__latIndex] = ms;
   __latIndex = (__latIndex + 1) % LAT_SAMPLE_SIZE;
   if (__latCount < LAT_SAMPLE_SIZE) __latCount++;
@@ -389,7 +393,7 @@ function slowRequestLogger(req, res, next) {
   const started = Date.now();
   res.once("finish", () => {
     const dur = Date.now() - started;
-    recordLatency(dur);
+    if (!/^\/(?:api\/)?health(?:\/|$)/.test(req.path || "")) recordLatency(dur);
     if (dur >= SLOW_REQ_MS) {
       logger.warn("[slow]", req.method, requestLogPath(req.originalUrl), dur + "ms", "status=", res.statusCode);
     }
@@ -1002,6 +1006,7 @@ try {
   app.use(require("./middlewares/accessLog")(logger, appendAccessLine));
 
   app.use(slowRequestLogger);
+  app.use((req, res, next) => backgroundActivity.middleware(req, res, next));
   // Lazy warmup trigger (will start warmup if not already and early request hits)
   try {
     app.use(ensureWarmup);
@@ -3067,7 +3072,8 @@ try {
   };
 
   if (ENABLE_BACKGROUND) {
-    console.log("🛠  Background job runner enabled.");
+    backgroundActivity.start();
+    console.log("🛠  Background job runner enabled (idle scans sleep until work or feature use).");
     try {
       const { pollYouTubeStatsBatch } = require("./services/youtubeStatsPoller");
       const { pollPlatformPostMetricsBatch } = require("./services/platformStatsPoller");
@@ -3082,12 +3088,16 @@ try {
       let statsRunning = false;
       let taskRunning = false;
       let platformMetricsRunning = false;
+      let lastStatsPollAt = 0;
+      let lastPlatformMetricsAt = 0;
 
-      setInterval(async () => {
-        if (statsRunning) return; // skip overlapping
+      const runStatsPoller = async () => {
+        if (statsRunning || !backgroundActivity.active("analytics") ||
+            Date.now() - lastStatsPollAt < STATS_POLL_INTERVAL_MS) return; // idle: no lock or scan
         const ok = await acquireLock("statsPoller", STATS_POLL_INTERVAL_MS * 2).catch(() => false);
         if (!ok) return; // another instance owns lock
         statsRunning = true;
+        lastStatsPollAt = Date.now();
         try {
           const jitter = require("crypto").randomInt(0, 250);
           if (jitter) await new Promise(r => setTimeout(r, jitter));
@@ -3121,10 +3131,16 @@ try {
         } finally {
           statsRunning = false;
         }
-      }, STATS_POLL_INTERVAL_MS).unref();
+      };
+      setInterval(runStatsPoller, STATS_POLL_INTERVAL_MS).unref();
+      backgroundActivity.onActive("analytics", runStatsPoller);
 
       setInterval(async () => {
         if (taskRunning) return;
+        const work = await Promise.all(["youtube_upload", "platform_post", "media_transform"].map(type => backgroundWork.hasTasks(type))).catch(error => {
+          console.warn("[BG][tasks] Work listener unavailable:", error.message); return [];
+        });
+        if (!work.some(Boolean)) return;
         const ok = await acquireLock("promotionTasks", TASK_PROCESS_INTERVAL_MS * 2).catch(
           () => false
         );
@@ -3138,10 +3154,10 @@ try {
           const MAX_BATCH = 5;
           const mt = require("./services/mediaTransform");
           for (let i = 0; i < MAX_BATCH; i++) {
-            const yt = await processNextYouTubeTask();
-            const pf = await processNextPlatformTask();
+            const yt = await processNextYouTubeTask({ background: true });
+            const pf = await processNextPlatformTask({ background: true });
             if (mt && typeof mt.processNextMediaTransformTask === "function") {
-              await mt.processNextMediaTransformTask();
+              await mt.processNextMediaTransformTask({ background: true });
             }
             if (!yt && !pf) break;
             processed += (yt ? 1 : 0) + (pf ? 1 : 0);
@@ -3174,13 +3190,15 @@ try {
         }
       }, TASK_PROCESS_INTERVAL_MS).unref();
 
-      setInterval(async () => {
-        if (platformMetricsRunning) return;
+      const runPlatformMetrics = async () => {
+        if (platformMetricsRunning || !backgroundActivity.active("analytics") ||
+            Date.now() - lastPlatformMetricsAt < PLATFORM_STATS_POLL_INTERVAL_MS) return;
         const ok = await acquireLock("platformMetrics", PLATFORM_STATS_POLL_INTERVAL_MS * 2).catch(
           () => false
         );
         if (!ok) return;
         platformMetricsRunning = true;
+        lastPlatformMetricsAt = Date.now();
         try {
           const jitter = require("crypto").randomInt(0, 250);
           if (jitter) await new Promise(r => setTimeout(r, jitter));
@@ -3212,7 +3230,9 @@ try {
         } finally {
           platformMetricsRunning = false;
         }
-      }, PLATFORM_STATS_POLL_INTERVAL_MS).unref();
+      };
+      setInterval(runPlatformMetrics, PLATFORM_STATS_POLL_INTERVAL_MS).unref();
+      backgroundActivity.onActive("analytics", runPlatformMetrics);
 
       // Cleanup old oauth_states docs (stale PKCE state) to reduce clutter
       try {
@@ -3253,6 +3273,7 @@ try {
         const { acquireLock } = require("./services/workerLockService");
         setInterval(async () => {
           try {
+            if (!await backgroundWork.hasRows("earnings:pending", "earnings_events", "processed", false)) return;
             const locked = await acquireLock(
               "earningsAggregator",
               EARNINGS_AGG_INTERVAL_MS * 2
@@ -3302,7 +3323,7 @@ try {
       setInterval(async () => {
         try {
           const now = Date.now();
-          const snap = await db.collection("system_locks").limit(200).get();
+          const snap = await db.collection("system_locks").where("expiresAt", "<", now - 60000).select("expiresAt").limit(100).get();
           const batch = db.batch();
           let removed = 0;
           snap.forEach(d => {
@@ -3328,9 +3349,9 @@ try {
       }, LOCK_CLEAN_INTERVAL_MS).unref();
 
       // Bandit auto-tuning, exploration factor, and alerts loops guarded by leader flag
-      const leaderInterval = (fn, ms) => {
+      const leaderInterval = (fn, ms, { onDemand = true, category = "analytics" } = {}) => {
         setInterval(() => {
-          if (!__isLeader) return;
+          if (!__isLeader || (onDemand && !backgroundActivity.active(category))) return;
           fn();
         }, ms).unref();
       };
@@ -3425,6 +3446,7 @@ try {
           const paypalPayoutService = require("./services/paypalPayoutService");
           leaderInterval(async () => {
             try {
+              if (!await backgroundWork.hasRows("payouts:pending", "payouts", "status", "pending")) return;
               const processed = await paypalPayoutService.processPendingPayouts(50);
               if (processed && processed.processed)
                 console.log("[BG][payouts] processed", processed.processed, "pending payouts");
@@ -3449,7 +3471,7 @@ try {
                 });
               } catch (_) {}
             }
-          }, PAYOUTS_PROCESS_INTERVAL_MS);
+          }, PAYOUTS_PROCESS_INTERVAL_MS, { onDemand: false });
         } catch (e) {
           console.log("[BG][payouts] skipped: payout service not found", e.message);
         }
@@ -3464,23 +3486,14 @@ try {
         process.env.LAT_SNAPSHOT_INTERVAL_MS || "60000",
         10
       );
+      const persistLatencySnapshot = require("./services/latencySnapshotService").createLatencySnapshotWriter({ db });
       leaderInterval(async () => {
-        const stats = getLatencyStats();
-        if (!stats.count) return;
         try {
-          await db.collection("system_latency_snapshots").add({ at: Date.now(), stats });
-          // Prune older docs beyond 200
-          const snap = await db.collection("system_latency_snapshots").orderBy("at", "asc").get();
-          if (snap.size > 220) {
-            const excess = snap.docs.slice(0, snap.size - 200);
-            const batch = db.batch();
-            excess.forEach(d => batch.delete(d.ref));
-            await batch.commit();
-          }
+          await persistLatencySnapshot(__latVersion, getLatencyStats());
         } catch (e) {
           console.warn("[BG][latency-snapshot] error:", e.message);
         }
-      }, LAT_SNAPSHOT_INTERVAL_MS);
+      }, LAT_SNAPSHOT_INTERVAL_MS, { category: "general" });
     } catch (e) {
       console.warn("⚠️ Background job initialization failed:", e.message);
     }
@@ -3555,7 +3568,7 @@ if (process.env.SCHEDULER_ENABLED !== "false" && !isTestEnv) {
     const isLeader = (global.__bgLeader && global.__bgLeader.isLeader()) || false;
     if (!isLeader && process.env.ENABLE_BACKGROUND_JOBS === "true") return;
     try {
-      await promotionService.processDueSchedules();
+      await promotionService.processDueSchedules({ background: true });
     } catch (e) {
       console.error("[Scheduler] ⚠️ Interval Check Failed:", e.message);
     }
@@ -3567,7 +3580,7 @@ if (process.env.SCHEDULER_ENABLED !== "false" && !isTestEnv) {
     setInterval(
       async () => {
         const isLeader = (global.__bgLeader && global.__bgLeader.isLeader()) || false;
-        if (!isLeader) return;
+        if (!isLeader || !backgroundActivity.active("analytics")) return;
         try {
           const { analyzeAndScheduleReposts } = require("./services/repostSchedulerService");
           const result = await analyzeAndScheduleReposts({ limit: 10 });

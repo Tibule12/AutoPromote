@@ -2,6 +2,8 @@
 const { db } = require("../firebaseAdmin");
 
 async function recordRun(worker, data = {}) {
+  const counts = ["processed", "lastProcessed", "processedEvents", "removed"].filter(key => Object.hasOwn(data, key));
+  if (data.ok !== false && counts.length && counts.every(key => data[key] === 0)) return;
   return setStatus(worker, data);
 }
 

@@ -490,7 +490,8 @@ class PromotionService {
    * REAL-TIME SCHEDULER: Process due schedules and dispatch to platforms
    * This bridges the gap between the "Schedules" panel (Db) and "PlatformPoster" (API)
    */
-  async processDueSchedules() {
+  async processDueSchedules({ background = false } = {}) {
+    if (background && !await require("./services/backgroundWorkService").hasSchedules()) return 0;
     try {
       // 0. Auto-recover stuck locks from previous crashes
       await this.recoverStaleLocks();

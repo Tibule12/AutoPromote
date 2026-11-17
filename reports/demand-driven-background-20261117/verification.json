@@ -1,0 +1,28 @@
+{
+  "date": "2026-11-17",
+  "status": "VERIFIED_LOCAL_NOT_DEPLOYED",
+  "defaultBackgroundMode": "demand",
+  "optionalActivityTtlMs": 120000,
+  "maximumActivityWritesPerCategoryPerMinute": 1,
+  "idleSimulatedTicks": 1440,
+  "idlePollingGetCalls": 0,
+  "idleAdditionalListenerRegistrations": 0,
+  "requestedSchedulesContinueWithUiClosed": true,
+  "pausedSchedulesRemainPaused": true,
+  "tests": {
+    "focusedCases": 40,
+    "fullBackendCasesPassed": 956,
+    "fullBackendSuitesPassed": 174,
+    "fullBackendCasesSkipped": 7,
+    "fullBackendSuitesSkipped": 5,
+    "nativeFirestoreEmulatorCasesPassed": 2,
+    "knowledgeAssistanceCasesPassed": 52
+  },
+  "basicSanity": true,
+  "routeImports": true,
+  "productionResourcesChanged": false,
+  "providerPublishingCallsStarted": false,
+  "storageImagesDeleted": false,
+  "localInitialToolingFailure": "Missing checkout-local locked Firebase CLI; clean locked validation install and full rerun pass.",
+  "remaining": "Merge/deploy approval and post-deployment runtime/cost observation. Retained image storage is a separate cost driver."
+}
