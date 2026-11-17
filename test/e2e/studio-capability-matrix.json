@@ -33542,6 +33542,7 @@
     "mockApiRealMediaPlaywrightJourneyPass": true,
     "strictFrontendBuildPass": true,
     "readinessPromotion": false,
-    "next": "Verify fresh PR checks; retain shared S02/S04/S03 and typography backlog."
+    "next": "Verify fresh PR checks; retain shared S02/S04/S03 and typography backlog.",
+    "replayLockedDependenciesEnforced": true
   }
 }

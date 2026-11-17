@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "PR530 CI repair: reviewed Composite image/video keying restriction, canonical percentage controls and legacy setting compatibility; added the actual workflow to compositing help. Replay, scratch, native canvas/cache fixtures and keyboard target guard do not expand readiness. Updated contract evidence retains shared Studio blockers.",
-  "reviewed_at": "2026-11-17T08:57:32.625Z",
+  "reason": "PR530 follow-through: rebuilt canonical replay using clean locked dependencies and verified stale shared inputs are refused; scoped CI evidence preserves readiness. Composite canonical media keying and its in-product help were reviewed in the preceding change.",
+  "reviewed_at": "2026-11-17T09:10:27.881Z",
   "catalog_sha256": "8ecac9fb6d0e30ccfa3e88cfb5b972cc13cdab737f21bd871b10e73489de6e1b",
   "sources": [
     {
@@ -723,11 +723,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "af6e01fb86df25c01c4e0ba82de048d9822ef4c66b9d6b38b58a03a14f48c7d9"
+      "sha256": "8b24e612b81c2e3c9d0fe1fcd5f2f8568a58e2278d9109ed8449d0645a58b766"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "5c02e29fffa5db6eb3ac12e8cba274789f88ae971e7d709b134962eeadcf3c98"
+      "sha256": "c5ed8ec40c1d464d464d9acf216a2d504bdc78cb5d050e38fac8eecdf1555537"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

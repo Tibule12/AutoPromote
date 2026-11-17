@@ -2,7 +2,7 @@
 
 The five failed checks on commit `807368250112cdfaf43039f20b78a83718489e88` had four causes:
 
-- Backend and frontend build verification rejected the stale generated Director replay kernel. Regenerated it from the current canonical compiler and verified exact reproducibility.
+- Backend and frontend build verification rejected the stale generated Director replay kernel. Regenerated it from the current canonical compiler and the clean locked frontend dependencies. The first shared-install rebuild still failed GitHub because installed DOMPurify3.4.14 differed from locked3.4.17. The builder now refuses drift in its compiler/minifier/sanitizer inputs with exact versions and an installation instruction. Clean and symlinked locked installs must produce identical bytes.
 - The read-only media-worker image test lacked its approved `/workspace/tmp` directory. The verifier now supplies a writable ephemeral scratch mount; the real 24fps ingest test creates its scratch parent. Source code stays read-only and ingest authorization is unchanged.
 - Unit fixtures lacked the current native canvas APIs and preference-aware scanner cache identity. Fixtures now exercise processed pixels and real Web Crypto. Node Flow also ignores keyboard events whose target is not a DOM node, preserving ordinary global history shortcuts.
 - The browser journey attempted chroma keying on a text title, which the canonical processor correctly refuses. Composite now explains and disables that unsupported action. Its percentage controls write canonical key parameters; legacy colour/tolerance/spill projects remain readable. The journey keys an actual video layer and verifies a painted, error-free native canvas.

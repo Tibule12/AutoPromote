@@ -15,7 +15,9 @@
     "strictFrontendBuild": true,
     "deterministicReplayCheck": true,
     "readOnlyCheckoutAndWritableScratchMount": true,
-    "fullProductionDockerImageBuiltLocally": false
+    "fullProductionDockerImageBuiltLocally": false,
+    "replayLockedDependencyDriftRefused": true,
+    "cleanAndSymlinkedLockedReplayIdentical": true
   },
   "activeLocalAppReplaced": false,
   "ingestAuthorizationChanged": false,
@@ -23,5 +25,6 @@
   "readinessPromotion": false,
   "productionDeployment": false,
   "mainMerge": false,
-  "next": "Verify all fresh PR checks, then continue the existing shared Studio backlog."
+  "next": "Verify all fresh PR checks, then continue the existing shared Studio backlog.",
+  "initialSharedInstallCorrectionStillFailedRemoteReplay": true
 }
