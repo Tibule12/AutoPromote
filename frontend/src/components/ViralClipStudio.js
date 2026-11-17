@@ -2798,6 +2798,7 @@ const ViralClipStudio = ({
   const [musicDucking, setMusicDucking] = useState(true);
   const [musicDuckingStrength, setMusicDuckingStrength] = useState(0.35);
   const [silencePreview, setSilencePreview] = useState(null);
+  const silencePreviewGenerationRef = useRef(0);
   const [isRippleCuttingSilence, setIsRippleCuttingSilence] = useState(false);
   const [punchScale, setPunchScale] = useState(1.25);
   const [punchStyle, setPunchStyle] = useState("punch");
@@ -3307,6 +3308,8 @@ const ViralClipStudio = ({
   const lastSnapshotRef = useRef(null);
   const lastSnapshotSignatureRef = useRef(null);
   const isRestoringHistoryRef = useRef(false);
+  const historyRestoreCommitRef = useRef(0);
+  const [historyRestoreCommit, setHistoryRestoreCommit] = useState(0);
   const pendingHistoryBaselineRef = useRef(null);
   const cutHistoryTransactionRef = useRef(null);
   const previewPlaybackIntentRef = useRef(true);
@@ -4271,6 +4274,12 @@ const ViralClipStudio = ({
   };
 
   const applyEditorSnapshot = snapshot => {
+    // Invalidate pending analysis before the restored render commits. A late
+    // reply must not consume the history restore or clear its Redo stack.
+    ++silencePreviewGenerationRef.current;
+    if (isRestoringHistoryRef.current) {
+      setHistoryRestoreCommit(++historyRestoreCommitRef.current);
+    }
     setExportErrorMessage("");
     setCreativeTemplateInstance(snapshot.creativeTemplateInstance || snapshot.studioDocument?.editGraph?.settings?.creativeTemplateInstance || null);
     if (isRestoringHistoryRef.current && studioDocumentRef.current) {
@@ -11587,6 +11596,8 @@ const ViralClipStudio = ({
 
   useEffect(() => {
     let isCancelled = false;
+    const generation = ++silencePreviewGenerationRef.current;
+    const isCurrent = () => !isCancelled && generation === silencePreviewGenerationRef.current;
 
     if (!silenceRemoval || !currentTimelineClip) {
       setSilencePreview(null);
@@ -11621,7 +11632,7 @@ const ViralClipStudio = ({
         });
 
         const payload = await response.json();
-        if (!isCancelled) {
+        if (isCurrent()) {
           if (!response.ok) throw new Error(payload.error || "Silence analysis failed.");
           setSilencePreview({
             ...silenceBinding,
@@ -11631,7 +11642,7 @@ const ViralClipStudio = ({
         }
       } catch (error) {
         console.error("Silence preview failed", error);
-        if (!isCancelled) setSilencePreview(null);
+        if (isCurrent()) setSilencePreview(null);
       }
     };
 
@@ -13401,6 +13412,10 @@ const ViralClipStudio = ({
   }, [projectId, localDirectorProposal, directorDraftRestore]);
 
   useEffect(() => {
+    // A passive effect from the preceding render can run after Undo starts.
+    // Only the render that committed the restored state may finish restoration.
+    if (isRestoringHistoryRef.current &&
+        historyRestoreCommit !== historyRestoreCommitRef.current) return;
     const snapshot = cloneSnapshot(getEditorSnapshot());
     // Inspector selection and playhead navigation are not edits. Excluding
     // them keeps Undo focused on visible media/timeline changes instead of
@@ -13489,6 +13504,7 @@ const ViralClipStudio = ({
     syncHistoryAvailability();
     scheduleProjectAutosave(snapshot);
   }, [
+    historyRestoreCommit,
     orderedClips,
     projectMedia,
     creativeTemplateInstance,

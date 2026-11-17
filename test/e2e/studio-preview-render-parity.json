@@ -26289,6 +26289,10 @@
     "strictFrontendBuildPass": true,
     "readinessPromotion": false,
     "next": "Verify fresh PR checks; retain shared S02/S04/S03 and typography backlog.",
-    "replayLockedDependenciesEnforced": true
+    "replayLockedDependenciesEnforced": true,
+    "historyRestorationCommitGuard": true,
+    "lateSilenceAnalysisInvalidated": true,
+    "orderedMediaHistoryCases": 3,
+    "unitStepBudgetMinutes": 30
   }
 }

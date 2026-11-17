@@ -17,7 +17,9 @@
     "readOnlyCheckoutAndWritableScratchMount": true,
     "fullProductionDockerImageBuiltLocally": false,
     "replayLockedDependencyDriftRefused": true,
-    "cleanAndSymlinkedLockedReplayIdentical": true
+    "cleanAndSymlinkedLockedReplayIdentical": true,
+    "orderedMediaHistoryCases": 3,
+    "broaderHistoryCases": 8
   },
   "activeLocalAppReplaced": false,
   "ingestAuthorizationChanged": false,
@@ -26,5 +28,8 @@
   "productionDeployment": false,
   "mainMerge": false,
   "next": "Verify all fresh PR checks, then continue the existing shared Studio backlog.",
-  "initialSharedInstallCorrectionStillFailedRemoteReplay": true
+  "initialSharedInstallCorrectionStillFailedRemoteReplay": true,
+  "historyRestorationCommitGuard": true,
+  "lateSilenceAnalysisInvalidated": true,
+  "unitStepBudgetMinutes": 30
 }

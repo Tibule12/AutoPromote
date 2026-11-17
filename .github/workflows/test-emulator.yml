@@ -58,8 +58,10 @@ jobs:
           python -m pip install --disable-pip-version-check --timeout 20 --retries 2 --only-binary=:all: --requirement python_media_worker/requirements-ci.txt
           PYTHONPATH=python_media_worker python -c "import numpy, PIL, studio_voice_bus_preview; print('CPU preview imports ready: NumPy', numpy.__version__, 'Pillow', PIL.__version__)"
 
+      # The complete 183-case native Studio component suite now takes about
+      # 18 minutes alone; leave time for the other 400 suites and final report.
       - name: Run emulator-backed unit tests
-        timeout-minutes: 20
+        timeout-minutes: 30
         env:
           CI: true
           STUDIO_AUDIO_PREVIEW_PYTHON: python

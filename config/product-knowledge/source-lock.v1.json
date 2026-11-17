@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "PR530 follow-through: rebuilt canonical replay using clean locked dependencies and verified stale shared inputs are refused; scoped CI evidence preserves readiness. Composite canonical media keying and its in-product help were reviewed in the preceding change.",
-  "reviewed_at": "2026-11-17T09:10:27.881Z",
+  "reason": "PR530 final unit failure: reviewed history restoration commit guard and invalidation of late silence analysis; ordered media/Make It Hit sequence now passes. Existing help promises Undo/Redo behavior, with no new controls or readiness expansion. Recorded measured full-suite CI budget and retained all tests.",
+  "reviewed_at": "2026-11-17T17:46:29.151Z",
   "catalog_sha256": "8ecac9fb6d0e30ccfa3e88cfb5b972cc13cdab737f21bd871b10e73489de6e1b",
   "sources": [
     {
@@ -199,7 +199,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "8f6da786932e723f3133b70d37772480a57bc2aaeee373e2bf8eb4baebd87061"
+      "sha256": "8a18cba47e67d54c42c43b5cb353a235835a7ac3de6edba3ba13a0d4dd45910a"
     },
     {
       "path": "frontend/src/components/ViralScanner.js",
@@ -723,11 +723,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "8b24e612b81c2e3c9d0fe1fcd5f2f8568a58e2278d9109ed8449d0645a58b766"
+      "sha256": "f5fdda039173a4f823bfb788b3d1eff8f3495a3ac6fd26efa89ec213d9a45b3c"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "c5ed8ec40c1d464d464d9acf216a2d504bdc78cb5d050e38fac8eecdf1555537"
+      "sha256": "dc3fee9607be15ff1876993dce9796c81247a9506e48e376edb640601a24fce5"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."
