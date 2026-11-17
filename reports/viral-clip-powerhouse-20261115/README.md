@@ -1,0 +1,28 @@
+# Find Viral Clips improvements — 15 November 2026
+
+The Finder now competes complete source moments on opening, context and payoff, combines recognised speech with measured audio/motion evidence, penalises incomplete endings, promotions, repetition and weak context, and suppresses substantially overlapping or repeated suggestions. Ranking is deterministic; fresh scans no longer add random score boosts or favour late footage. The existing optional AI reranker has bounded influence and cannot replace source timestamps or dialogue. Scores are editorial rankings, not predicted views.
+
+Target length (15–30, 30–60 or 60–90 seconds), destinations and the optional brief reach the worker. Versioned cache keys hash the complete source fingerprint and settings within the server token limit. Wrong-setting cache results are rejected. The scanner completes empty-result responses and permits retries; replacing a source clears old results/preview bounds. Source selection is disabled during an active scan.
+
+Generated thumbnail/poster creation, choice and download tools are removed from this Finder/editor flow. Source-video preview remains. Each suggested moment shows recognised source wording, timestamps, evidence and correction flags; Preview pauses at its endpoint. Create clip uses the existing canonical Studio document/compiler/render path.
+
+## Verified evidence
+
+- **Final real signed-in flow:** a 29.9-second real-footage excerpt with spoken audio was uploaded normally, analysed by cached local faster-whisper turbo on CPU, and returned two moments. With the brief “ideas dreams”, the best was **0–17.18 seconds**, score **89.5**. The 13.92–29.9 alternative scored 72.4 and disclosed its incomplete final phrase. The exact chosen range passed bounded preview, native Studio save, ordinary approved export, byte-identical download, full FFmpeg decode and complete playback: **17.18 seconds, 720×1280, 412 decoded pictures**, with audio. No browser exceptions.
+- **Real visual fallback:** a separate 20-second silent excerpt produced three source-bound visual-only suggestions, review flags and no invented dialogue or generated thumbnails. Actual worker analysis took about 3.62 seconds on this machine.
+- The full 52-second source also completed direct real speech analysis. Its initial ranking diagnostic exposed legacy score overwrites; regression coverage prevents every new score being inflated to the same maximum. A subsequent real 30-second diagnostic exposed comma-pause splitting and an unfinished ending outranking a complete moment; both were corrected before the final native flow.
+- **Focused checks:** 13 selector checks, 21 frontend cases, 15 backend route cases, 2 settings cases, and 52 knowledge/help cases pass. The final build passes eight anonymous welcome comparisons and normal signed-in Studio/contextual-help entry. See `verification.json` and private logs.
+
+## Boundaries and retained attempts
+
+English cue matching remains heuristic. The optional existing remote AI reranker was not called during this offline proof; multilingual meaning, speech wording and visual intent still need creator review. These tests do not establish guaranteed viral performance, all-media/concurrency/device reliability, native long-source coverage or whole-Studio picture/audio parity.
+
+The local credit pilot caps analysis sources at 30 seconds, so the native flow uses a real excerpt and the 52-second source is separately analysed directly. Its intentional `OUTSIDE_PILOT_SCOPE` restriction also blocks cache POST writes; the retained native cache-reopen attempt cannot qualify replay. Cache identity and preference isolation have meaningful automated coverage. No pilot permissions, prices, source limits or wallet balances were loosened to pass this test. An expired local QA session deadline was renewed for two hours with its prior configuration retained; all new debits use ordinary UI approval.
+
+The earlier label-selector, disconnected API, over-limit source, expired-session and diagnostic capture failures are retained privately. The earlier export did play completely; its recorder exceeded 256 MiB. The final lower-bandwidth native capture passed and is retained with its project, exact movie, receipts and playback evidence. No accepted analysis/render was duplicated to recover a pending job.
+
+The candidate was frozen in `AutoPromote-viral-clips-powerhouse-20261115` while unrelated caption/VFX work continued in the active `AutoPromote-pro-studio-20261114` worktree. Finder changes were copied back with pre-sync backups. The final native proof qualifies the frozen source/build, rather than later concurrent caption changes. Preserve the existing Studio classifications (17 FUNCTIONAL / 9 PARTIAL / 1 BROKEN / 2 UNIMPLEMENTED / 0 PRO / 0 PRODUCTION), typography failures and S02/S04/S03 backlog. No deployment, publication, paid inference or cloud/GPU allocation occurred.
+
+Private evidence includes `native/verification.json`, `native/selected-range.json`, `native/completed.json`, `native/finished-playback.json`, `native/editing-in-studio.mp4`, the selected movie/project backup, actual analysis/transcription, focused test logs and a full terminal Auth/Firestore/Storage checkpoint. The original source and historical projects are preserved.
+
+The final full checkpoint verifies **seven terminal operations, zero active operations and zero held credits**. All three earlier operations and the unrelated empty wallet are exact. The normal new scan/render approvals leave the local symbolic wallet at three credits; no wallet was reset. Final knowledge/help rerun: 52 pass.

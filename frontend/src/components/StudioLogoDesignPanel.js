@@ -1,6 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   LOGO_DESIGN_DEFAULT,
+  STUDIO_LOGO_ANIMATION_STYLES,
+  STUDIO_LOGO_COLOR_RECIPES,
+  STUDIO_LOGO_FAMILIES,
   buildStudioLogoDesign,
   studioLogoMasterSvg,
   studioLogoPreviewUri,
@@ -52,6 +55,8 @@ export default function StudioLogoDesignPanel({
 }) {
   const [spec, setSpec] = useState({ ...LOGO_DESIGN_DEFAULT }),
     [animate, setAnimate] = useState(false),
+    [animationStyle, setAnimationStyle] = useState("cascade"),
+    [strokeTrace, setStrokeTrace] = useState(false),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [selected, setSelected] = useState(""),
@@ -68,14 +73,25 @@ export default function StudioLogoDesignPanel({
         width,
         height,
         duration: Math.max(0.2, duration || 8),
+        ...(strokeTrace ? { strokeTrace: true } : {}),
       });
       return { input, svg: studioLogoMasterSvg(input.layers, { width, height }) };
     } catch (e) {
       return { error: e.message };
     }
-  }, [spec, width, height, duration]);
+  }, [spec, width, height, duration, strokeTrace]);
   const change = (key, value) => {
     setSpec(s => ({ ...s, [key]: value }));
+    setError("");
+  };
+  const applyColorRecipe = recipe => {
+    setSpec(s => ({
+      ...s,
+      primary: recipe.primary,
+      secondary: recipe.secondary,
+      lettering: recipe.lettering,
+      gradient: recipe.gradient,
+    }));
     setError("");
   };
   const act = async callback => {
@@ -128,11 +144,7 @@ export default function StudioLogoDesignPanel({
           />
         </label>
         <div className="studio-logo-family-grid" role="group" aria-label="Logo symbol family">
-          {[
-            ["flow", "Flow", "Ribbon ascent"],
-            ["orbit", "Orbit", "Interlocking motion"],
-            ["facet", "Facet", "Geometric structure"],
-          ].map(([family, name, description]) => {
+          {STUDIO_LOGO_FAMILIES.map(([family, name, description]) => {
             let src;
             try {
               const input = buildStudioLogoDesign(
@@ -202,6 +214,29 @@ export default function StudioLogoDesignPanel({
             />
           </label>
         </div>
+        <div className="studio-logo-recipe-row" role="group" aria-label="Brand colour recipes">
+          {STUDIO_LOGO_COLOR_RECIPES.map(recipe => (
+            <button
+              key={recipe.id}
+              type="button"
+              className="studio-logo-recipe-chip"
+              onClick={() => applyColorRecipe(recipe)}
+              title={`Apply ${recipe.label} brand palette`}
+            >
+              <span
+                style={{
+                  display: "inline-block",
+                  width: 10,
+                  height: 10,
+                  borderRadius: "50%",
+                  background: `linear-gradient(135deg, ${recipe.primary}, ${recipe.secondary})`,
+                  marginRight: 5,
+                }}
+              />
+              {recipe.label}
+            </button>
+          ))}
+        </div>
         <div className="studio-logo-colours">
           {[
             ["primary", "Primary"],
@@ -228,6 +263,15 @@ export default function StudioLogoDesignPanel({
           />
           Gradient symbol
         </label>
+        <label>
+          <input
+            type="checkbox"
+            aria-label="Logo contour stroke outline"
+            checked={strokeTrace}
+            onChange={e => setStrokeTrace(e.target.checked)}
+          />
+          Luminous vector contour outline (trim-path ready)
+        </label>
         {draft.svg && (
           <div className="studio-logo-design-preview" data-testid="studio-logo-design-preview">
             <img src={studioLogoPreviewUri(draft.svg)} alt={`${spec.name} logo design preview`} />
@@ -242,11 +286,42 @@ export default function StudioLogoDesignPanel({
           />
           Assemble the pieces with editable motion keys
         </label>
+        {animate && (
+          <label>
+            Animation choreography
+            <select
+              aria-label="Logo animation choreography"
+              value={animationStyle}
+              onChange={e => {
+                const style = e.target.value;
+                setAnimationStyle(style);
+                if (style === "laser_trace") setStrokeTrace(true);
+              }}
+            >
+              {STUDIO_LOGO_ANIMATION_STYLES.map(style => (
+                <option key={style.id} value={style.id}>
+                  {style.label} — {style.description}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <button
           type="button"
           disabled={!!draft.error}
           onClick={() =>
-            act(() => onBuild(buildStudioLogoDesign(spec, { width, height, duration, animate })))
+            act(() =>
+              onBuild(
+                buildStudioLogoDesign(spec, {
+                  width,
+                  height,
+                  duration,
+                  animate,
+                  ...(animate && animationStyle !== "cascade" ? { animationStyle } : {}),
+                  ...(strokeTrace ? { strokeTrace: true } : {}),
+                })
+              )
+            )
           }
         >
           Add logo to timeline

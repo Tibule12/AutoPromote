@@ -73,3 +73,20 @@ test('a rejected take can rerun visual review using its same exact hash',async()
   expect(JSON.parse(fetch.mock.calls[1][1].body)).toEqual({shotId:'shot-1',contentHash:'b'.repeat(64)});
   expect(accept).not.toHaveBeenCalled();
 });
+test('passes selected cutaway framing, motion, and visual match preset to onAccept without altering review payload',async()=>{
+  fetch.mockResolvedValueOnce(response({job:ready})).mockResolvedValueOnce(response({job:{...ready,shots:[{...shot,status:'accepted'}]}}));
+  setup({jobId:ready.id});
+  fireEvent.change(await screen.findByLabelText('Generated B-roll framing'),{target:{value:'circle_portal'}});
+  fireEvent.change(screen.getByLabelText('Generated B-roll motion'),{target:{value:'whip_pan_cutaway'}});
+  fireEvent.change(screen.getByLabelText('Generated B-roll visual match'),{target:{value:'cinema_warm_match'}});
+  fireEvent.click(screen.getByText('Use this generated shot'));
+  await waitFor(()=>expect(accept).toHaveBeenCalledTimes(1));
+  expect(JSON.parse(fetch.mock.calls[1][1].body)).toEqual({shotId:'shot-1',decision:'accept',contentHash:'a'.repeat(64)});
+  expect(accept.mock.calls[0][0]).toMatchObject({
+    id:'shot-1',
+    status:'accepted',
+    placementPreset:'circle_portal',
+    choreographyPreset:'whip_pan_cutaway',
+    lookPreset:'cinema_warm_match',
+  });
+});

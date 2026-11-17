@@ -1,0 +1,7 @@
+{
+  "finishedPlaybackAudioCorrelation": 0.9999660954927536,
+  "narrationRmsPcm16": 3732.439253042171,
+  "finishedPlaybackStartsAtSeconds": 427.51900005340576,
+  "completeDecode": "passed in assemble.py",
+  "nativeFilmSoundPresent": true
+}

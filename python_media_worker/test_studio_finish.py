@@ -69,6 +69,24 @@ class StudioFinishFilterTests(unittest.TestCase):
         self.assertIn("drawbox=", result)
         self.assertIn("colorbalance=", result)
 
+    def test_builds_optical_vfx_filters_for_lens_blur_dream_glow_and_anamorphic_flare(self):
+        result = build_studio_finish_filter(
+            {
+                "enabled": True,
+                "texture": {
+                    "lens_blur": 0.4,
+                    "dream_glow": 0.35,
+                    "anamorphic_flare": 0.5,
+                },
+            }
+        )
+
+        self.assertIn("format=gbrp", result)
+        self.assertIn("maskedmerge", result)
+        self.assertIn("lutrgb=", result)
+        self.assertIn("sigmaV=0.5", result)
+        self.assertIn("blend=all_mode=screen", result)
+
     def test_builds_real_audio_driven_visualizer_graph(self):
         result = build_studio_visualizer_filter(
             {

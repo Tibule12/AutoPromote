@@ -1,0 +1,148 @@
+{
+  "checkedAt": "2026-11-15T10:49:02.293Z",
+  "fixes": [
+    "All paused-source PNG profiles describe decoded RGB as sRGB",
+    "Paint deadline includes work already done and retains frame cadence phase",
+    "Adaptive moving raster is labelled; paused raster is full size",
+    "Identical accurate solo-still reuse invalidates on edits, source, time and geometry",
+    "Existing CPU primary/LUT sampler avoids software GL transfer; spatial secondary and hardware GL remain"
+  ],
+  "tests": {
+    "targetedFrontend": 59,
+    "actualFfmpegPngProfiles": 3,
+    "knowledgeAndHelp": 52
+  },
+  "native": {
+    "ordinaryAuthentication": true,
+    "newNormalExport": true,
+    "sameJobDownloadSha256": "0c05d06bd32c87ef39382711c500a76e13eff7f6ef61489897a8c595f00e1ce6",
+    "fullDecode": true,
+    "seconds": 12,
+    "width": 720,
+    "height": 1280,
+    "fps": 24,
+    "completeSameFilePlayback": true,
+    "pausedEditAndUndo": {
+      "checkedAt": "2026-11-15T10:45:54.598Z",
+      "initialMix": 75,
+      "editedMix": 100,
+      "restoredMix": 75,
+      "changedAfterEdit": true,
+      "exactPixelsAfterUndo": true
+    },
+    "exactCanonicalColdRecovery": {
+      "normalSavedLogin": true,
+      "exactCanonicalDocument": true,
+      "exactLutMix": true,
+      "mix": 75,
+      "checkedAt": "2026-11-15T10:45:09.523Z"
+    },
+    "finalPlaybackRecoveryRenderRequests": 0,
+    "allTwelveGatesInOneAttempt": false,
+    "exportBinding": {
+      "projectId": "viral-project-f04886fd-163b-4b33-82ed-cc4f914cc379",
+      "exportedLutMix": 50,
+      "canonicalLutExactlyMatchesAcceptedWorker": true,
+      "acceptedJobId": "viral_04c0c1f5d607eae80727679e86db562a7b9c164508c83d28f56d5f77dc8f5e75",
+      "outputSha256": "0c05d06bd32c87ef39382711c500a76e13eff7f6ef61489897a8c595f00e1ce6",
+      "backupSha256": "e3ccea5e936cd6e27b82151fae9a6f8db5a2e5e6e663dafe841876fa5d773c38",
+      "subsequentEditAndColdRecoveryMix": 75
+    }
+  },
+  "colourPairs": {
+    "pairs": [
+      {
+        "seconds": 1,
+        "exportFrame": 24,
+        "psnrDb": 37.195373357748444,
+        "meanAbsoluteError": 2.591779513888889,
+        "maximumChannelError": 40
+      },
+      {
+        "seconds": 3,
+        "exportFrame": 72,
+        "psnrDb": 36.8812060747877,
+        "meanAbsoluteError": 2.7507602719907407,
+        "maximumChannelError": 54
+      },
+      {
+        "seconds": 6,
+        "exportFrame": 144,
+        "psnrDb": 36.91408663607854,
+        "meanAbsoluteError": 2.6933463541666667,
+        "maximumChannelError": 46
+      },
+      {
+        "seconds": 10,
+        "exportFrame": 240,
+        "psnrDb": 37.11509266961349,
+        "meanAbsoluteError": 2.61212890625,
+        "maximumChannelError": 41
+      }
+    ],
+    "minimumPsnrDb": 36.8812060747877,
+    "meanAbsoluteError": 2.6620037615740744,
+    "method": "Actual paused full720x1280 Live Edit PNG versus exact same-job H264 decoded frame; no resize, alignment or excluded pixels.",
+    "qualification": "Scoped colour-profile repair; no whole moving picture/audio or strict typography promotion."
+  },
+  "playback": {
+    "headless": true,
+    "softwareRendering": true,
+    "targetFps": 24,
+    "observedPictureUpdates": 263,
+    "observedMiddleIntervalFps": 21.919409637227805,
+    "p95UpdateGapMs": 74.5,
+    "maximumUpdateGapMs": 96.20000000298023,
+    "decodedSourceFrames": 356,
+    "droppedSourceFrames": 95,
+    "movingResolutionScale": [
+      0.25
+    ],
+    "pausedFullRaster": true,
+    "universalDeviceSmoothnessQualified": false,
+    "note": "Measured programme canvas updates at its actual clock. Source-video drop metrics are separate from target programme cadence. No human AV/listening or device-wide performance qualification."
+  },
+  "anonymousAndHelp": {
+    "normalSignIn": true,
+    "studioEntry": true,
+    "contextualHelpHttp200": true,
+    "feature": "studio.color",
+    "errors": [],
+    "anonymousViewportChecks": 8
+  },
+  "build": {
+    "path": "/tmp/autopromote-application-demo-K9waj1/build-preview-repair-software",
+    "bundle": "main.5b506486.js",
+    "sha256": "ba49ead3b2b62504e4027a5f834b0b5709536afc06dfd2d585f2f27823c0c60b"
+  },
+  "sourceHashes": {
+    "frontend/src/components/ViralClipStudio.js": "d33f6cab85c23534b9405068fb54c4911f89dd55e596559712c25fab7132d08d",
+    "frontend/src/components/studioWebGLCompositor.js": "a96e8d40d73d6e84b5ae5f94850bf6ac27ea1f695290ecec3d2dbf4bf1a58ed6",
+    "frontend/src/components/studioPreviewBudget.js": "c876dd9f312b55e2552794730da061b1e3910802edeb0dba71c1f53822e818e0",
+    "src/services/studioSourceFrameService.js": "c162f5e17d22cf2ed90332f8b09cfafef8aea462ba81ac38cec16a64bb287cee",
+    "python_media_worker/main_media_server.py": "f62625105deb698afe6170437539c1cce6bdbe93a4d5fd9cd2c68fdf00c3dcea"
+  },
+  "rendererRecovery": {
+    "sourceWasExternallyEmptied": true,
+    "recoveredSourceSha256": "f62625105deb698afe6170437539c1cce6bdbe93a4d5fd9cd2c68fdf00c3dcea",
+    "recoveredSourceMatchesPreTruncationCachedFunctionsAndTopLevelBytecode": true,
+    "retainedCache": "private/main-before-truncation.cpython-312.pyc"
+  },
+  "limits": [
+    "Remaining compression/raster differences; no exact whole-picture equality",
+    "Prior strict typography failures and broad optical/effect combinations remain",
+    "No whole moving audio/picture, human listening, creative or production readiness promotion",
+    "Separate caption integration and festival package still pending"
+  ],
+  "productionWrites": 0,
+  "paidProviderCalls": 0,
+  "gpuAllocations": 0,
+  "deployments": 0,
+  "concurrentSourceCaveat": "Later colour/Director work in this shared branch is preserved. Native evidence qualifies the retained compiled build and listed tested scopes, not later concurrent feature additions.",
+  "retainedObserverFailures": [
+    "A private proof assumed LUT25 after the saved fixture had become50.",
+    "A private proof callback omitted its value argument.",
+    "A private proof selected an absent aria-label instead of the native labelled slider.",
+    "After a deliberate edit invalidated the export mapping, a recovery observer waited for a ready state; the exact completed film and owned server job remain."
+  ]
+}

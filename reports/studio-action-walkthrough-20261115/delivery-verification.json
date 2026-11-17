@@ -1,0 +1,42 @@
+{
+  "Visible Studio actions \u2014 complete walkthrough.mp4": {
+    "sha256": "cc54824a59fd6249926763b272fd7cd61c73784d600755e7ca0b1b955217e408",
+    "duration": 458.0,
+    "streams": [
+      {
+        "type": "video",
+        "codec": "h264",
+        "width": 1600,
+        "height": 1200,
+        "sample_rate": null
+      },
+      {
+        "type": "audio",
+        "codec": "aac",
+        "width": null,
+        "height": null,
+        "sample_rate": "48000"
+      }
+    ]
+  },
+  "Studio action demonstration.mp4": {
+    "sha256": "2ff898607e7fe334efd7a4c1f4e55fd8d4822a7342b1afa93008850db40aebf1",
+    "duration": 17.208333,
+    "streams": [
+      {
+        "type": "video",
+        "codec": "h264",
+        "width": 720,
+        "height": 1280,
+        "sample_rate": null
+      },
+      {
+        "type": "audio",
+        "codec": "aac",
+        "width": null,
+        "height": null,
+        "sample_rate": "48000"
+      }
+    ]
+  }
+}

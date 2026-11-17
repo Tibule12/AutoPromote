@@ -63,6 +63,23 @@ test('titles and projected media evaluate on the same presented picture between 
   expect(video.cancelVideoFrameCallback).toHaveBeenCalledTimes(1);
 });
 
+test('a layer mounted between transport updates immediately joins the presented frame clock', async () => {
+  const video = decoder(), clockRef = { current: video };
+  const layer = { id: 'late', type: 'image', startTime: 1, duration: 3 };
+  const props = { clockRef, mapTime: t => t, time: 0, layers: [layer] };
+  const view = render(<StudioProgrammeFrame {...props}>{() => null}</StudioProgrammeFrame>);
+  act(() => video.frame(1.25, 1.4));
+  const node = document.createElement('div');
+  node.dataset.studioLayerId = layer.id;
+  // Native media may mount after a decoded callback, without a React
+  // transport render. Its first pose must use the displayed picture's time.
+  await act(async () => { view.container.appendChild(node); });
+  expect(node.dataset.programmeTime).toBe('1.25');
+  act(() => video.frame(1.5, 1.65));
+  expect(node.dataset.programmeTime).toBe('1.5');
+  view.unmount();
+});
+
 test('normal pause, seek, play and ref promotion stop the former shot and rebind the next decoder', () => {
   const first = decoder(), second = decoder(), clockRef = { current: first };
   const children = () => <div data-testid="time" data-studio-layer-id="layer" />;

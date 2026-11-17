@@ -1,0 +1,237 @@
+{
+  "checkedAt": "2026-11-16T08:53:00.586662+00:00",
+  "build": "/tmp/autopromote-node-conformance-build-20261116-r8",
+  "frontendTests": {
+    "passed": 130,
+    "suites": 14
+  },
+  "workerTests": {
+    "passed": 249
+  },
+  "knowledgeHelpTests": {
+    "passed": 52
+  },
+  "actualChromiumMaskChecks": 14,
+  "shaderReadbackMaxChannelError": 0,
+  "runtime": {
+    "finalUiUsesOriginalSingleRenderCheckpoint": true,
+    "newRenderJobsInUiReplay": 0,
+    "exportRunFinalFullCheckpointComplete": false,
+    "terminalExportWorkerReceiptsRetained": true,
+    "lastObservedExportRunOperations": {
+      "succeeded": 5,
+      "failed": 1
+    },
+    "lastObservedExportRunWalletBalances": [
+      0,
+      5
+    ],
+    "lastObservedHeldAndActive": 0,
+    "finalUiFullCheckpointComplete": true
+  },
+  "picture": {
+    "mask-routing": {
+      "fixedThresholds": {
+        "mae8bitMax": 3,
+        "p95ChannelErrorMax": 12
+      },
+      "fittedAlignment": false,
+      "passed": 5,
+      "total": 6,
+      "checks": [
+        {
+          "frame": 6,
+          "mae8bit": 2.2372445197500794,
+          "p95ChannelError": 7.0,
+          "fixedPass": true
+        },
+        {
+          "frame": 18,
+          "mae8bit": 2.085988445291633,
+          "p95ChannelError": 6.0,
+          "fixedPass": true
+        },
+        {
+          "frame": 30,
+          "mae8bit": 2.836483226846459,
+          "p95ChannelError": 10.0,
+          "fixedPass": true
+        },
+        {
+          "frame": 48,
+          "mae8bit": 2.791762269523574,
+          "p95ChannelError": 10.0,
+          "fixedPass": true
+        },
+        {
+          "frame": 72,
+          "mae8bit": 2.6230788238201135,
+          "p95ChannelError": 9.0,
+          "fixedPass": true
+        },
+        {
+          "frame": 90,
+          "mae8bit": 3.167193806111523,
+          "p95ChannelError": 11.0,
+          "fixedPass": false
+        }
+      ],
+      "finalCandidateSource": "final-preview-r8"
+    },
+    "six-rig": {
+      "fixedThresholds": {
+        "mae8bitMax": 3,
+        "p95ChannelErrorMax": 12
+      },
+      "fittedAlignment": false,
+      "passed": 0,
+      "total": 6,
+      "checks": [
+        {
+          "frame": 6,
+          "mae8bit": 7.8574593761398805,
+          "p95ChannelError": 27.0,
+          "fixedPass": false
+        },
+        {
+          "frame": 18,
+          "mae8bit": 7.759879746314142,
+          "p95ChannelError": 28.0,
+          "fixedPass": false
+        },
+        {
+          "frame": 30,
+          "mae8bit": 7.998520950262981,
+          "p95ChannelError": 29.0,
+          "fixedPass": false
+        },
+        {
+          "frame": 48,
+          "mae8bit": 8.004810147434313,
+          "p95ChannelError": 30.0,
+          "fixedPass": false
+        },
+        {
+          "frame": 72,
+          "mae8bit": 7.6935343052466845,
+          "p95ChannelError": 27.0,
+          "fixedPass": false
+        },
+        {
+          "frame": 90,
+          "mae8bit": 8.087649875863367,
+          "p95ChannelError": 28.0,
+          "fixedPass": false
+        }
+      ]
+    }
+  },
+  "playback": {
+    "base": {
+      "wallMs": 4125.29999999702,
+      "programmeSeconds": 4,
+      "wallTimeRatio": 1.0313249999992549,
+      "decoded": 96,
+      "dropped": 1,
+      "droppedFraction": 0.010416666666666666,
+      "pictureCallbacks": 95,
+      "programmePaints": 96,
+      "maxLayerClockDistanceFrames": 0,
+      "stallOrErrorEvents": [],
+      "fixedCriteria": {
+        "maxWallTimeRatio": 1.15,
+        "maxDroppedFraction": 0.05,
+        "maxLayerClockDistanceFrames": 2
+      },
+      "fixedCriteriaPass": true,
+      "screenRecordingDisabled": true,
+      "semanticColdReopenPass": true
+    },
+    "heavy": {
+      "wallMs": 4219.0999999940395,
+      "programmeSeconds": 4,
+      "wallTimeRatio": 1.0547749999985099,
+      "decoded": 104,
+      "dropped": 30,
+      "droppedFraction": 0.28846153846153844,
+      "pictureCallbacks": 65,
+      "programmePaints": 66,
+      "maxLayerClockDistanceFrames": 0,
+      "stallOrErrorEvents": [],
+      "fixedCriteria": {
+        "maxWallTimeRatio": 1.15,
+        "maxDroppedFraction": 0.05,
+        "maxLayerClockDistanceFrames": 2
+      },
+      "fixedCriteriaPass": false,
+      "screenRecordingDisabled": true,
+      "semanticColdReopenPass": true
+    },
+    "heavy-node": {
+      "wallMs": 4332.10000000149,
+      "programmeSeconds": 4,
+      "wallTimeRatio": 1.0830250000003725,
+      "decoded": 98,
+      "dropped": 39,
+      "droppedFraction": 0.3979591836734694,
+      "pictureCallbacks": 35,
+      "programmePaints": 36,
+      "maxLayerClockDistanceFrames": 0,
+      "stallOrErrorEvents": [],
+      "fixedCriteria": {
+        "maxWallTimeRatio": 1.15,
+        "maxDroppedFraction": 0.05,
+        "maxLayerClockDistanceFrames": 2
+      },
+      "fixedCriteriaPass": false,
+      "screenRecordingDisabled": true,
+      "semanticColdReopenPass": true
+    }
+  },
+  "movies": [
+    {
+      "name": "RGB mask conformance.mp4",
+      "sha256": "ef793b37cead632402d273ab550588a2923a5179b0ccbc8e8e3499fd6e34ed9c",
+      "durationSeconds": 4,
+      "width": 720,
+      "height": 1280,
+      "fps": 24,
+      "finishedPlayback": {
+        "duration": 4,
+        "ended": true,
+        "decoded": 96
+      },
+      "exactOriginalDecodedAudio": true
+    },
+    {
+      "name": "Six Rig conformance.mp4",
+      "sha256": "680cb8674784d457ae6384945c2d7ff4dc3ae941a794f27ec08d2eb9b2093986",
+      "durationSeconds": 4,
+      "width": 720,
+      "height": 1280,
+      "fps": 24,
+      "finishedPlayback": {
+        "duration": 4,
+        "ended": true,
+        "decoded": 96
+      },
+      "exactOriginalDecodedAudio": true
+    }
+  ],
+  "readinessPromotion": false,
+  "paidCalls": 0,
+  "productionWrites": 0,
+  "creatorOverlayClock": "Existing decoded-frame painter in all overlay workspaces",
+  "ui": {
+    "welcomeComparisons": 8,
+    "servedJsCssMatch": 37,
+    "signedInHelpRequestsPassed": 3,
+    "desktopWidths": [
+      1600,
+      1280,
+      1024
+    ],
+    "phoneDesktopGuardPassed": true,
+    "pageErrors": 0
+  }
+}

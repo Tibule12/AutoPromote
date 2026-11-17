@@ -30,7 +30,8 @@ export const normalizeSpeedSegmentsForRender = speedSegments => {
       return segments;
     }
 
-    segments.push({
+    const holdSeconds = toFiniteNumber(segment?.hold_seconds ?? segment?.holdSeconds);
+    const entry = {
       id: segment?.id || `speed-${index + 1}`,
       start_time: startTime,
       end_time: endTime,
@@ -39,7 +40,20 @@ export const normalizeSpeedSegmentsForRender = speedSegments => {
         segment?.pitch_preserved !== undefined
           ? !!segment.pitch_preserved
           : segment?.pitchPreserved !== false,
-    });
+    };
+    if (segment?.direction === "reverse") {
+      entry.direction = "reverse";
+    }
+    if (segment?.freeze) {
+      entry.freeze = true;
+      if (holdSeconds !== null && holdSeconds > 0) {
+        entry.hold_seconds = holdSeconds;
+      }
+    }
+    if (segment?.optical_flow ?? segment?.opticalFlow) {
+      entry.optical_flow = true;
+    }
+    segments.push(entry);
     return segments;
   }, []);
 };
@@ -292,6 +306,14 @@ export const buildViralRenderData = ({
     extraOptions.captionSegments,
     normalizeCaptionSegmentsForRender
   );
+  if (Array.isArray(extraOptions.captionSuppressRanges) && extraOptions.captionSuppressRanges.length) {
+    payload.caption_suppress_ranges = extraOptions.captionSuppressRanges
+      .map(range => ({
+        start_time: Number(range?.start_time ?? range?.start ?? 0),
+        end_time: Number(range?.end_time ?? range?.end ?? 0),
+      }))
+      .filter(range => Number.isFinite(range.start_time) && Number.isFinite(range.end_time) && range.end_time > range.start_time);
+  }
   addDefined(payload, "caption_coverage_mode", extraOptions.captionCoverageMode, String);
   addDefined(payload, "caption_review_copy", extraOptions.captionReviewCopy, Boolean);
   addDefined(

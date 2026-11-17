@@ -76,13 +76,13 @@ async function main() {
     check("Paused scrub reaches the trimmed end without looping");
     stage = "trimmed playback";
     for (let step = 0; step < 5; step++) await scrubber.press("ArrowLeft");
-    assert(Math.abs((await video.evaluate(node => node.currentTime)) - 7.75) < 0.01);
+    assert(Math.abs((await video.evaluate(node => node.currentTime)) - (8 - 5 / 30)) < 0.02);
     await page.getByRole("button", { name: "Play comparison", exact: true }).click();
     await page.waitForFunction(() => {
       const node = document.querySelector('[data-testid="studio-after-video"]');
-      return !node.paused && node.currentTime >= 2 && node.currentTime < 3;
+      return node.paused && node.currentTime >= 7.9 && node.currentTime <= 8.01;
     });
-    check("Native playback loops at the trimmed end instead of continuing into excluded footage");
+    check("Native playback stops at the trimmed end instead of continuing into excluded footage");
     await pause();
     await seek(3);
     stage = "undo and redo";
@@ -175,7 +175,7 @@ async function main() {
           Number(
             document.querySelector(".studio-timeline-resize").getAttribute("aria-valuemax")
           ) === limit,
-        Math.max(148, Math.min(480, height - 220))
+        Math.max(148, height - 350)
       );
       await page.getByTestId("studio-pro-timeline").scrollIntoViewIfNeeded();
       const geometry = await page.evaluate(() => {

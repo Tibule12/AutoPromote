@@ -5,6 +5,16 @@ const os = require("os");
 const path = require("path");
 
 const repoRoot = path.resolve(__dirname, "..");
+// Shared worktree installs can predate the lockfile. Refuse those inputs before
+// generating a bundle that a clean CI install would immediately reject.
+const frontendLock = require(path.join(repoRoot, "frontend/package-lock.json"));
+for (const name of ["webpack", "terser", "terser-webpack-plugin", "dompurify"]) {
+  const installed = require(path.join(repoRoot, "frontend/node_modules", name, "package.json"));
+  const locked = frontendLock.packages[`node_modules/${name}`];
+  if (!locked || installed.version !== locked.version) {
+    throw new Error(`Replay dependency ${name}@${installed.version} differs from frontend lock ${locked?.version}. Run npm ci --prefix frontend before rebuilding.`);
+  }
+}
 const webpack = require(path.join(repoRoot, "frontend/node_modules/webpack"));
 const outputFile = path.join(repoRoot, "src/generated/studioDirectorReplayKernel.cjs");
 const check = process.argv.includes("--check");

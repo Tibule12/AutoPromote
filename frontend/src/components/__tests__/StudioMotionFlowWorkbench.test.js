@@ -94,6 +94,7 @@ function Harness() {
       <output data-testid="state-readout">
         {JSON.stringify({
           overlayCount: overlays.length,
+          overlays,
           plateParent: overlays.find(o => o.id === "plate-1")?.parentId || null,
           plateMatte: overlays.find(o => o.id === "plate-1")?.trackMatte?.mode || "none",
           keyCount: motionKeyframes.length,
@@ -297,8 +298,127 @@ describe("StudioCompWorkbench & StudioNodeFlow UI Integration", () => {
   });
 });
 
+test('a physical down/up/click sequence keeps an output port armed for click-to-wire',()=>{
+  render(<Harness/>);
+  const port=screen.getByTestId('flow-port-out-Transform:plate-1-Out');
+  fireEvent.mouseDown(port);fireEvent.mouseUp(port);fireEvent.click(port);
+  expect(port).toHaveClass('is-wiring-source');
+});
+
+test('a physical input mouse-up followed by click connects once instead of disconnecting the new wire',()=>{
+  render(<Harness/>);fireEvent.click(screen.getByTestId('flow-palette-add_null_rig'));
+  const layers=JSON.parse(screen.getByTestId('state-readout').textContent).overlays;
+  const rig=layers.find(layer=>layer.isNullRig);
+  const output=screen.getByTestId(`flow-port-out-NullRig:${rig.id}-Out`);
+  const input=screen.getByTestId('flow-port-in-Transform:plate-1-Parent');
+  fireEvent.mouseDown(output);fireEvent.mouseUp(output);fireEvent.click(output);
+  fireEvent.mouseDown(input);fireEvent.mouseUp(input);fireEvent.click(input);
+  expect(JSON.parse(screen.getByTestId('state-readout').textContent).plateParent).toBe(rig.id);
+  fireEvent.click(input);
+  expect(JSON.parse(screen.getByTestId('state-readout').textContent).plateParent).toBeNull();
+});
+
+test('published macro scale applies once and preserves child scale and opacity through zero',()=>{
+  render(<Harness/>);
+  fireEvent.click(screen.getByTestId('flow-palette-add_compound_macro'));
+  const read=()=>JSON.parse(screen.getByTestId('state-readout').textContent).overlays;
+  const before=read(),child=before.find(l=>l.id==='plate-1');
+  fireEvent.change(screen.getByTestId('flow-macro-scale-slider'),{target:{value:'1.5'}});
+  expect(read().find(l=>l.id==='plate-1').scale).toBe(child.scale);
+  expect(read().find(l=>l.isCompoundMacro).scale).toBe(1.5);
+  fireEvent.change(screen.getByTestId('flow-macro-opacity-slider'),{target:{value:'0'}});
+  expect(read().find(l=>l.id==='plate-1').opacity).toBe(0);
+  fireEvent.change(screen.getByTestId('flow-macro-opacity-slider'),{target:{value:'1'}});
+  expect(read().find(l=>l.id==='plate-1').opacity).toBe(child.opacity);
+});
+
+test('expanded graph returns with Escape and does not steal Delete from the rest of Studio',()=>{
+  render(<Harness/>);
+  const panel=()=>screen.getByTestId('studio-node-flow'),button=()=>screen.getByTestId('flow-expand-workspace');
+  fireEvent.click(button());expect(button()).toHaveAttribute('aria-pressed','true');
+  fireEvent.keyDown(button(),{key:'Escape'});expect(button()).toHaveAttribute('aria-pressed','false');
+  fireEvent.click(screen.getByTestId('flow-node-Transform:plate-1'));
+  const before=screen.getByTestId('state-readout').textContent;
+  fireEvent.keyDown(document.body,{key:'Delete'});
+  expect(screen.getByTestId('state-readout').textContent).toBe(before);
+  expect(panel()).not.toHaveClass('is-expanded-workspace');
+});
+
+test('A/B divider offers keyboard control with bounded Home and End positions',()=>{
+  render(<Harness/>);fireEvent.click(screen.getByTestId('flow-toggle-ab-wipe'));
+  const handle=screen.getByTestId('flow-viewer-split-handle');
+  fireEvent.keyDown(handle,{key:'End'});expect(handle).toHaveAttribute('aria-valuenow','90');
+  fireEvent.keyDown(handle,{key:'ArrowRight'});expect(handle).toHaveAttribute('aria-valuenow','90');
+  fireEvent.keyDown(handle,{key:'Home'});expect(handle).toHaveAttribute('aria-valuenow','10');
+  fireEvent.keyDown(handle,{key:'ArrowRight',shiftKey:true});expect(handle).toHaveAttribute('aria-valuenow','20');
+});
+
 test('Fit graph reveals the full node network without mutating the canonical edit',()=>{
  render(<Harness/>);const panel=screen.getByTestId('studio-node-flow'),before=screen.getByTestId('state-readout').textContent;fireEvent.click(within(panel).getByRole('button',{name:'Fit graph'}));expect(screen.getByTestId('state-readout').textContent).toBe(before);expect(within(panel).getByRole('button',{name:'Zoom node graph out'})).toBeInTheDocument();
 });
 
 test('Inspect node selects an off-canvas branch and keeps its canonical pose intact',()=>{render(<Harness/>);const panel=screen.getByTestId('studio-node-flow'),before=screen.getByTestId('state-readout').textContent;fireEvent.change(within(panel).getByLabelText('Inspect node'),{target:{value:'Transform:plate-1'}});expect(screen.getByTestId('state-readout').textContent).toBe(before);expect(screen.getByTestId('flow-node-inspector')).toHaveTextContent('Transform');});
+
+test('ColorCorrector applies Camera CST, Film Emulation, HSL Qualifier, Power Window, and Preset Import/Export',()=>{
+  render(<Harness/>);
+  fireEvent.click(screen.getByTestId('flow-node-ColorCorrector:finish'));
+  fireEvent.change(screen.getByTestId('flow-cst-profile-select'),{target:{value:'apple_log'}});
+  fireEvent.change(screen.getByTestId('flow-film-emulation-select'),{target:{value:'35mm_halation'}});
+  fireEvent.change(screen.getByTestId('flow-hsl-qualifier-select'),{target:{value:'skin_isolate'}});
+  fireEvent.change(screen.getByTestId('flow-power-window-select'),{target:{value:'subject_spotlight'}});
+  const state=JSON.parse(screen.getByTestId('state-readout').textContent);
+  expect(state.lutPresetId).toBe('cst:apple_log->rec709');
+  expect(state.lutSize).toBe(17);
+  expect(screen.getByTestId('flow-capture-shot-ref')).toBeInTheDocument();
+  expect(screen.getByTestId('flow-export-preset')).toBeInTheDocument();
+  expect(screen.getByTestId('flow-import-preset')).toBeInTheDocument();
+});
+
+test('Powerhouse Node Flow: ChromaKeyer, 2.5D CornerPin, CompoundMacro, Boolean Sub-Masks, Masked Grade Port, Parameter Expression Pick-Whip, and Quick Node Search',()=>{
+  render(<Harness/>);
+  // 1. Quick Node Search Launcher (/ button) + Splice ChromaKeyer into active branch
+  fireEvent.click(screen.getByTestId('flow-open-quick-search'));
+  expect(screen.getByTestId('flow-quick-search-modal')).toBeInTheDocument();
+  fireEvent.click(screen.getByTestId('flow-splice-into-branch-add_chroma_keyer'));
+  expect(screen.getByTestId('flow-chroma-keyer-controls')).toBeInTheDocument();
+  fireEvent.change(screen.getByTestId('flow-chroma-mode-select'),{target:{value:'hsl_delta'}});
+
+  // 2. Add 2.5D CornerPin Homography Node & stamp 4 corner keyframes
+  fireEvent.click(screen.getByTestId('flow-palette-add_corner_pin'));
+  expect(screen.getByTestId('flow-corner-pin-editor')).toBeInTheDocument();
+  expect(screen.getByTestId('flow-corner-pin-handle-0')).toBeInTheDocument();
+  fireEvent.click(screen.getByTestId('flow-corner-pin-stamp-keys'));
+  expect(JSON.parse(screen.getByTestId('state-readout').textContent).keyCount).toBe(8);
+
+  // 3. Add Polygon Mask & Multi-Mask Boolean Sub-Mask
+  fireEvent.click(screen.getByTestId('flow-palette-add_polygon_mask'));
+  expect(screen.getByTestId('flow-boolean-mask-stack')).toBeInTheDocument();
+  fireEvent.click(screen.getByTestId('flow-add-boolean-submask'));
+  expect(screen.getByTestId('flow-boolean-submask-row-0')).toBeInTheDocument();
+
+  // 4. Select Transform:plate-1 -> 2.5D Depth Parallax + Bind Cross-Node Parameter Expression
+  fireEvent.click(screen.getByTestId('flow-node-Transform:plate-1'));
+  expect(screen.getByTestId('flow-depth-parallax-controls')).toBeInTheDocument();
+  expect(screen.getByTestId('flow-parameter-link-card')).toBeInTheDocument();
+  fireEvent.click(screen.getByTestId('flow-bind-param-link'));
+  expect(screen.getByTestId('flow-active-param-link-scale')).toBeInTheDocument();
+
+  // 5. Select ColorCorrector:finish -> Route PolygonMask:plate-1 into Mask Port
+  fireEvent.click(screen.getByTestId('flow-node-ColorCorrector:finish'));
+  expect(screen.getByTestId('flow-masked-grade-controls')).toBeInTheDocument();
+  fireEvent.change(screen.getByTestId('flow-grade-mask-source-select'),{target:{value:'PolygonMask:plate-1'}});
+
+  // 6. Add CompoundMacro Group Node
+  fireEvent.click(screen.getByTestId('flow-palette-add_compound_macro'));
+  expect(screen.getByTestId('flow-macro-controls')).toBeInTheDocument();
+});
+test('connected grade mask survives advanced edits and uses its own inversion flag',()=>{
+ render(<Harness/>);fireEvent.click(screen.getByTestId('flow-node-ColorCorrector:finish'));
+ fireEvent.change(screen.getByTestId('flow-grade-mask-source-select'),{target:{value:'Transform:plate-1'}});
+ fireEvent.click(screen.getByTestId('flow-grade-mask-invert'));
+ expect(screen.getByTestId('flow-grade-mask-invert')).toBeChecked();
+ expect(screen.getByTestId('flow-grade-mask-source-select')).toHaveValue('Transform:plate-1');
+ fireEvent.change(screen.getByTestId('flow-hsl-qualifier-select'),{target:{value:'skin_isolate'}});
+ expect(screen.getByTestId('flow-grade-mask-invert')).toBeChecked();
+ expect(screen.getByTestId('flow-grade-mask-source-select')).toHaveValue('Transform:plate-1');
+});

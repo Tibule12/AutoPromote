@@ -1,0 +1,27 @@
+{
+  "walkthroughSeconds": 458,
+  "movieSeconds": 17.208333,
+  "audioVerified": true,
+  "files": [
+    {
+      "file": "/home/tibule12/Videos/AutoPromote B-roll Studio \u2014 2026-11-15/05 \u2014 WATCH THIS \u2014 visible Studio actions.mp4",
+      "sha256": "cc54824a59fd6249926763b272fd7cd61c73784d600755e7ca0b1b955217e408",
+      "bytes": 46093489
+    },
+    {
+      "file": "/home/tibule12/Videos/AutoPromote B-roll Studio \u2014 2026-11-15/06 \u2014 Matching Studio edit with sound.mp4",
+      "sha256": "2ff898607e7fe334efd7a4c1f4e55fd8d4822a7342b1afa93008850db40aebf1",
+      "bytes": 5271559
+    },
+    {
+      "file": "/home/tibule12/Videos/AutoPromote B-roll Studio \u2014 2026-11-15/07 \u2014 Matching editable Studio project.autopromote.json",
+      "sha256": "a3ce04ae22c5eb1201e9fc5a77acdd0ad23f520ba56708c8c7f32809b5626f40",
+      "bytes": 171162
+    },
+    {
+      "file": "/home/tibule12/Videos/AutoPromote B-roll Studio \u2014 2026-11-15/08 \u2014 Visible walkthrough chapters and transcript.txt",
+      "sha256": "be9d4b198a6989fae6a9f7b15831c67c2941bd961b1d2bd014f25bfbcb360f15",
+      "bytes": 4683
+    }
+  ]
+}

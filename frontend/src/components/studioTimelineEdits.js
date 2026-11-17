@@ -1,3 +1,4 @@
+import { advanceBRollSource } from './studioBRollTiming';
 // Ripple edits use the retained programme clock; captions remain source-timed
 // and are remapped separately by mapCaptionSegmentsToTimeline.
 import { retainStudioVoiceoverFade } from "./studioAudioFades";
@@ -24,7 +25,7 @@ export const rippleTimedItems = (items, from, to, createId, { preserveVoiceFade 
         startTime: from,
         duration: end - to,
         ...(item.type === "video"
-          ? { sourceStartTime: Number(item.sourceStartTime || 0) + skipped }
+          ? advanceBRollSource(item, skipped)
           : {}),
         ...(item.trimStart !== undefined || preserveVoiceFade
           ? { trimStart: Number(item.trimStart || 0) + skipped }

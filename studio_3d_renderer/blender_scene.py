@@ -343,19 +343,28 @@ def setup_scene(spec, asset_file=None):
     world.camera = camera
     camera.data.type = "PERSP"
     camera.data.lens = s["focalLength"]
-    bpy.ops.object.light_add(type="AREA", location=(-3, 5, 8))
+    key_dir = math.radians(s.get("lightDirection", 35))
+    bpy.ops.object.light_add(type="AREA", location=(math.sin(key_dir) * 6, 5, 8))
     key = bpy.context.object
     key.name = "Softbox key"
     key.data.energy = 420 * s["lightIntensity"] / 2.2
     key.data.color = rgba(s["lightColor"])[:3]
     key.data.shape = "DISK"
     key.data.size = 6
+    key.data.use_shadow = bool(s.get("shadows", True))
     bpy.ops.object.light_add(type="AREA", location=(4, -2, 4))
     rim = bpy.context.object
     rim.name = "Cool rim"
     rim.data.energy = 360
     rim.data.color = (.52, .63, 1)
     rim.data.size = 4
+    rim.data.use_shadow = bool(s.get("shadows", True))
+    if s.get("reflections", True) and s["template"] != "object_scene":
+        world.world.use_nodes = True
+        background = world.world.node_tree.nodes.get("Background")
+        if background:
+            background.inputs["Color"].default_value = (.22, .26, .36, 1)
+            background.inputs["Strength"].default_value = .18
     if s["template"] == "object_scene":
         # A physical broad fill and soft environment expose dark materials and
         # give independently authored metal/glass objects readable reflections.

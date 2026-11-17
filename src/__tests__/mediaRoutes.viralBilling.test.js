@@ -178,6 +178,19 @@ describe("viral scan and render billing recovery", () => {
     expect(refundCredits).not.toHaveBeenCalled();
   });
 
+  it('rejects invalid clip preferences before charging or contacting the worker',async()=>{
+    const response=await request(buildApp()).post('/api/media/analyze').send({fileUrl:'https://example.com/source.mp4',selectionSettings:{minDuration:60,maxDuration:15,destinations:['tiktok'],focus:''}});
+    expect(response.statusCode).toBe(400);expect(response.body.code).toBe('VIRAL_SCAN_SETTINGS_INVALID');
+    expect(deductCredits).not.toHaveBeenCalled();expect(mockAnalyzeVideo).not.toHaveBeenCalled();
+  });
+
+  it('carries validated length, destinations and brief to actual analysis admission',async()=>{
+    mockAnalyzeVideo.mockResolvedValue([]);
+    const settings={minDuration:60,maxDuration:90,destinations:['youtube_shorts'],focus:'customer retention'};
+    const response=await request(buildApp()).post('/api/media/analyze').send({fileUrl:'https://example.com/source.mp4',selectionSettings:settings});
+    expect(response.statusCode).toBe(200);expect(mockAnalyzeVideo).toHaveBeenCalledWith('https://example.com/source.mp4','viral-user',expect.objectContaining({selectionSettings:{...settings,version:'moments-v2'}}));
+  });
+
   it("verifies an owned temporary upload and deletes it after analysis", async () => {
     mockAnalyzeVideo.mockResolvedValue([{ id: "secure-clip", start: 3, end: 15 }]);
 

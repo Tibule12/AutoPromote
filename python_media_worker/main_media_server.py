@@ -111,6 +111,17 @@ except ImportError:
     )
 
 try:
+    from .studio_caption_renderer import (
+        filter_suppressed_whisper_segments,
+        generate_studio_ass_captions,
+    )
+except ImportError:
+    from studio_caption_renderer import (
+        filter_suppressed_whisper_segments,
+        generate_studio_ass_captions,
+    )
+
+try:
     from .viral_creative_effects import build_creative_filter_complex, normalize_creative_plan
     from .motion_sculpture import render_motion_sculpture, validate_rendered_media
     from .content_aware_reality import (
@@ -1207,6 +1218,7 @@ async def materialize_video_input(video_url, local_path, keep_audio=False, max_l
                     "-i",
                     source,
                     "-c:v", "libx264",
+                    "-threads", "2",
                     "-preset", "ultrafast",
                     "-crf", "23",
                     "-vf", build_cfr_video_filter(max_long_edge),
@@ -1276,6 +1288,7 @@ async def materialize_video_input(video_url, local_path, keep_audio=False, max_l
                         "-fflags", "+genpts",
                         "-i", resolved_local_path,
                         "-c:v", "libx264",
+                        "-threads", "2",
                         "-preset", "ultrafast",
                         "-crf", "23",
                         "-vf", build_cfr_video_filter(max_long_edge),
@@ -1325,6 +1338,7 @@ async def materialize_video_input(video_url, local_path, keep_audio=False, max_l
                 "-fflags", "+genpts",
                 "-i", absolute_source,
                 "-c:v", "libx264",
+                "-threads", "2",
                 "-preset", "ultrafast",
                 "-crf", "23",
                 "-vf", build_cfr_video_filter(max_long_edge),
@@ -5106,31 +5120,31 @@ CAPTION_STYLES = {
     },
     "glow": {
         "label": "Neon Glow",
-        "fontname": "DejaVu Sans",
-        "primary_color": "&H00FFAA00",  # Cyan-ish (BGR)
-        "outline_color": "&H00FF6600",  # Blue glow
-        "highlight_color": "&H0000FFFF",  # Yellow highlight
-        "fontsize": 64,
-        "bold": True,
-        "outline": 6,
-        "shadow": 4,
+        "fontname": "Inter Black",
+        "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00FF7711",
+        "highlight_color": "&H0052E6F6",
+        "fontsize": 66,
+        "bold": False,
+        "outline": 3,
+        "shadow": 0,
         "alignment": 2,
-        "margin_v": 115,
-        "animation": "glow_pulse",
+        "margin_v": 116,
+        "animation": "neon_bloom",
     },
     "bounce": {
         "label": "Bounce",
-        "fontname": "DejaVu Sans",
+        "fontname": "Inter ExtraBold",
         "primary_color": "&H00FFFFFF",
-        "outline_color": "&H00222222",
-        "highlight_color": "&H005050FF",  # Red highlight (BGR)
+        "outline_color": "&H00120E18",
+        "highlight_color": "&H005050FF",
         "fontsize": 68,
-        "bold": True,
-        "outline": 4,
+        "bold": False,
+        "outline": 5,
         "shadow": 3,
         "alignment": 2,
-        "margin_v": 125,
-        "animation": "bounce_word",
+        "margin_v": 124,
+        "animation": "vertical_bounce",
     },
     "minimal": {
         "label": "Minimal Clean",
@@ -5147,10 +5161,10 @@ CAPTION_STYLES = {
         "animation": "fade_word",
     },
     "headline": {
-        "label": "Big Headline", "fontname": "DejaVu Sans", "primary_color": "&H00FFFFFF",
-        "outline_color": "&H00050508", "highlight_color": "&H003DB3FF", "fontsize": 78,
-        "bold": True, "outline": 5, "shadow": 3, "alignment": 2, "margin_v": 120,
-        "animation": "scale_pop", "uppercase": True, "spacing": -1,
+        "label": "Big Headline", "fontname": "Inter Black", "primary_color": "&H00FFFFFF",
+        "outline_color": "&H0008060E", "highlight_color": "&H003DB3FF", "fontsize": 80,
+        "bold": False, "outline": 6, "shadow": 4, "alignment": 2, "margin_v": 120,
+        "animation": "spring_pop", "uppercase": True, "spacing": -1,
     },
     "boxed": {
         "label": "Subtitle Card", "fontname": "DejaVu Sans", "primary_color": "&H00FFFFFF",
@@ -5159,22 +5173,22 @@ CAPTION_STYLES = {
         "animation": "karaoke_fill", "border_style": 3, "back_color": "&HC0080402",
     },
     "comic": {
-        "label": "Comic Punch", "fontname": "DejaVu Sans", "primary_color": "&H00111111",
-        "outline_color": "&H0007070B", "highlight_color": "&H0052E6F6", "fontsize": 70,
-        "bold": True, "outline": 5, "shadow": 4, "alignment": 2, "margin_v": 120,
-        "animation": "bounce_word", "uppercase": True,
+        "label": "Comic Punch", "fontname": "Inter Black", "primary_color": "&H00FFFFFF",
+        "outline_color": "&H0008080F", "highlight_color": "&H0052E6F6", "fontsize": 72,
+        "bold": False, "outline": 7, "shadow": 5, "alignment": 2, "margin_v": 120,
+        "animation": "spring_pop", "uppercase": True,
     },
     "gradient": {
-        "label": "Gradient Pop", "fontname": "DejaVu Sans", "primary_color": "&H00FFFFFF",
-        "outline_color": "&H00200B12", "highlight_color": "&H008F5DFF", "fontsize": 62,
-        "bold": True, "outline": 4, "shadow": 3, "alignment": 2, "margin_v": 112,
-        "animation": "story_pop", "border_style": 3, "back_color": "&HC0120B20",
+        "label": "Gradient Pop", "fontname": "Inter ExtraBold", "primary_color": "&H00FFFFFF",
+        "outline_color": "&H0018091E", "highlight_color": "&H008F5DFF", "fontsize": 64,
+        "bold": False, "outline": 4, "shadow": 3, "alignment": 2, "margin_v": 114,
+        "animation": "active_pill",
     },
     "typewriter": {
         "label": "Typewriter", "fontname": "DejaVu Sans Mono", "primary_color": "&H00FFFFFF",
         "outline_color": "&H00100804", "highlight_color": "&H00D0E03C", "fontsize": 50,
-        "bold": True, "outline": 2, "shadow": 1, "alignment": 2, "margin_v": 105,
-        "animation": "karaoke_fill",
+        "bold": True, "outline": 2, "shadow": 1, "alignment": 2, "margin_v": 108,
+        "animation": "true_typewriter",
     },
     "editorial": {
         "label": "Editorial Serif", "fontname": "DejaVu Serif", "primary_color": "&H00FFFFFF",
@@ -5183,31 +5197,28 @@ CAPTION_STYLES = {
         "animation": "fade_word", "italic": True, "spacing": 1,
     },
     "sticker": {
-        "label": "Sticker Stack", "fontname": "DejaVu Sans", "primary_color": "&H00100B08",
-        "outline_color": "&H00F8FBFF", "highlight_color": "&H008F5DFF", "fontsize": 66,
-        "bold": True, "outline": 9, "shadow": 6, "alignment": 2, "margin_v": 118,
-        "animation": "scale_pop", "border_style": 3, "back_color": "&H00FFFFFF",
-        "uppercase": True,
+        "label": "Sticker Stack", "fontname": "Inter Black", "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00140E0A", "highlight_color": "&H008F5DFF", "fontsize": 68,
+        "bold": False, "outline": 5, "shadow": 4, "alignment": 2, "margin_v": 118,
+        "animation": "sticker_pill", "uppercase": True,
     },
     "marker": {
-        "label": "Marker Swipe", "fontname": "DejaVu Sans", "primary_color": "&H00121110",
-        "outline_color": "&H0052E6F6", "highlight_color": "&H00121110", "fontsize": 66,
-        "bold": True, "outline": 7, "shadow": 1, "alignment": 2, "margin_v": 118,
-        "animation": "scale_pop", "border_style": 3, "back_color": "&H0052E6F6",
-        "uppercase": True, "spacing": -1,
+        "label": "Marker Swipe", "fontname": "Inter ExtraBold", "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00101018", "highlight_color": "&H0052E6F6", "fontsize": 66,
+        "bold": False, "outline": 4, "shadow": 2, "alignment": 2, "margin_v": 118,
+        "animation": "marker_swipe", "uppercase": True,
     },
     "glass": {
-        "label": "Glass", "fontname": "DejaVu Sans", "primary_color": "&H00FFFFFF",
-        "outline_color": "&HA8402818", "highlight_color": "&H00D0E03C", "fontsize": 58,
-        "bold": True, "outline": 7, "shadow": 3, "alignment": 2, "margin_v": 112,
-        "animation": "glow_pulse", "border_style": 3, "back_color": "&HA828160D",
+        "label": "Glass", "fontname": "Inter SemiBold", "primary_color": "&H00FFFFFF",
+        "outline_color": "&H8818120E", "highlight_color": "&H00D0E03C", "fontsize": 56,
+        "bold": False, "outline": 2, "shadow": 0, "alignment": 2, "margin_v": 112,
+        "animation": "glass_card",
     },
     "newsroom": {
-        "label": "News Flash", "fontname": "Liberation Sans Narrow", "primary_color": "&H00FFFFFF",
-        "outline_color": "&H004516C5", "highlight_color": "&H006DE6FF", "fontsize": 67,
-        "bold": True, "outline": 8, "shadow": 5, "alignment": 2, "margin_v": 116,
-        "animation": "scale_pop", "border_style": 3, "back_color": "&H004516C5",
-        "uppercase": True, "spacing": 1,
+        "label": "News Flash", "fontname": "Inter Black", "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00100A14", "highlight_color": "&H006DE6FF", "fontsize": 66,
+        "bold": False, "outline": 4, "shadow": 3, "alignment": 2, "margin_v": 116,
+        "animation": "active_pill", "uppercase": True, "spacing": 1,
     },
     "luxury": {
         "label": "Luxury", "fontname": "DejaVu Serif", "primary_color": "&H00E9F8FF",
@@ -5216,11 +5227,40 @@ CAPTION_STYLES = {
         "animation": "fade_word", "italic": True, "spacing": 3,
     },
     "retro": {
-        "label": "Retro", "fontname": "DejaVu Sans Condensed", "primary_color": "&H00C9F1FF",
+        "label": "Retro", "fontname": "Inter ExtraBold", "primary_color": "&H00C9F1FF",
         "outline_color": "&H0011193B", "highlight_color": "&H006EE3FF", "fontsize": 64,
-        "bold": True, "outline": 7, "shadow": 5, "alignment": 2, "margin_v": 118,
-        "animation": "bounce_word", "border_style": 3, "back_color": "&H002A47B7",
-        "uppercase": True, "spacing": 1,
+        "bold": False, "outline": 5, "shadow": 4, "alignment": 2, "margin_v": 118,
+        "animation": "vertical_bounce", "uppercase": True, "spacing": 1,
+    },
+    "word_pill": {
+        "label": "Word Pill", "fontname": "Inter ExtraBold", "primary_color": "&H00FFFFFF",
+        "outline_color": "&H000D0A14", "highlight_color": "&H003DB3FF", "fontsize": 64,
+        "bold": False, "outline": 4, "shadow": 2, "alignment": 2, "margin_v": 116,
+        "animation": "active_pill",
+    },
+    "spring_slam": {
+        "label": "Spring Slam", "fontname": "Inter Black", "primary_color": "&H00FFFFFF",
+        "outline_color": "&H0008060E", "highlight_color": "&H00FF5D8F", "fontsize": 76,
+        "bold": False, "outline": 6, "shadow": 4, "alignment": 2, "margin_v": 122,
+        "animation": "spring_pop", "uppercase": True, "spacing": -1,
+    },
+    "neon_bloom": {
+        "label": "Neon Bloom", "fontname": "Inter Black", "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00F6E652", "highlight_color": "&H00D0E03C", "fontsize": 66,
+        "bold": False, "outline": 3, "shadow": 0, "alignment": 2, "margin_v": 116,
+        "animation": "neon_bloom",
+    },
+    "editorial_duo": {
+        "label": "Editorial Duo", "fontname": "Inter SemiBold", "primary_color": "&H00FFFFFF",
+        "outline_color": "&H68000000", "highlight_color": "&H003DB3FF", "fontsize": 58,
+        "bold": False, "outline": 3, "shadow": 2, "alignment": 2, "margin_v": 114,
+        "animation": "editorial_duo", "uppercase": True, "spacing": 1,
+    },
+    "kinetic_bar": {
+        "label": "Kinetic Bar", "fontname": "Inter ExtraBold", "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00120E0A", "highlight_color": "&H003CE0D0", "fontsize": 60,
+        "bold": False, "outline": 3, "shadow": 2, "alignment": 2, "margin_v": 114,
+        "animation": "kinetic_bar",
     },
 }
 
@@ -5353,315 +5393,23 @@ def generate_ass_captions(
     video_height=1920,
     caption_position="lower",
     caption_scale=1.0,
+    suppress_ranges=None,
 ):
     """
     Generate ASS (Advanced SubStation Alpha) subtitle file content
-    with word-level animated captions from Whisper's word_timestamps output.
+    with studio typography, vector pills, spring/bounce motion and word-level accents.
     """
-    style = resolve_caption_layout(
-        caption_position,
-        caption_scale,
-        CAPTION_STYLES.get(style_name, CAPTION_STYLES["bold_pop"]),
+    return generate_studio_ass_captions(
+        whisper_result=whisper_result,
+        caption_styles=CAPTION_STYLES,
+        resolve_story_treatment=resolve_story_caption_treatment,
+        style_name=style_name,
+        video_width=video_width,
+        video_height=video_height,
+        caption_position=caption_position,
+        caption_scale=caption_scale,
+        suppress_ranges=suppress_ranges,
     )
-    # Presets are authored for a 1080px-wide canvas. Keep text and safe margins
-    # proportional on landscape, portrait, preview-sized and 4K deliveries.
-    caption_pixel_scale = max(0.1, float(video_width) / 1080.0)
-    style["fontsize"] = max(12, round(style["fontsize"] * caption_pixel_scale))
-    style["outline"] = max(1, round(style["outline"] * caption_pixel_scale))
-    style["shadow"] = max(0, round(style["shadow"] * caption_pixel_scale))
-    style["margin_v"] = 0 if style["alignment"] == 5 else round(video_height * .12)
-    caption_margin_x = max(8, round(video_width * .04))
-    segments = whisper_result.get("segments", [])
-
-    # ASS header
-    ass_lines = [
-        "[Script Info]",
-        "ScriptType: v4.00+",
-        f"PlayResX: {video_width}",
-        f"PlayResY: {video_height}",
-        "WrapStyle: 0",
-        "ScaledBorderAndShadow: yes",
-        "",
-        "[V4+ Styles]",
-        "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, "
-        "Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, "
-        "Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
-        f"Style: Default,{style['fontname']},{style['fontsize']},{style['primary_color']},"
-        f"{style['highlight_color']},{style['outline_color']},{style.get('back_color', '&H80000000')},"
-        f"{'-1' if style['bold'] else '0'},{'-1' if style.get('italic') else '0'},0,0,100,100,{style.get('spacing', 0)},0,{style.get('border_style', 1)},{style['outline']},"
-        f"{style['shadow']},{style['alignment']},{caption_margin_x},{caption_margin_x},{style['margin_v']},1",
-        f"Style: Active,{style['fontname']},{style['fontsize']},{style['highlight_color']},"
-        f"{style['primary_color']},{style['outline_color']},{style.get('back_color', '&H80000000')},"
-        f"-1,{'-1' if style.get('italic') else '0'},0,0,100,100,{style.get('spacing', 0)},0,{style.get('border_style', 1)},{style['outline'] + 1},"
-        f"{style['shadow']},{style['alignment']},{caption_margin_x},{caption_margin_x},{style['margin_v']},1",
-        "",
-        "[Events]",
-        "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text",
-    ]
-
-    hallucinations = {"thank you.", "thanks.", "bye.", "music.", "watching.", "mbc", "lbc", "you", "silence"}
-
-    def caption_word(value):
-        clean_value = str(value or "").strip()
-        if style.get("uppercase"):
-            clean_value = clean_value.upper()
-        return _escape_ass(clean_value)
-
-    for segment_index, segment in enumerate(segments):
-        words = segment.get("words", [])
-        seg_text = str(segment.get("text", "")).strip()
-
-        # Filter hallucinations
-        if seg_text.lower().strip(". ") in hallucinations:
-            continue
-        if segment.get("no_speech_prob", 0) > 0.8:
-            continue
-
-        caption_treatment = resolve_story_caption_treatment(
-            segment,
-            segment_index,
-            video_width,
-            video_height,
-            style["fontsize"],
-            default_position=caption_position,
-        )
-        placement_override = caption_treatment["text_override"]
-        active_accent = caption_treatment["accent"]
-        emphasis_accent = (
-            style["primary_color"] if style_name == "marker" else active_accent
-        )
-        design_override = (
-            f"{{\\3c{active_accent}\\c{style['primary_color']}}}"
-            if style_name == "marker"
-            else ""
-        )
-        icon_prefix = (
-            f"{{\\fnNoto Sans Symbols2\\c{active_accent}\\fscx136\\fscy136}}"
-            f"{_escape_ass(caption_treatment['icon'])}"
-            f"{{\\fn{style['fontname']}\\c{style['primary_color']}\\fscx100\\fscy100}}\\h"
-            if caption_treatment.get("icon")
-            else ""
-        )
-
-        if not words:
-            # Fallback: show full segment text without word-level animation
-            start_ass = _seconds_to_ass_time(segment["start"])
-            end_ass = _seconds_to_ass_time(segment["end"])
-            clean = re.sub(r"\[.*?\]|\(.*?\)", "", seg_text).strip()
-            if clean and len(clean) >= 2:
-                ass_lines.append(
-                    f"Dialogue: 0,{start_ass},{end_ass},Default,,0,0,0,,"
-                    f"{placement_override}{design_override}{{\\c{emphasis_accent}}}"
-                    f"{icon_prefix}{caption_word(clean)}"
-                )
-            continue
-
-        # Keep enough neighbouring words together to preserve a phrase. The
-        # previous three-word split produced fragments such as "nathi through
-        # the" even when the reviewed line itself was correct.
-        story_group_size = 4
-        story_max_chars = max(
-            20,
-            min(34, int(video_width / max(1.0, style["fontsize"] * 0.58))),
-        )
-        groups = _chunk_words(
-            words,
-            max_words=(
-                story_group_size if style["animation"] == "story_pop" else 5
-            ),
-            max_chars=(
-                story_max_chars if style["animation"] == "story_pop" else None
-            ),
-        )
-
-        for group in groups:
-            if not group:
-                continue
-            group_start = group[0]["start"]
-            group_end = group[-1]["end"]
-            start_ass = _seconds_to_ass_time(group_start)
-            end_ass = _seconds_to_ass_time(group_end)
-
-            # Build the animated text line
-            if style["animation"] in {"rainbow_words", "focus_cut"}:
-                rainbow_palette = [
-                    "&H008F5DFF", "&H003DB3FF", "&H0052E6F6", "&H009BF572",
-                    "&H00D0E03C", "&H00FFA854", "&H00FF75A8",
-                ]
-                for i, word in enumerate(group):
-                    w_start = _seconds_to_ass_time(word["start"])
-                    w_end = _seconds_to_ass_time(word["end"])
-                    parts = []
-                    for j, candidate in enumerate(group):
-                        candidate_text = caption_word(candidate.get("word", ""))
-                        if not candidate_text:
-                            continue
-                        word_color = rainbow_palette[j % len(rainbow_palette)]
-                        if style["animation"] == "rainbow_words":
-                            if j == i:
-                                parts.append(
-                                    f"{{\\c{word_color}\\fscx122\\fscy122\\bord{style['outline'] + 2}"
-                                    f"\\t(60,190,\\fscx106\\fscy106)}}{candidate_text}"
-                                    f"{{\\fscx100\\fscy100\\bord{style['outline']}}}"
-                                )
-                            else:
-                                parts.append(f"{{\\c{word_color}}}{candidate_text}")
-                        elif j == i:
-                            parts.append(
-                                f"{{\\alpha&H00&\\c{emphasis_accent}\\fscx120\\fscy120"
-                                f"\\bord{style['outline'] + 2}\\t(70,210,\\fscx106\\fscy106)}}"
-                                f"{candidate_text}{{\\fscx100\\fscy100\\bord{style['outline']}}}"
-                            )
-                        else:
-                            parts.append(f"{{\\alpha&H38&\\c{style['primary_color']}}}{candidate_text}{{\\alpha&H00&}}")
-                    if parts:
-                        ass_lines.append(
-                            f"Dialogue: 2,{w_start},{w_end},Default,,0,0,0,,"
-                            f"{placement_override}{design_override}{{\\fad(45,65)}}{icon_prefix}{' '.join(parts)}"
-                        )
-
-            elif style["animation"] == "story_pop":
-                for i, word in enumerate(group):
-                    w_start = _seconds_to_ass_time(word["start"])
-                    w_end = _seconds_to_ass_time(word["end"])
-                    parts = []
-                    for j, candidate in enumerate(group):
-                        candidate_text = caption_word(candidate.get("word", ""))
-                        if not candidate_text:
-                            continue
-                        if j == i:
-                            parts.append(
-                                f"{{\\c{emphasis_accent}\\fscx118\\fscy118\\bord{style['outline'] + 1}"
-                                f"\\t(70,210,\\fscx104\\fscy104)}}{candidate_text}"
-                                f"{{\\c{style['primary_color']}\\fscx100\\fscy100\\bord{style['outline']}}}"
-                            )
-                        else:
-                            parts.append(candidate_text)
-                    if parts:
-                        line = " ".join(parts)
-                        ass_lines.append(
-                            f"Dialogue: 2,{w_start},{w_end},Default,,0,0,0,,"
-                            f"{placement_override}{design_override}{{\\fad(55,70)}}{icon_prefix}{line}"
-                        )
-
-            elif style["animation"] == "karaoke_fill":
-                # Karaoke: words fill with color as they're spoken
-                text_parts = []
-                rendered_words = [caption_word(word.get("word", "")) for word in group]
-                rendered_words = [word for word in rendered_words if word]
-                break_index = None
-                if (
-                    style_name == "boxed"
-                    and len(rendered_words) > 2
-                    and (sum(len(word) for word in rendered_words) + len(rendered_words) - 1)
-                    * style["fontsize"] * 0.58
-                    > video_width * 0.72
-                ):
-                    target_chars = (sum(len(word) for word in rendered_words) + len(rendered_words) - 1) / 2
-                    running_chars = 0
-                    break_index = min(
-                        range(1, len(rendered_words)),
-                        key=lambda index: abs(
-                            sum(len(word) for word in rendered_words[:index]) + index - 1 - target_chars
-                        ),
-                    )
-                for word_index, word in enumerate(group):
-                    w_dur_cs = max(1, int((word["end"] - word["start"]) * 100))
-                    word_text = caption_word(word.get("word", ""))
-                    if word_text:
-                        spacer = "" if not text_parts else "\\N" if word_index == break_index else " "
-                        text_parts.append(f"{spacer}{{\\kf{w_dur_cs}}}{word_text}")
-                if text_parts:
-                    line = "".join(text_parts)
-                    ass_lines.append(
-                        f"Dialogue: 0,{start_ass},{end_ass},Default,,0,0,0,,"
-                        f"{placement_override}{design_override}{{\\2c{emphasis_accent}}}{icon_prefix}{line}"
-                    )
-
-            elif style["animation"] == "scale_pop":
-                # Bold Pop: active word scales up briefly
-                for i, word in enumerate(group):
-                    w_start = _seconds_to_ass_time(word["start"])
-                    w_end = _seconds_to_ass_time(word["end"])
-                    word_text = caption_word(word.get("word", ""))
-                    if not word_text:
-                        continue
-                    # Build line: all words shown, active word is highlighted + scaled
-                    parts = []
-                    for j, w in enumerate(group):
-                        wt = caption_word(w.get("word", ""))
-                        if not wt:
-                            continue
-                        if j == i:
-                            parts.append(f"{{\\fscx115\\fscy115\\c{emphasis_accent}\\b1}}{wt}{{\\fscx100\\fscy100\\c{style['primary_color']}\\b1}}")
-                        else:
-                            parts.append(wt)
-                    line = " ".join(parts)
-                    ass_lines.append(
-                        f"Dialogue: 0,{w_start},{w_end},Default,,0,0,0,,"
-                        f"{placement_override}{design_override}{icon_prefix}{line}"
-                    )
-
-            elif style["animation"] == "bounce_word":
-                # Bounce: active word moves up slightly
-                for i, word in enumerate(group):
-                    w_start = _seconds_to_ass_time(word["start"])
-                    w_end = _seconds_to_ass_time(word["end"])
-                    word_text = caption_word(word.get("word", ""))
-                    if not word_text:
-                        continue
-                    parts = []
-                    for j, w in enumerate(group):
-                        wt = caption_word(w.get("word", ""))
-                        if not wt:
-                            continue
-                        if j == i:
-                            parts.append(f"{{\\fscy116\\t(80,190,\\fscy100)\\c{emphasis_accent}\\b1}}{wt}{{\\fscy100\\c{style['primary_color']}\\b0}}")
-                        else:
-                            parts.append(wt)
-                    line = " ".join(parts)
-                    ass_lines.append(
-                        f"Dialogue: 0,{w_start},{w_end},Default,,0,0,0,,"
-                        f"{placement_override}{design_override}{icon_prefix}{line}"
-                    )
-
-            elif style["animation"] == "glow_pulse":
-                # Glow: active word gets extra outline glow
-                for i, word in enumerate(group):
-                    w_start = _seconds_to_ass_time(word["start"])
-                    w_end = _seconds_to_ass_time(word["end"])
-                    word_text = caption_word(word.get("word", ""))
-                    if not word_text:
-                        continue
-                    parts = []
-                    for j, w in enumerate(group):
-                        wt = caption_word(w.get("word", ""))
-                        if not wt:
-                            continue
-                        if j == i:
-                            parts.append(f"{{\\bord{style['outline'] + 3}\\3c{emphasis_accent}\\c{emphasis_accent}}}{wt}{{\\bord{style['outline']}\\3c{style['outline_color']}\\c{style['primary_color']}}}")
-                        else:
-                            parts.append(wt)
-                    line = " ".join(parts)
-                    ass_lines.append(
-                        f"Dialogue: 0,{w_start},{w_end},Default,,0,0,0,,"
-                        f"{placement_override}{design_override}{icon_prefix}{line}"
-                    )
-
-            else:
-                # fade_word (minimal): simple fade per word group
-                clean_text = " ".join(caption_word(w.get("word", "")) for w in group if w.get("word", "").strip())
-                if clean_text:
-                    fade_in_ms = 100
-                    fade_out_ms = 150
-                    ass_lines.append(
-                        f"Dialogue: 0,{start_ass},{end_ass},Default,,0,0,0,,"
-                        f"{placement_override}{design_override}"
-                        f"{{\\fad({fade_in_ms},{fade_out_ms})\\c{emphasis_accent}}}"
-                        f"{icon_prefix}{clean_text}"
-                    )
-
-    return "\n".join(ass_lines)
 
 
 def multicam_caption_split_rects(video_width, video_height):
@@ -8793,6 +8541,12 @@ def preserve_reviewed_video_samples(input_path, duration, reviewed):
             float(numerator) / float(denominator), duration, reviewed)
     except (KeyError, ValueError, TypeError, ZeroDivisionError, StopIteration):
         return False
+
+
+def has_studio_node_grade_masks(plan):
+    plan = plan or {}
+    return bool(plan.get('node_mask') or any((item.get('effects') or {}).get('node_mask')
+        for item in plan.get('adjustment_layers') or []))
 
 
 def build_studio_sequence_encode_args(reviewed_subject=False, fps=None, preserve_samples=False):
@@ -14282,8 +14036,8 @@ async def plan_story_visuals(request: Dict[str, Any]):
 @app.post("/analyze-clips")
 async def analyze_clips(request: Dict[str, Any]):
     """
-    Phase 2: Scene Detection + Viral Keyword Spotting (Opus Clip Style)
-    Analyzes video content to find logical breakpoints/scenes AND scans audio for viral keywords.
+    Select source-bound short-form moments using sentence completeness,
+    opening/context/payoff, audio/visual evidence and diversity.
     Accepts video_url (http/https) or local_path (direct filesystem path from upload-source).
     """
     start_time = time.time()
@@ -14443,193 +14197,37 @@ async def analyze_clips(request: Dict[str, Any]):
         except Exception as scoring_err:
             logger.warning(f"Enhanced scoring failed (non-fatal): {scoring_err}")
 
-        scenes = []
-
         source_duration = get_media_duration(input_path)
-
-        # Detect content type for caption intelligence
         content_type_info = detect_content_type(input_path, audio_energy)
         content_type_label = content_type_info.get("contentType", "general")
         transcription_segments = annotate_transcription_segments(transcription_segments)
-        confident_speech_seconds = sum(
-            max(0.0, float(segment.get("end", 0.0) or 0.0) - float(segment.get("start", 0.0) or 0.0))
-            for segment in transcription_segments
-            if float(segment.get("transcriptConfidence", 0.0) or 0.0) >= 0.62
-        )
-        spoken_word_count = sum(
-            len(str(segment.get("text") or "").split())
-            for segment in transcription_segments
-        )
-        if (
-            content_type_label in {"general", "tutorial_demo"}
-            and audio_present
-            and confident_speech_seconds >= 8.0
-            and spoken_word_count >= 18
-        ):
-            content_type_label = "podcast_conversation"
-            content_type_info = {
-                **content_type_info,
-                "contentType": content_type_label,
-                "confidence": max(0.78, float(content_type_info.get("confidence", 0.0) or 0.0)),
-                "hints": list(dict.fromkeys([*(content_type_info.get("hints") or []), "sustained_confident_speech"])),
-            }
-        logger.info(f"Content type: {content_type_label} (conf={content_type_info.get('confidence')})")
         transcript_quality = summarize_transcript_quality(transcription_segments, content_type_label)
-        logger.info(
-            "Transcript quality: avg=%.2f reliable=%s ratio=%.2f mode=%s",
-            transcript_quality.get("averageConfidence", 0.0),
-            transcript_quality.get("reliableSegmentCount", 0),
-            transcript_quality.get("reliableSegmentRatio", 0.0),
-            transcript_quality.get("analysisMode"),
+        try:
+            from .viral_moment_selection import build_moment_candidates, finalize_moments, selection_settings
+        except ImportError:
+            from viral_moment_selection import build_moment_candidates, finalize_moments, selection_settings
+        settings = selection_settings(request.get("selection_settings"))
+        scene_ranges = [(scene[0].get_seconds(), scene[1].get_seconds()) for scene in scene_list]
+        # Sentence windows compete on opening, context and payoff. Camera cuts
+        # are visual evidence, not a reason to extend speech into another topic.
+        ranked_candidates = build_moment_candidates(
+            transcription_segments if transcript_quality.get("allowTranscriptWindows") else [], scene_ranges, source_duration,
+            settings=settings, audio=audio_energy, motion=motion_scores,
         )
-
-        if not scene_list:
-            logger.warning(f"SceneDetect returned no scenes. Using timed viral windows for {source_duration:.2f}s source.")
-            scenes.extend(build_timed_viral_windows(
-                source_duration,
-                VIRAL_KEYWORDS,
-                audio_energy,
-                motion_scores,
-                reason_prefix="Smart timing fallback",
-            ))
-            for scene in scenes:
-                scene["hasAudio"] = audio_present
-                scene["contentType"] = content_type_label
-        else:
-            # Map visual scenes to data structure
-            for i, scene in enumerate(scene_list):
-                start_time_sec = scene[0].get_seconds()
-                end_time_sec = scene[1].get_seconds()
-                duration_sec = end_time_sec - start_time_sec
-                
-                # Filter out tiny blips (< 2s)
-                if duration_sec < 2.0: continue
-
-                # Default Score
-                score = 60 # Base score for visual interest
-                reason_parts = ["Visual change detected"]
-                scene_text = ""
-                scene_transcript_confidence = 0.0
-
-                # 4. Integrate Transcription (Keyword Spotting)
-                scene_segments_txt = [
-                    seg for seg in transcription_segments 
-                    if (
-                        seg["start"] < end_time_sec
-                        and seg["end"] > start_time_sec
-                        and float(seg.get("transcriptConfidence", 0.0) or 0.0)
-                        >= (0.72 if content_type_label in {"choir_performance", "music_performance"} else 0.34)
-                    )
-                ]
-                
-                if scene_segments_txt:
-                    window_text_parts = []
-                    for transcript_segment in scene_segments_txt:
-                        timed_words = transcript_segment.get("words") or []
-                        selected_words = [
-                            str(word.get("word") or "").strip()
-                            for word in timed_words
-                            if (
-                                float(word.get("start", 0.0) or 0.0) < end_time_sec
-                                and float(word.get("end", 0.0) or 0.0) > start_time_sec
-                                and str(word.get("word") or "").strip()
-                            )
-                        ]
-                        window_text_parts.append(
-                            " ".join(selected_words)
-                            if selected_words
-                            else str(transcript_segment.get("text") or "").strip()
-                        )
-                    full_text = " ".join(window_text_parts).lower().strip()
-                    scene_text = full_text[:500] + "..." if len(full_text) > 500 else full_text
-                    scene_transcript_confidence = round(
-                        sum(float(s.get("transcriptConfidence", 0.0) or 0.0) for s in scene_segments_txt)
-                        / max(1, len(scene_segments_txt)),
-                        3,
-                    )
-                    
-                    keyword_boost, found_keywords = score_text_for_virality(full_text, VIRAL_KEYWORDS)
-                    
-                    if keyword_boost > 0:
-                        score += keyword_boost
-                        reason_parts.append(f"Keywords: {', '.join(found_keywords)}")
-                        score = min(99, score)
-                    
-                    if "!" in full_text: 
-                        score += 5
-
-                # Enhanced scoring with audio + motion
-                enhanced_score, enhanced_reasons = compute_enhanced_viral_score(
-                    score, start_time_sec, end_time_sec, scene_text,
-                    VIRAL_KEYWORDS,
-                    audio_energy,
-                    motion_scores,
-                    content_type=content_type_label,
-                    transcript_confidence=scene_transcript_confidence,
-                    speech_trusted=scene_transcript_confidence >= float(transcript_quality.get("speechEvidenceThreshold", 0.62) or 0.62),
-                )
-                reason_parts.extend(enhanced_reasons)
-
-                scenes.append({
-                    "id": f"scene_{i}",
-                    "start": round(start_time_sec, 2),
-                    "end": round(end_time_sec, 2),
-                    "duration": round(duration_sec, 2),
-                    "viralScore": min(99, enhanced_score),
-                    "reason": " + ".join(reason_parts),
-                    "text": scene_text or f"Visual moment {i+1}",
-                    "source": "scene_detect",
-                    "hasAudio": audio_present,
-                    "contentType": content_type_label,
-                    "transcriptConfidence": scene_transcript_confidence,
-                })
-
-        if not scenes:
-            source_duration = get_media_duration(input_path)
-            logger.warning(
-                f"SceneDetect produced {len(scene_list)} raw scenes but no usable clip windows. "
-                f"Using timed viral windows for {source_duration:.2f}s source."
-            )
-            scenes.extend(build_timed_viral_windows(
-                source_duration,
-                VIRAL_KEYWORDS,
-                audio_energy,
-                motion_scores,
-                reason_prefix="Recovered from unusable scene cuts",
-            ))
-            for scene in scenes:
-                scene["hasAudio"] = audio_present
-
-        transcript_windows = build_transcript_windows(
-            transcription_segments,
-            VIRAL_KEYWORDS,
-            min_segment_confidence=0.72 if content_type_label in {"choir_performance", "music_performance"} else 0.42,
-            min_window_confidence=0.78 if content_type_label in {"choir_performance", "music_performance"} else 0.52,
-        ) if transcript_quality.get("allowTranscriptWindows") else []
-        aligned_windows = [align_clip_to_scenes(candidate, scene_list) for candidate in transcript_windows]
-        for candidate in aligned_windows:
+        for candidate in ranked_candidates:
             candidate["contentType"] = content_type_label
-        ranked_candidates = enrich_clip_candidates(
-            dedupe_ranked_candidates(scenes + aligned_windows, max_results=15, source_duration=source_duration),
-            audio_energy,
-            motion_scores
-        )
-        if not ranked_candidates and scenes:
-            ranked_candidates = enrich_clip_candidates(scenes[:15], audio_energy, motion_scores)
+            candidate["hasAudio"] = audio_present
+        ranked_candidates = enrich_clip_candidates(ranked_candidates, audio_energy, motion_scores)
         ranked_candidates = rerank_clip_candidates_with_ai(
             ranked_candidates,
             objective_label="find_viral_clips",
             output_mode="campaign_set",
-            promo_angle=str(request.get("promo_angle") or "").strip().lower(),
+            promo_angle=str(settings.get("focus") or request.get("promo_angle") or "").strip(),
             max_candidates=10,
         )
         ranked_candidates = apply_outcome_learning_profile(ranked_candidates, learning_profile)
-        if force_fresh:
-            ranked_candidates = apply_fresh_scan_variation(ranked_candidates, scan_nonce)
-            campaign_roles = ["Lead Hook", "Proof Beat", "Replay Beat", "Trust Close", "Support Cut"]
-            for fresh_index, candidate in enumerate(ranked_candidates):
-                candidate["campaignOrder"] = fresh_index + 1
-                candidate["campaignRole"] = campaign_roles[min(fresh_index, len(campaign_roles) - 1)]
+        # A fresh scan recomputes evidence; it must not randomly boost scores.
+        ranked_candidates = finalize_moments(ranked_candidates, settings, limit=12)
 
         for candidate in ranked_candidates:
             candidate["hasAudio"] = audio_present
@@ -14641,21 +14239,18 @@ async def analyze_clips(request: Dict[str, Any]):
                 candidate["reasons"] = [
                     "Visual-only scan: no audio stream was detected",
                     "Scene changes and motion shaped this clip candidate",
-                    "Use generated hook text and thumbnails to package the moment",
+                    "Review the source opening and payoff before creating the clip",
                 ]
                 candidate["captionSuggestion"] = candidate.get("captionSuggestion") or "Visual Moment"
 
-        ranked_candidates = [
-            attach_clip_score_confidence(
-                candidate,
-                audio_energy=audio_energy,
-                motion_scores=motion_scores,
-            )
-            for candidate in ranked_candidates
-        ]
-
         for index, candidate in enumerate(ranked_candidates):
             studio_package = build_find_viral_studio_package(candidate, index)
+            source_hook = " ".join(str(candidate.get("text") or "").split()[:12]) or candidate.get("hookText")
+            studio_package["hookText"] = source_hook
+            studio_package["captionSuggestion"] = source_hook
+            studio_package["titleSuggestion"] = source_hook
+            studio_package["renderDefaults"]["hook_text"] = source_hook
+            studio_package["destinations"] = settings["destinations"]
             candidate["hookText"] = studio_package["hookText"]
             candidate["captionSuggestion"] = studio_package["captionSuggestion"]
             candidate["titleSuggestion"] = studio_package["titleSuggestion"]
@@ -14668,26 +14263,8 @@ async def analyze_clips(request: Dict[str, Any]):
                 transcript_quality=transcript_quality,
             )
 
-        for index, candidate in enumerate(ranked_candidates[:8]):
-            try:
-                visual_assets = build_promo_visual_assets(
-                    input_path,
-                    candidate,
-                    job_id,
-                    index,
-                    "youtube_bold" if index == 0 else "hype",
-                )
-                candidate["visualAssets"] = visual_assets
-                candidate["thumbnailOptions"] = [
-                    asset for asset in visual_assets if asset.get("type") == "thumbnail"
-                ]
-                candidate["posterOptions"] = [
-                    asset for asset in visual_assets if asset.get("type") in {"poster", "story"}
-                ]
-                if visual_assets:
-                    candidate["thumbnailUrl"] = visual_assets[0].get("url")
-            except Exception as visual_error:
-                logger.warning(f"Find Viral Clips visual packaging failed for candidate {index}: {visual_error}")
+        # Find Viral Clips returns source moments only. Thumbnail/poster
+        # generation is intentionally absent, including for cached candidates.
 
         return {
             "status": "completed",
@@ -14695,6 +14272,9 @@ async def analyze_clips(request: Dict[str, Any]):
             "scenes": ranked_candidates,
             "clipSuggestions": ranked_candidates,
             "transcriptQuality": transcript_quality,
+            "videoDurationSeconds": source_duration,
+            "selectionSettings": settings,
+            "selectorVersion": "moments-v2",
             "contentType": content_type_label,
             "learning": {
                 "status": learning_profile.get("status", "warming_up") if isinstance(learning_profile, dict) else "warming_up",
@@ -30671,6 +30251,7 @@ class ViralOverlay(BaseModel):
     useOverlayAudio: bool = False
     overlayAudioVolume: float = 0.7
     sourceStartTime: float = 0.0
+    sourceOffsetTime: float = 0.0
     sourceEndBehavior: str = "return"
     audioDucking: bool = False
     audioDuckingStrength: float = 0.35
@@ -30705,6 +30286,10 @@ class ViralSpeedSegment(BaseModel):
     end_time: float
     rate: float = 1.0
     pitch_preserved: bool = True
+    direction: str = "forward"
+    freeze: bool = False
+    hold_seconds: Optional[float] = None
+    optical_flow: bool = False
 
 class ViralCaptionSegment(BaseModel):
     id: Optional[Union[str, int]] = None
@@ -30829,7 +30414,7 @@ def build_finish_keyframe_expression(finish_plan, field, default_value, transfor
     first_time, first_value, _ = keyframes[0]
     return f"if(lt(t\\,{first_time:.5f})\\,{first_value:.6f}\\,{expression})"
 
-def build_studio_finish_filter(finish_plan, color_cube_path=None):
+def build_studio_finish_filter(finish_plan, color_cube_path=None, qualifier_cube_path=None):
     """Translate the browser Finish Rack into a conservative FFmpeg finishing pass."""
     plan = finish_plan or {}
     if not bool(plan.get("enabled")):
@@ -30837,6 +30422,7 @@ def build_studio_finish_filter(finish_plan, color_cube_path=None):
 
     color = plan.get("color") or {}
     texture = plan.get("texture") or {}
+    label_prefix = str(plan.get("_label_prefix") or "")
     brightness = clamp_float(float(color.get("brightness", 1.0) or 1.0) - 1.0, -0.35, 0.35)
     contrast = clamp_float(color.get("contrast", 1.0), 0.65, 1.75)
     saturation = clamp_float(color.get("saturation", 1.0), 0.0, 1.8)
@@ -30877,6 +30463,17 @@ def build_studio_finish_filter(finish_plan, color_cube_path=None):
         )
     if color_cube_path:
         filters.append(f"format=rgb24,lut3d=file='{escape_ffmpeg_filter_path(color_cube_path)}':interp=trilinear")
+    power_window = plan.get("power_window")
+    if isinstance(power_window, dict) and power_window.get("enabled"):
+        try:
+            from .studio_pro_render_engine import build_power_window_filter
+        except ImportError:
+            from studio_pro_render_engine import build_power_window_filter
+        pw_filter = build_power_window_filter(power_window)
+        if pw_filter:
+            filters.append(pw_filter)
+    if qualifier_cube_path:
+        filters.append(f"format=rgb24,lut3d=file='{escape_ffmpeg_filter_path(qualifier_cube_path)}':interp=trilinear")
     # Sharpness/texture negotiate a YUV input. Letting FFmpeg insert that RGB
     # conversion implicitly can use a different matrix while retaining the
     # programme's BT.709 metadata; even a neutral grade then changes colours.
@@ -30886,10 +30483,18 @@ def build_studio_finish_filter(finish_plan, color_cube_path=None):
         filters.append(f"unsharp=5:5:{sharpness * 0.65:.4f}:3:3:{sharpness * 0.18:.4f}")
     if vignette > 0.005:
         filters.append(f"vignette=angle=PI/{max(5.5, 17.0 - vignette * 10.0):.3f}:eval=frame")
-    if grain > 0.005:
+    native_texture=texture.get('pixel_version')==1
+    if native_texture:
+        try:
+            from .studio_finish_texture import finish_texture_filter
+        except ImportError:
+            from studio_finish_texture import finish_texture_filter
+        texture_filter=finish_texture_filter(texture)
+        if texture_filter:filters.append(texture_filter)
+    if grain > 0.005 and not native_texture:
         filters.append(f"noise=alls={grain * 13.0:.3f}:allf=t")
     chromatic = clamp_float(texture.get("chromatic_aberration", 0.0), 0.0, 1.0)
-    if chromatic > 0.005:
+    if chromatic > 0.005 and not native_texture:
         shift = max(1, int(round(chromatic * 9.0)))
         filters.append(f"rgbashift=rh={shift}:bh={-shift}:edge=smear")
     vhs_tracking = clamp_float(texture.get("vhs_tracking", 0.0), 0.0, 1.0)
@@ -30906,6 +30511,51 @@ def build_studio_finish_filter(finish_plan, color_cube_path=None):
             "colorbalance="
             f"rh={light_leak * 0.12:.5f}:gh={light_leak * 0.035:.5f}:"
             f"bh={light_leak * -0.075:.5f}"
+        )
+    lens_blur = clamp_float(texture.get("lens_blur", 0.0), 0.0, 1.0)
+    halation = clamp_float(texture.get("halation", 0.0), 0.0, 1.0)
+    dream_glow = clamp_float(texture.get("dream_glow", 0.0), 0.0, 1.0)
+    anamorphic_flare = clamp_float(texture.get("anamorphic_flare", 0.0), 0.0, 1.0)
+    if any(value > 0.005 for value in (lens_blur, halation, dream_glow, anamorphic_flare)):
+        filters.append("format=gbrp")
+    if lens_blur > 0.005:
+        sigma = round(1.5 + lens_blur * 9.5, 2)
+        filters.append(
+            f"split=3[{label_prefix}lb_base][{label_prefix}lb_src][{label_prefix}lb_ref];"
+            f"[{label_prefix}lb_src]gblur=sigma={sigma}:steps=2[{label_prefix}lb_blur];"
+            f"[{label_prefix}lb_ref]scale=64:64,geq="
+            f"r='255*clip((hypot((X-32)/32,(Y-32)/32)-0.25)/0.75,0,1)':"
+            f"g='255*clip((hypot((X-32)/32,(Y-32)/32)-0.25)/0.75,0,1)':"
+            f"b='255*clip((hypot((X-32)/32,(Y-32)/32)-0.25)/0.75,0,1)'[{label_prefix}lb_small];"
+            f"[{label_prefix}lb_small][{label_prefix}lb_base]scale2ref[{label_prefix}lb_mask][{label_prefix}lb_base2];"
+            f"[{label_prefix}lb_base2][{label_prefix}lb_blur][{label_prefix}lb_mask]maskedmerge"
+        )
+    if halation > 0.005:
+        sigma = round(2.0 + halation * 8.0, 2)
+        filters.append(
+            f"split[{label_prefix}h_base][{label_prefix}h_glow];"
+            f"[{label_prefix}h_glow]gblur=sigma={sigma}:steps=2[{label_prefix}h_blur];"
+            f"[{label_prefix}h_base][{label_prefix}h_blur]blend=all_mode=screen:all_opacity={round(halation * 0.45, 3)}"
+        )
+    if dream_glow > 0.005:
+        sigma = round(4.0 + dream_glow * 12.0, 2)
+        filters.append(
+            f"split[{label_prefix}dg_base][{label_prefix}dg_hi];"
+            f"[{label_prefix}dg_hi]lutrgb=r='if(gt(val,135),(val-135)*1.9,0)':"
+            f"g='if(gt(val,135),(val-135)*1.9,0)':"
+            f"b='if(gt(val,135),(val-135)*1.9,0)',"
+            f"gblur=sigma={sigma}:steps=2[{label_prefix}dg_blur];"
+            f"[{label_prefix}dg_base][{label_prefix}dg_blur]blend=all_mode=screen:all_opacity={round(dream_glow * 0.55, 3)}"
+        )
+    if anamorphic_flare > 0.005:
+        sigma_h = round(14.0 + anamorphic_flare * 42.0, 2)
+        filters.append(
+            f"split[{label_prefix}af_base][{label_prefix}af_hi];"
+            f"[{label_prefix}af_hi]lutrgb=r='if(gt(val,180),(val-180)*1.1,0)':"
+            f"g='if(gt(val,180),(val-180)*2.4,0)':"
+            f"b='if(gt(val,180),min(255,(val-180)*3.4),0)',"
+            f"gblur=sigma={sigma_h}:sigmaV=0.5:steps=2[{label_prefix}af_streak];"
+            f"[{label_prefix}af_base][{label_prefix}af_streak]blend=all_mode=screen:all_opacity={round(anamorphic_flare * 0.72, 3)}"
         )
     # RGB finish stages explicitly return to the programme YUV matrix/range.
     # Otherwise runtime negotiation can retain incompatible full-range tags.
@@ -31288,6 +30938,7 @@ class RenderViralRequest(BaseModel):
     caption_scale: float = 1.0
     caption_text_override: Optional[str] = None
     caption_segments: Optional[List[ViralCaptionSegment]] = None
+    caption_suppress_ranges: Optional[List[Dict[str, float]]] = None
     caption_review_copy: bool = False
     caption_coverage_mode: Literal["full", "selected"] = "full"
     translate_captions_to_english: bool = False
@@ -31427,6 +31078,13 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         [str(scene.get("id", "")) for scene in (request.motionGraphics or {}).get("scenes") or []],
         [graphic["id"] for graphic in request.threeDGraphics or []], source_overlays=request.overlays)
     validate_graphic_groups(request.composition_plan, explicit_layer_order)
+    try:
+        from .studio_node_mask_grade import validate_node_mask
+    except ImportError:
+        from studio_node_mask_grade import validate_node_mask
+    validate_node_mask((request.finish_plan or {}).get('node_mask'),request.overlays,request.composition_plan)
+    for adjustment in (request.finish_plan or {}).get('adjustment_layers') or []:
+        validate_node_mask((adjustment.get('effects') or {}).get('node_mask'),request.overlays,request.composition_plan)
     logger.info(f"Rendering viral clip for {request.video_url} with {len(request.overlays)} overlays (SmartCrop={request.smart_crop}, AutoCaptions={request.auto_captions})")
 
     unresolved_story_visuals = [
@@ -31572,12 +31230,18 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             and request.smart_crop_mode == "speaker_track" and sequence_framing_keys
             and not sequence_reframe.get("timeline_cuts")
             and float(sequence_reframe.get("zoom", 1)) == 1)
+        # An authored Studio sequence already owns its output frame rate and
+        # sampling. Ingesting it through the analysis CFR30/CRF23 proxy first
+        # changes both source pictures and colour before that sequence runs.
+        # Retain the verified original; the bounded segment pass below still
+        # performs delivery-rate normalization and canvas sizing.
+        studio_sequence_source = bool(request.timeline_segments and request.composition_plan)
         try:
             input_path = await materialize_video_input(
                 request.video_url,
                 input_path,
                 keep_audio=True,
-                preserve_source_bytes=bool(request.subjectVfx) or source_framing,
+                preserve_source_bytes=bool(request.subjectVfx) or source_framing or studio_sequence_source,
             )
         except Exception as e:
              err_msg = f"Failed to load video: {str(e)}"
@@ -31678,7 +31342,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         segment.url,
                         segment_source_path,
                         keep_audio=True,
-                        preserve_source_bytes=bool(request.subjectVfx) or source_framing,
+                        preserve_source_bytes=bool(request.subjectVfx) or source_framing or studio_sequence_source,
                     )
                     sequence_source_paths[segment.url] = segment_source_path
 
@@ -31746,7 +31410,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         # Raw YUV bounds the extra scratch even for noisy media;
                         # long/large sequences retain their existing profile.
                         preserve_samples=preserve_reviewed_sequence_samples(timeline_canvas_width,
-                            timeline_canvas_height,selected_timeline_fps,programme_duration,sequence_framing_keys),
+                            timeline_canvas_height,selected_timeline_fps,programme_duration,
+                            sequence_framing_keys or has_studio_node_grade_masks(request.finish_plan)),
                         fps=selected_timeline_fps),
                     "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-y",
                     segment_video_path,
@@ -32213,7 +31878,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         reviewed_subject=bool(request.subjectVfx),
                         preserve_samples=preserve_reviewed_sequence_samples(reframe_target_width,
                             reframe_target_height,programme_fps or (request.output_settings or {}).get('fps',30),
-                            reframe_duration,manual_reframe_keyframes),
+                            reframe_duration,manual_reframe_keyframes or has_studio_node_grade_masks(request.finish_plan)),
                         multicam_programme_path=multicam_programme_path,
                     )
                     if multicam_programme_path:
@@ -32234,13 +31899,22 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     ], check=True)
                     working_path = cropped_path
                 elif crop_mode == "speaker_track" and (manual_reframe_keyframes or "zoom" in finish_reframe_plan):
+                    try:
+                        from .studio_sequence_video import preserve_reviewed_sequence_samples
+                    except ImportError:
+                        from studio_sequence_video import preserve_reviewed_sequence_samples
+                    preserve_reframe_samples=preserve_reviewed_sequence_samples(
+                        reframe_target_width,reframe_target_height,
+                        resolve_viral_export_profile(request.output_settings,reframe_target_width,reframe_target_height).get('fps') or 30,
+                        get_media_duration(reframe_source_path),manual_reframe_keyframes or has_studio_node_grade_masks(request.finish_plan))
                     await run_subprocess_async([
                         "ffmpeg", "-i", reframe_source_path,
                         "-vf", build_reviewed_reframe_filter(
                             manual_reframe_keyframes or [{"time": 0, "x": 50, "y": 50}],
                             reframe_target_width, reframe_target_height, finish_reframe_plan.get("zoom", 1)),
                         "-map", "0:v:0", "-map", "0:a?",
-                        "-c:v", GPU_VIDEO_ENCODER, "-preset", GPU_PRESET,
+                        *(build_studio_sequence_encode_args(preserve_samples=True) if preserve_reframe_samples else
+                          ["-c:v", GPU_VIDEO_ENCODER, "-preset", GPU_PRESET]),
                         "-c:a", "copy", "-y", cropped_path,
                     ], check=True)
                     working_path = cropped_path
@@ -32374,7 +32048,19 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 from studio_color_cube import write_color_cube
             color_cube_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_grade.cube")
             write_color_cube(request.finish_plan["color_cube"], color_cube_path)
-        finish_filter = build_studio_finish_filter(request.finish_plan, color_cube_path)
+        qualifier_cube_path = None
+        hsl_qualifier = (request.finish_plan or {}).get("hsl_qualifier")
+        if isinstance(hsl_qualifier, dict) and hsl_qualifier.get("enabled"):
+            try:
+                from .studio_pro_render_engine import write_hsl_qualifier_cube
+            except ImportError:
+                from studio_pro_render_engine import write_hsl_qualifier_cube
+            qualifier_cube_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_qualifier.cube")
+            write_hsl_qualifier_cube(hsl_qualifier, qualifier_cube_path)
+            sequence_temp_paths.add(qualifier_cube_path)
+        finish_filter = build_studio_finish_filter(
+            request.finish_plan, color_cube_path, qualifier_cube_path=qualifier_cube_path
+        )
         zoom_filter = build_studio_motion_filter(
             (request.finish_plan or {}).get("motion"), *get_video_dimensions(working_path)
         )
@@ -32393,6 +32079,28 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 write_color_cube(effects["color_cube"], adjustment_cube_path)
                 sequence_temp_paths.add(adjustment_cube_path)
                 effects["_worker_cube_path"] = adjustment_cube_path
+        # Node masks are native branch rasters; grade only their actual coverage.
+        if has_studio_node_grade_masks(request.finish_plan):
+            try:
+                from .studio_node_mask_grade import render_node_masked_finish
+                from .studio_image_sources import materialize_studio_image
+            except ImportError:
+                from studio_node_mask_grade import render_node_masked_finish
+                from studio_image_sources import materialize_studio_image
+            picture = next(s for s in probe_media_stream_summary(working_path)['streams'] if s.get('codec_type') == 'video')
+            numerator, denominator = str(picture.get('avg_frame_rate') or '30/1').split('/')
+            working_path = await render_node_masked_finish(source_path=working_path,
+                output_path=os.path.join(SHARED_TMP_DIR, f'{job_id}_masked_finish.mp4'), request=request,
+                width=get_video_dimensions(working_path)[0], height=get_video_dimensions(working_path)[1],
+                duration=get_media_duration(working_path), fps=float(numerator)/float(denominator),
+                job_id=job_id, directory=SHARED_TMP_DIR, temp_paths=sequence_temp_paths,
+                run=run_subprocess_async, materialize_video=materialize_video_input,
+                materialize_image=materialize_studio_image, build_finish=build_studio_finish_filter,
+                zoom_filter=zoom_filter, probe=get_media_duration,
+                main_grade_filter=build_studio_finish_filter({**request.finish_plan,'texture':{}},
+                    color_cube_path,qualifier_cube_path=qualifier_cube_path))
+            finish_filter = ''
+            adjustment_layers = []
         adjustment_graph = build_studio_adjustment_timeline_filter(
             finish_filter, adjustment_layers, get_media_duration(working_path),
         )
@@ -32449,12 +32157,59 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         )
         rendered_timeline_duration = speed_plan_output_duration(speed_plan)
 
-        if speed_plan_changes_timing(speed_plan):
+        try:
+            from .studio_pro_render_engine import (
+                build_optical_flow_speed_filter,
+                build_reverse_freeze_filter,
+                select_video_encode_profile,
+            )
+        except ImportError:
+            from studio_pro_render_engine import (
+                build_optical_flow_speed_filter,
+                build_reverse_freeze_filter,
+                select_video_encode_profile,
+            )
+
+        requested_fps = int((request.output_settings or {}).get("fps", 30) or 30)
+        requested_speed_segments = request.speed_segments or []
+        has_reverse_or_freeze = any(
+            getattr(seg, "direction", "forward") == "reverse" or bool(getattr(seg, "freeze", False))
+            for seg in requested_speed_segments
+        )
+        has_optical_flow = any(bool(getattr(seg, "optical_flow", False)) for seg in requested_speed_segments)
+
+        if has_reverse_or_freeze or speed_plan_changes_timing(speed_plan):
             speed_adjusted_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_speed.mp4")
             speed_has_audio = has_audio_stream(working_path)
-            speed_filter = build_speed_filter_complex(
-                speed_plan, speed_has_audio, (request.output_settings or {}).get("fps", 30),
+            encode_profile = select_video_encode_profile(
+                prefer_hw=GPU_VIDEO_ENCODER == "h264_nvenc",
+                fps=requested_fps,
+                detected_caps={"h264_nvenc": GPU_VIDEO_ENCODER == "h264_nvenc"},
             )
+            if has_reverse_or_freeze and len(requested_speed_segments) == 1:
+                seg0 = requested_speed_segments[0]
+                rf_mode = "freeze" if getattr(seg0, "freeze", False) else "reverse"
+                explicit_hold = getattr(seg0, "hold_seconds", None)
+                hold_sec = (
+                    max(0.2, min(10.0, float(explicit_hold)))
+                    if explicit_hold is not None
+                    else max(0.25, min(5.0, float(getattr(seg0, "end_time", 1.5)) - float(getattr(seg0, "start_time", 0.0))))
+                )
+                rf = build_reverse_freeze_filter(mode=rf_mode, hold_seconds=hold_sec, has_audio=speed_has_audio)
+                speed_filter = f"[0:v]{rf['video_filter']}[v_speed]"
+                if speed_has_audio and rf["audio_filter"]:
+                    speed_filter += f";[0:a]{rf['audio_filter']}[a_speed]"
+            elif has_optical_flow and len(speed_plan) == 1 and speed_plan[0]["rate"] < 1.0:
+                vf_flow = build_optical_flow_speed_filter(
+                    speed_plan[0]["rate"], target_fps=requested_fps, optical_flow=True
+                )
+                speed_filter = f"[0:v]{vf_flow}[v_speed]"
+                if speed_has_audio:
+                    speed_filter += f";[0:a]atempo={speed_plan[0]['rate']:.6f}[a_speed]"
+            else:
+                speed_filter = build_speed_filter_complex(
+                    speed_plan, speed_has_audio, requested_fps,
+                )
             speed_cmd = [
                 "ffmpeg",
                 "-i",
@@ -32470,12 +32225,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 speed_cmd.append("-an")
             speed_cmd.extend(
                 [
-                    "-c:v",
-                    "libx264",
-                    "-preset",
-                    "veryfast",
-                    "-pix_fmt",
-                    "yuv420p",
+                    *encode_profile["args"],
                     "-movflags",
                     "+faststart",
                     "-y",
@@ -32910,6 +32660,23 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     whisper_result = {"segments": []}
 
                 segments = whisper_result.get("segments", [])
+                if segments and getattr(request, "caption_suppress_ranges", None):
+                    mapped_suppress = remap_caption_transcript_to_speed_plan(
+                        {
+                            "segments": [
+                                {
+                                    "start": float(r.get("start_time", r.get("start", 0.0))),
+                                    "end": float(r.get("end_time", r.get("end", 0.0))),
+                                    "text": "suppress",
+                                }
+                                for r in request.caption_suppress_ranges
+                                if isinstance(r, dict)
+                            ]
+                        },
+                        speed_plan,
+                    ).get("segments", [])
+                    whisper_result = filter_suppressed_whisper_segments(whisper_result, mapped_suppress)
+                    segments = whisper_result.get("segments", [])
                 if segments:
                     logger.info(f"Generated {len(segments)} caption segments (word_timestamps={use_animated})")
 
@@ -33152,14 +32919,16 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         video_overlays = [o for o in request.overlays if o.type == 'video' and o.src]
         overlay_audio_specs = []
         prepared_overlay_ranges = {}
+        prepared_overlay_audio_ranges = {}
+        prepared_video_sources = []
         video_layer_rasters = {}  # Scoped to this export; track mattes remain independent.
         
-        for ov in video_overlays:
+        for prepared_index, ov in enumerate(video_overlays):
             try:
-                from .studio_broll import overlay_commands
+                from .studio_broll import overlay_commands, audible_duration
             except ImportError:
-                from studio_broll import overlay_commands
-            prefix = os.path.join(SHARED_TMP_DIR, f"{job_id}_ov_{input_idx}")
+                from studio_broll import overlay_commands, audible_duration
+            prefix = os.path.join(SHARED_TMP_DIR, f"{job_id}_ov_{prepared_index}_{input_idx}")
             ov_dl_path = f"{prefix}_source.mp4"
             overlay_temp_paths.append(ov_dl_path)
             ov_path = await materialize_video_input(ov.src, ov_dl_path, keep_audio=True)
@@ -33172,14 +32941,41 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 continue
             commands, prepared_path, visible_duration, _ = overlay_commands(
                 ov_path, prefix, source_duration, ov.sourceStartTime, cue_duration,
-                ov.sourceEndBehavior, cue_start, speed_plan, has_audio_stream(ov_path))
+                ov.sourceEndBehavior, cue_start, speed_plan, has_audio_stream(ov_path), ov.sourceOffsetTime)
+            if visible_duration <= 0:
+                continue
+            audio_duration = audible_duration(source_duration, ov.sourceStartTime, visible_duration,
+                ov.sourceEndBehavior, ov.sourceOffsetTime)
+            prepared_overlay_audio_ranges[str(ov.id)] = ov.model_copy(update={"start_time": cue_start, "duration": audio_duration})
             for command in commands:
                 overlay_temp_paths.append(command[-1])
                 await run_subprocess_async(command, check=True)
             ov = ov.model_copy(update={"start_time": cue_start, "duration": visible_duration})
             prepared_overlay_ranges[str(ov.id)] = ov
-            ov_path = prepared_path
-            
+            prepared_video_sources.append((ov, prepared_path))
+
+        # The main picture fills the half opposite a left/right split cutaway.
+        try:
+            from .studio_broll import ducking_windows, split_layout_filters
+        except ImportError:
+            from studio_broll import ducking_windows, split_layout_filters
+        for layout_index, layout in enumerate(request.overlays):
+            if get_broll_mode(layout) != "sidebyside":
+                continue
+            if layout.type == "video" and str(layout.id) not in prepared_overlay_ranges:
+                continue
+            bounded_layout = prepared_overlay_ranges.get(str(layout.id), layout)
+            start = max(0, float(bounded_layout.start_time or 0))
+            end = start + max(0, float(bounded_layout.duration or 0))
+            if end <= start:
+                continue
+            split_label = f"broll_split_base_{layout_index}"
+            filter_chain.extend(part + ";" for part in split_layout_filters(current_v_label, split_label,
+                base_width, base_height, bounded_layout, rendered_timeline_time(start), rendered_timeline_time(end)))
+            current_v_label = split_label
+
+        for ov, ov_path in prepared_video_sources:
+            cue_start = max(0, float(ov.start_time or 0))
             if ov_path:
                 block_start, block_input = len(filter_chain), current_v_label
                 layer_plan = composition_layer(request.composition_plan, ov.id)
@@ -33262,8 +33058,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         
         for ov in image_overlays:
             ov_path = ""
-            if ov.src.startswith("http"):
-                 ext = ov.src.split('?')[0].split('.')[-1]
+            if ov.src.startswith(("http://","https://","data:image/")):
+                 ext = "png" if ov.src.startswith('data:') else ov.src.split('?')[0].split('.')[-1]
                  if len(ext) > 4: ext = "png"
                  ov_dl_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_img_{input_idx}.{ext}")
                  overlay_temp_paths.append(ov_dl_path)
@@ -33275,7 +33071,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                  except Exception as e:
                      raise RuntimeError(f"Image layer {ov.id} could not be loaded; export stopped") from e
             else:
-                raise ValueError(f"Image layer {ov.id} requires an uploaded HTTP(S) source")
+                raise ValueError(f"Image layer {ov.id} requires an uploaded or self-contained image source")
             
             if ov_path:
                 block_start, block_input = len(filter_chain), current_v_label
@@ -33302,6 +33098,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         or (layer_effects.get("mask") or {}).get("enabled")
                         or float((layer_plan.get("base_transform") or {}).get("crop_x") or 0) > 0
                         or float((layer_plan.get("base_transform") or {}).get("crop_y") or 0) > 0
+                        or layer_effects.get("node")
                         or float(layer_effects.get("blur") or 0) > 0
                         or (layer_effects.get("glow") or {}).get("enabled")
                         or (layer_effects.get("colorize") or {}).get("enabled")
@@ -33712,26 +33509,16 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     f"[{main_audio_label}]{main_automation}[main_audio_automated]"
                 )
                 main_audio_label = "main_audio_automated"
-            ducking_overlays = [
-                prepared_overlay_ranges.get(str(overlay.id), overlay)
-                for overlay in request.overlays
-                if overlay.start_time is not None
-                and overlay.duration is not None
-                and (getattr(overlay, "muteMainAudio", False) or getattr(overlay, "audioDucking", False))
-            ]
-            for duck_index, overlay in enumerate(ducking_overlays):
-                source_start = max(0.0, float(overlay.start_time))
-                source_end = source_start + max(0.05, float(overlay.duration))
+            ducking_overlays = [prepared_overlay_audio_ranges.get(str(overlay.id), overlay)
+                for overlay in request.overlays if overlay.type == "video"
+                and overlay.start_time is not None and overlay.duration is not None]
+            for duck_index, (source_start, source_end, gain) in enumerate(
+                    ducking_windows(ducking_overlays) if audio_track_audible(audio_track_states, "broll") else []):
                 rel_start = rendered_timeline_time(source_start)
-                rel_end = max(rel_start + 0.05, rendered_timeline_time(source_end))
-                if getattr(overlay, "muteMainAudio", False):
-                    gain = 0.0
-                else:
-                    duck_strength = clamp_float(float(getattr(overlay, "audioDuckingStrength", 0.35) or 0.35), 0.05, 0.95)
-                    gain = max(0.05, 1.0 - duck_strength)
+                rel_end = rendered_timeline_time(source_end)
                 next_label = f"main_audio_duck_{duck_index}"
                 audio_filter_chain.append(
-                    f"[{main_audio_label}]volume={gain:.3f}:enable='between(t,{rel_start:.3f},{rel_end:.3f})'[{next_label}]"
+                    f"[{main_audio_label}]volume={gain:.3f}:enable='gte(t,{rel_start:.6f})*lt(t,{rel_end:.6f})'[{next_label}]"
                 )
                 main_audio_label = next_label
             if normalized_audio_remix["enabled"] and normalized_audio_remix["target"] == "voice":
@@ -33748,6 +33535,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             audio_mix_labels.append(main_audio_mix_token)
 
         for audio_index, (overlay_input_idx, overlay) in enumerate(overlay_audio_specs):
+            overlay = prepared_overlay_audio_ranges.get(str(overlay.id), overlay)
+            if not overlay.duration or overlay.duration <= 0:
+                continue
             if not audio_track_audible(audio_track_states, "broll"):
                 continue
             if overlay.start_time is None or overlay.duration is None:
@@ -33997,7 +33787,10 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         delivery_filters = []
         if delivery_profile.get("colorSpace") == "rec709":
             # Frame properties can override encoder flags during negotiation.
-            # Bind the selected SDR delivery on the actual filtered pictures.
+            # Composite branches are RGB. Convert their code values explicitly
+            # before tagging SDR delivery; a metadata tag alone leaves the
+            # automatic RGB/YUV converter free to choose another matrix.
+            delivery_filters.extend(["scale=out_color_matrix=bt709:out_range=tv", "format=yuv420p"])
             delivery_filters.append("setparams=range=limited:color_primaries=bt709:color_trc=bt709:colorspace=bt709")
         if (
             delivery_profile["width"] != int(base_width)

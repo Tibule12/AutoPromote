@@ -1,6 +1,6 @@
 # Add B-roll
 
-Development documentation • product 1.2.0 • knowledge 1.0.53 • 2026-11-05
+Development documentation • product 1.2.0 • knowledge 1.0.58 • 2026-11-15
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -26,7 +26,7 @@ Use owned source footage or an accepted real generated shot as editable material
 ## Feature readiness
 
 - studio.generated_video — **PARTIAL**: Requests a bounded generated shot, reviews it and imports an accepted owned video into the canonical project. Provider availability, account entitlement and normal-account lifecycle remain partial.
-- studio.b_roll — **FUNCTIONAL**: Places owned B-roll as ordinary editable video occurrences or layers and mixes its sound where selected. Source cuts already inside a supplied clip are not newly authored timeline cuts.
+- studio.b_roll — **FUNCTIONAL**: Places owned video or images as editable timed cutaways, with source trim, end behaviour, layout, animation and selected audio mixing through the shared Studio engine.
 - studio.trim — **PARTIAL**: Changes the retained source range of an occurrence and rebases linked timing. This is a source edit rather than merely hiding a browser element.
 - studio.audio — **FUNCTIONAL**: Mixes owned original audio, master podcast, voiceover, music, B-roll and SFX buses. Cues and gain keys remain editable in the project.
 

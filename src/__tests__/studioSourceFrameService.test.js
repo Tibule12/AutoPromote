@@ -7,6 +7,10 @@ const { validateFrameRequest, decodeSourceFrame, prepareSequencePreviewSource } 
 const request = { storagePath: 'studio/sources/owner/video.mp4', sourceContentHash: 'a'.repeat(64),
   start: .125, end: 1.125, fps: 24, frameIndex: 5 };
 const digest = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
+// PNG metadata now explicitly describes the decoded sRGB surface. Compare
+// exact decoded pixels so that a colour tag is not mistaken for a new frame.
+const rgbDigest = bytes => digest(execFileSync('ffmpeg', ['-v','error','-i','pipe:0',
+  '-pix_fmt','rgb24','-f','rawvideo','pipe:1'], {input:bytes,maxBuffer:12*1024*1024}));
 
 test('sampling cannot accept caller URLs, invalid windows or a frame outside the trim', () => {
   expect(validateFrameRequest(request)).toBe(request);
@@ -90,7 +94,7 @@ describe('actual FFmpeg sampling matches a separately decoded full sequence', ()
     for (const index of [0, 1, 5, 17, 23]) {
       const actual = await decodeSourceFrame(source, { ...request, frameIndex: index });
       const expected = await fs.readFile(frames.replace('%02d', String(index+1).padStart(2, '0')));
-      expect(digest(actual)).toBe(digest(expected));
+      expect(rgbDigest(actual)).toBe(rgbDigest(expected));
     }
   }, 20000);
   test('a cancelled seek cannot leave its FFmpeg decoder running', async () => {
@@ -98,6 +102,26 @@ describe('actual FFmpeg sampling matches a separately decoded full sequence', ()
     await expect(decodeSourceFrame(path.join(folder, '30.mkv'), request, controller.signal))
       .rejects.toMatchObject({ name: 'AbortError' });
   });
+  test.each(['24','25','30000/1001'])('original %s pictures retain the canonical fractional sequence clock',async rate=>{
+    const source=path.join(folder,`original-${rate.replace('/','-')}.mkv`);
+    execFileSync('ffmpeg',['-v','error','-f','lavfi','-i',`testsrc2=size=160x90:rate=${rate}:duration=3`,
+      '-c:v','ffv1','-y',source]);
+    const window=JSON.parse(execFileSync('python3',['-c',
+      'import json,sys; from python_media_worker.studio_sequence_video import sequence_picture_window; n,d=map(float,sys.argv[1].split("/")) if "/" in sys.argv[1] else (float(sys.argv[1]),1); print(json.dumps(sequence_picture_window(.7,1.7,2.4,.53,n/d,24)))',rate],
+      {cwd:path.resolve(__dirname,'../..'),encoding:'utf8'}));
+    const files=path.join(folder,`original-ref-${rate.replace('/','-')}-%02d.png`);
+    execFileSync('ffmpeg',['-v','error','-ss',String(window.seek),'-i',source,'-vf',window.clock.join(','),
+      '-frames:v',String(window.frames),'-fps_mode','passthrough','-threads','2','-y',files]);
+    for(const index of [0,1,10,window.frames-1]){
+      const spec={...request,start:.53,end:2.23,frameIndex:index,
+        sampling:'studio-original-sequence-frame-v1',programmeStart:.7,programmeDuration:2.4};
+      expect(validateFrameRequest(spec)).toBe(spec);
+      const actual=await decodeSourceFrame(source,spec);
+      const expected=await fs.readFile(files.replace('%02d',String(index+1).padStart(2,'0')));
+      const rgb=bytes=>execFileSync('ffmpeg',['-v','error','-i','pipe:0','-pix_fmt','rgb24','-f','rawvideo','pipe:1'],{input:bytes});
+      expect(digest(rgb(actual))).toBe(digest(rgb(expected)));
+    }
+  },30000);
   test.each(['25','24000/1001','variable'])('fractional %s pictures match the actual canonical sequence window',async rate=>{
     const source=path.join(folder,`phase-${rate.replace('/','-')}.mkv`);
     const filter=rate==='variable'
@@ -149,7 +173,7 @@ describe('actual FFmpeg sampling matches a separately decoded full sequence', ()
       const actual = await decodeSourceFrame(source, { ...request, fps: 30,
         frameIndex: index, sampling: 'studio-3d-texture-frame-v1' });
       const expected = await fs.readFile(path.join(reference, 'texture', `texture_${String(index+1).padStart(4, '0')}.png`));
-      expect(digest(actual)).toBe(digest(expected));
+      expect(rgbDigest(actual)).toBe(rgbDigest(expected));
     }
   }, 30000);
 });

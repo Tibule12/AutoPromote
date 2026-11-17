@@ -1,0 +1,124 @@
+{
+  "status": "DELIVERED_CORRECTED_NATIVE_VIDEO_AND_SLOW_WALKTHROUGH",
+  "scope": "B-roll controls through ordinary Studio authoring, persistence and canonical export",
+  "repairs": [
+    "Real editor bindings for motion keys and beat markers; no undefined B-roll panel references.",
+    "Supported media colour settings replace invalid look-preset properties; invalid colour is rejected before preview.",
+    "Track locking covers timing, presets, style and audio; completed-file preview is invalidated by edits.",
+    "Programme start/duration keep authored motion aligned; left trim/split retain source window/loop phase, including held or exhausted sources.",
+    "Montage stops at programme end and avoids snapping cuts backwards over the prior slot.",
+    "Ripple insertion uses the canonical project reconciliation, source/storage identity and linked timeline ripple; explicit unapplied insert blocks export.",
+    "Return/loop/hold distinguish picture and audible ranges; held silent tails return the original voice. Overlapping ducks use the strongest active gain rather than multiplying.",
+    "Left/right split layouts share a worker stage for the opposite main-picture half.",
+    "Import controls wait for the new source metadata/selection.",
+    "Identical media bytes, including distinct File instances after reopen, share one in-flight owned export upload; per-layer identity and editing remain independent."
+  ],
+  "checks": {
+    "focusedFrontend": 77,
+    "workerBroll": 5,
+    "workerContract": 62,
+    "isolatedEditorAudio": 1,
+    "isolatedEditorDuplicate": 1,
+    "isolatedEditorMultiSource": 1,
+    "isolatedEditorUploadAndCloneRegression": 1,
+    "finalAnonymousWelcomeViewports": 8,
+    "normalSignedInStudioAndHelp": true,
+    "nativePresetApplyAndSave": 26,
+    "nativeTrackLockAndUndoRedo": true,
+    "nativeRippleInsertAndUndo": true,
+    "nativeColdReopen": true,
+    "nativeHoldOriginalVoiceRecovery": true
+  },
+  "fullStudioReadinessPromotion": false,
+  "paidCalls": 0,
+  "productionWrites": 0,
+  "gpuAllocations": 0,
+  "nativeCorrectedExport": {
+    "normalSignIn": true,
+    "normalOwnedBackupRestore": true,
+    "allSixEditingDecisionsExact": true,
+    "normalApprovedExport": true,
+    "downloadSha256": "7f4f7cbda3219fdba223b301e1854a67f77a405d259a55eb03606cd44b3c0eea",
+    "fullDecode": true,
+    "completePlayback": {
+      "ended": true,
+      "duration": 17.18,
+      "width": 720,
+      "height": 1280,
+      "decoded": 412
+    },
+    "paidCalls": 0,
+    "productionWrites": 0,
+    "errors": []
+  },
+  "heldPictureParity": {
+    "programmeTime": 4.2,
+    "expectedHeldSourceTime": 2.96,
+    "psnrDb": 35.99136689150687,
+    "scope": "One full-frame held cutaway; no whole-Studio parity promotion"
+  },
+  "actualDispatchCueTimes": {
+    "expectedVideoStarts": [
+      0.5,
+      3.0,
+      5.5,
+      8.0,
+      10.5
+    ],
+    "actualFFmpegOffsets": [
+      0.5,
+      3.0,
+      5.5,
+      5.5,
+      8.0,
+      10.5,
+      13.0
+    ],
+    "sourceWindowsIndependent": true,
+    "compiledFromActualNativeRequest": true
+  },
+  "terminalState": {
+    "activeOperations": 0,
+    "terminalOperations": 9,
+    "priorOperationsPreserved": 7,
+    "unrelatedWalletUnchanged": true,
+    "wallets": [
+      {
+        "userId": "demo-pilot-empty",
+        "balance": 0,
+        "reserved": 0
+      },
+      {
+        "userId": "demo-pilot-alice",
+        "balance": 1,
+        "reserved": 0
+      }
+    ],
+    "authFirestoreStorageExported": true
+  },
+  "localSymbolicCreditGrant": {
+    "credits": 2,
+    "adapter": "existing sandbox wallet service",
+    "realPayment": false,
+    "walletReset": false,
+    "reason": "One normal corrected export after real picture timing defect"
+  },
+  "delivery": {
+    "finishedVideo": "/home/tibule12/Videos/AutoPromote B-roll Studio \u2014 2026-11-15/01 \u2014 Studio B-roll edit with original sound.mp4",
+    "walkthroughVideo": "/home/tibule12/Videos/AutoPromote B-roll Studio \u2014 2026-11-15/02 \u2014 Slow Studio walkthrough with spoken explanations.mp4",
+    "project": "/home/tibule12/Videos/AutoPromote B-roll Studio \u2014 2026-11-15/03 \u2014 Editable Studio project.autopromote.json",
+    "finishedVideoSha256": "7f4f7cbda3219fdba223b301e1854a67f77a405d259a55eb03606cd44b3c0eea",
+    "walkthroughSha256": "654de741138c39822b2ebdaaff1ab5a0de74f38112d1ab82e9678e43f0519e3a",
+    "finishedSeconds": 17.18,
+    "walkthroughSeconds": 746.791667,
+    "nativeDownloadUnchanged": true,
+    "sourceAudioPresent": true,
+    "narrationCues": 46,
+    "completeMovieAudioInWalkthroughAt": 714.283332824707,
+    "fullDecodeBothMovies": true,
+    "noSpeedUp": true,
+    "ordinaryCorrectionAndReExportShown": true,
+    "firstAuthoringSeconds": 592.708333
+  },
+  "distinctFocusedChecksPassed": 200
+}

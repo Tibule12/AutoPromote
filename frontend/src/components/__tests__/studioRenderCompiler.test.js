@@ -4,6 +4,7 @@ import {
   assertStudioExportTimelineMatchesDocument,
   assertStudioSpeedPlanMatchesDocument,
   compileStudioTimelineForRender,
+  compileStudioFinishForRender,
   compileStudioCompositionForRender,
 } from "../studioRenderCompiler";
 import { buildViralRenderData, mapCaptionSegmentsToTimeline } from "../viralRenderPayload";
@@ -439,4 +440,11 @@ test("linked end trim removes cut media and gives later preview and worker cues 
       )
     ).toBe(cue.output_end);
   });
+});
+
+test('native keyer/depth/optics and grade-mask identities survive canonical compilation',()=>{
+ const snapshot={timeline:[{id:'clip',sourceClipId:'s',startRequest:0,endRequest:4}],overlays:[{id:'plate',type:'image',startTime:0,duration:4,width:50,height:50,zDepth:40,dofBlur:2,chromaKey:{enabled:true},opticalFx:{halation:.6,anamorphicStreak:.5},displacementWarp:{enabled:true,amountX:16,amountY:10}}],finishFx:{contrast:1.35,maskSourceNodeId:'ChromaKeyer:plate'},adjustmentLayers:[{id:'adj',startTime:0,duration:4,enabled:true,maskSourceNodeId:'Transform:plate',finishFx:{exposureStops:.5}}]};
+ const doc=adaptStudioSnapshotToDocument({snapshot,projectId:'node-effects'}),layer=compileStudioCompositionForRender(doc).layers.find(l=>l.id==='plate');
+ expect(layer.effects.node).toMatchObject({version:1,key:{enabled:true},defocus:2,depth:40,optical:{halation:.6,streak:.5},warp:{enabled:true,x:16,y:10}});expect(layer.base_transform.scale).toBeCloseTo(1.25,6);
+ const finish=compileStudioFinishForRender(doc);expect(finish.node_mask).toEqual({layer_id:'plate',operation:'ChromaKeyer'});expect(finish.adjustment_layers[0].effects.node_mask).toEqual({layer_id:'plate',operation:'Transform'});expect(finish.power_window).toBe(null);
 });

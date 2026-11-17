@@ -40,6 +40,13 @@ def validate_track_mattes(plan, order=None):
     by_id = {str(layer.get("id")): layer for layer in layers if isinstance(layer, dict) and layer.get("id")}
     active = {}
     for item in layers:
+        try:
+            from .studio_node_effects import validate_node_effects
+        except ImportError:
+            from studio_node_effects import validate_node_effects
+        node = validate_node_effects((item.get('effects') or {}).get('node'))
+        if node and node['key']['enabled'] and item.get('type') not in ('image', 'video'):
+            raise ValueError('Keying requires ordinary media')
         effect = (item.get("effects") or {}).get("colorize")
         validate_colorize(effect)
         surface=validate_surface((item.get("effects")or{}).get("matte_surface"))

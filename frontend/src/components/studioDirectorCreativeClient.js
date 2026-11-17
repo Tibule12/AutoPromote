@@ -85,13 +85,15 @@ export async function requestStudioCreativePlan(context, token, signal) {
       brief: plan.brief,
       duration: plan.duration,
       sourceEvidence: plan.sourceEvidence,
-      ...(plan.version === 4
-        ? { poster: plan.poster }
-        : plan.version === 3
-          ? { nodePlan: plan.nodePlan }
-          : plan.version === 2
-            ? { composition: plan.composition }
-            : { storyboard: plan.storyboard }),
+      ...(plan.version === 5
+        ? { threeDPlan: plan.threeDPlan }
+        : plan.version === 4
+          ? { poster: plan.poster }
+          : plan.version === 3
+            ? { nodePlan: plan.nodePlan }
+            : plan.version === 2
+              ? { composition: plan.composition }
+              : { storyboard: plan.storyboard }),
     };
   const bytes = new Uint8Array(
     await crypto.subtle.digest("SHA-256", new TextEncoder().encode(JSON.stringify(core)))

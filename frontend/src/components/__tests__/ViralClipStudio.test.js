@@ -155,6 +155,15 @@ describe("ViralClipStudio timeline sequencing", () => {
       clearRect: jest.fn(),
       drawImage: jest.fn(),
       fillRect: jest.fn(),
+      fill: jest.fn(),
+      roundRect: jest.fn(),
+      save: jest.fn(), restore: jest.fn(), scale: jest.fn(),
+      translate: jest.fn(), rotate: jest.fn(), setTransform: jest.fn(),
+      fillText: jest.fn(), strokeText: jest.fn(), rect: jest.fn(),
+      clip: jest.fn(), closePath: jest.fn(),
+      // Title measurement caches its context across cases; keep this native
+      // API stub independent of Jest's per-test mock reset.
+      measureText: text => ({ width: String(text).length * 18 }),
       getImageData: jest.fn(() => ({ data: new Uint8ClampedArray(96 * 54 * 4) })),
       lineTo: jest.fn(),
       moveTo: jest.fn(),
@@ -346,8 +355,16 @@ describe("ViralClipStudio timeline sequencing", () => {
     await screen.findByDisplayValue('Zero effects');
     const layer=(await screen.findByAltText('Overlay')).closest('.draggable-overlay');
     expect(layer).toBeTruthy();
-    expect(layer.style.filter).toContain('drop-shadow(0px 0px 0px');
-    expect(layer.style.filter).toContain('drop-shadow(0 0 0px');
+    const image=screen.getByAltText('Overlay');
+    Object.defineProperties(image,{complete:{configurable:true,value:true},
+      naturalWidth:{configurable:true,value:16},naturalHeight:{configurable:true,value:16}});
+    fireEvent.load(image);
+    const surface=layer.querySelector('[data-studio-node-effect-surface]');
+    await waitFor(()=>expect(Number(surface.dataset.pixelRevision)).toBeGreaterThan(0));
+    expect(surface.dataset.nodeEffectError).toBe('');
+    const filters=window.HTMLCanvasElement.prototype.getContext.mock.results.map(call=>call.value?.filter).filter(Boolean);
+    expect(filters.some(filter=>(filter.match(/drop-shadow\(0px 0px 0px/g)||[]).length===2)).toBe(true);
+    expect(layer.style.filter).toBe('none'); // Processed pixels own the effects, once.
   });
 
   test.each(['image', 'video'])('canonical %s opacity and transform keys cannot be replaced by legacy entrance animation', async type => {
@@ -973,6 +990,7 @@ describe("ViralClipStudio timeline sequencing", () => {
       ]);
     try {
       mountNativePreview({ onSave });
+      fireEvent.click(await screen.findByText(/^Open saved project \(/));
       fireEvent.click(
         await screen.findByRole("button", {
           name: /^Trimmed export checkpoint/,
@@ -1174,6 +1192,21 @@ describe("ViralClipStudio timeline sequencing", () => {
       unmount();
     } finally { window.AudioContext = previousContext;
       window.requestAnimationFrame = previousRaf; window.cancelAnimationFrame = previousCancelRaf; }
+  });
+
+  test('an expired source is renewed once without attaching it to programme decoders',async()=>{
+    const path='studio/sources/test-user/legacy.mp4';
+    const expired=`https://storage.googleapis.com/bucket/${path}?GoogleAccessId=owner&Signature=test&Expires=1`;
+    let finish;
+    global.fetch.mockImplementation(url=>String(url).endsWith('/studio-assets/resolve')
+      ?new Promise(resolve=>{finish=resolve;}):Promise.resolve({ok:true,json:async()=>({})}));
+    const view=render(<ViralClipStudio videoUrl={expired} sourceStoragePath={path}
+      clips={[{id:'source',start:0,end:4,duration:4}]} onSave={jest.fn()} onCancel={jest.fn()} />);
+    await waitFor(()=>expect(finish).toBeDefined());
+    expect([...view.container.querySelectorAll('video')].some(v=>v.getAttribute('src')===expired)).toBe(false);
+    expect(global.fetch.mock.calls.filter(([url])=>String(url).endsWith('/studio-assets/resolve'))).toHaveLength(1);
+    await act(async()=>{finish({ok:true,json:async()=>({url:'https://example.com/renewed.mp4'})});});
+    await waitFor(()=>expect(screen.getByTestId('studio-after-video')).toHaveAttribute('src','https://example.com/renewed.mp4'));
   });
 
   test("duplicate refresh completes in its own project and Pause stays usable while links load", async () => {
@@ -3889,16 +3922,17 @@ describe("ViralClipStudio timeline sequencing", () => {
 
   test("uploads a repeated overlay File once and preserves each occurrence when exporting", async () => {
     const shared = new File(["same media"], "repeat.mp4", { type: "video/mp4", lastModified: 12 });
+    const reopenedCopy = new File(["same media"], "repeat.mp4", { type: "video/mp4", lastModified: 12 });
     const distinct = new File(["different!"], "repeat.mp4", { type: "video/mp4", lastModified: 12 });
     const source = { id: "main", name: "Owned source", url: "https://example.com/source.mp4",
       storagePath: "studio/sources/test-user/source.mp4", start: 0, end: 6, duration: 6 };
     const layer = (id, file, startTime) => ({ id, name: id, type: "video", file, src: "blob:local-media",
       isLocal: true, bRollMode: "pip", startTime, duration: 2, sourceDuration: 6,
       sourceStartTime: 0, width: 30, height: 20, x: 50, y: 50, scale: 1, opacity: 1 });
-    const overlays = [layer("first", shared, 0), layer("second", shared, 2), layer("different", distinct, 4)];
+    const overlays = [layer("first", shared, 0), layer("second", shared, 2), layer("reopened", reopenedCopy, 3), layer("different", distinct, 4)];
     uploadSourceFileViaBackend.mockImplementation(({ file }) => Promise.resolve({
-      url: file === shared ? "https://example.com/shared.mp4" : "https://example.com/distinct.mp4",
-      storagePath: file === shared ? "studio/sources/test-user/shared.mp4" : "studio/sources/test-user/distinct.mp4",
+      url: file === distinct ? "https://example.com/distinct.mp4" : "https://example.com/shared.mp4",
+      storagePath: file === distinct ? "studio/sources/test-user/distinct.mp4" : "studio/sources/test-user/shared.mp4",
     }));
     global.fetch.mockResolvedValue({ ok: true, json: async () => ({}) });
     const onSave = jest.fn();
@@ -3913,11 +3947,12 @@ describe("ViralClipStudio timeline sequencing", () => {
     await screen.findByDisplayValue("Repeated source");
     await act(async () => { await clickRenderFinalClip(); });
     await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
-    expect(uploadSourceFileViaBackend.mock.calls.filter(([args]) => args.file === shared)).toHaveLength(1);
+    expect(uploadSourceFileViaBackend.mock.calls.filter(([args]) => (args.file === shared || args.file === reopenedCopy))).toHaveLength(1);
     expect(uploadSourceFileViaBackend.mock.calls.filter(([args]) => args.file === distinct)).toHaveLength(1);
     expect(onSave.mock.calls[0][1]).toEqual(expect.arrayContaining([
       expect.objectContaining({ id: "first", startTime: 0, duration: 2, src: "https://example.com/shared.mp4" }),
       expect.objectContaining({ id: "second", startTime: 2, duration: 2, src: "https://example.com/shared.mp4" }),
+      expect.objectContaining({ id: "reopened", startTime: 3, duration: 2, src: "https://example.com/shared.mp4" }),
       expect.objectContaining({ id: "different", startTime: 4, duration: 2, src: "https://example.com/distinct.mp4" }),
     ]));
   });

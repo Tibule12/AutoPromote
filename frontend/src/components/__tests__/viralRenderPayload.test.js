@@ -612,4 +612,32 @@ describe("viralRenderPayload", () => {
       }),
     ]);
   });
+
+  test("forwards optional reverse, freeze hold, and optical flow flags in speed_segments", () => {
+    expect(
+      normalizeSpeedSegmentsForRender([
+        { startTime: 0, endTime: 4, rate: 1, direction: "reverse" },
+        { startTime: 4, endTime: 8, rate: 1, freeze: true, holdSeconds: 2.5 },
+        { startTime: 8, endTime: 12, rate: 0.5, opticalFlow: true },
+      ])
+    ).toEqual([
+      { id: "speed-1", start_time: 0, end_time: 4, rate: 1, pitch_preserved: true, direction: "reverse" },
+      { id: "speed-2", start_time: 4, end_time: 8, rate: 1, pitch_preserved: true, freeze: true, hold_seconds: 2.5 },
+      { id: "speed-3", start_time: 8, end_time: 12, rate: 0.5, pitch_preserved: true, optical_flow: true },
+    ]);
+  });
+
+  test("forwards captionSuppressRanges cleanly to python worker payload when behind-subject captions hide foreground overlap", () => {
+    const payload = buildViralRenderData({
+      clip: { startTime: 0, endTime: 6 },
+      duration: 6,
+      extraOptions: {
+        autoCaptions: true,
+        captionStyle: "word_pill",
+        captionSuppressRanges: [{ start_time: 1.5, end_time: 4.5 }],
+      },
+    });
+    expect(payload.caption_style).toBe("word_pill");
+    expect(payload.caption_suppress_ranges).toEqual([{ start_time: 1.5, end_time: 4.5 }]);
+  });
 });

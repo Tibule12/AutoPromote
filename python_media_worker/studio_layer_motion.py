@@ -186,6 +186,20 @@ def layer_clip_mask(size, mask, crop_x=0, crop_y=0, feather_scale=1):
         result = padded.filter(ImageFilter.GaussianBlur(sigma)).crop((pad, pad, width + pad, height + pad))
     if enabled and mask.get("inverted"):
         result = ImageOps.invert(result)
+    secondary=(mask or {}).get('secondaryMasks') or []
+    if not isinstance(secondary,list) or len(secondary)>8:raise ValueError('Use at most eight secondary masks')
+    if enabled and secondary:
+        a=np.array(result,dtype=float)/255
+        for sub in secondary:
+            if not isinstance(sub,dict) or sub.get('secondaryMasks'):raise ValueError('Invalid secondary mask')
+            op=sub.get('booleanOp') or mask.get('booleanMode') or 'add'
+            b=np.array(layer_clip_mask(size,{**sub,'enabled':True},0,0,feather_scale),dtype=float)/255
+            if op=='add':a=a+b-a*b
+            elif op=='subtract':a=a*(1-b)
+            elif op=='intersect':a=a*b
+            elif op=='difference':a=a+b-2*a*b
+            else:raise ValueError('Invalid mask boolean operation')
+        result=Image.fromarray(np.clip(np.floor(a*255+.5),0,255).astype(np.uint8),'L')
     return result
 
 
@@ -199,15 +213,16 @@ def _effect_layer(alpha, color, opacity, blur):
 
 
 def _bounded_text_pose(artwork, overlay, layer, pose, canvas_size, sample_opacity):
-    """Project an unfiltered animated title directly into its bounded canvas.
+    """Project an unfiltered title directly into its bounded canvas.
 
+    Static and animated titles share the browser's fractional placement.
     Travel padding can be wider than the canvas. Building a square twice its
     diagonal per frame costs hundreds of MB without adding visible pixels.
     The same local bitmap and anchor are sampled by an inverse affine map.
     Filter/mask decisions retain the existing grouped implementation below.
     """
     effects = (layer or {}).get('effects') or {}
-    if (not (layer or {}).get('text_animator') or effects.get('shadow', {}).get('enabled')
+    if (_get(overlay, 'type') != 'text' or effects.get('shadow', {}).get('enabled')
             or effects.get('glow', {}).get('enabled') or finite(effects.get('blur'), 0) > 0
             or effects.get('mask', {}).get('enabled') or pose.get('crop_x') or pose.get('crop_y')):
         return None
@@ -266,6 +281,11 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1, *, 
     box = Image.new("RGBA", (box_width, box_height))
     box.alpha_composite(artwork, ((box_width - artwork.width) // 2, (box_height - artwork.height) // 2))
     artwork = colorize_media(box, ((layer or {}).get("effects") or {}).get("colorize"))
+    try:
+        from .studio_node_effects import apply_node_effects
+    except ImportError:
+        from studio_node_effects import apply_node_effects
+    artwork = apply_node_effects(artwork, ((layer or {}).get('effects') or {}).get('node'), pose.get('_programme_time', 0), canvas_height / 720 * pose['scale'])
     bounded_title = _bounded_text_pose(artwork, overlay, layer, pose, canvas_size, sample_opacity)
     if bounded_title is not None:
         return bounded_title
@@ -526,6 +546,7 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
                         if normalized_speed_plan else sample_output
                     )
                     pose = layer_pose(layer, overlay, edit_time)
+                    pose["_programme_time"] = edit_time if (((layer or {}).get("effects") or {}).get("node") or {}).get("warp", {}).get("enabled") else 0
                     if _get(overlay, "type") == "text":
                         try:
                             from .studio_text import title_animation_pose

@@ -310,7 +310,8 @@ app.locals.sharedCreditPilot = integration;
 // Apply before Auth, signed object reads, static files and SPA fallback. Credit
 // admission keeps its additional tighter per-operation limits.
 app.use(rateLimit({ windowMs: 60000, max: 1200, standardHeaders: true, legacyHeaders: false }));
-const localRequestBytes=Number(process.env.CREDITS_LOCAL_MAX_REQUEST_BYTES || 1024*1024);
+// A canonical 33-point RGB cube can exceed 2 MiB in the normal Studio body.
+const localRequestBytes=Number(process.env.CREDITS_LOCAL_MAX_REQUEST_BYTES || 4*1024*1024);
 if(!Number.isSafeInteger(localRequestBytes)||localRequestBytes<512*1024||localRequestBytes>4*1024*1024)
   throw Error('Local request limit must be 512 KiB–4 MiB.');
 app.use(express.json({ limit: localRequestBytes }));

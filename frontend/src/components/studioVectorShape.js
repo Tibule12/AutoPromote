@@ -99,6 +99,196 @@ export const createStudioVectorShape = () => ({
   fill: { kind: "linear", color: "#8b2bff", endColor: "#00d4ff", start: [0, 100], end: [100, 0] },
   stroke: { color: "#ffffff", width: 0 },
 });
+
+export const VECTOR_SHAPE_PRIMITIVE_CATALOG = Object.freeze([
+  { id: "arch_crest", label: "Arch Crest", summary: "Curved sculptural arch monogram" },
+  { id: "starburst_seal", label: "Starburst Seal", summary: "12-vertex radial promo burst badge" },
+  { id: "hexagon_shield", label: "Hexagon Shield", summary: "Precision 6-sided geometric emblem" },
+  { id: "broadcast_ribbon", label: "Broadcast Ribbon", summary: "Angled lower-third headline banner" },
+  { id: "target_reticle", label: "Target Reticle (v2 Cutout)", summary: "Compound ring with transparent inner counter" },
+  { id: "callout_pointer", label: "Callout Pointer", summary: "Editorial speech/callout badge with pointer tail" },
+  { id: "neon_capsule", label: "Neon Pill Capsule", summary: "Smooth Bezier pill frame with neon outline" },
+  { id: "lightning_chevron", label: "Lightning Chevron", summary: "High-velocity directional speed chevron" },
+]);
+
+const roundCoord = v => Number(Math.max(0, Math.min(100, v)).toFixed(2));
+const roundHandle = v => Number(Math.max(-200, Math.min(200, v)).toFixed(2));
+
+const buildCircleContour = (cx = 50, cy = 50, r = 34) => {
+  const k = Number((r * 0.5522847).toFixed(2));
+  return {
+    closed: true,
+    nodes: [
+      { x: roundCoord(cx), y: roundCoord(cy - r), in: [-k, 0], out: [k, 0] },
+      { x: roundCoord(cx + r), y: roundCoord(cy), in: [0, -k], out: [0, k] },
+      { x: roundCoord(cx), y: roundCoord(cy + r), in: [k, 0], out: [-k, 0] },
+      { x: roundCoord(cx - r), y: roundCoord(cy), in: [0, k], out: [0, -k] },
+    ],
+  };
+};
+
+export function createStudioVectorPrimitive(primitiveId = "arch_crest") {
+  if (primitiveId === "arch_crest") return createStudioVectorShape();
+  if (primitiveId === "starburst_seal") {
+    const spikes = 12;
+    const nodes = [];
+    for (let i = 0; i < spikes; i += 1) {
+      const angle = (i * Math.PI * 2) / spikes - Math.PI / 2;
+      const radius = i % 2 === 0 ? 42 : 24;
+      nodes.push({
+        x: roundCoord(50 + Math.cos(angle) * radius),
+        y: roundCoord(50 + Math.sin(angle) * radius),
+        in: [0, 0],
+        out: [0, 0],
+      });
+    }
+    return validateStudioVectorShape({
+      version: 1,
+      closed: true,
+      nodes,
+      fill: { kind: "linear", color: "#f97316", endColor: "#facc15", start: [0, 100], end: [100, 0] },
+      stroke: { color: "#ffffff", width: 1.5 },
+    });
+  }
+  if (primitiveId === "hexagon_shield") {
+    const nodes = [];
+    for (let i = 0; i < 6; i += 1) {
+      const angle = (i * Math.PI) / 3 - Math.PI / 2;
+      nodes.push({
+        x: roundCoord(50 + Math.cos(angle) * 38),
+        y: roundCoord(50 + Math.sin(angle) * 40),
+        in: [0, 0],
+        out: [0, 0],
+      });
+    }
+    return validateStudioVectorShape({
+      version: 1,
+      closed: true,
+      nodes,
+      fill: { kind: "linear", color: "#2563eb", endColor: "#22d3ee", start: [0, 0], end: [100, 100] },
+      stroke: { color: "#e0f2fe", width: 2 },
+    });
+  }
+  if (primitiveId === "broadcast_ribbon") {
+    return validateStudioVectorShape({
+      version: 1,
+      closed: true,
+      nodes: [
+        { x: 14, y: 34, in: [0, 0], out: [0, 0] },
+        { x: 92, y: 34, in: [0, 0], out: [0, 0] },
+        { x: 84, y: 66, in: [0, 0], out: [0, 0] },
+        { x: 8, y: 66, in: [0, 0], out: [0, 0] },
+      ],
+      fill: { kind: "linear", color: "#ec4899", endColor: "#8b5cf6", start: [0, 50], end: [100, 50] },
+      stroke: { color: "#ffffff", width: 1.5 },
+    });
+  }
+  if (primitiveId === "target_reticle") {
+    return validateStudioVectorShape({
+      version: 2,
+      contours: [buildCircleContour(50, 50, 38), buildCircleContour(50, 50, 20)],
+      fill: { kind: "linear", color: "#06b6d4", endColor: "#3b82f6", start: [0, 0], end: [100, 100] },
+      stroke: { color: "#a5f3fc", width: 1.5 },
+    });
+  }
+  if (primitiveId === "callout_pointer") {
+    return validateStudioVectorShape({
+      version: 1,
+      closed: true,
+      nodes: [
+        { x: 14, y: 22, in: [0, 0], out: [0, 0] },
+        { x: 86, y: 22, in: [0, 0], out: [0, 0] },
+        { x: 86, y: 66, in: [0, 0], out: [0, 0] },
+        { x: 46, y: 66, in: [0, 0], out: [0, 0] },
+        { x: 26, y: 86, in: [0, 0], out: [0, 0] },
+        { x: 30, y: 66, in: [0, 0], out: [0, 0] },
+        { x: 14, y: 66, in: [0, 0], out: [0, 0] },
+      ],
+      fill: { kind: "linear", color: "#6366f1", endColor: "#a855f7", start: [0, 0], end: [100, 100] },
+      stroke: { color: "#ffffff", width: 1.5 },
+    });
+  }
+  if (primitiveId === "neon_capsule") {
+    return validateStudioVectorShape({
+      version: 1,
+      closed: true,
+      nodes: [
+        { x: 28, y: 30, in: [-14, 0], out: [14, 0] },
+        { x: 72, y: 30, in: [-14, 0], out: [14, 0] },
+        { x: 88, y: 50, in: [0, -11], out: [0, 11] },
+        { x: 72, y: 70, in: [14, 0], out: [-14, 0] },
+        { x: 28, y: 70, in: [14, 0], out: [-14, 0] },
+        { x: 12, y: 50, in: [0, 11], out: [0, -11] },
+      ],
+      fill: { kind: "linear", color: "#14b8a6", endColor: "#0ea5e9", start: [0, 50], end: [100, 50] },
+      stroke: { color: "#5eead4", width: 2.5 },
+    });
+  }
+  if (primitiveId === "lightning_chevron") {
+    return validateStudioVectorShape({
+      version: 1,
+      closed: true,
+      nodes: [
+        { x: 20, y: 20, in: [0, 0], out: [0, 0] },
+        { x: 56, y: 20, in: [0, 0], out: [0, 0] },
+        { x: 82, y: 50, in: [0, 0], out: [0, 0] },
+        { x: 56, y: 80, in: [0, 0], out: [0, 0] },
+        { x: 20, y: 80, in: [0, 0], out: [0, 0] },
+        { x: 46, y: 50, in: [0, 0], out: [0, 0] },
+      ],
+      fill: { kind: "linear", color: "#f43f5e", endColor: "#fb923c", start: [0, 0], end: [100, 100] },
+      stroke: { color: "#ffe4e6", width: 1.5 },
+    });
+  }
+  throw Error(`Unknown vector primitive: ${primitiveId}`);
+}
+
+export function addStudioVectorCounterHole(shape, { radius = 16, centerX = 50, centerY = 54 } = {}) {
+  validateStudioVectorShape(shape);
+  const existing = studioVectorContours(shape);
+  if (existing.length >= 8) throw Error("Compound artwork supports at most 8 contours.");
+  const r = Math.max(4, Math.min(36, Number(radius) || 16));
+  const hole = buildCircleContour(centerX, centerY, r);
+  return validateStudioVectorShape({
+    version: 2,
+    contours: [...existing.map(c => ({ closed: c.closed, nodes: c.nodes })), hole],
+    fill: { ...shape.fill },
+    stroke: { ...shape.stroke },
+  });
+}
+
+export function smoothStudioVectorContourNodes(contour, factor = 0.22) {
+  const ns = contour?.nodes || [];
+  if (ns.length < 2) return contour;
+  const k = Math.max(0.05, Math.min(0.45, Number(factor) || 0.22));
+  const smoothed = ns.map((node, i) => {
+    const prev = ns[(i + ns.length - 1) % ns.length];
+    const next = ns[(i + 1) % ns.length];
+    const vx = roundHandle((next.x - prev.x) * k);
+    const vy = roundHandle((next.y - prev.y) * k);
+    return {
+      ...node,
+      in: [roundHandle(-vx), roundHandle(-vy)],
+      out: [vx, vy],
+    };
+  });
+  return { ...contour, nodes: smoothed };
+}
+
+export function scaleStudioVectorContour(contour, scaleFactor = 0.9) {
+  const ns = contour?.nodes || [];
+  if (!ns.length) return contour;
+  const s = Math.max(0.25, Math.min(2.5, Number(scaleFactor) || 0.9));
+  const cx = ns.reduce((acc, n) => acc + n.x, 0) / ns.length;
+  const cy = ns.reduce((acc, n) => acc + n.y, 0) / ns.length;
+  const scaled = ns.map(node => ({
+    x: roundCoord(cx + (node.x - cx) * s),
+    y: roundCoord(cy + (node.y - cy) * s),
+    in: [roundHandle(node.in[0] * s), roundHandle(node.in[1] * s)],
+    out: [roundHandle(node.out[0] * s), roundHandle(node.out[1] * s)],
+  }));
+  return { ...contour, nodes: scaled };
+}
 export function studioVectorPath(shape) {
   validateStudioVectorShape(shape);
   return studioVectorContours(shape)
@@ -221,18 +411,29 @@ export function studioVectorSvg(
   const d = studioVectorPath(shape),
     f = shape.fill,
     s = shape.stroke;
-  const gradient =
-    f.kind === "linear"
-      ? `<defs><linearGradient id="paint" gradientUnits="userSpaceOnUse" x1="${f.start[0]}" y1="${f.start[1]}" x2="${f.end[0]}" y2="${f.end[1]}"><stop stop-color="${f.color}"/><stop offset="1" stop-color="${f.endColor}"/></linearGradient></defs>`
-      : "";
   number(strokeStart, 0, 100);
   number(strokeEnd, 0, 100);
   number(strokeOffset, -1000, 1000);
   const contours = studioVectorContours(shape);
   const full =
     strokeStart === 0 && strokeEnd === 100 && (contours.every(c => c.closed) || strokeOffset === 0);
+  const traceActive = !full && s.width > 0;
+  const traceFrac = Math.max(0, Math.min(1, (strokeEnd - strokeStart) / 100));
+  const fillAlpha = traceActive ? (0.05 + traceFrac * traceFrac * 0.22).toFixed(3) : "1";
+  const glowFilter = traceActive
+    ? `<filter id="trim-glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`
+    : "";
+  const gradientStop =
+    f.kind === "linear"
+      ? `<linearGradient id="paint" gradientUnits="userSpaceOnUse" x1="${f.start[0]}" y1="${f.start[1]}" x2="${f.end[0]}" y2="${f.end[1]}"><stop stop-color="${f.color}"/><stop offset="1" stop-color="${f.endColor}"/></linearGradient>`
+      : "";
+  const fullStroke = full && s.width > 0 ? Number((s.width * 0.45).toFixed(2)) : 0;
+  const edgeGlow = fullStroke > 0
+    ? `<filter id="trim-glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`
+    : glowFilter;
+  const defsNext = gradientStop || edgeGlow ? `<defs>${gradientStop}${edgeGlow}</defs>` : "";
   const stroke =
-    !full && s.width
+    traceActive
       ? contours
           .map((contour, index) => {
             const points = offsetStudioVectorPoints(
@@ -243,7 +444,7 @@ export function studioVectorSvg(
               contour.closed
             );
             return points.length
-              ? `<polyline points="${points.map(p => p.join(",")).join(" ")}" fill="none" stroke="${s.color}" stroke-width="${s.width}" stroke-linejoin="round" stroke-linecap="round"/>`
+              ? `<polyline points="${points.map(p => p.join(",")).join(" ")}" fill="none" stroke="${s.color}" stroke-width="${s.width}" stroke-linejoin="round" stroke-linecap="round" filter="url(#trim-glow)"/>`
               : "";
           })
           .join("")
@@ -251,7 +452,7 @@ export function studioVectorSvg(
   // The image element owns contain/cover/stretch, matching the CPU raster.
   // SVG's default inner "meet" letterboxes a stretched non-square image a
   // second time, collapsing a wide contour into a small central square.
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 100 100" preserveAspectRatio="none">${gradient}<path d="${d}" fill-rule="evenodd" fill="${f.kind === "none" ? "none" : f.kind === "linear" ? "url(#paint)" : f.color}" stroke="${s.color}" stroke-width="${full ? s.width : 0}" stroke-linejoin="round" stroke-linecap="round"/>${stroke}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 100 100" preserveAspectRatio="none">${defsNext}<path d="${d}" fill-rule="evenodd" fill="${f.kind === "none" ? "none" : f.kind === "linear" ? "url(#paint)" : f.color}"${traceActive ? ` fill-opacity="${fillAlpha}"` : ""}${fullStroke > 0 ? ' filter="url(#trim-glow)"' : ""} stroke="${s.color}" stroke-width="${fullStroke}" stroke-linejoin="round" stroke-linecap="round"/>${stroke}</svg>`;
 }
 export const studioVectorUri = (shape, pose) =>
   `data:image/svg+xml;base64,${btoa(studioVectorSvg(shape, pose))}`;

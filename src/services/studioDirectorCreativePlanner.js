@@ -7,7 +7,7 @@ const text = (x, max) =>
   typeof x === "string" && x.trim() && x.length <= max && !/[\x00-\x08\x0b-\x1f<>]/.test(x);
 const finite = (x, min, max) => typeof x === "number" && Number.isFinite(x) && x >= min && x <= max;
 
-function validateContext(input) {
+function validateContext(input, { allowEmptyMedia = false } = {}) {
   if (
     !exact(input, ["brief", "projectId", "baseRevision", "duration", "media"]) ||
     !text(input.brief, 1200) ||
@@ -16,7 +16,7 @@ function validateContext(input) {
     input.baseRevision < 0 ||
     !finite(input.duration, 2, 30) ||
     !Array.isArray(input.media) ||
-    !input.media.length ||
+    (!allowEmptyMedia && !input.media.length) ||
     input.media.length > 12
   )
     throw fail("Provide a brief, saved project, 2–30 second range and up to twelve project clips.");
@@ -78,7 +78,7 @@ function createCreativePlanner({
   now = () => new Date().toISOString(),
 }) {
   return async input => {
-    if ([2,3,4].includes(input?.compositionVersion)) {
+    if ([2,3,4,5].includes(input?.compositionVersion)) {
       if (
         !exact(input, [
           "compositionVersion",
@@ -92,7 +92,8 @@ function createCreativePlanner({
       )
         throw fail("Unsupported composition request fields.");
       const { compositionVersion, pixelEvidence, ...base } = input;
-      validateContext(base);
+      validateContext(base, { allowEmptyMedia: compositionVersion === 5 });
+      if (compositionVersion === 5) return require('./studioDirector3DPlanner').createDirectorCinema3DPlan({ ...base, compositionVersion }, { now });
       if(compositionVersion===4)return require('./studioDirectorPosterPlanner').createDirectorPosterPlan({...base,compositionVersion},{model:compositionModel,now});
       if(compositionVersion===3)return require('./studioDirectorNodePlanner').createDirectorNodePlan({...base,compositionVersion,pixelEvidence},{model:compositionModel,now});
       return require("./studioDirectorCompositionPlanner").planComposition(

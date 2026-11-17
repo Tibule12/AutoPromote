@@ -4,7 +4,8 @@ import math
 
 def adjustment_grade_filter(effects, build_finish, prefix):
     parts = [build_finish({"enabled": True, "color": effects.get("color") or {},
-                           "texture": effects.get("texture") or {}})]
+                           "texture": effects.get("texture") or {},
+                           "_label_prefix": prefix})]
     # Only the worker's request preparation sets this path, after validating and
     # materializing the actual LUT bytes. Client-supplied paths are discarded.
     cube_path = effects.get("_worker_cube_path")

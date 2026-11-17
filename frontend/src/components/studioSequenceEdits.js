@@ -1,3 +1,4 @@
+import { advanceBRollSource } from './studioBRollTiming';
 import { secondsToTicks, ticksToSeconds } from './studioTime';
 import { reconcileStudioDocument, projectStudioEditableStateToSnapshot } from './studioProjectDocument';
 import { createStudioCommandInverse } from './studioCommandHistory';
@@ -58,7 +59,7 @@ export function insertStudioProgrammeTime(snapshot, atTick, durationTick, create
       replacements.set(item.id, [item.id, rightId]); split.set(item.id, rightId);
       return [{ ...item, duration: at - start }, { ...item, id: rightId, startTime: at + duration,
         duration: end - at,
-        ...(item.type === 'video' ? { sourceStartTime: Number(item.sourceStartTime || 0) + at - start } : {}),
+        ...(item.type === 'video' ? advanceBRollSource(item, at - start) : {}),
         ...(item.trimStart !== undefined ? { trimStart: Number(item.trimStart || 0) + at - start } : {}) }];
     });
   }

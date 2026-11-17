@@ -5,6 +5,10 @@ const PALETTES = {
   orange_ink: ["#f4efe6", "#141419", "#ff5838", "#daff40"],
   cobalt_lime: ["#f4f1e8", "#111624", "#244aff", "#dfff45"],
   pink_ink: ["#f4efe6", "#19121d", "#ff5c8b", "#c9ff4a"],
+  cyber_cyan: ["#eef7ff", "#090d1a", "#00c2ff", "#ff2a85"],
+  cinema_gold: ["#faf5eb", "#120f0b", "#f5a623", "#ff5838"],
+  emerald_noir: ["#eefbf4", "#081712", "#10b981", "#dfff45"],
+  ultraviolet_pulse: ["#f6f0ff", "#120924", "#9333ea", "#00f5d4"],
 };
 function validateKineticPoster(spec) {
   if (

@@ -1,11 +1,186 @@
 import { applySafeMediaSource, getSafeMediaSource } from "../utils/security";
 import { useEffect, useRef, useState } from "react";
-import { validateSubjectVfxScene, subjectVfxRevision } from "./studioSubjectVfxContract";
+import {
+  validateSubjectVfxScene,
+  subjectVfxRevision,
+  TEXT_BEHIND_PRESETS,
+  TEXT_BEHIND_FONTS,
+  TEXT_BEHIND_ANIMATIONS,
+} from "./studioSubjectVfxContract";
 import StudioSubjectMaskControls from "./StudioSubjectMaskControls";
 import { correctSubjectItem } from "./studioSubjectCorrections";
 import ProductHelpButton from "./ProductHelpButton";
 import { uploadSourceFileViaBackend } from "../utils/sourceUpload";
 import "./StudioSubjectVfxPanel.css";
+
+const TEXT_BEHIND_PRESET_LABELS = {
+  classic: "Classic (DejaVu)",
+  hero_poster: "Hero Poster (Inter Black + Spring)",
+  neon_backlit: "Neon Backlit (Back-Glow)",
+  caption_punch: "Caption Punch (Word Pop)",
+  editorial_depth: "Editorial Depth (Rise + Track)",
+};
+const TEXT_BEHIND_PRESET_DEFAULTS = {
+  classic: { font: "dejavu_bold", animation: "fade", shadow: 0, glow: 0, tracking: 0 },
+  hero_poster: { font: "inter_black", animation: "spring_pop", shadow: 0.65, glow: 0.18, tracking: 1.5 },
+  neon_backlit: { font: "inter_black", animation: "fade", shadow: 0.55, glow: 0.78, tracking: 2 },
+  caption_punch: { font: "inter_extrabold", animation: "word_pop", shadow: 0.72, glow: 0.24, tracking: 0.5 },
+  editorial_depth: { font: "inter_semibold", animation: "rise_reveal", shadow: 0.45, glow: 0, tracking: 3.5 },
+};
+const TEXT_BEHIND_FONT_LABELS = {
+  inter_black: "Inter Black (Heavy Display)",
+  inter_extrabold: "Inter ExtraBold",
+  inter_semibold: "Inter SemiBold",
+  dejavu_bold: "DejaVu Sans Bold",
+};
+const TEXT_BEHIND_ANIMATION_LABELS = {
+  fade: "Soft Fade",
+  spring_pop: "Spring Overshoot",
+  rise_reveal: "Rise Reveal + Motion Blur",
+  word_pop: "Speech Word Pop",
+};
+
+const normalizeHexColor = value =>
+  typeof value === "string" && /^#[a-fA-F0-9]{6}$/.test(value.trim()) ? value.trim() : "#ffb33d";
+
+function stripControlChars(value) {
+  return Array.from(String(value || ""), ch => (ch.charCodeAt(0) < 32 ? " " : ch)).join("");
+}
+
+export function buildBehindSubjectCaptionLayers({
+  captions = [],
+  sourceRange,
+  existingEffects = [],
+  accentColor = "#ffb33d",
+  preset = "caption_punch",
+  hideForegroundCaptions = true,
+  createId = prefix => `${prefix}-${Date.now()}`,
+}) {
+  const rangeStart = Number(sourceRange?.start || 0);
+  const rangeEnd = Number(sourceRange?.end || 0);
+  const duration = Math.max(0, rangeEnd - rangeStart);
+  if (duration < 0.25) return { layers: [], message: "Choose a source range of at least 0.25 seconds." };
+
+  const preservedEffects = (existingEffects || []).filter(
+    effect => !(effect?.type === "text_behind" && String(effect.id || "").startsWith("behind-caption-"))
+  );
+  const maxCaptionLayers = Math.max(0, 12 - preservedEffects.length);
+  if (maxCaptionLayers < 1) {
+    return {
+      layers: [],
+      message: "Remove a layer first to leave room for behind-subject speech captions (12 max).",
+    };
+  }
+
+  const normalizedSegments = (Array.isArray(captions) ? captions : [])
+    .map(segment => {
+      const start = Number(segment?.start ?? segment?.start_time ?? 0);
+      const end = Number(segment?.end ?? segment?.end_time ?? 0);
+      const text = stripControlChars(segment?.text).replace(/\s+/g, " ").trim();
+      const rawWords = Array.isArray(segment?.wordTimestamps || segment?.words)
+        ? segment.wordTimestamps || segment.words
+        : null;
+      return { start, end, text, rawWords, accent: segment?.captionAccent };
+    })
+    .filter(seg => seg.text && seg.end > seg.start && seg.end > rangeStart + 0.02 && seg.start < rangeEnd - 0.02)
+    .sort((a, b) => a.start - b.start);
+
+  if (!normalizedSegments.length) {
+    return {
+      layers: [],
+      message: "Generate or add transcript lines in Captions for this clip range first.",
+    };
+  }
+
+  // Split long segments into punchy 2-4 word phrases if room inside layer budget allows
+  const phrases = [];
+  for (const seg of normalizedSegments) {
+    const clStart = Math.max(0, seg.start - rangeStart);
+    const clEnd = Math.min(duration, seg.end - rangeStart);
+    if (clEnd - clStart < 0.06) continue;
+    const wordsList = seg.rawWords?.length
+      ? seg.rawWords
+          .map(w => ({
+            word: stripControlChars(w.word || w.text).trim().slice(0, 40),
+            start: Math.max(clStart, Number(w.start ?? w.start_time ?? seg.start) - rangeStart),
+            end: Math.min(clEnd, Number(w.end ?? w.end_time ?? seg.end) - rangeStart),
+          }))
+          .filter(w => w.word && w.end > w.start + 0.01)
+      : (() => {
+          const tokens = seg.text.split(" ").filter(Boolean).slice(0, 32);
+          const step = (clEnd - clStart) / Math.max(1, tokens.length);
+          return tokens.map((word, idx) => ({
+            word: word.slice(0, 40),
+            start: Number((clStart + idx * step).toFixed(3)),
+            end: Number((idx === tokens.length - 1 ? clEnd : clStart + (idx + 1) * step).toFixed(3)),
+          }));
+        })();
+
+    const wordsPerPhrase = wordsList.length > 5 && phrases.length + Math.ceil(wordsList.length / 3) <= maxCaptionLayers ? 3 : wordsList.length;
+    const frameCount = Math.floor(duration * 24 + 0.5);
+    for (let i = 0; i < wordsList.length && phrases.length < maxCaptionLayers; i += wordsPerPhrase) {
+      const slice = wordsList.slice(i, i + wordsPerPhrase).slice(0, 32);
+      if (!slice.length) continue;
+      let pStart = Number(Math.max(0, slice[0].start).toFixed(3));
+      const pEnd = Number(Math.min(duration, slice[slice.length - 1].end).toFixed(3));
+      if (pEnd <= pStart + 0.05) continue;
+      if (Math.ceil(pStart * 24) >= Math.min(frameCount, Math.ceil(pEnd * 24))) {
+        pStart = Number(Math.max(0, pEnd - 0.06).toFixed(3));
+      }
+      if (Math.ceil(pStart * 24) >= Math.min(frameCount, Math.ceil(pEnd * 24))) continue;
+      const phraseText = slice.map(item => item.word).join(" ").slice(0, 120);
+      phrases.push({
+        start: pStart,
+        end: pEnd,
+        text: phraseText,
+        accent: normalizeHexColor(seg.accent || accentColor),
+        words: slice.map(item => ({
+          word: item.word,
+          start: Number(Math.max(pStart, Math.min(pEnd, item.start)).toFixed(3)),
+          end: Number(Math.max(pStart + 0.01, Math.min(pEnd, item.end)).toFixed(3)),
+        })),
+      });
+    }
+    if (phrases.length >= maxCaptionLayers) break;
+  }
+
+  const defaults = TEXT_BEHIND_PRESET_DEFAULTS[preset] || TEXT_BEHIND_PRESET_DEFAULTS.caption_punch;
+  const captionLayers = phrases.map((phrase, idx) => {
+    const layer = {
+      id: `behind-caption-${idx + 1}-${String(createId("seg")).replace(/[^A-Za-z0-9_-]/g, "").slice(-10) || idx}`,
+      type: "text_behind",
+      start: phrase.start,
+      end: phrase.end,
+      text: phrase.text,
+      x: 50,
+      y: 44,
+      font_size: 86,
+      color: "#f8fafc",
+      preset,
+      font: defaults.font,
+      animation: phrase.words.length ? "word_pop" : defaults.animation,
+      accent_color: phrase.accent,
+      shadow: defaults.shadow,
+      glow: defaults.glow,
+      tracking: defaults.tracking,
+      words: phrase.words,
+      hide_fg_captions: Boolean(hideForegroundCaptions),
+    };
+    return layer;
+  });
+
+  if (!captionLayers.length) {
+    return {
+      layers: [],
+      message: "No transcript phrases overlap this clip range yet.",
+    };
+  }
+  return {
+    layers: [...preservedEffects, ...captionLayers],
+    syncedCount: captionLayers.length,
+    message: `Synced ${captionLayers.length} behind-subject caption phrase${captionLayers.length === 1 ? "" : "s"} behind the mask.`,
+  };
+}
 
 const presets = {
   foreground_holdout: duration => ({id:"foreground-holdout",type:"foreground_holdout",start:0,end:duration,
@@ -100,12 +275,271 @@ const names = {
   depth: "Background parallax",
   particles: "Particles",
 };
+
+export const SUBJECT_VFX_COMPOSITE_RECIPES = Object.freeze([
+  {
+    id: "hero_depth_title_stack",
+    label: "Hero Depth Title + Rim Glow",
+    build: duration => [
+      {
+        ...presets.foreground_refine(duration),
+        id: "recipe-matte-refine",
+        choke: 1,
+        feather: 0.45,
+      },
+      {
+        id: "recipe-bg-grade",
+        type: "background_grade",
+        start: 0,
+        end: duration,
+        exposure: -0.45,
+        saturation: 0.72,
+        contrast: 1.12,
+      },
+      {
+        id: "recipe-text-behind",
+        type: "text_behind",
+        start: 0,
+        end: duration,
+        text: "HEADLINE",
+        x: 50,
+        y: 42,
+        font_size: 112,
+        color: "#f8fafc",
+      },
+      {
+        id: "recipe-rim-glow",
+        type: "glow",
+        start: 0,
+        end: duration,
+        color: "#38bdf8",
+        strength: 0.14,
+        radius: 18,
+      },
+      {
+        id: "recipe-depth",
+        type: "depth",
+        start: 0,
+        end: duration,
+        amount: 0.024,
+      },
+    ],
+  },
+  {
+    id: "cyberpunk_neon_isolation",
+    label: "Cyberpunk Neon Isolation",
+    build: duration => [
+      {
+        id: "recipe-bg-grade",
+        type: "background_grade",
+        start: 0,
+        end: duration,
+        exposure: -0.65,
+        saturation: 0.35,
+        contrast: 1.25,
+      },
+      {
+        id: "recipe-fg-grade",
+        type: "foreground_grade",
+        start: 0,
+        end: duration,
+        exposure: 0.12,
+        saturation: 1.18,
+        contrast: 1.15,
+      },
+      {
+        id: "recipe-rim-glow",
+        type: "glow",
+        start: 0,
+        end: duration,
+        color: "#ec4899",
+        strength: 0.22,
+        radius: 22,
+      },
+      {
+        id: "recipe-particles",
+        type: "particles",
+        start: 0,
+        end: duration,
+        seed: 73,
+        count: 32,
+        color: "#22d3ee",
+        opacity: 0.28,
+        speed: 18,
+      },
+      {
+        id: "recipe-depth",
+        type: "depth",
+        start: 0,
+        end: duration,
+        amount: 0.03,
+      },
+    ],
+  },
+  {
+    id: "editorial_spotlight_callout",
+    label: "Editorial Spotlight & Callout",
+    build: duration => [
+      {
+        ...presets.foreground_refine(duration),
+        id: "recipe-matte-refine",
+        choke: 1,
+        feather: 0.5,
+      },
+      {
+        id: "recipe-bg-grade",
+        type: "background_grade",
+        start: 0,
+        end: duration,
+        exposure: -0.55,
+        saturation: 0.6,
+        contrast: 1.08,
+      },
+      {
+        id: "recipe-fg-grade",
+        type: "foreground_grade",
+        start: 0,
+        end: duration,
+        exposure: 0.15,
+        saturation: 1.1,
+        contrast: 1.1,
+      },
+      {
+        id: "recipe-callout",
+        type: "tracked_callout",
+        start: 0,
+        end: duration,
+        text: "FEATURED SUBJECT",
+        offset_x: -140,
+        offset_y: -120,
+        font_size: 26,
+        color: "#fde047",
+        avoid_subject: true,
+      },
+      {
+        id: "recipe-rim-glow",
+        type: "glow",
+        start: 0,
+        end: duration,
+        color: "#fde047",
+        strength: 0.08,
+        radius: 12,
+      },
+    ],
+  },
+  {
+    id: "kinetic_story_stage",
+    label: "Kinetic Story Stage",
+    build: duration => [
+      {
+        id: "recipe-bg-grade",
+        type: "background_grade",
+        start: 0,
+        end: duration,
+        exposure: -0.35,
+        saturation: 0.8,
+        contrast: 1.1,
+      },
+      {
+        id: "recipe-text-behind",
+        type: "text_behind",
+        start: 0,
+        end: duration,
+        text: "UNSTOPPABLE",
+        x: 50,
+        y: 38,
+        font_size: 108,
+        color: "#e2e8f0",
+      },
+      {
+        id: "recipe-kinetic-type",
+        type: "kinetic_type",
+        start: 0,
+        end: duration,
+        text: "NEW ERA",
+        x: 8,
+        y: 76,
+        font_size: 68,
+        color: "#c084fc",
+        tracking: 4,
+        travel: 42,
+        align: "left",
+      },
+      {
+        id: "recipe-particles",
+        type: "particles",
+        start: 0,
+        end: duration,
+        seed: 108,
+        count: 24,
+        color: "#c084fc",
+        opacity: 0.22,
+        speed: 14,
+      },
+    ],
+  },
+  {
+    id: "behind_subject_captions",
+    label: "Behind-Subject Captions + Depth",
+    build: duration => [
+      {
+        ...presets.foreground_refine(duration),
+        id: "recipe-matte-refine",
+        choke: 1,
+        feather: 0.45,
+      },
+      {
+        id: "recipe-bg-grade",
+        type: "background_grade",
+        start: 0,
+        end: duration,
+        exposure: -0.32,
+        saturation: 0.78,
+        contrast: 1.08,
+      },
+      {
+        id: "recipe-caption-behind",
+        type: "text_behind",
+        start: 0,
+        end: duration,
+        text: "SAY IT LOUD",
+        x: 50,
+        y: 44,
+        font_size: 88,
+        color: "#f8fafc",
+        preset: "caption_punch",
+        font: "inter_black",
+        animation: "spring_pop",
+        accent_color: "#ffb33d",
+        shadow: 0.72,
+        glow: 0.24,
+        tracking: 1,
+        hide_fg_captions: true,
+      },
+      {
+        id: "recipe-depth",
+        type: "depth",
+        start: 0,
+        end: duration,
+        amount: 0.02,
+      },
+    ],
+  },
+]);
+
+export function buildSubjectVfxCompositeRecipe(recipeId, duration = 4) {
+  const recipe = SUBJECT_VFX_COMPOSITE_RECIPES.find(item => item.id === recipeId);
+  if (!recipe) throw new Error(`Unknown subject composite recipe: ${recipeId}`);
+  return recipe.build(Math.max(0.25, Number(duration) || 4));
+}
 const limits = {
   x: [0, 100],
   y: [0, 100],
   font_size: [12, 320],
   tracking: [0, 40],
   travel: [0, 150],
+  shadow: [0, 1],
+  glow: [0, 1],
   exposure: [-3, 1],
   saturation: [0, 2],
   contrast: [0.5, 2],
@@ -138,6 +572,8 @@ export default function StudioSubjectVfxPanel({
   media = [],
   onMediaAdded,
   getDocument,
+  captions = [],
+  defaultCaptionAccent = "#ffb33d",
 }) {
   const backgrounds = media.filter(asset => asset.storagePath && /^[a-f0-9]{64}$/.test(asset.contentHash || "") &&
     ["image", "video"].includes(asset.mediaType || asset.type));
@@ -903,11 +1339,41 @@ export default function StudioSubjectVfxPanel({
                     } catch { setMessage("Use 1–32 removal paths, each with 3–64 source-frame points, or [] to remove the correction."); }
                   }} />
               </label>}
-              {Object.entries(effect.type === "foreground_refine" ? { edge_radius: 0, decontaminate: 0, blue_spill: 0, after_refine: false, after_holdout: false, reject_connected: false, ...effect } : effect.type === "foreground_holdout" ? { after_refine: false, saturation: 1, ...effect } : effect)
-                .filter(([key]) => !["id", "type", "asset_sha256", "alpha_levels", "alpha_polygon", "detail_polygon", "edge_polygon", "paths", "color_paths", "clear_paths", "source_patches"].includes(key))
+              {Object.entries(
+                effect.type === "foreground_refine"
+                  ? { edge_radius: 0, decontaminate: 0, blue_spill: 0, after_refine: false, after_holdout: false, reject_connected: false, ...effect }
+                  : effect.type === "foreground_holdout"
+                    ? { after_refine: false, saturation: 1, ...effect }
+                    : effect.type === "text_behind"
+                      ? {
+                          preset: "classic",
+                          font: "dejavu_bold",
+                          animation: "fade",
+                          accent_color: normalizeHexColor(defaultCaptionAccent),
+                          shadow: 0,
+                          glow: 0,
+                          tracking: 0,
+                          hide_fg_captions: false,
+                          ...effect,
+                        }
+                      : effect
+              )
+                .filter(([key]) => !["id", "type", "asset_sha256", "alpha_levels", "alpha_polygon", "detail_polygon", "edge_polygon", "paths", "color_paths", "clear_paths", "source_patches", "words"].includes(key))
                 .map(([key, value]) => (
                   <label key={key}>
-                    {key === "asset_id" ? "Background media" : key === "after_holdout" ? "Clean protected object edges" : key === "reject_connected" ? "Limit colour cleanup to background edges" : key === "after_refine" ? effect.type === "foreground_refine" ? "Apply colour cleanup after matting" : "Keep thin detail through cleanup" : key.replaceAll("_", " ")}
+                    {key === "asset_id"
+                      ? "Background media"
+                      : key === "after_holdout"
+                        ? "Clean protected object edges"
+                        : key === "reject_connected"
+                          ? "Limit colour cleanup to background edges"
+                          : key === "after_refine"
+                            ? effect.type === "foreground_refine"
+                              ? "Apply colour cleanup after matting"
+                              : "Keep thin detail through cleanup"
+                            : key === "hide_fg_captions"
+                              ? "Hide duplicate foreground captions"
+                              : key.replaceAll("_", " ")}
                     {Array.isArray(value) && Array.isArray(value[0]) ? (
                       <span className="subject-vfx-actions">
                         {value.map((point, corner) => <span key={corner}>{point.map((coordinate, axis) =>
@@ -931,6 +1397,71 @@ export default function StudioSubjectVfxPanel({
                       }}>
                         <option value="">Choose project media…</option>
                         {backgrounds.map(asset => <option key={asset.id} value={asset.id}>{asset.name || "Background"}</option>)}
+                      </select>
+                    ) : key === "preset" && effect.type === "text_behind" ? (
+                      <select
+                        value={value}
+                        onChange={event => {
+                          const nextPreset = event.target.value;
+                          const presetDefaults = TEXT_BEHIND_PRESET_DEFAULTS[nextPreset] || TEXT_BEHIND_PRESET_DEFAULTS.classic;
+                          update({
+                            ...item.scene,
+                            effects: item.scene.effects.map((layer, i) =>
+                              i === index
+                                ? {
+                                    ...layer,
+                                    preset: nextPreset,
+                                    ...presetDefaults,
+                                    ...(nextPreset !== "classic" && !layer.accent_color
+                                      ? { accent_color: normalizeHexColor(defaultCaptionAccent) }
+                                      : {}),
+                                  }
+                                : layer
+                            ),
+                          });
+                        }}
+                      >
+                        {TEXT_BEHIND_PRESETS.map(option => (
+                          <option key={option} value={option}>
+                            {TEXT_BEHIND_PRESET_LABELS[option] || option}
+                          </option>
+                        ))}
+                      </select>
+                    ) : key === "font" && effect.type === "text_behind" ? (
+                      <select
+                        value={value}
+                        onChange={event =>
+                          update({
+                            ...item.scene,
+                            effects: item.scene.effects.map((layer, i) =>
+                              i === index ? { ...layer, font: event.target.value } : layer
+                            ),
+                          })
+                        }
+                      >
+                        {TEXT_BEHIND_FONTS.map(option => (
+                          <option key={option} value={option}>
+                            {TEXT_BEHIND_FONT_LABELS[option] || option}
+                          </option>
+                        ))}
+                      </select>
+                    ) : key === "animation" && effect.type === "text_behind" ? (
+                      <select
+                        value={value}
+                        onChange={event =>
+                          update({
+                            ...item.scene,
+                            effects: item.scene.effects.map((layer, i) =>
+                              i === index ? { ...layer, animation: event.target.value } : layer
+                            ),
+                          })
+                        }
+                      >
+                        {TEXT_BEHIND_ANIMATIONS.map(option => (
+                          <option key={option} value={option}>
+                            {TEXT_BEHIND_ANIMATION_LABELS[option] || option}
+                          </option>
+                        ))}
                       </select>
                     ) : typeof value === "boolean" ? (
                       <input
@@ -964,7 +1495,11 @@ export default function StudioSubjectVfxPanel({
                     ) : (
                       <input
                         type={
-                          typeof value === "number" ? "number" : key === "color" ? "color" : "text"
+                          typeof value === "number"
+                            ? "number"
+                            : key === "color" || key === "accent_color"
+                              ? "color"
+                              : "text"
                         }
                         value={value}
                         min={limits[key]?.[0] ?? 0}
@@ -974,7 +1509,13 @@ export default function StudioSubjectVfxPanel({
                             ? item.scene.sourceRange.end - item.scene.sourceRange.start
                             : undefined)
                         }
-                        step={["count", "seed", "choke", "edge_radius"].includes(key) ? 1 : 0.01}
+                        step={
+                          ["count", "seed", "choke", "edge_radius", "tracking"].includes(key)
+                            ? 1
+                            : ["shadow", "glow"].includes(key)
+                              ? 0.05
+                              : 0.01
+                        }
                         maxLength={key === "text" ? 120 : undefined}
                         onChange={event =>
                           update({
@@ -996,6 +1537,24 @@ export default function StudioSubjectVfxPanel({
                     )}
                   </label>
                 ))}
+              {effect.type === "text_behind" && Array.isArray(effect.words) && effect.words.length > 0 && (
+                <div className="subject-vfx-actions">
+                  <small>{`Speech-synced: ${effect.words.length} timed word${effect.words.length === 1 ? "" : "s"}`}</small>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const nextLayer = { ...effect };
+                      delete nextLayer.words;
+                      update({
+                        ...item.scene,
+                        effects: item.scene.effects.map((layer, i) => (i === index ? nextLayer : layer)),
+                      });
+                    }}
+                  >
+                    Clear word timing
+                  </button>
+                </div>
+              )}
               <button
                 type="button"
                 onClick={() =>
@@ -1012,6 +1571,62 @@ export default function StudioSubjectVfxPanel({
           {getDocument && <StudioSubjectMaskControls key={item.scene.id} item={item}
             onChange={next => onChange(latest.current.map(value => value.scene.id === next.scene.id ? next : value))}
             getDocument={getDocument} getToken={getToken} apiBase={apiBase} createId={createId} />}
+          <div className="subject-vfx-actions" data-testid="subject-vfx-recipe-bar">
+            <button
+              type="button"
+              disabled={busy || operation.current}
+              data-testid="sync-behind-captions"
+              onClick={() => {
+                try {
+                  const synced = buildBehindSubjectCaptionLayers({
+                    captions,
+                    sourceRange: item.scene.sourceRange,
+                    existingEffects: item.scene.effects,
+                    accentColor: defaultCaptionAccent,
+                    createId,
+                  });
+                  if (!synced.layers.length) {
+                    setMessage(synced.message);
+                    return;
+                  }
+                  const nextScene = validateSubjectVfxScene({
+                    ...item.scene,
+                    effects: synced.layers,
+                  });
+                  update(nextScene);
+                  setMessage(synced.message);
+                } catch (err) {
+                  setMessage(err.message);
+                }
+              }}
+            >
+              Sync speech captions behind subject
+            </button>
+            {SUBJECT_VFX_COMPOSITE_RECIPES.map(recipe => (
+              <button
+                key={recipe.id}
+                type="button"
+                disabled={busy || operation.current}
+                data-testid={`subject-vfx-recipe-${recipe.id}`}
+                onClick={() => {
+                  try {
+                    const duration = item.scene.sourceRange.end - item.scene.sourceRange.start;
+                    const effects = buildSubjectVfxCompositeRecipe(recipe.id, duration);
+                    const nextScene = validateSubjectVfxScene({
+                      ...item.scene,
+                      effects,
+                    });
+                    update(nextScene);
+                    setMessage(`${recipe.label} composite recipe applied.`);
+                  } catch (err) {
+                    setMessage(err.message);
+                  }
+                }}
+              >
+                {recipe.label}
+              </button>
+            ))}
+          </div>
           <div className="subject-vfx-actions">
             <select
               aria-label="Subject effect type"

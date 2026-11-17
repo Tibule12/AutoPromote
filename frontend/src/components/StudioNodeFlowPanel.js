@@ -1,17 +1,21 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from 'react-dom';
 import {
   FLOW_NODE_KINDS,
   FLOW_NODE_PALETTE,
   SMART_FLOW_RIG_PRESETS,
   buildSmartFlowRigState,
   computeNodeFlowBounds,
-  connectNodeFlowPorts,
+  connectNodeFlowPorts as connectNodeFlowPortsUnsafe,
   createNodePaletteAddition,
   deleteNodeFromFlow,
   deriveNodeFlowGraph,
   describeNodeViewerSignal,
   disconnectNodeFlowPort,
+  evaluateParameterLinks,
+  spliceNodeIntoWire,
   toggleNodeFlowBypass,
+  restoreAllNodeFlowBypasses,
 } from "./studioNodeFlow";
 import {
   defaultMotionDriverForProperty,
@@ -31,12 +35,32 @@ import {
   studioMaskPolygonPath,
   validateStudioMaskAnimation,
 } from "./studioMaskGeometry";
+import {
+  PERSPECTIVE_IDENTITY,
+  PERSPECTIVE_LEFT,
+  PERSPECTIVE_RIGHT,
+  validateStudioPerspective,
+} from "./studioPerspective";
 import { CINEMATIC_PRESETS } from "../hooks/useCinematicEffects";
 import {
   CINEMA_3D_LUT_PRESETS,
   buildProceduralColorCube,
   parseColorCube,
 } from "./studioColorCube";
+import {
+  CAMERA_COLOR_PROFILES,
+  DEAD_CONTENT_REVITALIZER_PRESETS,
+  FILM_EMULATION_PRESETS,
+  HSL_QUALIFIER_PRESETS,
+  POWER_WINDOW_PRESETS,
+  buildColorSpaceTransformCube,
+  diagnoseDeadFootageAndSolveRevival,
+  solveShotMatchGrade,
+} from "./studioColorScience";
+import {
+  parseStudioPresetBundle,
+  serializeStudioPresetBundle,
+} from "./studioPresetExchange";
 import {
   SKIN_TONE_LINE_ANGLE_DEG,
   computeLiveGradeScopes,
@@ -49,7 +73,7 @@ import {
 } from "./studioFinishKeyframes";
 import { upsertAutomationKeyframe } from "./studioAutomation";
 import StudioVectorPathEditor from "./StudioVectorPathEditor";
-import StudioSourceGradeViewer from "./StudioSourceGradeViewer";
+import StudioNodeSignalViewer from "./StudioNodeSignalViewer";
 import StudioAdjustmentControls from "./StudioAdjustmentControls";
 import "./StudioMotionFlow.css";
 
@@ -100,9 +124,12 @@ const isPortCompatibleWithPending = (pendingWire, targetNode, inPort) => {
   if (!pendingWire || !targetNode || pendingWire.fromNodeId === targetNode.id) return false;
   if (inPort === "Parent") {
     return (
-      (targetNode.kind === "Transform" || targetNode.kind === "NullRig") &&
+      (targetNode.kind === "Transform" ||
+        targetNode.kind === "NullRig" ||
+        targetNode.kind === "CompoundMacro") &&
       targetNode.id !== "Transform:main-video" &&
       (pendingWire.fromNodeId.startsWith("NullRig:") ||
+        pendingWire.fromNodeId.startsWith("CompoundMacro:") ||
         pendingWire.fromNodeId.startsWith("Transform:") ||
         pendingWire.fromNodeId.startsWith("Merge:"))
     );
@@ -113,11 +140,26 @@ const isPortCompatibleWithPending = (pendingWire, targetNode, inPort) => {
         pendingWire.fromNodeId.startsWith("Transform:") ||
         pendingWire.fromNodeId.startsWith("GlowBlur:") ||
         pendingWire.fromNodeId.startsWith("MediaIn:") ||
+        pendingWire.fromNodeId.startsWith("SubjectMatte:") ||
+        pendingWire.fromNodeId.startsWith("ChromaKeyer:") ||
+        pendingWire.fromNodeId.startsWith("PolygonMask:")
+      );
+    }
+    if (targetNode.kind === "Transform" || targetNode.kind === "CompoundMacro") {
+      return (
+        pendingWire.fromNodeId.startsWith("PolygonMask:") ||
+        pendingWire.fromNodeId.startsWith("ChromaKeyer:") ||
         pendingWire.fromNodeId.startsWith("SubjectMatte:")
       );
     }
-    if (targetNode.kind === "Transform") {
-      return pendingWire.fromNodeId.startsWith("PolygonMask:");
+    if (targetNode.kind === "ColorCorrector" || targetNode.kind === "Adjustment") {
+      return (
+        pendingWire.fromNodeId.startsWith("PolygonMask:") ||
+        pendingWire.fromNodeId.startsWith("SubjectMatte:") ||
+        pendingWire.fromNodeId.startsWith("ChromaKeyer:") ||
+        pendingWire.fromNodeId.startsWith("Transform:") ||
+        pendingWire.fromNodeId.startsWith("MediaIn:")
+      );
     }
   }
   if ((inPort === "BG" || inPort === "FG") && targetNode.kind === "Merge") {
@@ -167,24 +209,38 @@ export default function StudioNodeFlow({
   onSeek,
   onInteractionStart,
   onInteractionEnd,
+  onApplyNodeChange,
 }) {
-  const emitNodeFlow = onChangeNodeFlow || onUpdateNodeFlow;
-  const emitOverlays = onChangeOverlays || onUpdateOverlays;
-  const emitCompositionOrder = onChangeCompositionOrder || onUpdateCompositionOrder;
-  const emitAdjustmentLayers = onChangeAdjustmentLayers || onUpdateAdjustmentLayers;
-  const emitFinishFx = onChangeFinishFx || onUpdateFinishFx;
-  const emitFinishKeyframes = onChangeFinishKeyframes || onUpdateFinishKeyframes;
-  const emitAdvancedColor = onChangeAdvancedColor || onUpdateAdvancedColor;
-  const emitMainTransform = onChangeMainTransform || onUpdateMainTransform;
-  const emitMotionKeyframes = onChangeMotionKeyframes || onUpdateMotionKeyframes;
+  const emitNodeFlow = onApplyNodeChange ? value => onApplyNodeChange({ nodeFlow: value }) : onChangeNodeFlow || onUpdateNodeFlow;
+  const emitOverlays = onApplyNodeChange ? value => onApplyNodeChange({ overlays: value }) : onChangeOverlays || onUpdateOverlays;
+  const emitCompositionOrder = onApplyNodeChange ? value => onApplyNodeChange({ compositionOrder: value }) : onChangeCompositionOrder || onUpdateCompositionOrder;
+  const emitAdjustmentLayers = onApplyNodeChange ? value => onApplyNodeChange({ adjustmentLayers: value }) : onChangeAdjustmentLayers || onUpdateAdjustmentLayers;
+  const emitFinishFx = onApplyNodeChange ? value => onApplyNodeChange({ finishFx: value }) : onChangeFinishFx || onUpdateFinishFx;
+  const emitFinishKeyframes = onApplyNodeChange ? value => onApplyNodeChange({ finishKeyframes: value }) : onChangeFinishKeyframes || onUpdateFinishKeyframes;
+  const emitAdvancedColor = onApplyNodeChange ? value => onApplyNodeChange({ advancedColor: value }) : onChangeAdvancedColor || onUpdateAdvancedColor;
+  const emitMainTransform = onApplyNodeChange ? value => onApplyNodeChange({ mainTransform: value }) : onChangeMainTransform || onUpdateMainTransform;
+  const emitMotionKeyframes = onApplyNodeChange ? value => onApplyNodeChange({ motionKeyframes: value }) : onChangeMotionKeyframes || onUpdateMotionKeyframes;
 
+  const [actionError, setActionError] = useState("");
+  const [expandedWorkspace, setExpandedWorkspace] = useState(false);
+  const rootRef = useRef(null);
+  const completedPortOnMouseUp = useRef(null);
   const [zoom, setZoom] = useState(0.72);
   const [pan, setPan] = useState({ x: 8, y: 6 });
   const [selectedNodeId, setSelectedNodeId] = useState("MediaOut");
   const [selectedVectorNodeIdx, setSelectedVectorNodeIdx] = useState(0);
   const [draggingMaskVertex, setDraggingMaskVertex] = useState(null);
+  const [draggingCornerIdx, setDraggingCornerIdx] = useState(null);
   const [autoKeyMaskVertices, setAutoKeyMaskVertices] = useState(false);
   const [scopeMode, setScopeMode] = useState("waveform");
+  const [shotMatchRefPixels, setShotMatchRefPixels] = useState(null);
+  const [quickSearchOpen, setQuickSearchOpen] = useState(false);
+  const [quickSearchQuery, setQuickSearchQuery] = useState("");
+  const [paramLinkTargetProp, setParamLinkTargetProp] = useState("scale");
+  const [paramLinkSourceId, setParamLinkSourceId] = useState("main-video");
+  const [paramLinkSourceProp, setParamLinkSourceProp] = useState("scale");
+  const [paramLinkMult, setParamLinkMult] = useState(1);
+  const [paramLinkOffset, setParamLinkOffset] = useState(0);
   const [draggingNode, setDraggingNode] = useState(null);
   const [panningCanvas, setPanningCanvas] = useState(null);
   const [pendingWire, setPendingWire] = useState(null);
@@ -193,6 +249,23 @@ export default function StudioNodeFlow({
   const [draggingSplit, setDraggingSplit] = useState(false);
   const canvasWrapRef = useRef(null);
   const viewerScreenRef = useRef(null);
+
+  useEffect(() => {
+    if (!expandedWorkspace) return undefined;
+    const previous=document.activeElement;
+    const root=rootRef.current;
+    const focusable=()=>[...root.querySelectorAll('button,input,select,[tabindex="0"]')]
+      .filter(element=>!element.disabled&&element.getClientRects().length);
+    const trap=event=>{
+      if(event.key!=='Tab')return;
+      const controls=focusable();if(!controls.length)return;
+      const first=controls[0],last=controls.at(-1);
+      if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}
+      else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}
+    };
+    root.addEventListener('keydown',trap);
+    return ()=>{root.removeEventListener('keydown',trap);previous?.focus?.()};
+  },[expandedWorkspace]);
 
   const graph = useMemo(
     () =>
@@ -253,12 +326,14 @@ export default function StudioNodeFlow({
   );
 
   const isSplitActive = Boolean(graph.viewerB || showSplitCompare);
+  const connectNodeFlowPorts=useCallback((...args)=>{try{return connectNodeFlowPortsUnsafe(...args)}catch(error){setActionError(error.message);return null;}},[]);
 
   const updateFlowPatch = useCallback(
     patch => {
       if (typeof emitNodeFlow === "function") {
         const base = nodeFlow && typeof nodeFlow === "object" ? nodeFlow : {};
         emitNodeFlow({
+          ...base,
           version: 1,
           viewerA: base.viewerA || "MediaOut",
           viewerB: base.viewerB ?? null,
@@ -274,7 +349,20 @@ export default function StudioNodeFlow({
 
   const applyCanonicalGraphResult = useCallback(
     res => {
-      if (!res) return;
+      if (!res) return false;
+      if (typeof onApplyNodeChange === 'function') {
+        const patch={};
+        for(const field of ['overlays','compositionOrder','adjustmentLayers','finishFx','advancedColor',
+          'nodeFlow','mainTransform','motionKeyframes','finishKeyframes'])
+          if(Object.prototype.hasOwnProperty.call(res,field))patch[field]=res[field];
+        if(onApplyNodeChange(patch)===false){setActionError('This change is unavailable for the selected layer or a locked track. Corner Pin needs an ordinary image or video plane without masks or crop.');return false;}
+        setActionError('');
+        if(res.selectNodeId)setSelectedNodeId(res.selectNodeId);
+        return true;
+      }
+      if (res.mainTransform && typeof emitMainTransform === 'function') emitMainTransform(res.mainTransform);
+      if (res.motionKeyframes && typeof emitMotionKeyframes === 'function') emitMotionKeyframes(res.motionKeyframes);
+      if (res.finishKeyframes && typeof emitFinishKeyframes === 'function') emitFinishKeyframes(res.finishKeyframes);
       if (res.overlays && typeof emitOverlays === "function") {
         emitOverlays(res.overlays);
       }
@@ -287,9 +375,13 @@ export default function StudioNodeFlow({
       if (res.finishFx && typeof emitFinishFx === "function") {
         emitFinishFx(res.finishFx);
       }
+      if (res.advancedColor && typeof emitAdvancedColor === "function") {
+        emitAdvancedColor(res.advancedColor);
+      }
       if (res.nodeFlow && typeof emitNodeFlow === "function") {
         const base = res.nodeFlow;
         emitNodeFlow({
+          ...base,
           version: 1,
           viewerA: base.viewerA || "MediaOut",
           viewerB: base.viewerB ?? null,
@@ -303,10 +395,15 @@ export default function StudioNodeFlow({
       }
     },
     [
+      onApplyNodeChange,
+      emitMainTransform,
+      emitMotionKeyframes,
+      emitFinishKeyframes,
       emitOverlays,
       emitCompositionOrder,
       emitAdjustmentLayers,
       emitFinishFx,
+      emitAdvancedColor,
       emitNodeFlow,
     ]
   );
@@ -340,12 +437,12 @@ export default function StudioNodeFlow({
     node => {
       if (!node || !node.bypassable) return;
       const res = toggleNodeFlowBypass(
-        { overlays, adjustmentLayers, nodeFlow },
+        { overlays, adjustmentLayers, nodeFlow, mainTransform, finishFx, advancedColor, motionKeyframes, finishKeyframes },
         node.id
       );
       applyCanonicalGraphResult(res);
     },
-    [overlays, adjustmentLayers, nodeFlow, applyCanonicalGraphResult]
+    [overlays, adjustmentLayers, nodeFlow, mainTransform, finishFx, advancedColor, motionKeyframes, finishKeyframes, applyCanonicalGraphResult]
   );
 
   const handleDeleteNode = useCallback(
@@ -359,6 +456,7 @@ export default function StudioNodeFlow({
           motionKeyframes,
           mainTransform,
           nodeFlow,
+          finishFx, advancedColor, finishKeyframes,
         },
         node.id,
         currentTime
@@ -371,7 +469,7 @@ export default function StudioNodeFlow({
       adjustmentLayers,
       motionKeyframes,
       mainTransform,
-      nodeFlow,
+      nodeFlow, finishFx, advancedColor, finishKeyframes,
       currentTime,
       applyCanonicalGraphResult,
     ]
@@ -407,11 +505,21 @@ export default function StudioNodeFlow({
 
   useEffect(() => {
     const onKeyDown = e => {
+      if (!(e.target instanceof Node) || !rootRef.current?.contains(e.target)) return;
+      if (e.key === "Escape" && quickSearchOpen) {
+        e.preventDefault();
+        setQuickSearchOpen(false);
+        return;
+      }
       const tag = e.target?.tagName?.toLowerCase();
       if (tag === "input" || tag === "textarea" || tag === "select" || e.target?.isContentEditable) {
         return;
       }
-      if (e.key === "1" && selectedNode) {
+      if (e.key === "/" || (e.shiftKey && e.code === "Space")) {
+        e.preventDefault();
+        setQuickSearchQuery("");
+        setQuickSearchOpen(true);
+      } else if (e.key === "1" && selectedNode) {
         e.preventDefault();
         handleAssignViewer("A", selectedNode.id);
       } else if (e.key === "2" && selectedNode) {
@@ -419,6 +527,8 @@ export default function StudioNodeFlow({
         handleAssignViewer("B", selectedNode.id);
       } else if (e.key === "Escape" && pendingWire) {
         setPendingWire(null);
+      } else if (e.key === "Escape" && expandedWorkspace) {
+        setExpandedWorkspace(false);
       } else if ((e.key === "Delete" || e.key === "Backspace") && selectedNode?.removable) {
         e.preventDefault();
         handleDeleteNode(selectedNode);
@@ -426,7 +536,7 @@ export default function StudioNodeFlow({
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [selectedNode, pendingWire, handleAssignViewer, handleDeleteNode]);
+  }, [selectedNode, pendingWire, quickSearchOpen, expandedWorkspace, handleAssignViewer, handleDeleteNode]);
 
   // Node card dragging
   useEffect(() => {
@@ -505,10 +615,15 @@ export default function StudioNodeFlow({
         setPendingWire(null);
         return;
       }
+      try {
+      setActionError("");
       const res = connectNodeFlowPorts(
         {
           overlays,
           compositionOrder,
+          adjustmentLayers,
+          finishFx,
+          advancedColor,
           motionKeyframes,
           mainTransform,
         },
@@ -520,12 +635,17 @@ export default function StudioNodeFlow({
         }
       );
       applyCanonicalGraphResult(res);
+      } catch(error) { setActionError(error.message); }
       setPendingWire(null);
     },
     [
       pendingWire,
+      connectNodeFlowPorts,
       overlays,
       compositionOrder,
+      adjustmentLayers,
+      finishFx,
+      advancedColor,
       motionKeyframes,
       mainTransform,
       currentTime,
@@ -536,19 +656,27 @@ export default function StudioNodeFlow({
   const handlePortClick = (e, node, side, portName) => {
     e.stopPropagation();
     if (side === "out") {
-      setPendingWire(prev =>
-        prev?.fromNodeId === node.id && prev?.fromPort === portName
-          ? null
-          : { fromNodeId: node.id, fromPort: portName }
-      );
+      setPendingWire({ fromNodeId: node.id, fromPort: portName });
       return;
     }
 
     if (side === "in") {
+      const completed=completedPortOnMouseUp.current;
+      if(completed?.nodeId===node.id&&completed.port===portName) {
+        completedPortOnMouseUp.current=null;
+        return;
+      }
       if (!pendingWire) {
         if (portName === "Parent" || portName === "Mask") {
           const res = disconnectNodeFlowPort(
-            { overlays, motionKeyframes, mainTransform },
+            {
+              overlays,
+              adjustmentLayers,
+              finishFx,
+              advancedColor,
+              motionKeyframes,
+              mainTransform,
+            },
             { toNodeId: node.id, toPort: portName, currentTime }
           );
           applyCanonicalGraphResult(res);
@@ -560,6 +688,7 @@ export default function StudioNodeFlow({
   };
 
   const handlePaletteAdd = paletteId => {
+    try {
     const res = createNodePaletteAddition(paletteId, {
       overlays,
       adjustmentLayers,
@@ -575,6 +704,7 @@ export default function StudioNodeFlow({
     if (res.selectNodeId) {
       setSelectedNodeId(res.selectNodeId);
     }
+    } catch(error) { setActionError(error.message); }
   };
 
   const handleInjectSmartRig = rigId => {
@@ -679,9 +809,28 @@ export default function StudioNodeFlow({
     });
   };
 
+  const sampleCurrentVideoRgba = useCallback(() => {
+    const media = videoRef?.current;
+    if (!media || typeof document === "undefined") return null;
+    try {
+      const probe = document.createElement("canvas");
+      probe.width = 48;
+      probe.height = 27;
+      const ctx = probe.getContext?.("2d", { willReadFrequently: true });
+      if (!ctx) return null;
+      ctx.drawImage(media, 0, 0, 48, 27);
+      return ctx.getImageData(0, 0, 48, 27).data;
+    } catch (_err) {
+      return null;
+    }
+  }, [videoRef]);
+
   const resolvedAdvancedColor = useMemo(() => {
     const raw = advancedColor || finishFx?.advancedColor || {};
     return {
+      ...raw,
+      maskSourceNodeId: raw.maskSourceNodeId || finishFx?.advancedColor?.maskSourceNodeId || finishFx?.maskSourceNodeId || null,
+      maskInvert: raw.maskInvert === true,
       curve: {
         shadows: Number(raw.curve?.shadows ?? 0),
         midtones: Number(raw.curve?.midtones ?? 0),
@@ -692,12 +841,18 @@ export default function StudioNodeFlow({
         saturation: Number(raw.hsl?.saturation ?? 1),
         luminance: Number(raw.hsl?.luminance ?? 0),
       },
-      lut: raw.lut || null,
+      lut: raw.lut || raw.lutData || null,
+      lutData: raw.lutData || raw.lut || null,
       lutName: raw.lutName || "",
       lutPresetId: raw.lutPresetId || "",
       lutIntensity: Number(raw.lutIntensity ?? 1),
+      cameraProfile: raw.cameraProfile || "rec709",
+      qualifierPresetId: raw.qualifierPresetId || "",
+      qualifier: raw.qualifier || null,
+      powerWindowPresetId: raw.powerWindowPresetId || "",
+      powerWindow: raw.powerWindow || null,
     };
-  }, [advancedColor, finishFx?.advancedColor]);
+  }, [advancedColor, finishFx?.advancedColor, finishFx?.maskSourceNodeId]);
 
   const updateAdvancedColorPatch = patch => {
     const next = {
@@ -778,69 +933,45 @@ export default function StudioNodeFlow({
     [currentTime, emitMotionKeyframes, motionKeyframes]
   );
 
+  const stampCornerPinKeyframes = useCallback(
+    (targetOverlay, corners, atTime = currentTime, onlyIndex = null) => {
+      if (!targetOverlay || typeof emitMotionKeyframes !== "function") return;
+      const safeTime = Math.max(0, Number(atTime) || 0);
+      let nextKeys = Array.isArray(motionKeyframes) ? [...motionKeyframes] : [];
+      corners.forEach(([cx, cy], idx) => {
+        if (onlyIndex !== null && idx !== onlyIndex) return;
+        nextKeys = upsertAutomationKeyframe(nextKeys, {
+          id: `pin-pt-${targetOverlay.id}-${idx}-x-${Math.round(safeTime * 100)}`,
+          targetId: targetOverlay.id,
+          property: `planeCorner${idx}X`,
+          time: safeTime,
+          value: Number(cx),
+          easing: "easeInOut",
+        });
+        nextKeys = upsertAutomationKeyframe(nextKeys, {
+          id: `pin-pt-${targetOverlay.id}-${idx}-y-${Math.round(safeTime * 100)}`,
+          targetId: targetOverlay.id,
+          property: `planeCorner${idx}Y`,
+          time: safeTime,
+          value: Number(cy),
+          easing: "easeInOut",
+        });
+      });
+      emitMotionKeyframes(nextKeys);
+    },
+    [currentTime, emitMotionKeyframes, motionKeyframes]
+  );
+
   const anyBypassed = useMemo(
     () => graph.nodes.some(n => n.bypassed),
     [graph.nodes]
   );
 
-  const renderViewerStagePreview = (signal, slotKey) => {
-    const visibleOverlays = overlays.filter(o => {
-      if (!o || o.isCaption) return false;
-      if (signal.includedOverlayIds === "all") return !o.hidden;
-      if (Array.isArray(signal.includedOverlayIds)) {
-        return signal.includedOverlayIds.includes(String(o.id));
-      }
-      return false;
-    });
-    const contrastPct = signal.includeGrade ? Math.round(Number(finishFx?.contrast ?? 1) * 100) : 100;
-    const satPct = signal.includeGrade ? Math.round(Number(finishFx?.saturation ?? 1) * 100) : 100;
-    const brightPct = signal.includeGrade ? Math.round(Number(finishFx?.brightness ?? 1) * 100) : 100;
-
-    return (
-      <div
-        className={`ap-flow-stage-schematic is-${signal.stage}`}
-        data-testid={`flow-viewer-stage-${slotKey}`}
-        style={{
-          filter: signal.includeGrade
-            ? `brightness(${brightPct}%) contrast(${contrastPct}%) saturate(${satPct}%)`
-            : "none",
-        }}
-      >
-        <div className="ap-flow-stage-grid" />
-        {signal.includeMainTransform && (
-          <div className="ap-flow-stage-frame-box">
-            <span>
-              Primary Plate · {Math.round((Number(mainTransform?.scale) || 1) * 100)}%
-            </span>
-          </div>
-        )}
-        {visibleOverlays.map(ov => {
-          const left = Math.max(10, Math.min(90, Number(ov.x) || 50));
-          const top = Math.max(16, Math.min(84, Number(ov.y) || 50));
-          return (
-            <div
-              key={ov.id}
-              className={`ap-flow-stage-token ${ov.isNullRig ? "is-null" : ov.vectorShape ? "is-vector" : "is-layer"}`}
-              style={{ left: `${left}%`, top: `${top}%` }}
-            >
-              {ov.isNullRig ? "⊕" : ov.vectorShape ? "◆" : "T"}{" "}
-              <span>{(ov.name || ov.text || ov.id).slice(0, 14)}</span>
-            </div>
-          );
-        })}
-        <div className="ap-flow-stage-telemetry">
-          <span>{signal.stage.toUpperCase()}</span>
-          <span>
-            {signal.includeGrade ? `C ${contrastPct}% · S ${satPct}%` : "UNGRADED"}
-          </span>
-          <span>{visibleOverlays.length} LYR</span>
-        </div>
-      </div>
-    );
-  };
-
-  return (
-    <div className="ap-node-flow-root" data-testid="studio-node-flow">
+  const workspace = (
+    <div ref={rootRef} role={expandedWorkspace ? 'dialog' : 'region'} aria-label="Node Flow workspace"
+      aria-modal={expandedWorkspace ? true : undefined}
+      className={`ap-node-flow-root${expandedWorkspace ? ' is-expanded-workspace' : ''}`} data-testid="studio-node-flow">
+      {actionError && <div role="alert" className="ap-flow-action-error">{actionError}</div>}
       {/* Top Toolbar: Node Palette + Smart Flow Rigs + Viewer Controls */}
       <div className="ap-node-flow-toolbar">
         <div className="ap-node-flow-palette" role="toolbar" aria-label="Node Flow Palette">
@@ -911,6 +1042,23 @@ export default function StudioNodeFlow({
         </div>
 
         <div className="ap-node-flow-view-controls">
+          <button type="button" className="ap-flow-ctrl-btn" data-testid="flow-expand-workspace"
+            aria-pressed={expandedWorkspace}
+            onClick={() => { setExpandedWorkspace(value => !value); requestAnimationFrame(() => handleFitView()); }}>
+            {expandedWorkspace ? 'Return to Studio' : 'Expand workspace'}
+          </button>
+          <button
+            type="button"
+            className={`ap-flow-ctrl-btn ${quickSearchOpen ? "is-active" : ""}`}
+            data-testid="flow-open-quick-search"
+            onClick={() => {
+              setQuickSearchQuery("");
+              setQuickSearchOpen(prev => !prev);
+            }}
+            title="Open Instant Fuzzy Node Command Launcher (/ or Shift+Space)"
+          >
+            ⌕ Quick Node (/)
+          </button>
           <label className="ap-comp-field"><span>Inspect node</span>
             <select className="ap-comp-select" aria-label="Inspect node" value={selectedNode?.id || ''}
               onChange={event => { const node = nodeMap.get(event.target.value); handleSelectNode(node); handleFitView(); }}>
@@ -976,6 +1124,119 @@ export default function StudioNodeFlow({
           </div>
         </div>
       </div>
+
+      {/* Instant Fuzzy Node Command Launcher (/ or Shift+Space) */}
+      {quickSearchOpen && (
+        <div
+          className="ap-flow-quick-search-modal"
+          data-testid="flow-quick-search-modal"
+          role="dialog"
+          aria-label="Quick Node Command Launcher"
+        >
+          <div className="ap-flow-quick-search-head">
+            <input
+              type="search"
+              data-testid="flow-quick-search-input"
+              aria-label="Search signal nodes and rigs"
+              placeholder="Search node to insert, splice into active branch, or jump to…"
+              value={quickSearchQuery}
+              onChange={e => setQuickSearchQuery(e.target.value)}
+            />
+            <button
+              type="button"
+              className="ap-flow-mini-btn"
+              onClick={() => setQuickSearchOpen(false)}
+            >
+              Esc
+            </button>
+          </div>
+          <div className="ap-flow-quick-search-list">
+            {FLOW_NODE_PALETTE.filter(item => {
+              const q = quickSearchQuery.trim().toLowerCase();
+              if (!q) return true;
+              return (
+                item.label.toLowerCase().includes(q) ||
+                item.kind.toLowerCase().includes(q) ||
+                (item.description || "").toLowerCase().includes(q)
+              );
+            }).map(item => (
+              <div key={item.id} className="ap-flow-quick-search-item">
+                <div>
+                  <strong>+ {item.label}</strong>
+                  <span>{item.description}</span>
+                </div>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <button
+                    type="button"
+                    className="ap-flow-mini-btn"
+                    data-testid={`flow-quick-insert-${item.id}`}
+                    onClick={() => {
+                      handlePaletteAdd(item.id);
+                      setQuickSearchOpen(false);
+                    }}
+                  >
+                    Insert
+                  </button>
+                  <button
+                    type="button"
+                    className="ap-flow-mini-btn is-active"
+                    data-testid={`flow-splice-into-branch-${item.id}`}
+                    onClick={() => {
+                      const activeWire =
+                        graph.wires.find(
+                          w => w.from === selectedNode?.id || w.to === selectedNode?.id
+                        ) || graph.wires[0] || null;
+                      const res = spliceNodeIntoWire(
+                        {
+                          overlays,
+                          adjustmentLayers,
+                          activeOverlayId: selectedOverlay?.id || activeOverlayId,
+                        },
+                        {
+                          paletteId: item.id,
+                          wire: activeWire,
+                          currentTime,
+                          programmeDuration,
+                        }
+                      );
+                      applyCanonicalGraphResult(res);
+                      setQuickSearchOpen(false);
+                    }}
+                  >
+                    Splice Into Pipe
+                  </button>
+                </div>
+              </div>
+            ))}
+            {SMART_FLOW_RIG_PRESETS.filter(rig => {
+              const q = quickSearchQuery.trim().toLowerCase();
+              if (!q) return true;
+              return (
+                rig.label.toLowerCase().includes(q) ||
+                (rig.description || "").toLowerCase().includes(q)
+              );
+            }).map(rig => (
+              <div key={rig.id} className="ap-flow-quick-search-item">
+                <div>
+                  <strong>⚡ Rig: {rig.label}</strong>
+                  <span>{rig.description}</span>
+                </div>
+                <button
+                  type="button"
+                  className="ap-flow-mini-btn"
+                  data-testid={`flow-quick-rig-${rig.id}`}
+                  onClick={() => {
+                    handleInjectSmartRig(rig.id);
+                    setQuickSearchOpen(false);
+                  }}
+                >
+                  Build Rig
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Main Split: Interactive Node Canvas + Optional Viewer [1]/[2] Monitor + Contextual Node Inspector */}
       <div className={`ap-flow-stage ${isSplitActive ? "has-split-viewer" : ""}`}>
@@ -1121,6 +1382,8 @@ export default function StudioNodeFlow({
                 <div
                   key={node.id}
                   role="button"
+                  aria-pressed={isSelected}
+                  aria-label={`${node.label} ${node.kind} node`}
                   tabIndex={0}
                   data-testid={`flow-node-${node.id}`}
                   className={[
@@ -1253,6 +1516,7 @@ export default function StudioNodeFlow({
                         key={`in-${inPort}`}
                         type="button"
                         data-testid={`flow-port-in-${node.id}-${inPort}`}
+                        aria-label={`${node.label} ${inPort} input`}
                         className={[
                           "ap-flow-port",
                           "is-in",
@@ -1276,6 +1540,8 @@ export default function StudioNodeFlow({
                         onMouseUp={e => {
                           if (pendingWire) {
                             e.stopPropagation();
+                            completedPortOnMouseUp.current={nodeId:node.id,port:inPort};
+                            window.setTimeout(()=>{completedPortOnMouseUp.current=null;},0);
                             completePortConnection(node.id, inPort);
                           }
                         }}
@@ -1297,6 +1563,7 @@ export default function StudioNodeFlow({
                         key={`out-${outPort}`}
                         type="button"
                         data-testid={`flow-port-out-${node.id}-${outPort}`}
+                        aria-label={`${node.label} ${outPort} output`}
                         className={[
                           "ap-flow-port",
                           "is-out",
@@ -1358,47 +1625,26 @@ export default function StudioNodeFlow({
               className="ap-flow-viewer-screen"
               data-testid="flow-viewer-screen"
             >
-              {videoRef &&
-              (viewerSignalA.stage === "source" ||
-                viewerSignalB.stage === "graded" ||
-                viewerSignalB.stage === "adjustment_grade") ? (
-                <div className="ap-flow-live-grade-viewer-wrap">
-                  <StudioSourceGradeViewer
-                    nodeId={
-                      viewerSignalB.stage === "graded" ||
-                      viewerSignalB.stage === "adjustment_grade"
-                        ? viewerSignalB.nodeId
-                        : viewerSignalA.nodeId
-                    }
-                    videoRef={videoRef}
-                    mapTime={mapTime}
-                    time={currentTime}
-                    finishFx={finishFx}
-                    advancedColor={advancedColor}
-                    adjustmentLayers={adjustmentLayers}
-                  />
-                </div>
-              ) : null}
               <div
                 className="ap-flow-viewer-pane is-pane-a"
-                style={{ width: `${graph.splitPosition}%` }}
+                style={{ width: "100%", clipPath: `inset(0 ${100-graph.splitPosition}% 0 0)` }}
               >
                 <span className="ap-flow-pane-watermark">
                   [1] {viewerSignalA.label} — {viewerSignalA.badge}
                 </span>
-                {renderViewerStagePreview(viewerSignalA, "a")}
+                <StudioNodeSignalViewer signal={viewerSignalA} videoRef={videoRef} overlays={overlays} time={currentTime} mapTime={mapTime} finishFx={finishFx} advancedColor={advancedColor} adjustmentLayers={adjustmentLayers} mainTransform={mainTransform} motionKeyframes={motionKeyframes} />
               </div>
               <div
                 className="ap-flow-viewer-pane is-pane-b"
                 style={{
-                  left: `${graph.splitPosition}%`,
-                  width: `${100 - graph.splitPosition}%`,
+                  left: 0,
+                  width: "100%", clipPath: `inset(0 0 0 ${graph.splitPosition}%)`,
                 }}
               >
                 <span className="ap-flow-pane-watermark">
                   [2] {viewerSignalB.label} — {viewerSignalB.badge}
                 </span>
-                {renderViewerStagePreview(viewerSignalB, "b")}
+                <StudioNodeSignalViewer signal={viewerSignalB} videoRef={videoRef} overlays={overlays} time={currentTime} mapTime={mapTime} finishFx={finishFx} advancedColor={advancedColor} adjustmentLayers={adjustmentLayers} mainTransform={mainTransform} motionKeyframes={motionKeyframes} />
               </div>
               <div
                 role="slider"
@@ -1414,6 +1660,12 @@ export default function StudioNodeFlow({
                   e.stopPropagation();
                   onInteractionStart?.();
                   setDraggingSplit(true);
+                }}
+                onKeyDown={e => {
+                  if (!['ArrowLeft','ArrowRight','Home','End'].includes(e.key)) return;
+                  e.preventDefault();e.stopPropagation();
+                  const next=e.key==='Home'?10:e.key==='End'?90:Math.max(10,Math.min(90,graph.splitPosition+(e.key==='ArrowRight'?1:-1)*(e.shiftKey?10:1)));
+                  updateFlowPatch({splitPosition:next});
                 }}
               />
             </div>
@@ -1874,6 +2126,206 @@ export default function StudioNodeFlow({
                           <option value="orbit">Circular Orbit</option>
                         </select>
                       </label>
+
+                      {/* 2.5D Virtual Camera Depth Plane & Rack Focus DOF */}
+                      <div
+                        className="ap-flow-grade-subcard"
+                        data-testid="flow-depth-parallax-controls"
+                      >
+                        <p className="ap-flow-empty">Depth changes the layer’s perspective scale; defocus softens its pixels in preview and export.</p>
+                        <div className="ap-flow-vector-editor-head">
+                          <span>2.5D Depth &amp; Defocus</span>
+                          <span className="ap-flow-node-chip">
+                            Z {Math.round(Number(selectedOverlay.zDepth ?? 0))}
+                          </span>
+                        </div>
+                        <div className="ap-flow-field-row">
+                          <label className="ap-flow-field">
+                            <span>
+                              Z-Depth Plane ({Math.round(Number(selectedOverlay.zDepth ?? 0))})
+                            </span>
+                            <input
+                              type="range"
+                              min="-100"
+                              max="100"
+                              step="2"
+                              data-testid="flow-zdepth-slider"
+                              value={Number(selectedOverlay.zDepth ?? 0)}
+                              onMouseDown={() => onInteractionStart?.()}
+                              onMouseUp={() => onInteractionEnd?.()}
+                              onChange={e =>
+                                updateSelectedOverlayField({ zDepth: Number(e.target.value) })
+                              }
+                            />
+                          </label>
+                          <label className="ap-flow-field">
+                            <span>
+                              DOF Defocus ({Number(selectedOverlay.dofBlur ?? 0).toFixed(1)}px)
+                            </span>
+                            <input
+                              type="range"
+                              min="0"
+                              max="20"
+                              step="0.5"
+                              data-testid="flow-dof-blur-slider"
+                              value={Number(selectedOverlay.dofBlur ?? 0)}
+                              onMouseDown={() => onInteractionStart?.()}
+                              onMouseUp={() => onInteractionEnd?.()}
+                              onChange={e =>
+                                updateSelectedOverlayField({ dofBlur: Number(e.target.value) })
+                              }
+                            />
+                          </label>
+                        </div>
+                      </div>
+
+                      {/* Cross-Node Parameter Expression Pick-Whip */}
+                      <div
+                        className="ap-flow-grade-subcard"
+                        data-testid="flow-parameter-link-card"
+                      >
+                        <div className="ap-flow-vector-editor-head">
+                          <span>Parameter Expression Pick-Whip</span>
+                          <span className="ap-flow-node-chip">EXPR</span>
+                        </div>
+                        <div className="ap-flow-field-row">
+                          <label className="ap-flow-field">
+                            <span>Target Prop</span>
+                            <select
+                              data-testid="flow-param-link-target-prop"
+                              value={paramLinkTargetProp}
+                              onChange={e => setParamLinkTargetProp(e.target.value)}
+                            >
+                              <option value="scale">Scale</option>
+                              <option value="rotation">Rotation</option>
+                              <option value="opacity">Opacity</option>
+                              <option value="x">Center X</option>
+                              <option value="y">Center Y</option>
+                            </select>
+                          </label>
+                          <label className="ap-flow-field">
+                            <span>Source Node</span>
+                            <select
+                              data-testid="flow-param-link-source-id"
+                              value={paramLinkSourceId}
+                              onChange={e => setParamLinkSourceId(e.target.value)}
+                            >
+                              <option value="main-video">Primary Video Plate</option>
+                              {overlays
+                                .filter(
+                                  o =>
+                                    o &&
+                                    !o.isCaption &&
+                                    String(o.id) !== String(selectedOverlay.id)
+                                )
+                                .map(candidate => (
+                                  <option key={candidate.id} value={candidate.id}>
+                                    {candidate.name || candidate.text || candidate.id}
+                                  </option>
+                                ))}
+                            </select>
+                          </label>
+                          <label className="ap-flow-field">
+                            <span>Source Channel</span>
+                            <select
+                              data-testid="flow-param-link-source-prop"
+                              value={paramLinkSourceProp}
+                              onChange={e => setParamLinkSourceProp(e.target.value)}
+                            >
+                              <option value="scale">Scale</option>
+                              <option value="rotation">Rotation</option>
+                              <option value="opacity">Opacity</option>
+                              <option value="x">Center X</option>
+                              <option value="y">Center Y</option>
+                            </select>
+                          </label>
+                        </div>
+                        <div className="ap-flow-field-row">
+                          <label className="ap-flow-field">
+                            <span>Multiplier (×{Number(paramLinkMult).toFixed(2)})</span>
+                            <input
+                              type="range"
+                              min="-2"
+                              max="3"
+                              step="0.05"
+                              data-testid="flow-param-link-mult"
+                              value={paramLinkMult}
+                              onChange={e => setParamLinkMult(Number(e.target.value))}
+                            />
+                          </label>
+                          <label className="ap-flow-field">
+                            <span>Offset ({Number(paramLinkOffset).toFixed(1)})</span>
+                            <input
+                              type="range"
+                              min="-50"
+                              max="50"
+                              step="1"
+                              data-testid="flow-param-link-offset"
+                              value={paramLinkOffset}
+                              onChange={e => setParamLinkOffset(Number(e.target.value))}
+                            />
+                          </label>
+                        </div>
+                        <button
+                          type="button"
+                          className="ap-flow-mini-btn is-active"
+                          data-testid="flow-bind-param-link"
+                          onClick={() => {
+                            const nextLinks = {
+                              ...(selectedOverlay.parameterLinks || {}),
+                              [paramLinkTargetProp]: {
+                                enabled: true,
+                                sourceLayerId: paramLinkSourceId,
+                                sourceProperty: paramLinkSourceProp,
+                                multiplier: Number(paramLinkMult),
+                                offset: Number(paramLinkOffset),
+                              },
+                            };
+                            const updatedOverlays = overlays.map(item =>
+                              String(item.id) === String(selectedOverlay.id)
+                                ? { ...item, parameterLinks: nextLinks }
+                                : item
+                            );
+                            try {
+                              setActionError("");
+                              emitOverlays?.(evaluateParameterLinks(updatedOverlays, mainTransform));
+                            } catch(error) { setActionError(error.message); }
+                          }}
+                        >
+                          ⛓ Bind Expression ({paramLinkTargetProp} = {paramLinkSourceId}.{paramLinkSourceProp} × {paramLinkMult})
+                        </button>
+                        {selectedOverlay.parameterLinks &&
+                          Object.entries(selectedOverlay.parameterLinks).map(
+                            ([prop, link]) =>
+                              link?.enabled !== false && (
+                                <div
+                                  key={prop}
+                                  className="ap-flow-param-link-pill"
+                                  data-testid={`flow-active-param-link-${prop}`}
+                                >
+                                  <span>
+                                    {prop} ← {link.sourceLayerId}.{link.sourceProperty} ×{" "}
+                                    {link.multiplier ?? 1}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    className="ap-flow-mini-btn"
+                                    onClick={() => {
+                                      const nextLinks = {
+                                        ...(selectedOverlay.parameterLinks || {}),
+                                      };
+                                      delete nextLinks[prop];
+                                      updateSelectedOverlayField({
+                                        parameterLinks: nextLinks,
+                                      });
+                                    }}
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              )
+                          )}
+                      </div>
                     </>
                   ) : null}
                 </div>
@@ -2061,6 +2513,129 @@ export default function StudioNodeFlow({
                           }
                         />
                       </label>
+
+                      {/* Optical Halation, Anamorphic Streak & Turbulent Displacement Warp */}
+                      {["image","video"].includes(selectedOverlay.type) && <div
+                        className="ap-flow-grade-subcard"
+                        data-testid="flow-optical-displacement-controls"
+                      >
+                        <p className="ap-flow-empty">Highlight bloom, horizontal streaks and animated warp apply before the layer mask.</p>
+                        <div className="ap-flow-vector-editor-head">
+                          <span>Optical Halation &amp; Displacement Warp</span>
+                          <span className="ap-flow-node-chip">OPTICAL</span>
+                        </div>
+                        <div className="ap-flow-field-row">
+                          <label className="ap-flow-field">
+                            <span>
+                              Halation Bloom ({Math.round(Number(selectedOverlay.opticalFx?.halation ?? 0) * 100)}%)
+                            </span>
+                            <input
+                              type="range"
+                              min="0"
+                              max="1"
+                              step="0.05"
+                              data-testid="flow-optical-halation-slider"
+                              value={Number(selectedOverlay.opticalFx?.halation ?? 0)}
+                              onChange={e =>
+                                updateSelectedOverlayField({
+                                  opticalFx: {
+                                    ...(selectedOverlay.opticalFx || {}),
+                                    halation: Number(e.target.value),
+                                  },
+                                })
+                              }
+                            />
+                          </label>
+                          <label className="ap-flow-field">
+                            <span>
+                              Anamorphic Streak ({Math.round(Number(selectedOverlay.opticalFx?.anamorphicStreak ?? 0) * 100)}%)
+                            </span>
+                            <input
+                              type="range"
+                              min="0"
+                              max="1"
+                              step="0.05"
+                              data-testid="flow-anamorphic-streak-slider"
+                              value={Number(selectedOverlay.opticalFx?.anamorphicStreak ?? 0)}
+                              onChange={e =>
+                                updateSelectedOverlayField({
+                                  opticalFx: {
+                                    ...(selectedOverlay.opticalFx || {}),
+                                    anamorphicStreak: Number(e.target.value),
+                                  },
+                                })
+                              }
+                            />
+                          </label>
+                        </div>
+                        <label className="ap-flow-checkbox-row">
+                          <input
+                            type="checkbox"
+                            data-testid="flow-displacement-warp-toggle"
+                            checked={Boolean(selectedOverlay.displacementWarp?.enabled)}
+                            onChange={e =>
+                              updateSelectedOverlayField({
+                                displacementWarp: {
+                                  amountX: 8,
+                                  amountY: 6,
+                                  frequency: 2.2,
+                                  ...(selectedOverlay.displacementWarp || {}),
+                                  enabled: e.target.checked,
+                                },
+                              })
+                            }
+                          />
+                          <span>Turbulent Displacement / Heat Haze Warp</span>
+                        </label>
+                        {selectedOverlay.displacementWarp?.enabled && (
+                          <div className="ap-flow-field-row">
+                            <label className="ap-flow-field">
+                              <span>
+                                Warp X ({Math.round(Number(selectedOverlay.displacementWarp?.amountX ?? 8))}px)
+                              </span>
+                              <input
+                                type="range"
+                                min="0"
+                                max="40"
+                                step="1"
+                                data-testid="flow-displacement-x-slider"
+                                value={Number(selectedOverlay.displacementWarp?.amountX ?? 8)}
+                                onChange={e =>
+                                  updateSelectedOverlayField({
+                                    displacementWarp: {
+                                      ...(selectedOverlay.displacementWarp || {}),
+                                      enabled: true,
+                                      amountX: Number(e.target.value),
+                                    },
+                                  })
+                                }
+                              />
+                            </label>
+                            <label className="ap-flow-field">
+                              <span>
+                                Warp Y ({Math.round(Number(selectedOverlay.displacementWarp?.amountY ?? 6))}px)
+                              </span>
+                              <input
+                                type="range"
+                                min="0"
+                                max="40"
+                                step="1"
+                                data-testid="flow-displacement-y-slider"
+                                value={Number(selectedOverlay.displacementWarp?.amountY ?? 6)}
+                                onChange={e =>
+                                  updateSelectedOverlayField({
+                                    displacementWarp: {
+                                      ...(selectedOverlay.displacementWarp || {}),
+                                      enabled: true,
+                                      amountY: Number(e.target.value),
+                                    },
+                                  })
+                                }
+                              />
+                            </label>
+                          </div>
+                        )}
+                      </div>}
                     </>
                   ) : null}
                 </div>
@@ -2308,6 +2883,532 @@ export default function StudioNodeFlow({
                     />
                     <span>Invert Matte Polarity</span>
                   </label>
+
+                  {/* Multi-Mask Boolean Chaining Stack (Add / Subtract / Intersect / Difference) */}
+                  <div
+                    className="ap-flow-grade-subcard"
+                    data-testid="flow-boolean-mask-stack"
+                  >
+                    <div className="ap-flow-vector-editor-head">
+                      <span>Multi-Mask Boolean Stack</span>
+                      <button
+                        type="button"
+                        className="ap-flow-mini-btn"
+                        data-testid="flow-add-boolean-submask"
+                        disabled={(selectedOverlay.mask?.secondaryMasks?.length||0)>=8}
+                        onClick={() => {
+                          const existing = Array.isArray(selectedOverlay.mask?.secondaryMasks)
+                            ? selectedOverlay.mask.secondaryMasks
+                            : [];
+                          const nextSub = {
+                            id: `submask-${Date.now()}-${existing.length + 1}`,
+                            shape: "ellipse",
+                            booleanOp: "subtract",
+                            feather: 12,
+                            inverted: false,
+                          };
+                          updateSelectedOverlayField({
+                            mask: {
+                              ...(selectedOverlay.mask || { enabled: true, shape: "polygon" }),
+                              booleanMode: selectedOverlay.mask?.booleanMode || "add",
+                              secondaryMasks: [...existing, nextSub],
+                            },
+                          });
+                        }}
+                      >
+                        + Add Sub-Mask
+                      </button>
+                    </div>
+                    <label className="ap-flow-field">
+                      <span>Primary Boolean Mode</span>
+                      <select
+                        data-testid="flow-mask-boolean-op"
+                        value={selectedOverlay.mask?.booleanMode || "add"}
+                        onChange={e =>
+                          updateSelectedOverlayField({
+                            mask: {
+                              ...(selectedOverlay.mask || { enabled: true, shape: "polygon" }),
+                              booleanMode: e.target.value,
+                              secondaryMasks: (selectedOverlay.mask?.secondaryMasks||[]).map(sub=>({...sub,booleanOp:e.target.value})),
+                            },
+                          })
+                        }
+                      >
+                        <option value="add">Union / Add (A ∪ B)</option>
+                        <option value="subtract">Subtract / Cutout (A − B)</option>
+                        <option value="intersect">Intersect Matte (A ∩ B)</option>
+                        <option value="difference">XOR Difference (A ⊕ B)</option>
+                      </select>
+                    </label>
+                    {(selectedOverlay.mask?.secondaryMasks || []).map((sub, idx) => (
+                      <div
+                        key={sub.id || idx}
+                        className="ap-flow-field-row"
+                        data-testid={`flow-boolean-submask-row-${idx}`}
+                      >
+                        <select
+                          aria-label={`Sub-mask ${idx + 1} boolean operator`}
+                          data-testid={`flow-submask-op-${idx}`}
+                          value={sub.booleanOp || "subtract"}
+                          onChange={e => {
+                            const nextList = (selectedOverlay.mask?.secondaryMasks || []).map(
+                              (item, i) =>
+                                i === idx ? { ...item, booleanOp: e.target.value } : item
+                            );
+                            updateSelectedOverlayField({
+                              mask: {
+                                ...(selectedOverlay.mask || {}),
+                                secondaryMasks: nextList,
+                              },
+                            });
+                          }}
+                        >
+                          <option value="add">Add</option>
+                          <option value="subtract">Subtract</option>
+                          <option value="intersect">Intersect</option>
+                          <option value="difference">Difference</option>
+                        </select>
+                        <select
+                          aria-label={`Sub-mask ${idx + 1} shape`}
+                          data-testid={`flow-submask-shape-${idx}`}
+                          value={sub.shape || "ellipse"}
+                          onChange={e => {
+                            const nextList = (selectedOverlay.mask?.secondaryMasks || []).map(
+                              (item, i) =>
+                                i === idx ? { ...item, shape: e.target.value } : item
+                            );
+                            updateSelectedOverlayField({
+                              mask: {
+                                ...(selectedOverlay.mask || {}),
+                                secondaryMasks: nextList,
+                              },
+                            });
+                          }}
+                        >
+                          <option value="ellipse">Ellipse</option>
+                          <option value="rectangle">Rectangle</option>
+                          <option value="diamond">Diamond</option>
+                          <option value="polygon">Polygon</option>
+                        </select>
+                        <button
+                          type="button"
+                          className="ap-flow-mini-btn"
+                          onClick={() => {
+                            const nextList = (selectedOverlay.mask?.secondaryMasks || []).filter(
+                              (_, i) => i !== idx
+                            );
+                            updateSelectedOverlayField({
+                              mask: {
+                                ...(selectedOverlay.mask || {}),
+                                secondaryMasks: nextList,
+                              },
+                            });
+                          }}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ChromaKeyer (Delta Chroma / Luma / HSL Keyer) Controls */}
+              {selectedNode.kind === "ChromaKeyer" && selectedOverlay && (
+                <div
+                  className="ap-flow-inspector-controls"
+                  data-testid="flow-chroma-keyer-controls"
+                >
+                  <p className="ap-flow-empty">The keyer removes the selected screen colour. Assign this node to a viewer to inspect its alpha matte.</p>
+                  <div className="ap-flow-field-row">
+                    <label className="ap-flow-field">
+                      <span>Keyer Algorithm</span>
+                      <select
+                        data-testid="flow-chroma-mode-select"
+                        value={selectedOverlay.chromaKey?.mode || "chroma"}
+                        onChange={e =>
+                          updateSelectedOverlayField({
+                            chromaKey: {
+                              enabled: true,
+                              keyColor: "#00d455",
+                              similarity: 0.32,
+                              smoothness: 0.14,
+                              spillSuppression: 0.48,
+                              ...(selectedOverlay.chromaKey || {}),
+                              mode: e.target.value,
+                            },
+                          })
+                        }
+                      >
+                        <option value="chroma">Delta Chroma Key (Green / Blue Screen)</option>
+                        <option value="luma">Luminance Matte Keyer</option>
+                        <option value="hsl_delta">Hue / Saturation Screen Key</option>
+                      </select>
+                    </label>
+                    <label className="ap-flow-field is-color">
+                      <span>Key Screen Color</span>
+                      <input
+                        type="color"
+                        data-testid="flow-chroma-color-input"
+                        disabled={selectedOverlay.chromaKey?.mode==='luma'}
+                        value={
+                          /^#[0-9a-fA-F]{6}$/.test(selectedOverlay.chromaKey?.keyColor || "")
+                            ? selectedOverlay.chromaKey.keyColor
+                            : "#00d455"
+                        }
+                        onChange={e =>
+                          updateSelectedOverlayField({
+                            chromaKey: {
+                              enabled: true,
+                              ...(selectedOverlay.chromaKey || {}),
+                              keyColor: e.target.value,
+                            },
+                          })
+                        }
+                      />
+                    </label>
+                  </div>
+                  <div className="ap-flow-field-row">
+                    <label className="ap-flow-field">
+                      <span>
+                        Similarity ({Math.round(Number(selectedOverlay.chromaKey?.similarity ?? 0.32) * 100)}%)
+                      </span>
+                      <input
+                        type="range"
+                        min="0.02"
+                        max="1"
+                        step="0.02"
+                        data-testid="flow-chroma-similarity-slider"
+                        value={Number(selectedOverlay.chromaKey?.similarity ?? 0.32)}
+                        onChange={e =>
+                          updateSelectedOverlayField({
+                            chromaKey: {
+                              enabled: true,
+                              ...(selectedOverlay.chromaKey || {}),
+                              similarity: Number(e.target.value),
+                            },
+                          })
+                        }
+                      />
+                    </label>
+                    <label className="ap-flow-field">
+                      <span>
+                        Edge Smoothness ({Math.round(Number(selectedOverlay.chromaKey?.smoothness ?? 0.14) * 100)}%)
+                      </span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.02"
+                        data-testid="flow-chroma-smoothness-slider"
+                        value={Number(selectedOverlay.chromaKey?.smoothness ?? 0.14)}
+                        onChange={e =>
+                          updateSelectedOverlayField({
+                            chromaKey: {
+                              enabled: true,
+                              ...(selectedOverlay.chromaKey || {}),
+                              smoothness: Number(e.target.value),
+                            },
+                          })
+                        }
+                      />
+                    </label>
+                  </div>
+                  <div className="ap-flow-field-row">
+                    <label className="ap-flow-field">
+                      <span>
+                        Spill Suppression ({Math.round(Number(selectedOverlay.chromaKey?.spillSuppression ?? 0.48) * 100)}%)
+                      </span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.02"
+                        data-testid="flow-chroma-spill-slider"
+                        disabled={selectedOverlay.chromaKey?.mode==='luma'}
+                        value={Number(selectedOverlay.chromaKey?.spillSuppression ?? 0.48)}
+                        onChange={e =>
+                          updateSelectedOverlayField({
+                            chromaKey: {
+                              enabled: true,
+                              ...(selectedOverlay.chromaKey || {}),
+                              spillSuppression: Number(e.target.value),
+                            },
+                          })
+                        }
+                      />
+                    </label>
+                    <label className="ap-flow-field">
+                      <span>
+                        Matte Choke ({Math.round(Number(selectedOverlay.chromaKey?.choke ?? 0))}px)
+                      </span>
+                      <input
+                        type="range"
+                        min="-20"
+                        max="20"
+                        step="1"
+                        data-testid="flow-chroma-choke-slider"
+                        value={Number(selectedOverlay.chromaKey?.choke ?? 0)}
+                        onChange={e =>
+                          updateSelectedOverlayField({
+                            chromaKey: {
+                              enabled: true,
+                              ...(selectedOverlay.chromaKey || {}),
+                              choke: Number(e.target.value),
+                            },
+                          })
+                        }
+                      />
+                    </label>
+                  </div>
+                  <label className="ap-flow-checkbox-row">
+                    <input
+                      type="checkbox"
+                      data-testid="flow-chroma-invert-toggle"
+                      checked={Boolean(selectedOverlay.chromaKey?.invert)}
+                      onChange={e =>
+                        updateSelectedOverlayField({
+                          chromaKey: {
+                            enabled: true,
+                            ...(selectedOverlay.chromaKey || {}),
+                            invert: e.target.checked,
+                          },
+                        })
+                      }
+                    />
+                    <span>Invert Keyed Alpha Matte</span>
+                  </label>
+                </div>
+              )}
+
+              {/* CornerPin (2.5D Planar Homography Quad) Controls */}
+              {selectedNode.kind === "CornerPin" && selectedOverlay && (() => {
+                const rawCorners =
+                  Array.isArray(selectedOverlay.perspective?.corners) &&
+                  selectedOverlay.perspective.corners.length === 4
+                    ? selectedOverlay.perspective.corners
+                    : PERSPECTIVE_LEFT;
+                const quadAttr = rawCorners.map(([cx, cy]) => `${cx},${cy}`).join(" ");
+                return (
+                  <div
+                    className="ap-flow-inspector-controls"
+                    data-testid="flow-corner-pin-editor"
+                  >
+                    <div className="ap-flow-vector-editor-head">
+                      <span>2.5D Homography Quad Pin</span>
+                      <div style={{ display: "flex", gap: 4 }}>
+                        {[
+                          { label: "Identity", corners: PERSPECTIVE_IDENTITY },
+                          { label: "Left Tilt", corners: PERSPECTIVE_LEFT },
+                          { label: "Right Tilt", corners: PERSPECTIVE_RIGHT },
+                        ].map(preset => (
+                          <button
+                            key={preset.label}
+                            type="button"
+                            className="ap-flow-mini-btn"
+                            data-testid={`flow-corner-pin-preset-${preset.label.toLowerCase().replace(/\s+/g, "-")}`}
+                            onClick={() =>
+                              updateSelectedOverlayField({
+                                perspective: validateStudioPerspective({
+                                  version: 1,
+                                  corners: preset.corners.map(pt => [...pt]),
+                                }),
+                              })
+                            }
+                          >
+                            {preset.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <svg
+                      viewBox="0 0 100 100"
+                      className="ap-flow-poly-mask-svg"
+                      aria-label="2.5D Corner Pin Homography Editor"
+                      onPointerMove={e => {
+                        if (draggingCornerIdx === null) return;
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        if (!rect.width || !rect.height) return;
+                        const nx = Math.max(
+                          2,
+                          Math.min(98, Math.round(((e.clientX - rect.left) / rect.width) * 100))
+                        );
+                        const ny = Math.max(
+                          2,
+                          Math.min(98, Math.round(((e.clientY - rect.top) / rect.height) * 100))
+                        );
+                        const candidateCorners = rawCorners.map((pt, idx) =>
+                          idx === draggingCornerIdx ? [nx, ny] : [...pt]
+                        );
+                        try {
+                          const validSpec = validateStudioPerspective({
+                            version: 1,
+                            corners: candidateCorners,
+                          });
+                          updateSelectedOverlayField({ perspective: validSpec });
+                        } catch (_err) {
+                          // Ignore degenerate non-convex drag positions
+                        }
+                      }}
+                      onPointerUp={() => setDraggingCornerIdx(null)}
+                      onPointerLeave={() => setDraggingCornerIdx(null)}
+                    >
+                      <polygon
+                        points={quadAttr}
+                        fill="rgba(249, 115, 22, 0.18)"
+                        stroke="#f97316"
+                        strokeWidth="1.8"
+                      />
+                      {rawCorners.map(([cx, cy], idx) => (
+                        <circle
+                          key={idx}
+                          cx={cx}
+                          cy={cy}
+                          r="4.5"
+                          fill={draggingCornerIdx === idx ? "#facc15" : "#f97316"}
+                          stroke="#0f172a"
+                          strokeWidth="1.5"
+                          style={{ cursor: "grab" }}
+                          data-testid={`flow-corner-pin-handle-${idx}`}
+                          onPointerDown={e => {
+                            e.stopPropagation();
+                            setDraggingCornerIdx(idx);
+                          }}
+                        />
+                      ))}
+                    </svg>
+                    <div className="ap-flow-field-row">
+                      <label className="ap-flow-field">
+                        <span>
+                          Perspective Blend ({Math.round(Number(selectedOverlay.perspectiveProgress ?? 1) * 100)}%)
+                        </span>
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.02"
+                          data-testid="flow-corner-pin-progress"
+                          value={Number(selectedOverlay.perspectiveProgress ?? 1)}
+                          onChange={e =>
+                            updateSelectedOverlayField({
+                              perspectiveProgress: Number(e.target.value),
+                            })
+                          }
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        className="ap-flow-mini-btn"
+                        data-testid="flow-corner-pin-stamp-keys"
+                        onClick={() =>
+                          stampCornerPinKeyframes(selectedOverlay, rawCorners, currentTime)
+                        }
+                      >
+                        + Key 4 Corners (@ {Number(currentTime || 0).toFixed(1)}s)
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* CompoundMacro (Pre-Comp Macro Group) Controls */}
+              {selectedNode.kind === "CompoundMacro" && selectedOverlay && (
+                <div
+                  className="ap-flow-inspector-controls"
+                  data-testid="flow-macro-controls"
+                >
+                  <label className="ap-flow-field">
+                    <span>Macro Group Name</span>
+                    <input
+                      type="text"
+                      data-testid="flow-macro-name-input"
+                      value={selectedOverlay.name || ""}
+                      onChange={e => updateSelectedOverlayField({ name: e.target.value })}
+                    />
+                  </label>
+                  <div className="ap-flow-field-row">
+                    <label className="ap-flow-field">
+                      <span>
+                        Published Macro Scale ({Math.round(Number(selectedOverlay.macroGroup?.publishedControls?.macroScale ?? 1) * 100)}%)
+                      </span>
+                      <input
+                        type="range"
+                        min="0.3"
+                        max="2.2"
+                        step="0.02"
+                        data-testid="flow-macro-scale-slider"
+                        value={Number(
+                          selectedOverlay.macroGroup?.publishedControls?.macroScale ?? 1
+                        )}
+                        onChange={e => {
+                          const nextScale = Number(e.target.value);
+                          emitOverlays?.(
+                            overlays.map(item => {
+                              if (String(item.id) === String(selectedOverlay.id)) {
+                                return {
+                                  ...item,
+                                  scale: nextScale,
+                                  macroGroup: {
+                                    ...(item.macroGroup || {}),
+                                    publishedControls: {
+                                      ...(item.macroGroup?.publishedControls || {}),
+                                      macroScale: nextScale,
+                                    },
+                                  },
+                                };
+                              }
+                              return item;
+                            })
+                          );
+                        }}
+                      />
+                    </label>
+                    <label className="ap-flow-field">
+                      <span>
+                        Published Macro Opacity ({Math.round(Number(selectedOverlay.macroGroup?.publishedControls?.macroOpacity ?? 1) * 100)}%)
+                      </span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.02"
+                        data-testid="flow-macro-opacity-slider"
+                        value={Number(
+                          selectedOverlay.macroGroup?.publishedControls?.macroOpacity ?? 1
+                        )}
+                        onChange={e => {
+                          const nextOpacity = Number(e.target.value);
+                          const memberIds = selectedOverlay.macroGroup?.memberIds || [];
+                          const previous=Number(selectedOverlay.macroGroup?.publishedControls?.macroOpacity ?? 1);
+                          const original=selectedOverlay.macroGroup?.memberOpacities || Object.fromEntries(
+                            overlays.filter(item=>memberIds.includes(String(item.id))).map(item=>
+                              [String(item.id),previous>0?Number(item.opacity??1)/previous:Number(item.opacity??1)]));
+                          emitOverlays?.(
+                            overlays.map(item => {
+                              if (String(item.id) === String(selectedOverlay.id)) {
+                                return {
+                                  ...item,
+                                  opacity: nextOpacity,
+                                  macroGroup: {
+                                    ...(item.macroGroup || {}),
+                                    publishedControls: {
+                                      ...(item.macroGroup?.publishedControls || {}),
+                                      macroOpacity: nextOpacity,
+                                    },
+                                    memberOpacities: original,
+                                  },
+                                };
+                              }
+                              if (memberIds.includes(String(item.id))) {
+                                return { ...item, opacity: Number(original[String(item.id)]??1)*nextOpacity };
+                              }
+                              return item;
+                            })
+                          );
+                        }}
+                      />
+                    </label>
+                  </div>
                 </div>
               )}
 
@@ -3112,6 +4213,7 @@ export default function StudioNodeFlow({
                           const presetMeta = CINEMA_3D_LUT_PRESETS.find(p => p.id === presetId);
                           updateAdvancedColorPatch({
                             lut: cube,
+                            lutData: cube,
                             lutPresetId: presetId,
                             lutName: presetMeta ? `${presetMeta.label}.cube` : `${presetId}.cube`,
                             lutIntensity: Number(resolvedAdvancedColor.lutIntensity ?? 1),
@@ -3168,6 +4270,361 @@ export default function StudioNodeFlow({
                         />
                       </label>
                     </div>
+                    <div className="ap-flow-field-row">
+                      <label className="ap-flow-field">
+                        <span>Camera Input CST</span>
+                        <select
+                          aria-label="Camera Input CST"
+                          data-testid="flow-cst-profile-select"
+                          value={resolvedAdvancedColor.cameraProfile || "rec709"}
+                          onChange={e => {
+                            const profileId = e.target.value;
+                            if (!profileId || profileId === "rec709") {
+                              updateAdvancedColorPatch({
+                                cameraProfile: "rec709",
+                                lut: null,
+                                lutData: null,
+                                lutName: "",
+                                lutPresetId: "",
+                              });
+                              return;
+                            }
+                            const cube = buildColorSpaceTransformCube(profileId, "rec709", 17);
+                            updateAdvancedColorPatch({
+                              cameraProfile: profileId,
+                              lut: cube,
+                              lutData: cube,
+                              lutName: `${cube.title}.cube`,
+                              lutPresetId: cube.presetId,
+                            });
+                          }}
+                        >
+                          {CAMERA_COLOR_PROFILES.map(profile => (
+                            <option key={profile.id} value={profile.id}>
+                              {profile.label}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <label className="ap-flow-field">
+                        <span>Film Emulation</span>
+                        <select
+                          aria-label="Film Emulation"
+                          data-testid="flow-film-emulation-select"
+                          value={finishFx?.filmEmulation || "none"}
+                          onChange={e => {
+                            const presetId = e.target.value;
+                            const fx = FILM_EMULATION_PRESETS[presetId] || FILM_EMULATION_PRESETS.none;
+                            emitFinishFx?.({
+                              ...finishFx,
+                              filmEmulation: presetId,
+                              halation: fx.halation,
+                              chromaticAberration: fx.chromaticAberration,
+                              filmGrain: fx.filmGrain,
+                            });
+                          }}
+                        >
+                          <option value="none">None (Clean Digital)</option>
+                          <option value="35mm_halation">35mm Cinema Halation</option>
+                          <option value="16mm_doc">16mm Documentary Grain</option>
+                          <option value="anamorphic_prism">Anamorphic Prism</option>
+                        </select>
+                      </label>
+                    </div>
+                    <div className="ap-flow-field-row">
+                      <label className="ap-flow-field">
+                        <span>Dead-Content Revitalizer</span>
+                        <select
+                          aria-label="Dead-Content Revitalizer"
+                          data-testid="flow-revitalizer-preset-select"
+                          value={resolvedAdvancedColor.revitalizerPresetId || finishFx?.revitalizerPresetId || ""}
+                          onChange={e => {
+                            const key = e.target.value;
+                            const preset = key ? DEAD_CONTENT_REVITALIZER_PRESETS[key] : null;
+                            if (!preset) {
+                              updateAdvancedColorPatch({
+                                revitalizerPresetId: "",
+                                revitalizer: null,
+                              });
+                              emitFinishFx?.({
+                                ...finishFx,
+                                revitalizerPresetId: "",
+                                dehaze: 0,
+                                clarity: 0,
+                                shadowRecovery: 0,
+                                highlightRollOff: 0,
+                                vibrance: 0,
+                              });
+                              return;
+                            }
+                            const rev = {
+                              dehaze: preset.dehaze,
+                              clarity: preset.clarity,
+                              shadowRecovery: preset.shadowRecovery,
+                              highlightRollOff: preset.highlightRollOff,
+                              vibrance: preset.vibrance,
+                              skinToneProtect: preset.skinToneProtect,
+                            };
+                            updateAdvancedColorPatch({
+                              revitalizerPresetId: key,
+                              revitalizer: rev,
+                            });
+                            emitFinishFx?.({
+                              ...finishFx,
+                              precisionGrade: true,
+                              revitalizerPresetId: key,
+                              ...rev,
+                              exposureStops: preset.exposureStops ?? finishFx?.exposureStops ?? 0,
+                              contrast: preset.contrast ?? finishFx?.contrast ?? 1,
+                              saturation: preset.saturation ?? finishFx?.saturation ?? 1,
+                              sharpness: preset.sharpness ?? finishFx?.sharpness ?? 0,
+                            });
+                          }}
+                        >
+                          <option value="">Off (Raw Signal)</option>
+                          {Object.values(DEAD_CONTENT_REVITALIZER_PRESETS).map(preset => (
+                            <option key={preset.id} value={preset.id}>
+                              {preset.icon} {preset.label}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
+                    <div className="ap-flow-field-row">
+                      <label className="ap-flow-field">
+                        <span>HSL Qualifier</span>
+                        <select
+                          aria-label="HSL Qualifier"
+                          data-testid="flow-hsl-qualifier-select"
+                          value={resolvedAdvancedColor.qualifierPresetId || ""}
+                          onChange={e => {
+                            const key = e.target.value;
+                            updateAdvancedColorPatch({
+                              qualifierPresetId: key,
+                              qualifier: key && HSL_QUALIFIER_PRESETS[key] ? { ...HSL_QUALIFIER_PRESETS[key] } : null,
+                            });
+                          }}
+                        >
+                          <option value="">Off</option>
+                          {Object.entries(HSL_QUALIFIER_PRESETS).map(([id, preset]) => (
+                            <option key={id} value={id}>
+                              {preset.label}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <label className="ap-flow-field">
+                        <span>Power Window</span>
+                        <select
+                          aria-label="Power Window"
+                          data-testid="flow-power-window-select"
+                          value={resolvedAdvancedColor.powerWindowPresetId || ""}
+                          onChange={e => {
+                            const key = e.target.value;
+                            updateAdvancedColorPatch({
+                              powerWindowPresetId: key,
+                              powerWindow: key && POWER_WINDOW_PRESETS[key] ? { ...POWER_WINDOW_PRESETS[key] } : null,
+                            });
+                          }}
+                        >
+                          <option value="">Off</option>
+                          {Object.entries(POWER_WINDOW_PRESETS).map(([id, preset]) => (
+                            <option key={id} value={id}>
+                              {preset.label}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
+                    <div className="ap-flow-field-row" data-testid="flow-shot-match-row">
+                      <button
+                        type="button"
+                        className="ap-flow-mini-btn"
+                        data-testid="flow-auto-revive-dead-clip"
+                        onClick={() => {
+                          const pixels = sampleCurrentVideoRgba();
+                          if (!pixels) return;
+                          const solved = diagnoseDeadFootageAndSolveRevival(pixels);
+                          updateAdvancedColorPatch({
+                            revitalizerPresetId: solved.presetId,
+                            revitalizer: solved.revitalizer,
+                          });
+                          emitFinishFx?.({
+                            ...finishFx,
+                            ...solved.grade,
+                            revitalizerPresetId: solved.presetId,
+                          });
+                        }}
+                      >
+                        ⚡ Auto Revive Dead Clip
+                      </button>
+                      <button
+                        type="button"
+                        className="ap-flow-mini-btn"
+                        data-testid="flow-capture-shot-ref"
+                        onClick={() => {
+                          const pixels = sampleCurrentVideoRgba();
+                          if (pixels) setShotMatchRefPixels(pixels);
+                        }}
+                      >
+                        Capture Shot Ref
+                      </button>
+                      <button
+                        type="button"
+                        className="ap-flow-mini-btn"
+                        data-testid="flow-apply-shot-match"
+                        disabled={!shotMatchRefPixels}
+                        onClick={() => {
+                          const targetPixels = sampleCurrentVideoRgba();
+                          if (!shotMatchRefPixels || !targetPixels) return;
+                          const matched = solveShotMatchGrade(shotMatchRefPixels, targetPixels);
+                          emitFinishFx?.({
+                            ...finishFx,
+                            ...matched,
+                          });
+                        }}
+                      >
+                        Auto Shot Match
+                      </button>
+                      <button
+                        type="button"
+                        className="ap-flow-mini-btn"
+                        data-testid="flow-export-preset"
+                        onClick={() => {
+                          if (typeof document === "undefined" || typeof URL?.createObjectURL !== "function") return;
+                          const json = serializeStudioPresetBundle({
+                            name: resolvedAdvancedColor.lutName || finishFx?.preset || "Studio Look",
+                            finishFx,
+                            advancedColor: resolvedAdvancedColor,
+                          });
+                          const blob = new Blob([json], { type: "application/json" });
+                          const url = URL.createObjectURL(blob);
+                          const link = document.createElement("a");
+                          link.href = url;
+                          link.download = "studio-look-preset.json";
+                          link.click?.();
+                          URL.revokeObjectURL?.(url);
+                        }}
+                      >
+                        Export Look JSON
+                      </button>
+                      <label className="ap-flow-field">
+                        <span>Import Look</span>
+                        <input
+                          type="file"
+                          accept=".json,application/json"
+                          aria-label="Import Look Preset"
+                          data-testid="flow-import-preset"
+                          onChange={async e => {
+                            const file = e.target.files?.[0];
+                            e.target.value = "";
+                            if (!file) return;
+                            try {
+                              const parsed = parseStudioPresetBundle(await file.text());
+                              if (parsed.finishFx) {
+                                emitFinishFx?.({
+                                  ...finishFx,
+                                  ...parsed.finishFx,
+                                  advancedColor: parsed.advancedColor || finishFx?.advancedColor || null,
+                                });
+                              }
+                              if (parsed.advancedColor) {
+                                updateAdvancedColorPatch(parsed.advancedColor);
+                              }
+                            } catch (_err) {
+                              // Ignore invalid preset JSON
+                            }
+                          }}
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Per-Node Masked Grading / Power Window Routing (Mask Port) */}
+                  <div
+                    className="ap-flow-grade-subcard"
+                    data-testid="flow-masked-grade-controls"
+                  >
+                    <div className="ap-flow-vector-editor-head">
+                      <span>Masked Grade / Power Window Routing</span>
+                      <span className="ap-flow-node-chip">
+                        {finishFx?.advancedColor?.maskSourceNodeId || finishFx?.maskSourceNodeId
+                          ? "MASKED"
+                          : "FULL FRAME"}
+                      </span>
+                    </div>
+                    <label className="ap-flow-field">
+                      <span>Mask Port Input Node</span>
+                      <select
+                        data-testid="flow-grade-mask-source-select"
+                        value={
+                          finishFx?.advancedColor?.maskSourceNodeId ||
+                          finishFx?.maskSourceNodeId ||
+                          ""
+                        }
+                        onChange={e => {
+                          const nextSource = e.target.value || null;
+                          if (!nextSource) {
+                            const res = disconnectNodeFlowPort(
+                              {
+                                overlays,
+                                adjustmentLayers,
+                                finishFx,
+                                advancedColor,
+                                motionKeyframes,
+                                mainTransform,
+                              },
+                              { toNodeId: "ColorCorrector:finish", toPort: "Mask", currentTime }
+                            );
+                            applyCanonicalGraphResult(res);
+                          } else {
+                            const res = connectNodeFlowPorts(
+                              {
+                                overlays,
+                                compositionOrder,
+                                adjustmentLayers,
+                                finishFx,
+                                advancedColor,
+                                motionKeyframes,
+                                mainTransform,
+                              },
+                              {
+                                fromNodeId: nextSource,
+                                toNodeId: "ColorCorrector:finish",
+                                toPort: "Mask",
+                                currentTime,
+                              }
+                            );
+                            applyCanonicalGraphResult(res);
+                          }
+                        }}
+                      >
+                        <option value="">None (Grade Full Frame)</option>
+                        {graph.nodes
+                          .filter(
+                            n =>
+                              n.kind === "PolygonMask" ||
+                              n.kind === "ChromaKeyer" || n.kind === "CornerPin" || (n.kind === "GlowBlur" && n.targetId!=="finish") ||
+                              (n.kind === "Transform" && n.id !== "Transform:main-video" && overlays.some(layer=>String(layer.id)===String(n.targetId)&&["image","video","text"].includes(layer.type)))
+                          )
+                          .map(candidate => (
+                            <option key={candidate.id} value={candidate.id}>
+                              {candidate.label} ({candidate.id})
+                            </option>
+                          ))}
+                      </select>
+                    </label>
+                    <label className="ap-flow-checkbox-row">
+                      <input
+                        type="checkbox"
+                        data-testid="flow-grade-mask-invert"
+                        checked={Boolean(resolvedAdvancedColor.maskSourceNodeId?resolvedAdvancedColor.maskInvert:resolvedAdvancedColor.powerWindow?.invert)}
+                        onChange={e => updateAdvancedColorPatch(resolvedAdvancedColor.maskSourceNodeId
+                          ? {maskInvert:e.target.checked}
+                          : {powerWindow:{...(resolvedAdvancedColor.powerWindow||{}),enabled:true,invert:e.target.checked}})}
+                      />
+                      <span>Invert Grade Mask (Grade Outside Selection)</span>
+                    </label>
                   </div>
 
                   <button
@@ -3209,6 +4666,76 @@ export default function StudioNodeFlow({
               {/* Adjustment Grade Node Inspector */}
               {selectedNode.kind === "Adjustment" && selectedAdjustment && (
                 <div className="ap-flow-inspector-controls">
+                  <div
+                    className="ap-flow-grade-subcard"
+                    data-testid="flow-adjustment-mask-controls"
+                  >
+                    <div className="ap-flow-vector-editor-head">
+                      <span>Adjustment Mask Port</span>
+                      <span className="ap-flow-node-chip">
+                        {selectedAdjustment.maskSourceNodeId || selectedAdjustment.mask?.enabled
+                          ? "MASKED"
+                          : "FULL"}
+                      </span>
+                    </div>
+                    <label className="ap-flow-field">
+                      <span>Mask Input Source</span>
+                      <select
+                        data-testid="flow-adjustment-mask-source-select"
+                        value={selectedAdjustment.maskSourceNodeId || ""}
+                        onChange={e => {
+                          const nextSource = e.target.value || null;
+                          if (!nextSource) {
+                            const res = disconnectNodeFlowPort(
+                              {
+                                overlays,
+                                adjustmentLayers,
+                                finishFx,
+                                advancedColor,
+                                motionKeyframes,
+                                mainTransform,
+                              },
+                              { toNodeId: selectedNode.id, toPort: "Mask", currentTime }
+                            );
+                            applyCanonicalGraphResult(res);
+                          } else {
+                            const res = connectNodeFlowPorts(
+                              {
+                                overlays,
+                                compositionOrder,
+                                adjustmentLayers,
+                                finishFx,
+                                advancedColor,
+                                motionKeyframes,
+                                mainTransform,
+                              },
+                              {
+                                fromNodeId: nextSource,
+                                toNodeId: selectedNode.id,
+                                toPort: "Mask",
+                                currentTime,
+                              }
+                            );
+                            applyCanonicalGraphResult(res);
+                          }
+                        }}
+                      >
+                        <option value="">None (Full Composite Stack)</option>
+                        {graph.nodes
+                          .filter(
+                            n =>
+                              n.kind === "PolygonMask" ||
+                              n.kind === "ChromaKeyer" || n.kind === "CornerPin" || (n.kind === "GlowBlur" && n.targetId!=="finish") ||
+                              (n.kind === "Transform" && n.id !== "Transform:main-video" && overlays.some(layer=>String(layer.id)===String(n.targetId)&&["image","video","text"].includes(layer.type)))
+                          )
+                          .map(candidate => (
+                            <option key={candidate.id} value={candidate.id}>
+                              {candidate.label} ({candidate.id})
+                            </option>
+                          ))}
+                      </select>
+                    </label>
+                  </div>
                   <StudioAdjustmentControls
                     layer={selectedAdjustment}
                     onUpdate={nextLayer => {
@@ -3246,12 +4773,10 @@ export default function StudioNodeFlow({
                       type="button"
                       className="ap-flow-reset-btn"
                       data-testid="flow-clear-bypasses"
-                      onClick={() => {
-                        updateFlowPatch({ bypassed: {} });
-                        emitAdjustmentLayers?.(
-                          adjustmentLayers.map(a => ({ ...a, enabled: true }))
-                        );
-                      }}
+                      onClick={() => applyCanonicalGraphResult(restoreAllNodeFlowBypasses({
+                        overlays,compositionOrder,adjustmentLayers,finishFx,advancedColor,
+                        motionKeyframes,finishKeyframes,mainTransform,nodeFlow,
+                      }))}
                     >
                       Restore All Bypassed Nodes
                     </button>
@@ -3270,4 +4795,5 @@ export default function StudioNodeFlow({
       </div>
     </div>
   );
+  return expandedWorkspace ? createPortal(workspace, document.body) : workspace;
 }

@@ -1,6 +1,7 @@
 // Model choices become the existing scene actions. This module authors ordinary
 // layers/keys; it does not draw frames or introduce another render path.
 import { compileDirectorComposition } from "./studioDirectorComposition";
+import { compileDirectorCinema3DPlan } from "./studioDirector3DPlan";
 import {compileDirectorNodePlan} from './studioDirectorNodePlan';
 import {compileDirectorPoster} from './studioDirectorPosterPlan';
 const treatments = ["full_frame", "time_weave", "orbit_cards", "radial_reveal"];
@@ -51,6 +52,7 @@ export function directorCreativeContext(snapshot, brief, duration) {
   };
 }
 export function compileDirectorCreativePlan(result, snapshot) {
+  if (result.version === 5) return compileDirectorCinema3DPlan(result, snapshot);
   if(result.version===4)return compileDirectorPoster(result,snapshot);
   if(result.version===3)return compileDirectorNodePlan(result,snapshot);
   if (result.version === 2) return compileDirectorComposition(result, snapshot);

@@ -243,7 +243,8 @@ async function main() {
       apiOrigin: origin,
       timeoutMs: Number(process.env.CREDITS_LOCAL_RENDER_TIMEOUT_MS || 120000),
       maxArtifactBytes: Number(process.env.CREDITS_LOCAL_MAX_ARTIFACT_BYTES || 20 * 1024 * 1024),
-      maxRequestBytes: Number(process.env.CREDITS_LOCAL_MAX_REQUEST_BYTES || 512 * 1024),
+      // A supported 33-point RGB cube contains 107,811 numeric values.
+      maxRequestBytes: Number(process.env.CREDITS_LOCAL_MAX_REQUEST_BYTES || 4 * 1024 * 1024),
       // Includes cold local model import/loading. Production Cloud Run limits
       // and the existing render deadline are unaffected; no paid execution.
       analysisTimeoutMs: 240000,

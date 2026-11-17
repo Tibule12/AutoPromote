@@ -1,4 +1,9 @@
-import { buildStudioKineticType } from '../studioKineticType';
+import {
+  KINETIC_TYPE_DIRECTIONS,
+  KINETIC_TYPE_RECIPES,
+  KINETIC_TYPE_STYLES,
+  buildStudioKineticType,
+} from '../studioKineticType';
 import { buildMotionAutomationStyle } from '../studioAutomation';
 import { studioGroupTree } from '../studioGroups';
 import { normalizeStudioTitleText } from '../studioTitleLayout';
@@ -69,4 +74,27 @@ test('rejects time collisions, excess letters and altered existing motion instea
   const changed = { ...source, text: 'a '.repeat(49), duration: 60 };
   expect(() => build({ source: changed, overlays: [changed] })).toThrow('at most 48');
   expect(() => build({ source: { ...source, bg: '#000000' } })).toThrow('No background');
+});
+
+test('all 9 kinetic movement styles, 5 stagger orders and 6 kinetic recipes generate valid grouped motion keys', () => {
+  expect(KINETIC_TYPE_STYLES).toHaveLength(9);
+  expect(KINETIC_TYPE_DIRECTIONS).toHaveLength(5);
+  expect(KINETIC_TYPE_RECIPES).toHaveLength(6);
+
+  for (const [style] of KINETIC_TYPE_STYLES) {
+    const result = build({ style, travel: 8, tilt: 14 });
+    expect(result.layers).toHaveLength(4);
+    expect(result.keys.length).toBeGreaterThanOrEqual(64);
+  }
+
+  for (const [direction] of KINETIC_TYPE_DIRECTIONS) {
+    const result = build({ direction });
+    expect(result.layers).toHaveLength(4);
+  }
+
+  for (const recipe of KINETIC_TYPE_RECIPES) {
+    const result = build(recipe.options);
+    expect(result.layers.length).toBeGreaterThan(0);
+    expect(result.group.layerIds).toEqual(result.layers.map(l => l.id));
+  }
 });

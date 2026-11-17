@@ -7,6 +7,14 @@ const { createAssistance } = require('../../src/productAssistance');
 const { ROOT, CATALOG } = require('../../src/productKnowledge');
 const { questionCoverage } = require('./question-coverage');
 const book = JSON.parse(fs.readFileSync(path.join(ROOT, CATALOG)));
+test('LUT and colour-grade questions open the documented colour controls', () => {
+  const service = createAssistance({ internalBook: book });
+  for (const question of ['How do I import a LUT and adjust its intensity in Studio?', 'Where is colour grading?', 'How do I use color correction?']) {
+    const reply = service.answer({ question });
+    assert.equal(reply.features[0].feature_id, 'studio.color', question);
+    assert.equal(reply.read_only, true);
+  }
+});
 test('all public features, controls, guides and independent question categories resolve without throwing or changing readiness', () => {
   const service = createAssistance({ internalBook: book });
   for (const row of questionCoverage(book)) {

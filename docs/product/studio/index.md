@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.53 • 2026-11-05
+Development documentation • product 1.2.0 • knowledge 1.0.58 • 2026-11-15
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -586,7 +586,7 @@ Combines ordinary layers and animated graphic groups with shared order, static m
 9. Choose a supported group blend mode to combine the assembled result with its sibling backdrop. Ordinary child blends stay inside the isolated parent group. Reset group mask clears only its mask; graphics locks prevent changes.
 10. Reset transform removes that group’s keys and restores its neutral base. Remove group transform removes its keys and promotes children without baking. Undo/redo and save/reopen apply; inspect the exact final export.
 11. Select the group clip bar to move all child clips and keys, or trim its In/Out visibility. Composite provides exact timing values, Fit to children and reversible Delete group and layers. Source and child-track locks protect the same operation.
-12. Open Studio → Composite and add effects to the selected owned video clip.
+12. Open Studio → Composite and add effects to the selected owned video clip. For Chroma key / green screen, select an image or video layer as Composite target. Text layers explain that keying is unavailable. Enable Key a color, choose its colour and adjust Tolerance (2–100%) and Spill removal (0–100%). These controls share the native Node processor; inspect moving edges and the exported result. Older saved percentage settings remain readable.
 13. Leave Background choice on Keep original background, or upload a PNG, JPEG or WebP image and choose it for replacement.
 14. Select the person using Subject point on the paused source. Select optional furniture, microphones or other objects separately. Extra objects are empty by default; people selection is not automatic detection of everyone.
 15. Create and review this source’s subject mask through the available model workflow, or explicitly reuse a valid mask belonging to the same source and range.
@@ -1120,6 +1120,7 @@ Edits deterministic grade parameters and finish keys. Grade controls affect the 
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
+- The WebGL LUT preview uses the same canonical cube and imported strength as export. Identity colours, changed interior cube points and fractional-strength sampling have scoped real WebGL/CPU checks; this does not qualify all film effects, secondary grades, composition stages or full moving picture/audio parity.
 
 **Common errors**
 
@@ -1447,6 +1448,8 @@ Shows the existing project programme with mapped source frames and sound. Retain
 - This dated development snapshot does not establish professional or production readiness.
 - Accurate paused source pictures remain bounded to qualified clip clocks,90-second windows and128MiB sources. Strict ellipse mask/effect raster agreement and broad continuous picture/sound remain open.
 - The 15 October programme-clock repair removes an erroneous black fade over dim footage. A20s CPU export completes in244.079s with all480 decoded picture frames unchanged; full colour/raster/live sound remains unqualified.
+- Continuous playback paints directly from the decoded video without filling the optional bitmap cache. Paused frame capture retains source dimensions and allows one pending capture. These bounds do not establish smooth playback, whole picture/audio equality or production readiness.
+- Moving playback adapts the preview resolution to measured paint cost and displays the reduced resolution. Pausing restores full detail. All paused source PNG profiles describe the decoded RGB surface consistently; broad optical effects, moving audio/picture equality and general device performance remain unqualified.
 
 **Common errors**
 
@@ -1651,11 +1654,11 @@ Preserves canonical revision and provenance for manual edits, Director proposals
 
 ID: `studio.b_roll` • **FUNCTIONAL** • DETERMINISTIC
 
-Places owned B-roll as ordinary editable video occurrences or layers and mixes its sound where selected. Source cuts already inside a supplied clip are not newly authored timeline cuts.
+Places owned video or images as editable timed cutaways, with source trim, end behaviour, layout, animation and selected audio mixing through the shared Studio engine.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
-**Media:** video
+**Media:** video, image
 
 **Requires:** No additional feature requirement recorded.
 
@@ -1663,8 +1666,12 @@ Places owned B-roll as ordinary editable video occurrences or layers and mixes i
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Open Studio → B-roll and upload an owned video/image or choose an existing project asset.
+2. Set Start, Duration and B-roll source start. Return shows the original at source EOF; Loop repeats the chosen window; Hold freezes the final picture while the original voice returns.
+3. Choose Full screen, Picture-in-picture or Side by side. Presets write ordinary editable layer settings and motion keys.
+4. For video, choose Keep original, Use overlay or Mix both and adjust its volume. Audio presets apply only to video.
+5. To add a story occurrence, choose Insert and explicitly apply Ripple-Insert. Later edits move with the programme; sequence inserts must fit the available source footage.
+6. Review the live picture/sound, Save, reopen the saved project and render/export through the ordinary Studio workflow.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
@@ -1672,7 +1679,9 @@ Places owned B-roll as ordinary editable video occurrences or layers and mixes i
 
 **Limits**
 
-- This dated development snapshot does not establish professional or production readiness.
+- Formal feature status remains FUNCTIONAL for bounded retained workflows; all-source, device, concurrency, creative and whole picture/audio parity are unqualified.
+- Earlier Cutaway and Extend Visual Tail change the visual interval. Independent J/L audio timing uses the existing Sequence audio tools.
+- Generated B-roll uses its separately available generator, source-grounding and artifact review; these controls do not guarantee generation availability or creative quality.
 
 **Common errors**
 

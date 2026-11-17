@@ -8,6 +8,48 @@ from PIL import Image
 import pytest
 from python_media_worker.studio_image_sources import materialize_studio_image
 
+def test_rec709_png_uses_its_cicp_transfer_before_fallback_gamma(tmp_path):
+    from PIL import PngImagePlugin
+    from python_media_worker.studio_image_sources import normalize_studio_image_colour
+    source=tmp_path/'rec709.png'
+    pixels=np.zeros((1,256,4),dtype=np.uint8)
+    pixels[0,:,:3]=np.arange(256)[:,None];pixels[0,:,3]=np.arange(256)
+    tags=PngImagePlugin.PngInfo();tags.add(b'gAMA',(50994).to_bytes(4,'big'))
+    Image.fromarray(pixels,'RGBA').save(source,pnginfo=tags)
+    import struct,zlib
+    original=source.read_bytes();chunk=b'cICP'+bytes((1,1,0,1))
+    source.write_bytes(original[:33]+struct.pack('>I',4)+chunk+struct.pack('>I',zlib.crc32(chunk))+original[33:])
+    normalize_studio_image_colour(source)
+    actual=np.array(Image.open(source))
+    linear=(np.arange(256)/255)**2.4
+    expected=np.rint(np.where(linear<=.0031308,linear*12.92,1.055*linear**(1/2.4)-.055)*255).astype(np.uint8)
+    np.testing.assert_array_equal(actual[0,:,:3],np.repeat(expected[:,None],3,axis=1))
+    np.testing.assert_array_equal(actual[0,:,3],pixels[0,:,3])
+    original=source.read_bytes();normalize_studio_image_colour(source);assert source.read_bytes()==original
+
+def test_untagged_png_render_copy_keeps_its_original_bytes(tmp_path):
+    from python_media_worker.studio_image_sources import normalize_studio_image_colour
+    source=tmp_path/'untagged.png';Image.new('RGBA',(4,4),(91,135,200,127)).save(source)
+    original=source.read_bytes();normalize_studio_image_colour(source);assert source.read_bytes()==original
+
+def test_native_rig_inline_svg_materializes_pixels_and_reuses_the_surface(tmp_path):
+    from urllib.parse import quote
+    svg="<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><rect width='64' height='64' fill='#00d455'/><circle cx='32' cy='32' r='16' fill='white'/></svg>"
+    source='data:image/svg+xml;utf8,'+quote(svg);cache={}
+    file=materialize_studio_image(source,str(tmp_path/'key.png'),cache)
+    assert materialize_studio_image(source,str(tmp_path/'repeat.png'),cache)==file
+    image=Image.open(file).convert('RGBA')
+    assert image.getpixel((32,32))==(255,255,255,255)
+    assert image.getpixel((2,2))==(0,212,85,255)
+
+@pytest.mark.parametrize('content',["<image href='https://example.invalid/image.png'/>","<rect onload='alert(1)'/>","<script>1</script>","<rect fill='url(file:///tmp/image)'/>"])
+def test_inline_svg_refuses_external_or_active_content(tmp_path,content):
+    from urllib.parse import quote
+    source='data:image/svg+xml;utf8,'+quote("<svg width='64' height='64'>"+content+'</svg>')
+    cache={}
+    with pytest.raises(ValueError):materialize_studio_image(source,str(tmp_path/'refused.png'),cache)
+    assert not cache
+
 
 def test_repeated_images_share_bytes_only_within_the_current_render(tmp_path):
     cache = {}

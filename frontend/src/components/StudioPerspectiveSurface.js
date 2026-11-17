@@ -3,9 +3,9 @@ import { perspectiveCssMatrix } from './studioPerspective';
 import { buildMotionAutomationStyle } from './studioAutomation';
 import { watchStudioProgrammeFrames, studioPresentedSourceTime } from './studioSourcePreview';
 
-export default function StudioPerspectiveSurface({ value, progress, children, clockRef, mapTime, layer, keyframes }) {
+export default function StudioPerspectiveSurface({ value, progress, children, clockRef, mapTime, layer, keyframes, baked=false }) {
   const ref = useRef(null), [size, setSize] = useState([1, 1]);
-  const enabled = !!value;
+  const enabled = !!value&&!baked;
   const latest = useRef(null), binding = useRef(null);
   latest.current = { value, mapTime, layer, keyframes };
   useLayoutEffect(() => {
@@ -51,9 +51,9 @@ export default function StudioPerspectiveSurface({ value, progress, children, cl
   if (!value) return children;
   const region=value.sourceRect||[0,0,100,100],rw=region[2]-region[0],rh=region[3]-region[1];
   const cropped=!!value.sourceRect;
-  return <div ref={ref} data-testid="studio-perspective-surface" data-plane-width={size[0]} data-plane-height={size[1]} style={{width:'100%',height:'100%',
-    transformOrigin:'0 0',transform:perspectiveCssMatrix(value,progress,...size)}}>
-    {cropped?<div style={{width:'100%',height:'100%',overflow:'hidden',position:'relative'}}>
+  return <div ref={ref} data-testid="studio-perspective-surface" data-projected-pixels={baked?'true':undefined} data-plane-width={size[0]} data-plane-height={size[1]} style={{width:'100%',height:'100%',
+    transformOrigin:'0 0',transform:baked?'none':perspectiveCssMatrix(value,progress,...size)}}>
+    {cropped&&!baked?<div style={{width:'100%',height:'100%',overflow:'hidden',position:'relative'}}>
       <div data-testid="studio-plane-source-region" style={{position:'absolute',width:`${10000/rw}%`,height:`${10000/rh}%`,
         left:`${-region[0]*100/rw}%`,top:`${-region[1]*100/rh}%`}}>{children}</div>
     </div>:children}</div>;

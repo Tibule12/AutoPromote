@@ -15,6 +15,9 @@ export default function StudioGeneratedBRollPanel({projectId,apiBase,getToken,ge
   const [job,setJob]=useState(null),[busy,setBusy]=useState(false),[error,setError]=useState('');
   const [maxShots,setMaxShots]=useState(2);
   const [autoPlace,setAutoPlace]=useState(false);
+  const [placementPreset,setPlacementPreset]=useState('fullscreen_cutaway');
+  const [lookPreset,setLookPreset]=useState('clean_natural');
+  const [choreographyPreset,setChoreographyPreset]=useState('cinema_push_in');
   const triggered=useRef(null),placing=useRef(new Set());
   const identity=useRef(projectId);identity.current=projectId;
   const pendingRequest=useRef(null);
@@ -79,8 +82,9 @@ export default function StudioGeneratedBRollPanel({projectId,apiBase,getToken,ge
       const result=await request(`/${job.id}/review`,{shotId:shot.id,decision,contentHash:shot.asset.contentHash});
       if(identity.current!==current)return;
       setJob(result);
-      if(decision==='accept')await onAccept(result.shots.find(s=>s.id===shot.id),result);
-      if(decision==='reject')await onReject?.(result.shots.find(s=>s.id===shot.id),result);
+      const reviewedShot=result.shots.find(s=>s.id===shot.id);
+      if(decision==='accept')await onAccept(reviewedShot?{...reviewedShot,placementPreset,lookPreset,choreographyPreset}:reviewedShot,result);
+      if(decision==='reject')await onReject?.(reviewedShot,result);
     }catch(e){if(identity.current===current)setError(e.message);}
     finally{if(identity.current===current)setBusy(false);}
   };
@@ -111,6 +115,25 @@ export default function StudioGeneratedBRollPanel({projectId,apiBase,getToken,ge
     <small>The system chooses concrete beats from the reviewed transcript. Generated illustrations become ordinary editable clips; your original speech continues.</small>
     <label>Maximum cutaways <select aria-label="Maximum generated cutaways" value={maxShots} disabled={busy || active(job)} onChange={e=>setMaxShots(Number(e.target.value))}>
       {[1,2,3].map(n=><option key={n} value={n}>{n}</option>)}
+    </select></label>
+    <label>Cutaway framing <select aria-label="Generated B-roll framing" value={placementPreset} disabled={busy} onChange={e=>setPlacementPreset(e.target.value)}>
+      <option value="fullscreen_cutaway">Fullscreen Cutaway</option>
+      <option value="pip_top_right">Top-Right Proof Card</option>
+      <option value="pip_center_showcase">Center Hero Showcase</option>
+      <option value="split_right_half">Right Split 50/50</option>
+      <option value="circle_portal">Circle Spotlight Portal</option>
+    </select></label>
+    <label>Cutaway motion <select aria-label="Generated B-roll motion" value={choreographyPreset} disabled={busy} onChange={e=>setChoreographyPreset(e.target.value)}>
+      <option value="cinema_push_in">Cinema Slow Push-In</option>
+      <option value="whip_pan_cutaway">Whip-Pan Cutaway</option>
+      <option value="elastic_pop_card">Elastic Pop Card</option>
+      <option value="impact_slam_zoom">Impact Slam Zoom</option>
+    </select></label>
+    <label>Visual match <select aria-label="Generated B-roll visual match" value={lookPreset} disabled={busy} onChange={e=>setLookPreset(e.target.value)}>
+      <option value="clean_natural">Clean Natural</option>
+      <option value="cinema_warm_match">Warm Cinema Match</option>
+      <option value="cool_tech_glass">Cool Cyber Glass</option>
+      <option value="noir_archival_proof">Archival B&W Proof</option>
     </select></label>
     <label><input type="checkbox" aria-label="Automatically place reviewed generated B-roll" checked={autoPlace}
       onChange={e=>setAutoPlace(e.target.checked)}/> Automatically place shots that pass visual checks</label>

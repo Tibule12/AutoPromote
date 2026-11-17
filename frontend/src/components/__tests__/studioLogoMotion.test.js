@@ -1,4 +1,9 @@
-import { buildStudioLogoMotion, AUTOPROMOTE_LOGO_SVG } from '../studioLogoMotion';
+import {
+  buildStudioLogoMotion,
+  AUTOPROMOTE_LOGO_SVG,
+  STUDIO_CREATIVE_LOGO_SVGS,
+  STUDIO_LOGO_CHOREOGRAPHIES,
+} from '../studioLogoMotion';
 import { buildStudioGraphicsPackage, validateStudioGraphicsPackage } from '../studioGraphicsPackage';
 import { adaptStudioSnapshotToDocument } from '../studioProjectDocument';
 import { compileStudioCompositionForRender } from '../studioRenderCompiler';
@@ -14,6 +19,29 @@ test('default mark preserves all three public logo strokes as independently edit
     .toEqual(['M5 25 16 7','M16 7 27 25','M10 21h12']);
   expect(spec.groups[0].layerIds).toEqual(parts.map(l=>l.id));
   expect(spec.layers.filter(l=>l.name.startsWith('Wordmark /')).map(l=>l.text).join('')).toBe('AutoPromote');
+});
+
+test.each(STUDIO_LOGO_CHOREOGRAPHIES.map(c => c.id))('cinema choreography %s builds bounded editable layers and effects', choreography => {
+  const spec = buildStudioLogoMotion({
+    ...options,
+    choreography,
+    anamorphicStreak: true,
+    particleBurst: true,
+    tagline: 'Powerhouse Studio.',
+    secondaryAccent: '#00e5ff',
+  });
+  validate(spec);
+  expect(spec.layers.some(l => l.name.startsWith('Optics / anamorphic'))).toBe(true);
+  expect(spec.layers.filter(l => l.name.startsWith('Particles / kinetic spark'))).toHaveLength(6);
+  expect(spec.layers.some(l => l.text === 'Powerhouse Studio.')).toBe(true);
+  const sweep = spec.layers.find(l => l.name.startsWith('Transition /'));
+  expect(sweep?.svg).toContain('linearGradient');
+});
+
+test.each(STUDIO_CREATIVE_LOGO_SVGS.map(e => [e.id, e.svg]))('creative emblem %s splits into valid editable SVG components', (_id, emblemSvg) => {
+  const spec = buildStudioLogoMotion({ ...options, svg: emblemSvg });
+  validate(spec);
+  expect(spec.layers.filter(l => l.name.startsWith('Mark / component')).length).toBeGreaterThanOrEqual(3);
 });
 
 test.each([[1280,720,8],[720,1280,10],[1080,1080,14]])('bounded layers and keys fit %s × %s at %s seconds',(width,height,duration)=>{
@@ -35,7 +63,7 @@ test('custom SVG dimensions are normalised without duplicate attributes or forei
 test('invalid names, colours, viewports and insufficient programme duration fail before authoring',()=>{
   for(const bad of [{duration:7},{duration:15},{programmeDuration:9},{programmeDuration:undefined},
     {brandName:'<script>'},{brandName:'x'.repeat(25)},{accent:'url(https://example.com)'},{width:Infinity},
-    {width:4096,height:16},{svg:'<svg/>'}]) expect(()=>buildStudioLogoMotion({...options,...bad})).toThrow();
+    {width:4096,height:16},{svg:'<svg/>'},{choreography:'invalid_mode'}]) expect(()=>buildStudioLogoMotion({...options,...bad})).toThrow();
 });
 
 test('transparent-background option preserves the source and every authored key reaches the shared compiler',async()=>{

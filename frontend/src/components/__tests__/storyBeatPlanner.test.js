@@ -1,6 +1,52 @@
-import { buildTranscriptGroundedBRollSuggestions } from "../storyBeatPlanner";
+import {
+  STORY_BROLL_RULES,
+  buildTranscriptGroundedBRollSuggestions,
+} from "../storyBeatPlanner";
 
 describe("buildTranscriptGroundedBRollSuggestions", () => {
+  it("exports 12 semantic story B-roll domain rules", () => {
+    expect(STORY_BROLL_RULES).toHaveLength(12);
+    expect(STORY_BROLL_RULES.map(r => r.id)).toEqual([
+      "online_discovery",
+      "choir_memory",
+      "location_memory",
+      "culinary_craft",
+      "tech_workspace",
+      "financial_growth",
+      "fitness_athletics",
+      "studio_production",
+      "urban_journey",
+      "product_unboxing",
+      "crowd_stage_event",
+      "nature_horizon",
+    ]);
+  });
+
+  it("grounds culinary, tech, finance, fitness, studio, travel, product, event, and nature cues", () => {
+    const suggestions = buildTranscriptGroundedBRollSuggestions({
+      captionSegments: [
+        { id: "c1", start: 1, end: 4, text: "Baking fresh sourdough bread in the kitchen", reviewRequired: false },
+        { id: "c2", start: 8, end: 11, text: "Coding software on the laptop monitor", reviewRequired: false },
+        { id: "c3", start: 15, end: 18, text: "Revenue growth and profit charts surged", reviewRequired: false },
+        { id: "c4", start: 22, end: 25, text: "Training in the gym before the marathon", reviewRequired: false },
+        { id: "c5", start: 29, end: 32, text: "Recording in the podcast studio with a microphone", reviewRequired: false },
+      ],
+      sourceStart: 0,
+      sourceEnd: 40,
+      maxBeats: 6,
+    });
+
+    expect(suggestions.map(s => s.concept)).toEqual([
+      "culinary_craft",
+      "tech_workspace",
+      "financial_growth",
+      "fitness_athletics",
+      "studio_production",
+    ]);
+    expect(suggestions[0].style).toBe("detail");
+    expect(suggestions[2].style).toBe("proof");
+  });
+
   it("ties phone and choir visuals to exact reviewed spoken lines", () => {
     const suggestions = buildTranscriptGroundedBRollSuggestions({
       captionSegments: [

@@ -1,0 +1,36 @@
+{
+  "pairs": [
+    {
+      "seconds": 1,
+      "exportFrame": 24,
+      "psnrDb": 37.195373357748444,
+      "meanAbsoluteError": 2.591779513888889,
+      "maximumChannelError": 40.0
+    },
+    {
+      "seconds": 3,
+      "exportFrame": 72,
+      "psnrDb": 36.8812060747877,
+      "meanAbsoluteError": 2.7507602719907407,
+      "maximumChannelError": 54.0
+    },
+    {
+      "seconds": 6,
+      "exportFrame": 144,
+      "psnrDb": 36.91408663607854,
+      "meanAbsoluteError": 2.6933463541666667,
+      "maximumChannelError": 46.0
+    },
+    {
+      "seconds": 10,
+      "exportFrame": 240,
+      "psnrDb": 37.11509266961349,
+      "meanAbsoluteError": 2.61212890625,
+      "maximumChannelError": 41.0
+    }
+  ],
+  "minimumPsnrDb": 36.8812060747877,
+  "meanAbsoluteError": 2.6620037615740744,
+  "method": "Actual paused full720x1280 Live Edit PNG versus exact same-job H264 decoded frame; no resize, alignment or excluded pixels.",
+  "qualification": "Scoped colour-profile repair; no whole moving picture/audio or strict typography promotion."
+}

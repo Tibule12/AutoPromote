@@ -10561,6 +10561,10 @@ body.dashboard-mode.viral-studio-open {
 @font-face { font-family: "Studio Caption DejaVu Sans"; font-style: normal; font-weight: 400; src: url("./motion/fonts/DejaVuSans.ttf") format("truetype"); }
 @font-face { font-family: "Studio Caption DejaVu Sans"; font-style: normal; font-weight: 700; src: url("./motion/fonts/DejaVuSans-Bold.ttf") format("truetype"); }
 @font-face { font-family: "Studio Caption Noto Sans Symbols2"; font-style: normal; font-weight: 400; src: url("./motion/fonts/NotoSansSymbols2-Regular.ttf") format("truetype"); }
+@font-face { font-family: "Studio Caption Inter Black"; font-style: normal; font-weight: 400; src: url("./motion/fonts/Inter-Black.ttf") format("truetype"); }
+@font-face { font-family: "Studio Caption Inter ExtraBold"; font-style: normal; font-weight: 400; src: url("./motion/fonts/Inter-ExtraBold.ttf") format("truetype"); }
+@font-face { font-family: "Studio Caption Inter SemiBold"; font-style: normal; font-weight: 400; src: url("./motion/fonts/Inter-SemiBold.ttf") format("truetype"); }
+@font-face { font-family: "Studio Caption Inter"; font-style: normal; font-weight: 400; src: url("./motion/fonts/Inter-Regular.ttf") format("truetype"); }
 
 .draggable-overlay.is-text-overlay:not(.broll-fullscreen):active {
   transform: translate(var(--layer-translate-x, -50%), var(--layer-translate-y, -50%)) rotate(var(--title-rotation, 0deg))
@@ -12112,6 +12116,37 @@ body.dashboard-mode.viral-studio-open {
   box-shadow: 3px 3px 0 #3b1911;
 }
 
+.caption-style-option-word_pill .caption-style-swatch {
+  color: #0b0d13;
+  background: linear-gradient(135deg, #3db3ff, #ffb33d);
+  box-shadow: 0 3px 10px rgba(61, 179, 255, 0.35);
+}
+
+.caption-style-option-spring_slam .caption-style-swatch {
+  color: #ffffff;
+  background: linear-gradient(135deg, #ff5d8f, #ff7c3a);
+  transform: rotate(-2deg);
+}
+
+.caption-style-option-neon_bloom .caption-style-swatch {
+  color: #ffffff;
+  background: #070b18;
+  text-shadow: 0 0 10px #d0e03c, 0 0 18px #3ce0d0;
+}
+
+.caption-style-option-editorial_duo .caption-style-swatch {
+  color: #ffffff;
+  background: linear-gradient(145deg, #161b29, #29334d);
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+}
+
+.caption-style-option-kinetic_bar .caption-style-swatch {
+  color: #ffffff;
+  background: #101622;
+  border-bottom: 3px solid #3ce0d0;
+}
+
 .caption-style-grid button small {
   color: #8290a5;
   font-size: 0.48rem;
@@ -12190,6 +12225,27 @@ body.dashboard-mode.viral-studio-open {
   color: #fff;
   background: linear-gradient(135deg, rgba(156, 44, 96, 0.36), rgba(72, 42, 137, 0.42));
   box-shadow: 0 0 16px rgba(255, 93, 143, 0.12);
+}
+
+.studio-secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 6px;
+  padding: 7px 11px;
+  border: 1px solid rgba(125, 150, 185, 0.32);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(16, 26, 46, 0.9), rgba(34, 21, 61, 0.85));
+  color: #eef4ff;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.studio-secondary-btn:hover {
+  border-color: rgba(167, 139, 250, 0.75);
+  background: linear-gradient(135deg, rgba(28, 39, 71, 0.96), rgba(53, 30, 92, 0.92));
 }
 
 .caption-accent-palette {

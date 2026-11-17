@@ -10,7 +10,6 @@ import { storage } from "../firebaseClient";
 import { ref, uploadBytes, getDownloadURL, deleteObject, getStorage } from "firebase/storage";
 import MultiCamCombiner from "./MultiCamCombiner";
 import ViralClipStudio from "./ViralClipStudio"; // Import the new Studio component
-import ThumbnailGenerator from "./ThumbnailGenerator";
 import { sanitizeUrl } from "../utils/security";
 import useCinematicEffects from "../hooks/useCinematicEffects";
 import CinematicEffectsPanel from "./CinematicEffectsPanel";
@@ -646,8 +645,6 @@ function VideoEditor({
 
   const videoRef = useRef(null);
   const blobUrlRef = useRef(null);
-  const [showThumbnailGenerator, setShowThumbnailGenerator] = useState(false);
-  const [thumbnailData, setThumbnailData] = useState(null); // { dataUrl, storageUrl, text, time }
 
   // Cinematic Effects — all CSS-based, no backend needed
   const {
@@ -1055,21 +1052,7 @@ function VideoEditor({
     ]);
   };
 
-  const handleThumbnailSelect = thumbData => {
-    setThumbnailData(thumbData);
-    setShowThumbnailGenerator(false);
-  };
-
-
-  const handleSave = () => {
-    const payload = processedFile || file;
-    if (thumbnailData) {
-      payload.thumbnailFrame = thumbnailData.dataUrl;
-      payload.coverFrame = thumbnailData.dataUrl;
-      payload.thumbnailUrl = thumbnailData.storageUrl;
-    }
-    onSave(payload);
-  };
+  const handleSave = () => onSave(processedFile || file);
 
   useEffect(() => {
     const uid = getAuth().currentUser?.uid;
@@ -2035,7 +2018,7 @@ function VideoEditor({
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ flex: 1 }}>{statusMessage}</span>
-            {creditBalance !== null ? (
+            {needsCredits && creditBalance !== null ? (
               <button
                 onClick={() => {
                   setShowCreditShop(true);
@@ -2229,40 +2212,6 @@ function VideoEditor({
                   className="cep-media-wrapper"
                   style={{ flex: 1, background: "#000", position: "relative", overflow: "hidden" }}
                 >
-                  {thumbnailData && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: 8,
-                        right: 8,
-                        zIndex: 10,
-                        background: "rgba(0,0,0,0.7)",
-                        borderRadius: 8,
-                        padding: 4,
-                        border: "2px solid #a78bfa",
-                      }}
-                    >
-                      <img
-                        src={thumbnailData.dataUrl}
-                        alt="Thumbnail preview"
-                        style={{
-                          width: 120,
-                          height: 72,
-                          objectFit: "contain",
-                          borderRadius: 4,
-                          display: "block",
-                          background: "#050816",
-                        }}
-                      />
-                      <div
-                        style={{ color: "#a78bfa", fontSize: 9, textAlign: "center", marginTop: 2 }}
-                      >
-                        {thumbnailData.source === "smart_promo_visual"
-                          ? "Selected Promo Visual"
-                          : "Thumbnail"}
-                      </div>
-                    </div>
-                  )}
                   <video
                     key={videoSrc}
                     ref={videoRef}
@@ -2435,30 +2384,10 @@ function VideoEditor({
           <div className="video-actions">
             {!hideCreationWorkflows && (
               <div className="video-actions-note">
-                Thumbnail Lab, Cam Combiner, and Flow Edit stay included on paid plans. Save your
+                Cam Combiner and Flow Edit stay included on paid plans. Save your
                 credits for analysis, promo generation, and final rendering.
               </div>
             )}
-            <button
-              type="button"
-              onClick={() => setShowThumbnailGenerator(true)}
-              disabled={!videoSrc || processing}
-              style={{
-                padding: "6px 16px",
-                borderRadius: 8,
-                border: "2px solid #a78bfa",
-                background: thumbnailData ? "rgba(167,139,250,0.15)" : "transparent",
-                color: thumbnailData ? "#c4b5fd" : "#a78bfa",
-                fontWeight: 600,
-                fontSize: 14,
-                cursor: videoSrc ? "pointer" : "not-allowed",
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-              }}
-            >
-              {thumbnailData ? "📸 ✓ Thumbnail Ready" : "🎬 Generate Thumbnail"}
-            </button>
             <button className="cancel-btn" onClick={onCancel} disabled={processing}>
               Cancel
             </button>
@@ -2468,14 +2397,7 @@ function VideoEditor({
           </div>
         </div>
       </div>
-      {showThumbnailGenerator && (
-        <ThumbnailGenerator
-          videoSrc={videoSrc}
-          videoRef={videoRef}
-          onSelect={handleThumbnailSelect}
-          onClose={() => setShowThumbnailGenerator(false)}
-        />
-      )}
+
     </div>
   );
 }

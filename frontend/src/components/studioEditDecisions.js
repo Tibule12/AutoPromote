@@ -23,6 +23,8 @@ export const STUDIO_ADDITIONAL_LAYER_FIELDS = [
   "vectorShape", "strokeStart", "strokeEnd", "strokeOffset",
   "mask", "chromaKey", "backgroundRemoval", "tracking", "presenterPolish",
   "sourceMediaId", "generationRef", "provenanceRef", "generationProvenance", "parentId", "clipOwnerId",
+  "parameterLinks", "isCompoundMacro", "isMacroGroup", "macroGroup",
+  "opticalFx", "displacementWarp", "depthParallax", "zDepth", "dofBlur", "cornerKeys",
   "trackMatte", "motionDrivers", "isNullRig", "keepMatteVisible", "shy", "solo", "locked",
 ];
 export const STUDIO_LAYER_BINDING_FIELDS = ["titlePreset", "clipId", "mixAudio"];

@@ -1,9 +1,17 @@
 import React, { useState } from 'react';
-import { AUTOPROMOTE_LOGO_SVG } from './studioLogoMotion';
+import {
+  AUTOPROMOTE_LOGO_SVG,
+  STUDIO_CREATIVE_LOGO_SVGS,
+  STUDIO_LOGO_CHOREOGRAPHIES,
+} from './studioLogoMotion';
 
 export default function StudioLogoMotionPanel({ onBuild, locked, programmeDuration }) {
   const [svg,setSvg]=useState(AUTOPROMOTE_LOGO_SVG), [bitmap,setBitmap]=useState(null), [brandName,setBrandName]=useState('AutoPromote');
-  const [accent,setAccent]=useState('#a855f7'), [duration,setDuration]=useState(10);
+  const [emblemPreset,setEmblemPreset]=useState('autopromote_apex');
+  const [choreography,setChoreography]=useState('signal');
+  const [tagline,setTagline]=useState('Create. Publish. Move forward.');
+  const [accent,setAccent]=useState('#a855f7'), [secondaryAccent,setSecondaryAccent]=useState('#00d7fa'), [duration,setDuration]=useState(10);
+  const [anamorphicStreak,setAnamorphicStreak]=useState(false), [particleBurst,setParticleBurst]=useState(false);
   const [background,setBackground]=useState(true), [busy,setBusy]=useState(false), [message,setMessage]=useState('');
   const [separateBitmap,setSeparateBitmap]=useState(false),[symbolWidth,setSymbolWidth]=useState(28);
   const [pieceConstruction,setPieceConstruction]=useState(false),[pieceColumns,setPieceColumns]=useState(11);
@@ -11,6 +19,23 @@ export default function StudioLogoMotionPanel({ onBuild, locked, programmeDurati
   return <details className="advanced-tool-section kinetic-type-panel" data-testid="studio-logo-motion">
     <summary>Logo motion</summary>
     <p>Build editable logo motion at the start of your programme. SVG shapes stay separate. A separated image symbol assembles through three masked components, accelerates along forward routes, then resolves into its original wordmark. Each layer and its keys remain editable.</p>
+    <label>Creative emblem preset
+      <select aria-label="Logo motion emblem preset" value={emblemPreset} disabled={busy || locked}
+        onChange={e=>{
+          const id = e.target.value;
+          setEmblemPreset(id);
+          const found = STUDIO_CREATIVE_LOGO_SVGS.find(item => item.id === id);
+          if (found) {
+            setSvg(found.svg);
+            setBitmap(null);
+            setMessage(`${found.label} selected.`);
+          }
+        }}>
+        {STUDIO_CREATIVE_LOGO_SVGS.map(item => (
+          <option key={item.id} value={item.id}>{item.label}</option>
+        ))}
+      </select>
+    </label>
     <label>Logo image<input aria-label="Logo motion image" type="file" accept=".svg,image/svg+xml,image/png,image/jpeg,image/webp" disabled={busy || locked}
       onChange={async e=>{const file=e.target.files?.[0];e.target.value='';if(!file)return;
         setBusy(true);try{
@@ -32,8 +57,20 @@ export default function StudioLogoMotionPanel({ onBuild, locked, programmeDurati
           }
           setMessage(`${file.name} selected.`);
         }catch(error){setMessage(error.message);}finally{setBusy(false);}}}/></label>
+    <label>Cinema choreography
+      <select aria-label="Logo motion choreography" value={choreography} disabled={busy || locked}
+        onChange={e=>setChoreography(e.target.value)}>
+        {STUDIO_LOGO_CHOREOGRAPHIES.map(item => (
+          <option key={item.id} value={item.id}>{item.label} — {item.description}</option>
+        ))}
+      </select>
+    </label>
     <label>Brand name<input aria-label="Logo motion brand name" value={brandName} maxLength={24} disabled={busy || locked} onChange={e=>setBrandName(e.target.value)}/></label>
-    <label>Accent<input aria-label="Logo motion accent" type="color" value={accent} disabled={busy || locked} onChange={e=>setAccent(e.target.value)}/></label>
+    <label>Tagline<input aria-label="Logo motion tagline" value={tagline} maxLength={48} disabled={busy || locked} onChange={e=>setTagline(e.target.value)}/></label>
+    <div className="motion-position-grid">
+      <label>Accent<input aria-label="Logo motion accent" type="color" value={accent} disabled={busy || locked} onChange={e=>setAccent(e.target.value)}/></label>
+      <label>Secondary accent<input aria-label="Logo motion secondary accent" type="color" value={secondaryAccent} disabled={busy || locked} onChange={e=>setSecondaryAccent(e.target.value)}/></label>
+    </div>
     {bitmap?<>
       <label><input type="checkbox" checked={separateBitmap} disabled={busy||locked} onChange={e=>setSeparateBitmap(e.target.checked)}/>Separate left symbol from wordmark</label>
       {separateBitmap?<>
@@ -48,8 +85,18 @@ export default function StudioLogoMotionPanel({ onBuild, locked, programmeDurati
     </>:null}
     <label>Duration (s)<input aria-label="Logo motion duration" type="number" min={8} max={Math.min(14,programmeDuration)} step={.5} value={duration} disabled={busy || locked} onChange={e=>setDuration(Number(e.target.value))}/></label>
     <label><input type="checkbox" checked={background} disabled={busy || locked} onChange={e=>setBackground(e.target.checked)}/>Add background</label>
+    <label><input type="checkbox" aria-label="Logo anamorphic flare" checked={anamorphicStreak} disabled={busy || locked} onChange={e=>setAnamorphicStreak(e.target.checked)}/>Anamorphic optical lens flare sweep</label>
+    <label><input type="checkbox" aria-label="Logo kinetic particle burst" checked={particleBurst} disabled={busy || locked} onChange={e=>setParticleBurst(e.target.checked)}/>Kinetic spark burst on lockup impact</label>
     <button type="button" disabled={busy || locked || programmeDuration<8} onClick={async()=>{
-      setBusy(true);setMessage('');try{await onBuild({svg,bitmap,brandName,accent,duration,separateBitmap,symbolWidth,pieceConstruction:separateBitmap&&pieceConstruction,pieceColumns,pieceStyle,includeBackground:background});
+      setBusy(true);setMessage('');try{await onBuild({
+        svg,bitmap,brandName,accent,duration,separateBitmap,symbolWidth,
+        pieceConstruction:separateBitmap&&pieceConstruction,pieceColumns,pieceStyle,includeBackground:background,
+        ...(choreography !== 'signal' ? { choreography } : {}),
+        ...(secondaryAccent !== '#00d7fa' ? { secondaryAccent } : {}),
+        ...(tagline !== 'Create. Publish. Move forward.' ? { tagline } : {}),
+        ...(anamorphicStreak ? { anamorphicStreak: true } : {}),
+        ...(particleBurst ? { particleBurst: true } : {}),
+      });
         setMessage('Logo motion created. Edit the layers and keys in the timeline; Undo removes the composition.');
       }catch(error){setMessage(error.message);}finally{setBusy(false);}}}>
       {busy?'Building logo motion…':'Build editable logo motion'}

@@ -1,0 +1,125 @@
+{
+  "status": "KNOWN_ROUTING_GAPS_IMPLEMENTED_AND_NATIVELY_VERIFIED",
+  "frontendTests": 115,
+  "workerTests": 243,
+  "knowledgeHelpTests": 52,
+  "strictBuild": "PASS",
+  "testedBuild": "/tmp/autopromote-node-routing-build-20261116-r5",
+  "nativeExport": {
+    "normalSignIn": true,
+    "actualSourceUpload": true,
+    "ordinaryMediaImport": true,
+    "projectedMaskSource": true,
+    "titleAdjustmentMaskSource": true,
+    "restoreAllCanonicalRecovery": true,
+    "visibleInvalidPaletteRefusal": true,
+    "nativeUndoRedo": true,
+    "semanticColdReopen": true,
+    "normalApprovedExport": true,
+    "downloadSha256": "d8c620cacdf0316114daef74498d6174832ff2dcc8e3ec6bacaf8d25a7fdefb4",
+    "fullDecode": true,
+    "playback": {
+      "duration": 4,
+      "ended": true,
+      "decoded": 96
+    },
+    "errors": [],
+    "paidJobs": 0,
+    "productionWrites": 0
+  },
+  "nativeUi": {
+    "normalSignIn": true,
+    "normalOwnedBackupRestore": true,
+    "physicalGraphViewerButtonUnobstructed": true,
+    "projectedAndTitleMaskOptions": true,
+    "mainSourceGradeLivePicture": true,
+    "connectedMaskInversionSavedWithoutEllipse": true,
+    "viewports": [
+      {
+        "width": 1600,
+        "height": 1200,
+        "left": 12,
+        "right": 1588,
+        "bottom": 1188,
+        "toolbarOverflow": false
+      },
+      {
+        "width": 1280,
+        "height": 900,
+        "left": 12,
+        "right": 1268,
+        "bottom": 888,
+        "toolbarOverflow": false
+      },
+      {
+        "width": 1024,
+        "height": 820,
+        "left": 12,
+        "right": 1012,
+        "bottom": 808,
+        "toolbarOverflow": false
+      }
+    ],
+    "mobileDesktopGuard": true,
+    "noUnrelatedCreditPrompt": true,
+    "escapeReturns": true,
+    "errors": []
+  },
+  "browserPixels": {
+    "actualChromiumPixels": true,
+    "checks": [
+      {
+        "kind": "projected",
+        "solidPixels": 5184
+      },
+      {
+        "kind": "projected-inverted",
+        "solidPixels": 9216
+      },
+      {
+        "kind": "static-title",
+        "solidPixels": 36
+      },
+      {
+        "kind": "animated-title",
+        "solidPixels": 40
+      }
+    ]
+  },
+  "renderBinding": {
+    "nativeWorkerDownloadSha256": "d8c620cacdf0316114daef74498d6174832ff2dcc8e3ec6bacaf8d25a7fdefb4",
+    "projectedMask": {
+      "layer_id": "overlay-81cdfa97-5855-4f85-b881-31a8ea455b88",
+      "operation": "CornerPin"
+    },
+    "perspective": {
+      "version": 1,
+      "corners": [
+        0,
+        12,
+        88,
+        0,
+        88,
+        100,
+        0,
+        88
+      ]
+    },
+    "titleAdjustmentMask": {
+      "layer_id": "flow-title-flow-74d2fa81-de8d-4b92-aaa8-99dede436822",
+      "operation": "Transform"
+    },
+    "titleLayerType": "text"
+  },
+  "fullAuthFirestoreStorageCheckpoint": true,
+  "concurrentLogoGraphicsEditsPreservedAndExcludedFromRuntimeQualification": true,
+  "wholeMovingPictureAudioParity": "UNVERIFIED",
+  "unrestrictedRealtimeThroughput": "UNVERIFIED",
+  "readinessPromotion": false,
+  "paidCalls": 0,
+  "productionWrites": 0,
+  "allOwnedServicesStopped": true,
+  "anonymousWelcomeComparisons": 8,
+  "signedInHelpChecks": 3,
+  "servedBuildAssetsVerified": 37
+}

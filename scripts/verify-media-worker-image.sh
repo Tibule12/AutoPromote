@@ -7,8 +7,12 @@ IMAGE="${IMAGE:-autopromote-media-worker:verify}"
 cd "$TASK_REPOSITORY_ROOT/python_media_worker"
 docker build --tag "${IMAGE}" .
 
+# Keep source code read-only while giving real-ingest fixtures the worker's
+# approved scratch path. A clean checkout does not contain this directory.
+mkdir -p "${GITHUB_WORKSPACE}/tmp"
 docker run --rm \
   --volume "${GITHUB_WORKSPACE}:/workspace:ro" \
+  --tmpfs /workspace/tmp:rw,size=512m \
   --workdir /workspace \
   --entrypoint python \
   "${IMAGE}" \

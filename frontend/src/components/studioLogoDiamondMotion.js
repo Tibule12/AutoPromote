@@ -14,14 +14,15 @@ export function buildStudioLogoDiamondMotion({bitmap,symbol,wordmark,brandName,a
   const geometry=b=>({width:fullWidth*b[2]/bw,height:fullHeight*b[3]/bh,
     x:50-fullWidth/2+(b[0]-bx+b[2]/2)*fullWidth/bw,
     y:39-fullHeight/2+(b[1]-by+b[3]/2)*fullHeight/bh});
-  if(includeBackground)shape('Stage / lavender paper',0,10,'<rect width="1280" height="720" fill="#f6f2ff"/>',100,100);
+  if(includeBackground)shape('Stage / obsidian crystal',0,10,`<defs><linearGradient id="dlbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#070511"/><stop offset=".55" stop-color="#120926"/><stop offset="1" stop-color="#05030d"/></linearGradient><radialGradient id="dlspot" cx="50%" cy="38%" r="54%"><stop offset="0" stop-color="${accent}" stop-opacity=".34"/><stop offset=".45" stop-color="#00d7fa" stop-opacity=".14"/><stop offset="1" stop-color="#070511" stop-opacity="0"/></radialGradient></defs><rect width="1280" height="720" fill="url(#dlbg)"/><rect width="1280" height="720" fill="url(#dlspot)"/>`,100,100);
   for(let i=0;i<6;i++){
-    const a=4.28+i*.065,b=6.9,angle=i*Math.PI/3;
-    const petal=shape(`Cascade / flying diamond ${i+1}`,a,b,`<path d="M640 0 1280 360 640 720 0 360Z" fill="${i%2?'#00c7f4':accent}"/>`,1.6,2.8,{x:50,y:39});
-    key(petal,'x',[[a,50],[a+.6,50+Math.cos(angle)*34],[b,50+Math.cos(angle)*42]],soft);
-    key(petal,'y',[[a,39],[a+.6,39+Math.sin(angle)*24],[b,39+Math.sin(angle)*28]],soft);
+    const a=4.28+i*.065,b=7.2,angle=i*Math.PI/3;
+    const petal=shape(`Cascade / flying diamond ${i+1}`,a,b,`<defs><filter id="dimglow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="16" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter><linearGradient id="dm" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity="1"/><stop offset=".48" stop-color="${i%2?'#00e5ff':accent}" stop-opacity=".95"/><stop offset="1" stop-color="#6d28d9" stop-opacity=".6"/></linearGradient></defs><path d="M640 0 1280 360 640 720 0 360Z" fill="url(#dm)" filter="url(#dimglow)"/><path d="M640 90 1120 360 640 630 160 360Z" fill="#ffffff" fill-opacity=".42"/>`,5.8,9.6,{x:50,y:39});
+    key(petal,'x',[[a,50],[a+.6,50+Math.cos(angle)*35],[b,50+Math.cos(angle)*43]],soft);
+    key(petal,'y',[[a,39],[a+.6,39+Math.sin(angle)*25],[b,39+Math.sin(angle)*29]],soft);
+    key(petal,'scale',[[a,.4],[a+.35,1.2],[b,.28]]);
     key(petal,'rotation',[[a,i*30-75],[b,i*30+105]]);
-    key(petal,'opacity',[[a,0],[a+.15,.65],[a+.7,.4],[b,0]]);
+    key(petal,'opacity',[[a,0],[a+.15,.85],[a+.7,.55],[b,0]]);
   }
   const sg=geometry(symbol.bounds),symbolPaths=['polygon(0% 0%,60% 0%,70% 38%,0% 86%)',
     'polygon(60% 0%,100% 0%,100% 100%,0% 100%,0% 86%,70% 38%)',
@@ -35,7 +36,7 @@ export function buildStudioLogoDiamondMotion({bitmap,symbol,wordmark,brandName,a
     key(part,'opacity',[[a,0],[a+.08,1],[5.58,1],[5.72,0]]);ids.push(part.id);
   });
   const mark=art('Mark / gradient symbol',5.5,7.05,symbol.svg,sg.width,sg.height,{x:sg.x,y:sg.y});
-  key(mark,'opacity',[[5.5,0],[5.65,1],[7.05,1]]);ids.push(mark.id);
+  key(mark,'opacity',[[5.5,0],[5.65,1],[6.82,1],[7.05,0]]);ids.push(mark.id);
   const [wx,wy,ww,wh]=wordmark.bounds,sequence=Array.from({length:pieceColumns},(_,i)=>i)
     .sort((a,b)=>Math.abs(a-(pieceColumns-1)/2)-Math.abs(b-(pieceColumns-1)/2)||a-b);
   const rank=new Map(sequence.map((column,i)=>[column,i]));
@@ -44,10 +45,10 @@ export function buildStudioLogoDiamondMotion({bitmap,symbol,wordmark,brandName,a
     const g=geometry(bounds),url=encodeCrop(bitmap,bounds);
     if(typeof url!=='string'||url.length>180000||!/^data:image\/png;base64,[a-z0-9+/=]+$/i.test(url))throw Error('The wordmark pieces could not be cropped within the artwork budget.');
     const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${end-x}" height="${wh}" viewBox="0 0 ${end-x} ${wh}"><image width="${end-x}" height="${wh}" href="${url}"/></svg>`;
-    const paths=column%2?['polygon(0% 0%,100% 0%,0% 100%)','polygon(100% 0%,100% 100%,0% 100%)']
-      :['polygon(0% 0%,100% 0%,100% 100%)','polygon(0% 0%,100% 100%,0% 100%)'];
+    const paths=column%2?['polygon(0% 0%,100% 0%,100% 1%,1% 100%,0% 100%)','polygon(99% 0%,100% 0%,100% 100%,0% 100%,0% 99%)']
+      :['polygon(0% 0%,100% 0%,100% 100%,99% 100%,0% 1%)','polygon(0% 0%,1% 0%,100% 99%,100% 100%,0% 100%)'];
     paths.forEach((path,half)=>{
-      const a=4.65+rank.get(column)*.055+half*.08,arrive=5.75+rank.get(column)*.065+half*.09;
+      const a=4.65+rank.get(column)*.048+half*.075,arrive=5.65+rank.get(column)*.052+half*.08;
       const angle=column/pieceColumns*Math.PI*2+half*Math.PI,part=art(`Wordmark pieces / ${column+1} ${half?'lower':'upper'}`,a,7.05,svg,g.width,g.height,{x:g.x,y:g.y,mask:mask(path)});
       const safeY=value=>Math.max(10,Math.min(56-g.height*.6,value));
       const startX=Math.max(4,Math.min(96,g.x+Math.cos(angle)*18)),startY=safeY(g.y+Math.sin(angle)*26);
@@ -55,12 +56,16 @@ export function buildStudioLogoDiamondMotion({bitmap,symbol,wordmark,brandName,a
       key(part,'y',[[a,startY],[a+.35,safeY(g.y+Math.cos(angle)*7)],[arrive,g.y],[7.05,g.y]]);
       key(part,'rotation',[[a,half?-110:110],[a+.35,half?16:-16],[arrive,0],[7.05,0]]);
       key(part,'scale',[[a,.4],[a+.35,1.15],[arrive,1],[7.05,1]]);
-      key(part,'opacity',[[a,0],[a+.08,1],[7.05,1]]);ids.push(part.id);
+      key(part,'opacity',[[a,0],[a+.08,1],[6.82,1],[7.05,0]]);ids.push(part.id);
     });
   }
   const full=`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="${Math.round(1200*bh/bw)}" viewBox="${bitmap.bounds.join(' ')}"><image width="${bitmap.width}" height="${bitmap.height}" href="${bitmap.dataUrl}"/></svg>`;
-  const original=art('Mark / continuous original lockup',7,10,full,fullWidth,fullHeight,{y:39});
-  key(original,'opacity',[[7,0],[7.05,1],[10,1]]);ids.push(original.id);
+  const lockupHalo=shape('Optics / diamond lockup aura',6.4,10,`<defs><radialGradient id="dhalo"><stop offset="0" stop-color="#00e5ff" stop-opacity=".38"/><stop offset=".45" stop-color="${accent}" stop-opacity=".2"/><stop offset="1" stop-color="${accent}" stop-opacity="0"/></radialGradient></defs><ellipse cx="640" cy="360" rx="560" ry="260" fill="url(#dhalo)"/>`,78,42,{y:39});
+  key(lockupHalo,'scale',[[6.4,.6],[7.4,1.12],[8.8,1.04],[10,1]],soft);
+  key(lockupHalo,'opacity',[[6.4,0],[6.9,.85],[10,.65]]);ids.push(lockupHalo.id);
+  const original=art('Mark / continuous original lockup',6.55,10,full,fullWidth,fullHeight,{y:39});
+  key(original,'scale',[[6.55,.97],[7.15,1.03],[8.6,1.05],[10,1.02]],soft);
+  key(original,'opacity',[[6.55,0],[6.82,1],[10,1]]);ids.push(original.id);
   groups.push({id:'identity',name:'Identity / diamond cascade',startTime:0,duration,layerIds:ids,keys:[]});
   const words=['Create.','Schedule.','Publish.','Move','forward.'],portrait=ratio<1;
   const poses=portrait?[[50,62],[50,69],[50,76],[35,85],[65,85]]:[[27,66],[50,66],[74,66],[40,79],[58,79]];
@@ -72,16 +77,18 @@ export function buildStudioLogoDiamondMotion({bitmap,symbol,wordmark,brandName,a
     const wordWidth=Math.max(15,Math.min(90,(measure(text)+32)/layout*100+1));
     wedges.forEach((path,piece)=>{
       const begin=a+piece*.035,angle=piece*Math.PI/2+index*.25;
-      const item=add(`Words / ${text} / piece ${piece+1}`,begin,handoff,{type:'text',text,fontWeight:800,textAlign:'center',color:'#24133e',width:wordWidth,scale:heroScale,x:50,y:40,mask:mask(path)});
+      const item=add(`Words / ${text} / piece ${piece+1}`,begin,handoff,{type:'text',text,fontWeight:800,textAlign:'center',color:'#f8fafc',width:wordWidth,scale:heroScale,x:50,y:40,mask:mask(path)});
       key(item,'x',[[begin,50+Math.cos(angle)*18],[arrive-.2,50-Math.cos(angle)*1.5],[arrive,50],[handoff,50]]);
       key(item,'y',[[begin,40+Math.sin(angle)*23],[arrive-.2,40-Math.sin(angle)*2],[arrive,40],[handoff,40]]);
       key(item,'rotation',[[begin,(piece%2?1:-1)*(55+index*8)],[arrive-.2,(piece%2?-1:1)*5],[arrive,0],[handoff,0]]);
       key(item,'opacity',[[begin,0],[begin+.05,1],[handoff,1]]);wordIds.push(item.id);
     });
-    const whole=add(`Words / ${text} / continuous`,handoff,10,{type:'text',text,fontWeight:800,textAlign:'center',color:'#24133e',width:wordWidth,scale:finalScale,x,y});
+    const whole=add(`Words / ${text} / continuous`,handoff,10,{type:'text',text,fontWeight:800,textAlign:'center',color:'#e2e8f0',width:wordWidth,scale:finalScale,x,y});
     key(whole,'x',[[handoff,50],[a+1.1,x],[10,x]],soft);
     key(whole,'y',[[handoff,40],[a+1.1,y],[10,y]],soft);
-    key(whole,'scale',[[handoff,heroScale],[a+1.1,finalScale],[10,finalScale]],soft);wordIds.push(whole.id);
+    key(whole,'scale',[[handoff,heroScale],[a+1.1,finalScale],[7.5+index*.18,finalScale*1.04],[10,finalScale]],soft);
+    key(whole,'opacity',[[handoff,1],[6.6,.72],[7.4+index*.16,1],[10,.88]],soft);
+    wordIds.push(whole.id);
     groups.push({id:`word-${index}`,name:`Word / ${text}`,startTime:time(a),duration:time(10)-time(a),layerIds:wordIds,keys:[]});
   });
   return {format:'autopromote-graphics',version:1,name:`${brandName} / Diamond cascade`,width,height,duration:programmeDuration,layers,groups};

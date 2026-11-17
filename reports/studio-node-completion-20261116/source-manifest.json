@@ -1,0 +1,158 @@
+{
+  "activeWorkspace": "/home/tibule12/Projects/AutoPromte/AutoPromote-pro-studio-20261114",
+  "files": [
+    {
+      "path": "config/product-knowledge/source-lock.v1.json",
+      "sha256": "9e47a97e612bda893062650aeefc08a4e77ca4598d120f3abf0e57fcb177e956"
+    },
+    {
+      "path": "docs/STUDIO-COMPLETION-CONTRACT.md",
+      "sha256": "94d1987cf4cbcf808dc74fb96ce31adbf44b7a6d6b5aea26e68f3cb0be615636"
+    },
+    {
+      "path": "docs/STUDIO-PRODUCT-READINESS.md",
+      "sha256": "21f377d05f2ff2b7899e103ab4baf4ca7e87009c2b646c657eb7d1fd7a3f9c04"
+    },
+    {
+      "path": "frontend/src/components/StudioMotionFlow.css",
+      "sha256": "59b5fa170c9310d4b98ff115178c6bf813caf00325d291af2b38a856e265f1ae"
+    },
+    {
+      "path": "frontend/src/components/StudioNodeFlowPanel.js",
+      "sha256": "aac5780b9efa3c0c028789296f91e6aa9ec4d10a39321daa4eb7484679613ad2"
+    },
+    {
+      "path": "frontend/src/components/StudioProgrammeFrame.js",
+      "sha256": "8a84aa30c2e2087fe470791cebc9a2429b9f0d6cfffd4a8b3e49f552873bfc4a"
+    },
+    {
+      "path": "frontend/src/components/StudioSourceGradeViewer.js",
+      "sha256": "e9db73a291943dd182450995483020d49d241f5aaabbfdb05d379d397ed0f2ca"
+    },
+    {
+      "path": "frontend/src/components/VideoEditor.js",
+      "sha256": "dea8516e3518637f78cd4f81342796eb0403c21526ef36cd5955739bdaeda214"
+    },
+    {
+      "path": "frontend/src/components/ViralClipStudio.js",
+      "sha256": "fa75412169bb1df29abda10fa813e212b37e8ebfe7a7392396544b442db3b401"
+    },
+    {
+      "path": "frontend/src/components/__tests__/StudioMotionFlowWorkbench.test.js",
+      "sha256": "8054a2b906ccdbd80068858cfabf993b775fe202fd883197854cf09939dbcb9b"
+    },
+    {
+      "path": "frontend/src/components/__tests__/studioRenderCompiler.test.js",
+      "sha256": "3bcfabf316a11c42b3113e6b8972f868dafb47f3a94095152116683dc7c19eb8"
+    },
+    {
+      "path": "frontend/src/components/studioCompRigging.js",
+      "sha256": "f81ad92f15b8f946e8d3e982586f843fac5465b5f68b0005048de605abb0e808"
+    },
+    {
+      "path": "frontend/src/components/studioDirectorComposition.js",
+      "sha256": "042ff49b2708f75041942f20e7aa757eb61360e230c826faa55648bb54988504"
+    },
+    {
+      "path": "frontend/src/components/studioEditDecisions.js",
+      "sha256": "2a3c8a2639b8de0add29929cb125eb249e23f057137d6f83a6a28917a4cc282e"
+    },
+    {
+      "path": "frontend/src/components/studioMaskGeometry.js",
+      "sha256": "441e5df3d6c10e550619cca5068366cdd227c8af155b2112a006ec4f70ab25c0"
+    },
+    {
+      "path": "frontend/src/components/studioMediaEffects.js",
+      "sha256": "2373ea1bef6d4042a33b22cd98b2d82a91539e02b0a395e6ee8e791b378bf727"
+    },
+    {
+      "path": "frontend/src/components/studioNodeFlow.js",
+      "sha256": "814b778518c17ebc804084f2055be2de04c9e3efa3ff6d99b89e6c0fd61426b3"
+    },
+    {
+      "path": "frontend/src/components/studioProjectDocument.js",
+      "sha256": "d1e0db8f28e5eaa1808759cc844e847f99e3925f7dc8402ee824d5d7e562fc69"
+    },
+    {
+      "path": "frontend/src/components/studioRenderCompiler.js",
+      "sha256": "65b0d7f513c3ea2462fb7e55cf543834bb140b3cc9e2c394946647b461316029"
+    },
+    {
+      "path": "python_media_worker/main_media_server.py",
+      "sha256": "5d3c7c58b5d960aaea9f02bb9c25995e67675df2f1dfcb8bac91153533614b63"
+    },
+    {
+      "path": "python_media_worker/studio_composition.py",
+      "sha256": "2f06ff251dc8766153890bcc2ed5e848bd4be56d7ddb7932c8de45c7d7068c1a"
+    },
+    {
+      "path": "python_media_worker/studio_layer_cache.py",
+      "sha256": "ff0ee05a8eb81d8a9158594d61d3decad54424cfc9ba4a2cbd42ad1e82a80ae9"
+    },
+    {
+      "path": "python_media_worker/studio_layer_motion.py",
+      "sha256": "991799056e71acd5ca8f87c9ce74bcddb9464a098998f10399cceac1419fbf14"
+    },
+    {
+      "path": "test/e2e/studio-capability-matrix.json",
+      "sha256": "37e50314acabbe6fb57bac053e03cd3e8071692098c70c2c4bb07f76a7b07f51"
+    },
+    {
+      "path": "test/e2e/studio-combination-matrix.json",
+      "sha256": "ed12402c1c616daae186d2ac0a967ee10e420eb936fa5f237ce503763ed85d28"
+    },
+    {
+      "path": "test/e2e/studio-preview-render-parity.json",
+      "sha256": "b3b3469ec1a385e28635718f9e22d8677a2c428b7eabb3edb8624ac17daba284"
+    },
+    {
+      "path": "frontend/src/components/StudioNodeEffectSurface.js",
+      "sha256": "b79e6ccb2c3f29c4510c38bf572a02798f5d3c0e85ad1361c5afee3578c0738a"
+    },
+    {
+      "path": "frontend/src/components/StudioNodeSignalViewer.js",
+      "sha256": "6ebe8725718e9ec53eeacd87b64b832ed2c79399b84bf164eed1deaa3b31bdfd"
+    },
+    {
+      "path": "frontend/src/components/studioNodeEffects.js",
+      "sha256": "cb1788b37928f8c6f5616e65323a17cc09acc537bc6f0f1dad0c25001ac61f88"
+    },
+    {
+      "path": "frontend/src/components/studioNodeMask.js",
+      "sha256": "205ab8a07bb9109c234bd279bfa354c592f8b8b5e2d7a02336f8a2005f3f6cec"
+    },
+    {
+      "path": "frontend/src/components/__tests__/studioNodeEffects.test.js",
+      "sha256": "369313a14ad7953f2f196eaeb48e930868332e7c2b7af8320826a3d02f10e5fa"
+    },
+    {
+      "path": "frontend/src/components/__tests__/studioNodeFlowEdit.test.js",
+      "sha256": "67bf6df3573bf517f18d85c2f6d4f5188fb07100151fc9b27c4182c4d988852f"
+    },
+    {
+      "path": "frontend/src/components/__tests__/studioNodeFlowLifecycle.test.js",
+      "sha256": "f0f5b3d6094091a6801c8f0206e3f9f9ea387f2029f221c34adcd6e6f30a8674"
+    },
+    {
+      "path": "frontend/src/components/studioNodeFlowEdit.js",
+      "sha256": "354ff4576181a3b2f0a21844261774e5e2be3fbe8b3649112ebf83c8f7d8e315"
+    },
+    {
+      "path": "python_media_worker/studio_node_effects.py",
+      "sha256": "ab3f1778bd7e8a3a47c60e03f6880be91e883bf9e9d405cd70359de44544af60"
+    },
+    {
+      "path": "python_media_worker/studio_node_mask_grade.py",
+      "sha256": "56e8867d1450e25dc5137d0e334377981c5f7abbe87488fa291e57d696d44d70"
+    },
+    {
+      "path": "python_media_worker/test_studio_node_effects.py",
+      "sha256": "41bb1cc4318adaab329ce527950daae7af524f47ab00cd52f2b0263b3ec408f2"
+    },
+    {
+      "path": "python_media_worker/test_studio_node_mask_grade.py",
+      "sha256": "17e31aa6993bcc07379376e1a96c3ab9478b9e72444af307b0d7f1c10a094845"
+    }
+  ],
+  "priorDiffPreserved": "private/initial-diff.patch"
+}

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-11-10",
+  "updatedAt": "2026-11-17T08:57:17.485854+00:00",
   "assessment": "Retained October8 audit plus scoped October9 native NVIDIA podcast delivery/recovery evidence; no full conformance, production or creative promotion.",
   "readinessStates": [
     "UNIMPLEMENTED",
@@ -49,7 +49,13 @@
     "studioNodeFlow": "frontend/src/components/studioNodeFlow.js",
     "studioCompWorkbench": "frontend/src/components/StudioCompWorkbench.js",
     "studioNodeFlowUi": "frontend/src/components/StudioNodeFlowPanel.js",
-    "workerComposition": "python_media_worker/studio_composition.py"
+    "workerComposition": "python_media_worker/studio_composition.py",
+    "studioNodeEffects": "frontend/src/components/studioNodeEffects.js",
+    "studioNodeMask": "frontend/src/components/studioNodeMask.js",
+    "studioNodeSignalViewer": "frontend/src/components/StudioNodeSignalViewer.js",
+    "workerNodeEffects": "python_media_worker/studio_node_effects.py",
+    "workerNodeMaskGrade": "python_media_worker/studio_node_mask_grade.py",
+    "studioNodeTitleMask": "frontend/src/components/studioNodeTitleMask.js"
   },
   "policy": {
     "sameGraphRequired": true,
@@ -869,7 +875,7 @@
   ],
   "continuity": {
     "nextHighestPriorityTaskId": "S02",
-    "lastSessionKind": "NATIVE_RESTAURANT_FILM",
+    "lastSessionKind": "NODE_PROJECTED_TITLE_MASK_ROUTING_AND_RESTORE_ALL",
     "lastSessionRealCapabilityRuns": 2,
     "lastSessionGpuJobsStarted": 0,
     "exactBlockersSource": "reports/studio-restaurant-film-20261020/checkpoint.json",
@@ -879,7 +885,7 @@
       "result": "VALID",
       "capabilityQualification": "Targeted tests and actual native films/timelines qualify bounded slices. Full live picture/audio, ordinary-account runtime, product and creative/public gates remain open."
     },
-    "lastSessionEvidence": "reports/studio-restaurant-film-20261020/README.md",
+    "lastSessionEvidence": "reports/studio-node-routing-20261116/README.md",
     "lastSessionAutomatedChecks": {
       "nativeSourceCuts": 20,
       "uniqueSourceFiles": 3,
@@ -13042,7 +13048,7 @@
         "independentExactBackupRestore": true,
         "nativeGeometryPairsPassed": 4,
         "nativeGeometryMinIou": 0.9694525904203324,
-        "nativeGeometryMaxBoundaryP95Pixels": 1.0,
+        "nativeGeometryMaxBoundaryP95Pixels": 1,
         "freshSuccessfulNativeRenderJobs": 1
       },
       "nextSlice": "Continue S02 whole picture/processed sound and strict colour/edge/low-alpha comparisons, cut/fade phase and latency alongside S03 ownership; preserve prior projects, receipts and timers."
@@ -13139,7 +13145,7 @@
       "sampleFrames": 553811,
       "scalarSamples": 1107622,
       "sampleRate": 48000,
-      "maxAbsoluteError": 0.0,
+      "maxAbsoluteError": 0,
       "absoluteTolerance": 4e-05,
       "exactSourceHash": true,
       "actualNativeExportDecisions": true,
@@ -13703,7 +13709,7 @@
         "samples": 286,
         "decoded": 381,
         "dropped": 14,
-        "maximumSampledLayerCanvasClockDifferenceSeconds": 0.0,
+        "maximumSampledLayerCanvasClockDifferenceSeconds": 0,
         "completeCycle": true
       },
       {
@@ -13711,7 +13717,7 @@
         "samples": 215,
         "decoded": 380,
         "dropped": 77,
-        "maximumSampledLayerCanvasClockDifferenceSeconds": 0.0,
+        "maximumSampledLayerCanvasClockDifferenceSeconds": 0,
         "completeCycle": true
       }
     ],
@@ -17424,7 +17430,7 @@
                 "phase": "CURRENT_SOURCE_TRACKING",
                 "runtimeSeconds": 770.7149786980008,
                 "sourceFrame": 48,
-                "sourceSeconds": 2.0,
+                "sourceSeconds": 2,
                 "totalFrames": 5760,
                 "visualPass": false
               }
@@ -17602,7 +17608,7 @@
                 "phase": "CURRENT_SOURCE_TRACKING",
                 "runtimeSeconds": 582.458808288,
                 "sourceFrame": 24,
-                "sourceSeconds": 1.0,
+                "sourceSeconds": 1,
                 "totalFrames": 5760,
                 "visualPass": false
               }
@@ -18582,7 +18588,7 @@
                 "phase": "CURRENT_SOURCE_TRACKING",
                 "runtimeSeconds": 3407.0421225719983,
                 "sourceFrame": 72,
-                "sourceSeconds": 3.0,
+                "sourceSeconds": 3,
                 "totalFrames": 5760,
                 "visualPass": false
               },
@@ -18935,7 +18941,7 @@
                 "phase": "CURRENT_SOURCE_TRACKING",
                 "runtimeSeconds": 51369.270847821,
                 "sourceFrame": 912,
-                "sourceSeconds": 38.0,
+                "sourceSeconds": 38,
                 "totalFrames": 5760,
                 "visualPass": false
               },
@@ -18999,7 +19005,7 @@
                 "phase": "CURRENT_SOURCE_TRACKING",
                 "runtimeSeconds": 24158.067203596,
                 "sourceFrame": 432,
-                "sourceSeconds": 18.0,
+                "sourceSeconds": 18,
                 "totalFrames": 5760,
                 "visualPass": false
               },
@@ -19379,7 +19385,7 @@
                 "phase": "CURRENT_SOURCE_TRACKING",
                 "runtimeSeconds": 508.63369548399896,
                 "sourceFrame": 24,
-                "sourceSeconds": 1.0,
+                "sourceSeconds": 1,
                 "totalFrames": 5760,
                 "visualPass": false
               },
@@ -19985,7 +19991,7 @@
                         ],
                         "queryRowsPerChunk": 128,
                         "fullKeyContextRetained": true,
-                        "actualSourceProbeMaximumDifference": 0.0,
+                        "actualSourceProbeMaximumDifference": 0,
                         "actualSourceProbeQueries": 32
                       },
                       {
@@ -20003,7 +20009,7 @@
                         ],
                         "queryRowsPerChunk": 128,
                         "fullKeyContextRetained": true,
-                        "actualSourceProbeMaximumDifference": 0.0,
+                        "actualSourceProbeMaximumDifference": 0,
                         "actualSourceProbeQueries": 32
                       },
                       {
@@ -20021,7 +20027,7 @@
                         ],
                         "queryRowsPerChunk": 128,
                         "fullKeyContextRetained": true,
-                        "actualSourceProbeMaximumDifference": 0.0,
+                        "actualSourceProbeMaximumDifference": 0,
                         "actualSourceProbeQueries": 32
                       },
                       {
@@ -20039,7 +20045,7 @@
                         ],
                         "queryRowsPerChunk": 128,
                         "fullKeyContextRetained": true,
-                        "actualSourceProbeMaximumDifference": 0.0,
+                        "actualSourceProbeMaximumDifference": 0,
                         "actualSourceProbeQueries": 32
                       },
                       {
@@ -20057,7 +20063,7 @@
                         ],
                         "queryRowsPerChunk": 128,
                         "fullKeyContextRetained": true,
-                        "actualSourceProbeMaximumDifference": 0.0,
+                        "actualSourceProbeMaximumDifference": 0,
                         "actualSourceProbeQueries": 32
                       },
                       {
@@ -20075,7 +20081,7 @@
                         ],
                         "queryRowsPerChunk": 128,
                         "fullKeyContextRetained": true,
-                        "actualSourceProbeMaximumDifference": 0.0,
+                        "actualSourceProbeMaximumDifference": 0,
                         "actualSourceProbeQueries": 32
                       },
                       {
@@ -20093,7 +20099,7 @@
                         ],
                         "queryRowsPerChunk": 128,
                         "fullKeyContextRetained": true,
-                        "actualSourceProbeMaximumDifference": 0.0,
+                        "actualSourceProbeMaximumDifference": 0,
                         "actualSourceProbeQueries": 32
                       },
                       {
@@ -20147,7 +20153,7 @@
                         ],
                         "queryRowsPerChunk": 128,
                         "fullKeyContextRetained": true,
-                        "actualSourceProbeMaximumDifference": 0.0,
+                        "actualSourceProbeMaximumDifference": 0,
                         "actualSourceProbeQueries": 32
                       }
                     ],
@@ -21080,7 +21086,7 @@
     "independentRestoreEditUndoRedo": true,
     "completeLiveAndFinishedPlayback": true,
     "liveWallSeconds": 24.998,
-    "finishedWallSeconds": 24.0,
+    "finishedWallSeconds": 24,
     "liveCaptureFps": 10.258,
     "finishedCaptureFps": 11.418,
     "pausedPairs": 20,
@@ -22846,9 +22852,9 @@
         "originalMusic": true,
         "audio": {
           "source": "original video soundtrack",
-          "durationSeconds": 8.0,
+          "durationSeconds": 8,
           "bestLagSamplesAt16k": 0,
-          "bestLagMilliseconds": 0.0,
+          "bestLagMilliseconds": 0,
           "waveformCorrelation": 0.9988345026152202,
           "fittedGain": 0.9922363578239141,
           "humanListeningQualified": false,
@@ -22922,9 +22928,9 @@
         "originalMusic": true,
         "audio": {
           "source": "original video soundtrack",
-          "durationSeconds": 8.0,
+          "durationSeconds": 8,
           "bestLagSamplesAt16k": 0,
-          "bestLagMilliseconds": 0.0,
+          "bestLagMilliseconds": 0,
           "waveformCorrelation": 0.9953254961520749,
           "fittedGain": 0.8876621149989447,
           "humanListeningQualified": false,
@@ -22998,9 +23004,9 @@
         "originalMusic": true,
         "audio": {
           "source": "original video soundtrack",
-          "durationSeconds": 8.0,
+          "durationSeconds": 8,
           "bestLagSamplesAt16k": 0,
-          "bestLagMilliseconds": 0.0,
+          "bestLagMilliseconds": 0,
           "waveformCorrelation": 0.9988126518531109,
           "fittedGain": 0.9908272026258615,
           "humanListeningQualified": false,
@@ -23074,9 +23080,9 @@
         "originalMusic": true,
         "audio": {
           "source": "original video soundtrack",
-          "durationSeconds": 8.0,
+          "durationSeconds": 8,
           "bestLagSamplesAt16k": 0,
-          "bestLagMilliseconds": 0.0,
+          "bestLagMilliseconds": 0,
           "waveformCorrelation": 0.9991576256358959,
           "fittedGain": 0.9922566072238387,
           "humanListeningQualified": false,
@@ -23186,9 +23192,9 @@
         "originalMusic": true,
         "audio": {
           "source": "original video soundtrack",
-          "durationSeconds": 8.0,
+          "durationSeconds": 8,
           "bestLagSamplesAt16k": 0,
-          "bestLagMilliseconds": 0.0,
+          "bestLagMilliseconds": 0,
           "waveformCorrelation": 0.9988345026152202,
           "fittedGain": 0.9922363578239141,
           "humanListeningQualified": false,
@@ -23263,9 +23269,9 @@
         "originalMusic": true,
         "audio": {
           "source": "original video soundtrack",
-          "durationSeconds": 8.0,
+          "durationSeconds": 8,
           "bestLagSamplesAt16k": 0,
-          "bestLagMilliseconds": 0.0,
+          "bestLagMilliseconds": 0,
           "waveformCorrelation": 0.9953254961520749,
           "fittedGain": 0.8876621149989447,
           "humanListeningQualified": false,
@@ -23340,9 +23346,9 @@
         "originalMusic": true,
         "audio": {
           "source": "original video soundtrack",
-          "durationSeconds": 8.0,
+          "durationSeconds": 8,
           "bestLagSamplesAt16k": 0,
-          "bestLagMilliseconds": 0.0,
+          "bestLagMilliseconds": 0,
           "waveformCorrelation": 0.9988126518531109,
           "fittedGain": 0.9908272026258615,
           "humanListeningQualified": false,
@@ -23417,9 +23423,9 @@
         "originalMusic": true,
         "audio": {
           "source": "original video soundtrack",
-          "durationSeconds": 8.0,
+          "durationSeconds": 8,
           "bestLagSamplesAt16k": 0,
-          "bestLagMilliseconds": 0.0,
+          "bestLagMilliseconds": 0,
           "waveformCorrelation": 0.9991576256358959,
           "fittedGain": 0.9922566072238387,
           "humanListeningQualified": false,
@@ -23564,9 +23570,9 @@
     "strictPredictivePictureAudioParityQualified": false,
     "music": {
       "source": "original video soundtrack",
-      "durationSeconds": 8.0,
+      "durationSeconds": 8,
       "bestLagSamplesAt16k": 0,
-      "bestLagMilliseconds": 0.0,
+      "bestLagMilliseconds": 0,
       "waveformCorrelation": 0.9953254961520749,
       "fittedGain": 0.8876621149989447,
       "humanListeningQualified": false,
@@ -23676,9 +23682,9 @@
         },
         "music": {
           "source": "original video soundtrack",
-          "durationSeconds": 8.0,
+          "durationSeconds": 8,
           "bestLagSamplesAt16k": 0,
-          "bestLagMilliseconds": 0.0,
+          "bestLagMilliseconds": 0,
           "waveformCorrelation": 0.9990693111177505,
           "fittedGain": 0.9924191854518802,
           "humanListeningQualified": false,
@@ -23793,9 +23799,9 @@
         },
         "music": {
           "source": "original video soundtrack",
-          "durationSeconds": 8.0,
+          "durationSeconds": 8,
           "bestLagSamplesAt16k": 0,
-          "bestLagMilliseconds": 0.0,
+          "bestLagMilliseconds": 0,
           "waveformCorrelation": 0.9945482728010976,
           "fittedGain": 0.8852835046289337,
           "humanListeningQualified": false,
@@ -23912,7 +23918,7 @@
           "source": "original video soundtrack",
           "durationSeconds": 7.5,
           "bestLagSamplesAt16k": 0,
-          "bestLagMilliseconds": 0.0,
+          "bestLagMilliseconds": 0,
           "waveformCorrelation": 0.998701639032303,
           "fittedGain": 0.9924622144909307,
           "humanListeningQualified": false,
@@ -24027,9 +24033,9 @@
         },
         "music": {
           "source": "original video soundtrack",
-          "durationSeconds": 8.0,
+          "durationSeconds": 8,
           "bestLagSamplesAt16k": 0,
-          "bestLagMilliseconds": 0.0,
+          "bestLagMilliseconds": 0,
           "waveformCorrelation": 0.9991576256358959,
           "fittedGain": 0.9922566072238387,
           "humanListeningQualified": false,
@@ -25011,9 +25017,9 @@
     "strictPredictivePixelAudioParityQualified": false,
     "music": {
       "source": "original video soundtrack",
-      "durationSeconds": 6.0,
+      "durationSeconds": 6,
       "bestLagSamplesAt16k": 0,
-      "bestLagMilliseconds": 0.0,
+      "bestLagMilliseconds": 0,
       "waveformCorrelation": 0.9954259686223772,
       "fittedGain": 0.8932796268429615,
       "humanListeningQualified": false,
@@ -25281,7 +25287,7 @@
       "lagSamplesAt48k": 0,
       "gainDb": -4.505357015751828,
       "integratedLufs": -19.9,
-      "truePeakDbtp": -6.0,
+      "truePeakDbtp": -6,
       "decodedSamplesAtOrAboveFullScale": 0,
       "humanListeningQualified": false
     },
@@ -25430,7 +25436,7 @@
       "lagSamplesAt48k": 0,
       "gainDb": -4.505357015751828,
       "integratedLufs": -19.9,
-      "truePeakDbtp": -6.0,
+      "truePeakDbtp": -6,
       "decodedSamplesAtOrAboveFullScale": 0,
       "humanListeningQualified": false
     },
@@ -25597,8 +25603,8 @@
       ],
       "reflectionContactY": 70,
       "sameDeclaredReflectionAndFade": true,
-      "alphaMaxByteDifference": 14.0,
-      "overBlackMaxByteDifference": 14.0,
+      "alphaMaxByteDifference": 14,
+      "overBlackMaxByteDifference": 14,
       "overBlackMeanByteDifference": 0.4732476128472222,
       "strictLowAlphaPixelParity": false
     },
@@ -25666,7 +25672,7 @@
       "lagSamplesAt48k": 0,
       "gainDb": -4.505357015751828,
       "integratedLufs": -19.9,
-      "truePeakDbtp": -6.0,
+      "truePeakDbtp": -6,
       "decodedSamplesAtOrAboveFullScale": 0,
       "humanListeningQualified": false
     },
@@ -25868,5 +25874,425 @@
     "liveAdsEnabled": false,
     "productionDataMigration": false,
     "next": "Complete full editor, responsive, CI and deployed-origin verification."
+  },
+  "festivalReliability20261115": {
+    "report": "reports/studio-festival-reliability-20261115/README.md",
+    "scope": "Scoped LUT sampler/cache/strength and percentage/curve controls; bounded optional bitmap cache; bounded local request/no-dispatch recovery; colour-help routing. Successful native export/download/decode/finished playback. Smoothness and whole picture/audio parity remain unqualified.",
+    "readinessPromotion": false,
+    "gpuJobs": 0,
+    "paidProviderCalls": 0,
+    "productionWrites": 0,
+    "wholePreviewFinalParity": "UNVERIFIED",
+    "humanListening": "UNVERIFIED",
+    "creativeApproval": "UNVERIFIED",
+    "captionsIntegration": "Separate worktree; not qualified in this candidate.",
+    "nativeSnapshot": "AutoPromote-festival-readiness-20261115; later concurrent optical-effects changes in the active branch are outside that native proof."
+  },
+  "studioPreviewRepair20261115": {
+    "report": "reports/studio-preview-repair-20261115/README.md",
+    "scope": "All paused PNG sampler RGB profiles; phase-aware adaptive moving-preview scheduling and labelled resolution; bounded exact held-still reuse; existing canonical primary/LUT CPU fallback on detected software GL.",
+    "readinessPromotion": false,
+    "wholeMovingPictureAudioParity": "UNVERIFIED",
+    "priorTypographyFailures": "Retained",
+    "paidCalls": 0,
+    "productionWrites": 0
+  },
+  "viralClipPowerhouse20261115": {
+    "report": "reports/viral-clip-powerhouse-20261115/README.md",
+    "scope": "Find Viral Clips selection, settings, source preview and canonical Studio handoff/export; thumbnail tools removed",
+    "sourceRangeSeconds": [
+      0,
+      17.18
+    ],
+    "nativeSourceSeconds": 29.9,
+    "realUserFlow": true,
+    "sameFileCompletePlayback": true,
+    "nativeCacheReplay": "BLOCKED_BY_LOCAL_PILOT_SCOPE",
+    "wholeMovingPictureAudioParity": "UNVERIFIED",
+    "readinessPromotion": false,
+    "paidCalls": 0,
+    "productionWrites": 0
+  },
+  "studioBRollControls20261115": {
+    "report": "reports/studio-broll-controls-20261115/README.md",
+    "scope": "B-roll timing/source phase/end behaviour/layout/audio/presets/import/locks/canonical insert/persistence/export with actual slow authoring recording",
+    "nativeSourceOccurrences": 1,
+    "nativeVideoLayers": 5,
+    "nativeImageLayers": 1,
+    "nativePresetApplySave": 26,
+    "correctedNativeExportAndCompletePlayback": true,
+    "firstExport": "RETAINED_REJECTED_TIMING_DRAFT",
+    "wholeMovingPictureAudioParity": "UNVERIFIED",
+    "readinessPromotion": false,
+    "paidCalls": 0,
+    "productionWrites": 0
+  },
+  "studioNodeFlowAudit20261115": {
+    "report": "reports/studio-node-flow-audit-20261115/README.md",
+    "scope": "Core Node Flow lifecycle and desktop UI; experimental operators remain partial",
+    "frontendTests": 85,
+    "cpuCompositionMatteTests": 135,
+    "nativePaletteAuthoringActions": 9,
+    "nativeSmartRigAuthoringActions": 6,
+    "physicalPointerWiring": true,
+    "canonicalBypassRestore": true,
+    "nativeHistoryLocksColdReopen": true,
+    "nativeExportSeconds": 4,
+    "nativeExportAudio": true,
+    "nativeDownloadSha256": "0b7e445df42f67727cce4659e1dfb0d650f14c1c5ea8eec6f6c30fe178fa98c9",
+    "completeFinishedPlayback": true,
+    "remainingOperatorConsumers": [
+      "ChromaKeyer",
+      "optical/displacement",
+      "depth/rack-focus",
+      "arbitrary effect mask-source routing",
+      "generic node-isolated viewers"
+    ],
+    "wholeMovingPictureAudioParity": "UNVERIFIED",
+    "readinessPromotion": false,
+    "paidCalls": 0,
+    "productionWrites": 0
+  },
+  "studioNodeFlowCompletion20261116": {
+    "report": "reports/studio-node-completion-20261116/README.md",
+    "scope": "Shared media-node render consumers, actual native pictures, grade-mask routing and lifecycle/UI completion",
+    "frontendTests": 107,
+    "cpuPixelCompositionTests": 208,
+    "knowledgeHelpTests": 52,
+    "browserWorkerNodePixels": "MATCH_WITHIN_ONE_CHANNEL_VALUE",
+    "actualChromiumBooleanAlphaChecks": 4,
+    "invertedFeatherBrowserEdge": true,
+    "nativeSourceUpload": true,
+    "nativeKeyerBypassRestore": true,
+    "canonicalDepthDefocus": true,
+    "nativeGradeMaskSource": true,
+    "nativeBooleanAuthoring": true,
+    "nativeABPictures": true,
+    "nonOverlappingDefaultLayout": true,
+    "semanticColdReopen": true,
+    "nativeExportAndCompletePlayback": true,
+    "movieSeconds": 4,
+    "movieSize": [
+      720,
+      1280
+    ],
+    "movieFps": 24,
+    "audio": "stereo AAC",
+    "downloadSha256": "031c3df5b94fd9f91dceb9d8b52a0309acaecc43c1e480b3c9518be89820aabc",
+    "firstDraft": "RETAINED_SUPERSEDED_CANONICAL_DEPTH_OMISSION",
+    "localRenderOperations": 2,
+    "fullAuthFirestoreStorageCheckpoint": true,
+    "wholeMovingPictureAudioParity": "UNVERIFIED",
+    "readinessPromotion": false,
+    "paidCalls": 0,
+    "productionWrites": 0,
+    "boundaries": [
+      "ordinary media node pixels",
+      "no projected/non-pixel/service grade-mask source",
+      "2.5D scale and layer defocus; no physical camera simulation"
+    ]
+  },
+  "studioNodeRoutingFollowthrough20261116": {
+    "report": "reports/studio-node-routing-20261116/README.md",
+    "scope": "Projected and title grade masks, connected-mask inversion, common programme timestamps and canonical Restore All",
+    "frontendTests": 115,
+    "workerTests": 243,
+    "actualChromiumMaskPixelChecks": 4,
+    "nativeProjectedMediaMask": true,
+    "nativeTitleAdjustmentMask": true,
+    "nativeRestoreAllCanonicalValues": true,
+    "nativeInvalidPaletteRefusal": true,
+    "nativeUndoRedoColdReopen": true,
+    "nativeExportAndCompletePlayback": true,
+    "movieSeconds": 4,
+    "downloadSha256": "d8c620cacdf0316114daef74498d6174832ff2dcc8e3ec6bacaf8d25a7fdefb4",
+    "localRenderOperations": 1,
+    "paidCalls": 0,
+    "productionWrites": 0,
+    "wholeMovingPictureAudioParity": "UNVERIFIED",
+    "readinessPromotion": false,
+    "nativeConnectedMaskInversionSaved": true
+  },
+  "studioNodeConformance20261116": {
+    "report": "reports/studio-node-conformance-20261116/README.md",
+    "scope": "Native six-rig combination, fixed picture thresholds, original-phase audio and software preview throughput",
+    "frontendTests": 130,
+    "frontendSuites": 14,
+    "workerTests": 249,
+    "knowledgeHelpTests": 52,
+    "normalSignInAndBackupRestore": true,
+    "allSixSmartRigsTogether": true,
+    "overlayCount": 12,
+    "adjustmentLayerCount": 2,
+    "nativeExportsCompletedThisContinuation": 4,
+    "nativeExportFailedAndSettledThisContinuation": 1,
+    "moviesSeconds": 4,
+    "movieFrames": 96,
+    "decodedAudioMatchesPriorProgrammeExactly": true,
+    "maskRoutingStrictFinalPicturePairsPassed": 5,
+    "maskRoutingStrictFinalPicturePairsTotal": 6,
+    "maskRoutingLastFrameMae": 3.167193806111523,
+    "sixRigStrictPictureParity": "FAIL",
+    "automaticFrameRateExperiment": "REJECTED_AND_REMOVED",
+    "wholeMovingPictureAudioParity": "NOT_QUALIFIED",
+    "remainingBlockers": [
+      "Combined texture/grade/projected-layout colour and edge fidelity",
+      "Heavy software-device live playback throughput",
+      "Existing strict typography 13/16 failures and shared S02/S04/S03"
+    ],
+    "readinessPromotion": false,
+    "productionWrites": 0,
+    "paidCalls": 0,
+    "exportRunFinalFullEmulatorCheckpointComplete": false,
+    "allTerminalWorkerReceiptsRetained": true,
+    "lastObservedTerminalOperations": {
+      "succeeded": 5,
+      "failed": 1
+    },
+    "lastObservedHeldAndActiveOperations": 0,
+    "finalUiReplay": "Original full single-render checkpoint; no new render or financial reconstruction",
+    "creatorOverlayClockOnDecodedFrames": true,
+    "finalNativePlayback": {
+      "base": {
+        "wallMs": 4125.29999999702,
+        "programmeSeconds": 4,
+        "wallTimeRatio": 1.0313249999992549,
+        "decoded": 96,
+        "dropped": 1,
+        "droppedFraction": 0.010416666666666666,
+        "pictureCallbacks": 95,
+        "programmePaints": 96,
+        "maxLayerClockDistanceFrames": 0,
+        "stallOrErrorEvents": [],
+        "fixedCriteria": {
+          "maxWallTimeRatio": 1.15,
+          "maxDroppedFraction": 0.05,
+          "maxLayerClockDistanceFrames": 2
+        },
+        "fixedCriteriaPass": true,
+        "screenRecordingDisabled": true,
+        "semanticColdReopenPass": true
+      },
+      "heavy": {
+        "wallMs": 4219.0999999940395,
+        "programmeSeconds": 4,
+        "wallTimeRatio": 1.0547749999985099,
+        "decoded": 104,
+        "dropped": 30,
+        "droppedFraction": 0.28846153846153844,
+        "pictureCallbacks": 65,
+        "programmePaints": 66,
+        "maxLayerClockDistanceFrames": 0,
+        "stallOrErrorEvents": [],
+        "fixedCriteria": {
+          "maxWallTimeRatio": 1.15,
+          "maxDroppedFraction": 0.05,
+          "maxLayerClockDistanceFrames": 2
+        },
+        "fixedCriteriaPass": false,
+        "screenRecordingDisabled": true,
+        "semanticColdReopenPass": true
+      },
+      "heavy-node": {
+        "wallMs": 4332.10000000149,
+        "programmeSeconds": 4,
+        "wallTimeRatio": 1.0830250000003725,
+        "decoded": 98,
+        "dropped": 39,
+        "droppedFraction": 0.3979591836734694,
+        "pictureCallbacks": 35,
+        "programmePaints": 36,
+        "maxLayerClockDistanceFrames": 0,
+        "stallOrErrorEvents": [],
+        "fixedCriteria": {
+          "maxWallTimeRatio": 1.15,
+          "maxDroppedFraction": 0.05,
+          "maxLayerClockDistanceFrames": 2
+        },
+        "fixedCriteriaPass": false,
+        "screenRecordingDisabled": true,
+        "semanticColdReopenPass": true
+      }
+    },
+    "finalUiFullEmulatorCheckpointComplete": true,
+    "immutableFrontendBuild": "autopromote-node-conformance-build-20261116-r8"
+  },
+  "studioNodeFinalization20261116": {
+    "status": "PARTIAL \u2014 NOT FULLY FINISHED",
+    "fullyFinished": false,
+    "readinessPromotion": false,
+    "tests": {
+      "frontendFull": 181,
+      "frontendSuites": 18,
+      "subsequentViewerRegressions": 50,
+      "finalCornerPinRegressions": 42,
+      "worker": 325,
+      "workerAdditionalSubtests": 26
+    },
+    "finalSixRigFixedPicturePairsPassed": 2,
+    "finalSixRigFixedPicturePairsTotal": 6,
+    "pictureThresholdsUnchanged": {
+      "mae8bitMax": 3,
+      "p95ChannelErrorMax": 12
+    },
+    "finalNativePlayback": {
+      "base": {
+        "wallMs": 4069.6999999955297,
+        "programmeSeconds": 4,
+        "wallTimeRatio": 1.0174249999988825,
+        "decoded": 95,
+        "dropped": 1,
+        "droppedFraction": 0.010526315789473684,
+        "pictureCallbacks": 93,
+        "maxLayerClockDistanceFrames": 0,
+        "stallOrErrorEvents": [],
+        "fixedCriteria": {
+          "maxWallTimeRatio": 1.15,
+          "maxDroppedFraction": 0.05,
+          "maxLayerClockDistanceFrames": 2
+        },
+        "fixedPass": true
+      },
+      "heavy": {
+        "wallMs": 4151.60000000149,
+        "programmeSeconds": 4,
+        "wallTimeRatio": 1.0379000000003726,
+        "decoded": 96,
+        "dropped": 17,
+        "droppedFraction": 0.17708333333333334,
+        "pictureCallbacks": 79,
+        "maxLayerClockDistanceFrames": 0,
+        "stallOrErrorEvents": [],
+        "fixedCriteria": {
+          "maxWallTimeRatio": 1.15,
+          "maxDroppedFraction": 0.05,
+          "maxLayerClockDistanceFrames": 2
+        },
+        "fixedPass": false
+      },
+      "heavy-node": {
+        "wallMs": 4288.89999999851,
+        "programmeSeconds": 4,
+        "wallTimeRatio": 1.0722249999996274,
+        "decoded": 112,
+        "dropped": 21,
+        "droppedFraction": 0.1875,
+        "pictureCallbacks": 78,
+        "maxLayerClockDistanceFrames": 6.841871999999999,
+        "stallOrErrorEvents": [],
+        "fixedCriteria": {
+          "maxWallTimeRatio": 1.15,
+          "maxDroppedFraction": 0.05,
+          "maxLayerClockDistanceFrames": 2
+        },
+        "fixedPass": false
+      }
+    },
+    "remainingFailures": [
+      "Heavy six-rig pre-final picture tolerance: four of six fixed pairs fail MAE",
+      "Heavy software playback misses dropped-frame and dual-viewer layer-clock limits"
+    ],
+    "formalStudioCountsUnchanged": {
+      "FUNCTIONAL": 17,
+      "PARTIAL": 9,
+      "BROKEN": 1,
+      "UNIMPLEMENTED": 2,
+      "PRO-READY": 0,
+      "PRODUCTION-READY": 0
+    },
+    "productionWrites": 0,
+    "paidProviderCalls": 0,
+    "creditGrants": 0,
+    "deliveryDirectory": "/home/tibule12/Videos/Studio Node Flow - Final Checks - 2026-11-16",
+    "report": "reports/studio-node-finalization-20261116/README.md",
+    "verification": "reports/studio-node-finalization-20261116/verification.json",
+    "nativeMovieSha256": "1a5ae8a1eae3880287b749ea3d38973d24d99b80d3815147b37d0195b8491154",
+    "normalNativeApprovalDownload": true,
+    "allSixSmartRigs": true,
+    "overlayCount": 12,
+    "adjustmentLayerCount": 2,
+    "wholeMovingPictureAudioParity": "NOT_QUALIFIED",
+    "nativeControlRecoveryVerified": true,
+    "sourceCheckpointHistoryPreserved": true
+  },
+  "studioNodeRepair20261116": {
+    "status": "VALIDATED_LOCAL_REPAIR",
+    "scope": "Previously failing six-rig picture and heavy native playback gates",
+    "report": "reports/studio-node-repair-20261116/README.md",
+    "verification": "reports/studio-node-repair-20261116/verification.json",
+    "picturePassed": 6,
+    "pictureTotal": 6,
+    "unchangedPictureLimits": {
+      "mae8bitMax": 3,
+      "p95ChannelErrorMax": 12
+    },
+    "nativePlaybackProfilesPassed": [
+      "base",
+      "six-rig",
+      "six-rig-dual-viewer"
+    ],
+    "unchangedPlaybackLimits": {
+      "wallRatioMax": 1.15,
+      "dropFractionMax": 0.05,
+      "layerLagFramesMax": 2
+    },
+    "actualNativeControlAndColdReopenChecks": true,
+    "freshNativeSubmittedExport": false,
+    "correctedCanonicalDiagnosticWithSound": true,
+    "priorSevenNativeSucceededOperationsRetained": true,
+    "readinessPromotion": false,
+    "creditGrants": false,
+    "productionWrites": false,
+    "paidProviderCalls": false,
+    "deployment": false,
+    "remainingNodeRepairGates": [],
+    "sharedBacklogStillSeparate": [
+      "S02 wider preview/material/audio parity",
+      "S04 motion/glyph depth",
+      "S03 ownership"
+    ],
+    "concurrentLogoAnd3DWorkPreserved": true
+  },
+  "studioSourceAccess20261117": {
+    "status": "VERIFIED_LOCAL_FIX",
+    "report": "reports/studio-source-access-20261117/README.md",
+    "verification": "reports/studio-source-access-20261117/verification.json",
+    "ownedSourceExpiryRecovered": true,
+    "failedUploadedPreviewAccessRetries": 1,
+    "noSecondByteTransferForAccessRecovery": true,
+    "lateSelectionProtected": true,
+    "realBrowserTransportCases": 2,
+    "realSignedInStudioCases": 2,
+    "strictBuildPass": true,
+    "welcomeChecks": 8,
+    "unsafeHeaderWarningsAfterFix": 0,
+    "partialUploadAcknowledgementsPreserved": true,
+    "productionWrites": false,
+    "productionBucketCorsChanged": false,
+    "readinessPromotion": false,
+    "paidProviderCalls": false
+  },
+  "prActions53020261117": {
+    "date": "2026-11-17",
+    "report": "reports/pr-actions-530-20261117/README.md",
+    "status": "LOCAL_REGRESSIONS_PASS_REMOTE_RECHECK_REQUIRED",
+    "canonicalReplayRegenerated": true,
+    "readOnlyWorkerScratchFixed": true,
+    "compositeKeyerUsesCanonicalMediaParameters": true,
+    "legacyKeyerValuesRetained": true,
+    "workerContractCases": 162,
+    "replayCases": 27,
+    "scannerCases": 9,
+    "selectedStudioCases": 15,
+    "keyerAndNodeCases": 32,
+    "mockApiRealMediaPlaywrightJourneyPass": true,
+    "strictFrontendBuildPass": true,
+    "readinessPromotion": false,
+    "next": "Verify fresh PR checks; retain shared S02/S04/S03 and typography backlog.",
+    "replayLockedDependenciesEnforced": true,
+    "historyRestorationCommitGuard": true,
+    "lateSilenceAnalysisInvalidated": true,
+    "orderedMediaHistoryCases": 3,
+    "unitStepBudgetMinutes": 30
   }
 }

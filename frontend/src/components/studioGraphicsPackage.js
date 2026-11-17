@@ -4,7 +4,7 @@ import { sanitizeLogoSvg } from './motion/sanitizeLogoSvg';
 import { GROUP_KIND, GROUP_TRANSFORM, GROUP_BOUNDS, studioGroupTree, validateStudioGroupKeyframes, validateStudioGroupComposite } from './studioGroups';
 import { validateSpatialCurve } from './studioAutomation';
 import { validateStudioTextAnimation } from './studioTextAnimator';
-import { validateStudioVectorShape, studioVectorSvg } from './studioVectorShape';
+import { validateStudioVectorShape, validateStudioVectorTrim, studioVectorSvg } from './studioVectorShape';
 
 const number = (value, low, high, label) => {
   if (typeof value !== 'number' || !Number.isFinite(value) || value < low || value > high)
@@ -69,12 +69,18 @@ export function validateStudioGraphicsPackage(input, { duration, aspect, existin
   };
   const cleanLayers = input.layers.map(layer => {
     only(layer, ['id', 'name', 'type', 'text', 'svg', 'startTime', 'duration', 'x', 'y', 'scale', 'rotation', 'opacity',
-      'width', 'height', 'fontWeight', 'color', 'textAlign', 'strokeWidth', 'strokeColor', 'mask', 'keys', 'textAnimator', 'textProgress', 'vectorShape'], 'layer');
-    identity(layer, layer.textAnimator ? { ...bounds, textProgress: [0, 100] } : bounds);
+      'width', 'height', 'fontWeight', 'color', 'textAlign', 'strokeWidth', 'strokeColor', 'mask', 'keys',
+      'textAnimator', 'textProgress', 'vectorShape', 'strokeStart', 'strokeEnd', 'strokeOffset'], 'layer');
+    identity(layer, {
+      ...bounds,
+      ...(layer.textAnimator ? { textProgress: [0, 100] } : {}),
+      ...(layer.vectorShape ? { strokeStart: [0, 100], strokeEnd: [0, 100], strokeOffset: [-1000, 1000] } : {}),
+    });
     for (const [property, limits] of Object.entries(bounds)) number(layer[property], ...limits, property);
     number(layer.width, 1, 100, 'Layer width');
     if (layer.mask !== undefined) validateStudioGroupComposite({ mask: layer.mask });
     if (layer.type === 'text') {
+      validateStudioVectorTrim(layer, layer.keys || []);
       validateStudioTextAnimation(layer, layer.keys || []);
       text(layer.text, 500, 'title text'); color(layer.color);
       if (layer.strokeColor !== undefined) color(layer.strokeColor);
@@ -90,10 +96,11 @@ export function validateStudioGraphicsPackage(input, { duration, aspect, existin
       if (layer.svg !== undefined) throw Error('Choose editable vector geometry or an SVG, not both.');
       validateStudioVectorShape(layer.vectorShape);
     }
+    validateStudioVectorTrim(layer, layer.keys || []);
     if (['text', 'color', 'fontWeight', 'textAlign', 'strokeWidth', 'strokeColor', 'textAnimator', 'textProgress'].some(field => layer[field] !== undefined))
       throw Error('Artwork styling belongs in its SVG, not in title fields.');
     number(layer.height, 1, 100, 'Artwork height');
-    const svg = layer.vectorShape ? studioVectorSvg(layer.vectorShape) : sanitizeLogoSvg(layer.svg);
+    const svg = layer.vectorShape ? studioVectorSvg(layer.vectorShape, layer) : sanitizeLogoSvg(layer.svg);
     artworkBytes += svg.length;
     return layer.vectorShape ? { ...layer } : { ...layer, svg };
   });
