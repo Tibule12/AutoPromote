@@ -55,7 +55,13 @@ const sendUploadRequest = ({ uploadUrl, body, contentRange, contentType, signal,
     };
     xhr.onload = () => {
       signal?.removeEventListener("abort", abort);
-      resolve({ status: xhr.status, range: xhr.getResponseHeader("Range") || "" });
+      // Range is only meaningful for an incomplete upload. Browsers log an
+      // unsafe-header error even for a successful response when a missing
+      // header is not exposed by CORS. Read only the exposed header list;
+      // never guess an acknowledged byte offset when Range is unavailable.
+      const headers = xhr.status === 308 ? xhr.getAllResponseHeaders() : "";
+      const range = headers.match(/^range:\s*([^\r\n]*)/im)?.[1]?.trim() || "";
+      resolve({ status: xhr.status, range });
     };
     xhr.onerror = () => {
       signal?.removeEventListener("abort", abort);

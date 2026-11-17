@@ -1,4 +1,5 @@
 import { applySafeMediaSource } from "../utils/security";
+import { studioSourcePlaybackUrl } from './studioSourceAccess';
 import React, { useEffect, useState } from "react";
 
 const thumbnailCache = new Map();
@@ -77,6 +78,7 @@ export default function TimelineSourceFilmstrip({ frames = [], playing = false }
       for (const [id, src, time] of requested) {
         if (controller.signal.aborted) return;
         if (values[id]) continue;
+        if (!studioSourcePlaybackUrl(src)) continue;
         if (failedSources.has(src)) continue;
         try {
           if (source !== src) {

@@ -1,4 +1,5 @@
 import { applySafeMediaSource, getSafeMediaSource } from '../utils/security';
+import { studioSourcePlaybackUrl } from './studioSourceAccess';
 import { mapStudioContinuousSeconds } from './studioTime';
 import { SEQUENCE_SAMPLER, ORIGINAL_SEQUENCE_SAMPLER, sequencePictureWindow } from './studioSequencePictureClock';
 
@@ -304,7 +305,7 @@ export function watchStudioClipBoundary(video, { end, enabled, onBoundary }) {
 // removes its pending seek listener; it must not clear a decoder just promoted
 // to the active programme. Source ownership/identity remains the original URL.
 export function primeStudioSourceVideo(video, { url, start }) {
-  const source = getSafeMediaSource(url);
+  const source = getSafeMediaSource(studioSourcePlaybackUrl(url));
   if (!video || !source) return () => {};
   const seek = () => {
     if (video.src !== source || video.readyState < 1) return;

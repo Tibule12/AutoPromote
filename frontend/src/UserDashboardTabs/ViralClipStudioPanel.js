@@ -8,10 +8,29 @@ import { getMediaAuthToken } from "../utils/mediaAuth";
 import { API_BASE_URL } from "../config";
 import { listViralStudioProjects, saveViralStudioProject } from "../components/viralStudioProjectStore";
 import { readStudioProjectBackup } from "../components/studioProjectBackup";
+import { studioSourceLeaseRefreshDelay, studioSourceStoragePath } from '../components/studioSourceAccess';
 
 const resolveSourceUrl = source => {
   if (typeof source === "string") return sanitizeUrl(source);
   return source?.url ? sanitizeUrl(source.url) : "";
+};
+
+const renewSourceRead = async source => {
+  const storagePath = studioSourceStoragePath(source);
+  if (!storagePath) throw new Error('This video has no saved source to refresh. Choose the original file again.');
+  const token = await getMediaAuthToken();
+  if (!token) throw new Error('Sign in to refresh access to this video.');
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 15000);
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/media/studio-assets/resolve`, {
+      method:'POST', headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
+      body:JSON.stringify({storagePath}), signal:controller.signal,
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.url) throw new Error(result.message || 'Could not refresh access to this video.');
+    return {...(typeof source === 'object' ? source : {}),url:result.url,storagePath,isRemote:true};
+  } finally { clearTimeout(timer); }
 };
 
 const createStudioSource = (sourceFile, clip, sourceDuration, moments = null) => {
@@ -81,6 +100,7 @@ function ViralClipStudioPanel({
   const { canUseFeature, loading: subscriptionLoading } = useSubscription();
   const uploadRequestRef = useRef(0);
   const retrySourceRef = useRef(null);
+  const sourceReadRetryRef = useRef(null);
   const [sourceFile, setSourceFile] = useState(null);
   const [selectedClip, setSelectedClip] = useState(initialClip);
   const [sourceDuration, setSourceDuration] = useState(0);
@@ -176,6 +196,7 @@ function ViralClipStudioPanel({
     retrySourceRef.current = incomingSource;
     const requestId = uploadRequestRef.current + 1;
     uploadRequestRef.current = requestId;
+    sourceReadRetryRef.current = null;
     setStudioSource(null);
     setResumedProject(null);
     setSourceDuration(0);
@@ -200,8 +221,18 @@ function ViralClipStudioPanel({
         setSourceError("The selected source has no usable video URL.");
         return;
       }
-      setSourceFile(incomingSource);
       setSourceState("validating");
+      try {
+        let prepared = incomingSource;
+        const storagePath = studioSourceStoragePath(incomingSource);
+        if (storagePath && studioSourceLeaseRefreshDelay(remoteUrl) === 0) {
+          prepared = await renewSourceRead(incomingSource);
+        }
+        if (uploadRequestRef.current === requestId) setSourceFile(prepared);
+      } catch (error) {
+        if (uploadRequestRef.current !== requestId) return;
+        setSourceState('failed'); setSourceError(error.message || 'Could not load this saved video.');
+      }
       return;
     }
 
@@ -228,7 +259,7 @@ function ViralClipStudioPanel({
         throw new Error("The upload completed without a usable video URL.");
       }
 
-      setSourceFile({
+      let prepared = {
         name: incomingName,
         fileName: incomingName,
         type: incomingSource.type || "video/mp4",
@@ -237,7 +268,10 @@ function ViralClipStudioPanel({
         storagePath: uploadResult.storagePath || null,
         ...(uploadResult.contentHash || uploadResult.sha256 ? {contentHash: uploadResult.contentHash || uploadResult.sha256} : {}),
         isRemote: true,
-      });
+      };
+      if (studioSourceLeaseRefreshDelay(prepared.url) === 0) prepared = await renewSourceRead(prepared);
+      if (uploadRequestRef.current !== requestId) return;
+      setSourceFile(prepared);
       setSourceUploadProgress(100);
       setSourceState("validating");
     } catch (error) {
@@ -246,6 +280,27 @@ function ViralClipStudioPanel({
       setSourceError(error?.message || "The source video upload failed.");
     }
   }, []);
+
+  const recoverSourceRead = async failedUrl => {
+    const requestId = uploadRequestRef.current;
+    if (resolveSourceUrl(sourceFile) !== failedUrl) return;
+    const storagePath = studioSourceStoragePath(sourceFile);
+    if (!storagePath || sourceReadRetryRef.current === requestId) {
+      setSourceState('failed');
+      setSourceError('The uploaded video could not be loaded. Retry access or choose another video.');
+      return;
+    }
+    sourceReadRetryRef.current = requestId;
+    setSourceFile(null); setSourceState('validating');
+    try {
+      const prepared = await renewSourceRead(sourceFile);
+      if (uploadRequestRef.current !== requestId) return;
+      setSourceFile(prepared);
+    } catch (error) {
+      if (uploadRequestRef.current !== requestId) return;
+      setSourceState('failed'); setSourceError(error.message || 'Could not refresh access to this video.');
+    }
+  };
 
   useEffect(() => {
     setSelectedClip(initialClip || null);
@@ -449,10 +504,7 @@ function ViralClipStudioPanel({
                   setSourceError("");
                   setSourceState("ready");
                 }}
-                onError={() => {
-                  setSourceState("failed");
-                  setSourceError("The uploaded video could not be played. Choose a valid MP4 or MOV file and retry.");
-                }}
+                onError={() => void recoverSourceRead(previewUrl)}
               />
             </div>
 

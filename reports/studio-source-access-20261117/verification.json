@@ -1,0 +1,133 @@
+{
+  "status": "VERIFIED_LOCAL_FIX",
+  "date": "2026-11-17",
+  "sourceUrlExpiryReportedByOwner": "2026-11-06T17:39:32Z",
+  "credentialsRetainedInReport": false,
+  "scope": [
+    "owned source lease recovery",
+    "resumable upload acknowledgement headers"
+  ],
+  "tests": {
+    "client": 83,
+    "nativeComponentRegressions": 3,
+    "realBrowserTransportCases": 2,
+    "realSignedInStudioCases": 2,
+    "welcomeViewportChecks": 8
+  },
+  "strictBuild": {
+    "code": 0,
+    "build": "/tmp/autopromote-source-access-build-20261117-r2"
+  },
+  "beforeUnsafeHeaderWarnings": 4,
+  "afterUnsafeHeaderWarnings": 0,
+  "transportExactBytes": true,
+  "nativeCases": [
+    {
+      "name": "fresh-upload",
+      "normalSignIn": true,
+      "normalFileChooserUpload": true,
+      "normalStudioOpen": true,
+      "transfers": [
+        "/api/media/multicam/uploads/start"
+      ],
+      "media": {
+        "readyState": 4,
+        "duration": 16,
+        "error": null
+      },
+      "newRender": false,
+      "noExpiredStorageRequest": true,
+      "noUnsafeHeaderWarning": true
+    },
+    {
+      "name": "expired-project",
+      "normalOwnedBackupRestore": true,
+      "expiredSourceLeaseRecovered": true,
+      "ownedPathPreserved": true,
+      "storageReadRequests": 3,
+      "media": {
+        "readyState": 1,
+        "error": null
+      },
+      "newRender": false,
+      "noExpiredStorageRequest": true,
+      "noUnsafeHeaderWarning": true
+    }
+  ],
+  "renewalAuthorizationUnchanged": true,
+  "uploadedBytesNotRetransferredForReadRecovery": true,
+  "boundedReadRetry": 1,
+  "lateRefreshCannotOverwriteNewSource": true,
+  "productionWrites": false,
+  "paidProviderCalls": false,
+  "newNativeExports": 0,
+  "readinessPromotion": false,
+  "evidenceDirectory": "reports/studio-source-access-20261117/private",
+  "checkpoint": {
+    "fullAuthFirestoreStorage": true,
+    "originalMetadataPreserved": true,
+    "workerRequestsAndReceipts": true,
+    "terminalSucceededOperations": 7,
+    "terminalFailedOperations": 0,
+    "walletBalances": [
+      0,
+      1
+    ],
+    "allWalletsZeroHeldAndActive": true,
+    "unrelatedEmptyWalletUnchanged": true,
+    "financialWrites": false
+  },
+  "shutdown": {
+    "allOwnedServicesStopped": true,
+    "fullCheckpointBeforeStop": true,
+    "terminalSucceededOperations": 7,
+    "terminalFailedOperations": 0,
+    "unchangedWalletBalances": [
+      0,
+      1
+    ],
+    "zeroHeldAndActive": true,
+    "financialWrites": false,
+    "states": [
+      {
+        "pid": 16818,
+        "running": false
+      },
+      {
+        "pid": 19421,
+        "running": false
+      },
+      {
+        "pid": 16885,
+        "running": false
+      },
+      {
+        "pid": 17010,
+        "running": false
+      },
+      {
+        "pid": 18717,
+        "running": false
+      }
+    ]
+  },
+  "signedInHelpPassed": true,
+  "contractValidation": {
+    "valid": true,
+    "capabilities": 29,
+    "counts": {
+      "UNIMPLEMENTED": 2,
+      "BROKEN": 1,
+      "PARTIAL": 9,
+      "FUNCTIONAL": 17,
+      "PRO-READY": 0,
+      "PRODUCTION-READY": 0
+    },
+    "combinations": 13,
+    "parityChecks": 17,
+    "presentFixtures": 4,
+    "newCapabilityExecutions": 0,
+    "note": "Record validation only; no browser, provider or GPU execution."
+  },
+  "completeRetainedClient": "reports/studio-source-access-20261117/private/client-r2"
+}

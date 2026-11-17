@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "reviewer": "Antigravity",
-  "reason": "Add WebGL2/GLSL 3D Studio VFX, Inter Black typography, Logo Motion VFX, and AI Director cinema_3d v5 pipeline on top of Node Flow release 1b68d5c0; unchanged public readiness, pricing, or capability governance.",
-  "reviewed_at": "2026-11-16T19:47:17.755Z",
+  "reviewer": "Codex",
+  "reason": "Final upload/access continuity review: readiness and matrices record the expired6November source lease investigation, safe exposed-header308 acknowledgements, one bounded preview access retry with no retransferred bytes, native upload/open and expired-project recovery.83 client and3 native component regressions, real browser byte-integrity/warning reproduction, strict build and paired welcome checks pass. Claims remain local/bounded; no production CORS, bucket, billing, provider or readiness promotion. Wider S02/S04/S03 and prior Node evidence remain unchanged.",
+  "reviewed_at": "2026-11-17T08:08:40.578Z",
   "catalog_sha256": "7b68131cbe28f8039be77ae00619b27e584df361e0d7a2ca4a26a54e70f4a783",
   "sources": [
     {
@@ -51,7 +51,7 @@
     },
     {
       "path": "frontend/src/UserDashboardTabs/ViralClipStudioPanel.js",
-      "sha256": "cfe5fda802fe0d4133dd4129e867284f0d7831d69b03f76639b44ca2a7340e52"
+      "sha256": "115d04d5c131e489b3bffa70ecc30a563c3da11a731a1d5ce27e9ff36638b91d"
     },
     {
       "path": "frontend/src/UserDashboard_full.js",
@@ -199,7 +199,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "0a2f7c34c45750d9e998b79c2a3580e820de656fdb1965bf50f876c1862b53d9"
+      "sha256": "8f6da786932e723f3133b70d37772480a57bc2aaeee373e2bf8eb4baebd87061"
     },
     {
       "path": "frontend/src/components/ViralScanner.js",
@@ -355,7 +355,7 @@
     },
     {
       "path": "frontend/src/components/studioSourcePreview.js",
-      "sha256": "746151d3e2cf210dc77937c934c8bcdf8633515641d93cc4fc43509b7e286b59"
+      "sha256": "e40b6af67e2f4d8d8dd8c5bbd8348f7558179fdf936d3ae65fafbe037ed1f5a5"
     },
     {
       "path": "frontend/src/components/studioSubjectCircle.js",
@@ -723,11 +723,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "9e25b70f0d40c7260a45a54ef260bee29dd070809d4269f6d14a8992aff4a4ca"
+      "sha256": "d511be1ab398dd5c02f28a88d3ca10e4ab7bdb29f8468d137f56f69459de85d7"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "97fb83e7f57f97cfa5bbda0b692d480d8b8c694778644b556b7ec19b52602ac0"
+      "sha256": "e20d9374ac18db10e97959e0b70b5b89c166d03f6a2caf48d5dcd9639afa95ab"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

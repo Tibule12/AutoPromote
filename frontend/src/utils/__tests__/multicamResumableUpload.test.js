@@ -72,6 +72,9 @@ describe("multicam resumable upload helpers", () => {
       getResponseHeader(name) {
         return name === "Range" ? this.range : "";
       }
+      getAllResponseHeaders() {
+        return this.range ? `Range: ${this.range}\r\n` : "";
+      }
       send(body) {
         if (body) {
           this.status = 200;
@@ -151,5 +154,43 @@ describe("multicam resumable upload helpers", () => {
       global.fetch = originalFetch;
       global.XMLHttpRequest = originalXhr;
     }
+  });
+
+  it('reads only exposed incomplete-upload headers and resumes a partially acknowledged chunk', async () => {
+    const originalFetch=global.fetch, originalXhr=global.XMLHttpRequest;
+    const sent=[], unsafeRead=jest.fn(()=>{throw Error('Unsafe header read');});
+    let chunks=0;
+    global.fetch=jest.fn().mockResolvedValueOnce({ok:true,json:async()=>({
+      uploadUrl:'https://upload.example/session',storagePath:'studio/sources/user/source.mp4',
+      downloadToken:'download-token',chunkSizeBytes:256*1024,
+    })}).mockResolvedValueOnce({ok:true,json:async()=>({url:'https://storage.example/source.mp4'})});
+    class ExposedHeaderXhr {
+      constructor(){this.upload={};this.headers={};}
+      open(){}
+      setRequestHeader(name,value){this.headers[name]=value;}
+      getResponseHeader(...args){return unsafeRead(...args);}
+      getAllResponseHeaders(){
+        if(this.status!==308)throw Error('Completed uploads have no acknowledgement header');
+        return this.range?`content-type: text/plain\r\nrange: ${this.range}\r\n`:'';
+      }
+      send(body){
+        sent.push({range:this.headers['Content-Range'],size:body?.size||0});
+        if(!body){this.status=308;this.range='';}
+        else if(++chunks===1){this.status=308;this.range='bytes=0-131071';}
+        else {this.status=200;}
+        this.onload();
+      }
+    }
+    global.XMLHttpRequest=ExposedHeaderXhr;
+    try {
+      const file=new File([new Uint8Array(300000)],'source.mp4',{type:'video/mp4'});
+      await uploadMulticamSourceResumable({apiBaseUrl:'https://api.example',token:'token',file,purpose:'studio_source'});
+      expect(unsafeRead).not.toHaveBeenCalled();
+      expect(sent).toEqual([
+        {range:'bytes */300000',size:0},
+        {range:'bytes 0-262143/300000',size:262144},
+        {range:'bytes 131072-299999/300000',size:168928},
+      ]);
+    } finally {global.fetch=originalFetch;global.XMLHttpRequest=originalXhr;}
   });
 });

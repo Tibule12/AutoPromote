@@ -141,6 +141,66 @@ describe("ViralClipStudioPanel", () => {
     } finally { listing.mockRestore(); global.fetch = originalFetch; }
   });
 
+  test('refreshes an expired incoming source before attaching a preview decoder',async()=>{
+    const originalFetch=global.fetch;
+    const path='studio/sources/user/legacy.mp4';
+    const expired=`https://storage.googleapis.com/bucket/${path}?GoogleAccessId=owner&Signature=test&Expires=1`;
+    let finish;
+    global.fetch=jest.fn(()=>new Promise(resolve=>{finish=resolve;}));
+    try {
+      const {container}=render(<ViralClipStudioPanel initialFile={{url:expired,name:'legacy.mp4'}} />);
+      await waitFor(()=>expect(global.fetch).toHaveBeenCalledTimes(1));
+      expect(container.querySelector('video')).toBeNull();
+      expect(uploadSourceFileViaBackend).not.toHaveBeenCalled();
+      expect(JSON.parse(global.fetch.mock.calls[0][1].body)).toEqual({storagePath:path});
+      finish({ok:true,json:async()=>({url:'https://storage.example/fresh.mp4'})});
+      await waitFor(()=>expect(container.querySelector('video')).toHaveAttribute('src','https://storage.example/fresh.mp4'));
+    } finally {global.fetch=originalFetch;}
+  });
+
+  test('renews a stale upload response without transferring the video again',async()=>{
+    const originalFetch=global.fetch;
+    const path='studio/sources/user/uploaded.mp4';
+    uploadSourceFileViaBackend.mockResolvedValue({url:`https://storage.googleapis.com/bucket/${path}?GoogleAccessId=owner&Signature=test&Expires=1`,storagePath:path});
+    global.fetch=jest.fn().mockResolvedValue({ok:true,json:async()=>({url:'https://storage.example/fresh-upload.mp4'})});
+    try {
+      const {container}=render(<ViralClipStudioPanel initialFile={new File(['video'],'uploaded.mp4',{type:'video/mp4'})} />);
+      await waitFor(()=>expect(container.querySelector('video')).toHaveAttribute('src','https://storage.example/fresh-upload.mp4'));
+      expect(uploadSourceFileViaBackend).toHaveBeenCalledTimes(1);
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+    } finally {global.fetch=originalFetch;}
+  });
+
+  test('retries failed source access once and reports failure without a second upload',async()=>{
+    const originalFetch=global.fetch;
+    global.fetch=jest.fn().mockResolvedValue({ok:true,json:async()=>({url:'https://storage.example/recovered.mp4'})});
+    try {
+      const {container}=render(<ViralClipStudioPanel initialFile={new File(['video'],'source.mp4',{type:'video/mp4'})} />);
+      await waitFor(()=>expect(container.querySelector('video')).not.toBeNull());
+      fireEvent.error(container.querySelector('video'));
+      await waitFor(()=>expect(container.querySelector('video')).toHaveAttribute('src','https://storage.example/recovered.mp4'));
+      fireEvent.error(container.querySelector('video'));
+      await waitFor(()=>expect(screen.getByRole('alert')).toHaveTextContent('could not be loaded'));
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(uploadSourceFileViaBackend).toHaveBeenCalledTimes(1);
+    } finally {global.fetch=originalFetch;}
+  });
+
+  test('a late source refresh cannot replace a newer upload',async()=>{
+    const originalFetch=global.fetch;
+    let finish;
+    global.fetch=jest.fn(()=>new Promise(resolve=>{finish=resolve;}));
+    try {
+      const expired='https://storage.googleapis.com/bucket/studio/sources/user/old.mp4?GoogleAccessId=owner&Signature=test&Expires=1';
+      const view=render(<ViralClipStudioPanel initialFile={{url:expired,name:'old.mp4'}} />);
+      await waitFor(()=>expect(global.fetch).toHaveBeenCalledTimes(1));
+      view.rerender(<ViralClipStudioPanel initialFile={new File(['video'],'new.mp4',{type:'video/mp4'})} />);
+      await waitFor(()=>expect(view.container.querySelector('video')).toHaveAttribute('src','https://storage.example/source.mp4'));
+      finish({ok:true,json:async()=>({url:'https://storage.example/old-refreshed.mp4'})});
+      await waitFor(()=>expect(view.container.querySelector('video')).toHaveAttribute('src','https://storage.example/source.mp4'));
+    } finally {global.fetch=originalFetch;}
+  });
+
   test("uploads and validates the source before opening the original Studio controller", async () => {
     const source = new File(["video"], "source.mp4", { type: "video/mp4" });
     const clip = { id: "clip-1", start: 4, end: 24, score: 91 };

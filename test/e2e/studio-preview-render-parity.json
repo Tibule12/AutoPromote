@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-11-16T17:28:56.656479+00:00",
+  "updatedAt": "2026-11-17T08:06:58.102887+00:00",
   "assessment": "Retained October8 audit plus scoped October9 native NVIDIA podcast delivery/recovery evidence; no full conformance, production or creative promotion.",
   "readinessStates": [
     "UNIMPLEMENTED",
@@ -26252,5 +26252,24 @@
       "S03 ownership"
     ],
     "concurrentLogoAnd3DWorkPreserved": true
+  },
+  "studioSourceAccess20261117": {
+    "status": "VERIFIED_LOCAL_FIX",
+    "report": "reports/studio-source-access-20261117/README.md",
+    "verification": "reports/studio-source-access-20261117/verification.json",
+    "ownedSourceExpiryRecovered": true,
+    "failedUploadedPreviewAccessRetries": 1,
+    "noSecondByteTransferForAccessRecovery": true,
+    "lateSelectionProtected": true,
+    "realBrowserTransportCases": 2,
+    "realSignedInStudioCases": 2,
+    "strictBuildPass": true,
+    "welcomeChecks": 8,
+    "unsafeHeaderWarningsAfterFix": 0,
+    "partialUploadAcknowledgementsPreserved": true,
+    "productionWrites": false,
+    "productionBucketCorsChanged": false,
+    "readinessPromotion": false,
+    "paidProviderCalls": false
   }
 }

@@ -36,9 +36,9 @@ import {
   validateStudioTrackMattes,
 } from "./studioCompRigging";
 import {
-  applySafeMediaSource,
+  applySafeMediaSource as applyValidatedMediaSource,
   createSecureId,
-  getSafeMediaSource,
+  getSafeMediaSource as getValidatedMediaSource,
   sanitizeUrl,
 } from "../utils/security";
 import { API_BASE_URL, API_ENDPOINTS } from "../config";
@@ -65,6 +65,7 @@ import StudioGroupPreview from "./StudioGroupPreview";
 import { hasSoftStudioMask, studioMaskPointProperty, parseStudioMaskPolygon, studioMaskPolygonPath, validateStudioMaskAnimation } from "./studioMaskGeometry";
 import { primeStudioSourceVideo, watchStudioProgrammeFrames, studioPresentedSourceTime, watchStudioClipBoundary, watchStudioAudioClock, studioJoinFade, mapStudioSourceAccess, isStudioSourceClockCurrent, pausedStudioMappedFrameRequest, pausedStudioFrameKey, studioPausedSampleTime, studioFinishedFrameSeekTime } from "./studioSourcePreview";
 import { loadStudioSourceFrame } from "./studioSourceFrameClient";
+import { studioSourceLeaseRefreshDelay, studioSourceStoragePath, studioSourcePlaybackUrl } from './studioSourceAccess';
 import { studioPreviewScale, studioNextPreviewPaint, studioPreviewFrameDue, studioNextPreviewFrame } from './studioPreviewBudget';
 import { musicBufferNeedsResync, musicBufferPosition, prepareStudioMusicPlayback, studioMusicBufferIdentity, studioPictureRateCorrection } from "./studioMusicBufferClock";
 import { loadStudioVoiceBus, scheduleStudioPreparedDuck, studioDialogueBusRequest } from './studioPreparedVoiceBus';
@@ -287,6 +288,9 @@ import "./StudioControls.css";
 import "./studioFeatureControls.css";
 import TimelineSourceFilmstrip from "./TimelineSourceFilmstrip";
 import StudioControlMenu from "./StudioControlMenu";
+
+const getSafeMediaSource = value => getValidatedMediaSource(studioSourcePlaybackUrl(value));
+const applySafeMediaSource = (element,value) => applyValidatedMediaSource(element,getSafeMediaSource(value));
 
 const Studio3DCanvas = React.lazy(() => import("./threeD/Studio3DCanvas"));
 
@@ -3289,6 +3293,8 @@ const ViralClipStudio = ({
   const activeProjectIdRef = useRef(projectId);
   const directorProposalRequestRef = useRef(incomingDirectorProposalRequest);
   const attemptedSourceRefreshRef = useRef(new Set());
+  const sourceRefreshInFlightRef = useRef(new Map());
+  const sourceRefreshCallbackRef = useRef(null);
   activeProjectIdRef.current = projectId;
   directorProposalRequestRef.current = incomingDirectorProposalRequest;
   const quickMusicFileInputRef = useRef(null);
@@ -3934,8 +3940,11 @@ const ViralClipStudio = ({
     };
   };
 
-  const refreshSourceUrlByPath = async (storagePath, expectedProjectId = activeProjectIdRef.current) => {
+  const refreshSourceUrlByPath = (storagePath, expectedProjectId = activeProjectIdRef.current) => {
     if (!storagePath) return false;
+    const key = `${expectedProjectId}:${storagePath}`;
+    if (sourceRefreshInFlightRef.current.has(key)) return sourceRefreshInFlightRef.current.get(key);
+    const operation = (async () => {
     try {
       const token = await getMediaAuthToken();
       if (!token) throw new Error("Sign in to reopen saved videos.");
@@ -3990,7 +3999,28 @@ const ViralClipStudio = ({
       setMediaImportMessage("Some saved videos could not be reopened. Use Refresh link on an affected video.");
       return false;
     }
+    })().finally(() => sourceRefreshInFlightRef.current.delete(key));
+    sourceRefreshInFlightRef.current.set(key, operation);
+    return operation;
   };
+
+  sourceRefreshCallbackRef.current = refreshSourceUrlByPath;
+  const sourceLeaseSignature = JSON.stringify([
+    ...projectMedia, ...timeline, ...overlays, ...speakerStackSources,
+    ...voiceovers, ...soundEffects, musicTrack, extractedAudio,
+  ].filter(Boolean).map(item => [studioSourceStoragePath(item),item.src || item.url])
+    .filter(([path,url]) => path && url));
+  useEffect(() => {
+    const leases = new Map();
+    for (const [path,url] of JSON.parse(sourceLeaseSignature)) {
+      const delay = studioSourceLeaseRefreshDelay(url);
+      if (delay !== null) leases.set(path, Math.min(leases.get(path) ?? Infinity,delay));
+    }
+    const timers = [...leases].map(([path,delay]) => setTimeout(() => {
+      void sourceRefreshCallbackRef.current(path,projectId);
+    },delay));
+    return () => timers.forEach(clearTimeout);
+  },[projectId,sourceLeaseSignature]);
 
   const refreshStoredSourceUrls = async snapshot => {
     const expectedProjectId = activeProjectIdRef.current;
@@ -19391,7 +19421,7 @@ const ViralClipStudio = ({
                                   if (video) filmAnglePreviewRefsRef.current.set(asset.id, video);
                                   else filmAnglePreviewRefsRef.current.delete(asset.id);
                                 }}
-                                src={asset.url}
+                                src={getSafeMediaSource(asset.url) || undefined}
                                 controls
                                 playsInline
                                 preload="metadata"

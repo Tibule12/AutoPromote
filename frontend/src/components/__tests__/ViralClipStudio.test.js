@@ -1177,6 +1177,21 @@ describe("ViralClipStudio timeline sequencing", () => {
       window.requestAnimationFrame = previousRaf; window.cancelAnimationFrame = previousCancelRaf; }
   });
 
+  test('an expired source is renewed once without attaching it to programme decoders',async()=>{
+    const path='studio/sources/test-user/legacy.mp4';
+    const expired=`https://storage.googleapis.com/bucket/${path}?GoogleAccessId=owner&Signature=test&Expires=1`;
+    let finish;
+    global.fetch.mockImplementation(url=>String(url).endsWith('/studio-assets/resolve')
+      ?new Promise(resolve=>{finish=resolve;}):Promise.resolve({ok:true,json:async()=>({})}));
+    const view=render(<ViralClipStudio videoUrl={expired} sourceStoragePath={path}
+      clips={[{id:'source',start:0,end:4,duration:4}]} onSave={jest.fn()} onCancel={jest.fn()} />);
+    await waitFor(()=>expect(finish).toBeDefined());
+    expect([...view.container.querySelectorAll('video')].some(v=>v.getAttribute('src')===expired)).toBe(false);
+    expect(global.fetch.mock.calls.filter(([url])=>String(url).endsWith('/studio-assets/resolve'))).toHaveLength(1);
+    await act(async()=>{finish({ok:true,json:async()=>({url:'https://example.com/renewed.mp4'})});});
+    await waitFor(()=>expect(screen.getByTestId('studio-after-video')).toHaveAttribute('src','https://example.com/renewed.mp4'));
+  });
+
   test("duplicate refresh completes in its own project and Pause stays usable while links load", async () => {
     let finishOriginal;
     const originalRefresh = new Promise(resolve => { finishOriginal = resolve; });
