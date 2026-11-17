@@ -754,7 +754,8 @@ async function processMediaTransformTaskDoc(doc) {
   }
 }
 
-async function processNextMediaTransformTask() {
+async function processNextMediaTransformTask({ background = false } = {}) {
+  if (background && !await require("./backgroundWorkService").hasTasks("media_transform")) return null;
   const snap = await db
     .collection("promotion_tasks")
     .where("type", "==", "media_transform")

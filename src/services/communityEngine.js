@@ -649,7 +649,8 @@ async function purchaseCredits(userId, packageId) {
  * Checks for tasks that have been available for too long with no human takers.
  * Triggers the Bot Execution Service to fulfill them.
  */
-async function processStaleBounties() {
+async function processStaleBounties({ background = false } = {}) {
+  if (background && !await require("./backgroundWorkService").hasCampaigns()) return { processed: 0, message: "No due campaigns." };
   const db = require("../firebaseAdmin").db;
   const botService = require("./botExecutionService");
   let processedCount = 0;

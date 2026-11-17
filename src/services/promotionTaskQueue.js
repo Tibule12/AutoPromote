@@ -280,7 +280,8 @@ async function enqueueYouTubeUploadTask({
   return { id: ref.id, ...task };
 }
 
-async function processNextYouTubeTask() {
+async function processNextYouTubeTask({ background = false } = {}) {
+  if (background && !await require("./backgroundWorkService").hasTasks("youtube_upload")) return null;
   // Fetch one queued task (simple FIFO by createdAt)
   let snapshot;
   try {
@@ -964,7 +965,8 @@ async function enqueueMediaTransform({ contentId, uid, meta, sourceUrl }) {
   return task;
 }
 
-async function processNextPlatformTask() {
+async function processNextPlatformTask({ background = false } = {}) {
+  if (background && !await require("./backgroundWorkService").hasTasks("platform_post")) return null;
   // Fetch small batch of queued tasks then pick highest priority dynamically (velocity-aware)
   let snapshot;
   try {

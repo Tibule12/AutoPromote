@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "PR530 final unit failure: reviewed history restoration commit guard and invalidation of late silence analysis; ordered media/Make It Hit sequence now passes. Existing help promises Undo/Redo behavior, with no new controls or readiness expansion. Recorded measured full-suite CI budget and retained all tests.",
-  "reviewed_at": "2026-11-17T17:46:29.151Z",
-  "catalog_sha256": "8ecac9fb6d0e30ccfa3e88cfb5b972cc13cdab737f21bd871b10e73489de6e1b",
+  "reason": "Reviewed demand-only queue listeners, shared authenticated activity expiry, immediate throttled refresh, bounded latency pruning, API/worker leases and projected owner-scoped YouTube refresh. Added source evidence and clarified offline scheduling; no Studio or production readiness promotion.",
+  "reviewed_at": "2026-11-17T19:01:16.229Z",
+  "catalog_sha256": "61762382c3606b67e563094fa72a90cbdcad6f9a1461d6e1863ebdf5b8434187",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -615,7 +615,7 @@
     },
     {
       "path": "src/promotionService.js",
-      "sha256": "20974df7dd3ed6d79c5391a49d0e4d8d226c69d661b4d4427bc28b2ca034c701"
+      "sha256": "b9bdb1621e970c5d0967ff41b84192ae4cb854aba8a134184912dceb4ea37dde"
     },
     {
       "path": "src/routes/platformRoutes.js",
@@ -627,11 +627,19 @@
     },
     {
       "path": "src/server.js",
-      "sha256": "ed3e97b17276b85f8090d9b8f01edc6b202446663832f198bfc125c6cb0050c7"
+      "sha256": "6bf80a1a834c5e8ca96275a81698154fe5aa8253ec7ef282ba584be28f45f622"
     },
     {
       "path": "src/services/__tests__/publishedVideoRetention.test.js",
       "sha256": "54d4000593443e4f5dbb9a5411f2c1c1de7706cb2bf7429bf6dc9f37ca64ac53"
+    },
+    {
+      "path": "src/services/backgroundActivityService.js",
+      "sha256": "2164c9b32536bf0fe963cbbc65700c1a3c7560ce51e92f84387b7cab5b2d3657"
+    },
+    {
+      "path": "src/services/backgroundWorkService.js",
+      "sha256": "38b6ffec86d90cee9277d21dc13438c9b8e18c46446ee6a06f5dceb1e69f9438"
     },
     {
       "path": "src/services/billingService.js",
@@ -663,7 +671,7 @@
     },
     {
       "path": "src/services/promotionTaskQueue.js",
-      "sha256": "6b371a403f061c078aff5f88e3cd61e5b9cb255b86b5e8cdbb30a3857e4cafb9"
+      "sha256": "a20c4ac88c6cb181c5e33ec0b47e28938bf0f384d6e4237432fb446b696b45be"
     },
     {
       "path": "src/services/publishedVideoRetention.js",
@@ -728,6 +736,10 @@
     {
       "path": "test/e2e/studio-preview-render-parity.json",
       "sha256": "dc3fee9607be15ff1876993dce9796c81247a9506e48e376edb640601a24fce5"
+    },
+    {
+      "path": "worker.js",
+      "sha256": "afe0b6cb877e6f8938ee09ec4bfce2e94e40bb3a195ce163f67361b117afe985"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."
