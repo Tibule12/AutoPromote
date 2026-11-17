@@ -505,7 +505,7 @@ export default function StudioNodeFlow({
 
   useEffect(() => {
     const onKeyDown = e => {
-      if (!rootRef.current?.contains(e.target)) return;
+      if (!(e.target instanceof Node) || !rootRef.current?.contains(e.target)) return;
       if (e.key === "Escape" && quickSearchOpen) {
         e.preventDefault();
         setQuickSearchOpen(false);

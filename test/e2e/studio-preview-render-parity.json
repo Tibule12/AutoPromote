@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-11-17T08:06:58.102887+00:00",
+  "updatedAt": "2026-11-17T08:57:17.485854+00:00",
   "assessment": "Retained October8 audit plus scoped October9 native NVIDIA podcast delivery/recovery evidence; no full conformance, production or creative promotion.",
   "readinessStates": [
     "UNIMPLEMENTED",
@@ -26271,5 +26271,23 @@
     "productionBucketCorsChanged": false,
     "readinessPromotion": false,
     "paidProviderCalls": false
+  },
+  "prActions53020261117": {
+    "date": "2026-11-17",
+    "report": "reports/pr-actions-530-20261117/README.md",
+    "status": "LOCAL_REGRESSIONS_PASS_REMOTE_RECHECK_REQUIRED",
+    "canonicalReplayRegenerated": true,
+    "readOnlyWorkerScratchFixed": true,
+    "compositeKeyerUsesCanonicalMediaParameters": true,
+    "legacyKeyerValuesRetained": true,
+    "workerContractCases": 162,
+    "replayCases": 27,
+    "scannerCases": 9,
+    "selectedStudioCases": 15,
+    "keyerAndNodeCases": 32,
+    "mockApiRealMediaPlaywrightJourneyPass": true,
+    "strictFrontendBuildPass": true,
+    "readinessPromotion": false,
+    "next": "Verify fresh PR checks; retain shared S02/S04/S03 and typography backlog."
   }
 }

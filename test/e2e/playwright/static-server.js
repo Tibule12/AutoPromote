@@ -3,6 +3,9 @@ const path = require("path");
 const app = express();
 const port = process.env.STATIC_SERVER_PORT || 5000;
 const host = "127.0.0.1";
+const buildDirectory = process.env.PLAYWRIGHT_BUILD_DIR
+  ? path.resolve(process.env.PLAYWRIGHT_BUILD_DIR)
+  : path.join(__dirname, "../../../frontend/build");
 // Avoid starting multiple servers when tests `require` this module repeatedly
 let __staticServerReady;
 if (global.__STATIC_SERVER_STARTED) {
@@ -24,14 +27,14 @@ if (global.__STATIC_SERVER_STARTED) {
   });
   app.use(limiter);
 
-  app.use(express.static(path.join(__dirname, "../../../frontend/build")));
+  app.use(express.static(buildDirectory));
   // Serve e2e fixtures so we can load standalone HTML test pages
   app.use(express.static(path.join(__dirname, "../../fixtures")));
   // Serve Playwright test assets used by E2E tests
   app.use("/test-assets", express.static(path.join(__dirname, "test-assets")));
   // Fallback to index.html for SPA
   app.get(/(.*)/, (req, res) => {
-    res.sendFile(path.join(__dirname, "../../../frontend/build/index.html"));
+    res.sendFile(path.join(buildDirectory, "index.html"));
   });
 
   __staticServerReady = new Promise((resolve, reject) => {

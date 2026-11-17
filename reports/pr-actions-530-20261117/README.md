@@ -1,0 +1,14 @@
+# PR #530 Actions repair — 17 November 2026
+
+The five failed checks on commit `807368250112cdfaf43039f20b78a83718489e88` had four causes:
+
+- Backend and frontend build verification rejected the stale generated Director replay kernel. Regenerated it from the current canonical compiler and verified exact reproducibility.
+- The read-only media-worker image test lacked its approved `/workspace/tmp` directory. The verifier now supplies a writable ephemeral scratch mount; the real 24fps ingest test creates its scratch parent. Source code stays read-only and ingest authorization is unchanged.
+- Unit fixtures lacked the current native canvas APIs and preference-aware scanner cache identity. Fixtures now exercise processed pixels and real Web Crypto. Node Flow also ignores keyboard events whose target is not a DOM node, preserving ordinary global history shortcuts.
+- The browser journey attempted chroma keying on a text title, which the canonical processor correctly refuses. Composite now explains and disables that unsupported action. Its percentage controls write canonical key parameters; legacy colour/tolerance/spill projects remain readable. The journey keys an actual video layer and verifies a painted, error-free native canvas.
+
+Local verification passes: 162 worker contract cases, 27 replay/review cases, 9 scanner cases, 15 previously failing Studio cases, 32 keyer/Node cases, strict frontend build, deterministic replay check and the complete previously failing Playwright feature journey. The latter uses real playable FFmpeg fixtures against an isolated build with API routes supplied by the test; it does not qualify a signed-in production flow. CI fixture selection now ignores incidental owner Downloads/Videos, and an explicit build-directory option keeps the active local App untouched.
+
+Full fresh GitHub results are authoritative at [PR #530](https://github.com/Tibule12/AutoPromote/pull/530/checks). Local Docker verification covers the read-only checkout/writable scratch mount; the complete production image build is left to that existing GitHub gate. No tests or security checks were disabled, and no main merge or production deployment occurred.
+
+Formal Studio readiness remains 17 FUNCTIONAL / 9 PARTIAL / 1 BROKEN / 2 UNIMPLEMENTED / 0 PRO-READY / 0 PRODUCTION-READY. Typography 13/16 and the shared S02/S04/S03 backlog remain separate. See [verification.json](verification.json); raw logs and browser artifacts are retained privately.

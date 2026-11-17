@@ -21,7 +21,9 @@ class StudioColourContractTests(unittest.TestCase):
     def test_authored_24fps_sequence_retains_original_source_pictures(self):
         # Exercise ordinary ingest as well as sequence rendering. A CFR30
         # analysis proxy before this pass can shift the original 24fps cuts.
-        with tempfile.TemporaryDirectory(prefix='studio-source-clock-', dir=Path(worker.__file__).resolve().parent.parent/'tmp') as temp, ExitStack() as patches:
+        scratch_root = Path(worker.__file__).resolve().parent.parent/'tmp'
+        scratch_root.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix='studio-source-clock-', dir=scratch_root) as temp, ExitStack() as patches:
             folder = Path(temp)
             source, final = folder/'source.mp4', folder/'final.mp4'
             frames = np.zeros((24,90,160,3), np.uint8)

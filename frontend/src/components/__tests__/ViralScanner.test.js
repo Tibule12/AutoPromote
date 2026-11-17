@@ -2,6 +2,9 @@ import React from "react";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import ViralScanner from "../ViralScanner";
 import { uploadTemporaryVideoSource } from "../../utils/sourceUpload";
+import { clipSelectionSettings } from '../../utils/clipSelectionSettings';
+import { webcrypto } from 'crypto';
+import { TextEncoder } from 'util';
 
 jest.mock("../../utils/clipWorkflowAnalytics", () => ({
   trackClipWorkflowEvent: jest.fn(() => Promise.resolve(true)),
@@ -22,6 +25,15 @@ jest.mock("../../firebaseClient", () => ({
 }));
 
 describe("ViralScanner guided clip selection", () => {
+  const originalCrypto = globalThis.crypto, originalEncoder = globalThis.TextEncoder;
+  beforeAll(() => {
+    Object.defineProperty(globalThis,'crypto',{configurable:true,value:webcrypto});
+    globalThis.TextEncoder = TextEncoder;
+  });
+  afterAll(() => {
+    Object.defineProperty(globalThis,'crypto',{configurable:true,value:originalCrypto});
+    globalThis.TextEncoder = originalEncoder;
+  });
   const originalFetch = global.fetch;
   const originalPlay = window.HTMLMediaElement.prototype.play;
   const originalPause = window.HTMLMediaElement.prototype.pause;
@@ -482,6 +494,7 @@ describe("ViralScanner guided clip selection", () => {
         results: [
           {
             id: "cached-1",
+            selectionSettings: clipSelectionSettings(),
             start: 8,
             end: 20,
             duration: 12,

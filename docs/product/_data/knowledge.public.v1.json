@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.57",
+  "knowledge_version": "1.0.58",
   "product_version": "1.2.0",
   "release_channel": "development",
   "updated_at": "2026-11-15",
@@ -935,7 +935,7 @@
         "Choose a supported group blend mode to combine the assembled result with its sibling backdrop. Ordinary child blends stay inside the isolated parent group. Reset group mask clears only its mask; graphics locks prevent changes.",
         "Reset transform removes that group’s keys and restores its neutral base. Remove group transform removes its keys and promotes children without baking. Undo/redo and save/reopen apply; inspect the exact final export.",
         "Select the group clip bar to move all child clips and keys, or trim its In/Out visibility. Composite provides exact timing values, Fit to children and reversible Delete group and layers. Source and child-track locks protect the same operation.",
-        "Open Studio → Composite and add effects to the selected owned video clip.",
+        "Open Studio → Composite and add effects to the selected owned video clip. For Chroma key / green screen, select an image or video layer as Composite target. Text layers explain that keying is unavailable. Enable Key a color, choose its colour and adjust Tolerance (2–100%) and Spill removal (0–100%). These controls share the native Node processor; inspect moving edges and the exported result. Older saved percentage settings remain readable.",
         "Leave Background choice on Keep original background, or upload a PNG, JPEG or WebP image and choose it for replacement.",
         "Select the person using Subject point on the paused source. Select optional furniture, microphones or other objects separately. Extra objects are empty by default; people selection is not automatic detection of everyone.",
         "Create and review this source’s subject mask through the available model workflow, or explicitly reuse a valid mask belonging to the same source and range.",
@@ -1017,7 +1017,7 @@
         }
       ],
       "aliases": [],
-      "updated_at": "2026-10-14",
+      "updated_at": "2026-11-17",
       "product_version": "1.2.0"
     },
     {

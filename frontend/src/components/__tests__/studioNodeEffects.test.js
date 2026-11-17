@@ -26,4 +26,11 @@ it('depth changes shared preview pose and requires canonical export baking',()=>
 it.each([{zDepth:Infinity},{dofBlur:-1},{chromaKey:{mode:'bad'}},{opticalFx:{halation:NaN}},{displacementWarp:{frequency:0}}])('rejects malformed node values %p',value=>expect(()=>spec(value)).toThrow());
 it('neutral effects preserve every byte',()=>{const d=pixels([[5,88,170,17],[245,2,91,255]]),before=[...d];applyStudioNodeEffects(d,2,1,spec({}));expect([...d]).toEqual(before);});
 
+it('retains legacy Composite key colours/percentages and gives authored Node values precedence',()=>{
+ expect(spec({chromaKey:{enabled:true,color:'#00ff00',tolerance:42,spill:55}}).key)
+  .toMatchObject({color:'#00ff00',similarity:.42,spill:.55});
+ expect(spec({chromaKey:{enabled:true,color:'#00ff00',tolerance:42,spill:55,keyColor:'#0000ff',similarity:.2,spillSuppression:0}}).key)
+  .toMatchObject({color:'#0000ff',similarity:.2,spill:0});
+});
+
 it('reparenting and unparenting a depth plane preserve its world scale',()=>{const rig={id:'rig',type:'text',isNullRig:true,scale:2,zDepth:20},layer={id:'i',type:'image',zDepth:40,scale:.5};const world=evaluateWorldLayerPose(layer,[rig,layer]);const parented=reparentStudioLayerPreservingWorldPose(layer,'rig',[rig,layer]);expect(evaluateWorldLayerPose(parented,[rig,parented]).scale).toBeCloseTo(world.scale,3);const detached=reparentStudioLayerPreservingWorldPose(parented,null,[rig,parented]);expect(evaluateWorldLayerPose(detached,[rig,detached]).scale).toBeCloseTo(world.scale,3);});

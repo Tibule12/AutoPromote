@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.57 • 2026-11-15
+Development documentation • product 1.2.0 • knowledge 1.0.58 • 2026-11-15
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -586,7 +586,7 @@ Combines ordinary layers and animated graphic groups with shared order, static m
 9. Choose a supported group blend mode to combine the assembled result with its sibling backdrop. Ordinary child blends stay inside the isolated parent group. Reset group mask clears only its mask; graphics locks prevent changes.
 10. Reset transform removes that group’s keys and restores its neutral base. Remove group transform removes its keys and promotes children without baking. Undo/redo and save/reopen apply; inspect the exact final export.
 11. Select the group clip bar to move all child clips and keys, or trim its In/Out visibility. Composite provides exact timing values, Fit to children and reversible Delete group and layers. Source and child-track locks protect the same operation.
-12. Open Studio → Composite and add effects to the selected owned video clip.
+12. Open Studio → Composite and add effects to the selected owned video clip. For Chroma key / green screen, select an image or video layer as Composite target. Text layers explain that keying is unavailable. Enable Key a color, choose its colour and adjust Tolerance (2–100%) and Spill removal (0–100%). These controls share the native Node processor; inspect moving edges and the exported result. Older saved percentage settings remain readable.
 13. Leave Background choice on Keep original background, or upload a PNG, JPEG or WebP image and choose it for replacement.
 14. Select the person using Subject point on the paused source. Select optional furniture, microphones or other objects separately. Extra objects are empty by default; people selection is not automatic detection of everyone.
 15. Create and review this source’s subject mask through the available model workflow, or explicitly reuse a valid mask belonging to the same source and range.

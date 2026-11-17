@@ -91,7 +91,8 @@ const defaultContextBRollSource = path.join(
   "Screencasts",
   "Screencast from 2026-08-22 13-21-50.webm"
 );
-const hasLocalSpeakerPair =
+const preferLocalMedia = process.env.CI !== "true";
+const hasLocalSpeakerPair = preferLocalMedia &&
   fs.existsSync(defaultSpeakerTopSource) && fs.existsSync(defaultSpeakerBottomSource);
 const defaultBRollSource = path.join(
   os.homedir(),
@@ -103,7 +104,7 @@ const defaultBRollSource = path.join(
 );
 const bRollSourcePath =
   process.env.VIRAL_STUDIO_E2E_BROLL ||
-  (fs.existsSync(defaultBRollSource) ? defaultBRollSource : liveSourcePath);
+  (preferLocalMedia && fs.existsSync(defaultBRollSource) ? defaultBRollSource : liveSourcePath);
 
 const enabledEditingProfile = {
   success: true,
@@ -133,7 +134,7 @@ const json = value => ({
 const buildLiveSource = () => {
   const requestedSource =
     process.env.VIRAL_STUDIO_E2E_SOURCE ||
-    (fs.existsSync(defaultEpisodeThreeSource) ? defaultEpisodeThreeSource : null);
+    (preferLocalMedia && fs.existsSync(defaultEpisodeThreeSource) ? defaultEpisodeThreeSource : null);
   if (requestedSource && fs.existsSync(requestedSource)) {
     execFileSync("ffmpeg", [
       "-v",
@@ -515,7 +516,7 @@ test.beforeAll(async () => {
       motionSourcePath,
     ]);
   }
-  if (fs.existsSync(defaultContextBRollSource)) {
+  if (preferLocalMedia && fs.existsSync(defaultContextBRollSource)) {
     // This is real moving AutoPromote/Cam Combiner footage from the same podcast
     // workflow. Crop away the desktop/browser identity chrome before using it as
     // an editorial cutaway in the frontend proof.
@@ -1913,10 +1914,7 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
   await inspector.getByRole("checkbox", { name: "Enable mask" }).uncheck();
   await inspector.getByText("Chroma key / green screen", { exact: true }).click();
   const chromaToggle = inspector.getByRole("checkbox", { name: /Key a color/i });
-  await chromaToggle.check();
-  await inspector.getByRole("slider", { name: /Tolerance/i }).fill("42");
-  await inspector.getByRole("slider", { name: /Spill removal/i }).fill("55");
-  await chromaToggle.uncheck();
+  await expect(chromaToggle).toBeDisabled(); // This target is editable text.
   await inspector.getByText("Background & tracking", { exact: true }).click();
   const backgroundToggle = inspector.getByRole("checkbox", { name: /Remove background/i });
   await backgroundToggle.check();
@@ -2004,6 +2002,21 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
   );
   await captureLiveProof(path.join("test-results", "viral-clip-studio-live-round-broll.png"));
   await setTimelineExpanded(true);
+
+  // Key actual media pixels, using the same native processor as Node Flow.
+  const brollLayerId = await roundBrollPreview.evaluate(video => video.closest('[data-studio-layer-id]').dataset.studioLayerId);
+  await toolRail.getByRole('button',{name:'Composite',exact:true}).click();
+  await inspector.getByRole('combobox',{name:'Composite target',exact:true}).selectOption(brollLayerId);
+  await inspector.getByText('Chroma key / green screen',{exact:true}).click();
+  await expect(chromaToggle).toBeEnabled();
+  await chromaToggle.check();
+  await inspector.getByRole('slider',{name:/Tolerance/i}).fill('42');
+  await inspector.getByRole('slider',{name:/Spill removal/i}).fill('55');
+  const keyedSurface=page.locator(`[data-studio-layer-id="${brollLayerId}"] [data-studio-node-effect-surface]`);
+  await expect(keyedSurface).toBeVisible();
+  await expect.poll(()=>keyedSurface.evaluate(canvas=>Number(canvas.dataset.pixelRevision||0))).toBeGreaterThan(0);
+  await expect(keyedSurface).toHaveAttribute('data-node-effect-error','');
+  await chromaToggle.uncheck();
 
   await toolRail.getByRole("button", { name: "Sound", exact: true }).click();
   await inspector.getByRole("button", { name: "podcast", exact: true }).click();

@@ -533,6 +533,10 @@ export function CompositeInspector({
   onAddAdjustmentLayer,
   onCreateCompound,
 }) {
+  const mediaKey = ['image','video'].includes(activeOverlay?.type);
+  const key = activeOverlay?.chromaKey || {};
+  const tolerance = Math.max(2,Math.round(100*(key.similarity ?? (key.tolerance ?? 32)/100)));
+  const spill = Math.round(100*(key.spillSuppression ?? (key.spill ?? 48)/100));
   return (
     <div className="clip-inspector-body advanced-inspector-body" role="tabpanel">
       <div className="inspector-heading-row">
@@ -728,6 +732,7 @@ export function CompositeInspector({
               <input
                 type="checkbox"
                 checked={!!activeOverlay.chromaKey?.enabled}
+                disabled={!mediaKey}
                 onChange={event =>
                   onUpdateOverlay("chromaKey", {
                     ...(activeOverlay.chromaKey || {}),
@@ -736,44 +741,45 @@ export function CompositeInspector({
                 }
               />
             </label>
+            {!mediaKey && <p>Select an image or video layer to key its background.</p>}
             {activeOverlay.chromaKey?.enabled ? (
               <>
                 <label className="composite-color-field">
                   <span>Key color</span>
                   <input
                     type="color"
-                    value={activeOverlay.chromaKey?.color || "#00ff00"}
+                    value={key.keyColor || key.color || "#00d455"}
                     onChange={event =>
                       onUpdateOverlay("chromaKey", {
                         ...activeOverlay.chromaKey,
-                        color: event.target.value,
+                        keyColor: event.target.value,
                       })
                     }
                   />
                 </label>
                 <Range
                   label="Tolerance"
-                  valueLabel={`${Number(activeOverlay.chromaKey?.tolerance || 30)}%`}
-                  min={0}
+                  valueLabel={`${tolerance}%`}
+                  min={2}
                   max={100}
-                  value={Number(activeOverlay.chromaKey?.tolerance || 30)}
+                  value={tolerance}
                   onChange={event =>
                     onUpdateOverlay("chromaKey", {
                       ...activeOverlay.chromaKey,
-                      tolerance: Number(event.target.value),
+                      similarity: Number(event.target.value)/100,
                     })
                   }
                 />
                 <Range
                   label="Spill removal"
-                  valueLabel={`${Number(activeOverlay.chromaKey?.spill || 35)}%`}
+                  valueLabel={`${spill}%`}
                   min={0}
                   max={100}
-                  value={Number(activeOverlay.chromaKey?.spill || 35)}
+                  value={spill}
                   onChange={event =>
                     onUpdateOverlay("chromaKey", {
                       ...activeOverlay.chromaKey,
-                      spill: Number(event.target.value),
+                      spillSuppression: Number(event.target.value)/100,
                     })
                   }
                 />

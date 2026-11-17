@@ -1,0 +1,27 @@
+{
+  "date": "2026-11-17",
+  "status": "LOCAL_REGRESSIONS_PASS_REMOTE_RECHECK_REQUIRED",
+  "pullRequest": 530,
+  "originalHead": "807368250112cdfaf43039f20b78a83718489e88",
+  "originalFailedChecks": 5,
+  "local": {
+    "workerContractCases": 162,
+    "directorReplayCases": 27,
+    "scannerCases": 9,
+    "previouslyFailingStudioCases": 15,
+    "keyerAndNodeCases": 32,
+    "fullPreviouslyFailingPlaywrightJourney": true,
+    "playwrightUsesMockApiAndRealPlayableMedia": true,
+    "strictFrontendBuild": true,
+    "deterministicReplayCheck": true,
+    "readOnlyCheckoutAndWritableScratchMount": true,
+    "fullProductionDockerImageBuiltLocally": false
+  },
+  "activeLocalAppReplaced": false,
+  "ingestAuthorizationChanged": false,
+  "checksDisabled": false,
+  "readinessPromotion": false,
+  "productionDeployment": false,
+  "mainMerge": false,
+  "next": "Verify all fresh PR checks, then continue the existing shared Studio backlog."
+}

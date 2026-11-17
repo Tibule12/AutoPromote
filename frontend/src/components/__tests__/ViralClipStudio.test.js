@@ -155,6 +155,15 @@ describe("ViralClipStudio timeline sequencing", () => {
       clearRect: jest.fn(),
       drawImage: jest.fn(),
       fillRect: jest.fn(),
+      fill: jest.fn(),
+      roundRect: jest.fn(),
+      save: jest.fn(), restore: jest.fn(), scale: jest.fn(),
+      translate: jest.fn(), rotate: jest.fn(), setTransform: jest.fn(),
+      fillText: jest.fn(), strokeText: jest.fn(), rect: jest.fn(),
+      clip: jest.fn(), closePath: jest.fn(),
+      // Title measurement caches its context across cases; keep this native
+      // API stub independent of Jest's per-test mock reset.
+      measureText: text => ({ width: String(text).length * 18 }),
       getImageData: jest.fn(() => ({ data: new Uint8ClampedArray(96 * 54 * 4) })),
       lineTo: jest.fn(),
       moveTo: jest.fn(),
@@ -346,8 +355,16 @@ describe("ViralClipStudio timeline sequencing", () => {
     await screen.findByDisplayValue('Zero effects');
     const layer=(await screen.findByAltText('Overlay')).closest('.draggable-overlay');
     expect(layer).toBeTruthy();
-    expect(layer.style.filter).toContain('drop-shadow(0px 0px 0px');
-    expect(layer.style.filter).toContain('drop-shadow(0 0 0px');
+    const image=screen.getByAltText('Overlay');
+    Object.defineProperties(image,{complete:{configurable:true,value:true},
+      naturalWidth:{configurable:true,value:16},naturalHeight:{configurable:true,value:16}});
+    fireEvent.load(image);
+    const surface=layer.querySelector('[data-studio-node-effect-surface]');
+    await waitFor(()=>expect(Number(surface.dataset.pixelRevision)).toBeGreaterThan(0));
+    expect(surface.dataset.nodeEffectError).toBe('');
+    const filters=window.HTMLCanvasElement.prototype.getContext.mock.results.map(call=>call.value?.filter).filter(Boolean);
+    expect(filters.some(filter=>(filter.match(/drop-shadow\(0px 0px 0px/g)||[]).length===2)).toBe(true);
+    expect(layer.style.filter).toBe('none'); // Processed pixels own the effects, once.
   });
 
   test.each(['image', 'video'])('canonical %s opacity and transform keys cannot be replaced by legacy entrance animation', async type => {

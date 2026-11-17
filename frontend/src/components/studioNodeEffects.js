@@ -8,12 +8,14 @@ const finite = (value, fallback, min, max) => {
 export function compileStudioNodeEffects(layer = {}) {
   const key = layer.chromaKey || {}, optical = layer.opticalFx || {}, warp = layer.displacementWarp || {};
   if (key.enabled && !['image', 'video'].includes(layer.type)) throw new Error('Keying requires an image or video layer.');
-  const mode = key.mode || 'chroma', color = key.keyColor || '#00d455';
+  const mode = key.mode || 'chroma', color = key.keyColor || key.color || '#00d455';
+  const similarity = key.similarity ?? (key.tolerance == null ? undefined : Math.max(.02,finite(key.tolerance,32,0,100)/100));
+  const spill = key.spillSuppression ?? (key.spill == null ? undefined : finite(key.spill,48,0,100)/100);
   if (!['chroma', 'luma', 'hsl_delta'].includes(mode) || !/^#[\da-f]{6}$/i.test(color)) throw new Error('Invalid keyer mode or screen colour.');
   return { version: 1,
     key: { enabled: key.enabled === true, mode, color,
-      similarity: finite(key.similarity, .32, .02, 1), smoothness: finite(key.smoothness, .14, 0, 1),
-      spill: finite(key.spillSuppression, .48, 0, 1), choke: finite(key.choke, 0, -20, 20), invert: key.invert === true },
+      similarity: finite(similarity, .32, .02, 1), smoothness: finite(key.smoothness, .14, 0, 1),
+      spill: finite(spill, .48, 0, 1), choke: finite(key.choke, 0, -20, 20), invert: key.invert === true },
     optical: { halation: finite(optical.halation, 0, 0, 1), streak: finite(optical.anamorphicStreak, 0, 0, 1) },
     warp: { enabled: warp.enabled === true, x: finite(warp.amountX, 8, 0, 40), y: finite(warp.amountY, 6, 0, 40), frequency: finite(warp.frequency, 2.2, .1, 10) },
     defocus: finite(layer.dofBlur, 0, 0, 20), depth: finite(layer.zDepth, 0, -100, 100),
