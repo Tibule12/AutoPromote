@@ -60,6 +60,7 @@ async function createDirectorNodePlan(
   {
     model = "llama3:latest",
     transport = requestLocalModel,
+    provider = "ollama",
     now = () => new Date().toISOString(),
   } = {}
 ) {
@@ -110,13 +111,12 @@ async function createDirectorNodePlan(
         Error(
           error.name === "TimeoutError"
             ? "The Director reached its planning time limit. No edit was applied."
-            : "The local Director is unavailable. No edit was applied."
+            : "The Director is unavailable. No edit was applied."
         ),
         { status: 503 }
       );
     }
-    if (!response.ok)
-      throw Object.assign(Error("The local Director is unavailable."), { status: 503 });
+    if (!response.ok) throw Object.assign(Error("The Director is unavailable."), { status: 503 });
     const content = response.data.message?.content,
       entry = {
         index: index + 1,
@@ -187,7 +187,7 @@ async function createDirectorNodePlan(
     ...core,
     fingerprint: crypto.createHash("sha256").update(JSON.stringify(core)).digest("hex"),
     provenance: {
-      provider: "ollama",
+      provider,
       model,
       generatedAt: now(),
       elapsedMs: Date.now() - started,
@@ -207,7 +207,7 @@ async function createDirectorNodePlan(
       validationRevisionPasses: attempts.length - 1,
       attempts,
       fragmentIntent: wire.fragment || null,
-      paidProviderCalls: 0,
+      paidProviderCalls: provider === "openai" ? attempts.length : 0,
     },
   };
 }

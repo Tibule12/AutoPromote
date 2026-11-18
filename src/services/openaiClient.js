@@ -9,7 +9,13 @@ async function request(path, payload = {}, opts = {}) {
   if (!OPENAI_API_KEY) throw new Error("OpenAI API key not configured.");
   const url = `${DEFAULT_OPENAI_BASE}${path}`;
   const headers = Object.assign({ Authorization: `Bearer ${OPENAI_API_KEY}` }, opts.headers || {});
-  const res = await axios.post(url, payload, { headers, maxBodyLength: Infinity });
+  const res = await axios.post(url, payload, {
+    headers,
+    maxBodyLength: Infinity,
+    ...(opts.timeout ? { timeout: opts.timeout } : {}),
+    ...(opts.signal ? { signal: opts.signal } : {}),
+    ...(opts.maxContentLength ? { maxContentLength: opts.maxContentLength } : {}),
+  });
   return res.data;
 }
 

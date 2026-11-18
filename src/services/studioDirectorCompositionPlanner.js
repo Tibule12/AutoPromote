@@ -329,14 +329,14 @@ async function compositionInference({
     throw Object.assign(
       Error(
         cause.name === "TimeoutError"
-          ? "The local Director reached its planning time limit. No edit was applied."
-          : "The local Director could not finish planning. No edit was applied."
+          ? "The Director reached its planning time limit. No edit was applied."
+          : "The Director could not finish planning. No edit was applied."
       ),
       { status: 503 }
     );
   }
   if (!response.ok)
-    throw Object.assign(Error("The local Director model is unavailable."), { status: 503 });
+    throw Object.assign(Error("The Director model is unavailable."), { status: 503 });
   const data = response.data;
   let wire;
   try {
@@ -372,11 +372,20 @@ async function compositionInference({
 }
 async function planComposition(
   context,
-  { infer = compositionInference, model = "phi3:latest", now = () => new Date().toISOString() } = {}
+  {
+    infer = compositionInference,
+    model = "phi3:latest",
+    transport,
+    provider = "ollama",
+    now = () => new Date().toISOString(),
+  } = {}
 ) {
   validatePixelEvidence(context);
   const started = Date.now(),
-    composition = validateComposition(await infer({ context, model }), context);
+    composition = validateComposition(
+      await infer({ context, model, ...(transport ? { transport } : {}) }),
+      context
+    );
   const core = {
     version: 2,
     projectId: context.projectId,
@@ -390,7 +399,7 @@ async function planComposition(
     ...core,
     fingerprint: crypto.createHash("sha256").update(JSON.stringify(core)).digest("hex"),
     provenance: {
-      provider: "ollama",
+      provider,
       model,
       generatedAt: now(),
       elapsedMs: Date.now() - started,
@@ -398,7 +407,7 @@ async function planComposition(
       sourceUnderstanding: "client_hash_bound_decoded_colour_and_frame_difference_only",
       pixelEvidence: context.pixelEvidence,
       authoring: "ordinary_scene_actions_no_effect_recipes",
-      paidProviderCalls: 0,
+      paidProviderCalls: provider === "openai" ? 1 : 0,
     },
   };
 }

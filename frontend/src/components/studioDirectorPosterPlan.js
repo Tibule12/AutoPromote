@@ -1,3 +1,4 @@
+import { studioProjectAspect } from "./studioProjectAspect";
 import { directorCompositionContext } from "./studioDirectorComposition";
 const { buildKineticPoster } = require("./studioKineticPoster");
 export function directorPosterContext(snapshot, brief, duration) {
@@ -21,7 +22,11 @@ export function compileDirectorPoster(result, snapshot) {
     )
   )
     throw Error("The project media changed after planning.");
-  const composition = buildKineticPoster(result.poster, result.duration);
+  const composition = buildKineticPoster(
+    result.poster,
+    result.duration,
+    studioProjectAspect(snapshot)
+  );
   return {
     plan: {
       format: "autopromote-scene-actions",
