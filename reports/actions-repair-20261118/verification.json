@@ -1,0 +1,34 @@
+{
+  "date": "2026-11-18",
+  "failedRun": "https://github.com/Tibule12/AutoPromote/actions/runs/44269803483",
+  "failedStep": "Install live-media test prerequisites",
+  "attemptsFailed": 2,
+  "cause": "Ubuntu mirror transfer of87 FFmpeg packages timed out after5 minutes before browser tests.",
+  "change": "Use both existing locked npm media binaries in owned scratch and export standard Actions PATH/environment files.",
+  "localVerification": {
+    "actualMediaRegression": "PASS",
+    "h264AacEncodeProbeAndDecode": "PASS",
+    "vp8WebmEncode": "PASS",
+    "workflowYamlAndBashSyntax": "PASS",
+    "aptInvocationsInMediaSetup": 0,
+    "nativeHeadlessMutedBrowserProbe": "PASS",
+    "imageSdkVersionAndNoAptInvariant": "PASS"
+  },
+  "applicationCodeChanged": false,
+  "testsSkippedOrThresholdsChanged": false,
+  "freshGitHubVerification": "PENDING",
+  "unchangedLimits": [
+    "Director model planning remains separately unverified.",
+    "17 FUNCTIONAL/9 PARTIAL/1 BROKEN/2 UNIMPLEMENTED/0 PRO/0 PRODUCTION",
+    "Typography13/16 and shared S02/S04/S03 remain."
+  ],
+  "additionalFailedRun": "https://github.com/Tibule12/AutoPromote/actions/runs/44273011140",
+  "additionalFailedStep": "Prepare playwright browsers",
+  "additionalCause": "After media setup passed, Playwright apt installation stalled on32.1MB of Mesa/font packages and hit its five-minute timeout.",
+  "browserImage": {
+    "version": "1.59.1-noble",
+    "digest": "sha256:b0ab6f3cb99aa7803adbc14d9027ec1785fc6e433b97e134e0f8fe61683b6b53",
+    "registryManifestVerified": true,
+    "lockedSdkVersion": "1.59.1"
+  }
+}

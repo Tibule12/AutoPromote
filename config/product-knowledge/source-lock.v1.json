@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Record native Studio visibility/quality/recovery, Wolf Hunt retirement, unchanged publishing/financial behavior and preserved readiness limits.",
-  "reviewed_at": "2026-11-18T08:43:48.397Z",
+  "reason": "CI-only media and prebuilt browser environment repair; repeated apt timeouts removed without changing application or readiness.",
+  "reviewed_at": "2026-11-18T09:19:10.715Z",
   "catalog_sha256": "6e99cb68f4c18cb94fcdc679e7d6a029cde5860a17a54bd8c7bbd0e3a953c162",
   "sources": [
     {
@@ -731,11 +731,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "1caf8501da114381a26c618648ddd57387c0f647f69284c8082dc644f3c63d86"
+      "sha256": "f8b03e4f0f7c4e1fa7ca68a5e2c4ec15d64ec971c26c4d09944fe4c6516c53d0"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "28da06ebf202974a96a8b5d2dc31781864412c4a3f62efe5f29c60db6eefbaa4"
+      "sha256": "ecc173e4b65433dc52c899113a7cd3674306876ae4f0164ac1b977587bf5521d"
     },
     {
       "path": "worker.js",

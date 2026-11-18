@@ -14,9 +14,12 @@ concurrency:
 
 jobs:
   playwright-e2e:
-    # The locked Playwright browser/dependency bundle supports Ubuntu 24.04;
-    # the ubuntu-latest move to 26.04 fails before browser tests can start.
+    # Match package-lock.json and keep browser/OS dependencies preinstalled.
+    # Runner apt mirrors have repeatedly timed out before tests could start.
     runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.59.1-noble@sha256:b0ab6f3cb99aa7803adbc14d9027ec1785fc6e433b97e134e0f8fe61683b6b53
+      options: --ipc=host
     timeout-minutes: 30
     env:
       FUNCTIONS_TOKEN_ENCRYPTION_KEY: ${{ secrets.FUNCTIONS_TOKEN_ENCRYPTION_KEY }}
@@ -45,12 +48,8 @@ jobs:
       - name: Install live-media test prerequisites
         timeout-minutes: 5
         run: |
-          if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
-            sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 update
-            sudo env DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::Lock::Timeout=60 -o Acquire::Retries=2 -o Acquire::http::Timeout=30 install --yes --no-install-recommends ffmpeg
-          fi
-          ffmpeg -version
-          ffprobe -version
+          node --test test/ci/prepare-media-tools.test.cjs
+          node scripts/ci/prepare-media-tools.cjs
       - name: Install frontend dependencies
         timeout-minutes: 5
         run: npm ci --prefix frontend
@@ -63,7 +62,7 @@ jobs:
         run: npm run build --prefix frontend
       - name: Prepare playwright browsers
         timeout-minutes: 5
-        run: npx playwright install --with-deps chromium
+        run: node scripts/ci/verify-playwright-browser.cjs
       - name: Upload test reporters directory (pre-clean)
         run: rm -rf test-results || true
       - name: Setup isolated Firebase emulator runtime

@@ -1,4 +1,24 @@
 {
+  "actionsMediaSetupRepair20261118": {
+    "date": "2026-11-18",
+    "scope": "Actions-only repair of the Playwright media prerequisite step.",
+    "evidenceRefs": [
+      "reports/actions-repair-20261118/README.md"
+    ],
+    "cause": "Apt mirror transfer exceeded the five-minute setup timeout twice; browsers never started.",
+    "change": "Prepare verified locked media tools and use an SDK-matched, digest-pinned Playwright image with preinstalled browser/OS dependencies.",
+    "verification": {
+      "actualVideoAndSoundEncodeProbeDecode": "PASS",
+      "vp8WebmEncode": "PASS",
+      "workflowSyntax": "PASS",
+      "freshGitHubPlaywright": "PENDING",
+      "nativeHeadlessMutedBrowserProbe": "PASS",
+      "imageSdkVersionInvariant": "PASS"
+    },
+    "applicationCodeChanged": false,
+    "readinessCountsUnchanged": true,
+    "nextTask": "Verify fresh GitHub Playwright run; Director model planning remains separately unverified."
+  },
   "studioVisibilityPreview20261118": {
     "date": "2026-11-18",
     "scope": "Owner-requested Studio tool visibility, preview quality and permanent Wolf Hunt retirement.",
