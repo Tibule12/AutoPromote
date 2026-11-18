@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Review actual edc03e96 live poster/footage Director flows, independent52-layer48-image native backup/cold recovery,147 Director tests and retained shared limits.",
-  "reviewed_at": "2026-11-18T10:50:45.903Z",
-  "catalog_sha256": "d36ff9e0692c1c961b54a65c30babc2405b2c043fc4ac3d0ad76b5cb60e4ddad",
+  "reason": "Keep public help focused on editable settings and render requirements; retain technical artifact binding in the implementation report.",
+  "reviewed_at": "2026-11-18T13:54:33.357Z",
+  "catalog_sha256": "727a1d5742f68437b8e6c088f37fdcd1b80417b1ca5a0e571d6301a3c681eb57",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -91,7 +91,7 @@
     },
     {
       "path": "frontend/src/components/StudioAnimatedText.js",
-      "sha256": "5b9793f3542f52cc0174749d9fc4c11e118419a54d06b5096d263e1448daa7c2"
+      "sha256": "89b747a5377714901f1680ceea20a24c0ff46a65bcc02dbfea3f2f5d6699c4da"
     },
     {
       "path": "frontend/src/components/StudioControls.css",
@@ -355,7 +355,7 @@
     },
     {
       "path": "frontend/src/components/studioProjectDocument.js",
-      "sha256": "d1e0db8f28e5eaa1808759cc844e847f99e3925f7dc8402ee824d5d7e562fc69"
+      "sha256": "b65a2e8cb06aba08d687f4e549b4c25783fc9848815b1f2d2b196b922b1a6d71"
     },
     {
       "path": "frontend/src/components/studioRenderCompiler.js",
@@ -471,7 +471,7 @@
     },
     {
       "path": "python_media_worker/main_media_server.py",
-      "sha256": "851d9aec092df9cfe995b9f18697b53d14035d897a01185575752c4143fd7f49"
+      "sha256": "0281b09d6c2fed006da4c3597bd72baaccbf8a3965c13ae4284ffde8b1d239f0"
     },
     {
       "path": "python_media_worker/studio_audio.py",
@@ -486,8 +486,12 @@
       "sha256": "2f06ff251dc8766153890bcc2ed5e848bd4be56d7ddb7932c8de45c7d7068c1a"
     },
     {
+      "path": "python_media_worker/studio_image_sources.py",
+      "sha256": "1be008066aadb41bba34b036b066e5c7a0a0a4d63b19f593ed07539b4a630f19"
+    },
+    {
       "path": "python_media_worker/studio_layer_motion.py",
-      "sha256": "d4d5e8df7a8d8f3dc512522c77782a1e0e3b405d59fbbea48fe935ad4325a2a4"
+      "sha256": "0f014adf4a69ea44ab90ff69d748220f506c78d26127ed9ee4141a05e6db7c4f"
     },
     {
       "path": "python_media_worker/studio_matte_surface.py",
@@ -503,7 +507,7 @@
     },
     {
       "path": "python_media_worker/studio_text_animator.py",
-      "sha256": "71aa009541659a37d607a990496b4571897f2cbbed1e51f73763fa704d8e7175"
+      "sha256": "260275115c04f264280e4f072bbbe5d613b4c7ec75d4802ef25c822c0d9cbed1"
     },
     {
       "path": "python_media_worker/studio_vector_shape.py",
@@ -532,6 +536,10 @@
     {
       "path": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
       "sha256": "b3bece0fe3f653ef88368b3013fbe96ccfd13ed953efa3342fb89eb20186374b"
+    },
+    {
+      "path": "reports/studio-completion-20261118/README.md",
+      "sha256": "4e3f7d5e173f176eeeb4a9d35e25f071b7f952786e8ec65bf2c8d9be888b9afe"
     },
     {
       "path": "reports/studio-logo-design-20261018/README.md",
@@ -747,11 +755,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "70272857f6ee61e4b21ff81b8f075cbbabc89d8ccfd67dadf8ef142e3247fa66"
+      "sha256": "b3826284494356fdd3906a78247c414c59c1e382edda450a2b8a0ea8490bac40"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "840f3e52e1a946c67d5c1d37e9850af20638db0c2422b7779ba7abae4d2c9452"
+      "sha256": "2eb728f1877902a3dd4839ff818bb58eae3740bca722f10844f08fb988eb2687"
     },
     {
       "path": "worker.js",

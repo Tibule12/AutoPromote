@@ -108,6 +108,7 @@ const programmeCodeHashes = root => Object.fromEntries([
   "python_media_worker/studio_cinematic_programme.py", "python_media_worker/studio_rendered_scene.py",
   "python_media_worker/studio_composition.py", "python_media_worker/studio_layer_motion.py",
   "python_media_worker/studio_text.py", "python_media_worker/studio_text_animator.py", "python_media_worker/studio_audio.py",
+  "python_media_worker/assets/studio-title-glyphs.v1.json",
   "python_media_worker/viral_motion_graphics.py", "python_media_worker/viral_render_contract.py",
   "python_media_worker/assets/fonts/Inter-Black.ttf", "python_media_worker/assets/fonts/Inter-ExtraBold.ttf",
   "python_media_worker/assets/fonts/Inter-Regular.ttf", "python_media_worker/assets/fonts/Inter-SemiBold.ttf",

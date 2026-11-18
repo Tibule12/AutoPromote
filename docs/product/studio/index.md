@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.63 • 2026-11-18
+Development documentation • product 1.2.0 • knowledge 1.0.64 • 2026-11-18
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -1565,6 +1565,7 @@ Saves canonical project assets, occurrences, layers, keys and audio; reopening r
 
 - This dated development snapshot does not establish professional or production readiness.
 - Opening an unchanged source occurrence preserves its legacy duration metadata and matching completed-export identity; source-range edits create a new revision.
+- 3D parameter schema v4 retains cinematic scene settings and verified local export identity through canonical JSON. Export access URLs are transport-only and reattach only to the same job/hash/revision; older layers retain their versioned migration behavior. This does not enable cloud cinematic execution.
 
 **Common errors**
 
@@ -2277,15 +2278,16 @@ Animate individual letters or words inside one editable title using a normal Tex
 4. Rebuild entrance keys replaces only that title’s progress keys; Remove text animator returns it to a plain title. Other layer motion is retained.
 5. Save, reopen and export through the normal Studio workflow.
 
-**Preview:** Explicit per-unit SVG text transforms follow evaluated programme-clock Text progress. One plain copy field remains editable; wrapping uses the same versioned Inter glyph advances as export.
+**Preview:** Per-unit SVG paths use the shared versioned Inter outlines and evaluated programme-clock Text progress. One plain copy field remains editable; layout and glyph advances match export and Node title mattes.
 
-**Final render:** The existing title/image compositor transforms immutable glyph or word patches using canonical progress after output speed mapping. Travel padding is excluded from native anchor/mask geometry; held-frame identity includes progress.
+**Final render:** The existing compositor projects the same glyph paths directly at delivery resolution when no pixel effect requires an intermediate raster. Active masks, perspective and pixel effects retain the shared compositor. Travel padding stays outside native anchor/mask geometry; held-frame identity includes progress.
 
 **Limits**
 
 - Supported copy is at most 180 composed Latin characters with bundled punctuation and four Inter weights, up to twelve wrapped rows. A word wider than the title box requires more width or an internal line break. Complex scripts, combining sequences, emoji and arbitrary fonts are not supported in this optional animator; existing plain titles retain their path.
 - The selector uses unit centers; empty or crossed ranges leave units settled. Stagger is a share of the progress window, not seconds. Opacity uses linear unit progress while geometry uses the selected settling curve.
 - This is local glyph placement, not editable glyph outlines, automatic logo tracing or contour morphing. Broader parent/mask/speed combinations, full live raster/audio, smoothness, creative acceptance and professional/production qualification remain separate.
+- Sixteen native-size 1280×720 pre-export text colour/edge pairs pass unchanged strict gates in a four-second local engineering check. One scaled-display overlap pair still fails; this does not requalify the historical minute film or whole Studio picture/sound.
 
 **Common errors**
 

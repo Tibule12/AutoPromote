@@ -17,6 +17,24 @@ SOURCE = dict(id='text', type='text', text='MAKE IT MOVE', width=90, fontFamily=
 
 
 class StudioTextAnimatorTests(unittest.TestCase):
+    def test_svg_transparency_keeps_straight_colour_before_compositing(self):
+        from urllib.parse import quote
+        from PIL import Image
+        from python_media_worker.studio_image_sources import materialize_studio_image
+        svg = "<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><rect width='16' height='16' fill='#ff5838' opacity='.5'/></svg>"
+        with tempfile.TemporaryDirectory() as directory:
+            destination = Path(directory) / 'translucent.png'
+            materialize_studio_image('data:image/svg+xml,' + quote(svg), str(destination), {})
+            image = Image.open(destination).convert('RGBA')
+        r, g, b, a = image.getpixel((8, 8))
+        assert a == 128 and r == 255 and abs(g - 88) <= 1 and abs(b - 56) <= 1
+        background = Image.new('RGBA', image.size, 'white')
+        background.alpha_composite(image)
+        expected = Image.new('RGBA', image.size, (255, 88, 56, 128))
+        reference = Image.new('RGBA', image.size, 'white')
+        reference.alpha_composite(expected)
+        assert np.max(np.abs(np.asarray(background).astype(int) - np.asarray(reference).astype(int))) <= 1
+
     def test_bounded_title_projection_retains_reference_geometry_and_filter_fallback(self):
         from unittest.mock import patch
         from PIL import Image, ImageDraw
@@ -46,6 +64,20 @@ class StudioTextAnimatorTests(unittest.TestCase):
             assert layout == fixture['layout']
             for observation in fixture['observations']:
                 assert text_poses(spec, observation['progress'], layout) == observation['poses']
+
+    def test_outline_assets_are_identical_and_filtered_titles_keep_the_existing_effect_path(self):
+        root = Path(__file__).resolve().parents[1]
+        assert (root/'frontend/src/components/motion/titleGlyphs.v1.json').read_bytes() == (root/'python_media_worker/assets/studio-title-glyphs.v1.json').read_bytes()
+        title = AnimatedTitle(SOURCE,320,180,SPEC)
+        pose = dict(x=50,y=50,scale=1,rotation=0,opacity=1,crop_x=0,crop_y=0)
+        assert title.can_project({},pose)
+        neutral={'version':1,'key':{'enabled':False},'optical':{'halation':0,'streak':0},'warp':{'enabled':False,'x':8,'y':6},'defocus':0,'depth':0}
+        assert title.can_project({'effects':{'node':neutral}},pose)
+        assert not title.can_project({'effects':{'node':dict(neutral,defocus=2)}},pose)
+        assert not title.can_project({'perspective':{'sourceRect':[0,0,100,100]}},pose)
+        for effects in [{'mask':{'enabled':True}},{'node':{'key':{'enabled':True}}},{'blur':2},{'colorize':{'enabled':True}}]:
+            assert not title.can_project({'effects':effects},pose)
+        assert not title.can_project({},dict(pose,crop_x=5))
 
     def test_metrics_are_byte_identical_and_bound_to_bundled_fonts(self):
         root = Path(__file__).resolve().parents[1]
@@ -99,11 +131,11 @@ class StudioTextAnimatorTests(unittest.TestCase):
                                           {'property': 'textProgress', 'time': 1.5, 'value': 100, 'easing': 'linear'},
                                           {'property': 'textProgress', 'time': 1.9, 'value': 0, 'easing': 'linear'}]}
             calls = []
-            original = title.frame
-            def observed(progress):
+            original = title.project
+            def observed(progress, *args):
                 calls.append(progress)
-                return original(progress)
-            title.frame = observed
+                return original(progress, *args)
+            title.project = observed
             receipt = render_image_layer_motion(asset, movie, {**SOURCE, **geometry}, layer, 320, 180, 2, [], 10, title_animator=title)
             assert receipt['duration'] == 2
             raw = subprocess.check_output(['ffmpeg', '-v', 'error', '-i', str(movie), '-f', 'rawvideo', '-pix_fmt', 'rgba', '-'])

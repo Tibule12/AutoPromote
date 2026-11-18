@@ -8,8 +8,9 @@ import json
 import math
 import re
 from pathlib import Path
-from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
+
+GLYPHS = json.loads((Path(__file__).parent / 'assets/studio-title-glyphs.v1.json').read_text())
 METRICS = json.loads((Path(__file__).parent / 'assets/studio-text-metrics.v1.json').read_text())
 BOUNDS = {'stagger': (0, 95), 'fromX': (-4, 4), 'fromY': (-4, 4), 'fromScale': (0, 2.5),
           'fromRotation': (-360, 360), 'fromOpacity': (0, 1), 'tracking': (-1, 1),
@@ -134,26 +135,7 @@ class AnimatedTitle:
         self.logical = (math.ceil(layout['width']) + 2 * self.margin, math.ceil(layout['height']) + 2 * self.margin)
         self.density = min(3, 8192 / max(self.logical))
         self.size = tuple(math.ceil(v * self.density) for v in self.logical)
-        self.patches = []
-        font = ImageFont.truetype(str(Path(__file__).parent / 'assets/fonts' / f"Inter-{WEIGHTS[int(overlay.get('fontWeight') or 900)]}.ttf"), round(36 * self.density))
-        # Unit patches are immutable; only their transforms change per frame.
-        for unit in layout['units']:
-            pad, d = 24, self.density
-            patch = Image.new('RGBA', (math.ceil((unit['width'] + pad * 2) * d), math.ceil((50.4 + pad * 2) * d)))
-            glyphs = Image.new('RGBA', patch.size)
-            draw = ImageDraw.Draw(glyphs)
-            for g in unit['glyphs']:
-                draw.text(((pad + g['x'] - unit['x']) * d, (pad + g['baseline'] - unit['y']) * d), g['char'], font=font,
-                          anchor='ls', fill=color(overlay.get('color'), 'white'), stroke_width=max(0, round(float(overlay.get('strokeWidth') or 0) * d / 2)),
-                          stroke_fill=color(overlay.get('strokeColor'), 'rgba(0,0,0,0.92)'))
-            shadow = overlay.get('shadow') or 'soft'
-            if shadow != 'none':
-                for y, blur, opacity in ([(4, 7, .95), (1, 1, 1)] if shadow == 'strong' else [(3, 5, .72)]):
-                    mask = glyphs.getchannel('A').filter(ImageFilter.GaussianBlur(blur * d)).point(lambda a: round(a * opacity))
-                    shade = Image.new('RGBA', patch.size); shade.putalpha(mask)
-                    patch.alpha_composite(shade, (0, round(y * d)))
-            patch.alpha_composite(glyphs)
-            self.patches.append(patch)
+        self.font = GLYPHS['weights'][str(overlay.get('fontWeight') or 900)]
         m, (lw, lh) = self.margin, self.logical
         output_width, output_height = round(lw * height / 720), round(lh * height / 720)
         self.geometry = {'width': output_width / width * 100, 'height': output_height / height * 100, 'mediaFit': 'stretch',
@@ -161,18 +143,90 @@ class AnimatedTitle:
                          'anchorY': (m + layout['height'] * float(overlay.get('anchorY', 50)) / 100) / lh * 100,
                          'clipBox': {'x': m / lw, 'y': m / lh, 'width': layout['width'] / lw, 'height': layout['height'] / lh}, 'lines': layout['lines']}
 
-    def frame(self, progress):
-        image, d, m = Image.new('RGBA', self.size), self.density, self.margin
-        ImageDraw.Draw(image).rounded_rectangle(tuple(v * d for v in (m, m, m + self.layout['width'], m + self.layout['height'])),
-                                               radius=10 * d, fill=self.color(self.overlay.get('bg')))
-        for unit, patch, pose in zip(self.layout['units'], self.patches, text_poses(self.spec, progress, self.layout)):
+
+    @staticmethod
+    def can_project(layer, pose):
+        effects = (layer or {}).get('effects') or {}
+        node = effects.get('node') or {}
+        optical = node.get('optical') or {}
+        warp = node.get('warp') or {}
+        node_pixels = ((node.get('key') or {}).get('enabled')
+                       or optical.get('halation') or optical.get('streak')
+                       or (warp.get('enabled') and (warp.get('x') or warp.get('y')))
+                       or node.get('defocus') or node.get('depth'))
+        return not ((layer or {}).get('perspective') or pose.get('mask_path') or pose.get('crop_x') or pose.get('crop_y')
+                    or (effects.get('mask') or {}).get('enabled')
+                    or (effects.get('shadow') or {}).get('enabled')
+                    or (effects.get('glow') or {}).get('enabled')
+                    or float(effects.get('blur') or 0) > 0
+                    or (effects.get('colorize') or {}).get('enabled')
+                    or node_pixels)
+
+    def _paint(self, progress):
+        # Paths, explicit advances and per-unit poses are the same browser
+        # primitive. No platform font hinting, kerning or glyph bitmap rotation.
+        def paint(value, default='transparent'):
+            r, g, b, a = self.color(value, default)
+            return f'rgba({r},{g},{b},{a / 255})'
+        m, layout = self.margin, self.layout
+        fill = paint(self.overlay.get('color'), 'white')
+        stroke = paint(self.overlay.get('strokeColor'), 'rgba(0,0,0,0.92)')
+        glyph_scale = 36 / self.font['unitsPerEm']
+        stroke_width = max(0, float(self.overlay.get('strokeWidth') or 0)) / glyph_scale
+        shadow = self.overlay.get('shadow') or 'soft'
+        definitions = ''
+        shadow_ref = ''
+        if shadow != 'none':
+            shades = [(4, 7, .95), (1, 1, 1)] if shadow == 'strong' else [(3, 5, .72)]
+            filters, merge = [], []
+            for i, (dy, blur, opacity) in enumerate(shades):
+                filters.append(f'<feGaussianBlur in="SourceAlpha" stdDeviation="{blur}" result="blur{i}"/>'
+                               f'<feOffset in="blur{i}" dy="{dy}" result="offset{i}"/>'
+                               f'<feFlood flood-color="black" flood-opacity="{opacity}" result="ink{i}"/>'
+                               f'<feComposite in="ink{i}" in2="offset{i}" operator="in" result="shade{i}"/>')
+                merge.append(f'<feMergeNode in="shade{i}"/>')
+            definitions = ('<defs><filter id="title-shadow" x="-100%" y="-200%" width="300%" height="500%" '
+                           'color-interpolation-filters="sRGB">' + ''.join(filters) + '<feMerge>' +
+                           ''.join(merge) + '<feMergeNode in="SourceGraphic"/></feMerge></filter></defs>')
+            shadow_ref = ' filter="url(#title-shadow)"'
+        parts = [definitions,
+                 f'<rect x="{m}" y="{m}" width="{layout["width"]}" height="{layout["height"]}" rx="10" fill="{paint(self.overlay.get("bg"))}"/>',
+                 f'<g transform="translate({m + 16} {m + 8})">']
+        for unit, pose in zip(layout['units'], text_poses(self.spec, progress, layout)):
             if pose['opacity'] <= 0 or pose['scale'] <= 0:
                 continue
-            transformed = patch.resize(tuple(max(1, round(v * pose['scale'])) for v in patch.size), Image.Resampling.BICUBIC)
-            transformed = transformed.rotate(-pose['rotation'], resample=Image.Resampling.BICUBIC, expand=True)
-            if pose['opacity'] < 1:
-                transformed.putalpha(transformed.getchannel('A').point(lambda a: round(a * pose['opacity'])))
-            center = ((m + 16 + unit['x'] + unit['width'] / 2 + pose['x']) * d,
-                      (m + 8 + unit['y'] + 25.2 + pose['y']) * d)
-            image.alpha_composite(transformed, (round(center[0] - transformed.width / 2), round(center[1] - transformed.height / 2)))
-        return image
+            cx, cy = unit['x'] + unit['width'] / 2, unit['y'] + 25.2
+            parts.append(f'<g opacity="{pose["opacity"]}" transform="translate({cx + pose["x"]} {cy + pose["y"]}) '
+                         f'rotate({pose["rotation"]}) scale({pose["scale"]}) translate({-cx} {-cy})"><g{shadow_ref}>')
+            for glyph in unit['glyphs']:
+                path = self.font['glyphs'][glyph['char']]['path']
+                parts.append(f'<path d="{path}" transform="translate({glyph["x"]} {glyph["baseline"]}) '
+                             f'scale({glyph_scale} {-glyph_scale})" fill="{fill}" stroke="{stroke}" '
+                             f'stroke-width="{stroke_width}" paint-order="stroke fill"/>')
+            parts.append('</g></g>')
+        parts.append('</g>')
+        return ''.join(parts)
+
+    def _raster(self, body, size):
+        try:
+            from .studio_image_sources import rasterize_studio_svg
+        except ImportError:
+            from studio_image_sources import rasterize_studio_svg
+        width, height = size
+        return rasterize_studio_svg(f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
+                                   f'viewBox="0 0 {width} {height}">{body}</svg>')
+
+    def frame(self, progress):
+        body = f'<g transform="scale({self.density})">{self._paint(progress)}</g>'
+        return self._raster(body, self.size)
+
+    def project(self, progress, layer, pose, size, sample_opacity=1):
+        width, height = size
+        anchor_x = self.logical[0] * float(layer.get('anchor_x', 50)) / 100
+        anchor_y = self.logical[1] * float(layer.get('anchor_y', 50)) / 100
+        opacity = max(0, min(1, pose['opacity'] * sample_opacity))
+        scale = pose['scale'] * height / 720
+        body = (f'<g opacity="{opacity}" transform="translate({width * pose["x"] / 100} {height * pose["y"] / 100}) '
+                f'rotate({pose["rotation"]}) scale({scale}) translate({-anchor_x} {-anchor_y})">'
+                f'{self._paint(progress)}</g>')
+        return self._raster(body, size)

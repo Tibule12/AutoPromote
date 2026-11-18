@@ -3,6 +3,7 @@ import {
   validateStudioProjectDocument,
 } from "../studioProjectDocument";
 import { normalizeStudio3DScene } from "../threeD/studio3DModel";
+import { createCinematicParameters } from "../threeD/cinematicContract";
 import { executeStudioCommandBatch, runStudioCommandOnSnapshot, undoStudioCommandBatch } from "../studioCommands";
 import { secondsToTicks } from "../studioTime";
 
@@ -38,6 +39,69 @@ const mixed = () => ({
 });
 const adapt = (snapshot, previousDocument = null) => adaptStudioSnapshotToDocument({
   snapshot, projectId: "mixed-project", previousDocument,
+});
+
+test("cinematic scenes survive canonical JSON alone and access URL refresh does not change decisions", () => {
+  const source = mixed();
+  source.threeDScenes = [{ id: "cinematic", version: 1, sceneType: "cinematic_evidence",
+    startTime: 2, duration: 8, endTime: 10, cinematic: createCinematicParameters("a".repeat(64)),
+    localExport: { jobId: "b".repeat(64), sha256: "c".repeat(64), revision: "scene-v1:bound",
+      url: "https://signed.test/cinematic" } }];
+  const doc = copy(adapt(source));
+  validateStudioProjectDocument(doc);
+  expect(doc.layers.find(layer => layer.type === "three_d").parameterSchemaVersion).toBe(4);
+  expect(JSON.stringify(doc)).not.toContain("https://signed.test/");
+  const cold = projectStudioEditableStateToSnapshot(doc, { timeline: source.timeline });
+  const { url, ...identity } = source.threeDScenes[0].localExport;
+  expect(cold.threeDScenes[0]).toEqual({ ...source.threeDScenes[0], localExport: identity });
+  expect(projectStudioEditableStateToSnapshot(doc, source).threeDScenes).toEqual(source.threeDScenes);
+  const refreshed = copy(source);
+  refreshed.threeDScenes[0].localExport.url = "https://signed.test/refreshed-cinematic";
+  expect(adapt(refreshed, doc).revision).toBe(doc.revision);
+  refreshed.threeDScenes[0].cinematic.camera.focalLength = 60;
+  expect(adapt(refreshed, doc).revision).toBe(doc.revision + 1);
+});
+
+test("cinematic artifact replacement and field removal cannot inherit stale export URLs or scene settings", () => {
+  const source = mixed();
+  source.threeDScenes[0] = { ...source.threeDScenes[0], sceneType: "cinematic_evidence",
+    cinematic: createCinematicParameters("a".repeat(64)),
+    localExport: { jobId: "b".repeat(64), sha256: "c".repeat(64), revision: "r1",
+      url: "https://signed.test/cinematic" } };
+  for (const field of ["jobId", "sha256", "revision"]) {
+    const doc = copy(adapt(source));
+    doc.layers.find(layer => layer.type === "three_d").parameters.localExport[field] = "different";
+    expect(projectStudioEditableStateToSnapshot(doc, source).threeDScenes[0].localExport)
+      .not.toHaveProperty("url");
+  }
+  const removed = copy(adapt(source));
+  const parameters = removed.layers.find(layer => layer.type === "three_d").parameters;
+  for (const field of ["sceneType", "cinematic", "localExport"]) delete parameters[field];
+  const restored = projectStudioEditableStateToSnapshot(removed, source).threeDScenes[0];
+  for (const field of ["sceneType", "cinematic", "localExport"]) expect(restored).not.toHaveProperty(field);
+  const forged = copy(adapt(source));
+  forged.layers.find(layer => layer.type === "three_d").parameters.localExport.url = "https://foreign.test/";
+  expect(() => validateStudioProjectDocument(forged)).toThrow();
+  source.threeDScenes[0].localExport = { url: "https://signed.test/unbound" };
+  expect(projectStudioEditableStateToSnapshot(adapt(source), source).threeDScenes[0].localExport)
+    .not.toHaveProperty("url");
+});
+
+test("legacy v3 cinematic transport remains readable until migrated to canonical v4", () => {
+  const source = mixed();
+  source.threeDScenes[0].sceneType = "cinematic_evidence";
+  source.threeDScenes[0].cinematic = createCinematicParameters("a".repeat(64));
+  const old = copy(adapt(source));
+  const layer = old.layers.find(item => item.type === "three_d");
+  layer.parameterSchemaVersion = 3;
+  delete layer.parameters.sceneType;
+  delete layer.parameters.cinematic;
+  validateStudioProjectDocument(old);
+  const restored = projectStudioEditableStateToSnapshot(old, source);
+  expect(restored.threeDScenes[0]).toEqual(source.threeDScenes[0]);
+  const migrated = adapt(restored, old);
+  expect(migrated.layers.find(item => item.type === "three_d").parameters.cinematic)
+    .toEqual(source.threeDScenes[0].cinematic);
 });
 
 test("mixed canonical JSON retains all normalized 3D fields, owned refs, audio gain/fades and editorial timing", () => {

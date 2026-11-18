@@ -33790,7 +33790,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             # Composite branches are RGB. Convert their code values explicitly
             # before tagging SDR delivery; a metadata tag alone leaves the
             # automatic RGB/YUV converter free to choose another matrix.
-            delivery_filters.extend(["scale=out_color_matrix=bt709:out_range=tv", "format=yuv420p"])
+            # Accurate rounding and full chroma interpolation retain low-alpha
+            # authored colours through the one final 8-bit delivery conversion.
+            delivery_filters.extend(["scale=out_color_matrix=bt709:out_range=tv:flags=accurate_rnd+full_chroma_int", "format=yuv420p"])
             delivery_filters.append("setparams=range=limited:color_primaries=bt709:color_trc=bt709:colorspace=bt709")
         if (
             delivery_profile["width"] != int(base_width)
