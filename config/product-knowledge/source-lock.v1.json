@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Actions-only pinned media setup repair; record deployed PR532 and preserve Studio readiness/Director runtime limits.",
-  "reviewed_at": "2026-11-18T09:06:58.666Z",
+  "reason": "CI-only media and prebuilt browser environment repair; repeated apt timeouts removed without changing application or readiness.",
+  "reviewed_at": "2026-11-18T09:19:10.715Z",
   "catalog_sha256": "6e99cb68f4c18cb94fcdc679e7d6a029cde5860a17a54bd8c7bbd0e3a953c162",
   "sources": [
     {
@@ -731,11 +731,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "bb9e9f805964be2497a2b9bf193a45644625b215e933a2e4eff4055def7656f7"
+      "sha256": "f8b03e4f0f7c4e1fa7ca68a5e2c4ec15d64ec971c26c4d09944fe4c6516c53d0"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "97ae4a6761c32805b88b03d8f97b2f54ac792ffb3ebf488cedd635b6eea55329"
+      "sha256": "ecc173e4b65433dc52c899113a7cd3674306876ae4f0164ac1b977587bf5521d"
     },
     {
       "path": "worker.js",

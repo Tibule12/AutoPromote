@@ -7,6 +7,15 @@ const path = require("node:path");
 const { execFileSync } = require("node:child_process");
 const { prepareMediaTools } = require("../../scripts/ci/prepare-media-tools.cjs");
 
+test("the browser image matches the locked SDK and setup never requests apt downloads", () => {
+  const yaml = require("yaml");
+  const job = yaml.parse(fs.readFileSync(path.join(__dirname, "../../.github/workflows/playwright-e2e.yml"), "utf8")).jobs["playwright-e2e"];
+  const locked = require("../../package-lock.json").packages["node_modules/playwright"].version;
+  assert(job.container.image.startsWith(`mcr.microsoft.com/playwright:v${locked}-noble@sha256:`));
+  assert.match(job.container.image, /@sha256:[a-f0-9]{64}$/);
+  assert(!job.steps.some(step => /apt-get|playwright install/.test(step.run || "")));
+});
+
 test("locked media tools work across Actions steps and encode/decode video with sound", { timeout: 30000 }, () => {
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), "autopromote-media-setup-test-"));
   try {

@@ -10,7 +10,9 @@
     "h264AacEncodeProbeAndDecode": "PASS",
     "vp8WebmEncode": "PASS",
     "workflowYamlAndBashSyntax": "PASS",
-    "aptInvocationsInMediaSetup": 0
+    "aptInvocationsInMediaSetup": 0,
+    "nativeHeadlessMutedBrowserProbe": "PASS",
+    "imageSdkVersionAndNoAptInvariant": "PASS"
   },
   "applicationCodeChanged": false,
   "testsSkippedOrThresholdsChanged": false,
@@ -19,5 +21,14 @@
     "Director model planning remains separately unverified.",
     "17 FUNCTIONAL/9 PARTIAL/1 BROKEN/2 UNIMPLEMENTED/0 PRO/0 PRODUCTION",
     "Typography13/16 and shared S02/S04/S03 remain."
-  ]
+  ],
+  "additionalFailedRun": "https://github.com/Tibule12/AutoPromote/actions/runs/44273011140",
+  "additionalFailedStep": "Prepare playwright browsers",
+  "additionalCause": "After media setup passed, Playwright apt installation stalled on32.1MB of Mesa/font packages and hit its five-minute timeout.",
+  "browserImage": {
+    "version": "1.59.1-noble",
+    "digest": "sha256:b0ab6f3cb99aa7803adbc14d9027ec1785fc6e433b97e134e0f8fe61683b6b53",
+    "registryManifestVerified": true,
+    "lockedSdkVersion": "1.59.1"
+  }
 }

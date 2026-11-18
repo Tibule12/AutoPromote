@@ -6,12 +6,14 @@
       "reports/actions-repair-20261118/README.md"
     ],
     "cause": "Apt mirror transfer exceeded the five-minute setup timeout twice; browsers never started.",
-    "change": "Prepare verified media binaries from already-locked npm packages in owned runner scratch.",
+    "change": "Prepare verified locked media tools and use an SDK-matched, digest-pinned Playwright image with preinstalled browser/OS dependencies.",
     "verification": {
       "actualVideoAndSoundEncodeProbeDecode": "PASS",
       "vp8WebmEncode": "PASS",
       "workflowSyntax": "PASS",
-      "freshGitHubPlaywright": "PENDING"
+      "freshGitHubPlaywright": "PENDING",
+      "nativeHeadlessMutedBrowserProbe": "PASS",
+      "imageSdkVersionInvariant": "PASS"
     },
     "applicationCodeChanged": false,
     "readinessCountsUnchanged": true,
