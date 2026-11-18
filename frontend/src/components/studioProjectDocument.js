@@ -145,18 +145,29 @@ const LAYER_PARAMETER_FIELDS = [
   "quality",
 ];
 
-const layerParameterFields = version => version === 3
+const CINEMATIC_LAYER_FIELDS = ["sceneType", "cinematic", "localExport"];
+const LOCAL_EXPORT_FIELDS = ["jobId", "sha256", "revision"];
+const layerParameterFields = version => version === 4
+  ? [...LAYER_PARAMETER_FIELDS, ...STUDIO_ADDITIONAL_LAYER_FIELDS, ...STUDIO_LAYER_BINDING_FIELDS, ...CINEMATIC_LAYER_FIELDS]
+  : version === 3
   ? [...LAYER_PARAMETER_FIELDS, ...STUDIO_ADDITIONAL_LAYER_FIELDS, ...STUDIO_LAYER_BINDING_FIELDS]
   : version === 2 ? [...LAYER_PARAMETER_FIELDS, ...STUDIO_ADDITIONAL_LAYER_FIELDS] : LAYER_PARAMETER_FIELDS;
 
 export const filterStudioLayerParameters = (item, version = 3) =>
-  cloneParameters(item, layerParameterFields(version));
+  cloneLayerParameters(item, version);
 
 // Access URLs and File/Blob payloads stay in the media store/snapshot. Persist
 // the owned reference and hash (when available), never an expiring URL identity.
 const cloneParameters = (item, fields) => JSON.parse(JSON.stringify(Object.fromEntries(
   fields.filter(field => item[field] !== undefined).map(field => [field, item[field]])
 )));
+
+const cloneLayerParameters = (item, version) => {
+  const parameters = cloneParameters(item, layerParameterFields(version));
+  if (parameters.localExport)
+    parameters.localExport = cloneParameters(parameters.localExport, LOCAL_EXPORT_FIELDS);
+  return parameters;
+};
 
 const AUDIO_CUE_PARAMETER_FIELDS = [
   "enabled", "builtIn", "kind", "tone", "name", "label", "sourceClipId",
@@ -234,8 +245,8 @@ const layerReference = (item, type, index) => ({
     : {}),
   compositionStage:
     type === "three_d" ? "final_alpha" : type === "motion" ? "worker_motion" : "worker_overlay",
-  parameterSchemaVersion: 3,
-  parameters: cloneParameters(item, layerParameterFields(3)),
+  parameterSchemaVersion: type === "three_d" ? 4 : 3,
+  parameters: cloneLayerParameters(item, type === "three_d" ? 4 : 3),
 });
 
 export const buildStudioLayersFromSnapshot = snapshot => {
@@ -542,7 +553,16 @@ export const projectStudioEditableStateToSnapshot = (document, transportSnapshot
       }
       if (item.hqPreviewJobId !== old?.hqPreviewJobId ||
         item.hqPreviewRevision !== old?.hqPreviewRevision) delete transport.hqPreviewUrl;
-      return { ...transport, ...item };
+      const restored = { ...transport, ...item };
+      // Canonical export identity owns the binding, while its expiring access
+      // URL may only come from the exact same verified artifact in transport.
+      if (collection === "threeDScenes" && item.localExport &&
+        /^[a-f0-9]{64}$/.test(item.localExport.jobId || "") &&
+        /^[a-f0-9]{64}$/.test(item.localExport.sha256 || "") &&
+        LOCAL_EXPORT_FIELDS.every(key => item.localExport[key] === old?.localExport?.[key]) &&
+        old?.localExport?.url)
+        restored.localExport = { ...item.localExport, url: old.localExport.url };
+      return restored;
     });
   }
   if (document.audioGraph?.parameterSchemaVersion === 1) {
@@ -1081,7 +1101,11 @@ export const validateStudioProjectDocument = document => {
     if (document.compatibility.editableStateVersion !== 1 ||
       !Array.isArray(document.layers) ||
       document.layers.some(layer => layer.type !== "caption" && layer.type !== "subject_vfx" &&
-        (![1, 2, 3].includes(layer.parameterSchemaVersion) || !validParameters(layer.parameters, layerParameterFields(layer.parameterSchemaVersion)))) ||
+        (![1, 2, 3, 4].includes(layer.parameterSchemaVersion) ||
+          (layer.parameterSchemaVersion === 4 && (layer.type !== "three_d" ||
+            (layer.parameters?.localExport !== undefined &&
+              !validParameters(layer.parameters.localExport, LOCAL_EXPORT_FIELDS)))) ||
+          !validParameters(layer.parameters, layerParameterFields(layer.parameterSchemaVersion)))) ||
       document.audioGraph?.parameterSchemaVersion !== 1 ||
       !validParameters(document.audioGraph.settings, AUDIO_SETTING_FIELDS) ||
       (document.audioGraph.music !== null &&

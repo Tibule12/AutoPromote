@@ -564,6 +564,15 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
                     if frame_source is None and pose == held_pose and sample_opacity == held_sample_opacity:
                         raster = held_raster
                     else:
+                        if title_animator is not None and title_animator.can_project(layer, pose):
+                            # Draw the same glyph outlines and sampled pose once at
+                            # delivery resolution. Intermediate glyph resizing can
+                            # create opacity rings around translucent moving type.
+                            raster = title_animator.project(pose["text_progress"], layer, pose,
+                                                            (width, height), sample_opacity)
+                            held_pose, held_sample_opacity, held_raster = pose, sample_opacity, raster
+                            frame.alpha_composite(raster)
+                            continue
                         if title_animator is not None and text_progress != pose["text_progress"]:
                             asset = title_animator.frame(pose["text_progress"])
                             text_progress = pose["text_progress"]

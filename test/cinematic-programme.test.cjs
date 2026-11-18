@@ -28,7 +28,12 @@ test("local programme uses actual canonical cuts, Inter title compositor, source
   try {
     const media = engine.register(source), state = snapshot(media);
     state.overlays = [{ id: "ordinary-title", type: "text", text: "CANONICAL TITLE", startTime: 1, duration: 2,
-      x: 50, y: 50, width: 70, fontFamily: "Inter", color: "#ffffff", fontWeight: 900 }];
+      x: 50, y: 50, width: 70, fontFamily: "Inter", color: "#ffffff", fontWeight: 900 },
+    { id: "animated-title", type: "text", text: "EDITABLE MOTION", startTime: 3, duration: 1,
+      x: 50, y: 70, width: 70, fontFamily: "Inter", color: "#ff5838", fontWeight: 900,
+      textProgress: 60, textAnimator: { version: 1, unit: "word", order: "forward", stagger: 65,
+        fromX: 0, fromY: 1.4, fromScale: .35, fromRotation: -35, fromOpacity: 0, tracking: .3,
+        rangeStart: 0, rangeEnd: 100, easing: "back_out" } }];
     state.soundEffects = [{ id: "native-reveal", builtIn: true, kind: "sfx", tone: "cinematic_hit",
       startTime: 1, duration: .7, volume: .1, fadeIn: .01, fadeOut: .15 }];
     const d = document(state), job = engine.submitProgramme(d);

@@ -80,9 +80,13 @@ def render(manifest_path):
         animator = None
         if layer.get("text_animator"):
             from studio_text_animator import AnimatedTitle
-            animator = AnimatedTitle(title, layer["text_animator"], width, height)
+            animator = AnimatedTitle(title, width, height, layer["text_animator"])
         png, movie = scratch / f"title{i}.png", scratch / f"title{i}.mov"
-        geometry = render_title_asset(title, png, width, height)
+        if animator is not None:
+            geometry = animator.geometry
+            animator.frame(100).save(png)
+        else:
+            geometry = render_title_asset(title, png, width, height)
         layer["title_clip_box"] = geometry["clipBox"]
         styled = {**title, **{key: value for key, value in geometry.items() if key not in ("lines", "clipBox")}}
         receipt = render_image_layer_motion(png, movie, styled, layer, width, height,

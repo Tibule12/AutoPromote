@@ -17,3 +17,6 @@ for weight,suffix in [(400,'Regular'),(600,'SemiBold'),(800,'ExtraBold'),(900,'B
         data['glyphs'][char]={'path':pen.getCommands(),'advance':advance}
     result['weights'][str(weight)]=data
 out=ROOT/'frontend/src/components/motion/titleGlyphs.v1.json';out.write_text(json.dumps(result,separators=(',',':'))+'\n');print('Native title glyph bytes:',out.stat().st_size)
+
+# Both projections consume the same licensed outlines, not platform font rasterizers.
+(ROOT/'python_media_worker/assets/studio-title-glyphs.v1.json').write_bytes(out.read_bytes())

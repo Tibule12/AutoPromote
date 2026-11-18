@@ -1,0 +1,130 @@
+{
+  "date": "2026-11-18",
+  "scope": "Shared native text precision and cinematic canonical recovery; whole Studio remains partial",
+  "evidenceType": "Real normal-account local emulator UI/native CPU export plus labelled unit/integration checks",
+  "headless": true,
+  "muted": true,
+  "mockedApiResponses": false,
+  "nativeText": {
+    "preFinalCapture": true,
+    "normalImportControlsUndoRedoSaveColdReopen": true,
+    "pairsPassed": 16,
+    "pairsTotal": 16,
+    "stage": [
+      1280,
+      720
+    ],
+    "iouMinObserved": 0.9048575253394531,
+    "boundaryP95MaxObserved": 2,
+    "unchangedThresholds": {
+      "iouMin": 0.9,
+      "boundaryP95MaxNativePixels": 2
+    },
+    "spatialOrTimingFitting": false,
+    "outputSha256": "ecfd5f24b89ee4d624518f4076ee198f82f158eb339c7b570eb2531782c53f3e",
+    "seconds": 4,
+    "frames": 96,
+    "fps": 24,
+    "stereoAudioSampleRate": 48000,
+    "fullDecode": true
+  },
+  "recovery": {
+    "normalSignIn": true,
+    "normalBackupImport": true,
+    "pageErrors": [],
+    "newRenderRequests": 0,
+    "headless": true,
+    "muted": true,
+    "recoveredRotation": "-25",
+    "editablePlayback": {
+      "endedEventFlag": false,
+      "duration": 4,
+      "time": 3.958333,
+      "lastAuthoredFrameReached": true
+    },
+    "completedFilePlayback": {
+      "endedEventFlag": true,
+      "duration": 4,
+      "time": 4,
+      "lastAuthoredFrameReached": true
+    },
+    "actualCompletedJobRestored": true,
+    "help": [
+      {
+        "expected": "studio.keyframes",
+        "status": 200
+      },
+      {
+        "expected": "studio.keyframes",
+        "status": 200
+      },
+      {
+        "expected": "studio.audio_restoration",
+        "status": 200
+      }
+    ],
+    "complete": true,
+    "downloadMatchesOriginal": true,
+    "finalClient": true
+  },
+  "checks": {
+    "textNodeFrontend": 47,
+    "canonicalFrontend": 67,
+    "directorFrontend": 135,
+    "workerCompositorImageTextNode": 195,
+    "colourDelivery": 17,
+    "cinematicContractProgramme": 9,
+    "knowledge": 17,
+    "strictBuild": true,
+    "lockedReplay": true,
+    "welcomeViewportChecks": 8
+  },
+  "remaining": {
+    "scaledDisplayStrictOverlapFailed": 1,
+    "scaledDisplayPairs": 16,
+    "historicalMinuteFilmFailed": 13,
+    "historicalMinuteFilmPairs": 16,
+    "historicalRequalified": false,
+    "wholePictureAudioColourMaterialLighting": false,
+    "broaderThroughput": false,
+    "professionalOrProductionQualified": false,
+    "creativeListeningApproved": false
+  },
+  "testRuntime": {
+    "project": "demo-autopromote-credits",
+    "initialIdempotentFixtureCredits": 5,
+    "extraIdempotentFixtureCredits": 2,
+    "testGrantsAreNotPurchases": true,
+    "productionFinancialChanges": false,
+    "completedOperationCount": 11,
+    "activeOrReserved": 0,
+    "checkpointComplete": true,
+    "originalCompletedOperationsPreserved": 7,
+    "checkpointSha256": "a2d1239467ff88ab805c1e6869d2bad68a75f79deb47acc2a2411426a2897dee",
+    "ownedServicesStopped": true
+  },
+  "execution": {
+    "localCpu": true,
+    "newPaidGpuOrModelJobs": 0,
+    "publicationOrScheduling": false
+  },
+  "proofHashes": {
+    "native-parity.json": "7009fddab7551eb9ebdb3b8a481555febefa0405ff72bb31859a062e00ab7cea",
+    "native-text-progress.json": "5fc6548795c7921b3ae4826f027e02c973e0d4258d076c61c32dcfa8f2c3b7fc",
+    "native-text/render-receipt.json": "073c20caee5301a3c0406556a284e51e32cda80b411cb0eef46ce8cf1db772c8",
+    "native-playback/verification.json": "7c990d7ece2a20f432f4dd15a0251183d2d3f0708a9435031b31976f236ecdf1",
+    "release-final-client-build.log": "bbed1772319ba58ed36f802200e324563b089d4873bd699da8c6e2d5cda800bf",
+    "release-final-welcome.log": "9416a18881d1e95244ab72d2d5dbc89ba8bf94b24cefc2f6760454d4e851716b",
+    "canonical-final-tests.log": "398245f9aea2a4bd9c0c0cf51c5efa5fd67d86f7174fb841e19176dc9a4d26fe",
+    "canonical-binding-final.log": "5434da2f409a1d76327a52c9b0b9714d2714ad98829d67a1fac18d3b0c0e58bd",
+    "director-focused-final.log": "9d15d68cc14c4d3a1b0388a946367fe3ee2e7f433767721f1a7968fed1c03c32",
+    "compositor-regressions.log": "2095ecdb80cc39653f048068f788a3f323ed27f82d872f847a2a434af98e2f99",
+    "colour-delivery-tests.log": "1054b9e405f1ec1952ccf22fd2aa2938fd4f5b25811859f555a6c38d8de700c6",
+    "cinematic-release-tests.log": "2644c0559875a8f42068440485fc4870546ab87bd7d7dcaf8ed070e902f05af2",
+    "knowledge-final-tests.log": "891a0481c32e6bcf262f99a345b64fea70ccf62e96117999d7ac1dac8764ba17"
+  },
+  "release": {
+    "state": "LOCAL_VERIFIED_RELEASE_PENDING",
+    "liveVerified": false
+  }
+}

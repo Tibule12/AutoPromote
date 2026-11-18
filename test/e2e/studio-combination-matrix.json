@@ -1,4 +1,38 @@
 {
+  "studioCompletion20261118": {
+    "date": "2026-11-18",
+    "status": "BOUNDED_NATIVE_TEXT_PARITY_AND_CINEMATIC_CANONICAL_REPAIR",
+    "report": "reports/studio-completion-20261118/README.md",
+    "verification": "reports/studio-completion-20261118/verification.json",
+    "preFinalNativeTextPairs": {
+      "passed": 16,
+      "total": 16,
+      "stage": [
+        1280,
+        720
+      ],
+      "iouMin": 0.9,
+      "boundaryP95MaxNativePixels": 2,
+      "thresholdsUnchanged": true
+    },
+    "scaledDisplay": {
+      "passed": 15,
+      "total": 16,
+      "remainingStrictOverlapFailure": true
+    },
+    "historicalMinuteFilm": {
+      "strictFailures": 13,
+      "total": 16,
+      "requalified": false
+    },
+    "canonicalCinematicFields": "3D parameter schema v4; sceneType/cinematic/localExport identity; versioned legacy support",
+    "artifactUrls": "transport-only; exact job/hash/revision binding",
+    "completedRecoveryWithoutNewRender": true,
+    "localCpuOnly": true,
+    "productionFinancialChanges": false,
+    "productionReady": false,
+    "next": "S02 scaled-display precision and broader picture/audio/throughput; S04 motion/vector depth; S03 occurrence/group ownership"
+  },
   "studioLiveDirectorPlanner20261118": {
     "date": "2026-11-18",
     "scope": "Complete the live Director planning and editable authoring workflow.",
@@ -121,7 +155,7 @@
   },
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-11-17T08:57:17.443286+00:00",
+  "updatedAt": "2026-11-18T13:51:05.359Z",
   "baseline": "reports/studio-stability-20261008/results.json",
   "readinessStates": [
     "UNIMPLEMENTED",

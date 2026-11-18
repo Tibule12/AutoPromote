@@ -13,6 +13,39 @@ import tempfile
 import struct
 
 
+def rasterize_studio_svg(payload):
+    """Rasterize a validated, self-contained SVG into straight RGBA.
+
+    librsvg exposes Cairo's associated colour channels. PNG/Pillow and the
+    Studio compositor expect straight colour; undo that association once at
+    this decoder boundary, before any opacity, filtering or compositing.
+    Callers own the existing SVG allowlist or generate trusted native markup.
+    """
+    import numpy as np
+    from PIL import Image
+    if isinstance(payload, str):
+        payload = payload.encode('utf-8')
+    if len(payload) > 8 * 1024 * 1024:
+        raise ValueError('Native SVG exceeds the source limit')
+    with tempfile.NamedTemporaryFile(suffix='.svg') as svg:
+        svg.write(payload)
+        svg.flush()
+        result = subprocess.run(
+            ['ffmpeg', '-nostdin', '-v', 'error', '-protocol_whitelist', 'file',
+             '-c:v', 'librsvg', '-i', svg.name, '-frames:v', '1', '-threads', '2',
+             '-c:v', 'png', '-f', 'image2pipe', '-'],
+            check=True, capture_output=True, timeout=30)
+    with Image.open(io.BytesIO(result.stdout)) as source:
+        if source.width > 8192 or source.height > 8192 or source.width * source.height > 64 * 1024 * 1024:
+            raise ValueError('Native SVG exceeds the pixel limit')
+        pixels = np.asarray(source.convert('RGBA')).astype(np.uint32)
+    alpha = pixels[..., 3:4]
+    # Integer rounding avoids float colour drift and zero-alpha division.
+    pixels[..., :3] = np.where(alpha > 0,
+        np.minimum(255, (pixels[..., :3] * 255 + alpha // 2) // np.maximum(alpha, 1)), 0)
+    return Image.fromarray(pixels.astype(np.uint8), 'RGBA')
+
+
 def normalize_studio_image_colour(destination):
     """Preserve the browser's SDR appearance for Rec709-tagged PNG assets.
 
@@ -77,9 +110,7 @@ def materialize_inline_image(source, destination):
         for name in ('width','height'):
             value=root.get(name,'')
             if not re.fullmatch(r'\d+(?:\.\d+)?(?:px)?',value) or not 0<float(value.removesuffix('px'))<=4096:raise ValueError('SVG dimensions must be between 1 and 4096')
-        with tempfile.NamedTemporaryFile(suffix='.svg',dir=Path(destination).parent) as svg:
-            svg.write(payload);svg.flush()
-            subprocess.run(['ffmpeg','-nostdin','-v','error','-protocol_whitelist','file','-c:v','librsvg','-i',svg.name,'-frames:v','1','-threads','2','-c:v','png','-f','image2','-y',str(destination)],check=True,capture_output=True,timeout=30)
+        rasterize_studio_svg(payload).save(destination, format='PNG')
     else:
         from PIL import Image
         with Image.open(io.BytesIO(payload)) as image:

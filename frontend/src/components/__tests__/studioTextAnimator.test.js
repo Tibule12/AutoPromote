@@ -255,3 +255,18 @@ test("all 6 text choreography presets validate and apply in one click via Studio
   fireEvent.click(screen.getByTestId("text-animator-preset-vortex_spiral_reveal"));
   expect(onChange).toHaveBeenCalledWith(buildStudioTextAnimatorPreset("vortex_spiral_reveal"));
 });
+
+test("animated titles use the bundled outline, local stroke width and one shadow per unit", () => {
+  const layer = { ...title(), shadow: "strong", strokeWidth: 2, strokeColor: "#334455" };
+  const { container } = render(
+    <StudioAnimatedText layer={layer} programmeWidth={1280} progress={50} />
+  );
+  expect(container.querySelectorAll("text")).toHaveLength(0);
+  const path = container.querySelector("[data-text-unit] path");
+  expect(path.getAttribute("d")).toMatch(/^M/);
+  expect(path.getAttribute("transform")).toMatch(/scale\(0\.017578125 -0\.017578125\)/);
+  expect((Number(path.getAttribute("stroke-width")) * 36) / 2048).toBe(2);
+  expect(path.getAttribute("paint-order")).toBe("stroke fill");
+  expect(container.querySelectorAll("feGaussianBlur")).toHaveLength(2);
+  expect(container.querySelector("[data-text-unit] > g").getAttribute("filter")).toMatch(/^url\(#/);
+});
