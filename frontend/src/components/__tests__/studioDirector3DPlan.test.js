@@ -20,8 +20,9 @@ jest.mock('../studioDirectorCreativeClient', () => ({
 }));
 jest.mock('firebase/auth', () => ({ getAuth: jest.fn() }));
 
-function makeProjectSnapshot(withMedia = true) {
+function makeProjectSnapshot(withMedia = true, aspect = "16:9") {
   const s = {
+    reframeAspect: aspect,
     orderedClips: withMedia ? [{ id: 'c1', url: 'http://127.0.0.1/city.mp4', start: 0, end: 10 }] : [],
     timeline: withMedia ? [{ id: 'occ1', sourceClipId: 'c1', startRequest: 0, endRequest: 10 }] : [],
     overlays: [],
@@ -62,7 +63,7 @@ describe('studioDirector3DPlan', () => {
     expect(inferCinema3DMode('Hybrid rotoscope split film with 3D reveal', true)).toBe('hybrid_film_3d');
   });
 
-  test('compiles and executes all 5 Director Cinema 3D modes atomically onto threeDScenes and studioDocument', async () => {
+  test.each(['9:16', '4:5', '1:1', '16:9'])('compiles and executes all 5 Director Cinema 3D modes atomically at %s', async aspect => {
     const briefs = {
       brand_vfx: "Direct molten gold WebGL2 VFX reveal for 'APEX NOVA'",
       sculpture_ribbon: "Choreograph liquid holographic ribbon sculpture 'ORBITAL FORM'",
@@ -72,7 +73,7 @@ describe('studioDirector3DPlan', () => {
     };
 
     for (const mode of Object.keys(DIRECTOR_CINEMA_3D_MODES)) {
-      const snapshot = makeProjectSnapshot(mode === 'hybrid_film_3d');
+      const snapshot = makeProjectSnapshot(mode === 'hybrid_film_3d', aspect);
       const before = JSON.stringify(snapshot);
       const proposal = buildDirectorCinema3DProposal(snapshot, briefs[mode], 6, { mode });
       expect(proposal.version).toBe(5);
@@ -84,7 +85,7 @@ describe('studioDirector3DPlan', () => {
         snapshot,
         prefix => `${prefix}-${++idCount}`,
         {
-          aspect: 16 / 9,
+          aspect: Number(aspect.split(":")[0]) / Number(aspect.split(":")[1]),
           rasterize: async () => new File(['art'], 'art.png', { type: 'image/png' }),
           createUrl: () => `blob:art-${++idCount}`,
           revokeUrl: () => {},

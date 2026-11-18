@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Review demand-only Director provider and four-aspect kinetic posters; 58 backend,51 frontend,17 knowledge tests and strict build pass; native model release verification pending.",
-  "reviewed_at": "2026-11-18T10:29:56.738Z",
-  "catalog_sha256": "54ef38296e8cfbccc5f6162c9fd98483230c76f15aa30272e55ffe61fb081b2a",
+  "reason": "Review actual edc03e96 live poster/footage Director flows, independent52-layer48-image native backup/cold recovery,147 Director tests and retained shared limits.",
+  "reviewed_at": "2026-11-18T10:50:45.903Z",
+  "catalog_sha256": "d36ff9e0692c1c961b54a65c30babc2405b2c043fc4ac3d0ad76b5cb60e4ddad",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -747,11 +747,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "efb751f2a1b888eef0be7f5691049c2a70fa8b1aecbfa54751176197bed07210"
+      "sha256": "70272857f6ee61e4b21ff81b8f075cbbabc89d8ccfd67dadf8ef142e3247fa66"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "82f6dfb3ce30e79597408fe62e4705bc4bb7c40cca8f70f5937962e6675407f9"
+      "sha256": "840f3e52e1a946c67d5c1d37e9850af20638db0c2422b7779ba7abae4d2c9452"
     },
     {
       "path": "worker.js",
