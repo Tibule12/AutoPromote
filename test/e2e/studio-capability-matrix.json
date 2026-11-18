@@ -15,7 +15,11 @@
       "providerBackendTests": 58,
       "posterAspectCases": 4,
       "strictBuild": "PASS",
-      "generatedPlanLiveRoundTrip": "PENDING"
+      "generatedPlanLiveRoundTrip": "PASS at edc03e96: actual poster and footage model planning/review/refine/Apply/manual edit/history/save/cold reopen",
+      "fullDirectorFrontendTests": 147,
+      "knowledgeTests": 17,
+      "nativeBackupRestoreAndColdReopen": "PASS: 52 layers,48 File/PNG decodes, settled paused picture, zero page/HTTP errors",
+      "cinema3DAuthoringAspectCombinations": 20
     },
     "changes": [
       "Use existing configured OpenAI key for demand-only Director planning; preserve explicit local and disabled provider modes.",
@@ -24,11 +28,10 @@
       "Use saved output aspect for kinetic posters and preserve vector-letter proportions."
     ],
     "remainingBlockers": [
-      "Production generated-plan review/Apply/manual editing/history/save/cold-reopen verification.",
-      "Broader S02/S04/S03 and typography13/16 remain."
+      "Broader Studio S02/S04/S03, full preview/final picture/audio parity and typography13/16 remain separate."
     ],
     "readinessCountsUnchanged": true,
-    "nextTask": "Deploy and verify actual generated-plan round trip on the serving App."
+    "nextTask": "Continue shared Studio picture/audio/parity, motion and ownership backlog; scoped Director live workflow verified."
   },
   "studioLiveDirectorAspect20261118": {
     "date": "2026-11-18",

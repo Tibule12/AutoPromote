@@ -1,6 +1,6 @@
 # Director
 
-Development documentation • product 1.2.0 • knowledge 1.0.62 • 2026-11-18
+Development documentation • product 1.2.0 • knowledge 1.0.63 • 2026-11-18
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -34,7 +34,7 @@ Proposes reviewed edits through shared Studio operations. Accepting a proposal m
 - Model planning uses the configured OpenAI provider on demand, or explicitly selected local CPU inference. No key or an explicit disabled provider leaves model planning offline. Existing paid-plan/tester access is required. No model request runs on status checks or when idle.
 - Source-bound choreography and built-in 3D design are deterministic operators, separate from model inference. Colour and frame-change descriptors do not recognize subjects or understand speech.
 - Composition and kinetic posters use the saved output aspect, including portrait. Poster copy is exactly three uppercase English words of two to six letters each.
-- Production model activation and the generated-plan live round trip are pending release verification. Broader preview/final picture and sound agreement remains unqualified.
+- Actual OpenAI poster and footage-composition planning, review, refinement, Apply, manual editing, Undo/Redo, saving and reopening pass on the live App. Independent native backup import and reopening retain all tested image bytes. Broader preview/final picture and sound agreement remains unqualified.
 
 **Common errors**
 

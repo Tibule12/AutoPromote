@@ -1,0 +1,47 @@
+{
+  "date": "2026-11-18",
+  "testedRelease": "edc03e96541b9abdc91f30715bf3c66177cd1730",
+  "mockedResponses": false,
+  "headless": true,
+  "muted": true,
+  "posterWorkflow": "PASS: real OpenAI planning, review without mutation, words/palette/energy refinement, Apply, manual layer edit, Undo/Redo, Save/cold reopen",
+  "footageCompositionWorkflow": "PASS: source decoding/descriptors, actual OpenAI composition, Apply, advancing playback, Undo/Redo, Save/cold reopen",
+  "independentNativeBackup": {
+    "startedAt": "2026-11-18T10:49:16.619Z",
+    "headless": true,
+    "muted": true,
+    "nativeBackupRestore": true,
+    "pageErrors": [],
+    "httpErrors": [],
+    "modelRequests": 0,
+    "renderRequests": 0,
+    "restored": {
+      "layers": 52,
+      "imageLayers": 48,
+      "fileCount": 48,
+      "decoded": 48
+    },
+    "settledPausedPicture": true,
+    "reopened": {
+      "layers": 52,
+      "imageLayers": 48,
+      "fileCount": 48,
+      "decoded": 48
+    },
+    "complete": true,
+    "finishedAt": "2026-11-18T10:49:40.113Z"
+  },
+  "backendTests": 58,
+  "directorFrontendTests": 147,
+  "knowledgeTests": 17,
+  "strictBuild": "PASS",
+  "lockedReplay": "PASS",
+  "contract": "PASS",
+  "privateEvidenceSha256": {
+    "live-model-verification.json": "006c1dc2e4907bf7da22abaa3bca6fd15524d864af19c85a11082d2e564ed7e5",
+    "live-ai-composition-verification.json": "111f45b802f15969ecf5f03368924b5f8e7a94f59504ff27f6297305e1f6abcc",
+    "native-backup-integrity.json": "2f5dedd129815876c224c7d7ff4e21450ad9a920b90dd5a9f13e0849f99dcb61",
+    "Clean live model and footage composition applied.autopromote.json": "ebb889f90fe175be5f513cf03b90e18e5ae4a00a3226fc20c496b8586c8521d9"
+  },
+  "scopeLimit": "No new export/render or native 3D pixel qualification. Whole Studio S02/S04/S03 and typography13/16 remain unchanged."
+}
