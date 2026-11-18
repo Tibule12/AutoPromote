@@ -2,6 +2,7 @@ import { validateStudioPerspective, PERSPECTIVE_LEFT } from './studioPerspective
 import { parseStudioMaskPolygon } from './studioMaskGeometry';
 import { computeColorScopesFromRgba } from './studioColorScopes';
 import { defaultMotionDriverForProperty } from './studioCompRigging';
+import { createStudioVectorPrimitive } from './studioVectorShape';
 
 const fullMask = { enabled: false, shape: 'rectangle', feather: 0, inverted: false };
 const finite = (v, a, b) => typeof v === 'number' && Number.isFinite(v) && v >= a && v <= b;
@@ -219,6 +220,18 @@ export const DIRECTOR_CHOREOGRAPHY_ARCHETYPES = {
     description:
       'Source-bound Portal & Rotoscope Prism + Vector Broadcast Framing & Accent Rules',
   },
+  broll_cutaway_rig: {
+    id: 'broll_cutaway_rig',
+    label: 'B-Roll Powerhouse + Kinetic Callout',
+    description:
+      'Circle Spotlight B-Roll Portal + Whip-Pan Motion Blur + Voice-First Audio Ducking + Per-Character Kinetic Title',
+  },
+  omniscient_showpiece: {
+    id: 'omniscient_showpiece',
+    label: '8-Track Omniscient Studio Masterpiece',
+    description:
+      'Null Rig + Alpha Portal + Rotoscope Spline + B-Roll Circle Portal + Vector Reticle Trim + Kinetic Title + Dead-Clip Revival + Selective HSL/Window Grade',
+  },
 };
 
 const SHA256_K = new Uint32Array([
@@ -323,15 +336,88 @@ export function inferDirectorLookProfileId(brief = '', samples = []) {
 
 export function inferDirectorArchetypeId(brief = '') {
   const text = String(brief || '').toLowerCase();
+  if (/\b(omniscient|masterpiece|showpiece|everything|all-in-one|full studio|8-track)\b/.test(text)) {
+    return 'omniscient_showpiece';
+  }
+  if (/\b(b-roll|broll|cutaway|circle portal|ducking|j-cut|l-cut)\b/.test(text)) {
+    return 'broll_cutaway_rig';
+  }
   if (/\b(split|diptych|dual|versus|side by side)\b/.test(text)) return 'split_diptych';
   if (/\b(orbit|perspective|3d|2\.5d|card|tilt)\b/.test(text)) return 'orbit_cascade';
   if (/\b(hybrid|poster|title|typography|frame|broadcast)\b/.test(text)) return 'kinetic_hybrid';
   return 'portal_prism';
 }
 
+export function inferDirectorRevivalAndSelectiveGrade(brief = '', samples = []) {
+  const text = String(brief || '').toLowerCase();
+  let revitalizerPresetId = null;
+  let qualifierPresetId = null;
+  let powerWindowPresetId = null;
+
+  const avgLuma =
+    Array.isArray(samples) && samples.length > 0
+      ? samples.reduce((sum, s) => sum + Number(s.luma ?? 108), 0) / samples.length
+      : 108;
+  const avgEntropy =
+    Array.isArray(samples) && samples.length > 0
+      ? samples.reduce((sum, s) => sum + Number(s.tonalEntropy ?? 3.1), 0) / samples.length
+      : 3.1;
+
+  if (/\b(low[\s-]?light|dark|muddy|underexposed|night rescue)\b/.test(text) || avgLuma < 68) {
+    revitalizerPresetId = 'low_light_rescue';
+  } else if (/\b(flat|log|washed|hazy|faded|dehaze)\b/.test(text) || avgEntropy < 2.3) {
+    revitalizerPresetId = 'flat_log_revival';
+  } else if (/\b(resurrect|hdr pop|lifeless|vivid)\b/.test(text)) {
+    revitalizerPresetId = 'lifeless_color_resurrection';
+  } else if (/\b(revive|dead|phone|crisp|bring.*to life|omniscient|masterpiece|showpiece|everything)\b/.test(text)) {
+    revitalizerPresetId = 'dead_phone_enhancer';
+  }
+
+  if (/\b(sin city|color splash|red splash|b&w splash)\b/.test(text)) {
+    qualifierPresetId = 'sin_city_red_splash';
+  } else if (/\b(crimson|red|garment|jacket|dress|lips)\b/.test(text)) {
+    qualifierPresetId = 'garment_crimson';
+  } else if (/\b(cobalt|denim|blue|vehicle)\b/.test(text)) {
+    qualifierPresetId = 'garment_cobalt';
+  } else if (/\b(gold|amber|jewelry|watch|trophy)\b/.test(text)) {
+    qualifierPresetId = 'gold_amber_object';
+  } else if (/\b(violet|purple|cyber object)\b/.test(text)) {
+    qualifierPresetId = 'violet_neon_accent';
+  } else if (/\b(skin|face|portrait|radiance|omniscient|masterpiece|showpiece|everything)\b/.test(text)) {
+    qualifierPresetId = 'skin_radiance';
+  }
+
+  if (/\b(face|upper body|headshot|portrait)\b/.test(text)) {
+    powerWindowPresetId = 'face_upper_body';
+  } else if (/\b(full body|standing|column)\b/.test(text)) {
+    powerWindowPresetId = 'full_body_column';
+  } else if (/\b(product|center object|hero object)\b/.test(text)) {
+    powerWindowPresetId = 'center_object_hero';
+  } else if (/\b(hands|desk|foreground)\b/.test(text)) {
+    powerWindowPresetId = 'hands_foreground_zone';
+  } else if (/\b(spotlight|isolate|dim surround|omniscient|masterpiece|showpiece|everything)\b/.test(text)) {
+    powerWindowPresetId = 'subject_spotlight';
+  }
+
+  return {
+    revitalizerPresetId,
+    qualifierPresetId,
+    powerWindowPresetId,
+  };
+}
+
 export function buildDirectorFinishGradeAction(
   lookId = 'kodak_2383',
-  { duration = 12, beatSyncPulses = true, beats = null, gradeOverrides = {}, advancedOverrides = {} } = {}
+  {
+    duration = 12,
+    beatSyncPulses = true,
+    beats = null,
+    gradeOverrides = {},
+    advancedOverrides = {},
+    revitalizerPresetId = null,
+    qualifierPresetId = null,
+    powerWindowPresetId = null,
+  } = {}
 ) {
   const profile =
     DIRECTOR_CINEMA_LOOK_PROFILES[lookId] || DIRECTOR_CINEMA_LOOK_PROFILES.kodak_2383;
@@ -350,10 +436,13 @@ export function buildDirectorFinishGradeAction(
     name: profile.label,
     grade: {
       ...(profile.grade || {}),
+      ...(revitalizerPresetId ? { revitalizerPresetId } : {}),
       ...gradeOverrides,
     },
     advancedColor: {
       ...(profile.advancedColor || {}),
+      ...(qualifierPresetId ? { qualifierPresetId } : {}),
+      ...(powerWindowPresetId ? { powerWindowPresetId } : {}),
       ...advancedOverrides,
     },
     beatSyncPulses: Boolean(beatSyncPulses),
@@ -642,7 +731,7 @@ export function compileDirectorComposition(result, snapshot) {
       typeof node.id !== 'string' ||
       !/^[a-zA-Z][\w-]{0,39}$/.test(node.id) ||
       ids.has(node.id) ||
-      !['video', 'shape', 'rig'].includes(node.kind) ||
+      !['video', 'shape', 'rig', 'title', 'vector'].includes(node.kind) ||
       !finite(node.start, 0, context.duration) ||
       !finite(node.end, node.start + 0.05, context.duration)
     ) {
@@ -682,6 +771,9 @@ export function compileDirectorComposition(result, snapshot) {
           value: pose[p] * (p === 'scale' && node.kind === 'video' ? 10 / 7 : 1),
           easing: 'bezier',
           curve: poseCurve,
+          ...(Array.isArray(pose.spatialCurve) && (p === 'x' || p === 'y')
+            ? { spatialCurve: [...pose.spatialCurve] }
+            : {}),
         });
       }
     }
@@ -756,6 +848,9 @@ export function compileDirectorComposition(result, snapshot) {
         validateStudioPerspective(node.perspective);
         if (mask.enabled) throw Error('A perspective plane cannot also have a shape mask.');
       }
+      if (node.bRollLayoutPreset === 'circle_portal' && !mask.enabled) {
+        softMaskCount += 1;
+      }
       add({
         type: 'media_plane',
         id: node.id,
@@ -768,6 +863,10 @@ export function compileDirectorComposition(result, snapshot) {
         mask,
         ...(node.perspective ? { perspective: node.perspective } : {}),
         ...(node.motionDrivers ? { motionDrivers: node.motionDrivers } : {}),
+        ...(node.bRollLayoutPreset ? { bRollLayoutPreset: node.bRollLayoutPreset } : {}),
+        ...(node.bRollAudioPreset ? { bRollAudioPreset: node.bRollAudioPreset } : {}),
+        ...(node.bRollLookPreset ? { bRollLookPreset: node.bRollLookPreset } : {}),
+        ...(node.motionBlur ? { motionBlur: node.motionBlur } : {}),
       });
       reports.push({
         startTime: node.start,
@@ -785,6 +884,81 @@ export function compileDirectorComposition(result, snapshot) {
         duration: node.end - node.start,
         transform,
         ...(node.motionDrivers ? { motionDrivers: node.motionDrivers } : {}),
+      });
+    } else if (node.kind === 'title') {
+      const titleText = String(node.text || 'STUDIO SHOWPIECE')
+        .replace(/[^A-Za-z0-9 .,!?'-]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 80) || 'STUDIO SHOWPIECE';
+      const animEnd = Number(
+        Math.min(node.end, node.start + Math.max(0.25, (node.end - node.start) * 0.45)).toFixed(3)
+      );
+      add({
+        type: 'title',
+        id: node.id,
+        name: node.name || node.id,
+        text: titleText,
+        textAnimatorPreset: node.textAnimatorPreset || 'elastic_wave_cascade',
+        textProgress: 0,
+        color: /^#[\da-f]{6}$/i.test(node.color || '') ? node.color : '#f8fafc',
+        fontWeight: 900,
+        width: 78,
+        textAlign: 'center',
+        startTime: node.start,
+        duration: node.end - node.start,
+        transform,
+      });
+      keys.push(
+        { property: 'textProgress', time: node.start, value: 0, easing: 'linear' },
+        {
+          property: 'textProgress',
+          time: animEnd,
+          value: 100,
+          easing: 'bezier',
+          curve: defaultCurve,
+        }
+      );
+      reports.push({
+        startTime: node.start,
+        endTime: node.end,
+        sourceName: titleText,
+        treatment: `Kinetic Title (${node.textAnimatorPreset || 'elastic_wave_cascade'})`,
+        reason: node.reason || 'Per-character kinetic typography reveal.',
+      });
+    } else if (node.kind === 'vector') {
+      const vectorShape = createStudioVectorPrimitive(node.primitiveId || 'target_reticle');
+      const trimDone = Number(
+        Math.min(node.end, node.start + Math.max(0.25, (node.end - node.start) * 0.48)).toFixed(3)
+      );
+      graphics.push({
+        id: node.id,
+        name: node.name || node.id,
+        type: 'artwork',
+        vectorShape,
+        strokeStart: 0,
+        strokeEnd: 100,
+        strokeOffset: 0,
+        startTime: node.start,
+        duration: node.end - node.start,
+        x: pose.x,
+        y: pose.y,
+        width: node.width || 38,
+        height: node.height || 38,
+        scale: pose.scale,
+        rotation: pose.rotation,
+        opacity: pose.opacity,
+        keys: [
+          ...keys,
+          { property: 'strokeEnd', time: node.start, value: 0, easing: 'linear' },
+          {
+            property: 'strokeEnd',
+            time: trimDone,
+            value: 100,
+            easing: 'bezier',
+            curve: defaultCurve,
+          },
+        ],
       });
     } else {
       if (!/^#[\da-f]{6}$/i.test(node.color || '')) {
@@ -812,7 +986,7 @@ export function compileDirectorComposition(result, snapshot) {
         keys,
       });
     }
-    if (node.kind !== 'shape') add({ type: 'keys', targetId: node.id, keys });
+    if (!['shape', 'vector'].includes(node.kind)) add({ type: 'keys', targetId: node.id, keys });
   }
 
   // Resolve edges only after every node exists. Shared scene actions validate
@@ -864,6 +1038,9 @@ export function compileDirectorComposition(result, snapshot) {
       beats: Array.isArray(cg.beats) ? cg.beats : null,
       gradeOverrides: cg.grade || {},
       advancedOverrides: cg.advancedColor || {},
+      revitalizerPresetId: cg.revitalizerPresetId || null,
+      qualifierPresetId: cg.qualifierPresetId || null,
+      powerWindowPresetId: cg.powerWindowPresetId || null,
     });
     add(gradeAction);
     colorSummary = {
@@ -872,6 +1049,9 @@ export function compileDirectorComposition(result, snapshot) {
       label: profile.label,
       lutPresetId: gradeAction.advancedColor.lutPresetId || profile.id,
       beatSyncPulses: Boolean(cg.beatSyncPulses),
+      ...(cg.revitalizerPresetId ? { revitalizerPresetId: cg.revitalizerPresetId } : {}),
+      ...(cg.qualifierPresetId ? { qualifierPresetId: cg.qualifierPresetId } : {}),
+      ...(cg.powerWindowPresetId ? { powerWindowPresetId: cg.powerWindowPresetId } : {}),
     };
   }
 
@@ -902,7 +1082,10 @@ export function compileDirectorComposition(result, snapshot) {
     topologySummary: {
       videoLayers: graph.layers.filter(l => l.kind === 'video').length,
       nullRigs: graph.layers.filter(l => l.kind === 'rig').length,
-      shapeLayers: graph.layers.filter(l => l.kind === 'shape').length,
+      shapeLayers: graph.layers.filter(l => ['shape', 'vector'].includes(l.kind)).length,
+      kineticTitles: graph.layers.filter(l => l.kind === 'title').length,
+      vectorPrimitives: graph.layers.filter(l => l.kind === 'vector').length,
+      bRollCutaways: graph.layers.filter(l => l.kind === 'video' && Boolean(l.bRollLayoutPreset)).length,
       parentLinks: parentCount,
       trackMattes: matteCount,
       softMasks: softMaskCount,
@@ -1209,16 +1392,187 @@ export function buildSourceBoundDirectorProposal(
         { at: revealEnd, x: 50, y: 50, scale: 1.04, rotation: 0, opacity: 0.85 },
       ],
     });
+  } else if (archetype.id === 'broll_cutaway_rig') {
+    const midReveal = Number(((revealStart + revealEnd) * 0.5).toFixed(3));
+    layers.push(
+      {
+        id: 'brollCirclePortal',
+        name: `${clipB.name} · Circle Spotlight B-Roll Portal`,
+        kind: 'video',
+        sourceMediaId: clipB.id,
+        sourceStart: sourceStartB,
+        start: revealStart,
+        end: revealEnd,
+        shape: 'none',
+        polygon: '',
+        color: '',
+        parentId: 'cameraRig',
+        matteId: '',
+        matteMode: '',
+        curvePreset: 'whip_snap',
+        bRollLayoutPreset: 'circle_portal',
+        bRollAudioPreset: 'voice_first_duck',
+        bRollLookPreset: 'cool_tech_glass',
+        motionBlur: { enabled: true, samples: 6, shutter: 0.65 },
+        reason: 'Circle spotlight B-roll portal with voice-first audio ducking and whip-pan shutter blur.',
+        poses: [
+          { at: revealStart, x: 52, y: 28, scale: 0.48, rotation: -8, opacity: 0 },
+          { at: midReveal, x: 72, y: 28, scale: 0.84, rotation: 0, opacity: 1 },
+          { at: revealEnd, x: 76, y: 26, scale: 0.78, rotation: 4, opacity: 0.92 },
+        ],
+      },
+      {
+        id: 'kineticCalloutTitle',
+        name: 'Kinetic Story Callout',
+        kind: 'title',
+        text: 'DIRECTOR CUTAWAY PROOF',
+        textAnimatorPreset: 'elastic_wave_cascade',
+        color: '#f8fafc',
+        sourceMediaId: '',
+        sourceStart: 0,
+        start: revealStart,
+        end: revealEnd,
+        shape: 'none',
+        polygon: '',
+        parentId: 'cameraRig',
+        matteId: '',
+        matteMode: '',
+        curvePreset: 'elastic_overshoot',
+        reason: 'Per-character elastic wave kinetic title paired with the B-roll cutaway.',
+        poses: [
+          { at: revealStart, x: 50, y: 82, scale: 0.88, rotation: 0, opacity: 0.85 },
+          { at: revealEnd, x: 50, y: 80, scale: 1, rotation: 0, opacity: 1 },
+        ],
+      }
+    );
+  } else if (archetype.id === 'omniscient_showpiece') {
+    const midReveal = Number(((revealStart + revealEnd) * 0.5).toFixed(3));
+    layers.push(
+      {
+        id: 'brollCirclePortal',
+        name: `${clipB.name} · Circle Spotlight B-Roll Portal`,
+        kind: 'video',
+        sourceMediaId: clipB.id,
+        sourceStart: sourceStartB,
+        start: revealStart,
+        end: revealEnd,
+        shape: 'none',
+        polygon: '',
+        color: '',
+        parentId: 'cameraRig',
+        matteId: '',
+        matteMode: '',
+        curvePreset: 'whip_snap',
+        bRollLayoutPreset: 'circle_portal',
+        bRollAudioPreset: 'voice_first_duck',
+        bRollLookPreset: 'cool_tech_glass',
+        motionBlur: { enabled: true, samples: 6, shutter: 0.65 },
+        reason: 'B-Roll Powerhouse circle spotlight portal with voice-first 25% audio ducking and shutter motion blur.',
+        poses: [
+          {
+            at: revealStart,
+            x: 48,
+            y: 34,
+            scale: 0.45,
+            rotation: -10,
+            opacity: 0,
+            spatialCurve: [12, -8],
+          },
+          {
+            at: midReveal,
+            x: 72,
+            y: 28,
+            scale: 0.85,
+            rotation: 0,
+            opacity: 1,
+            spatialCurve: [-10, 10],
+          },
+          { at: revealEnd, x: 74, y: 26, scale: 0.8, rotation: 4, opacity: 0.94 },
+        ],
+      },
+      {
+        id: 'vectorReticleHud',
+        name: 'Target Reticle Vector HUD (v2 Cutout)',
+        kind: 'vector',
+        primitiveId: 'target_reticle',
+        width: 34,
+        height: 34,
+        sourceMediaId: '',
+        sourceStart: 0,
+        start: revealStart,
+        end: revealEnd,
+        shape: 'none',
+        polygon: '',
+        color: '#38bdf8',
+        parentId: 'cameraRig',
+        matteId: '',
+        matteMode: '',
+        curvePreset: 'expo_punch',
+        reason: 'Compound v2 parametric vector reticle with inner counter-cutout hole and animated laser trim path.',
+        poses: [
+          { at: revealStart, x: 72, y: 28, scale: 0.55, rotation: -45, opacity: 0.4 },
+          { at: midReveal, x: 72, y: 28, scale: 0.92, rotation: 0, opacity: 0.96 },
+          { at: revealEnd, x: 74, y: 26, scale: 0.88, rotation: 45, opacity: 0.88 },
+        ],
+      },
+      {
+        id: 'kineticHeroTitle',
+        name: 'Omniscient Kinetic Hero Headline',
+        kind: 'title',
+        text: 'APEX NOVA STUDIO MASTERPIECE',
+        textAnimatorPreset: 'elastic_wave_cascade',
+        color: '#f8fafc',
+        sourceMediaId: '',
+        sourceStart: 0,
+        start: revealStart,
+        end: revealEnd,
+        shape: 'none',
+        polygon: '',
+        parentId: 'cameraRig',
+        matteId: '',
+        matteMode: '',
+        curvePreset: 'elastic_overshoot',
+        reason: 'Per-character elastic wave kinetic typography headline choreographed with the camera rig.',
+        poses: [
+          { at: revealStart, x: 50, y: 84, scale: 0.86, rotation: 0, opacity: 0.85 },
+          { at: midReveal, x: 50, y: 80, scale: 1.02, rotation: 0, opacity: 1 },
+          { at: revealEnd, x: 50, y: 78, scale: 0.98, rotation: 0, opacity: 0.95 },
+        ],
+      }
+    );
   }
+
+  const inferredSelective = inferDirectorRevivalAndSelectiveGrade(context.brief, primarySamples);
+  const revitalizerPresetId =
+    opts.revitalizerPresetId !== undefined
+      ? opts.revitalizerPresetId
+      : archetype.id === 'omniscient_showpiece'
+        ? inferredSelective.revitalizerPresetId || 'dead_phone_enhancer'
+        : inferredSelective.revitalizerPresetId;
+  const qualifierPresetId =
+    opts.qualifierPresetId !== undefined
+      ? opts.qualifierPresetId
+      : archetype.id === 'omniscient_showpiece'
+        ? inferredSelective.qualifierPresetId || 'skin_radiance'
+        : inferredSelective.qualifierPresetId;
+  const powerWindowPresetId =
+    opts.powerWindowPresetId !== undefined
+      ? opts.powerWindowPresetId
+      : archetype.id === 'omniscient_showpiece'
+        ? inferredSelective.powerWindowPresetId || 'subject_spotlight'
+        : inferredSelective.powerWindowPresetId;
 
   const composition = {
     name: `${lookProfile.label} · ${archetype.label}`,
-    concept: `Source-bound ${lookProfile.label} choreography (${archetype.label}) anchored at focal centroid (${cx}%, ${cy}%) with Null Rig parenting, Alpha Track Matte portal, feathered rotoscope polygon spline, and ${beatSyncPulses ? 'beat-synced grade pulses' : 'precision 3D LUT grade'}.`,
+    concept: `Source-bound ${lookProfile.label} choreography (${archetype.label}) anchored at focal centroid (${cx}%, ${cy}%) with Null Rig parenting, Alpha Track Matte portal, feathered rotoscope polygon spline${archetype.id === 'omniscient_showpiece' ? ', B-Roll Circle Spotlight Portal, Target Reticle Vector Trim HUD, Per-Character Kinetic Headline, Dead-Clip Revival, and Selective HSL/Power-Window Color Grade' : ''}, and ${beatSyncPulses ? 'beat-synced grade pulses' : 'precision 3D LUT grade'}.`,
     layers,
     colorGrade: {
       lookId: lookProfile.id,
       beatSyncPulses: Boolean(beatSyncPulses),
       beats,
+      ...(revitalizerPresetId ? { revitalizerPresetId } : {}),
+      ...(qualifierPresetId ? { qualifierPresetId } : {}),
+      ...(powerWindowPresetId ? { powerWindowPresetId } : {}),
     },
   };
 

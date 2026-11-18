@@ -85,7 +85,7 @@ function extractBrandAndSubtitle(brief, mode) {
 
 export function inferCinema3DMode(brief = '', hasFootage = false) {
   const text = String(brief || '').toLowerCase();
-  if (/\b(hybrid|diptych|rotoscope|footage|overlay|film\s*\+\s*3d)\b/.test(text)) {
+  if (/\b(hybrid|diptych|rotoscope|footage|overlay|film\s*\+\s*3d|omniscient|masterpiece|8-track|showpiece)\b/.test(text)) {
     return hasFootage ? 'hybrid_film_3d' : 'brand_vfx';
   }
   if (/\b(ribbon|sculpture|morph|product|object|knot)\b/.test(text)) {
@@ -482,6 +482,7 @@ export function compileDirectorCinema3DPlan(result, snapshot) {
 
   const actions = [];
   let sourceGraphics = null;
+  let sourceTopology = null;
   if (planSpec.sourceComposition) {
     const sourceCompiled = compileDirectorComposition(
       {
@@ -498,6 +499,7 @@ export function compileDirectorCinema3DPlan(result, snapshot) {
       snapshot
     );
     actions.push(...sourceCompiled.plan.actions);
+    sourceTopology = sourceCompiled.topologySummary || null;
     if (sourceCompiled.plan.graphics) {
       sourceGraphics = sourceCompiled.plan.graphics;
     }
@@ -544,9 +546,14 @@ export function compileDirectorCinema3DPlan(result, snapshot) {
       threeDScenes: actions.filter(a => a.type === 'three_d_scene').length,
       nullRigs: actions.filter(a => a.type === 'null').length,
       shapeLayers: sourceGraphics?.layers?.length || actions.filter(a => a.type === 'shape').length,
+      kineticTitles: actions.filter(a => a.type === 'title' && (a.textAnimatorPreset || a.textAnimator)).length,
+      vectorPrimitives: (sourceGraphics?.layers || []).filter(l => Boolean(l.vectorShape)).length,
+      bRollCutaways: actions.filter(a => a.type === 'media_plane' && Boolean(a.bRollLayoutPreset)).length,
       parentLinks: actions.filter(a => a.type === 'parent').length,
       trackMattes: actions.filter(a => a.type === 'matte').length,
-      softMasks: actions.filter(a => a.type === 'media_plane' && Number(a.mask?.feather) > 0).length,
+      softMasks:
+        sourceTopology?.softMasks ??
+        actions.filter(a => a.type === 'media_plane' && Number(a.mask?.feather) > 0).length,
       motionDrivers: actions.filter(
         a => a.type === 'motion_driver' || (a.motionDrivers && Object.keys(a.motionDrivers).length > 0)
       ).length,
@@ -556,6 +563,7 @@ export function compileDirectorCinema3DPlan(result, snapshot) {
           (sum, a) => sum + (a.keys || []).filter(k => /^maskPoint\d+[XY]$/.test(k.property)).length,
           0
         ),
+      ...(sourceTopology?.colorGrade ? { colorGrade: sourceTopology.colorGrade } : {}),
     },
   };
 }

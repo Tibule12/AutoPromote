@@ -90,6 +90,24 @@ export const DIRECTOR_BRIEF_TEMPLATES = [
     brief:
       "Direct a hybrid split-diptych video film with Kodak 2383 LUT, 3D glass lower-third callout, and closing 3D brand reveal.",
   },
+  {
+    id: "omniscient_masterpiece",
+    label: "8-Track Omniscient Masterpiece",
+    approach: "cinema_3d",
+    lookId: "teal_orange",
+    archetypeId: "omniscient_showpiece",
+    brief:
+      "Direct an 8-track omniscient studio masterpiece for 'APEX NOVA': revive dead footage, isolate skin radiance with a subject spotlight power window, open a circle B-roll portal with voice-first ducking, trace a vector target reticle HUD, animate an elastic wave kinetic headline, and close with a 3D brand reveal.",
+  },
+  {
+    id: "revive_selective_broll",
+    label: "Revive Dead Clip + B-Roll Portal",
+    approach: "composition",
+    lookId: "kodak_2383",
+    archetypeId: "broll_cutaway_rig",
+    brief:
+      "Revive flat low-light footage, apply crimson garment selective HSL splash and face spotlight window, cut in a circle B-roll portal with voice-first audio ducking, and animate a kinetic callout.",
+  },
 ];
 
 function summarizePlanTopology(compiled, forceRecompute = false) {
@@ -100,6 +118,15 @@ function summarizePlanTopology(compiled, forceRecompute = false) {
         id: finishAction.advancedColor?.lutPresetId || "custom",
         label: finishAction.name || "Cinema Grade",
         beatSyncPulses: Boolean(finishAction.beatSyncPulses),
+        ...(finishAction.grade?.revitalizerPresetId
+          ? { revitalizerPresetId: finishAction.grade.revitalizerPresetId }
+          : {}),
+        ...(finishAction.advancedColor?.qualifierPresetId
+          ? { qualifierPresetId: finishAction.advancedColor.qualifierPresetId }
+          : {}),
+        ...(finishAction.advancedColor?.powerWindowPresetId
+          ? { powerWindowPresetId: finishAction.advancedColor.powerWindowPresetId }
+          : {}),
       }
     : null;
   if (compiled.topologySummary && !forceRecompute) {
@@ -113,6 +140,14 @@ function summarizePlanTopology(compiled, forceRecompute = false) {
     threeDScenes: actions.filter(a => a.type === "three_d_scene").length,
     nullRigs: actions.filter(a => a.type === "null").length,
     shapeLayers: compiled?.plan?.graphics?.layers?.length || 0,
+    kineticTitles: actions.filter(
+      a => a.type === "title" && Boolean(a.textAnimatorPreset || a.textAnimator)
+    ).length,
+    vectorPrimitives: (compiled?.plan?.graphics?.layers || []).filter(l =>
+      Boolean(l.vectorShape)
+    ).length,
+    bRollCutaways: actions.filter(a => a.type === "media_plane" && Boolean(a.bRollLayoutPreset))
+      .length,
     parentLinks: actions.filter(
       a => a.type === "parent" || (a.type === "node_connect" && a.port === "Parent")
     ).length,
@@ -636,8 +671,26 @@ export default function StudioDirectorCreativePanel({
               {review.topologySummary.threeDScenes > 0 ? (
                 <span>3D Scenes: {review.topologySummary.threeDScenes}</span>
               ) : null}
+              {review.topologySummary.kineticTitles > 0 ? (
+                <span>Kinetic Titles: {review.topologySummary.kineticTitles}</span>
+              ) : null}
+              {review.topologySummary.vectorPrimitives > 0 ? (
+                <span>Vector HUDs: {review.topologySummary.vectorPrimitives}</span>
+              ) : null}
+              {review.topologySummary.bRollCutaways > 0 ? (
+                <span>B-Roll Portals: {review.topologySummary.bRollCutaways}</span>
+              ) : null}
               {review.topologySummary.colorGrade ? (
                 <span>Look: {review.topologySummary.colorGrade.label}</span>
+              ) : null}
+              {review.topologySummary.colorGrade?.revitalizerPresetId ? (
+                <span>Revival: {review.topologySummary.colorGrade.revitalizerPresetId}</span>
+              ) : null}
+              {review.topologySummary.colorGrade?.qualifierPresetId ? (
+                <span>Selective HSL: {review.topologySummary.colorGrade.qualifierPresetId}</span>
+              ) : null}
+              {review.topologySummary.colorGrade?.powerWindowPresetId ? (
+                <span>Power Window: {review.topologySummary.colorGrade.powerWindowPresetId}</span>
               ) : null}
             </div>
           ) : null}

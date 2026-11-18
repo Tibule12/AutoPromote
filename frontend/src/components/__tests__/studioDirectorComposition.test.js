@@ -229,6 +229,8 @@ test.each([
   ['split_diptych', 'noir_silver'],
   ['orbit_cascade', 'ultraviolet_pulse'],
   ['kinetic_hybrid', 'emerald_matrix'],
+  ['broll_cutaway_rig', 'kodak_2383'],
+  ['omniscient_showpiece', 'teal_orange'],
 ])(
   'choreography archetype %s with %s 3D LUT profile compiles cleanly into canonical scene actions',
   async (archetypeId, lookId) => {
@@ -257,3 +259,65 @@ test.each([
     expect(prepared.snapshot.finishFx.precisionGrade).toBe(true);
   }
 );
+
+test('8-Track Omniscient Studio Masterpiece orchestrates Null Rig, Alpha Track Matte, Rotoscope Spline, B-Roll Circle Portal with Audio Ducking, Vector Reticle Trim HUD, Per-Character Kinetic Title, Dead-Clip Revival, and Selective HSL/Power-Window Grade', async () => {
+  const s = fixture();
+  const built = buildSourceBoundDirectorProposal(
+    s,
+    'Direct an 8-track omniscient studio masterpiece: revive dead footage, isolate skin radiance with a subject spotlight power window, open a circle B-roll portal with voice-first ducking, trace a vector target reticle HUD, and animate an elastic wave kinetic headline',
+    8,
+    { lookId: 'teal_orange', beatSyncPulses: true }
+  );
+  expect(built.provenance.archetypeId).toBe('omniscient_showpiece');
+  const compiled = compileDirectorComposition(built, s);
+  expect(compiled.topologySummary).toMatchObject({
+    nullRigs: 1,
+    trackMattes: 1,
+    kineticTitles: 1,
+    vectorPrimitives: 1,
+    bRollCutaways: 1,
+  });
+  expect(compiled.topologySummary.colorGrade).toMatchObject({
+    id: 'teal_orange',
+    revitalizerPresetId: 'dead_phone_enhancer',
+    qualifierPresetId: 'skin_radiance',
+    powerWindowPresetId: 'subject_spotlight',
+  });
+
+  let serial = 0;
+  const prepared = await prepareStudioSceneActions(
+    compiled.plan,
+    s,
+    p => `${p}-${++serial}`,
+    {
+      aspect: 16 / 9,
+      rasterize: async () => new File(['raster fixture'], 'art.png', { type: 'image/png' }),
+      createUrl: () => `blob:fixture-${serial}`,
+      revokeUrl: () => {},
+    }
+  );
+  const next = prepared.snapshot;
+  // 1. Dead-Clip Revival + Selective HSL Qualifier + Spatial Power Window
+  expect(next.finishFx.dehaze).toBeGreaterThan(0);
+  expect(next.finishFx.shadowRecovery).toBeGreaterThan(0);
+  expect(next.advancedColor.qualifier?.enabled).toBe(true);
+  expect(next.advancedColor.powerWindow?.enabled).toBe(true);
+  // 2. B-Roll Circle Spotlight Portal with Voice-First Audio Ducking & Motion Blur
+  const brollPortal = next.overlays.find(l => l.name?.includes('Circle Spotlight B-Roll Portal'));
+  expect(brollPortal).toBeDefined();
+  expect(brollPortal.mask?.shape).toBe('ellipse');
+  expect(brollPortal.audioDucking).toBe(true);
+  expect(brollPortal.motionBlur?.enabled).toBe(true);
+  // 3. Compound v2 Target Reticle Vector HUD with Trim Path keyframes
+  const vectorReticle = next.overlays.find(l => l.vectorShape?.version === 2);
+  expect(vectorReticle).toBeDefined();
+  expect(
+    next.motionKeyframes.some(k => k.targetId === vectorReticle.id && k.property === 'strokeEnd')
+  ).toBe(true);
+  // 4. Per-Character Kinetic Hero Title with textProgress keyframes
+  const kineticTitle = next.overlays.find(l => Boolean(l.textAnimator));
+  expect(kineticTitle).toBeDefined();
+  expect(
+    next.motionKeyframes.some(k => k.targetId === kineticTitle.id && k.property === 'textProgress')
+  ).toBe(true);
+});

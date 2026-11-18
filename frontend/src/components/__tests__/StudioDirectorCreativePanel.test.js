@@ -411,3 +411,26 @@ test('1-Click Brief Templates, Poster Lockup Presets, extended palettes and Bind
   await waitFor(() => expect(onApply).toHaveBeenCalledTimes(1));
   expect(onApply.mock.calls[0][0].actions.some(a => a.type === 'finish_grade')).toBe(true);
 });
+
+test('8-Track Omniscient Masterpiece preset choreographs 3D VFX + B-Roll Portal + Vector HUD + Kinetic Title + Dead-Clip Revival + Selective HSL/Power-Window Grade', async () => {
+  const onApply = jest.fn().mockResolvedValue();
+  render(<StudioDirectorCreativePanel getSnapshot={state} onApply={onApply} />);
+  fireEvent.click(screen.getByTestId('director-brief-preset-omniscient_masterpiece'));
+  fireEvent.click(screen.getByTestId('director-choreograph-btn'));
+  await screen.findByRole('button', { name: 'Apply Director edit' });
+  const topology = screen.getByTestId('director-topology-summary');
+  expect(topology.textContent).toMatch(/3D Scenes: 2/);
+  expect(topology.textContent).toMatch(/Kinetic Titles: 1/);
+  expect(topology.textContent).toMatch(/Vector HUDs: 1/);
+  expect(topology.textContent).toMatch(/B-Roll Portals: 1/);
+  expect(topology.textContent).toMatch(/Revival: dead_phone_enhancer/);
+  expect(topology.textContent).toMatch(/Selective HSL: skin_radiance/);
+  expect(topology.textContent).toMatch(/Power Window: subject_spotlight/);
+  fireEvent.click(screen.getByRole('button', { name: 'Apply Director edit' }));
+  await waitFor(() => expect(onApply).toHaveBeenCalledTimes(1));
+  const applied = onApply.mock.calls[0][0];
+  expect(applied.actions.some(a => a.type === 'three_d_scene')).toBe(true);
+  expect(applied.actions.some(a => a.type === 'title' && a.textAnimatorPreset)).toBe(true);
+  expect(applied.actions.some(a => a.type === 'media_plane' && a.bRollLayoutPreset === 'circle_portal')).toBe(true);
+  expect(applied.graphics.layers.some(l => l.vectorShape?.version === 2)).toBe(true);
+});
