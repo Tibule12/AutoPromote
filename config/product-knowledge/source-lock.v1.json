@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Record native Studio visibility/quality/recovery, Wolf Hunt retirement, unchanged publishing/financial behavior and preserved readiness limits.",
-  "reviewed_at": "2026-11-18T08:43:48.397Z",
+  "reason": "Actions-only pinned media setup repair; record deployed PR532 and preserve Studio readiness/Director runtime limits.",
+  "reviewed_at": "2026-11-18T09:06:58.666Z",
   "catalog_sha256": "6e99cb68f4c18cb94fcdc679e7d6a029cde5860a17a54bd8c7bbd0e3a953c162",
   "sources": [
     {
@@ -731,11 +731,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "1caf8501da114381a26c618648ddd57387c0f647f69284c8082dc644f3c63d86"
+      "sha256": "bb9e9f805964be2497a2b9bf193a45644625b215e933a2e4eff4055def7656f7"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "28da06ebf202974a96a8b5d2dc31781864412c4a3f62efe5f29c60db6eefbaa4"
+      "sha256": "97ae4a6761c32805b88b03d8f97b2f54ac792ffb3ebf488cedd635b6eea55329"
     },
     {
       "path": "worker.js",

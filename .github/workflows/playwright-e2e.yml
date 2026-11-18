@@ -45,12 +45,8 @@ jobs:
       - name: Install live-media test prerequisites
         timeout-minutes: 5
         run: |
-          if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
-            sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 update
-            sudo env DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::Lock::Timeout=60 -o Acquire::Retries=2 -o Acquire::http::Timeout=30 install --yes --no-install-recommends ffmpeg
-          fi
-          ffmpeg -version
-          ffprobe -version
+          node --test test/ci/prepare-media-tools.test.cjs
+          node scripts/ci/prepare-media-tools.cjs
       - name: Install frontend dependencies
         timeout-minutes: 5
         run: npm ci --prefix frontend
