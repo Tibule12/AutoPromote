@@ -1,4 +1,38 @@
 {
+  "studioLiveDirectorAspect20261118": {
+    "date": "2026-11-18",
+    "scope": "Actual owner live Studio test and source-bound Director project-aspect repair.",
+    "evidenceRefs": [
+      "reports/studio-live-test-20261118/README.md"
+    ],
+    "liveVerifiedBeforeRepair": [
+      "Actual saved Firebase login and production file-chooser upload/preview",
+      "Director visibility and Quick All tools",
+      "Full1080x1920/Half540x960/Quarter270x480 with advancing decoder",
+      "Full paused picture and1280x720 Before source detail",
+      "Native QA project save and cold reopening"
+    ],
+    "liveFailures": [
+      "AI planner status200 available:false/provider:null",
+      "Source-bound Director Apply refused portrait project because the graphics package was fixed16:9"
+    ],
+    "repair": [
+      "Use semantic saved project aspect for shape package and Apply validation",
+      "Preserve native shared actions, output aspect, masks/keys and no-mutation refusal"
+    ],
+    "verification": {
+      "directorCasesPassed": 49,
+      "aspectRegressions": 4,
+      "strictBuild": "PENDING",
+      "correctedNativeLive": "PENDING"
+    },
+    "readinessCountsUnchanged": true,
+    "remainingBlockers": [
+      "Live model planner is disabled.",
+      "Typography13/16 and broader S02/S04/S03 unchanged."
+    ],
+    "nextTask": "Verify corrected live Director Apply/history/save/cold reopening."
+  },
   "actionsMediaSetupRepair20261118": {
     "date": "2026-11-18",
     "scope": "Actions-only repair of the Playwright media prerequisite step.",

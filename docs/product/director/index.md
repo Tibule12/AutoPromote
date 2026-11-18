@@ -1,6 +1,6 @@
 # Director
 
-Development documentation • product 1.2.0 • knowledge 1.0.60 • 2026-11-18
+Development documentation • product 1.2.0 • knowledge 1.0.61 • 2026-11-18
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -31,6 +31,7 @@ Proposes reviewed edits through shared Studio operations. Accepting a proposal m
 
 - This dated development snapshot does not establish professional or production readiness.
 - The Director tool is visible without a build-time enable flag, including Quick Create. Model planning still requires a configured server; source-bound choreography uses its existing separate review path.
+- Source-bound graphics use the saved project output aspect for both construction and Apply; preview-monitor CSS size must not change admission. The live model planner status remains unavailable as of18 November2026.
 
 **Common errors**
 

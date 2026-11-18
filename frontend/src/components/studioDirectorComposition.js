@@ -2,6 +2,7 @@ import { validateStudioPerspective, PERSPECTIVE_LEFT } from './studioPerspective
 import { parseStudioMaskPolygon } from './studioMaskGeometry';
 import { computeColorScopesFromRgba } from './studioColorScopes';
 import { defaultMotionDriverForProperty } from './studioCompRigging';
+import { studioProjectAspect } from './studioProjectAspect';
 
 const fullMask = { enabled: false, shape: 'rectangle', feather: 0, inverted: false };
 const finite = (v, a, b) => typeof v === 'number' && Number.isFinite(v) && v >= a && v <= b;
@@ -593,6 +594,7 @@ export async function measureDirectorSources(context, snapshot, signal) {
 
 export function compileDirectorComposition(result, snapshot) {
   const context = directorCompositionContext(snapshot, result.brief, result.duration);
+  const stage = studioProjectAspect(snapshot);
   if (
     result.version !== 2 ||
     result.projectId !== context.projectId ||
@@ -792,13 +794,13 @@ export function compileDirectorComposition(result, snapshot) {
       }
       const shape =
         node.shape === 'ellipse'
-          ? `<ellipse cx="640" cy="360" rx="360" ry="360" fill="${node.color}"/>`
-          : `<rect width="1280" height="720" fill="${node.color}"/>`;
+          ? `<ellipse cx="${stage.width / 2}" cy="${stage.height / 2}" rx="${Math.min(stage.width, stage.height) / 2}" ry="${Math.min(stage.width, stage.height) / 2}" fill="${node.color}"/>`
+          : `<rect width="${stage.width}" height="${stage.height}" fill="${node.color}"/>`;
       graphics.push({
         id: node.id,
         name: node.name || node.id,
         type: 'artwork',
-        svg: `<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720">${shape}</svg>`,
+        svg: `<svg xmlns="http://www.w3.org/2000/svg" width="${stage.width}" height="${stage.height}">${shape}</svg>`,
         startTime: node.start,
         duration: node.end - node.start,
         x: 50,
@@ -888,8 +890,8 @@ export function compileDirectorComposition(result, snapshot) {
       format: 'autopromote-graphics',
       version: 1,
       name: graph.name,
-      width: 1280,
-      height: 720,
+      width: stage.width,
+      height: stage.height,
       duration: context.duration,
       layers: graphics,
       groups: [],

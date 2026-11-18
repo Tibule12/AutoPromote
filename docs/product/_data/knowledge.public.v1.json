@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.60",
+  "knowledge_version": "1.0.61",
   "product_version": "1.2.0",
   "release_channel": "development",
   "updated_at": "2026-11-18",
@@ -3691,7 +3691,8 @@
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
       "limitations": [
         "This dated development snapshot does not establish professional or production readiness.",
-        "The Director tool is visible without a build-time enable flag, including Quick Create. Model planning still requires a configured server; source-bound choreography uses its existing separate review path."
+        "The Director tool is visible without a build-time enable flag, including Quick Create. Model planning still requires a configured server; source-bound choreography uses its existing separate review path.",
+        "Source-bound graphics use the saved project output aspect for both construction and Apply; preview-monitor CSS size must not change admission. The live model planner status remains unavailable as of18 November2026."
       ],
       "common_errors": [
         {
