@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "CI-only media and prebuilt browser environment repair; repeated apt timeouts removed without changing application or readiness.",
-  "reviewed_at": "2026-11-18T09:19:10.715Z",
-  "catalog_sha256": "6e99cb68f4c18cb94fcdc679e7d6a029cde5860a17a54bd8c7bbd0e3a953c162",
+  "reason": "Bind saved-project aspect repair to the shared source, preserving live model-off and formal readiness limits.",
+  "reviewed_at": "2026-11-18T10:11:38.303Z",
+  "catalog_sha256": "00144c1ee336c41e4ec96663283987056ed04125958513ac95e25aeba0696238",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -199,7 +199,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "f896e9feb983d22f41b859ad20f01324c0c6d0cef694d61f28e216b02893ada0"
+      "sha256": "5af26c1017b867314e9154de1499aed47f74a0c4d46110a087e8d0f72c219e0a"
     },
     {
       "path": "frontend/src/components/ViralScanner.js",
@@ -344,6 +344,10 @@
     {
       "path": "frontend/src/components/studioPreviewBudget.js",
       "sha256": "6b7d44b58aa1c297075e6b1ec279a365f0919e6a47a994b20069b49164769fdb"
+    },
+    {
+      "path": "frontend/src/components/studioProjectAspect.js",
+      "sha256": "53ed4ea38c98a5015ca7d8d733ad09ee48fa698db8d8e161ce4943c992f374a6"
     },
     {
       "path": "frontend/src/components/studioProjectDocument.js",
@@ -731,11 +735,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "f8b03e4f0f7c4e1fa7ca68a5e2c4ec15d64ec971c26c4d09944fe4c6516c53d0"
+      "sha256": "7c07ba8f58765f7ec310f1bc93ad0b852a3471aadcaac918f9e8c94b358547d3"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "ecc173e4b65433dc52c899113a7cd3674306876ae4f0164ac1b977587bf5521d"
+      "sha256": "c862a2b832c2fe55c1b5d25572f8455a3956d58ba21c590d9ebcbcd4f94a7c64"
     },
     {
       "path": "worker.js",

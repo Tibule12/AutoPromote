@@ -11,6 +11,7 @@ const pose = (at, scale = 1) => ({ at, x: 50, y: 50, scale, rotation: 0, opacity
 
 function fixture() {
   const s = {
+    reframeAspect: '16:9',
     orderedClips: [{ id: 's', url: 'http://localhost/s', start: 0, end: 8 }],
     timeline: [{ id: 'o', sourceClipId: 's', startRequest: 0, endRequest: 8 }],
     overlays: [],
@@ -47,6 +48,31 @@ const layer = () => ({
   matteMode: '',
   poses: [pose(0), pose(8, 1.1)],
 });
+
+test.each(['9:16', '4:5', '1:1', '16:9'])(
+  'a source-bound Director proposal applies to the saved %s project without changing its output aspect',
+  async aspect => {
+    const s = fixture();
+    s.reframeAspect = aspect;
+    s.studioDocument = adaptStudioSnapshotToDocument({projectId:'p',snapshot:s});
+    const before = JSON.stringify(s);
+    const proposal = buildSourceBoundDirectorProposal(s, 'A connected footage reveal.', 4);
+    const compiled = compileDirectorComposition(proposal, s);
+    const [width, height] = aspect.split(':').map(Number);
+    let serial = 0;
+    const prepared = await prepareStudioSceneActions(compiled.plan, s, prefix => `${prefix}-${++serial}`, {
+      aspect: width / height,
+      rasterize: async () => new File(['native artwork fixture'], 'art.png', {type:'image/png'}),
+      createUrl: () => `blob:aspect-${serial}`,
+      revokeUrl: () => {},
+    });
+    expect(prepared.snapshot.overlays.length).toBeGreaterThan(3);
+    expect(prepared.snapshot.overlays.some(layer=>layer.trackMatte?.mode==='alpha')).toBe(true);
+    expect(prepared.snapshot.motionKeyframes.length).toBeGreaterThan(20);
+    expect(prepared.snapshot.studioDocument.output.aspectRatio).toBe(aspect);
+    expect(JSON.stringify(s)).toBe(before);
+  }
+);
 
 function proposal(s) {
   return {

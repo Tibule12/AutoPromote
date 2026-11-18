@@ -71,6 +71,7 @@ import { musicBufferNeedsResync, musicBufferPosition, prepareStudioMusicPlayback
 import { loadStudioVoiceBus, scheduleStudioPreparedDuck, studioDialogueBusRequest } from './studioPreparedVoiceBus';
 import { sourceDialoguePreviewEnabled } from './studioSourceDialoguePolicy';
 import { studioSoloPictureProjection, studioSoloPictureDimensions } from './studioSoloPictureProjection';
+import { studioProjectAspect } from './studioProjectAspect';
 import { studioCueSourceKey, createStudioCueBuffer, prepareStudioCuePlayback, prepareStudioBuiltInCue } from "./studioCueBuffer";
 import {
   MAX_STUDIO_ANGLES,
@@ -9790,9 +9791,9 @@ const ViralClipStudio = ({
     if (trackStates.graphics?.locked || trackStates.broll?.locked || trackStates.video?.locked)
       throw Error('Unlock the Video, Graphics and B-roll tracks to apply a complete scene.');
     const projectId = activeProjectIdRef.current, signature = lastSnapshotSignatureRef.current;
-    const stage = phoneFrameRef.current;
-    const result = await prepareStudioSceneActions(plan, getEditorSnapshot(), createSecureId, {
-      aspect: (stage?.clientWidth || 1280) / (stage?.clientHeight || 720),
+    const snapshot = getEditorSnapshot();
+    const result = await prepareStudioSceneActions(plan, snapshot, createSecureId, {
+      aspect: studioProjectAspect(snapshot).ratio,
       isCurrent: () => activeProjectIdRef.current === projectId && lastSnapshotSignatureRef.current === signature,
     });
     const next = result.snapshot;
