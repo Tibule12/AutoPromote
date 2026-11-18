@@ -66,7 +66,7 @@ import { hasSoftStudioMask, studioMaskPointProperty, parseStudioMaskPolygon, stu
 import { primeStudioSourceVideo, watchStudioProgrammeFrames, studioPresentedSourceTime, watchStudioClipBoundary, watchStudioAudioClock, studioJoinFade, mapStudioSourceAccess, isStudioSourceClockCurrent, pausedStudioMappedFrameRequest, pausedStudioFrameKey, studioPausedSampleTime, studioFinishedFrameSeekTime } from "./studioSourcePreview";
 import { loadStudioSourceFrame } from "./studioSourceFrameClient";
 import { studioSourceLeaseRefreshDelay, studioSourceStoragePath, studioSourcePlaybackUrl } from './studioSourceAccess';
-import { studioPreviewScale, studioNextPreviewPaint, studioPreviewFrameDue, studioNextPreviewFrame } from './studioPreviewBudget';
+import { studioPreviewScale, studioPreviewDimensions, normalizeStudioPreviewQuality, STUDIO_PREVIEW_QUALITIES, studioNextPreviewPaint, studioPreviewFrameDue, studioNextPreviewFrame } from './studioPreviewBudget';
 import { musicBufferNeedsResync, musicBufferPosition, prepareStudioMusicPlayback, studioMusicBufferIdentity, studioPictureRateCorrection } from "./studioMusicBufferClock";
 import { loadStudioVoiceBus, scheduleStudioPreparedDuck, studioDialogueBusRequest } from './studioPreparedVoiceBus';
 import { sourceDialoguePreviewEnabled } from './studioSourceDialoguePolicy';
@@ -2361,9 +2361,7 @@ const VIRAL_STUDIO_WORKFLOW = [
 ];
 
 const CREATIVE_STUDIO_TOOLS = [
-  ...(process.env.REACT_APP_STUDIO_DIRECTOR_MOTION === "true"
-    ? [{ id: "director", label: "Director", icon: "✦", helper: "Describe a motion edit. Review the Director’s selected shots and editable motion before applying." }]
-    : []),
+  { id: "director", label: "Director", icon: "✦", helper: "Describe a motion edit. Review the Director’s selected shots and editable motion before applying." },
   { id: "moments", label: "Moments", icon: "✦", helper: "Choose a source range. Review Director suggestions before applying them to the timeline." },
   { id: "cut", label: "Cut", icon: "✂", helper: "Select a video clip for trim, split, delete and precision edits. Ripple edits move the following clips; slip edits change the source range." },
   { id: "hook", label: "Hook", icon: "⌁", helper: "Set opening text, style, focus and timing. This changes the opening of the clip, not the underlying source file." },
@@ -2965,7 +2963,9 @@ const ViralClipStudio = ({
     resolution: "720p",
     codec: "h264",
     status: "source_ready",
+    quality: "full",
   });
+  const previewQuality = normalizeStudioPreviewQuality(proxySettings.quality);
   const [stabilization, setStabilization] = useState({
     enabled: false,
     strength: 35,
@@ -4583,6 +4583,7 @@ const ViralClipStudio = ({
       codec: "h264",
       status: "source_ready",
       ...(snapshot.proxySettings || {}),
+      quality: normalizeStudioPreviewQuality(snapshot.proxySettings?.quality),
     });
     setStabilization({
       enabled: false,
@@ -14233,8 +14234,8 @@ const ViralClipStudio = ({
       if (programmeVideo.readyState < 2 || !programmeVideo.videoWidth || !programmeVideo.videoHeight) return;
       const paintStarted = performance.now(), moving = !programmeVideo.paused && !programmeVideo.seeking;
       const budget = programmePaintBudgetRef.current;
-      if (budget.video !== programmeVideo || budget.source !== programmeVideo.currentSrc) {
-        budget.video=programmeVideo;budget.source=programmeVideo.currentSrc;budget.nextAt=0;budget.fullCost=0;budget.lastSourceTime=undefined;budget.nextSourceTime=undefined;
+      if (budget.video !== programmeVideo || budget.source !== programmeVideo.currentSrc || budget.quality !== previewQuality) {
+        budget.video=programmeVideo;budget.source=programmeVideo.currentSrc;budget.quality=previewQuality;budget.nextAt=0;budget.fullCost=0;budget.lastSourceTime=undefined;budget.nextSourceTime=undefined;
       }
       if(moving&&typeof programmeVideo.requestVideoFrameCallback==='function'){
         // Moving frames belong to the shared decoder callback. Coarse native
@@ -14247,32 +14248,41 @@ const ViralClipStudio = ({
       }else if(moving&&paintStarted<budget.nextAt)return;
       // Keep expensive CPU pixel readback from occupying every display turn.
       // A paused authoring frame always retains its full canonical raster.
-      const performanceScale = studioPreviewScale(budget.fullCost, moving);
+      const performanceScale = studioPreviewScale(budget.fullCost, moving, previewQuality);
       canvas.dataset.playbackScale = String(performanceScale);
-      const resolutionLabel = previewResolutionLabelRef.current;
-      if (resolutionLabel) {
-        resolutionLabel.hidden = !moving || performanceScale === 1 || Boolean(renderedOutputUrl);
-        resolutionLabel.style.display = resolutionLabel.hidden ? 'none' : '';
-        resolutionLabel.textContent = `Playback resolution ${Math.round(performanceScale * 100)}% · pause for full detail`;
-      }
       // Size the decoded programme to the visible inner frame. Measuring the
       // outer monitor here stretches an inset canvas and makes preview framing
       // diverge from the backend's scale/crop result.
       const rect = programmeBounds || (programmeBounds = canvas.getBoundingClientRect());
       if (rect.width < 1 || rect.height < 1) return;
-      const pixelRatio = Math.min(1.5, Math.max(1, window.devicePixelRatio || 1));
-      // A settled exact picture uses the worker's intermediate raster before
-      // the browser scales it to the monitor. Grading a tiny CSS-sized raster
-      // first changes fine edges and colour averages. Moving playback keeps
-      // its bounded display-sized canvas rather than adding per-frame work.
+      const pixelRatio = Math.max(1, window.devicePixelRatio || 1);
+      // Full detail uses the project raster before display scaling. Only Auto
+      // uses a display-sized budget; explicit quality choices stay stable.
       const pausedRaster = soloFinishRasterEnabled
         ? studioSoloPictureDimensions({sourceWidth:programmeVideo.videoWidth,sourceHeight:programmeVideo.videoHeight,
           aspect:reframeAspect,resolution:exportSettings.resolution,frame:mainFrame}) : null;
+      const referenceRaster = pausedRaster || studioSoloPictureDimensions({
+        sourceWidth: programmeVideo.videoWidth, sourceHeight: programmeVideo.videoHeight,
+        aspect: reframeAspect, resolution: exportSettings.resolution, frame: mainFrame,
+      });
+      const referenceWidth = framedSoloRasterEnabled ? referenceRaster?.width : referenceRaster?.innerWidth;
+      const detail = studioPreviewDimensions({ width: rect.width, height: rect.height,
+        referenceWidth: referenceWidth || programmeVideo.videoWidth, pixelRatio,
+        scale: performanceScale, quality: moving ? previewQuality : 'full' });
       const rasterScale = pausedRaster ? programmeVideo.paused && !programmeVideo.seeking &&
-        pausedSourceFrame?.status === 'accurate' ? 1 : Math.min(1,rect.width * pixelRatio /
-          (framedSoloRasterEnabled ? pausedRaster.width : pausedRaster.innerWidth))*performanceScale : 1;
-      const targetWidth = pausedRaster ? Math.max(2,Math.round((framedSoloRasterEnabled ? pausedRaster.width : pausedRaster.innerWidth)*rasterScale)) : Math.max(2, Math.round(rect.width * pixelRatio * performanceScale));
-      const targetHeight = pausedRaster ? Math.max(2,Math.round((framedSoloRasterEnabled ? pausedRaster.height : pausedRaster.innerHeight)*rasterScale)) : Math.max(2, Math.round(rect.height * pixelRatio * performanceScale));
+        pausedSourceFrame?.status === 'accurate' ? 1 : detail.width /
+          (framedSoloRasterEnabled ? pausedRaster.width : pausedRaster.innerWidth) : 1;
+      const targetWidth = pausedRaster ? Math.max(2,Math.round((framedSoloRasterEnabled ? pausedRaster.width : pausedRaster.innerWidth)*rasterScale)) : detail.width;
+      const targetHeight = pausedRaster ? Math.max(2,Math.round((framedSoloRasterEnabled ? pausedRaster.height : pausedRaster.innerHeight)*rasterScale)) : detail.height;
+      canvas.dataset.previewQuality = previewQuality;
+      const resolutionLabel = previewResolutionLabelRef.current;
+      if (resolutionLabel) {
+        resolutionLabel.hidden = false;
+        resolutionLabel.style.display = '';
+        const label = !moving ? 'Full detail · paused' : previewQuality === 'auto'
+          ? `Auto · ${Math.round(performanceScale * 100)}%` : `${Math.round(performanceScale * 100)}% detail`;
+        resolutionLabel.textContent = `${label} · ${targetWidth}×${targetHeight}`;
+      }
       if (canvas.width !== targetWidth) canvas.width = targetWidth;
       if (canvas.height !== targetHeight) canvas.height = targetHeight;
       const paintCanvas = pausedRaster
@@ -14283,7 +14293,7 @@ const ViralClipStudio = ({
       if (paintCanvas.height !== canvasHeight) paintCanvas.height = canvasHeight;
       const context = paintCanvas.getContext("2d", { alpha: false, willReadFrequently: true });
       if (!context) return;
-      context.imageSmoothingQuality = rasterScale === 1 && pausedRaster ? "high" : "low";
+      context.imageSmoothingQuality = "high";
       const pausedPaint = !moving && soloFinishRasterEnabled && !overlays.length &&
         !compiledAdjustmentGrades.length && pausedSourceFrame?.status === 'accurate'
         ? [programmeVideo.currentSrc,programmeVideo.currentTime,pausedSourceFrame.image,
@@ -15093,6 +15103,7 @@ const ViralClipStudio = ({
       stopProgrammeFrames?.();
     };
   }, [
+    previewQuality,
     activeProgrammeSlot,
     pausedSourceFrame,
     pausedSourceGeneration,
@@ -15169,8 +15180,15 @@ const ViralClipStudio = ({
       if (beforeVideo.readyState < 2 || !beforeVideo.videoWidth || !beforeVideo.videoHeight) return;
       const context = beforeCanvas.getContext("2d", { alpha: false });
       if (!context) return;
-      const canvasWidth = 960;
-      const canvasHeight = 540;
+      const beforeBounds = beforeCanvas.getBoundingClientRect();
+      const playbackScale = studioPreviewScale(0, !afterVideo.paused, previewQuality);
+      const detail = studioPreviewDimensions({ width: beforeBounds.width || 960,
+        height: (beforeBounds.width || 960) * 9 / 16,
+        referenceWidth: Math.max(beforeVideo.videoWidth, beforeVideo.videoHeight * 16 / 9),
+        pixelRatio: window.devicePixelRatio || 1, scale: playbackScale,
+        quality: afterVideo.paused ? 'full' : previewQuality });
+      const canvasWidth = detail.width;
+      const canvasHeight = detail.height;
       if (beforeCanvas.width !== canvasWidth) beforeCanvas.width = canvasWidth;
       if (beforeCanvas.height !== canvasHeight) beforeCanvas.height = canvasHeight;
       const scale = Math.min(
@@ -15279,7 +15297,7 @@ const ViralClipStudio = ({
       if (beforeAnimationFrame) window.cancelAnimationFrame(beforeAnimationFrame);
       beforeVideo.pause();
     };
-  }, [activeProgrammeSlot, activeTimelineIndex, currentTimelineClip, currentTimelineWindow.start, comparisonMode, renderedOutputUrl, previewOutputTimeMap]);
+  }, [activeProgrammeSlot, activeTimelineIndex, currentTimelineClip, currentTimelineWindow.start, comparisonMode, renderedOutputUrl, previewOutputTimeMap, previewQuality]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -19529,43 +19547,9 @@ const ViralClipStudio = ({
               </div>
               </details>
               <details className="studio-proxy-settings">
-                <summary>Optimized media / proxies</summary>
-                <label className="inspector-check-row">
-                  <input
-                    type="checkbox"
-                    checked={proxySettings.enabled}
-                    onChange={event =>
-                      setProxySettings(current => ({
-                        ...current,
-                        enabled: event.target.checked,
-                        status: event.target.checked ? "source_ready" : "off",
-                      }))
-                    }
-                  />
-                  <span>
-                    <strong>Use optimized preview media</strong>
-                    <small>Original files remain linked for final export.</small>
-                  </span>
-                </label>
-                <select
-                  aria-label="Proxy resolution"
-                  value={proxySettings.resolution}
-                  onChange={event =>
-                    setProxySettings(current => ({
-                      ...current,
-                      resolution: event.target.value,
-                    }))
-                  }
-                >
-                  <option value="540p">540p · fastest</option>
-                  <option value="720p">720p · balanced</option>
-                  <option value="1080p">1080p · detailed</option>
-                </select>
-                <small>
-                  {proxySettings.enabled
-                    ? "Source-linked editing is active; proxy generation is queued only for heavy media."
-                    : "The browser previews original media."}
-                </small>
+                <summary>Preview quality</summary>
+                <p>Choose the picture detail above the preview. Full detail keeps the project resolution during playback. Auto can reduce detail for smoother editing. Pausing restores full detail.</p>
+                <small>Preview quality does not change the original media or export settings.</small>
               </details>
               <details className="studio-template-library">
                 <summary>Reusable edit templates ({editTemplates.length})</summary>
@@ -19678,6 +19662,15 @@ const ViralClipStudio = ({
                 >
                   {timelineDockExpanded ? "Hide timeline" : "Show timeline"}
                 </button>
+                <label className="studio-preview-quality">
+                  <span>Preview quality</span>
+                  <select aria-label="Preview quality" value={previewQuality}
+                    onChange={event => setProxySettings(current => ({ ...current,
+                      quality: normalizeStudioPreviewQuality(event.target.value) }))}>
+                    {STUDIO_PREVIEW_QUALITIES.map(option => <option key={option.value}
+                      value={option.value}>{option.label}</option>)}
+                  </select>
+                </label>
                 <StudioControlMenu className="studio-view-options" label="View options">
                 <div className="preview-display-controls" aria-label="Preview display controls">
                   <div className="preview-reframe-quick-group" aria-label="Quick camera framing">

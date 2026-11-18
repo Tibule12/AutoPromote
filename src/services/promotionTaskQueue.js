@@ -1682,42 +1682,6 @@ async function processNextPlatformTask({ background = false } = {}) {
           shortlinkCode: payload.__shortlinkCode || null,
         });
 
-        // --- MISSION CONTROL INJECTION (The "Win" for Users) ---
-        // Trigger Organic Mission immediately after successful publish
-        try {
-          const communityEngine = require("./communityEngine");
-          const targetUrl =
-            simulatedResult.videoUrl ||
-            simulatedResult.externalId ||
-            simulatedResult.url ||
-            simulatedResult.permlink ||
-            simulatedResult.shareId;
-          if (targetUrl && (task.platform === "tiktok" || task.platform === "youtube")) {
-            // 1. Default Mission: "Operation First Contact"
-            // 2,000 views target via community swarm.
-            // Looks organic because it IS organic (real people).
-            await communityEngine.triggerPriorityBotSurge(targetUrl, task.platform, 2000, "view");
-            // Track as 1 "Mission Launch" per upload
-            await billingService.trackBotUsage(task.uid, 1);
-
-            // 2. Extra Boosts (User Selected) - Check top-level task props OR hidden payload props
-            const repostParams = task.repost_boost || (task.payload && task.payload.repost_boost);
-            const shareParams = task.share_boost || (task.payload && task.payload.share_boost);
-
-            if (repostParams) {
-              await communityEngine.triggerPriorityBotSurge(targetUrl, task.platform, 15, "repost");
-              // Track extra actions as distinct events if desired, or bundle them.
-              await billingService.trackBotUsage(task.uid, 1);
-            }
-            if (shareParams) {
-              await communityEngine.triggerPriorityBotSurge(targetUrl, task.platform, 25, "share");
-              await billingService.trackBotUsage(task.uid, 1);
-            }
-          }
-        } catch (surgeErr) {
-          console.warn("[Mission Control] Priority Surge Trigger Failed:", surgeErr);
-        }
-
         // Notify user about success
         if (task.uid) {
           await notificationEngine

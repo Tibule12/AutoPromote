@@ -1,12 +1,12 @@
 # AutoPromote product knowledge
 
-Development documentation • product 1.2.0 • knowledge 1.0.59 • 2026-11-17
+Development documentation • product 1.2.0 • knowledge 1.0.60 • 2026-11-18
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
 This generated user documentation describes the actual development snapshot. It does not announce a release or certify public showcase films.
 
-The canonical internal catalogue has 104 features, 204 control records and 19 task guides. This safe projection contains 102 features; internal-only provider records and implementation/evidence paths are excluded.
+The canonical internal catalogue has 104 features, 205 control records and 19 task guides. This safe projection contains 102 features; internal-only provider records and implementation/evidence paths are excluded.
 
 ## Readiness
 

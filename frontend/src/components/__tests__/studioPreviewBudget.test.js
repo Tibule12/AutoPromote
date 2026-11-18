@@ -1,4 +1,27 @@
-import {studioPreviewScale,studioNextPreviewPaint,studioPreviewFrameDue,studioNextPreviewFrame} from '../studioPreviewBudget';
+import {studioPreviewScale,studioPreviewDimensions,normalizeStudioPreviewQuality,studioNextPreviewPaint,studioPreviewFrameDue,studioNextPreviewFrame} from '../studioPreviewBudget';
+
+test('full detail cannot be lowered by an expensive frame and explicit choices remain stable',()=>{
+  expect(normalizeStudioPreviewQuality(undefined)).toBe('full');
+  expect(studioPreviewScale(240,true,'full')).toBe(1);
+  expect(studioPreviewScale(240,true,'half')).toBe(.5);
+  expect(studioPreviewScale(240,true,'quarter')).toBe(.25);
+  expect(studioPreviewScale(240,true,'auto')).toBe(.25);
+  expect(studioPreviewScale(240,false,'quarter')).toBe(1);
+});
+
+test('a small monitor retains project detail in Full and Auto uses its display budget',()=>{
+  const monitor={width:270,height:480,referenceWidth:1080,pixelRatio:1};
+  expect(studioPreviewDimensions({...monitor,quality:'full'})).toEqual({width:1080,height:1920});
+  expect(studioPreviewDimensions({...monitor,quality:'half',scale:.5})).toEqual({width:540,height:960});
+  expect(studioPreviewDimensions({...monitor,quality:'auto',scale:.5})).toEqual({width:135,height:240});
+});
+
+test('high-density and pathological source sizes stay bounded without distorting aspect',()=>{
+  expect(studioPreviewDimensions({width:400,height:225,pixelRatio:2,referenceWidth:1920})).toEqual({width:1920,height:1080});
+  const raster=studioPreviewDimensions({width:9000,height:16000,referenceWidth:12000,pixelRatio:4});
+  expect(Math.max(raster.width,raster.height)).toBeLessThanOrEqual(4096);
+  expect(raster.width/raster.height).toBeCloseTo(9/16,3);
+});
 
 test('paused inspection remains full resolution after an expensive moving frame',()=>{
   expect(studioPreviewScale(240,false)).toBe(1);

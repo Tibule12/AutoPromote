@@ -241,6 +241,48 @@ describe("ViralClipStudio timeline sequencing", () => {
     return { video, props, ...rendered };
   };
 
+  test("preview quality controls the real moving canvas and is saved without an Undo edit", async () => {
+    const store = require('../viralStudioProjectStore');
+    const saveProject = jest.spyOn(store, 'saveViralStudioProject').mockImplementation(async project => project);
+    const bounds = jest.spyOn(HTMLCanvasElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: 270, height: 480, x: 0, y: 0 });
+    const { video } = mountNativePreview();
+    Object.defineProperties(video, {
+      seeking: { configurable: true, value: false },
+      videoWidth: { configurable: true, value: 1920 },
+      videoHeight: { configurable: true, value: 1080 },
+    });
+    const canvas = screen.getByTestId('studio-program-canvas');
+    canvas.getBoundingClientRect = () => ({ width: 270, height: 480, x: 0, y: 0 });
+    fireEvent.loadedData(video);
+    const quality = screen.getByLabelText('Preview quality');
+    expect(quality).toHaveValue('full');
+    fireEvent.change(quality, { target: { value: 'auto' } });
+    fireEvent.change(quality, { target: { value: 'full' } });
+    fireEvent.resize(window);
+    fireEvent.click(screen.getByRole('button', { name: 'Play comparison', exact: true }));
+    fireEvent.timeUpdate(video);
+    await waitFor(() => expect(canvas.dataset.previewQuality).toBe('full'));
+    expect(canvas.width).toBeGreaterThanOrEqual(720);
+    const fullWidth = canvas.width;
+    fireEvent.change(quality, { target: { value: 'half' } });
+    await waitFor(() => expect(canvas.dataset.previewQuality).toBe('half'));
+    expect(canvas.width).toBeCloseTo(fullWidth / 2, -1);
+    fireEvent.click(screen.getByRole('button', { name: 'Pause comparison', exact: true }));
+    await waitFor(() => expect(canvas.width).toBe(fullWidth));
+    expect(screen.getByTestId('preview-resolution')).toHaveTextContent('Full detail');
+    fireEvent.click(screen.getByRole('button', { name: 'Save project', exact: true, hidden: true }));
+    await waitFor(() => expect(saveProject).toHaveBeenCalled());
+    expect(saveProject.mock.calls.at(-1)[0].snapshot.proxySettings.quality).toBe('half');
+    saveProject.mockRestore();
+    bounds.mockRestore();
+  });
+
+  test("Director is available in the tool rail without a build-time opt-in", () => {
+    mountNativePreview();
+    expect(within(screen.getByRole('navigation', { name: 'Creative tools' }))
+      .getByRole('button', { name: 'Director', exact: true })).toBeInTheDocument();
+  });
+
   test.each(["slowed_reverb", "chipmunk", "deep_voice"])("Sound %s resumes the real transport and updates the playhead", async preset => {
     const { video } = mountNativePreview();
     fireEvent.click(within(screen.getByRole("navigation", { name: "Creative tools" }))

@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.59",
+  "knowledge_version": "1.0.60",
   "product_version": "1.2.0",
   "release_channel": "development",
-  "updated_at": "2026-11-17",
+  "updated_at": "2026-11-18",
   "features": [
     {
       "feature_id": "studio.timeline",
@@ -2227,19 +2227,22 @@
       ],
       "requires": [],
       "optional_capabilities": [],
-      "controls": [],
+      "controls": [
+        "studio.preview.quality"
+      ],
       "workflow": [
         "Open the relevant workspace with an owned source.",
         "Review the result and its limitations before saving or exporting."
       ],
-      "preview_behavior": "Reopening a saved owned upload can prepare precise paused source frames without changing the edit, including older uploads without a saved digest. Broad continuous picture and sound agreement with final export remains unqualified.",
+      "preview_behavior": "Preview quality offers Full detail, Auto, Half and Quarter. Full detail is the default and does not reduce resolution under playback load. Auto alone uses the adaptive display budget. Pausing restores full detail; the Before comparison follows the quality choice instead of using a fixed 540p canvas. The choice is saved with the project and does not alter export settings.",
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
       "limitations": [
         "This dated development snapshot does not establish professional or production readiness.",
         "Accurate paused source pictures remain bounded to qualified clip clocks,90-second windows and128MiB sources. Strict ellipse mask/effect raster agreement and broad continuous picture/sound remain open.",
         "The 15 October programme-clock repair removes an erroneous black fade over dim footage. A20s CPU export completes in244.079s with all480 decoded picture frames unchanged; full colour/raster/live sound remains unqualified.",
         "Continuous playback paints directly from the decoded video without filling the optional bitmap cache. Paused frame capture retains source dimensions and allows one pending capture. These bounds do not establish smooth playback, whole picture/audio equality or production readiness.",
-        "Moving playback adapts the preview resolution to measured paint cost and displays the reduced resolution. Pausing restores full detail. All paused source PNG profiles describe the decoded RGB surface consistently; broad optical effects, moving audio/picture equality and general device performance remain unqualified."
+        "Moving playback adapts the preview resolution to measured paint cost and displays the reduced resolution. Pausing restores full detail. All paused source PNG profiles describe the decoded RGB surface consistently; broad optical effects, moving audio/picture equality and general device performance remain unqualified.",
+        "Full detail can reduce playback speed on slower devices; choose Auto for smoother editing. These controls do not qualify whole-stage picture/audio parity."
       ],
       "common_errors": [
         {
@@ -3687,7 +3690,8 @@
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
       "limitations": [
-        "This dated development snapshot does not establish professional or production readiness."
+        "This dated development snapshot does not establish professional or production readiness.",
+        "The Director tool is visible without a build-time enable flag, including Quick Create. Model planning still requires a configured server; source-bound choreography uses its existing separate review path."
       ],
       "common_errors": [
         {
@@ -12514,6 +12518,44 @@
       ],
       "updated_at": "2026-10-30",
       "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.preview.quality",
+      "feature_ids": [
+        "studio.preview"
+      ],
+      "label": "Preview quality",
+      "status": "PARTIAL",
+      "meaning": "Controls the real live programme and Before comparison raster. Full preserves project detail; Auto adapts to playback cost. Half and Quarter select fixed moving detail. Pause restores full detail.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "full",
+          "auto",
+          "half",
+          "quarter"
+        ],
+        "default": "full",
+        "default_known": true
+      },
+      "unit": "playback detail",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "UNSUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.preview"
+      ],
+      "limitations": [
+        "Preview-only setting; does not change original source or final export. Full detail may be slower."
+      ],
+      "updated_at": "2026-11-18",
+      "product_version": "1.2.0"
     }
   ],
   "tasks": [
@@ -15865,6 +15907,11 @@
       "from": "studio.compositing",
       "type": "editable_with",
       "to": "studio.composite.alpha_region"
+    },
+    {
+      "from": "studio.preview",
+      "type": "editable_with",
+      "to": "studio.preview.quality"
     }
   ]
 }

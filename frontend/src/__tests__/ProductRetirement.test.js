@@ -27,6 +27,11 @@ test.each(retired)("old %s links reopen an active workspace", alias => {
   expect(workspaceDestination(alias)).toBe(target);
   expect(requestedWorkspace(`?tab=${alias}`)).toBe(target);
 });
+test.each(['wolf_hunt','wolf-hunt','wolfhunt','marketplace'])('retired marketplace %s cannot reopen its former UI', alias => {
+  expect(workspaceDestination(alias)).toBe('profile');
+  expect(requestedWorkspace(`?tab=${alias}`)).toBe('profile');
+  expect(publicEntryRoute({pathname:`/${alias}`})).toBe('/#/?tab=profile');
+});
 test("team invitation IDs remain separate from workspace navigation", () => {
   expect(requestedWorkspace("?workspace=workspace-private-id&invite=invite-1")).toBeNull();
 });

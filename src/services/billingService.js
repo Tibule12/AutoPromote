@@ -170,7 +170,7 @@ function getPlatformPostMonthlyQuota(planId, plan = null, testerAccess = null, b
     parseInt(process.env[envKey] || "", 10) ||
     parseInt(process.env.PLATFORM_POST_MONTHLY_QUOTA || "", 10) ||
     defaultPlatformPostQuotas[normalized] ||
-    (plan && plan.features ? Number(plan.features.wolfHuntTasks) : 0) ||
+    (plan && plan.features ? Number(plan.features.monthlyPromotions) : 0) ||
     0
   );
   // Only server-owned billing data can raise one account's publishing capacity.

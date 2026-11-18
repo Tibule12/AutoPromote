@@ -1,5 +1,5 @@
 {
-  "knowledge_version": "1.0.59",
+  "knowledge_version": "1.0.60",
   "controls": [
     {
       "control_id": "studio.transform.x",
@@ -7120,6 +7120,44 @@
         "Preview and full-film appearance still require moving review; the controls do not establish professional or universal replacement quality."
       ],
       "updated_at": "2026-10-30",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.preview.quality",
+      "feature_ids": [
+        "studio.preview"
+      ],
+      "label": "Preview quality",
+      "status": "PARTIAL",
+      "meaning": "Controls the real live programme and Before comparison raster. Full preserves project detail; Auto adapts to playback cost. Half and Quarter select fixed moving detail. Pause restores full detail.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "full",
+          "auto",
+          "half",
+          "quarter"
+        ],
+        "default": "full",
+        "default_known": true
+      },
+      "unit": "playback detail",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "UNSUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.preview"
+      ],
+      "limitations": [
+        "Preview-only setting; does not change original source or final export. Full detail may be slower."
+      ],
+      "updated_at": "2026-11-18",
       "product_version": "1.2.0"
     }
   ]

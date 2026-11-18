@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.59 • 2026-11-17
+Development documentation • product 1.2.0 • knowledge 1.0.60 • 2026-11-18
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -1439,7 +1439,7 @@ Shows the existing project programme with mapped source frames and sound. Retain
 1. Open the relevant workspace with an owned source.
 2. Review the result and its limitations before saving or exporting.
 
-**Preview:** Reopening a saved owned upload can prepare precise paused source frames without changing the edit, including older uploads without a saved digest. Broad continuous picture and sound agreement with final export remains unqualified.
+**Preview:** Preview quality offers Full detail, Auto, Half and Quarter. Full detail is the default and does not reduce resolution under playback load. Auto alone uses the adaptive display budget. Pausing restores full detail; the Before comparison follows the quality choice instead of using a fixed 540p canvas. The choice is saved with the project and does not alter export settings.
 
 **Final render:** Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.
 
@@ -1450,12 +1450,13 @@ Shows the existing project programme with mapped source frames and sound. Retain
 - The 15 October programme-clock repair removes an erroneous black fade over dim footage. A20s CPU export completes in244.079s with all480 decoded picture frames unchanged; full colour/raster/live sound remains unqualified.
 - Continuous playback paints directly from the decoded video without filling the optional bitmap cache. Paused frame capture retains source dimensions and allows one pending capture. These bounds do not establish smooth playback, whole picture/audio equality or production readiness.
 - Moving playback adapts the preview resolution to measured paint cost and displays the reduced resolution. Pausing restores full detail. All paused source PNG profiles describe the decoded RGB surface consistently; broad optical effects, moving audio/picture equality and general device performance remain unqualified.
+- Full detail can reduce playback speed on slower devices; choose Auto for smoother editing. These controls do not qualify whole-stage picture/audio parity.
 
 **Common errors**
 
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
 
-**Controls:** No source-qualified editable control is recorded.
+**Controls:** [Preview quality](../control-reference/index.md#studio-preview-quality)
 
 **Guides:** [Export a final film](../task-guides/task-final_export.md)
 

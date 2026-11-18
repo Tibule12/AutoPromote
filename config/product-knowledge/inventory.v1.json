@@ -639,12 +639,6 @@
       "required": false
     },
     {
-      "feature_id": "workspace.mission_control",
-      "path": "frontend/src/UserDashboardTabs/MissionControlPanel.js",
-      "anchor": "MissionControlPanel",
-      "required": false
-    },
-    {
       "feature_id": "workspace.memetic",
       "path": "frontend/src/UserDashboardTabs/MemeticComposerPanel.js",
       "anchor": "MemeticComposerPanel",

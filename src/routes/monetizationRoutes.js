@@ -3,6 +3,7 @@
 
 const express = require("express");
 const router = express.Router();
+router.use("/boost/create", require("../retiredFeatureResponse"));
 const authMiddleware = require("../authMiddleware");
 const { db } = require("../firebaseAdmin");
 const monetizationService = require("../services/monetizationService");

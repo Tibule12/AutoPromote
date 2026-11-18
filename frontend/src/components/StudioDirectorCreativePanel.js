@@ -611,7 +611,7 @@ export default function StudioDirectorCreativePanel({
             : "Builds editable footage fragments, Null Rigs, Motion Drivers, and 3D LUT Color Grades. Samples clip colours and frame changes."}
       </p>
       {available === false ? (
-        <p role="status">Director planning is not enabled in this environment.</p>
+        <p role="status">AI planning is offline on this server. You can still build and review an editable motion graph with the choreography control above.</p>
       ) : null}
       {review ? (
         <div className="studio-director-creative__review" aria-label="Director storyboard">

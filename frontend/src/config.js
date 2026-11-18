@@ -15,8 +15,6 @@ export const API_BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8
 export const PUBLIC_SITE_URL = process.env.REACT_APP_SITE_URL || "https://autopromote.org";
 
 // Feature flags (controlled via environment variables)
-// Wolf Hunt is disabled by default; set REACT_APP_ENABLE_WOLF_HUNT=true to enable.
-export const ENABLE_WOLF_HUNT = process.env.REACT_APP_ENABLE_WOLF_HUNT === "true";
 
 // API Endpoints
 export const API_ENDPOINTS = {

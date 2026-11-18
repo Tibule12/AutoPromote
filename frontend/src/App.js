@@ -85,7 +85,6 @@ const Privacy = lazy(() => import("./Privacy"));
 const LiveLanding = lazy(() => import("./LiveLanding"));
 const LiveWatch = lazy(() => import("./LiveWatch"));
 const StreamerDashboard = lazy(() => import("./StreamerDashboard"));
-const EngagementMarketplace = lazy(() => import("./EngagementMarketplace"));
 const AdminDashboard = lazy(() => import("./AdminDashboard"));
 const InternalDemoEditorPage = lazy(() => import("./InternalDemoEditorPage"));
 
@@ -1652,7 +1651,7 @@ function App() {
           <Route path="/live" element={<LiveLanding />} />
           <Route path="/live/watch" element={<LiveWatch />} />
           <Route path="/streamer" element={<StreamerDashboard />} />
-          <Route path="/marketplace" element={<EngagementMarketplace />} />
+          <Route path="/marketplace" element={<Navigate to="/?tab=profile" replace />} />
           <Route path="/internal/demo-editor" element={<InternalDemoEditorPage />} />
 
           {/* Main Application Logic (Welcome / Auth / Dashboard) */}

@@ -24,7 +24,7 @@ function buildPricingTiers() {
       period: "month",
       limits: {
         uploads: plan.features?.uploads,
-        promotions: Number(plan.features?.wolfHuntTasks) || 0,
+        promotions: Number(plan.features?.monthlyPromotions) || 0,
         platforms: plan.features?.platformLimit,
         analytics: plan.features?.analytics || "basic",
         support: plan.features?.support || "Self-serve",
@@ -32,7 +32,6 @@ function buildPricingTiers() {
       features: [
         formatLimitValue(plan.features?.uploads, "content uploads per month"),
         formatLimitValue(plan.features?.platformLimit, "connected platforms"),
-        `${Number(plan.features?.wolfHuntTasks) || 0} mission opportunities per month`,
         `${plan.features?.analytics || "Basic"} analytics`,
         `${plan.features?.support || "Self-serve"} support`,
       ],

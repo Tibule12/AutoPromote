@@ -245,24 +245,6 @@ async function loop() {
       }
     }
 
-    // --- NIGHT SHIFT BOT TRIGGER (Auto-Pilot) ---
-    // Checks for engagement tasks that human users haven't picked up
-    // Priority Surge (New Uploads) runs frequently (80% chance) to ensure velocity
-    // Stale Cleanups (Old Tasks) run rarely (10% chance)
-    if (randChance(0.8)) {
-      try {
-        const communityEngine = require("./src/services/communityEngine");
-        // This function now handles BOTH priority surges (first) and stale tasks (second)
-        // It internally prioritizes the surge.
-        const result = await communityEngine.processStaleBounties({ background: true });
-        if (result.processed > 0) {
-          console.log(`[Worker] Auto-Pilot: ${result.message}`);
-        }
-      } catch (err) {
-        console.warn("[Worker] Auto-Pilot Error:", err.message);
-      }
-    }
-
     // Periodic earnings snapshot (simulate accrual) - dev placeholder: store latest provisional balance summary every ~loop with low probability
     if (backgroundActivity.active("general") && balanceService && randChance(0.05)) {
       try {
