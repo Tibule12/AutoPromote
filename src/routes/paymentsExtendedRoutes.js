@@ -654,7 +654,7 @@ router.get("/plans", async (_req, res) => {
     name: plan.name,
     priceId: null,
     monthly: Number(plan.price) || 0,
-    quota: String(Number(plan.features?.wolfHuntTasks) || 0),
+    quota: String(Number(plan.features?.monthlyPromotions) || 0),
     uploads: plan.features?.uploads,
     platformLimit: plan.features?.platformLimit,
   }));

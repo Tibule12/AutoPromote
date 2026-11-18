@@ -7,7 +7,7 @@ const SUBSCRIPTION_PLANS = {
       monthlyCredits: 15,
       uploads: 3,
       platformLimit: 1,
-      wolfHuntTasks: 3,
+      monthlyPromotions: 3,
       support: "Self-serve",
       multicam: false,
       teamSeats: 1,
@@ -22,7 +22,7 @@ const SUBSCRIPTION_PLANS = {
       monthlyCredits: 150,
       uploads: 20,
       platformLimit: 5,
-      wolfHuntTasks: 20,
+      monthlyPromotions: 20,
       support: "Email support",
       multicam: true,
       teamSeats: 1,
@@ -37,7 +37,7 @@ const SUBSCRIPTION_PLANS = {
       monthlyCredits: 500,
       uploads: 80,
       platformLimit: 6,
-      wolfHuntTasks: 100,
+      monthlyPromotions: 100,
       support: "Priority support",
       multicam: true,
       teamSeats: 3,
@@ -52,7 +52,7 @@ const SUBSCRIPTION_PLANS = {
       monthlyCredits: 2000,
       uploads: 240,
       platformLimit: 6,
-      wolfHuntTasks: 500,
+      monthlyPromotions: 500,
       support: "Priority support",
       multicam: true,
       teamSeats: 10,
@@ -250,7 +250,6 @@ function getPlanCapabilities(planId) {
   const normalizedPlanId = normalizePlanId(planId);
   const plan = resolvePlan(normalizedPlanId);
   const base = PLAN_CAPABILITIES[normalizedPlanId] || PLAN_CAPABILITIES.free;
-  const missionQuota = Number(plan.features.wolfHuntTasks);
   const isPaidPlan = normalizedPlanId !== "free";
   const editing = Object.fromEntries(
     Object.entries(EDITING_FEATURE_CATALOG).map(([featureId, feature]) => {
@@ -276,10 +275,6 @@ function getPlanCapabilities(planId) {
     support: {
       ...base.support,
       label: plan.features.support,
-    },
-    missions: {
-      label: `${plan.features.wolfHuntTasks} mission opportunities per month`,
-      monthlyBoosts: Number.isFinite(missionQuota) ? missionQuota : 0,
     },
     credits: {
       monthlyAllocation: plan.features.monthlyCredits || 0,

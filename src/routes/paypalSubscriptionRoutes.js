@@ -51,7 +51,7 @@ if (!fetchFn) {
 
 const { safeFetch } = require("../utils/ssrfGuard");
 
-const HIDDEN_PUBLIC_PLAN_FEATURES = new Set(["wolfHuntTasks"]);
+const HIDDEN_PUBLIC_PLAN_FEATURES = new Set(["wolfHuntTasks", "monthlyPromotions"]);
 
 function buildPublicPlan(plan) {
   const features = Object.fromEntries(
@@ -82,7 +82,7 @@ function getPlatformPostQuota(planId, plan, testerAccess = null, billingData = {
     (getPlatformPostMonthlyQuota &&
       typeof getPlatformPostMonthlyQuota === "function" &&
       getPlatformPostMonthlyQuota(planId, plan, testerAccess, billingData)) ||
-    (plan && plan.features && plan.features.wolfHuntTasks) ||
+    (plan && plan.features && plan.features.monthlyPromotions) ||
     0
   );
 }
@@ -1164,7 +1164,7 @@ router.get("/usage", authMiddleware, async (req, res) => {
     };
 
     // Get usage counts (with error handling for missing indexes/collections)
-    let uploadsByUserIdSnap, uploadsByLegacySnap, postsSnap, boostsSnap, platformTaskSnap;
+    let uploadsByUserIdSnap, uploadsByLegacySnap, postsSnap, platformTaskSnap;
     try {
       [uploadsByUserIdSnap, uploadsByLegacySnap] = await Promise.all([
         db.collection("content").where("userId", "==", userId).get(),
@@ -1183,12 +1183,6 @@ router.get("/usage", authMiddleware, async (req, res) => {
       postsSnap = { docs: [] };
     }
 
-    try {
-      boostsSnap = await db.collection("viral_boosts").where("userId", "==", userId).get();
-    } catch (e) {
-      console.log("[PayPal] Boosts query error:", e.message);
-      boostsSnap = { docs: [] };
-    }
 
     try {
       platformTaskSnap = await db
@@ -1205,7 +1199,6 @@ router.get("/usage", authMiddleware, async (req, res) => {
 
     const uploadLimit = effectiveTier.tier?.monthly_upload_cap ?? plan.features.uploads;
     const communityPostLimit = plan.features.communityPosts;
-    const missionOpportunityLimit = plan.features.wolfHuntTasks;
     const platformPostLimit = getPlatformPostQuota(
       tier, plan, effectiveTier.testerAccess, effectiveTier.billingData
     );
@@ -1214,7 +1207,6 @@ router.get("/usage", authMiddleware, async (req, res) => {
 
     const uploadsUsed = countDocsSince([uploadsByUserIdSnap, uploadsByLegacySnap], periodStart);
     const postsUsed = countDocsSince([postsSnap], periodStart);
-    const boostsUsed = countDocsSince([boostsSnap], periodStart);
     const publishingByPlatform = {};
     let publishingUsed = 0;
     (platformTaskSnap.docs || []).forEach(doc => {
@@ -1255,16 +1247,6 @@ router.get("/usage", authMiddleware, async (req, res) => {
         used: postsUsed,
         limit: isUnlimited(communityPostLimit) ? null : communityPostLimit,
         unlimited: isUnlimited(communityPostLimit),
-      },
-      missionOpportunities: {
-        used: boostsUsed,
-        limit: isUnlimited(missionOpportunityLimit) ? null : missionOpportunityLimit,
-        unlimited: isUnlimited(missionOpportunityLimit),
-      },
-      viralBoosts: {
-        used: boostsUsed,
-        limit: isUnlimited(missionOpportunityLimit) ? null : missionOpportunityLimit,
-        unlimited: isUnlimited(missionOpportunityLimit),
       },
       publishing: {
         used: publishingUsed,

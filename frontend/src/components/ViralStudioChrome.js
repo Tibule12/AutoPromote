@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import AutoPromoteLogo from './AutoPromoteLogo';
 
 export const VIRAL_STUDIO_WORKSPACE_MODES = [
@@ -28,7 +28,7 @@ export const VIRAL_STUDIO_WORKSPACE_MODES = [
   },
 ];
 
-const QUICK_TOOL_IDS = new Set(["moments", "hook", "captions", "broll", "export"]);
+const QUICK_TOOL_IDS = new Set(["director", "moments", "hook", "captions", "broll", "export"]);
 
 export const normalizeViralStudioWorkspaceMode = value =>
   VIRAL_STUDIO_WORKSPACE_MODES.some(mode => mode.id === value) ? value : "creator";
@@ -70,7 +70,11 @@ export function StudioWorkspaceModeSwitch({ mode, onChange }) {
 }
 
 export function CreativeToolRail({ tools, mode, activeTool, onSelect }) {
-  const visibleTools = getViralStudioToolsForMode(tools, mode);
+  const [showAllTools, setShowAllTools] = useState(false);
+  const quick = normalizeViralStudioWorkspaceMode(mode) === 'quick';
+  const visibleTools = quick && !showAllTools
+    ? tools.filter(tool => QUICK_TOOL_IDS.has(tool.id) || tool.id === activeTool)
+    : tools;
 
   return (
     <nav
@@ -91,6 +95,14 @@ export function CreativeToolRail({ tools, mode, activeTool, onSelect }) {
           <strong>{tool.label}</strong>
         </button>
       ))}
+      {quick && tools.some(tool => !QUICK_TOOL_IDS.has(tool.id)) ? (
+        <button type="button" aria-expanded={showAllTools}
+          title={showAllTools ? 'Return to the guided tool list' : 'Show every Studio editing tool'}
+          onClick={() => setShowAllTools(value => !value)}>
+          <span aria-hidden="true">{showAllTools ? '−' : '+'}</span>
+          <strong>{showAllTools ? 'Fewer tools' : 'All tools'}</strong>
+        </button>
+      ) : null}
     </nav>
   );
 }

@@ -17,7 +17,7 @@ class BotExecutionService {
     // --- SAFETY PROTOCOL ACTIVE ---
     // User requested removal of proxy/bot capability to avoid ban risk.
     // Returning null forces direct connection (or no connection if blocked).
-    // This effectively disables the "Wolf Hunt" automated bot network.
+    // This effectively disables the retired automated engagement network.
     console.log("[Bot] Proxy system disabled by safety protocol.");
     return null;
   }

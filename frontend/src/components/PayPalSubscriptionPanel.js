@@ -820,7 +820,7 @@ const PayPalSubscriptionPanel = ({
     "viralClipStudio",
     "findViralClips",
   ];
-  const hiddenPlanFeatureKeys = new Set(["wolfHuntTasks", "analytics", "smartPromoSummary", "ideaVideoPreview", "ideaVideoRender", "smartPromo"]);
+  const hiddenPlanFeatureKeys = new Set(["monthlyPromotions", "analytics", "smartPromoSummary", "ideaVideoPreview", "ideaVideoRender", "smartPromo"]);
 
   const getPlanEditingSummary = plan => {
     const editing = plan.capabilities?.editing;

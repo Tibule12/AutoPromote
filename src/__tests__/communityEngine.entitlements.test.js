@@ -84,10 +84,14 @@ jest.mock("../services/viralMissionControl", () => ({
 
 const { createEngagementBounty } = require("../services/communityEngine");
 
-describe("communityEngine entitlement enforcement", () => {
-  it("blocks mission creation after the monthly plan quota is reached", async () => {
-    await expect(
-      createEngagementBounty("user-1", "content-1", "youtube", "like", 5)
-    ).rejects.toThrow("3 mission opportunities per month");
+describe("retired engagement marketplace", () => {
+  it("refuses old direct creation without reading or changing records", async () => {
+    const { db } = require('../firebaseAdmin');
+    db.collection.mockClear();
+    db.runTransaction.mockClear();
+    await expect(createEngagementBounty('user-1','content-1','youtube','like',5))
+      .rejects.toMatchObject({ code: 'FEATURE_RETIRED', statusCode: 410 });
+    expect(db.collection).not.toHaveBeenCalled();
+    expect(db.runTransaction).not.toHaveBeenCalled();
   });
 });

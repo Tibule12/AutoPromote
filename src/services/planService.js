@@ -20,7 +20,7 @@ function buildDefaultPlans() {
   return Object.values(SUBSCRIPTION_PLANS).map(plan => ({
     id: plan.id,
     price: Number(plan.price) || 0,
-    monthlyTaskQuota: Number(plan.features && plan.features.wolfHuntTasks) || 0,
+    monthlyTaskQuota: Number(plan.features && plan.features.monthlyPromotions) || 0,
     aiQuota: DEFAULT_AI_QUOTAS[plan.id] || 0,
   }));
 }

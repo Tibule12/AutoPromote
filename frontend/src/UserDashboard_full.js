@@ -19,8 +19,6 @@ import PayPalSubscriptionPanel from "./components/PayPalSubscriptionPanel";
 import AdminAuditViewer from "./AdminAuditViewer";
 import SecurityPanel from "./UserDashboardTabs/SecurityPanel";
 // CommunityPanel and CommunityFeed removed
-import WolfHuntDashboard from "./EngagementMarketplace";
-import MissionControlPanel from "./UserDashboardTabs/MissionControlPanel";
 import CamCombinerPanel from "./UserDashboardTabs/CamCombinerPanel";
 import TeamPanel from "./UserDashboardTabs/TeamPanel";
 // LiveWatch import removed
@@ -33,7 +31,7 @@ import { ProductAssistanceLauncher } from "./components/ProductAssistance";
 import AdminKyc from "./AdminKyc";
 import { auth } from "./firebaseClient";
 import { sendEmailVerification } from "firebase/auth";
-import { API_ENDPOINTS, API_BASE_URL, ENABLE_WOLF_HUNT } from "./config";
+import { API_ENDPOINTS, API_BASE_URL } from "./config";
 import toast, { Toaster } from "react-hot-toast";
 import { cachedFetch, batchWithDelay, clearCache } from "./utils/requestCache";
 import { startVisiblePoller } from "./utils/visiblePoller";
@@ -49,6 +47,9 @@ import usePlatformStatus from "./hooks/usePlatformStatus";
 import useTelegramConnection from "./hooks/useTelegramConnection";
 import TelegramConnectDialog from "./components/TelegramConnectDialog";
 import "./DashboardRedesign.css";
+
+const isRetiredProductNotification = notification =>
+  notification?.type === 'wolf_hunt_invite' || String(notification?.id || '').startsWith('wolf-hunt-welcome-');
 
 const DEFAULT_IMAGE = `${process.env.PUBLIC_URL || ""}/image.png`;
 
@@ -119,11 +120,6 @@ const DASHBOARD_PAGE_META = {
     eyebrow: "Administration",
     title: "Admin KYC",
     description: "Review identity verification submissions and account status.",
-  },
-  wolf_hunt: {
-    eyebrow: "Labs",
-    title: "Mission Board",
-    description: "Review available missions and community campaign activity.",
   },
 };
 
@@ -354,12 +350,6 @@ const UserDashboard = ({
   const testerAccessActive =
     testerAccess?.status === "active" && Date.parse(testerAccess?.expiresAt || "") > Date.now();
 
-  // If Wolf Hunt is disabled, prevent accidentally staying on that tab
-  useEffect(() => {
-    if (!ENABLE_WOLF_HUNT && activeTab === "wolf_hunt") {
-      setActiveTab("profile");
-    }
-  }, [activeTab]);
 
   useEffect(() => {
     if (typeof window === "undefined" || !window.matchMedia) return undefined;
@@ -387,7 +377,7 @@ const UserDashboard = ({
   }, [activeTab, isMobileViewport]);
 
   const [notifs, setNotifs] = useState(
-    Array.isArray(notifications) ? notifications.filter(notification => !notification?.read) : []
+    Array.isArray(notifications) ? notifications.filter(notification => !notification?.read && !isRetiredProductNotification(notification)) : []
   );
   const notifiedNotificationIdsRef = useRef(
     new Set(
@@ -444,8 +434,6 @@ const UserDashboard = ({
     notifications: "Notifications",
     "admin-audit": "Admin Audit",
     "admin-kyc": "Admin KYC",
-    wolf_hunt: "Mission Board",
-    ads: "Rewards",
     rewards: "Rewards",
     live: "Live",
   };
@@ -516,7 +504,7 @@ const UserDashboard = ({
 
   useEffect(() => {
     const unreadNotifications = Array.isArray(notifications)
-      ? notifications.filter(notification => !notification?.read)
+      ? notifications.filter(notification => !notification?.read && !isRetiredProductNotification(notification))
       : [];
     unreadNotifications.forEach(notification => {
       if (notification?.id) notifiedNotificationIdsRef.current.add(notification.id);
@@ -542,82 +530,6 @@ const UserDashboard = ({
       return hasChanged ? unreadNotifications : previous;
     });
   }, [notifications]);
-
-  useEffect(() => {
-    // NEW: Check for "Wolf Hunt" onboarding criteria
-    // Triggers if user has >= 2 content items AND hasn't seen the welcome yet
-    if (!ENABLE_WOLF_HUNT) return; // Do not show recruitment notice when Wolf Hunt is locked
-
-    if (contentList && contentList.length >= 2) {
-      const hasSeen = localStorage.getItem("wolfHuntWelcomeSeen");
-
-      if (!hasSeen) {
-        // Trigger the special notification logic
-        // Mark as seen so it doesn't fire again immediately on refresh
-        localStorage.setItem("wolfHuntWelcomeSeen", "true");
-
-        // 1. Add to Notifications Panel
-        const welcomeMsg = {
-          id: "wolf-hunt-welcome-" + Date.now(),
-          title: "🐺 WOLF HUNT INVITATION",
-          message:
-            "Soldier! You have proven your worth by publishing content. The Wolf Hunt awaits. Go to the Wolf Hunt tab and click the Speaker icon for your mission briefing.",
-          type: "wolf_hunt_invite",
-          read: false,
-          created_at: new Date().toISOString(),
-        };
-
-        setNotifs(prev => [welcomeMsg, ...(prev || [])]);
-
-        // 2. Show Persistent "Call to Action" Toast
-        toast(
-          t => (
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "8px", minWidth: "250px" }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ fontSize: "20px" }}>🐺</span>
-                <b>RECRUITMENT NOTICE</b>
-              </div>
-              <span>You&apos;ve published content. Now it&apos;s time to hunt.</span>
-              <button
-                onClick={() => {
-                  toast.dismiss(t.id);
-                  handleNav("wolf_hunt"); // Navigate to Wolf Hunt tab
-                }}
-                style={{
-                  background: "#00ff88",
-                  color: "#000",
-                  border: "none",
-                  padding: "8px 12px",
-                  fontWeight: "bold",
-                  cursor: "pointer",
-                  marginTop: "8px",
-                  borderRadius: "4px",
-                  textTransform: "uppercase",
-                }}
-              >
-                REPORT FOR DUTY →
-              </button>
-              <small style={{ color: "#aaa", fontSize: "11px", marginTop: "4px" }}>
-                ℹ️ Click the Speaker icon on the Hunt page for full briefing.
-              </small>
-            </div>
-          ),
-          {
-            duration: 15000,
-            position: "top-center",
-            style: {
-              background: "#111",
-              border: "1px solid #00ff88",
-              color: "#fff",
-              boxShadow: "0 0 20px rgba(0,255,136,0.2)",
-            },
-          }
-        );
-      }
-    }
-  }, [contentList]); // Depend on contentList
 
   // Toggle dashboard-mode class on mount/unmount so global gradients don't show through dashboard pages
   useEffect(() => {
@@ -661,7 +573,7 @@ const UserDashboard = ({
         const json = await res.json();
         if (signal.aborted || auth?.currentUser?.uid !== currentUser.uid) return;
         if (!json.notifications) return;
-        const incoming = Array.isArray(json.notifications) ? json.notifications : [];
+        const incoming = Array.isArray(json.notifications) ? json.notifications.filter(notification => !isRetiredProductNotification(notification)) : [];
         const incomingUnread = incoming.filter(notification => !notification?.read);
         const unseenRecentUnread = incomingUnread.filter(notification => {
           if (!notification?.id || notifiedNotificationIdsRef.current.has(notification.id)) {
@@ -676,11 +588,7 @@ const UserDashboard = ({
         });
 
         setNotifs(prevNotifs => {
-          const currentList = Array.isArray(prevNotifs) ? prevNotifs : [];
-          const syntheticNotifications = currentList.filter(notification =>
-            String(notification?.id || "").startsWith("wolf-hunt-welcome-")
-          );
-          const merged = [...incomingUnread, ...syntheticNotifications].reduce(
+          const merged = incomingUnread.reduce(
             (acc, notification) => {
               const key =
                 notification?.id ||
@@ -730,10 +638,6 @@ const UserDashboard = ({
   const handleNav = useCallback(
     (tab, options = {}) => {
       const destinationTab = workspaceDestination(tab);
-      if (destinationTab === "wolf_hunt" && !ENABLE_WOLF_HUNT) {
-        toast("🐺 Wolf Hunt is currently locked. Come back later!", { icon: "🔒" });
-        return;
-      }
       if (destinationTab === "cam_combiner" && isMobileViewport) {
         toast("Cam Combiner is desktop-only because its editing canvas needs more screen space.", {
           icon: "🖥️",
@@ -752,7 +656,7 @@ const UserDashboard = ({
       setActiveTab(destinationTab);
       setSidebarOpen(false);
     },
-    [ENABLE_WOLF_HUNT, activeTab, isMobileViewport]
+    [activeTab, isMobileViewport]
   );
   const triggerSchedulesRefresh = useCallback(() => {
     onSchedulesChanged && onSchedulesChanged();
@@ -1568,20 +1472,7 @@ const UserDashboard = ({
               </section>
             )}
 
-            {ENABLE_WOLF_HUNT && (
-              <section className="dashboard-nav-group">
-                <p>Labs</p>
-                <ul>
-                  {ENABLE_WOLF_HUNT && (
-                    <DashboardNavItem
-                      item={{ id: "wolf_hunt", label: "Mission Board", icon: "target" }}
-                      activeTab={activeTab}
-                      onNavigate={handleNav}
-                    />
-                  )}
-                </ul>
-              </section>
-            )}
+
           </nav>
           <div className="dashboard-sidebar-footer">
             <a className="dashboard-help-card" href="/docs">
@@ -1912,7 +1803,6 @@ const UserDashboard = ({
           />
         )}
 
-        {activeTab === "ads" && <MissionControlPanel />}
 
         {activeTab === "billing" && (
           <div style={{ padding: "0 0 16px" }}>
@@ -2001,7 +1891,6 @@ const UserDashboard = ({
 
         {activeTab === "security" && <SecurityPanel user={user} />}
 
-        {activeTab === "wolf_hunt" && <WolfHuntDashboard />}
 
         {activeTab === "cam_combiner" && !isMobileViewport && (
           <CamCombinerPanel

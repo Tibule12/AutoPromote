@@ -9,6 +9,7 @@ import {
 } from "../ViralStudioChrome";
 
 const tools = [
+  { id: "director", label: "Director", icon: "D" },
   { id: "moments", label: "Moments", icon: "M" },
   { id: "cut", label: "Cut", icon: "C" },
   { id: "captions", label: "Captions", icon: "CC" },
@@ -24,12 +25,27 @@ describe("ViralStudioChrome", () => {
 
   test("Quick Create reduces visible controls without changing the shared tools", () => {
     expect(getViralStudioToolsForMode(tools, "quick").map(tool => tool.id)).toEqual([
+      "director",
       "moments",
       "captions",
       "broll",
       "export",
     ]);
-    expect(tools).toHaveLength(5);
+    expect(tools).toHaveLength(6);
+  });
+
+  test('Quick exposes Director and lets the user open every advanced tool without switching modes', () => {
+    const onSelect = jest.fn();
+    const {rerender}=render(<CreativeToolRail tools={tools} mode="quick" activeTool="moments" onSelect={onSelect} />);
+    expect(screen.getByRole('button',{name:'Director'})).toBeInTheDocument();
+    const more=screen.getByRole('button',{name:'All tools'});
+    expect(more).toHaveAttribute('aria-expanded','false');
+    fireEvent.click(more);
+    fireEvent.click(screen.getByRole('button',{name:'Cut'}));
+    expect(onSelect).toHaveBeenCalledWith('cut');
+    rerender(<CreativeToolRail tools={tools} mode="quick" activeTool="cut" onSelect={onSelect} />);
+    fireEvent.click(screen.getByRole('button',{name:'Fewer tools'}));
+    expect(screen.getByRole('button',{name:'Cut'})).toHaveAttribute('aria-pressed','true');
   });
 
   test("switches modes and exposes the right creative rail", () => {

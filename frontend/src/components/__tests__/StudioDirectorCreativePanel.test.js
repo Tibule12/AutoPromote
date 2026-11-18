@@ -123,7 +123,7 @@ test('a changed revision or sign-in refuses Apply', async () => {
 test('an unavailable planner does not pretend to plan or silently fall back to a recipe', async () => {
   studioCreativePlannerStatus.mockResolvedValue({ available: false });
   render(<StudioDirectorCreativePanel getSnapshot={state} onApply={jest.fn()} />);
-  await screen.findByText('Director planning is not enabled in this environment.');
+  await screen.findByText('AI planning is offline on this server. You can still build and review an editable motion graph with the choreography control above.');
   expect(screen.getByRole('button', { name: 'Create my motion edit' }).disabled).toBe(true);
   expect(requestStudioCreativePlan).not.toHaveBeenCalled();
 });

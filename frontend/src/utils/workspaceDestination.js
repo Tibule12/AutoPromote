@@ -1,5 +1,10 @@
 // Legacy URLs and persisted navigation intents never recreate retired tools.
 const RETIRED = {
+  marketplace: "profile",
+  ads: "rewards",
+  wolf_hunt: "profile",
+  "wolf-hunt": "profile",
+  wolfhunt: "profile",
   analytics: "schedules",
   metrics: "schedules",
   smart_promo: "viral_clip_studio",
@@ -36,7 +41,7 @@ export function requestedWorkspace(search = "") {
 }
 
 export const RETIRED_PUBLIC_PATH =
-  /^\/(?:analytics|metrics|smart[-_]promo|smartpromo|idea[-_]video|idea[-_]to[-_]video)(?:\/.*)?$/i;
+  /^\/(?:marketplace|wolf[-_]?hunt|analytics|metrics|smart[-_]promo|smartpromo|idea[-_]video|idea[-_]to[-_]video)(?:\/.*)?$/i;
 
 export function retiredWorkspacePath(path) {
   if (!RETIRED_PUBLIC_PATH.test(path)) return null;

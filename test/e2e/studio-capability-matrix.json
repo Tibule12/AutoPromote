@@ -1,4 +1,36 @@
 {
+  "studioVisibilityPreview20261118": {
+    "date": "2026-11-18",
+    "scope": "Owner-requested Studio tool visibility, preview quality and permanent Wolf Hunt retirement.",
+    "evidenceRefs": [
+      "reports/studio-visibility-preview-20261118/README.md"
+    ],
+    "implemented": [
+      "Director entry no longer depends on an absent build flag.",
+      "Quick Create includes Director and an accessible All tools expansion.",
+      "Full/Auto/Half/Quarter control real programme/Before rasters; project-persisted Full default and full paused inspection.",
+      "Wolf Hunt UI/routes/automatic work retired without deleting financial/project records."
+    ],
+    "verification": {
+      "frontendFocusedPassed": 60,
+      "backendFocusedPassed": 44,
+      "strictBuild": "PASS",
+      "directorReplay": "PASS",
+      "nativeBrowser": "PASS",
+      "backendAllPassed": 969,
+      "backendSuitesPassed": 175,
+      "knowledgeAndAssistancePassed": 52,
+      "welcomeViewportChecks": 8,
+      "signedInHelpQuestions": 3
+    },
+    "readinessCountsUnchanged": true,
+    "remainingBlockers": [
+      "Model planning requires its configured server runtime.",
+      "Existing typography13/16 and broader S02/S04/S03 limits remain.",
+      "Full detail may reduce playback speed; Auto is an explicit alternative."
+    ],
+    "nextTask": "Release via the existing GitHub deployment path and verify the exact serving build. Shared S02/S04/S03 remain."
+  },
   "schemaVersion": 1,
   "contractVersion": 1,
   "updatedAt": "2026-11-17T08:57:17.384588+00:00",

@@ -1,0 +1,88 @@
+{
+  "date": "2026-11-18",
+  "scope": "Owner-requested Studio visibility/preview repair and Wolf Hunt retirement",
+  "verification": {
+    "backend": {
+      "passed": 969,
+      "suitesPassed": 175,
+      "existingSkippedTests": 7,
+      "existingSkippedSuites": 5
+    },
+    "frontendFocusedPassed": 60,
+    "knowledgeAndAssistancePassed": 52,
+    "knowledgeNote": "35 assistance cases passed in the combined run; the corrected17 knowledge cases pass after removing the obsolete mission inventory expectation.",
+    "strictBuild": "PASS",
+    "lockedDirectorReplay": "PASS",
+    "welcomeViewportChecks": 8,
+    "welcomeContentMatchesPreservedBuild": true,
+    "signedInHelpQuestions": 3,
+    "native": {
+      "normalSignInAndFileChooserUpload": true,
+      "directorVisibleAndOpens": true,
+      "quickAllTools": true,
+      "movingFull": [
+        1080,
+        1920
+      ],
+      "movingHalf": [
+        540,
+        960
+      ],
+      "movingQuarter": [
+        270,
+        480
+      ],
+      "pausedFull": [
+        1080,
+        1920
+      ],
+      "beforeOriginalSourceDetail": [
+        1280,
+        720
+      ],
+      "autoDisplayRaster": [
+        343,
+        610
+      ],
+      "autoDecoderAdvances": true,
+      "nativeProjectBackupQuality": "half",
+      "fullReloadAndReopenRetainsQuality": true,
+      "pageErrors": 0,
+      "newRenderJobs": 0,
+      "headless": true,
+      "muted": true,
+      "mockedResponses": false
+    }
+  },
+  "retirement": {
+    "legacyEndpoints": "Permanent410 independent of former enable flag; API tests verify no database/provider work.",
+    "localNativeCommunityRequest": "Isolated application host refuses this unmounted route with403 before the production router; permanent410 is verified by actual Express route tests.",
+    "removed": [
+      "Wolf Hunt dashboard and Marketplace page",
+      "Mission Control UI and onboarding notices",
+      "campaign/claim/reward routes",
+      "worker polling and post-publish engagement campaigns",
+      "legacy paid-mission creation before payment dispatch"
+    ],
+    "preserved": [
+      "existing publishing limits and queued publication behavior",
+      "subscription prices and credit allocations",
+      "historical campaign/payment/project records"
+    ]
+  },
+  "limits": [
+    "Director model planning requires a configured server runtime; the UI exposes the existing separate source-bound choreography review workflow.",
+    "Team/private model workers and gated source-dialogue preparation were not globally enabled.",
+    "Full detail may reduce playback throughput; Auto is an explicit option.",
+    "Whole-programme preview/export parity and formal PRO/production qualification remain open."
+  ],
+  "readinessCountsUnchanged": {
+    "FUNCTIONAL": 17,
+    "PARTIAL": 9,
+    "BROKEN": 1,
+    "UNIMPLEMENTED": 2,
+    "PRO_READY": 0,
+    "PRODUCTION_READY": 0
+  },
+  "release": "Local verification complete; GitHub delivery follows this checkpoint."
+}

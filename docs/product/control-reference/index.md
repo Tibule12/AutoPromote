@@ -1,6 +1,6 @@
 # Source-qualified controls
 
-Development documentation • product 1.2.0 • knowledge 1.0.59 • 2026-11-17
+Development documentation • product 1.2.0 • knowledge 1.0.60 • 2026-11-18
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -212,6 +212,7 @@ A value is scoped to its listed inspector/media type. Unknown defaults/ranges ar
 | studio.composite.alpha_transparent | Transparent edge level | number | 0 … 1 | alpha | 0 | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
 | studio.composite.alpha_opaque | Opaque edge level | number | 0 … 1 | alpha | 1 | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
 | studio.composite.alpha_region | Edge opacity region points | array | 0 … 64 | normalized source-frame points | [] | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.preview.quality | Preview quality | enum | full, auto, half, quarter | playback detail | "full" | UNSUPPORTED | PARTIAL | UNSUPPORTED | UNSUPPORTED |
 
 <a id="studio-transform-x"></a>
 
@@ -2802,3 +2803,15 @@ Applies to: owned video with a source-bound subject mask. Requires: studio.compo
 - Use 3–64 normalized source-frame points forming a nonempty polygon. Clear the field to apply levels across the subject.
 - The polygon stays fixed in source coordinates and is not an automatically tracked selection. Explicit removed-background regions remain excluded.
 - Preview and full-film appearance still require moving review; the controls do not establish professional or universal replacement quality.
+
+<a id="studio-preview-quality"></a>
+
+## Preview quality
+
+ID: `studio.preview.quality` • **PARTIAL**
+
+Controls the real live programme and Before comparison raster. Full preserves project detail; Auto adapts to playback cost. Half and Quarter select fixed moving detail. Pause restores full detail.
+
+Applies to: video. Requires: studio.preview.
+
+- Preview-only setting; does not change original source or final export. Full detail may be slower.

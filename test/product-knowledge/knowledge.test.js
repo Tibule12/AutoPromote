@@ -14,7 +14,8 @@ function rejected(mutator,pattern){const b=clone();mutator(b);const r=validate(b
 
 test('real catalogue, implementation references and explicit deferred inventory validate',()=>{
   const r=k.validateKnowledge(book,{strictReview:true});assert.equal(r.valid,true,r.errors.join('\n'));
-  assert.equal(r.warnings.length,9);assert.ok(book.features.length>=100);assert.ok(book.controls.length>=100);assert.equal(book.tasks.length,19);
+  assert.equal(r.warnings.length,8);
+  assert.ok(!JSON.parse(fs.readFileSync(path.join(k.ROOT,"config/product-knowledge/inventory.v1.json"),"utf8")).surfaces.some(item=>item.feature_id==="workspace.mission_control"));assert.ok(book.features.length>=100);assert.ok(book.controls.length>=100);assert.equal(book.tasks.length,19);
   assert.equal(book.qualifications.length,3);assert.equal(book.features.filter(f=>['PRO_READY','PRODUCTION_READY'].includes(f.status)).length,0);
 });
 test('all three documentation qualifications include real feature/control/task references and retained limits',()=>{

@@ -17382,3 +17382,8 @@ body.dashboard-mode.viral-studio-open {
   border-color: #65dfba;
   background: #163f39;
 }
+
+/* Preview detail is a playback choice, visible beside the monitor controls. */
+.studio-preview-quality { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 11px; color: #d6deef; }
+.studio-preview-quality select { max-width: 220px; min-height: 32px; padding: 4px 6px; border: 1px solid #40516e; border-radius: 6px; background: #111b2b; color: #eef3ff; }
+.studio-preview-quality select:focus-visible { outline: 2px solid #75c3ff; outline-offset: 2px; }

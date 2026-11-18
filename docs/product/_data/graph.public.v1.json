@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.59",
+  "knowledge_version": "1.0.60",
   "product_version": "1.2.0",
   "nodes": [
     {
@@ -1530,6 +1530,11 @@
     },
     {
       "id": "studio.composite.alpha_region",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.preview.quality",
       "kind": "control",
       "status": "PARTIAL"
     },
@@ -3924,6 +3929,11 @@
       "from": "studio.compositing",
       "type": "editable_with",
       "to": "studio.composite.alpha_region"
+    },
+    {
+      "from": "studio.preview",
+      "type": "editable_with",
+      "to": "studio.preview.quality"
     }
   ]
 }
