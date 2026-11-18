@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.61",
+  "knowledge_version": "1.0.62",
   "product_version": "1.2.0",
   "release_channel": "development",
   "updated_at": "2026-11-18",
@@ -5203,7 +5203,7 @@
       "area": "Director",
       "summary": "Proposes reviewed edits through shared Studio operations. Accepting a proposal modifies ordinary editable project state; manual editing continues afterward.",
       "purpose": "Proposes reviewed edits through shared Studio operations. Accepting a proposal modifies ordinary editable project state; manual editing continues afterward.",
-      "implementation_kind": "DETERMINISTIC",
+      "implementation_kind": "HYBRID",
       "available_to": [
         "signed-in users with owned project and applicable entitlement"
       ],
@@ -5216,15 +5216,18 @@
       "optional_capabilities": [],
       "controls": [],
       "workflow": [
-        "Open the relevant workspace with an owned source.",
-        "Review the result and its limitations before saving or exporting."
+        "Save an owned project video, open Director, enter a brief and select a design approach.",
+        "Create a model proposal, review it and edit its supported design controls before Apply.",
+        "Apply to ordinary editable layers, then use manual controls, Undo/Redo and Save."
       ],
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
       "limitations": [
-        "This dated development snapshot does not establish professional or production readiness.",
-        "The Director tool is visible without a build-time enable flag, including Quick Create. Model planning still requires a configured server; source-bound choreography uses its existing separate review path.",
-        "Source-bound graphics use the saved project output aspect for both construction and Apply; preview-monitor CSS size must not change admission. The live model planner status remains unavailable as of18 November2026."
+        "This dated snapshot does not establish professional or production readiness.",
+        "Model planning uses the configured OpenAI provider on demand, or explicitly selected local CPU inference. No key or an explicit disabled provider leaves model planning offline. Existing paid-plan/tester access is required. No model request runs on status checks or when idle.",
+        "Source-bound choreography and built-in 3D design are deterministic operators, separate from model inference. Colour and frame-change descriptors do not recognize subjects or understand speech.",
+        "Composition and kinetic posters use the saved output aspect, including portrait. Poster copy is exactly three uppercase English words of two to six letters each.",
+        "Production model activation and the generated-plan live round trip are pending release verification. Broader preview/final picture and sound agreement remains unqualified."
       ],
       "common_errors": [
         {
@@ -5245,7 +5248,7 @@
       },
       "review_state": "SOURCE_AUDITED",
       "status": "FUNCTIONAL",
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-11-18",
       "product_version": "1.2.0",
       "visibility": "PUBLIC",
       "source_evidence": [
@@ -5262,6 +5265,21 @@
         {
           "path": "frontend/src/components/studioProjectAspect.js",
           "anchor": "studioProjectAspect",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "src/services/studioDirectorProvider.js",
+          "anchor": "directorProvider",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "src/routes/studioDirectorCreativeRoutes.js",
+          "anchor": "requireDirectorAccess",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioDirectorPosterPlan.js",
+          "anchor": "studioProjectAspect(snapshot)",
           "kind": "IMPLEMENTATION"
         }
       ]

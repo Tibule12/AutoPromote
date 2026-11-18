@@ -75,10 +75,12 @@ function createCreativePlanner({
   infer,
   model = "phi3:latest",
   compositionModel = "phi3:latest",
+  transport,
+  provider = "ollama",
   now = () => new Date().toISOString(),
 }) {
   return async input => {
-    if ([2,3,4,5].includes(input?.compositionVersion)) {
+    if ([2, 3, 4, 5].includes(input?.compositionVersion)) {
       if (
         !exact(input, [
           "compositionVersion",
@@ -93,12 +95,24 @@ function createCreativePlanner({
         throw fail("Unsupported composition request fields.");
       const { compositionVersion, pixelEvidence, ...base } = input;
       validateContext(base, { allowEmptyMedia: compositionVersion === 5 });
-      if (compositionVersion === 5) return require('./studioDirector3DPlanner').createDirectorCinema3DPlan({ ...base, compositionVersion }, { now });
-      if(compositionVersion===4)return require('./studioDirectorPosterPlanner').createDirectorPosterPlan({...base,compositionVersion},{model:compositionModel,now});
-      if(compositionVersion===3)return require('./studioDirectorNodePlanner').createDirectorNodePlan({...base,compositionVersion,pixelEvidence},{model:compositionModel,now});
+      if (compositionVersion === 5)
+        return require("./studioDirector3DPlanner").createDirectorCinema3DPlan(
+          { ...base, compositionVersion },
+          { now }
+        );
+      if (compositionVersion === 4)
+        return require("./studioDirectorPosterPlanner").createDirectorPosterPlan(
+          { ...base, compositionVersion },
+          { model: compositionModel, now, transport, provider }
+        );
+      if (compositionVersion === 3)
+        return require("./studioDirectorNodePlanner").createDirectorNodePlan(
+          { ...base, compositionVersion, pixelEvidence },
+          { model: compositionModel, now, transport, provider }
+        );
       return require("./studioDirectorCompositionPlanner").planComposition(
         { ...base, compositionVersion, pixelEvidence },
-        { model: compositionModel, now }
+        { model: compositionModel, now, transport, provider }
       );
     }
     const context = validateContext(input);
@@ -126,14 +140,14 @@ function createCreativePlanner({
       ...content,
       fingerprint,
       provenance: {
-        provider: "ollama",
+        provider,
         model,
         generatedAt: now(),
         elapsedMs: Date.now() - started,
         sourceUnderstanding: "brief_and_clip_metadata_only",
         automaticModelPlanning: true,
         timingAllocation: "90khz_source_bounded_weighted_intents",
-        paidProviderCalls: 0,
+        paidProviderCalls: provider === "openai" ? 1 : 0,
       },
     };
   };
@@ -209,7 +223,7 @@ function materializeMotionIntent(intent, context, aliases) {
   };
 }
 
-async function localInference({ system, context, model }) {
+async function localInference({ system, context, model, transport }) {
   const aliases = new Map(context.media.map((media, index) => [`clip_${index + 1}`, media.id]));
   const modelContext = {
     brief: context.brief,
@@ -245,25 +259,28 @@ async function localInference({ system, context, model }) {
       },
     },
   };
-  const response = await fetch("http://127.0.0.1:11434/api/chat", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    signal: AbortSignal.timeout(150000),
-    body: JSON.stringify({
-      model,
-      stream: false,
-      format: schema,
-      keep_alive: 0,
-      options: { num_ctx: 3072, num_predict: 1100, num_thread: 3, num_gpu: 0, temperature: 0 },
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: JSON.stringify(modelContext) },
-      ],
-    }),
-  });
-  if (!response.ok)
-    throw fail("The local Director model is unavailable. No edit was applied.", 503);
-  const data = await response.json();
+  const payload = {
+    model,
+    stream: false,
+    format: schema,
+    keep_alive: 0,
+    options: { num_ctx: 3072, num_predict: 1100, num_thread: 3, num_gpu: 0, temperature: 0 },
+    messages: [
+      { role: "system", content: system },
+      { role: "user", content: JSON.stringify(modelContext) },
+    ],
+  };
+  const signal = AbortSignal.timeout(150000);
+  const response = transport
+    ? await transport(payload, { signal })
+    : await fetch("http://127.0.0.1:11434/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal,
+        body: JSON.stringify(payload),
+      });
+  if (!response.ok) throw fail("The Director model is unavailable. No edit was applied.", 503);
+  const data = transport ? response.data : await response.json();
   if (typeof data.message?.content !== "string" || data.message.content.length > 16000)
     throw fail("The Director response was incomplete. No edit was applied.", 422);
   let intent;

@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Bind saved-project aspect repair to the shared source, preserving live model-off and formal readiness limits.",
-  "reviewed_at": "2026-11-18T10:11:38.303Z",
-  "catalog_sha256": "00144c1ee336c41e4ec96663283987056ed04125958513ac95e25aeba0696238",
+  "reason": "Review demand-only Director provider and four-aspect kinetic posters; 58 backend,51 frontend,17 knowledge tests and strict build pass; native model release verification pending.",
+  "reviewed_at": "2026-11-18T10:29:56.738Z",
+  "catalog_sha256": "54ef38296e8cfbccc5f6162c9fd98483230c76f15aa30272e55ffe61fb081b2a",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -264,6 +264,10 @@
     {
       "path": "frontend/src/components/studioDirectorEvidenceProposals.js",
       "sha256": "a001527c25caa8f176b18011aa46091c943181c356f9abcc6af3ab260515d9d9"
+    },
+    {
+      "path": "frontend/src/components/studioDirectorPosterPlan.js",
+      "sha256": "bdcf36b6df7e13a9b7a2e18aaf9a5837eeeeb3ad847431654497edf5cf73e7d4"
     },
     {
       "path": "frontend/src/components/studioDirectorProposals.js",
@@ -630,8 +634,12 @@
       "sha256": "336e78c1300678ea52624f0c4c33196de391d30a36b847b7f1aa7c98a24eaa68"
     },
     {
+      "path": "src/routes/studioDirectorCreativeRoutes.js",
+      "sha256": "d2f36092b4fd5243a6e8c0c59b34e6fce5489e0da972e59e3565227336578789"
+    },
+    {
       "path": "src/server.js",
-      "sha256": "6bf80a1a834c5e8ca96275a81698154fe5aa8253ec7ef282ba584be28f45f622"
+      "sha256": "663a3b236ea98c28f60e9c78bcd52768279513f1cd1f4e3bacef9e8dd8cfbcc9"
     },
     {
       "path": "src/services/__tests__/publishedVideoRetention.test.js",
@@ -706,6 +714,10 @@
       "sha256": "e2ff6f50f7c3f5aa8b1570150d1d9bb20b7c51cc80a525a7c518ecade7bc1aa5"
     },
     {
+      "path": "src/services/studioDirectorProvider.js",
+      "sha256": "5ae0b6cddd57a2ed46d5f3eed9bf1ec7ad5e6b7f8ed371b93e9df4eccec0ef10"
+    },
+    {
       "path": "src/services/studioModelCapabilityService.js",
       "sha256": "05bc927b49ae98524ca6f07b2656debb19b12a9c74801103354b3f50b768b000"
     },
@@ -735,11 +747,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "7c07ba8f58765f7ec310f1bc93ad0b852a3471aadcaac918f9e8c94b358547d3"
+      "sha256": "efb751f2a1b888eef0be7f5691049c2a70fa8b1aecbfa54751176197bed07210"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "c862a2b832c2fe55c1b5d25572f8455a3956d58ba21c590d9ebcbcd4f94a7c64"
+      "sha256": "82f6dfb3ce30e79597408fe62e4705bc4bb7c40cca8f70f5937962e6675407f9"
     },
     {
       "path": "worker.js",

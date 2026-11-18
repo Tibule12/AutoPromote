@@ -1,4 +1,35 @@
 {
+  "studioLiveDirectorPlanner20261118": {
+    "date": "2026-11-18",
+    "scope": "Complete the live Director planning and editable authoring workflow.",
+    "evidenceRefs": [
+      "reports/studio-live-test-20261118/README.md"
+    ],
+    "verification": {
+      "correctedSourceBoundLiveApplyHistorySaveReopen": "PASS at000d5f59",
+      "sourceBoundLayers": 5,
+      "sourceBoundMotionKeys": 85,
+      "livePageAndHttpErrors": 0,
+      "actualOpenAIModelPoster": "PASS (one request, 2943ms)",
+      "actualOpenAIModelComposition": "PASS (one request,3970ms,4 validated layers)",
+      "providerBackendTests": 58,
+      "posterAspectCases": 4,
+      "strictBuild": "PASS",
+      "generatedPlanLiveRoundTrip": "PENDING"
+    },
+    "changes": [
+      "Use existing configured OpenAI key for demand-only Director planning; preserve explicit local and disabled provider modes.",
+      "Require existing paid-plan/tester entitlement, enforce concurrency and request deadlines, cancel disconnected requests and keep ordinary rate limiting.",
+      "Pass both providers through the same validated plan/action compilation and accurately attribute provider calls.",
+      "Use saved output aspect for kinetic posters and preserve vector-letter proportions."
+    ],
+    "remainingBlockers": [
+      "Production generated-plan review/Apply/manual editing/history/save/cold-reopen verification.",
+      "Broader S02/S04/S03 and typography13/16 remain."
+    ],
+    "readinessCountsUnchanged": true,
+    "nextTask": "Deploy and verify actual generated-plan round trip on the serving App."
+  },
   "studioLiveDirectorAspect20261118": {
     "date": "2026-11-18",
     "scope": "Actual owner live Studio test and source-bound Director project-aspect repair.",

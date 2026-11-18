@@ -1313,7 +1313,6 @@ try {
     codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (_req, _res, next) => next(),
     require("./routes/studioDirectorReviewRoutes")
   );
-  app.use("/api/studio/director/creative-plan", require("./routes/studioDirectorCreativeRoutes"));
   app.use(
     "/api/studio/director/projects/revisions",
     routeLimiter({ windowHint: "studio_director_project_revisions" }),

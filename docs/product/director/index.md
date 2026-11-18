@@ -1,12 +1,12 @@
 # Director
 
-Development documentation • product 1.2.0 • knowledge 1.0.61 • 2026-11-18
+Development documentation • product 1.2.0 • knowledge 1.0.62 • 2026-11-18
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
 ## Studio Director proposals
 
-ID: `director.proposals` • **FUNCTIONAL** • DETERMINISTIC
+ID: `director.proposals` • **FUNCTIONAL** • HYBRID
 
 Proposes reviewed edits through shared Studio operations. Accepting a proposal modifies ordinary editable project state; manual editing continues afterward.
 
@@ -20,8 +20,9 @@ Proposes reviewed edits through shared Studio operations. Accepting a proposal m
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Save an owned project video, open Director, enter a brief and select a design approach.
+2. Create a model proposal, review it and edit its supported design controls before Apply.
+3. Apply to ordinary editable layers, then use manual controls, Undo/Redo and Save.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
@@ -29,9 +30,11 @@ Proposes reviewed edits through shared Studio operations. Accepting a proposal m
 
 **Limits**
 
-- This dated development snapshot does not establish professional or production readiness.
-- The Director tool is visible without a build-time enable flag, including Quick Create. Model planning still requires a configured server; source-bound choreography uses its existing separate review path.
-- Source-bound graphics use the saved project output aspect for both construction and Apply; preview-monitor CSS size must not change admission. The live model planner status remains unavailable as of18 November2026.
+- This dated snapshot does not establish professional or production readiness.
+- Model planning uses the configured OpenAI provider on demand, or explicitly selected local CPU inference. No key or an explicit disabled provider leaves model planning offline. Existing paid-plan/tester access is required. No model request runs on status checks or when idle.
+- Source-bound choreography and built-in 3D design are deterministic operators, separate from model inference. Colour and frame-change descriptors do not recognize subjects or understand speech.
+- Composition and kinetic posters use the saved output aspect, including portrait. Poster copy is exactly three uppercase English words of two to six letters each.
+- Production model activation and the generated-plan live round trip are pending release verification. Broader preview/final picture and sound agreement remains unqualified.
 
 **Common errors**
 

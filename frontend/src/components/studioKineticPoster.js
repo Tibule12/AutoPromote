@@ -29,7 +29,12 @@ function validateKineticPoster(spec) {
     throw Error("Choose three short uppercase words, a motion palette and energy0.5–1.");
   return spec;
 }
-function buildKineticPoster(spec, duration = 10) {
+function buildKineticPoster(spec, duration = 10, stage = { width: 1280, height: 720 }) {
+  const { width, height } = stage;
+  if (![width, height].every(n => Number.isFinite(n) && n >= 100 && n <= 4096))
+    throw Error("Choose supported motion-design stage dimensions.");
+  const px = width / 100,
+    py = height / 100;
   validateKineticPoster(spec);
   if (!Number.isFinite(duration) || duration < 8 || duration > 20)
     throw Error("Kinetic motion design needs8–20seconds.");
@@ -66,9 +71,11 @@ function buildKineticPoster(spec, duration = 10) {
       l.keys.push({ property, time: t(time), value, easing: "bezier", curve });
   };
   const svg = body =>
-    `<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720">${body}</svg>`;
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 1280 720">${body}</svg>`;
   const field = (id, color, a, b) =>
-    add(id, id, a, b, { svg: svg(`<rect width="1280" height="720" fill="${color}"/>`) });
+    add(id, id, a, b, {
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><rect width="${width}" height="${height}" fill="${color}"/></svg>`,
+    });
   const solid = color => ({
     kind: "solid",
     color,
@@ -89,23 +96,28 @@ function buildKineticPoster(spec, duration = 10) {
     stroke: { color, width: stroke },
   });
   const disk = (id, color, a, b, width = 24) =>
-    add(id, id, a, b, { vectorShape: circle(color), width, height: (width * 1280) / 720 });
+    add(id, id, a, b, {
+      vectorShape: circle(color),
+      width,
+      height: (width * stage.width) / stage.height,
+    });
   const word = (text, a, b, cx, cy, em, color, prefix, outline = false) => {
     const font = glyphs.weights["900"];
     em = Math.min(
-      em,
-      (1050 * font.unitsPerEm) / [...text].reduce((n, c) => n + font.glyphs[c].advance, 0)
+      em * Math.min(width / 1280, height / 720),
+      (width * (1050 / 1280) * font.unitsPerEm) /
+        [...text].reduce((n, c) => n + font.glyphs[c].advance, 0)
     );
     const unit = em / font.unitsPerEm;
     const advance = [...text].reduce((n, c) => n + font.glyphs[c].advance * unit, 0);
-    let cursor = cx * 12.8 - advance / 2;
-    const baseline = cy * 7.2 + em * 0.35,
+    let cursor = cx * px - advance / 2;
+    const baseline = cy * py + em * 0.35,
       out = [];
     for (const [i, c] of [...text].entries()) {
       const g = font.glyphs[c],
         side = g.side * unit,
-        x = (cursor + (g.left + g.side / 2) * unit) / 12.8,
-        y = (baseline + (-g.top + g.side / 2) * unit) / 7.2;
+        x = (cursor + (g.left + g.side / 2) * unit) / px,
+        y = (baseline + (-g.top + g.side / 2) * unit) / py;
       const vectorShape = {
         version: 2,
         contours: JSON.parse(JSON.stringify(g.contours)),
@@ -116,8 +128,8 @@ function buildKineticPoster(spec, duration = 10) {
         vectorShape,
         x,
         y,
-        width: side / 12.8,
-        height: side / 7.2,
+        width: side / px,
+        height: side / py,
       });
       out.push(l);
       cursor += g.advance * unit;
@@ -245,7 +257,7 @@ function buildKineticPoster(spec, duration = 10) {
   const orbit = add("orbit", "Orbit / editable trim stroke", 2.75, 4.9, {
     vectorShape: circle(ink, 1.2),
     width: 48,
-    height: (48 * 1280) / 720,
+    height: (48 * width) / height,
   });
   key(
     orbit,
@@ -435,7 +447,7 @@ function buildKineticPoster(spec, duration = 10) {
       l = add("petal_" + i, "Motion mark / petal" + (i + 1), a, 10, {
         svg: svg(`<rect x="610" y="120" width="60" height="235" rx="28" fill="${accent}"/>`),
         width: 28,
-        height: (28 * 1280) / 720,
+        height: (28 * width) / height,
         x: 24,
         y: 49,
         rotation: angle,
@@ -488,8 +500,8 @@ function buildKineticPoster(spec, duration = 10) {
       format: "autopromote-graphics",
       version: 1,
       name: spec.name,
-      width: 1280,
-      height: 720,
+      width,
+      height,
       duration,
       layers,
       groups,

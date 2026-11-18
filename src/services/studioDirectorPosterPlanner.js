@@ -6,6 +6,7 @@ async function createDirectorPosterPlan(
   {
     model = "phi3:latest",
     transport = requestLocalModel,
+    provider = "ollama",
     now = () => new Date().toISOString(),
   } = {}
 ) {
@@ -54,13 +55,12 @@ async function createDirectorPosterPlan(
       { signal: AbortSignal.timeout(180000) }
     );
   } catch {
-    throw Object.assign(
-      Error("Local Director motion planning is unavailable. No edit was applied."),
-      { status: 503 }
-    );
+    throw Object.assign(Error("Director motion planning is unavailable. No edit was applied."), {
+      status: 503,
+    });
   }
   if (!response.ok)
-    throw Object.assign(Error("Local Director motion planning is unavailable."), { status: 503 });
+    throw Object.assign(Error("Director motion planning is unavailable."), { status: 503 });
   let poster;
   try {
     poster = validateKineticPoster(JSON.parse(response.data.message.content));
@@ -82,7 +82,7 @@ async function createDirectorPosterPlan(
     ...core,
     fingerprint: crypto.createHash("sha256").update(JSON.stringify(core)).digest("hex"),
     provenance: {
-      provider: "ollama",
+      provider,
       model,
       generatedAt: now(),
       elapsedMs: Date.now() - start,
@@ -91,7 +91,7 @@ async function createDirectorPosterPlan(
       authoredMotionOperator: true,
       sourceUnderstanding: "source_independent_graphic_design",
       modelCalls: 1,
-      paidProviderCalls: 0,
+      paidProviderCalls: provider === "openai" ? 1 : 0,
     },
   };
 }

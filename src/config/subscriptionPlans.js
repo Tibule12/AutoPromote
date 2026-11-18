@@ -116,7 +116,7 @@ const EDITING_FEATURE_CATALOG = {
   autoDirector: {
     label: "Auto Director",
     clientSide: true,
-    backendProcessing: false,
+    backendProcessing: true,
     pythonWorker: false,
     usesStorage: false,
     creditOperation: null,
