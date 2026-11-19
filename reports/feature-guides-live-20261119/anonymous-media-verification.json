@@ -1,0 +1,42 @@
+[
+  {
+    "id": "feature-color",
+    "pass_": true,
+    "status": 206,
+    "bytes": 65536,
+    "totalBytes": 39277477,
+    "contentType": "video/mp4",
+    "cors": "https://autopromote.org",
+    "sha256": "bf37708682568dd828572fa06be21c8cddadcdf13aec065add3a857bbf48295e"
+  },
+  {
+    "id": "feature-logo",
+    "pass_": true,
+    "status": 206,
+    "bytes": 65536,
+    "totalBytes": 20747071,
+    "contentType": "video/mp4",
+    "cors": "https://autopromote.org",
+    "sha256": "25d305dc5428ee5f86893690c004ef03d064d2fe97955abf88d4dbca2d7574c5"
+  },
+  {
+    "id": "feature-node",
+    "pass_": true,
+    "status": 206,
+    "bytes": 65536,
+    "totalBytes": 31941791,
+    "contentType": "video/mp4",
+    "cors": "https://autopromote.org",
+    "sha256": "ae2c4f5669c537f316c2daf98ba042f6b15e0c453857d21bf0e806e6e26bf8a2"
+  },
+  {
+    "id": "feature-sound",
+    "pass_": true,
+    "status": 206,
+    "bytes": 65536,
+    "totalBytes": 45005706,
+    "contentType": "video/mp4",
+    "cors": "https://autopromote.org",
+    "sha256": "2e3b72ba64bab3db97f2ad8e8725e7dc31b858cfeea47b56ee767305807b72b8"
+  }
+]

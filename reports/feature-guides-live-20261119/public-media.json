@@ -1,0 +1,54 @@
+[
+  {
+    "id": "feature-color",
+    "title": "Cinematic color grading",
+    "description": "Exposure, curves, LUTs and scopes. Watch the controls change the picture.",
+    "src": "https://firebasestorage.googleapis.com/v0/b/autopromote-cc6d3.firebasestorage.app/o/public%2Fwelcome%2F2026-11-19%2Ffeatures%2Fcolor-bf37708682568dd8.mp4?alt=media&token=39675f4d-d2cf-44c8-b3d3-16286fe8cdf1",
+    "duration": "3:53",
+    "kind": "Tutorial",
+    "poster": "/welcome/2026-11-19/features/color.jpg",
+    "object": "public/welcome/2026-11-19/features/color-bf37708682568dd8.mp4",
+    "sha256": "bf37708682568dd828572fa06be21c8cddadcdf13aec065add3a857bbf48295e",
+    "bytes": 39277477,
+    "generation": "1795123024015611"
+  },
+  {
+    "id": "feature-logo",
+    "title": "Animate a logo",
+    "description": "Design editable symbols and letters, animate the assembly, and export the result.",
+    "src": "https://firebasestorage.googleapis.com/v0/b/autopromote-cc6d3.firebasestorage.app/o/public%2Fwelcome%2F2026-11-19%2Ffeatures%2Flogo-25d305dc5428ee5f.mp4?alt=media&token=61bbe777-9b6a-4e7c-804e-5c567fddf039",
+    "duration": "2:58",
+    "kind": "Tutorial",
+    "poster": "/welcome/2026-11-19/features/logo.jpg",
+    "object": "public/welcome/2026-11-19/features/logo-25d305dc5428ee5f.mp4",
+    "sha256": "25d305dc5428ee5f86893690c004ef03d064d2fe97955abf88d4dbca2d7574c5",
+    "bytes": 20747071,
+    "generation": "1795123034590130"
+  },
+  {
+    "id": "feature-node",
+    "title": "Build a floating video display",
+    "description": "Perspective, animated planes, glow and a connected Node Flow rig.",
+    "src": "https://firebasestorage.googleapis.com/v0/b/autopromote-cc6d3.firebasestorage.app/o/public%2Fwelcome%2F2026-11-19%2Ffeatures%2Fnode-ae2c4f5669c537f3.mp4?alt=media&token=62f221ca-05f3-467d-b4d0-e85c96c832d7",
+    "duration": "3:48",
+    "kind": "Tutorial",
+    "poster": "/welcome/2026-11-19/features/node.jpg",
+    "object": "public/welcome/2026-11-19/features/node-ae2c4f5669c537f3.mp4",
+    "sha256": "ae2c4f5669c537f316c2daf98ba042f6b15e0c453857d21bf0e806e6e26bf8a2",
+    "bytes": 31941791,
+    "generation": "1795123049259954"
+  },
+  {
+    "id": "feature-sound",
+    "title": "Make the sound yours",
+    "description": "Place voiceover, duck music, shape effects and automate the mix.",
+    "src": "https://firebasestorage.googleapis.com/v0/b/autopromote-cc6d3.firebasestorage.app/o/public%2Fwelcome%2F2026-11-19%2Ffeatures%2Fsound-2e3b72ba64bab3db.mp4?alt=media&token=df5013fe-ddf5-40d6-ad2b-8bc46a8b060e",
+    "duration": "3:38",
+    "kind": "Tutorial",
+    "poster": "/welcome/2026-11-19/features/sound.jpg",
+    "object": "public/welcome/2026-11-19/features/sound-2e3b72ba64bab3db.mp4",
+    "sha256": "2e3b72ba64bab3db97f2ad8e8725e7dc31b858cfeea47b56ee767305807b72b8",
+    "bytes": 45005706,
+    "generation": "1795123068965366"
+  }
+]

@@ -9,6 +9,42 @@
     "poster": "/welcome/2026-11-19/afterimage.jpg"
   },
   {
+    "id": "feature-color",
+    "title": "Cinematic color grading",
+    "description": "Exposure, curves, LUTs and scopes. Watch the controls change the picture.",
+    "src": "https://firebasestorage.googleapis.com/v0/b/autopromote-cc6d3.firebasestorage.app/o/public%2Fwelcome%2F2026-11-19%2Ffeatures%2Fcolor-bf37708682568dd8.mp4?alt=media&token=39675f4d-d2cf-44c8-b3d3-16286fe8cdf1",
+    "duration": "3:53",
+    "kind": "Tutorial",
+    "poster": "/welcome/2026-11-19/features/color.jpg"
+  },
+  {
+    "id": "feature-logo",
+    "title": "Animate a logo",
+    "description": "Design editable symbols and letters, animate the assembly, and export the result.",
+    "src": "https://firebasestorage.googleapis.com/v0/b/autopromote-cc6d3.firebasestorage.app/o/public%2Fwelcome%2F2026-11-19%2Ffeatures%2Flogo-25d305dc5428ee5f.mp4?alt=media&token=61bbe777-9b6a-4e7c-804e-5c567fddf039",
+    "duration": "2:58",
+    "kind": "Tutorial",
+    "poster": "/welcome/2026-11-19/features/logo.jpg"
+  },
+  {
+    "id": "feature-node",
+    "title": "Build a floating video display",
+    "description": "Perspective, animated planes, glow and a connected Node Flow rig.",
+    "src": "https://firebasestorage.googleapis.com/v0/b/autopromote-cc6d3.firebasestorage.app/o/public%2Fwelcome%2F2026-11-19%2Ffeatures%2Fnode-ae2c4f5669c537f3.mp4?alt=media&token=62f221ca-05f3-467d-b4d0-e85c96c832d7",
+    "duration": "3:48",
+    "kind": "Tutorial",
+    "poster": "/welcome/2026-11-19/features/node.jpg"
+  },
+  {
+    "id": "feature-sound",
+    "title": "Make the sound yours",
+    "description": "Place voiceover, duck music, shape effects and automate the mix.",
+    "src": "https://firebasestorage.googleapis.com/v0/b/autopromote-cc6d3.firebasestorage.app/o/public%2Fwelcome%2F2026-11-19%2Ffeatures%2Fsound-2e3b72ba64bab3db.mp4?alt=media&token=df5013fe-ddf5-40d6-ad2b-8bc46a8b060e",
+    "duration": "3:38",
+    "kind": "Tutorial",
+    "poster": "/welcome/2026-11-19/features/sound.jpg"
+  },
+  {
     "id": "studio",
     "title": "Make the Studio edit",
     "description": "Follow the real controls, layers, soundtrack and export.",

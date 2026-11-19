@@ -1,0 +1,176 @@
+{
+  "pass": true,
+  "live": false,
+  "checks": [
+    {
+      "width": 1920,
+      "id": "feature-color",
+      "title": "Cinematic color grading",
+      "playing": true,
+      "endingVerified": true,
+      "height": 1080,
+      "duration": 232.633333,
+      "muted": false,
+      "ended": false,
+      "audioDecodedBytes": 23661
+    },
+    {
+      "width": 1920,
+      "id": "feature-logo",
+      "title": "Animate a logo",
+      "playing": true,
+      "endingVerified": true,
+      "height": 1080,
+      "duration": 178,
+      "muted": false,
+      "ended": false,
+      "audioDecodedBytes": 25113
+    },
+    {
+      "width": 1920,
+      "id": "feature-node",
+      "title": "Build a floating video display",
+      "playing": true,
+      "endingVerified": true,
+      "height": 1080,
+      "duration": 227.966667,
+      "muted": false,
+      "ended": false,
+      "audioDecodedBytes": 27551
+    },
+    {
+      "width": 1920,
+      "id": "feature-sound",
+      "title": "Make the sound yours",
+      "playing": true,
+      "endingVerified": true,
+      "height": 1080,
+      "duration": 218.033333,
+      "muted": false,
+      "ended": false,
+      "audioDecodedBytes": 27610
+    },
+    {
+      "width": 1440,
+      "automaticPopup": true,
+      "playlist": 9,
+      "closeAndReopen": true,
+      "reloadShowsAgain": true,
+      "noHorizontalOverflow": true
+    },
+    {
+      "width": 1920,
+      "id": "feature-color",
+      "title": "Cinematic color grading",
+      "playing": true,
+      "endingVerified": false,
+      "height": 1080,
+      "duration": 232.633333,
+      "muted": false,
+      "ended": false,
+      "audioDecodedBytes": 24107
+    },
+    {
+      "width": 1920,
+      "id": "feature-logo",
+      "title": "Animate a logo",
+      "playing": true,
+      "endingVerified": false,
+      "height": 1080,
+      "duration": 178,
+      "muted": false,
+      "ended": false,
+      "audioDecodedBytes": 24105
+    },
+    {
+      "width": 1920,
+      "id": "feature-node",
+      "title": "Build a floating video display",
+      "playing": true,
+      "endingVerified": false,
+      "height": 1080,
+      "duration": 227.966667,
+      "muted": false,
+      "ended": false,
+      "audioDecodedBytes": 24551
+    },
+    {
+      "width": 1920,
+      "id": "feature-sound",
+      "title": "Make the sound yours",
+      "playing": true,
+      "endingVerified": false,
+      "height": 1080,
+      "duration": 218.033333,
+      "muted": false,
+      "ended": false,
+      "audioDecodedBytes": 24398
+    },
+    {
+      "width": 390,
+      "automaticPopup": true,
+      "playlist": 9,
+      "closeAndReopen": true,
+      "reloadShowsAgain": true,
+      "noHorizontalOverflow": true
+    },
+    {
+      "width": 1920,
+      "id": "feature-color",
+      "title": "Cinematic color grading",
+      "playing": true,
+      "endingVerified": false,
+      "height": 1080,
+      "duration": 232.633333,
+      "muted": false,
+      "ended": false,
+      "audioDecodedBytes": 24113
+    },
+    {
+      "width": 1920,
+      "id": "feature-logo",
+      "title": "Animate a logo",
+      "playing": true,
+      "endingVerified": false,
+      "height": 1080,
+      "duration": 178,
+      "muted": false,
+      "ended": false,
+      "audioDecodedBytes": 24541
+    },
+    {
+      "width": 1920,
+      "id": "feature-node",
+      "title": "Build a floating video display",
+      "playing": true,
+      "endingVerified": false,
+      "height": 1080,
+      "duration": 227.966667,
+      "muted": false,
+      "ended": false,
+      "audioDecodedBytes": 24997
+    },
+    {
+      "width": 1920,
+      "id": "feature-sound",
+      "title": "Make the sound yours",
+      "playing": true,
+      "endingVerified": false,
+      "height": 1080,
+      "duration": 218.033333,
+      "muted": false,
+      "ended": false,
+      "audioDecodedBytes": 25009
+    },
+    {
+      "width": 360,
+      "automaticPopup": true,
+      "playlist": 9,
+      "closeAndReopen": true,
+      "reloadShowsAgain": true,
+      "noHorizontalOverflow": true
+    }
+  ],
+  "errors": [],
+  "remoteAnonymousMedia": true
+}
