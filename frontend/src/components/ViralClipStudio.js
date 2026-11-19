@@ -25629,10 +25629,11 @@ const ViralClipStudio = ({
                                   ? "is-active"
                                   : ""
                               }
-                              onClick={() => {
-                                setOverlayStyleOption(activeOverlay.id, "x", 50);
-                                setOverlayStyleOption(activeOverlay.id, "y", position);
-                              }}
+                              onClick={() => commitCheckedOverlayChange(overlays.map(overlay =>
+                                overlay.id === activeOverlay.id
+                                  ? { ...overlay, x: 50, y: position }
+                                  : overlay
+                              ))}
                             >
                               {label}
                             </button>

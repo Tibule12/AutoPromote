@@ -3665,6 +3665,42 @@ describe("ViralClipStudio timeline sequencing", () => {
     })]);
   });
 
+  test("title position presets center both axes in one undoable edit and respect track locks", async () => {
+    const source = { id: 'source', start: 0, end: 8, duration: 8 };
+    const snapshot = { orderedClips: [source], selectedClipId: 'source',
+      timeline: [{ ...source, id: 'main', sourceClipId: 'source', url: 'https://example.com/source.mp4', startRequest: 0, endRequest: 8 }],
+      reframeAspect: '16:9', smartCrop: false, autoCaptions: false, addHook: false,
+      activeOverlayId: 'title',
+      overlays: [{ id: 'title', name: 'MAKE SPACE', type: 'text', text: 'MAKE SPACE', startTime: 0, duration: 4, x: 72, y: 18 }] };
+    const saveSpy = jest.spyOn(studioProjectStore, 'saveViralStudioProject').mockImplementation(async project => ({ ...project, updatedAt: Date.now() }));
+    try {
+      render(<ViralClipStudio videoUrl="https://example.com/source.mp4" clips={[source]}
+        initialSavedProject={{ id: 'title-position', name: 'Title position', snapshot }} onSave={jest.fn()} onCancel={jest.fn()} />);
+      await screen.findByDisplayValue('Title position');
+      fireEvent.click(within(screen.getByRole('navigation', { name: 'Creative tools' })).getByRole('button', { name: 'Graphics', exact: true }));
+      const title = screen.getByTestId('title-editor');
+      const save = async (x, y) => {
+        fireEvent.click(screen.getByTestId('studio-save-project'));
+        await waitFor(() => expect(saveSpy.mock.calls.at(-1)[0].snapshot.overlays[0]).toEqual(expect.objectContaining({ x, y })));
+      };
+      await save(72, 18);
+      fireEvent.click(within(title).getByRole('button', { name: 'Center', exact: true }));
+      await save(50, 50);
+      fireEvent.click(screen.getByTestId('studio-undo-button'));
+      await save(72, 18);
+      fireEvent.click(screen.getByTestId('studio-redo-button'));
+      await save(50, 50);
+      fireEvent.click(within(title).getByRole('button', { name: 'Lower', exact: true }));
+      await save(50, 82);
+      fireEvent.click(within(title).getByRole('button', { name: 'Top', exact: true }));
+      await save(50, 18);
+      fireEvent.click(screen.getByRole('button', { name: 'Sequence tracks', exact: true }));
+      fireEvent.click(within(screen.getByTestId('pro-track-row-graphics')).getByRole('button', { name: 'Lock track', hidden: true }));
+      fireEvent.click(within(title).getByRole('button', { name: 'Lower', exact: true }));
+      await save(50, 18);
+    } finally { saveSpy.mockRestore(); }
+  });
+
   test("composition timeline moves keyed titles as one undo step and respects the actual owning track", async () => {
     const source = { id: 'source', start: 0, end: 8, duration: 8 };
     const snapshot = { orderedClips: [source], selectedClipId: 'source',

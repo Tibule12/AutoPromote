@@ -6,10 +6,10 @@
     "scope": "CPU memory repair, private on-demand CUDA/NVENC backup, shared routing and Studio entry UX",
     "cpuAnalysis": "PASS: 375s source / 9 scenes at 8GiB",
     "gpuEngineering": "PASS: strict CUDA and real NVENC export with audio; backend identity invocation",
-    "normalLiveApiRouting": "PENDING_DEPLOYMENT",
+    "normalLiveApiRouting": "PASS: actual 375s GPU scan / 9 suggestions; actual 24s 1080p60 Studio GPU export, matching downloaded hash, sound and native full playback",
     "studioEntry": "29 focused frontend cases; native choosers/saved reopen/moving preview; signed-in responsive layout and eight welcome comparisons",
     "readinessPromotion": false,
-    "next": "Normal live GPU scan/render and successful tutorial recording; retain shared S02/S04/S03 backlog."
+    "next": "Finish caption-free narrated tutorials and owner-requested VFX review; retain shared S02/S04/S03 backlog. Title position presets now update both axes in one undoable edit with track lock protection."
   },
   "studioCompletion20261118": {
     "date": "2026-11-18",
