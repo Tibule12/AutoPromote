@@ -35,6 +35,27 @@ test("render budget follows output timeline duration, not a long source's origin
   expect(selectMediaWorker("/render-viral-clip", {source_duration_seconds:375,timeline_segments:[{duration:20}]})).toMatchObject({device:"cpu",sourceSeconds:20});
   expect(selectMediaWorker("/process-video", {source_duration_seconds:180})).toMatchObject({device:"gpu"});
 });
+test("native per-frame composition uses its raster cost before choosing or charging a worker", async () => {
+  const payload = { timeline_segments: [{ duration: 10 }], output_settings: { resolution: "1080p", fps: "60" },
+    overlays: [{ type: "video" }, { type: "image" }], composition_plan: { layers: [
+      { id: "base", type: "video" }, { id: "portal", type: "video", motion_keyframes: [{ time: 1.2, property: "scale", value: .1 }] },
+      { id: "rim", type: "image", motion_keyframes: [{ time: 7.4, property: "rotation", value: 80 }] },
+    ] } };
+  expect(selectMediaWorker("/render-viral-clip", payload)).toMatchObject({ device: "gpu", estimatedCpuSeconds: 160 });
+  expect(selectMediaWorker("/render-viral-clip", { ...payload, timeline_segments: [{ duration: 4 }],
+    output_settings: { resolution: "720p", fps: "30" } })).toMatchObject({ device: "cpu" });
+  expect(selectMediaWorker("/render-viral-clip", { timeline_segments: [{ duration: 54.13 }],
+    composition_plan: { layers: [{ id: "base", type: "video" }] } })).toMatchObject({ device: "cpu", estimatedCpuSeconds: 54.13 });
+  axios.get.mockResolvedValueOnce({ data: { status: "ok", worker_state: { status: "idle" },
+    computeDevice: "cuda", videoEncoder: "h264_nvenc", gpuRequired: true } });
+  await expect(assertMediaWorkerReady(payload)).resolves.toMatchObject({ device: "gpu" });
+  expect(axios.get.mock.calls[0][0]).toBe("https://gpu.example/health");
+  axios.post.mockResolvedValueOnce({ data: { status: "completed" } });
+  await postMediaWorker("/render-viral-clip", payload, { preferredDevice: "gpu" });
+  expect(axios.post.mock.calls[0][0]).toBe("https://gpu.example/render-viral-clip");
+  expect(axios.post.mock.calls[0][1]).toBe(payload);
+});
+
 test("local credit verification cannot escape its loopback worker onto a cloud GPU", () => {
   application.getApplicationContext.mockReturnValue({workerVerifier:{}});
   expect(selectMediaWorker("/analyze-clips", {source_duration_seconds:375})).toMatchObject({device:"cpu",gpuUrl:null});

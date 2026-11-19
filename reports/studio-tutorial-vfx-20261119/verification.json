@@ -1,0 +1,63 @@
+{
+  "date": "2026-11-19",
+  "normalLiveStudioVfx": {
+    "file": "studio-afterlight-vfx.mp4",
+    "sha256": "c419a8960694284e5d1f9361c01a5b5f2ef944d6b8762869a96f0a07019fe1f0",
+    "bytes": 10367079,
+    "seconds": 10.0,
+    "video": [
+      {
+        "codec_name": "h264",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "60/1"
+      }
+    ],
+    "audio": {
+      "expected": true,
+      "verified": true,
+      "codec": "aac",
+      "channels": 2,
+      "sample_rate": 48000,
+      "duration_seconds": 10
+    },
+    "nativeJobHashMatches": true,
+    "fullDecode": true,
+    "fullNativePlayback": true,
+    "representativeFramesReviewed": true,
+    "nativeBackupFreshRestore": {
+      "pass": true,
+      "layers": 2,
+      "keys": 56,
+      "captions": false,
+      "newRenderJobs": 0
+    },
+    "observedCpuSeconds": 245.451
+  },
+  "freshNativeBackupRestore": {
+    "pass": true,
+    "layers": 2,
+    "transformKeys": 56,
+    "captionFree": true,
+    "newRenders": 0,
+    "pageErrors": 0,
+    "blockedRequests": 0
+  },
+  "gpuBudgetCorrection": {
+    "originalEstimate": 26,
+    "observedCpuSeconds": 245.451,
+    "sourceSeconds": 10,
+    "output": "1080p60",
+    "rasterLayers": 3,
+    "revisedEstimate": 160,
+    "cpuBudgetSeconds": 120,
+    "nowSelectsGpu": true,
+    "readinessAndDispatchTested": true,
+    "extraPaidReExport": false
+  },
+  "creativeApproval": false,
+  "readinessPromotion": false,
+  "publishingSubmitted": false,
+  "originalLoginUnchanged": true,
+  "next": "Finish narrated tutorial verification and retain shared S02/S04/S03 precision/ownership backlog."
+}

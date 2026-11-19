@@ -1,4 +1,14 @@
 {
+  "studioTutorialVfx20261119": {
+    "date": "2026-11-19",
+    "report": "reports/studio-tutorial-vfx-20261119/README.md",
+    "verification": "reports/studio-tutorial-vfx-20261119/verification.json",
+    "nativeVfx": "PASS: 10s1080p60 film, sound, matching download hash, full native playback and fresh backup restore (2layers/56keys)",
+    "threeFeatureFilm": "PASS: Director fragments, animated B-roll and editable text; actual24s1080p60 GPU export",
+    "gpuRasterBudget": "Former26s CPU estimate measured245.451s; revised160s estimate selects qualified GPU before charging. No duplicate paid export.",
+    "readinessPromotion": false,
+    "next": "Finish final narrated tutorial verification; retain shared S02/S04/S03 backlog and owner creative review."
+  },
   "mediaWorkerRecovery20261119": {
     "date": "2026-11-19",
     "report": "reports/media-worker-recovery-20261119/README.md",

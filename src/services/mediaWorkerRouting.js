@@ -50,8 +50,15 @@ function selectMediaWorker(endpoint, payload = {}, env = process.env) {
   const motionLayers = payload.motion_graphics?.layers || payload.motion_graphics;
   const layers = (Array.isArray(payload.overlays) ? payload.overlays.length : 0) +
     (Array.isArray(motionLayers) ? motionLayers.length : 0);
+  const composition = payload.composition_plan || payload.compositionPlan;
+  const rasterLayers = Array.isArray(composition?.layers) ? composition.layers : [];
+  // Native multi-layer composition paints each programme frame. A measured
+  // 10s/1080p60 mask + animated PNG exceeded the 120s CPU budget despite having
+  // only two overlays; stream duration and a small layer surcharge undercount it.
+  const perFrameComposite = rasterLayers.length > 1;
+  const renderCost = Math.max(1 + Math.min(layers, 12) * .15, perFrameComposite ? 8 : 1);
   const estimatedCpuSeconds = ANALYSIS.has(endpoint) ? seconds || budget + 1
-    : seconds ? seconds * pixels * frameRate * (1 + Math.min(layers, 12) * .15)
+    : seconds ? seconds * pixels * frameRate * renderCost
       : endpoint === "/process-video" ? budget + 1 : 0;
   const useGpu = Boolean(gpu && estimatedCpuSeconds > budget);
   return { workerUrl: useGpu ? gpu : cpu, device: useGpu ? "gpu" : "cpu", gpuUrl: gpu,
