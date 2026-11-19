@@ -32,7 +32,47 @@
     "backendServiceIdentityHttpStatus": 200
   },
   "engineeringWorkerTests": true,
-  "normalLiveApiRouting": "PENDING_DEPLOYMENT",
+  "normalLiveApiRouting": {
+    "status": "PASS",
+    "health": {
+      "httpStatus": 200,
+      "device": "cuda",
+      "encoder": "h264_nvenc",
+      "strictGpu": true
+    },
+    "analysis": {
+      "sourceSeconds": 375,
+      "suggestions": 9,
+      "elapsedSecondsIncludingUpload": 61.485,
+      "device": "gpu",
+      "reason": "cpu_budget",
+      "credits": 8
+    },
+    "studioRender": {
+      "seconds": 24,
+      "width": 1920,
+      "height": 1080,
+      "fps": 60,
+      "device": "gpu",
+      "reason": "cpu_budget",
+      "estimatedCpuSeconds": 127.2,
+      "outputSha256": "6d65e098e22b9154808c861e198bf7937e83b4f862738be18312c90489587b30",
+      "bytes": 62585085,
+      "audioVerified": true,
+      "fullDecode": true,
+      "nativeFullPlayback": true,
+      "captions": false,
+      "credits": 5
+    },
+    "suggestedClipRender": {
+      "seconds": 54.133333,
+      "completed": true,
+      "nativeFullPlayback": true,
+      "captions": false,
+      "credits": 5
+    },
+    "publicationSubmitted": false
+  },
   "studioEntry": {
     "frontendTests": 19,
     "desktopAndMobileNoOverflow": true,
@@ -46,5 +86,26 @@
   "gpuStartupAndNvencTests": 10,
   "broadStudioReadinessPromotion": false,
   "frontendTests": 29,
-  "securityRegressionTests": 8
+  "securityRegressionTests": 8,
+  "titlePositionRegression": {
+    "case": "Top/Center/Lower update X and Y atomically; Undo/Redo and track lock",
+    "targetedTest": "PASS",
+    "realBrowser": {
+      "status": "PASS",
+      "nativeBackupRestored": true,
+      "initial": {
+        "x": 72,
+        "y": 50
+      },
+      "centered": {
+        "x": 50,
+        "y": 50
+      },
+      "undoBothAxes": true,
+      "redoBothAxes": true,
+      "paidJobs": 0
+    },
+    "welcomeViewportComparisons": 8,
+    "strictBuild": "PASS"
+  }
 }
