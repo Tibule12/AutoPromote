@@ -1,4 +1,17 @@
 {
+  "featureGuidesLive20261119": {
+    "date": "2026-11-19",
+    "report": "reports/feature-guides-live-20261119/README.md",
+    "ownerRequestedLiveRelease": true,
+    "selectedAdditionalGuides": 4,
+    "welcomePlaylistVideos": 9,
+    "staticMediaOnly": true,
+    "newRenders": 0,
+    "readinessPromotion": false,
+    "liveVerified": false,
+    "remaining": "Shared S02 whole picture/audio/monitor/throughput; S04 motion depth; S03 ownership.",
+    "next": "Verify the four exact public files in the serving production welcome popup."
+  },
   "welcomeVideos20261119": {
     "date": "2026-11-19",
     "report": "reports/welcome-videos-20261119/README.md",
@@ -190,7 +203,7 @@
   },
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-11-19T01:31:49.741913+00:00",
+  "updatedAt": "2026-11-19T21:19:58.966417+00:00",
   "sourceOfTruth": "docs/STUDIO-COMPLETION-CONTRACT.md",
   "baseline": {
     "checkpoint": "docs/HANDOFF-studio-reliability-repair-20261008.md",

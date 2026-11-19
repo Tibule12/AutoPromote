@@ -1,3 +1,9 @@
+<!-- feature-guides-live-20261119 -->
+
+19 November owner-directed [four additional public feature guides](../reports/feature-guides-live-20261119/README.md) adds the exact narrated Color, Logo, 2.5D Node Flow and Sound tutorials to the existing welcome popup, with native-result posters and a scrollable desktop playlist. Ten popup/welcome tests pass; immutable public uploads match their local identities. Anonymous range/CORS, final-build and serving-production evidence are recorded with the release. No new models, renders, scheduling or social publishing. Public release is explicitly requested; full Studio readiness and S02/S04/S03 remain unchanged at17 FUNCTIONAL/9 PARTIAL/1 BROKEN/2 UNIMPLEMENTED/0 PRO/0 PRODUCTION. Next: verify serving public media and popup.
+
+<!-- /feature-guides-live-20261119 -->
+
 <!-- welcome-videos-20261119 -->
 
 19 November owner explicitly requested the selected finished videos on the live welcome page with an automatic popup. [Welcome video delivery](../reports/welcome-videos-20261119/README.md) adds the Pulse AFTERIMAGE film and four product tutorials, native sound controls, mobile playlist, close/Escape/reopen and immutable public copies. Three new/seven existing interaction tests and strict build pass. Live delivery is verified after serving. This public placement instruction supersedes the selected files’ earlier private publication hold; rejected city/coast examples stay excluded. No models, renders or schedule/publication calls run on view. No whole-Studio readiness promotion; shared S02/S04/S03 remain.

@@ -5,6 +5,17 @@ try {
   // Parsing fallback removed
 }
 
+// jsdom exposes <dialog> without its browser methods. Keep actual native-dialog
+// behavior covered by the headless browser checks; supply its open state here.
+if (typeof HTMLDialogElement !== "undefined") {
+  if (typeof HTMLDialogElement.prototype.showModal !== "function") {
+    HTMLDialogElement.prototype.showModal = function () { this.setAttribute("open", ""); };
+  }
+  if (typeof HTMLDialogElement.prototype.close !== "function") {
+    HTMLDialogElement.prototype.close = function () { this.removeAttribute("open"); };
+  }
+}
+
 // Polyfill TextEncoder/TextDecoder for jsdom (required by newer react-router)
 if (typeof global.TextEncoder === "undefined") {
   const { TextEncoder, TextDecoder } = require("util");
