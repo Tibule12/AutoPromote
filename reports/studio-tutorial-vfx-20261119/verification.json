@@ -53,11 +53,98 @@
     "cpuBudgetSeconds": 120,
     "nowSelectsGpu": true,
     "readinessAndDispatchTested": true,
-    "extraPaidReExport": false
+    "extraPaidReExport": false,
+    "servingCommit": "ce76f219d02b660f0665386750c1b2f6c7196233",
+    "backendRegressionTests": 30
   },
   "creativeApproval": false,
   "readinessPromotion": false,
   "publishingSubmitted": false,
   "originalLoginUnchanged": true,
-  "next": "Finish narrated tutorial verification and retain shared S02/S04/S03 precision/ownership backlog."
+  "next": "Owner picture/listening review; retain the shared S02/S04/S03 precision and ownership backlog.",
+  "tutorialDelivery": {
+    "complete": true,
+    "guides": [
+      {
+        "file": "01-publisher-full-guide.mp4",
+        "sha256": "0b18c03089e0399dc45375ff3403216d057c8f398a4540b7285dd9824f143606",
+        "seconds": 375,
+        "bytes": 33164124,
+        "fullDecode": true,
+        "fullPlayback": true,
+        "representativeFramesReviewed": true
+      },
+      {
+        "file": "02-schedule-calendar-full-guide.mp4",
+        "sha256": "c0af9bcf4087538aa7bc4c3c6d43519d829bfbd3792e0224a44835f943e33045",
+        "seconds": 301,
+        "bytes": 56559380,
+        "fullDecode": true,
+        "fullPlayback": true,
+        "representativeFramesReviewed": true
+      },
+      {
+        "file": "03-find-viral-clips-full-guide.mp4",
+        "sha256": "799873ff70b695fc27f79fe5de371297b8075ab885995eaf5b6dbb4143eb15f9",
+        "seconds": 328.866667,
+        "bytes": 28450859,
+        "fullDecode": true,
+        "fullPlayback": true,
+        "representativeFramesReviewed": true
+      },
+      {
+        "file": "04-viral-clip-studio-full-guide.mp4",
+        "sha256": "536a4e124d517434e8a043928f382389a7214051cc9bc19d2b572c6df564d610",
+        "seconds": 451.633333,
+        "bytes": 69755296,
+        "fullDecode": true,
+        "fullPlayback": true,
+        "representativeFramesReviewed": true
+      },
+      {
+        "file": "05-studio-afterlight-vfx-guide.mp4",
+        "sha256": "8bdbb9ea7f535757bb602a7c72fa2bc2950793357af47a12f73d484caf9dd5ae",
+        "seconds": 314.433333,
+        "bytes": 56649210,
+        "fullDecode": true,
+        "fullPlayback": true,
+        "representativeFramesReviewed": true
+      }
+    ],
+    "normalSpeedFullPlayback": true,
+    "noInstructionalSubtitles": true,
+    "narrationPresent": true,
+    "totalMinutes": 29.52,
+    "localOutputFolder": "tutorials/output",
+    "nativeExamples": 3
+  },
+  "gpuFinalConfiguration": {
+    "service": "media-worker-gpu",
+    "minInstances": "0",
+    "maxInstances": "1",
+    "limits": {
+      "cpu": "20",
+      "memory": "80Gi",
+      "nvidia.com/gpu": "1"
+    },
+    "readyRevision": "media-worker-gpu-00004-jun",
+    "traffic": [
+      {
+        "revision": "media-worker-gpu-00002-tel",
+        "percent": 0
+      },
+      {
+        "revision": "media-worker-gpu-00004-jun",
+        "percent": 100
+      }
+    ],
+    "private": true
+  },
+  "newSuccessfulAppCredits": {
+    "start": 289,
+    "scan": 8,
+    "threeNativeExports": 15,
+    "spent": 23,
+    "remaining": 266
+  }
 }
