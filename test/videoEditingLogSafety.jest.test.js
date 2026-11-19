@@ -1,4 +1,7 @@
 jest.mock("axios", () => ({ post: jest.fn() }));
+jest.mock("../src/utils/cloudRunAuth", () => ({
+  buildWorkerRequestConfig: jest.fn(async (_url, config) => config),
+}));
 jest.mock("../src/services/unifiedCredits/workerTransport", () => ({
   applicationWorkerConfig: jest.fn(async () => ({ timeout: 1000 })),
 }));

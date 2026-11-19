@@ -12,7 +12,7 @@ jest.mock("../../creditSystem", () => ({
   refundCredits: jest.fn(),
 }));
 jest.mock("../../utils/cloudRunAuth", () => ({
-  buildWorkerRequestConfig: jest.fn(() => Promise.resolve({})),
+  buildWorkerRequestConfig: jest.fn(async (_url, config) => config),
 }));
 jest.mock("../cloudRunJobService", () => ({
   executeMulticamRenderJob: jest.fn(),
