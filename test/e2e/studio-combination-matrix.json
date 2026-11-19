@@ -1,4 +1,15 @@
 {
+  "welcomeVideos20261119": {
+    "date": "2026-11-19",
+    "report": "reports/welcome-videos-20261119/README.md",
+    "ownerRequestedLivePopup": true,
+    "selectedPublicVideos": 5,
+    "automaticOnWelcomeLoad": true,
+    "mutedAutoplayWithSoundButton": true,
+    "readinessPromotion": false,
+    "scope": "Publish owner-selected native outputs and tutorials; static media only; no rendering or scheduling on view",
+    "next": "Verify deployed popup and all public media on desktop/mobile; retain shared S02/S04/S03."
+  },
   "studioTutorialVfx20261119": {
     "date": "2026-11-19",
     "report": "reports/studio-tutorial-vfx-20261119/README.md",

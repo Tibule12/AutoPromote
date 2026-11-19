@@ -1,0 +1,47 @@
+[
+  {
+    "id": "afterimage",
+    "title": "See Studio in action",
+    "description": "Background replacement, motion echoes and animated text.",
+    "src": "https://firebasestorage.googleapis.com/v0/b/autopromote-cc6d3.firebasestorage.app/o/public%2Fwelcome%2F2026-11-19%2Fafterimage-05a95a8768d5d933.mp4?alt=media&token=3d7ad092-1610-4345-8877-d56cf4feb1e7",
+    "duration": "0:17",
+    "kind": "Showcase",
+    "poster": "/welcome/2026-11-19/afterimage.jpg"
+  },
+  {
+    "id": "studio",
+    "title": "Make the Studio edit",
+    "description": "Follow the real controls, layers, soundtrack and export.",
+    "src": "https://firebasestorage.googleapis.com/v0/b/autopromote-cc6d3.firebasestorage.app/o/public%2Fwelcome%2F2026-11-19%2Fstudio-eadb53e5326cd7e4.mp4?alt=media&token=0d4ef4a6-3f4c-4809-92e1-b073e057ac88",
+    "duration": "4:44",
+    "kind": "Tutorial",
+    "poster": "/welcome/2026-11-19/afterimage.jpg"
+  },
+  {
+    "id": "clips",
+    "title": "Find Viral Clips",
+    "description": "Go from a long video to a selected and exported clip.",
+    "src": "https://firebasestorage.googleapis.com/v0/b/autopromote-cc6d3.firebasestorage.app/o/public%2Fwelcome%2F2026-11-19%2Fclips-799873ff70b695fc.mp4?alt=media&token=22f848db-7ee9-4cee-8d87-a82ddcdb383a",
+    "duration": "5:29",
+    "kind": "Tutorial",
+    "poster": "/welcome/2026-11-19/afterimage.jpg"
+  },
+  {
+    "id": "publisher",
+    "title": "Prepare your post",
+    "description": "Upload a video and review each destination.",
+    "src": "https://firebasestorage.googleapis.com/v0/b/autopromote-cc6d3.firebasestorage.app/o/public%2Fwelcome%2F2026-11-19%2Fpublisher-0b18c03089e0399d.mp4?alt=media&token=8f638816-54e8-433d-a5fe-33963aea9627",
+    "duration": "6:15",
+    "kind": "Tutorial",
+    "poster": "/welcome/2026-11-19/afterimage.jpg"
+  },
+  {
+    "id": "schedule",
+    "title": "Plan your release",
+    "description": "Review destinations, dates and your Queue.",
+    "src": "https://firebasestorage.googleapis.com/v0/b/autopromote-cc6d3.firebasestorage.app/o/public%2Fwelcome%2F2026-11-19%2Fschedule-c0af9bcf4087538a.mp4?alt=media&token=d6f8aefa-d456-4b05-b996-77f38c316770",
+    "duration": "5:01",
+    "kind": "Tutorial",
+    "poster": "/welcome/2026-11-19/afterimage.jpg"
+  }
+]

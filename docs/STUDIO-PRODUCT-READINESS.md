@@ -1,3 +1,9 @@
+<!-- welcome-videos-20261119 -->
+
+19 November owner explicitly requested the selected finished videos on the live welcome page with an automatic popup. [Welcome video delivery](../reports/welcome-videos-20261119/README.md) adds the Pulse AFTERIMAGE film and four product tutorials, native sound controls, mobile playlist, close/Escape/reopen and immutable public copies. Three new/seven existing interaction tests and strict build pass. Live delivery is verified after serving. This public placement instruction supersedes the selected files’ earlier private publication hold; rejected city/coast examples stay excluded. No models, renders or schedule/publication calls run on view. No whole-Studio readiness promotion; shared S02/S04/S03 remain.
+
+<!-- /welcome-videos-20261119 -->
+
 <!-- studio-tutorial-vfx-20261119 -->
 
 19 November [native tutorial/VFX delivery](../reports/studio-tutorial-vfx-20261119/README.md): actual Director/B-roll/editable-text Studio film and successful GPU viral scan/native clip are demonstrated. The new10s1080p60 AFTERLIGHT export combines a masked moving plate and externally generated alpha ring with56 native keys and sound; native finished playback, matching download, full decode and fresh backup restore pass. Its measured245.451s CPU execution exposed a26s workload underestimate; canonical multi-layer raster cost now estimates160s and selects the qualified GPU before charge, while short720p compositions and ordinary trims stay on CPU. No duplicate paid export, publishing, scheduling or readiness promotion. Keep17 FUNCTIONAL/9 PARTIAL/1 BROKEN/2 UNIMPLEMENTED/0 PRO/0 PRODUCTION and shared S02/S04/S03. All five narrated, caption-free guides (29.52min total) now pass full decode, normal-speed full MP4 playback and representative-frame review; the GPU-budget correction is confirmed serving atce76f219. Next: owner picture/listening review and shared S02/S04/S03 backlog.

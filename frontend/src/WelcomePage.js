@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from "react";
+import WelcomeVideoDialog from "./components/landing/WelcomeVideoDialog";
 import LandingNavbar from "./components/landing/LandingNavbar";
 import HeroSection from "./components/landing/HeroSection";
 import LandingFeatures from "./components/landing/LandingFeatures";
@@ -124,7 +125,7 @@ const WorkspaceInviteNotice = ({ onCreateAccount, onSignIn }) => {
   );
 };
 
-const WelcomePage = ({ onGetStarted, onSignIn }) => {
+const WelcomePageContent = ({ onGetStarted, onSignIn }) => {
 
   if (process.env.REACT_APP_WELCOME_STUDIO_PREVIEW === "true" && !getWorkspaceInviteParams()) {
     return <Suspense fallback={<div style={{ minHeight: "100vh", background: "#0b0b10" }} />}><StudioWelcomePreview onGetStarted={onGetStarted} onSignIn={onSignIn} /></Suspense>;
@@ -166,4 +167,6 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
   );
 };
 
-export default WelcomePage;
+export default function WelcomePage(props) {
+  return <><WelcomePageContent {...props} /><WelcomeVideoDialog /></>;
+}

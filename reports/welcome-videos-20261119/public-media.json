@@ -1,0 +1,62 @@
+[
+  {
+    "id": "afterimage",
+    "title": "See Studio in action",
+    "description": "Background replacement, motion echoes and animated text.",
+    "src": "https://firebasestorage.googleapis.com/v0/b/autopromote-cc6d3.firebasestorage.app/o/public%2Fwelcome%2F2026-11-19%2Fafterimage-05a95a8768d5d933.mp4?alt=media&token=3d7ad092-1610-4345-8877-d56cf4feb1e7",
+    "duration": "0:17",
+    "kind": "Showcase",
+    "poster": "/welcome/2026-11-19/afterimage.jpg",
+    "sha256": "05a95a8768d5d933750fb9951e7c969b20ff7a4a34136c6a3aa27c614a517044",
+    "bytes": 6837453,
+    "object": "public/welcome/2026-11-19/afterimage-05a95a8768d5d933.mp4"
+  },
+  {
+    "id": "studio",
+    "title": "Make the Studio edit",
+    "description": "Follow the real controls, layers, soundtrack and export.",
+    "src": "https://firebasestorage.googleapis.com/v0/b/autopromote-cc6d3.firebasestorage.app/o/public%2Fwelcome%2F2026-11-19%2Fstudio-eadb53e5326cd7e4.mp4?alt=media&token=0d4ef4a6-3f4c-4809-92e1-b073e057ac88",
+    "duration": "4:44",
+    "kind": "Tutorial",
+    "poster": "/welcome/2026-11-19/afterimage.jpg",
+    "sha256": "eadb53e5326cd7e460bb008caed97a83cc52f53a508dd3eaf0a5e7c22f3c7943",
+    "bytes": 56505552,
+    "object": "public/welcome/2026-11-19/studio-eadb53e5326cd7e4.mp4"
+  },
+  {
+    "id": "clips",
+    "title": "Find Viral Clips",
+    "description": "Go from a long video to a selected and exported clip.",
+    "src": "https://firebasestorage.googleapis.com/v0/b/autopromote-cc6d3.firebasestorage.app/o/public%2Fwelcome%2F2026-11-19%2Fclips-799873ff70b695fc.mp4?alt=media&token=22f848db-7ee9-4cee-8d87-a82ddcdb383a",
+    "duration": "5:29",
+    "kind": "Tutorial",
+    "poster": "/welcome/2026-11-19/afterimage.jpg",
+    "sha256": "799873ff70b695fc27f79fe5de371297b8075ab885995eaf5b6dbb4143eb15f9",
+    "bytes": 28450859,
+    "object": "public/welcome/2026-11-19/clips-799873ff70b695fc.mp4"
+  },
+  {
+    "id": "publisher",
+    "title": "Prepare your post",
+    "description": "Upload a video and review each destination.",
+    "src": "https://firebasestorage.googleapis.com/v0/b/autopromote-cc6d3.firebasestorage.app/o/public%2Fwelcome%2F2026-11-19%2Fpublisher-0b18c03089e0399d.mp4?alt=media&token=8f638816-54e8-433d-a5fe-33963aea9627",
+    "duration": "6:15",
+    "kind": "Tutorial",
+    "poster": "/welcome/2026-11-19/afterimage.jpg",
+    "sha256": "0b18c03089e0399dc45375ff3403216d057c8f398a4540b7285dd9824f143606",
+    "bytes": 33164124,
+    "object": "public/welcome/2026-11-19/publisher-0b18c03089e0399d.mp4"
+  },
+  {
+    "id": "schedule",
+    "title": "Plan your release",
+    "description": "Review destinations, dates and your Queue.",
+    "src": "https://firebasestorage.googleapis.com/v0/b/autopromote-cc6d3.firebasestorage.app/o/public%2Fwelcome%2F2026-11-19%2Fschedule-c0af9bcf4087538a.mp4?alt=media&token=d6f8aefa-d456-4b05-b996-77f38c316770",
+    "duration": "5:01",
+    "kind": "Tutorial",
+    "poster": "/welcome/2026-11-19/afterimage.jpg",
+    "sha256": "c0af9bcf4087538aa7bc4c3c6d43519d829bfbd3792e0224a44835f943e33045",
+    "bytes": 56559380,
+    "object": "public/welcome/2026-11-19/schedule-c0af9bcf4087538a.mp4"
+  }
+]
