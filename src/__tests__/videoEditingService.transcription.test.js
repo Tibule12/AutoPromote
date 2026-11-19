@@ -10,7 +10,9 @@ jest.mock("../firebaseAdmin", () => ({
 jest.mock("axios", () => ({ post: mockPost }));
 jest.mock("../services/mediaWorkerTaskQueue", () => ({ queueAudioExtractionTask: jest.fn() }));
 jest.mock("../creditSystem", () => ({ deductCredits: jest.fn(), refundCredits: jest.fn() }));
-jest.mock("../utils/cloudRunAuth", () => ({ buildWorkerRequestConfig: jest.fn() }));
+jest.mock("../utils/cloudRunAuth", () => ({
+  buildWorkerRequestConfig: jest.fn(async (_url, config) => config),
+}));
 jest.mock("../services/cloudRunJobService", () => ({
   executeMulticamRenderJob: jest.fn(),
   isDurableMulticamRenderEnabled: jest.fn(),

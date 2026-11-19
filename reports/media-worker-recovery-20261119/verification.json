@@ -1,0 +1,50 @@
+{
+  "date": "2026-11-19",
+  "cpu": {
+    "revision": "media-worker-v1-00139-kob",
+    "memoryGiB": 8,
+    "sourceSeconds": 375,
+    "elapsedSeconds": 291.08,
+    "scenes": 9
+  },
+  "gpu": {
+    "revision": "media-worker-gpu-00002-tel",
+    "type": "nvidia-rtx-pro-6000",
+    "gpuCount": 1,
+    "cpu": 20,
+    "memoryGiB": 80,
+    "minInstances": 0,
+    "maxInstances": 1,
+    "private": true,
+    "computeDevice": "cuda",
+    "videoEncoder": "h264_nvenc",
+    "strictStartupInference": true,
+    "analysisSeconds": 45.9,
+    "scenes": 9,
+    "renderSeconds": 18.66,
+    "renderStatus": "completed",
+    "outputDuration": 6.0,
+    "encoder": "h264_nvenc",
+    "audioVerified": true,
+    "qualityGate": "passed",
+    "sha256": "fe9aa223dcd9526b3ec130b494e55c2b6a09677dbda6b8f3a2f1229a3dbbb4b1",
+    "bytes": 407474,
+    "backendServiceIdentityHttpStatus": 200
+  },
+  "engineeringWorkerTests": true,
+  "normalLiveApiRouting": "PENDING_DEPLOYMENT",
+  "studioEntry": {
+    "frontendTests": 19,
+    "desktopAndMobileNoOverflow": true,
+    "anonymousWelcomeChecks": 8,
+    "signedInRealApiEntry": true,
+    "nativeChoosersAndSavedReopen": "PASS",
+    "movingReopenedPreview": true,
+    "localCandidateStorageCorsAdapter": true
+  },
+  "backendTests": 84,
+  "gpuStartupAndNvencTests": 10,
+  "broadStudioReadinessPromotion": false,
+  "frontendTests": 29,
+  "securityRegressionTests": 8
+}

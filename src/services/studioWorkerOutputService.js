@@ -8,6 +8,7 @@ const path = require("path");
 const crypto = require("crypto");
 const { Transform } = require("stream");
 const { pipeline } = require("stream/promises");
+const { buildWorkerRequestConfig } = require("../utils/cloudRunAuth");
 
 function isTransientWorkerOutput(value, workerUrl) {
   try {
@@ -45,7 +46,8 @@ async function persistWorkerOutput({ url, workerUrl, userId, jobId, thumbnail = 
   const file = bucket.file(storagePath);
   try {
     // Never follow a worker redirect to an arbitrary host or credential endpoint.
-    response = await axios.get(url, { responseType: "stream", maxRedirects: 0, timeout: 120000 });
+    response = await axios.get(url, await buildWorkerRequestConfig(url,
+      { responseType: "stream", maxRedirects: 0, timeout: 120000 }));
     if (Number(response.headers["content-length"] || 0) > maximum) throw new Error("Studio output exceeds transfer limit");
     let bytes = 0;
     const hash = crypto.createHash("sha256");

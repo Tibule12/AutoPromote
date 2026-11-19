@@ -88,6 +88,20 @@ const createStudioSource = (sourceFile, clip, sourceDuration, moments = null) =>
   };
 };
 
+const savedProjectSummary = project => {
+  const snapshot = project.snapshot || {};
+  const source = [...(snapshot.projectMedia || []), ...(snapshot.timeline || [])]
+    .find(item => item?.name || item?.fileName);
+  const sourceName = source?.name || source?.fileName || "Saved video project";
+  const generic = !project.name || /^(Full source video loaded for manual editing|Untitled viral edit|Untitled project)$/i.test(project.name.trim());
+  const name = generic ? sourceName.replace(/\.[a-z0-9]{2,5}$/i, "") : project.name;
+  const updated = Number(project.updatedAt || project.createdAt);
+  const date = Number.isFinite(updated) && updated > 0
+    ? new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(updated))
+    : "Saved on this device";
+  return { name, sourceName, date };
+};
+
 function ViralClipStudioPanel({
   initialFile = null,
   initialClip = null,
@@ -394,41 +408,13 @@ function ViralClipStudioPanel({
           ← Back to discovery
         </button>
       ) : null}
-      <div className="viral-clips-workspace creator-studio-entry">
-        <div className="creator-studio-logo-entry">
-          <h3>Design a logo</h3>
-          <p>Start with a blank canvas. Build your symbol and lettering in Graphics → Logo Workshop, then export transparent artwork or animate its pieces.</p>
-          <button type="button" className="creator-studio-btn"
-            disabled={preparingLogoCanvas || subscriptionLoading || sourceState === "uploading" || sourceState === "validating" || resumingProject || restoringBackup}
-            onClick={() => void startLogoCanvas()}>
-            {preparingLogoCanvas ? "Preparing logo canvas…" : "Start a logo design"}
-          </button>
-        </div>
-        <label className="btn-secondary">
-          {restoringBackup ? "Restoring project…" : "Restore project backup"}
-          <input type="file" accept="application/json,.json" aria-label="Restore project backup"
-            disabled={restoringBackup || subscriptionLoading}
-            onChange={event => { const file = event.target.files?.[0]; event.target.value = ""; void restoreBackup(file); }} />
-        </label>
-        {savedProjectsError && <div role="alert">
-          <p>{savedProjectsError}</p>
-          <button type="button" onClick={async () => {
-            try { setSavedProjects(await listViralStudioProjects()); setSavedProjectsError(""); }
-            catch (error) { console.warn("Could not reload saved Studio projects", error); }
-          }}>Retry saved projects</button>
-        </div>}
-        {savedProjects.length > 0 && (
-          <section aria-label="Saved Studio projects">
-            <h3>Open saved project</h3>
-            {savedProjects.map(project => (
-              <button key={project.id} type="button" className="btn-secondary"
-                disabled={resumingProject || subscriptionLoading} onClick={() => void resumeSavedProject(project)}>
-                {project.name || "Untitled viral edit"}
-              </button>
-            ))}
-            {sourceError && sourceState === "idle" ? <p role="alert">{sourceError}</p> : null}
-          </section>
-        )}
+      <div className="creator-studio-entry">
+        <div className="studio-entry-main">
+          <div className="studio-entry-section-heading">
+            <span className="studio-entry-eyebrow">START CREATING</span>
+            <h3>Your next edit starts here</h3>
+            <p>Bring in your footage. Shape the story. Make it yours.</p>
+          </div>
         {sourceState === "idle" && !previewUrl && (
           <label
             className="creator-studio-dropzone"
@@ -438,13 +424,17 @@ function ViralClipStudioPanel({
               prepareSelectedVideos(event.dataTransfer.files);
             }}
           >
-            <span className="creator-studio-dropzone-icon">☁️</span>
-            <h3>Bring your footage into Studio</h3>
-            <p>Choose one video or several scenes and camera takes. The first video opens the editor; the rest appear in your project library.</p>
-            <span className="creator-studio-btn">Choose Videos</span>
+            <span className="creator-studio-dropzone-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48" fill="none"><path d="M24 31V12m0 0-7 7m7-7 7 7M12 30v7a3 3 0 0 0 3 3h18a3 3 0 0 0 3-3v-7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </span>
+            <h3>Drop your videos here</h3>
+            <p>Start with one video or bring several scenes and camera takes.</p>
+            <span className="creator-studio-btn">Choose videos <span aria-hidden="true">↗</span></span>
+            <small>Video files · Multiple clips welcome</small>
             <input
               type="file"
               accept="video/*"
+              aria-label="Choose videos for Studio"
               multiple
               disabled={sourceState === "uploading"}
               onChange={event => {
@@ -532,6 +522,51 @@ function ViralClipStudioPanel({
             </div>
           </div>
         )}
+          <div className="studio-entry-workflow" aria-label="Studio workflow">
+            <span><b>01</b> Bring your footage</span>
+            <span><b>02</b> Edit on the timeline</span>
+            <span><b>03</b> Review & export</span>
+          </div>
+          <div className="studio-entry-secondary">
+            <div className="creator-studio-logo-entry">
+              <span className="studio-entry-small-icon" aria-hidden="true">✦</span>
+              <div><h3>Start with a logo</h3><p>Design artwork or animate your identity in Logo Workshop.</p></div>
+              <button type="button" className="studio-entry-text-action" aria-label={preparingLogoCanvas ? "Preparing logo canvas…" : "Start a logo design"}
+                disabled={preparingLogoCanvas || subscriptionLoading || sourceState === "uploading" || sourceState === "validating" || resumingProject || restoringBackup}
+                onClick={() => void startLogoCanvas()}>
+                {preparingLogoCanvas ? "Preparing…" : "Design a logo"}<span aria-hidden="true">↗</span>
+              </button>
+            </div>
+            <label className="studio-entry-restore">
+              <span className="studio-entry-small-icon" aria-hidden="true">↥</span>
+              <span><strong>{restoringBackup ? "Restoring project…" : "Restore a project"}</strong><small>Continue from a saved project backup.</small></span>
+              <span className="studio-entry-restore-action">Choose backup <span aria-hidden="true">↗</span></span>
+              <input type="file" accept="application/json,.json" aria-label="Restore project backup"
+                disabled={restoringBackup || subscriptionLoading}
+                onChange={event => { const file = event.target.files?.[0]; event.target.value = ""; void restoreBackup(file); }} />
+            </label>
+          </div>
+        </div>
+        <aside className="studio-entry-projects" aria-label="Saved Studio projects">
+          <div className="studio-entry-projects-heading"><div><span className="studio-entry-eyebrow">PICK UP WHERE YOU LEFT OFF</span><h3>Recent projects</h3></div><span className="studio-entry-count">{savedProjects.length}</span></div>
+          <p className="studio-entry-device-note">Saved in this browser on this device.</p>
+          {savedProjectsError && <div role="alert" className="studio-entry-alert"><p>{savedProjectsError}</p>
+            <button type="button" onClick={async () => {
+              try { setSavedProjects(await listViralStudioProjects()); setSavedProjectsError(""); }
+              catch (error) { console.warn("Could not reload saved Studio projects", error); }
+            }}>Retry saved projects</button>
+          </div>}
+          {savedProjects.length ? <div className="studio-entry-project-list">{savedProjects.map(project => {
+            const summary = savedProjectSummary(project);
+            return <button key={project.id} type="button" className="studio-entry-project-card" aria-label={summary.name}
+              disabled={resumingProject || subscriptionLoading} onClick={() => void resumeSavedProject(project)}>
+              <span className="studio-entry-project-art" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><rect x="4" y="5" width="24" height="22" rx="5" stroke="currentColor" strokeWidth="1.5"/><path d="m13 11 8 5-8 5V11Z" fill="currentColor"/></svg></span>
+              <span className="studio-entry-project-copy"><strong>{summary.name}</strong><small title={summary.sourceName}>{summary.sourceName}</small><time>{summary.date}</time></span>
+              <span className="studio-entry-project-arrow" aria-hidden="true">↗</span>
+            </button>;
+          })}</div> : <div className="studio-entry-no-projects"><span aria-hidden="true">▣</span><strong>A fresh canvas awaits</strong><p>Your saved edits will appear here. Choose a video to start your first project.</p></div>}
+          {sourceError && sourceState === "idle" ? <p role="alert" className="studio-entry-alert">{sourceError}</p> : null}
+        </aside>
       </div>
     </section>
   );

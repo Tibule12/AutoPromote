@@ -75,6 +75,12 @@ jobs:
           test/promotionTaskQueue.hashing.jest.test.js
           src/__tests__/mediaRoutes.studioSources.test.js
           src/__tests__/mediaRoutes.viralBilling.test.js
+          src/__tests__/mediaRoutes.workerHealth.test.js
+          src/__tests__/mediaWorkerRouting.test.js
+          src/__tests__/videoEditingService.transcription.test.js
+          src/utils/__tests__/cloudRunAuth.identity.test.js
+          src/services/__tests__/videoEditingService.viralPayload.test.js
+          test/videoEditingLogSafety.jest.test.js
 
       - name: Install frontend replay build dependencies
         run: npm --prefix frontend ci

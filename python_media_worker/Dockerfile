@@ -5,6 +5,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PORT=8080 \
     WHISPER_ENGINE=faster \
     PROMO_WHISPER_MODEL=small \
+    VIRAL_CAPTION_GENERAL_WHISPER_MODEL=deepdml/faster-whisper-large-v3-turbo-ct2 \
     AUTOPROMOTE_REALITY_WHISPER_MODEL=digiphyte/swivuriso-turbo \
     AUTOPROMOTE_REALITY_WHISPER_REVISION=6e96700b527e49f2d48fdc55e632c7cb62029e91 \
     FASTER_WHISPER_DEVICE=cpu \
@@ -39,6 +40,9 @@ RUN python -c "import cv2, mediapipe as mp; assert hasattr(mp.solutions, 'selfie
 # second fallback added PyTorch and a duplicate model, making this image over
 # 4 GiB compressed.
 RUN python -c "from faster_whisper import WhisperModel; WhisperModel('small', device='cpu', compute_type='int8')"
+# Find Viral Clips uses this recognition model; cache it in the image so a
+# cold request does not download multi-gigabyte weights into Cloud Run memory.
+RUN python -c "import os; from faster_whisper import WhisperModel; WhisperModel(os.environ['VIRAL_CAPTION_GENERAL_WHISPER_MODEL'], device='cpu', compute_type='int8')"
 RUN python -c "from faster_whisper import WhisperModel; WhisperModel('digiphyte/swivuriso-turbo', revision='6e96700b527e49f2d48fdc55e632c7cb62029e91', device='cpu', compute_type='int8')"
 
 # Copy source code

@@ -12241,6 +12241,26 @@ def resolve_music_input(music_file, output_path, *, is_search=False, safe_search
 
 app = FastAPI(title="AutoPromote Media Worker (Python)")
 
+
+@app.on_event("startup")
+def verify_required_gpu_runtime():
+    # A healthy HTTP server alone does not prove that CUDA or NVENC works.
+    # Qualify both before a GPU revision can receive production traffic.
+    if not env_flag("MEDIA_WORKER_REQUIRE_GPU", default=False):
+        return
+    if get_faster_whisper_device() != "cuda" or GPU_VIDEO_ENCODER != "h264_nvenc":
+        raise RuntimeError("GPU backup requires CUDA speech recognition and a working NVENC encoder")
+    model = get_faster_whisper_model(os.getenv("VIRAL_CAPTION_GENERAL_WHISPER_MODEL") or
+        "deepdml/faster-whisper-large-v3-turbo-ct2")
+    if model is None:
+        raise RuntimeError("GPU speech model could not be loaded")
+    # Decode one second so unsupported CUDA kernels/libraries fail at startup,
+    # rather than after the first customer's job has been charged.
+    segments, _ = model.transcribe(np.zeros(16000, dtype=np.float32),
+        language="en", beam_size=1, vad_filter=False)
+    list(segments)
+    logger.warning("GPU backup verified: CUDA speech inference and NVENC encoding")
+
 # Allow local frontend to call worker directly for ingest
 app.add_middleware(
     CORSMiddleware,
@@ -12494,6 +12514,9 @@ def health_check():
         "tmpDir": os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp")),
         "studioRenderTmpDir": studio_render_scratch_directory(os.path.dirname(__file__)),
         "whisperReady": FasterWhisperModel is not None or whisper is not None,
+        "computeDevice": get_faster_whisper_device(),
+        "videoEncoder": GPU_VIDEO_ENCODER,
+        "gpuRequired": env_flag("MEDIA_WORKER_REQUIRE_GPU", default=False),
     }
 
 
