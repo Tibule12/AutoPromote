@@ -1,4 +1,16 @@
 {
+  "mediaWorkerRecovery20261119": {
+    "date": "2026-11-19",
+    "report": "reports/media-worker-recovery-20261119/README.md",
+    "verification": "reports/media-worker-recovery-20261119/verification.json",
+    "scope": "CPU memory repair, private on-demand CUDA/NVENC backup, shared routing and Studio entry UX",
+    "cpuAnalysis": "PASS: 375s source / 9 scenes at 8GiB",
+    "gpuEngineering": "PASS: strict CUDA and real NVENC export with audio; backend identity invocation",
+    "normalLiveApiRouting": "PENDING_DEPLOYMENT",
+    "studioEntry": "29 focused frontend cases; native choosers/saved reopen/moving preview; signed-in responsive layout and eight welcome comparisons",
+    "readinessPromotion": false,
+    "next": "Normal live GPU scan/render and successful tutorial recording; retain shared S02/S04/S03 backlog."
+  },
   "studioCompletion20261118": {
     "date": "2026-11-18",
     "status": "BOUNDED_NATIVE_TEXT_PARITY_AND_CINEMATIC_CANONICAL_REPAIR",
@@ -155,7 +167,7 @@
   },
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-11-18T13:51:05.348Z",
+  "updatedAt": "2026-11-19T01:31:49.741913+00:00",
   "sourceOfTruth": "docs/STUDIO-COMPLETION-CONTRACT.md",
   "baseline": {
     "checkpoint": "docs/HANDOFF-studio-reliability-repair-20261008.md",

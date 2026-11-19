@@ -13,6 +13,7 @@ const { isTransientWorkerOutput, persistWorkerOutput, persistWorkerBucketOutput 
 const { queueAudioExtractionTask } = require("./mediaWorkerTaskQueue");
 const { deductCredits, refundCredits } = require("../creditSystem");
 const { buildWorkerRequestConfig } = require("../utils/cloudRunAuth");
+const { postMediaWorker, assertMediaWorkerReady } = require("./mediaWorkerRouting");
 const {
   executeMulticamRenderJob,
   isDurableMulticamRenderEnabled,
@@ -136,23 +137,8 @@ const { v4: uuidv4 } = require("uuid");
 
 class VideoEditingService {
   static readProcessingOptions(record) { return decodeStudioJobOptions(record); }
-  async assertRenderWorkerReady() {
-    require("./unifiedCredits/application").assertApplicationTransport(MEDIA_WORKER_URL);
-    try {
-      const target = `${MEDIA_WORKER_URL}/health`;
-      const config = await buildWorkerRequestConfig(target, { timeout: Math.max(10000,
-        Number(process.env.MEDIA_WORKER_HEALTH_TIMEOUT_MS) || 60000) });
-      const response = await axios.get(target, config);
-      if (response.data?.status !== "ok") throw new Error("Worker health is not ready");
-      if (response.data?.worker_state?.status && response.data.worker_state.status !== "idle") {
-        throw Object.assign(new Error("The render worker is busy. Try again shortly; no credits were charged."),
-          { code: "STUDIO_RENDER_WORKER_BUSY", statusCode: 503 });
-      }
-    } catch (error) {
-      if (error.code === "STUDIO_RENDER_WORKER_BUSY") throw error;
-      throw Object.assign(new Error("The render worker is unavailable. Try again once it is online; no credits were charged."),
-        { code: "STUDIO_RENDER_WORKER_UNAVAILABLE", statusCode: 503 });
-    }
+  async assertRenderWorkerReady(options = {}) {
+    return assertMediaWorkerReady(options.viralData || {});
   }
 
   async startAudioExtractionJob(videoUrl, userId, options = {}) {
@@ -1190,15 +1176,15 @@ class VideoEditingService {
       // A reviewed long-form Studio render may use the full 60-minute Cloud Run
       // window. Keep the Node request alive slightly longer so it cannot mark a
       // healthy worker job failed while that worker is still rendering.
-      const requestConfig =
-        await require("./unifiedCredits/workerTransport").applicationWorkerConfig(
-          `${MEDIA_WORKER_URL}${endpoint}`,
-          payload,
-          {
-            timeout: endpoint === "/render-viral-clip" ? VIRAL_RENDER_WORKER_TIMEOUT_MS : 1800000,
-          }
-        );
-      const response = await axios.post(`${MEDIA_WORKER_URL}${endpoint}`, payload, requestConfig);
+      const execution = await postMediaWorker(endpoint, payload, {
+        timeoutMs: endpoint === "/render-viral-clip" ? VIRAL_RENDER_WORKER_TIMEOUT_MS : 1800000,
+        preferredDevice: endpoint === "/render-viral-clip" ? options.renderWorkerDevice : undefined,
+        onRoute: jobId ? route => db.collection("video_edits").doc(jobId).update({
+          executionDevice: route.device, workerRouteReason: route.reason,
+          estimatedCpuSeconds: route.estimatedCpuSeconds,
+        }) : undefined,
+      });
+      const { response, workerUrl } = execution;
 
       const result = response.data;
 
@@ -1222,13 +1208,13 @@ class VideoEditingService {
         let outputStoragePath = result.output_storage_path || null;
         let thumbnailUrl = result.thumbnail_url || result.thumbnailUrl || null;
         let durableOutput = null;
-        if (isTransientWorkerOutput(outputUrl, MEDIA_WORKER_URL)) {
-          durableOutput = await persistWorkerOutput({ url: outputUrl, workerUrl: MEDIA_WORKER_URL, userId, jobId });
+        if (isTransientWorkerOutput(outputUrl, workerUrl)) {
+          durableOutput = await persistWorkerOutput({ url: outputUrl, workerUrl, userId, jobId });
           outputUrl = durableOutput.url;
           outputStoragePath = durableOutput.storagePath;
-          if (thumbnailUrl && isTransientWorkerOutput(thumbnailUrl, MEDIA_WORKER_URL)) {
+          if (thumbnailUrl && isTransientWorkerOutput(thumbnailUrl, workerUrl)) {
             try {
-              thumbnailUrl = (await persistWorkerOutput({ url: thumbnailUrl, workerUrl: MEDIA_WORKER_URL,
+              thumbnailUrl = (await persistWorkerOutput({ url: thumbnailUrl, workerUrl,
                 userId, jobId, thumbnail: true })).url;
             } catch (error) {
               console.warn("[VideoEditing] Optional export thumbnail transfer failed:", errorSummary(error));
@@ -1381,19 +1367,13 @@ class VideoEditingService {
       local_path: options.localPath || null,
       learning_profile: options.learningProfile || null,
       selection_settings: require('./clipSelectionSettings').normalizeClipSelectionSettings(options.selectionSettings),
+      ...(Number(options.sourceDurationSeconds) > 0 ? { source_duration_seconds: Number(options.sourceDurationSeconds) } : {}),
     };
     try {
       let response;
       try {
-        response = await axios.post(
-          `${MEDIA_WORKER_URL}/analyze-clips`,
-          payload,
-          await require("./unifiedCredits/workerTransport").applicationWorkerConfig(
-            `${MEDIA_WORKER_URL}/analyze-clips`,
-            payload,
-            { timeout: 600000 }
-          )
-        );
+        ({ response } = await postMediaWorker("/analyze-clips", payload,
+          { timeoutMs: 600000, onRoute: options.onRoute }));
       } catch (error) {
         if (
           require("./unifiedCredits/application").getApplicationContext(userId)?.workerVerifier ||
@@ -1459,15 +1439,7 @@ class VideoEditingService {
         end_time: endTime,
         target_aspect_ratio: "9:16",
       };
-      const response = await axios.post(
-        `${MEDIA_WORKER_URL}/render-clip`,
-        clipPayload,
-        await require("./unifiedCredits/workerTransport").applicationWorkerConfig(
-          `${MEDIA_WORKER_URL}/render-clip`,
-          clipPayload,
-          { timeout: 300000 }
-        )
-      );
+      const { response } = await postMediaWorker("/render-clip", clipPayload, { timeoutMs: 600000 });
 
       const resultPath = response.data.output_path;
 
@@ -1555,8 +1527,8 @@ class VideoEditingService {
       console.log(`[VideoTranscribe] Calling worker for job ${jobId}`);
 
       // Call Python Worker
-      const response = await axios.post(
-        `${process.env.CAPTION_WORKER_URL || MEDIA_WORKER_URL}/transcribe`,
+      const { response } = await postMediaWorker(
+        "/transcribe",
         {
           video_url: videoUrl,
           // The worker intentionally validates this endpoint as Dict[str, str].
@@ -1569,7 +1541,9 @@ class VideoEditingService {
           // Full podcast transcription can legitimately exceed ten minutes on
           // CPU workers. The browser polls the durable job and must not receive
           // a false failure while the worker is still producing captions.
-          timeout: 3600000,
+          timeoutMs: 3600000,
+          onRoute: route => docRef.update({ executionDevice: route.device,
+            workerRouteReason: route.reason }),
         }
       );
 
@@ -1633,12 +1607,12 @@ class VideoEditingService {
   async transcribeVideo(videoUrl) {
     console.log("[VideoTranscription] Requesting transcription", { hasSource: Boolean(videoUrl) });
     try {
-      const response = await axios.post(
-        `${MEDIA_WORKER_URL}/transcribe`,
+      const { response } = await postMediaWorker(
+        "/transcribe",
         {
           video_url: videoUrl,
         },
-        { timeout: 600000 }
+        { timeoutMs: 600000 }
       ); // 10 mins
 
       // Returns { status, segments: [...] }

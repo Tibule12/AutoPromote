@@ -217,6 +217,7 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
           <ViralScanner
             file={sourceFile}
             selectionSettings={settings}
+            sourceDurationSeconds={Number(sourceVideoRef.current?.duration) || 0}
             embedded
             autoStart
             onClose={() => setScannerOpen(false)}

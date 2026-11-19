@@ -335,7 +335,6 @@ const ClipResultThumbnail = ({
   videoSrc,
   clip,
   isActive,
-  preferVideo = false,
   autoplayPreview = false,
   className = "",
 }) => {
@@ -429,6 +428,7 @@ const ViralScanner = ({
   autoStart = false,
   onResults,
   selectionSettings = null,
+  sourceDurationSeconds = 0,
 }) => {
   const settings=selectionSettings||clipSelectionSettings();
   const settingsKey=JSON.stringify(settings);
@@ -884,7 +884,9 @@ const ViralScanner = ({
 
       setScanPhase("waking");
       setStatusMessage("Preparing the secure AI analysis service...");
-      const workerHealth = await fetch(API_ENDPOINTS.MEDIA_WORKER_HEALTH, {
+      const durationHint = Number(sourceDurationSeconds) || Number(videoRef.current?.duration) || 0;
+      const healthUrl = `${API_ENDPOINTS.MEDIA_WORKER_HEALTH}?sourceDurationSeconds=${encodeURIComponent(durationHint)}`;
+      const workerHealth = await fetch(healthUrl, {
         headers: { Authorization: `Bearer ${token}` },
         credentials: "include",
       });
@@ -953,6 +955,7 @@ const ViralScanner = ({
           forceFresh,
           scanNonce,
           selectionSettings: settings,
+          ...(durationHint > 0 ? { sourceDurationSeconds: durationHint } : {}),
         }),
       });
 

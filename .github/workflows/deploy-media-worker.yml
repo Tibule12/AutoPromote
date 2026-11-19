@@ -8,6 +8,7 @@ on:
     paths:
       - .github/workflows/deploy-media-worker.yml
       - python_media_worker/**
+      - scripts/verify-gpu-media-worker.py
 
 permissions:
   contents: read
@@ -31,6 +32,8 @@ jobs:
     name: Build, verify and promote Cloud Run revision
     runs-on: ubuntu-latest
     timeout-minutes: 75
+    outputs:
+      image: ${{ steps.build.outputs.image }}
 
     steps:
       - name: Checkout requested revision
@@ -83,6 +86,7 @@ jobs:
           gcloud config set project "${PROJECT_ID}"
 
       - name: Build and render-test immutable worker image
+        id: build
         shell: bash
         run: |
           set -euo pipefail
@@ -91,6 +95,7 @@ jobs:
           bash scripts/verify-media-worker-image.sh
           docker push "${IMAGE}"
           echo "IMAGE=${IMAGE}" >> "${GITHUB_ENV}"
+          echo "image=${IMAGE}" >> "${GITHUB_OUTPUT}"
 
       - name: Deploy candidate with zero production traffic
         id: candidate
@@ -105,7 +110,7 @@ jobs:
             --execution-environment gen2 \
             --region "${REGION}" \
             --allow-unauthenticated \
-            --memory 4Gi \
+            --memory 8Gi \
             --cpu 4 \
             --cpu-boost \
             --timeout 3600 \
@@ -115,7 +120,7 @@ jobs:
             --no-traffic \
             --tag "${TAG}" \
             --set-secrets "MEDIA_WORKER_TASK_SECRET=${TASK_SECRET_NAME}:latest" \
-            --set-env-vars "NODE_ENV=production,FIREBASE_STORAGE_BUCKET=autopromote-cc6d3.firebasestorage.app,MULTICAM_UPLOAD_FIREBASE=true,MULTICAM_MASTER_RETENTION_DAYS=7,ENABLE_LOCAL_MEDIA_OUTPUT_FALLBACK=false,WHISPER_ENGINE=faster,PROMO_WHISPER_MODEL=small,FASTER_WHISPER_DEVICE=cpu,FASTER_WHISPER_COMPUTE_TYPE=int8,FASTER_WHISPER_STRICT=true,ALLOW_RUNTIME_DEPENDENCY_INSTALL=false"
+            --set-env-vars "NODE_ENV=production,FIREBASE_STORAGE_BUCKET=autopromote-cc6d3.firebasestorage.app,MULTICAM_UPLOAD_FIREBASE=true,MULTICAM_MASTER_RETENTION_DAYS=7,ENABLE_LOCAL_MEDIA_OUTPUT_FALLBACK=false,WHISPER_ENGINE=faster,PROMO_WHISPER_MODEL=small,VIRAL_CAPTION_GENERAL_WHISPER_MODEL=deepdml/faster-whisper-large-v3-turbo-ct2,FASTER_WHISPER_DEVICE=cpu,FASTER_WHISPER_COMPUTE_TYPE=int8,FASTER_WHISPER_STRICT=true,VIDEO_ENCODER=libx264,ALLOW_RUNTIME_DEPENDENCY_INSTALL=false"
 
           gcloud run services describe "${SERVICE_NAME}" \
             --region "${REGION}" \
@@ -226,3 +231,93 @@ jobs:
             --region "${REGION}" \
             --to-revisions "${PREVIOUS_REVISION}=100"
           echo "Rolled production traffic back to ${PREVIOUS_REVISION}."
+
+  deploy-gpu-backup:
+    name: Verify and retain the private GPU backup
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      GPU_SERVICE: media-worker-gpu
+    steps:
+      - uses: actions/checkout@v4
+      - name: Authenticate with Workload Identity
+        if: ${{ env.WIF_PROVIDER != '' && env.WIF_SERVICE_ACCOUNT != '' }}
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.WIF_SERVICE_ACCOUNT }}
+      - name: Authenticate with the existing service account
+        if: ${{ env.WIF_PROVIDER == '' || env.WIF_SERVICE_ACCOUNT == '' }}
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ env.LEGACY_CREDENTIALS }}
+      - uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+      - name: Build GPU image from the exact verified CPU image
+        env:
+          CPU_IMAGE: ${{ needs.deploy.outputs.image }}
+        run: |
+          set -euo pipefail
+          test -n "${CPU_IMAGE}"
+          GPU_IMAGE="gcr.io/${PROJECT_ID}/${GPU_SERVICE}:${GITHUB_SHA}"
+          gcloud auth configure-docker gcr.io --quiet
+          docker build --file python_media_worker/Dockerfile.gpu-backup \
+            --build-arg "MEDIA_WORKER_BASE_IMAGE=${CPU_IMAGE}" \
+            --tag "${GPU_IMAGE}" python_media_worker
+          docker push "${GPU_IMAGE}"
+          echo "GPU_IMAGE=${GPU_IMAGE}" >> "${GITHUB_ENV}"
+      - name: Deploy a private GPU candidate without moving traffic
+        id: gpu-candidate
+        env:
+          TAG: candidate-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          PREVIOUS=$(gcloud run services describe "${GPU_SERVICE}" --region "${REGION}" \
+            --format='value(status.latestReadyRevisionName)' 2>/dev/null || true)
+          echo "previous_revision=${PREVIOUS}" >> "${GITHUB_OUTPUT}"
+          gcloud run deploy "${GPU_SERVICE}" --image "${GPU_IMAGE}" \
+            --region "${REGION}" --platform managed --execution-environment gen2 \
+            --no-allow-unauthenticated --gpu 1 --gpu-type nvidia-rtx-pro-6000 \
+            --no-gpu-zonal-redundancy --cpu 20 --memory 80Gi --no-cpu-throttling \
+            --concurrency 1 --min-instances 0 --max-instances 1 --timeout 3600 \
+            --no-traffic --tag "${TAG}" \
+            --set-secrets "MEDIA_WORKER_TASK_SECRET=${TASK_SECRET_NAME}:latest" \
+            --set-env-vars "NODE_ENV=production,FIREBASE_STORAGE_BUCKET=autopromote-cc6d3.firebasestorage.app,MULTICAM_UPLOAD_FIREBASE=true,ENABLE_LOCAL_MEDIA_OUTPUT_FALLBACK=false" --quiet
+          gcloud run services add-iam-policy-binding "${GPU_SERVICE}" --region "${REGION}" \
+            --member "serviceAccount:firebase-adminsdk-fbsvc@${PROJECT_ID}.iam.gserviceaccount.com" \
+            --role roles/run.invoker --quiet
+          gcloud run services describe "${GPU_SERVICE}" --region "${REGION}" --format=json > /tmp/gpu-service.json
+          python - <<'PY'
+          import json, os
+          data = json.load(open('/tmp/gpu-service.json'))
+          candidate = next(t['url'] for t in data['status']['traffic'] if t.get('tag') == os.environ['TAG'])
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write('candidate_url=' + candidate + '\n')
+              f.write('revision=' + data['status']['latestCreatedRevisionName'] + '\n')
+              f.write('audience=' + data['status']['url'] + '\n')
+          PY
+      - name: Prove CUDA startup and a real NVENC render with sound
+        env:
+          CANDIDATE_URL: ${{ steps.gpu-candidate.outputs.candidate_url }}
+          WORKER_AUDIENCE: ${{ steps.gpu-candidate.outputs.audience }}
+        run: |
+          set -euo pipefail
+          WORKER_TOKEN=$(gcloud auth print-identity-token --audiences="${WORKER_AUDIENCE}")
+          echo "::add-mask::${WORKER_TOKEN}"
+          export WORKER_TOKEN
+          python scripts/verify-gpu-media-worker.py
+      - name: Promote the verified GPU backup
+        id: gpu-promote
+        env:
+          REVISION: ${{ steps.gpu-candidate.outputs.revision }}
+        run: |
+          set -euo pipefail
+          gcloud run services update-traffic "${GPU_SERVICE}" --region "${REGION}" \
+            --to-revisions "${REVISION}=100"
+      - name: Restore the prior GPU revision if promotion fails
+        if: ${{ failure() && steps.gpu-promote.outcome == 'failure' && steps.gpu-candidate.outputs.previous_revision != '' }}
+        env:
+          PREVIOUS: ${{ steps.gpu-candidate.outputs.previous_revision }}
+        run: gcloud run services update-traffic "${GPU_SERVICE}" --region "${REGION}" --to-revisions "${PREVIOUS}=100"

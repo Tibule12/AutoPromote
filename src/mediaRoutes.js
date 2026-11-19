@@ -245,27 +245,6 @@ const postToMediaWorker = async (endpoint, payload, timeout = 120000) =>
 const postToCamCombinerWorker = async (endpoint, payload, timeout = 120000) =>
   postToWorker(endpoint, payload, timeout, CAM_COMBINER_WORKER_URL, LOCAL_CAM_COMBINER_WORKER_URL);
 
-const getFromMediaWorker = async (endpoint, timeout = 15000) => {
-  try {
-    const targetUrl = `${MEDIA_WORKER_URL}${endpoint}`;
-    const requestConfig = await buildWorkerRequestConfig(targetUrl, { timeout });
-    return await axios.get(targetUrl, requestConfig);
-  } catch (error) {
-    const canFallback =
-      ALLOW_LOCAL_WORKER_FALLBACK &&
-      LOCAL_MEDIA_WORKER_URL &&
-      LOCAL_MEDIA_WORKER_URL !== MEDIA_WORKER_URL &&
-      shouldRetryWithLocalWorker(error);
-
-    if (!canFallback) throw error;
-
-    console.warn(
-      `[MediaRoute] Falling back to local worker for ${endpoint}. Primary worker: ${MEDIA_WORKER_URL}`
-    );
-    return axios.get(`${LOCAL_MEDIA_WORKER_URL}${endpoint}`, { timeout });
-  }
-};
-
 const getFromCamCombinerWorker = async (endpoint, timeout = 15000) => {
   try {
     const targetUrl = `${CAM_COMBINER_WORKER_URL}${endpoint}`;
@@ -1289,10 +1268,10 @@ router.get("/credits", async (req, res) => {
   }
 });
 
-router.get("/worker-health", async (_req, res) => {
+router.get("/worker-health", async (req, res) => {
   const startedAt = Date.now();
   try {
-    const response = await getFromMediaWorker("/health", MEDIA_WORKER_HEALTH_TIMEOUT_MS);
+    const response = await require("./services/mediaWorkerRouting").mediaWorkerHealth(req.query.sourceDurationSeconds);
     res.json({
       ok: true,
       worker: response.data || null,
@@ -1893,7 +1872,11 @@ router.post(
     // job. A stopped NVIDIA worker must not leave a creator waiting on a render
     // that could never start, or temporarily deduct credits for that attempt.
     if (isViralClipRender) {
-      try { await videoEditingService.assertRenderWorkerReady(); }
+      try {
+        const ready = await videoEditingService.assertRenderWorkerReady(resolvedOptions);
+        // Server-selected readiness lane; never accept a caller-supplied URL.
+        resolvedOptions.renderWorkerDevice = ready?.device || null;
+      }
       catch (error) {
         const localCreditContext = require("./services/unifiedCredits/application").getApplicationContext(userId);
         if (localCreditContext) await localCreditContext.confirmNoDispatch();
@@ -3443,6 +3426,7 @@ router.post("/analyze", require("./services/unifiedCredits/application").applica
     forceFresh = false,
     scanNonce = "",
     selectionSettings: rawSelectionSettings,
+    sourceDurationSeconds,
   } = req.body;
   let selectionSettings;
   try { selectionSettings = require('./services/clipSelectionSettings').normalizeClipSelectionSettings(rawSelectionSettings); }
@@ -3533,15 +3517,20 @@ router.post("/analyze", require("./services/unifiedCredits/application").applica
       );
       return null;
     });
+    let execution = null;
     const scenes = await videoEditingService.analyzeVideo(analysisSource, userId, {
+      onRoute: route => { execution = { device: route.device, reason: route.reason }; },
       forceFresh: Boolean(forceFresh),
       scanNonce: typeof scanNonce === "string" ? scanNonce : "",
       learningProfile,
       selectionSettings,
+      ...(Number.isFinite(Number(sourceDurationSeconds)) && Number(sourceDurationSeconds) > 0 && Number(sourceDurationSeconds) <= 86400
+        ? { sourceDurationSeconds: Number(sourceDurationSeconds) } : {}),
     });
     res.json({
       success: true,
       scenes: scenes,
+      execution,
       remainingCredits: credits.remaining,
       billingDisabled: !!credits.skipped,
       learning: {

@@ -17,6 +17,8 @@ docker run --rm \
   --entrypoint python \
   "${IMAGE}" \
   -m unittest \
+  python_media_worker.test_gpu_startup \
+  python_media_worker.test_studio_nvenc_export \
   python_media_worker.test_viral_render_contract \
   python_media_worker.test_studio_delivery_timing \
   python_media_worker.test_studio_finish \

@@ -1,6 +1,16 @@
 const { GoogleAuth } = require("google-auth-library");
 
-const auth = new GoogleAuth();
+// Render already receives the Firebase service account as environment JSON.
+// GoogleAuth does not discover those Firebase-specific variables on its own.
+// Reuse that identity for private Cloud Run calls, while leaving explicit ADC
+// and the Cloud Run metadata identity in control where they are configured.
+const serviceAccount = require("../../firebaseConfig.server");
+const auth = new GoogleAuth(
+  !process.env.GOOGLE_APPLICATION_CREDENTIALS && !process.env.K_SERVICE &&
+    serviceAccount.client_email && serviceAccount.private_key
+    ? { credentials: serviceAccount }
+    : {}
+);
 const clientCache = new Map();
 
 function isLocalUrl(value) {
