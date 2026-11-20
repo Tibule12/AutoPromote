@@ -1,0 +1,9 @@
+# Preserve the qualified runtime/model layers while pinning all shared worker
+# source to this release. Used for bounded production repair deployments.
+ARG WORKER_BASE_IMAGE
+FROM ${WORKER_BASE_IMAGE}
+WORKDIR /app
+COPY *.py ./
+COPY assets ./assets
+COPY models/yunet ./models/yunet
+CMD ["python3", "multicam_job_runner.py"]

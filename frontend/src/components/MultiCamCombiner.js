@@ -51,6 +51,7 @@ import { useSubscription } from "../hooks/useSubscription";
 import PayPalSubscriptionPanel from "./PayPalSubscriptionPanel";
 import { SafeAudio, SafeVideo } from "./SafeMedia";
 import { uploadMulticamSourceResumable } from "../utils/multicamResumableUpload";
+import { normalizeMulticamSetup, MULTICAM_SHOT_LENGTHS, buildMulticamDirectorSettings } from "./multicamSetup";
 
 const CAMERA_COLORS = ["#f97316", "#38bdf8", "#a78bfa", "#34d399", "#fb7185", "#facc15"];
 
@@ -2324,8 +2325,12 @@ function MultiCamCombiner({
   returnToStudio = false,
 }) {
   const { canUseFeature, credits } = useSubscription();
+  const initialSetup = normalizeMulticamSetup(initialSettings);
+  const hasExplicitSetup = Object.keys(initialSettings).length > 0;
+  const [speakerDetectionEnabled, setSpeakerDetectionEnabled] = useState(initialSetup.speakerDetection);
+  const [minimumShotLengthSeconds, setMinimumShotLengthSeconds] = useState(initialSetup.minimumShotLengthSeconds);
   const [sources, setSources] = useState(() => {
-    const seededFiles = Array.from(initialFiles || []).filter(Boolean);
+    const seededFiles = Array.from(initialFiles || []).filter(Boolean).slice(0, MULTICAM_MAX_SOURCES);
     const initialSources = buildInitialSources(seededFiles[0] || primaryFile);
 
     seededFiles.slice(1).forEach((file, index) => {
@@ -2387,11 +2392,11 @@ function MultiCamCombiner({
   const [focusPickerActive, setFocusPickerActive] = useState(false);
   const [multicamLayoutMode, setMulticamLayoutMode] = useState("cut");
   const [reactionOverlayEnabled, setReactionOverlayEnabled] = useState(
-    Boolean(initialSettings.reactionShots)
+    initialSetup.reactionShots
   );
   const [directorStyleId, setDirectorStyleId] = useState(DIRECTOR_STYLE_PRESETS[0].id);
   const [autoDirectorEnabled, setAutoDirectorEnabled] = useState(
-    initialSettings.speakerDetection !== false
+    initialSetup.speakerDetection
   );
   const [autoDirectorSummary, setAutoDirectorSummary] = useState(null);
   const [studioMode, setStudioMode] = useState("combine");
@@ -2401,7 +2406,7 @@ function MultiCamCombiner({
   );
   const [flowAuraTemplateId, setFlowAuraTemplateId] = useState(FLOW_AURA_TEMPLATE_PRESETS[0].id);
   const [flowIntensityMode, setFlowIntensityMode] = useState(
-    initialSettings.minimumShotLength === "2 seconds" ? "harder" : "standard"
+    "standard"
   );
   const [flowAudioTrack, setFlowAudioTrack] = useState(null);
   const [flowEditPlan, setFlowEditPlan] = useState(null);
@@ -2413,7 +2418,7 @@ function MultiCamCombiner({
   const [flowEditInsight, setFlowEditInsight] = useState("");
   const [flowEditWarning, setFlowEditWarning] = useState("");
   const [flowSegmentFraming, setFlowSegmentFraming] = useState({});
-  const [useExternalCleanAudio, setUseExternalCleanAudio] = useState(Boolean(initialExternalAudio));
+  const [useExternalCleanAudio, setUseExternalCleanAudio] = useState(Boolean(initialExternalAudio) && initialSetup.useMasterAudio);
   const [externalAudioTrack, setExternalAudioTrack] = useState(() => {
     if (!initialExternalAudio) return null;
     return {
@@ -2433,11 +2438,7 @@ function MultiCamCombiner({
   const [confirmedDirectorChannelMapKey, setConfirmedDirectorChannelMapKey] = useState("");
   const [applyRecoveredChannelMapApproval, setApplyRecoveredChannelMapApproval] = useState(false);
   const [cleanAudioSyncJob, setCleanAudioSyncJob] = useState(null);
-  const [multicamRenderTier, setMulticamRenderTier] = useState(() => {
-    if (initialSettings.outputQuality === "720p") return "simple";
-    if (initialSettings.outputQuality === "4K") return "studio";
-    return "premium";
-  });
+  const [multicamRenderTier, setMulticamRenderTier] = useState(initialSetup.renderTier);
   const [multicamBurnCaptions, setMulticamBurnCaptions] = useState(false);
   const [multicamTranslateCaptionsToEnglish, setMulticamTranslateCaptionsToEnglish] = useState(false);
   const [multicamBrandWatermark, setMulticamBrandWatermark] = useState(false);
@@ -2461,7 +2462,7 @@ function MultiCamCombiner({
   const fileInputRef = useRef(null);
   const flowAudioInputRef = useRef(null);
   const externalAudioInputRef = useRef(null);
-  const nextCameraIndexRef = useRef(3);
+  const nextCameraIndexRef = useRef(Math.max(2, ...sources.map(source => Number(source.id.replace(/^cam-/, "")) || 0)) + 1);
   const objectUrlsRef = useRef(
     new Set(
       [...sources.map(source => source.previewUrl), externalAudioTrack?.previewUrl].filter(url =>
@@ -4061,8 +4062,16 @@ function MultiCamCombiner({
       if (draft.outputAspectRatio) {
         setOutputAspectRatio(draft.outputAspectRatio);
       }
-      if (draft.useExternalCleanAudio !== undefined) {
+      if (draft.useExternalCleanAudio !== undefined && !hasExplicitSetup) {
         setUseExternalCleanAudio(Boolean(draft.useExternalCleanAudio));
+      }
+      if (draft.setupSettings && !hasExplicitSetup) {
+        const restored = normalizeMulticamSetup(draft.setupSettings);
+        setSpeakerDetectionEnabled(restored.speakerDetection);
+        setAutoDirectorEnabled(restored.speakerDetection);
+        setMinimumShotLengthSeconds(restored.minimumShotLengthSeconds);
+        setReactionOverlayEnabled(restored.reactionShots);
+        setMulticamRenderTier(restored.renderTier);
       }
       if (draft.sourceUploads && typeof draft.sourceUploads === "object") {
         setSources(currentSources =>
@@ -4081,7 +4090,8 @@ function MultiCamCombiner({
       }
       if (draft.externalAudioUpload && typeof draft.externalAudioUpload === "object") {
         setExternalAudioTrack(current =>
-          current
+          current && draft.externalAudioUpload.cacheKey &&
+          draft.externalAudioUpload.cacheKey === (buildBackendMediaCacheKey(current.file) || current.cacheKey)
             ? {
                 ...current,
                 url: draft.externalAudioUpload.url || current.url || "",
@@ -4100,7 +4110,7 @@ function MultiCamCombiner({
     } finally {
       draftHydratedRef.current = true;
     }
-  }, [multicamDraftKey]);
+  }, [multicamDraftKey, hasExplicitSetup]);
 
   useEffect(() => {
     if (typeof window === "undefined" || !multicamDraftKey || !draftHydratedRef.current) return;
@@ -4134,12 +4144,14 @@ function MultiCamCombiner({
           masterAudioCameraId,
           outputAspectRatio,
           useExternalCleanAudio,
+          setupSettings: { speakerDetection: speakerDetectionEnabled, minimumShotLengthSeconds,
+            reactionShots: reactionOverlayEnabled, renderTier: multicamRenderTier },
           sourceUploads,
           externalAudioUpload: {
             url: String(externalAudioTrack?.url || "").startsWith("http")
               ? externalAudioTrack.url
               : "",
-            cacheKey: externalAudioTrack?.cacheKey || "",
+            cacheKey: buildBackendMediaCacheKey(externalAudioTrack?.file) || externalAudioTrack?.cacheKey || "",
           },
           flowEditPlan,
         })
@@ -4156,6 +4168,10 @@ function MultiCamCombiner({
     masterAudioCameraId,
     outputAspectRatio,
     useExternalCleanAudio,
+    speakerDetectionEnabled,
+    minimumShotLengthSeconds,
+    reactionOverlayEnabled,
+    multicamRenderTier,
     externalAudioTrack,
     flowEditPlan,
   ]);
@@ -4359,6 +4375,7 @@ function MultiCamCombiner({
     timelineDuration,
     timelineBounds.timelineStart,
     directorStyleId,
+    minimumShotLengthSeconds,
     audioAnalysisByCameraId,
     flowFrameQualityByCameraId,
   ]);
@@ -5066,7 +5083,7 @@ function MultiCamCombiner({
       timelineStart: timelineBounds.timelineStart,
       directorStyleId,
       intensityMode: flowIntensityMode,
-      minimumShotLengthSeconds: Number.parseFloat(initialSettings.minimumShotLength) || undefined,
+      minimumShotLengthSeconds,
       audioActivityBySource: audioAnalysisByCameraId,
       qualityBySource: flowFrameQualityByCameraId,
     });
@@ -5419,61 +5436,52 @@ function MultiCamCombiner({
     return normalizedAnalysis;
   };
 
-  const handleLoadExternalAudioFile = async file => {
+  const handleLoadExternalAudioFile = file => {
     if (!file) return;
+    const previousUrl = externalAudioTrack?.previewUrl;
+    if (previousUrl && objectUrlsRef.current.has(previousUrl)) {
+      URL.revokeObjectURL(previousUrl);
+      objectUrlsRef.current.delete(previousUrl);
+    }
     const previewUrl = URL.createObjectURL(file);
     objectUrlsRef.current.add(previewUrl);
     setUseExternalCleanAudio(true);
-    setExternalAudioTrack({
-      file,
-      previewUrl,
-      name: file.name || "External clean audio",
-      offsetSeconds: 0,
-      duration: 0,
-    });
+    setExternalAudioTrack({ file, previewUrl, name: file.name || "External clean audio", offsetSeconds: 0, duration: 0 });
     setExternalAudioMixMode("external_only");
     setConfirmedDirectorChannelMapKey("");
     setCleanAudioSyncJob(null);
-    const externalAudioTooLarge = Number(file.size || 0) > BROWSER_SYNC_MAX_EXTERNAL_AUDIO_BYTES;
-    if (externalAudioTooLarge) {
-      const message = `${file.name || "External audio"} loaded. This clean audio is ${formatMediaBytes(
-        file.size
-      )}, so AutoPromote will sync it in the background instead of decoding the whole waveform in the browser.`;
-      setStatusMessage(message);
-      toast(message, { duration: 9000 });
-      return;
-    }
-    setStatusMessage("External clean audio loaded. Reading waveform for sync...");
-
-    try {
-      const analysis = await analyzeAudioTrack(previewUrl);
-      const normalizedAnalysis = {
-        ...analysis,
-        mediaUrl: previewUrl,
-        bars: buildWaveformBars(analysis.envelope),
-      };
-      audioAnalysisCacheRef.current.set("external-clean-audio", normalizedAnalysis);
-      setAudioAnalysisByCameraId(current => ({
-        ...current,
-        "external-clean-audio": normalizedAnalysis,
-      }));
-      setExternalAudioTrack(current =>
-        current
-          ? {
-              ...current,
-              duration: Number(analysis.duration) || 0,
-            }
-          : current
-      );
-      setStatusMessage(
-        "Clean audio is ready. Export will prove sync against the camera scratch audio before rendering."
-      );
-    } catch (error) {
-      setStatusMessage(
-        "Clean audio loaded, but waveform analysis failed. Export will still require automatic sync proof."
-      );
-    }
   };
+
+  // Setup uploads and in-editor uploads must take the same waveform/metadata path.
+  // No cloud sync, render or credit spend starts merely from selecting a file.
+  useEffect(() => {
+    if (!externalAudioUrl) return undefined;
+    let cancelled = false;
+    const file = externalAudioTrack?.file;
+    const name = externalAudioTrack?.name || "External clean audio";
+    if (Number(file?.size || 0) > BROWSER_SYNC_MAX_EXTERNAL_AUDIO_BYTES) {
+      setStatusMessage(`${name} loaded. Use the background sync check for this large recording.`);
+      return undefined;
+    }
+    const prepare = async () => {
+      try {
+        const cached = audioAnalysisCacheRef.current.get("external-clean-audio");
+        const analysis = cached?.mediaUrl === externalAudioUrl && !cached.error
+          ? cached : await analyzeAudioTrack(externalAudioUrl);
+        if (cancelled) return;
+        const normalized = { ...analysis, mediaUrl: externalAudioUrl, bars: buildWaveformBars(analysis.envelope) };
+        audioAnalysisCacheRef.current.set("external-clean-audio", normalized);
+        setAudioAnalysisByCameraId(current => ({ ...current, "external-clean-audio": normalized }));
+        setExternalAudioTrack(current => current && (current.previewUrl || current.url) === externalAudioUrl
+          ? { ...current, duration: Number(analysis.duration) || Number(current.duration) || 0 } : current);
+        setStatusMessage("Clean audio is ready. Export will prove sync against the camera scratch audio before rendering.");
+      } catch (_error) {
+        if (!cancelled) setStatusMessage("Clean audio loaded, but waveform analysis failed. Export still requires automatic sync proof.");
+      }
+    };
+    void prepare();
+    return () => { cancelled = true; };
+  }, [externalAudioUrl, externalAudioTrack?.file, externalAudioTrack?.name]);
 
   const handleClearExternalAudio = () => {
     externalAudioRef.current?.pause?.();
@@ -8313,7 +8321,7 @@ function MultiCamCombiner({
       setStatusMessage("Set up synced sources before exporting.");
       return;
     }
-    if (hasExternalCleanAudio && readySources.length >= 2 && !directorChannelMapConfirmed) {
+    if (speakerDetectionEnabled && hasExternalCleanAudio && readySources.length >= 2 && !directorChannelMapConfirmed) {
       const leftCamera = getExportSourceLabel(
         externalAudioSpeakerChannelsSwapped ? readySources[1] : readySources[0],
         externalAudioSpeakerChannelsSwapped ? 1 : 0
@@ -9129,7 +9137,8 @@ function MultiCamCombiner({
       );
       // ===== END TRACE =====
 
-      const useServerAutoDirector = readySources.length >= 2;
+      const directorSettings = buildMulticamDirectorSettings({ speakerDetection: speakerDetectionEnabled, minimumShotLengthSeconds }, readySources.length);
+      const useServerAutoDirector = directorSettings.autoSwitch;
       const directorChannelCameraIds =
         useServerAutoDirector && externalAudioPayload && sourcesPayload.length >= 2
           ? externalAudioSpeakerChannelsSwapped
@@ -9189,10 +9198,10 @@ function MultiCamCombiner({
           render_tier: multicamRenderTier,
           autoSwitch: useServerAutoDirector,
           auto_switch: useServerAutoDirector,
-          audioBasedAutoSwitch: true,
-          audio_based_auto_switch: true,
-          autoSwitchInterval: 2,
-          auto_switch_interval: 2,
+          audioBasedAutoSwitch: directorSettings.audioBasedAutoSwitch,
+          audio_based_auto_switch: directorSettings.audioBasedAutoSwitch,
+          autoSwitchInterval: directorSettings.autoSwitchInterval,
+          auto_switch_interval: directorSettings.autoSwitchInterval,
           autoSwitchAggressiveness: flowIntensityMode === "harder" ? "aggressive" : "balanced",
           auto_switch_aggressiveness: flowIntensityMode === "harder" ? "aggressive" : "balanced",
           reactionOverlays: reactionOverlayEnabled,
@@ -10111,6 +10120,24 @@ function MultiCamCombiner({
                 <aside className="nle-render-ready-card">
                   <span className="nle-eyebrow">Render Ready</span>
                   <strong>{multicamRenderCreditEstimate} cr</strong>
+                  <div className="nle-render-finishing" aria-label="First cut settings">
+                    <label className="nle-render-finish-toggle">
+                      <input type="checkbox" aria-label="Speaker detection" checked={speakerDetectionEnabled}
+                        onChange={event => { setSpeakerDetectionEnabled(event.target.checked); setAutoDirectorEnabled(event.target.checked); }} />
+                      <span><strong>Speaker detection</strong><small>{speakerDetectionEnabled ? "Follow active speakers in the final edit." : "Export your current camera-switch timeline."}</small></span>
+                    </label>
+                    <label>Minimum shot length
+                      <select aria-label="Minimum shot length" value={minimumShotLengthSeconds}
+                        onChange={event => setMinimumShotLengthSeconds(Number(event.target.value))}>
+                        {MULTICAM_SHOT_LENGTHS.map(seconds => <option key={seconds} value={seconds}>{seconds} seconds</option>)}
+                      </select>
+                    </label>
+                    {externalAudioTrack && <label className="nle-render-finish-toggle">
+                      <input type="checkbox" aria-label="Use master audio" checked={useExternalCleanAudio}
+                        onChange={event => setUseExternalCleanAudio(event.target.checked)} />
+                      <span><strong>Use master audio</strong><small>Use the imported clean recording instead of camera audio.</small></span>
+                    </label>}
+                  </div>
                   <div
                     className="nle-render-tier-group is-compact"
                     aria-label="Cam Combiner render pricing"
@@ -10223,7 +10250,7 @@ function MultiCamCombiner({
                       syncingCameraId === "external-clean-audio" ||
                       !canExportProject ||
                       isSingleSourceWorkflow ||
-                      (hasExternalCleanAudio &&
+                      (speakerDetectionEnabled && hasExternalCleanAudio &&
                         readySources.length >= 2 &&
                         !directorChannelMapConfirmed)
                     }
@@ -10234,7 +10261,7 @@ function MultiCamCombiner({
                         cleanAudioSyncIsRunning || syncingCameraId === "external-clean-audio",
                       isPending: serverExportPending,
                       needsChannelConfirmation:
-                        hasExternalCleanAudio &&
+                        speakerDetectionEnabled && hasExternalCleanAudio &&
                         readySources.length >= 2 &&
                         !directorChannelMapConfirmed,
                     })}

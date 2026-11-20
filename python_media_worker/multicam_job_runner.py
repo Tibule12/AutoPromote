@@ -238,7 +238,7 @@ def _claim_job(doc_ref, dispatch_token, execution_id):
         expected_hash = str(data.get("dispatchTokenHash") or "")
         provided_hash = hashlib.sha256(dispatch_token.encode("utf-8")).hexdigest()
         if not expected_hash or not hmac.compare_digest(expected_hash, provided_hash):
-            raise RuntimeError("Cloud Run Job dispatch token does not match")
+            return "superseded", data
 
         if data.get("creditsRefunded") or str(data.get("status") or "") == "dispatch_failed":
             return "refunded", data
@@ -275,6 +275,8 @@ def _claim_job(doc_ref, dispatch_token, execution_id):
                     "execution": execution_id,
                     "taskAttempt": os.getenv("CLOUD_RUN_TASK_ATTEMPT"),
                     "claimedAt": now.isoformat(),
+                    "device": "gpu" if worker.GPU_VIDEO_ENCODER == "h264_nvenc" else "cpu",
+                    "videoEncoder": worker.GPU_VIDEO_ENCODER,
                     "expiresAt": (now + datetime.timedelta(hours=6)).isoformat(),
                 },
                 "updatedAt": now.isoformat(),
@@ -308,17 +310,20 @@ def run():
     doc_ref = db.collection("video_edits").document(job_id)
     execution_id = _execution_identity()
     job = None
+    claimed = False
 
     try:
+        worker.verify_required_gpu_runtime()
         claim_status, job = _claim_job(doc_ref, dispatch_token, execution_id)
         if claim_status in {"completed", "refunded"}:
             _release_capacity(job_id, claim_status)
             print(f"Multicam job {job_id} skipped: {claim_status}")
             return 0
-        if claim_status == "duplicate":
+        if claim_status in {"duplicate", "superseded"}:
             print(f"Multicam job {job_id} skipped: {claim_status}")
             return 0
 
+        claimed = True
         raw_request = job.get("multicamRequest")
         if not isinstance(raw_request, dict):
             raise RuntimeError("Job has no canonical multicamRequest")
@@ -516,6 +521,8 @@ def run():
         created_at = _datetime_value((job or {}).get("createdAt"))
         execution_telemetry = {
             "version": 2,
+            "executionDevice": "gpu" if worker.GPU_VIDEO_ENCODER == "h264_nvenc" else "cpu",
+            "videoEncoder": worker.GPU_VIDEO_ENCODER,
             "execution": execution_id,
             "workerFlavor": "lean_no_captions" if lean_no_captions else "caption_capable",
             "taskAttempt": os.getenv("CLOUD_RUN_TASK_ATTEMPT") or "0",
@@ -587,6 +594,10 @@ def run():
     except Exception as error:
         message = _error_text(error)
         print(f"Multicam job {job_id} failed: {message}", file=sys.stderr)
+        if not claimed:
+            # A delayed/superseded task has no authority over this job. A GPU
+            # startup rejection stays queued for the API's fenced CPU fallback.
+            return 1
         refundable = bool(job and job.get("creditReceipt") and not job.get("creditReceipt", {}).get("skipped"))
         attempt, max_retries = _task_retry_context()
         nonretryable = _is_nonretryable_render_error(error)

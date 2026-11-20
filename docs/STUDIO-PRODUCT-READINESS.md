@@ -1,3 +1,9 @@
+<!-- cam-entry-gpu-primary-20261120 -->
+
+20 November owner-directed [Cam Combiner entry parity and GPU-primary routing](../reports/cam-entry-gpu-primary-20261120/README.md) fixes setup limits/settings/audio preparation and selects qualified GPU first for Finder, Viral Clip Studio and durable Cam renders, with same-job fenced CPU fallback. 44 backend, 11 frontend, 8 runner and18 release/chunk tests plus strict builds pass; production GPU and CPU definitions are deployed, and signed-in setup/import/control/sync/moving preview plus eight anonymous comparisons pass. A real GPU job qualifies CUDA/NVENC in2m18.12s; serving native delivery verification continues. No readiness promotion:17 FUNCTIONAL/9 PARTIAL/1 BROKEN/2 UNIMPLEMENTED/0 PRO/0 PRODUCTION. Full S02/S04/S03, broad media/concurrency and owner review remain. Next: serving signed-in control and native GPU/fallback evidence.
+
+<!-- /cam-entry-gpu-primary-20261120 -->
+
 <!-- feature-guides-live-20261119 -->
 
 19 November owner-directed [four additional public feature guides](../reports/feature-guides-live-20261119/README.md) adds the exact narrated Color, Logo, 2.5D Node Flow and Sound tutorials to the existing welcome popup, with native-result posters and a scrollable desktop playlist. Ten popup/welcome tests pass; immutable public uploads match their local identities. Anonymous range/CORS, final-build and serving-production evidence are recorded with the release. No new models, renders, scheduling or social publishing. Public release is explicitly requested; full Studio readiness and S02/S04/S03 remain unchanged at17 FUNCTIONAL/9 PARTIAL/1 BROKEN/2 UNIMPLEMENTED/0 PRO/0 PRODUCTION. Next: verify serving public media and popup.

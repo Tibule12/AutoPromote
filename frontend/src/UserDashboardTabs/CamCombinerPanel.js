@@ -1,19 +1,19 @@
 import React, { useMemo, useState } from "react";
 import MultiCamCombiner from "../components/MultiCamCombiner";
 import ProductHelpButton from "../components/ProductHelpButton";
+import { MULTICAM_MAX_SOURCES } from "../components/multicamUtils";
+import {
+  normalizeMulticamSetup,
+  MULTICAM_SHOT_LENGTHS,
+  MULTICAM_RENDER_TREATMENTS,
+} from "../components/multicamSetup";
 import "./CamCombinerPanel.css";
 
 function CamCombinerPanel({ onClose, onUseExport, onFindViralClips }) {
-  const [studioOpen, setStudioOpen] = useState(false);
+  const [studioSession, setStudioSession] = useState(null);
   const [cameraFiles, setCameraFiles] = useState([null, null]);
   const [masterAudio, setMasterAudio] = useState(null);
-  const [settings, setSettings] = useState({
-    speakerDetection: true,
-    reactionShots: true,
-    minimumShotLength: "3 seconds",
-    outputQuality: "1080p",
-    useMasterAudio: true,
-  });
+  const [settings, setSettings] = useState(() => normalizeMulticamSetup());
 
   const loadedCameraCount = useMemo(() => cameraFiles.filter(Boolean).length, [cameraFiles]);
 
@@ -25,10 +25,14 @@ function CamCombinerPanel({ onClose, onUseExport, onFindViralClips }) {
     });
   };
 
-  if (!studioOpen) {
+  if (!studioSession) {
     return (
       <section className="dashboard-cam-combiner-page cam-combiner-setup">
-        <ProductHelpButton featureId="cam_combiner.switching" label="Cam Combiner" workspaceType="CAM_COMBINER" />
+        <ProductHelpButton
+          featureId="cam_combiner.switching"
+          label="Cam Combiner"
+          workspaceType="CAM_COMBINER"
+        />
         <ol className="cam-combiner-steps" aria-label="Cam Combiner workflow">
           {["Upload", "Auto-sync", "Review", "Export"].map((label, index) => (
             <li key={label} className={index === 0 ? "active" : ""}>
@@ -45,7 +49,9 @@ function CamCombinerPanel({ onClose, onUseExport, onFindViralClips }) {
                 <span>Uploaded recordings</span>
                 <h3>Add every camera angle and your clean audio</h3>
               </div>
-              <small>{loadedCameraCount}/2 cameras ready</small>
+              <small>
+                {loadedCameraCount}/{MULTICAM_MAX_SOURCES} recordings selected
+              </small>
             </div>
 
             <div className="cam-recording-list">
@@ -62,28 +68,51 @@ function CamCombinerPanel({ onClose, onUseExport, onFindViralClips }) {
                   <em>{file ? "Ready" : "Choose file"}</em>
                   <input
                     type="file"
+                    aria-label={`Camera ${index + 1} recording`}
                     accept="video/*"
-                    onChange={event => updateCamera(index, event.target.files?.[0])}
+                    onChange={event => {
+                      updateCamera(index, event.target.files?.[0]);
+                      event.target.value = "";
+                    }}
                   />
+                  {file && (
+                    <button
+                      type="button"
+                      aria-label={`Remove Camera ${index + 1}`}
+                      onClick={event => {
+                        event.preventDefault();
+                        updateCamera(index, null);
+                      }}
+                    >
+                      Remove
+                    </button>
+                  )}
                 </label>
               ))}
 
-              <label className="cam-recording-row cam-recording-add">
-                <span className="cam-recording-icon">＋</span>
-                <span>
-                  <strong>Add another camera</strong>
-                  <small>Optional third angle for reactions or wide shots</small>
-                </span>
-                <em>Choose file</em>
-                <input
-                  type="file"
-                  accept="video/*"
-                  onChange={event => {
-                    const file = event.target.files?.[0];
-                    if (file) setCameraFiles(current => [...current, file]);
-                  }}
-                />
-              </label>
+              {cameraFiles.length < MULTICAM_MAX_SOURCES && (
+                <label className="cam-recording-row cam-recording-add">
+                  <span className="cam-recording-icon">＋</span>
+                  <span>
+                    <strong>Add another camera</strong>
+                    <small>Optional third angle for reactions or wide shots</small>
+                  </span>
+                  <em>Choose file</em>
+                  <input
+                    type="file"
+                    aria-label="Add another camera recording"
+                    accept="video/*"
+                    onChange={event => {
+                      const file = event.target.files?.[0];
+                      if (file)
+                        setCameraFiles(current =>
+                          current.length < MULTICAM_MAX_SOURCES ? [...current, file] : current
+                        );
+                      event.target.value = "";
+                    }}
+                  />
+                </label>
+              )}
 
               <label className={`cam-recording-row master-audio ${masterAudio ? "has-file" : ""}`}>
                 <span className="cam-recording-icon">≋</span>
@@ -94,9 +123,24 @@ function CamCombinerPanel({ onClose, onUseExport, onFindViralClips }) {
                 <em>{masterAudio ? "Ready" : "Choose file"}</em>
                 <input
                   type="file"
+                  aria-label="Master audio recording"
                   accept="audio/*,video/*"
-                  onChange={event => setMasterAudio(event.target.files?.[0] || null)}
+                  onChange={event => {
+                    setMasterAudio(event.target.files?.[0] || null);
+                    event.target.value = "";
+                  }}
                 />
+                {masterAudio && (
+                  <button
+                    type="button"
+                    onClick={event => {
+                      event.preventDefault();
+                      setMasterAudio(null);
+                    }}
+                  >
+                    Remove master audio
+                  </button>
+                )}
               </label>
             </div>
           </section>
@@ -148,35 +192,40 @@ function CamCombinerPanel({ onClose, onUseExport, onFindViralClips }) {
                 <small>Prevents distracting rapid cuts.</small>
               </span>
               <select
-                value={settings.minimumShotLength}
+                aria-label="Minimum shot length"
+                value={settings.minimumShotLengthSeconds}
                 onChange={event =>
                   setSettings(current => ({
                     ...current,
-                    minimumShotLength: event.target.value,
+                    minimumShotLengthSeconds: Number(event.target.value),
                   }))
                 }
               >
-                <option>2 seconds</option>
-                <option>3 seconds</option>
-                <option>5 seconds</option>
-                <option>8 seconds</option>
+                {MULTICAM_SHOT_LENGTHS.map(seconds => (
+                  <option key={seconds} value={seconds}>
+                    {seconds} seconds
+                  </option>
+                ))}
               </select>
             </label>
 
             <label className="cam-setting-select">
               <span>
-                <strong>Output quality</strong>
-                <small>The editor still confirms render settings before export.</small>
+                <strong>Render treatment</strong>
+                <small>Choose the same finishing treatment available in the editor.</small>
               </span>
               <select
-                value={settings.outputQuality}
+                aria-label="Render treatment"
+                value={settings.renderTier}
                 onChange={event =>
-                  setSettings(current => ({ ...current, outputQuality: event.target.value }))
+                  setSettings(current => ({ ...current, renderTier: event.target.value }))
                 }
               >
-                <option>720p</option>
-                <option>1080p</option>
-                <option>4K</option>
+                {MULTICAM_RENDER_TREATMENTS.map(tier => (
+                  <option key={tier.id} value={tier.id}>
+                    {tier.label}
+                  </option>
+                ))}
               </select>
             </label>
           </aside>
@@ -202,14 +251,24 @@ function CamCombinerPanel({ onClose, onUseExport, onFindViralClips }) {
           <button type="button" className="btn-secondary" onClick={onClose}>
             Back to Overview
           </button>
-          <button type="button" className="btn-secondary" onClick={() => setStudioOpen(true)}>
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() => setStudioSession({ files: [], audio: null, settings: {} })}
+          >
             Open empty editor
           </button>
           <button
             type="button"
             className="check-quality"
             disabled={!loadedCameraCount}
-            onClick={() => setStudioOpen(true)}
+            onClick={() =>
+              setStudioSession({
+                files: cameraFiles.filter(Boolean),
+                audio: masterAudio,
+                settings: normalizeMulticamSetup(settings),
+              })
+            }
           >
             ✦ Start Auto Edit
           </button>
@@ -220,13 +279,17 @@ function CamCombinerPanel({ onClose, onUseExport, onFindViralClips }) {
 
   return (
     <section className="dashboard-cam-combiner-page" aria-label="Cam Combiner workspace">
-      <ProductHelpButton featureId="cam_combiner.switching" label="Cam Combiner" workspaceType="CAM_COMBINER" />
+      <ProductHelpButton
+        featureId="cam_combiner.switching"
+        label="Cam Combiner"
+        workspaceType="CAM_COMBINER"
+      />
       <MultiCamCombiner
-        primaryFile={cameraFiles[0] || null}
-        initialFiles={cameraFiles.filter(Boolean)}
-        initialExternalAudio={settings.useMasterAudio ? masterAudio : null}
-        initialSettings={settings}
-        onCancel={() => setStudioOpen(false)}
+        primaryFile={studioSession.files[0] || null}
+        initialFiles={studioSession.files}
+        initialExternalAudio={studioSession.audio}
+        initialSettings={studioSession.settings}
+        onCancel={() => setStudioSession(null)}
         onComplete={result => onUseExport?.(result)}
         onStatusChange={() => {}}
         onFindViralClips={source => onFindViralClips?.(source)}

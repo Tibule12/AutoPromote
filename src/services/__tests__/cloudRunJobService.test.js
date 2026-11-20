@@ -1,3 +1,10 @@
+const mockRequest = jest.fn();
+jest.mock("google-auth-library", () => ({
+  GoogleAuth: jest.fn(() => ({
+    getClient: async () => ({ request: mockRequest }),
+    getProjectId: async () => "example-project",
+  })),
+}));
 describe("cloudRunJobService", () => {
   const originalName = process.env.MULTICAM_RENDER_JOB_NAME;
   const originalFastName = process.env.MULTICAM_FAST_RENDER_JOB_NAME;
@@ -8,6 +15,9 @@ describe("cloudRunJobService", () => {
 
   afterEach(() => {
     jest.resetModules();
+    mockRequest.mockReset();
+    delete process.env.MULTICAM_GPU_RENDER_JOB_NAME;
+    delete process.env.MULTICAM_GPU_PRIMARY;
     if (originalName === undefined) delete process.env.MULTICAM_RENDER_JOB_NAME;
     else process.env.MULTICAM_RENDER_JOB_NAME = originalName;
     if (originalFastName === undefined) delete process.env.MULTICAM_FAST_RENDER_JOB_NAME;
@@ -74,5 +84,71 @@ describe("cloudRunJobService", () => {
     process.env.NODE_ENV = "production";
     const { getMulticamRenderJobName } = require("../cloudRunJobService");
     expect(getMulticamRenderJobName({ burn_captions: true })).toBe("cam-combiner-render-job");
+  });
+  it("production dispatch uses a GPU job for both captioned and clean exports and retains the actual execution identity", async () => {
+    process.env.NODE_ENV = "production";
+    process.env.GOOGLE_CLOUD_PROJECT = "example-project";
+    const { executeMulticamRenderJob } = require("../cloudRunJobService");
+    mockRequest.mockResolvedValue({
+      data: {
+        name: "projects/example-project/locations/us-central1/operations/gpu-op",
+        metadata: {
+          name: "projects/example-project/locations/us-central1/jobs/cam-combiner-render-gpu-job/executions/one",
+        },
+      },
+    });
+    for (const captions of [false, true]) {
+      const result = await executeMulticamRenderJob({
+        jobId: "one-edit",
+        dispatchToken: "same-dispatch-token",
+        multicamRequest: { burnCaptions: captions },
+      });
+      expect(result.device).toBe("gpu");
+      expect(result.executionName).toContain("/executions/one");
+      expect(mockRequest.mock.lastCall[0]).toMatchObject({
+        method: "POST",
+        url: "https://run.googleapis.com/v2/projects/example-project/locations/us-central1/jobs/cam-combiner-render-gpu-job:run",
+      });
+      expect(mockRequest.mock.lastCall[0].data.overrides.containerOverrides[0].env).toContainEqual({
+        name: "MULTICAM_FAST_NO_CAPTIONS",
+        value: captions ? "0" : "1",
+      });
+    }
+  });
+  it("a definitively rejected GPU dispatch uses the CPU worker once with the original job identity", async () => {
+    process.env.NODE_ENV = "production";
+    process.env.GOOGLE_CLOUD_PROJECT = "example-project";
+    const { executeMulticamRenderJob } = require("../cloudRunJobService");
+    mockRequest
+      .mockRejectedValueOnce({ response: { status: 429 } })
+      .mockResolvedValueOnce({
+        data: { name: "cpu-operation", metadata: { name: "cpu-execution" } },
+      });
+    const result = await executeMulticamRenderJob({
+      jobId: "one-edit",
+      dispatchToken: "same-dispatch-token",
+      multicamRequest: { burnCaptions: false },
+    });
+    expect(result).toMatchObject({ device: "cpu", routeReason: "gpu_unavailable" });
+    expect(mockRequest).toHaveBeenCalledTimes(2);
+    expect(mockRequest.mock.calls[1][0].url).toContain("cam-combiner-render-fast-job:run");
+    for (const call of mockRequest.mock.calls)
+      expect(call[0].data.overrides.containerOverrides[0].env).toEqual(
+        expect.arrayContaining([
+          { name: "MULTICAM_JOB_ID", value: "one-edit" },
+          { name: "MULTICAM_DISPATCH_TOKEN", value: "same-dispatch-token" },
+        ])
+      );
+  });
+  it("a lost GPU admission response does not blindly create a CPU execution", async () => {
+    process.env.NODE_ENV = "production";
+    process.env.GOOGLE_CLOUD_PROJECT = "example-project";
+    const { executeMulticamRenderJob } = require("../cloudRunJobService");
+    const error = { code: "ECONNRESET" };
+    mockRequest.mockRejectedValueOnce(error);
+    await expect(
+      executeMulticamRenderJob({ jobId: "one-edit", dispatchToken: "same-token" })
+    ).rejects.toBe(error);
+    expect(mockRequest).toHaveBeenCalledTimes(1);
   });
 });

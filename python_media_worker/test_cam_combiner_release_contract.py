@@ -16,6 +16,7 @@ class CamCombinerReleaseContractTests(unittest.TestCase):
             "cam-combiner-worker",
             "cam-combiner-render-fast-job",
             "cam-combiner-render-job",
+            "cam-combiner-render-gpu-job",
         ):
             self.assertIn(component, self.workflow)
 
@@ -58,7 +59,15 @@ class CamCombinerReleaseContractTests(unittest.TestCase):
 
     def test_job_image_lookup_uses_cloud_run_job_resource_shape(self):
         image_field = "spec.template.spec.template.spec.containers[0].image"
-        self.assertEqual(self.workflow.count(image_field), 4)
+        self.assertEqual(self.workflow.count(image_field), 6)
+
+    def test_gpu_is_qualified_and_rollback_preserves_cpu_fallbacks(self):
+        self.assertIn("--gpu-type nvidia-rtx-pro-6000", self.workflow)
+        self.assertIn("--cpu 20", self.workflow)
+        self.assertIn("--memory 80Gi", self.workflow)
+        self.assertIn("MEDIA_WORKER_REQUIRE_GPU=true", self.workflow)
+        self.assertIn("PREVIOUS_GPU_IMAGE", self.workflow)
+        self.assertIn("cloudbuild.multicam-gpu.json", self.workflow)
 
     def test_container_tests_preserve_repository_package_imports(self):
         self.assertEqual(

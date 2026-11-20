@@ -43,6 +43,8 @@ class FakeHTTPException(Exception):
 class MulticamJobRunnerRetryTests(unittest.TestCase):
     def setUp(self):
         fake_worker.FIREBASE_STATUS_UPDATES_ENABLED = True
+        fake_worker.verify_required_gpu_runtime = mock.Mock()
+        fake_worker.GPU_VIDEO_ENCODER = "libx264"
         fake_worker.logger = mock.Mock()
         fake_worker.RenderMultiCamRequest = FakeRenderMultiCamRequest
         fake_worker.HTTPException = FakeHTTPException
@@ -92,6 +94,24 @@ class MulticamJobRunnerRetryTests(unittest.TestCase):
         ):
             exit_code = runner.run()
         return exit_code, notify_failure, release_capacity
+
+    def test_gpu_startup_failure_never_claims_or_refunds_the_cpu_fallback(self):
+        environment = {"MULTICAM_JOB_ID": "gpu-start-job", "MULTICAM_DISPATCH_TOKEN": "dispatch-token-long-enough"}
+        fake_worker.verify_required_gpu_runtime.side_effect = RuntimeError("NVENC unavailable")
+        with mock.patch.dict(os.environ, environment), mock.patch.object(runner, "_claim_job") as claim, mock.patch.object(runner, "_notify_failure_callback") as notify, mock.patch.object(runner, "_release_capacity") as release:
+            self.assertEqual(runner.run(), 1)
+        claim.assert_not_called()
+        fake_worker.update_firestore_job.assert_not_called()
+        notify.assert_not_called()
+        release.assert_not_called()
+
+    def test_fenced_gpu_task_does_not_mutate_the_same_cpu_job(self):
+        environment = {"MULTICAM_JOB_ID": "fenced-gpu-job", "MULTICAM_DISPATCH_TOKEN": "dispatch-token-long-enough"}
+        with mock.patch.dict(os.environ, environment), mock.patch.object(runner, "_claim_job", return_value=("superseded", self.job)), mock.patch.object(runner, "_notify_failure_callback") as notify, mock.patch.object(runner, "_release_capacity") as release:
+            self.assertEqual(runner.run(), 0)
+        fake_worker.update_firestore_job.assert_not_called()
+        notify.assert_not_called()
+        release.assert_not_called()
 
     def test_nonterminal_attempt_marks_retrying_without_refund_or_capacity_release(self):
         exit_code, notify_failure, release_capacity = self.run_failed_attempt(attempt=0)

@@ -156,6 +156,22 @@
   border-color: rgba(34, 211, 238, 0.2);
 }
 
+.cam-recording-row > button {
+  grid-column: 2 / -1;
+  justify-self: end;
+  padding: 4px 9px;
+  border: 1px solid rgba(148, 163, 184, .3);
+  border-radius: 7px;
+  background: transparent;
+  color: #cbd5e1;
+  cursor: pointer;
+}
+
+.cam-recording-row:focus-within {
+  outline: 2px solid #a78bfa;
+  outline-offset: 2px;
+}
+
 .cam-recording-row input {
   position: absolute;
   width: 1px;

@@ -1,4 +1,18 @@
 {
+  "camEntryGpuPrimary20261120": {
+    "date": "2026-11-20",
+    "evidenceRefs": [
+      "reports/cam-entry-gpu-primary-20261120/README.md"
+    ],
+    "scope": "Shared Cam Combiner setup/empty-entry controls and GPU-primary worker routing with fenced CPU fallback; no separate render engine.",
+    "verification": "44 backend, 11 frontend, 8 runner, 18 release/chunk tests; strict builds; signed-in setup/import/control/sync/moving preview; eight welcome comparisons; real GPU-job CUDA/NVENC runtime qualification (2m18.12s). Native production delivery qualification follows.",
+    "remainingBlockers": [
+      "Broad media/concurrency and measured GPU/CPU delivery qualification",
+      "Whole-Studio S02/S04/S03 and full predictive picture/audio parity remain open"
+    ],
+    "readinessPromotion": false,
+    "nextTask": "Verify serving release and native GPU/fallback results through ordinary account endpoints."
+  },
   "featureGuidesLive20261119": {
     "date": "2026-11-19",
     "report": "reports/feature-guides-live-20261119/README.md",
@@ -203,7 +217,7 @@
   },
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-11-19T21:19:59.029146+00:00",
+  "updatedAt": "2026-11-20T15:00:00.000Z",
   "baseline": "reports/studio-stability-20261008/results.json",
   "readinessStates": [
     "UNIMPLEMENTED",
