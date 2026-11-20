@@ -62,6 +62,10 @@ class CamCombinerReleaseContractTests(unittest.TestCase):
         self.assertEqual(self.workflow.count(image_field), 6)
 
     def test_gpu_is_qualified_and_rollback_preserves_cpu_fallbacks(self):
+        # Long GPU jobs require beta commands, installed before any production mutation.
+        setup = self.workflow.split("- name: Install Google Cloud CLI", 1)[1].split("- name:", 1)[0]
+        self.assertIn("install_components: beta", setup)
+        self.assertIn('gcloud beta run jobs deploy "${GPU_JOB_NAME}"', self.workflow)
         self.assertIn("--gpu-type nvidia-rtx-pro-6000", self.workflow)
         self.assertIn("--cpu 20", self.workflow)
         self.assertIn("--memory 80Gi", self.workflow)

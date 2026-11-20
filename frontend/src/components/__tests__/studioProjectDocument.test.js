@@ -38,7 +38,11 @@ const snapshot = () => ({
     { time: 0, value: 1 },
     { time: 4, value: 2 },
   ],
-  captionSegments: [{ id: "caption-1", text: "Large transcript", words: Array(500).fill("word") }],
+  captionSegments: [{ id: "caption-1", text: "Large transcript", words: [
+    { word: "Large", start: 2, end: 2.5 },
+    { word: "transcript", start: 2.6, end: 3.5 },
+  ] }],
+  denseAnalysis: { words: Array(500).fill("raw-analysis-word") },
   analysisRefs: [
     {
       artifactId: "words-sha256",
@@ -124,7 +128,13 @@ test("adapts duplicate source occurrences with separate IDs and half-open progra
     "worker_caption",
   ]);
   expect(document.layers.at(-1).parameters.text).toBe("Large transcript");
-  expect(JSON.stringify(document)).not.toContain('"words"');
+  // Editable caption timing belongs in the saved project; dense source
+  // analysis stays in its referenced artifact rather than being duplicated.
+  expect(document.layers.at(-1).parameters.words).toEqual(snapshot().captionSegments[0].words);
+  const restored = projectStudioEditableStateToSnapshot(document, snapshot());
+  expect(restored.captionSegments[0].words).toEqual(snapshot().captionSegments[0].words);
+  expect(document).not.toHaveProperty("denseAnalysis");
+  expect(JSON.stringify(document)).not.toContain("raw-analysis-word");
   expect(JSON.stringify(document)).not.toContain("https://signed/");
   expect(document.analysisRefs[0]).toMatchObject({
     artifactId: "words-sha256",

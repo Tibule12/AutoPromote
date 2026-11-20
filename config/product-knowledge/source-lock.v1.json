@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Reviewed final Cam native GPU/CPU and owner-received completion notifications. Preserve owner-checked ready media URLs so SDK metadata permissions do not hide downloadable saved masters; retain bare-path resolution/missing-object handling. Source-only/readiness limits and independent-camera backlog remain unchanged.",
-  "reviewed_at": "2026-11-20T17:54:15.097Z",
+  "reason": "Record serving Cam saved-master playback and contextual-help evidence plus bounded Actions fixture/release repairs; readiness and all shared blockers unchanged",
+  "reviewed_at": "2026-11-20T18:24:59.345Z",
   "catalog_sha256": "dbccf16776eba7c2ccdc3147942ca59af341a2bf46c05675c6f85a59221c371a",
   "sources": [
     {
@@ -763,11 +763,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "358adc6f1829884731c2ff216d6b1fb176848b975ecfd7402a40043e63123227"
+      "sha256": "0ab9602dd86d23ae4e1f6de7b460d396a278d0a902dbc433c39b76b3ce9891e9"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "5c6b9e5f554f782ba2fd3e1109c6a60217d04aa5e74614a01a52aa6dc0535a6c"
+      "sha256": "4a6aea5e419d758bcb9764072c687d9fc72542a32f30b1e6b007b9ed28a3a47c"
     },
     {
       "path": "worker.js",

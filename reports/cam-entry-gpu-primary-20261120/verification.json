@@ -93,6 +93,56 @@
     "cause": "SDK metadata lookup erased valid tokenized media URLs",
     "fix": "Use ready HTTPS Firebase media links directly; retain legacy bare-path SDK resolution",
     "regressionTestsAdded": 2,
-    "finalBrowserVerification": "pending candidate/serving check"
+    "finalBrowserVerification": {
+      "release": "07187202f53b9e8e638582a6481bfb9b2000261a",
+      "checkedAt": "2026-11-20T18:02:46.879Z",
+      "headless": true,
+      "muted": true,
+      "mockedResponses": false,
+      "signedInEmptyEditor": true,
+      "savedNativeMasters": [
+        {
+          "jobId": "40a54601-5b9e-4b75-a8eb-399f7a857318",
+          "duration": 30,
+          "time": 29.860801,
+          "ended": false,
+          "width": 1920,
+          "height": 1080,
+          "error": null
+        },
+        {
+          "jobId": "0da8ccdf-cfcc-4db1-8407-deccdb62ab78",
+          "duration": 30,
+          "time": 29.892064,
+          "ended": false,
+          "width": 1920,
+          "height": 1080,
+          "error": null
+        }
+      ],
+      "help": [
+        {
+          "path": "/api/product-assistance/ask",
+          "status": 200,
+          "featureIds": [
+            "cam_combiner.switching"
+          ]
+        }
+      ],
+      "errors": [],
+      "blocked": [],
+      "originalLoginUnchanged": true
+    }
+  },
+  "ciRepair": {
+    "unitRegressionsReproduced": 3,
+    "targetedExportCasePassed": true,
+    "colorAndDocumentSuiteTestsPassed": 30,
+    "camReleaseContractTestsPassed": 9,
+    "browserLogoCaseRepeatPasses": 2,
+    "modernCpuVoicePreviewTestsPassed": 9,
+    "fullRemoteChecks": "pending latest merged revision",
+    "camFailure": "Missing beta CLI component; image builds and candidate health passed; automatic rollback passed",
+    "fix": "Install beta component during setup before mutating production jobs"
   }
 }
