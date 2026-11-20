@@ -67,7 +67,11 @@ class CamCombinerReleaseContractTests(unittest.TestCase):
         self.assertIn("--memory 80Gi", self.workflow)
         self.assertIn("MEDIA_WORKER_REQUIRE_GPU=true", self.workflow)
         self.assertIn("PREVIOUS_GPU_IMAGE", self.workflow)
-        self.assertIn("cloudbuild.multicam-gpu.json", self.workflow)
+        gpu_build = self.workflow.split("Build GPU source release on the qualified immutable runtime", 1)[1].split("- name: Deploy private", 1)[0]
+        self.assertIn("Dockerfile.multicam-job-overlay", gpu_build)
+        self.assertIn("WORKER_BASE_IMAGE=${GPU_RUNTIME_BASE_IMAGE}", gpu_build)
+        self.assertIn('docker push "${GPU_IMAGE}"', gpu_build)
+        self.assertNotIn("gcloud builds submit", gpu_build)
 
     def test_container_tests_preserve_repository_package_imports(self):
         self.assertEqual(

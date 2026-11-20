@@ -221,9 +221,15 @@ jobs:
         run: |
           set -euo pipefail
           GPU_IMAGE="gcr.io/${PROJECT_ID}/cam-combiner-worker-gpu:${GITHUB_SHA}"
-          gcloud builds submit . --project "${PROJECT_ID}" \
-            --config cloudbuild.multicam-gpu.json \
-            --substitutions "_BASE_IMAGE=${GPU_RUNTIME_BASE_IMAGE},_GPU_IMAGE=${GPU_IMAGE}"
+          # Both CPU images are already tested and pushed. Reclaim their
+          # local cache before pulling the qualified GPU runtime on this runner.
+          # This matches the working media-worker deployment and avoids a
+          # second Cloud Build queue, service account and billed build VM.
+          docker system prune --all --force
+          docker build --file Dockerfile.multicam-job-overlay \
+            --build-arg "WORKER_BASE_IMAGE=${GPU_RUNTIME_BASE_IMAGE}" \
+            --tag "${GPU_IMAGE}" .
+          docker push "${GPU_IMAGE}"
           echo "GPU_IMAGE=${GPU_IMAGE}" >> "${GITHUB_ENV}"
 
       - name: Deploy private zero-traffic candidate
