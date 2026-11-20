@@ -60,7 +60,7 @@ Aligns camera material and optional master audio using the existing deterministi
 
 1. Select up to three camera recordings and optional master audio in setup, or open the same empty editor and import them there.
 2. Review speaker detection, reaction shots, master audio and minimum shot length in the shared editor. Render treatment selects finishing and price, not a promised output resolution.
-3. For cloud export with master audio, use camera recordings longer than20 seconds so start, middle and end sync can be proved. Confirm speaker-channel mapping when automatic speaker switching is enabled.
+3. For cloud export with master audio, use camera recordings longer than 20 seconds so start, middle and end sync can be proved. Confirm speaker-channel mapping when automatic speaker switching is enabled.
 4. Review and confirm the proof or full render, then inspect the actual downloaded picture and sound.
 
 **Preview:** Preview follows the session camera plan and sync offsets; inspect lip/audio alignment at several points.
@@ -72,7 +72,8 @@ Aligns camera material and optional master audio using the existing deterministi
 - Source and test evidence establish the documented contract, not broad professional workflow qualification.
 - Review audio alignment, speaker mapping and final moving output for this recording.
 - GPU cold starts add startup time; GPU selection alone does not guarantee a shorter end-to-end render.
-- Master-audio cloud sync needs camera recordings longer than20 seconds. The editor blocks shorter recordings before upload or credits.
+- Master-audio cloud sync needs camera recordings longer than 20 seconds. The editor blocks shorter recordings before upload or credits.
+- Browser proof proxies must independently pass sync. If they fail, originals mode is selected before credits; run Render again to review the original transfer size.
 
 **Common errors**
 
@@ -260,7 +261,7 @@ Builds an editable switching plan using audio activity, continuity and reaction 
 
 1. Select up to three camera recordings and optional master audio in setup, or open the same empty editor and import them there.
 2. Review speaker detection, reaction shots, master audio and minimum shot length in the shared editor. Render treatment selects finishing and price, not a promised output resolution.
-3. For cloud export with master audio, use camera recordings longer than20 seconds so start, middle and end sync can be proved. Confirm speaker-channel mapping when automatic speaker switching is enabled.
+3. For cloud export with master audio, use camera recordings longer than 20 seconds so start, middle and end sync can be proved. Confirm speaker-channel mapping when automatic speaker switching is enabled.
 4. Review and confirm the proof or full render, then inspect the actual downloaded picture and sound.
 
 **Preview:** Preview follows the session camera plan and sync offsets; inspect lip/audio alignment at several points.
@@ -272,7 +273,8 @@ Builds an editable switching plan using audio activity, continuity and reaction 
 - Source and test evidence establish the documented contract, not broad professional workflow qualification.
 - Review audio alignment, speaker mapping and final moving output for this recording.
 - GPU cold starts add startup time; GPU selection alone does not guarantee a shorter end-to-end render.
-- Master-audio cloud sync needs camera recordings longer than20 seconds. The editor blocks shorter recordings before upload or credits.
+- Master-audio cloud sync needs camera recordings longer than 20 seconds. The editor blocks shorter recordings before upload or credits.
+- Browser proof proxies must independently pass sync. If they fail, originals mode is selected before credits; run Render again to review the original transfer size.
 
 **Common errors**
 

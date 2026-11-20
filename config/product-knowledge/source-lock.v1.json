@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "reviewer": "Antigravity",
-  "reason": "Merge origin/main #544 with VoiceOverGuide update and pro-studio engine sprints",
-  "reviewed_at": "2026-11-20T15:31:42.800Z",
-  "catalog_sha256": "e0363dbe27ea51b3744e1026e7b9270d40386882699e8bcd4a2ffab3a036086a",
+  "reviewer": "Codex",
+  "reason": "Reviewed retained pro-editor/VoiceOver updates and completed native GPU/CPU Cam outputs, exact media ownership/sync handoff, manual-cut versus speaker mapping, strict proxy failure recovery, source minimum, honest cold-start timings, expiry notification and unchanged broad Studio readiness. No readiness promotion.",
+  "reviewed_at": "2026-11-20T17:41:22.439Z",
+  "catalog_sha256": "dbccf16776eba7c2ccdc3147942ca59af341a2bf46c05675c6f85a59221c371a",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -67,7 +67,7 @@
     },
     {
       "path": "frontend/src/components/MultiCamCombiner.js",
-      "sha256": "728df2d7f4c4301a9b17513fe54fe6a275dae665e6736259c1ba6d54aee27e00"
+      "sha256": "ed79f93885e01e6550b4aaf5e0f0e5a747d68dbddb1d042c7d268ec7d84f1a21"
     },
     {
       "path": "frontend/src/components/PlatformIcon.js",
@@ -450,6 +450,10 @@
       "sha256": "025f0a6c7aa91cab9fa23c3fde768f2eddc93fc38e93623b56fa4b44fcffbdc8"
     },
     {
+      "path": "frontend/src/utils/multicamProxyUpload.js",
+      "sha256": "a9da09512cb4c13000d5dd10a4b6e578cf2e51598ae09392275011169e687a3a"
+    },
+    {
       "path": "frontend/src/utils/sourceUpload.js",
       "sha256": "a4633e94b2db72c294f4cc2e62fdd3b9a47fe13508a5f9d68470b70b5ee7a944"
     },
@@ -471,7 +475,7 @@
     },
     {
       "path": "python_media_worker/main_media_server.py",
-      "sha256": "170f9af3dcf08fcfe388f366f6f467c10302eb6f1bdc63d88fe1be1e62c7715a"
+      "sha256": "1331dd7a975fdb571612500ddcca732e51a03fda3e19b31babb40220bf8e21ee"
     },
     {
       "path": "python_media_worker/studio_audio.py",
@@ -670,6 +674,10 @@
       "sha256": "11d3f880e5c4d1355fdb2c48e1e611cb546abe1a014ac6a50c3089db61d298dd"
     },
     {
+      "path": "src/services/cloudRunJobService.js",
+      "sha256": "40f342c7af53851a2eb391d54fbbd72e9e8159b5aa2a7704d022c82be6509d47"
+    },
+    {
       "path": "src/services/contentFactoryProviders.js",
       "sha256": "8800914b936f9b7429c0532820ad450cfe57fbd40a4aa8697d8df76ae8c1f633"
     },
@@ -755,11 +763,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "df4abf7db9f34039266ac0ed3f20045c23edc25a6e26d34af6ce698fe9cdf6a2"
+      "sha256": "1160d6cbcf70c8dcabbccefb10eaa614bd4cb931754966a63705cd663dc3b89a"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "759a234d27a116eb3dce38f3bedd1f9494d84303ce3cdb0af037b5976b7e26a3"
+      "sha256": "1b42b56516ccfff4b45325a812d7c71ebd7667314f88fa38eaea93643c9323fa"
     },
     {
       "path": "worker.js",

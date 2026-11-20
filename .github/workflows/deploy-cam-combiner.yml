@@ -11,6 +11,8 @@ on:
     paths:
       - python_media_worker/.dockerignore
       - python_media_worker/Dockerfile.cam-combiner
+      - python_media_worker/Dockerfile.multicam-job-overlay
+      - python_media_worker/test_multicam_manual_quality_gate.py
       - python_media_worker/Dockerfile.gpu-backup
       - python_media_worker/cloudbuild.multicam-gpu.json
       - .github/workflows/deploy-cam-combiner.yml
@@ -36,6 +38,7 @@ env:
   FAST_JOB_NAME: cam-combiner-render-fast-job
   CAPTION_JOB_NAME: cam-combiner-render-job
   GPU_JOB_NAME: cam-combiner-render-gpu-job
+  GPU_RUNTIME_BASE_IMAGE: gcr.io/autopromote-cc6d3/cam-combiner-worker-gpu@sha256:8d1ef46c7a6d21ddc6cd3e2b66a181c874ec07a2c26f91a8fa19e423865c4eb7
   JOB_SERVICE_ACCOUNT: cam-combiner-job@autopromote-cc6d3.iam.gserviceaccount.com
   QA_SECRET_NAME: multicam-qa-receipt-secret
   CALLBACK_SECRET_NAME: multicam-job-callback-secret
@@ -63,7 +66,8 @@ jobs:
         run: |
           python -m unittest \
             python_media_worker.test_cam_combiner_release_contract \
-            python_media_worker.test_multicam_chunking
+            python_media_worker.test_multicam_chunking \
+            python_media_worker.test_multicam_manual_quality_gate
 
       - name: Validate Google Cloud identity configuration
         shell: bash
@@ -211,7 +215,7 @@ jobs:
           echo "FAST_IMAGE=${FAST_IMAGE}" >> "${GITHUB_ENV}"
           echo "CAPTION_IMAGE=${CAPTION_IMAGE}" >> "${GITHUB_ENV}"
 
-      - name: Build immutable GPU runtime from the same caption release
+      - name: Build GPU source release on the qualified immutable runtime
         working-directory: python_media_worker
         shell: bash
         run: |
@@ -219,7 +223,7 @@ jobs:
           GPU_IMAGE="gcr.io/${PROJECT_ID}/cam-combiner-worker-gpu:${GITHUB_SHA}"
           gcloud builds submit . --project "${PROJECT_ID}" \
             --config cloudbuild.multicam-gpu.json \
-            --substitutions "_BASE_IMAGE=${CAPTION_IMAGE},_GPU_IMAGE=${GPU_IMAGE}"
+            --substitutions "_BASE_IMAGE=${GPU_RUNTIME_BASE_IMAGE},_GPU_IMAGE=${GPU_IMAGE}"
           echo "GPU_IMAGE=${GPU_IMAGE}" >> "${GITHUB_ENV}"
 
       - name: Deploy private zero-traffic candidate

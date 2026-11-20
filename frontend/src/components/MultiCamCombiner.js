@@ -8762,6 +8762,10 @@ function MultiCamCombiner({
             source => !verifiedIds.has(source.id)
           );
           if (preflightStatus !== "good" || missingVerified.length) {
+            if (useProofProxyTimeline) {
+              setProofSourceMode("originals_once");
+              throw new Error("The browser proof proxy did not pass sync verification. No credits were spent. Originals mode is now selected. Render again to review the original transfer size and complete your proof.");
+            }
             const preflightSummary = summarizePreflightIssue(preflight);
             throw new Error(
               `Automatic start/middle/end sync returned ${preflightStatus || "unknown"} and could not prove ${missingVerified.length || preflightSourcesPayload.length} camera${(missingVerified.length || preflightSourcesPayload.length) === 1 ? "" : "s"}. ${preflightSummary ? `${preflightSummary}. ` : ""}Render cancelled before credits are spent.`

@@ -3457,7 +3457,7 @@
       "optional_capabilities": [],
       "controls": [],
       "workflow": [
-        "Open Export in a project with owned sources. Choose resolution, frame rate, video codec, quality and AAC bitrate. Match first source sets the output to the first retained picture source’s nominal rate.",
+        "Open Export in a project with owned sources. Choose resolution, frame rate, video codec, quality and AAC bitrate. Match first source sets the output to the first retained picture source\u2019s nominal rate.",
         "The verified first-source rate also drives timeline SMPTE timecode and the desktop handoff. If the source rate is unavailable, choose a fixed rate to use exact frame navigation and export the desktop timeline.",
         "Open Desktop NLE handoff in Export for OTIO, the primary-cut EDL, and separate SRT or VTT files. Review the translation checklist for effects and media that need attention in the desktop project.",
         "Review the complete movie with sound after rendering. Download the completed file."
@@ -4652,7 +4652,7 @@
       "workflow": [
         "Select up to three camera recordings and optional master audio in setup, or open the same empty editor and import them there.",
         "Review speaker detection, reaction shots, master audio and minimum shot length in the shared editor. Render treatment selects finishing and price, not a promised output resolution.",
-        "For cloud export with master audio, use camera recordings longer than20 seconds so start, middle and end sync can be proved. Confirm speaker-channel mapping when automatic speaker switching is enabled.",
+        "For cloud export with master audio, use camera recordings longer than 20 seconds so start, middle and end sync can be proved. Confirm speaker-channel mapping when automatic speaker switching is enabled.",
         "Review and confirm the proof or full render, then inspect the actual downloaded picture and sound."
       ],
       "preview_behavior": "Preview follows the session camera plan and sync offsets; inspect lip/audio alignment at several points.",
@@ -4661,7 +4661,8 @@
         "Source and test evidence establish the documented contract, not broad professional workflow qualification.",
         "Review audio alignment, speaker mapping and final moving output for this recording.",
         "GPU cold starts add startup time; GPU selection alone does not guarantee a shorter end-to-end render.",
-        "Master-audio cloud sync needs camera recordings longer than20 seconds. The editor blocks shorter recordings before upload or credits."
+        "Master-audio cloud sync needs camera recordings longer than 20 seconds. The editor blocks shorter recordings before upload or credits.",
+        "Browser proof proxies must independently pass sync. If they fail, originals mode is selected before credits; run Render again to review the original transfer size."
       ],
       "common_errors": [
         {
@@ -4684,6 +4685,16 @@
         {
           "path": "frontend/src/components/MultiCamCombiner.js",
           "anchor": "isRecoverableMediaUrl",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "src/services/cloudRunJobService.js",
+          "anchor": "executeMulticamRenderJob",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/utils/multicamProxyUpload.js",
+          "anchor": "uploadOwnedMulticamProxy",
           "kind": "IMPLEMENTATION"
         }
       ]
@@ -4947,7 +4958,7 @@
       "workflow": [
         "Select up to three camera recordings and optional master audio in setup, or open the same empty editor and import them there.",
         "Review speaker detection, reaction shots, master audio and minimum shot length in the shared editor. Render treatment selects finishing and price, not a promised output resolution.",
-        "For cloud export with master audio, use camera recordings longer than20 seconds so start, middle and end sync can be proved. Confirm speaker-channel mapping when automatic speaker switching is enabled.",
+        "For cloud export with master audio, use camera recordings longer than 20 seconds so start, middle and end sync can be proved. Confirm speaker-channel mapping when automatic speaker switching is enabled.",
         "Review and confirm the proof or full render, then inspect the actual downloaded picture and sound."
       ],
       "preview_behavior": "Preview follows the session camera plan and sync offsets; inspect lip/audio alignment at several points.",
@@ -4956,7 +4967,8 @@
         "Source and test evidence establish the documented contract, not broad professional workflow qualification.",
         "Review audio alignment, speaker mapping and final moving output for this recording.",
         "GPU cold starts add startup time; GPU selection alone does not guarantee a shorter end-to-end render.",
-        "Master-audio cloud sync needs camera recordings longer than20 seconds. The editor blocks shorter recordings before upload or credits."
+        "Master-audio cloud sync needs camera recordings longer than 20 seconds. The editor blocks shorter recordings before upload or credits.",
+        "Browser proof proxies must independently pass sync. If they fail, originals mode is selected before credits; run Render again to review the original transfer size."
       ],
       "common_errors": [
         {
@@ -4988,6 +5000,16 @@
         {
           "path": "frontend/src/components/multicamUtils.js",
           "anchor": "MULTICAM_MAX_SOURCES",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "src/services/cloudRunJobService.js",
+          "anchor": "executeMulticamRenderJob",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/utils/multicamProxyUpload.js",
+          "anchor": "uploadOwnedMulticamProxy",
           "kind": "IMPLEMENTATION"
         }
       ]

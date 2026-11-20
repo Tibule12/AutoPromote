@@ -5,9 +5,9 @@
       "args": [
         "build",
         "--build-arg",
-        "MEDIA_WORKER_BASE_IMAGE=${_BASE_IMAGE}",
+        "WORKER_BASE_IMAGE=${_BASE_IMAGE}",
         "-f",
-        "Dockerfile.gpu-backup",
+        "Dockerfile.multicam-job-overlay",
         "-t",
         "${_GPU_IMAGE}",
         "."

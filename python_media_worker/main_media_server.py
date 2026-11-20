@@ -20969,6 +20969,7 @@ def build_multicam_final_quality_gate(
     director_truth_audit=None,
     director_latency_audit=None,
     director_audio=None,
+    director_audio_required=True,
     continuous_sync_anchors=None,
     continuous_sync_required=None,
     segment_duration_receipts=None,
@@ -21120,7 +21121,7 @@ def build_multicam_final_quality_gate(
         },
     )
 
-    director_audio_status = (director_audio or {}).get("status")
+    director_audio_status = (director_audio or {}).get("status") if director_audio_required else "not_required_manual_cuts"
     add_check(
         "director_audio_mapping",
         director_audio_status not in {"unproven_channel_mapping", "skipped_channel_analysis_failed", "skipped_decode_failed"},
@@ -28452,6 +28453,7 @@ async def render_multicam_impl(
             director_truth_audit=director_truth_audit,
             director_latency_audit=director_latency_audit,
             director_audio=director_audio_receipt,
+            director_audio_required=bool(request.auto_switch and request.audio_based_auto_switch),
             continuous_sync_anchors=continuous_sync_receipt,
             continuous_sync_required=bool(
                 effective_external_audio_url and MULTICAM_CONTINUOUS_SYNC_ANCHORS
