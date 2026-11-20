@@ -420,6 +420,8 @@ const installAppRoutes = async (page, sourcePath = liveSourcePath) => {
   return state;
 };
 
+// Dashboard polling can keep the network active indefinitely. Navigation waits
+// for the actual UI control; all editor/transport/export assertions stay intact.
 const openViralClipStudioEntry = async page => {
   const navButton = page.getByRole("button", { name: "Viral Clip Studio", exact: true });
   await expect(navButton).toBeVisible();
@@ -582,7 +584,7 @@ test("records playable voice-over, edits takes, restores audio after reload and 
     };
   });
   const open = async () => {
-    await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
+    await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "domcontentloaded" });
     await openViralClipStudioEntry(page);
     await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(liveSourcePath);
     await page.getByRole("button", { name: "Open Creator Studio", exact: true }).click();
@@ -650,7 +652,7 @@ test("records playable voice-over, edits takes, restores audio after reload and 
   await clickStudioControl(page, page.getByTestId("studio-save-project"));
   await expect(page.locator(".studio-project-save-state")).toContainText("Saved locally");
   const originalUrl = await audio.getAttribute("src");
-  await page.reload({ waitUntil: "networkidle" });
+  await page.reload({ waitUntil: "domcontentloaded" });
   await open();
   await page.getByRole("button", { name: "Show media", exact: true }).click();
   await clickStudioControl(page, page.locator(".studio-saved-projects summary"));
@@ -709,7 +711,7 @@ test("proves new motion studio editing, linked audio, timeline seeking and local
     localStorage.setItem("user", JSON.stringify({ uid: "testUser", email: "test@local", name: "Studio Tester" }));
   });
   const open = async () => {
-    await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
+    await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "domcontentloaded" });
     await openViralClipStudioEntry(page);
     await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(liveSourcePath);
     await page.getByRole("button", { name: "Open Creator Studio", exact: true }).click();
@@ -892,7 +894,7 @@ test("proves new motion studio editing, linked audio, timeline seeking and local
   }));
   expect(saved.snapshot.motionScenes).toHaveLength(1);
   expect(saved.snapshot.motionScenes[0]).toMatchObject({ text: "@AUTOPROMOTE", startTime: 3, sound: "impact" });
-  await page.reload({ waitUntil: "networkidle" });
+  await page.reload({ waitUntil: "domcontentloaded" });
   await open();
   await page.getByRole("button", { name: "Show media", exact: true }).click();
   await clickStudioControl(page, page.locator(".studio-saved-projects summary"));
@@ -941,7 +943,7 @@ test("keeps every creative caption style and free placement inside the real prog
     );
   });
 
-  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
+  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "domcontentloaded" });
   await openViralClipStudioEntry(page);
   await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(liveSourcePath);
   const openStudio = page.getByRole("button", { name: "Open Creator Studio" });
@@ -1026,7 +1028,7 @@ test("records the focused Motion workflow and verifies its export payload", asyn
       JSON.stringify({ uid: "testUser", email: "test@local", name: "Motion QA" })
     );
   });
-  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
+  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "domcontentloaded" });
   await openViralClipStudioEntry(page);
   await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(liveSourcePath);
   await page.getByRole("button", { name: "Open Creator Studio", exact: true }).click();
@@ -1123,7 +1125,7 @@ test("records imported logo layer design and verifies preview-to-export keyframe
     localStorage.setItem("E2E_BYPASS", "true");
     localStorage.setItem("user", JSON.stringify({ uid: "testUser", email: "test@local", name: "Logo Motion QA" }));
   });
-  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
+  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "domcontentloaded" });
   await openViralClipStudioEntry(page);
   await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(liveSourcePath);
   await page.getByRole("button", { name: "Open Creator Studio", exact: true }).click();
@@ -1254,7 +1256,7 @@ test("designs an AutoPromote 3D logo and verifies HQ preview transport and expor
     }))
   );
 
-  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
+  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "domcontentloaded" });
   await openViralClipStudioEntry(page);
   await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(liveSourcePath);
   await page.getByRole("button", { name: "Open Creator Studio", exact: true }).click();
@@ -1391,7 +1393,7 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
     );
   });
 
-  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
+  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "domcontentloaded" });
   const identityImage = page.locator(".overview-identity-card img");
   await expect(identityImage).toBeVisible();
   const identityBounds = await identityImage.boundingBox();
@@ -2089,7 +2091,7 @@ test("records focused proof of the synchronized two-speaker stack", async ({ pag
     );
   });
 
-  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
+  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "domcontentloaded" });
   await openViralClipStudioEntry(page);
   await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(liveSourcePath);
   const openStudio = page.getByRole("button", { name: "Open Creator Studio" });
@@ -2231,7 +2233,7 @@ test("proves the three-input hero and duo multicamera layout", async ({ page }) 
     );
   });
 
-  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
+  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "domcontentloaded" });
   await openViralClipStudioEntry(page);
   await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(liveSourcePath);
   const openStudio = page.getByRole("button", { name: "Open Creator Studio" });
@@ -2340,7 +2342,7 @@ test("proves the four-input multicamera grid with moving synchronized test views
     );
   });
 
-  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
+  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "domcontentloaded" });
   await openViralClipStudioEntry(page);
   await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(liveSourcePath);
   const openStudio = page.getByRole("button", { name: "Open Creator Studio" });
@@ -2442,7 +2444,7 @@ test("keeps comparison monitors fitted and transport usable at every output aspe
     localStorage.setItem("E2E_BYPASS", "true");
     localStorage.setItem("user", JSON.stringify({ uid: "testUser", email: "test@local", name: "Studio Tester" }));
   });
-  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
+  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "domcontentloaded" });
   await openViralClipStudioEntry(page);
   await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(liveSourcePath);
   await page.getByRole("button", { name: "Open Creator Studio", exact: true }).click();
@@ -2560,7 +2562,7 @@ test("follows existing camera cuts using real full-minute analysis in the progra
     localStorage.setItem("E2E_BYPASS", "true");
     localStorage.setItem("user", JSON.stringify({ uid: "testUser", email: "test@local", name: "Studio Tester" }));
   });
-  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
+  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "domcontentloaded" });
   await openViralClipStudioEntry(page);
   await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(source);
   await page.getByRole("button", { name: "Open Creator Studio", exact: true }).click();
@@ -2676,7 +2678,7 @@ test("switches the full-minute programme from Show Everyone to a solo speaker at
     localStorage.setItem("E2E_BYPASS", "true");
     localStorage.setItem("user", JSON.stringify({ uid: "testUser", email: "test@local", name: "Studio Tester" }));
   });
-  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
+  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "domcontentloaded" });
   await openViralClipStudioEntry(page);
   await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(source);
   await page.getByRole("button", { name: "Open Creator Studio", exact: true }).click();
@@ -2736,7 +2738,7 @@ test("proves precision grade, curves and imported LUT on the full 60 second sour
     localStorage.setItem("E2E_BYPASS", "true");
     localStorage.setItem("user", JSON.stringify({ uid: "testUser", email: "test@local", name: "Studio Tester" }));
   });
-  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
+  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "domcontentloaded" });
   await openViralClipStudioEntry(page);
   await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(source);
   await page.getByRole("button", { name: "Open Creator Studio", exact: true }).click();
@@ -2819,7 +2821,7 @@ test("proves Motion Sculpture with real full-body movement footage", async ({ pa
     );
   });
 
-  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
+  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "domcontentloaded" });
   await openViralClipStudioEntry(page);
   await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(
     motionSourcePath
@@ -2895,7 +2897,7 @@ test("records the complete frontend-first creator feature tour without rendering
     );
   });
 
-  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
+  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "domcontentloaded" });
   await openViralClipStudioEntry(page);
   await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(liveSourcePath);
   const openStudio = page.getByRole("button", { name: "Open Creator Studio" });

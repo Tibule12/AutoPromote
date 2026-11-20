@@ -12,7 +12,8 @@ on:
 jobs:
   emulator-tests:
     name: Firestore Emulator Unit Tests
-    runs-on: ubuntu-latest
+    # Keep media packages on the same stable runner family as browser CI.
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - name: Checkout
@@ -46,13 +47,15 @@ jobs:
           echo "Installing frontend devDependencies"
           npm ci --prefix frontend || (echo "frontend npm ci failed — falling back to npm install" && npm install --prefix frontend)
 
-      - name: Install and verify CPU preview runtime
-        timeout-minutes: 5
+      - name: Prepare locked media tools
+        timeout-minutes: 2
         run: |
-          if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
-            sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 update
-            sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 install --yes --no-install-recommends ffmpeg
-          fi
+          node --test test/ci/prepare-media-tools.test.cjs
+          node scripts/ci/prepare-media-tools.cjs
+
+      - name: Install and verify CPU preview runtime
+        timeout-minutes: 10
+        run: |
           ffmpeg -version
           ffprobe -version
           python -m pip install --disable-pip-version-check --timeout 20 --retries 2 --only-binary=:all: --requirement python_media_worker/requirements-ci.txt
