@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "reviewer": "Antigravity",
-  "reason": "Merge origin/main #544 with VoiceOverGuide update and pro-studio engine sprints",
-  "reviewed_at": "2026-11-20T15:31:42.800Z",
+  "reviewer": "Codex",
+  "reason": "Record local professional editor recovery and codec-aware delivery verification",
+  "reviewed_at": "2026-11-20T19:07:06.713Z",
   "catalog_sha256": "e0363dbe27ea51b3744e1026e7b9270d40386882699e8bcd4a2ffab3a036086a",
   "sources": [
     {
@@ -51,7 +51,7 @@
     },
     {
       "path": "frontend/src/UserDashboardTabs/ViralClipStudioPanel.js",
-      "sha256": "4a76f7beeb02255c2ce4b2242fe6e43d7e4c51da92ef98ef8887475317f2d3c8"
+      "sha256": "c65a67612a8d8f4fceeff18a21ce64047e89ac4e9cd108385cfff4123523fff3"
     },
     {
       "path": "frontend/src/UserDashboard_full.js",
@@ -195,11 +195,11 @@
     },
     {
       "path": "frontend/src/components/VideoEditor.js",
-      "sha256": "dae18b1a55e22fe250d820cf9794aab4ebac867103bd21720db113fa444099ba"
+      "sha256": "1f22cf3a12ec9f847c76d76210196518ba721efd568f0c487a9a8877e2012f4c"
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "9c16e63d88228d5f1b9de0eaf5facaeea4b1d19e03a7ee5e7989aed65ed3573d"
+      "sha256": "6048dc8cc138ec7a8ee45c38897bee3f1717b6c63ad435ad0aa36b31bbe8eacf"
     },
     {
       "path": "frontend/src/components/ViralScanner.js",
@@ -471,7 +471,7 @@
     },
     {
       "path": "python_media_worker/main_media_server.py",
-      "sha256": "170f9af3dcf08fcfe388f366f6f467c10302eb6f1bdc63d88fe1be1e62c7715a"
+      "sha256": "95569e81120cb4a8f48880def22aa308856df093617ea60f8762a9e406b430ce"
     },
     {
       "path": "python_media_worker/studio_audio.py",
@@ -755,11 +755,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "df4abf7db9f34039266ac0ed3f20045c23edc25a6e26d34af6ce698fe9cdf6a2"
+      "sha256": "f4196ff8d46d2ee892d0522e9d37f2411dc2a62af2d7660af56942cb5a165019"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "759a234d27a116eb3dce38f3bedd1f9494d84303ce3cdb0af037b5976b7e26a3"
+      "sha256": "f828660b4baff1c9e7b5a7218d8d49d02a38c5c469a9aeff6c1a942d9ea6c1e5"
     },
     {
       "path": "worker.js",

@@ -63,6 +63,18 @@ test('hashes exact generation bytes before create-only owned persistence',async(
   expect(mockObjects.get(target).bytes).toEqual(bytes);
   expect(mockObjects.get(target).metadata.metadata).toMatchObject({ownerUid:owner,jobId:job,sha256:digest,sourceGeneration:'123'});
 });
+test('preserves the QuickTime extension and MIME when adopting a ProRes master', async () => {
+  const moviePath = source.replace(/\.mp4$/, '.mov');
+  const ownedPath = target.replace(/\.mp4$/, '.mov');
+  mockObjects.set(moviePath, mockObjects.get(source));
+  const url = input.url.replace(/\.mp4\?/, '.mov?');
+  const result = await persistWorkerBucketOutput({ ...input, url });
+  expect(result).toMatchObject({ storagePath: ownedPath, sha256: digest, bytes: bytes.length });
+  expect(mockUploads).toHaveBeenCalledWith(expect.stringMatching(/\.mov$/), expect.objectContaining({
+    destination: ownedPath, metadata: expect.objectContaining({ contentType: 'video/quicktime' }),
+  }));
+  expect(mockObjects.get(ownedPath).bytes).toEqual(bytes);
+});
 test('repeated adoption renews access without rereading or replacing immutable bytes',async()=>{
   const first=await persistWorkerBucketOutput(input),second=await persistWorkerBucketOutput(input);
   expect(first.url).not.toBe(second.url);expect(mockReads).toHaveLength(1);expect(mockUploads).toHaveBeenCalledTimes(1);

@@ -34,6 +34,14 @@ import {
 
 const DESKTOP_EDITING_TOOL_QUERY = "(min-width: 720px)";
 
+const studioRenderedFileType = output => {
+  const movie = /\.mov(?:[?#]|$)/i.test(output || "");
+  return {
+    name: movie ? "viral_clip_rendered.mov" : "viral_clip_rendered.mp4",
+    type: movie ? "video/quicktime" : "video/mp4",
+  };
+};
+
 const canUseDesktopEditingTools = () => {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") return true;
   return window.matchMedia(DESKTOP_EDITING_TOOL_QUERY).matches;
@@ -264,7 +272,9 @@ function VideoEditor({
 
     try {
       const downloadName =
-        typeof sourceOverride === "string" ? "viral_clip_rendered.mp4" : getDownloadFileName();
+        typeof sourceOverride === "string"
+          ? studioRenderedFileType(downloadOverride || sourceOverride).name
+          : getDownloadFileName();
 
       if (typeof downloadOverride === "string" && downloadOverride) {
         // Owner-checked storage access signs an attachment disposition. Let
@@ -1125,8 +1135,7 @@ function VideoEditor({
           );
           if (!outputUrl) throw new Error("This render finished without a playable video URL.");
           const recoveredFile = {
-            name: "viral_clip_rendered.mp4",
-            type: "video/mp4",
+            ...studioRenderedFileType(job.outputStoragePath || result.outputStoragePath || outputUrl),
             url: outputUrl,
             previewUrl: outputUrl,
             downloadUrl: job.downloadUrl || null,
@@ -1200,7 +1209,7 @@ function VideoEditor({
         brandWatermark: false, captionReviewCopy: false,
       });
       recoveryDismissedRef.current = true;
-      setViralRenderedFile({ name: "viral_clip_rendered.mp4", type: "video/mp4", url,
+      setViralRenderedFile({ ...studioRenderedFileType(job.outputStoragePath || job.result?.outputStoragePath || url), url,
         previewUrl: url, downloadUrl: job.result?.downloadUrl || job.downloadUrl || null,
         isRemote: true, captionReviewCopy: false });
       setRenderRecovery({ status: "completed", requestId: job.renderRequestId,
@@ -1596,8 +1605,7 @@ function VideoEditor({
             ? `${renderedUrl}&t=${Date.now()}`
             : `${renderedUrl}?t=${Date.now()}`;
         const fakeFile = {
-          name: `viral_clip_rendered.mp4`,
-          type: "video/mp4",
+          ...studioRenderedFileType(result.outputStoragePath || renderedUrl),
           url: renderedUrl,
           downloadUrl: result.downloadUrl || null,
           thumbnailUrl: result.thumbnailUrl || null,

@@ -1,4 +1,22 @@
 {
+  "proEditorCorrections20261120": {
+    "date": "2026-11-20",
+    "evidence": "reports/pro-editor-qa-20261120/correction-verification.json",
+    "scope": "Owner-scoped project recovery, canonical ProRes HQ MOV delivery, and compact monitor correction.",
+    "readinessPromotion": false
+  },
+  "proEditorQa20261120": {
+    "date": "2026-11-20",
+    "evidence": "reports/pro-editor-qa-20261120/verification.json",
+    "focusIds": [
+      "broll_captions_music_transitions",
+      "captions_reframe_speed",
+      "director_then_manual"
+    ],
+    "scope": "Scoped native trim, split, title, cutaway, dialogue, music and four cues at 1.25\u00d7, plus local Director storyboard Apply/Undo/Redo.",
+    "readinessPromotion": false,
+    "nextTaskId": "S02"
+  },
   "camEntryGpuPrimary20261120": {
     "date": "2026-11-20",
     "evidenceRefs": [

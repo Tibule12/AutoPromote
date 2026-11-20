@@ -1,3 +1,11 @@
+<!-- pro-editor-qa-20261120 -->
+
+The 20 November correction scopes Recent Projects by the signed-in owner, preserves QuickTime output through ProRes validation and owned storage, and expands the compact monitor. The canonical CPU renderer passes ProRes 422 HQ MOV and PCM checks for ordinary and caption-review exports. A fresh signed-in browser qualification and production deployment remain open. [Correction evidence](../reports/pro-editor-qa-20261120/README.md#correction-pass)
+
+20 November [professional editor verification](../reports/pro-editor-qa-20261120/README.md) qualifies the scoped 46.463-second H.264 edit, three aligned WAV stems, SRT/VTT, OTIO/EDL, Director apply/history and the H.264 dual-master path in a signed-in loopback browser. Recent Projects hides owned saves after reload and ProRes is rejected by H.264-only output verification. An authenticated lookup retrieves the existing H.264 movie with an identical SHA-256 and no new render. Keep formal readiness at 17 FUNCTIONAL, 9 PARTIAL, 1 BROKEN, 2 UNIMPLEMENTED and zero PRO or PRODUCTION-READY. Fix the ownership query and codec-aware delivery validation, repeat the corresponding native flows, then continue S02 picture/audio conformance.
+
+<!-- /pro-editor-qa-20261120 -->
+
 <!-- cam-entry-gpu-primary-20261120 -->
 
 20 November owner-directed [Cam Combiner entry parity and GPU-primary routing](../reports/cam-entry-gpu-primary-20261120/README.md) fixes setup limits/settings/audio preparation and selects qualified GPU first for Finder, Viral Clip Studio and durable Cam renders, with same-job fenced CPU fallback. 44 backend, 11 frontend, 8 runner and18 release/chunk tests plus strict builds pass; production GPU and CPU definitions are deployed, and signed-in setup/import/control/sync/moving preview plus eight anonymous comparisons pass. A real GPU job qualifies CUDA/NVENC in2m18.12s; serving native delivery verification continues. No readiness promotion:17 FUNCTIONAL/9 PARTIAL/1 BROKEN/2 UNIMPLEMENTED/0 PRO/0 PRODUCTION. Full S02/S04/S03, broad media/concurrency and owner review remain. Next: serving signed-in control and native GPU/fallback evidence.

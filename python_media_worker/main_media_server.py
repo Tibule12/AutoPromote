@@ -689,9 +689,12 @@ def validate_final_viral_delivery(
     expected_duration,
     expected_audio,
     planned_black_ranges=None,
+    expected_codec="h264",
 ):
     """Reject technically broken exports before they are published to a creator."""
-    media = validate_rendered_media(output_path, expected_audio=expected_audio)
+    media = validate_rendered_media(
+        output_path, expected_audio=expected_audio, expected_codec=expected_codec,
+    )
     actual_duration = float(media.get("duration") or 0.0)
     target_duration = max(0.05, float(expected_duration or 0.0))
     tolerance = max(0.45, target_duration * 0.035)
@@ -6703,7 +6706,7 @@ async def apply_viral_caption_review_stamp(output_path, job_id, output_width,
                                            output_height, output_settings=None):
     """Apply only a draft transcript label, independently of platform branding."""
     profile = resolve_viral_export_profile(output_settings, output_width, output_height)
-    labeled_path = os.path.join(os.path.dirname(output_path), f"{job_id}_caption_review.mp4")
+    labeled_path = os.path.join(os.path.dirname(output_path), f"{job_id}_caption_review.{profile['container']}")
     try:
         await run_subprocess_async([
             "ffmpeg", "-nostdin", "-i", output_path,
@@ -31268,7 +31271,6 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
 
     input_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_input.mp4")
     trimmed_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_trimmed.mp4")
-    output_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_viral.mp4")
     thumbnail_output_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_thumbnail.jpg")
     downloaded_background_audio_path = None
     downloaded_music_path = None
@@ -34010,6 +34012,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             base_width,
             base_height,
         )
+        output_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_viral.{delivery_profile['container']}")
         # Cleanup must affect the actual assembled native picture, including
         # subject copies. Keeping it inside this graph preserves audio and clocks.
         try:
@@ -34035,7 +34038,11 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             # automatic RGB/YUV converter free to choose another matrix.
             # Accurate rounding and full chroma interpolation retain low-alpha
             # authored colours through the one final 8-bit delivery conversion.
-            delivery_filters.extend(["scale=out_color_matrix=bt709:out_range=tv:flags=accurate_rnd+full_chroma_int", "format=yuv420p"])
+            delivery_pixel_format = "yuv422p10le" if delivery_profile["codec"] == "prores" else "yuv420p"
+            delivery_filters.extend([
+                "scale=out_color_matrix=bt709:out_range=tv:flags=accurate_rnd+full_chroma_int",
+                f"format={delivery_pixel_format}",
+            ])
             delivery_filters.append("setparams=range=limited:color_primaries=bt709:color_trc=bt709:colorspace=bt709")
         elif delivery_profile.get("colorSpace") == "rec2020":
             delivery_filters.extend(["scale=out_color_matrix=bt2020nc:out_range=tv"])
@@ -34153,7 +34160,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 raise ValueError("Remix Audio requires an audible source track")
             report_progress(88, "Mastering Remix Audio")
             with tempfile.TemporaryDirectory(prefix="viral-audio-remix-", dir=SHARED_TMP_DIR) as remix_dir:
-                remixed_path = os.path.join(remix_dir, "remixed.mp4")
+                remixed_path = os.path.join(remix_dir, f"remixed.{delivery_profile['container']}")
                 loop = asyncio.get_running_loop()
                 audio_remix_receipt = await asyncio.to_thread(
                     render_audio_remix,
@@ -34161,6 +34168,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     remixed_path,
                     normalized_audio_remix,
                     audio_bitrate=audio_bitrate,
+                    pcm_audio=delivery_profile["container"] == "mov" and delivery_profile["audioCodec"] == "pcm",
                 )
                 os.replace(remixed_path, output_path)
         elif normalized_audio_remix["enabled"] and audio_remix_receipt["status"] == "not_requested":
@@ -34194,6 +34202,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 expected_duration=rendered_timeline_duration,
                 expected_audio=audio_expected,
                 planned_black_ranges=request.planned_black_ranges,
+                expected_codec={"h265": "hevc"}.get(delivery_profile["codec"], delivery_profile["codec"]),
             )
             media_validation = final_quality_gate["media"]
             report_progress(95, "Uploading finished video")

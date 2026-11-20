@@ -3193,10 +3193,11 @@ const ViralClipStudio = ({
   const loggedScannerEntryRef = useRef(new Set());
   const [previewFinishedFile, setPreviewFinishedFile] = useState(true);
   const completedOutputUrl = getSafeMediaSource(renderedOutput?.previewUrl || renderedOutput?.url);
+  const isMezzanineDownload = renderedOutput?.type === "video/quicktime";
   // Both monitor modes have the same identity when no completed movie exists.
   // The first edit must not turn undefined into a different source window and
   // rewind a paused authoring frame to the clip start.
-  const renderedOutputUrl = previewFinishedFile ? completedOutputUrl || "" : "";
+  const renderedOutputUrl = previewFinishedFile && !isMezzanineDownload ? completedOutputUrl || "" : "";
   const hasCompletedOutput = Boolean(completedOutputUrl);
   // Access recovery can clear and restore a completed URL. Preserve the
   // editor's explicit monitor choice through that transport transition.
@@ -30803,21 +30804,21 @@ const ViralClipStudio = ({
                 >
                   <div>
                     <strong>{renderedOutput?.captionReviewCopy ? "Caption review copy ready" : "Rendered video ready"}</strong>
-                    <span>{!previewFinishedFile ? "After is showing your editable project. The finished download is retained." : renderedOutput?.captionReviewCopy
+                    <span>{isMezzanineDownload ? "Download the ProRes master for playback in your editing application." : !previewFinishedFile ? "After is showing your editable project. The finished download is retained." : renderedOutput?.captionReviewCopy
                       ? "Draft captions are burned in for review. Correct and approve the timeline before publishing."
                       : "The finished file is loaded in After above."}</span>
                   </div>
                   <div className="rendered-output-actions">
-                    <button type="button" aria-pressed={!previewFinishedFile} onClick={() => {
+                    {!isMezzanineDownload && <button type="button" aria-pressed={!previewFinishedFile} onClick={() => {
                       pauseSynchronizedPreview();
                       setPreviewFinishedFile(current => !current);
                     }}>
                       {previewFinishedFile ? "Show Live Edit" : "Show Finished Video"}
-                    </button>
+                    </button>}
                     <button type="button" onClick={onDownloadRendered}>
                       Download Rendered Clip
                     </button>
-                    {!renderedOutput?.captionReviewCopy ? (
+                    {!isMezzanineDownload && !renderedOutput?.captionReviewCopy ? (
                       <button type="button" onClick={onUseRendered}>
                         Use in Publisher
                       </button>
@@ -31043,11 +31044,12 @@ const ViralClipStudio = ({
                   dualExportOutputs.captioned?.output_url ? (
                     <a
                       href={
+                        dualExportOutputs.captioned.downloadUrl ||
                         dualExportOutputs.captioned.url ||
                         dualExportOutputs.captioned.outputUrl ||
                         dualExportOutputs.captioned.output_url
                       }
-                      download
+                      download={dualExportOutputs.captioned.type === "video/quicktime" ? "captioned-master.mov" : "captioned-master.mp4"}
                       target="_blank"
                       rel="noreferrer"
                     >
@@ -31061,11 +31063,12 @@ const ViralClipStudio = ({
                   dualExportOutputs.clean?.output_url ? (
                     <a
                       href={
+                        dualExportOutputs.clean.downloadUrl ||
                         dualExportOutputs.clean.url ||
                         dualExportOutputs.clean.outputUrl ||
                         dualExportOutputs.clean.output_url
                       }
-                      download
+                      download={dualExportOutputs.clean.type === "video/quicktime" ? "clean-master.mov" : "clean-master.mp4"}
                       target="_blank"
                       rel="noreferrer"
                     >

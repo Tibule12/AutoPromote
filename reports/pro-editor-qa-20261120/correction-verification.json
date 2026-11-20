@@ -1,0 +1,40 @@
+{
+  "date": "2026-11-20",
+  "tests": {
+    "frontend": 48,
+    "integratedEditor": 2,
+    "apiAndStorage": 44,
+    "worker": 32,
+    "browserInteractions": 17
+  },
+  "recentProjects": {
+    "ownerScopedListing": true,
+    "accountSwitchIsolation": true,
+    "atomicOwnedBackupRestore": true
+  },
+  "proRes": {
+    "canonicalCpuRender": true,
+    "captionReview": true,
+    "container": "mov",
+    "profile": "HQ",
+    "pixelFormat": "yuv422p10le",
+    "audioCodec": "pcm_s16le",
+    "fullDecode": true,
+    "ownedStorageTest": true
+  },
+  "compactMonitor": {
+    "viewport": [
+      390,
+      844
+    ],
+    "picture": [
+      77.625,
+      138
+    ],
+    "transportFits": true,
+    "verifiedWithUpdatedStyles": true
+  },
+  "signedInRequalification": false,
+  "productionDeployment": false,
+  "signedInBlocker": "Local Firestore emulator requires Java 21"
+}
