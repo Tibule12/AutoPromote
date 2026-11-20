@@ -305,9 +305,21 @@ function createTeamWorkspace({
       return { status: decision };
     });
   }
-  async function comment(workspaceId, uid, id, text) {
+  async function comment(workspaceId, uid, id, text, anchor = null) {
     if (typeof text !== "string" || !text.trim() || text.length > 2000)
       fail(400, "invalid_comment");
+    const anchorFields = {};
+    if (anchor && typeof anchor === "object") {
+      if (typeof anchor.timecode === "string" && /^\d{2}:\d{2}:\d{2}[:;]\d{2}$/.test(anchor.timecode.trim())) {
+        anchorFields.timecode = anchor.timecode.trim();
+      }
+      if (Number.isInteger(Number(anchor.frameNumber)) && Number(anchor.frameNumber) >= 0) {
+        anchorFields.frameNumber = Number(anchor.frameNumber);
+      }
+      if (Number.isFinite(Number(anchor.fps)) && Number(anchor.fps) > 0 && Number(anchor.fps) <= 120) {
+        anchorFields.fps = Number(anchor.fps);
+      }
+    }
     return db.runTransaction(async tx => {
       const context = await access(workspaceId, uid, tx),
         ref = releaseRef(context, id),
@@ -318,7 +330,13 @@ function createTeamWorkspace({
       tx.update(ref, {
         comments: [
           ...comments,
-          { uid, authorLabel: context.label, text: text.trim(), at: new Date(now()).toISOString() },
+          {
+            uid,
+            authorLabel: context.label,
+            text: text.trim(),
+            at: new Date(now()).toISOString(),
+            ...anchorFields,
+          },
         ],
       });
       log(tx, context, "release_commented", id);

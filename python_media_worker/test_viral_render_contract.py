@@ -3,6 +3,7 @@ import json
 import os
 import re
 from pathlib import Path
+from fractions import Fraction
 import subprocess
 import tempfile
 import unittest
@@ -13,6 +14,7 @@ from python_media_worker.viral_render_contract import (
     build_caption_override_transcript,
     build_edited_caption_transcript,
     build_delivery_video_clock_filter,
+    verified_studio_source_rate,
     build_segment_transition_filters,
     build_speed_filter_complex,
     find_uncovered_caption_speech_ranges,
@@ -59,6 +61,17 @@ from python_media_worker.main_media_server import (
 
 
 class ViralRenderContractTests(unittest.TestCase):
+    def test_match_first_source_rate_keeps_exact_fraction_through_speed_and_delivery(self):
+        streams = [{"codec_type": "audio"}, {"codec_type": "video", "avg_frame_rate": "24000/1001"}]
+        rate = verified_studio_source_rate({"streams": streams})
+        self.assertEqual(rate, Fraction(24000, 1001))
+        plan = normalize_speed_plan(8.008, preview_speed=2)
+        self.assertIn("fps=24000/1001[v_speed]", build_speed_filter_complex(plan, True, rate))
+        self.assertIn("fps=24000/1001,trim=", build_delivery_video_clock_filter(rate, 4.004, rate))
+        for invalid in ("", "0/0", "0", "121", "NaN"):
+            with self.subTest(invalid=invalid), self.assertRaises(ValueError):
+                verified_studio_source_rate({"streams": [{"codec_type": "video", "avg_frame_rate": invalid}]})
+
     def test_subframe_tail_cut_requires_a_verified_sequence_budget(self):
         plan={"main_frame":{"enabled":False},"reframe":{"aspect":"16:9",
             "timeline_cuts":[{"time":0,"mode":"center"},{"time":11.966,"mode":"center"}]}}

@@ -27,7 +27,13 @@ export const STUDIO_ADDITIONAL_LAYER_FIELDS = [
   "opticalFx", "displacementWarp", "depthParallax", "zDepth", "dofBlur", "cornerKeys",
   "trackMatte", "motionDrivers", "isNullRig", "keepMatteVisible", "shy", "solo", "locked",
 ];
-export const STUDIO_LAYER_BINDING_FIELDS = ["titlePreset", "clipId", "mixAudio"];
+export const STUDIO_LAYER_BINDING_FIELDS = [
+  "titlePreset",
+  "clipId",
+  "occurrenceId",
+  "clipOccurrenceId",
+  "mixAudio",
+];
 
 export const STUDIO_OCCURRENCE_PARAMETER_FIELDS = [
   "name", "duration", "sourceMediaId", "angleGroupId", "sharedStart", "sharedEnd",

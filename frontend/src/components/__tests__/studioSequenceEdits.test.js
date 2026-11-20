@@ -155,3 +155,37 @@ test('independent audio trims keep their detached source phase; Straight Cut res
   expect(reset.snapshot.timeline[1].audioDetached).toBeUndefined();
   expect(reset.snapshot.timeline[1].audioTrimOffsetStart).toBe(0);
 });
+
+test('programme range removal trims and shifts clips with detached audio and occurrence-scoped overlays isolate duplicate source placements', () => {
+  const { studioOverlayBelongsToClip } = require('../studioOverlayBinding');
+  const source = fixture();
+  source.linkedSelection = false;
+  const slipped = edit(source, 'slip', 2).snapshot;
+  expect(slipped.timeline[1]).toMatchObject({ audioDetached: true, audioSourceStart: 3, audioSourceEnd: 7, audioProgrammeStart: 4 });
+
+  // Cut 1s before clip[1] (which splits clip[0] into two pieces, moving 'b' to index 2) -> detached audio shifts 4s -> 3s
+  const cutBefore = removeStudioProgrammeRanges(slipped, [{ start: 1, end: 2 }], 'cut-before');
+  const shiftedB = cutBefore.snapshot.timeline.find(clip => clip.sourceClipId === 'b');
+  expect(shiftedB).toMatchObject({
+    audioDetached: true,
+    audioSourceStart: 3,
+    audioSourceEnd: 7,
+    audioProgrammeStart: 3,
+  });
+
+  // Cut across the start of detached audio (2.5..4.0) -> audioSourceStart advances by 1s (to 4) and programmeStart shifts cleanly
+  const cutOverlap = removeStudioProgrammeRanges(cutBefore.snapshot, [{ start: 2.5, end: 4.0 }], 'cut-overlap');
+  const trimmedB = cutOverlap.snapshot.timeline.find(clip => clip.sourceClipId === 'b');
+  expect(trimmedB).toMatchObject({
+    audioDetached: true,
+    audioSourceStart: 4,
+    audioSourceEnd: 7,
+  });
+
+  // Occurrence-scoped binding keeps overlays isolated between two uses of the same sourceClipId
+  const dupA = { id: 'occ-1', occurrenceId: 'occ-1', sourceClipId: 'shared-src' };
+  const dupB = { id: 'occ-2', occurrenceId: 'occ-2', sourceClipId: 'shared-src' };
+  const brollScoped = { id: 'br-1', bRollMode: true, clipId: 'shared-src', occurrenceId: 'occ-2' };
+  expect(studioOverlayBelongsToClip(brollScoped, dupA, [dupA, dupB])).toBe(false);
+  expect(studioOverlayBelongsToClip(brollScoped, dupB, [dupA, dupB])).toBe(true);
+});

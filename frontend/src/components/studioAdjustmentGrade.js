@@ -55,7 +55,14 @@ export function compileStudioAdjustmentGrade(layer) {
     !hasRevitalizerGrade(advanced.revitalizer) &&
     (imported.domainMin || [0, 0, 0]).every(n => n === 0) &&
     (imported.domainMax || [1, 1, 1]).every(n => n === 1);
-  const cube = buildAdvancedColorCube({ ...advanced, lutIntensity: number(advanced.lutIntensity, 100, 0, 100) * strength }, directGrid ? imported.size : 33);
+  const cube = buildAdvancedColorCube(
+    {
+      ...advanced,
+      qualifier: null,
+      lutIntensity: number(advanced.lutIntensity, 100, 0, 100) * strength,
+    },
+    directGrid ? imported.size : 33
+  );
   return { ...layer, effects: { color, blendMode: 'normal', opacity: 1,
     ...(cube ? { color_cube: cube } : {}),
     ...(advanced.powerWindow?.enabled ? { power_window: { ...advanced.powerWindow } } : {}),

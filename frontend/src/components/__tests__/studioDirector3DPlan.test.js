@@ -124,4 +124,31 @@ describe('studioDirector3DPlan', () => {
     await waitFor(() => expect(onApply).toHaveBeenCalledTimes(1));
     expect(onApply.mock.calls[0][0].actions.some(a => a.type === 'three_d_scene')).toBe(true);
   });
+
+  test('ignores technical acronyms like LUT/VFX/HUD when extracting unquoted 3D headline copy', () => {
+    const snapshot = makeProjectSnapshot(true);
+    const proposal = buildDirectorCinema3DProposal(
+      snapshot,
+      'Hybrid culinary reel with Kodak 2383 LUT grade, VFX glow, and smooth chef plating transition',
+      6.5,
+      { mode: 'hybrid_film_3d', lookId: 'kodak_2383' }
+    );
+    const texts = proposal.threeDPlan.threeDScenes.map(sc => sc.text);
+    expect(texts.every(t => t !== 'LUT' && t !== 'VFX' && t !== 'HUD')).toBe(true);
+    expect(proposal.threeDPlan.sourceComposition.layers.some(l => l.bRollLayoutPreset === 'fullscreen_cutaway' || l.bRollLayoutPreset === 'pip_top_right')).toBe(true);
+  });
+
+  test('hybrid_film_3d layers live holographic 3D ribbon sculpture over footage when brief asks for liquid ribbon artistry', () => {
+    const snapshot = makeProjectSnapshot(true);
+    const proposal = buildDirectorCinema3DProposal(
+      snapshot,
+      'Artistic live film with iridescent 3D liquid chrome ribbon weaving over plating for "TASTE"',
+      6.5,
+      { mode: 'hybrid_film_3d', lookId: 'kodak_2383' }
+    );
+    expect(proposal.threeDPlan.threeDScenes[0].template).toBe('object_scene');
+    expect(proposal.threeDPlan.threeDScenes[0].background).toBe('transparent');
+    expect(proposal.threeDPlan.threeDScenes[0].objects[0].shape).toBe('ribbon');
+    expect(proposal.threeDPlan.threeDScenes[1].template).toBe('neon_logo');
+  });
 });

@@ -1,4 +1,6 @@
 import {
+  alignStudioAngleGroupOffsets,
+  computeWaveformSyncOffsetSeconds,
   createStudioAngleGroup,
   createStudioAngleShot,
   getAngleGroupSharedDuration,
@@ -44,5 +46,35 @@ describe("Studio film camera takes", () => {
     expect(() => createStudioAngleShot({
       group, asset: assets[1], sharedStart: 8, sharedEnd: 11, clipId: "too-long",
     })).toThrow(/shot range/i);
+  });
+
+  test("computes shifted waveform cross-correlation offset and aligns multi-angle take", () => {
+    const sampleRate = 200;
+    const totalSamples = sampleRate * 6;
+    const refWave = new Float32Array(totalSamples);
+    const camBWave = new Float32Array(totalSamples);
+    // Transient speech burst centered at t=1.2s in refWave and at t=2.7s in camBWave (+1.5s earlier start on camB)
+    for (let i = 0; i < 80; i += 1) {
+      const env = Math.sin((Math.PI * i) / 80);
+      const val = env * Math.sin(0.6 * i);
+      refWave[Math.round(1.2 * sampleRate) + i] = val;
+      camBWave[Math.round(2.7 * sampleRate) + i] = val;
+    }
+
+    const sync = computeWaveformSyncOffsetSeconds(refWave, camBWave, sampleRate, { maxOffsetSeconds: 4 });
+    expect(sync.lagSeconds).toBeCloseTo(1.5, 2);
+    expect(sync.offsetForTarget).toBeCloseTo(1.5, 2);
+    expect(sync.offsetForReference).toBe(0);
+    expect(sync.correlation).toBeGreaterThan(0.95);
+
+    const group = createStudioAngleGroup({ id: "sync-take", name: "Two-cam sync", assets });
+    const aligned = alignStudioAngleGroupOffsets({
+      group,
+      rawLagsByAssetId: { "cam-a": 0, "cam-b": sync.lagSeconds },
+      assets,
+    });
+    expect(aligned.angles.find(a => a.assetId === "cam-a").offsetSeconds).toBe(0);
+    expect(aligned.angles.find(a => a.assetId === "cam-b").offsetSeconds).toBeCloseTo(1.5, 2);
+    expect(aligned.sharedEnd).toBeCloseTo(8.5, 2);
   });
 });

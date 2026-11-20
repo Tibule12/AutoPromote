@@ -66,7 +66,13 @@ router.post(
 );
 router.post(
   "/releases/:releaseId/comments",
-  run((service, req) => service.comment(...args(req), req.params.releaseId, req.body?.text))
+  run((service, req) =>
+    service.comment(...args(req), req.params.releaseId, req.body?.text, {
+      timecode: req.body?.timecode,
+      frameNumber: req.body?.frameNumber,
+      fps: req.body?.fps,
+    })
+  )
 );
 router.post(
   "/releases/:releaseId/dispatch",

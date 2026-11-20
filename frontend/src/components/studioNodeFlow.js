@@ -893,6 +893,12 @@ export const connectNodeFlowPorts = (
   const fromLayerId = extractLayerId(fromNodeId);
   const toLayerId = extractLayerId(toNodeId);
 
+  if (fromNodeId?.startsWith("SubjectMatte:") && toPort === "Mask") {
+    throw new Error(
+      "SubjectMatte outputs an isolated foreground plate, not an alpha Mask branch. Connect a PolygonMask, ChromaKeyer, MediaIn, Transform, CornerPin, or GlowBlur branch to Mask."
+    );
+  }
+
   // Case 1: Wiring into a Transform / NullRig / CompoundMacro Parent port -> Pick-Whip Parenting!
   if (toPort === "Parent" && toLayerId && fromLayerId) {
     const nextOverlays = overlays.map(item =>

@@ -3,6 +3,7 @@ import {
   buildDirectorFinishGradeAction,
   buildSourceBoundDirectorProposal,
   compileDirectorComposition,
+  extractCreatorTitleAndHook,
   inferDirectorLookProfileId,
   sha256HexSync,
 } from './studioDirectorComposition';
@@ -58,34 +59,42 @@ function sanitizeCopy(value, fallback, maxLen = 40) {
   return cleaned || fallback;
 }
 
+const ACRONYM_IGNORE = new Set([
+  'LUT', 'VFX', 'HUD', 'HDR', 'SDR', 'FPS', 'RAW', 'LOG', 'RGB', 'HSL', 'NLE', 'API', 'CPU', 'GPU', 'SDK',
+  '3D', '2D', '4K', '8K', 'HD', 'AI', 'UI', 'UX', 'MP4', 'MOV', 'AAC', 'PIP',
+]);
+
 function extractBrandAndSubtitle(brief, mode) {
-  const quoted = String(brief || '').match(/["'`]([^"'`]{2,28})["'`]/);
-  const allCaps = String(brief || '').match(/\b([A-Z]{3,14}(?:\s+[A-Z]{2,14})?)\b/);
-  let main =
-    quoted?.[1] ||
-    allCaps?.[1] ||
-    (mode === 'audio_spectrum'
+  const raw = String(brief || '');
+  const quoted = raw.match(/["'`]([^"'`]{2,28})["'`]/);
+  const allCapsMatches = raw.match(/\b[A-Z]{3,14}(?:\s+[A-Z]{2,14})?\b/g) || [];
+  const validAllCaps = allCapsMatches.find(token =>
+    token.split(/\s+/).every(part => !ACRONYM_IGNORE.has(part))
+  );
+  const derived = extractCreatorTitleAndHook(raw);
+  const fallback =
+    mode === 'audio_spectrum'
       ? 'SONIC HORIZON'
       : mode === 'hud_title_slate'
         ? 'BEYOND STATIC'
         : mode === 'sculpture_ribbon'
           ? 'ORBITAL FORM'
-          : 'APEX NOVA');
-  main = sanitizeCopy(main.toUpperCase(), 'APEX NOVA', 32);
+          : derived || 'FEATURED STORY';
+  const main = sanitizeCopy((quoted?.[1] || validAllCaps || fallback).toUpperCase(), fallback, 32);
 
   const subMap = {
-    brand_vfx: 'CINEMA WEBGL2 VFX ARCHITECTURE',
-    sculpture_ribbon: 'PARAMETRIC LIQUID CHROME STAGE',
-    audio_spectrum: '22-BAND HARMONIC FREQUENCY ARENA',
-    hud_title_slate: 'REAL-TIME OPTICAL TELEMETRY',
-    hybrid_film_3d: 'DIRECTOR MULTI-LAYER COMPOSITION',
+    brand_vfx: 'FEATURED EDITION',
+    sculpture_ribbon: 'STUDIO SCULPTURE SERIES',
+    audio_spectrum: 'LIVE AUDIO EDITION',
+    hud_title_slate: 'PRECISION SHOWCASE',
+    hybrid_film_3d: 'FEATURED CREATOR CUT',
   };
-  return { main, subtitle: subMap[mode] || 'CINEMA GRADE VISUALS' };
+  return { main, subtitle: subMap[mode] || 'FEATURED EDITION' };
 }
 
 export function inferCinema3DMode(brief = '', hasFootage = false) {
   const text = String(brief || '').toLowerCase();
-  if (/\b(hybrid|diptych|rotoscope|footage|overlay|film\s*\+\s*3d)\b/.test(text)) {
+  if (/\b(hybrid|diptych|rotoscope|footage|overlay|film\s*\+\s*3d|omniscient|masterpiece|8-track|showpiece)\b/.test(text)) {
     return hasFootage ? 'hybrid_film_3d' : 'brand_vfx';
   }
   if (/\b(ribbon|sculpture|morph|product|object|knot)\b/.test(text)) {
@@ -342,9 +351,15 @@ export function buildDirectorCinema3DProposal(snapshot, brief, duration = 6, opt
       { startTime: titleScene.startTime, endTime: dur, sourceName: main, treatment: 'cinematic_title', reason: 'Volumetric god-ray and particle-burst Inter 900 blockbuster lockup.' },
     ];
   } else if (mode === 'hybrid_film_3d') {
+    const resolvedHybridArchetype =
+      options.archetypeId && options.archetypeId !== 'auto'
+        ? options.archetypeId
+        : /split|diptych/i.test(context.brief)
+          ? 'split_diptych'
+          : 'viral_hook_cutaway';
     const baseProposal = buildSourceBoundDirectorProposal(snapshot, context.brief, dur, {
       lookId,
-      archetypeId: options.archetypeId || 'split_diptych',
+      archetypeId: resolvedHybridArchetype,
       beatSyncPulses: options.beatSyncPulses !== false,
       pixelEvidence: options.pixelEvidence,
     });
@@ -354,31 +369,61 @@ export function buildDirectorCinema3DProposal(snapshot, brief, duration = 6, opt
       : lookId === 'neon_cyber'
         ? { entrance: 'pulse', material: 'chrome' }
         : { entrance: 'burst', material: 'gold' };
-    const introDur = roundT(Math.max(1.2, Math.min(2.8, dur * 0.42)));
-    const stingerStart = roundT(Math.max(introDur + 0.2, dur * 0.55));
-    const lowerThird = normalizeStudio3DScene({
-      ...createStudio3DScene('speaker_intro', 0.35, 'dir-3d-lower-third'),
-      name: 'Director 3D Lower-Third',
-      text: main,
-      secondary: subtitle,
-      duration: roundT(Math.min(introDur, dur - 0.45)),
-      background: 'transparent',
-      material: 'glass',
-      entrance: 'slide',
-      primaryColor: colors.primary,
-      secondaryColor: '#f8fafc',
-      glowColor: colors.glow,
-      y: 78,
-      scale: 0.64,
-      bloom: 0.65,
-      cameraMotion: 0.35,
-    });
+    const introDur = roundT(Math.max(1.1, Math.min(2.2, dur * 0.36)));
+    const stingerStart = roundT(Math.max(introDur + 0.25, Math.min(dur - 1.2, dur * 0.64)));
+    const wantsSculptureOverlay = /\b(ribbon|sculpture|liquid chrome|iridescent|holographic|creative|artistic|diamond)\b/i.test(context.brief);
+    const introScene = wantsSculptureOverlay
+      ? normalizeStudio3DScene({
+          ...createStudio3DScene('object_scene', 0.3, 'dir-3d-ribbon-overlay'),
+          name: 'Holographic 3D Ribbon Overlay',
+          text: '',
+          secondary: '',
+          duration: roundT(Math.max(0.8, stingerStart - 0.35)),
+          background: 'transparent',
+          lightingRig: 'sculpture',
+          material: 'holographic',
+          primaryColor: colors.primary,
+          secondaryColor: '#f8fafc',
+          glowColor: colors.glow,
+          bloom: 0.72,
+          cameraMotion: 0.7,
+          objects: [
+            {
+              id: 'hybrid-ribbon-1',
+              name: 'Liquid Chrome Film Ribbon',
+              shape: 'ribbon',
+              color: colors.primary,
+              material: 'holographic',
+              roughness: 0.1,
+              ribbon: { path: 'knot', width: 0.56, thickness: 0.07, wave: 0.68, lobes: 3, twists: 2, speed: 0.62, phase: 0 },
+              x: 0, y: 0.45, z: -0.2, scaleX: 0.88, scaleY: 0.88, scaleZ: 0.88,
+              rotationX: 14, rotationY: -18, rotationZ: 0,
+            },
+          ],
+        })
+      : normalizeStudio3DScene({
+          ...createStudio3DScene('speaker_intro', 0.25, 'dir-3d-lower-third'),
+          name: 'Editorial 3D Lower-Third',
+          text: main,
+          secondary: subtitle,
+          duration: roundT(Math.min(introDur, Math.max(0.6, stingerStart - 0.35))),
+          background: 'transparent',
+          material: 'glass',
+          entrance: 'slide',
+          primaryColor: colors.primary,
+          secondaryColor: '#f8fafc',
+          glowColor: colors.glow,
+          y: 80,
+          scale: 0.48,
+          bloom: 0.58,
+          cameraMotion: 0.28,
+        });
     const stinger = normalizeStudio3DScene({
       ...createStudio3DScene('neon_logo', stingerStart, 'dir-3d-stinger'),
-      name: `Director 3D Closing Brand · ${main}`,
+      name: `Closing 3D Brand Lockup · ${main}`,
       text: main,
       secondary: subtitle,
-      duration: roundT(Math.max(1.2, dur - stingerStart)),
+      duration: roundT(Math.max(1.1, dur - stingerStart)),
       background: 'transparent',
       entrance: style.entrance,
       material: style.material,
@@ -387,12 +432,13 @@ export function buildDirectorCinema3DProposal(snapshot, brief, duration = 6, opt
       glowColor: colors.glow,
       bloom: 0.82,
       cameraMotion: 0.9,
+      focalLength: 45,
     });
-    threeDScenes = [lowerThird, stinger];
+    threeDScenes = [introScene, stinger];
     shots = [
-      { startTime: 0, endTime: dur, sourceName: 'Split Diptych & Rotoscope Mask', treatment: 'hybrid_source_lut', reason: `Source-bound footage choreography with ${lookId} 3D LUT finish grade.` },
-      { startTime: lowerThird.startTime, endTime: lowerThird.endTime, sourceName: main, treatment: 'speaker_intro', reason: 'Transparent 3D optical glass lower-third composited over graded video.' },
-      { startTime: stingerStart, endTime: dur, sourceName: `${main} 3D Reveal`, treatment: 'neon_logo', reason: 'Transparent WebGL2 3D VFX brand lockup finale over footage.' },
+      { startTime: 0, endTime: dur, sourceName: 'Creator Story Choreography', treatment: 'hybrid_source_lut', reason: `Source-bound story choreography with ${lookId} finish grade.` },
+      { startTime: introScene.startTime, endTime: introScene.endTime, sourceName: main, treatment: introScene.template, reason: wantsSculptureOverlay ? 'Transparent holographic 3D liquid ribbon weaving across live-action footage.' : 'Transparent optical glass lower-third opener cleanly anchored in bottom safe zone.' },
+      { startTime: stingerStart, endTime: dur, sourceName: `${main} 3D Lockup`, treatment: 'neon_logo', reason: 'Transparent WebGL2 3D crest closing lockup.' },
     ];
   } else {
     const style = inferLogoStyleFromBrief(context.brief, lookId);
@@ -482,6 +528,7 @@ export function compileDirectorCinema3DPlan(result, snapshot) {
 
   const actions = [];
   let sourceGraphics = null;
+  let sourceTopology = null;
   if (planSpec.sourceComposition) {
     const sourceCompiled = compileDirectorComposition(
       {
@@ -498,6 +545,7 @@ export function compileDirectorCinema3DPlan(result, snapshot) {
       snapshot
     );
     actions.push(...sourceCompiled.plan.actions);
+    sourceTopology = sourceCompiled.topologySummary || null;
     if (sourceCompiled.plan.graphics) {
       sourceGraphics = sourceCompiled.plan.graphics;
     }
@@ -544,9 +592,14 @@ export function compileDirectorCinema3DPlan(result, snapshot) {
       threeDScenes: actions.filter(a => a.type === 'three_d_scene').length,
       nullRigs: actions.filter(a => a.type === 'null').length,
       shapeLayers: sourceGraphics?.layers?.length || actions.filter(a => a.type === 'shape').length,
+      kineticTitles: actions.filter(a => a.type === 'title' && (a.textAnimatorPreset || a.textAnimator)).length,
+      vectorPrimitives: (sourceGraphics?.layers || []).filter(l => Boolean(l.vectorShape)).length,
+      bRollCutaways: actions.filter(a => a.type === 'media_plane' && Boolean(a.bRollLayoutPreset)).length,
       parentLinks: actions.filter(a => a.type === 'parent').length,
       trackMattes: actions.filter(a => a.type === 'matte').length,
-      softMasks: actions.filter(a => a.type === 'media_plane' && Number(a.mask?.feather) > 0).length,
+      softMasks:
+        sourceTopology?.softMasks ??
+        actions.filter(a => a.type === 'media_plane' && Number(a.mask?.feather) > 0).length,
       motionDrivers: actions.filter(
         a => a.type === 'motion_driver' || (a.motionDrivers && Object.keys(a.motionDrivers).length > 0)
       ).length,
@@ -556,6 +609,7 @@ export function compileDirectorCinema3DPlan(result, snapshot) {
           (sum, a) => sum + (a.keys || []).filter(k => /^maskPoint\d+[XY]$/.test(k.property)).length,
           0
         ),
+      ...(sourceTopology?.colorGrade ? { colorGrade: sourceTopology.colorGrade } : {}),
     },
   };
 }

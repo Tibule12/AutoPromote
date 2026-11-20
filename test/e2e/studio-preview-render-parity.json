@@ -204,6 +204,32 @@
   "schemaVersion": 1,
   "contractVersion": 1,
   "updatedAt": "2026-11-19T21:19:59.073485+00:00",
+  "studioTransportHandoff20261119": {
+    "evidence": "reports/studio-transport-handoff-20261119/verification.json",
+    "focusIds": ["edited_clock", "caption_layout_animation"],
+    "nextTaskId": "S02",
+    "scope": "Verified owned source cadence, nonlinear output-clock navigation guards, and the 1,114-frame movie and handoff clock. Five paused 372×660 comparisons and finished-mix −13.8 LUFS / −1.0 dBTP are scoped observations. Continuous picture and paired audio parity remain open."
+  },
+  "studioSourceRateProof20261119": {
+    "evidence": "reports/studio-source-rate-20261119/verification.json",
+    "focusIds": [
+      "edited_clock",
+      "caption_layout_animation",
+      "audio_routing_timing"
+    ],
+    "nextTaskId": "S02",
+    "scope": "Scoped normal signed-in source-rate sequence with two occurrences, caption review, title and cutaway. Native delivery tests cover 24000/1001 fps at 1x and 2x with stereo AAC, exact downloads and fresh local backup recovery. Remaining unexercised combination gates stay open."
+  },
+  "proEditorNativeProof20261119": {
+    "evidence": "reports/studio-pro-editor-proof-20261119/verification.json",
+    "focusIds": [
+      "edited_clock",
+      "caption_layout_animation",
+      "transform_curves"
+    ],
+    "nextTaskId": "S02",
+    "scope": "Scoped local signed-in 8.5-second source split, reviewed captions, B-roll with original dialogue, title and H.264/AAC delivery. Unexercised capabilities and combination gates stay open."
+  },
   "assessment": "Retained October8 audit plus scoped October9 native NVIDIA podcast delivery/recovery evidence; no full conformance, production or creative promotion.",
   "readinessStates": [
     "UNIMPLEMENTED",

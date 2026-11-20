@@ -8,6 +8,9 @@ export function serializeStudioPresetBundle({
   finishFx = {},
   advancedColor = null,
   audioRestoration = null,
+  mainFrame = null,
+  captionStyle = "",
+  audioRemix = null,
 } = {}) {
   const safeAdv = advancedColor || finishFx?.advancedColor || null;
   const cleanAdv = safeAdv
@@ -17,11 +20,13 @@ export function serializeStudioPresetBundle({
         lutName: safeAdv.lutName || "",
         lutPresetId: safeAdv.lutPresetId || "",
         lutIntensity: Number(safeAdv.lutIntensity ?? 100),
+        lutData: safeAdv.lutData ?? safeAdv.lut ?? null,
         cameraProfile: safeAdv.cameraProfile || "rec709",
         qualifierPresetId: safeAdv.qualifierPresetId || "",
         qualifier: safeAdv.qualifier || null,
         powerWindowPresetId: safeAdv.powerWindowPresetId || "",
         powerWindow: safeAdv.powerWindow || null,
+        revitalizer: safeAdv.revitalizer || null,
       }
     : null;
 
@@ -34,10 +39,18 @@ export function serializeStudioPresetBundle({
     saturation: Number(finishFx.saturation ?? 1),
     temperature: Number(finishFx.temperature ?? 0),
     tint: Number(finishFx.tint ?? 0),
+    sharpness: Number(finishFx.sharpness ?? 0),
     lift: Number(finishFx.lift ?? 0),
     gamma: Number(finishFx.gamma ?? 1),
     gain: Number(finishFx.gain ?? 1),
     vignette: Number(finishFx.vignette ?? 0),
+    dehaze: Number(finishFx.dehaze ?? 0),
+    clarity: Number(finishFx.clarity ?? 0),
+    shadowRecovery: Number(finishFx.shadowRecovery ?? 0),
+    highlightRollOff: Number(finishFx.highlightRollOff ?? 0),
+    vibrance: Number(finishFx.vibrance ?? 0),
+    skinToneProtect: Number(finishFx.skinToneProtect ?? 0.85),
+    revitalizerPresetId: finishFx.revitalizerPresetId || "",
     filmEmulation: finishFx.filmEmulation || "none",
     halation: Number(finishFx.halation ?? 0),
     chromaticAberration: Number(finishFx.chromaticAberration ?? 0),
@@ -54,6 +67,9 @@ export function serializeStudioPresetBundle({
       finishFx: cleanFinish,
       advancedColor: cleanAdv,
       audioRestoration: audioRestoration ? { ...audioRestoration } : null,
+      ...(mainFrame && typeof mainFrame === "object" ? { mainFrame: { ...mainFrame } } : {}),
+      ...(captionStyle ? { captionStyle: String(captionStyle) } : {}),
+      ...(audioRemix && typeof audioRemix === "object" ? { audioRemix: { ...audioRemix } } : {}),
     },
     null,
     2
@@ -80,5 +96,14 @@ export function parseStudioPresetBundle(jsonText) {
       parsed.audioRestoration && typeof parsed.audioRestoration === "object"
         ? parsed.audioRestoration
         : null,
+    ...(parsed.mainFrame && typeof parsed.mainFrame === "object"
+      ? { mainFrame: { ...parsed.mainFrame } }
+      : {}),
+    ...(typeof parsed.captionStyle === "string" && parsed.captionStyle
+      ? { captionStyle: parsed.captionStyle }
+      : {}),
+    ...(parsed.audioRemix && typeof parsed.audioRemix === "object"
+      ? { audioRemix: { ...parsed.audioRemix } }
+      : {}),
   };
 }

@@ -74,6 +74,7 @@ try:
         build_caption_override_transcript,
         build_edited_caption_transcript,
         build_delivery_video_clock_filter,
+        verified_studio_source_rate,
         build_studio_cfr_packet_args,
         build_studio_timeline_mux_args,
         resolve_studio_audio_bitrate,
@@ -94,6 +95,7 @@ except ImportError:
         build_caption_override_transcript,
         build_edited_caption_transcript,
         build_delivery_video_clock_filter,
+        verified_studio_source_rate,
         build_studio_cfr_packet_args,
         build_studio_timeline_mux_args,
         resolve_studio_audio_bitrate,
@@ -1960,7 +1962,7 @@ def annotate_caption_identity_segments(transcription_segments, detected_language
     return annotated
 
 
-def normalize_openai_diarized_transcription(payload):
+def normalize_openai_diarized_transcription(payload, *, detected_language=None):
     """Convert diarized_json into the timestamp contract used by the editor."""
     normalized = []
     for index, segment in enumerate((payload or {}).get("segments") or []):
@@ -2000,7 +2002,7 @@ def normalize_openai_diarized_transcription(payload):
         "text": normalize_transcript_text((payload or {}).get("text")),
         "segments": normalized,
         "duration": (payload or {}).get("duration"),
-        "language": None,
+        "language": detected_language or None,
         "engine": "openai-gpt-4o-transcribe-diarize",
     }
 
@@ -2077,7 +2079,7 @@ def classify_caption_segment_languages_with_openai(segments):
         return segments
 
 
-def transcribe_with_openai_diarization(file_path):
+def transcribe_with_openai_diarization(file_path, *, language=None):
     """Use the speaker-aware transcription API when this project is entitled to it."""
     api_key = str(os.getenv("OPENAI_API_KEY") or os.getenv("OPENAI_KEY") or "").strip()
     if not api_key:
@@ -2110,22 +2112,29 @@ def transcribe_with_openai_diarization(file_path):
             capture_output=True,
             timeout=180,
         )
+        form_data = {
+            "model": os.getenv("OPENAI_DIARIZED_TRANSCRIPTION_MODEL")
+            or "gpt-4o-transcribe-diarize",
+            "response_format": "diarized_json",
+            "chunking_strategy": "auto",
+        }
+        normalized_lang = normalize_transcription_language(language)
+        if normalized_lang and normalized_lang not in {"za-mixed", "und"}:
+            form_data["language"] = normalized_lang
         with open(audio_path, "rb") as audio_stream:
             response = requests.post(
                 (os.getenv("OPENAI_API_BASE") or "https://api.openai.com")
                 + "/v1/audio/transcriptions",
                 headers={"Authorization": f"Bearer {api_key}"},
                 files={"file": ("podcast-clip.mp3", audio_stream, "audio/mpeg")},
-                data={
-                    "model": os.getenv("OPENAI_DIARIZED_TRANSCRIPTION_MODEL")
-                    or "gpt-4o-transcribe-diarize",
-                    "response_format": "diarized_json",
-                    "chunking_strategy": "auto",
-                },
+                data=form_data,
                 timeout=600,
             )
         response.raise_for_status()
-        result = normalize_openai_diarized_transcription(response.json())
+        result = normalize_openai_diarized_transcription(
+            response.json(),
+            detected_language=form_data.get("language"),
+        )
         result["segments"] = classify_caption_segment_languages_with_openai(result["segments"])
         return result
     finally:
@@ -2139,9 +2148,15 @@ def transcribe_with_openai_diarization(file_path):
 def transcribe_captions_with_provider(file_path, *, translate_to_english=False, prompt_hint="", source_language="auto"):
     local_options = caption_transcription_options(source_language, translate_to_english=translate_to_english)
     provider = str(os.getenv("VIRAL_CAPTION_TRANSCRIPTION_PROVIDER") or "auto").strip().lower()
-    if not translate_to_english and (source_language == "auto" or provider != "auto") and provider in {"auto", "openai", "openai_diarize", "diarize"}:
+    selected_source = str(source_language or "auto").strip().lower()
+    local_south_african_only = {"xh", "zu", "st", "tn", "ts", "nr", "ve", "za-mixed"}
+    diarize_allowed = not translate_to_english and provider in {"auto", "openai", "openai_diarize", "diarize"}
+    if diarize_allowed and (provider != "auto" or selected_source not in local_south_african_only):
         try:
-            return transcribe_with_openai_diarization(file_path)
+            diarize_lang = local_options.get("language") or (
+                None if selected_source in {"", "auto", "detect", "unknown", "za-mixed"} else selected_source
+            )
+            return transcribe_with_openai_diarization(file_path, language=diarize_lang)
         except Exception as exc:
             if provider not in {"", "auto"}:
                 raise
@@ -6180,15 +6195,20 @@ def generate_multicam_word_highlight_ass(
             clean_words = []
             group_start = None
             group_end = None
+            prev_word_end = None
             for word in group:
                 word_text = _escape_ass(str(word.get("word", "")).strip())
                 if not word_text:
                     continue
                 start = float(word.get("start", segment.get("start", 0.0)) or 0.0)
+                if prev_word_end is not None:
+                    start = max(prev_word_end, start)
                 end = max(start + 0.05, float(word.get("end", start + 0.25) or start + 0.25))
+                gap_cs = max(0, int(round((start - prev_word_end) * 100))) if prev_word_end is not None else 0
+                prev_word_end = end
                 group_start = start if group_start is None else min(group_start, start)
                 group_end = end if group_end is None else max(group_end, end)
-                clean_words.append((word_text, max(1, int(round((end - start) * 100)))))
+                clean_words.append((word_text, gap_cs, max(1, int(round((end - start) * 100)))))
             if not clean_words or group_start is None or group_end is None:
                 continue
 
@@ -6216,8 +6236,10 @@ def generate_multicam_word_highlight_ass(
             # ASS karaoke timing highlights words in sequence inside one stable
             # caption line, avoiding the jitter of one subtitle event per word.
             text = " ".join(
-                f"{caption_emotion_word_prefix(emotion, idx)}{{\\kf{duration_cs}}}{word_text}"
-                for idx, (word_text, duration_cs) in enumerate(clean_words)
+                f"{caption_emotion_word_prefix(emotion, idx)}{{\\k{gap_cs}}}{{\\kf{duration_cs}}}{word_text}"
+                if gap_cs > 0
+                else f"{caption_emotion_word_prefix(emotion, idx)}{{\\kf{duration_cs}}}{word_text}"
+                for idx, (word_text, gap_cs, duration_cs) in enumerate(clean_words)
             )
             ass_lines.append(
                 "Dialogue: 0,{start},{end},{style},,0,0,0,,{override}{text}".format(
@@ -6509,29 +6531,62 @@ def resolve_viral_export_profile(output_settings, source_width, source_height):
     fps_raw = str(settings.get("fps") or "source").strip().lower()
     fps = int(fps_raw) if fps_raw in {"24", "25", "30", "50", "60"} else None
     codec = str(settings.get("codec") or "h264").strip().lower()
-    if codec not in {"h264", "h265"}:
+    if codec not in {"h264", "h265", "prores"}:
         codec = "h264"
     quality = str(settings.get("quality") or "high").strip().lower()
     if quality not in {"draft", "balanced", "high", "master"}:
         quality = "high"
     crf_by_quality = {"draft": 27, "balanced": 23, "high": 19, "master": 16}
     crf = crf_by_quality[quality] + (2 if codec == "h265" else 0)
-    encoder = "libx265" if codec == "h265" else "libx264"
-    encoder_preference = str(os.getenv("VIRAL_EXPORT_ENCODER", "auto")).strip().lower()
-    use_nvenc = codec == "h264" and encoder_preference != "cpu" and GPU_VIDEO_ENCODER == "h264_nvenc"
-    if codec == "h264" and encoder_preference == "nvenc" and not use_nvenc:
-        raise RuntimeError("Studio NVENC export was required, but the GPU encoder probe failed")
-    if use_nvenc:
-        encoder = "h264_nvenc"
-    # Cloud Run's CPU fallback must finish inside the same bounded request as
-    # the browser job. CRF remains the creator-facing quality control; faster
-    # presets trade file size/encode efficiency, not resolution or frame rate.
+    if codec == "prores":
+        encoder = "prores_ks"
+        use_nvenc = False
+    else:
+        encoder = "libx265" if codec == "h265" else "libx264"
+        encoder_preference = str(os.getenv("VIRAL_EXPORT_ENCODER", "auto")).strip().lower()
+        use_nvenc = codec == "h264" and encoder_preference != "cpu" and GPU_VIDEO_ENCODER == "h264_nvenc"
+        if codec == "h264" and encoder_preference == "nvenc" and not use_nvenc:
+            raise RuntimeError("Studio NVENC export was required, but the GPU encoder probe failed")
+        if use_nvenc:
+            encoder = "h264_nvenc"
     preset_by_quality = {
         "draft": "ultrafast",
         "balanced": "superfast",
         "high": "veryfast",
         "master": "fast",
     }
+
+    video_bitrate_kbps = None
+    raw_vbr = str(settings.get("videoBitrate") or "auto").strip().lower()
+    if raw_vbr not in {"", "auto", "none"}:
+        try:
+            if raw_vbr.endswith("m"):
+                parsed_kbps = int(round(float(raw_vbr[:-1]) * 1000))
+            elif raw_vbr.endswith("k"):
+                parsed_kbps = int(round(float(raw_vbr[:-1])))
+            else:
+                parsed_kbps = int(round(float(raw_vbr)))
+            if parsed_kbps > 0:
+                video_bitrate_kbps = max(350, min(50000, parsed_kbps))
+        except (TypeError, ValueError):
+            video_bitrate_kbps = None
+
+    if video_bitrate_kbps is None and settings.get("targetFileSizeMb") not in {None, "", 0, "0"}:
+        try:
+            target_mb = float(settings.get("targetFileSizeMb"))
+            target_dur = float(settings.get("targetDurationSeconds") or settings.get("duration") or 15.0)
+            audio_kbps = float(settings.get("audioBitrate") or 192)
+            if target_mb > 0 and target_dur > 0:
+                total_kbps = (target_mb * 8192.0) / max(1.0, target_dur)
+                video_bitrate_kbps = max(350, min(50000, int(round(total_kbps - audio_kbps))))
+        except (TypeError, ValueError):
+            pass
+
+    color_space = str(settings.get("colorSpace") or "").strip().lower() or None
+    audio_codec = str(settings.get("audioCodec") or ("pcm" if codec == "prores" else "aac")).strip().lower()
+    if audio_codec not in {"aac", "pcm"}:
+        audio_codec = "aac"
+
     return {
         "resolution": resolution,
         "width": output_width,
@@ -6539,21 +6594,41 @@ def resolve_viral_export_profile(output_settings, source_width, source_height):
         "fps": fps,
         "codec": codec,
         "encoder": encoder,
+        "container": "mov" if codec == "prores" else "mp4",
         "quality": quality,
         "crf": crf,
         "preset": "p4" if use_nvenc else preset_by_quality[quality],
-        "colorSpace": settings.get("colorSpace"),
+        "videoBitrateKbps": video_bitrate_kbps,
+        "audioCodec": audio_codec,
+        "colorSpace": color_space,
     }
 
 
 def build_viral_export_encode_args(profile):
-    # The authored RGB finish/frame passes return BT.709 YUV. An explicit
-    # Rec.709 delivery must describe that surface instead of inheriting the
-    # original camera's primaries (for example P3) through those RGB passes.
-    colour_args = (["-color_primaries", "bt709", "-color_trc", "bt709",
-                    "-colorspace", "bt709", "-color_range", "tv"]
-                   if profile.get("colorSpace") == "rec709" else [])
+    # The authored RGB finish/frame passes return BT.709 YUV unless Rec.2020 is requested.
+    cs = profile.get("colorSpace")
+    if cs == "rec2020":
+        colour_args = ["-color_primaries", "bt2020", "-color_trc", "bt2020-10", "-colorspace", "bt2020nc", "-color_range", "tv"]
+    elif cs == "rec709":
+        colour_args = ["-color_primaries", "bt709", "-color_trc", "bt709", "-colorspace", "bt709", "-color_range", "tv"]
+    else:
+        colour_args = []
+
+    if profile.get("encoder") == "prores_ks":
+        return [
+            "-c:v", "prores_ks", "-profile:v", "3", "-vendor", "apl0",
+            "-pix_fmt", "yuv422p10le", *colour_args,
+        ]
+
+    vbr_kbps = profile.get("videoBitrateKbps")
     if profile["encoder"] == "h264_nvenc":
+        if vbr_kbps:
+            return [
+                "-c:v", "h264_nvenc", "-preset", profile.get("preset", "p4"),
+                "-rc", "vbr", "-b:v", f"{int(vbr_kbps)}k",
+                "-maxrate", f"{int(vbr_kbps * 1.5)}k", "-bufsize", f"{int(vbr_kbps * 2)}k",
+                "-pix_fmt", "yuv420p", *colour_args,
+            ]
         # NVENC uses constant quality with VBR; CRF is an x264/x265 option.
         return [
             "-c:v", "h264_nvenc", "-preset", profile.get("preset", "p4"),
@@ -6565,11 +6640,16 @@ def build_viral_export_encode_args(profile):
         profile["encoder"],
         "-preset",
         profile.get("preset", "veryfast"),
-        "-crf",
-        str(profile["crf"]),
-        "-pix_fmt",
-        "yuv420p",
     ]
+    if vbr_kbps:
+        args.extend([
+            "-b:v", f"{int(vbr_kbps)}k",
+            "-maxrate", f"{int(vbr_kbps * 1.5)}k",
+            "-bufsize", f"{int(vbr_kbps * 2)}k",
+        ])
+    else:
+        args.extend(["-crf", str(profile["crf"])])
+    args.extend(["-pix_fmt", "yuv420p"])
     if profile["codec"] == "h265":
         args.extend(["-tag:v", "hvc1"])
     return [*args, *colour_args]
@@ -31259,12 +31339,14 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         # Retain the verified original; the bounded segment pass below still
         # performs delivery-rate normalization and canvas sizing.
         studio_sequence_source = bool(request.timeline_segments and request.composition_plan)
+        match_source_rate = str((request.output_settings or {}).get("fps", "")).strip().lower() == "source"
+        source_delivery_rate = None
         try:
             input_path = await materialize_video_input(
                 request.video_url,
                 input_path,
                 keep_audio=True,
-                preserve_source_bytes=bool(request.subjectVfx) or source_framing or studio_sequence_source,
+                preserve_source_bytes=bool(request.subjectVfx) or source_framing or studio_sequence_source or match_source_rate,
             )
         except Exception as e:
              err_msg = f"Failed to load video: {str(e)}"
@@ -31365,10 +31447,13 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         segment.url,
                         segment_source_path,
                         keep_audio=True,
-                        preserve_source_bytes=bool(request.subjectVfx) or source_framing or studio_sequence_source,
+                        preserve_source_bytes=bool(request.subjectVfx) or source_framing or studio_sequence_source or match_source_rate,
                     )
                     sequence_source_paths[segment.url] = segment_source_path
 
+                if match_source_rate and source_delivery_rate is None:
+                    source_delivery_rate = verified_studio_source_rate(probe_media_stream_summary(segment_source_path))
+                    selected_timeline_fps = source_delivery_rate
                 segment_picture_path, segment_picture_start = segment_source_path, float(segment.start_time)
                 if request.subjectVfx:
                     try:
@@ -31525,6 +31610,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     SHARED_TMP_DIR,
                 )
         else:
+            if match_source_rate:
+                source_delivery_rate = verified_studio_source_rate(probe_media_stream_summary(input_path))
             duration = request.end_time - request.start_time
             try:
                 await run_subprocess_async([
@@ -31900,7 +31987,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         programme_fps=programme_fps,
                         reviewed_subject=bool(request.subjectVfx),
                         preserve_samples=preserve_reviewed_sequence_samples(reframe_target_width,
-                            reframe_target_height,programme_fps or (request.output_settings or {}).get('fps',30),
+                            reframe_target_height,programme_fps or float(source_delivery_rate or (request.output_settings or {}).get('fps',30)),
                             reframe_duration,manual_reframe_keyframes or has_studio_node_grade_masks(request.finish_plan)),
                         multicam_programme_path=multicam_programme_path,
                     )
@@ -31928,6 +32015,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         from studio_sequence_video import preserve_reviewed_sequence_samples
                     preserve_reframe_samples=preserve_reviewed_sequence_samples(
                         reframe_target_width,reframe_target_height,
+                        float(source_delivery_rate) if source_delivery_rate else
                         resolve_viral_export_profile(request.output_settings,reframe_target_width,reframe_target_height).get('fps') or 30,
                         get_media_duration(reframe_source_path),manual_reframe_keyframes or has_studio_node_grade_masks(request.finish_plan))
                     await run_subprocess_async([
@@ -32092,6 +32180,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         for index, adjustment in enumerate(adjustment_layers):
             effects = adjustment.setdefault("effects", {})
             effects.pop("_worker_cube_path", None)
+            effects.pop("_worker_qualifier_cube_path", None)
             effects["_worker_height"] = get_video_dimensions(working_path)[1]
             if effects.get("color_cube"):
                 try:
@@ -32102,6 +32191,16 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 write_color_cube(effects["color_cube"], adjustment_cube_path)
                 sequence_temp_paths.add(adjustment_cube_path)
                 effects["_worker_cube_path"] = adjustment_cube_path
+            adj_qualifier = effects.get("hsl_qualifier")
+            if isinstance(adj_qualifier, dict) and adj_qualifier.get("enabled"):
+                try:
+                    from .studio_pro_render_engine import write_hsl_qualifier_cube
+                except ImportError:
+                    from studio_pro_render_engine import write_hsl_qualifier_cube
+                adj_qual_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_adjustment_qual_{index}.cube")
+                write_hsl_qualifier_cube(adj_qualifier, adj_qual_path)
+                sequence_temp_paths.add(adj_qual_path)
+                effects["_worker_qualifier_cube_path"] = adj_qual_path
         # Node masks are native branch rasters; grade only their actual coverage.
         if has_studio_node_grade_masks(request.finish_plan):
             try:
@@ -32193,7 +32292,6 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 select_video_encode_profile,
             )
 
-        requested_fps = int((request.output_settings or {}).get("fps", 30) or 30)
         requested_speed_segments = request.speed_segments or []
         has_reverse_or_freeze = any(
             getattr(seg, "direction", "forward") == "reverse" or bool(getattr(seg, "freeze", False))
@@ -32202,6 +32300,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         has_optical_flow = any(bool(getattr(seg, "optical_flow", False)) for seg in requested_speed_segments)
 
         if has_reverse_or_freeze or speed_plan_changes_timing(speed_plan):
+            requested_fps = source_delivery_rate or int((request.output_settings or {}).get("fps", 30) or 30)
             speed_adjusted_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_speed.mp4")
             speed_has_audio = has_audio_stream(working_path)
             encode_profile = select_video_encode_profile(
@@ -32222,6 +32321,76 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 speed_filter = f"[0:v]{rf['video_filter']}[v_speed]"
                 if speed_has_audio and rf["audio_filter"]:
                     speed_filter += f";[0:a]{rf['audio_filter']}[a_speed]"
+            elif has_reverse_or_freeze and len(requested_speed_segments) > 1:
+                seg_count = len(requested_speed_segments)
+                v_split_outs = "".join(f"[vrfin_{i}]" for i in range(seg_count))
+                rf_filters = [f"[0:v]split={seg_count}{v_split_outs}"]
+                if speed_has_audio:
+                    a_split_outs = "".join(f"[arfin_{i}]" for i in range(seg_count))
+                    rf_filters.append(f"[0:a]asplit={seg_count}{a_split_outs}")
+                v_seg_labels = []
+                a_seg_labels = []
+                rf_total_duration = 0.0
+                for seg_idx, seg in enumerate(requested_speed_segments):
+                    seg_start = max(0.0, float(getattr(seg, "start_time", 0.0) or 0.0))
+                    seg_end = max(
+                        seg_start + 0.04,
+                        min(pre_speed_duration, float(getattr(seg, "end_time", pre_speed_duration) or pre_speed_duration)),
+                    )
+                    seg_dir = str(getattr(seg, "direction", "forward") or "forward").strip().lower()
+                    seg_freeze = bool(getattr(seg, "freeze", False))
+                    seg_rate = max(0.1, min(16.0, float(getattr(seg, "rate", 1.0) or 1.0)))
+                    explicit_hold = getattr(seg, "hold_seconds", None)
+                    seg_hold = (
+                        max(0.1, min(30.0, float(explicit_hold)))
+                        if explicit_hold is not None
+                        else max(0.25, min(5.0, seg_end - seg_start))
+                    )
+                    v_lbl = f"vrf_{seg_idx}"
+                    v_in = f"[vrfin_{seg_idx}]"
+                    if seg_freeze:
+                        rf_filters.append(
+                            f"{v_in}trim=start={seg_start:.6f}:end={seg_end:.6f},setpts=PTS-STARTPTS,"
+                            f"tpad=stop_mode=clone:stop_duration={seg_hold:.3f},fps={requested_fps}[{v_lbl}]"
+                        )
+                        rf_total_duration += (seg_end - seg_start) + seg_hold
+                    elif seg_dir == "reverse":
+                        rf_filters.append(
+                            f"{v_in}trim=start={seg_start:.6f}:end={seg_end:.6f},setpts=PTS-STARTPTS,"
+                            f"reverse,setpts=PTS-STARTPTS,fps={requested_fps}[{v_lbl}]"
+                        )
+                        rf_total_duration += (seg_end - seg_start) / seg_rate
+                    else:
+                        rf_filters.append(
+                            f"{v_in}trim=start={seg_start:.6f}:end={seg_end:.6f},setpts=(PTS-STARTPTS)/{seg_rate:.6f},"
+                            f"fps={requested_fps}[{v_lbl}]"
+                        )
+                        rf_total_duration += (seg_end - seg_start) / seg_rate
+                    v_seg_labels.append(f"[{v_lbl}]")
+                    if speed_has_audio:
+                        a_lbl = f"arf_{seg_idx}"
+                        a_in = f"[arfin_{seg_idx}]"
+                        if seg_freeze:
+                            rf_filters.append(
+                                f"{a_in}atrim=start={seg_start:.6f}:end={seg_end:.6f},asetpts=PTS-STARTPTS,"
+                                f"apad=pad_dur={seg_hold:.3f}[{a_lbl}]"
+                            )
+                        elif seg_dir == "reverse":
+                            rf_filters.append(
+                                f"{a_in}atrim=start={seg_start:.6f}:end={seg_end:.6f},asetpts=PTS-STARTPTS,"
+                                f"areverse,asetpts=PTS-STARTPTS[{a_lbl}]"
+                            )
+                        else:
+                            rf_filters.append(
+                                f"{a_in}atrim=start={seg_start:.6f}:end={seg_end:.6f},asetpts=PTS-STARTPTS,"
+                                f"atempo={seg_rate:.6f}[{a_lbl}]"
+                            )
+                        a_seg_labels.append(f"[{a_lbl}]")
+                rf_filters.append(f"{''.join(v_seg_labels)}concat=n={len(v_seg_labels)}:v=1:a=0[v_speed]")
+                if speed_has_audio and a_seg_labels:
+                    rf_filters.append(f"{''.join(a_seg_labels)}concat=n={len(a_seg_labels)}:v=0:a=1[a_speed]")
+                speed_filter = ";".join(rf_filters)
+                rendered_timeline_duration = max(0.05, rf_total_duration)
             elif has_optical_flow and len(speed_plan) == 1 and speed_plan[0]["rate"] < 1.0:
                 vf_flow = build_optical_flow_speed_filter(
                     speed_plan[0]["rate"], target_fps=requested_fps, optical_flow=True
@@ -32758,6 +32927,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         # using that floor here displaces native layers on a 320x240 picture.
         base_width, base_height = get_studio_picture_dimensions(working_path)
         delivery_profile = resolve_viral_export_profile(request.output_settings, base_width, base_height)
+        composition_fps = float(source_delivery_rate) if source_delivery_rate else delivery_profile["fps"] or 30
         inputs = ["-i", working_path]
         filter_chain = []
         current_v_label = "0:v"
@@ -32936,7 +33106,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             block = blend_layer_block(list(filter_chain[start:]), input_label, current_v_label,
                                       overlay.blendMode, base_width, base_height,
                                       rendered_timeline_duration, f"studio_blend_{len(overlay_filter_blocks)}", time_window,
-                                      resolve_viral_export_profile(request.output_settings, base_width, base_height)["fps"] or 30)
+                                      composition_fps)
             overlay_filter_blocks.append((str(overlay.id), block, input_label, current_v_label))
 
         video_overlays = [o for o in request.overlays if o.type == 'video' and o.src]
@@ -33016,7 +33186,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         from .studio_layer_cache import video_layer_raster_key
                     except ImportError:
                         from studio_layer_cache import video_layer_raster_key
-                    layer_fps = delivery_profile['fps'] or 30
+                    layer_fps = composition_fps
                     raster_key = await asyncio.to_thread(video_layer_raster_key,
                         ov_path, ov, layer_plan, base_width, base_height,
                         rendered_timeline_duration, speed_plan, layer_fps)
@@ -33042,7 +33212,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         except ImportError:
                             from studio_perspective import projected_overlay_options
                         media_label = f'plane_rgba_{input_idx}'
-                        plane_fps = delivery_profile['fps'] or 30
+                        plane_fps = composition_fps
                         filter_chain.append(f'[{input_idx}:v:0][{input_idx}:v:1]alphamerge,settb=1/90000,setpts=STARTPTS+N*90000/{plane_fps}[{media_label}];')
                         overlay_options = projected_overlay_options(receipt['start_time'],receipt['duration'])
                     filter_chain.append(f"[{current_v_label}][{media_label}]overlay=0:0:"
@@ -33146,7 +33316,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         base_height,
                         rendered_timeline_duration,
                         speed_plan,
-                        delivery_profile['fps'] or 30,
+                        composition_fps,
                     )
                     inputs.extend(["-itsoffset", f"{receipt['start_time']:.6f}", "-i", motion_layer_path])
                     media_label = f'{input_idx}:v'
@@ -33157,7 +33327,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         except ImportError:
                             from studio_perspective import projected_overlay_options
                         media_label = f'plane_rgba_{input_idx}'
-                        plane_fps = delivery_profile['fps'] or 30
+                        plane_fps = composition_fps
                         filter_chain.append(f'[{input_idx}:v:0][{input_idx}:v:1]alphamerge,settb=1/90000,setpts=STARTPTS+N*90000/{plane_fps}[{media_label}];')
                         overlay_options = projected_overlay_options(receipt['start_time'],receipt['duration'])
                     overlay_filter = (
@@ -33344,7 +33514,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             rendered_title = txt.model_copy(update={key: value for key, value in geometry.items() if key not in {"lines", "clipBox"}})
             receipt = await asyncio.to_thread(render_image_layer_motion, text_asset, text_motion,
                                              rendered_title, layer_plan, base_width, base_height,
-                                             rendered_timeline_duration, speed_plan, delivery_profile['fps'] or 30, title_animator=title_animator)
+                                             rendered_timeline_duration, speed_plan, composition_fps, title_animator=title_animator)
             inputs.extend(["-itsoffset", f"{receipt['start_time']:.6f}", "-i", text_motion])
             next_label = f"text_overlay_{idx}"
             filter_chain.append(f"[{current_v_label}][{input_idx}:v]overlay=0:0:eof_action=pass:format=auto[{next_label}];")
@@ -33429,7 +33599,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             except ImportError:
                 from studio_composition import connect_grouped_layer_blocks, graphic_group_mask
             group_mask_inputs = {}
-            group_fps = resolve_viral_export_profile(request.output_settings, base_width, base_height)["fps"] or 30
+            group_fps = composition_fps
             for index, group in enumerate(request.composition_plan.get("groups", [])):
                 if not group.get("mask", {}).get("enabled"):
                     continue
@@ -33489,9 +33659,25 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
 
         audio_filter_chain = []
         try:
-            from .studio_audio import audio_track_audible, build_volume_filter, build_audio_bus_mix
+            from .studio_audio import (
+                audio_track_audible,
+                build_volume_filter,
+                build_audio_bus_mix,
+                build_pan_filter,
+                track_pan,
+                build_smooth_ducking_filter,
+                build_master_bus_loudnorm,
+            )
         except ImportError:
-            from studio_audio import audio_track_audible, build_volume_filter, build_audio_bus_mix
+            from studio_audio import (
+                audio_track_audible,
+                build_volume_filter,
+                build_audio_bus_mix,
+                build_pan_filter,
+                track_pan,
+                build_smooth_ducking_filter,
+                build_master_bus_loudnorm,
+            )
         audio_track_states = request.audio_track_states or {}
         audio_automation = request.audio_automation or {}
         audio_automation_receipt = {}
@@ -33513,6 +33699,13 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         audio_mix_labels = []
         main_audio_mix_token = None
 
+        has_companion_audio_buses = bool(
+            (overlay_audio_specs and audio_track_audible(audio_track_states, "broll"))
+            or (studio_music_source and os.path.exists(studio_music_source) and audio_track_audible(audio_track_states, "music"))
+            or bool(request.sound_effects)
+            or (background_audio and background_audio.url)
+        )
+
         if has_main_audio:
             main_audio_label = "0:a"
             restoration_receipt = None
@@ -33521,7 +33714,10 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     from .studio_audio import build_dialogue_filter
                 except ImportError:
                     from studio_audio import build_dialogue_filter
-                restoration_filter, restoration_receipt = build_dialogue_filter(request.audio_restoration)
+                restoration_filter, restoration_receipt = build_dialogue_filter(
+                    request.audio_restoration,
+                    include_loudnorm=not has_companion_audio_buses,
+                )
                 if restoration_filter:
                     audio_filter_chain.append(f"[{main_audio_label}]{restoration_filter}[main_audio_restored]")
                     main_audio_label = "main_audio_restored"
@@ -33535,15 +33731,20 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             ducking_overlays = [prepared_overlay_audio_ranges.get(str(overlay.id), overlay)
                 for overlay in request.overlays if overlay.type == "video"
                 and overlay.start_time is not None and overlay.duration is not None]
-            for duck_index, (source_start, source_end, gain) in enumerate(
-                    ducking_windows(ducking_overlays) if audio_track_audible(audio_track_states, "broll") else []):
-                rel_start = rendered_timeline_time(source_start)
-                rel_end = rendered_timeline_time(source_end)
-                next_label = f"main_audio_duck_{duck_index}"
-                audio_filter_chain.append(
-                    f"[{main_audio_label}]volume={gain:.3f}:enable='gte(t,{rel_start:.6f})*lt(t,{rel_end:.6f})'[{next_label}]"
+            rendered_duck_windows = [
+                (rendered_timeline_time(source_start), rendered_timeline_time(source_end), gain)
+                for source_start, source_end, gain in (
+                    ducking_windows(ducking_overlays) if audio_track_audible(audio_track_states, "broll") else []
                 )
-                main_audio_label = next_label
+            ]
+            smooth_duck = build_smooth_ducking_filter(rendered_duck_windows)
+            if smooth_duck:
+                audio_filter_chain.append(f"[{main_audio_label}]{smooth_duck}[main_audio_ducked]")
+                main_audio_label = "main_audio_ducked"
+            main_pan = build_pan_filter(track_pan(audio_track_states, "originalAudio"))
+            if main_pan:
+                audio_filter_chain.append(f"[{main_audio_label}]{main_pan}[main_audio_panned]")
+                main_audio_label = "main_audio_panned"
             if normalized_audio_remix["enabled"] and normalized_audio_remix["target"] == "voice":
                 remix_chain, _ = build_audio_remix_chain(normalized_audio_remix)
                 audio_filter_chain.append(
@@ -33574,7 +33775,10 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             volume = clamp_float(float(overlay.overlayAudioVolume), 0.0, 1.5)
             output_label = f"overlay_audio_{audio_index}"
             broll_automation = bus_automation("broll")
-            automation_suffix = f",{broll_automation}" if broll_automation else ""
+            broll_pan = build_pan_filter(track_pan(audio_track_states, "broll"))
+            automation_suffix = "".join(
+                f",{part}" for part in (broll_automation, broll_pan) if part
+            )
             fade_out_st = max(0.01, audio_duration - 0.06)
             audio_filter_chain.append(
                 f"[{overlay_input_idx}:a]atrim=0:{audio_duration:.3f},asetpts=PTS-STARTPTS,"
@@ -33661,6 +33865,10 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         f"[studio_music_raw]{sidechain}sidechaincompress="
                         f"threshold=0.025:ratio={ratio:.2f}:attack=18:release=280[music_ducked]")
                     studio_music_label = "[music_ducked]"
+            music_pan = build_pan_filter(track_pan(audio_track_states, "music"))
+            if music_pan:
+                audio_filter_chain.append(f"{studio_music_label}{music_pan}[studio_music_panned]")
+                studio_music_label = "[studio_music_panned]"
             audio_mix_labels.append(studio_music_label)
 
         if request.sound_effects:
@@ -33692,9 +33900,11 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                                         rendered_timeline_duration, speed_plan, resolved_effect_audio, channels=2)
                 inputs.extend(["-i", effect_mix_path])
                 automation = bus_automation(bus)
-                if automation:
+                bus_pan = build_pan_filter(track_pan(audio_track_states, bus))
+                bus_chain = ",".join(part for part in (automation, bus_pan) if part)
+                if bus_chain:
                     automated_label = f"{bus}_automated"
-                    audio_filter_chain.append(f"[{input_idx}:a]{automation}[{automated_label}]")
+                    audio_filter_chain.append(f"[{input_idx}:a]{bus_chain}[{automated_label}]")
                     bus_label = f"[{automated_label}]"
                 else:
                     bus_label = f"[{input_idx}:a]"
@@ -33781,12 +33991,22 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
 
         if audio_mix_labels:
             audio_filter_chain.append(build_audio_bus_mix(audio_mix_labels))
+            master_unpadded = "a_mix_unpadded"
+            if request.audio_restoration and (not has_main_audio or has_companion_audio_buses):
+                master_norm, _ = build_master_bus_loudnorm(request.audio_restoration)
+                if master_norm:
+                    audio_filter_chain.append(f"[{master_unpadded}]{master_norm}[a_mix_leveled]")
+                    master_unpadded = "a_mix_leveled"
             audio_filter_chain.append(
-                f"[a_mix_unpadded]{build_studio_audio_delivery_filter(rendered_timeline_duration)}[a_mix]"
+                f"[{master_unpadded}]{build_studio_audio_delivery_filter(rendered_timeline_duration)}[a_mix]"
             )
 
+        delivery_settings_with_duration = {
+            **(request.output_settings or {}),
+            "targetDurationSeconds": rendered_timeline_duration,
+        }
         delivery_profile = resolve_viral_export_profile(
-            request.output_settings,
+            delivery_settings_with_duration,
             base_width,
             base_height,
         )
@@ -33817,6 +34037,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             # authored colours through the one final 8-bit delivery conversion.
             delivery_filters.extend(["scale=out_color_matrix=bt709:out_range=tv:flags=accurate_rnd+full_chroma_int", "format=yuv420p"])
             delivery_filters.append("setparams=range=limited:color_primaries=bt709:color_trc=bt709:colorspace=bt709")
+        elif delivery_profile.get("colorSpace") == "rec2020":
+            delivery_filters.extend(["scale=out_color_matrix=bt2020nc:out_range=tv"])
+            delivery_filters.append("setparams=range=limited:color_primaries=bt2020:color_trc=bt2020-10:colorspace=bt2020nc")
         if (
             delivery_profile["width"] != int(base_width)
             or delivery_profile["height"] != int(base_height)
@@ -33824,14 +34047,17 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             delivery_filters.append(
                 f"scale={delivery_profile['width']}:{delivery_profile['height']}:flags=lanczos"
             )
-        if delivery_profile["fps"]:
+        delivery_fps = source_delivery_rate or delivery_profile["fps"]
+        if source_delivery_rate:
+            delivery_profile.update(fps=float(source_delivery_rate), frameRate=str(source_delivery_rate))
+        if delivery_fps:
             picture = next((stream for stream in probe_media_stream_summary(working_path).get("streams", [])
                             if stream.get("codec_type") == "video"), {})
             try:
                 numerator, denominator = str(picture["avg_frame_rate"]).split("/")
                 source_fps = float(numerator) / float(denominator)
                 delivery_filters.append(build_delivery_video_clock_filter(
-                    delivery_profile["fps"], rendered_timeline_duration, source_fps,
+                    delivery_fps, rendered_timeline_duration, source_fps,
                 ))
             except (KeyError, ValueError, ZeroDivisionError):
                 raise RuntimeError("Studio source picture clock could not be verified")
@@ -33883,15 +34109,26 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
              else:
                  cmd.extend(["-map", "0:v:0"])
 
+             use_pcm_audio = (
+                 delivery_profile.get("audioCodec") == "pcm"
+                 and delivery_profile.get("container") == "mov"
+             )
+             audio_encode_flags = (
+                 ["-c:a", "pcm_s16le"]
+                 if use_pcm_audio
+                 else ["-c:a", "aac", "-b:a", audio_bitrate]
+             )
              if audio_filter_chain:
-                 cmd.extend(["-map", "[a_mix]", "-c:a", "aac", "-b:a", audio_bitrate])
+                 cmd.extend(["-map", "[a_mix]", *audio_encode_flags])
              elif request.mute_audio or not source_audio_allowed:
                  cmd.extend(["-an"])
              else:
-                 cmd.extend(["-map", "0:a?", "-c:a", "aac", "-b:a", audio_bitrate])
+                 cmd.extend(["-map", "0:a?", *audio_encode_flags])
 
              cmd.extend(["-t", f"{rendered_timeline_duration:.3f}"])
              cmd.extend(build_viral_export_encode_args(delivery_profile))
+             if delivery_profile.get("container") == "mov":
+                 cmd.extend(["-f", "mov"])
              cmd.extend(["-movflags", "+faststart", "-y", output_path])
         
         cmd = bounded_studio_ffmpeg_command(cmd)
@@ -33918,12 +34155,12 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             with tempfile.TemporaryDirectory(prefix="viral-audio-remix-", dir=SHARED_TMP_DIR) as remix_dir:
                 remixed_path = os.path.join(remix_dir, "remixed.mp4")
                 loop = asyncio.get_running_loop()
-                audio_remix_receipt = await loop.run_in_executor(
-                    None,
+                audio_remix_receipt = await asyncio.to_thread(
                     render_audio_remix,
                     output_path,
                     remixed_path,
                     normalized_audio_remix,
+                    audio_bitrate=audio_bitrate,
                 )
                 os.replace(remixed_path, output_path)
         elif normalized_audio_remix["enabled"] and audio_remix_receipt["status"] == "not_requested":

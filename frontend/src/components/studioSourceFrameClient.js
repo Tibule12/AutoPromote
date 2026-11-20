@@ -5,15 +5,30 @@ import { studioPausedFrameReceiptMatches } from './studioSourcePreview';
 // Raw source pictures only. Native scene geometry/materials still render in
 // Studio; this request never supplies a flattened effect or changes an edit.
 let pending = Promise.resolve();
-export function loadStudioSourceFrame(request, signal) {
+function queueSourceInspection(action) {
   // Programme and scene inspection share the server's one-decoder-per-owner
   // budget. Superseded queued requests are discarded before touching the API.
-  const task = pending.then(() => fetchSourceFrame(request, signal));
+  const task = pending.then(action);
   pending = task.catch(() => {});
   return task;
 }
 
-async function fetchSourceFrame(request, signal) {
+export function loadStudioSourceFrame(request, signal) {
+  return queueSourceInspection(() => fetchSourceFrame(request, signal));
+}
+
+export function loadStudioSourceFrameRate(storagePath, signal) {
+  return queueSourceInspection(async () => {
+    const { response, result } = await inspectSource("source-frame-rate", { storagePath }, signal);
+    const [numerator, denominator] = String(result.frameRate || "").split("/").map(Number);
+    const fps = numerator / denominator;
+    if (!response.ok || !/^\d+\/[1-9]\d*$/.test(result.frameRate || "") ||
+        !Number.isFinite(fps) || fps < 1 || fps > 120) throw new Error("Source frame rate unavailable");
+    return result;
+  });
+}
+
+async function inspectSource(endpoint, request, signal) {
   if (signal.aborted) throw new DOMException('Cancelled', 'AbortError');
   const token = await getMediaAuthToken();
   if (!token || signal.aborted) throw new Error('Source frame unavailable');
@@ -22,7 +37,7 @@ async function fetchSourceFrame(request, signal) {
   // download. Honour that backpressure within the caller's 30s abort deadline.
   const retryUntil = Date.now() + 10000;
   for (;;) {
-    response = await fetch(`${API_BASE_URL}/api/media/studio-assets/source-frame`, {
+    response = await fetch(`${API_BASE_URL}/api/media/studio-assets/${endpoint}`, {
       method: 'POST', signal, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(request),
     });
@@ -35,7 +50,13 @@ async function fetchSourceFrame(request, signal) {
       if (signal.aborted) cancel();
     });
   }
-  if (signal.aborted || !response.ok || !studioPausedFrameReceiptMatches(request, result) ||
+  if (signal.aborted) throw new DOMException('Cancelled', 'AbortError');
+  return { response, result };
+}
+
+async function fetchSourceFrame(request, signal) {
+  const { response, result } = await inspectSource("source-frame", request, signal);
+  if (!response.ok || !studioPausedFrameReceiptMatches(request, result) ||
       result.sampler !== (request.sampling || 'studio-sequence-source-frame-v1'))
     throw new Error('Source frame receipt does not match');
   const image = await new Promise((resolve, reject) => {

@@ -1,0 +1,476 @@
+{
+  "company": "AUTOPROMOTE (PTY) LTD",
+  "founder": "Thulani Mtshwelo",
+  "email": "thulani@autopromote.org",
+  "website": "https://autopromote.org",
+  "date": "15 November 2026",
+  "event": "Africa Tech Festival • 17–19 November 2026 • CTICC, Cape Town",
+  "stage": "Prelaunch • founder testing • South Africa",
+  "slides": [
+    {
+      "kind": "hero",
+      "eyebrow": "AFRICA TECH FESTIVAL 2026",
+      "title": "Create. Refine.\nRelease.",
+      "subtitle": "An AI-assisted video workspace that keeps creative decisions editable.",
+      "image": "hero.jpg",
+      "note": "I am Thulani, founder of AUTOPROMOTE (PTY) LTD. I am building a workspace for turning footage into an editable video and preparing its release. The product is prelaunch; I am currently its tester. These are real Studio outputs, not customer results."
+    },
+    {
+      "kind": "cards",
+      "eyebrow": "THE PROBLEM",
+      "title": "A video becomes a workflow.",
+      "subtitle": "The creator's job continues long after the first cut.",
+      "cards": [
+        [
+          "Find the moment",
+          "Review long footage, choose a complete idea and preserve context."
+        ],
+        [
+          "Shape the edit",
+          "Make framing, timing, motion, sound and revisions work together."
+        ],
+        [
+          "Prepare the release",
+          "Adapt the result, prepare destination copy and keep the handoff visible."
+        ]
+      ],
+      "bottom": "First validation question: where does the handoff cost teams the most time?",
+      "note": "The problem hypothesis is a fragmented workflow. Choosing moments, editing and preparing releases often happen in separate tools. I want to test where small creative teams lose time, rather than claim an unmeasured productivity improvement."
+    },
+    {
+      "kind": "flow",
+      "eyebrow": "THE PRODUCT",
+      "title": "One creative path.\nHuman decisions throughout.",
+      "subtitle": "Footage → suggested moments → editable Studio → finished export → release preparation",
+      "cards": [
+        [
+          "Discover",
+          "Source-bound suggestions; review the dialogue and boundaries."
+        ],
+        [
+          "Edit",
+          "Timeline, motion, compositing, B-roll, grading and sound."
+        ],
+        [
+          "Deliver",
+          "Actual export today; Publisher and Queue require separate live qualification."
+        ]
+      ],
+      "bottom": "Demonstrated in selected local workflows: source review, native editing and finished export.",
+      "note": "Clip Finder ranks source intervals and the founder reviews what was actually said. Studio carries the edit through one project and renderer. The publishing implementation exists, but this event package does not claim a fresh end-to-end multi-platform publishing test."
+    },
+    {
+      "kind": "image",
+      "eyebrow": "REAL STUDIO WORK",
+      "title": "Show the work.\nThen open the decisions.",
+      "subtitle": "Selected existing films from Videos, with their original sound and retained project evidence.",
+      "image": "showcase.jpg",
+      "bottom": "Existing Studio outputs and native records • selected from Videos",
+      "note": "Open the offline showcase now. It uses stronger existing Studio films from my Videos folder, selected after review. The separate source movies remain available in full. This is proof of selected outputs, not a claim that every tool or creative task is production-ready."
+    },
+    {
+      "kind": "image",
+      "eyebrow": "CREATIVE CONTROL",
+      "title": "The project stays editable.",
+      "subtitle": "Native authoring records show the timeline, layers, camera, motion and sound decisions behind the result.",
+      "image": "studio.jpg",
+      "bottom": "Continue the creative decisions in the native project.",
+      "note": "The value is not only the finished movie. The creator can return to the timeline and adjust native decisions. The package includes actual Studio control recordings for selected films. A project backup can still depend on its owned media and runtime; it is not a promise of universal portability."
+    },
+    {
+      "kind": "cards",
+      "eyebrow": "DIFFERENTIATION TO VALIDATE",
+      "title": "A connected edit,\nwith evidence behind it.",
+      "subtitle": "Product hypotheses to test against the tools buyers already use.",
+      "cards": [
+        [
+          "Source grounded",
+          "Moments retain source wording and timestamps; a ranking is not a promise of views."
+        ],
+        [
+          "Creative control",
+          "Manual edits continue in the same native project rather than ending at an opaque result."
+        ],
+        [
+          "Creator review",
+          "English and supported-language output remain editable; uncertain language needs review."
+        ]
+      ],
+      "bottom": "Next test: compare this connected workflow with buyers’ current editing stack.",
+      "note": "These are differentiation hypotheses. Existing editors and repurposing tools are credible alternatives. I want to learn whether maintaining context and editable decisions through the workflow improves a buyer's actual work. Language quality must be reviewed, particularly for code-switching and local languages."
+    },
+    {
+      "kind": "cards",
+      "eyebrow": "INITIAL CUSTOMER",
+      "title": "Start with repeated\nvideo work.",
+      "subtitle": "Proposed beachhead: South African small creative teams repurposing recurring footage.",
+      "cards": [
+        [
+          "Podcast / interview teams",
+          "A regular long-form source and a repeatable need for short clips."
+        ],
+        [
+          "Small agencies",
+          "Ongoing content work, client revisions and a clear workflow owner."
+        ],
+        [
+          "Creator-led businesses",
+          "A founder or editor responsible for both production and release."
+        ]
+      ],
+      "bottom": "Build the opportunity estimate from a specific reachable buyer segment and measured spend.",
+      "note": "My initial market hypothesis is small teams with recurring video output. I would start locally and learn from a focused cohort before expanding geographically. I have not established market size or willingness to pay. A bottom-up estimate needs a counted reachable segment and observed account spend."
+    },
+    {
+      "kind": "cards",
+      "eyebrow": "COMMERCIAL MODEL — PROPOSED",
+      "title": "Subscription access.\nMeasured processing.",
+      "subtitle": "Test a clear team value proposition before setting commercial prices.",
+      "cards": [
+        [
+          "Subscription",
+          "Workspace access and a bounded allowance appropriate to a creator or small team."
+        ],
+        [
+          "Usage",
+          "Additional processing priced against measured costs and delivery outcomes."
+        ],
+        [
+          "Cost discipline",
+          "Include retries, failures, storage, egress and support in contribution margin."
+        ]
+      ],
+      "bottom": "Commercial validation: test prices, delivered-job cost and repeat use together.",
+      "note": "The proposed business model combines subscription access with metered processing. I have not validated prices or unit economics. Local test credits are test machinery. Before charging users I need attributable costs, reliable failure settlement and a simple offer that buyers understand."
+    },
+    {
+      "kind": "architecture",
+      "eyebrow": "TECHNOLOGY",
+      "title": "An existing application,\nwith a shared media path.",
+      "subtitle": "React authoring • Node/Express API • Firebase identity and media • Python/FFmpeg rendering",
+      "cards": [
+        [
+          "Authoring",
+          "Timeline and canonical project document; editable native controls."
+        ],
+        [
+          "Processing",
+          "API admission, owned media, canonical compile and worker execution."
+        ],
+        [
+          "Infrastructure",
+          "Firebase and existing cloud integration; optional model/GPU paths qualify separately."
+        ]
+      ],
+      "bottom": "Shared project/compiler/render path; optional GPU and generated-media capabilities qualify separately.",
+      "note": "The repository contains a real React and Node application with Firebase and Python media workers. The same canonical project drives the demonstrated rendering path. GPU and generated-media capabilities have their own qualification boundaries; no paid GPU work was needed for this package."
+    },
+    {
+      "kind": "cards",
+      "eyebrow": "STAGE AND PROGRESS",
+      "title": "Working examples.\nCommercial validation next.",
+      "subtitle": "Founder-led and prelaunch. The founder is the only current user/tester.",
+      "cards": [
+        [
+          "Demonstrated",
+          "Selected native films, editable projects, local save/reopen, export/download and complete playback."
+        ],
+        [
+          "Still qualifying",
+          "Whole live preview/export picture and audio agreement, device performance, supported combinations and production flows."
+        ],
+        [
+          "Not claimed",
+          "External customer traction, revenue growth, committed investment, enterprise certification or guaranteed viral results."
+        ]
+      ],
+      "bottom": "Next evidence: pilot acceptance, production reliability and repeat customer use.",
+      "note": "I want to be precise about progress. There are working examples and real technical evidence. There are no external users to present as traction. Reliability, cloud workflow qualification and commercial discovery remain work. Funding and runway figures are not confirmed for this presentation."
+    },
+    {
+      "kind": "cards",
+      "eyebrow": "PROPOSED NEXT 90 DAYS",
+      "title": "Earn the right to scale.",
+      "subtitle": "Milestones are targets for discussion, not results already achieved.",
+      "cards": [
+        [
+          "1 / Stabilise",
+          "Qualify a narrow supported workflow, track failures and measure delivered-job costs."
+        ],
+        [
+          "2 / Learn",
+          "Recruit three design partners; review their recurring workflow and acceptance criteria."
+        ],
+        [
+          "3 / Validate",
+          "Run a bounded pilot, test willingness to pay and review retention and contribution margin."
+        ]
+      ],
+      "bottom": "A narrow pilot comes first; general availability follows reliability and account/security qualification.",
+      "note": "My next plan is deliberately narrow. First qualify a supported workflow and its economics, then work with a small design-partner cohort. Three partners is a proposed target, not signed traction. Expansion should follow delivery quality and payment evidence, not precede them."
+    },
+    {
+      "kind": "ask",
+      "eyebrow": "THE CONVERSATION",
+      "title": "Help turn a working\nproduct into a business.",
+      "subtitle": "Design partners. Technical guidance. Appropriate early-stage introductions.",
+      "cards": [
+        [
+          "Investor",
+          "Which milestones would make this opportunity investable at our stage?"
+        ],
+        [
+          "Agency",
+          "Who owns a repeated video workflow we could evaluate together?"
+        ],
+        [
+          "Cloud partner",
+          "Which architecture, cost and startup-programme path fits our actual stage?"
+        ]
+      ],
+      "bottom": "Shape the capital plan around a confirmed budget, runway and milestone scope.",
+      "note": "At this festival I am asking for grounded next steps: a design-partner introduction, a technical review and feedback on investment milestones. I have not set a raise amount in this package. Any later funding request will be tied to a measured budget and milestones."
+    },
+    {
+      "kind": "contact",
+      "eyebrow": "LET'S CONTINUE",
+      "title": "AutoPromote",
+      "subtitle": "Thulani Mtshwelo • Founder & CEO\nAUTOPROMOTE (PTY) LTD",
+      "bottom": "thulani@autopromote.org • autopromote.org",
+      "note": "Thank you. What would be the most useful next conversation from your perspective? May I send you the one-page profile and the selected offline demo after the event?"
+    }
+  ],
+  "intro30": "I’m Thulani, founder of AutoPromote, a South African AI-assisted video workspace. It helps creators find moments in footage, shape an editable video and prepare its release. I’m currently testing it myself before launch. I can show you real Studio films and the controls behind them. I’m here to meet potential design partners and get practical guidance on turning the product into a sustainable business.",
+  "intro60": "I’m Thulani Mtshwelo, founder of AUTOPROMOTE (PTY) LTD. I’m building an AI-assisted workspace for creators and small teams who repeatedly turn footage into social content. The idea is to connect choosing the moment, making the edit and preparing the release, while keeping the creator in control. There is an existing application, with source-bound clip suggestions, an editable Studio and actual rendered films. I can show the work and its native timeline. The product is prelaunch and I am currently the only tester, so I’m not presenting customer traction or revenue growth. My next priorities are reliability, real processing costs and a small design-partner pilot. At the festival I’m looking for relevant creative teams, technical guidance and advice on the milestones an investor would need to see.",
+  "fiveMinute": [
+    [
+      "0:00–0:40 / Why this exists",
+      "I’m Thulani Mtshwelo, founder of AUTOPROMOTE (PTY) LTD. I’m building AutoPromote because making a video is only one part of getting useful content out into the world. A creator still needs to find a complete moment, shape the edit, check its sound and prepare the release. My working hypothesis is that small teams lose valuable time between those steps. I want to test that problem with people who repeat the workflow every week."
+    ],
+    [
+      "0:40–1:25 / What is already built",
+      "AutoPromote is an existing application. Its Clip Finder produces suggestions tied to source wording and timestamps. Its Studio contains a native editable timeline, compositing, camera and motion controls, B-roll, grading and sound tools. Selected projects have been saved, reopened, exported and played back as actual finished files. Publisher and Queue are part of the broader platform, but the selected demo does not establish a fresh production publishing flow. The strongest evidence here is the real Studio work and the decisions behind it."
+    ],
+    [
+      "1:25–2:10 / Show the work",
+      "Let me show a short part of the offline showcase. These films already exist in my Videos folder; I have not invented a UI or a processing result for this presentation. The accompanying Studio records show native project decisions. I can also open the complete selected films with sound. The recording is a development demonstration: it is evidence of these particular examples, not a claim that every supported control, device or combination is already reliable in production."
+    ],
+    [
+      "2:10–2:55 / Who it could serve",
+      "The first customer hypothesis is a small creative team with recurring footage: a podcast or interview team, a small agency or a creator-led business. I want to learn who owns the work, where revisions accumulate and what a dependable result is worth to them. I have not established a market-size number or validated willingness to pay. A focused beachhead and real interviews will give a more useful opportunity estimate than a large unsupported headline."
+    ],
+    [
+      "2:55–3:40 / Model and technology",
+      "The proposed commercial model is subscription access with bounded processing and additional usage. Prices remain to be tested. Contribution margin must include actual compute, failed attempts, storage, egress, support and payment costs. Technically, this is a React and Node application with Firebase and Python media workers, built around a shared project and rendering path. Optional model and GPU capabilities are separate from the CPU work demonstrated here. I am looking for guidance on cost attribution, reliability and a sensible cloud configuration."
+    ],
+    [
+      "3:40–4:25 / Where we really are",
+      "The product is prelaunch. I am the only current user and tester. There are no external customer results or revenue-growth figures to claim. Some capabilities are functional in bounded tests, while broader preview-to-export agreement, performance and normal production workflows still need qualification. My proposed next steps are to stabilise a narrow workflow, measure its costs and recruit three design partners for a bounded pilot. Three is a target, not existing traction."
+    ],
+    [
+      "4:25–5:00 / The ask",
+      "At this event I want to turn the technical work into a stronger business foundation. For an investor, I would value clear advice on the milestones that would make us relevant, and introductions suitable for a prelaunch company. For a creative partner, I would like to identify a repeated workflow we can evaluate together. For a cloud partner, I want architecture and startup-programme guidance that matches our actual stage. I am not asserting a fundraising amount before confirming the budget and runway. What next step would be useful from your perspective?"
+    ]
+  ],
+  "qa": [
+    [
+      "Is AutoPromote launched?",
+      "No. It is prelaunch and I am currently the only user/tester. The demonstrations are real development work, not customer adoption."
+    ],
+    [
+      "Do you have paying customers or revenue?",
+      "There is no launched external user base to present. No verified revenue figure is supplied in this package. I will not describe symbolic local test credits as commercial revenue."
+    ],
+    [
+      "What have you actually proved?",
+      "Selected source analysis, native editing, project persistence and rendering workflows, with retained finished movies and playback evidence. Those examples do not qualify every feature or production combination."
+    ],
+    [
+      "Why not use an existing editor or repurposing tool?",
+      "Those are credible alternatives. My hypothesis is that keeping source context, editable decisions and release preparation connected will help a particular recurring workflow. Customer comparison must establish whether that matters enough to pay for."
+    ],
+    [
+      "What is your moat?",
+      "No exclusive foundation model or established data moat is claimed. A potential advantage would have to come from workflow quality, reliability, customer understanding and defensible execution. That still needs commercial evidence."
+    ],
+    [
+      "Will it make content go viral?",
+      "No guarantee. Clip scores rank editorial candidates using source evidence; views depend on the content, audience, distribution and many other factors."
+    ],
+    [
+      "Can it perfectly translate African languages?",
+      "No universal language-quality claim is justified. The goal is strong English handling, support where models are reliable, and visible uncertainty/correction so creators can fix what needs review. Language and code-switching quality require testing."
+    ],
+    [
+      "Is the whole platform production-ready?",
+      "No. Bounded functional evidence exists, and incomplete paths remain. Production onboarding, billing/provider outcomes, security follow-through and whole live picture/sound reliability need separate qualification."
+    ],
+    [
+      "How much does each video cost?",
+      "Invoice-backed contribution cost has not been established. Local CPU timing and symbolic credits do not answer that. The included workbook separates compute, retries, storage, egress, payment fees and support so real measurements can populate it."
+    ],
+    [
+      "How much are you raising?",
+      "A fundraising amount and valuation are not set in this package. I want to connect the next reliable pilot milestone to an actual costed plan and confirmed runway before proposing terms."
+    ],
+    [
+      "Are the named investors or companies already partners?",
+      "No. The founder reported sending meeting requests. Acceptance has not been verified, and there is no claimed investment, endorsement or partnership."
+    ],
+    [
+      "Are you replacing editors or agencies?",
+      "The intended role is to assist a creator or small team and keep their decisions editable. We need to learn which tasks are useful to support and which require expert creative judgment."
+    ],
+    [
+      "What happens when AI or processing fails?",
+      "The creator must be able to review wording and edits. The implementation has scoped job/receipt/recovery work, but broad production failure settlement is not certified. Pilots must track failures, charge outcomes and support effort explicitly."
+    ],
+    [
+      "Can I try it now?",
+      "I can arrange a founder-guided demonstration. A design-partner pilot should follow a narrow supported scope, account/security checks and agreed acceptance criteria; I am not promising unrestricted launch access."
+    ],
+    [
+      "Who owns the technology and content rights?",
+      "The company and product identity are founder supplied. No completed IP chain-of-title audit or blanket media licence is claimed. Source rights, code/model licences and any generated-media restrictions must be checked for the proposed use."
+    ],
+    [
+      "How big is the team?",
+      "The founder is the only confirmed current product user/tester. A broader employee count or team structure has not been verified. Do not infer staff numbers from automated development work."
+    ],
+    [
+      "What would funding change?",
+      "A measured plan could support reliability work, cost attribution, tightly scoped pilot delivery and customer discovery. The allocation and runway cannot be asserted before the underlying budget is confirmed."
+    ]
+  ],
+  "briefs": [
+    {
+      "file": "Launch Africa",
+      "title": "Launch Africa Ventures",
+      "person": "Janade du Plessis • Managing Partner",
+      "status": "Requested: Thursday 19 November, 10:00–10:20 SAST. Acceptance unverified; this is not a confirmed appointment.",
+      "intro": "I am building AutoPromote, a prelaunch AI-assisted video workspace. I am currently the only tester. I can show real editable Studio work, and I would value your view on the commercial milestones we need before institutional investment makes sense.",
+      "sections": [
+        [
+          "Fit and meeting objective",
+          "Launch Africa's published FAQ prefers B2B/B2B2C and commercial validation. It describes a preference for at least US$25k net MRR and 10%+ monthly growth, with limited exceptional pre-revenue cases. AutoPromote does not demonstrate that traction. Treat this as an honest milestone/advice conversation and ask about more suitable early-stage introductions, without assuming an exception."
+        ],
+        [
+          "20-minute structure",
+          "0–2: stage and problem. 2–5: strongest offline work. 5–9: target buyer and proposed model. 9–15: investment-fit and milestone questions. 15–18: agree one useful next step. 18–20: recap and confirm permission to follow up."
+        ],
+        [
+          "Commercial discussion",
+          "Proposed beachhead: recurring video workflows at small agencies, podcast/interview teams and creator-led businesses. Proposed model: subscription plus bounded/metered processing. The next evidence should cover buyer urgency, willingness to pay, repeat use, delivered-job cost and contribution margin. No TAM, paying-customer count, revenue growth, CAC, LTV or signed pilot is being claimed."
+        ],
+        [
+          "Questions to prioritise",
+          "Which two or three milestones would make a company at this stage relevant to your fund? What would count as a convincing design-partner pilot? Which buyer segment would you test first? How would you evaluate workflow software that uses third-party AI rather than owning a foundation model? If this is too early for Launch Africa, which angels, accelerators or non-dilutive programmes would be appropriate?"
+        ],
+        [
+          "Unit economics and funding",
+          "Use the editable workbook only as a structure. Invoice-backed processing costs, recurring burn, current funding, runway and a fundraising amount remain unconfirmed. Do not quote the local symbolic credit rate as a price. Build a milestone budget before suggesting round size or valuation."
+        ],
+        [
+          "Realistic desired outcome",
+          "A clearly stated investment-readiness gap, one concrete milestone for a later update, and permission for a relevant introduction or follow-up. Do not treat a meeting, positive feedback or an introduction as investment commitment."
+        ]
+      ],
+      "sources": [
+        [
+          "Launch Africa investment FAQ",
+          "https://www.launchafrica.vc/faqs"
+        ],
+        [
+          "Janade's role in official fund communication",
+          "https://www.launchafrica.vc/news/launch-africa-ventures-achieves-dpi-milestone"
+        ]
+      ]
+    },
+    {
+      "file": "WPP South Africa",
+      "title": "WPP South Africa",
+      "person": "Tebogo Skwambane • WPP South Africa contact named by founder",
+      "status": "Meeting request sent according to founder. Date, time, role as of the event and acceptance need verification in the networking platform.",
+      "intro": "I am building AutoPromote for recurring video work. I would like to learn where a small creative team still has a painful handoff between choosing footage, editing and preparing releases, and whether a narrow evaluation would be useful alongside your existing tools.",
+      "sections": [
+        [
+          "Relevant context",
+          "WPP already operates WPP Open across marketing workflows. AutoPromote should not assume WPP lacks AI tooling or claim an existing integration. Historical WPP material identifies Tebogo as Country Manager in South Africa; a current event-specific title has not been independently confirmed."
+        ],
+        [
+          "What to show",
+          "Use a visually strong existing Studio film, then a short actual native authoring record. Explain the editable timeline, camera/motion decisions and sound. Offer the full example with its original audio. Do not promise an enterprise deployment, an API integration, a productivity saving or client-ready quality from test passes alone."
+        ],
+        [
+          "Potential evaluation — proposal",
+          "One team, one agreed repeated task and a small set of permissioned assets. Agree the baseline process, revision requirements, acceptable output and data handling before work. Measure time to accepted edit, human correction/review time, completion failures and actual processing cost. Any commercial pilot needs a separately agreed scope; no pilot is signed."
+        ],
+        [
+          "Questions to prioritise",
+          "Where do editors lose time after the first automated cut? Which current tools already solve this well? What would make another tool worth evaluating alongside WPP Open? Who owns review and brand approval? What export/project handoff formats matter? Which data, procurement and security checks would be required for a limited evaluation? How do you judge multilingual wording and local cultural context?"
+        ],
+        [
+          "Discussion boundaries",
+          "Keep human creative and client approval explicit. Models can make language and visual errors. Current demos do not qualify multi-tenant enterprise controls, indemnities, data residency commitments or unrestricted client-media upload. Do not show private client material without the required permission."
+        ],
+        [
+          "Realistic desired outcome",
+          "A workflow-owner introduction, feedback on a specific unsolved production task, and a decision about whether a later scoped evaluation is worth discussing. A partnership, procurement decision or WPP endorsement is not assumed."
+        ]
+      ],
+      "sources": [
+        [
+          "WPP Open",
+          "https://www.wpp.com/en/open"
+        ],
+        [
+          "Historical WPP role reference — July 2024",
+          "https://www.wpp.com/en/news/2024/07/wpp-champions-inclusive-creativity-at-inaugural-unite-south-africa-awards-during-pride-month"
+        ]
+      ]
+    },
+    {
+      "file": "Google Cloud",
+      "title": "Google Cloud",
+      "person": "Donovan Mooney • Google Cloud security contact named by founder",
+      "status": "Meeting request sent according to founder. Title, responsibilities, date/time and acceptance are not independently verified.",
+      "intro": "AutoPromote is an existing React/Node/Firebase and Python media application in founder testing. I would value a focused security and architecture review, and an introduction to the right startup and media/GPU specialists. I am not treating a security introduction as approval for cloud credits or GPU capacity.",
+      "sections": [
+        [
+          "Architecture to explain",
+          "Browser: React authoring and canonical project state. API: Node/Express; retained deployment records identify a primary Render API. Identity/data/media: Firebase Auth, Firestore and Storage. Processing: canonical media compile plus Python/FFmpeg CPU workers, with optional cloud/model/GPU integrations. Publisher/Queue connect through separate provider paths. The festival proof is local development evidence; no fresh authenticated cloud topology or capacity audit was run for this package."
+        ],
+        [
+          "Cost position",
+          "Invoice-backed cost per delivered operation is not established. Historical cost cleanup records describe budget alerts and registry retention work; an alert is not a hard spend cap. Ask how to attribute CPU/GPU seconds, storage byte-time, egress, queue/Firestore operations, model charges and retries to one delivered job. Avoid quoting historical instance prices or test-credit values as current commercial economics."
+        ],
+        [
+          "GPU and scaling questions",
+          "Which CPU/GPU split suits video composition, transcription and occasional model inference? What measured memory/throughput information should we collect before choosing an accelerator? How should regional availability, quotas, cold starts, concurrency and cancellation be handled? When are queued jobs preferable to an always-on endpoint? What is the smallest bounded pilot configuration worth benchmarking? No new GPU reservation or paid run is requested by this preparation."
+        ],
+        [
+          "Security review agenda",
+          "Review ownership checks across API, stored media and signed URLs; token lifetime/revocation; least-privilege service identities; job/receipt integrity; secret handling; account recovery; and tenant separation. Retained owner-scoping/security fixes and tests are evidence of work, not certification. Historical account/session and financial-authority follow-through remain open, and normal authenticated production workflows require qualification."
+        ],
+        [
+          "Startup programme questions",
+          "Google's current public pages advertise stage-dependent startup support; headline maximum credits are not an entitlement. Some previously indexed pre-funded pages now redirect to the main programme. Ask the team to confirm the current pre-funded route, company-age/funding criteria, prior-credit restrictions and supported services. AutoPromote's founding date, funding documentation and prior cloud-credit history are not verified in this packet. No acceptance or credit award is claimed."
+        ],
+        [
+          "Realistic desired outcome",
+          "One named technical follow-up, the appropriate startup-programme route, and a short list of measurements or security controls to complete. Seek a media/GPU specialist introduction where useful; do not assume a credit award, cloud approval or production readiness."
+        ]
+      ],
+      "sources": [
+        [
+          "Current Google for Startups Cloud Programme",
+          "https://cloud.google.com/startup"
+        ],
+        [
+          "Pre-funded route — redirect observed on 15 November",
+          "https://cloud.google.com/startup/pre-funded"
+        ]
+      ]
+    }
+  ]
+}

@@ -24,6 +24,51 @@ import StudioDirectorPosterControls from "./StudioDirectorPosterControls";
 
 export const DIRECTOR_BRIEF_TEMPLATES = [
   {
+    id: "viral_social_reel",
+    label: "Viral Reel · Hook + Clean B-Roll",
+    approach: "composition",
+    lookId: "kodak_2383",
+    archetypeId: "viral_hook_cutaway",
+    brief:
+      "Viral creator reel with punch-in opening hook, crisp full-screen B-roll cutaway with voice-first audio ducking, and warm Kodak 2383 cinema finish.",
+  },
+  {
+    id: "noir_splash_artistic",
+    label: "Noir Color-Splash & Match-Cut",
+    approach: "composition",
+    lookId: "noir_silver",
+    archetypeId: "noir_color_splash",
+    brief:
+      "Bold editorial film noir with Sin City color splash popping vibrant highlights out of black-and-white contrast, followed by a match-cut bloom into full sunlight.",
+  },
+  {
+    id: "holographic_ribbon_film",
+    label: "Holographic 3D Ribbon × Live Film",
+    approach: "cinema_3d",
+    lookId: "kodak_2383",
+    archetypeId: "viral_hook_cutaway",
+    brief:
+      "Artistic live film fused with an iridescent morphing 3D liquid chrome ribbon sweeping across the scene before locking into a molten-gold 3D emblem finale.",
+  },
+  {
+    id: "creator_split_50_50",
+    label: "50/50 Creator Split Comparison",
+    approach: "composition",
+    lookId: "teal_orange",
+    archetypeId: "split_diptych",
+    brief:
+      "Clean 50/50 split-screen comparison pairing two real clips side-by-side under a Teal & Orange finish without overlapping layers.",
+  },
+  {
+    id: "hybrid_3d_film",
+    label: "Creator Film + 3D Closing Lockup",
+    approach: "cinema_3d",
+    lookId: "kodak_2383",
+    archetypeId: "viral_hook_cutaway",
+    brief:
+      "Creator highlight film with Kodak 2383 grade, sleek 3D glass lower-third opener, clean B-roll cutaway, and closing 3D brand lockup.",
+  },
+  {
     id: "kinetic_opener",
     label: "Kinetic Broadcast Opener",
     approach: "poster",
@@ -82,13 +127,22 @@ export const DIRECTOR_BRIEF_TEMPLATES = [
       "Build an audio-reactive 3D chrome title stage 'SONIC HORIZON' with glowing crystal spectrum pylons and beat LUT pulses.",
   },
   {
-    id: "hybrid_3d_film",
-    label: "Full-Stack Hybrid Film + 3D",
+    id: "omniscient_masterpiece",
+    label: "8-Track Omniscient Masterpiece",
     approach: "cinema_3d",
-    lookId: "kodak_2383",
-    archetypeId: "split_diptych",
+    lookId: "teal_orange",
+    archetypeId: "omniscient_showpiece",
     brief:
-      "Direct a hybrid split-diptych video film with Kodak 2383 LUT, 3D glass lower-third callout, and closing 3D brand reveal.",
+      "Direct an 8-track omniscient studio masterpiece for 'APEX NOVA': revive dead footage, isolate skin radiance with a subject spotlight power window, open a circle B-roll portal with voice-first ducking, trace a vector target reticle HUD, animate an elastic wave kinetic headline, and close with a 3D brand reveal.",
+  },
+  {
+    id: "revive_selective_broll",
+    label: "Revive Dead Clip + B-Roll Portal",
+    approach: "composition",
+    lookId: "kodak_2383",
+    archetypeId: "broll_cutaway_rig",
+    brief:
+      "Revive flat low-light footage, apply crimson garment selective HSL splash and face spotlight window, cut in a circle B-roll portal with voice-first audio ducking, and animate a kinetic callout.",
   },
 ];
 
@@ -100,6 +154,15 @@ function summarizePlanTopology(compiled, forceRecompute = false) {
         id: finishAction.advancedColor?.lutPresetId || "custom",
         label: finishAction.name || "Cinema Grade",
         beatSyncPulses: Boolean(finishAction.beatSyncPulses),
+        ...(finishAction.grade?.revitalizerPresetId
+          ? { revitalizerPresetId: finishAction.grade.revitalizerPresetId }
+          : {}),
+        ...(finishAction.advancedColor?.qualifierPresetId
+          ? { qualifierPresetId: finishAction.advancedColor.qualifierPresetId }
+          : {}),
+        ...(finishAction.advancedColor?.powerWindowPresetId
+          ? { powerWindowPresetId: finishAction.advancedColor.powerWindowPresetId }
+          : {}),
       }
     : null;
   if (compiled.topologySummary && !forceRecompute) {
@@ -113,6 +176,14 @@ function summarizePlanTopology(compiled, forceRecompute = false) {
     threeDScenes: actions.filter(a => a.type === "three_d_scene").length,
     nullRigs: actions.filter(a => a.type === "null").length,
     shapeLayers: compiled?.plan?.graphics?.layers?.length || 0,
+    kineticTitles: actions.filter(
+      a => a.type === "title" && Boolean(a.textAnimatorPreset || a.textAnimator)
+    ).length,
+    vectorPrimitives: (compiled?.plan?.graphics?.layers || []).filter(l =>
+      Boolean(l.vectorShape)
+    ).length,
+    bRollCutaways: actions.filter(a => a.type === "media_plane" && Boolean(a.bRollLayoutPreset))
+      .length,
     parentLinks: actions.filter(
       a => a.type === "parent" || (a.type === "node_connect" && a.port === "Parent")
     ).length,
@@ -636,8 +707,26 @@ export default function StudioDirectorCreativePanel({
               {review.topologySummary.threeDScenes > 0 ? (
                 <span>3D Scenes: {review.topologySummary.threeDScenes}</span>
               ) : null}
+              {review.topologySummary.kineticTitles > 0 ? (
+                <span>Kinetic Titles: {review.topologySummary.kineticTitles}</span>
+              ) : null}
+              {review.topologySummary.vectorPrimitives > 0 ? (
+                <span>Vector HUDs: {review.topologySummary.vectorPrimitives}</span>
+              ) : null}
+              {review.topologySummary.bRollCutaways > 0 ? (
+                <span>B-Roll Portals: {review.topologySummary.bRollCutaways}</span>
+              ) : null}
               {review.topologySummary.colorGrade ? (
                 <span>Look: {review.topologySummary.colorGrade.label}</span>
+              ) : null}
+              {review.topologySummary.colorGrade?.revitalizerPresetId ? (
+                <span>Revival: {review.topologySummary.colorGrade.revitalizerPresetId}</span>
+              ) : null}
+              {review.topologySummary.colorGrade?.qualifierPresetId ? (
+                <span>Selective HSL: {review.topologySummary.colorGrade.qualifierPresetId}</span>
+              ) : null}
+              {review.topologySummary.colorGrade?.powerWindowPresetId ? (
+                <span>Power Window: {review.topologySummary.colorGrade.powerWindowPresetId}</span>
               ) : null}
             </div>
           ) : null}

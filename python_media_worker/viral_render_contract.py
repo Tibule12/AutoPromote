@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 import os
 import re
+from fractions import Fraction
 from typing import Any, Dict, Iterable, List, Mapping, Optional
 
 
@@ -24,6 +25,23 @@ def append_studio_caption_filter(filter_chain, input_label, ass_path, fonts_path
     return "v_captions"
 
 
+def verified_studio_source_rate(media_summary: Mapping[str, Any]) -> Fraction:
+    """Read the first picture stream's nominal average rate as an exact ratio."""
+    picture = next((stream for stream in media_summary.get("streams", ())
+                    if stream.get("codec_type") == "video"), {})
+    try:
+        rate = Fraction(str(picture.get("avg_frame_rate", "")))
+    except (ValueError, ZeroDivisionError) as error:
+        raise ValueError("Studio source frame rate could not be verified") from error
+    if not 1 <= rate <= 120:
+        raise ValueError("Studio source frame rate must be between 1 and 120 fps")
+    return rate
+
+
+def studio_ffmpeg_frame_rate(fps) -> str:
+    return str(fps) if isinstance(fps, Fraction) else f"{fps:g}"
+
+
 def build_delivery_video_clock_filter(fps: float, duration: float, source_fps: float) -> str:
     """Preserve the final frame's duration through overlay framesync and CFR.
 
@@ -36,7 +54,7 @@ def build_delivery_video_clock_filter(fps: float, duration: float, source_fps: f
         raise ValueError("Delivery clock requires a positive finite rate and duration")
     return (
         f"tpad=stop_mode=clone:stop_duration={1.0 / source_fps:.9f},"
-        f"fps={fps:g},trim=duration={duration:.9f}"
+        f"fps={studio_ffmpeg_frame_rate(fps)},trim=duration={duration:.9f}"
     )
 
 
@@ -50,7 +68,8 @@ def build_studio_cfr_packet_args(fps: float) -> List[str]:
     """
     if not math.isfinite(fps) or not 1 <= fps <= 120:
         raise ValueError("Picture packets require a valid frame rate")
-    clock = f"({fps:.12g}*TB)"
+    rate = f"({fps})" if isinstance(fps, Fraction) else f"{fps:.12g}"
+    clock = f"({rate}*TB)"
     return ["-bsf:v", f"setts=pts=N/{clock}:dts=N/{clock}:duration=1/{clock}",
             "-video_track_timescale", "90000"]
 
@@ -243,8 +262,12 @@ def build_speed_filter_complex(
     normalized = list(plan)
     if not normalized or not speed_plan_changes_timing(normalized):
         return ""
-    selected_fps = _finite_number(output_fps, 30)
-    if selected_fps not in {24, 25, 30, 50, 60}:
+    if isinstance(output_fps, Fraction):
+        selected_fps = output_fps if 1 <= output_fps <= 120 else None
+    else:
+        numeric_rate = _finite_number(output_fps, 30)
+        selected_fps = numeric_rate if numeric_rate in {24, 25, 30, 50, 60} else None
+    if selected_fps is None:
         raise ValueError("Unsupported Studio speed delivery frame rate")
     # One continuous picture clock: independently rounding each ramp range to
     # CFR and concatenating it with audio accumulates video padding at every
@@ -265,7 +288,7 @@ def build_speed_filter_complex(
             )
         video_time = "round((" + "+".join(terms) + ")/TB)"
     filters: List[str] = [
-        f"[0:v]settb=expr=1/90000,setpts='{video_time}',fps={selected_fps:g}[v_speed]"
+        f"[0:v]settb=expr=1/90000,setpts='{video_time}',fps={studio_ffmpeg_frame_rate(selected_fps)}[v_speed]"
     ]
     audio_labels: List[str] = []
     for index, segment in enumerate(normalized):
@@ -402,6 +425,38 @@ def build_caption_override_transcript(text: Any, duration: Any) -> Dict[str, Lis
     }
 
 
+def _extract_aligned_word_timings(
+    item: Any, expected_words: List[str], seg_start: float, seg_end: float
+) -> Optional[List[Dict[str, Any]]]:
+    raw_words = _read(item, "words", default=None)
+    if not isinstance(raw_words, list) or len(raw_words) != len(expected_words) or not expected_words:
+        return None
+    normalized_words = []
+    for idx, expected in enumerate(expected_words):
+        raw = raw_words[idx]
+        if not isinstance(raw, Mapping):
+            return None
+        token = re.sub(r"\s+", " ", str(_read(raw, "word", default="") or "")).strip()
+        if not token or token != expected:
+            return None
+        w_start = _finite_number(_read(raw, "start", default=None), None)
+        w_end = _finite_number(_read(raw, "end", default=None), None)
+        if w_start is None or w_end is None:
+            return None
+        clamped_start = max(seg_start, min(seg_end, w_start))
+        clamped_end = max(clamped_start + 0.01, min(seg_end + 0.05, w_end))
+        prob = _finite_number(_read(raw, "probability", default=None), 1.0)
+        normalized_words.append(
+            {
+                "word": expected,
+                "start": clamped_start,
+                "end": clamped_end,
+                "probability": max(0.0, min(1.0, prob if prob is not None else 1.0)),
+            }
+        )
+    return normalized_words
+
+
 def build_edited_caption_transcript(caption_segments: Iterable[Any]) -> Dict[str, List[Dict[str, Any]]]:
     """Preserve creator-reviewed caption text/timing and derive word timings for ASS."""
     normalized = []
@@ -412,13 +467,16 @@ def build_edited_caption_transcript(caption_segments: Iterable[Any]) -> Dict[str
         if not text or end is None or end <= start:
             continue
         words = text.split()
+        supplied_words = _extract_aligned_word_timings(item, words, start, end)
         word_duration = (end - start) / max(1, len(words))
         normalized_segment = {
                 "id": _read(item, "id", default=index),
                 "start": start,
                 "end": end,
                 "text": text,
-                "words": [
+                "words": supplied_words
+                if supplied_words is not None
+                else [
                     {
                         "word": word,
                         "start": start + word_index * word_duration,

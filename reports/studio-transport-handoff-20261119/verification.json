@@ -1,0 +1,294 @@
+{
+  "date": "2026-11-19",
+  "branchBase": "81e4b791",
+  "scope": "Signed-in isolated CPU browser authoring, retimed delivery and desktop interchange readers",
+  "testedSource": {
+    "seconds": 60.06,
+    "rate": "24000/1001"
+  },
+  "authored": {
+    "pictureOccurrences": 2,
+    "cutaways": 1,
+    "animatedTitles": 1,
+    "reviewedCaptionCues": 4,
+    "musicAdded": true,
+    "speed": 1.25
+  },
+  "browser": {
+    "headless": true,
+    "muted": true,
+    "errorCount": 0,
+    "shuttlePreservedPacing": true,
+    "jumpTenSecondNdf": true,
+    "welcomeComparisons": 8,
+    "helpQuestions": 3
+  },
+  "render": {
+    "fps": "24000/1001",
+    "frames": 1114,
+    "duration": 46.463083,
+    "channels": 2,
+    "width": 720,
+    "height": 1280,
+    "sha256": "595d68c1ab2c93237a7c06d3524b2b421ccdcf332a889bb1f47ca9657d225580",
+    "fullDecode": true,
+    "playedToEndInStudio": true,
+    "submittedJobs": 1
+  },
+  "handoff": {
+    "reader": "0.18.1",
+    "fps": 23.976023976023978,
+    "otio": [
+      {
+        "name": "V1",
+        "kind": "Video",
+        "frames": 1114,
+        "clips": [
+          {
+            "sourceInFrames": 48,
+            "frames": 48,
+            "scalar": [
+              1.25
+            ]
+          },
+          {
+            "sourceInFrames": 108,
+            "frames": 1066,
+            "scalar": [
+              1.25
+            ]
+          }
+        ]
+      },
+      {
+        "name": "V2 B-Roll",
+        "kind": "Video",
+        "frames": 106,
+        "clips": [
+          {
+            "sourceInFrames": 0,
+            "frames": 58,
+            "scalar": []
+          }
+        ]
+      },
+      {
+        "name": "A1 Dialogue",
+        "kind": "Audio",
+        "frames": 1114,
+        "clips": [
+          {
+            "sourceInFrames": 48,
+            "frames": 48,
+            "scalar": [
+              1.25
+            ]
+          },
+          {
+            "sourceInFrames": 108,
+            "frames": 1066,
+            "scalar": [
+              1.25
+            ]
+          }
+        ]
+      },
+      {
+        "name": "A2 Music",
+        "kind": "Audio",
+        "frames": 1114,
+        "clips": [
+          {
+            "sourceInFrames": 0,
+            "frames": 1114,
+            "scalar": []
+          }
+        ]
+      }
+    ],
+    "edl": [
+      {
+        "name": "V",
+        "kind": "Video",
+        "frames": 1114,
+        "clips": [
+          {
+            "sourceInFrames": 48,
+            "frames": 48,
+            "scalar": [
+              1.2499987499999998
+            ]
+          },
+          {
+            "sourceInFrames": 108,
+            "frames": 1066,
+            "scalar": [
+              1.2499987499999998
+            ]
+          }
+        ]
+      },
+      {
+        "name": "A1",
+        "kind": "Audio",
+        "frames": 1114,
+        "clips": [
+          {
+            "sourceInFrames": 48,
+            "frames": 48,
+            "scalar": [
+              1.2499987499999998
+            ]
+          },
+          {
+            "sourceInFrames": 108,
+            "frames": 1066,
+            "scalar": [
+              1.2499987499999998
+            ]
+          }
+        ]
+      },
+      {
+        "name": "A2",
+        "kind": "Audio",
+        "frames": 1114,
+        "clips": [
+          {
+            "sourceInFrames": 48,
+            "frames": 48,
+            "scalar": [
+              1.2499987499999998
+            ]
+          },
+          {
+            "sourceInFrames": 108,
+            "frames": 1066,
+            "scalar": [
+              1.2499987499999998
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "relinkedLocalReferences": 6,
+  "measurements": {
+    "mixedDelivery": {
+      "integratedLufs": -13.8,
+      "truePeakDbtp": -1,
+      "rangeLu": 2.5
+    },
+    "pausedPictureSamples": [
+      {
+        "requested": 1.5,
+        "actual": 1.5,
+        "preview": "live-1.5.png",
+        "width": 372,
+        "height": 660,
+        "frame": 36,
+        "meanAbs8Bit": 4.21,
+        "p95Abs8Bit": 6
+      },
+      {
+        "requested": 2.7,
+        "actual": 2.7,
+        "preview": "live-2.7.png",
+        "width": 372,
+        "height": 660,
+        "frame": 65,
+        "meanAbs8Bit": 5.983,
+        "p95Abs8Bit": 11
+      },
+      {
+        "requested": 10.01,
+        "actual": 10.01,
+        "preview": "live-10.01.png",
+        "width": 372,
+        "height": 660,
+        "frame": 240,
+        "meanAbs8Bit": 3.001,
+        "p95Abs8Bit": 6
+      },
+      {
+        "requested": 24.024,
+        "actual": 24.024,
+        "preview": "live-24.024.png",
+        "width": 372,
+        "height": 660,
+        "frame": 576,
+        "meanAbs8Bit": 2.369,
+        "p95Abs8Bit": 7
+      },
+      {
+        "requested": 40.04,
+        "actual": 40.04,
+        "preview": "live-40.04.png",
+        "width": 372,
+        "height": 660,
+        "frame": 960,
+        "meanAbs8Bit": 2.691,
+        "p95Abs8Bit": 5
+      }
+    ],
+    "wholePictureOrAudioParityQualified": false
+  },
+  "isolatedCheckpoint": {
+    "terminalOperations": 1,
+    "outstandingHolds": 0,
+    "authFirestoreStorageExported": true
+  },
+  "tests": {
+    "focusedTimelineAndFormat": 53,
+    "nativeShellRegression": 1,
+    "serverKeysAndSampling": 39,
+    "productionModeBuild": true
+  },
+  "delivery": {
+    "recordingSeconds": 153.08,
+    "files": [
+      {
+        "name": "01 Timeline captions.srt",
+        "bytes": 211,
+        "sha256": "39af04efb1f385180edc0496a4fa1849d3d9bf372f951dbf7ab03e30c30f4caf"
+      },
+      {
+        "name": "02 Timeline captions.vtt",
+        "bytes": 241,
+        "sha256": "eeca0428f5e2fcaa6a3a0e116e063f6c0cbb2c46005b4eba0706ab4fd1f47c89"
+      },
+      {
+        "name": "03 Editable sequence.otio",
+        "bytes": 14118,
+        "sha256": "161acdfa4295683e9ae0345e8620e8e33ad7acd2da5a3395af485b1a1431f463"
+      },
+      {
+        "name": "04 Primary cuts.edl",
+        "bytes": 1810,
+        "sha256": "2365baa5c9943bbe23887924f470554e236b76713f72b2bd19b096f5a64e53d6"
+      },
+      {
+        "name": "05 Project.autopromote.json",
+        "bytes": 1357552,
+        "sha256": "313a976d9ad65a012695aaa1b8e5b08249802b52236544b7dd19f852eecb3396"
+      },
+      {
+        "name": "06 Finished programme.mp4",
+        "bytes": 13065169,
+        "sha256": "595d68c1ab2c93237a7c06d3524b2b421ccdcf332a889bb1f47ca9657d225580"
+      },
+      {
+        "name": "07 OTIO with local media.otio",
+        "bytes": 19204,
+        "sha256": "927137b7ea7d7d15a7fbedf98062b835edfb318409767a5dd4cee6b773b0b427"
+      },
+      {
+        "name": "08 Studio edit and complete playback.mp4",
+        "bytes": 9816715,
+        "sha256": "87d86a7f229e6c36449814fb13930109586d252d6ab46a89bb58f8dbbf0a50fe"
+      }
+    ]
+  },
+  "readinessPromotion": false,
+  "productionDeployment": false
+}

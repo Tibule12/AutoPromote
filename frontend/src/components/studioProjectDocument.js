@@ -170,7 +170,7 @@ const cloneLayerParameters = (item, version) => {
 };
 
 const AUDIO_CUE_PARAMETER_FIELDS = [
-  "enabled", "builtIn", "kind", "tone", "name", "label", "sourceClipId",
+  "enabled", "builtIn", "kind", "tone", "name", "label", "sourceClipId", "occurrenceId", "clipOccurrenceId",
   "sourceStoragePath", "storagePath", "contentHash", "sha256", "volume",
   "muted", "fadeIn", "fadeOut", "fadeOffset", "fadeDuration", "pan", "audioMode", "rate", "pitchPreserved",
 ];
@@ -206,7 +206,7 @@ const CAMERA_SOURCE_FIELDS = [
   "startRequest", "endRequest", "offsetSeconds", "syncConfirmed",
 ];
 const CAPTION_PARAMETER_FIELDS = [
-  "text", "reviewRequired", "textReviewed", "textReviewRequired", "speaker", "speakerLabel",
+  "text", "words", "wordTimings", "reviewRequired", "textReviewed", "textReviewRequired", "speaker", "speakerLabel",
   "language", "languageLabel", "languages", "languageConfidence", "transcriptConfidence",
   "transcriptionReviewReasons", "translatedToEnglish", "captionPlacement", "captionIcon",
   "captionAccent", "captionX", "captionY", "placement",

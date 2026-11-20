@@ -17,7 +17,7 @@ function TimingValue({ label, value, disabled, onCommit }) {
     }} />{error && <small role="alert">{error}</small>}</label>;
 }
 
-export default function StudioGroupTimingInspector({ row, onEdit, onFit, onDelete }) {
+export default function StudioGroupTimingInspector({ row, onEdit, onFit, onDuplicate, onSplit, onDelete }) {
   if (!row || !onEdit) return null;
   return <div className="studio-group-timing" aria-label={`${row.name} clip timing`}>
     <strong>Group clip · {row.childCount} layers</strong>
@@ -29,6 +29,8 @@ export default function StudioGroupTimingInspector({ row, onEdit, onFit, onDelet
       onCommit={value => onEdit(row.id, 'trim-end', value)} />
     <small>Move carries child clips and keys together. In/Out limits visibility; child source edits and keys stay available.</small>
     <button type="button" disabled={row.locked} onClick={() => onFit(row.id)}>Fit {row.name} to children</button>
+    {onSplit && <button type="button" disabled={row.locked} onClick={() => onSplit(row.id)}>Split {row.name} at playhead</button>}
+    {onDuplicate && <button type="button" onClick={() => onDuplicate(row.id)}>Duplicate {row.name}</button>}
     <button type="button" disabled={row.locked} onClick={() => onDelete(row.id)}>Delete {row.name} and layers</button>
   </div>;
 }

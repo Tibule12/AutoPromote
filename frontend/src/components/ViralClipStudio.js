@@ -64,7 +64,7 @@ import { editStudioPositionPose, editStudioSpatialPath } from './studioMotionEdi
 import StudioGroupPreview from "./StudioGroupPreview";
 import { hasSoftStudioMask, studioMaskPointProperty, parseStudioMaskPolygon, studioMaskPolygonPath, validateStudioMaskAnimation } from "./studioMaskGeometry";
 import { primeStudioSourceVideo, watchStudioProgrammeFrames, studioPresentedSourceTime, watchStudioClipBoundary, watchStudioAudioClock, studioJoinFade, mapStudioSourceAccess, isStudioSourceClockCurrent, pausedStudioMappedFrameRequest, pausedStudioFrameKey, studioPausedSampleTime, studioFinishedFrameSeekTime } from "./studioSourcePreview";
-import { loadStudioSourceFrame } from "./studioSourceFrameClient";
+import { loadStudioSourceFrame, loadStudioSourceFrameRate } from "./studioSourceFrameClient";
 import { studioSourceLeaseRefreshDelay, studioSourceStoragePath, studioSourcePlaybackUrl } from './studioSourceAccess';
 import { studioPreviewScale, studioPreviewDimensions, normalizeStudioPreviewQuality, STUDIO_PREVIEW_QUALITIES, studioNextPreviewPaint, studioPreviewFrameDue, studioNextPreviewFrame } from './studioPreviewBudget';
 import { musicBufferNeedsResync, musicBufferPosition, prepareStudioMusicPlayback, studioMusicBufferIdentity, studioPictureRateCorrection } from "./studioMusicBufferClock";
@@ -75,8 +75,11 @@ import { studioProjectAspect } from './studioProjectAspect';
 import { studioCueSourceKey, createStudioCueBuffer, prepareStudioCuePlayback, prepareStudioBuiltInCue } from "./studioCueBuffer";
 import {
   MAX_STUDIO_ANGLES,
+  alignStudioAngleGroupOffsets,
+  computeWaveformSyncOffsetSeconds,
   createStudioAngleGroup,
   createStudioAngleShot,
+  decodeMediaAudioSamples,
   getStudioAngleSharedRange,
   setStudioAngleOffset,
 } from "./studioAngleGroups";
@@ -91,6 +94,7 @@ import {
   buildCaptionRenderPreviewChunks,
   getCaptionPreviewStyles,
   getCaptionPreviewOutputClock,
+  resolveActiveWordTimingState,
   sliceTypewriterWord,
 } from "./studioCaptionPreviewStyle";
 import { studioOverlayBelongsToClip } from "./studioOverlayBinding";
@@ -219,7 +223,10 @@ import { studioMusicFadeGain } from "./studioAudioFades";
 import { applyStudioClipMetadata } from "./studioTimelineEdits";
 import { rippleStudioSnapshotLinkedTimeline, splitStudioOverlayAtProgrammeTime } from "./studioTrimTransaction";
 import { editStudioSequence, removeStudioProgrammeRanges } from './studioSequenceEdits';
-import { studioGroupTimingRows, editStudioGroupTiming, clipStudioGroupMotionCues } from "./studioGroupTiming";
+import { studioGroupTimingRows, editStudioGroupTiming, clipStudioGroupMotionCues, duplicateStudioGroup, splitStudioGroup } from "./studioGroupTiming";
+import { exportStudioCaptionSidecar } from "./studioCaptionSidecar";
+import { buildInterchangeTranslationReport, exportStudioTimelineInterchange } from "./studioTimelineInterchange";
+import { exportStudioAudioStemsArchive } from "./studioAudioStems";
 import { editStudioKeyframeSelection } from "./studioKeyframeSelection";
 import {
   reconcileStudioDocument,
@@ -243,6 +250,7 @@ import { createSourceShotDirectorDraft, restoreSourceShotDirectorDraft,
   sourceShotDirectorDraftMatches } from "./studioDirectorSavedDraft";
 import { buildDirectorReframeRequest, buildDirectorMomentRequest } from "./studioDirectorWorkspaceProposals";
 import { secondsToTicks, ticksToSeconds, mapOutputTickToProgrammeTick, mapProgrammeTickToOutputTick } from "./studioTime";
+import { normalizeFrameRate } from "./studioTimecode";
 import { advanceStudioCueStartPlan, scheduleStudioCueGain, scheduleStudioCueRate, studioCueProgrammeTime, studioCueStartPlan } from "./studioCueGain";
 import { bindStudioAudioSource, bindStudioAudioSources, studioUploadedAudioBinding } from "./studioAudioSourceBindings";
 import {
@@ -1759,6 +1767,38 @@ const normalizeCaptionSegments = segments =>
       const text = normalizePlainText(segment?.text || "");
       if (!text) return null;
       const words = text.split(/\s+/).filter(Boolean);
+      const rawWordTimings = Array.isArray(segment?.wordTimings)
+        ? segment.wordTimings
+        : Array.isArray(segment?.words) && segment.words.some(word => word && typeof word === "object")
+          ? segment.words
+          : null;
+      let wordTimings = null;
+      if (rawWordTimings && rawWordTimings.length === words.length) {
+        const sanitizedTimings = rawWordTimings
+          .map((item, wordIdx) => {
+            if (!item || typeof item !== "object") return null;
+            const wText = normalizePlainText(item.word || "");
+            const wStart = Number(item.start);
+            const wEnd = Number(item.end);
+            if (!wText || wText !== words[wordIdx] || !Number.isFinite(wStart) || !Number.isFinite(wEnd)) {
+              return null;
+            }
+            const clampedStart = Math.max(start, Math.min(end, wStart));
+            const clampedEnd = Math.max(clampedStart + 0.01, Math.min(end + 0.05, wEnd));
+            return {
+              word: wText,
+              start: clampedStart,
+              end: clampedEnd,
+              ...(Number.isFinite(Number(item.probability))
+                ? { probability: clampNumber(item.probability, 0, 1, 1) }
+                : {}),
+            };
+          })
+          .filter(Boolean);
+        if (sanitizedTimings.length === words.length) {
+          wordTimings = sanitizedTimings;
+        }
+      }
       const language = normalizeCaptionLanguage(
         segment?.language ?? segment?.language_code ?? segment?.languageCode
       );
@@ -1783,6 +1823,7 @@ const normalizeCaptionSegments = segments =>
         duration: end - start,
         text,
         words,
+        ...(wordTimings ? { wordTimings } : {}),
         sourceClipId: segment?.sourceClipId ?? segment?.source_clip_id ?? null,
         speaker,
         speakerLabel:
@@ -2072,16 +2113,14 @@ const getTimedCaptionPreviewState = ({ segments, sourceTime, clipStartTime = 0, 
   const chunkDur = currentChunk ? Math.max(currentChunk.duration, 0.05) : 1;
   const effectiveTime =
     rawTime >= chunkStart ? rawTime : rawTime - clipStart >= chunkStart ? rawTime - clipStart : chunkStart;
-  const elapsedInChunk = Math.max(0, effectiveTime - chunkStart);
 
   const activeWordIndex =
     currentChunk && Array.isArray(currentChunk.words) && currentChunk.words.length
-      ? Math.min(
-          currentChunk.words.length - 1,
-          Math.floor(
-            clampNumber(elapsedInChunk / chunkDur, 0, 0.999, 0) * currentChunk.words.length
-          )
-        )
+      ? resolveActiveWordTimingState(
+          currentChunk,
+          { start: chunkStart, end: chunkStart + chunkDur, time: effectiveTime },
+          currentChunk.words.length
+        ).activeIdx
       : 0;
 
   return {
@@ -2701,6 +2740,7 @@ const ViralClipStudio = ({
   const [activeOverlayId, setActiveOverlayId] = useState(null);
   const [videoTime, setVideoTime] = useState(0);
   const studioShortcutActionsRef = useRef({});
+  const studioShuttleRef = useRef(null);
   const [programmeMediaAspectRatio, setProgrammeMediaAspectRatio] = useState(16 / 9);
   const [videoFit, setVideoFit] = useState("cover");
   const [safeFaceFraming, setSafeFaceFraming] = useState(false);
@@ -2814,6 +2854,7 @@ const ViralClipStudio = ({
   const [bRollGenerationJobId, setBRollGenerationJobId] = useState("");
   const [autoBRollRequest, setAutoBRollRequest] = useState(null);
   const [captionBulkLanguage, setCaptionBulkLanguage] = useState("en");
+  const [sidecarIncludeSpeakers, setSidecarIncludeSpeakers] = useState(false);
   const [storyVisualSearchStatus, setStoryVisualSearchStatus] = useState("idle");
   const [storyVisualSearchMessage, setStoryVisualSearchMessage] = useState("");
   const [storyVisualCandidates, setStoryVisualCandidates] = useState({});
@@ -3134,6 +3175,7 @@ const ViralClipStudio = ({
   const [isExtractingAudio, setIsExtractingAudio] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [exportStatusLabel, setExportStatusLabel] = useState("Render Final Clip");
+  const [dualExportOutputs, setDualExportOutputs] = useState(null);
   const [selectedExportDestination, setSelectedExportDestination] = useState("general");
   const [splitExportEnabled, setSplitExportEnabled] = useState(false);
   const [splitExportHooks, setSplitExportHooks] = useState([]);
@@ -3192,6 +3234,39 @@ const ViralClipStudio = ({
       endRequest: null,
     }];
   });
+  const [sourceRateResult, setSourceRateResult] = useState(null);
+  const firstSourcePath = timeline[0]?.sourceStoragePath || timeline[0]?.storagePath;
+  const firstSourceGeneration = sourceAccessGenerations.projectId === projectId
+    ? sourceAccessGenerations.byPath[firstSourcePath]
+    : null;
+  const matchSourceRate = exportSettings.fps === "source";
+  const sourceRateKey = matchSourceRate && firstSourcePath
+    ? `${projectId}:${firstSourcePath}:${firstSourceGeneration || ""}`
+    : null;
+  const sourceRate = sourceRateKey && sourceRateKey === sourceRateResult?.key ? sourceRateResult.frameRate : null;
+  const deliveryFrameRate = matchSourceRate ? sourceRate : exportSettings.fps;
+  const deliveryFps = deliveryFrameRate ? normalizeFrameRate(deliveryFrameRate).fps : null;
+  const sourceRatePending = Boolean(sourceRateKey && sourceRateKey !== sourceRateResult?.key);
+  useEffect(() => {
+    if (!sourceRateKey || projectSourcesRefreshing) return undefined;
+    const controller = new AbortController();
+    const save = frameRate => setSourceRateResult({ key: sourceRateKey, frameRate });
+    const timeout = setTimeout(() => {
+      if (!controller.signal.aborted) save(null);
+      controller.abort();
+    }, 35000);
+    loadStudioSourceFrameRate(firstSourcePath, controller.signal).then(result => {
+      if (!controller.signal.aborted)
+        save(firstSourceGeneration && firstSourceGeneration !== result.sourceGeneration ? null : result.frameRate);
+    }).catch(() => {
+      if (!controller.signal.aborted) save(null);
+    }).finally(() => clearTimeout(timeout));
+    return () => {
+      clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [sourceRateKey, firstSourcePath, firstSourceGeneration, projectSourcesRefreshing]);
+
   const [activeTimelineIndex, setActiveTimelineIndex] = useState(0);
   const [draggedOverlayId, setDraggedOverlayId] = useState(null);
   const [draggedTimelineClipId, setDraggedTimelineClipId] = useState(null);
@@ -3797,9 +3872,19 @@ const ViralClipStudio = ({
   };
   latestEditorSnapshotRef.current = getEditorSnapshot;
 
+  const studioOwnerUidOptions = () => {
+    try {
+      const uid = getAuth()?.currentUser?.uid || null;
+      return uid ? { ownerUid: uid } : undefined;
+    } catch (_) {
+      return undefined;
+    }
+  };
+
   const refreshSavedProjects = async () => {
     try {
-      const nextProjects = await listViralStudioProjects();
+      const opts = studioOwnerUidOptions();
+      const nextProjects = await (opts ? listViralStudioProjects(opts) : listViralStudioProjects());
       if (nextProjects.length === 0 && savedProjects.length === 0) return;
       setSavedProjects(nextProjects);
     } catch (error) {
@@ -3856,13 +3941,17 @@ const ViralClipStudio = ({
         // its edit/media but needs a new source-bound Director analysis.
         savedSnapshot.sourceShotDirectorDraft = null;
       }
-      const saved = await saveViralStudioProject({
+      const saveOpts = studioOwnerUidOptions();
+      const projectRecord = {
         id: nextId,
         name: duplicate ? `${nextName} copy` : nextName,
         createdAt: duplicate ? Date.now() : projectCreatedAtRef.current,
         snapshot: savedSnapshot,
         versions,
-      });
+      };
+      const saved = await (saveOpts
+        ? saveViralStudioProject(projectRecord, saveOpts)
+        : saveViralStudioProject(projectRecord));
       if (duplicate) {
         studioDocumentRef.current = savedSnapshot.studioDocument || null;
         activeProjectIdRef.current = saved.id;
@@ -4111,7 +4200,8 @@ const ViralClipStudio = ({
     if (!window.confirm(`Delete the saved project “${project.name || "Untitled viral edit"}”?`)) {
       return;
     }
-    await deleteViralStudioProject(project.id);
+    const deleteOpts = studioOwnerUidOptions();
+    await (deleteOpts ? deleteViralStudioProject(project.id, deleteOpts) : deleteViralStudioProject(project.id));
     if (project.id === projectId) {
       setProjectId(createSecureId("viral-project"));
       projectCreatedAtRef.current = Date.now();
@@ -4683,6 +4773,13 @@ const ViralClipStudio = ({
       const targetTag = event.target?.tagName;
       const isTypingTarget =
         event.target?.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(targetTag);
+      if (event.key === " " && !event.defaultPrevented &&
+          !event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey &&
+          !isTypingTarget && !event.target?.closest?.('button, a[href], summary, [role="button"], [role="dialog"]')) {
+        event.preventDefault();
+        if (!event.repeat) studioShortcutActionsRef.current.togglePlayback?.();
+        return;
+      }
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
         setCommandPaletteOpen(current => !current);
@@ -4705,7 +4802,7 @@ const ViralClipStudio = ({
       }
       if (!isTypingTarget && !event.metaKey && !event.ctrlKey && event.key.toLowerCase() === "j" && event.shiftKey) {
         event.preventDefault();
-        studioShortcutActionsRef.current.shuttleReverse?.();
+        if (!event.repeat) studioShortcutActionsRef.current.shuttle?.(-1);
       }
       if (!isTypingTarget && !event.metaKey && !event.ctrlKey && event.key.toLowerCase() === "k" && !event.shiftKey) {
         event.preventDefault();
@@ -4713,7 +4810,7 @@ const ViralClipStudio = ({
       }
       if (!isTypingTarget && !event.metaKey && !event.ctrlKey && event.key.toLowerCase() === "l" && event.shiftKey) {
         event.preventDefault();
-        studioShortcutActionsRef.current.shuttleFastForward?.();
+        if (!event.repeat) studioShortcutActionsRef.current.shuttle?.(1);
       }
       if (!isTypingTarget && !event.metaKey && !event.ctrlKey && event.key.toLowerCase() === "i" && !event.shiftKey) {
         event.preventDefault();
@@ -5261,7 +5358,16 @@ const ViralClipStudio = ({
     safePlayMediaElement(video);
   };
 
+  const stopStudioShuttle = useCallback(() => {
+    if (!studioShuttleRef.current) return;
+    cancelAnimationFrame(studioShuttleRef.current.frame);
+    studioShuttleRef.current = null;
+  }, []);
+
+  useEffect(() => stopStudioShuttle, [stopStudioShuttle, projectId, renderedOutputUrl]);
+
   const pauseSynchronizedPreview = () => {
+    stopStudioShuttle();
     previewPlaybackStartRef.current += 1;
     previewPlaybackPreparingRef.current = null;
     preparedCutHandoffRef.current = null;
@@ -6079,6 +6185,161 @@ const ViralClipStudio = ({
       const { timing, ...rest } = group; return rest;
     }));
   };
+  const duplicateGroupClip = id => {
+    const frame = (Number(previewSpeed) || 1) / (Number(exportSettings.fps) || 30);
+    try {
+      const { state: next, duplicatedGroupId } = duplicateStudioGroup(
+        { compounds: effectiveCompoundClips, order: compositionIds, overlays, motionScenes, threeDScenes, motionKeyframes, trackStates, frameStep: frame },
+        id,
+        { programmeDuration: liveTimelineDuration }
+      );
+      setPreviewFinishedFile(false);
+      setCompoundClips(next.compounds);
+      setCompositionOrder(next.order);
+      setOverlays(next.overlays);
+      setMotionScenes(next.motionScenes);
+      setThreeDScenes(next.threeDScenes);
+      setMotionKeyframes(next.motionKeyframes);
+      setSelectedGroupId(duplicatedGroupId);
+      setActiveOverlayId(null);
+      setMotionTargetId(duplicatedGroupId);
+      setStudioActionMessage("Group duplicated with its child layers and keyframes.");
+    } catch (error) { setStudioActionMessage(error.message); }
+  };
+  const splitGroupClipAtPlayhead = id => {
+    const frame = (Number(previewSpeed) || 1) / (Number(exportSettings.fps) || 30);
+    try {
+      const { state: next, rightGroupId } = splitStudioGroup(
+        { compounds: effectiveCompoundClips, order: compositionIds, overlays, motionScenes, threeDScenes, motionKeyframes, trackStates, frameStep: frame },
+        id,
+        Number(previewTimelineTime || 0),
+        { programmeDuration: liveTimelineDuration }
+      );
+      setPreviewFinishedFile(false);
+      setCompoundClips(next.compounds);
+      setCompositionOrder(next.order);
+      setOverlays(next.overlays);
+      setMotionScenes(next.motionScenes);
+      setThreeDScenes(next.threeDScenes);
+      setMotionKeyframes(next.motionKeyframes);
+      setSelectedGroupId(rightGroupId);
+      setActiveOverlayId(null);
+      setMotionTargetId(rightGroupId);
+      setStudioActionMessage("Group split cleanly into two independent segments at the playhead.");
+    } catch (error) { setStudioActionMessage(error.message); }
+  };
+  const triggerStudioTextDownload = result => {
+    const blob = new Blob([result.content], { type: result.mimeType });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = result.filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+  const buildInterchangeProjectPayload = () => ({
+    projectName: selectedClip?.title || "viral-clip-sequence",
+    title: selectedClip?.title || "Viral Clip Studio Sequence",
+    frameRate: deliveryFrameRate,
+    playbackRate: previewSpeed,
+    outputTimeMap: previewOutputTimeMap,
+    timelineSegments: timeline.map(clip => {
+      const window = getTimelineClipWindow(clip);
+      return { ...clip, startTime: window.start, endTime: window.end, startRequest: window.start, endRequest: window.end };
+    }),
+    defaultSourceUrl: selectedClip?.url || videoUrl || "",
+    overlays,
+    voiceovers,
+    soundEffects,
+    musicTrack: addMusic ? musicTrack : null,
+    captionSegments: normalizeCaptionSegments(captionSegments),
+    finishFx,
+    nodeFlow,
+    threeD: threeDScenes.length ? { enabled: true, scenes: threeDScenes } : null,
+    subjectVfx: subjectVfxScenes.length ? { enabled: true, scenes: subjectVfxScenes } : null,
+    silenceRegions: silenceRegionsForTimeline,
+    framingCuts: normalizeReframeModeCuts(reframeModeCuts),
+    punchZones: activePunchZones,
+  });
+  const handleDownloadCaptionSidecar = format => {
+    const result = exportStudioCaptionSidecar({
+      format,
+      projectName: selectedClip?.title || "viral-clip-sequence",
+      title: selectedClip?.title || "Viral Clip Captions",
+      captionSegments: normalizeCaptionSegments(captionSegments),
+      timelineSegments: timeline.map(clip => {
+        const window = getTimelineClipWindow(clip);
+        return { ...clip, start_time: window.start, end_time: window.end, duration: window.duration };
+      }),
+      fallbackSourceClipId: currentTimelineClip?.sourceClipId || currentTimelineClip?.id || selectedClip?.id || null,
+      outputTimeMap: previewOutputTimeMap,
+      durationSeconds: liveTimelineDuration,
+      playbackRate: previewSpeed,
+      includeSpeakers: sidecarIncludeSpeakers,
+    });
+    if (!result.cueCount) {
+      setStudioActionMessage("Add or import at least one timed caption cue on the active sequence before exporting.");
+      return;
+    }
+    triggerStudioTextDownload(result);
+    setStudioActionMessage(`Exported ${result.cueCount} timeline-synced caption(s) as ${result.filename}.`);
+  };
+  const handleDownloadTimelineInterchange = format => {
+    if (!deliveryFps) {
+      setStudioActionMessage("Choose a delivery frame rate to export this timeline.");
+      return;
+    }
+    const result = exportStudioTimelineInterchange({
+      format,
+      ...buildInterchangeProjectPayload(),
+    });
+    triggerStudioTextDownload(result);
+    setStudioActionMessage(`Exported desktop NLE sequence as ${result.filename} (${result.report.summary}).`);
+  };
+  const handleDownloadAudioStems = async () => {
+    const decodeBrowserAudio = async (url, targetSampleRate) => {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const arrayBuf = await response.arrayBuffer();
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) throw new Error("Web Audio API unavailable");
+      const ctx = new AudioCtx({ sampleRate: targetSampleRate });
+      try {
+        const decoded = await ctx.decodeAudioData(arrayBuf);
+        const left = decoded.getChannelData(0);
+        const right = decoded.numberOfChannels > 1 ? decoded.getChannelData(1) : left;
+        return { left: new Float32Array(left), right: new Float32Array(right) };
+      } finally {
+        await ctx.close?.().catch(() => {});
+      }
+    };
+    const result = await exportStudioAudioStemsArchive({
+      projectName: selectedClip?.title || "viral-clip-sequence",
+      durationSeconds: liveTimelineDuration,
+      playbackRate: previewSpeed,
+      timelineSegments: timeline.map(clip => {
+        const window = getTimelineClipWindow(clip);
+        return { ...clip, startTime: window.start, endTime: window.end, startRequest: window.start, endRequest: window.end };
+      }),
+      overlays,
+      musicTrack: addMusic ? musicTrack : null,
+      voiceovers,
+      soundEffects,
+      trackStates,
+      audioKeyframes,
+      decodeAudioUrl: decodeBrowserAudio,
+    });
+    if (!result.stemCount) {
+      setStudioActionMessage("No unmuted audio buses are active to export as stems.");
+      return;
+    }
+    triggerStudioTextDownload(result);
+    setStudioActionMessage(
+      `Exported ${result.stemCount} time-aligned stereo WAV stems as ${result.filename}${result.warnings.length ? ` (${result.warnings.length} decode notice)` : ""}.`
+    );
+  };
   const deleteGroupClip = id => {
     if (groupClipRows.find(group => group.id === id)?.locked) { setStudioActionMessage('Unlock the group and its child tracks first.'); return; }
     const leaves = new Set(compositionGroups.leaves(id));
@@ -6298,7 +6559,8 @@ const ViralClipStudio = ({
     setVideoTime(boundedTime);
   };
 
-  const jumpToOutputTimelineTime = outputTime => {
+  const jumpToOutputTimelineTime = (outputTime, fromShuttle = false) => {
+    if (!fromShuttle) stopStudioShuttle();
     if (renderedOutputUrl && videoRef.current) {
       const video = videoRef.current;
       if (video.paused) {
@@ -6310,7 +6572,7 @@ const ViralClipStudio = ({
       const programmeTick = Math.min(previewOutputTimeMap.at(-1)?.programmeRange.endTick || 0,
         secondsToTicks(Math.max(0, Number(outputTime || 0))));
       const time = ticksToSeconds(mapProgrammeTickToOutputTick(previewOutputTimeMap, programmeTick) || 0);
-      const seek=studioFinishedFrameSeekTime(time,Number(exportSettings.fps),video.duration);
+      const seek=studioFinishedFrameSeekTime(time,deliveryFps,video.duration);
       video.currentTime = seek;
       setVideoTime(seek);
       return;
@@ -8423,6 +8685,7 @@ const ViralClipStudio = ({
   };
 
   const toggleComparisonPlayback = async ({ resumeOnly = false } = {}) => {
+    stopStudioShuttle();
     const playRequest = ++previewPlaybackStartRef.current;
     // Pause must remain available while owned media links are being refreshed.
     if (!resumeOnly && !isPreviewPaused) {
@@ -10848,6 +11111,7 @@ const ViralClipStudio = ({
   };
 
   Object.assign(studioShortcutActionsRef.current, {
+    togglePlayback: () => void toggleComparisonPlayback(),
     markIn: () => markCutBoundary("start"),
     markOut: () => markCutBoundary("end"),
     extractMarkedRange: () => {
@@ -10858,23 +11122,44 @@ const ViralClipStudio = ({
       if (end - start < 0.15) return;
       commitProgrammeRemoval([{ start, end }], "Three-point range cut");
     },
-    shuttleStop: () => {
-      pauseSynchronizedPreview();
-      changePreviewSpeed(1);
+    shuttleStop: pauseSynchronizedPreview,
+    seekShuttle: outputTime => {
+      if (!videoRef.current || videoRef.current.seeking) return false;
+      const programmeTick = mapOutputTickToProgrammeTick(previewOutputTimeMap, secondsToTicks(outputTime));
+      if (programmeTick == null) return false;
+      jumpToOutputTimelineTime(ticksToSeconds(programmeTick), true);
+      return true;
     },
-    shuttleReverse: () => {
+    shuttle: direction => {
+      const clock = studioPlaybackClockRef.current;
+      const previous = studioShuttleRef.current;
+      const position = clock.read() || (previous && clock.getSnapshot());
+      const end = previewOutputTimeMap.at(-1)?.outputRange.endTick;
+      if (!position || !end || projectSourcesRefreshing) return;
+      const rate = direction === previous?.direction ? Math.min(4, previous.rate * 2) : 1;
       pauseSynchronizedPreview();
-      const target = Math.max(0, Number(previewTimelineTime || 0) - 0.5);
-      jumpToOutputTimelineTime(target);
-    },
-    shuttleFastForward: () => {
-      const nextRate = previewSpeed >= 2 ? 1 : Number((previewSpeed * 2).toFixed(2));
-      changePreviewSpeed(nextRate);
-      if (videoRef.current?.paused) {
-        previewPlaybackIntentRef.current = true;
-        setIsPreviewPaused(false);
-        videoRef.current.play?.().catch(() => {});
-      }
+      const duration = ticksToSeconds(end);
+      const start = Math.max(0, Math.min(duration, position.outputTime));
+      const shuttle = { direction, rate, frame: null };
+      studioShuttleRef.current = shuttle;
+      const started = performance.now();
+      let lastSeek = started;
+      const tick = now => {
+        if (studioShuttleRef.current !== shuttle) return;
+        if (now - lastSeek >= 40) {
+          const target = Math.max(0, Math.min(duration, start + direction * rate * (now - started) / 1000));
+          if (studioShortcutActionsRef.current.seekShuttle(target)) {
+            lastSeek = now;
+            if (target === 0 || target === duration) {
+              stopStudioShuttle();
+              return;
+            }
+          }
+        }
+        shuttle.frame = requestAnimationFrame(tick);
+      };
+      shuttle.frame = requestAnimationFrame(tick);
+      setStudioActionMessage(`Shuttle ${direction < 0 ? "reverse" : "forward"} · ${rate}× · K to stop.`);
     },
   });
 
@@ -12522,9 +12807,13 @@ const ViralClipStudio = ({
     return { gaps, message };
   };
 
-  const handleExportRender = async (destination, { captionReviewCopy = false } = {}) => {
+  const handleExportRender = async (
+    destination,
+    { captionReviewCopy = false, dualCleanAndCaptioned = false } = {}
+  ) => {
     if (isExporting) return;
     setExportErrorMessage("");
+    setDualExportOutputs(null);
     const exportEditState = getEditorSnapshot();
     const {
       autoCaptions, captionStyle, captionPosition, captionScale, captionTextOverride, captionCoverageMode,
@@ -13080,7 +13369,7 @@ const ViralClipStudio = ({
         subjectVfxScenes,
         exportTimeline
       );
-      const completedRender = await onSave(selectedClip, normalizedOverlays, {
+      const renderPayload = {
         autoCaptions,
         captionReviewCopy,
         captionCoverageMode,
@@ -13267,8 +13556,47 @@ const ViralClipStudio = ({
         timelineSegments: exportTimeline,
         backgroundAudio: null,
         exportDestination: destination || "general",
-        outputSettings: exportSettings,
-      });
+        outputSettings: {
+          resolution: exportSettings.resolution,
+          fps: exportSettings.fps,
+          codec: exportSettings.codec,
+          quality: exportSettings.quality,
+          videoBitrate: exportSettings.videoBitrate || "auto",
+          targetFileSizeMb: exportSettings.targetFileSizeMb || "",
+          audioBitrate: exportSettings.audioBitrate,
+          audioCodec:
+            exportSettings.codec === "prores"
+              ? exportSettings.audioCodec || "pcm"
+              : exportSettings.audioCodec || "aac",
+          colorSpace: exportSettings.colorSpace || "rec709",
+        },
+      };
+      let completedRender = null;
+      if (dualCleanAndCaptioned && autoCaptions && !captionReviewCopy) {
+        flushSync(() => setExportStatusLabel("Rendering Captioned Master (1/2)…"));
+        const captionedRender = await onSave(selectedClip, normalizedOverlays, {
+          ...renderPayload,
+          autoCaptions: true,
+          captionReviewCopy: false,
+          dualVariant: "captioned",
+        });
+        flushSync(() => setExportStatusLabel("Rendering Clean Textless Master (2/2)…"));
+        const cleanRender = await onSave(selectedClip, normalizedOverlays, {
+          ...renderPayload,
+          autoCaptions: false,
+          captionReviewCopy: false,
+          captionTextOverride: null,
+          dualVariant: "clean",
+        });
+        completedRender = captionedRender || cleanRender;
+        setDualExportOutputs({
+          captioned: captionedRender || null,
+          clean: cleanRender || null,
+        });
+        setStudioActionMessage("Dual export ready: Captioned social + Clean textless master.");
+      } else {
+        completedRender = await onSave(selectedClip, normalizedOverlays, renderPayload);
+      }
       if (completedRender?.url || completedRender?.outputUrl || completedRender?.output_url) {
         setPreviewFinishedFile(true);
       }
@@ -18993,14 +19321,35 @@ const ViralClipStudio = ({
                   // Export only this ordinary editable record. Authentication,
                   // other projects and render-recovery session state stay out.
                   let backup;
-                  try { backup = await packageStudioBackup(saved, { includeVersions: backupIncludeVersions }); }
-                  catch (error) { setStudioActionMessage(error.message); return; }
+                  let usedRelinkManifest = false;
+                  try {
+                    backup = await packageStudioBackup(saved, { includeVersions: backupIncludeVersions });
+                  } catch (error) {
+                    if (/20 MB/i.test(error?.message || "")) {
+                      try {
+                        backup = await packageStudioBackup(saved, {
+                          includeVersions: backupIncludeVersions,
+                          allowOfflineRelinkManifest: true,
+                        });
+                        usedRelinkManifest = true;
+                      } catch (fallbackErr) {
+                        setStudioActionMessage(fallbackErr.message);
+                        return;
+                      }
+                    } else {
+                      setStudioActionMessage(error.message);
+                      return;
+                    }
+                  }
                   const url = URL.createObjectURL(backup);
                   const link = document.createElement("a");
                   link.href = url;
                   link.download = `${saved.name.replace(/[^a-zA-Z0-9_-]+/g, "-")}.autopromote.json`;
                   document.body.appendChild(link); link.click(); link.remove();
                   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+                  if (usedRelinkManifest) {
+                    setStudioActionMessage("Downloaded portable relink manifest (.autopromote.json) for >20 MB local files.");
+                  }
                 }}>Download project backup</button>
               </div>
               <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", marginTop: "5px" }}>
@@ -19349,6 +19698,63 @@ const ViralClipStudio = ({
                         {item.status === "ready" && !(Number(item.duration) > 0) ? (
                           <button type="button" onClick={() => void probeProjectMediaDuration(item)}>Retry duration</button>
                         ) : null}
+                        {(item.status === "unavailable" || item.offlineRelinkRef || selectedProjectMediaId === item.id) ? (
+                          <label className="studio-media-relink-label" style={{ cursor: "pointer" }}>
+                            <span
+                              className="studio-media-relink-btn"
+                              data-testid="media-offline-relink-btn"
+                              role="button"
+                              tabIndex={0}
+                            >
+                              Relink offline file…
+                            </span>
+                            <input
+                              type="file"
+                              accept="video/*,audio/*,image/*"
+                              data-testid="media-offline-relink-input"
+                              style={{ display: "none" }}
+                              onChange={event => {
+                                const picked = event.target.files?.[0];
+                                event.target.value = "";
+                                if (!picked) return;
+                                const objectUrl = URL.createObjectURL(picked);
+                                setProjectMedia(current =>
+                                  current.map(entry =>
+                                    entry.id === item.id
+                                      ? {
+                                          ...entry,
+                                          file: picked,
+                                          url: objectUrl,
+                                          name: entry.name || picked.name,
+                                          status: "ready",
+                                          offlineRelinkRef: null,
+                                          error: "",
+                                        }
+                                      : entry
+                                  )
+                                );
+                                setTimeline(current =>
+                                  current.map(clip =>
+                                    clip.sourceMediaId === item.id ||
+                                    clip.sourceClipId === item.id ||
+                                    (item.storagePath && (clip.storagePath || clip.sourceStoragePath) === item.storagePath)
+                                      ? { ...clip, url: objectUrl }
+                                      : clip
+                                  )
+                                );
+                                setOverlays(current =>
+                                  current.map(ov =>
+                                    ov.sourceMediaId === item.id ||
+                                    (item.storagePath && (ov.storagePath || ov.sourceStoragePath) === item.storagePath)
+                                      ? { ...ov, url: objectUrl, src: objectUrl, file: picked }
+                                      : ov
+                                  )
+                                );
+                                setMediaImportMessage(`Relinked ${picked.name} to ${item.name || "project media"}.`);
+                              }}
+                            />
+                          </label>
+                        ) : null}
                       </div>
                     </article>
                   );
@@ -19443,6 +19849,55 @@ const ViralClipStudio = ({
                           ▶ Play all angles together
                         </button>
                         <button type="button" onClick={pauseFilmTakePreview}>Pause all</button>
+                        <button
+                          type="button"
+                          data-testid="multicam-auto-sync-btn"
+                          onClick={() => void (async () => {
+                            try {
+                              setMediaImportMessage("Analyzing audio waveforms for multicam sync…");
+                              const angleAssets = activeFilmTake.angles
+                                .map(a => projectMedia.find(item => item.id === a.assetId))
+                                .filter(Boolean);
+                              if (angleAssets.length < 2) {
+                                toast.error("Select a take with at least 2 camera/audio sources.");
+                                return;
+                              }
+                              const decodedList = await Promise.all(
+                                angleAssets.map(async asset => ({
+                                  asset,
+                                  decoded: await decodeMediaAudioSamples(getSafeMediaSource(asset.url)),
+                                }))
+                              );
+                              const ref = decodedList[0];
+                              const rawLags = { [String(ref.asset.id)]: 0 };
+                              let minConfidence = 1;
+                              for (let i = 1; i < decodedList.length; i += 1) {
+                                const target = decodedList[i];
+                                const res = computeWaveformSyncOffsetSeconds(
+                                  ref.decoded.samples,
+                                  target.decoded.samples,
+                                  ref.decoded.sampleRate
+                                );
+                                rawLags[String(target.asset.id)] = res.lagSeconds;
+                                minConfidence = Math.min(minConfidence, res.confidence);
+                              }
+                              updateFilmTake(activeFilmTake.id, group =>
+                                alignStudioAngleGroupOffsets({
+                                  group,
+                                  rawLagsByAssetId: rawLags,
+                                  assets: projectMedia,
+                                })
+                              );
+                              const msg = `Synced ${angleAssets.length} angles by audio waveform (${Math.round(minConfidence * 100)}% match).`;
+                              setMediaImportMessage(msg);
+                              toast.success(msg);
+                            } catch (err) {
+                              toast.error(err?.message || "Could not decode camera audio for auto-sync.");
+                            }
+                          })()}
+                        >
+                          🔊 Auto-Sync by Waveform
+                        </button>
                       </div>
                       <div className="studio-angle-groups__angles">
                         {activeFilmTake.angles.map((angle, index) => {
@@ -21089,6 +21544,7 @@ const ViralClipStudio = ({
                         <button
                           type="button"
                           onClick={toggleComparisonPlayback}
+                          aria-keyshortcuts="Space"
                           aria-label={
                             isPreviewPaused ? "Play edited preview" : "Pause edited preview"
                           }
@@ -23230,79 +23686,9 @@ const ViralClipStudio = ({
                     </button>
                   </div>
 
-                  <details className="advanced-tool-section stabilization-section">
-                    <summary>Video stabilization</summary>
-                    <label className="inspector-toggle-row">
-                      <span>
-                        <b>Stabilize shaky footage</b>
-                        <small>Motion analysis smooths camera shake before reframing.</small>
-                      </span>
-                      <input
-                        type="checkbox"
-                        checked={stabilization.enabled}
-                        onChange={event =>
-                          setStabilization(current => ({
-                            ...current,
-                            enabled: event.target.checked,
-                          }))
-                        }
-                      />
-                    </label>
-                    {stabilization.enabled ? (
-                      <>
-                        <label className="inspector-range">
-                          <span>
-                            <b>Smoothing</b>
-                            <strong>{stabilization.strength}%</strong>
-                          </span>
-                          <input
-                            type="range"
-                            min={5}
-                            max={100}
-                            value={stabilization.strength}
-                            onChange={event =>
-                              setStabilization(current => ({
-                                ...current,
-                                strength: Number(event.target.value),
-                              }))
-                            }
-                          />
-                        </label>
-                        <label className="inspector-select-field">
-                          <span>Edge crop</span>
-                          <select
-                            value={stabilization.crop}
-                            onChange={event =>
-                              setStabilization(current => ({
-                                ...current,
-                                crop: event.target.value,
-                              }))
-                            }
-                          >
-                            <option value="adaptive">Adaptive crop</option>
-                            <option value="minimal">Minimal crop</option>
-                            <option value="scale">Scale to hide edges</option>
-                          </select>
-                        </label>
-                        <label className="inspector-check-row">
-                          <input
-                            type="checkbox"
-                            checked={stabilization.rollingShutter}
-                            onChange={event =>
-                              setStabilization(current => ({
-                                ...current,
-                                rollingShutter: event.target.checked,
-                              }))
-                            }
-                          />
-                          <span>
-                            <strong>Rolling-shutter repair</strong>
-                            <small>Corrects phone-camera wobble before stabilization.</small>
-                          </span>
-                        </label>
-                      </>
-                    ) : null}
-                  </details>
+                  {stabilization.enabled && (
+                    <p className="inspector-note">Saved stabilization settings are unavailable in this editor. Exports use the original camera motion.</p>
+                  )}
 
                   <button
                     type="button"
@@ -24658,9 +25044,66 @@ const ViralClipStudio = ({
                         applyCaptionBulkEdit(previous, "approve_wording"))}>I checked every line — approve wording</button>
                       <small>Wording approval applies to every line. Unknown speakers or languages still require correction.</small>
                     </div> : null}
-                    <div className="caption-segment-heading">
+                    <div className="caption-segment-heading" style={{ flexWrap: "wrap", gap: "6px", alignItems: "center" }}>
                       <span>Transcript lines</span>
-                      <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                      <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap", width: "100%" }}>
+                        {captionSegments.length ? (
+                          <>
+                            <button
+                              type="button"
+                              className="caption-import-srt-btn"
+                              data-testid="caption-export-srt"
+                              onClick={() => handleDownloadCaptionSidecar("srt")}
+                              title="Download SubRip (.srt) timed to the current edited and speed-retimed sequence"
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                cursor: "pointer",
+                                padding: "4px 8px",
+                                borderRadius: "6px",
+                                background: "rgba(34, 197, 94, 0.14)",
+                                border: "1px solid rgba(34, 197, 94, 0.35)",
+                                fontSize: "0.78rem",
+                                color: "#86efac",
+                                fontWeight: 600,
+                              }}
+                            >
+                              ⬇ Export .srt
+                            </button>
+                            <button
+                              type="button"
+                              className="caption-import-srt-btn"
+                              data-testid="caption-export-vtt"
+                              onClick={() => handleDownloadCaptionSidecar("vtt")}
+                              title="Download WebVTT (.vtt) timed to the current edited and speed-retimed sequence"
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                cursor: "pointer",
+                                padding: "4px 8px",
+                                borderRadius: "6px",
+                                background: "rgba(34, 197, 94, 0.14)",
+                                border: "1px solid rgba(34, 197, 94, 0.35)",
+                                fontSize: "0.78rem",
+                                color: "#86efac",
+                                fontWeight: 600,
+                              }}
+                            >
+                              ⬇ Export .vtt
+                            </button>
+                            <label
+                              style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontSize: "0.72rem", color: "#cbd5e1", cursor: "pointer" }}
+                              title="Prefix exported SRT/VTT captions with speaker names"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={sidecarIncludeSpeakers}
+                                onChange={event => setSidecarIncludeSpeakers(event.target.checked)}
+                              />
+                              Speakers
+                            </label>
+                          </>
+                        ) : null}
                         <label
                           className="caption-import-srt-btn"
                           style={{
@@ -24956,17 +25399,25 @@ const ViralClipStudio = ({
                                   setCaptionSegments(previous =>
                                     previous.map(item =>
                                       item.id === segment.id
-                                        ? {
-                                            ...item,
-                                            text,
-                                            words: normalizePlainText(text)
+                                        ? (() => {
+                                            const nextWords = normalizePlainText(text)
                                               .split(/\s+/)
-                                              .filter(Boolean),
-                                            textReviewRequired: false,
-                                            textReviewed: true,
-                                            reviewRequired:
-                                              item.speaker === "unknown" || item.language === "und",
-                                          }
+                                              .filter(Boolean);
+                                            const keepWordTimings =
+                                              Array.isArray(item.wordTimings) &&
+                                              item.wordTimings.length === nextWords.length &&
+                                              nextWords.every((w, i) => w === item.wordTimings[i]?.word);
+                                            return {
+                                              ...item,
+                                              text,
+                                              words: nextWords,
+                                              wordTimings: keepWordTimings ? item.wordTimings : null,
+                                              textReviewRequired: false,
+                                              textReviewed: true,
+                                              reviewRequired:
+                                                item.speaker === "unknown" || item.language === "und",
+                                            };
+                                          })()
                                         : item
                                     )
                                   );
@@ -26190,7 +26641,7 @@ const ViralClipStudio = ({
                     setMotionKeyframes(current => current.filter(key => key.targetId !== id));
                   }}
                   groupAnimation={{ keyframes: motionKeyframes, playhead: previewTimelineTime,
-                    timingRows: groupClipRows, onEditTiming: editGroupClipTiming, onFitTiming: fitGroupClipTiming, onDeleteGroup: deleteGroupClip,
+                    timingRows: groupClipRows, onEditTiming: editGroupClipTiming, onFitTiming: fitGroupClipTiming, onDuplicateGroup: duplicateGroupClip, onSplitGroup: splitGroupClipAtPlayhead, onDeleteGroup: deleteGroupClip,
                     keyTolerance: motionKeyframeTolerance(exportSettings.fps, previewSpeed),
                     locked: Boolean(trackStates.graphics?.locked), focusKeyId: focusedMotionKeyframeId,
                     onProperty: editMotionPropertyAtPlayhead,
@@ -30331,64 +30782,9 @@ const ViralClipStudio = ({
               {exportErrorMessage ? <p role="alert" data-testid="studio-export-error">
                 {exportErrorMessage}
               </p> : null}
-              <section className="split-export-card">
-                <div>
-                  <span>A/B hook pack</span>
-                  <strong>Export alternate first-three-second hooks</strong>
-                  <small>One edit, up to three hook variants for real platform testing.</small>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const suggestions = getHookCopySuggestions(selectedClip).slice(0, 3);
-                    setSplitExportHooks(
-                      suggestions.map((text, index) => ({
-                        id: createSecureId("split-hook"),
-                        text,
-                        template: ["zoom_focus", "freeze_text", "blur_reveal"][index],
-                      }))
-                    );
-                    setSplitExportEnabled(true);
-                    setStudioActionMessage(
-                      "Three editable hook variants are ready for split export."
-                    );
-                  }}
-                >
-                  {splitExportHooks.length ? "Regenerate hooks" : "Generate 3 hooks"}
-                </button>
-                {splitExportHooks.length ? (
-                  <div className="split-export-variants">
-                    {splitExportHooks.map((variant, index) => (
-                      <label key={variant.id}>
-                        <span>V{index + 1}</span>
-                        <input
-                          aria-label={`Split export hook ${index + 1}`}
-                          value={variant.text}
-                          onChange={event =>
-                            setSplitExportHooks(current =>
-                              current.map(item =>
-                                item.id === variant.id
-                                  ? { ...item, text: normalizeHookText(event.target.value) }
-                                  : item
-                              )
-                            )
-                          }
-                        />
-                      </label>
-                    ))}
-                    <label className="inspector-check-row">
-                      <input
-                        type="checkbox"
-                        checked={splitExportEnabled}
-                        onChange={event => setSplitExportEnabled(event.target.checked)}
-                      />
-                      <span>
-                        <strong>Include all variants in this render job</strong>
-                      </span>
-                    </label>
-                  </div>
-                ) : null}
-              </section>
+              {splitExportEnabled && splitExportHooks.length > 0 && (
+                <p className="inspector-note">This project has saved hook drafts. Render produces one movie using the hook selected in the editor.</p>
+              )}
               {onRestoreExport && !isExporting ? (
                 <label className="inspector-check-row">
                   <span>Restore export receipt</span>
@@ -30483,7 +30879,7 @@ const ViralClipStudio = ({
                     }
                     disabled={isExporting}
                   >
-                    <option value="source">Source</option>
+                    <option value="source">Match first source</option>
                     {[24, 25, 30, 50, 60].map(fps => (
                       <option key={fps} value={String(fps)}>
                         {fps} fps
@@ -30497,12 +30893,17 @@ const ViralClipStudio = ({
                     aria-label="Export codec"
                     value={exportSettings.codec}
                     onChange={event =>
-                      setExportSettings(current => ({ ...current, codec: event.target.value }))
+                      setExportSettings(current => ({
+                        ...current,
+                        codec: event.target.value,
+                        audioCodec: event.target.value === "prores" ? "pcm" : "aac",
+                      }))
                     }
                     disabled={isExporting}
                   >
                     <option value="h264">H.264 · compatible</option>
                     <option value="h265">H.265 · smaller</option>
+                    <option value="prores">ProRes 422 HQ · mezzanine (.mov)</option>
                   </select>
                 </label>
                 <label>
@@ -30525,57 +30926,60 @@ const ViralClipStudio = ({
                   <span>Video bitrate</span>
                   <select
                     aria-label="Export video bitrate"
-                    value={exportSettings.videoBitrate}
+                    data-testid="export-video-bitrate-select"
+                    value={exportSettings.videoBitrate || "auto"}
                     onChange={event =>
                       setExportSettings(current => ({
                         ...current,
                         videoBitrate: event.target.value,
                       }))
                     }
-                    disabled={isExporting}
+                    disabled={isExporting || exportSettings.codec === "prores"}
                   >
-                    <option value="auto">Auto for quality</option>
-                    <option value="5">5 Mbps</option>
-                    <option value="8">8 Mbps</option>
-                    <option value="12">12 Mbps</option>
-                    <option value="20">20 Mbps</option>
-                    <option value="40">40 Mbps</option>
+                    <option value="auto">Auto (Quality CRF)</option>
+                    <option value="5000">5 Mbps (5000 kbps)</option>
+                    <option value="8000">8 Mbps (8000 kbps)</option>
+                    <option value="12000">12 Mbps (12000 kbps)</option>
+                    <option value="20000">20 Mbps (20000 kbps)</option>
+                    <option value="35000">35 Mbps (35000 kbps)</option>
                   </select>
                 </label>
                 <label>
-                  <span>Target size</span>
+                  <span>Target size (MB)</span>
                   <input
-                    aria-label="Target file size megabytes"
                     type="number"
-                    min={1}
-                    max={10000}
-                    placeholder="Auto (MB)"
-                    value={exportSettings.targetFileSizeMb}
+                    min="0"
+                    max="4096"
+                    step="1"
+                    placeholder="Auto"
+                    aria-label="Export target size MB"
+                    data-testid="export-target-mb-input"
+                    value={exportSettings.targetFileSizeMb ?? ""}
                     onChange={event =>
                       setExportSettings(current => ({
                         ...current,
                         targetFileSizeMb: event.target.value,
                       }))
                     }
-                    disabled={isExporting}
+                    disabled={isExporting || exportSettings.codec === "prores"}
                   />
                 </label>
                 <label>
-                  <span>Audio codec</span>
+                  <span>Color space</span>
                   <select
-                    aria-label="Export audio codec"
-                    value={exportSettings.audioCodec}
+                    aria-label="Export color space"
+                    data-testid="export-color-space-select"
+                    value={exportSettings.colorSpace || "rec709"}
                     onChange={event =>
                       setExportSettings(current => ({
                         ...current,
-                        audioCodec: event.target.value,
+                        colorSpace: event.target.value,
                       }))
                     }
                     disabled={isExporting}
                   >
-                    <option value="aac">AAC</option>
-                    <option value="opus">Opus</option>
-                    <option value="pcm">PCM · lossless</option>
+                    <option value="rec709">Rec.709 SDR</option>
+                    <option value="rec2020">Rec.2020 Wide Gamut</option>
                   </select>
                 </label>
                 <label>
@@ -30598,26 +31002,12 @@ const ViralClipStudio = ({
                     ))}
                   </select>
                 </label>
-                <label>
-                  <span>Color space</span>
-                  <select
-                    aria-label="Export color space"
-                    value={exportSettings.colorSpace}
-                    onChange={event =>
-                      setExportSettings(current => ({
-                        ...current,
-                        colorSpace: event.target.value,
-                      }))
-                    }
-                    disabled={isExporting}
-                  >
-                    <option value="rec709">Rec.709</option>
-                    <option value="srgb">sRGB</option>
-                    <option value="display_p3">Display P3</option>
-                    <option value="hdr10">HDR10</option>
-                  </select>
-                </label>
               </div>
+              <p className="inspector-note">
+                {exportSettings.codec === "prores"
+                  ? "MOV · ProRes 422 HQ (10-bit 4:2:2) · Uncompressed PCM audio when audio is present."
+                  : `MP4 · ${exportSettings.colorSpace === "rec2020" ? "Rec.2020" : "Rec.709 SDR"} · AAC ${exportSettings.audioBitrate || "192"}k${exportSettings.videoBitrate && exportSettings.videoBitrate !== "auto" ? ` · ${exportSettings.videoBitrate} kbps CBR/VBR` : Number(exportSettings.targetFileSizeMb) > 0 ? ` · Target ~${exportSettings.targetFileSizeMb} MB` : " · Quality CRF"}.`}
+              </p>
               <button
                 className="export-btn"
                 onClick={() => void handleExportRender(selectedExportDestination)}
@@ -30625,6 +31015,67 @@ const ViralClipStudio = ({
               >
                 {exportStatusLabel}
               </button>
+              {autoCaptions && (
+                <button
+                  type="button"
+                  className="export-btn"
+                  data-testid="export-dual-clean-captioned-btn"
+                  style={{ marginTop: "6px", background: "rgba(30, 41, 59, 0.9)", border: "1px solid rgba(56, 189, 248, 0.35)" }}
+                  onClick={() =>
+                    void handleExportRender(selectedExportDestination, {
+                      dualCleanAndCaptioned: true,
+                    })
+                  }
+                  disabled={isExporting}
+                >
+                  Export Captioned + Clean Master Pair
+                </button>
+              )}
+              {dualExportOutputs && (
+                <div
+                  className="inspector-note"
+                  data-testid="dual-export-outputs"
+                  role="status"
+                  style={{ marginTop: "6px", display: "flex", gap: "8px", flexWrap: "wrap" }}
+                >
+                  {dualExportOutputs.captioned?.url ||
+                  dualExportOutputs.captioned?.outputUrl ||
+                  dualExportOutputs.captioned?.output_url ? (
+                    <a
+                      href={
+                        dualExportOutputs.captioned.url ||
+                        dualExportOutputs.captioned.outputUrl ||
+                        dualExportOutputs.captioned.output_url
+                      }
+                      download
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Download Captioned Master
+                    </a>
+                  ) : (
+                    <span>Captioned master rendered</span>
+                  )}
+                  {dualExportOutputs.clean?.url ||
+                  dualExportOutputs.clean?.outputUrl ||
+                  dualExportOutputs.clean?.output_url ? (
+                    <a
+                      href={
+                        dualExportOutputs.clean.url ||
+                        dualExportOutputs.clean.outputUrl ||
+                        dualExportOutputs.clean.output_url
+                      }
+                      download
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Download Clean Textless Master
+                    </a>
+                  ) : (
+                    <span>Clean textless master rendered</span>
+                  )}
+                </div>
+              )}
               {autoCaptions && captionSegments.some(segment => segment.reviewRequired) ? (
                 <button
                   type="button"
@@ -30665,6 +31116,78 @@ const ViralClipStudio = ({
                 One render includes your hook, B-roll, audio rules, captions, and selected
                 destination.
               </p>
+              <details
+                className="studio-interchange-handoff"
+                data-testid="studio-interchange-handoff"
+                style={{ marginTop: "10px", paddingTop: "8px", borderTop: "1px solid rgba(148, 163, 184, 0.2)" }}
+              >
+                <summary style={{ cursor: "pointer", fontSize: "0.78rem", color: "#cbd5e1", fontWeight: 600 }}>
+                  Desktop NLE handoff (.otio / .edl) & caption sidecars
+                </summary>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px", marginTop: "8px" }}>
+                  <button
+                    type="button"
+                    className="inspector-action-btn"
+                    data-testid="export-otio-btn"
+                    disabled={!deliveryFps}
+                    onClick={() => handleDownloadTimelineInterchange("otio")}
+                  >
+                    Export OpenTimelineIO (.otio)
+                  </button>
+                  <button
+                    type="button"
+                    className="inspector-action-btn"
+                    data-testid="export-edl-btn"
+                    disabled={!deliveryFps}
+                    onClick={() => handleDownloadTimelineInterchange("edl")}
+                  >
+                    Export CMX 3600 (.edl)
+                  </button>
+                  <button
+                    type="button"
+                    className="inspector-action-btn"
+                    data-testid="export-sidecar-srt-btn"
+                    onClick={() => handleDownloadCaptionSidecar("srt")}
+                  >
+                    Download Captions (.srt)
+                  </button>
+                  <button
+                    type="button"
+                    className="inspector-action-btn"
+                    data-testid="export-sidecar-vtt-btn"
+                    onClick={() => handleDownloadCaptionSidecar("vtt")}
+                  >
+                    Download Captions (.vtt)
+                  </button>
+                  <button
+                    type="button"
+                    className="inspector-action-btn"
+                    style={{ gridColumn: "1 / -1" }}
+                    data-testid="export-audio-stems-btn"
+                    onClick={() => void handleDownloadAudioStems()}
+                  >
+                    Download Synced Audio Stems (.zip WAVs)
+                  </button>
+                </div>
+                {!deliveryFps && <p className="inspector-note">{sourceRatePending
+                  ? "Checking the first source frame rate before timeline export…"
+                  : "Choose a fixed frame rate to export this timeline. The first source rate is unavailable."}</p>}
+                {(() => {
+                  const report = buildInterchangeTranslationReport(buildInterchangeProjectPayload());
+                  return (
+                    <div className="inspector-note" data-testid="interchange-translation-report" style={{ marginTop: "8px", fontSize: "0.72rem", lineHeight: 1.4 }}>
+                      <strong>Translation checklist</strong>
+                      <div>{report.summary}</div>
+                      {report.requiresBakeOrRecreate.map((note, idx) => (
+                        <div key={`bake-${idx}`}>• {note}</div>
+                      ))}
+                      {report.relinkWarnings.map((note, idx) => (
+                        <div key={`relink-${idx}`} style={{ color: "#fbbf24" }}>⚠ {note}</div>
+                      ))}
+                    </div>
+                  );
+                })()}
+              </details>
             </section>
 
             {overlays.length > 0 && (
@@ -31257,6 +31780,7 @@ const ViralClipStudio = ({
               playbackClock={studioPlaybackClockRef.current}
               duration={liveTimelineDuration}
               playbackRate={previewSpeed}
+              outputTimeMap={previewOutputTimeMap}
               playhead={previewTimelineTime}
               zoom={timelineZoom}
               onZoomChange={setTimelineZoom}
@@ -31352,7 +31876,8 @@ const ViralClipStudio = ({
               mainTransform={mainTransform}
               onUpdateMotionProperty={(targetId, property, value) => editMotionPropertyAtPlayhead(targetId, property, value)}
               onToggleMotionPropertyKeyframe={(targetId, property) => editMotionPropertyAtPlayhead(targetId, property, undefined, true)}
-              frameRate={Number(exportSettings.fps) || 30}
+              frameRate={deliveryFps}
+              frameRatePending={sourceRatePending}
               onSelectMotionKeyframe={(keyId, targetId) => {
                 setSelectedGroupId(compositionGroups.byId.has(targetId) ? targetId : null);
                 setFocusedMotionKeyframeId(keyId);
@@ -31391,10 +31916,10 @@ const ViralClipStudio = ({
               onMotionTrim={handleMotionTimelineTrim}
               onAutoGenerateMotionBeats={handleAutoGenerateMotionBeats}
               onSelectTool={toolId => toolId && selectCreativeTool(toolId)}
-              onSplit={splitCurrentClipAtPlayhead}
+              onSplit={selectedGroupClip ? () => splitGroupClipAtPlayhead(selectedGroupId) : splitCurrentClipAtPlayhead}
               onRazorCut={(time, layerId) => splitCurrentClipAtPlayhead(time, layerId)}
               onSequenceEdit={commitSequenceEdit}
-              splitLocked={Boolean(selectedGroupClip || trackStates[activeOverlay ? (activeOverlay.bRollMode ? "broll" : "graphics") : "video"]?.locked)}
+              splitLocked={Boolean(selectedGroupClip ? selectedGroupClip.locked : trackStates[activeOverlay ? (activeOverlay.bRollMode ? "broll" : "graphics") : "video"]?.locked)}
               onTrimStart={selectedGroupClip ? () => editGroupClipTiming(selectedGroupId, 'trim-start', previewTimelineTime) : trimClipStartToPlayhead}
               onTrimEnd={selectedGroupClip ? () => editGroupClipTiming(selectedGroupId, 'trim-end', previewTimelineTime) : trimClipEndToPlayhead}
               trimLocked={selectedGroupClip ? selectedGroupClip.locked : Boolean(trackStates.video?.locked)}

@@ -143,6 +143,16 @@ const renderBody = (segments, extra = {}) => ({
 });
 
 describe("owned Studio project sources", () => {
+  it("does not inspect a forged first-source frame rate or start a paid operation", async () => {
+    const storagePath = "studio/sources/owner-1/forged-rate.mp4";
+    putVideo(storagePath, "attacker");
+    const response = await request(buildApp()).post("/api/media/studio-assets/source-frame-rate").send({ storagePath });
+    expect(response.statusCode).toBe(403);
+    expect(response.body).not.toHaveProperty("frameRate");
+    expect(deductCredits).not.toHaveBeenCalled();
+    expect(mockStartProcessingJob).not.toHaveBeenCalled();
+  });
+
   it('rejects a changed legacy generation before decoding or charging', async () => {
     putVideo('studio/sources/owner-1/old.mp4');
     const response = await request(buildApp()).post('/api/media/studio-assets/source-frame').send({

@@ -61,3 +61,27 @@ test('current-project backup succeeds when an older saved version exceeds the li
   expect(saved.snapshot.file).toBe(current);
   await expect(packageStudioBackup(saved, { includeVersions: true })).rejects.toThrow('20 MB');
 });
+
+test('large >20MB local media exports portable relink manifest and restores offlineRelinkRef cleanly', async () => {
+  const large = new File([new Uint8Array(16 * 1024 * 1024)], '4k_camera_a.mov', {
+    type: 'video/quicktime',
+    lastModified: 1700000000000,
+  });
+  const saved = {
+    id: 'project-relink',
+    name: 'Heavy ProRes Edit',
+    snapshot: { projectMedia: [{ id: 'cam-1', name: '4k_camera_a.mov', file: large }] },
+    versions: [],
+  };
+  const backup = JSON.parse(
+    await text(await packageStudioBackup(saved, { allowOfflineRelinkManifest: true }))
+  );
+  expect(backup.relinkManifestRequired).toBe(true);
+  const restored = restoreStudioBackupMedia(backup);
+  expect(restored.snapshot.projectMedia[0].status).toBe('unavailable');
+  expect(restored.snapshot.projectMedia[0].offlineRelinkRef).toMatchObject({
+    name: '4k_camera_a.mov',
+    relinkRequired: true,
+    size: 16 * 1024 * 1024,
+  });
+});

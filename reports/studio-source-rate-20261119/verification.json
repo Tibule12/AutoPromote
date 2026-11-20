@@ -1,0 +1,58 @@
+{
+  "headless": true,
+  "muted": true,
+  "errors": [],
+  "renders": [
+    {
+      "name": "01 Source rate",
+      "rate": 1,
+      "requestedRate": "source",
+      "fps": "24000/1001",
+      "frames": 192,
+      "duration": 8.008,
+      "width": 720,
+      "height": 1280,
+      "colour": "bt709",
+      "audioCodec": "aac",
+      "channels": 2,
+      "sha": "a4a322053e4862674ae717b2a08a9931d9b5f6bf016e318f36c941c611f23964",
+      "playedToEnd": true
+    },
+    {
+      "name": "02 Source rate at twice speed",
+      "rate": 2,
+      "requestedRate": "source",
+      "fps": "24000/1001",
+      "frames": 96,
+      "duration": 4.004,
+      "width": 720,
+      "height": 1280,
+      "colour": "bt709",
+      "audioCodec": "aac",
+      "channels": 2,
+      "sha": "011c4af7a033bc04ce5b9d5af837854ff3dfbc528a1fbe27737e618634f2ca81",
+      "playedToEnd": true
+    }
+  ],
+  "requests": 2,
+  "nativeKeyboardPlayPause": true,
+  "completed": true,
+  "date": "2026-11-19",
+  "freshRestore": {
+    "freshBrowserContext": true,
+    "requestedRate": "source",
+    "editSpeed": 2,
+    "timelineOccurrences": 2,
+    "approvedCues": 4,
+    "videoCutaways": 1,
+    "editedTitle": "STILL TRYING",
+    "outputTimeMapMatched": true,
+    "renderRequests": 0,
+    "pageErrors": []
+  },
+  "workerTests": 77,
+  "frontendTests": 5,
+  "anonymousViewportChecks": 8,
+  "localTestJobsSucceeded": 2,
+  "activeReservations": 0
+}

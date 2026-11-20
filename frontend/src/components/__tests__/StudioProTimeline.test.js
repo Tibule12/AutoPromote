@@ -769,3 +769,102 @@ test('Select visible keys follows displayed layer rows when timing filters or co
   expect(screen.queryByTestId('motion-timeline-key-b-x')).toBeNull();
   expect(screen.getByText('1 keys selected')).toBeInTheDocument();
 });
+
+test('timeline displays SMPTE timecode with DF toggle, supports Jump to timecode, and handles Home/End/frame-step shortcuts', () => {
+  const seek = jest.fn();
+  const { rerender } = render(
+    <StudioProTimeline duration={120} playhead={60} playbackRate={2} frameRate={24} trackStates={{}} onSeek={seek} />
+  );
+  // 60 programme seconds at 2x speed = 30 output seconds -> 00:00:30:00 at 24 fps
+  expect(screen.getByTestId('pro-smpte-timecode')).toHaveTextContent('00:00:30:00');
+  expect(screen.getByTestId('pro-smpte-fps')).toHaveTextContent('24 fps');
+  expect(screen.queryByTestId('pro-smpte-df-toggle')).toBeNull();
+
+  // Enter SMPTE output timecode -> seeks programme time (outputSeconds * 2)
+  const jumpInput = screen.getByTestId('pro-jump-timecode-input');
+  fireEvent.change(jumpInput, { target: { value: '00:00:12:12' } });
+  fireEvent.submit(jumpInput.closest('form'));
+  expect(seek).toHaveBeenLastCalledWith(expect.anything(), 25);
+
+  // Relative offset jump (+12f at 24fps from output 30s -> 30.5s output -> 61s programme)
+  fireEvent.change(jumpInput, { target: { value: '+12f' } });
+  fireEvent.submit(jumpInput.closest('form'));
+  expect(seek).toHaveBeenLastCalledWith(expect.anything(), 61);
+
+  // Drop-frame mode toggle on 29.97 fps
+  const fps2997 = 30000 / 1001;
+  rerender(
+    <StudioProTimeline duration={200} playhead={1800 / fps2997} playbackRate={1} frameRate={29.97} trackStates={{}} onSeek={seek} />
+  );
+  expect(screen.getByTestId('pro-smpte-timecode')).toHaveTextContent('00:01:00;02');
+  fireEvent.click(screen.getByTestId('pro-smpte-df-toggle'));
+  expect(screen.getByTestId('pro-smpte-timecode')).toHaveTextContent('00:01:00:00');
+
+  // Home / End / ArrowRight frame step on timeline container (without focused clip button)
+  const timelineContent = screen.getByTestId('studio-pro-timeline').querySelector('.pro-timeline-content');
+  fireEvent.keyDown(timelineContent, { key: 'Home' });
+  expect(seek).toHaveBeenLastCalledWith(expect.anything(), 0);
+  fireEvent.keyDown(timelineContent, { key: 'End' });
+  expect(seek).toHaveBeenLastCalledWith(expect.anything(), 200);
+});
+
+test('audio track header exposes stereo Pan control updating trackStates', () => {
+  const onTrackStateChange = jest.fn();
+  render(
+    <StudioProTimeline
+      duration={10}
+      playhead={0}
+      trackStates={{ originalAudio: { pan: 0 } }}
+      onTrackStateChange={onTrackStateChange}
+      timelineSegments={[{ id: 'a', startTime: 0, endTime: 10, duration: 10 }]}
+    />
+  );
+  const pan = screen.getByTestId('pro-track-pan-originalAudio');
+  fireEvent.change(pan, { target: { value: '-100' } });
+  expect(onTrackStateChange).toHaveBeenCalledWith('originalAudio', { pan: -100 });
+});
+
+test("SMPTE Jump and frame stepping use the retimed output clock and wait for Match Source", () => {
+  const seek = jest.fn();
+  const timeMap = [
+    { programmeRange: { startTick: 0, endTick: 180000 }, outputRange: { startTick: 0, endTick: 180000 }, rateNumerator: 1, rateDenominator: 1 },
+    { programmeRange: { startTick: 180000, endTick: 720000 }, outputRange: { startTick: 180000, endTick: 450000 }, rateNumerator: 2, rateDenominator: 1 },
+  ];
+  const { rerender } = render(<StudioProTimeline duration={8} playhead={4} frameRate={null} frameRatePending
+    outputTimeMap={timeMap} trackStates={{}} onSeek={seek} />);
+  expect(screen.getByTestId("pro-smpte-fps")).toHaveTextContent("Checking source fps");
+  expect(screen.getByLabelText("Jump to timecode")).toBeDisabled();
+  rerender(<StudioProTimeline duration={8} playhead={4} frameRate={24000 / 1001}
+    outputTimeMap={timeMap} trackStates={{}} onSeek={seek} />);
+  expect(screen.getByTestId("pro-smpte-fps")).toHaveTextContent("23.976 fps");
+  expect(screen.getByTestId("pro-smpte-timecode")).toHaveTextContent("00:00:02:23");
+  const input = screen.getByLabelText("Jump to timecode");
+  fireEvent.change(input, { target: { value: "00:00:04:00" } });
+  fireEvent.submit(input.closest("form"));
+  expect(seek.mock.calls.at(-1)[1]).toBeCloseTo(6.008, 6);
+});
+
+test("video B-Roll clips render a TimelineSourceFilmstrip preview strip", () => {
+  render(
+    <StudioProTimeline
+      duration={10}
+      playhead={1}
+      playing={true}
+      trackStates={{}}
+      overlays={[
+        {
+          id: "broll-vid-1",
+          type: "video",
+          bRollMode: true,
+          name: "Cutaway Clip",
+          url: "https://example.test/broll.mp4",
+          startTime: 2,
+          duration: 4,
+          sourceStartTime: 1,
+        },
+      ]}
+    />
+  );
+  const clip = screen.getByTestId("pro-broll-clip-1");
+  expect(clip.querySelector(".pro-source-filmstrip")).not.toBeNull();
+});

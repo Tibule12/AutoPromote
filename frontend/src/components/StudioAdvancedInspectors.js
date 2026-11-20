@@ -966,10 +966,10 @@ export function AudioRestorationPanel({
 }) {
   const sourceKeys = keyframes[source] || [];
   const repairPresets = {
-    natural: { voiceIsolation: false, denoise: 22, deEsser: 18, humFrequency: 50, compressor: 35, limiter: -1, loudness: -14, eq: { low: 0, mid: 0, high: 0 } },
-    podcast: { voiceIsolation: false, denoise: 30, deEsser: 28, humFrequency: 50, compressor: 52, limiter: -1, loudness: -14, eq: { low: 1, mid: 2, high: 1 } },
+    natural: { voiceIsolation: false, denoise: 22, deEsser: 18, humFrequency: 50, compressor: 35, limiter: AUDIO_MASTER_PRESETS.social.truePeakDbtp, loudness: AUDIO_MASTER_PRESETS.social.targetLufs, eq: { low: 0, mid: 0, high: 0 } },
+    podcast: { voiceIsolation: false, denoise: 30, deEsser: 28, humFrequency: 50, compressor: 52, limiter: AUDIO_MASTER_PRESETS.podcast.truePeakDbtp, loudness: AUDIO_MASTER_PRESETS.podcast.targetLufs, eq: { low: 1, mid: 2, high: 1 } },
     noisy_room: { voiceIsolation: true, denoise: 70, deEsser: 35, humFrequency: 50, compressor: 48, limiter: -1.2, loudness: -15, eq: { low: -2, mid: 3, high: 0 } },
-    broadcast: { voiceIsolation: true, denoise: 38, deEsser: 42, humFrequency: 50, compressor: 72, limiter: -.8, loudness: -13, eq: { low: 1, mid: 1, high: 2 } },
+    broadcast: { voiceIsolation: true, denoise: 38, deEsser: 42, humFrequency: 50, compressor: 72, limiter: AUDIO_MASTER_PRESETS.broadcast.truePeakDbtp, loudness: AUDIO_MASTER_PRESETS.broadcast.targetLufs, eq: { low: 1, mid: 1, high: 2 } },
   };
   const applyRepairPreset = preset => {
     onUpdate("preset", preset);

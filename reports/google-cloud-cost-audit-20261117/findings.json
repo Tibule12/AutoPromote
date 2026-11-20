@@ -1,0 +1,32 @@
+{
+  "date": "2026-11-17",
+  "scope": "Read-only diagnosis of AutoPromote project plus owner-supplied billing screenshot",
+  "screenshotCurrentMonthUSD": {
+    "total": 18.54,
+    "appEngine": 13.17,
+    "artifactRegistry": 4.64,
+    "cloudStorage": 0.46,
+    "cloudRunNet": 0.27,
+    "cloudRunFunctionsNet": 0
+  },
+  "screenshotProjectFilterUnverified": true,
+  "observed30Days": {
+    "firestoreReads": 37199956,
+    "firestoreQueryReads": 36126660,
+    "functionInvocations": 1471544,
+    "artifactStoredBytes": 97083122963
+  },
+  "appEngineApplicationFound": false,
+  "firestoreExplanationForAppEngine": "LIKELY_REQUIRES_SKU_CONFIRMATION",
+  "registryCleanupPoliciesConfigured": false,
+  "recentQuerySample": {
+    "entries": 100,
+    "truncated": true,
+    "promotion_tasks": 33,
+    "promotion_schedules": 28,
+    "engagement_campaigns": 16,
+    "platform_posts": 13
+  },
+  "productionResourcesChanged": false,
+  "next": "Filter billing to the project and App Engine, then group by SKU; inspect retained images and background polling before planning cost fixes."
+}

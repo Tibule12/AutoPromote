@@ -32,7 +32,7 @@ import {
   saveViralRenderAttempt,
 } from "../utils/viralRenderRecovery";
 
-const DESKTOP_EDITING_TOOL_QUERY = "(min-width: 900px) and (hover: hover) and (pointer: fine)";
+const DESKTOP_EDITING_TOOL_QUERY = "(min-width: 720px)";
 
 const canUseDesktopEditingTools = () => {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") return true;
@@ -42,28 +42,35 @@ const canUseDesktopEditingTools = () => {
 const DESKTOP_TOOL_MESSAGE =
   "Clip Studio and Cam Combiner are desktop tools. Open AutoPromote on a laptop or computer to use the timeline editor.";
 
-function DesktopOnlyToolNotice({ toolName, onClose }) {
+function DesktopOnlyToolNotice({ toolName, onClose, onContinueAnyway }) {
   return (
     <div
       className="desktop-tool-overlay"
       role="dialog"
       aria-modal="true"
-      aria-label={`${toolName} desktop required`}
+      aria-label={`${toolName} desktop recommended`}
     >
       <div className="desktop-tool-card">
-        <span className="desktop-tool-eyebrow">Desktop Required</span>
+        <span className="desktop-tool-eyebrow">Wide Viewport Recommended</span>
         <h3>{toolName}</h3>
         <p>
-          This workspace needs a larger screen, precise pointer controls, and room for the timeline.
-          Use AutoPromote on a laptop or desktop computer to open it.
+          This workspace works best on a wider screen with precise pointer controls for the timeline.
+          You can continue in compact mode or widen your browser window.
         </p>
         <div className="desktop-tool-list">
-          <span>Best on laptop or desktop</span>
-          <span>Timeline editing and exports stay available there</span>
+          <span>Best on laptop, split-screen &ge;720px, or desktop</span>
+          <span>Timeline editing and exports stay available</span>
         </div>
-        <button type="button" className="desktop-tool-close" onClick={onClose}>
-          Back to editor
-        </button>
+        <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", flexWrap: "wrap" }}>
+          {onContinueAnyway && (
+            <button type="button" className="desktop-tool-close" onClick={onContinueAnyway}>
+              Open anyway
+            </button>
+          )}
+          <button type="button" className="desktop-tool-close" onClick={onClose}>
+            Back to editor
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -204,6 +211,7 @@ function VideoEditor({
   const [recoveryProjectId, setRecoveryProjectId] = useState(initialSavedProject?.id);
   const studioEditRevisionRef = useRef(0);
   const [desktopToolsAvailable, setDesktopToolsAvailable] = useState(canUseDesktopEditingTools);
+  const [desktopGateBypassed, setDesktopGateBypassed] = useState(false);
   // Wait until the media source is ready before mounting Studio. Mounting it with
   // an empty source and immediately replacing that source aborts Firefox's fetch.
   const [clipSuggestions, setClipSuggestions] = useState(null);
@@ -1865,10 +1873,11 @@ function VideoEditor({
   ) : null;
 
   if (clipSuggestions) {
-    if (!desktopToolsAvailable) {
+    if (!desktopToolsAvailable && !desktopGateBypassed) {
       const notice = (
         <DesktopOnlyToolNotice
           toolName="Clip Studio"
+          onContinueAnyway={() => setDesktopGateBypassed(true)}
           onClose={() => {
             setClipSuggestions(null);
             setStatusMessage(DESKTOP_TOOL_MESSAGE);
@@ -1968,10 +1977,11 @@ function VideoEditor({
   }
 
   if (showMultiCamCombiner) {
-    if (!desktopToolsAvailable) {
+    if (!desktopToolsAvailable && !desktopGateBypassed) {
       const notice = (
         <DesktopOnlyToolNotice
           toolName="Cam Combiner"
+          onContinueAnyway={() => setDesktopGateBypassed(true)}
           onClose={() => {
             setShowMultiCamCombiner(false);
             setStatusMessage(DESKTOP_TOOL_MESSAGE);

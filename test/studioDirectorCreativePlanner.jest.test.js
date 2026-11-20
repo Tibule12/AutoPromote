@@ -43,3 +43,27 @@ test('version4 selects source-independent motion design without entering the foo
  const service=require('../src/services/studioDirectorPosterPlanner'),spy=jest.spyOn(service,'createDirectorPosterPlan').mockResolvedValue({version:4,poster:{name:'Motion'}});
  try{const planner=require('../src/services/studioDirectorCreativePlanner').createCreativePlanner({infer:jest.fn()});const input={compositionVersion:4,brief:'MAKE IT MOVE.',projectId:'project',baseRevision:1,duration:10,media:[{id:'source',name:'Base.mp4',duration:10,contentHash:'a'.repeat(64)}]};await expect(planner(input)).resolves.toEqual({version:4,poster:{name:'Motion'}});expect(spy).toHaveBeenCalledWith(expect.objectContaining({compositionVersion:4,brief:'MAKE IT MOVE.'}),expect.any(Object));await expect(planner({...input,media:[{...input.media[0],contentHash:'bad'}]})).rejects.toThrow();expect(spy).toHaveBeenCalledTimes(1);}finally{spy.mockRestore();}
 });
+
+test('version5 omniscient masterpiece returns full 3D + 8-track sourceComposition with revival, selective HSL, power window, B-roll portal, vector reticle and kinetic title',async()=>{
+ const planner=createCreativePlanner({infer:jest.fn(),now:()=> '2026-11-18T08:00:00Z'});
+ const out=await planner({
+  compositionVersion:5,
+  brief:"Direct an 8-track omniscient studio masterpiece for 'APEX NOVA'",
+  projectId:'project',
+  baseRevision:4,
+  duration:12,
+  media:context.media,
+  pixelEvidence:[],
+ });
+ expect(out.version).toBe(5);
+ expect(out.threeDPlan.mode).toBe('hybrid_film_3d');
+ expect(out.threeDPlan.sourceComposition.layers.map(l=>l.kind)).toEqual(
+  expect.arrayContaining(['video','rig','shape','vector','title'])
+ );
+ expect(out.threeDPlan.sourceComposition.colorGrade).toMatchObject({
+  lookId:'teal_orange',
+  revitalizerPresetId:'dead_phone_enhancer',
+  qualifierPresetId:'skin_radiance',
+  powerWindowPresetId:'subject_spotlight',
+ });
+});

@@ -44,7 +44,7 @@ test('24 fps preview on a 30 fps source retains its phase instead of falling to 
   expect(painted).toBeGreaterThanOrEqual(239);
   expect(painted).toBeLessThanOrEqual(241);
 });
-test.each([[24,24,240],[25,25,250],[30,24,240],[60,30,300]])('decoded %s fps pictures retain %s fps phase', (sourceFps,targetFps,expected)=>{
+test.each([[24,24,240],[25,25,250],[30,24,240],[60,30,300],[60,60,600]])('decoded %s fps pictures retain %s fps phase', (sourceFps,targetFps,expected)=>{
   let deadline,painted=0;
   for(let n=0;n<sourceFps*10;n++){
     const time=Number((n/sourceFps).toFixed(6));
@@ -52,4 +52,9 @@ test.each([[24,24,240],[25,25,250],[30,24,240],[60,30,300]])('decoded %s fps pic
     painted++;deadline=studioNextPreviewFrame(time,targetFps,deadline);
   }
   expect(Math.abs(painted-expected)).toBeLessThanOrEqual(1);
+});
+
+test('50/60fps projects preserve native preview budget without clamping at 30fps', () => {
+  expect(studioNextPreviewPaint(1000, 1005, 60)).toBeCloseTo(1016.667, 2);
+  expect(studioNextPreviewPaint(1000, 1005, 50)).toBeCloseTo(1020, 2);
 });

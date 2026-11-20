@@ -11,7 +11,20 @@ def adjustment_grade_filter(effects, build_finish, prefix):
     cube_path = effects.get("_worker_cube_path")
     if cube_path:
         escaped = str(cube_path).replace("\\", "\\\\").replace(":", "\\:").replace("'", "\\'")
-        parts.append(f"lut3d=file='{escaped}':interp=trilinear")
+        parts.append(f"format=rgb24,lut3d=file='{escaped}':interp=trilinear")
+    power_window = effects.get("power_window")
+    if isinstance(power_window, dict) and power_window.get("enabled"):
+        try:
+            from .studio_pro_render_engine import build_power_window_filter
+        except ImportError:
+            from studio_pro_render_engine import build_power_window_filter
+        pw_filter = build_power_window_filter(power_window, prefix=f"{prefix}pw_")
+        if pw_filter:
+            parts.append(pw_filter)
+    qualifier_cube_path = effects.get("_worker_qualifier_cube_path")
+    if qualifier_cube_path:
+        escaped_qual = str(qualifier_cube_path).replace("\\", "\\\\").replace(":", "\\:").replace("'", "\\'")
+        parts.append(f"format=rgb24,lut3d=file='{escaped_qual}':interp=trilinear")
     glow = effects.get("glow") or {}
     radius = float(glow.get("radius", 0))
     intensity = float(glow.get("intensity", 0))

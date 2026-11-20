@@ -15,21 +15,26 @@ const getDatabase = () => {
   });
 };
 
-export const listViralStudioProjects = async () => {
+export const listViralStudioProjects = async ({ ownerUid = null } = {}) => {
   const databasePromise = getDatabase();
   if (!databasePromise) return [];
   const database = await databasePromise;
   const projects = await database.getAll(PROJECT_STORE);
-  return projects.sort((left, right) => Number(right.updatedAt || 0) - Number(left.updatedAt || 0));
+  const filtered = ownerUid
+    ? projects.filter(item => !item.ownerUid || String(item.ownerUid) === String(ownerUid))
+    : projects.filter(item => !item.ownerUid);
+  return filtered.sort((left, right) => Number(right.updatedAt || 0) - Number(left.updatedAt || 0));
 };
 
-export const saveViralStudioProject = async project => {
+export const saveViralStudioProject = async (project, { ownerUid = null } = {}) => {
   const databasePromise = getDatabase();
   if (!databasePromise) throw new Error("Local project storage is unavailable in this browser.");
   const database = await databasePromise;
   const now = Date.now();
+  const resolvedOwnerUid = project?.ownerUid || ownerUid || null;
   const record = {
     ...project,
+    ...(resolvedOwnerUid ? { ownerUid: String(resolvedOwnerUid) } : {}),
     createdAt: Number(project.createdAt || now),
     updatedAt: now,
   };
@@ -45,9 +50,15 @@ export const saveViralStudioProject = async project => {
   return record;
 };
 
-export const deleteViralStudioProject = async projectId => {
+export const deleteViralStudioProject = async (projectId, { ownerUid = null } = {}) => {
   const databasePromise = getDatabase();
   if (!databasePromise) return;
   const database = await databasePromise;
+  if (ownerUid && typeof database.get === "function") {
+    const existing = await database.get(PROJECT_STORE, projectId);
+    if (existing?.ownerUid && String(existing.ownerUid) !== String(ownerUid)) {
+      throw new Error("Cannot delete another signed-in account's local project.");
+    }
+  }
   await database.delete(PROJECT_STORE, projectId);
 };

@@ -1117,6 +1117,24 @@ router.post("/studio-assets/source-frame", requireTesterEditingFeature("clipRend
   } finally { res.removeListener('close', cancel); }
 });
 
+router.post("/studio-assets/source-frame-rate", requireTesterEditingFeature("clipRender"), async (req, res) => {
+  const controller = new AbortController();
+  res.once("close", () => controller.abort());
+  res.set("Cache-Control", "private, no-store");
+  try {
+    const { getOwnedSourceFrameRate } = require("./services/studioSourceFrameService");
+    const result = await getOwnedSourceFrameRate({
+      ownerUid: req.user.uid, storagePath: req.body?.storagePath, signal: controller.signal,
+    });
+    if (!res.destroyed) return res.json(result);
+  } catch (error) {
+    if (!res.destroyed) return res.status(error.statusCode || 503).json({
+      code: error.code || "STUDIO_SOURCE_RATE_UNAVAILABLE",
+      message: "Could not verify the first source frame rate.",
+    });
+  }
+});
+
 router.post('/studio-assets/voice-bus-preview', requireTesterEditingFeature('clipRender'), async (req, res) => {
   if (req.body?.version === 2 && !require('../frontend/src/components/studioSourceDialoguePolicy')
     .sourceDialoguePreviewEnabled(req.user.uid, process.env.STUDIO_SOURCE_DIALOGUE_PREVIEW_ENABLED,

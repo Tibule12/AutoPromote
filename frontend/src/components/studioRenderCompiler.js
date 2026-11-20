@@ -7,7 +7,7 @@ import { compileStudioAdjustmentStack } from './studioAdjustmentGrade';
 import { validateStudioTextAnimation } from "./studioTextAnimator";
 import { createOutputTimeMap, createTimeRange, secondsToTicks, ticksToSeconds } from "./studioTime";
 import { projectStudioLinkedTimingToSnapshot, projectStudioEditableStateToSnapshot, validateStudioProjectDocument } from "./studioProjectDocument";
-import { buildAdvancedColorCube } from "./studioColorCube";
+import { buildAdvancedColorCube, hasRevitalizerGrade } from "./studioColorCube";
 import { assertStudioLayerBlendMode, assertStudioMainBlendMode } from "./studioBlendModes";
 import { parseStudioMaskPolygon, validateStudioMaskAnimation } from "./studioMaskGeometry";
 import { studioGroupTree, removeStudioGroupMembers, GROUP_KIND, validateStudioGroupKeyframes } from "./studioGroups";
@@ -150,10 +150,25 @@ export const compileStudioFinishForRender = document => {
     : fx.qualifier?.enabled
       ? fx.qualifier
       : null;
+  const activeRevitalizer = hasRevitalizerGrade(adv.revitalizer)
+    ? adv.revitalizer
+    : hasRevitalizerGrade(fx)
+      ? {
+          dehaze: Number(fx.dehaze || 0),
+          shadowRecovery: Number(fx.shadowRecovery || 0),
+          highlightRollOff: Number(fx.highlightRollOff || 0),
+          clarity: Number(fx.clarity || 0),
+          vibrance: Number(fx.vibrance || 0),
+          skinToneProtect: Number(fx.skinToneProtect ?? 0.85),
+        }
+      : null;
   return {
+    // Bake curve/HSL/LUT/revitalizer into color_cube once, and keep secondary
+    // hsl_qualifier in its dedicated field so main_media_server applies it once.
     color_cube: buildAdvancedColorCube({
       ...adv,
-      ...(activeQualifier && !adv.qualifier ? { qualifier: activeQualifier } : {}),
+      ...(activeRevitalizer ? { revitalizer: activeRevitalizer } : {}),
+      qualifier: null,
     }),
     power_window: activePowerWindow ? { ...activePowerWindow } : null,
     hsl_qualifier: activeQualifier ? { ...activeQualifier } : null,

@@ -1,6 +1,6 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { editStudioGroupTiming, studioGroupTimingRows, rippleStudioGroupTiming, clipStudioGroupMotionCues } from '../studioGroupTiming';
+import { editStudioGroupTiming, studioGroupTimingRows, rippleStudioGroupTiming, clipStudioGroupMotionCues, duplicateStudioGroup, splitStudioGroup } from '../studioGroupTiming';
 import { GROUP_KIND, studioGroupTree } from '../studioGroups';
 import StudioGroupTimelineClip from '../StudioGroupTimelineClip';
 import StudioGroupPreview from '../StudioGroupPreview';
@@ -84,4 +84,28 @@ test('drag samples remain local until pointer-up commits one move, and cancellin
 });
 test.each([null,{startTime:-1,duration:2},{startTime:0,duration:NaN},{startTime:0,duration:1,sourceOffset:2}])('malformed group timing fails preflight',timing=>{
  expect(()=>studioGroupTree([group('g',['a'],timing===null?undefined:timing)].map(g=>({...g,timing})),['a'])).toThrow(/timing/);
+});
+
+test('duplicating and splitting a nested group clones descendants, keyframes, and preserves media phase cleanly', () => {
+  const base = state();
+  const dup = duplicateStudioGroup(base, 'outer', { targetStartTime: 4, programmeDuration: 12 });
+  expect(dup.duplicatedGroupId).toBe('outer-copy-1');
+  const rows = studioGroupTimingRows({ ...dup.state, duration: 12 });
+  const copyRow = rows.find(r => r.id === 'outer-copy-1');
+  expect(copyRow).toMatchObject({ startTime: 4, duration: 4, childCount: 3 });
+  // Cloned overlay keyframes and group keys shift cleanly by +3s without mutating originals
+  expect(dup.state.overlays.length).toBe(5);
+  expect(base.overlays.length).toBe(3);
+  const clonedTitleKey = dup.state.motionKeyframes.find(k => k.targetId === dup.idMap.title);
+  expect(clonedTitleKey.time).toBe(4);
+  expect(dup.state.motionKeyframes.find(k => k.id === 'child').time).toBe(1);
+
+  // Split outer group at t=2.5 (originally 1..5 -> left 1..2.5, right 2.5..5)
+  const split = splitStudioGroup(base, 'outer', 2.5, { programmeDuration: 8 });
+  const splitRows = studioGroupTimingRows({ ...split.state, duration: 8 });
+  expect(splitRows.find(r => r.id === split.leftGroupId)).toMatchObject({ startTime: 1, duration: 1.5 });
+  expect(splitRows.find(r => r.id === split.rightGroupId)).toMatchObject({ startTime: 2.5, duration: 2.5 });
+  // Right half video preserves exact child media phase (startTime: 2, sourceStartTime: 3)
+  const rightVideo = split.state.overlays.find(o => o.id === dup.idMap.video || o.id.startsWith('video-copy-'));
+  expect(rightVideo).toMatchObject({ startTime: 2, duration: 2, sourceStartTime: 3 });
 });
