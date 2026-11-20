@@ -85,14 +85,22 @@ function sourceFrameArgs(file, { start, end, fps, frameIndex, sampling, programm
     '-color_primaries', 'bt709', '-color_trc', 'iec61966-2-1', '-f', 'image2pipe', 'pipe:1'];
 }
 
+async function probeSourceFrameRate(file, signal) {
+  const { stdout } = await execute('ffprobe', ['-v', 'error', ...LOCAL_VIDEO_INPUT, '-i', file, '-select_streams', 'v:0',
+    '-show_entries', 'stream=avg_frame_rate', '-of', 'json'], { timeout: 10000, maxBuffer: 65536, signal });
+  const frameRate = String(JSON.parse(stdout).streams?.[0]?.avg_frame_rate || '');
+  const [numerator, denominator] = frameRate.split('/').map(Number);
+  const fps = numerator / denominator;
+  if (!/^\d+\/[1-9]\d*$/.test(frameRate) || !Number.isFinite(fps) || fps <= 0)
+    throw sourceError(422, 'STUDIO_FRAME_MISSING', 'The source picture clock is unavailable');
+  return frameRate;
+}
+
 async function decodeSourceFrame(file, request, signal) {
-  let sourceFps=30;
-  if(request.sampling===ORIGINAL_SEQUENCE_SAMPLER){
-    const {stdout}=await execute('ffprobe',['-v','error',...LOCAL_VIDEO_INPUT,'-i',file,'-select_streams','v:0',
-      '-show_entries','stream=avg_frame_rate','-of','json'],{timeout:10000,maxBuffer:65536,signal});
-    const [n,d]=String(JSON.parse(stdout).streams?.[0]?.avg_frame_rate||'0/1').split('/').map(Number);
-    sourceFps=n/d;
-    if(!Number.isFinite(sourceFps)||sourceFps<=0)throw sourceError(422,'STUDIO_FRAME_MISSING','The source picture clock is unavailable');
+  let sourceFps = 30;
+  if (request.sampling === ORIGINAL_SEQUENCE_SAMPLER) {
+    const [numerator, denominator] = (await probeSourceFrameRate(file, signal)).split('/').map(Number);
+    sourceFps = numerator / denominator;
   }
   const { stdout } = await execute('ffmpeg', sourceFrameArgs(file, request, sourceFps), {
     timeout: 30000, maxBuffer: 12 * 1024 * 1024, encoding: 'buffer', killSignal: 'SIGKILL', signal,
@@ -129,8 +137,7 @@ async function prune() {
 }
 setInterval(() => prune().catch(() => {}), TTL).unref();
 
-async function getOwnedSourceFrame({ ownerUid, input, signal }) {
-  const request = validateFrameRequest(input);
+async function withOwnedSource({ ownerUid, request, signal }, inspect) {
   // Authorization is checked even when bytes are already cached. The exact
   // storage generation is then pinned throughout download/decode.
   const owned = await resolveOwnedStudioVideoSource({ userId: ownerUid, storagePath: request.storagePath, signRead: false });
@@ -170,21 +177,7 @@ async function getOwnedSourceFrame({ ownerUid, input, signal }) {
     if (signal?.aborted) throw new Error('Preview request was superseded');
     if (request.sourceContentHash && cached.hash !== request.sourceContentHash)
       throw sourceError(409, 'STUDIO_FRAME_SOURCE_CHANGED', 'The source bytes no longer match this project');
-    let pictureSource=cached.file;
-    if(request.sampling===SEQUENCE_SAMPLER){
-      if(!cached.sequenceReady) cached.sequenceReady=prepareSequencePreviewSource(cached.file,
-        path.join(cached.folder,'sequence.mp4'),signal).then(prepared=>{
-        cached.size+=prepared.size;return prepared.file;
-      }).catch(async error=>{cached.sequenceReady=null;await fs.rm(path.join(cached.folder,'sequence.mp4'),{force:true});throw error;});
-      pictureSource=await cached.sequenceReady;
-    }
-    const image = await decodeSourceFrame(pictureSource, request, signal);
-    return { sampler: request.sampling || SAMPLER, sourceContentHash: cached.hash, sourceGeneration: owned.generation,
-      ...([SEQUENCE_SAMPLER,ORIGINAL_SEQUENCE_SAMPLER].includes(request.sampling) ? { sampling: request.sampling,
-        programmeStart: request.programmeStart, programmeDuration: request.programmeDuration } : {}),
-      start: request.start, end: request.end, fps: request.fps, frameIndex: request.frameIndex,
-      imageContentHash: crypto.createHash('sha256').update(image).digest('hex'),
-      image: image.toString('base64'), contentType: 'image/png' };
+    return await inspect(cached, owned);
   } catch (error) {
     if (error.statusCode) throw error;
     throw sourceError(503, 'STUDIO_FRAME_UNAVAILABLE', 'Accurate paused preview is temporarily unavailable');
@@ -194,4 +187,40 @@ async function getOwnedSourceFrame({ ownerUid, input, signal }) {
   }
 }
 
-module.exports = { getOwnedSourceFrame, validateFrameRequest, sourceFrameArgs, decodeSourceFrame, prepareSequencePreviewSource };
+async function getOwnedSourceFrame({ ownerUid, input, signal }) {
+  const request = validateFrameRequest(input);
+  return withOwnedSource({ ownerUid, request, signal }, async (cached, owned) => {
+    let pictureSource = cached.file;
+    if (request.sampling === SEQUENCE_SAMPLER) {
+      if (!cached.sequenceReady) cached.sequenceReady = prepareSequencePreviewSource(cached.file,
+        path.join(cached.folder, 'sequence.mp4'), signal).then(prepared => {
+        cached.size += prepared.size;
+        return prepared.file;
+      }).catch(async error => {
+        cached.sequenceReady = null;
+        await fs.rm(path.join(cached.folder, 'sequence.mp4'), { force: true });
+        throw error;
+      });
+      pictureSource = await cached.sequenceReady;
+    }
+    const image = await decodeSourceFrame(pictureSource, request, signal);
+    return { sampler: request.sampling || SAMPLER, sourceContentHash: cached.hash, sourceGeneration: owned.generation,
+      ...([SEQUENCE_SAMPLER, ORIGINAL_SEQUENCE_SAMPLER].includes(request.sampling) ? { sampling: request.sampling,
+        programmeStart: request.programmeStart, programmeDuration: request.programmeDuration } : {}),
+      start: request.start, end: request.end, fps: request.fps, frameIndex: request.frameIndex,
+      imageContentHash: crypto.createHash('sha256').update(image).digest('hex'),
+      image: image.toString('base64'), contentType: 'image/png' };
+  });
+}
+
+function getOwnedSourceFrameRate({ ownerUid, storagePath, signal }) {
+  return withOwnedSource({ ownerUid, request: { storagePath }, signal }, async (cached, owned) => {
+    cached.frameRate ??= await probeSourceFrameRate(cached.file, signal);
+    const [numerator, denominator] = cached.frameRate.split('/').map(Number);
+    if (numerator / denominator < 1 || numerator / denominator > 120)
+      throw sourceError(422, 'STUDIO_SOURCE_RATE_UNSUPPORTED', 'Match Source requires a rate between 1 and 120 fps.');
+    return { frameRate: cached.frameRate, sourceGeneration: owned.generation };
+  });
+}
+
+module.exports = { getOwnedSourceFrame, getOwnedSourceFrameRate, validateFrameRequest, sourceFrameArgs, decodeSourceFrame, prepareSequencePreviewSource };

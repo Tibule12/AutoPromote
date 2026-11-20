@@ -58,6 +58,38 @@ export const normalizeSpeedSegmentsForRender = speedSegments => {
   }, []);
 };
 
+const normalizeCaptionWordTimings = (segment, text, fallbackStart, fallbackEnd) => {
+  const rawWords = Array.isArray(segment?.wordTimings)
+    ? segment.wordTimings
+    : Array.isArray(segment?.words) && segment.words.some(word => word && typeof word === "object")
+      ? segment.words
+      : null;
+  if (!rawWords || !rawWords.length) return null;
+  const expectedTokens = String(text || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (!expectedTokens.length || rawWords.length !== expectedTokens.length) return null;
+  const normalized = [];
+  for (let i = 0; i < expectedTokens.length; i += 1) {
+    const raw = rawWords[i];
+    if (!raw || typeof raw !== "object") return null;
+    const token = String(raw.word ?? "").trim();
+    if (!token || token !== expectedTokens[i]) return null;
+    const rawStart = toFiniteNumber(raw.start);
+    const rawEnd = toFiniteNumber(raw.end);
+    if (rawStart === null || rawEnd === null) return null;
+    const clampedStart = Math.max(fallbackStart, Math.min(fallbackEnd, rawStart));
+    const clampedEnd = Math.max(clampedStart, Math.min(fallbackEnd, rawEnd));
+    if (clampedEnd <= clampedStart) return null;
+    const entry = { word: token, start: clampedStart, end: clampedEnd };
+    const prob = toFiniteNumber(raw.probability);
+    if (prob !== null) entry.probability = Math.max(0, Math.min(1, prob));
+    normalized.push(entry);
+  }
+  return normalized.length ? normalized : null;
+};
+
 export const normalizeCaptionSegmentsForRender = captionSegments => {
   if (!Array.isArray(captionSegments)) return [];
   return captionSegments.reduce((segments, segment, index) => {
@@ -73,6 +105,10 @@ export const normalizeCaptionSegmentsForRender = captionSegments => {
       end_time: endTime,
       text,
     };
+    const wordTimings = normalizeCaptionWordTimings(segment, text, startTime, endTime);
+    if (wordTimings) {
+      normalized.words = wordTimings;
+    }
     const speaker = String(segment?.speaker ?? segment?.speaker_id ?? "").trim();
     const speakerLabel = String(segment?.speakerLabel ?? segment?.speaker_label ?? "").trim();
     const language = String(
@@ -167,6 +203,7 @@ export const mapCaptionSegmentsToTimeline = ({
 
   let outputOffset = 0;
   const mapped = [];
+  const lastCueByCaption = new Map();
   timeline.forEach((clip, clipIndex) => {
     const clipStart = toFiniteNumber(clip?.start_time ?? clip?.startTime ?? clip?.start);
     const clipEnd = toFiniteNumber(clip?.end_time ?? clip?.endTime ?? clip?.end);
@@ -174,6 +211,17 @@ export const mapCaptionSegmentsToTimeline = ({
       toFiniteNumber(clip?.duration) ??
       (clipStart !== null && clipEnd !== null ? Math.max(0, clipEnd - clipStart) : 0);
     const clipSourceId = clip?.source_clip_id ?? clip?.sourceClipId ?? clip?.id ?? null;
+    const previous = timeline[clipIndex - 1];
+    const previousSourceId = previous?.source_clip_id ?? previous?.sourceClipId ?? previous?.id;
+    const previousEnd = toFiniteNumber(previous?.end_time ?? previous?.endTime ?? previous?.end);
+    const matchingMedia = previous?.sourceStoragePath || clip?.sourceStoragePath
+      ? previous?.sourceStoragePath === clip?.sourceStoragePath
+      : previous?.url === clip?.url;
+    const continuesSource = previousEnd !== null && clipStart !== null &&
+      clipSourceId !== null && String(previousSourceId) === String(clipSourceId) &&
+      matchingMedia && Math.abs(previousEnd - clipStart) < 1e-6 &&
+      !previous?.transition_out && !clip?.transition_in &&
+      !previous?.audioTrimOffsetEnd && !clip?.audioTrimOffsetStart;
 
     if (clipStart !== null && clipEnd !== null && clipEnd > clipStart) {
       captions.forEach(caption => {
@@ -187,19 +235,68 @@ export const mapCaptionSegmentsToTimeline = ({
         const visibleStart = Math.max(caption.start_time, clipStart);
         const visibleEnd = Math.min(caption.end_time, clipEnd);
         if (visibleEnd <= visibleStart) return;
+        const outputStart = outputOffset + visibleStart - clipStart;
+        const outputEnd = outputOffset + visibleEnd - clipStart;
+        const clippedWords = Array.isArray(caption.words) && caption.words.length
+          ? caption.words.reduce((acc, wordItem) => {
+              const overlapStart = Math.max(wordItem.start, visibleStart);
+              const overlapEnd = Math.min(wordItem.end, visibleEnd);
+              if (overlapEnd - overlapStart > 1e-4) {
+                acc.push({
+                  ...wordItem,
+                  start: Number((outputOffset + (overlapStart - clipStart)).toFixed(6)),
+                  end: Number((outputOffset + (overlapEnd - clipStart)).toFixed(6)),
+                });
+              }
+              return acc;
+            }, [])
+          : null;
+        const priorCue = lastCueByCaption.get(caption);
+        // A razor split through continuous source must not restart karaoke timing.
+        if (continuesSource && priorCue && Math.abs(priorCue.end_time - outputStart) < 1e-6) {
+          priorCue.end_time = outputEnd;
+          if (clippedWords && clippedWords.length) {
+            if (!Array.isArray(priorCue.words)) {
+              priorCue.words = clippedWords;
+            } else if (
+              priorCue.words.length &&
+              Math.abs(priorCue.words[priorCue.words.length - 1].end - clippedWords[0].start) < 1e-4 &&
+              priorCue.words[priorCue.words.length - 1].word === clippedWords[0].word
+            ) {
+              priorCue.words[priorCue.words.length - 1] = {
+                ...priorCue.words[priorCue.words.length - 1],
+                end: clippedWords[0].end,
+              };
+              priorCue.words.push(...clippedWords.slice(1));
+            } else {
+              priorCue.words.push(...clippedWords);
+            }
+            if (Array.isArray(caption.words) && priorCue.words.length === caption.words.length) {
+              priorCue.text = caption.text;
+            }
+          }
+          return;
+        }
         const captionMetadata = { ...caption };
         delete captionMetadata.source_clip_id;
         delete captionMetadata.start_time;
         delete captionMetadata.end_time;
         delete captionMetadata.id;
         delete captionMetadata.text;
-        mapped.push({
+        delete captionMetadata.words;
+        const cue = {
           ...captionMetadata,
           id: `${caption.id}-timeline-${clipIndex + 1}`,
-          start_time: outputOffset + visibleStart - clipStart,
-          end_time: outputOffset + visibleEnd - clipStart,
-          text: caption.text,
-        });
+          start_time: outputStart,
+          end_time: outputEnd,
+          text:
+            clippedWords && clippedWords.length && Array.isArray(caption.words) && clippedWords.length < caption.words.length
+              ? clippedWords.map(w => w.word).join(" ")
+              : caption.text,
+          ...(clippedWords && clippedWords.length ? { words: clippedWords } : {}),
+        };
+        mapped.push(cue);
+        lastCueByCaption.set(caption, cue);
       });
     }
     outputOffset += Math.max(0, clipDuration || 0);

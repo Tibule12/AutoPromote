@@ -24,12 +24,14 @@ export const SPLIT_AUDIO_PRESETS = [
  * @returns {Object} Normalized clip with audio start/duration and wing descriptors
  */
 export function normalizeSplitAudioClip(clip, clipIndex = 0, outputStart = 0) {
-  const start = Number(clip?.startRequest ?? clip?.start_time ?? clip?.start ?? 0);
-  const end = Number(clip?.endRequest ?? clip?.end_time ?? clip?.end);
+  const start = Number(clip?.startRequest ?? clip?.start_time ?? clip?.startTime ?? clip?.start ?? 0);
+  const rawEnd = clip?.endRequest ?? clip?.end_time ?? clip?.endTime ?? clip?.end;
+  const parsedEnd = rawEnd !== undefined && rawEnd !== null ? Number(rawEnd) : NaN;
   const videoDuration = Math.max(
     0.04,
-    Number.isFinite(end) && end > start ? end - start : Number(clip?.duration) || 0.04
+    Number.isFinite(parsedEnd) && parsedEnd > start ? parsedEnd - start : Number(clip?.duration) || 0.04
   );
+  const end = Number.isFinite(parsedEnd) && parsedEnd > start ? parsedEnd : start + videoDuration;
   if (clip.audioDetached === true) {
     const audioStart = Number(clip.audioSourceStart), audioEnd = Number(clip.audioSourceEnd),
       programmeStart = Number(clip.audioProgrammeStart);

@@ -2,6 +2,7 @@ import {
   applySilenceKeepSegmentsToTimeline,
   buildViralRenderData,
   mapCaptionSegmentsToTimeline,
+  normalizeCaptionSegmentsForRender,
   normalizeSpeedSegmentsForRender,
 } from "../viralRenderPayload";
 
@@ -210,6 +211,26 @@ describe("viralRenderPayload", () => {
         caption_y: 24,
       },
     ]);
+  });
+
+  test("keeps one caption clock through a split of continuous source", () => {
+    const first = { source_clip_id: "speech", start_time: 0, end_time: 4.5, duration: 4.5 };
+    const next = { source_clip_id: "speech", start_time: 4.5, end_time: 8.5, duration: 4 };
+    const captionSegments = [{ id: "dialogue", sourceClipId: "speech",
+      start: 2.62, end: 4.92, text: "I have been stood up," }];
+
+    expect(mapCaptionSegmentsToTimeline({ captionSegments, timelineSegments: [first, next] })).toEqual([
+      { id: "dialogue-timeline-1", start_time: 2.62, end_time: 4.92, text: "I have been stood up," },
+    ]);
+    for (const discontinuity of [
+      { start_time: 4.75, duration: 3.75 },
+      { transition_in: "dip" },
+      { audioTrimOffsetStart: 0.12 },
+    ]) {
+      expect(mapCaptionSegmentsToTimeline({
+        captionSegments, timelineSegments: [first, { ...next, ...discontinuity }],
+      })).toHaveLength(2);
+    }
   });
 
   test("sends a Studio spelling correction through the caption timeline into the render payload", () => {
@@ -639,5 +660,60 @@ describe("viralRenderPayload", () => {
     });
     expect(payload.caption_style).toBe("word_pill");
     expect(payload.caption_suppress_ranges).toEqual([{ start_time: 1.5, end_time: 4.5 }]);
+  });
+
+  test("preserves pause-aligned words[] across normalize, continuous razor split, and discontinuous trim", () => {
+    const captionSegments = [
+      {
+        id: "pause-cue",
+        sourceClipId: "host",
+        start: 1.0,
+        end: 4.0,
+        text: "Wait yes now",
+        wordTimings: [
+          { word: "Wait", start: 1.0, end: 1.35 },
+          { word: "yes", start: 2.8, end: 3.2 },
+          { word: "now", start: 3.3, end: 3.9 },
+        ],
+      },
+    ];
+    const continuous = mapCaptionSegmentsToTimeline({
+      captionSegments,
+      timelineSegments: [
+        { source_clip_id: "host", start_time: 0, end_time: 2.0, duration: 2.0 },
+        { source_clip_id: "host", start_time: 2.0, end_time: 5.0, duration: 3.0 },
+      ],
+    });
+    expect(continuous).toHaveLength(1);
+    expect(continuous[0].words).toEqual([
+      { word: "Wait", start: 1.0, end: 1.35 },
+      { word: "yes", start: 2.8, end: 3.2 },
+      { word: "now", start: 3.3, end: 3.9 },
+    ]);
+
+    const trimmed = mapCaptionSegmentsToTimeline({
+      captionSegments,
+      timelineSegments: [{ source_clip_id: "host", start_time: 2.5, end_time: 5.0, duration: 2.5 }],
+    });
+    expect(trimmed).toHaveLength(1);
+    expect(trimmed[0].text).toBe("yes now");
+    expect(trimmed[0].words).toEqual([
+      { word: "yes", start: 0.3, end: 0.7 },
+      { word: "now", start: 0.8, end: 1.4 },
+    ]);
+
+    const staleTextSegment = [
+      {
+        id: "edited",
+        start: 0,
+        end: 2,
+        text: "Changed copy here",
+        wordTimings: [
+          { word: "Old", start: 0, end: 0.5 },
+          { word: "copy", start: 0.6, end: 1.2 },
+        ],
+      },
+    ];
+    expect(normalizeCaptionSegmentsForRender(staleTextSegment)[0].words).toBeUndefined();
   });
 });

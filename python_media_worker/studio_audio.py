@@ -47,7 +47,7 @@ def normalize_audio_restoration(raw):
     }
 
 
-def build_dialogue_filter(raw):
+def build_dialogue_filter(raw, include_loudnorm=True):
     settings = normalize_audio_restoration(raw)
     if not settings["enabled"]:
         return "", settings
@@ -72,9 +72,79 @@ def build_dialogue_filter(raw):
     if settings["compressor"] > 0:
         amount = settings["compressor"] / 100
         filters.append(f"acompressor=threshold={.22-.14*amount:.4f}:ratio={1+7*amount:.2f}:attack=12:release=180:makeup={1+1.2*amount:.2f}:knee=3:link=maximum")
-    filters.append(f"loudnorm=I={settings['loudness']:.1f}:LRA=9:TP={settings['limiter']:.1f}")
-    filters.append(f"alimiter=limit={10 ** (settings['limiter']/20):.6f}:level=false:latency=true")
+    if include_loudnorm:
+        filters.append(f"loudnorm=I={settings['loudness']:.1f}:LRA=9:TP={settings['limiter']:.1f}")
+        filters.append(f"alimiter=limit={10 ** (settings['limiter']/20):.6f}:level=false:latency=true")
     return ",".join(filters), settings
+
+
+def build_master_bus_loudnorm(raw):
+    settings = normalize_audio_restoration(raw)
+    if not settings["enabled"]:
+        return "", settings
+    chain = ",".join([
+        "aresample=48000",
+        f"loudnorm=I={settings['loudness']:.1f}:LRA=9:TP={settings['limiter']:.1f}",
+        f"alimiter=limit={10 ** (settings['limiter']/20):.6f}:level=false:latency=true",
+    ])
+    return chain, settings
+
+
+def track_pan(states, track):
+    states = states if isinstance(states, dict) else {}
+    current = states.get(track) if isinstance(states.get(track), dict) else {}
+    return _number(current.get("pan"), -100, 100, 0.0)
+
+
+def build_pan_filter(pan):
+    amount = _number(pan, -100, 100, 0.0)
+    if abs(amount) < 0.5:
+        return ""
+    norm = amount / 100.0
+    p = (norm + 1.0) * 0.5
+    lg = math.sqrt(2.0) * math.cos(p * math.pi * 0.5)
+    rg = math.sqrt(2.0) * math.sin(p * math.pi * 0.5)
+    cross = abs(norm)
+    w_same = (1.0 - cross) + cross * 0.5
+    w_other = cross * 0.5
+    c0_l = lg * w_same
+    c0_r = lg * w_other
+    c1_l = rg * w_other
+    c1_r = rg * w_same
+    return f"pan=stereo|c0={c0_l:.6f}*c0+{c0_r:.6f}*c1|c1={c1_l:.6f}*c0+{c1_r:.6f}*c1"
+
+
+def build_smooth_ducking_filter(windows, fade_seconds=0.06):
+    """Build click-free sample-accurate ducking envelope using linear ramp edges."""
+    clean = []
+    for item in windows or []:
+        if not item or len(item) < 3:
+            continue
+        start, end, gain = float(item[0]), float(item[1]), max(0.05, min(1.0, float(item[2])))
+        if end > start + 1e-4 and gain < 0.999:
+            clean.append((max(0.0, start), end, gain))
+    if not clean:
+        return ""
+    fade = max(0.01, min(0.25, float(fade_seconds or 0.06)))
+    expr_terms = []
+    for start, end, gain in sorted(clean):
+        ramp = min(fade, max(0.005, (end - start) * 0.25))
+        t0 = max(0.0, start - ramp * 0.5)
+        t1 = start + ramp * 0.5
+        t2 = max(t1 + 1e-4, end - ramp * 0.5)
+        t3 = end + ramp * 0.5
+        drop = 1.0 - gain
+        if t1 > t0:
+            atk = f"(1-{drop:.6f}*clip(((n/s)-{t0:.6f})/{(t1-t0):.6f},0,1))"
+        else:
+            atk = f"{gain:.6f}"
+        rel = f"({gain:.6f}+{drop:.6f}*clip(((n/s)-{t2:.6f})/{max(1e-4, t3-t2):.6f},0,1))"
+        env = f"if(lt(n/s,{t0:.6f}),1,if(lt(n/s,{t1:.6f}),{atk},if(lt(n/s,{t2:.6f}),{gain:.6f},if(lt(n/s,{t3:.6f}),{rel},1))))"
+        expr_terms.append(env)
+    combined = expr_terms[0]
+    for term in expr_terms[1:]:
+        combined = f"min({combined},{term})"
+    return f"aeval=exprs='val(ch)*({combined})':c=same"
 
 
 def audio_track_audible(states, track):

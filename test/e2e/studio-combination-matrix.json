@@ -218,6 +218,45 @@
   "schemaVersion": 1,
   "contractVersion": 1,
   "updatedAt": "2026-11-20T15:00:00.000Z",
+  "studioTransportHandoff20261119": {
+    "evidence": "reports/studio-transport-handoff-20261119/verification.json",
+    "focusIds": [
+      "broll_captions_music_transitions"
+    ],
+    "nextTaskId": "S02",
+    "scope": "Scoped native trim/split, cutaway, title, dialogue, music and four reviewed cues at 1.25\u00d7. Full stereo delivery playback, retimed handoff and subtitle sidecars verified. No transition or whole-combination readiness promotion."
+  },
+  "studioSourceRateProof20261119": {
+    "evidence": "reports/studio-source-rate-20261119/verification.json",
+    "focusIds": [
+      "captions_reframe_speed",
+      "broll_captions_music_transitions"
+    ],
+    "nextTaskId": "S02",
+    "scope": "Scoped normal signed-in source-rate sequence with two occurrences, caption review, title and cutaway. Native delivery tests cover 24000/1001 fps at 1x and 2x with stereo AAC, exact downloads and fresh local backup recovery. Remaining unexercised combination gates stay open."
+  },
+  "proEditorNativeProof20261119": {
+    "evidence": "reports/studio-pro-editor-proof-20261119/verification.json",
+    "focusIds": [
+      "broll_captions_music_transitions",
+      "captions_reframe_speed"
+    ],
+    "nextTaskId": "S02",
+    "scope": "Scoped local signed-in 8.5-second source split, reviewed captions, B-roll with original dialogue, title and H.264/AAC delivery. Unexercised capabilities and combination gates stay open."
+  },
+  "proEditorAssessment20261119": {
+    "document": "docs/VIRAL-CLIP-STUDIO-PRO-EDITOR-READINESS.md",
+    "kind": "Documentation review of retained evidence",
+    "focusIds": [
+      "captions_reframe_speed",
+      "broll_captions_music_transitions",
+      "multi_source_vo_captions",
+      "director_then_manual",
+      "nested_av_layer_order"
+    ],
+    "nextTaskId": "S02",
+    "newCapabilityExecutions": 0
+  },
   "baseline": "reports/studio-stability-20261008/results.json",
   "readinessStates": [
     "UNIMPLEMENTED",

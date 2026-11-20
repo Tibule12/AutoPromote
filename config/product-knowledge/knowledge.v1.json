@@ -3457,12 +3457,16 @@
       "optional_capabilities": [],
       "controls": [],
       "workflow": [
-        "Open the relevant workspace with an owned source.",
-        "Review the result and its limitations before saving or exporting."
+        "Open Export in a project with owned sources. Choose resolution, frame rate, video codec, quality and AAC bitrate. Match first source sets the output to the first retained picture source’s nominal rate.",
+        "The verified first-source rate also drives timeline SMPTE timecode and the desktop handoff. If the source rate is unavailable, choose a fixed rate to use exact frame navigation and export the desktop timeline.",
+        "Open Desktop NLE handoff in Export for OTIO, the primary-cut EDL, and separate SRT or VTT files. Review the translation checklist for effects and media that need attention in the desktop project.",
+        "Review the complete movie with sound after rendering. Download the completed file."
       ],
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "The shared worker derives the programme clock from the requested source intervals on the canonical 90 kHz timebase before applying speed. Codec padding in intermediate files cannot append an unrequested speed-plan tail. The declared clock is checked against those intervals. Downloads retain the exact completed output hash.",
       "limitations": [
+        "Match first source uses a constant output rate. Variable-rate timestamp preservation still requires qualification.",
+        "Studio delivers Rec.709 SDR MP4 with AAC when audio is present. Video compression follows the selected Quality preset and byte size varies with the footage.",
         "This dated development snapshot does not establish professional or production readiness.",
         "The eight-second native 24 fps clock regression is verified at 192 frames. This bounded result does not qualify every fractional source duration, retime, hook, caption, picture or audio combination."
       ],

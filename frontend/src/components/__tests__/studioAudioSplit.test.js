@@ -127,5 +127,19 @@ describe("studioAudioSplit - J-Cut & L-Cut Split Audio Transitions", () => {
     expect(SPLIT_AUDIO_PRESETS.map(p => p.id)).toContain("cinematic_j");
     expect(SPLIT_AUDIO_PRESETS.map(p => p.id)).toContain("reaction_l");
   });
+
+  test("handles startTime/endTime clips with finite sourceDuration safely", () => {
+    const clip = {
+      id: "camel",
+      startTime: 10,
+      endTime: 15,
+      sourceDuration: 60,
+      audioTrimOffsetEnd: 1.25,
+    };
+    const normalized = normalizeSplitAudioClip(clip, 0, 0);
+    expect(normalized.videoDuration).toBe(5);
+    expect(normalized.audioTimelineDuration).toBe(6.25);
+    expect(normalized.hasLCut).toBe(true);
+  });
 });
 

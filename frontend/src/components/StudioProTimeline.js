@@ -2,7 +2,9 @@ import React from "react";
 import TimelineSourceFilmstrip from "./TimelineSourceFilmstrip";
 import StudioSequenceClip from './StudioSequenceClip';
 import { normalizeSplitAudioClip } from './studioAudioSplit';
-import { StudioTimelinePosition, useStudioPlayheadDisplay } from "./StudioPlaybackPosition";
+import { StudioPlaybackTime, StudioTimelinePosition, useStudioPlayheadDisplay } from "./StudioPlaybackPosition";
+import { formatSmpteTimecode, normalizeFrameRate, parseStudioTimecode, resolveDropFrameMode } from "./studioTimecode";
+import { mapStudioContinuousSeconds, ticksToSeconds } from "./studioTime";
 import StudioControlMenu from "./StudioControlMenu";
 import StudioGroupTimelineClip from "./StudioGroupTimelineClip";
 import StudioKeyframeActions from "./StudioKeyframeActions";
@@ -124,6 +126,20 @@ const TrackControls = ({ trackId, state, onChange }) => (
         >
           S
         </button>
+        <select
+          className="pro-track-pan"
+          aria-label="Pan track"
+          data-testid={`pro-track-pan-${trackId}`}
+          title="Stereo pan (Left / Center / Right)"
+          value={String(Number(state.pan || 0))}
+          onChange={event => onChange(trackId, { pan: Number(event.target.value) })}
+        >
+          <option value="-100">L</option>
+          <option value="-50">L50</option>
+          <option value="0">C</option>
+          <option value="50">R50</option>
+          <option value="100">R</option>
+        </select>
       </>
     ) : null}
   </div>
@@ -208,6 +224,7 @@ const BrollClip = ({
   onClick,
   allowSlip = true,
   locked = false,
+  playing = false,
 }) => {
   const dragRef = React.useRef(null);
   const [isSnapped, setIsSnapped] = React.useState(false);
@@ -330,6 +347,22 @@ const BrollClip = ({
     }
   };
 
+  const brollFilmstripFrames = React.useMemo(() => {
+    if (trackId !== "broll" || item.type !== "video" || item.bRollPlaceholder) return [];
+    const src = item.url || item.src || "";
+    if (!src) return [];
+    const sourceOffset = Math.max(0, Number(item.sourceStartTime ?? item.trimStart ?? 0) || 0);
+    const clipDur = Math.max(0.1, Number(duration || 1));
+    const count = 4;
+    return Array.from({ length: count }, (_, idx) => ({
+      id: `${item.id || `broll-${index}`}-f-${idx}`,
+      src,
+      previewTime: Number((sourceOffset + (clipDur * (idx + 0.5)) / count).toFixed(3)),
+      left: (idx * 100) / count,
+      width: 100 / count,
+    }));
+  }, [trackId, item.type, item.bRollPlaceholder, item.url, item.src, item.sourceStartTime, item.trimStart, item.id, index, duration]);
+
   return (
     <div
       className={`pro-track-clip ${isSnapped ? "is-magnet-snapped" : ""}`}
@@ -362,6 +395,7 @@ const BrollClip = ({
       />
       <div
         style={{
+          position: "relative",
           width: "100%",
           height: "100%",
           cursor: "grab",
@@ -369,14 +403,20 @@ const BrollClip = ({
           alignItems: "center",
           padding: "0 8px",
           boxSizing: "border-box",
+          overflow: "hidden",
         }}
         onPointerDown={handlePointerDownBody}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onClick={onClick}
       >
+        {brollFilmstripFrames.length > 0 && (
+          <TimelineSourceFilmstrip frames={brollFilmstripFrames} playing={playing} />
+        )}
         <span
           style={{
+            position: "relative",
+            zIndex: 1,
             pointerEvents: "none",
             overflow: "hidden",
             whiteSpace: "nowrap",
@@ -829,6 +869,7 @@ export default function StudioProTimeline({
   playing = false,
   duration,
   playbackRate = 1,
+  outputTimeMap,
   playhead,
   playbackClock,
   zoom,
@@ -879,6 +920,7 @@ export default function StudioProTimeline({
   onEditMotionKeyframes,
   motionKeyframeEditError,
   frameRate = 30,
+  frameRatePending = false,
   motionScenes = [],
   onSelectMotion,
   audioKeyframes,
@@ -944,6 +986,10 @@ export default function StudioProTimeline({
   const [copiedMotionKeys, setCopiedMotionKeys] = React.useState([]);
   const [pasteTargetId, setPasteTargetId] = React.useState('');
   const [keyDragDelta, setKeyDragDelta] = React.useState(0);
+  const [dropFramePref, setDropFramePref] = React.useState("auto");
+  const [jumpTimecodeValue, setJumpTimecodeValue] = React.useState("");
+  const [jumpTimecodeError, setJumpTimecodeError] = React.useState("");
+  const jumpInputRef = React.useRef(null);
   const marquee = useStudioKeyframeMarquee(scrollRef, selectedMotionKeys, setSelectedMotionKeys, showMotionKeys);
   const focusedTrack = {
     reframe: "framing",
@@ -977,6 +1023,37 @@ export default function StudioProTimeline({
   // Authored edits retain their source coordinates. Only the displayed clock
   // changes with global playback speed, matching the programme and export.
   const displayRate = Number.isFinite(Number(playbackRate)) && Number(playbackRate) > 0 ? Number(playbackRate) : 1;
+  const rateInfo = normalizeFrameRate(frameRate);
+  const hasFrameRate = frameRate !== null;
+  const useDropFrame = resolveDropFrameMode(frameRate, dropFramePref);
+  const toOutputTime = programmeTime => outputTimeMap?.length
+    ? mapStudioContinuousSeconds(outputTimeMap, programmeTime, "programme")
+    : programmeTime / displayRate;
+  const toProgrammeTime = outputTime => outputTimeMap?.length
+    ? mapStudioContinuousSeconds(outputTimeMap, outputTime, "output")
+    : outputTime * displayRate;
+  const outputDuration = outputTimeMap?.length
+    ? ticksToSeconds(outputTimeMap.at(-1).outputRange.endTick)
+    : safeDuration / displayRate;
+  const readPlayheadOutput = () => playbackClock?.read?.()?.outputTime ??
+    playbackClock?.getSnapshot?.()?.outputTime ?? toOutputTime(Number(playheadRef.current || 0));
+  const submitJumpTimecode = event => {
+    event.preventDefault();
+    if (!hasFrameRate) return;
+    const parsed = parseStudioTimecode(jumpTimecodeValue, frameRate, {
+      dropFrame: useDropFrame,
+      currentSeconds: readPlayheadOutput(),
+      maxSeconds: outputDuration,
+    });
+    if (!parsed.valid) {
+      setJumpTimecodeError(parsed.error);
+      return;
+    }
+    setJumpTimecodeError("");
+    const programmeTarget = Math.max(0, Math.min(safeDuration, toProgrammeTime(parsed.seconds)));
+    onSeek?.(event, programmeTarget);
+    setJumpTimecodeValue("");
+  };
   const allMotionTargets = [{ ...mainTransform, id: 'main-video' }, ...(overlays || []).filter(layer => !layer.isCaption),
     ...graphicGroups.map(group => ({ ...group, ...group.transform }))];
   const motionTargets = allMotionTargets.filter(layer => !selectedGroupId || layer.id === selectedGroupId)
@@ -1256,6 +1333,38 @@ export default function StudioProTimeline({
 
   return (
     <section ref={clockDisplayRef} className={`studio-pro-timeline${layerView ? ' is-layer-view' : ''}`} data-testid="studio-pro-timeline" onKeyDown={event => {
+      if (!event.defaultPrevented && !event.ctrlKey && !event.metaKey && !event.altKey &&
+          !event.target.closest('input,select,textarea,button,[contenteditable="true"],[role="button"],[role="slider"]')) {
+        if (event.key === 'Home') {
+          event.preventDefault();
+          onSeek?.(event, 0);
+          return;
+        }
+        if (event.key === 'End') {
+          event.preventDefault();
+          onSeek?.(event, safeDuration);
+          return;
+        }
+        if (editTool !== 'hand' && (hasFrameRate || event.shiftKey) &&
+            (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+          event.preventDefault();
+          const direction = event.key === 'ArrowRight' ? 1 : -1;
+          const currentOutput = readPlayheadOutput();
+          const stepOutput = event.shiftKey ? 1 : 1 / rateInfo.fps;
+          const position = currentOutput / stepOutput;
+          const tolerance = Math.max(0.0001, (2 / 90000) / stepOutput);
+          const gridStep = direction > 0 ? Math.floor(position + tolerance) + 1 : Math.ceil(position - tolerance) - 1;
+          const targetOutput = Math.max(0, Math.min(outputDuration, gridStep * stepOutput));
+          onSeek?.(event, Math.max(0, Math.min(safeDuration, toProgrammeTime(targetOutput))));
+          return;
+        }
+        if (hasFrameRate && (event.key === 'g' || event.key === 'G') && jumpInputRef.current) {
+          event.preventDefault();
+          jumpInputRef.current.focus();
+          jumpInputRef.current.select?.();
+          return;
+        }
+      }
       if (!showMotionKeys || !onEditMotionKeyframes || !(event.ctrlKey || event.metaKey) ||
           event.target.closest('input,select,textarea,[contenteditable="true"]')) return;
       if (event.key.toLowerCase() === 'c' && chosenKeys.length) {
@@ -1848,6 +1957,7 @@ export default function StudioProTimeline({
                           snapTargets={snapTargets}
                           onOverlayMove={onOverlayMove}
                           locked={!!state.locked}
+                          playing={playing}
                           onOverlayTrim={onOverlayTrim}
                           onOverlaySlip={onOverlaySlip}
                           onClick={event => {
@@ -2086,6 +2196,62 @@ export default function StudioProTimeline({
         <span>{linkedSelection ? "Audio/video linked" : "Audio/video independent"}</span>
         <StudioTimelinePosition clock={playbackClock} playhead={playhead} displayRate={displayRate}
           framingItems={framingItems} format={timecode} />
+        <div className="pro-smpte-group">
+          <StudioPlaybackTime
+            clock={playbackClock}
+            fallback={toOutputTime(Number(playhead || 0))}
+            format={sec => hasFrameRate ? formatSmpteTimecode(sec, frameRate, { dropFrame: useDropFrame }) : "--:--:--:--"}
+            className="pro-smpte-readout"
+            data-testid="pro-smpte-timecode"
+            title={hasFrameRate ? `Output SMPTE timecode (${rateInfo.label} fps${useDropFrame ? " Drop-Frame" : ""}) — click or press G to jump` : "Choose a fixed frame rate if the source rate cannot be verified."}
+            onClick={hasFrameRate ? () => jumpInputRef.current?.focus() : undefined}
+          />
+          <span className="pro-smpte-fps" data-testid="pro-smpte-fps">
+            {hasFrameRate ? `${rateInfo.label} fps` : frameRatePending ? "Checking source fps…" : "Source fps unavailable"}
+          </span>
+          {rateInfo.dropFrameCapable && (
+            <button
+              type="button"
+              className={`pro-smpte-df-toggle${useDropFrame ? " is-active" : ""}`}
+              data-testid="pro-smpte-df-toggle"
+              aria-pressed={useDropFrame}
+              title="Toggle SMPTE Drop-Frame (;) vs Non-Drop-Frame (:) display"
+              onClick={() => setDropFramePref(!useDropFrame)}
+            >
+              {useDropFrame ? "DF" : "NDF"}
+            </button>
+          )}
+          <form className="pro-jump-timecode" onSubmit={submitJumpTimecode}>
+            <input
+              ref={jumpInputRef}
+              type="text"
+              value={jumpTimecodeValue}
+              placeholder="HH:MM:SS:FF or +15f"
+              aria-label="Jump to timecode"
+              data-testid="pro-jump-timecode-input"
+              disabled={!hasFrameRate}
+              onChange={event => {
+                setJumpTimecodeValue(event.target.value);
+                if (jumpTimecodeError) setJumpTimecodeError("");
+              }}
+              onKeyDown={event => {
+                if (event.key === "Escape") {
+                  setJumpTimecodeValue("");
+                  setJumpTimecodeError("");
+                  event.currentTarget.blur();
+                }
+              }}
+            />
+            <button type="submit" data-testid="pro-jump-timecode-btn" disabled={!hasFrameRate} title="Jump playhead to timecode (G)">
+              Go
+            </button>
+            {jumpTimecodeError && (
+              <span className="pro-jump-timecode-error" role="status" data-testid="pro-jump-timecode-error">
+                {jumpTimecodeError}
+              </span>
+            )}
+          </form>
+        </div>
       </footer>
     </section>
   );

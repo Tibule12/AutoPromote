@@ -218,6 +218,58 @@
   "schemaVersion": 1,
   "contractVersion": 1,
   "updatedAt": "2026-11-20T15:00:00.000Z",
+  "studioTransportHandoff20261119": {
+    "evidence": "reports/studio-transport-handoff-20261119/verification.json",
+    "focusIds": [
+      "preview",
+      "cuts_speed",
+      "captions",
+      "export"
+    ],
+    "nextTaskId": "S02",
+    "scope": "Native 24000/1001 SMPTE, preview-only shuttle, trimmed SRT/VTT, and 46.463-second CPU result. Both handoff readers preserve two picture events and the 1,114-frame presentation. No readiness promotion."
+  },
+  "studioSourceRateProof20261119": {
+    "evidence": "reports/studio-source-rate-20261119/verification.json",
+    "focusIds": [
+      "media_ingest",
+      "cuts_speed",
+      "captions",
+      "export",
+      "save_reload"
+    ],
+    "nextTaskId": "S02",
+    "scope": "Scoped normal signed-in source-rate sequence with two occurrences, caption review, title and cutaway. Native delivery tests cover 24000/1001 fps at 1x and 2x with stereo AAC, exact downloads and fresh local backup recovery. Remaining unexercised combination gates stay open."
+  },
+  "proEditorNativeProof20261119": {
+    "evidence": "reports/studio-pro-editor-proof-20261119/verification.json",
+    "focusIds": [
+      "preview",
+      "captions",
+      "cuts_speed",
+      "b_roll",
+      "overlays",
+      "export",
+      "save_reload",
+      "audio"
+    ],
+    "nextTaskId": "S02",
+    "scope": "Scoped local signed-in 8.5-second source split, reviewed captions, B-roll with original dialogue, title and H.264/AAC delivery. Unexercised capabilities and combination gates stay open."
+  },
+  "proEditorAssessment20261119": {
+    "document": "docs/VIRAL-CLIP-STUDIO-PRO-EDITOR-READINESS.md",
+    "kind": "Documentation review of retained evidence",
+    "focusIds": [
+      "preview",
+      "captions",
+      "cuts_speed",
+      "audio",
+      "export",
+      "save_reload"
+    ],
+    "nextTaskId": "S02",
+    "newCapabilityExecutions": 0
+  },
   "sourceOfTruth": "docs/STUDIO-COMPLETION-CONTRACT.md",
   "baseline": {
     "checkpoint": "docs/HANDOFF-studio-reliability-repair-20261008.md",
@@ -6165,7 +6217,7 @@
           {
             "field": "videoBitrate",
             "status": "IGNORED_BY_FINAL_RENDER",
-            "uiActive": true,
+            "uiActive": false,
             "reason": "Final encoder uses quality CQ/CRF; selected explicit video bitrate is not consumed.",
             "sourcePaths": [
               "frontend/src/components/ViralClipStudio.js",
@@ -6175,7 +6227,7 @@
           {
             "field": "targetFileSizeMb",
             "status": "IGNORED_BY_FINAL_RENDER",
-            "uiActive": true,
+            "uiActive": false,
             "reason": "The final profile/encoder does not consume selected target size.",
             "sourcePaths": [
               "frontend/src/components/ViralClipStudio.js",
@@ -6185,18 +6237,18 @@
           {
             "field": "audioCodec",
             "status": "IGNORED_BY_FINAL_RENDER",
-            "uiActive": true,
-            "reason": "The final audio encoder remains AAC regardless of the active Opus/PCM choice.",
+            "uiActive": false,
+            "reason": "Studio outputs AAC. Opus and PCM are no longer selectable in Export.",
             "sourcePaths": [
               "frontend/src/components/ViralClipStudio.js",
               "python_media_worker/main_media_server.py"
             ]
           },
           {
-            "field": "colorSpace",
+            "field": "colorSpace (sRGB, Display P3, HDR10)",
             "status": "IGNORED_BY_FINAL_RENDER",
-            "uiActive": true,
-            "reason": "The final profile/filters/encoder do not consume the active colour-space choice.",
+            "uiActive": false,
+            "reason": "The editor offers Rec.709 SDR only. Other legacy choices have no explicit final colour transform.",
             "sourcePaths": [
               "frontend/src/components/ViralClipStudio.js",
               "python_media_worker/main_media_server.py"
@@ -6339,7 +6391,7 @@
         "Claimed formats/color spaces and long export",
         "Ordinary billing/credits",
         "Restart/cancel recovery",
-        "Four active ignored professional export controls need implementation or explicit unavailability.",
+        "The editor offers quality-based encoding, Rec.709 SDR and AAC. Explicit video bitrate, fixed file size and alternate audio/colour formats need end-to-end implementation before enabling.",
         "Fresh listening and broad audio fidelity remain unqualified; only exact sample and packet clock is repaired.",
         "Brev cloud stop/billing confirmation remains blocked by provider API transport failures."
       ],

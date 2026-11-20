@@ -48,14 +48,72 @@ export const captionAssColor = value => {
 
 const widthUnit = ratio => `calc(var(--caption-programme-width, 320px) * ${ratio})`;
 
-const computeWordTimingState = (chunk, clock, wordsCount) => {
+const extractAlignedSegmentWordTimings = (segment, expectedWords) => {
+  if (!segment || !Array.isArray(expectedWords) || !expectedWords.length) return null;
+  const rawWords = Array.isArray(segment.wordTimings)
+    ? segment.wordTimings
+    : Array.isArray(segment.words) && segment.words.some(word => word && typeof word === "object")
+      ? segment.words
+      : null;
+  if (!rawWords || rawWords.length !== expectedWords.length) return null;
+  const segStart = Number(segment.start);
+  const segEnd = Number(segment.end);
+  if (!Number.isFinite(segStart) || !Number.isFinite(segEnd) || segEnd <= segStart) return null;
+  const normalized = [];
+  for (let i = 0; i < expectedWords.length; i += 1) {
+    const raw = rawWords[i];
+    if (!raw || typeof raw !== "object") return null;
+    const token = String(raw.word ?? "").trim();
+    if (!token || token !== expectedWords[i]) return null;
+    const wStart = Number(raw.start);
+    const wEnd = Number(raw.end);
+    if (!Number.isFinite(wStart) || !Number.isFinite(wEnd)) return null;
+    const clampedStart = Math.max(segStart, Math.min(segEnd, wStart));
+    const clampedEnd = Math.max(clampedStart + 0.01, Math.min(segEnd + 0.05, wEnd));
+    normalized.push({ word: token, start: clampedStart, end: clampedEnd });
+  }
+  return normalized;
+};
+
+export const resolveActiveWordTimingState = (chunk, clock, wordsCount) => {
   if (!chunk || !clock || !Number.isFinite(clock.time) || !Number.isFinite(clock.start) || !Number.isFinite(clock.end)) {
     return { activeIdx: 0, wordFrac: 1, localWordElapsed: 0.25 };
+  }
+  const count = Math.max(1, wordsCount || 1);
+  if (
+    Array.isArray(chunk.wordTimings) &&
+    chunk.wordTimings.length === count &&
+    Number.isFinite(chunk.start) &&
+    Number.isFinite(chunk.end) &&
+    chunk.end > chunk.start
+  ) {
+    const chunkSpan = Math.max(0.05, chunk.end - chunk.start);
+    const clockSpan = Math.max(0.05, clock.end - clock.start);
+    const scale = clockSpan / chunkSpan;
+    const mapped = chunk.wordTimings.map(w => ({
+      start: clock.start + (w.start - chunk.start) * scale,
+      end: clock.start + (w.end - chunk.start) * scale,
+    }));
+    if (clock.time < mapped[0].start) {
+      return { activeIdx: 0, wordFrac: 0, localWordElapsed: 0 };
+    }
+    let activeIdx = 0;
+    for (let i = 0; i < mapped.length; i += 1) {
+      if (clock.time >= mapped[i].start) {
+        activeIdx = i;
+      } else {
+        break;
+      }
+    }
+    const current = mapped[activeIdx];
+    const wordDur = Math.max(0.05, current.end - current.start);
+    const localWordElapsed = Math.max(0, clock.time - current.start);
+    const wordFrac = Math.max(0, Math.min(1, localWordElapsed / wordDur));
+    return { activeIdx, wordFrac, localWordElapsed };
   }
   const dur = Math.max(0.05, clock.end - clock.start);
   const elapsed = Math.max(0, clock.time - clock.start);
   const progress = Math.max(0, Math.min(0.999, elapsed / dur));
-  const count = Math.max(1, wordsCount || 1);
   const activeIdx = Math.min(count - 1, Math.floor(progress * count));
   const wordDur = dur / count;
   const wordStart = clock.start + activeIdx * wordDur;
@@ -63,6 +121,8 @@ const computeWordTimingState = (chunk, clock, wordsCount) => {
   const wordFrac = Math.max(0, Math.min(1, localWordElapsed / Math.max(0.05, wordDur)));
   return { activeIdx, wordFrac, localWordElapsed };
 };
+
+const computeWordTimingState = resolveActiveWordTimingState;
 
 export const sliceTypewriterWord = (word, frac, isDone = false) => {
   const clean = String(word || "");
@@ -330,14 +390,27 @@ export const buildCaptionRenderPreviewChunks = (segments, styleName, captionScal
       if (group.length >= (story ? 4 : 5)) flush();
     });
     flush();
+    const alignedTimings = extractAlignedSegmentWordTimings(segment, words);
     const wordDuration = (segment.end - segment.start) / Math.max(1, words.length);
-    return groups.map(group => ({
-      ...segment,
-      // Keep the cue's ID and full text for inspector selection/semantic accent.
-      words: group.words,
-      start: segment.start + group.first * wordDuration,
-      end: segment.start + (group.first + group.words.length) * wordDuration,
-      duration: group.words.length * wordDuration,
-    }));
+    return groups.map(group => {
+      const groupWordTimings = alignedTimings
+        ? alignedTimings.slice(group.first, group.first + group.words.length)
+        : null;
+      const start = groupWordTimings
+        ? groupWordTimings[0].start
+        : segment.start + group.first * wordDuration;
+      const end = groupWordTimings
+        ? Math.max(start + 0.05, groupWordTimings[groupWordTimings.length - 1].end)
+        : segment.start + (group.first + group.words.length) * wordDuration;
+      return {
+        ...segment,
+        // Keep the cue's ID and full text for inspector selection/semantic accent.
+        words: group.words,
+        ...(groupWordTimings ? { wordTimings: groupWordTimings } : {}),
+        start,
+        end,
+        duration: Math.max(0.05, end - start),
+      };
+    });
   });
 };

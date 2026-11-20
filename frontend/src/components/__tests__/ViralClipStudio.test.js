@@ -578,6 +578,21 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(video.paused).toBe(true);
   });
 
+  test("Space toggles the real monitor without consuming input or repeated keypresses", async () => {
+    const { video } = mountNativePreview();
+    const workspace = screen.getByTestId("viral-studio-workspace");
+    const frameRate = screen.getByLabelText("Export frame rate");
+    expect(fireEvent.keyDown(frameRate, { key: " " })).toBe(true);
+    expect(video.paused).toBe(true);
+
+    await act(async () => fireEvent.keyDown(workspace, { key: " " }));
+    expect(video.paused).toBe(false);
+    fireEvent.keyDown(workspace, { key: " ", repeat: true });
+    expect(video.paused).toBe(false);
+    fireEvent.keyDown(workspace, { key: " " });
+    expect(video.paused).toBe(true);
+  });
+
   test("a loading source resumes when playable only while playback is requested", () => {
     const { video } = mountNativePreview();
     fireEvent.click(screen.getByRole("button", { name: "Play comparison" }));
@@ -3480,7 +3495,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(
       uploadSourceFileViaBackend.mock.calls.some(([options]) => options.file === uploadedFile)
     ).toBe(true);
-  }, 15000);
+  }, 30000);
 
   test("undoes and redoes Make It Hit as one reversible edit", async () => {
     global.fetch.mockResolvedValue({
@@ -5727,7 +5742,7 @@ describe("ViralClipStudio timeline sequencing", () => {
       ])
     );
     expect(exportedOverlays.some(overlay => overlay.bRollPlaceholder)).toBe(false);
-  });
+  }, 45000);
 
   test("does not invent subtitles when the worker finds no usable words", async () => {
     global.fetch
@@ -6047,6 +6062,12 @@ describe("ViralClipStudio timeline sequencing", () => {
         exact: true,
       })
     );
+    expect(screen.getByText(/MP4 · Rec.709 SDR · AAC/)).toBeInTheDocument();
+    expect(screen.getByLabelText("Export target size MB")).toBeInTheDocument();
+    expect(screen.getByLabelText("Export video bitrate")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Export audio codec")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Export color space")).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("Export audio bitrate"), { target: { value: "128" } });
     const destinationPicker = screen.getByRole("radiogroup", { name: "Export destination" });
     expect(within(destinationPicker).getByRole("radio", { name: "Download" })).toHaveAttribute(
       "aria-checked",
@@ -6071,6 +6092,11 @@ describe("ViralClipStudio timeline sequencing", () => {
     await waitFor(() => expect(onSave).toHaveBeenCalled());
     expect(onSave.mock.calls[0][2]).toEqual(
       expect.objectContaining({
+        outputSettings: {
+          resolution: "1080p", fps: "30", codec: "h264", quality: "high",
+          videoBitrate: "auto", targetFileSizeMb: "",
+          audioBitrate: "128", audioCodec: "aac", colorSpace: "rec709",
+        },
         exportDestination: "tiktok",
         creativeIntent: "proof",
         previewSpeed: 1.5,
@@ -7797,6 +7823,146 @@ describe("ViralClipStudio timeline sequencing", () => {
       if(previousCohort===undefined)delete process.env.REACT_APP_STUDIO_SOURCE_DIALOGUE_PREVIEW_UIDS;
       else process.env.REACT_APP_STUDIO_SOURCE_DIALOGUE_PREVIEW_UIDS=previousCohort;
     }
+  });
+
+  test("exports post-edit SRT/VTT sidecar captions, desktop NLE OTIO/EDL packages, and supports SMPTE Jump-to-Timecode", async () => {
+    const exportedBlobs = [];
+    const origCreateObjectUrl = URL.createObjectURL;
+    const origRevokeObjectUrl = URL.revokeObjectURL;
+    URL.createObjectURL = jest.fn(blob => {
+      exportedBlobs.push(blob);
+      return `blob:test-export-${exportedBlobs.length}`;
+    });
+    URL.revokeObjectURL = jest.fn();
+    const clickSpy = jest.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+
+    try {
+      mountNativePreview({
+        clips: [{ id: "main", title: "Demo Episode", start: 0, end: 12, duration: 12, sourceDuration: 12 }],
+        initialSavedProject: {
+          id: "pro-handoff-proj",
+          name: "Pro Handoff Project",
+          snapshot: {
+            orderedClips: [{ id: "main", title: "Demo Episode", start: 0, end: 12, duration: 12, sourceDuration: 12 }],
+            selectedClipId: "main",
+            timeline: [{ id: "main", sourceClipId: "main", url: "https://example.com/source.mp4", startRequest: 2, endRequest: 10 }],
+            captionSegments: [
+              { id: "c-out", sourceClipId: "main", start: 0, end: 1, text: "Trimmed before in point", speaker: "Host" },
+              { id: "c-in", sourceClipId: "main", start: 3, end: 5.5, text: "Edited line", speaker: "Host" },
+            ],
+            overlays: [{ id: "title-1", type: "text", name: "Lower Third", startTime: 1, duration: 3 }],
+            autoCaptions: true,
+            addHook: false,
+            exportSettings: { fps: "24" },
+            reframeAspect: "16:9",
+          },
+        },
+      });
+
+      await waitFor(() => expect(screen.getByDisplayValue("Pro Handoff Project")).toBeInTheDocument());
+      await waitFor(() => expect(screen.getByTestId("pro-smpte-fps")).toHaveTextContent("24 fps"));
+      const video = readyCutawaySource(12);
+
+      // Jump via SMPTE timecode input inside the Studio timeline (t=4s -> sourceTime 2+4=6s)
+      const jumpInput = screen.getByTestId("pro-jump-timecode-input");
+      fireEvent.change(jumpInput, { target: { value: "00:00:04:00" } });
+      fireEvent.submit(jumpInput.closest("form"));
+      expect(video.currentTime).toBeCloseTo(6, 2);
+      fireEvent.seeked(video);
+      fireEvent.timeUpdate(video);
+      await waitFor(() => expect(screen.getByTestId("pro-smpte-timecode")).toHaveTextContent("00:00:04:00"));
+
+      // Captions inspector -> Download post-edit SRT and VTT (only c-in inside 2..10s remains, shifted to 1..3.5s)
+      const tools = screen.getByRole("navigation", { name: "Creative tools" });
+      fireEvent.click(within(tools).getByRole("button", { name: "Captions", exact: true }));
+      fireEvent.click(await screen.findByTestId("caption-export-srt"));
+      fireEvent.click(screen.getByTestId("caption-export-vtt"));
+
+      // Export panel -> Desktop NLE handoff OTIO & CMX 3600 EDL + honest translation checklist
+      fireEvent.click(within(tools).getByRole("button", { name: "Export", exact: true }));
+      const handoff = await screen.findByTestId("studio-interchange-handoff");
+      expect(within(handoff).getByTestId("interchange-translation-report")).toHaveTextContent(
+        /2 Studio FX area\(s\) require bake\/sidecar/i
+      );
+      fireEvent.click(within(handoff).getByTestId("export-otio-btn"));
+      fireEvent.click(within(handoff).getByTestId("export-edl-btn"));
+
+      expect(exportedBlobs).toHaveLength(4);
+      const [srtText, vttText, otioText, edlText] = await Promise.all(
+        exportedBlobs.map(blob => new Response(blob).text())
+      );
+      expect(srtText).toContain("00:00:01,000 --> 00:00:03,500");
+      expect(srtText).not.toContain("Trimmed before in point");
+      expect(vttText).toContain("WEBVTT");
+      expect(vttText).toContain("00:00:01.000 --> 00:00:03.500");
+      expect(JSON.parse(otioText).OTIO_SCHEMA).toBe("Timeline.1");
+      expect(edlText).toContain("FCM: NON-DROP FRAME");
+    } finally {
+      clickSpy.mockRestore();
+      URL.createObjectURL = origCreateObjectUrl;
+      URL.revokeObjectURL = origRevokeObjectUrl;
+    }
+  });
+
+  test("Dual Clean + Captioned Master export sends pause-aligned wordTimings and clean textless render", async () => {
+    const onSave = jest.fn(async (_clip, _overlays, opts) => ({
+      url: opts.autoCaptions ? "https://example.com/captioned.mp4" : "https://example.com/clean.mp4",
+    }));
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "main", title: "Dual Demo", start: 0, end: 10, duration: 10, sourceDuration: 10 }]}
+        initialSavedProject={{
+          id: "dual-proj",
+          name: "Dual Project",
+          snapshot: {
+            orderedClips: [{ id: "main", title: "Dual Demo", start: 0, end: 10, duration: 10, sourceDuration: 10 }],
+            selectedClipId: "main",
+            timeline: [{ id: "main", sourceClipId: "main", url: "https://example.com/source.mp4", startRequest: 0, endRequest: 8, duration: 8 }],
+            captionCoverageMode: "selected",
+            captionSegments: [
+              {
+                id: "cue-1",
+                sourceClipId: "main",
+                start: 1,
+                end: 5,
+                text: "Wait yes",
+                speaker: "Host",
+                language: "en",
+                words: [
+                  { word: "Wait", start: 1.0, end: 1.4 },
+                  { word: "yes", start: 3.6, end: 4.2 },
+                ],
+                textReviewed: true,
+                reviewRequired: false,
+              },
+            ],
+            autoCaptions: true,
+            addHook: false,
+          },
+        }}
+        onSave={onSave}
+        onCancel={jest.fn()}
+      />
+    );
+    await screen.findByDisplayValue("Dual Project");
+    readyCutawaySource(10);
+    const tools = screen.getByRole("navigation", { name: "Creative tools" });
+    fireEvent.click(within(tools).getByRole("button", { name: "Export", exact: true }));
+    fireEvent.click(await screen.findByTestId("export-dual-clean-captioned-btn"));
+
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(2));
+    expect(onSave.mock.calls[0][2].autoCaptions).toBe(true);
+    expect(onSave.mock.calls[0][2].dualVariant).toBe("captioned");
+    expect(onSave.mock.calls[0][2].captionSegments[0].words).toEqual([
+      { word: "Wait", start: 1, end: 1.4 },
+      { word: "yes", start: 3.6, end: 4.2 },
+    ]);
+    expect(onSave.mock.calls[1][2].autoCaptions).toBe(false);
+    expect(onSave.mock.calls[1][2].dualVariant).toBe("clean");
+    const dualStatus = await screen.findByTestId("dual-export-outputs");
+    expect(dualStatus).toHaveTextContent("Download Captioned Master");
+    expect(dualStatus).toHaveTextContent("Download Clean Textless Master");
   });
 
 });

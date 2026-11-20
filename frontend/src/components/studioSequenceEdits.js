@@ -230,26 +230,123 @@ export function removeStudioProgrammeRanges(snapshot, ranges, id, options = {}) 
   const removed = merged.reduce((sum,range)=>sum+range.to-range.from,0);
   const minimum=tick((Number(snapshot.previewSpeed)||1)/(Number(snapshot.exportSettings?.fps)||30));
   if (!removed || total-removed<minimum) throw Error('Keep at least one frame of video outside the removed ranges.');
-  if (snapshot.timeline.some(clip=>clip.audioDetached))
-    throw Error('Use Straight Cut to relink detached source audio before removing programme time.');
+  const retimeDetachedAudioForRange = (clip, atTick, clipDurTick, fromTick, toTick, side = 'single') => {
+    if (!clip.audioDetached) return {};
+    const aProgStartTick = tick(clip.audioProgrammeStart || 0);
+    const aSrcStartTick = tick(clip.audioSourceStart || 0);
+    const aSrcEndTick = tick(clip.audioSourceEnd ?? clip.audioSourceStart ?? 0);
+    const aDurTick = Math.max(0, aSrcEndTick - aSrcStartTick);
+    const aProgEndTick = aProgStartTick + aDurTick;
+    const removedTick = toTick - fromTick;
+    if (toTick <= aProgStartTick) {
+      return {
+        audioDetached: true,
+        audioSourceStart: seconds(aSrcStartTick),
+        audioSourceEnd: seconds(aSrcEndTick),
+        audioProgrammeStart: seconds(Math.max(0, aProgStartTick - removedTick)),
+      };
+    }
+    if (fromTick >= aProgEndTick || aDurTick <= 0) {
+      return {
+        audioDetached: true,
+        audioSourceStart: seconds(aSrcStartTick),
+        audioSourceEnd: seconds(aSrcEndTick),
+        audioProgrammeStart: seconds(aProgStartTick),
+      };
+    }
+    const leftKeepTick = Math.max(0, Math.min(aDurTick, fromTick - aProgStartTick));
+    const rightSkipTick = Math.max(0, Math.min(aDurTick, toTick - aProgStartTick));
+    if (side === 'left') {
+      const endTick = aSrcStartTick + (leftKeepTick > 0 ? leftKeepTick : 0);
+      if (endTick - aSrcStartTick < minimum) {
+        return { audioDetached: undefined, audioSourceStart: undefined, audioSourceEnd: undefined, audioProgrammeStart: undefined };
+      }
+      return {
+        audioDetached: true,
+        audioSourceStart: seconds(aSrcStartTick),
+        audioSourceEnd: seconds(endTick),
+        audioProgrammeStart: seconds(aProgStartTick),
+      };
+    }
+    if (side === 'right') {
+      const startTick = aSrcStartTick + rightSkipTick;
+      if (aSrcEndTick - startTick < minimum) {
+        return { audioDetached: undefined, audioSourceStart: undefined, audioSourceEnd: undefined, audioProgrammeStart: undefined };
+      }
+      return {
+        audioDetached: true,
+        audioSourceStart: seconds(startTick),
+        audioSourceEnd: seconds(aSrcEndTick),
+        audioProgrammeStart: seconds(Math.max(0, Math.min(aProgStartTick, fromTick))),
+      };
+    }
+    // Single uncut piece whose audio overlapped the cut head or tail
+    if (fromTick <= aProgStartTick && toTick >= aProgEndTick) {
+      return { audioDetached: undefined, audioSourceStart: undefined, audioSourceEnd: undefined, audioProgrammeStart: undefined };
+    }
+    if (fromTick <= aProgStartTick) {
+      const startTick = aSrcStartTick + rightSkipTick;
+      return {
+        audioDetached: true,
+        audioSourceStart: seconds(startTick),
+        audioSourceEnd: seconds(Math.max(startTick + minimum, aSrcEndTick)),
+        audioProgrammeStart: seconds(fromTick),
+      };
+    }
+    return {
+      audioDetached: true,
+      audioSourceStart: seconds(aSrcStartTick),
+      audioSourceEnd: seconds(Math.max(aSrcStartTick + minimum, aSrcStartTick + leftKeepTick)),
+      audioProgrammeStart: seconds(aProgStartTick),
+    };
+  };
   let next={...snapshot};
   const sequence={value:0};
   for (const range of [...merged].reverse()) {
     let elapsed=0;
     const timeline=next.timeline.flatMap(clip=>{
       const w=sequenceWindow(clip), at=elapsed; elapsed+=w.duration;
-      if (range.to<=at || range.from>=elapsed) return [clip];
+      if (range.to<=at || range.from>=elapsed) {
+        if (!clip.audioDetached) return [clip];
+        const updatedAudio = retimeDetachedAudioForRange(clip, at, w.duration, range.from, range.to, 'single');
+        const nextClip = { ...clip, ...updatedAudio };
+        if (updatedAudio.audioDetached === undefined) {
+          for (const k of ['audioDetached', 'audioSourceStart', 'audioSourceEnd', 'audioProgrammeStart']) delete nextClip[k];
+        }
+        return [nextClip];
+      }
       if (snapshot.studioDocument.constraints.locks.some(lock=>lock.occurrenceId===String(clip.id)))
         throw Error('The cut touches a preserved source range.');
       const left=Math.max(0,range.from-at), right=Math.min(w.duration,range.to-at);
       if ((left>0 && left<minimum) || (right<w.duration && w.duration-right<minimum))
         throw Error('Leave at least one full frame at the cut boundary.');
       const pieces=[];
-      if (left>0) pieces.push({...clip,sourceClipId:clip.sourceClipId||clip.id,endRequest:seconds(w.start+left),duration:seconds(left),
-        ...(options.transition ? {transitionOut:options.transition,transitionDuration:options.transitionDuration} : {})});
-      if (right<w.duration) pieces.push({...clip,id:pieces.length?`kept:${id}:${++sequence.value}`:clip.id,
-        sourceClipId:clip.sourceClipId||clip.id,startRequest:seconds(w.start+right),duration:seconds(w.duration-right),
-        ...(options.transition ? {transitionIn:options.transition,transitionDuration:options.transitionDuration} : {})});
+      const isSplitBoth = left > 0 && right < w.duration;
+      if (left>0) {
+        const leftAudio = clip.audioDetached
+          ? retimeDetachedAudioForRange(clip, at, w.duration, range.from, range.to, isSplitBoth ? 'left' : 'single')
+          : {};
+        const piece = {...clip,sourceClipId:clip.sourceClipId||clip.id,endRequest:seconds(w.start+left),duration:seconds(left),
+          ...leftAudio,
+          ...(options.transition ? {transitionOut:options.transition,transitionDuration:options.transitionDuration} : {})};
+        if (leftAudio.audioDetached === undefined && clip.audioDetached) {
+          for (const k of ['audioDetached', 'audioSourceStart', 'audioSourceEnd', 'audioProgrammeStart']) delete piece[k];
+        }
+        pieces.push(piece);
+      }
+      if (right<w.duration) {
+        const rightAudio = clip.audioDetached
+          ? retimeDetachedAudioForRange(clip, at, w.duration, range.from, range.to, isSplitBoth ? 'right' : 'single')
+          : {};
+        const piece = {...clip,id:pieces.length?`kept:${id}:${++sequence.value}`:clip.id,
+          sourceClipId:clip.sourceClipId||clip.id,startRequest:seconds(w.start+right),duration:seconds(w.duration-right),
+          ...rightAudio,
+          ...(options.transition ? {transitionIn:options.transition,transitionDuration:options.transitionDuration} : {})};
+        if (rightAudio.audioDetached === undefined && clip.audioDetached) {
+          for (const k of ['audioDetached', 'audioSourceStart', 'audioSourceEnd', 'audioProgrammeStart']) delete piece[k];
+        }
+        pieces.push(piece);
+      }
       return pieces;
     });
     next=rippleStudioSnapshotLinkedTimeline({...next,timeline},{fromTick:range.from,toTick:range.to},`${id}:${sequence}`);

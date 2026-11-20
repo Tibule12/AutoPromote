@@ -209,3 +209,32 @@ test("creative studio styles render distinct pills, bloom, Y-hop, serif duo, kin
   expect(sliceTypewriterWord("Creators", 0.25, false)).toBe("Cr");
   expect(sliceTypewriterWord("Creators", 0.25, true)).toBe("Creators");
 });
+
+test("pause-aligned wordTimings hold the active word during silences instead of uniform drift", () => {
+  const { resolveActiveWordTimingState } = require("../studioCaptionPreviewStyle");
+  const segments = [
+    {
+      id: "pause-preview",
+      start: 0,
+      end: 3,
+      text: "Wait for it",
+      wordTimings: [
+        { word: "Wait", start: 0.0, end: 0.35 },
+        { word: "for", start: 2.0, end: 2.35 },
+        { word: "it", start: 2.4, end: 2.9 },
+      ],
+    },
+  ];
+  const chunks = buildCaptionRenderPreviewChunks(segments, "bold_pop");
+  expect(chunks).toHaveLength(1);
+  expect(chunks[0].wordTimings).toHaveLength(3);
+  expect(
+    resolveActiveWordTimingState(chunks[0], { start: 0, end: 2.9, time: 1.35 }, 3).activeIdx
+  ).toBe(0);
+  expect(
+    resolveActiveWordTimingState(chunks[0], { start: 0, end: 2.9, time: 2.15 }, 3).activeIdx
+  ).toBe(1);
+  expect(
+    resolveActiveWordTimingState(chunks[0], { start: 0, end: 2.9, time: 2.65 }, 3).activeIdx
+  ).toBe(2);
+});

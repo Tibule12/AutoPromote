@@ -1,0 +1,162 @@
+{
+  "date": "2026-11-19",
+  "scope": "Normal signed-in isolated Studio app and CPU worker",
+  "title": "Still Trying",
+  "proof": {
+    "normalSignIn": true,
+    "historyVerified": true,
+    "coldReopenVerified": true,
+    "outputDownloaded": true,
+    "completeFinishedPlayback": true,
+    "projectBackup": true,
+    "renderRequests": 1,
+    "pageErrors": []
+  },
+  "splitAtSeconds": 4.5,
+  "captionRangesSeconds": [
+    [
+      0,
+      2.28
+    ],
+    [
+      2.62,
+      4.92
+    ],
+    [
+      5.66,
+      6.34
+    ],
+    [
+      7.140000000000001,
+      7.92
+    ]
+  ],
+  "captionMatchAtBoundary": {
+    "frame107": "stood",
+    "frame108": "up"
+  },
+  "settings": {
+    "resolution": "720p",
+    "fps": "24",
+    "codec": "h264",
+    "quality": "high",
+    "audioBitrate": "128",
+    "audioCodec": "aac",
+    "colorSpace": "rec709"
+  },
+  "pairedPicturesAndOutput": {
+    "video": {
+      "codec_name": "h264",
+      "width": 720,
+      "height": 1280,
+      "pix_fmt": "yuv420p",
+      "avg_frame_rate": "24/1",
+      "nb_read_frames": "204",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709",
+      "color_range": "tv"
+    },
+    "audio": {
+      "codec_name": "aac",
+      "channels": 2,
+      "sample_rate": "48000",
+      "bit_rate": "127583",
+      "duration": "8.500000"
+    },
+    "durationSeconds": 8.5,
+    "byteCount": 1925944,
+    "audioPeakDbfs": -2.24,
+    "pairs": [
+      {
+        "frame": 43,
+        "programmeSeconds": 1.7916666666666667,
+        "previewSize": [
+          372,
+          660
+        ],
+        "meanAbsoluteChannelError": 2.693,
+        "p95ChannelError": 4.0,
+        "psnrDb": 24.78
+      },
+      {
+        "frame": 107,
+        "programmeSeconds": 4.458333333333333,
+        "previewSize": [
+          372,
+          660
+        ],
+        "meanAbsoluteChannelError": 3.09,
+        "p95ChannelError": 7.0,
+        "psnrDb": 24.683
+      },
+      {
+        "frame": 108,
+        "programmeSeconds": 4.5,
+        "previewSize": [
+          372,
+          660
+        ],
+        "meanAbsoluteChannelError": 4.104,
+        "p95ChannelError": 6.0,
+        "psnrDb": 23.949
+      },
+      {
+        "frame": 109,
+        "programmeSeconds": 4.541666666666667,
+        "previewSize": [
+          372,
+          660
+        ],
+        "meanAbsoluteChannelError": 4.499,
+        "p95ChannelError": 8.0,
+        "psnrDb": 23.815
+      },
+      {
+        "frame": 141,
+        "programmeSeconds": 5.875,
+        "previewSize": [
+          372,
+          660
+        ],
+        "meanAbsoluteChannelError": 4.129,
+        "p95ChannelError": 8.0,
+        "psnrDb": 26.934
+      },
+      {
+        "frame": 181,
+        "programmeSeconds": 7.541666666666667,
+        "previewSize": [
+          372,
+          660
+        ],
+        "meanAbsoluteChannelError": 2.924,
+        "p95ChannelError": 6.0,
+        "psnrDb": 26.198
+      }
+    ]
+  },
+  "freshNativeBackupRestore": {
+    "freshBrowserContext": true,
+    "timelineOccurrences": 2,
+    "approvedCues": 4,
+    "videoCutaways": 1,
+    "editedTitle": "STILL TRYING",
+    "outputTimeMapMatched": true,
+    "renderRequests": 0,
+    "pageErrors": []
+  },
+  "downloadSha256": "fddbeed3a92052638060599736d1e477597cdb7d3a0e5f301a01f5b31121f880",
+  "testCounts": {
+    "exportRelatedFrontend": 45,
+    "mapperAndCompiler": 28,
+    "worker": 20,
+    "anonymousViewportChecks": 8
+  },
+  "pending": [
+    "paired moving picture and preview sound",
+    "broader caption styling and retiming",
+    "interrupted recovery",
+    "professional handoff"
+  ]
+}

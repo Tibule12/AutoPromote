@@ -1,6 +1,11 @@
 """Choose source samples on the programme's shared constant-frame-rate grid."""
 import math
 
+try:
+    from .viral_render_contract import studio_ffmpeg_frame_rate
+except ImportError:
+    from viral_render_contract import studio_ffmpeg_frame_rate
+
 
 def preserve_reviewed_sequence_samples(width, height, fps, duration, reviewed):
     """Bound lossless temporary YUV size; final export still sets quality."""
@@ -22,7 +27,7 @@ def sequence_picture_window(programme_start, duration, programme_duration, sourc
     phase = source_frame_time - source_time
     return {"frames": max(0, end-first), "seek": seek, "programme_start": first/fps,
             "clock": [f"setpts=PTS-STARTPTS+({phase:.9f})/TB",
-                      f"fps={fps:g}:start_time=0:round=up",
+                      f"fps={studio_ffmpeg_frame_rate(fps)}:start_time=0:round=up",
                       # A source's container can outlast its last picture by
                       # part of a frame. Hold only that final CFR sample.
                       f"tpad=stop_mode=clone:stop_duration={1/fps:.9f}",

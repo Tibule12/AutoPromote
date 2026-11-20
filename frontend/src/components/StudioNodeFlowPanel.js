@@ -53,7 +53,6 @@ import {
   FILM_EMULATION_PRESETS,
   HSL_QUALIFIER_PRESETS,
   POWER_WINDOW_PRESETS,
-  buildColorSpaceTransformCube,
   diagnoseDeadFootageAndSolveRevival,
   solveShotMatchGrade,
 } from "./studioColorScience";
@@ -135,12 +134,14 @@ const isPortCompatibleWithPending = (pendingWire, targetNode, inPort) => {
     );
   }
   if (inPort === "Mask") {
+    if (pendingWire.fromNodeId.startsWith("SubjectMatte:")) {
+      return false;
+    }
     if (targetNode.kind === "Merge") {
       return (
         pendingWire.fromNodeId.startsWith("Transform:") ||
         pendingWire.fromNodeId.startsWith("GlowBlur:") ||
         pendingWire.fromNodeId.startsWith("MediaIn:") ||
-        pendingWire.fromNodeId.startsWith("SubjectMatte:") ||
         pendingWire.fromNodeId.startsWith("ChromaKeyer:") ||
         pendingWire.fromNodeId.startsWith("PolygonMask:")
       );
@@ -148,14 +149,12 @@ const isPortCompatibleWithPending = (pendingWire, targetNode, inPort) => {
     if (targetNode.kind === "Transform" || targetNode.kind === "CompoundMacro") {
       return (
         pendingWire.fromNodeId.startsWith("PolygonMask:") ||
-        pendingWire.fromNodeId.startsWith("ChromaKeyer:") ||
-        pendingWire.fromNodeId.startsWith("SubjectMatte:")
+        pendingWire.fromNodeId.startsWith("ChromaKeyer:")
       );
     }
     if (targetNode.kind === "ColorCorrector" || targetNode.kind === "Adjustment") {
       return (
         pendingWire.fromNodeId.startsWith("PolygonMask:") ||
-        pendingWire.fromNodeId.startsWith("SubjectMatte:") ||
         pendingWire.fromNodeId.startsWith("ChromaKeyer:") ||
         pendingWire.fromNodeId.startsWith("Transform:") ||
         pendingWire.fromNodeId.startsWith("MediaIn:")
@@ -879,15 +878,53 @@ export default function StudioNodeFlow({
     [finishKeyframes]
   );
 
+  const scopeCanvasRef = useRef(null);
+  const [liveVideoFrameBytes, setLiveVideoFrameBytes] = useState(null);
+
+  useEffect(() => {
+    const videoEl = videoRef?.current;
+    if (!videoEl || typeof document === "undefined") {
+      setLiveVideoFrameBytes(null);
+      return undefined;
+    }
+    const sampleFrame = () => {
+      try {
+        if (!videoEl || videoEl.readyState < 2 || !videoEl.videoWidth || !videoEl.videoHeight) return;
+        if (!scopeCanvasRef.current) {
+          const c = document.createElement("canvas");
+          c.width = 48;
+          c.height = 27;
+          scopeCanvasRef.current = c;
+        }
+        const ctx = scopeCanvasRef.current.getContext("2d", { willReadFrequently: true });
+        if (!ctx) return;
+        ctx.drawImage(videoEl, 0, 0, 48, 27);
+        const imageData = ctx.getImageData(0, 0, 48, 27);
+        if (imageData?.data?.length === 48 * 27 * 4) {
+          setLiveVideoFrameBytes(new Uint8ClampedArray(imageData.data));
+        }
+      } catch (_) {
+        setLiveVideoFrameBytes(null);
+      }
+    };
+    sampleFrame();
+    const events = ["loadeddata", "canplay", "seeked", "timeupdate"];
+    events.forEach(ev => videoEl.addEventListener?.(ev, sampleFrame));
+    return () => {
+      events.forEach(ev => videoEl.removeEventListener?.(ev, sampleFrame));
+    };
+  }, [videoRef, currentTime, clipUrl]);
+
   const liveColorScopes = useMemo(
     () =>
       computeLiveGradeScopes({
         finishFx: interpolateFinishKeyframes(finishFx, normalizedFinishKeyframes, currentTime),
         advancedColor: resolvedAdvancedColor,
+        rgbaBytes: liveVideoFrameBytes,
         width: 48,
         height: 27,
       }),
-    [finishFx, normalizedFinishKeyframes, currentTime, resolvedAdvancedColor]
+    [finishFx, normalizedFinishKeyframes, currentTime, resolvedAdvancedColor, liveVideoFrameBytes]
   );
 
   const stampMaskVertexKeyframes = useCallback(
@@ -3409,6 +3446,93 @@ export default function StudioNodeFlow({
                       />
                     </label>
                   </div>
+                  <div className="ap-flow-field-row">
+                    <label className="ap-flow-field">
+                      <span>
+                        Macro Glow Boost ({Math.round(Number(selectedOverlay.macroGroup?.publishedControls?.macroGlowBoost ?? 0.4) * 100)}%)
+                      </span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.05"
+                        data-testid="flow-macro-glow-slider"
+                        value={Number(
+                          selectedOverlay.macroGroup?.publishedControls?.macroGlowBoost ?? 0.4
+                        )}
+                        onChange={e => {
+                          const nextGlow = Number(e.target.value);
+                          const memberIds = selectedOverlay.macroGroup?.memberIds || [];
+                          emitOverlays?.(
+                            overlays.map(item => {
+                              if (String(item.id) === String(selectedOverlay.id)) {
+                                return {
+                                  ...item,
+                                  macroGroup: {
+                                    ...(item.macroGroup || {}),
+                                    publishedControls: {
+                                      ...(item.macroGroup?.publishedControls || {}),
+                                      macroGlowBoost: nextGlow,
+                                    },
+                                  },
+                                };
+                              }
+                              if (memberIds.includes(String(item.id))) {
+                                return {
+                                  ...item,
+                                  glow: {
+                                    color: "#22d3ee",
+                                    radius: 18,
+                                    ...(item.glow || {}),
+                                    enabled: nextGlow > 0.01,
+                                    intensity: nextGlow,
+                                  },
+                                };
+                              }
+                              return item;
+                            })
+                          );
+                        }}
+                      />
+                    </label>
+                    <label className="ap-flow-field">
+                      <span>Macro Blend Mode</span>
+                      <select
+                        aria-label="Macro Blend Mode"
+                        data-testid="flow-macro-blend-select"
+                        value={selectedOverlay.macroGroup?.publishedControls?.macroBlendMode || "normal"}
+                        onChange={e => {
+                          const nextBlend = e.target.value || "normal";
+                          const memberIds = selectedOverlay.macroGroup?.memberIds || [];
+                          emitOverlays?.(
+                            overlays.map(item => {
+                              if (String(item.id) === String(selectedOverlay.id)) {
+                                return {
+                                  ...item,
+                                  blendMode: nextBlend,
+                                  macroGroup: {
+                                    ...(item.macroGroup || {}),
+                                    publishedControls: {
+                                      ...(item.macroGroup?.publishedControls || {}),
+                                      macroBlendMode: nextBlend,
+                                    },
+                                  },
+                                };
+                              }
+                              if (memberIds.includes(String(item.id))) {
+                                return { ...item, blendMode: nextBlend };
+                              }
+                              return item;
+                            })
+                          );
+                        }}
+                      >
+                        {["normal", "screen", "multiply", "overlay", "lighten"].map(mode => (
+                          <option key={mode} value={mode}>{mode}</option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
                 </div>
               )}
 
@@ -3562,10 +3686,12 @@ export default function StudioNodeFlow({
               {/* ColorCorrector Controls */}
               {selectedNode.kind === "ColorCorrector" && (
                 <div className="ap-flow-inspector-controls" data-testid="flow-color-grade-suite">
-                  {/* Live Broadcast Color Scopes (Waveform / RGB Parade / Vectorscope) */}
+                  {/* Live footage or reference chart scopes (Waveform / RGB Parade / Vectorscope) */}
                   <div className="ap-flow-grade-subcard" data-testid="flow-color-scopes-card">
                     <div className="ap-flow-vector-editor-head">
-                      <span>Broadcast Color Scopes</span>
+                      <span data-scope-source={liveVideoFrameBytes ? "footage" : "reference"}>
+                        {liveVideoFrameBytes ? "Live footage scopes" : "Reference chart scopes"}
+                      </span>
                       <div style={{ display: "flex", gap: 4 }}>
                         {[
                           { id: "waveform", label: "Waveform" },
@@ -3589,7 +3715,8 @@ export default function StudioNodeFlow({
                       className="ap-flow-scope-svg"
                       data-testid="flow-color-scope-svg"
                       data-scope-mode={scopeMode}
-                      aria-label={`Broadcast ${scopeMode} scope`}
+                      data-scope-source={liveVideoFrameBytes ? "footage" : "reference"}
+                      aria-label={`${liveVideoFrameBytes ? "Live footage" : "Reference chart"} ${scopeMode} scope`}
                     >
                       <rect x="0" y="0" width="120" height="68" fill="#060b16" rx="4" />
                       {scopeMode === "waveform" && (
@@ -4278,24 +4405,13 @@ export default function StudioNodeFlow({
                           data-testid="flow-cst-profile-select"
                           value={resolvedAdvancedColor.cameraProfile || "rec709"}
                           onChange={e => {
-                            const profileId = e.target.value;
-                            if (!profileId || profileId === "rec709") {
-                              updateAdvancedColorPatch({
-                                cameraProfile: "rec709",
-                                lut: null,
-                                lutData: null,
-                                lutName: "",
-                                lutPresetId: "",
-                              });
-                              return;
-                            }
-                            const cube = buildColorSpaceTransformCube(profileId, "rec709", 17);
+                            const profileId = e.target.value || "rec709";
+                            const hasLegacyCstOnlyLut = String(resolvedAdvancedColor.lutPresetId || "").startsWith("cst:");
                             updateAdvancedColorPatch({
                               cameraProfile: profileId,
-                              lut: cube,
-                              lutData: cube,
-                              lutName: `${cube.title}.cube`,
-                              lutPresetId: cube.presetId,
+                              ...(hasLegacyCstOnlyLut
+                                ? { lut: null, lutData: null, lutName: "", lutPresetId: "" }
+                                : {}),
                             });
                           }}
                         >

@@ -3,7 +3,7 @@ import { validateStudioMediaColorize } from './studioMediaColorize';
 import { validateStudioParentGraph, validateStudioTrackMattes, validateStudioMotionDrivers } from './studioCompRigging';
 import { connectNodeFlowPorts, deriveNodeFlowGraph } from './studioNodeFlow';
 import { validateStudioPerspectiveLayer, PERSPECTIVE_LEFT } from './studioPerspective';
-import { validateStudioTextAnimation } from './studioTextAnimator';
+import { buildStudioTextAnimatorPreset, validateStudioTextAnimation, validateStudioTextAnimator } from './studioTextAnimator';
 import { reconcileStudioDocument } from './studioProjectDocument';
 import { compileStudioCompositionForRender, compileStudioFinishForRender } from './studioRenderCompiler';
 import { buildStudioGraphicsPackage } from './studioGraphicsPackage';
@@ -11,6 +11,16 @@ import { studioMotionPropertiesForTarget } from './studioMotionProperties';
 import { validateSpatialCurve } from './studioAutomation';
 import { validateStudioGroupComposite } from './studioGroups';
 import { buildProceduralColorCube } from './studioColorCube';
+import {
+  DEAD_CONTENT_REVITALIZER_PRESETS,
+  HSL_QUALIFIER_PRESETS,
+  POWER_WINDOW_PRESETS,
+} from './studioColorScience';
+import {
+  applyBRollAudioCutPreset,
+  applyBRollLayoutPreset,
+  applyBRollLookPolishPreset,
+} from './studioBRollPowerhouse';
 import { buildBeatSyncedGradePulses, normalizeFinishKeyframes } from './studioFinishKeyframes';
 import { STUDIO_EXPORT_BLEND_MODES } from './studioBlendModes';
 import { normalizeStudio3DScene } from './threeD/studio3DModel';
@@ -59,7 +69,7 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
     return legacy[property] || [field.min, field.max];
   };
   for (const action of plan.actions) {
-    only(action, ['type', 'id', 'name', 'startTime', 'duration', 'transform', 'text', 'sourceMediaId', 'sourceStart', 'mediaFit', 'perspective', 'mask', 'motionDrivers', 'targetId', 'parentId', 'matteSourceId', 'mode', 'keys', 'grade', 'advancedColor', 'beatSyncPulses', 'beats', 'beforeId', 'property', 'sourceId', 'port', 'driver', 'style', 'scene']);
+    only(action, ['type', 'id', 'name', 'startTime', 'duration', 'transform', 'text', 'sourceMediaId', 'sourceStart', 'mediaFit', 'perspective', 'mask', 'motionDrivers', 'targetId', 'parentId', 'matteSourceId', 'mode', 'keys', 'grade', 'advancedColor', 'beatSyncPulses', 'beats', 'beforeId', 'property', 'sourceId', 'port', 'driver', 'style', 'scene', 'bRollLayoutPreset', 'bRollAudioPreset', 'bRollLookPreset', 'motionBlur', 'textAnimator', 'textAnimatorPreset', 'textProgress', 'color', 'fontWeight', 'textAlign', 'strokeColor', 'strokeWidth', 'width']);
     const type = action.type;
     if (type === 'three_d_scene') {
       string(action.id); string(action.name, 100);
@@ -80,9 +90,13 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
     }
     if (type === 'finish_grade') {
       const grade = action.grade || {};
-      only(grade, ['preset', 'precisionGrade', 'exposureStops', 'brightness', 'contrast', 'saturation', 'lift', 'gamma', 'gain', 'temperature', 'tint', 'vignette', 'clarity']);
+      only(grade, ['preset', 'precisionGrade', 'exposureStops', 'brightness', 'contrast', 'saturation', 'lift', 'gamma', 'gain', 'temperature', 'tint', 'vignette', 'clarity', 'dehaze', 'shadowRecovery', 'highlightRollOff', 'vibrance', 'skinToneProtect', 'sharpness', 'revitalizerPresetId']);
+      const revivalPreset = grade.revitalizerPresetId && DEAD_CONTENT_REVITALIZER_PRESETS[grade.revitalizerPresetId]
+        ? (({ id: _id, label: _label, icon: _icon, description: _desc, ...fields }) => fields)(DEAD_CONTENT_REVITALIZER_PRESETS[grade.revitalizerPresetId])
+        : {};
       const nextFinishFx = {
         ...(snapshot.finishFx || {}),
+        ...revivalPreset,
         ...grade,
         precisionGrade: grade.precisionGrade !== false,
       };
@@ -91,6 +105,16 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
         const adv = action.advancedColor;
         const lutPresetId = typeof adv.lutPresetId === 'string' ? adv.lutPresetId : '';
         const lut = adv.lut || (lutPresetId ? buildProceduralColorCube(lutPresetId, 17) : null);
+        const resolvedQualifier = adv.qualifierPresetId && HSL_QUALIFIER_PRESETS[adv.qualifierPresetId]
+          ? { ...HSL_QUALIFIER_PRESETS[adv.qualifierPresetId], ...(adv.qualifier || {}), enabled: true }
+          : adv.qualifier && typeof adv.qualifier === 'object'
+            ? { ...adv.qualifier }
+            : null;
+        const resolvedPowerWindow = adv.powerWindowPresetId && POWER_WINDOW_PRESETS[adv.powerWindowPresetId]
+          ? { ...POWER_WINDOW_PRESETS[adv.powerWindowPresetId], ...(adv.powerWindow || {}), enabled: true }
+          : adv.powerWindow && typeof adv.powerWindow === 'object'
+            ? { ...adv.powerWindow }
+            : null;
         nextAdvancedColor = {
           curve: {
             shadows: finite(adv.curve?.shadows ?? 0, -0.45, 0.45),
@@ -107,8 +131,12 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
           lutPresetId,
           lutName: lutPresetId ? `${lutPresetId}.cube` : (adv.lutName || ''),
           lutIntensity: finite(adv.lutIntensity ?? 0.85, 0, 1),
+          ...(resolvedQualifier ? { qualifier: resolvedQualifier } : {}),
+          ...(resolvedPowerWindow ? { powerWindow: resolvedPowerWindow } : {}),
         };
         nextFinishFx.advancedColor = nextAdvancedColor;
+        if (resolvedQualifier) nextFinishFx.qualifier = resolvedQualifier;
+        if (resolvedPowerWindow) nextFinishFx.powerWindow = resolvedPowerWindow;
       }
       snapshot = {
         ...snapshot,
@@ -129,8 +157,8 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
       if (startTime + length > duration + 1 / 90000) throw Error('Scene layer extends past the programme.');
       const id = createId('scene'); ids.set(action.id, id);
       if (type === 'adjustment') {
-        only(action.grade || {}, ['exposureStops', 'brightness', 'contrast', 'saturation', 'lift', 'gamma', 'gain', 'temperature', 'tint', 'vignette']);
-        const limits = { exposureStops: [-2, 2], brightness: [.65, 1.4], contrast: [.65, 1.75], saturation: [0, 1.8], lift: [-0.5, 0.5], gamma: [0.35, 2.2], gain: [0.4, 2.0], temperature: [-1, 1], tint: [-1, 1], vignette: [0, 0.85] };
+        only(action.grade || {}, ['exposureStops', 'brightness', 'contrast', 'saturation', 'lift', 'gamma', 'gain', 'temperature', 'tint', 'vignette', 'dehaze', 'clarity', 'shadowRecovery', 'highlightRollOff', 'vibrance', 'skinToneProtect']);
+        const limits = { exposureStops: [-2, 2], brightness: [.65, 1.4], contrast: [.65, 1.75], saturation: [0, 1.8], lift: [-0.5, 0.5], gamma: [0.35, 2.2], gain: [0.4, 2.0], temperature: [-1, 1], tint: [-1, 1], vignette: [0, 0.85], dehaze: [0, 1], clarity: [0, 1], shadowRecovery: [0, 1], highlightRollOff: [0, 1], vibrance: [-1, 1], skinToneProtect: [0, 1] };
         Object.entries(action.grade || {}).forEach(([key, value]) => finite(value, ...limits[key]));
         adjustmentLayers.push({ id, name: action.name, startTime, duration: length, enabled: true, intensity: 100, opacity: 1, finishFx: { ...action.grade } });
         continue;
@@ -139,8 +167,28 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
         anchorX: 50, anchorY: 50, shadow: 'none', blendMode: 'normal', animation: { enter: 'none', exit: 'none' },
         ...(action.motionDrivers && typeof action.motionDrivers === 'object' ? { motionDrivers: JSON.parse(JSON.stringify(action.motionDrivers)) } : {}) };
       if (type === 'null') Object.assign(layer, { type: 'text', text: '', isNullRig: true });
-      if (type === 'title') Object.assign(layer, { type: 'text', text: string(action.text, 180), bg: 'transparent',
-        color: '#f1ede4', fontFamily: 'Inter', fontWeight: 800, width: 60, textAlign: 'center' });
+      if (type === 'title') {
+        const titleColor = action.color !== undefined ? string(action.color, 16) : '#f1ede4';
+        if (!/^#[a-f0-9]{6}$/i.test(titleColor)) throw Error('Use a six-digit hex title colour.');
+        const fontWeight = action.fontWeight !== undefined ? action.fontWeight : 800;
+        if (![400, 600, 800, 900].includes(fontWeight)) throw Error('Choose a supported title font weight.');
+        const textAlign = action.textAlign !== undefined ? action.textAlign : 'center';
+        if (!['left', 'center', 'right'].includes(textAlign)) throw Error('Choose a supported title alignment.');
+        const width = action.width !== undefined ? finite(action.width, 15, 90) : 60;
+        Object.assign(layer, { type: 'text', text: string(action.text, 180), bg: 'transparent',
+          color: titleColor, fontFamily: 'Inter', fontWeight, width, textAlign });
+        if (action.strokeColor !== undefined) {
+          if (!/^#[a-f0-9]{6}$/i.test(action.strokeColor || '')) throw Error('Use a six-digit hex title stroke colour.');
+          layer.strokeColor = action.strokeColor;
+        }
+        if (action.strokeWidth !== undefined) layer.strokeWidth = finite(action.strokeWidth, 0, 8);
+        if (action.textAnimatorPreset || action.textAnimator) {
+          layer.textAnimator = action.textAnimatorPreset
+            ? buildStudioTextAnimatorPreset(action.textAnimatorPreset)
+            : validateStudioTextAnimator({ ...action.textAnimator });
+          layer.textProgress = finite(action.textProgress ?? 0, 0, 100);
+        }
+      }
       if (type === 'media_plane') {
         if (action.mediaFit !== undefined && !['contain', 'cover'].includes(action.mediaFit))
           throw Error('Scene media fit must be contain or cover.');
@@ -154,7 +202,28 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
           bRollMode: 'pip', mediaFit: action.mediaFit || 'contain', frameShape: 'edge', borderRadius: 0, volume: 0, muted: true,
           layerShadow: {enabled: true, color: '#000000', opacity: .35, blur: 12, x: 0, y: 16},
           ...(action.perspective ? { perspective: action.perspective } : {}) });
-        if (action.mask) {
+        if (action.bRollLayoutPreset) {
+          const layoutUpdated = applyBRollLayoutPreset(layer, action.bRollLayoutPreset);
+          Object.assign(layer, layoutUpdated);
+        }
+        if (action.bRollLookPreset) {
+          const lookUpdated = applyBRollLookPolishPreset(layer, action.bRollLookPreset);
+          Object.assign(layer, lookUpdated);
+        }
+        if (action.bRollAudioPreset) {
+          const audioUpdated = applyBRollAudioCutPreset(layer, action.bRollAudioPreset, duration);
+          delete audioUpdated.mixAudio;
+          Object.assign(layer, audioUpdated);
+        }
+        if (action.motionBlur && typeof action.motionBlur === 'object') {
+          only(action.motionBlur, ['enabled', 'samples', 'shutter']);
+          layer.motionBlur = {
+            enabled: Boolean(action.motionBlur.enabled),
+            samples: finite(action.motionBlur.samples ?? 6, 1, 16),
+            shutter: finite(action.motionBlur.shutter ?? 0.5, 0, 1),
+          };
+        }
+        if (action.mask && (!action.bRollLayoutPreset || action.mask.enabled)) {
           validateStudioGroupComposite({ mask: action.mask });
           layer.mask = JSON.parse(JSON.stringify(action.mask));
           layer.layerShadow = { enabled: false };

@@ -1516,8 +1516,10 @@ Requests a final movie and downloads the exact completed output after applicable
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Open Export in a project with owned sources. Choose resolution, frame rate, video codec, quality and AAC bitrate. Match first source sets the output to the first retained picture source’s nominal rate.
+2. The verified first-source rate also drives timeline SMPTE timecode and the desktop handoff. If the source rate is unavailable, choose a fixed rate to use exact frame navigation and export the desktop timeline.
+3. Open Desktop NLE handoff in Export for OTIO, the primary-cut EDL, and separate SRT or VTT files. Review the translation checklist for effects and media that need attention in the desktop project.
+4. Review the complete movie with sound after rendering. Download the completed file.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
@@ -1525,6 +1527,8 @@ Requests a final movie and downloads the exact completed output after applicable
 
 **Limits**
 
+- Match first source uses a constant output rate. Variable-rate timestamp preservation still requires qualification.
+- Studio delivers Rec.709 SDR MP4 with AAC when audio is present. Video compression follows the selected Quality preset and byte size varies with the footage.
 - This dated development snapshot does not establish professional or production readiness.
 - The eight-second native 24 fps clock regression is verified at 192 frames. This bounded result does not qualify every fractional source duration, retime, hook, caption, picture or audio combination.
 
@@ -1565,7 +1569,7 @@ Saves canonical project assets, occurrences, layers, keys and audio; reopening r
 
 - This dated development snapshot does not establish professional or production readiness.
 - Opening an unchanged source occurrence preserves its legacy duration metadata and matching completed-export identity; source-range edits create a new revision.
-- 3D parameter schema v4 retains cinematic scene settings and verified local export identity through canonical JSON. Export access URLs are transport-only and reattach only to the same job/hash/revision; older layers retain their versioned migration behavior. This does not enable cloud cinematic execution.
+- Saved cinematic scenes retain camera, material, lighting and timing settings. After changing a scene, render its current revision before assembling the programme. Cloud cinematic execution remains unavailable.
 
 **Common errors**
 

@@ -1,4 +1,5 @@
 import {
+  buildColorSpaceTransformCube,
   evaluatePixelRevitalizer,
   evaluateSelectiveColorTransform,
 } from "./studioColorScience";
@@ -139,7 +140,9 @@ export function hasRevitalizerGrade(rev = {}) {
 export function hasAdvancedGrade(advanced = {}) {
   const lutObj = advanced.lutData || advanced.lut;
   const intensity = Number(advanced.lutIntensity ?? 100);
+  const hasCst = Boolean(advanced.cameraProfile && advanced.cameraProfile !== "rec709");
   return (
+    hasCst ||
     (!!lutObj && intensity > 0) ||
     [...Object.values(advanced.curve || {}), ...Object.values(advanced.hsl || {})].some(
       value => Number(value) !== 0
@@ -166,11 +169,21 @@ export function buildAdvancedColorCube(advanced = {}, size = 33) {
   const cube = { size, data: [] }, imported = advanced.lutData || advanced.lut;
   const rawIntensity = Number(advanced.lutIntensity ?? 100);
   const strength = imported ? clamp(rawIntensity / 100) : 0;
+  const cameraProfile = String(advanced.cameraProfile || "rec709").trim().toLowerCase();
+  const isLegacyCstLut = String(advanced.lutPresetId || "").startsWith("cst:");
+  const cameraCstCube =
+    cameraProfile && cameraProfile !== "rec709" && !isLegacyCstLut
+      ? buildColorSpaceTransformCube(cameraProfile, "rec709", 17)
+      : null;
   const hasRev = hasRevitalizerGrade(advanced.revitalizer);
   const hasQual = Boolean(advanced.qualifier?.enabled);
 
   for (let blue = 0; blue < size; blue++) for (let green = 0; green < size; green++) for (let red = 0; red < size; red++) {
-    let rgb = [curve(red/(size-1)), curve(green/(size-1)), curve(blue/(size-1))];
+    let baseRgb = [red / (size - 1), green / (size - 1), blue / (size - 1)];
+    if (cameraCstCube) {
+      baseRgb = sampleColorCube(cameraCstCube, baseRgb[0], baseRgb[1], baseRgb[2]);
+    }
+    let rgb = [curve(baseRgb[0]), curve(baseRgb[1]), curve(baseRgb[2])];
     const high = Math.max(...rgb), low = Math.min(...rgb), delta = high-low;
     let light = (high+low)/2, sat = delta === 0 ? 0 : delta/(1-Math.abs(2*light-1));
     let angle = delta === 0 ? 0 : high === rgb[0] ? ((rgb[1]-rgb[2])/delta)%6 : high === rgb[1] ? (rgb[2]-rgb[0])/delta+2 : (rgb[0]-rgb[1])/delta+4;

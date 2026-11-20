@@ -34,3 +34,33 @@ test("sound automation plots and edits the real bus curve without a decorative w
   fireEvent.change(screen.getByLabelText('Selected audio key value'),{target:{value:'250'}});
   expect(update).toHaveBeenLastCalledWith('b',{value:200});
 });
+
+test("podcast and broadcast voice repair presets align with AUDIO_MASTER_PRESETS loudness targets", () => {
+  const onUpdate = jest.fn();
+  render(
+    <AudioRestorationPanel
+      settings={{ enabled: true, preset: "natural", eq: { low: 0, mid: 0, high: 0 } }}
+      onUpdate={onUpdate}
+      source="originalAudio"
+      onSourceChange={jest.fn()}
+      keyframes={{ originalAudio: [] }}
+      playhead={0}
+      onAddKeyframe={jest.fn()}
+      onUpdateKeyframe={jest.fn()}
+      onRemoveKeyframe={jest.fn()}
+      onSeek={jest.fn()}
+      recording={false}
+      onToggleRecording={jest.fn()}
+      voiceoverCount={0}
+    />
+  );
+
+  fireEvent.click(screen.getByRole("button", { name: "podcast" }));
+  expect(onUpdate).toHaveBeenCalledWith("loudness", -16);
+  expect(onUpdate).toHaveBeenCalledWith("limiter", -1);
+
+  onUpdate.mockClear();
+  fireEvent.click(screen.getByRole("button", { name: "broadcast" }));
+  expect(onUpdate).toHaveBeenCalledWith("loudness", -23);
+  expect(onUpdate).toHaveBeenCalledWith("limiter", -1);
+});

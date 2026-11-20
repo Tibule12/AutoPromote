@@ -600,12 +600,18 @@ def generate_studio_ass_captions(
                             sum(len(word) for word in rendered_words[:index]) + index - 1 - target_chars
                         ),
                     )
+                prev_end = float(group[0]["start"])
                 for word_index, word in enumerate(group):
-                    w_dur_cs = max(1, int((word["end"] - word["start"]) * 100))
+                    w_start = max(prev_end, float(word["start"]))
+                    w_end = max(w_start + 0.01, float(word["end"]))
+                    gap_cs = max(0, int(round((w_start - prev_end) * 100)))
+                    w_dur_cs = max(1, int(round((w_end - w_start) * 100)))
+                    prev_end = w_end
                     word_text = caption_word(word.get("word", ""))
                     if word_text:
                         spacer = "" if not text_parts else "\\N" if word_index == break_index else " "
-                        text_parts.append(f"{spacer}{{\\kf{w_dur_cs}}}{word_text}")
+                        gap_tag = f"{{\\k{gap_cs}}}" if gap_cs > 0 else ""
+                        text_parts.append(f"{spacer}{gap_tag}{{\\kf{w_dur_cs}}}{word_text}")
                 if text_parts:
                     line = "".join(text_parts)
                     ass_lines.append(

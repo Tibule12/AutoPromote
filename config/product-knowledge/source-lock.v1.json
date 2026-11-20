@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "reviewer": "Codex",
-  "reason": "Keep public help focused on editable settings and render requirements; retain technical artifact binding in the implementation report.",
-  "reviewed_at": "2026-11-18T13:54:33.357Z",
-  "catalog_sha256": "727a1d5742f68437b8e6c088f37fdcd1b80417b1ca5a0e571d6301a3c681eb57",
+  "reviewer": "Antigravity",
+  "reason": "Merge origin/main #544 with VoiceOverGuide update and pro-studio engine sprints",
+  "reviewed_at": "2026-11-20T15:31:42.800Z",
+  "catalog_sha256": "e0363dbe27ea51b3744e1026e7b9270d40386882699e8bcd4a2ffab3a036086a",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -43,7 +43,7 @@
     },
     {
       "path": "frontend/src/UserDashboardTabs/FindViralClipsPanel.js",
-      "sha256": "44281e7e7e49170dad9866930a99236b2e6ab603fc33300f61b271c533c0f7db"
+      "sha256": "d0c03a1ca7b353b3be9d6ba1bc768e39ac02dc96f7fbbaa3139754c8832e2fbc"
     },
     {
       "path": "frontend/src/UserDashboardTabs/SchedulesPanel.js",
@@ -51,7 +51,7 @@
     },
     {
       "path": "frontend/src/UserDashboardTabs/ViralClipStudioPanel.js",
-      "sha256": "115d04d5c131e489b3bffa70ecc30a563c3da11a731a1d5ce27e9ff36638b91d"
+      "sha256": "4a76f7beeb02255c2ce4b2242fe6e43d7e4c51da92ef98ef8887475317f2d3c8"
     },
     {
       "path": "frontend/src/UserDashboard_full.js",
@@ -59,7 +59,7 @@
     },
     {
       "path": "frontend/src/WelcomePage.js",
-      "sha256": "26419b950ed262d46a08e9fea1ecd5d4b83d4ee93c39fbc05f97f0cd16edea22"
+      "sha256": "5b4d3cda6890ac109ee6b39995321a343ee95420b51badc9688aa01473cc399f"
     },
     {
       "path": "frontend/src/__tests__/UnifiedPublisher.release.test.js",
@@ -67,7 +67,7 @@
     },
     {
       "path": "frontend/src/components/MultiCamCombiner.js",
-      "sha256": "9a28d50cd0402f9131fcf2bd1701633deb77bf863940654179a93d77fb9646f4"
+      "sha256": "728df2d7f4c4301a9b17513fe54fe6a275dae665e6736259c1ba6d54aee27e00"
     },
     {
       "path": "frontend/src/components/PlatformIcon.js",
@@ -87,7 +87,7 @@
     },
     {
       "path": "frontend/src/components/StudioAdvancedInspectors.js",
-      "sha256": "29e4ad8e8165cdf098b975a5db6fb0c7c3f380b88b350bd65a07c6ba18738343"
+      "sha256": "e0d73efef79ad4a09c5fbd7102779af0d0e6b6b94499502b03ccd2d02feb206f"
     },
     {
       "path": "frontend/src/components/StudioAnimatedText.js",
@@ -115,7 +115,7 @@
     },
     {
       "path": "frontend/src/components/StudioGroupInspector.js",
-      "sha256": "5fd1eb4cde2f0c164f72855cc0dcb7a3c2cecf84e24ec01b2516525bcc8652c2"
+      "sha256": "f3a813eecdb66918d8ff50e4c5d7059dce31e1297d5f5c37f2b7e8649b9c16a5"
     },
     {
       "path": "frontend/src/components/StudioGroupPreview.js",
@@ -127,7 +127,7 @@
     },
     {
       "path": "frontend/src/components/StudioGroupTimingInspector.js",
-      "sha256": "a35263f30eac29cb84c35e4d0dd629fc98b960ad29b17dc5ad93cfc412bd3e94"
+      "sha256": "e41dfefe8ccff1651ac48435cf75f19de01dc6f35416b6812e558adab321ccfd"
     },
     {
       "path": "frontend/src/components/StudioKeyframeActions.js",
@@ -171,7 +171,7 @@
     },
     {
       "path": "frontend/src/components/StudioProTimeline.js",
-      "sha256": "a680b28eb56b11722dd116b6c84bf1905fa70d43eab0233736dca8e4066fe514"
+      "sha256": "794871ff89fd04af88e572df2a825d9ef55dc19ca03d01f5c66c7c89421e585f"
     },
     {
       "path": "frontend/src/components/StudioSubjectMaskControls.js",
@@ -195,15 +195,15 @@
     },
     {
       "path": "frontend/src/components/VideoEditor.js",
-      "sha256": "dea8516e3518637f78cd4f81342796eb0403c21526ef36cd5955739bdaeda214"
+      "sha256": "dae18b1a55e22fe250d820cf9794aab4ebac867103bd21720db113fa444099ba"
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "5af26c1017b867314e9154de1499aed47f74a0c4d46110a087e8d0f72c219e0a"
+      "sha256": "9c16e63d88228d5f1b9de0eaf5facaeea4b1d19e03a7ee5e7989aed65ed3573d"
     },
     {
       "path": "frontend/src/components/ViralScanner.js",
-      "sha256": "50164d32c6615929a56da4f72b387155cf004edca45c1830c1f60253d006122c"
+      "sha256": "a1d1ebae962f0f16bd795d911d8dcbb9a3bc711c0aa50e63bd974e0f674b3030"
     },
     {
       "path": "frontend/src/components/landing/StudioWelcomePage.js",
@@ -279,7 +279,7 @@
     },
     {
       "path": "frontend/src/components/studioGroupTiming.js",
-      "sha256": "90dc50c41af72cdb1882b3f4f602a5ff1265be5263fd9a857f1f89ca57c9148f"
+      "sha256": "9ccfdcab50f284626aad052afecef1dbc4d6438126351fb6fcb209150a89e6e8"
     },
     {
       "path": "frontend/src/components/studioGroups.js",
@@ -347,7 +347,7 @@
     },
     {
       "path": "frontend/src/components/studioPreviewBudget.js",
-      "sha256": "6b7d44b58aa1c297075e6b1ec279a365f0919e6a47a994b20069b49164769fdb"
+      "sha256": "61e01d0c70111549dd214cc6a48e53c644767257f963efcd0ae2279e9e6c7270"
     },
     {
       "path": "frontend/src/components/studioProjectAspect.js",
@@ -355,11 +355,11 @@
     },
     {
       "path": "frontend/src/components/studioProjectDocument.js",
-      "sha256": "b65a2e8cb06aba08d687f4e549b4c25783fc9848815b1f2d2b196b922b1a6d71"
+      "sha256": "63263bb612337c95c3ce77c8ebc6c27046cd5ea814d9aea1488a7004ce478624"
     },
     {
       "path": "frontend/src/components/studioRenderCompiler.js",
-      "sha256": "dc9f237c6aa30d10f8107923e0c7826b670a637fa390ebd66e74f98de02765f7"
+      "sha256": "c021548dc13440a3cbd6175ae67ec1f501db43ef8717a9e19582323039789c40"
     },
     {
       "path": "frontend/src/components/studioSourcePreview.js",
@@ -423,7 +423,7 @@
     },
     {
       "path": "frontend/src/components/viralRenderPayload.js",
-      "sha256": "076e580d55f02674271b8c213251014f7dc803dc3d66f8a545cce44c62ea9ab4"
+      "sha256": "a8229495e125d999f42de6b740a42c01fe9c9de79f0a61000572d4d2ac18d1e5"
     },
     {
       "path": "frontend/src/docs/content.js",
@@ -471,11 +471,11 @@
     },
     {
       "path": "python_media_worker/main_media_server.py",
-      "sha256": "0281b09d6c2fed006da4c3597bd72baaccbf8a3965c13ae4284ffde8b1d239f0"
+      "sha256": "170f9af3dcf08fcfe388f366f6f467c10302eb6f1bdc63d88fe1be1e62c7715a"
     },
     {
       "path": "python_media_worker/studio_audio.py",
-      "sha256": "a09be348dd9daf72c88e4924b7fd1e2f9f8cccdce5619009061c4b725a42697f"
+      "sha256": "98c3b1d93d0233901e39ab83fc775c4ac13b49b20b2363271ddf15a52c5e118c"
     },
     {
       "path": "python_media_worker/studio_broll.py",
@@ -527,7 +527,7 @@
     },
     {
       "path": "python_media_worker/viral_render_contract.py",
-      "sha256": "640bb8ab74e69c7afbafba29afef8c97f5e62c8b46158f93a0ca8ebdef520265"
+      "sha256": "d54fd0d332584d00b58887194f56569de1234126aab6403bc10daec62c91288a"
     },
     {
       "path": "reports/footer-pages-20261021/README.md",
@@ -731,7 +731,7 @@
     },
     {
       "path": "src/services/studioSourceFrameService.js",
-      "sha256": "8828aaf7f434d82b54e59a0600020b12c218266c9bd1ff76da0fb66c41eeb5b7"
+      "sha256": "3f84d9391335175d9a177f433dd7c8580891c240cc0473e9142c8a1efc3b4bdd"
     },
     {
       "path": "src/services/studioSourceService.js",
@@ -755,11 +755,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "b3826284494356fdd3906a78247c414c59c1e382edda450a2b8a0ea8490bac40"
+      "sha256": "df4abf7db9f34039266ac0ed3f20045c23edc25a6e26d34af6ce698fe9cdf6a2"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "2eb728f1877902a3dd4839ff818bb58eae3740bca722f10844f08fb988eb2687"
+      "sha256": "759a234d27a116eb3dce38f3bedd1f9494d84303ce3cdb0af037b5976b7e26a3"
     },
     {
       "path": "worker.js",

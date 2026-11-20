@@ -203,6 +203,23 @@ test("compileStudioFinishForRender forwards enabled secondary powerWindow and hs
   const finish = compileStudioFinishForRender(document);
   expect(finish.power_window).toMatchObject({ enabled: true, x: 0.42, invert: true, rotation: 0.35 });
   expect(finish.hsl_qualifier).toMatchObject({ enabled: true, hueCenter: 0.08, saturation: 1.25 });
+  // Ensure hsl_qualifier is not double-baked into color_cube when only qualifier is active
+  expect(finish.color_cube).toBeNull();
+});
+
+test("compileStudioFinishForRender bakes Finish Rack revitalizer sliders into export color_cube", () => {
+  const snapshot = visualProject();
+  snapshot.finishFx = {
+    ...snapshot.finishFx,
+    dehaze: 0.35,
+    shadowRecovery: 0.45,
+    vibrance: 0.25,
+    revitalizerPresetId: "low_light_rescue",
+  };
+  const finish = compileStudioFinishForRender(makeDocument(snapshot));
+  expect(finish.color_cube).not.toBeNull();
+  expect(finish.color_cube.size).toBe(33);
+  expect(finish.color.revitalizerPresetId).toBe("low_light_rescue");
 });
 
 test("compileStudioFinishForRender forwards optical VFX texture controls", () => {
@@ -219,4 +236,39 @@ test("compileStudioFinishForRender forwards optical VFX texture controls", () =>
     anamorphic_flare: 0.6,
     lens_blur: 0.3,
   });
+});
+
+test("Camera Input CST stacks cleanly before a creative .cube LUT in buildAdvancedColorCube", () => {
+  const { buildAdvancedColorCube, sampleColorCube } = require("../studioColorCube");
+  const creativeIdentityScaled = {
+    size: 2,
+    domainMin: [0, 0, 0],
+    domainMax: [1, 1, 1],
+    data: [
+      0, 0, 0, 0.8, 0, 0,
+      0, 1, 0, 0.8, 1, 0,
+      0, 0, 1, 0.8, 0, 1,
+      0, 1, 1, 0.8, 1, 1,
+    ],
+  };
+  const withoutCst = buildAdvancedColorCube({
+    cameraProfile: "rec709",
+    lutPresetId: "creative_dim_red",
+    lutData: creativeIdentityScaled,
+    lutIntensity: 100,
+  }, 9);
+  const withSlog3Cst = buildAdvancedColorCube({
+    cameraProfile: "sony_slog3",
+    lutPresetId: "creative_dim_red",
+    lutData: creativeIdentityScaled,
+    lutIntensity: 100,
+  }, 9);
+  expect(withoutCst).not.toBeNull();
+  expect(withSlog3Cst).not.toBeNull();
+  // Sony S-Log3 expands flat log mid-tones (~0.41) differently from linear Rec.709 BEFORE creative LUT
+  const pRec = sampleColorCube(withoutCst, 0.25, 0.5, 0.5);
+  const pSlog = sampleColorCube(withSlog3Cst, 0.25, 0.5, 0.5);
+  expect(Math.abs(pRec[0] - pSlog[0]) + Math.abs(pRec[1] - pSlog[1])).toBeGreaterThan(0.05);
+  // And creative LUT's red scaling (<= 0.8) is preserved on top of CST
+  expect(sampleColorCube(withSlog3Cst, 1, 0.5, 0.5)[0]).toBeLessThanOrEqual(0.85);
 });

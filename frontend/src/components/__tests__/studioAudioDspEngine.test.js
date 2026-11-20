@@ -1,8 +1,10 @@
 import {
   AUDIO_MASTER_PRESETS,
+  analyzeAudioCompliance,
   computeNormalizationGainDb,
   createStudioAudioDspChain,
   detectAudioTransients,
+  equalPowerPanGains,
   measureBufferLufs,
 } from "../studioAudioDspEngine";
 
@@ -111,5 +113,40 @@ describe("studioAudioDspEngine", () => {
     expect(meter.rmsDbfs).toBeCloseTo(-12.0, 0);
     chain.disconnect();
     expect(chain.input.disconnect).toHaveBeenCalled();
+  });
+
+  test("measures per-channel BS.1770 K-weighting and 4x oversampled inter-sample true peak", () => {
+    // 48kHz fs/4 sine (12kHz at 45 deg phase): samples equal +/-0.5, actual analog peak ~0.707 (-3.01 dBTP)
+    const sr = 48000;
+    const len = sr;
+    const monoInterSample = new Float32Array(len);
+    for (let i = 0; i < len; i += 1) {
+      monoInterSample[i] = Math.SQRT1_2 * Math.sin(Math.PI / 4 + (Math.PI / 2) * i);
+    }
+    const meter = measureBufferLufs(monoInterSample, sr, 1);
+    expect(meter.samplePeakDbfs).toBeCloseTo(-6.02, 1);
+    expect(meter.truePeakDbtp).toBeGreaterThan(-3.3);
+    expect(meter.truePeakDbtp).toBeCloseTo(-3.01, 0);
+
+    // Stereo interleaved: L = 1kHz sine @ 0.5, R = 0 -> filter state must stay isolated per channel
+    const monoSine = makeSineBuffer(0.5, 1000, 1.0, sr);
+    const stereoLeftOnly = new Float32Array(monoSine.length * 2);
+    for (let i = 0; i < monoSine.length; i += 1) {
+      stereoLeftOnly[i * 2] = monoSine[i];
+      stereoLeftOnly[i * 2 + 1] = 0;
+    }
+    const monoRes = measureBufferLufs(monoSine, sr, 1);
+    const stereoRes = measureBufferLufs(stereoLeftOnly, sr, 2);
+    expect(Math.abs(stereoRes.integratedLufs - monoRes.integratedLufs)).toBeLessThan(0.05);
+
+    const panLeft = equalPowerPanGains(-100);
+    expect(panLeft.rightFromLeft).toBe(0);
+    expect(panLeft.leftFromLeft).toBeCloseTo(0.7071, 3);
+    const passSpec = analyzeAudioCompliance({ integratedLufs: -15.8, truePeakDbtp: -1.2 }, "podcast");
+    expect(passSpec.compliant).toBe(true);
+    const hotSpec = analyzeAudioCompliance({ integratedLufs: -10, truePeakDbtp: 0.2 }, "podcast");
+    expect(hotSpec.compliant).toBe(false);
+    expect(hotSpec.truePeakCompliant).toBe(false);
+    expect(hotSpec.recommendedGainDb).toBeLessThan(-1);
   });
 });

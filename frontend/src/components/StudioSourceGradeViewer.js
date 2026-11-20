@@ -5,7 +5,7 @@ import {parseStudioMaskPolygon} from './studioMaskGeometry';
 import React, { useLayoutEffect, useMemo, useRef } from 'react';
 import { watchStudioProgrammeFrames } from './studioSourcePreview';
 import { buildPrecisionGrade, applyPrecisionGrade, applyPrecisionVignette } from './studioPrecisionGrade';
-import { applyColorCube, buildAdvancedColorCube } from './studioColorCube';
+import { applyColorCube, buildAdvancedColorCube, hasRevitalizerGrade } from './studioColorCube';
 import { compileStudioAdjustmentStack } from './studioAdjustmentGrade';
 import { applySelectiveAndRevitalizerGrade } from './studioColorScience';
 import { buildCinematicCssFilter, DEFAULT_CINEMATIC_FX } from '../hooks/useCinematicEffects';
@@ -16,7 +16,15 @@ import { computeColorScopesFromRgba } from './studioColorScopes';
 export default function StudioSourceGradeViewer({ nodeId, videoRef, mapTime, time,
   finishFx, advancedColor, adjustmentLayers, overlays=[], motionKeyframes=[], mainTransform }) {
   const canvas = useRef(null), latest = useRef(null);
-  const cube = useMemo(() => buildAdvancedColorCube(advancedColor || {}), [advancedColor]);
+  const cube = useMemo(
+    () =>
+      buildAdvancedColorCube(
+        advancedColor?.qualifier?.showMatte
+          ? { ...advancedColor, qualifier: null }
+          : advancedColor || {}
+      ),
+    [advancedColor]
+  );
   const stack = useMemo(() => compileStudioAdjustmentStack(adjustmentLayers), [adjustmentLayers]);
   latest.current = { nodeId, mapTime, time, finishFx, advancedColor, cube, stack, overlays, motionKeyframes, mainTransform };
   useLayoutEffect(() => {
@@ -38,7 +46,15 @@ export default function StudioSourceGradeViewer({ nodeId, videoRef, mapTime, tim
         const adv = state.advancedColor || fx.advancedColor || {};
         if (fx.precisionGrade || fx.dehaze || fx.shadowRecovery || fx.vibrance || fx.qualifier?.enabled || fx.powerWindow?.enabled || adv.powerWindow?.enabled || adv.qualifier?.enabled) {
           const pixels = ctx.getImageData(0, 0, out.width, out.height);
-          applyPrecisionGrade(pixels.data, buildPrecisionGrade(fx), out.width, out.height);
+          // When cube already bakes adv.revitalizer / qualifier (non-matte), avoid double-applying them in precision pass.
+          const cubeOwnsRevitalizer = hasRevitalizerGrade(adv.revitalizer);
+          const cubeOwnsQualifier = Boolean(adv.qualifier?.enabled && !adv.qualifier?.showMatte);
+          const precisionFx = {
+            ...fx,
+            ...(cubeOwnsRevitalizer ? { revitalizer: {}, dehaze: 0, shadowRecovery: 0, highlightRollOff: 0, clarity: 0, vibrance: 0 } : {}),
+            ...(cubeOwnsQualifier ? { qualifier: null, advancedColor: { ...(fx.advancedColor || {}), qualifier: null } } : {}),
+          };
+          applyPrecisionGrade(pixels.data, buildPrecisionGrade(precisionFx), out.width, out.height);
           if (adv.powerWindow?.enabled || adv.qualifier?.showMatte) {
             applySelectiveAndRevitalizerGrade(pixels.data, out.width, out.height, {
               qualifier: adv.qualifier?.showMatte ? adv.qualifier : null,

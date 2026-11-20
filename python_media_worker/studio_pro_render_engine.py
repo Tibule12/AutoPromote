@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 import shutil
 import subprocess
+from fractions import Fraction
 from typing import Any, Dict, List, Mapping, Optional
 
 LOUDNESS_STANDARDS: Dict[str, Dict[str, float]] = {
@@ -128,7 +129,12 @@ def build_optical_flow_speed_filter(
 ) -> str:
     """Build video retiming filter with optional motion-compensated optical flow."""
     rate = _clamp(speed_rate, 0.1, 16.0, 1.0)
-    fps = max(15, min(120, int(target_fps or 60)))
+    if isinstance(target_fps, Fraction):
+        if not 1 <= target_fps <= 120:
+            raise ValueError("Unsupported Studio optical flow frame rate")
+        fps = str(target_fps)
+    else:
+        fps = max(15, min(120, int(target_fps or 60)))
     pts_expr = f"setpts={1.0 / rate:.6f}*(PTS-STARTPTS)"
     if optical_flow and rate < 0.99:
         return (
@@ -354,10 +360,11 @@ def write_hsl_qualifier_cube(
     return str(destination)
 
 
-def build_power_window_filter(window: Mapping[str, Any]) -> str:
-    """Build elliptical secondary power window FFmpeg filter matching studioWebGLCompositor.js."""
+def build_power_window_filter(window: Mapping[str, Any], prefix: str = "pw_") -> str:
+    """Build elliptical, rectangular, or linear secondary power window FFmpeg filter."""
     if not window or not window.get("enabled"):
         return ""
+    shape = str(window.get("shape") or "ellipse").strip().lower()
     cx = _clamp(window.get("x", 0.5), 0.0, 1.0, 0.5)
     cy = _clamp(window.get("y", 0.5), 0.0, 1.0, 0.5)
     rx = max(0.02, _clamp(window.get("rx", 0.28), 0.02, 1.5, 0.28))
@@ -368,35 +375,47 @@ def build_power_window_filter(window: Mapping[str, Any]) -> str:
     exposure = _clamp(window.get("exposureStops", 0.0), -2.0, 2.0, 0.0)
     gain = _clamp(window.get("gain", 1.0), 0.2, 2.5, 1.0)
     saturation = _clamp(window.get("saturation", 1.0), 0.0, 2.5, 1.0)
+    temperature = _clamp(window.get("temperature", 0.0), -1.0, 1.0, 0.0)
 
-    scale = round((2.0 ** exposure) * gain, 6)
+    scale = (2.0 ** exposure) * gain
+    r_scale = round(scale * (1.0 + temperature * 0.18), 6)
+    g_scale = round(scale * (1.0 + temperature * 0.02), 6)
+    b_scale = round(scale * max(0.1, 1.0 - temperature * 0.18), 6)
+
     cos_r = math.cos(rot)
     sin_r = math.sin(rot)
+    dx = f"(X/W-{cx:.5f})"
+    dy = f"(Y/H-{cy:.5f})"
     if abs(rot) < 1e-4:
-        dist_expr = f"hypot((X/W-{cx:.5f})/{rx:.5f},(Y/H-{cy:.5f})/{ry:.5f})"
+        ux, vy = dx, dy
     else:
-        dx = f"(X/W-{cx:.5f})"
-        dy = f"(Y/H-{cy:.5f})"
-        dist_expr = (
-            f"hypot((({dx})*{cos_r:.6f}-({dy})*{sin_r:.6f})/{rx:.5f},"
-            f"(({dx})*{sin_r:.6f}+({dy})*{cos_r:.6f})/{ry:.5f})"
-        )
+        ux = f"(({dx})*{cos_r:.6f}-({dy})*{sin_r:.6f})"
+        vy = f"(({dx})*{sin_r:.6f}+({dy})*{cos_r:.6f})"
+
+    if shape in {"rectangle", "rect", "box"}:
+        dist_expr = f"max(abs({ux})/{rx:.5f},abs({vy})/{ry:.5f})"
+    elif shape in {"linear", "gradient"}:
+        # Directional linear sweep from 0 (inside side) -> >1 (outside side)
+        dist_expr = f"(1.0+({ux})/{rx:.5f})"
+    else:
+        dist_expr = f"hypot({ux}/{rx:.5f},{vy}/{ry:.5f})"
+
     lo = 1.0 - feather
     denom = 2.0 * feather
     inside_expr = f"(1-clip(({dist_expr}-{lo:.5f})/{denom:.5f},0,1))"
     mask_expr = f"1-{inside_expr}" if invert else inside_expr
 
     return (
-        f"split=3[pw_base][pw_fx][pw_mask_src];"
-        f"[pw_fx]format=rgb24,lutrgb=r='clip(val*{scale:.6f},0,255)':"
-        f"g='clip(val*{scale:.6f},0,255)':b='clip(val*{scale:.6f},0,255)',"
-        f"hue=s={saturation:.5f}[pw_graded];"
-        f"[pw_mask_src]trim=end_frame=1,format=gray,"
+        f"split=3[{prefix}base][{prefix}fx][{prefix}mask_src];"
+        f"[{prefix}fx]format=rgb24,lutrgb=r='clip(val*{r_scale:.6f},0,255)':"
+        f"g='clip(val*{g_scale:.6f},0,255)':b='clip(val*{b_scale:.6f},0,255)',"
+        f"hue=s={saturation:.5f}[{prefix}graded];"
+        f"[{prefix}mask_src]trim=end_frame=1,format=gray,"
         f"geq=lum='255*({mask_expr})':cb=128:cr=128,"
-        f"loop=-1:size=1:start=0[pw_mask];"
-        f"[pw_graded]format=yuva420p[pw_yuva];"
-        f"[pw_yuva][pw_mask]alphamerge[pw_alpha];"
-        f"[pw_base][pw_alpha]overlay=shortest=1:format=auto"
+        f"loop=-1:size=1:start=0[{prefix}mask];"
+        f"[{prefix}graded]format=yuva420p[{prefix}yuva];"
+        f"[{prefix}yuva][{prefix}mask]alphamerge[{prefix}alpha];"
+        f"[{prefix}base][{prefix}alpha]overlay=shortest=1:format=auto"
     )
 
 

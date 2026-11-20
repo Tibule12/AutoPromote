@@ -285,5 +285,14 @@ describe("studioNodeFlow — AutoPromote Signal Node Topology & Bidirectional St
     expect(spliced.selectNodeId).toBe("PolygonMask:plate-1");
     expect(spliced.overlays[0].mask.enabled).toBe(true);
   });
+
+  test("rejects SubjectMatte -> Mask port connection with an explicit actionable warning", () => {
+    expect(() =>
+      connectNodeFlowPorts(
+        { overlays: [{ id: "layer-1", type: "video", startTime: 0, duration: 4 }] },
+        { fromNodeId: "SubjectMatte:scene-1", toNodeId: "ColorCorrector:finish", toPort: "Mask" }
+      )
+    ).toThrow(/SubjectMatte outputs an isolated foreground plate/i);
+  });
 });
 
