@@ -46,6 +46,9 @@ async function main() {
           await page.getByRole('tab', { name: 'LinkedIn', exact: true }).waitFor();
           await page.locator('.wf-queue-window img').evaluate(img => img.decode());
           await page.evaluate(() => document.fonts.ready);
+          // The welcome showcase opens automatically for first-time visitors.
+          const showcaseClose = page.getByRole('button', { name: 'Close video showcase', exact: true });
+          if (await showcaseClose.isVisible()) await showcaseClose.click();
           const state = await page.evaluate(() => ({
             heading: document.querySelector('h1').textContent,
             hero: document.querySelector('.wf-hero').innerText,

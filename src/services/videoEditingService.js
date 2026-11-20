@@ -18,6 +18,7 @@ const {
   executeMulticamRenderJob,
   isDurableMulticamRenderEnabled,
 } = require("./cloudRunJobService");
+const { ensureMulticamGpuAdmission, recordDispatch } = require("./multicamGpuAdmission");
 const {
   releaseMulticamRenderCapacity,
   reserveMulticamRenderCapacity,
@@ -328,22 +329,25 @@ class VideoEditingService {
         });
 
       if (durableRender) {
-        const dispatch = await executeMulticamRenderJob({
-          jobId,
-          dispatchToken,
-          multicamRequest: persistedRequest,
-        });
-        await db.collection("video_edits").doc(jobId).set(
-          {
-            status: "queued",
-            stage: "cloud_run_job_accepted",
-            detail: "Durable render worker accepted the job",
-            cloudRunExecution: dispatch.executionName,
-            dispatchedAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-          { merge: true }
-        );
+        const jobRef = db.collection("video_edits").doc(jobId);
+        try {
+          const dispatch = await executeMulticamRenderJob({ jobId, dispatchToken, multicamRequest: persistedRequest });
+          await recordDispatch(db, jobRef, dispatch);
+          if (dispatch.device === "gpu" || dispatch.routeReason === "gpu_unavailable") this.ensureMulticamGpuAdmission(jobId);
+        } catch (error) {
+          // A lost provider reply may already have started the task. Preserve
+          // the job/charge, then fence only if no worker has claimed it.
+          if (!error.multicamDispatchDevice || (error.response && Number(error.response.status) < 500)) throw error;
+          await db.runTransaction(async transaction => {
+            const data = (await transaction.get(jobRef)).data();
+            if (data?.status !== "queued" || data.renderLease?.claimedAt) return;
+            transaction.set(jobRef, { executionDevice: error.multicamDispatchDevice,
+              ...(error.multicamDispatchDevice === "cpu" ? { gpuFallbackCount: 1 } : {}),
+              dispatchedAt: new Date().toISOString(), stage: "awaiting_worker_admission",
+              detail: "Checking worker startup before continuing the same render" }, { merge: true });
+          });
+          this.ensureMulticamGpuAdmission(jobId);
+        }
       } else {
         this.processMulticamJobBackground(jobId, normalizedMulticamRequest, userId).catch(err => {
           console.error(`[VideoEditing] Multicam Job ${jobId} Failed (uncaught):`, errorSummary(err));
@@ -393,6 +397,19 @@ class VideoEditingService {
       }
       throw new Error("Failed to queue multi-camera render job");
     }
+  }
+
+  ensureMulticamGpuAdmission(jobId) {
+    ensureMulticamGpuAdmission({ db, jobId, onFailure: async (data, error) => {
+      const receipt = data.creditReceipt;
+      let refund = null;
+      if (receipt && !receipt.skipped) refund = await refundCredits(data.userId, receipt, "render-multicam-refund", {
+        jobId, reason: `dispatch_failed:${error.message}`, idempotencyKey: `render-multicam-refund:${jobId}`,
+      }).catch(refundError => ({ success: false, message: refundError.message }));
+      await db.collection("video_edits").doc(jobId).set({ creditRefund: refund,
+        refundRequired: Boolean(receipt && !receipt.skipped && !refund?.success) }, { merge: true });
+      await releaseMulticamRenderCapacity(jobId, "dispatch_failed");
+    } });
   }
 
   /**

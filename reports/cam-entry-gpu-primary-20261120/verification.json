@@ -1,0 +1,30 @@
+{
+  "headless": true,
+  "muted": true,
+  "mockedBrowserResponses": false,
+  "frontendTests": 11,
+  "backendTests": 44,
+  "pythonRunnerTests": 8,
+  "releaseChunkTests": 18,
+  "welcomeViewportComparisons": 8,
+  "setup": {
+    "threeSourceLimit": true,
+    "emptyEntryWithSelectionsIsEmpty": true,
+    "settingsAndFilesPreserved": true,
+    "masterAudioOffThenReenabled": true,
+    "waveformPrepared": true,
+    "localSyncApprovedAtZeroCredits": true,
+    "programmeAdvances": true,
+    "pageErrors": [],
+    "blockedWrites": []
+  },
+  "runtime": {
+    "execution": "cam-combiner-render-gpu-job-fchxg",
+    "cudaSpeechInference": true,
+    "videoEncoder": "h264_nvenc",
+    "executionElapsedSeconds": 138.12,
+    "nativeCamRender": false
+  },
+  "originalAuthSha256": "00d48e87bd9b77ba9ead11c92bf93039f43fc3e7e6b322c3e379f6b4dac55254",
+  "readinessPromotion": false
+}

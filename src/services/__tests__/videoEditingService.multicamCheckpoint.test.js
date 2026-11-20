@@ -1,9 +1,11 @@
 const mockSet = jest.fn();
 const mockExecuteMulticamRenderJob = jest.fn();
+const mockRunTransaction = jest.fn();
 
 jest.mock("../../firebaseAdmin", () => ({
   admin: {},
   db: {
+    runTransaction: mockRunTransaction,
     collection: jest.fn(() => ({
       doc: jest.fn(() => ({ set: mockSet })),
     })),
@@ -31,7 +33,19 @@ describe("VideoEditingService multicam checkpoint contract", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockSet.mockResolvedValue(undefined);
-    mockExecuteMulticamRenderJob.mockResolvedValue({ executionName: "executions/episode-2" });
+    mockRunTransaction.mockImplementation(async callback =>
+      callback({
+        get: async () => ({ data: () => ({ status: "queued" }) }),
+        set: mockSet,
+      })
+    );
+    mockExecuteMulticamRenderJob.mockResolvedValue({
+      executionName: "executions/episode-2",
+      operationName: "operations/test",
+      resourceName: "jobs/test",
+      device: "cpu",
+      routeReason: "gpu_unavailable",
+    });
   });
 
   it("persists the v2 checkpoint contract in the job and canonical worker payload", async () => {
@@ -106,6 +120,34 @@ describe("VideoEditingService multicam checkpoint contract", () => {
         expectedCheckpointCount: 9,
       })
     );
+  });
+
+  it("keeps an ambiguous GPU admission queued for fenced recovery without refunding", async () => {
+    mockExecuteMulticamRenderJob.mockRejectedValueOnce(
+      Object.assign(new Error("provider response lost"), {
+        multicamDispatchDevice: "gpu",
+        code: "ECONNRESET",
+      })
+    );
+    const service = new VideoEditingService();
+    const recovery = jest.spyOn(service, "ensureMulticamGpuAdmission").mockImplementation(() => {});
+    const result = await service.startMulticamRenderJob(
+      {
+        sources: [{ id: "cam-1" }, { id: "cam-2" }],
+        overlapDuration: 12,
+        creditReceipt: { success: true, amount: 15 },
+      },
+      "user-1",
+      { jobId: "unknown-gpu-job", capacityReserved: true }
+    );
+    expect(result.jobId).toBe("unknown-gpu-job");
+    expect(recovery).toHaveBeenCalledWith("unknown-gpu-job");
+    expect(require("../../creditSystem").refundCredits).not.toHaveBeenCalled();
+    expect(
+      mockSet.mock.calls.some(args =>
+        args.some(data => data?.stage === "awaiting_worker_admission")
+      )
+    ).toBe(true);
   });
 
   it("allows full-length original preflight more than two minutes to finish", async () => {
