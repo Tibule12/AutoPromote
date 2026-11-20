@@ -22,17 +22,17 @@ beforeEach(() => {
 });
 afterAll(() => { process.env = prior; });
 
-test("long speech sources use the GPU; short known sources keep the CPU lane", () => {
-  expect(selectMediaWorker("/analyze-clips", { source_duration_seconds: 375 })).toMatchObject({device:"gpu",reason:"cpu_budget"});
-  expect(selectMediaWorker("/analyze-clips", { source_duration_seconds: 20 })).toMatchObject({device:"cpu"});
+test("all speech sources use the GPU first, including short recordings", () => {
+  expect(selectMediaWorker("/analyze-clips", { source_duration_seconds: 375 })).toMatchObject({device:"gpu",reason:"gpu_primary"});
+  expect(selectMediaWorker("/analyze-clips", { source_duration_seconds: 20 })).toMatchObject({device:"gpu"});
   expect(selectMediaWorker("/analyze-clips")).toMatchObject({device:"gpu"});
 });
 test("render budget follows output timeline duration, not a long source's original duration", () => {
-  expect(selectMediaWorker("/render-viral-clip", { timeline_segments:[{start_time:300,end_time:332.8,duration:32.8}], motion_graphics:{} })).toMatchObject({device:"cpu",sourceSeconds:32.8});
+  expect(selectMediaWorker("/render-viral-clip", { timeline_segments:[{start_time:300,end_time:332.8,duration:32.8}], motion_graphics:{} })).toMatchObject({device:"gpu",sourceSeconds:32.8});
   expect(selectMediaWorker("/render-viral-clip", {start_time:0,end_time:180})).toMatchObject({device:"gpu"});
   expect(selectMediaWorker("/render-viral-clip", {start_time:0,end_time:40,export_settings:{resolution:"2160p"}})).toMatchObject({device:"gpu"});
   expect(selectMediaWorker("/render-viral-clip", {start_time:0,end_time:20,output_settings:{resolution:"2160p",fps:"60"}})).toMatchObject({device:"gpu"});
-  expect(selectMediaWorker("/render-viral-clip", {source_duration_seconds:375,timeline_segments:[{duration:20}]})).toMatchObject({device:"cpu",sourceSeconds:20});
+  expect(selectMediaWorker("/render-viral-clip", {source_duration_seconds:375,timeline_segments:[{duration:20}]})).toMatchObject({device:"gpu",sourceSeconds:20});
   expect(selectMediaWorker("/process-video", {source_duration_seconds:180})).toMatchObject({device:"gpu"});
 });
 test("native per-frame composition uses its raster cost before choosing or charging a worker", async () => {
@@ -43,9 +43,9 @@ test("native per-frame composition uses its raster cost before choosing or charg
     ] } };
   expect(selectMediaWorker("/render-viral-clip", payload)).toMatchObject({ device: "gpu", estimatedCpuSeconds: 160 });
   expect(selectMediaWorker("/render-viral-clip", { ...payload, timeline_segments: [{ duration: 4 }],
-    output_settings: { resolution: "720p", fps: "30" } })).toMatchObject({ device: "cpu" });
+    output_settings: { resolution: "720p", fps: "30" } })).toMatchObject({ device: "gpu" });
   expect(selectMediaWorker("/render-viral-clip", { timeline_segments: [{ duration: 54.13 }],
-    composition_plan: { layers: [{ id: "base", type: "video" }] } })).toMatchObject({ device: "cpu", estimatedCpuSeconds: 54.13 });
+    composition_plan: { layers: [{ id: "base", type: "video" }] } })).toMatchObject({ device: "gpu", estimatedCpuSeconds: 54.13 });
   axios.get.mockResolvedValueOnce({ data: { status: "ok", worker_state: { status: "idle" },
     computeDevice: "cuda", videoEncoder: "h264_nvenc", gpuRequired: true } });
   await expect(assertMediaWorkerReady(payload)).resolves.toMatchObject({ device: "gpu" });
@@ -65,14 +65,14 @@ test("misconfigured external GPU credentials or insecure transport are rejected"
   for(const url of ["http://gpu.example", "https://user:password@gpu.example", "https://gpu.example?token=x"])
     expect(() => selectMediaWorker("/analyze-clips",{}, {...process.env,MEDIA_WORKER_GPU_URL:url})).toThrow(/HTTPS worker origin/);
 });
-test("a pre-dispatch CPU busy response hands off the same render payload exactly once", async () => {
+test("a pre-dispatch GPU busy response hands off the same render payload to CPU exactly once", async () => {
   const body={job_id:"same-owned-job",start_time:0,end_time:32.8,timeline_segments:[{duration:32.8}]};
   axios.post.mockRejectedValueOnce({response:{status:503,data:{detail:"Worker is busy. Try again"}}}).mockResolvedValueOnce({data:{status:"completed"}});
   const route=jest.fn();const result=await postMediaWorker("/render-viral-clip",body,{onRoute:route});
-  expect(axios.post.mock.calls.map(c=>c[0])).toEqual(["https://cpu.example/render-viral-clip","https://gpu.example/render-viral-clip"]);
+  expect(axios.post.mock.calls.map(c=>c[0])).toEqual(["https://gpu.example/render-viral-clip","https://cpu.example/render-viral-clip"]);
   expect(axios.post.mock.calls[0][1]).toBe(body);expect(axios.post.mock.calls[1][1]).toBe(body);
-  expect(axios.post.mock.calls[1][2].headers.Authorization).toBe("identity:gpu.example");
-  expect(result).toMatchObject({device:"gpu",routeReason:"cpu_unavailable"});expect(route).toHaveBeenCalledTimes(2);
+  expect(axios.post.mock.calls[1][2].headers.Authorization).toBe("identity:cpu.example");
+  expect(result).toMatchObject({device:"cpu",routeReason:"gpu_unavailable"});expect(route).toHaveBeenCalledTimes(2);
 });
 test("an uncertain accepted render is never duplicated on another worker", async () => {
   const error={code:"ECONNABORTED"};axios.post.mockRejectedValueOnce(error);
@@ -90,12 +90,12 @@ test("validation and authorization errors do not start a second processing attem
     await expect(postMediaWorker("/analyze-clips",{source_duration_seconds:20})).rejects.toBe(error);expect(axios.post).toHaveBeenCalledTimes(1);
   }
 });
-test("GPU health is checked before long-render charging and CPU busy can use the backup", async () => {
+test("GPU health is checked before charging even short renders and a busy GPU uses CPU", async () => {
   const readyGpu={status:"ok",worker_state:{status:"idle"},computeDevice:"cuda",videoEncoder:"h264_nvenc",gpuRequired:true};
   axios.get.mockResolvedValueOnce({data:readyGpu});
   await expect(assertMediaWorkerReady({end_time:180})).resolves.toMatchObject({device:"gpu"});expect(axios.get.mock.calls[0][0]).toBe("https://gpu.example/health");
-  axios.get.mockReset();axios.get.mockResolvedValueOnce({data:{status:"ok",worker_state:{status:"busy"}}}).mockResolvedValueOnce({data:readyGpu});
-  await expect(assertMediaWorkerReady({end_time:20})).resolves.toMatchObject({device:"gpu",reason:"cpu_unavailable"});
+  axios.get.mockReset();axios.get.mockResolvedValueOnce({data:{status:"ok",worker_state:{status:"busy"}}}).mockResolvedValueOnce({data:{status:"ok",worker_state:{status:"idle"}}});
+  await expect(assertMediaWorkerReady({end_time:20})).resolves.toMatchObject({device:"cpu",reason:"gpu_unavailable"});
 });
 test("HTTP health without real GPU qualification uses CPU and dispatch honors that readiness choice", async () => {
   axios.get.mockResolvedValueOnce({data:{status:"ok",computeDevice:"cpu",videoEncoder:"libx264"}}).mockResolvedValueOnce({data:{status:"ok"}});

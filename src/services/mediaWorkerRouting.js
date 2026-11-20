@@ -60,9 +60,11 @@ function selectMediaWorker(endpoint, payload = {}, env = process.env) {
   const estimatedCpuSeconds = ANALYSIS.has(endpoint) ? seconds || budget + 1
     : seconds ? seconds * pixels * frameRate * renderCost
       : endpoint === "/process-video" ? budget + 1 : 0;
-  const useGpu = Boolean(gpu && estimatedCpuSeconds > budget);
+  // Production editing and scanning prefer the qualified GPU at every size.
+  // Keep the estimate for telemetry; it must not silently send short jobs to CPU.
+  const useGpu = Boolean(gpu);
   return { workerUrl: useGpu ? gpu : cpu, device: useGpu ? "gpu" : "cpu", gpuUrl: gpu,
-    reason: useGpu ? "cpu_budget" : "within_cpu_budget", estimatedCpuSeconds, sourceSeconds: seconds };
+    reason: useGpu ? "gpu_primary" : "gpu_not_configured", estimatedCpuSeconds, sourceSeconds: seconds };
 }
 
 function cpuWorkerUrl(endpoint, env = process.env) {
@@ -77,10 +79,10 @@ function safeToFailOver(error, endpoint) {
   if (ANALYSIS.has(endpoint) && ["ETIMEDOUT", "ECONNABORTED"].includes(error.code)) return true;
   // A render timeout may have an accepted job. Keep its existing recovery
   // identity; never submit that uncertain render to a second worker.
-  if (status !== 503) return false;
+  if (![429, 503].includes(status)) return false;
   const data = error.response?.data;
   const message = String(data?.detail || data?.message || (typeof data === "string" ? data : ""));
-  return /worker is busy|no available instance|unable to start|no credits were charged/i.test(message);
+  return /worker is busy|no available instance|unable to start|no credits were charged|maximum concurrent requests|resource exhausted|capacity/i.test(message);
 }
 
 async function requestConfig(target, payload, timeoutMs) {

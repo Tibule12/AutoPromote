@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Antigravity",
-  "reason": "Merge origin/main (#543) with pro-studio engine sprints 1-6, transport, source-rate and proof reports",
-  "reviewed_at": "2026-11-20T14:31:38.849Z",
+  "reason": "Update VoiceOverGuide tab explanations and include Cam Combiner entry parity and GPU-primary routing updates",
+  "reviewed_at": "2026-11-20T15:27:53.025Z",
   "catalog_sha256": "e0363dbe27ea51b3744e1026e7b9270d40386882699e8bcd4a2ffab3a036086a",
   "sources": [
     {
@@ -67,7 +67,7 @@
     },
     {
       "path": "frontend/src/components/MultiCamCombiner.js",
-      "sha256": "9a28d50cd0402f9131fcf2bd1701633deb77bf863940654179a93d77fb9646f4"
+      "sha256": "728df2d7f4c4301a9b17513fe54fe6a275dae665e6736259c1ba6d54aee27e00"
     },
     {
       "path": "frontend/src/components/PlatformIcon.js",
@@ -755,11 +755,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "b1e9bf129160ee753ad9c96962736d1fe031730a92bac2fcad439c7c560272d8"
+      "sha256": "df4abf7db9f34039266ac0ed3f20045c23edc25a6e26d34af6ce698fe9cdf6a2"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "72ad0657a583851d70454fbb7417d16de3bad3a1a1ad6731ba4a47a4f0258bc0"
+      "sha256": "759a234d27a116eb3dce38f3bedd1f9494d84303ce3cdb0af037b5976b7e26a3"
     },
     {
       "path": "worker.js",

@@ -921,7 +921,7 @@ router.post("/internal/multicam-job-failed", async (req, res) => {
       providedDispatchToken.length >= 16 &&
       expectedDispatchHash.length === providedDispatchHash.length &&
       crypto.timingSafeEqual(Buffer.from(expectedDispatchHash), Buffer.from(providedDispatchHash));
-    if (!secretMatches && !dispatchTokenMatches) {
+    if ((providedDispatchToken && !dispatchTokenMatches) || (!secretMatches && !dispatchTokenMatches)) {
       return res.status(401).json({ success: false, message: "Invalid render job callback" });
     }
     const refund = await refundMulticamRenderJobIfNeeded(
@@ -3288,6 +3288,11 @@ router.get("/status/:jobId", async (req, res) => {
     // independently of the worker's availability or the old signed URL expiry.
     await refreshCompletedStudioOutput(data,userId,jobId,
       admin.firestore().collection("video_edits").doc(jobId));
+
+    if (data.type === "multicam_render" && data.status === "queued" &&
+        (data.executionDevice === "gpu" || data.gpuFallbackCount)) {
+      videoEditingService.ensureMulticamGpuAdmission?.(jobId);
+    }
 
     await refundCleanAudioSyncJobIfNeeded(userId, jobId, data, "worker_failed");
     await refundMulticamRenderJobIfNeeded(userId, jobId, data, "status_poll_failed_job");

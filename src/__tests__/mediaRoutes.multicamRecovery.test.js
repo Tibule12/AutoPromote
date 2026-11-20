@@ -2,6 +2,8 @@ const express = require("express");
 const request = require("supertest");
 
 const mockFirestoreDocs = [];
+let mockCallbackData = {};
+const mockCallbackSet = jest.fn();
 const mockRecoverMulticamUpload = jest.fn();
 
 jest.mock("firebase-admin", () => ({
@@ -11,6 +13,7 @@ jest.mock("firebase-admin", () => ({
         const filters = [];
         let queryLimit = Infinity;
         const query = {
+          doc: () => ({ get: async () => ({ exists: true, data: () => mockCallbackData }), set: mockCallbackSet }),
           where: jest.fn((field, operator, value) => {
             filters.push({ field, operator, value });
             return query;
@@ -224,5 +227,21 @@ describe("mediaRoutes recoverable multicam project", () => {
     expect(response.body.project.previousJobId).toBe("reusable-after-crowded-history");
     expect(response.body.project.sources).toHaveLength(2);
     expect(mockRecoverMulticamUpload).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("multicam callback fencing", () => {
+  it("rejects a superseded GPU token even with the correct shared secret", async () => {
+    const previous = process.env.MULTICAM_JOB_CALLBACK_SECRET;
+    process.env.MULTICAM_JOB_CALLBACK_SECRET = "current-shared-secret";
+    mockCallbackData = { userId: "user-1", type: "multicam_render", status: "processing", dispatchTokenHash: require("crypto").createHash("sha256").update("current-cpu-dispatch-token").digest("hex") };
+    try {
+      const response = await request(buildApp()).post("/api/media/internal/multicam-job-failed")
+        .set("x-multicam-job-secret", "current-shared-secret").set("x-multicam-dispatch-token", "superseded-gpu-token")
+        .send({ jobId: "same-render-job", reason: "old GPU startup failed" });
+      expect(response.statusCode).toBe(401);
+      expect(mockCallbackSet).not.toHaveBeenCalled();
+      expect(require("../creditSystem").refundCredits).not.toHaveBeenCalled();
+    } finally { if (previous === undefined) delete process.env.MULTICAM_JOB_CALLBACK_SECRET; else process.env.MULTICAM_JOB_CALLBACK_SECRET = previous; }
   });
 });
