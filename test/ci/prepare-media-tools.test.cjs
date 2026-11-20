@@ -16,6 +16,18 @@ test("the browser image matches the locked SDK and setup never requests apt down
   assert(!job.steps.some(step => /apt-get|playwright install/.test(step.run || "")));
 });
 
+test("emulator media setup uses locked binaries before Python checks", () => {
+  const yaml = require("yaml");
+  const job = yaml.parse(fs.readFileSync(path.join(__dirname, "../../.github/workflows/test-emulator.yml"), "utf8")).jobs["emulator-tests"];
+  assert.equal(job["runs-on"], "ubuntu-24.04");
+  const tools = job.steps.findIndex(step => step.name === "Prepare locked media tools");
+  const preview = job.steps.findIndex(step => step.name === "Install and verify CPU preview runtime");
+  assert(tools >= 0 && tools < preview);
+  assert.match(job.steps[tools].run, /node scripts\/ci\/prepare-media-tools\.cjs/);
+  assert(!job.steps.some(step => /apt-get/.test(step.run || "")));
+  assert.match(job.steps[preview].run, /import numpy, PIL, studio_voice_bus_preview/);
+});
+
 test("locked media tools work across Actions steps and encode/decode video with sound", { timeout: 30000 }, () => {
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), "autopromote-media-setup-test-"));
   try {
