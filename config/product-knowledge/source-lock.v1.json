@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Antigravity",
-  "reason": "Update VoiceOverGuide tab explanations and include Cam Combiner entry parity and GPU-primary routing updates",
-  "reviewed_at": "2026-11-20T15:27:53.025Z",
+  "reason": "Merge origin/main #544 with VoiceOverGuide update and pro-studio engine sprints",
+  "reviewed_at": "2026-11-20T15:31:42.800Z",
   "catalog_sha256": "e0363dbe27ea51b3744e1026e7b9270d40386882699e8bcd4a2ffab3a036086a",
   "sources": [
     {
