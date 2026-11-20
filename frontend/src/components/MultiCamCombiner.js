@@ -213,6 +213,16 @@ const firebaseRenderUrlResolutionCache = new Map();
 
 export const resolveFirebaseRenderUrl = async value => {
   const candidate = String(value || "").trim();
+  // Owner-checked API responses already contain working Firebase media links.
+  // A separate SDK metadata lookup has different Storage-rule permissions and
+  // must not discard the same link that works in the completion email.
+  try {
+    const url = new URL(candidate);
+    if (url.protocol === "https:" && url.hostname === "firebasestorage.googleapis.com" &&
+        url.searchParams.get("alt") === "media" && url.searchParams.get("token")) {
+      return candidate;
+    }
+  } catch (_) { /* Bare legacy Storage paths still need SDK resolution. */ }
   const storagePath = extractFirebaseRenderStoragePath(candidate);
   if (!storagePath) return candidate;
   if (firebaseRenderUrlResolutionCache.has(storagePath)) {
