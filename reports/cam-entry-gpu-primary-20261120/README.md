@@ -31,3 +31,8 @@ Both final30s two-camera edits are delivered under `Videos/AutoPromote - Cam GPU
 Both completion notifications are recorded, and the owner confirms receiving them. Once uploads finish and server acceptance is shown, users can leave the page; cloud execution continues, completion email links to the master and Saved Cam Combiner masters retains it until its actual expiry. Notification wording now uses the actual expiry instead of the stale hardcoded four-day statement, and its fallback App link isautopromote.org. No additional manual email was sent.
 
 The source-derived camera views prove two-cut encoding/sync/delivery and fallback, not independent-camera speech attribution or broad media qualification. Initial failures and refund receipts remain in private evidence. Final release/build/signed-in help verification is recorded after serving. Shared readiness counts and S02/S04/S03 remain unchanged.
+
+
+## Saved-master playback correction
+
+The final serving browser check found that owner-checked `/api/media/renders` correctly returns both new masters, while the client separately asks the Firebase SDK for object metadata. Storage rules intentionally reject that metadata lookup for these processed objects; the client then erased the working tokenized media URL and hid the result. Ready HTTPS Firebase `alt=media` links with download tokens now remain intact. Bare legacy object paths still use SDK resolution, including the existing missing-object handling. Storage permissions and source ownership checks are unchanged. Two regression cases cover the ready-link and bare-path cases. Final signed-in saved-library playback and contextual help follow this small client release. No additional paid renders are needed.

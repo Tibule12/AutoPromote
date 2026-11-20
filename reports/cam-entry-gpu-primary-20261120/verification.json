@@ -87,5 +87,12 @@
     }
   ],
   "userConfirmedEmailReceipt": true,
-  "gpuColdStartLimit": "GPU worker processing16.983s versus CPU31.688s; cold total161.543s versus87.923s. No end-to-end speedup claim."
+  "gpuColdStartLimit": "GPU worker processing16.983s versus CPU31.688s; cold total161.543s versus87.923s. No end-to-end speedup claim.",
+  "savedLibraryCorrection": {
+    "apiReturnsBothNewMasters": true,
+    "cause": "SDK metadata lookup erased valid tokenized media URLs",
+    "fix": "Use ready HTTPS Firebase media links directly; retain legacy bare-path SDK resolution",
+    "regressionTestsAdded": 2,
+    "finalBrowserVerification": "pending candidate/serving check"
+  }
 }

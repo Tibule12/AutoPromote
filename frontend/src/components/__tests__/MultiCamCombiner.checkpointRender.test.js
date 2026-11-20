@@ -43,6 +43,7 @@ jest.mock("../../hooks/useCinematicEffects", () => jest.fn(() => ({})));
 describe("MultiCamCombiner checkpoint render helpers", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    getDownloadURL.mockReset();
   });
 
   it("submits a 44-minute project as one full timeline beginning at zero", () => {
@@ -182,6 +183,24 @@ describe("MultiCamCombiner checkpoint render helpers", () => {
       )
     ).toBe("video/webm;codecs=vp8");
     expect(getVideoProxyMimeCandidates(false).some(type => type.includes("opus"))).toBe(false);
+  });
+
+  it("keeps the API's ready media link without requiring SDK metadata access", async () => {
+    const url = "https://firebasestorage.googleapis.com/v0/b/app/o/processed%2Fmulticam_ready-link.mp4?alt=media&token=owner-download-token";
+    getDownloadURL.mockRejectedValueOnce(Object.assign(new Error("metadata forbidden"), { code: "storage/unauthorized" }));
+    const resolved = await resolveRenderDeliveryUrls({ outputUrl: url, previewUrl: url, approvedOutputUrl: url });
+    expect(getRenderOutputUrl(resolved)).toBe(url);
+    expect(resolved.previewUrl).toBe(url);
+    expect(resolved.approvedOutputUrl).toBe(url);
+    expect(getDownloadURL).not.toHaveBeenCalled();
+  });
+
+  it("still resolves a bare legacy object through the SDK", async () => {
+    const path = "processed/multicam_legacy-metadata-success.mp4";
+    const url = "https://firebasestorage.googleapis.com/v0/b/app/o/processed%2Fmulticam_legacy-metadata-success.mp4?alt=media&token=resolved";
+    getDownloadURL.mockResolvedValueOnce(url);
+    await expect(resolveFirebaseRenderUrl(path)).resolves.toBe(url);
+    expect(getDownloadURL).toHaveBeenCalledTimes(1);
   });
 
   it("clears and negative-caches confirmed missing Firebase render objects", async () => {

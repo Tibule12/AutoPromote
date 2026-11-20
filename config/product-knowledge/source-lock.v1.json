@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Reviewed retained pro-editor/VoiceOver updates and completed native GPU/CPU Cam outputs, exact media ownership/sync handoff, manual-cut versus speaker mapping, strict proxy failure recovery, source minimum, honest cold-start timings, expiry notification and unchanged broad Studio readiness. No readiness promotion.",
-  "reviewed_at": "2026-11-20T17:41:22.439Z",
+  "reason": "Reviewed final Cam native GPU/CPU and owner-received completion notifications. Preserve owner-checked ready media URLs so SDK metadata permissions do not hide downloadable saved masters; retain bare-path resolution/missing-object handling. Source-only/readiness limits and independent-camera backlog remain unchanged.",
+  "reviewed_at": "2026-11-20T17:54:15.097Z",
   "catalog_sha256": "dbccf16776eba7c2ccdc3147942ca59af341a2bf46c05675c6f85a59221c371a",
   "sources": [
     {
@@ -67,7 +67,7 @@
     },
     {
       "path": "frontend/src/components/MultiCamCombiner.js",
-      "sha256": "ed79f93885e01e6550b4aaf5e0f0e5a747d68dbddb1d042c7d268ec7d84f1a21"
+      "sha256": "e402ff353f91c2cb7f479a06e973e8e93da6b0fafa01369f437253c52f1c4a58"
     },
     {
       "path": "frontend/src/components/PlatformIcon.js",
@@ -763,11 +763,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "1160d6cbcf70c8dcabbccefb10eaa614bd4cb931754966a63705cd663dc3b89a"
+      "sha256": "358adc6f1829884731c2ff216d6b1fb176848b975ecfd7402a40043e63123227"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "1b42b56516ccfff4b45325a812d7c71ebd7667314f88fa38eaea93643c9323fa"
+      "sha256": "5c6b9e5f554f782ba2fd3e1109c6a60217d04aa5e74614a01a52aa6dc0535a6c"
     },
     {
       "path": "worker.js",
