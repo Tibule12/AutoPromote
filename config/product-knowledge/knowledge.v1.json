@@ -4650,14 +4650,18 @@
         "cam_combiner.sync_offset"
       ],
       "workflow": [
-        "Open the relevant workspace with an owned source.",
-        "Review the result and its limitations before saving or exporting."
+        "Select up to three camera recordings and optional master audio in setup, or open the same empty editor and import them there.",
+        "Review speaker detection, reaction shots, master audio and minimum shot length in the shared editor. Render treatment selects finishing and price, not a promised output resolution.",
+        "For cloud export with master audio, use camera recordings longer than20 seconds so start, middle and end sync can be proved. Confirm speaker-channel mapping when automatic speaker switching is enabled.",
+        "Review and confirm the proof or full render, then inspect the actual downloaded picture and sound."
       ],
       "preview_behavior": "Preview follows the session camera plan and sync offsets; inspect lip/audio alignment at several points.",
-      "render_behavior": "Existing deterministic camera render is authoritative. A generated model must not replace camera synchronization or the final switching render.",
+      "render_behavior": "The existing deterministic camera renderer remains authoritative. Cloud renders prefer GPU video encoding, with CPU fallback when the GPU cannot start. Both entries use this same renderer; models do not replace synchronization. Review final cuts and sound.",
       "limitations": [
         "Source and test evidence establish the documented contract, not broad professional workflow qualification.",
-        "Review audio alignment, speaker mapping and final moving output for this recording."
+        "Review audio alignment, speaker mapping and final moving output for this recording.",
+        "GPU cold starts add startup time; GPU selection alone does not guarantee a shorter end-to-end render.",
+        "Master-audio cloud sync needs camera recordings longer than20 seconds. The editor blocks shorter recordings before upload or credits."
       ],
       "common_errors": [
         {
@@ -4673,7 +4677,7 @@
       "readiness_authority": null,
       "review_state": "DOCUMENTATION_QUALIFIED",
       "status": "PARTIAL",
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-11-20",
       "product_version": "1.2.0",
       "visibility": "PUBLIC",
       "source_evidence": [
@@ -4941,14 +4945,18 @@
         "cam_combiner.switch_interval"
       ],
       "workflow": [
-        "Generate/edit the activity-based switching plan and its reaction/split views.",
-        "Rebuild/review the switching plan and inspect the actual rendered audio/video alignment."
+        "Select up to three camera recordings and optional master audio in setup, or open the same empty editor and import them there.",
+        "Review speaker detection, reaction shots, master audio and minimum shot length in the shared editor. Render treatment selects finishing and price, not a promised output resolution.",
+        "For cloud export with master audio, use camera recordings longer than20 seconds so start, middle and end sync can be proved. Confirm speaker-channel mapping when automatic speaker switching is enabled.",
+        "Review and confirm the proof or full render, then inspect the actual downloaded picture and sound."
       ],
       "preview_behavior": "Preview follows the session camera plan and sync offsets; inspect lip/audio alignment at several points.",
-      "render_behavior": "Existing deterministic camera render is authoritative. A generated model must not replace camera synchronization or the final switching render.",
+      "render_behavior": "The existing deterministic camera renderer remains authoritative. Cloud renders prefer GPU video encoding, with CPU fallback when the GPU cannot start. Both entries use this same renderer; models do not replace synchronization. Review final cuts and sound.",
       "limitations": [
         "Source and test evidence establish the documented contract, not broad professional workflow qualification.",
-        "Review audio alignment, speaker mapping and final moving output for this recording."
+        "Review audio alignment, speaker mapping and final moving output for this recording.",
+        "GPU cold starts add startup time; GPU selection alone does not guarantee a shorter end-to-end render.",
+        "Master-audio cloud sync needs camera recordings longer than20 seconds. The editor blocks shorter recordings before upload or credits."
       ],
       "common_errors": [
         {
@@ -4973,7 +4981,7 @@
       "readiness_authority": null,
       "review_state": "DOCUMENTATION_QUALIFIED",
       "status": "PARTIAL",
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-11-20",
       "product_version": "1.2.0",
       "visibility": "PUBLIC",
       "source_evidence": [
@@ -7668,8 +7676,8 @@
       "workflow": [
         "Open Graphics, select an ordinary title and expand Text choreography. Choose Animate this title.",
         "Choose letters or words, ordering, stagger, selector range and the starting travel, scale, rotation, opacity and spread.",
-        "Open Motion → Transform keyframes, select that title and edit Text progress. Reverse or hold its ordinary timeline keys and shape their value/velocity curves.",
-        "Rebuild entrance keys replaces only that title’s progress keys; Remove text animator returns it to a plain title. Other layer motion is retained.",
+        "Open Motion \u2192 Transform keyframes, select that title and edit Text progress. Reverse or hold its ordinary timeline keys and shape their value/velocity curves.",
+        "Rebuild entrance keys replaces only that title\u2019s progress keys; Remove text animator returns it to a plain title. Other layer motion is retained.",
         "Save, reopen and export through the normal Studio workflow."
       ],
       "preview_behavior": "Per-unit SVG paths use the shared versioned Inter outlines and evaluated programme-clock Text progress. One plain copy field remains editable; layout and glyph advances match export and Node title mattes.",
@@ -7678,7 +7686,7 @@
         "Supported copy is at most 180 composed Latin characters with bundled punctuation and four Inter weights, up to twelve wrapped rows. A word wider than the title box requires more width or an internal line break. Complex scripts, combining sequences, emoji and arbitrary fonts are not supported in this optional animator; existing plain titles retain their path.",
         "The selector uses unit centers; empty or crossed ranges leave units settled. Stagger is a share of the progress window, not seconds. Opacity uses linear unit progress while geometry uses the selected settling curve.",
         "This is local glyph placement, not editable glyph outlines, automatic logo tracing or contour morphing. Broader parent/mask/speed combinations, full live raster/audio, smoothness, creative acceptance and professional/production qualification remain separate.",
-        "Sixteen native-size 1280×720 pre-export text colour/edge pairs pass unchanged strict gates in a four-second local engineering check. One scaled-display overlap pair still fails; this does not requalify the historical minute film or whole Studio picture/sound."
+        "Sixteen native-size 1280\u00d7720 pre-export text colour/edge pairs pass unchanged strict gates in a four-second local engineering check. One scaled-display overlap pair still fails; this does not requalify the historical minute film or whole Studio picture/sound."
       ],
       "common_errors": [
         {

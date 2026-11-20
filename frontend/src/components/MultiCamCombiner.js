@@ -40,7 +40,7 @@ import {
   getFlowSourceTimeAtPlayhead,
 } from "./flowEditUtils";
 import { getAuth } from "firebase/auth";
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { getStorage, ref, getDownloadURL } from "firebase/storage";
 import { API_BASE_URL } from "../config";
 import { applySafeMediaSource, getSafeMediaSource } from "../utils/security";
 import toast from "react-hot-toast";
@@ -51,6 +51,7 @@ import { useSubscription } from "../hooks/useSubscription";
 import PayPalSubscriptionPanel from "./PayPalSubscriptionPanel";
 import { SafeAudio, SafeVideo } from "./SafeMedia";
 import { uploadMulticamSourceResumable } from "../utils/multicamResumableUpload";
+import { uploadOwnedMulticamProxy } from "../utils/multicamProxyUpload";
 import { normalizeMulticamSetup, MULTICAM_SHOT_LENGTHS, buildMulticamDirectorSettings } from "./multicamSetup";
 
 const CAMERA_COLORS = ["#f97316", "#38bdf8", "#a78bfa", "#34d399", "#fb7185", "#facc15"];
@@ -2444,7 +2445,10 @@ function MultiCamCombiner({
   const [multicamBrandWatermark, setMulticamBrandWatermark] = useState(false);
   const [multicamGenerateThumbnail, setMulticamGenerateThumbnail] = useState(false);
   const [cloudRenderMode, setCloudRenderMode] = useState("proof");
-  const [proofSourceMode, setProofSourceMode] = useState("small_proxy");
+  const [proofSourceMode, setProofSourceMode] = useState(() =>
+    typeof document !== "undefined" && typeof document.createElement("video").captureStream === "function" &&
+    !/firefox/i.test(navigator.userAgent) ? "small_proxy" : "originals_once"
+  );
   const [proofRenderStartSeconds, setProofRenderStartSeconds] = useState(
     MULTICAM_PRODUCTION_PROOF_DEFAULT_START_SECONDS
   );
@@ -6407,7 +6411,6 @@ function MultiCamCombiner({
 
   const uploadMediaForBackendSync = async ({
     user,
-    storage,
     file,
     fallbackUrl,
     folder,
@@ -6593,7 +6596,7 @@ function MultiCamCombiner({
       const cachedRenderProxyUpload = renderProxyCacheKey
         ? await readCachedRenderProxyUpload(renderProxyCacheKey)
         : null;
-      if (cachedRenderProxyUpload?.url) {
+      if (cachedRenderProxyUpload?.url && cachedRenderProxyUpload.storagePath) {
         actualTrimStart = Number(cachedRenderProxyUpload.trimStart ?? actualTrimStart) || 0;
         actualTrimDuration =
           Number(cachedRenderProxyUpload.trimDuration ?? actualTrimDuration) || 0;
@@ -6601,6 +6604,7 @@ function MultiCamCombiner({
           `Reusing uploaded render-window proxy for ${label}. No repeat upload needed.`
         );
         return {
+          ...cachedRenderProxyUpload,
           url: cachedRenderProxyUpload.url,
           videoUrl: cachedRenderProxyUpload.videoUrl || cachedRenderProxyUpload.url,
           syncAudioUrl: "",
@@ -6678,21 +6682,12 @@ function MultiCamCombiner({
       );
     }
 
-    const safeName = (uploadFile.name || `${label || "media"}.bin`).replace(
-      /[^a-zA-Z0-9._-]/g,
-      "_"
-    );
-    const mediaRef = ref(storage, `${folder}/${user.uid}/${Date.now()}_${safeName}`);
     const startTime = Date.now();
-    const uploadPurpose =
-      mode === "audio_only" ? "sync proxy" : trimWindow ? "render-window proxy" : "media";
-    const task = uploadBytesResumable(mediaRef, uploadFile, {
-      contentType: uploadFile.type || "application/octet-stream",
-    });
-    const directUrl = await waitForResumableUploadDownloadUrl({
-      task,
-      storageRef: mediaRef,
-      onProgress: snapshot => {
+    const uploadPurpose = mode === "audio_only" ? "sync proxy" : trimWindow ? "render-window proxy" : "media";
+    const upload = await uploadOwnedMulticamProxy({
+      apiBaseUrl: API_BASE_URL, user, file: uploadFile, folder,
+      onProgress: (bytesTransferred, totalBytes) => {
+        const snapshot = { bytesTransferred, totalBytes };
         const transferred = snapshot.bytesTransferred || 0;
         const total = snapshot.totalBytes || uploadFile.size || 0;
         const pct = total ? (transferred / total) * 100 : 0;
@@ -6716,8 +6711,10 @@ function MultiCamCombiner({
         );
       },
     });
+    const directUrl = upload.url;
     if (shouldCreateVideoProxy && renderProxyCacheKey) {
       await writeCachedRenderProxyUpload(renderProxyCacheKey, {
+        ...upload,
         url: directUrl,
         videoUrl: directUrl,
         size: uploadFile.size,
@@ -6726,6 +6723,7 @@ function MultiCamCombiner({
       });
     }
     return {
+      ...upload,
       url: directUrl,
       videoUrl: mode === "audio_only" ? "" : directUrl,
       syncAudioUrl: mode === "audio_only" ? directUrl : "",
@@ -6795,7 +6793,7 @@ function MultiCamCombiner({
 
   const buildRenderProxyCacheKey = (file, trimWindow = null) => {
     if (!file || !trimWindow) return "";
-    const proxyVersion = `v2-track-matched-webm-${UPLOAD_COMPRESSION_TARGET_BPS}-${UPLOAD_COMPRESSION_AUDIO_BPS}`;
+    const proxyVersion = `v4-owned-audio-matched-webm-${UPLOAD_COMPRESSION_TARGET_BPS}-${UPLOAD_COMPRESSION_AUDIO_BPS}`;
     const trimStart = Math.max(0, Number(trimWindow?.start || 0) || 0);
     const trimDuration = Math.max(0, Number(trimWindow?.duration || 0) || 0);
     if (trimDuration <= 0.05) return "";
@@ -8321,6 +8319,12 @@ function MultiCamCombiner({
       setStatusMessage("Set up synced sources before exporting.");
       return;
     }
+    if (hasExternalCleanAudio && readySources.some(source => Number(source.duration) <= 20)) {
+      const message = "Automatic start/middle/end sync requires camera recordings longer than 20 seconds. Load longer recordings before cloud export.";
+      setStatusMessage(message);
+      toast.error(message);
+      return;
+    }
     if (speakerDetectionEnabled && hasExternalCleanAudio && readySources.length >= 2 && !directorChannelMapConfirmed) {
       const leftCamera = getExportSourceLabel(
         externalAudioSpeakerChannelsSwapped ? readySources[1] : readySources[0],
@@ -8381,6 +8385,7 @@ function MultiCamCombiner({
       cloudRenderMode === "proof" &&
       proofSourceMode === "small_proxy" &&
       !hasRemoteOnlyCamera &&
+      readySources.some(source => Number(source.file?.size || 0) > 64 * 1024 * 1024) &&
       plannedProxyItems.some(item => !item.hasMatchingRenderProxy);
     const estimatedProofProxyBytesPerCamera = Math.ceil(
       (plannedRenderWindowDuration *
@@ -8504,69 +8509,24 @@ function MultiCamCombiner({
               duration: sourceTrimDuration,
             };
             const sourceLabel = getExportSourceLabel(source, index);
-            const cachedOriginal = source.file
-              ? await readCachedRenderProxyUpload(buildOriginalIngestCacheKey(source.file))
-              : null;
-            const reusableCloudOriginalUrl = getReusableCloudOriginalUrl(source, cachedOriginal);
-            const reusableCloudSync = reusableCloudOriginalUrl
-              ? {
-                  url: reusableCloudOriginalUrl,
-                  syncAudioUrl: reusableCloudOriginalUrl,
-                  cacheKey:
-                    source.cloudOriginalCacheKey ||
-                    cachedOriginal?.cacheKey ||
-                    buildOriginalIngestCacheKey(source.file),
-                  storagePath: source.cloudOriginalStoragePath || cachedOriginal?.storagePath || "",
-                  usesOriginal: true,
-                  trimStart: sourceTrimStart,
-                  trimDuration: sourceTrimDuration,
-                }
-              : null;
-            const [uploaded, syncAudioUpload] = await Promise.all([
-              uploadMediaForBackendSync({
-                user,
-                storage: proofProxyStorage,
-                file: source.file,
-                fallbackUrl: "",
-                folder: "temp/multicam",
-                label: `${sourceLabel} proof window`,
-                mode: "auto",
-                trimWindow,
-                // Firefox can stall forever when one MediaRecorder combines a
-                // canvas video track with captured element audio. Record the
-                // visual and sync-audio proxies independently in one pass each.
-                videoProxyIncludeAudio: !hasExternalCleanAudio,
-              }),
-              hasExternalCleanAudio
-                ? reusableCloudSync ||
-                  uploadMediaForBackendSync({
-                    user,
-                    storage: proofProxyStorage,
-                    file: source.file,
-                    fallbackUrl: "",
-                    folder: "temp/multicam-sync-audio",
-                    label: `${sourceLabel} proof sync audio`,
-                    mode: "audio_only",
-                    trimWindow,
-                  })
-                : Promise.resolve(null),
-            ]);
+            // The signed preflight receipt must identify the exact video
+            // used by the render. Keep scratch audio in that same proxy.
+            const uploaded = await uploadMediaForBackendSync({
+              user,
+              file: source.file,
+              fallbackUrl: "",
+              folder: "temp/multicam",
+              label: `${sourceLabel} proof window`,
+              mode: "auto",
+              trimWindow,
+              videoProxyIncludeAudio: true,
+            });
             return [
               source.id,
               {
                 url: uploaded.videoUrl || uploaded.url,
-                syncAudioUrl: syncAudioUpload?.syncAudioUrl || syncAudioUpload?.url || "",
                 cacheKey: buildRenderProxyCacheKey(source.file, trimWindow),
-                syncAudioCacheKey:
-                  syncAudioUpload?.cacheKey || buildSyncAudioCacheKey(source.file, trimWindow),
-                syncStoragePath: syncAudioUpload?.storagePath || "",
-                syncTrimStart: syncAudioUpload?.usesOriginal
-                  ? Number(syncAudioUpload.trimStart || 0)
-                  : 0,
-                syncTrimDuration: syncAudioUpload?.usesOriginal
-                  ? Number(syncAudioUpload.trimDuration || 0)
-                  : 0,
-                storagePath: "",
+                storagePath: uploaded.storagePath,
                 proofProxy: true,
               },
             ];
@@ -8637,7 +8597,7 @@ function MultiCamCombiner({
           externalOriginalUpload = {
             url: uploaded.syncAudioUrl || uploaded.url,
             cacheKey: buildSyncAudioCacheKey(externalAudioTrack.file, externalTrimWindow),
-            storagePath: "",
+            storagePath: uploaded.storagePath,
             proofProxy: true,
           };
         } else {
@@ -9428,7 +9388,7 @@ function MultiCamCombiner({
           <span>
             {cloudRenderMode === "proof"
               ? proofSourceMode === "small_proxy"
-                ? "Reuses retained Firebase originals when available. If none exist, it creates small 60-second proof proxies; Firefox may require the originals mode when camera audio cannot be read."
+                ? "Reuses originals for small files and retained uploads. Large local files use selected-window video proxies with scratch audio. Browsers without reliable audio capture use originals."
                 : "Reuses retained originals and uploads only missing originals once. The proof still renders only the selected 60 seconds; uploads are resumable and retained for 72 hours."
               : `Originals upload once, then the full timeline is submitted once. The server resumes internally in ${formatDurationLabel(MULTICAM_RENDER_CHECKPOINT_SECONDS)} checkpoints.`}
           </span>
@@ -9463,6 +9423,11 @@ function MultiCamCombiner({
               type="button"
               className={`nle-mini-btn ${proofSourceMode === "small_proxy" ? "is-active" : ""}`}
               onClick={() => {
+                if (typeof document.createElement("video").captureStream !== "function" || /firefox/i.test(navigator.userAgent)) {
+                  setProofSourceMode("originals_once");
+                  setStatusMessage("This browser uses original recordings so camera scratch audio and verified sync stay intact.");
+                  return;
+                }
                 setProofSourceMode("small_proxy");
                 setRecoverableProjectStatus("");
                 setStatusMessage(
