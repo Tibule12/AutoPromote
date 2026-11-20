@@ -2,7 +2,7 @@
   "headless": true,
   "muted": true,
   "mockedBrowserResponses": false,
-  "frontendTests": 11,
+  "frontendTests": 22,
   "backendTests": 44,
   "pythonRunnerTests": 8,
   "releaseChunkTests": 18,
@@ -23,8 +23,69 @@
     "cudaSpeechInference": true,
     "videoEncoder": "h264_nvenc",
     "executionElapsedSeconds": 138.12,
-    "nativeCamRender": false
+    "nativeCamRender": true
   },
   "originalAuthSha256": "00d48e87bd9b77ba9ead11c92bf93039f43fc3e7e6b322c3e379f6b4dac55254",
-  "readinessPromotion": false
+  "readinessPromotion": false,
+  "finder": {
+    "sourceSeconds": 45,
+    "suggestions": 2,
+    "device": "gpu",
+    "reason": "gpu_primary"
+  },
+  "studio": {
+    "jobId": "viral_c8c41ef1a9dd1be45a35dd52cf02fd1ad0b3745258c8a7b0e143578e9a91b31d",
+    "device": "gpu",
+    "reason": "gpu_primary",
+    "sourceSeconds": 45.011,
+    "elapsedSeconds": 15.897,
+    "fullDecode": true,
+    "audioVerified": true,
+    "sha256": "ed6e006498f1eab2f4e58258e03213784872d729a2223378be3552f83a7aad80"
+  },
+  "camFollowThrough": {
+    "ownershipPathCorrected": true,
+    "sameVideoSyncIdentity": true,
+    "manualCutsMappingGateCorrected": true,
+    "automaticMappingRemainsStrict": true,
+    "nativeDeliveryQualification": "Both final production worker outputs downloaded and fully decoded, sound verified, all nine final quality checks passed. GPU-first through live API; CPU fallback through bounded loopback qualification using production CPU Job and normal account reservation. Two-angle source-derived diagnostic, not independent physical cameras."
+  },
+  "pythonTests": 29,
+  "documentationTests": 17,
+  "camNativeDeliveries": [
+    {
+      "jobId": "40a54601-5b9e-4b75-a8eb-399f7a857318",
+      "device": "gpu",
+      "routeReason": "gpu_primary",
+      "encoder": "h264_nvenc",
+      "durationSeconds": 30,
+      "workerSeconds": 16.983,
+      "totalSeconds": 161.543,
+      "allFinalQualityChecksPassed": true,
+      "postRenderMaxSyncResidualSeconds": 0,
+      "fullDecode": true,
+      "sha256": "ba5cd92369e267bb53507ec51abbf99e30ce0b2f911eb1ba3325c8debfd499b6",
+      "audioMeanDb": -18,
+      "audioPeakDb": -1.7,
+      "completionEmailRecorded": true
+    },
+    {
+      "jobId": "0da8ccdf-cfcc-4db1-8407-deccdb62ab78",
+      "device": "cpu",
+      "routeReason": "gpu_unavailable",
+      "encoder": "libx264",
+      "durationSeconds": 30,
+      "workerSeconds": 31.688,
+      "totalSeconds": 87.923,
+      "allFinalQualityChecksPassed": true,
+      "postRenderMaxSyncResidualSeconds": 0,
+      "fullDecode": true,
+      "sha256": "839252c938676ddae81f2aa6e34bed1f82b83e9b59ffc87b4fb19126db897917",
+      "audioMeanDb": -18,
+      "audioPeakDb": -1.7,
+      "completionEmailRecorded": true
+    }
+  ],
+  "userConfirmedEmailReceipt": true,
+  "gpuColdStartLimit": "GPU worker processing16.983s versus CPU31.688s; cold total161.543s versus87.923s. No end-to-end speedup claim."
 }

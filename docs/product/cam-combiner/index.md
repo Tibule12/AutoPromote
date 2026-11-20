@@ -58,17 +58,22 @@ Aligns camera material and optional master audio using the existing deterministi
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Select up to three camera recordings and optional master audio in setup, or open the same empty editor and import them there.
+2. Review speaker detection, reaction shots, master audio and minimum shot length in the shared editor. Render treatment selects finishing and price, not a promised output resolution.
+3. For cloud export with master audio, use camera recordings longer than 20 seconds so start, middle and end sync can be proved. Confirm speaker-channel mapping when automatic speaker switching is enabled.
+4. Review and confirm the proof or full render, then inspect the actual downloaded picture and sound.
 
 **Preview:** Preview follows the session camera plan and sync offsets; inspect lip/audio alignment at several points.
 
-**Final render:** Existing deterministic camera render is authoritative. A generated model must not replace camera synchronization or the final switching render.
+**Final render:** The existing deterministic camera renderer remains authoritative. Cloud renders prefer GPU video encoding, with CPU fallback when the GPU cannot start. Both entries use this same renderer; models do not replace synchronization. Review final cuts and sound.
 
 **Limits**
 
 - Source and test evidence establish the documented contract, not broad professional workflow qualification.
 - Review audio alignment, speaker mapping and final moving output for this recording.
+- GPU cold starts add startup time; GPU selection alone does not guarantee a shorter end-to-end render.
+- Master-audio cloud sync needs camera recordings longer than 20 seconds. The editor blocks shorter recordings before upload or credits.
+- Browser proof proxies must independently pass sync. If they fail, originals mode is selected before credits; run Render again to review the original transfer size.
 
 **Common errors**
 
@@ -254,17 +259,22 @@ Builds an editable switching plan using audio activity, continuity and reaction 
 
 **Workflow**
 
-1. Generate/edit the activity-based switching plan and its reaction/split views.
-2. Rebuild/review the switching plan and inspect the actual rendered audio/video alignment.
+1. Select up to three camera recordings and optional master audio in setup, or open the same empty editor and import them there.
+2. Review speaker detection, reaction shots, master audio and minimum shot length in the shared editor. Render treatment selects finishing and price, not a promised output resolution.
+3. For cloud export with master audio, use camera recordings longer than 20 seconds so start, middle and end sync can be proved. Confirm speaker-channel mapping when automatic speaker switching is enabled.
+4. Review and confirm the proof or full render, then inspect the actual downloaded picture and sound.
 
 **Preview:** Preview follows the session camera plan and sync offsets; inspect lip/audio alignment at several points.
 
-**Final render:** Existing deterministic camera render is authoritative. A generated model must not replace camera synchronization or the final switching render.
+**Final render:** The existing deterministic camera renderer remains authoritative. Cloud renders prefer GPU video encoding, with CPU fallback when the GPU cannot start. Both entries use this same renderer; models do not replace synchronization. Review final cuts and sound.
 
 **Limits**
 
 - Source and test evidence establish the documented contract, not broad professional workflow qualification.
 - Review audio alignment, speaker mapping and final moving output for this recording.
+- GPU cold starts add startup time; GPU selection alone does not guarantee a shorter end-to-end render.
+- Master-audio cloud sync needs camera recordings longer than 20 seconds. The editor blocks shorter recordings before upload or credits.
+- Browser proof proxies must independently pass sync. If they fail, originals mode is selected before credits; run Render again to review the original transfer size.
 
 **Common errors**
 

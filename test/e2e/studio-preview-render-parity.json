@@ -5,13 +5,14 @@
       "reports/cam-entry-gpu-primary-20261120/README.md"
     ],
     "scope": "Shared Cam Combiner setup/empty-entry controls and GPU-primary worker routing with fenced CPU fallback; no separate render engine.",
-    "verification": "44 backend, 11 frontend, 8 runner, 18 release/chunk tests; strict builds; signed-in setup/import/control/sync/moving preview; eight welcome comparisons; real GPU-job CUDA/NVENC runtime qualification (2m18.12s). Native production delivery qualification follows.",
+    "verification": "44 backend,22 frontend,29 Python and17 documentation tests; strict builds; signed-in three-camera settings/import/sync/moving preview; eight welcome comparisons. Serving Finder GPU scan2suggestions and45.011s Studio export15.897s. Native30s Cam GPU (16.983s worker/161.543s total) and controlled CPU fallback (31.688s/87.923s) pass all final gates, full decode, zero measured sync residual and sound checks. Both completion emails recorded and owner confirms receipt.",
     "remainingBlockers": [
-      "Broad media/concurrency and measured GPU/CPU delivery qualification",
+      "Broad independent-camera media/concurrency and automatic speech ownership qualification",
+      "Browser proxy may fail strict sync and require original-media retry; cold GPU startup can dominate short jobs",
       "Whole-Studio S02/S04/S03 and full predictive picture/audio parity remain open"
     ],
     "readinessPromotion": false,
-    "nextTask": "Verify serving release and native GPU/fallback results through ordinary account endpoints."
+    "nextTask": "Verify final serving UI/help and retain normal expiry/download evidence; continue broad media/concurrency and shared S02/S04/S03."
   },
   "featureGuidesLive20261119": {
     "date": "2026-11-19",
