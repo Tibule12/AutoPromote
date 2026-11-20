@@ -5,14 +5,14 @@
       "reports/cam-entry-gpu-primary-20261120/README.md"
     ],
     "scope": "Shared Cam Combiner setup/empty-entry controls and GPU-primary worker routing with fenced CPU fallback; no separate render engine.",
-    "verification": "44 backend,22 frontend,29 Python and17 documentation tests; strict builds; signed-in three-camera settings/import/sync/moving preview; eight welcome comparisons. Serving Finder GPU scan2suggestions and45.011s Studio export15.897s. Native30s Cam GPU (16.983s worker/161.543s total) and controlled CPU fallback (31.688s/87.923s) pass all final gates, full decode, zero measured sync residual and sound checks. Both completion emails recorded and owner confirms receipt. Final serving check found and corrects ready-link loss during redundant SDK metadata resolution; two regression cases preserve ready media URLs and legacy resolution.",
+    "verification": "44 backend,22 frontend,29 Python and17 documentation tests; strict builds; signed-in three-camera settings/import/sync/moving preview; eight welcome comparisons. Serving Finder GPU scan2suggestions and45.011s Studio export15.897s. Native30s Cam GPU (16.983s worker/161.543s total) and controlled CPU fallback (31.688s/87.923s) pass all final gates, full decode, zero measured sync residual and sound checks. Both completion emails recorded and owner confirms receipt. Final serving check found and corrects ready-link loss during redundant SDK metadata resolution; two regression cases preserve ready media URLs and legacy resolution. Serving07187202 signed-in playback reaches29.86s/29.89s for both1080p masters and contextual help returns200 with no errors/blocked writes; original login unchanged. Actions follow-through:31 targeted export/color/project tests,9 modern voice DSP and9 Cam release tests pass; repeated browser logo case passes twice. Latest complete remote checks remain pending.",
     "remainingBlockers": [
       "Broad independent-camera media/concurrency and automatic speech ownership qualification",
       "Browser proxy may fail strict sync and require original-media retry; cold GPU startup can dominate short jobs",
       "Whole-Studio S02/S04/S03 and full predictive picture/audio parity remain open"
     ],
     "readinessPromotion": false,
-    "nextTask": "Verify final signed-in library playback and contextual help after ready-link client release; continue broad media/concurrency and shared S02/S04/S03."
+    "nextTask": "Confirm the repaired main Actions and Cam deployment; continue broad independent-camera media/concurrency and shared S02/S04/S03."
   },
   "featureGuidesLive20261119": {
     "date": "2026-11-19",

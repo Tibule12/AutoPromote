@@ -103,6 +103,8 @@ function Harness() {
           lift: finishFx?.lift ?? 0,
           lutPresetId: advancedColor?.lutPresetId || "",
           lutSize: advancedColor?.lut?.size || 0,
+          advancedColor,
+          finishFx,
           curveShadows: advancedColor?.curve?.shadows ?? 0,
         })}
       </output>
@@ -362,12 +364,23 @@ test('Inspect node selects an off-canvas branch and keeps its canonical pose int
 test('ColorCorrector applies Camera CST, Film Emulation, HSL Qualifier, Power Window, and Preset Import/Export',()=>{
   render(<Harness/>);
   fireEvent.click(screen.getByTestId('flow-node-ColorCorrector:finish'));
+  fireEvent.change(screen.getByTestId('flow-lut-preset-select'),{target:{value:'kodak_2383'}});
   fireEvent.change(screen.getByTestId('flow-cst-profile-select'),{target:{value:'apple_log'}});
   fireEvent.change(screen.getByTestId('flow-film-emulation-select'),{target:{value:'35mm_halation'}});
   fireEvent.change(screen.getByTestId('flow-hsl-qualifier-select'),{target:{value:'skin_isolate'}});
   fireEvent.change(screen.getByTestId('flow-power-window-select'),{target:{value:'subject_spotlight'}});
   const state=JSON.parse(screen.getByTestId('state-readout').textContent);
-  expect(state.lutPresetId).toBe('cst:apple_log->rec709');
+  // Camera input conversion is composed once by the renderer, separately from
+  // a creative LUT. Selecting a camera profile must not replace that LUT.
+  expect(state.advancedColor).toMatchObject({
+    cameraProfile: 'apple_log',
+    qualifierPresetId: 'skin_isolate',
+    powerWindowPresetId: 'subject_spotlight',
+  });
+  expect(state.advancedColor.qualifier).toEqual(expect.any(Object));
+  expect(state.advancedColor.powerWindow).toEqual(expect.any(Object));
+  expect(state.finishFx.filmEmulation).toBe('35mm_halation');
+  expect(state.lutPresetId).toBe('kodak_2383');
   expect(state.lutSize).toBe(17);
   expect(screen.getByTestId('flow-capture-shot-ref')).toBeInTheDocument();
   expect(screen.getByTestId('flow-export-preset')).toBeInTheDocument();

@@ -7889,7 +7889,14 @@ describe("ViralClipStudio timeline sequencing", () => {
 
       expect(exportedBlobs).toHaveLength(4);
       const [srtText, vttText, otioText, edlText] = await Promise.all(
-        exportedBlobs.map(blob => new Response(blob).text())
+        exportedBlobs.map(blob => new Promise((resolve, reject) => {
+          // Read the actual downloaded bytes with jsdom's Blob implementation;
+          // the auth-only Response mock deliberately has no body reader.
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => reject(reader.error);
+          reader.readAsText(blob);
+        }))
       );
       expect(srtText).toContain("00:00:01,000 --> 00:00:03,500");
       expect(srtText).not.toContain("Trimmed before in point");
