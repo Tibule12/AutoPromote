@@ -47,17 +47,18 @@ jobs:
           echo "Installing frontend devDependencies"
           npm ci --prefix frontend || (echo "frontend npm ci failed — falling back to npm install" && npm install --prefix frontend)
 
-      - name: Prepare locked media tools
-        timeout-minutes: 2
-        run: |
-          node --test test/ci/prepare-media-tools.test.cjs
-          node scripts/ci/prepare-media-tools.cjs
-
       - name: Install and verify CPU preview runtime
         timeout-minutes: 10
         run: |
+          # The npm browser fixture binary predates the final speech filters.
+          # Use the stable runner's modern system runtime for real DSP tests.
+          if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
+            sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 update
+            sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 install --yes --no-install-recommends ffmpeg
+          fi
           ffmpeg -version
           ffprobe -version
+          ffmpeg -nostdin -v error -f lavfi -i anullsrc=r=48000:cl=stereo -t 0.05 -af 'afftdn=tn=1:gs=4,alimiter=latency=true' -f null -
           python -m pip install --disable-pip-version-check --timeout 20 --retries 2 --only-binary=:all: --requirement python_media_worker/requirements-ci.txt
           PYTHONPATH=python_media_worker python -c "import numpy, PIL, studio_voice_bus_preview; print('CPU preview imports ready: NumPy', numpy.__version__, 'Pillow', PIL.__version__)"
 
