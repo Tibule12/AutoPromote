@@ -1251,6 +1251,7 @@ try {
   // neither project payloads nor remote billing/worker infrastructure.
   app.use('/api/product-assistance', require('./routes/productAssistanceRoutes')());
   // Discord interactions require the raw body for signature verification, so parse them before the global JSON middleware.
+  app.use(require("./utils/mediaTransferBudget").admitLargeStructuredBody);
   app.use(
     "/api/discord/interactions",
     express.json({
@@ -2337,6 +2338,8 @@ try {
         process.env.VERCEL_GIT_COMMIT_SHA ||
         null;
       extended.diagnostics.backgroundJobsEnabled = process.env.ENABLE_BACKGROUND_JOBS === "true";
+      extended.diagnostics.mediaTransfers = require("./utils/mediaTransferBudget").transfers.snapshot();
+      extended.diagnostics.apiProcessesPublishingTasks = process.env.API_PROCESS_PUBLISHING_TASKS !== "false";
 
       // OpenAI configuration status
       extended.diagnostics.openai = {
@@ -3136,16 +3139,18 @@ try {
 
       setInterval(async () => {
         if (taskRunning) return;
-        const work = await Promise.all(["youtube_upload", "platform_post", "media_transform"].map(type => backgroundWork.hasTasks(type))).catch(error => {
-          console.warn("[BG][tasks] Work listener unavailable:", error.message); return [];
-        });
-        if (!work.some(Boolean)) return;
-        const ok = await acquireLock("promotionTasks", TASK_PROCESS_INTERVAL_MS * 2).catch(
-          () => false
-        );
-        if (!ok) return;
         taskRunning = true;
         try {
+          const publishingHere = process.env.API_PROCESS_PUBLISHING_TASKS !== "false";
+          const taskTypes = publishingHere ? ["youtube_upload", "platform_post", "media_transform"] : ["media_transform"];
+          const work = await Promise.all(taskTypes.map(type => backgroundWork.hasTasks(type))).catch(error => {
+            console.warn("[BG][tasks] Work listener unavailable:", error.message); return [];
+          });
+          if (!work.some(Boolean)) return;
+          const ok = await acquireLock("promotionTasks", TASK_PROCESS_INTERVAL_MS * 2).catch(
+            () => false
+          );
+          if (!ok) return;
           const jitter = require("crypto").randomInt(0, 250);
           if (jitter) await new Promise(r => setTimeout(r, jitter));
           let processed = 0;
@@ -3153,8 +3158,8 @@ try {
           const MAX_BATCH = 5;
           const mt = require("./services/mediaTransform");
           for (let i = 0; i < MAX_BATCH; i++) {
-            const yt = await processNextYouTubeTask({ background: true });
-            const pf = await processNextPlatformTask({ background: true });
+            const yt = publishingHere ? await processNextYouTubeTask({ background: true }) : null;
+            const pf = publishingHere ? await processNextPlatformTask({ background: true }) : null;
             if (mt && typeof mt.processNextMediaTransformTask === "function") {
               await mt.processNextMediaTransformTask({ background: true });
             }

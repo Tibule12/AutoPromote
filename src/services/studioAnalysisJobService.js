@@ -1,4 +1,7 @@
 const crypto = require("crypto");
+const fs = require("node:fs");
+const { pipeline } = require("node:stream/promises");
+const { fileSha256 } = require("../utils/temporaryMediaUpload");
 const axios = require("axios");
 const admin = require("firebase-admin");
 const { db } = require("../firebaseAdmin");
@@ -190,9 +193,17 @@ const sameJob = (record, { uid, jobId, fingerprint }) => {
 // The Firestore staging record is created before the GCS object. Repeating the
 // same request can finish staging after a process exits between these steps.
 const createStudioAnalysisJob = async (input, { firestore = db, storage = bucketFor() } = {}) => {
-  if (!Buffer.isBuffer(input.buffer) || input.buffer.length < 1 ||
-      input.buffer.length > MAX_SOURCE_BYTES || hash(input.buffer) !== input.sourceSha256)
-    throw invalid();
+  let sourceBytes;
+  if (input.sourcePath) {
+    const stat = await fs.promises.lstat(input.sourcePath).catch(() => null);
+    if (!stat?.isFile() || stat.isSymbolicLink() || stat.size < 1 || stat.size > MAX_SOURCE_BYTES ||
+        await fileSha256(input.sourcePath) !== input.sourceSha256) throw invalid();
+    sourceBytes = stat.size;
+  } else {
+    if (!Buffer.isBuffer(input.buffer) || input.buffer.length < 1 ||
+        input.buffer.length > MAX_SOURCE_BYTES || hash(input.buffer) !== input.sourceSha256) throw invalid();
+    sourceBytes = input.buffer.length;
+  }
   const request = normalizeRequest(input);
   const { uid, requestId, buffer } = input;
   const jobId = jobIdFor(uid, requestId);
@@ -237,8 +248,8 @@ const createStudioAnalysisJob = async (input, { firestore = db, storage = bucket
 
   const file = storage.file(objectPath(uid, jobId));
   try {
-    await file.save(buffer, {
-      resumable: false,
+    const saveOptions = {
+      resumable: true,
       preconditionOpts: { ifGenerationMatch: 0 },
       metadata: {
         contentType: "video/mp4",
@@ -249,7 +260,10 @@ const createStudioAnalysisJob = async (input, { firestore = db, storage = bucket
           jobId,
         },
       },
-    });
+    };
+    if (input.sourcePath)
+      await pipeline(fs.createReadStream(input.sourcePath), file.createWriteStream(saveOptions));
+    else await file.save(buffer, saveOptions);
   } catch (error) {
     if (![412, "conditionNotMet"].includes(error?.code)) throw unavailable();
   }
@@ -258,7 +272,7 @@ const createStudioAnalysisJob = async (input, { firestore = db, storage = bucket
     metadata?.metadata?.ownerUid !== uid ||
     metadata?.metadata?.sourceSha256 !== request.sourceSha256 ||
     metadata?.metadata?.jobId !== jobId ||
-    Number(metadata.size) !== buffer.length
+    Number(metadata.size) !== sourceBytes
   )
     throw unavailable();
   const result = await firestore.runTransaction(async transaction => {

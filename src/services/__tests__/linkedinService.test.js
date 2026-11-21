@@ -75,6 +75,19 @@ afterEach(() => {
   delete global.__linkedin_connection_update;
 });
 
+test("a provider 500 retains the submission marker and prevents a blind resend", async () => {
+  let receipt;
+  safeFetch.mockResolvedValueOnce({ ok: false, status: 500, text: async () => '{"message":"server error"}' });
+  const input = { uid: "user1", personId: "fixture-person", text: "One release",
+    onSubmissionAccepted: async value => { receipt = value; } };
+  await expect(postToLinkedIn(input)).rejects.toThrow("server error");
+  expect(receipt.phase).toBe("submitting");
+  const calls = safeFetch.mock.calls.length;
+  await expect(postToLinkedIn({ ...input, submissionReceipt: receipt }))
+    .rejects.toMatchObject({ errorClass: "publication_unconfirmed" });
+  expect(safeFetch.mock.calls).toHaveLength(calls);
+});
+
 describe("LinkedIn expired credentials", () => {
   test("stops an expired ISO timestamp credential and asks for reconnect", async () => {
     global.__linkedin_connection = {
@@ -130,6 +143,31 @@ describe("LinkedIn expired credentials", () => {
 });
 
 describe("LinkedIn posting with hashtags", () => {
+  test("confirms a receipt before return and resumes it without sending a second post", async () => {
+    const persist = jest.fn(async () => {});
+    const args = { uid: "user1", text: "Original release", onSubmissionAccepted: persist };
+    await postToLinkedIn(args);
+    expect(persist.mock.calls[0][0]).toMatchObject({ platform: "linkedin", phase: "submitting" });
+    const receipt = persist.mock.calls.at(-1)[0];
+    expect(receipt).toMatchObject({ phase: "confirmed", shareId: "share_1" });
+    const posts = () => safeFetch.mock.calls.filter(([url]) => url.includes("/v2/ugcPosts")).length;
+    const before = posts();
+    await expect(postToLinkedIn({ ...args, submissionReceipt: receipt }))
+      .resolves.toMatchObject({ success: true, shareId: "share_1", recovered: true });
+    expect(posts()).toBe(before);
+  });
+
+  test("a process loss at the public-post boundary holds the release instead of resending", async () => {
+    const persist = jest.fn(async receipt => {
+      if (receipt?.phase === "submitting") throw new Error("Process stopped before request");
+    });
+    const args = { uid: "user1", text: "Interrupted release", onSubmissionAccepted: persist };
+    const before = safeFetch.mock.calls.filter(([url]) => url.includes("/v2/ugcPosts")).length;
+    await expect(postToLinkedIn(args)).rejects.toThrow("Process stopped");
+    await expect(postToLinkedIn({ ...args, submissionReceipt: persist.mock.calls[0][0] }))
+      .rejects.toMatchObject({ errorClass: "publication_unconfirmed" });
+    expect(safeFetch.mock.calls.filter(([url]) => url.includes("/v2/ugcPosts"))).toHaveLength(before);
+  });
   test("streams the video and polls its opaque asset ID before posting", async () => {
     const { streamLinkedInVideo } = require("../../utils/streamLinkedInVideo");
     await expect(postToLinkedIn({ uid: "user1", text: "Festival", videoUrl: "https://storage.googleapis.com/b/video.mp4" }))

@@ -4,7 +4,13 @@ const crypto = require("crypto");
 const mockSave = jest.fn().mockResolvedValue();
 const mockDelete = jest.fn().mockResolvedValue();
 const mockSignedUrl = jest.fn().mockResolvedValue(["https://storage.example.test/tracking-source"]);
-const mockFile = jest.fn(() => ({ save: mockSave, delete: mockDelete, getSignedUrl: mockSignedUrl }));
+const mockFile = jest.fn(() => ({ save: mockSave, delete: mockDelete, getSignedUrl: mockSignedUrl,
+  createWriteStream: options => {
+    const chunks = [];
+    return new (require("node:stream").Writable)({ write(c, _e, next) { chunks.push(c); next(); },
+      final(next) { mockSave(Buffer.concat(chunks), options).then(() => next(), next); } });
+  },
+}));
 jest.mock("../src/authMiddleware", () => (req, res, next) => {
   req.user = { uid: "tracking-user" };
   req.userId = "tracking-user";

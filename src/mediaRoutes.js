@@ -3,7 +3,10 @@ const express = require("express");
 const { errorSummary } = require("./utils/logSanitizer");
 const router = express.Router();
 const crypto = require("crypto");
-const multer = require("multer");
+const fs = require("node:fs");
+const { pipeline: streamPipeline } = require("node:stream/promises");
+const { temporaryMediaUpload, fileSha256 } = require("./utils/temporaryMediaUpload");
+const { admitMediaTransfer } = require("./utils/mediaTransferBudget");
 const axios = require("axios");
 const admin = require("firebase-admin");
 const { v4: uuidv4 } = require("uuid");
@@ -881,14 +884,8 @@ const getRequestedMulticamDuration = body => {
   return Math.max(0, ...candidates.map(value => Number(value || 0)).filter(Number.isFinite));
 };
 
-// Configure Multer (Buffer storage)
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 500 * 1024 * 1024 }, // 500MB Limit
-});
-const studioAnalysisUpload = multer({
-  storage: multer.memoryStorage(), limits: { fileSize: MAX_SOURCE_BYTES, files: 1 },
-});
+const upload = temporaryMediaUpload(500 * 1024 * 1024);
+const studioAnalysisUpload = temporaryMediaUpload(MAX_SOURCE_BYTES);
 
 // Cloud Run render Jobs cannot carry a Firebase user token. This callback is
 // intentionally mounted before user auth and protected by a dedicated managed
@@ -1135,7 +1132,7 @@ router.post("/studio-assets/source-frame-rate", requireTesterEditingFeature("cli
   }
 });
 
-router.post('/studio-assets/voice-bus-preview', requireTesterEditingFeature('clipRender'), async (req, res) => {
+router.post('/studio-assets/voice-bus-preview', requireTesterEditingFeature('clipRender'), require('./utils/mediaTransferBudget').admitVoicePreview, async (req, res) => {
   if (req.body?.version === 2 && !require('../frontend/src/components/studioSourceDialoguePolicy')
     .sourceDialoguePreviewEnabled(req.user.uid, process.env.STUDIO_SOURCE_DIALOGUE_PREVIEW_ENABLED,
       process.env.STUDIO_SOURCE_DIALOGUE_PREVIEW_UIDS))
@@ -1399,6 +1396,7 @@ router.post("/studio-analysis-jobs/from-source", requireTesterEditingFeature("au
   });
 
 router.post("/studio-analysis-jobs", requireTesterEditingFeature("audioExtract"),
+  admitMediaTransfer,
   (req, res, next) => studioAnalysisUpload.single("file")(req, res, error => {
     if (error?.code === "LIMIT_FILE_SIZE")
       return res.status(413).json({ code: "STUDIO_ANALYSIS_SOURCE_TOO_LARGE" });
@@ -1411,11 +1409,11 @@ router.post("/studio-analysis-jobs", requireTesterEditingFeature("audioExtract")
       let anchors;
       try { anchors = JSON.parse(req.body?.anchors || ""); }
       catch (_) { return res.status(400).json({ code: "STUDIO_ANALYSIS_JOB_INVALID" }); }
-      const sourceSha256 = crypto.createHash("sha256").update(req.file.buffer).digest("hex");
+      const sourceSha256 = await fileSha256(req.file.path);
       const job = await createStudioAnalysisJob({
         uid: req.user.uid, requestId: req.body.requestId,
         projectId: req.body.projectId, sourceAssetId: req.body.sourceAssetId,
-        sourceSha256, buffer: req.file.buffer, anchors,
+        sourceSha256, sourcePath: req.file.path, anchors,
         mode: req.body.mode, start: req.body.start, end: req.body.end,
       });
       return res.status(job.status === "queued" ? 202 : 200).json(job);
@@ -1459,7 +1457,7 @@ router.post("/studio-analysis-jobs/:jobId/cancel", requireTesterEditingFeature("
   });
 
 // Route: POST /api/media/transcribe
-router.post("/track-studio-faces", requireTesterEditingFeature("audioExtract"), upload.single("file"), async (req, res) => {
+router.post("/track-studio-faces", requireTesterEditingFeature("audioExtract"), admitMediaTransfer, upload.single("file"), async (req, res) => {
   let temporaryFile;
   try {
     if (!req.file) return res.status(400).json({ error: "Upload the source video" });
@@ -1494,7 +1492,7 @@ router.post("/track-studio-faces", requireTesterEditingFeature("audioExtract"), 
           error: "Choose a Studio project and source before analysis",
         });
       }
-      sourceSha256 = crypto.createHash("sha256").update(req.file.buffer).digest("hex");
+      sourceSha256 = await fileSha256(req.file.path);
       const sourceAssetId = req.body.sourceAssetId;
       if (typeof sourceAssetId === "string" && sourceAssetId.includes(":sha256:")) {
         const qualifiedHash = /:sha256:([a-f0-9]{64})$/.exec(sourceAssetId)?.[1];
@@ -1507,7 +1505,9 @@ router.post("/track-studio-faces", requireTesterEditingFeature("audioExtract"), 
       }
     }
     temporaryFile = admin.storage().bucket().file(`temp_tracking/${req.user.uid}/${uuidv4()}.mp4`);
-    await temporaryFile.save(req.file.buffer, { resumable: false, metadata: { contentType: req.file.mimetype } });
+    await streamPipeline(fs.createReadStream(req.file.path), temporaryFile.createWriteStream({
+      resumable: true, metadata: { contentType: req.file.mimetype },
+    }));
     const [url] = await temporaryFile.getSignedUrl({ action: "read", expires: Date.now() + 15*60*1000 });
     const response = await postToMediaWorker("/track-studio-faces", { video_url: url, anchors, start, end, mode }, 720000);
     if (mode === "source_shots") {
@@ -1635,6 +1635,7 @@ router.post(
 router.post(
   "/transcribe",
   requireTesterEditingFeature("audioExtract"),
+  admitMediaTransfer,
   upload.single("file"),
   async (req, res) => {
     try {
@@ -1655,34 +1656,26 @@ router.post(
         metadata: { contentType: req.file.mimetype },
       });
 
-      blobStream.on("error", err => {
-        console.error(errorSummary(err));
-        res.status(500).json({ error: "Upload to storage failed" });
+      await streamPipeline(fs.createReadStream(req.file.path), blobStream);
+      // 2. Get Signed URL (or make public? Signed is safer)
+      // Python worker needs to access it.
+      const [url] = await blob.getSignedUrl({
+        action: "read",
+        expires: Date.now() + 1000 * 60 * 60, // 1 hour
       });
 
-      blobStream.on("finish", async () => {
-        // 2. Get Signed URL (or make public? Signed is safer)
-        // Python worker needs to access it.
-        const [url] = await blob.getSignedUrl({
-          action: "read",
-          expires: Date.now() + 1000 * 60 * 60, // 1 hour
+      console.log(`[MediaRoute] File uploaded. Sending to Python Worker...`);
+
+      // 3. Call Service (Async Job)
+      try {
+        // Old sync: const segments = await videoEditingService.transcribeVideo(url);
+        const job = await videoEditingService.startTranscriptionJob(url, userId, {
+          ...speechOptions,
         });
-
-        console.log(`[MediaRoute] File uploaded. Sending to Python Worker...`);
-
-        // 3. Call Service (Async Job)
-        try {
-          // Old sync: const segments = await videoEditingService.transcribeVideo(url);
-          const job = await videoEditingService.startTranscriptionJob(url, userId, {
-            ...speechOptions,
-          });
-          res.json({ success: true, jobId: job.jobId, message: "Transcription started" });
-        } catch (err) {
-          res.status(500).json({ error: "Transcription service failed: " + err.message });
-        }
-      });
-
-      blobStream.end(req.file.buffer);
+        res.json({ success: true, jobId: job.jobId, message: "Transcription started" });
+      } catch (err) {
+        res.status(500).json({ error: "Transcription service failed: " + err.message });
+      }
     } catch (e) {
       console.error(errorSummary(e));
       res.status(500).json({ error: e.message });

@@ -1,5 +1,8 @@
 const crypto = require("crypto");
-const { Readable } = require("stream");
+const { Readable, Writable } = require("stream");
+const fs = require("node:fs/promises");
+const os = require("node:os");
+const path = require("node:path");
 
 jest.mock("../src/services/studioDirectorProjectBinding", () => ({
   getOwnedStudioSourceBinding: jest.fn().mockResolvedValue(null),
@@ -115,6 +118,19 @@ const fakeStorage = () => {
           metadata: {
             size: String(buffer.length),
             metadata: options.metadata.metadata,
+          },
+        });
+      },
+      createWriteStream: options => {
+        const chunks = [];
+        return new Writable({
+          write(chunk, _enc, callback) { chunks.push(Buffer.from(chunk)); callback(); },
+          final(callback) {
+            if (objects.has(path)) return callback(Object.assign(new Error("exists"), { code: 412 }));
+            saves++;
+            const buffer = Buffer.concat(chunks);
+            objects.set(path, { buffer, metadata: { size: String(buffer.length), metadata: options.metadata.metadata } });
+            callback();
           },
         });
       },
@@ -991,4 +1007,21 @@ test("a cleanup outage does not stall queued analysis", async () => {
   expect(await getOwnedStudioAnalysisJob({ uid: "owner-1", jobId: next.jobId, firestore }))
     .toMatchObject({ status: "completed" });
   expect(firestore.docs.get(finishedPath).cleanupPending).toBe(true);
+});
+
+
+test("a disk-backed multipart source verifies its digest and streams to durable storage", async () => {
+  const firestore = fakeFirestore(), storage = fakeStorage();
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "analysis-upload-test-"));
+  const sourcePath = path.join(directory, "source.mp4");
+  try {
+    await fs.writeFile(sourcePath, source);
+    const job = await createStudioAnalysisJob(input({ buffer: undefined, sourcePath }), { firestore, storage });
+    expect(job.status).toBe("queued");
+    expect(storage.saves).toBe(1);
+    expect([...storage.objects.values()][0].buffer).toEqual(source);
+    await expect(createStudioAnalysisJob(input({ buffer: undefined, sourcePath, sourceSha256: "a".repeat(64) }),
+      { firestore, storage })).rejects.toMatchObject({ code: "STUDIO_ANALYSIS_JOB_INVALID" });
+    expect(storage.saves).toBe(1);
+  } finally { await fs.rm(directory, { recursive: true, force: true }); }
 });

@@ -1,3 +1,4 @@
+const { nodeReadable } = require("../utils/mediaStreams");
 const { safeFetch, validateUrl } = require("../utils/ssrfGuard");
 const { publishingError } = require("./publishingTaskErrors");
 
@@ -175,10 +176,19 @@ async function verifyRedditVideoPublication({ identity, accessToken, fetchFn }) 
     allowHosts: ["v.redd.it"],
   });
   if (!media.ok) return null;
-  const bytes =
-    typeof media.buffer === "function"
-      ? await media.buffer()
-      : Buffer.from(await media.arrayBuffer());
+  // Some CDNs ignore Range. Read only the signature, then cancel the source.
+  const stream = nodeReadable(media.body);
+  const prefix = [];
+  let size = 0;
+  try {
+    for await (const chunk of stream) {
+      const part = chunk.subarray(0, 12 - size);
+      prefix.push(part);
+      size += part.length;
+      if (size >= 12) break;
+    }
+  } finally { stream.destroy(); }
+  const bytes = Buffer.concat(prefix, size);
   if (bytes.length < 12 || bytes.toString("ascii", 4, 8) !== "ftyp") return null;
   return {
     videoVerified: true,

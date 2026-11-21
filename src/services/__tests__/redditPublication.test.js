@@ -1,3 +1,4 @@
+const { Readable } = require("node:stream");
 jest.mock("../../utils/ssrfGuard", () => ({
   safeFetch: jest.fn(),
   validateUrl: jest.fn().mockResolvedValue({ ok: true }),
@@ -64,13 +65,13 @@ test("completed media metadata still needs accessible MP4 bytes", async () => {
   safeFetch.mockResolvedValueOnce({ ok: true, json: async () => metadata });
   safeFetch.mockResolvedValueOnce({
     ok: true,
-    buffer: async () => Buffer.from("<html>not video</html>"),
+    body: Readable.from([Buffer.from("<html>not video</html>")]),
   });
   await expect(verifyRedditVideoPublication(args)).resolves.toBeNull();
   safeFetch.mockResolvedValueOnce({ ok: true, json: async () => metadata });
   safeFetch.mockResolvedValueOnce({
     ok: true,
-    buffer: async () => Buffer.from("0000ftypisom0000000000000000000000"),
+    body: Readable.from([Buffer.from("0000ftypisom0000000000000000000000")]),
   });
   await expect(verifyRedditVideoPublication(args)).resolves.toMatchObject({
     publicationConfirmed: true,

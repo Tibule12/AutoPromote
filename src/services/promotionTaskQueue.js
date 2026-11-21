@@ -160,6 +160,24 @@ async function replaceSignedTask(ref, current, patch) {
   return next;
 }
 
+async function claimReadyTask(ref, taskId) {
+  // A query is only a candidate list. Recheck and claim atomically so multiple
+  // instances (or an expired global worker lease) cannot publish the same task.
+  return db.runTransaction(async transaction => {
+    const snapshot = await transaction.get(ref);
+    if (!snapshot.exists) return null;
+    const current = snapshot.data();
+    if (!isTaskReadyForProcessing(current)) return null;
+    if (!current._testStub) {
+      const { verifySignature } = require("../utils/docSigner");
+      if (!verifySignature(current)) return null;
+    }
+    const next = signTaskDocument({ ...current, ...buildProcessingUpdate(taskId, current) });
+    transaction.set(ref, next);
+    return next;
+  });
+}
+
 async function notifyPublishingQuotaBlocked({ uid, platform, contentId, quota, used, planTier }) {
   if (!uid) return;
   const dashboardUrl =
@@ -314,7 +332,7 @@ async function processNextYouTubeTask({ background = false } = {}) {
     }
   }
   if (!selectedDoc) return null; // none ready yet
-  const task = { id: selectedDoc.id, ...selectedData };
+  let task = { id: selectedDoc.id, ...selectedData };
   let taskData = { ...selectedData };
 
   // Verify signature before processing
@@ -340,7 +358,9 @@ async function processNextYouTubeTask({ background = false } = {}) {
   }
 
   const taskRef = selectedDoc.ref;
-  taskData = await replaceSignedTask(taskRef, taskData, buildProcessingUpdate(task.id, taskData));
+  taskData = await claimReadyTask(taskRef, task.id);
+  if (!taskData) return null;
+  task = { id: selectedDoc.id, ...taskData };
 
   try {
     const { uploadVideo } = require("./youtubeService");
@@ -1037,7 +1057,7 @@ async function processNextPlatformTask({ background = false } = {}) {
     }
   }
   if (!selectedDoc) return null;
-  const task = { id: selectedDoc.id, ...selectedData };
+  let task = { id: selectedDoc.id, ...selectedData };
   let taskData = { ...selectedData };
 
   // Debug visibility (User explicitly requested upload logs)
@@ -1072,11 +1092,9 @@ async function processNextPlatformTask({ background = false } = {}) {
   } catch (e) {
     console.log("[process] signature verification error", e && e.message);
   }
-  taskData = await replaceSignedTask(
-    selectedDoc.ref,
-    taskData,
-    buildProcessingUpdate(task.id, taskData)
-  );
+  taskData = await claimReadyTask(selectedDoc.ref, task.id);
+  if (!taskData) return null;
+  task = { id: selectedDoc.id, ...taskData };
   let lockId = null; // promote to function-scope so catch handlers can access it
   try {
     const { dispatchPlatformPost } = require("./platformPoster");

@@ -3,7 +3,8 @@ const router = express.Router();
 const { createCaptions, generateTranscription } = require("../services/captionsService");
 const { db } = require("../firebaseAdmin");
 const { audit } = require("../services/auditLogger");
-const multer = require("multer");
+const { temporaryMediaUpload } = require("../utils/temporaryMediaUpload");
+const { admitMediaTransfer } = require("../utils/mediaTransferBudget");
 const ALLOWED_MIME_TYPES = [
   "audio/mpeg",
   "audio/wav",
@@ -17,9 +18,7 @@ const ALLOWED_MIME_TYPES = [
   "video/quicktime",
   "video/x-msvideo",
 ];
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 25 * 1024 * 1024 }, // 25MB Whisper Limit
+const upload = temporaryMediaUpload(25 * 1024 * 1024, {
   fileFilter: (_req, file, cb) => {
     if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
       cb(null, true);
@@ -31,7 +30,7 @@ const upload = multer({
 
 // POST /transcribe relative to mount point
 // Mounted at /api/captions, so full path is /api/captions/transcribe
-router.post("/transcribe", upload.single("file"), async (req, res) => {
+router.post("/transcribe", admitMediaTransfer, upload.single("file"), async (req, res) => {
   // Check Auth - Assuming authMiddleware is used globally or injected here
   // If your app uses a middleware, this check might be redundant but safe
   const userId = req.user?.uid || (req.headers.authorization ? "unknown_user" : null);
@@ -43,7 +42,10 @@ router.post("/transcribe", upload.single("file"), async (req, res) => {
 
   try {
     console.log(`[Transcribe] Processing file, size: ${req.file.size}`);
-    const result = await generateTranscription(req.file.buffer);
+    const result = await generateTranscription(req.file.path, {
+      filename: req.file.originalname,
+      contentType: req.file.mimetype,
+    });
 
     audit.log("captions.transcribed", {
       userId,

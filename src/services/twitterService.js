@@ -3,6 +3,8 @@
 
 const fetch = require("node-fetch");
 const crypto = require("crypto");
+const fs = require("node:fs");
+const { withStagedMedia } = require("../utils/stagedMedia");
 const { db, admin } = require("../firebaseAdmin");
 const { encryptToken, decryptToken, hasEncryption } = require("./secretVault");
 const { safeFetch } = require("../utils/ssrfGuard");
@@ -349,285 +351,281 @@ async function uploadMedia({ uid, mediaUrl, mediaType = "image/jpeg" }) {
   const accessToken = await getValidAccessToken(uid);
   if (!accessToken) throw new Error("No valid Twitter access token found");
 
-  // Download media from URL (allow the media host through SSRF allowlist)
-  let mediaResponse;
-  try {
-    const mediaHost = new URL(mediaUrl).hostname;
-    mediaResponse = await safeFetch(mediaUrl, fetch, {
-      requireHttps: true,
-      allowHosts: [mediaHost],
-    });
-  } catch (e) {
-    throw new Error(`Failed to download media from URL: ${e && e.message}`);
-  }
-  if (!mediaResponse.ok) {
-    // Attempt Firebase Admin SDK download for private storage URLs
-    const m = mediaUrl.match(/^https?:\/\/[^/]+\/([^/]+)\/(.+)$/i);
-    if (m) {
-      const bucketName = m[1];
-      const objectPath = m[2];
-      try {
-        const bucket = admin.storage().bucket(bucketName);
-        const file = bucket.file(objectPath);
-        const data = await file.download();
-        mediaResponse = { ok: true, buffer: async () => data[0] };
-      } catch (err) {
-        throw new Error(`Failed to download media from URL: ${err && err.message}`);
-      }
-    } else {
-      throw new Error("Failed to download media from URL");
-    }
-  }
-
-  let mediaBuffer;
-  try {
-    mediaBuffer = await mediaResponse.buffer();
-  } catch (e) {
-    // If fetch failed or is forbidden (e.g., private storage URL), try using Firebase Admin SDK to download
-    const m = mediaUrl.match(/^https?:\/\/[^/]+\/([^/]+)\/(.+)$/i);
-    if (m) {
-      const bucketName = m[1];
-      const objectPath = m[2];
-      try {
-        const bucket = admin.storage().bucket(bucketName);
-        const file = bucket.file(objectPath);
-        const data = await file.download();
-        mediaBuffer = data[0];
-      } catch (err) {
-        throw new Error(`Failed to download media from storage bucket: ${err && err.message}`);
-      }
-    } else {
-      throw new Error(`Failed to buffer media response: ${e && e.message}`);
-    }
-  }
-  const mediaSize = mediaBuffer.length;
-
-  // Twitter media upload uses v1.1 API with multipart/form-data
-  // Prefer OAuth1.0a user-signed requests (required for many accounts). Fall back to OAuth2 if only OAuth2 tokens are present.
-  const UPLOAD_URL = "https://upload.twitter.com/1.1/media/upload.json";
-
-  // Prefer OAuth1 tokens when available
-  const oauth1 = await getUserOAuth1Tokens(uid);
-  const consumerKey = process.env.TWITTER_CLIENT_ID || process.env.TWITTER_CONSUMER_KEY;
-  const consumerSecret = process.env.TWITTER_CLIENT_SECRET || process.env.TWITTER_CONSUMER_SECRET;
-
-  // Helper to throw helpful guidance when upload fails due to missing OAuth1
-  async function oauth1MissingError() {
-    try {
-      // Mark user's connection doc to indicate OAuth1 is required so the frontend can surface a banner
-      const ref = db.collection("users").doc(uid).collection("connections").doc("twitter");
-      await ref.set(
-        {
-          oauth1_missing: true,
-          oauth1_missingAt: admin.firestore.FieldValue.serverTimestamp(),
-        },
-        { merge: true }
-      );
-    } catch (e) {
-      // Non-fatal; continue to throw the guidance error
-      console.warn("Failed to persist oauth1_missing flag:", e.message);
-    }
-    const err = new Error(
-      "Twitter media upload failed: OAuth1 credentials required for native media uploads. Reconnect with OAuth1 at /api/twitter/oauth1/prepare"
-    );
-    err.code = "oauth1_required";
-    err.reconnectUrl = "/api/twitter/oauth1/prepare";
-    return err;
-  }
-
-  // INIT phase
-  let initResponse;
-  if (oauth1 && consumerKey && consumerSecret) {
-    // Build OAuth1 Authorization header including the form params in the signature
-    const extraParams = {
-      command: "INIT",
-      total_bytes: mediaSize.toString(),
-      media_type: mediaType,
-    };
-    const { buildOauth1Header } = require("../utils/oauth1");
-    const authHeader = buildOauth1Header({
-      method: "POST",
-      url: UPLOAD_URL,
-      consumerKey,
-      consumerSecret,
-      token: oauth1.token,
-      tokenSecret: oauth1.tokenSecret,
-      extraParams,
-    });
-
-    initResponse = await fetch(UPLOAD_URL, {
-      method: "POST",
-      headers: {
-        Authorization: authHeader,
-        "Content-Type": "application/x-www-form-urlencoded",
+  return withStagedMedia(
+    {
+      fetchImpl: fetch,
+      source: async signal => {
+        const mediaHost = new URL(mediaUrl).hostname;
+        const response = await safeFetch(mediaUrl, fetch, {
+          requireHttps: true,
+          allowHosts: [mediaHost],
+          fetchOptions: { signal },
+        });
+        if (response.ok) return response;
+        // Preserve the private Firebase-source fallback using its SDK stream.
+        const match = mediaUrl.match(/^https:\/\/storage\.googleapis\.com\/([^/]+)\/(.+)$/i);
+        if (!match) throw new Error("Failed to download media from URL");
+        response.body?.destroy?.();
+        return {
+          ok: true,
+          body: admin
+            .storage()
+            .bucket(match[1])
+            .file(decodeURIComponent(match[2].split("?")[0]))
+            .createReadStream(),
+        };
       },
-      body: new URLSearchParams(extraParams),
-    });
-  } else {
-    // Fallback: try using OAuth2 Bearer token (may be rejected with 403)
-    if (!accessToken) throw oauth1MissingError();
+    },
+    async ({ filePath, bytes: mediaSize, signal }) => {
+      // Twitter media upload uses v1.1 API with multipart/form-data
+      // Prefer OAuth1.0a user-signed requests (required for many accounts). Fall back to OAuth2 if only OAuth2 tokens are present.
+      const UPLOAD_URL = "https://upload.twitter.com/1.1/media/upload.json";
 
-    initResponse = await safeFetch(UPLOAD_URL, fetch, {
-      fetchOptions: {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
+      // Prefer OAuth1 tokens when available
+      const oauth1 = await getUserOAuth1Tokens(uid);
+      const consumerKey = process.env.TWITTER_CLIENT_ID || process.env.TWITTER_CONSUMER_KEY;
+      const consumerSecret =
+        process.env.TWITTER_CLIENT_SECRET || process.env.TWITTER_CONSUMER_SECRET;
+
+      // Helper to throw helpful guidance when upload fails due to missing OAuth1
+      async function oauth1MissingError() {
+        try {
+          // Mark user's connection doc to indicate OAuth1 is required so the frontend can surface a banner
+          const ref = db.collection("users").doc(uid).collection("connections").doc("twitter");
+          await ref.set(
+            {
+              oauth1_missing: true,
+              oauth1_missingAt: admin.firestore.FieldValue.serverTimestamp(),
+            },
+            { merge: true }
+          );
+        } catch (e) {
+          // Non-fatal; continue to throw the guidance error
+          console.warn("Failed to persist oauth1_missing flag:", e.message);
+        }
+        const err = new Error(
+          "Twitter media upload failed: OAuth1 credentials required for native media uploads. Reconnect with OAuth1 at /api/twitter/oauth1/prepare"
+        );
+        err.code = "oauth1_required";
+        err.reconnectUrl = "/api/twitter/oauth1/prepare";
+        return err;
+      }
+
+      // INIT phase
+      let initResponse;
+      if (oauth1 && consumerKey && consumerSecret) {
+        // Build OAuth1 Authorization header including the form params in the signature
+        const extraParams = {
           command: "INIT",
           total_bytes: mediaSize.toString(),
           media_type: mediaType,
-        }),
-      },
-      requireHttps: true,
-      allowHosts: ["upload.twitter.com"],
-    });
-  }
+        };
+        const { buildOauth1Header } = require("../utils/oauth1");
+        const authHeader = buildOauth1Header({
+          method: "POST",
+          url: UPLOAD_URL,
+          consumerKey,
+          consumerSecret,
+          token: oauth1.token,
+          tokenSecret: oauth1.tokenSecret,
+          extraParams,
+        });
 
-  // Robustly handle non-JSON / empty responses and include status/body in errors
-  const initText = await initResponse.text();
-  let initData = null;
-  try {
-    initData = initText ? JSON.parse(initText) : null;
-  } catch (e) {
-    throw new Error(
-      `Twitter media upload INIT returned invalid JSON (status ${initResponse.status}): ${initText}`
-    );
-  }
-  if (!initResponse.ok) {
-    // If we tried OAuth2 and got a 403, suggest OAuth1 reconnect
-    if (!oauth1 && initResponse.status === 403) {
-      const e = await oauth1MissingError();
-      throw e;
+        initResponse = await fetch(UPLOAD_URL, {
+          method: "POST",
+          signal,
+          headers: {
+            Authorization: authHeader,
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams(extraParams),
+        });
+      } else {
+        // Fallback: try using OAuth2 Bearer token (may be rejected with 403)
+        if (!accessToken) throw oauth1MissingError();
+
+        initResponse = await safeFetch(UPLOAD_URL, fetch, {
+          fetchOptions: {
+            method: "POST",
+            signal,
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({
+              command: "INIT",
+              total_bytes: mediaSize.toString(),
+              media_type: mediaType,
+            }),
+          },
+          requireHttps: true,
+          allowHosts: ["upload.twitter.com"],
+        });
+      }
+
+      // Robustly handle non-JSON / empty responses and include status/body in errors
+      const initText = await initResponse.text();
+      let initData = null;
+      try {
+        initData = initText ? JSON.parse(initText) : null;
+      } catch (e) {
+        throw new Error(
+          `Twitter media upload INIT returned invalid JSON (status ${initResponse.status}): ${initText}`
+        );
+      }
+      if (!initResponse.ok) {
+        // If we tried OAuth2 and got a 403, suggest OAuth1 reconnect
+        if (!oauth1 && initResponse.status === 403) {
+          const e = await oauth1MissingError();
+          throw e;
+        }
+      }
+
+      const mediaId = initData.media_id_string;
+
+      // Each APPEND is bounded to 5 MiB and streamed directly from scratch.
+      for (let offset = 0, segment = 0; offset < mediaSize; offset += 5 * 1024 ** 2, segment++) {
+        const length = Math.min(5 * 1024 ** 2, mediaSize - offset);
+        const mediaStream = fs.createReadStream(filePath, {
+          start: offset,
+          end: offset + length - 1,
+          signal,
+        });
+        const FormData = require("form-data");
+        const formData = new FormData();
+        formData.append("command", "APPEND");
+        formData.append("media_id", mediaId);
+        formData.append("media", mediaStream, {
+          filename: "media",
+          contentType: mediaType,
+          knownLength: length,
+        });
+        formData.append("segment_index", String(segment));
+
+        let appendResponse;
+        if (oauth1 && consumerKey && consumerSecret) {
+          const { buildOauth1Header } = require("../utils/oauth1");
+          // For multipart, do not include the binary body in the signature (per OAuth1 rules). Include the simple params instead.
+          const authHeader = buildOauth1Header({
+            method: "POST",
+            url: UPLOAD_URL,
+            consumerKey,
+            consumerSecret,
+            token: oauth1.token,
+            tokenSecret: oauth1.tokenSecret,
+            extraParams: { command: "APPEND", media_id: mediaId, segment_index: String(segment) },
+          });
+
+          appendResponse = await fetch(UPLOAD_URL, {
+            method: "POST",
+            signal,
+            headers: {
+              Authorization: authHeader,
+              ...formData.getHeaders(),
+            },
+            body: formData,
+          });
+        } else {
+          appendResponse = await fetch(UPLOAD_URL, {
+            method: "POST",
+            signal,
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              ...formData.getHeaders(),
+            },
+            body: formData,
+          });
+        }
+
+        if (!appendResponse.ok) {
+          let txt = "";
+          try {
+            txt = await appendResponse.text();
+          } catch (e) {
+            txt = "<no body>";
+          }
+          // If 403 and no oauth1, recommend reauth
+          if (!oauth1 && appendResponse.status === 403) {
+            const e = await oauth1MissingError();
+            throw e;
+          }
+          throw new Error(
+            `Twitter media upload APPEND failed (status ${appendResponse.status}): ${txt}`
+          );
+        }
+      }
+
+      // FINALIZE phase
+      let finalizeResponse;
+      if (oauth1 && consumerKey && consumerSecret) {
+        const { buildOauth1Header } = require("../utils/oauth1");
+        const authHeader = buildOauth1Header({
+          method: "POST",
+          url: UPLOAD_URL,
+          consumerKey,
+          consumerSecret,
+          token: oauth1.token,
+          tokenSecret: oauth1.tokenSecret,
+          extraParams: { command: "FINALIZE", media_id: mediaId },
+        });
+
+        finalizeResponse = await fetch(UPLOAD_URL, {
+          method: "POST",
+          signal,
+          headers: {
+            Authorization: authHeader,
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({ command: "FINALIZE", media_id: mediaId }),
+        });
+      } else {
+        finalizeResponse = await safeFetch(UPLOAD_URL, fetch, {
+          fetchOptions: {
+            method: "POST",
+            signal,
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({
+              command: "FINALIZE",
+              media_id: mediaId,
+            }),
+          },
+          requireHttps: true,
+          allowHosts: ["upload.twitter.com"],
+        });
+      }
+
+      const finalizeText = await finalizeResponse.text();
+      let finalizeData = null;
+      try {
+        finalizeData = finalizeText ? JSON.parse(finalizeText) : null;
+      } catch (e) {
+        throw new Error(
+          `Twitter media upload FINALIZE returned invalid JSON (status ${finalizeResponse.status}): ${finalizeText}`
+        );
+      }
+      if (!finalizeResponse.ok) {
+        if (!oauth1 && finalizeResponse.status === 403) {
+          const e = await oauth1MissingError();
+          throw e;
+        }
+        throw new Error(
+          `Twitter media upload FINALIZE failed (status ${finalizeResponse.status}): ${finalizeText}`
+        );
+      }
+
+      // Check processing status if needed
+      if (finalizeData.processing_info) {
+        // For video/gif, may need to poll STATUS
+        // Simplified: just wait a bit
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+
+      return mediaId;
     }
-  }
-
-  const mediaId = initData.media_id_string;
-
-  // APPEND phase (simplified - in production, chunk large files)
-  const FormData = require("form-data");
-  const formData = new FormData();
-  formData.append("command", "APPEND");
-  formData.append("media_id", mediaId);
-  formData.append("media", mediaBuffer, { filename: "media", contentType: mediaType });
-  formData.append("segment_index", "0");
-
-  let appendResponse;
-  if (oauth1 && consumerKey && consumerSecret) {
-    const { buildOauth1Header } = require("../utils/oauth1");
-    // For multipart, do not include the binary body in the signature (per OAuth1 rules). Include the simple params instead.
-    const authHeader = buildOauth1Header({
-      method: "POST",
-      url: UPLOAD_URL,
-      consumerKey,
-      consumerSecret,
-      token: oauth1.token,
-      tokenSecret: oauth1.tokenSecret,
-      extraParams: { command: "APPEND", media_id: mediaId, segment_index: "0" },
-    });
-
-    appendResponse = await fetch(UPLOAD_URL, {
-      method: "POST",
-      headers: {
-        Authorization: authHeader,
-        ...formData.getHeaders(),
-      },
-      body: formData,
-    });
-  } else {
-    appendResponse = await fetch(UPLOAD_URL, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        ...formData.getHeaders(),
-      },
-      body: formData,
-    });
-  }
-
-  if (!appendResponse.ok) {
-    let txt = "";
-    try {
-      txt = await appendResponse.text();
-    } catch (e) {
-      txt = "<no body>";
-    }
-    // If 403 and no oauth1, recommend reauth
-    if (!oauth1 && appendResponse.status === 403) {
-      const e = await oauth1MissingError();
-      throw e;
-    }
-    throw new Error(`Twitter media upload APPEND failed (status ${appendResponse.status}): ${txt}`);
-  }
-
-  // FINALIZE phase
-  let finalizeResponse;
-  if (oauth1 && consumerKey && consumerSecret) {
-    const { buildOauth1Header } = require("../utils/oauth1");
-    const authHeader = buildOauth1Header({
-      method: "POST",
-      url: UPLOAD_URL,
-      consumerKey,
-      consumerSecret,
-      token: oauth1.token,
-      tokenSecret: oauth1.tokenSecret,
-      extraParams: { command: "FINALIZE", media_id: mediaId },
-    });
-
-    finalizeResponse = await fetch(UPLOAD_URL, {
-      method: "POST",
-      headers: {
-        Authorization: authHeader,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({ command: "FINALIZE", media_id: mediaId }),
-    });
-  } else {
-    finalizeResponse = await safeFetch(UPLOAD_URL, fetch, {
-      fetchOptions: {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          command: "FINALIZE",
-          media_id: mediaId,
-        }),
-      },
-      requireHttps: true,
-      allowHosts: ["upload.twitter.com"],
-    });
-  }
-
-  const finalizeText = await finalizeResponse.text();
-  let finalizeData = null;
-  try {
-    finalizeData = finalizeText ? JSON.parse(finalizeText) : null;
-  } catch (e) {
-    throw new Error(
-      `Twitter media upload FINALIZE returned invalid JSON (status ${finalizeResponse.status}): ${finalizeText}`
-    );
-  }
-  if (!finalizeResponse.ok) {
-    if (!oauth1 && finalizeResponse.status === 403) {
-      const e = await oauth1MissingError();
-      throw e;
-    }
-    throw new Error(
-      `Twitter media upload FINALIZE failed (status ${finalizeResponse.status}): ${finalizeText}`
-    );
-  }
-
-  // Check processing status if needed
-  if (finalizeData.processing_info) {
-    // For video/gif, may need to poll STATUS
-    // Simplified: just wait a bit
-    await new Promise(resolve => setTimeout(resolve, 2000));
-  }
-
-  return mediaId;
+  );
 }
 
 /**
