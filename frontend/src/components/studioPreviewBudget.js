@@ -1,6 +1,6 @@
 export const STUDIO_PREVIEW_QUALITIES = [
   { value: 'full', label: 'Full detail · 100%' },
-  { value: 'auto', label: 'Auto · smoother playback' },
+  { value: 'auto', label: 'Auto playback · full detail paused' },
   { value: 'half', label: 'Half · 50%' },
   { value: 'quarter', label: 'Quarter · 25%' },
 ];

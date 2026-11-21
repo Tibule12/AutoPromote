@@ -21,7 +21,7 @@ def validate_selective_mask(mask):
     if mask['shape']=='polygon' and (not isinstance(points,list) or not 3<=len(points)<=64 or any(not isinstance(p,list) or len(p)!=2 or any(isinstance(n,bool) or not isinstance(n,(int,float)) or not math.isfinite(n) or not 0<=n<=1 for n in p)for p in points)):
         raise ValueError('Draw a closed outline with 3–64 points')
     keys=mask.get('keyframes')
-    if not isinstance(keys,list) or len(keys)>128:raise ValueError('Use at most 128 mask position keys')
+    if not isinstance(keys,list) or len(keys)>2048:raise ValueError('Use at most 2048 mask position keys')
     if 'opacity'in mask and (type(mask['opacity'])not in(int,float)or not math.isfinite(mask['opacity'])or not 0<=mask['opacity']<=1):raise ValueError('Invalid mask visibility')
     material=mask.get('material')
     if material is not None:validate_material(material)

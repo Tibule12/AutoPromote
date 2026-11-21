@@ -1,3 +1,6 @@
+import {REGION_SHADER,packRegionGeometry} from './studioRegionShader';
+import {buildMaterialCube} from './studioMaterialQualifier';
+import {buildAdvancedColorCube} from './studioColorCube';
 import { computeColorScopesFromRgba } from "./studioColorScopes";
 
 const clamp = (value, low, high) => Math.max(low, Math.min(high, Number(value) || 0));
@@ -85,6 +88,8 @@ uniform float u_lensBlur;
 
 uniform int u_joinMode; // 0=none, 1=black, 2=white
 uniform float u_joinOpacity;
+
+${REGION_SHADER}
 
 in vec2 v_texCoord;
 out vec4 outColor;
@@ -312,6 +317,10 @@ void main() {
     color = clamp(color + vec3(n * u_grainAmount * 0.16), 0.0, 1.0);
   }
 
+  if(u_regionEnabled==1){
+    if(u_regionHasRecolor==1)color=regionCube(u_regionRecolor,color);
+    color=mix(texel.rgb,color,regionAlpha(v_texCoord,texel.rgb));
+  }
   outColor = vec4(color, texel.a);
 }
 `;
@@ -541,6 +550,29 @@ export function createStudioWebGLCompositor(outputCanvas = null) {
     new Uint8Array(2 * 2 * 2 * 4)
   );
 
+  gl.activeTexture(gl.TEXTURE2);
+  const regionGeometry=gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D,regionGeometry);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA32F,66,9,0,gl.RGBA,gl.FLOAT,new Float32Array(66*9*4));
+  const makeRegionCubeTexture=unit=>{
+    gl.activeTexture(gl.TEXTURE0+unit);
+    const texture=gl.createTexture();gl.bindTexture(gl.TEXTURE_3D,texture);
+    for(const field of [gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER])gl.texParameteri(gl.TEXTURE_3D,field,gl.LINEAR);
+    for(const field of [gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T,gl.TEXTURE_WRAP_R])gl.texParameteri(gl.TEXTURE_3D,field,gl.CLAMP_TO_EDGE);
+    gl.texImage3D(gl.TEXTURE_3D,0,gl.RGBA8,2,2,2,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array(32));return texture;
+  };
+  const regionMaterial=makeRegionCubeTexture(3),regionRecolor=makeRegionCubeTexture(4);
+  const materialCubes=new Map(),recolorCubes=new Map(),packedRegionCubes=new WeakMap();
+  const uploadRegionCube=(unit,texture,spec,cache,build)=>{
+    gl.activeTexture(gl.TEXTURE0+unit);gl.bindTexture(gl.TEXTURE_3D,texture);
+    if(!spec?.enabled)return false;
+    const id=JSON.stringify(spec);let cube=cache.get(id);
+    if(!cube){cube=build(spec);if(cache.size>=8)cache.delete(cache.keys().next().value);cache.set(id,cube);}
+    let packed=packedRegionCubes.get(cube);if(!packed){packed=packColorCubeRgba8(cube);packedRegionCubes.set(cube,packed);}
+    gl.texImage3D(gl.TEXTURE_3D,0,gl.RGBA8,packed.size,packed.size,packed.size,0,gl.RGBA,gl.UNSIGNED_BYTE,packed.data);return true;
+  };
   let scopeCanvas = null;
   let scopeCtx = null;
   let cachedLutCube = null;
@@ -593,6 +625,9 @@ export function createStudioWebGLCompositor(outputCanvas = null) {
     qualifier = null,
     textureEffects = null,
     joinFade = null,
+    selectiveMask = null,
+    selectiveTime = 0,
+    recolor = null,
   }) => {
     if (disposed || !source || !width || !height) return false;
     if (surface.width !== width) surface.width = width;
@@ -674,6 +709,28 @@ export function createStudioWebGLCompositor(outputCanvas = null) {
     gl.uniform1i(gl.getUniformLocation(gradeProgram, "u_joinMode"), joinMode);
     gl.uniform1f(gl.getUniformLocation(gradeProgram, "u_joinOpacity"), joinOpacity);
 
+    gl.uniform1i(gl.getUniformLocation(gradeProgram,'u_regionEnabled'),selectiveMask?1:0);
+    if(selectiveMask){
+      const geometry=packRegionGeometry(selectiveMask,width,height,selectiveTime);
+      gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,regionGeometry);
+      gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA32F,66,9,0,gl.RGBA,gl.FLOAT,geometry.data);
+      gl.uniform1i(gl.getUniformLocation(gradeProgram,'u_regionGeometry'),2);
+      gl.uniform1i(gl.getUniformLocation(gradeProgram,'u_regionCount'),geometry.count);
+      gl.uniform1i(gl.getUniformLocation(gradeProgram,'u_regionInvert'),geometry.inverted?1:0);
+      gl.uniform1f(gl.getUniformLocation(gradeProgram,'u_regionOpacity'),geometry.opacity);
+      const material=uploadRegionCube(3,regionMaterial,selectiveMask.material,materialCubes,buildMaterialCube);
+      const colorize=uploadRegionCube(4,regionRecolor,recolor,recolorCubes,spec=>buildAdvancedColorCube({recolor:spec}));
+      gl.uniform1i(gl.getUniformLocation(gradeProgram,'u_regionMaterial'),3);
+      gl.uniform1i(gl.getUniformLocation(gradeProgram,'u_regionRecolor'),4);
+      gl.uniform1i(gl.getUniformLocation(gradeProgram,'u_regionHasMaterial'),material?1:0);
+      gl.uniform1i(gl.getUniformLocation(gradeProgram,'u_regionHasRecolor'),colorize?1:0);
+    }else{
+      // Bind distinct texture units even when the feature is inactive: sampler
+      // type conflicts invalidate an otherwise unrelated legacy grade draw.
+      gl.uniform1i(gl.getUniformLocation(gradeProgram,'u_regionGeometry'),2);
+      gl.uniform1i(gl.getUniformLocation(gradeProgram,'u_regionMaterial'),3);
+      gl.uniform1i(gl.getUniformLocation(gradeProgram,'u_regionRecolor'),4);
+    }
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     gl.bindVertexArray(null);
     return true;
@@ -715,6 +772,7 @@ export function createStudioWebGLCompositor(outputCanvas = null) {
     disposed = true;
     gl.deleteTexture(sourceTex);
     gl.deleteTexture(lutTex);
+    gl.deleteTexture(regionGeometry);gl.deleteTexture(regionMaterial);gl.deleteTexture(regionRecolor);
     gl.deleteBuffer(quadBuffer);
     gl.deleteVertexArray(vao);
     gl.deleteProgram(gradeProgram);

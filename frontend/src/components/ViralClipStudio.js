@@ -1,8 +1,8 @@
 import StudioSelectiveGradePanel from './StudioSelectiveGradePanel';
 import StudioSelectiveMaskEditor from './StudioSelectiveMaskEditor';
 import {newMaterialQualifier} from './studioMaterialQualifier';
-import {captureRegionTracking,applyRegionTracking} from './studioRegionTracking';
-import { blendSelectiveGrade, applySelectiveClone, applySelectiveRecolor } from './studioSelectiveMask';
+import {captureRegionTracking,trackRegionRange} from './studioRegionTracking';
+import { applySelectiveAdjustment, blendSelectiveGrade, applySelectiveClone, applySelectiveRecolor } from './studioSelectiveMask';
 import { blendStudioNodeMask, captureStudioGradeSurface } from './studioNodeMask';
 import {paintStudioNodeSurface,hasStudioNodeSurface} from './studioNodeEffects';
 import {applyStudioFinishTexture} from './studioFinishTexture';
@@ -3024,7 +3024,7 @@ const ViralClipStudio = ({
     resolution: "720p",
     codec: "h264",
     status: "source_ready",
-    quality: "full",
+    quality: "auto",
   });
   const previewQuality = normalizeStudioPreviewQuality(proxySettings.quality);
   const [stabilization, setStabilization] = useState({
@@ -4694,7 +4694,7 @@ const ViralClipStudio = ({
       codec: "h264",
       status: "source_ready",
       ...(snapshot.proxySettings || {}),
-      quality: normalizeStudioPreviewQuality(snapshot.proxySettings?.quality),
+      quality: normalizeStudioPreviewQuality(snapshot.proxySettings?.quality||'auto'),
     });
     setStabilization({
       enabled: false,
@@ -8120,11 +8120,11 @@ const ViralClipStudio = ({
     const color='#'+[image.data[index],image.data[index+1],image.data[index+2]].map(v=>v.toString(16).padStart(2,'0')).join('');
     setAdjustmentLayers(current=>current.map(layer=>layer.id!==sample.layerId?layer:{...layer,mask:{...layer.mask,material:{...newMaterialQualifier(),...layer.mask.material,enabled:true,samples:[...new Set([...(layer.mask.material?.samples||[]),color])].slice(0,8)}}}));
   };
-  const trackGradeRegion=async(layer,direction)=>{
+  const trackGradeRegion=async(layer,direction,span=10)=>{
     if(gradeTrackingRequestRef.current)return;
     if(layer.enabled===false||trackStates.adjustment?.visible===false||trackStates.adjustment?.locked){setGradeTrackingStatus('Enable and unlock this adjustment track before tracking.');return;}
     const controller=new AbortController(),initial=gradeTrackingContextRef.current,returnTime=previewTimelineTime;
-    const first=direction>0?returnTime:Math.max(layer.startTime,returnTime-10),last=direction>0?Math.min(layer.startTime+layer.duration-1/exportSettings.fps,returnTime+10):returnTime;
+    const first=direction>0?returnTime:Math.max(layer.startTime,returnTime-span),last=direction>0?Math.min(layer.startTime+layer.duration-1/exportSettings.fps,returnTime+span):returnTime;
     if(last-first<.08){setGradeTrackingStatus('Move the playhead inside this area’s time range before tracking.');return;}
     gradeTrackingRequestRef.current=controller;
     const isCurrent=()=>gradeTrackingRequestRef.current===controller&&!controller.signal.aborted&&
@@ -8132,18 +8132,17 @@ const ViralClipStudio = ({
     pauseSynchronizedPreview();setGradeRegionEditMode(null);setGradeTrackingBusy(true);setGradeTrackingStatus('Capturing this area’s programme frames…');
     try{
       const token=await getMediaAuthToken();if(!token)throw Error('Sign in to track this selection.');
-      const packet=await captureRegionTracking({layer,start:first,end:last,direction,
-        seek:async time=>{gradeTrackingSeekRef.current(time);},getFrame:()=>gradeRegionInputFrameRef.current,isCurrent,
-        onProgress:(done,total)=>setGradeTrackingStatus(`Sampling movement ${done}/${total}…`)});
-      if(!isCurrent())throw Error('The edit changed; tracking was not applied.');
-      setGradeTrackingStatus('Following picture detail and checking confidence…');
-      const body=new FormData();body.append('file',packet,'programme.stframes');
-      const response=await fetch(`${API_BASE_URL}/api/media/track-studio-region`,{method:'POST',headers:{Authorization:`Bearer ${token}`},body,signal:controller.signal});
-      const result=await response.json();if(!response.ok)throw Error(result.error||'The selection could not be tracked.');
-      if(!isCurrent())throw Error('The edit changed; tracking was not applied.');
-      const next=applyRegionTracking(layer,result,first,last,exportSettings.fps);
+      const next=await trackRegionRange({layer,start:first,end:last,direction,frameRate:exportSettings.fps,isCurrent,
+        capture:sample=>captureRegionTracking({...sample,
+          seek:async time=>gradeTrackingSeekRef.current(time),getFrame:()=>gradeRegionInputFrameRef.current,isCurrent}),
+        analyze:async packet=>{
+          setGradeTrackingStatus('Following picture detail and checking confidence…');
+          const body=new FormData();body.append('file',packet,'programme.stframes');
+          const response=await fetch(`${API_BASE_URL}/api/media/track-studio-region`,{method:'POST',headers:{Authorization:`Bearer ${token}`},body,signal:controller.signal});
+          const result=await response.json();if(!response.ok)throw Error(result.error||'The selection could not be tracked.');return result;
+        },onProgress:progress=>setGradeTrackingStatus(`Following movement ${progress.start.toFixed(1)}–${progress.end.toFixed(1)}s · ${progress.done}/${progress.total}…`)});
       setAdjustmentLayers(current=>current.map(item=>item.id===next.id?next:item));
-      setGradeTrackingStatus(result.stopReason?`Tracking stopped at ${result.stopReason}. Review the last visible mask and correct that section.`:`Tracked ${result.trackedSamples} frames. Scrub the range to review the selection.`);
+      setGradeTrackingStatus(next.tracking.stopReason?`Tracking needs correction at ${next.tracking.reviewTime?.toFixed(2)||'?'}s. Review that frame and continue.`:`Tracked ${next.tracking.trackedSamples} frames. Scrub the range to review the selection.`);
     }catch(error){if(gradeTrackingRequestRef.current===controller)setGradeTrackingStatus(error.name==='AbortError'?'Tracking cancelled; the selection is unchanged.':error.message);}
     finally{
       if(gradeTrackingRequestRef.current===controller){gradeTrackingRequestRef.current=null;setGradeTrackingBusy(false);if(activeProjectIdRef.current===initial.projectId)gradeTrackingSeekRef.current(returnTime);}
@@ -13636,7 +13635,7 @@ const ViralClipStudio = ({
         const regionToken=await getMediaAuthToken();
         const regionCompatibility=await fetch(`${API_BASE_URL}/api/media/studio-grade-capabilities`,{headers:{Authorization:`Bearer ${regionToken}`}});
         const regionSupport=regionCompatibility.ok?await regionCompatibility.json():null;
-        if((regionSupport?.selectiveGradingVersion||0)<2)throw Error('Selected-area export needs the updated rendering service. Your edit is saved; no render was submitted.');
+        if((regionSupport?.selectiveGradingVersion||0)<3)throw Error('Selected-area export needs the updated rendering service. Your edit is saved; no render was submitted.');
       }
       let completedRender = null;
       if (dualCleanAndCaptioned && autoCaptions && !captionReviewCopy) {
@@ -15323,6 +15322,18 @@ const ViralClipStudio = ({
       for (const layer of finishPreviewIsLive ? compiledAdjustmentGrades : []) {
         if (frameOutputTime < layer.startTime || frameOutputTime >= layer.startTime + layer.duration) continue;
         const adjustment = layer.effects;
+        if(layer.mask?.space==='programme'&&webglCompositorRef.current===null)webglCompositorRef.current=createStudioWebGLCompositor()||false;
+        const regionGpu=webglCompositorRef.current;
+        const capturingRegion=gradeRegionCaptureRef.current?.active&&gradeRegionCaptureRef.current.id===layer.id;
+        if(layer.mask?.space==='programme'&&!capturingRegion&&!layer.maskSourceNodeId&&
+          !adjustment.clone_patch?.enabled&&!adjustment.glow?.intensity&&!adjustment.color.powerWindow?.enabled&&!adjustment.color.qualifier?.enabled&&regionGpu&&!regionGpu.softwareRenderer&&
+          regionGpu.renderGradedFrame({source:paintCanvas,width:canvasWidth,height:canvasHeight,
+            grade:adjustment.color,cube:adjustment.color_cube||null,vignetteAmount:adjustment.color.vignette||0,
+            selectiveMask:layer.mask,selectiveTime:frameOutputTime-layer.startTime,recolor:adjustment.recolor})){
+          regionGpu.copyGradedFrame(context);canvas.dataset.previewPipeline='webgl2-regions';continue;
+        }
+
+        if(layer.mask?.space==='programme'&&!capturingRegion&&!layer.maskSourceNodeId&&applySelectiveAdjustment(context,layer,frameOutputTime-layer.startTime))continue;
         const adjustmentMaskOriginal=layer.maskSourceNodeId?captureStudioGradeSurface(context):null;
         const regionOriginal=layer.mask?.space==='programme'?context.getImageData(0,0,canvasWidth,canvasHeight):null;
         if(regionOriginal&&gradeRegionCaptureRef.current?.active&&gradeRegionCaptureRef.current.id===layer.id)gradeRegionInputFrameRef.current={layerId:layer.id,time:frameOutputTime,image:regionOriginal};
@@ -15410,6 +15421,8 @@ const ViralClipStudio = ({
         visible.drawImage(paintCanvas,inset+projection.x,inset+projection.y,projection.width,projection.height);
         visible.restore();
       }
+      canvas.dataset.paintMilliseconds=String(performance.now()-paintStarted);
+      canvas.dataset.pictureLagSeconds=String(Math.max(0,Number(programmeVideo.currentTime||0)-sampledSourceTime));
       if (pausedPaint) lastPausedPaint = pausedPaint;
       if (!moving && pausedFrameIsCurrent && pausedRaster) {
         // Seed the moving raster budget from the frame the user has already

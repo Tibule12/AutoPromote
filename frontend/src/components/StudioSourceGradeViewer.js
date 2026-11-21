@@ -1,4 +1,4 @@
-import { blendSelectiveGrade, applySelectiveClone, applySelectiveRecolor } from './studioSelectiveMask';
+import { applySelectiveAdjustment, blendSelectiveGrade, applySelectiveClone, applySelectiveRecolor } from './studioSelectiveMask';
 import {blendStudioNodeMask,captureStudioGradeSurface} from './studioNodeMask';
 import {paintStudioNodeSurface} from './studioNodeEffects';
 import {evaluateWorldLayerPose} from './studioCompRigging';
@@ -75,6 +75,7 @@ export default function StudioSourceGradeViewer({ nodeId, videoRef, mapTime, tim
           const at = state.mapTime ? state.mapTime(sourceTime) : state.time;
           for (const layer of state.stack) {
             if (at >= layer.startTime && at < layer.startTime + layer.duration) {
+              if(layer.mask?.space==='programme'&&!layer.maskSourceNodeId&&applySelectiveAdjustment(ctx,layer,at-layer.startTime)){if(`Adjustment:${layer.id}`===state.nodeId)break;continue;}
               const before=layer.maskSourceNodeId?captureStudioGradeSurface(ctx):null;
               const regionOriginal=layer.mask?.space==='programme'?ctx.getImageData(0,0,out.width,out.height):null;
               if(layer.effects.clone_patch?.enabled)ctx.putImageData(applySelectiveClone(ctx.getImageData(0,0,out.width,out.height),layer.effects.clone_patch,layer.mask,at-layer.startTime),0,0);

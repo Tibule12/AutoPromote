@@ -99,6 +99,7 @@ function needsSelectiveGrading(payload={}) {
   });
 }
 function requiredSelectiveVersion(payload={}) {
+  if((payload.finish_plan?.adjustment_layers||[]).some(layer=>layer.effects?.clone_patch?.follow||(layer.effects?.selective_mask?.keyframes?.length||0)>128))return 3;
   return (payload.finish_plan?.adjustment_layers||[]).some(layer=>{
     const fx=layer.effects||{},mask=fx.selective_mask;
     return mask?.opacity!==undefined||mask?.material?.enabled||mask?.subtract?.length||mask?.keyframes?.some(k=>k.opacity!==undefined||k.points)||fx.clone_patch?.mode==='heal';

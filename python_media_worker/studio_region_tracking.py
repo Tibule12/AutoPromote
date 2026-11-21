@@ -56,7 +56,7 @@ def track_frames(frames,times,mask):
     feature_mask=np.where(coverage>.65,255,0).astype(np.uint8)
     points=cv2.goodFeaturesToTrack(previous,maxCorners=160,qualityLevel=.008,minDistance=3,mask=feature_mask,blockSize=3)
     if points is None or len(points)<5:raise ValueError('This area has too little visible detail to track safely. Enlarge the outline or use manual position keys.')
-    stop=None
+    stop=None;stop_metrics=None
     for index in range(1,len(frames)):
         current=frames[index]
         next_points,status,_=cv2.calcOpticalFlowPyrLK(previous,current,points,None,winSize=(21,21),maxLevel=3,
@@ -80,9 +80,35 @@ def track_frames(frames,times,mask):
         old=warped[warped_mask].astype(np.float32);new=current[warped_mask].astype(np.float32)
         correlation=float(np.corrcoef(old,new)[0,1])if len(old)>12 and np.std(old)>2 and np.std(new)>2 else 0
         if not math.isfinite(correlation):correlation=0
-        confidence=min(fraction,inlier_ratio,max(0,correlation))
-        if not .85<scale<1.18 or abs(angle)>15 or inlier_ratio<.6 or correlation<.45:
-            stop='cut'if global_change>22 else'occlusion';break
+        local_correlations=[]
+        for a,b in zip(before[inliers.ravel()==1],after[inliers.ravel()==1]):
+            pa=cv2.getRectSubPix(previous,(9,9),tuple(map(float,a))).astype(np.float32).ravel()
+            pb=cv2.getRectSubPix(current,(9,9),tuple(map(float,b))).astype(np.float32).ravel()
+            if np.std(pa)>3 and np.std(pb)>3:
+                value=float(np.corrcoef(pa,pb)[0,1])
+                if math.isfinite(value):local_correlations.append(value)
+        local_correlation=float(np.median(local_correlations))if local_correlations else 0
+        # Talking, blinking and facial expression change the whole-region
+        # correlation even when stable features still follow the same person.
+        # Check the actual tracked detail; do not label a speaking mouth as an
+        # occlusion merely because a broad affine warp cannot deform it.
+        appearance=max(correlation,local_correlation if len(local_correlations)>=5 else 0)
+        confidence=min(fraction,inlier_ratio,max(0,appearance))
+        coherent=inlier_ratio>=.6
+        if not coherent and fraction>=.6 and len(local_correlations)>=12 and local_correlation>=.8 and global_change<15:
+            # A talking/blinking face is not a rigid plane. When its stable
+            # details agree on translation but disagree on a scale fit, keep
+            # the previous size rather than making the mask pulse/shrink.
+            flow=after-before;translation=np.median(flow,axis=0)
+            agreement=float(np.mean(np.linalg.norm(flow-translation,axis=1)<3))
+            if agreement>=.6:
+                affine=np.array([[1,0,translation[0]],[0,1,translation[1]]],dtype=np.float64)
+                scale=1.;angle=0.;inlier_ratio=agreement;coherent=True
+                confidence=min(fraction,agreement,local_correlation)
+
+        if not .85<scale<1.18 or abs(angle)>15 or not coherent or appearance<.55:
+            stop_metrics=dict(scale=scale,angle=angle,inliers=inlier_ratio,globalCorrelation=correlation,localCorrelation=local_correlation,features=len(local_correlations),fraction=fraction)
+            stop='cut'if global_change>22 else'uncertain_motion';break
         centre=affine@np.array([pose['x']*width,pose['y']*height,1])
         pose={**pose,'x':float(centre[0]/width),'y':float(centre[1]/height),
             'width':pose['width']*scale,'height':pose['height']*scale,
@@ -109,4 +135,4 @@ def track_frames(frames,times,mask):
             keys.append({**keys[-1],'time':loss_time,'opacity':0,'hold':True})
     return {'version':1,'engine':'programme-lk-ransac-v1','keyframes':sorted(keys,key=lambda k:k['time']),
         'observations':observations,'reviewRequired':True,'stopReason':stop,
-        'requestedRange':[min(times),max(times)],'trackedSamples':len(observations)+1}
+        'requestedRange':[min(times),max(times)],'trackedSamples':len(observations)+1,'stopMetrics':stop_metrics}

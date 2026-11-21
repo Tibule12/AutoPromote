@@ -1,3 +1,4 @@
+import {validateRepairMotion} from './studioRepairMotion';
 import { validateSelectiveMask } from './studioSelectiveMask';
 import { buildAdvancedColorCube, hasRevitalizerGrade } from './studioColorCube';
 
@@ -41,6 +42,7 @@ export function compileStudioAdjustmentGrade(layer) {
   const advanced = input.advancedColor || {};
   const mask = layer.mask?.space === 'programme' ? validateSelectiveMask(layer.mask) : null;
   const clone = input.clonePatch;
+  validateRepairMotion(clone);
   const recolor=advanced.recolor?.enabled?advanced.recolor:null;
   if(recolor&&(!/^#[a-f0-9]{6}$/i.test(recolor.color)||typeof recolor.strength!=='number'||!Number.isFinite(recolor.strength)||recolor.strength<0||recolor.strength>1))throw Error('Choose a valid selected-area colour and amount.');
   if(clone?.enabled && (!mask || ['dx','dy','strength'].some(k=>typeof clone[k]!=='number'||!Number.isFinite(clone[k])) || Math.abs(clone.dx)>1 || Math.abs(clone.dy)>1 || clone.strength<0 || clone.strength>1))throw Error('Choose a valid clean patch inside the picture.');

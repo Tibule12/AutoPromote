@@ -1,0 +1,262 @@
+{
+  "date": "2026-11-21",
+  "readinessPromotion": false,
+  "productionDeployed": false,
+  "ownerCreativeApproval": false,
+  "context": "Owner corrects image-centric demonstration and reports Studio picture lagging behind audio.",
+  "changes": [
+    "Moving clean-source offset attached to mask axes, with matched browser and canonical worker rotation/scale",
+    "Longer requests split into bounded tracking batches, up to sixty seconds/request and2048 editable keys/region",
+    "Exact-frame correction marker for uncertain motion; preserve rejected/failed paths",
+    "CPU region processing bounded to selected neighbourhood; native export repair cropped to observed source/destination neighbourhood",
+    "GPU colour-region shader with original-picture material selection and compound masks; hardware only, verified software fallback retained",
+    "New-project Auto playback default, full-detail paused inspection and export; explicit saved Full/Half/Quarter retained",
+    "Presentation-cost and picture-clock telemetry on the programme canvas; no audio-offset hack"
+  ],
+  "checks": {
+    "frontendCases": 93,
+    "apiRoutingHealthAndStreamingCases": 22,
+    "workerCases": 37,
+    "welcomeComparisons": 8,
+    "compoundCoverageCrossLanguageCases": 12,
+    "materialCubeCells": 125,
+    "shader": "Actual WebGL2 shader compiles and renders in headless SwiftShader; two simple inverse cases mean0.087/0.276 byte error, maximum8; this is not full pixel/material or real hardware throughput qualification.",
+    "signedInContextualHelp": {
+      "panel": true,
+      "feature": "Captions and transcription BROKEN",
+      "errors": [],
+      "blocked": []
+    }
+  },
+  "baseline": {
+    "build": "baseline",
+    "samples": 4,
+    "elapsedMs": 4491,
+    "lagSeconds": {
+      "median": 1.091405,
+      "p95": 1.091405,
+      "max": 1.091405
+    },
+    "pictures": 3,
+    "rasters": [
+      "1920x1080"
+    ],
+    "pipelines": [
+      "cpu2d"
+    ],
+    "errors": [],
+    "blocked": []
+  },
+  "shortAutoFallback": {
+    "build": "auto-fallback",
+    "samples": 79,
+    "elapsedMs": 4127,
+    "lagSeconds": {
+      "median": 0.017390999999999934,
+      "p95": 0.036202999999999985,
+      "max": 0.045372999999999886
+    },
+    "pictures": 66,
+    "rasters": [
+      "1920x1080",
+      "729x410",
+      "183x103",
+      "182x102"
+    ],
+    "pipelines": [
+      "cpu2d"
+    ],
+    "errors": [],
+    "blocked": []
+  },
+  "longRecordedLivePlayback": {
+    "duration": 20,
+    "quality": "auto",
+    "pausedFullDetail": true,
+    "samples": 463,
+    "lagSeconds": {
+      "median": 0.04580499999999965,
+      "p95": 0.0835480000000004,
+      "max": 0.10291000000000006
+    },
+    "pictures": 335,
+    "rasters": [
+      "182x102"
+    ],
+    "completeLivePlaybackWithAudio": true,
+    "capture": {
+      "seconds": 23.505000114440918,
+      "capturedPictures": 614,
+      "sourceBytes": 128509456,
+      "viewport": [
+        1920,
+        900
+      ],
+      "source": "Actual Chromium screencast",
+      "visualAnnotations": "Pointer, click ring and actual target outline only",
+      "applicationCodeChanged": false,
+      "audio": "Narration added in final production"
+    },
+    "errors": [],
+    "blocked": []
+  },
+  "longClockOnly": {
+    "duration": 20,
+    "capture": false,
+    "quality": "auto",
+    "samples": 348,
+    "lagSeconds": {
+      "median": 0.03563500000000008,
+      "p95": 0.0785859999999996,
+      "max": 0.11564999999999959
+    },
+    "pictures": 321,
+    "rasters": [
+      "1920x1080",
+      "182x102"
+    ],
+    "errors": []
+  },
+  "performanceLimits": [
+    "The retained3.8s Full-detail baseline offers only four samples/three pictures; observed lag is about1.09s, not a statistically broad device benchmark",
+    "The20s Auto test uses a182x102 moving raster on this loaded software-rendered browser. Paused inspection remains1920x1080. Do not call this full-resolution real-time playback.",
+    "The uncaptured20s run measures36ms median/79ms p95/116ms maximum lag. It is improved, not a universal zero-lag or every-device sync guarantee.",
+    "Software-GPU colour regions performed worse (about0.81s observed lag); that route is not enabled. Real hardware throughput is not qualified here."
+  ],
+  "export": {
+    "sha256": "5cbf00ed7cb63de4008d12d40ecba997ab223ce2795fcc2b49c1df1b396d9bcc",
+    "bytes": 39532374,
+    "duration": "20.000000",
+    "streams": [
+      {
+        "codec_type": "video",
+        "codec_name": "h264",
+        "width": 1920,
+        "height": 1080,
+        "avg_frame_rate": "30/1",
+        "nb_frames": "600",
+        "duration": "20.000000",
+        "sample_rate": null,
+        "channels": null,
+        "color_space": "bt709",
+        "color_transfer": "bt709",
+        "color_primaries": "bt709"
+      },
+      {
+        "codec_type": "audio",
+        "codec_name": "aac",
+        "width": null,
+        "height": null,
+        "avg_frame_rate": "0/0",
+        "nb_frames": "939",
+        "duration": "20.000000",
+        "sample_rate": "48000",
+        "channels": 2,
+        "color_space": null,
+        "color_transfer": null,
+        "color_primaries": null
+      }
+    ],
+    "pairs": [
+      {
+        "time": 0,
+        "meanAbsoluteError": 2.5862321566358024,
+        "p99": 12.0
+      },
+      {
+        "time": 5,
+        "meanAbsoluteError": 2.7260220550411525,
+        "p99": 12.0
+      },
+      {
+        "time": 10,
+        "meanAbsoluteError": 2.67548900462963,
+        "p99": 12.0
+      },
+      {
+        "time": 15,
+        "meanAbsoluteError": 2.755679816100823,
+        "p99": 12.0
+      },
+      {
+        "time": 19,
+        "meanAbsoluteError": 2.673382844650206,
+        "p99": 12.0
+      }
+    ],
+    "elapsedSeconds": 117.42019587299728
+  },
+  "audio": {
+    "sampleRate": 48000,
+    "channels": 2,
+    "lagSeconds": 0.0,
+    "correlation": 0.9863564227674977,
+    "sourceRms": 0.1086399182677269,
+    "outputRms": 0.10771150887012482
+  },
+  "restore": {
+    "independentNativeRestore": true,
+    "exactGradeMasksAndMovingRepair": true,
+    "snapshotDifferences": [
+      "projectMedia",
+      "timeline"
+    ],
+    "pausedRaster": {
+      "width": 1920,
+      "height": 1080
+    },
+    "errors": [],
+    "blocked": [],
+    "accessChanges": [
+      "/projectMedia/0/url",
+      "/projectMedia/0/error",
+      "/timeline/0/url"
+    ]
+  },
+  "finishedPlayback": {
+    "video": {
+      "path": "/local-master.mp4",
+      "currentTime": 20,
+      "duration": 20,
+      "error": null
+    },
+    "capture": {
+      "seconds": 22.42199993133545,
+      "capturedPictures": 622,
+      "sourceBytes": 168446982,
+      "viewport": [
+        1920,
+        900
+      ],
+      "source": "Actual Chromium screencast",
+      "visualAnnotations": "Pointer, click ring and actual target outline only",
+      "applicationCodeChanged": false,
+      "audio": "Narration added in final production"
+    },
+    "fullFinishedPlayback": true
+  },
+  "authoring": {
+    "duration": 20,
+    "skinPositionKeys": 6,
+    "repairPositionKeys": 7,
+    "manualCorrection": true,
+    "automaticUninterruptedTracking": false,
+    "automaticFailureRetained": "The real speaking/expression sequence lost confidence around two seconds; the final path was corrected with ordinary Studio controls. This must not be presented as an automatic twenty-second tracking success."
+  },
+  "workerProtocol": 3,
+  "paidCloudRenderOrGpuAllocation": false,
+  "transport": "Actual signed-in native UI requests, private local tracking/render transport bridge, canonical worker/gates unchanged; native owned source upload used normal API. API multipart is separately tested. Production execution is unqualified.",
+  "preservation": {
+    "originalLoginSha256": "00d48e87bd9b77ba9ead11c92bf93039f43fc3e7e6b322c3e379f6b4dac55254",
+    "sourceSha256": "ca4fae025b4e1414fba8e09bb77b66bc80494939afd9d29443e8c460a31d6da4",
+    "previousRejectedMediaRetained": true,
+    "publishingOrScheduling": false
+  },
+  "delivery": "/home/tibule12/Videos/Studio Video Grading and Sync - 2026-11-21",
+  "remaining": [
+    "Coordinate an explicitly authorized frontend/API/GPU/CPU v3 release; none deployed",
+    "Uninterrupted automatic non-rigid face/lip tracking and reliable occlusion recovery remain unfinished; manual corrections are required",
+    "Full-resolution CPU playback, long-form speed/memory/concurrency and real GPU-device throughput remain unqualified",
+    "Whole predictive picture/audio parity and shared S02/S04/S03 plus historical typography failures remain open"
+  ]
+}

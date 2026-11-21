@@ -1,4 +1,20 @@
 {
+  "videoSync20261121": {
+    "date": "2026-11-21",
+    "evidenceRefs": [
+      "reports/studio-video-sync-20261121/README.md",
+      "reports/studio-video-sync-20261121/verification.json"
+    ],
+    "scope": "Moving clean-source repair, bounded extended paths, CPU/GPU selective preview and actual20s native movie with manually corrected motion and measured adaptive playback.",
+    "readinessPromotion": false,
+    "nextTaskId": "S02",
+    "blockers": [
+      "Coordinate an explicitly authorized frontend/API/GPU/CPU v3 release; none deployed",
+      "Uninterrupted automatic non-rigid face/lip tracking and reliable occlusion recovery remain unfinished; manual corrections are required",
+      "Full-resolution CPU playback, long-form speed/memory/concurrency and real GPU-device throughput remain unqualified",
+      "Whole predictive picture/audio parity and shared S02/S04/S03 plus historical typography failures remain open"
+    ]
+  },
   "selectiveRefinement20261121": {
     "date": "2026-11-21",
     "evidenceRefs": [

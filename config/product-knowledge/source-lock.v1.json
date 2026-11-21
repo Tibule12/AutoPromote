@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Complete bounded native selective-refinement verification, preserve owner rejection, CPU latency and production release limits",
-  "reviewed_at": "2026-11-21T15:00:16.746Z",
-  "catalog_sha256": "9bdf0794e095827ba1ff456dc5d43de1179382375db6ab2fdc92410944586bff",
+  "reason": "Actual20s video workflow, measured adaptive picture-clock improvement and preserved automatic face-tracking failure",
+  "reviewed_at": "2026-11-21T15:48:11.666Z",
+  "catalog_sha256": "9d78593a436da2aac3131f0264935d14199b44c48a4949bebd4decdba9951278",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -175,7 +175,7 @@
     },
     {
       "path": "frontend/src/components/StudioSelectiveGradePanel.js",
-      "sha256": "ef795adb4c74293b284dbc6d87e2b22653601de12d1598ea30f47c6ea9127259"
+      "sha256": "39cbbce39efcde72cc0ca41e69cdfa865c2d41ad0138c2bbcab814df7f8c5d99"
     },
     {
       "path": "frontend/src/components/StudioSubjectMaskControls.js",
@@ -203,7 +203,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "e59622eaf34bb86ba172862b0b292e93d69697912849cb706f4bbd73ac4a726d"
+      "sha256": "7c456719a9da5cc96645e43d6f8e02d554829f00163bc795f5380efd166d5220"
     },
     {
       "path": "frontend/src/components/ViralScanner.js",
@@ -351,7 +351,7 @@
     },
     {
       "path": "frontend/src/components/studioPreviewBudget.js",
-      "sha256": "61e01d0c70111549dd214cc6a48e53c644767257f963efcd0ae2279e9e6c7270"
+      "sha256": "4edd106d1bb152a2c9c7b3df3bec7f4ba3d97a9294f829cafe3e07fec077636d"
     },
     {
       "path": "frontend/src/components/studioProjectAspect.js",
@@ -399,7 +399,7 @@
     },
     {
       "path": "frontend/src/components/studioWebGLCompositor.js",
-      "sha256": "d393fe8f7de123ddaf6ac50072c1a12fd09504d0985b16e7f94192780942c81d"
+      "sha256": "27320dba6ff6c24bab0a949fd395cf7e6162e54c3ff9873e85ccadb0aeb40fd6"
     },
     {
       "path": "frontend/src/components/threeD/Studio3DPanel.js",
@@ -479,7 +479,7 @@
     },
     {
       "path": "python_media_worker/main_media_server.py",
-      "sha256": "83a71da88ce9a6939e26e17704586aeffc3c3aa5e69066c817e379bff3179bb5"
+      "sha256": "a6c18421d5f26a1bbb1edb5159f7a047182d6bcca66b4efd01da80820d59379d"
     },
     {
       "path": "python_media_worker/studio_audio.py",
@@ -511,7 +511,7 @@
     },
     {
       "path": "python_media_worker/studio_selective_mask.py",
-      "sha256": "cc7efdcb737a1ac590f6d93b8d3fadd51df350e6dc6c60a4adc0818a1e200800"
+      "sha256": "eb79e41223d6387c78bfb4bb9125d5579027138c09053e8172012c9d15aead77"
     },
     {
       "path": "python_media_worker/studio_text.py",
@@ -771,11 +771,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "ce117082746b340bed445646ea89036c634026724e261aac754eb0c19cf03e9b"
+      "sha256": "7a517814c2f1ebb58713b64b1524090d86232522c006bc15fcec5e5b0be7be5a"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "069b7c1cd7e9149610cd9950429e9c23f2a973adad6adafd6e74aa033e2036fe"
+      "sha256": "c10307a1f688c8e2763f197403f53666d0590eb5b46544b96eab87c81e617b57"
     },
     {
       "path": "worker.js",

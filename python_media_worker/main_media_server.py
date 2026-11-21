@@ -12590,7 +12590,7 @@ def health_check():
     return {
         "status": "ok",
         "service": "python_media_worker",
-        "studioCapabilities": {"selectiveGrading": 2, "regionRecolor": 1, "clonePatch": 1, "regionTracking": 1, "materialMatte": 1, "textureHeal": 1},
+        "studioCapabilities": {"selectiveGrading": 3, "regionRecolor": 1, "clonePatch": 1, "regionTracking": 1, "materialMatte": 1, "textureHeal": 1},
         "worker_state": current_job_info,
         "concurrency": MEDIA_WORKER_CONCURRENCY,
         "maxVideoSeconds": MEDIA_WORKER_MAX_VIDEO_SECONDS,

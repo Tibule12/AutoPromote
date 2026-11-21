@@ -3,31 +3,12 @@ import math
 
 
 def adjustment_grade_filter(effects, build_finish, prefix):
-    clone = effects.get('clone_patch') or {}
-    parts = []
-    if clone.get('enabled'):
-        if not effects.get('selective_mask'):raise ValueError('Clone correction needs a selected-area mask')
-        dx,dy,strength=(float(clone.get(k,0)) for k in ('dx','dy','strength'))
-        if not all(math.isfinite(n)for n in (dx,dy,strength))or abs(dx)>1 or abs(dy)>1 or not 0<=strength<=1:raise ValueError('Invalid clean patch')
-        if clone.get('mode','clone')not in('clone','heal'):raise ValueError('Choose clone or heal')
-        channels=':'.join(f"{c}='{c}(clip(X+{dx:.9f}*W,0,W-1),clip(Y+{dy:.9f}*H,0,H-1))'"for c in 'rgb')
-        if clone.get('mode')=='heal':
-            radius=clone.get('radius',.012)
-            if type(radius)not in(int,float)or not math.isfinite(radius)or not .001<=radius<=.08:raise ValueError('Invalid healing detail radius')
-            radius=max(1,min(80,math.floor(radius*min(effects.get('_worker_width',1280),effects.get('_worker_height',720))+.5)))
-            inner=radius//2;outer_area=(2*radius+1)**2;inner_area=(2*inner+1)**2
-            outer_weight=outer_area/(outer_area-inner_area);inner_weight=inner_area/(outer_area-inner_area)
-            blur=lambda r:f'boxblur=luma_radius={r}:luma_power=1:chroma_radius={r}:chroma_power=1'
-            parts.append(f'format=gbrp,split=4[{prefix}healbase][{prefix}healouter][{prefix}healinner][{prefix}healinput];'
-                f'[{prefix}healouter]{blur(radius)}[{prefix}destinationouter];'
-                f'[{prefix}healinner]{blur(inner)}[{prefix}destinationinner];'
-                f'[{prefix}healinput]geq={channels},split=3[{prefix}clean][{prefix}cleanouterin][{prefix}cleaninnerin];'
-                f'[{prefix}cleanouterin]{blur(radius)}[{prefix}cleanouter];'
-                f'[{prefix}cleaninnerin]{blur(inner)}[{prefix}cleaninner];'
-                f'[{prefix}healbase][{prefix}clean][{prefix}destinationouter][{prefix}cleanouter][{prefix}destinationinner][{prefix}cleaninner]'
-                f"mix=inputs=6:weights='{1-strength:.9f} {strength:.9f} {strength*outer_weight:.9f} {-strength*outer_weight:.9f} {-strength*inner_weight:.9f} {strength*inner_weight:.9f}':scale=1:duration=first")
-        else:
-            parts.append(f'format=gbrp,split=2[{prefix}clonebase][{prefix}cloneinput];[{prefix}cloneinput]geq={channels}[{prefix}cloned];[{prefix}clonebase][{prefix}cloned]blend=all_expr=\'A*(1-{strength:.9f})+B*{strength:.9f}\'')
+    try:
+        from .studio_texture_repair import build_texture_repair_filter
+    except ImportError:
+        from studio_texture_repair import build_texture_repair_filter
+    repair=build_texture_repair_filter(effects,prefix+'repair_')
+    parts=[repair]if repair else[]
     parts += [build_finish({"enabled": True, "color": effects.get("color") or {},
                            "texture": effects.get("texture") or {},
                            "_label_prefix": prefix})]

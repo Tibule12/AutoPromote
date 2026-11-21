@@ -1,4 +1,6 @@
+import {buildPrecisionGrade,applyPrecisionGrade} from './studioPrecisionGrade';
 import {buildAdvancedColorCube,applyColorCube,sampleColorCube} from './studioColorCube';
+import {repairOffsetAt} from './studioRepairMotion';
 import {healTexture,coverageBounds,healRadius} from './studioTextureHeal';
 import {materialSampler,validateMaterialQualifier} from './studioMaterialQualifier';
 // Programme-space masks for ordinary timed colour adjustments. The same
@@ -11,7 +13,7 @@ export function validateSelectiveMask(input) {
   for(const [key,[lo,hi]] of Object.entries(ranges)) if(typeof input[key]!=='number'||!Number.isFinite(input[key])||input[key]<lo||input[key]>hi)throw Error(`Invalid selected-area ${key}.`);
   if(typeof input.inverted!=='boolean')throw Error('Choose mask inside or outside.');
   if(input.shape==='polygon'&&(!Array.isArray(input.points)||input.points.length<3||input.points.length>64||input.points.some(p=>!Array.isArray(p)||p.length!==2||p.some(n=>typeof n!=='number'||!Number.isFinite(n)||n<0||n>1))))throw Error('Draw a closed outline with 3–64 points.');
-  if(!Array.isArray(input.keyframes)||input.keyframes.length>128)throw Error('Use at most 128 mask position keys.');
+  if(!Array.isArray(input.keyframes)||input.keyframes.length>2048)throw Error('Use at most 2048 mask position keys.');
   if(input.opacity!==undefined&&(!Number.isFinite(input.opacity)||input.opacity<0||input.opacity>1))throw Error('Invalid mask visibility.');
   validateMaterialQualifier(input.material);
   if(input.subtract!==undefined){
@@ -34,11 +36,18 @@ export function keySelectiveMask(mask,time,patch={}) {
   const pose={...selectiveMaskAt(mask,time),...patch,opacity:patch.opacity??1};
   return {...mask,keyframes:[...mask.keyframes.filter(k=>Math.abs(k.time-time)>.0001),{time,...Object.fromEntries(fields.map(f=>[f,pose[f]])),...(pose.points?{points:pose.points.map(p=>[...p])}:{}),...(pose.opacity!==undefined?{opacity:pose.opacity}:{})}].sort((a,b)=>a.time-b.time)};
 }
+export function selectiveBounds(mask,width,height,time=0) {
+  if(mask.inverted)return {x0:0,y0:0,x1:width,y1:height};
+  const m=selectiveMaskAt(mask,time),unit=Math.min(width,height),rx=m.width*width/unit/2,ry=m.height*height/unit/2,a=m.rotation*Math.PI/180,c=Math.cos(a),s=Math.sin(a);
+  const pad=m.feather*(m.shape==='ellipse'?Math.max(rx,ry)/Math.min(rx,ry):1),bx=(Math.abs(rx*c)+Math.abs(ry*s)+pad)*unit,by=(Math.abs(rx*s)+Math.abs(ry*c)+pad)*unit;
+  return {x0:Math.max(0,Math.floor(m.x*width-bx)),y0:Math.max(0,Math.floor(m.y*height-by)),x1:Math.min(width,Math.ceil(m.x*width+bx)),y1:Math.min(height,Math.ceil(m.y*height+by))};
+}
 export function selectiveMaskCoverage(mask,width,height,time=0,validated=false) {
   if(!validated)validateSelectiveMask(mask);const m=selectiveMaskAt(mask,time),unit=Math.min(width,height),rx=m.width*width/unit/2,ry=m.height*height/unit/2;
   const angle=m.rotation*Math.PI/180,cs=Math.cos(angle),sn=Math.sin(angle),padding=m.feather*(m.shape==='ellipse'?Math.max(rx,ry)/Math.min(rx,ry):1),out=new Float32Array(width*height);
   const points=(m.points||[]).map(([x,y])=>[(x-.5)*rx*2,(y-.5)*ry*2]);
-  for(let py=0;py<height;py++)for(let px=0;px<width;px++){
+  const bounds=selectiveBounds({...m,inverted:false,keyframes:[]},width,height);if(m.inverted)out.fill(1);
+  for(let py=bounds.y0;py<bounds.y1;py++)for(let px=bounds.x0;px<bounds.x1;px++){
     const dx=((px+.5)/width-m.x)*width/unit,dy=((py+.5)/height-m.y)*height/unit,x=dx*cs+dy*sn,y=-dx*sn+dy*cs;
     if(Math.abs(dx)>Math.abs(rx*cs)+Math.abs(ry*sn)+padding||Math.abs(dy)>Math.abs(rx*sn)+Math.abs(ry*cs)+padding){out[py*width+px]=m.inverted?1:0;continue;}
     let distance;
@@ -60,10 +69,11 @@ export function selectiveMaskCoverage(mask,width,height,time=0,validated=false) 
         width:child.width*m.width,height:child.height*m.height,rotation:a*180/Math.PI,
         feather:child.feather*Math.min(m.width*width,m.height*height)/unit};
       const exclusion=selectiveMaskCoverage(transformed,width,height,0,true);
-      for(let i=0;i<out.length;i++)out[i]=m.inverted?1-(1-out[i])*(1-exclusion[i]):out[i]*(1-exclusion[i]);
+      const box=selectiveBounds(transformed,width,height);
+      for(let y=box.y0;y<box.y1;y++)for(let x=box.x0;x<box.x1;x++){const i=y*width+x;out[i]=m.inverted?1-(1-out[i])*(1-exclusion[i]):out[i]*(1-exclusion[i]);}
     }
   }
-  if(m.opacity!==undefined)for(let i=0;i<out.length;i++)out[i]*=m.opacity;
+  if(m.opacity!==undefined&&m.opacity!==1)for(let i=0;i<out.length;i++)out[i]*=m.opacity;
   return out;
 }
 const cache=new Map();
@@ -81,7 +91,7 @@ export function blendSelectiveGrade(context, original, mask, time=0) {
 // explicit clone tool, not an automatic face reconstruction/beautification model.
 export function applySelectiveClone(image, patch, mask=null, time=0) {
   if(!patch?.enabled)return image;
-  const {width:w,height:h,data}=image,source=data.slice(),amount=clamp(Number(patch.strength??1),0,1),dx=patch.dx*w,dy=patch.dy*h;
+  const {width:w,height:h,data}=image,source=data.slice(),amount=clamp(Number(patch.strength??1),0,1),offset=mask?repairOffsetAt(patch,selectiveMaskAt(mask,time),w,h):patch,dx=offset.dx*w,dy=offset.dy*h;
   const coverage=mask?cachedCoverage(mask,w,h,time):null;
   const bounds=coverageBounds(coverage,w,h,patch.mode==='heal'?healRadius(patch,w,h):0);
   for(let y=bounds.y0;y<bounds.y1;y++)for(let x=bounds.x0;x<bounds.x1;x++){
@@ -100,4 +110,35 @@ export function applySelectiveRecolor(image,recolor,mask=null,time=0) {
  if(mask){const coverage=cachedCoverage(mask,image.width,image.height,time),data=image.data,out=[0,0,0];
    for(let p=0;p<coverage.length;p++)if(coverage[p]){const i=p*4;sampleColorCube(cube,data[i]/255,data[i+1]/255,data[i+2]/255,out);data[i]=out[0]*255;data[i+1]=out[1]*255;data[i+2]=out[2]*255;}
  }else applyColorCube(image.data,cube);return image;
+}
+
+const precisionGrades=new WeakMap();
+// CPU fallback touches only the selected neighbourhood. The old whole-picture
+// three-pass readback made a small face repair stall the audio-independent UI.
+export function applySelectiveAdjustment(context,layer,time=0) {
+  const fx=layer.effects,mask=layer.mask,grade=fx?.color;
+  if(!mask||!grade?.precisionGrade||grade.powerWindow?.enabled||grade.qualifier?.enabled||fx.glow?.intensity)return false;
+  const width=context.canvas.width,height=context.canvas.height,b=selectiveBounds(mask,width,height,time);
+  if(b.x1<=b.x0||b.y1<=b.y0)return true;
+  const image=context.getImageData(0,0,width,height),original=image.data.slice(),coverage=cachedCoverage(mask,width,height,time);
+  if(fx.clone_patch?.enabled)applySelectiveClone(image,fx.clone_patch,mask,time);
+  let primary=precisionGrades.get(grade);if(!primary){primary=buildPrecisionGrade(grade);precisionGrades.set(grade,primary);}
+  const identity=['exposureStops','lift','temperature','tint'].every(f=>!grade[f])&&['brightness','contrast','saturation','gamma','gain'].every(f=>grade[f]===undefined||grade[f]===1);
+  for(let y=b.y0;y<b.y1;y++){
+    const row=image.data.subarray((y*width+b.x0)*4,(y*width+b.x1)*4);
+    if(!identity)applyPrecisionGrade(row,primary);
+  }
+  if(grade.vignette>.005){
+    const angle=Math.PI/Number(Math.max(5.5,17-grade.vignette*10).toFixed(3)),distance=Math.hypot(width/2,height/2),offsets=[16*255/219+1.5748*255/224,16*255/219-(.187324+.468124)*255/224,16*255/219+1.8556*255/224];
+    for(let y=b.y0;y<b.y1;y++)for(let x=b.x0;x<b.x1;x++){const radius=Math.hypot(Math.trunc(x-width/2),Math.trunc(y-height/2))/distance,factor=radius>1?0:Math.cos(angle*radius)**4;for(let c=0;c<3;c++){const i=(y*width+x)*4+c;image.data[i]=clamp(image.data[i]*factor+(factor-1)*offsets[c],0,255);}}
+  }
+  if(fx.color_cube)for(let y=b.y0;y<b.y1;y++)applyColorCube(image.data.subarray((y*width+b.x0)*4,(y*width+b.x1)*4),fx.color_cube);
+  if(fx.recolor?.enabled)applySelectiveRecolor(image,fx.recolor,mask,time);
+  const qualify=materialSampler(mask.material),scratch=[0,0,0];
+  for(let y=b.y0;y<b.y1;y++)for(let x=b.x0;x<b.x1;x++){
+    const p=y*width+x,i=p*4,a=coverage[p]*(coverage[p]?qualify(original[i],original[i+1],original[i+2],scratch):0);
+    for(let c=0;c<3;c++)image.data[i+c]=original[i+c]+(image.data[i+c]-original[i+c])*a;
+    image.data[i+3]=original[i+3];
+  }
+  context.putImageData(image,0,0,b.x0,b.y0,b.x1-b.x0,b.y1-b.y0);return true;
 }

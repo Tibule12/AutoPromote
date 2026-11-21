@@ -12,6 +12,7 @@ from PIL import Image
 from studio_adjustment_grade import adjustment_grade_filter
 from studio_region_tracking import read_packet, track_frames
 from studio_selective_mask import mask_coverage, mask_at, write_material_cube
+from studio_texture_repair import repair_offset_at,repair_bounds
 
 
 def mask(**patch):
@@ -124,3 +125,28 @@ process.stdout.write(JSON.stringify({cases,material,cube:context.material.buildM
         path=Path(folder)/'material.cube';write_material_cube(observed['material'],path,size=5)
         actual=np.asarray([[float(v)for v in line.split()]for line in path.read_text().splitlines()if not line.startswith(('LUT','DOMAIN'))]).ravel()
         np.testing.assert_allclose(actual,observed['cube'],atol=1e-8,rtol=0)
+
+
+def test_moving_patch_export_follows_rotating_material_on_every_sampled_frame():
+    from studio_selective_mask import render_selective_mask
+    width,height=320,180
+    y,x=np.mgrid[:height,:width];rgb=np.stack([x//2,y,np.full_like(x,100)],axis=2).astype(np.uint8)
+    m=mask();m.update(x=.4,y=.5,width=.05,height=.1,shape='rectangle')
+    m['keyframes']=[dict(time=0,x=.4,y=.5,width=.05,height=.1,rotation=0),dict(time=1,x=.5,y=.5,width=.1,height=.2,rotation=90)]
+    patch=dict(enabled=True,dx=.05,dy=0,strength=1,mode='clone',follow=dict(width=.05,height=.1,rotation=0))
+    bounds=repair_bounds(patch,m,width,height,4)
+    assert bounds[2]*bounds[3]<width*height*.5
+    with tempfile.TemporaryDirectory()as folder:
+        path=render_selective_mask(m,Path(folder)/'mask.mkv',width,height,1.5,2)
+        effects=dict(selective_mask=m,clone_patch=patch,_worker_width=width,_worker_height=height,
+            _worker_selective_mask_path=path,_worker_selective_mask_fps=2)
+        graph=adjustment_grade_filter(effects,lambda _:'null','follow_')
+        result=subprocess.run(['ffmpeg','-v','error','-threads','1','-filter_complex_threads','1','-f','rawvideo','-pixel_format','rgb24','-video_size',f'{width}x{height}','-framerate','2','-i','pipe:0','-vf',graph,'-frames:v','3','-f','rawvideo','-pix_fmt','rgb24','pipe:1'],input=rgb.tobytes()*3,check=True,capture_output=True)
+        frames=np.frombuffer(result.stdout,np.uint8).reshape(3,height,width,3)
+        for index,t in enumerate([0,.5,1]):
+            pose=mask_at(m,t);cx=round(pose['x']*width);cy=round(pose['y']*height)
+            dx,dy=repair_offset_at(patch,m,width,height,t)
+            expected=[(cx+dx)/2,cy+dy,100]
+            assert np.max(np.abs(frames[index,cy,cx].astype(float)-expected))<=1.1
+            # The moving correction cannot spill into an unrelated corner.
+            np.testing.assert_array_equal(frames[index,:10,:10],rgb[:10,:10])

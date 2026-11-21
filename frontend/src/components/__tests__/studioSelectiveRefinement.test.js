@@ -1,6 +1,7 @@
 import {buildMaterialCube,materialAlpha,newMaterialQualifier} from '../studioMaterialQualifier';
 import {newSelectiveMask,selectiveMaskCoverage,keySelectiveMask,selectiveMaskAt,applySelectiveClone} from '../studioSelectiveMask';
-import {applyRegionTracking,trackingTimes,inheritRegionMotion} from '../studioRegionTracking';
+import {applyRegionTracking,trackingTimes,inheritRegionMotion,trackRegionRange} from '../studioRegionTracking';
+import {repairOffsetAt} from '../studioRepairMotion';
 import {compileStudioAdjustmentGrade} from '../studioAdjustmentGrade';
 import {adaptStudioSnapshotToDocument,projectStudioEditableStateToSnapshot} from '../studioProjectDocument';
 
@@ -71,4 +72,24 @@ test('small repairs reuse a larger tracked area while preserving their local off
   const next=inheritRegionMotion(child,reference,0,16/9),last=selectiveMaskAt(next.mask,2);
   expect(last.x).toBeCloseTo(.7);expect(last.y).toBeCloseTo(.55);expect(last.width).toBeCloseTo(.02);
   expect(next.tracking.referenceId).toBe('face');
+});
+
+test('clean source follows rotation and size in picture coordinates',()=>{
+  const patch={dx:.05,dy:0,follow:{width:.1,height:.2,rotation:0}};
+  const offset=repairOffsetAt(patch,{width:.2,height:.4,rotation:90},320,180);
+  expect(offset.dx).toBeCloseTo(0);expect(offset.dy*180).toBeCloseTo(32);
+  expect(repairOffsetAt({dx:.05,dy:0},{width:.2,height:.4,rotation:90},320,180)).toEqual({dx:.05,dy:0});
+});
+
+test('long video tracking joins bounded passes without losing the earlier path',async()=>{
+  const layer={id:'face',startTime:0,duration:21,mask:newSelectiveMask()},ranges=[];
+  const next=await trackRegionRange({layer,start:0,end:20,capture:async segment=>{ranges.push([segment.start,segment.end]);return segment;},
+    analyze:async segment=>({version:1,engine:'test',trackedSamples:81,observations:[],keyframes:trackingTimes(segment.start,segment.end).map(t=>({time:t,x:.5+t*.001,y:.5,width:.25,height:.3,rotation:t,opacity:1}))}),isCurrent:()=>true});
+  expect(ranges).toEqual([[0,10],[10,20]]);
+  expect(next.mask.keyframes.length).toBeGreaterThan(128);
+  expect(selectiveMaskAt(next.mask,15).x).toBeCloseTo(.515);
+  expect(layer.mask.keyframes).toEqual([]);
+  let current=true;
+  await expect(trackRegionRange({layer,start:0,end:20,capture:async s=>s,analyze:async()=>{current=false;return{};},isCurrent:()=>current})).rejects.toThrow(/changed|cancelled/);
+  expect(layer.mask.keyframes).toEqual([]);
 });

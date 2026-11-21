@@ -59,11 +59,33 @@ export function applyRegionTracking(layer,result,requestedStart,requestedEnd,fra
     keys.push({...keys[keys.length-1],time:end+1/frameRate,opacity:0,hold:true});
   }
   const merged=[...retained,...keys].sort((a,b)=>a.time-b.time);
-  if(merged.length>128)throw Error('This region already has too many motion keys. Shorten the range or clear its tracking keys.');
+  if(merged.length>2048)throw Error('This region has reached 2048 motion keys. Start another region or clear unneeded keys.');
   const next={...layer,mask:{...layer.mask,keyframes:merged},tracking:{engine:result.engine,
     range:[requestedStart,requestedEnd],stopReason:result.stopReason,reviewRequired:true,
+    reviewTime:result.stopReason?result.keyframes.find(k=>k.opacity===0)?.time:undefined,
     observations:result.observations||[]}};
   validateSelectiveMask(next.mask);return next;
+}
+
+export async function trackRegionRange({layer,start,end,direction=1,frameRate=30,capture,analyze,isCurrent,onProgress}) {
+  if(end<=start||end-start>60.01)throw Error('Choose a tracking range up to sixty seconds.');
+  let working=layer,cursor=direction>0?start:end,samples=1,stopReason=null;
+  const observations=[];
+  while(direction>0?cursor<end-.001:cursor>start+.001) {
+    if(!isCurrent())throw Error('Selection tracking cancelled.');
+    const low=direction>0?cursor:Math.max(start,cursor-10),high=direction>0?Math.min(end,cursor+10):cursor;
+    const packet=await capture({layer:working,start:low,end:high,direction,
+      onProgress:(done,total)=>onProgress?.({start:low,end:high,done,total})});
+    if(!isCurrent())throw Error('Selection tracking cancelled.');
+    const result=await analyze(packet);
+    if(!isCurrent())throw Error('The edit changed; tracking was not applied.');
+    working=applyRegionTracking(working,result,low,high,frameRate);
+    observations.push(...(result.observations||[]));samples+=Math.max(0,(result.trackedSamples||result.keyframes.length)-1);
+    stopReason=result.stopReason;
+    if(stopReason)break;
+    cursor=direction>0?high:low;
+  }
+  return {...working,tracking:{...working.tracking,range:[start,end],observations,trackedSamples:samples,stopReason,reviewRequired:true}};
 }
 
 // Transfer an observed head/object path to a small local correction. This
@@ -82,7 +104,7 @@ export function inheritRegionMotion(layer,reference,time,aspect=16/9) {
     return {time:localTime,x:p.x+u*p.width*Math.cos(a)-v*p.height*Math.sin(a)/aspect,
       y:p.y+u*p.width*Math.sin(a)*aspect+v*p.height*Math.cos(a),
       width:child.width*p.width/anchor.width,height:child.height*p.height/anchor.height,
-      rotation:((child.rotation+p.rotation-anchor.rotation+180)%360+360)%360-180,
+      rotation:child.rotation+p.rotation-anchor.rotation,
       opacity:p.opacity??1,...(child.points?{points:child.points.map(point=>[...point])}:{})};
   });
   // Preserve cut/loss boundaries when copying the path in programme time.

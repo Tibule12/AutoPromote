@@ -141,3 +141,12 @@ test('healing, exclusions, colour mattes and tracked outlines require v2 on ever
  axios.post.mockResolvedValue({data:{status:'completed'}});
  await expect(postMediaWorker('/render-viral-clip',payload)).resolves.toMatchObject({device:'gpu'});
 });
+
+test('moving repair references and extended video paths require v3 before charge or dispatch',async()=>{
+ const payload={end_time:20,finish_plan:{adjustment_layers:[{effects:{selective_mask:{version:1},clone_patch:{enabled:true,follow:{width:.1,height:.1,rotation:0}}}}]}};
+ axios.get.mockResolvedValue({data:{status:'ok',computeDevice:'cuda',videoEncoder:'h264_nvenc',gpuRequired:true,studioCapabilities:{selectiveGrading:2}}});
+ await expect(assertMediaWorkerReady(payload)).rejects.toMatchObject({code:'STUDIO_SELECTIVE_GRADING_UNAVAILABLE'});
+ expect(axios.post).not.toHaveBeenCalled();
+ axios.get.mockReset();axios.get.mockResolvedValue({data:{status:'ok',computeDevice:'cuda',videoEncoder:'h264_nvenc',gpuRequired:true,studioCapabilities:{selectiveGrading:3}}});
+ await expect(assertMediaWorkerReady(payload)).resolves.toMatchObject({device:'gpu'});
+});
