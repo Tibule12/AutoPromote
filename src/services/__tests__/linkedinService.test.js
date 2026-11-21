@@ -14,9 +14,23 @@ jest.mock("../../utils/ssrfGuard", () => ({
       global.__last_linkedin_post = last;
       return Promise.resolve({ ok: true, text: async () => JSON.stringify({ id: "share_1" }) });
     }
+    if (url.includes("assets?action=registerUpload")) {
+      return Promise.resolve({ ok: true, json: async () => ({ value: {
+        asset: "urn:li:digitalmediaAsset:video_1",
+        uploadMechanism: { "com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest": {
+          uploadUrl: "https://www.linkedin.com/upload/video_1",
+        } },
+      } }) });
+    }
+    if (url.endsWith("/v2/assets/video_1")) {
+      return Promise.resolve({ ok: true, json: async () => ({ recipes: [{ status: "AVAILABLE" }] }) });
+    }
     return Promise.resolve({ ok: true, json: async () => ({}), text: async () => "{}" });
   }),
 }));
+
+jest.mock("../../utils/streamLinkedInVideo", () => ({ streamLinkedInVideo: jest.fn(async () => ({ bytes: 100 })) }));
+jest.mock("../../utils/cleanupSource", () => ({ cleanupSourceFile: jest.fn(async () => {}) }));
 
 jest.mock("../../firebaseAdmin", () => ({
   db: {
@@ -116,6 +130,18 @@ describe("LinkedIn expired credentials", () => {
 });
 
 describe("LinkedIn posting with hashtags", () => {
+  test("streams the video and polls its opaque asset ID before posting", async () => {
+    const { streamLinkedInVideo } = require("../../utils/streamLinkedInVideo");
+    await expect(postToLinkedIn({ uid: "user1", text: "Festival", videoUrl: "https://storage.googleapis.com/b/video.mp4" }))
+      .resolves.toMatchObject({ success: true });
+    expect(streamLinkedInVideo).toHaveBeenCalledWith(expect.objectContaining({
+      videoUrl: "https://storage.googleapis.com/b/video.mp4", uploadUrl: "https://www.linkedin.com/upload/video_1",
+    }));
+    expect(safeFetch.mock.calls.some(([url]) => url.endsWith("/v2/assets/video_1"))).toBe(true);
+    const body = JSON.parse(global.__last_linkedin_post.opts.fetchOptions.body);
+    expect(body.specificContent["com.linkedin.ugc.ShareContent"].media[0].media)
+      .toBe("urn:li:digitalmediaAsset:video_1");
+  });
   test("appends hashtagString to shareCommentary.text", async () => {
     global.__last_linkedin_post = null;
 

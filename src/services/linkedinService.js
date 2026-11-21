@@ -2,6 +2,7 @@
 const { db, admin } = require("../firebaseAdmin");
 const { safeFetch } = require("../utils/ssrfGuard");
 const { cleanupSourceFile } = require("../utils/cleanupSource");
+const { streamLinkedInVideo } = require("../utils/streamLinkedInVideo");
 
 let fetchFn = global.fetch;
 if (!fetchFn) {
@@ -353,29 +354,11 @@ async function uploadVideo({ uid, videoUrl }) {
       .uploadUrl;
   const asset = registerData.value.asset;
 
-  // Step 2: Download video stream
-  const videoResponse = await safeFetch(videoUrl, fetchFn, { requireHttps: true });
-  if (!videoResponse.ok) throw new Error("Failed to download video for upload");
+  // Steps 2–3: stream with backpressure instead of buffering the entire video.
+  await streamLinkedInVideo({ videoUrl, uploadUrl, accessToken, fetchImpl: fetchFn });
 
-  // Use buffer for compatibility
-  const videoBuffer =
-    typeof videoResponse.buffer === "function"
-      ? await videoResponse.buffer()
-      : Buffer.from(await videoResponse.arrayBuffer());
-
-  // Step 3: Upload video
-  const uploadResponse = await fetch(uploadUrl, {
-    method: "PUT",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/octet-stream",
-    },
-    body: videoBuffer,
-  });
-
-  if (!uploadResponse.ok) {
-    throw new Error("Failed to upload video bytes to LinkedIn");
-  }
+  // The read endpoint takes the opaque ID, not the digitalmediaAsset URN.
+  const assetId = String(asset).split(":").pop();
 
   // Step 4: Poll for completion
   return new Promise((resolve, reject) => {
@@ -386,7 +369,7 @@ async function uploadVideo({ uid, videoUrl }) {
     const poll = async () => {
       attempts++;
       try {
-        const statusRes = await safeFetch(`https://api.linkedin.com/v2/assets/${asset}`, fetchFn, {
+        const statusRes = await safeFetch(`https://api.linkedin.com/v2/assets/${encodeURIComponent(assetId)}`, fetchFn, {
           fetchOptions: {
             method: "GET",
             headers: {
