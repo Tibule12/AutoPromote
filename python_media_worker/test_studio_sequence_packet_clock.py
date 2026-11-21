@@ -43,7 +43,14 @@ class SequencePacketClockTests(unittest.TestCase):
     def test_short_reviewed_sequence_preserves_intermediates_but_keeps_delivery_quality(self):
         self.render_sequence(24, framed=True)
 
-    def render_sequence(self, fps, duration=2, tail_cut=None, framed=False):
+    def test_prores_movie_passes_the_canonical_delivery_gate(self):
+        self.render_sequence(24, codec="prores")
+
+    def test_prores_caption_review_preserves_the_movie_and_pcm(self):
+        self.render_sequence(24, codec="prores", caption_review=True)
+
+    def render_sequence(self, fps, duration=2, tail_cut=None, framed=False,
+                        codec="h264", caption_review=False):
         with tempfile.TemporaryDirectory(prefix="studio-packet-clock-") as folder, ExitStack() as patches:
             tmp_path = Path(folder)
 
@@ -84,9 +91,11 @@ class SequencePacketClockTests(unittest.TestCase):
                 return destination
 
             replace(worker, "materialize_video_input", materialize)
-            final = tmp_path / "verified-final.mp4"
+            extension = ".mov" if codec == "prores" else ".mp4"
+            final = tmp_path / ("verified-final" + extension)
 
             def retain_output(path, **_):
+                self.assertEqual(Path(path).suffix, extension)
                 shutil.copyfile(path, final)
                 return "local-regression-output"
 
@@ -127,11 +136,25 @@ class SequencePacketClockTests(unittest.TestCase):
                                       {"time": .7, "mode": "speaker_track"}] +
                                      ([{"time": tail_cut, "mode": "speaker_track"}] if tail_cut is not None else []),
                 }},
-                output_settings={"resolution": "720p", "fps": fps, "quality": "balanced"},
+                output_settings={"resolution": "720p", "fps": fps, "quality": "balanced",
+                                 "codec": codec, "colorSpace": "rec709"},
                 brand_watermark=False,
+                caption_review_copy=caption_review,
             )
             result = asyncio.run(worker.render_viral_clip_impl(request, f"packet-clock-{fps}"))
             assert result["status"] == "completed"
+            if codec == "prores":
+                media = result["final_quality_gate"]["media"]
+                self.assertEqual(media["video"]["codec_name"], "prores")
+                self.assertEqual(media["audio"]["codec_name"], "pcm_s16le")
+                picture_details = json.loads(subprocess.check_output([
+                    "ffprobe", "-v", "error", "-select_streams", "v:0",
+                    "-show_entries", "stream=profile,pix_fmt:format_tags=major_brand",
+                    "-of", "json", str(final),
+                ]))
+                self.assertEqual(picture_details["streams"][0]["profile"], "HQ")
+                self.assertEqual(picture_details["streams"][0]["pix_fmt"], "yuv422p10le")
+                self.assertEqual(picture_details["format"]["tags"]["major_brand"].strip(), "qt")
             assert len(checked_segments) == 3
             if framed:
                 self.assertEqual(len(checked_finish), 3)

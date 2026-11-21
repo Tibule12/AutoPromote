@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "PR552 Actions follow-through: constrain multipart scratch paths and repair transaction/create/cleanup/cooldown integration fixtures without weakening production claims. No readiness promotion.",
-  "reviewed_at": "2026-11-21T08:47:47.568Z",
+  "reason": "Integrate owner-scoped Studio recovery, ProRes delivery, and compact monitor corrections into the production base",
+  "reviewed_at": "2026-11-21T09:17:25.435Z",
   "catalog_sha256": "dbccf16776eba7c2ccdc3147942ca59af341a2bf46c05675c6f85a59221c371a",
   "sources": [
     {
@@ -51,7 +51,7 @@
     },
     {
       "path": "frontend/src/UserDashboardTabs/ViralClipStudioPanel.js",
-      "sha256": "4a76f7beeb02255c2ce4b2242fe6e43d7e4c51da92ef98ef8887475317f2d3c8"
+      "sha256": "c65a67612a8d8f4fceeff18a21ce64047e89ac4e9cd108385cfff4123523fff3"
     },
     {
       "path": "frontend/src/UserDashboard_full.js",
@@ -195,11 +195,11 @@
     },
     {
       "path": "frontend/src/components/VideoEditor.js",
-      "sha256": "dae18b1a55e22fe250d820cf9794aab4ebac867103bd21720db113fa444099ba"
+      "sha256": "1f22cf3a12ec9f847c76d76210196518ba721efd568f0c487a9a8877e2012f4c"
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "9c16e63d88228d5f1b9de0eaf5facaeea4b1d19e03a7ee5e7989aed65ed3573d"
+      "sha256": "6048dc8cc138ec7a8ee45c38897bee3f1717b6c63ad435ad0aa36b31bbe8eacf"
     },
     {
       "path": "frontend/src/components/ViralScanner.js",
@@ -475,7 +475,7 @@
     },
     {
       "path": "python_media_worker/main_media_server.py",
-      "sha256": "1331dd7a975fdb571612500ddcca732e51a03fda3e19b31babb40220bf8e21ee"
+      "sha256": "8429a25cbb80674d6b1703c8f97b1cec948b131f1e029713a31de2faedfb2b3c"
     },
     {
       "path": "python_media_worker/studio_audio.py",
@@ -763,11 +763,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "6114efee613e177a085935368d60041c50486d2981847d6f23243f7c694a669b"
+      "sha256": "e74dbc2b0e66fe93d64f36f5751265184705f59bda0ef1c984e16835cf8729c0"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "aff4823be10b374b000fc466c65faa0dc565fd6840775b0b1a6f61e2ab6c5bae"
+      "sha256": "c353ecf4724f404644686e214e700973a34ec8c3e312ece2b217d1e4b1bcd224"
     },
     {
       "path": "worker.js",

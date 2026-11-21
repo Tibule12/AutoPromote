@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { getAuth } from "firebase/auth";
 import VideoEditor from "../components/VideoEditor";
 import { SafeVideo } from "../components/SafeMedia";
 import { useSubscription } from "../hooks/useSubscription";
@@ -13,6 +14,14 @@ import { studioSourceLeaseRefreshDelay, studioSourceStoragePath } from '../compo
 const resolveSourceUrl = source => {
   if (typeof source === "string") return sanitizeUrl(source);
   return source?.url ? sanitizeUrl(source.url) : "";
+};
+
+const currentProjectOwnerUid = () => {
+  try {
+    return getAuth().currentUser?.uid || null;
+  } catch {
+    return null;
+  }
 };
 
 const renewSourceRead = async source => {
@@ -112,6 +121,11 @@ function ViralClipStudioPanel({
   onUpgrade,
 }) {
   const { canUseFeature, loading: subscriptionLoading } = useSubscription();
+  const ownerUid = currentProjectOwnerUid();
+  const listSavedProjects = useCallback(
+    () => listViralStudioProjects(ownerUid ? { ownerUid } : undefined),
+    [ownerUid]
+  );
   const uploadRequestRef = useRef(0);
   const retrySourceRef = useRef(null);
   const sourceReadRetryRef = useRef(null);
@@ -124,7 +138,8 @@ function ViralClipStudioPanel({
   const [pendingSourceName, setPendingSourceName] = useState("");
   const [studioSource, setStudioSource] = useState(null);
   const [additionalSourceFiles, setAdditionalSourceFiles] = useState([]);
-  const [savedProjects, setSavedProjects] = useState([]);
+  const [storedProjects, setSavedProjects] = useState([]);
+  const savedProjects = storedProjects.filter(project => !project.ownerUid || project.ownerUid === ownerUid);
   const [savedProjectsError, setSavedProjectsError] = useState("");
   const [resumedProject, setResumedProject] = useState(null);
   const [resumingProject, setResumingProject] = useState(false);
@@ -138,7 +153,7 @@ function ViralClipStudioPanel({
     setSavedProjectsError("");
     try {
       const { project, mediaPaths } = await readStudioProjectBackup(file);
-      const existing = await listViralStudioProjects();
+      const existing = await listSavedProjects();
       if (existing.some(item => item.id === project.id)) throw new Error("This project is already saved. Open its saved entry.");
       const token = await getMediaAuthToken();
       if (!token) throw new Error("Sign in to restore your project backup.");
@@ -154,8 +169,10 @@ function ViralClipStudioPanel({
           if (!response.ok || !result.url) throw new Error(result.message || "A backup source is unavailable to this account.");
         }));
       }
-      await saveViralStudioProject(project);
-      setSavedProjects(await listViralStudioProjects());
+      if (currentProjectOwnerUid() !== ownerUid) throw new Error("The signed-in account changed. Restore the backup again.");
+      await saveViralStudioProject(project, { ownerUid, createOnly: true });
+      const projects = await listSavedProjects();
+      if (currentProjectOwnerUid() === ownerUid) setSavedProjects(projects);
     } catch (error) {
       setSavedProjectsError(error.message || "Project backup could not be restored.");
     } finally { setRestoringBackup(false); }
@@ -163,14 +180,17 @@ function ViralClipStudioPanel({
 
   useEffect(() => {
     let active = true;
-    listViralStudioProjects().then(projects => {
-      if (active) setSavedProjects(projects);
+    listSavedProjects().then(projects => {
+      if (active && currentProjectOwnerUid() === ownerUid) {
+        setSavedProjects(projects);
+        setSavedProjectsError("");
+      }
     }).catch(error => {
       console.warn("Could not load saved Studio projects", error);
       if (active) setSavedProjectsError("Saved projects could not be loaded. Retry to reopen your edits.");
     });
     return () => { active = false; };
-  }, []);
+  }, [listSavedProjects, ownerUid]);
 
   const resumeSavedProject = async project => {
     if (subscriptionLoading) return;
@@ -195,6 +215,7 @@ function ViralClipStudioPanel({
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok || !result.url) throw new Error(result.message || result.error || "Saved video is unavailable.");
+      if (currentProjectOwnerUid() !== ownerUid) return;
       const clip = (snapshot.orderedClips || [])[0];
       const restoredSource = { ...source, url: result.url, storagePath, isRemote: true };
       setResumedProject(project);
@@ -552,7 +573,13 @@ function ViralClipStudioPanel({
           <p className="studio-entry-device-note">Saved in this browser on this device.</p>
           {savedProjectsError && <div role="alert" className="studio-entry-alert"><p>{savedProjectsError}</p>
             <button type="button" onClick={async () => {
-              try { setSavedProjects(await listViralStudioProjects()); setSavedProjectsError(""); }
+              try {
+                const projects = await listSavedProjects();
+                if (currentProjectOwnerUid() === ownerUid) {
+                  setSavedProjects(projects);
+                  setSavedProjectsError("");
+                }
+              }
               catch (error) { console.warn("Could not reload saved Studio projects", error); }
             }}>Retry saved projects</button>
           </div>}

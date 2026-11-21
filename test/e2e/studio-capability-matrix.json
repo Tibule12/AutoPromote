@@ -1,4 +1,30 @@
 {
+  "proEditorCorrections20261120": {
+    "date": "2026-11-20",
+    "evidence": "reports/pro-editor-qa-20261120/correction-verification.json",
+    "scope": "Owner-scoped project recovery, canonical ProRes HQ MOV delivery, and compact monitor correction.",
+    "readinessPromotion": false
+  },
+  "proEditorQa20261120": {
+    "date": "2026-11-20",
+    "evidence": "reports/pro-editor-qa-20261120/verification.json",
+    "focusIds": [
+      "preview",
+      "cuts_speed",
+      "audio",
+      "captions",
+      "export",
+      "save_reload",
+      "director"
+    ],
+    "scope": "Signed-in loopback 46.463-second H.264 delivery, stems and desktop handoff, H.264 dual masters, and local Director apply/history.",
+    "readinessPromotion": false,
+    "nextTaskId": "S02",
+    "originalRunBlockers": [
+      "Recent Projects dashboard omits the owner scope after reload",
+      "ProRes rejected by H.264-only output verification"
+    ]
+  },
   "mediaMemory20261121": {
     "date": "2026-11-21",
     "evidenceRefs": [

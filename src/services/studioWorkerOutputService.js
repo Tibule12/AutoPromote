@@ -90,7 +90,7 @@ async function refreshOwnedStudioOutput({ storagePath, userId, jobId, download =
   return url;
 }
 
-async function retainedLocalCompletionHash(jobId, env = process.env) {
+async function retainedLocalCompletionHash(jobId, env = process.env, outputUrl = null) {
   // Explicit workstation recovery only. The owner-checked completed job is
   // reconciled with its actual canonical worker file, never a browser hash.
   if (env.NODE_ENV !== 'development' || !env.STUDIO_LOCAL_COMPLETION_ROOT) return null;
@@ -101,7 +101,9 @@ async function retainedLocalCompletionHash(jobId, env = process.env) {
   if (!path.isAbsolute(root) || await fs.promises.realpath(root) !== root) throw new Error('Invalid retained local completion directory');
   const directory=await fs.promises.lstat(root);
   if (!directory.isDirectory() || directory.isSymbolicLink() || (directory.mode & 0o077)) throw new Error('Retained completion directory must be private');
-  const file=path.resolve(root,jobId+'_viral.mp4');
+  const extension = outputUrl && workerBucketOutputPath(outputUrl, jobId, outputBucket().name)?.endsWith('.mov')
+    ? '.mov' : '.mp4';
+  const file=path.resolve(root,jobId+'_viral'+extension);
   if(!file.startsWith(root+path.sep))throw new Error('Retained completion escaped its private root');
   let handle;
   try { handle=await fs.promises.open(file,fs.constants.O_RDONLY|fs.constants.O_NOFOLLOW); }
@@ -133,7 +135,8 @@ function workerBucketOutputPath(value, jobId, bucketName) {
       if (!parts) return null;
       bucket = decodeURIComponent(parts[1]); object = decodeURIComponent(parts[2]);
     } else return null;
-    return bucket === bucketName && object === `processed/${jobId}_viral.mp4` ? object : null;
+    return bucket === bucketName &&
+      [`processed/${jobId}_viral.mp4`, `processed/${jobId}_viral.mov`].includes(object) ? object : null;
   } catch { return null; }
 }
 
@@ -153,7 +156,9 @@ async function persistWorkerBucketOutput({ url, userId, jobId, expectedSha256, l
     if (legacy) return null;
     throw new Error('Worker output is not the configured job object');
   }
-  const storagePath = `studio/exports/${userId}/${jobId}/render.mp4`;
+  const extension = path.extname(sourcePath);
+  const contentType = extension === '.mov' ? 'video/quicktime' : 'video/mp4';
+  const storagePath = `studio/exports/${userId}/${jobId}/render${extension}`;
   const target = bucket.file(storagePath), maximum = 1024*1024*1024;
   async function existing() {
     let metadata;
@@ -172,7 +177,7 @@ async function persistWorkerBucketOutput({ url, userId, jobId, expectedSha256, l
   if (!Number.isSafeInteger(sourceBytes) || sourceBytes <= 0 || sourceBytes > maximum || !sourceMetadata.generation)
     throw new Error('Worker bucket output has invalid size or generation');
   const directory = await fs.promises.mkdtemp(path.join(os.tmpdir(),'studio-bucket-output-'));
-  const local = path.join(directory,'render.mp4');
+  const local = path.join(directory, 'render' + extension);
   try {
     let bytes = 0; const digest = crypto.createHash('sha256');
     const bounded = new Transform({transform(chunk,encoding,callback) {
@@ -186,7 +191,7 @@ async function persistWorkerBucketOutput({ url, userId, jobId, expectedSha256, l
       throw new Error('Worker bucket output differs from the completed render hash');
     try {
       await bucket.upload(local,{destination:storagePath,resumable:false,preconditionOpts:{ifGenerationMatch:0},
-        metadata:{contentType:'video/mp4',cacheControl:'private, max-age=3600',
+        metadata:{contentType,cacheControl:'private, max-age=3600',
           metadata:{ownerUid:userId,jobId,purpose:'studio_export',sha256:expectedSha256,
             sourceGeneration:String(sourceMetadata.generation)}}});
     } catch (error) { if (Number(error.code) !== 412) throw error; }

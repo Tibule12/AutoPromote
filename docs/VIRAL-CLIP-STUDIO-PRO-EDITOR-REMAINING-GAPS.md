@@ -4,7 +4,11 @@
 
 Companion to [VIRAL-CLIP-STUDIO-PRO-EDITOR-READINESS.md](VIRAL-CLIP-STUDIO-PRO-EDITOR-READINESS.md), [STUDIO-COMPLETION-CONTRACT.md](STUDIO-COMPLETION-CONTRACT.md), and the formal registers ([studio-capability-matrix.json](../test/e2e/studio-capability-matrix.json), [studio-combination-matrix.json](../test/e2e/studio-combination-matrix.json), [studio-preview-render-parity.json](../test/e2e/studio-preview-render-parity.json)).
 
-This document records **every remaining product, technical, and workflow gap** on Viral Clip Studio that professional editors will notice, ask about, or hit **during a live demonstration** and **when using Studio on real paid jobs, client revisions, and finishing handoffs**.
+This inventory captures the product, technical, and workflow gaps identified for live demonstrations, paid jobs, client revisions, and finishing handoffs.
+
+**20 November verification.** The tested professional-editor worktree was `11052f818`, with `main` at `dd4b80a6a` for comparison. Signed-in browser tests found two delivery blockers. Recent Projects hides owned saves after reload, and the ProRes worker output is rejected by an H.264-only check. H.264 delivery, both H.264 masters, caption sidecars, audio stems, and OTIO/EDL handoffs completed. The branch descriptions and references to available settings below date to the 19 November inventory. [Test results and evidence](../reports/pro-editor-qa-20261120/README.md)
+
+The subsequent local fix scopes Recent Projects by owner and completes ProRes delivery through the real CPU worker and QuickTime storage tests. Signed-in browser requalification and release remain open. [Correction evidence](../reports/pro-editor-qa-20261120/README.md#correction-pass)
 
 ---
 
@@ -203,7 +207,7 @@ Once past the first demo, editors test real client media, multi-camera shoots, t
 
 ## Verified Implementation Progress (Sprint 1–6 Update · 20 November 2026)
 
-All buildable software, UI, FFmpeg worker, audio DSP, color pipeline, timeline engine, and portability gaps identified above were implemented and verified on `feat/pro-studio-engine-20261114`:
+The six sprints added the implementations below. The [20 November professional editor QA](../reports/pro-editor-qa-20261120/README.md) verifies the tested workflows on `11052f818` and records release blockers in Recent Projects and ProRes delivery.
 
 - **Audio Mixing, Stems & Compliance (Sprint 1):** Equal-power stereo panning (`L100..R100`) per bus, click-free linear-ramp `volume` ducking (`build_smooth_ducking_filter`), combined-bus master `loudnorm` + `alimiter`, ITU-R BS.1770-4 K-weighting + 4x oversampled true peak meters (`studioAudioDspEngine.js`), aligned multi-bus 24-bit FFmpeg WAV stem export (`studio_audio_stems.py`), and browser-side sample-aligned 16-bit WAV stem `.zip` export (`studioAudioStems.js`).
 - **Captions, Diarization & Dual Masters (Sprint 2):** Pause-aligned word-level `words[]` / `wordTimings[]` preserved across `studioProjectDocument.js`, `ViralClipStudio.js`, `viralRenderPayload.js`, `studioCaptionPreviewStyle.js`, `viral_render_contract.py`, and ASS karaoke `{\\k...}` pause waits (`studio_caption_renderer.py`, `main_media_server.py`); post-edit `.srt`/`.vtt` sidecar export (`studioCaptionSidecar.js`); OpenAI `gpt-4o-transcribe-diarize` language-hint routing for non-`auto` ISO languages while retaining local `swivuriso` routing for regional South African choices; one-click **Export Captioned + Clean Master Pair** (`Dual Clean` + captioned master).
