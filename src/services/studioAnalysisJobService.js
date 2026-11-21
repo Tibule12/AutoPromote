@@ -1,7 +1,7 @@
 const crypto = require("crypto");
 const fs = require("node:fs");
 const { pipeline } = require("node:stream/promises");
-const { fileSha256 } = require("../utils/temporaryMediaUpload");
+const { fileSha256, temporarySourcePath } = require("../utils/temporaryMediaUpload");
 const axios = require("axios");
 const admin = require("firebase-admin");
 const { db } = require("../firebaseAdmin");
@@ -194,10 +194,11 @@ const sameJob = (record, { uid, jobId, fingerprint }) => {
 // same request can finish staging after a process exits between these steps.
 const createStudioAnalysisJob = async (input, { firestore = db, storage = bucketFor() } = {}) => {
   let sourceBytes;
-  if (input.sourcePath) {
-    const stat = await fs.promises.lstat(input.sourcePath).catch(() => null);
+  const sourcePath = input.sourcePath ? temporarySourcePath(input.sourcePath) : null;
+  if (sourcePath) {
+    const stat = await fs.promises.lstat(sourcePath).catch(() => null);
     if (!stat?.isFile() || stat.isSymbolicLink() || stat.size < 1 || stat.size > MAX_SOURCE_BYTES ||
-        await fileSha256(input.sourcePath) !== input.sourceSha256) throw invalid();
+        await fileSha256(sourcePath) !== input.sourceSha256) throw invalid();
     sourceBytes = stat.size;
   } else {
     if (!Buffer.isBuffer(input.buffer) || input.buffer.length < 1 ||
@@ -261,8 +262,8 @@ const createStudioAnalysisJob = async (input, { firestore = db, storage = bucket
         },
       },
     };
-    if (input.sourcePath)
-      await pipeline(fs.createReadStream(input.sourcePath), file.createWriteStream(saveOptions));
+    if (sourcePath)
+      await pipeline(fs.createReadStream(sourcePath), file.createWriteStream(saveOptions));
     else await file.save(buffer, saveOptions);
   } catch (error) {
     if (![412, "conditionNotMet"].includes(error?.code)) throw unavailable();

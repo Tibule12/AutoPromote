@@ -1012,8 +1012,8 @@ test("a cleanup outage does not stall queued analysis", async () => {
 
 test("a disk-backed multipart source verifies its digest and streams to durable storage", async () => {
   const firestore = fakeFirestore(), storage = fakeStorage();
-  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "analysis-upload-test-"));
-  const sourcePath = path.join(directory, "source.mp4");
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "autopromote-upload-"));
+  const sourcePath = path.join(directory, "source");
   try {
     await fs.writeFile(sourcePath, source);
     const job = await createStudioAnalysisJob(input({ buffer: undefined, sourcePath }), { firestore, storage });

@@ -31,7 +31,7 @@ test("X uploads sequential 5 MiB segments from disk and removes scratch", async 
   let sourcePath;
   const segments = [];
   safeFetch.mockImplementation(async (url, _fetch, options) => {
-    if (url.includes("storage.googleapis.com"))
+    if (new URL(url).hostname === "storage.googleapis.com")
       return {
         ok: true,
         body: Readable.from(

@@ -5,7 +5,7 @@ const router = express.Router();
 const crypto = require("crypto");
 const fs = require("node:fs");
 const { pipeline: streamPipeline } = require("node:stream/promises");
-const { temporaryMediaUpload, fileSha256 } = require("./utils/temporaryMediaUpload");
+const { temporaryMediaUpload, temporarySourcePath, fileSha256 } = require("./utils/temporaryMediaUpload");
 const { admitMediaTransfer } = require("./utils/mediaTransferBudget");
 const axios = require("axios");
 const admin = require("firebase-admin");
@@ -1409,11 +1409,11 @@ router.post("/studio-analysis-jobs", requireTesterEditingFeature("audioExtract")
       let anchors;
       try { anchors = JSON.parse(req.body?.anchors || ""); }
       catch (_) { return res.status(400).json({ code: "STUDIO_ANALYSIS_JOB_INVALID" }); }
-      const sourceSha256 = await fileSha256(req.file.path);
+      const sourceSha256 = await fileSha256(temporarySourcePath(req.file.path));
       const job = await createStudioAnalysisJob({
         uid: req.user.uid, requestId: req.body.requestId,
         projectId: req.body.projectId, sourceAssetId: req.body.sourceAssetId,
-        sourceSha256, sourcePath: req.file.path, anchors,
+        sourceSha256, sourcePath: temporarySourcePath(req.file.path), anchors,
         mode: req.body.mode, start: req.body.start, end: req.body.end,
       });
       return res.status(job.status === "queued" ? 202 : 200).json(job);
@@ -1492,7 +1492,7 @@ router.post("/track-studio-faces", requireTesterEditingFeature("audioExtract"), 
           error: "Choose a Studio project and source before analysis",
         });
       }
-      sourceSha256 = await fileSha256(req.file.path);
+      sourceSha256 = await fileSha256(temporarySourcePath(req.file.path));
       const sourceAssetId = req.body.sourceAssetId;
       if (typeof sourceAssetId === "string" && sourceAssetId.includes(":sha256:")) {
         const qualifiedHash = /:sha256:([a-f0-9]{64})$/.exec(sourceAssetId)?.[1];
@@ -1505,7 +1505,7 @@ router.post("/track-studio-faces", requireTesterEditingFeature("audioExtract"), 
       }
     }
     temporaryFile = admin.storage().bucket().file(`temp_tracking/${req.user.uid}/${uuidv4()}.mp4`);
-    await streamPipeline(fs.createReadStream(req.file.path), temporaryFile.createWriteStream({
+    await streamPipeline(fs.createReadStream(temporarySourcePath(req.file.path)), temporaryFile.createWriteStream({
       resumable: true, metadata: { contentType: req.file.mimetype },
     }));
     const [url] = await temporaryFile.getSignedUrl({ action: "read", expires: Date.now() + 15*60*1000 });
@@ -1656,7 +1656,7 @@ router.post(
         metadata: { contentType: req.file.mimetype },
       });
 
-      await streamPipeline(fs.createReadStream(req.file.path), blobStream);
+      await streamPipeline(fs.createReadStream(temporarySourcePath(req.file.path)), blobStream);
       // 2. Get Signed URL (or make public? Signed is safer)
       // Python worker needs to access it.
       const [url] = await blob.getSignedUrl({

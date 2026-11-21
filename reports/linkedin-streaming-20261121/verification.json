@@ -164,5 +164,17 @@
     "production concurrency/restart qualification",
     "dedicated publishing-worker activation and legacy local CPU isolation",
     "memory/error/queue-age alerting"
-  ]
+  ],
+  "actionsFollowThrough": {
+    "initialFailures": [
+      "CI integration fixture missing transactions",
+      "CodeQL scratch-path and fixture URL matching findings"
+    ],
+    "integrationLocal": {
+      "passed": 23,
+      "skipped": 1,
+      "failed": 0
+    },
+    "remoteStatus": "corrected commit pending"
+  }
 }

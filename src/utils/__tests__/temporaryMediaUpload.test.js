@@ -1,13 +1,13 @@
 const express = require("express");
 const request = require("supertest");
 const fs = require("node:fs/promises");
-const { temporaryMediaUpload, fileSha256 } = require("../temporaryMediaUpload");
+const { temporaryMediaUpload, temporarySourcePath, fileSha256 } = require("../temporaryMediaUpload");
 
 test("multipart bytes remain on disk and are removed on a rejected request", async () => {
   const app = express();
   let file;
-  app.post("/upload", temporaryMediaUpload(1024).single("file"), async (req, res) => {
-    file = req.file.path;
+  app.post("/upload", require("express-rate-limit")({ windowMs: 60000, max: 20 }), temporaryMediaUpload(1024).single("file"), async (req, res) => {
+    file = temporarySourcePath(req.file.path);
     expect(req.file.buffer).toBeUndefined();
     expect(await fs.readFile(file, "utf8")).toBe("source-video");
     expect(await fileSha256(file)).toBe(
@@ -29,4 +29,13 @@ test("multipart bytes remain on disk and are removed on a rejected request", asy
     }
   }
   throw Error("Temporary upload was not removed");
+});
+
+test.each([
+  "/etc/passwd",
+  "/tmp/autopromote-upload-ABC123/../secret",
+  "/tmp/autopromote-upload-ABC123/source.mp4",
+  "relative/autopromote-upload-ABC123/source",
+])("rejects an unowned or noncanonical multipart source path: %s", value => {
+  expect(() => temporarySourcePath(value)).toThrow("Invalid temporary media");
 });

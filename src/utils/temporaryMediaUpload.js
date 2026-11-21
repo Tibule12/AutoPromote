@@ -39,10 +39,22 @@ function temporaryMediaUpload(maxBytes, { fileFilter } = {}) {
   });
 }
 
+function temporarySourcePath(value) {
+  // Reconstruct from a single scratch-directory component and a fixed name.
+  // Never pass Multer's request-derived path directly to filesystem APIs.
+  if (typeof value !== "string") throw new Error("Invalid temporary media path");
+  const directory = path.basename(path.dirname(value));
+  if (!/^autopromote-upload-[A-Za-z0-9]{6}$/.test(directory))
+    throw new Error("Invalid temporary media directory");
+  const trusted = path.join(os.tmpdir(), directory, "source");
+  if (value !== trusted) throw new Error("Invalid temporary media path");
+  return trusted;
+}
+
 async function fileSha256(filePath) {
   const hash = crypto.createHash("sha256");
   for await (const chunk of fs.createReadStream(filePath)) hash.update(chunk);
   return hash.digest("hex");
 }
 
-module.exports = { temporaryMediaUpload, fileSha256 };
+module.exports = { temporaryMediaUpload, temporarySourcePath, fileSha256 };

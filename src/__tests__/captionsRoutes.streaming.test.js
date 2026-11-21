@@ -4,14 +4,15 @@ const request = require("supertest");
 jest.mock("../services/captionsService", () => ({ createCaptions: jest.fn(), generateTranscription: jest.fn() }));
 jest.mock("../services/auditLogger", () => ({ audit: { log: jest.fn() } }));
 const { generateTranscription } = require("../services/captionsService");
+const { temporarySourcePath } = require("../utils/temporaryMediaUpload");
 const router = require("../routes/captionsRoutes");
 
 test("transcription receives a temporary file and its original media metadata", async () => {
   let input;
   generateTranscription.mockImplementation(async (filePath, info) => {
-    input = filePath;
+    input = temporarySourcePath(filePath);
     expect(typeof filePath).toBe("string");
-    expect(await fs.readFile(filePath, "utf8")).toBe("sound-source");
+    expect(await fs.readFile(input, "utf8")).toBe("sound-source");
     expect(info).toEqual({ filename: "recording.mp4", contentType: "video/mp4" });
     return { text: "Speech", segments: [], language: "en" };
   });

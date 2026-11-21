@@ -3,7 +3,7 @@ const router = express.Router();
 const { createCaptions, generateTranscription } = require("../services/captionsService");
 const { db } = require("../firebaseAdmin");
 const { audit } = require("../services/auditLogger");
-const { temporaryMediaUpload } = require("../utils/temporaryMediaUpload");
+const { temporaryMediaUpload, temporarySourcePath } = require("../utils/temporaryMediaUpload");
 const { admitMediaTransfer } = require("../utils/mediaTransferBudget");
 const ALLOWED_MIME_TYPES = [
   "audio/mpeg",
@@ -42,7 +42,7 @@ router.post("/transcribe", admitMediaTransfer, upload.single("file"), async (req
 
   try {
     console.log(`[Transcribe] Processing file, size: ${req.file.size}`);
-    const result = await generateTranscription(req.file.path, {
+    const result = await generateTranscription(temporarySourcePath(req.file.path), {
       filename: req.file.originalname,
       contentType: req.file.mimetype,
     });

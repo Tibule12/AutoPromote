@@ -260,11 +260,11 @@ test("native Reddit uploads and poster generation use an owned staged file", asy
     return Buffer.from("poster-image");
   });
   safeFetch.mockImplementation(async (url, _fetch, options) => {
-    if (url.includes("storage.googleapis.com")) return { ok: true, body: Readable.from([Buffer.alloc(512)]) };
+    if (new URL(url).hostname === "storage.googleapis.com") return { ok: true, body: Readable.from([Buffer.alloc(512)]) };
     if (url.includes("/api/media/asset.json")) return { ok: true, json: async () => ({
       args: { action: "//reddit-media.s3.amazonaws.com", fields: [{ name: "key", value: "media" }] }, asset: { asset_id: "fixture" },
     }) };
-    if (url.includes("reddit-media.s3.amazonaws.com")) {
+    if (new URL(url).hostname === "reddit-media.s3.amazonaws.com") {
       const file = options.fetchOptions.body._streams.find(item => item?.source?.path)?.source;
       staged.push(file.path);
       let bytes = 0;

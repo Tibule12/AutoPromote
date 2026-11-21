@@ -1,3 +1,9 @@
+// Import the cooldown fixture before the queue captures its functions. Spying
+// after require cannot replace the queue's destructured function reference.
+jest.mock("../rateLimitTracker", () => ({
+  getCooldown: jest.fn().mockResolvedValue(null),
+  noteRateLimit: jest.fn().mockResolvedValue(0),
+}));
 const { db } = require("../../firebaseAdmin");
 const { enqueuePlatformPostTask, processNextPlatformTask } = require("../promotionTaskQueue");
 
@@ -6,6 +12,52 @@ jest.setTimeout(30000);
 describe("Promotion integration (mocked platforms)", () => {
   let contentId;
   let uid = "test-user-uid";
+  const previousTransaction = db.runTransaction;
+  const previousCollection = db.collection;
+  let transactionTail = Promise.resolve();
+
+  beforeAll(() => {
+    if (previousTransaction) return; // Real emulator transactions stay intact.
+    // Serialize the in-memory adapter's read/commit cycle, retaining atomic
+    // claims in the production implementation and in concurrent fixture runs.
+    db.runTransaction = work => {
+      const run = transactionTail.then(async () => {
+        const writes = [];
+        const result = await work({
+          get: ref => ref.get(),
+          set: (ref, data, options) => writes.push(() => ref.set(JSON.parse(JSON.stringify(data)), options)),
+          update: (ref, data) => writes.push(() => ref.update(JSON.parse(JSON.stringify(data)))),
+          delete: ref => writes.push(() => ref.delete()),
+        });
+        for (const write of writes) await write();
+        return result;
+      });
+      transactionTail = run.catch(() => {});
+      return run;
+    };
+    // The lightweight adapter also lacks create-if-absent. Model it with the
+    // same serialized fixture transaction, including server-timestamp values.
+    db.collection = name => {
+      const collection = previousCollection.call(db, name);
+      if (name !== "platform_posts") return collection;
+      const document = collection.doc.bind(collection);
+      collection.doc = id => {
+        const ref = document(id);
+        ref.create = data => db.runTransaction(async transaction => {
+          if ((await transaction.get(ref)).exists)
+            throw Object.assign(new Error("Already exists"), { code: 6 });
+          transaction.set(ref, data);
+        });
+        return ref;
+      };
+      return collection;
+    };
+  });
+  afterAll(() => {
+    if (previousTransaction) db.runTransaction = previousTransaction;
+    else delete db.runTransaction;
+    db.collection = previousCollection;
+  });
 
   beforeAll(async () => {
     // create a content doc
@@ -25,12 +77,12 @@ describe("Promotion integration (mocked platforms)", () => {
     // ensure no pending tasks for this content before each test
     const tasks = await db.collection("promotion_tasks").where("contentId", "==", contentId).get();
     const batch = db.batch();
-    tasks.forEach(d => batch.delete(d.ref));
+    for (const doc of tasks.docs) batch.delete(doc.ref);
     await batch.commit().catch(() => {});
     // also ensure no lingering platform_posts for this content
     const posts = await db.collection("platform_posts").where("contentId", "==", contentId).get();
     const b2 = db.batch();
-    posts.forEach(d => b2.delete(d.ref));
+    for (const doc of posts.docs) b2.delete(doc.ref);
     await b2.commit().catch(() => {});
   });
 
@@ -38,11 +90,11 @@ describe("Promotion integration (mocked platforms)", () => {
     // cleanup tasks after each test to avoid interference
     const tasks = await db.collection("promotion_tasks").where("contentId", "==", contentId).get();
     const batch = db.batch();
-    tasks.forEach(d => batch.delete(d.ref));
+    for (const doc of tasks.docs) batch.delete(doc.ref);
     await batch.commit().catch(() => {});
     const posts = await db.collection("platform_posts").where("contentId", "==", contentId).get();
     const b2 = db.batch();
-    posts.forEach(d => b2.delete(d.ref));
+    for (const doc of posts.docs) b2.delete(doc.ref);
     await b2.commit().catch(() => {});
   });
   afterAll(async () => {
@@ -55,11 +107,11 @@ describe("Promotion integration (mocked platforms)", () => {
     // remove promotion tasks and platform_posts linked to content
     const tasks = await db.collection("promotion_tasks").where("contentId", "==", contentId).get();
     const batch = db.batch();
-    tasks.forEach(d => batch.delete(d.ref));
+    for (const doc of tasks.docs) batch.delete(doc.ref);
     await batch.commit().catch(() => {});
     const posts = await db.collection("platform_posts").where("contentId", "==", contentId).get();
     const b2 = db.batch();
-    posts.forEach(d => b2.delete(d.ref));
+    for (const doc of posts.docs) b2.delete(doc.ref);
     await b2.commit().catch(() => {});
   });
 
@@ -474,7 +526,7 @@ describe("Promotion integration (mocked platforms)", () => {
       .where("platform", "==", platform)
       .get();
     expect(postsSnap.size).toBeLessThanOrEqual(1);
-    expect(spyDispatch.mock.calls.length).toBeLessThanOrEqual(1);
+    expect(spyDispatch).toHaveBeenCalledTimes(1);
 
     spyDispatch.mockRestore();
     signer.verifySignature.mockRestore();
