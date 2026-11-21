@@ -1,5 +1,35 @@
 const assert = require("assert/strict");
 
+// A correctly placed dock can still overflow internally when a legacy rule
+// changes its flex layout. Keep its footer and pointer targets on screen.
+async function assertStudioTimelineFooter(page, label) {
+  const geometry = await page.evaluate(() => {
+    const dock = document.querySelector(".studio-pro-timeline-dock");
+    const keys = ["pro-smpte-timecode", "pro-jump-timecode-input", "pro-jump-timecode-btn"];
+    const dockRect = dock.getBoundingClientRect();
+    return keys.map(key => {
+      const node = dock.querySelector(`[data-testid="${key}"]`);
+      if (!node) return { key, present: false };
+      const box = node.getBoundingClientRect();
+      const target = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2);
+      return {
+        key,
+        present: true,
+        inViewport: box.width > 0 && box.height > 0 && box.left >= 0 && box.top >= 0 &&
+          box.right <= innerWidth + 1 && box.bottom <= innerHeight + 1,
+        inDock: box.top >= dockRect.top && box.bottom <= dockRect.bottom + 1,
+        receivesPointer: node === target || node.contains(target),
+      };
+    });
+  });
+  for (const control of geometry) {
+    assert(control.present, `${label}: ${control.key} is missing`);
+    assert(control.inViewport && control.inDock, `${label}: ${control.key} is clipped`);
+    assert(control.receivesPointer, `${label}: ${control.key} is covered`);
+  }
+  return geometry;
+}
+
 // Check the usable viewport of the timeline, not its intentionally scrollable
 // inner time axis. Functional playback checks alone cannot catch grid clipping.
 async function assertStudioTimelineLayout(page, label) {
@@ -55,7 +85,8 @@ async function assertStudioTimelineLayout(page, label) {
     dock.bottom <= geometry.viewport.height + 2 && dock.top >= 0,
     `${label}: timeline extends outside the screen`
   );
-  return { label, ...geometry };
+  const footer = await assertStudioTimelineFooter(page, label);
+  return { label, ...geometry, footer };
 }
 
 async function clickStudioControl(page, control, options) {
@@ -80,4 +111,4 @@ async function clickStudioControl(page, control, options) {
   await control.click(options);
 }
 
-module.exports = { assertStudioTimelineLayout, clickStudioControl };
+module.exports = { assertStudioTimelineLayout, assertStudioTimelineFooter, clickStudioControl };

@@ -50,6 +50,7 @@ export default function StudioFinishRack({
   beatCount = 0,
   beatSnapEnabled = true,
   onBeatSnapChange,
+  showLegacySelective = true,
   mainFrame,
   onUpdateMainFrame,
 }) {
@@ -347,7 +348,7 @@ export default function StudioFinishRack({
         </div>
       </details>
 
-      <details className="finish-rack-section" data-testid="finish-selective-object-section" open>
+      {showLegacySelective ? (<details className="finish-rack-section" data-testid="finish-selective-object-section" open>
         <summary>
           <span>Selective object &amp; body color</span>
           <small>Target skin, clothing, objects or regions</small>
@@ -535,7 +536,7 @@ export default function StudioFinishRack({
             />
           </div>
         ) : null}
-      </details>
+      </details>) : null}
 
       <details className="finish-rack-section" open>
         <summary>

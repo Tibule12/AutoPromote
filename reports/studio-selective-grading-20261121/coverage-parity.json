@@ -1,0 +1,51 @@
+{
+  "samples": [
+    {
+      "shape": "ellipse",
+      "time": 0,
+      "maximumCoverageError": 0.0
+    },
+    {
+      "shape": "ellipse",
+      "time": 0.73,
+      "maximumCoverageError": 0.0
+    },
+    {
+      "shape": "ellipse",
+      "time": 2,
+      "maximumCoverageError": 0.0
+    },
+    {
+      "shape": "polygon",
+      "time": 0,
+      "maximumCoverageError": 0.0
+    },
+    {
+      "shape": "polygon",
+      "time": 0.73,
+      "maximumCoverageError": 0.0
+    },
+    {
+      "shape": "polygon",
+      "time": 2,
+      "maximumCoverageError": 0.0
+    },
+    {
+      "shape": "ellipse",
+      "time": 0,
+      "maximumCoverageError": 0.0
+    },
+    {
+      "shape": "ellipse",
+      "time": 0.73,
+      "maximumCoverageError": 0.0
+    },
+    {
+      "shape": "ellipse",
+      "time": 2,
+      "maximumCoverageError": 0.0
+    }
+  ],
+  "threshold": 1e-06,
+  "passed": true
+}

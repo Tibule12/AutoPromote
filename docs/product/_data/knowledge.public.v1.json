@@ -1754,14 +1754,19 @@
         "studio.grade.tint"
       ],
       "workflow": [
-        "Open the relevant workspace with an owned source.",
-        "Review the result and its limitations before saving or exporting."
+        "Open Color in the Studio tool rail. Use global controls for the programme picture.",
+        "In the selected-area candidate, add a grade for each area. Draw an ellipse, rectangle, polygon or freehand outline; move its points and feather its edge. Name the region and set its timeline range.",
+        "Use per-region exposure, lift/gamma/gain, curves, HSL, LUTs or recolouring. The strength slider mixes that correction from neutral inside the mask.",
+        "For local cleanup, draw a small mask over the defect and pick nearby clean same-frame texture. Add position keys and review movement and cuts.",
+        "Save a project backup, reopen the edit and inspect the actual exported picture and sound."
       ],
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
       "limitations": [
         "This dated development snapshot does not establish professional or production readiness.",
-        "The WebGL LUT preview uses the same canonical cube and imported strength as export. Identity colours, changed interior cube points and fractional-strength sampling have scoped real WebGL/CPU checks; this does not qualify all film effects, secondary grades, composition stages or full moving picture/audio parity."
+        "The WebGL LUT preview uses the same canonical cube and imported strength as export. Identity colours, changed interior cube points and fractional-strength sampling have scoped real WebGL/CPU checks; this does not qualify all film effects, secondary grades, composition stages or full moving picture/audio parity.",
+        "Independent selected-area grades and clean-patch cloning are a local candidate, pending deployment of the frontend, API capability check and both renderer lanes. Older workers must refuse the new masks rather than grade the whole picture.",
+        "Region movement uses manual position/size/rotation keys. Automatic tracking, semantic part selection, compound/subtractive mask authoring and advanced skin healing remain unimplemented in this candidate. Clone correction is an explicit same-frame texture patch, not automatic reconstruction."
       ],
       "common_errors": [
         {
@@ -1772,7 +1777,7 @@
       "related_features": [],
       "templates_using_feature": [],
       "aliases": [],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-11-21",
       "product_version": "1.2.0"
     },
     {

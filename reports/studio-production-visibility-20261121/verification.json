@@ -1,0 +1,1355 @@
+{
+  "date": "2026-11-21",
+  "scope": "Signed-in production Studio visibility, owned backup restored into disposable browser context; no jobs or publishing",
+  "productionOrigin": "https://autopromote.org",
+  "productionBundle": "main.da576d47.js",
+  "productionBundleSha256": "083be63f0f9e7e916dcb6a704853912d299aa2dfc30553b5276d12b2217eada6",
+  "baseCommit": "9d43b6189",
+  "candidateStylesheetSha256": "96caed35b41c148bac71d040728e1c9eab829b58fa1879ece4761ceab28a1037",
+  "negativeControlRejected": true,
+  "production": [
+    {
+      "width": 1366,
+      "height": 768,
+      "controls": [
+        {
+          "key": "studio-pro-timeline",
+          "rect": {
+            "x": 0,
+            "y": 530,
+            "width": 1366,
+            "height": 279,
+            "bottom": 809
+          },
+          "display": "flex",
+          "visibility": "visible",
+          "inViewport": false,
+          "parents": [
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 280
+            },
+            {
+              "class": "studio-layout preview-layout-center has-single-preview",
+              "overflow": "hidden",
+              "height": 716
+            },
+            {
+              "class": "viral-studio-container hook-broll-only-mode studio-mode-creator project-rail-closed timeline-dock-open",
+              "overflow": "clip",
+              "height": 768
+            },
+            {
+              "class": "viral-studio-overlay ap-dashboard-redesign",
+              "overflow": "visible",
+              "height": 768
+            },
+            {
+              "class": "dashboard-mode viral-studio-open",
+              "overflow": "hidden",
+              "height": 768
+            }
+          ]
+        },
+        {
+          "key": "FOOTER",
+          "rect": {
+            "x": 1,
+            "y": 777,
+            "width": 1364,
+            "height": 31,
+            "bottom": 808
+          },
+          "display": "flex",
+          "visibility": "visible",
+          "inViewport": false,
+          "parents": [
+            {
+              "class": "studio-pro-timeline is-layer-view",
+              "overflow": "visible",
+              "height": 279
+            },
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 280
+            },
+            {
+              "class": "studio-layout preview-layout-center has-single-preview",
+              "overflow": "hidden",
+              "height": 716
+            },
+            {
+              "class": "viral-studio-container hook-broll-only-mode studio-mode-creator project-rail-closed timeline-dock-open",
+              "overflow": "clip",
+              "height": 768
+            },
+            {
+              "class": "viral-studio-overlay ap-dashboard-redesign",
+              "overflow": "visible",
+              "height": 768
+            }
+          ]
+        },
+        {
+          "key": "pro-smpte-timecode",
+          "rect": {
+            "x": 1075.1875,
+            "y": 783.5,
+            "width": 86.859375,
+            "height": 19,
+            "bottom": 802.5
+          },
+          "display": "block",
+          "visibility": "visible",
+          "inViewport": false,
+          "parents": [
+            {
+              "class": "pro-smpte-group",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "",
+              "overflow": "visible",
+              "height": 31
+            },
+            {
+              "class": "studio-pro-timeline is-layer-view",
+              "overflow": "visible",
+              "height": 279
+            },
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 280
+            },
+            {
+              "class": "studio-layout preview-layout-center has-single-preview",
+              "overflow": "hidden",
+              "height": 716
+            }
+          ]
+        },
+        {
+          "key": "pro-jump-timecode-input",
+          "rect": {
+            "x": 1204.21875,
+            "y": 782,
+            "width": 118,
+            "height": 22,
+            "bottom": 804
+          },
+          "display": "block",
+          "visibility": "visible",
+          "inViewport": false,
+          "parents": [
+            {
+              "class": "pro-jump-timecode",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "pro-smpte-group",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "",
+              "overflow": "visible",
+              "height": 31
+            },
+            {
+              "class": "studio-pro-timeline is-layer-view",
+              "overflow": "visible",
+              "height": 279
+            },
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 280
+            }
+          ]
+        },
+        {
+          "key": "pro-jump-timecode-btn",
+          "rect": {
+            "x": 1326.21875,
+            "y": 782,
+            "width": 30.78125,
+            "height": 22,
+            "bottom": 804
+          },
+          "display": "block",
+          "visibility": "visible",
+          "inViewport": false,
+          "parents": [
+            {
+              "class": "pro-jump-timecode",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "pro-smpte-group",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "",
+              "overflow": "visible",
+              "height": 31
+            },
+            {
+              "class": "studio-pro-timeline is-layer-view",
+              "overflow": "visible",
+              "height": 279
+            },
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 280
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "width": 1920,
+      "height": 900,
+      "controls": [
+        {
+          "key": "studio-pro-timeline",
+          "rect": {
+            "x": 0,
+            "y": 662,
+            "width": 1920,
+            "height": 279,
+            "bottom": 941
+          },
+          "display": "flex",
+          "visibility": "visible",
+          "inViewport": false,
+          "parents": [
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 280
+            },
+            {
+              "class": "studio-layout preview-layout-center has-single-preview",
+              "overflow": "hidden",
+              "height": 848
+            },
+            {
+              "class": "viral-studio-container hook-broll-only-mode studio-mode-creator project-rail-closed timeline-dock-open",
+              "overflow": "clip",
+              "height": 900
+            },
+            {
+              "class": "viral-studio-overlay ap-dashboard-redesign",
+              "overflow": "visible",
+              "height": 900
+            },
+            {
+              "class": "dashboard-mode viral-studio-open",
+              "overflow": "hidden",
+              "height": 900
+            }
+          ]
+        },
+        {
+          "key": "FOOTER",
+          "rect": {
+            "x": 1,
+            "y": 909,
+            "width": 1918,
+            "height": 31,
+            "bottom": 940
+          },
+          "display": "flex",
+          "visibility": "visible",
+          "inViewport": false,
+          "parents": [
+            {
+              "class": "studio-pro-timeline is-layer-view",
+              "overflow": "visible",
+              "height": 279
+            },
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 280
+            },
+            {
+              "class": "studio-layout preview-layout-center has-single-preview",
+              "overflow": "hidden",
+              "height": 848
+            },
+            {
+              "class": "viral-studio-container hook-broll-only-mode studio-mode-creator project-rail-closed timeline-dock-open",
+              "overflow": "clip",
+              "height": 900
+            },
+            {
+              "class": "viral-studio-overlay ap-dashboard-redesign",
+              "overflow": "visible",
+              "height": 900
+            }
+          ]
+        },
+        {
+          "key": "pro-smpte-timecode",
+          "rect": {
+            "x": 1629.1875,
+            "y": 915.5,
+            "width": 86.859375,
+            "height": 19,
+            "bottom": 934.5
+          },
+          "display": "block",
+          "visibility": "visible",
+          "inViewport": false,
+          "parents": [
+            {
+              "class": "pro-smpte-group",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "",
+              "overflow": "visible",
+              "height": 31
+            },
+            {
+              "class": "studio-pro-timeline is-layer-view",
+              "overflow": "visible",
+              "height": 279
+            },
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 280
+            },
+            {
+              "class": "studio-layout preview-layout-center has-single-preview",
+              "overflow": "hidden",
+              "height": 848
+            }
+          ]
+        },
+        {
+          "key": "pro-jump-timecode-input",
+          "rect": {
+            "x": 1758.21875,
+            "y": 914,
+            "width": 118,
+            "height": 22,
+            "bottom": 936
+          },
+          "display": "block",
+          "visibility": "visible",
+          "inViewport": false,
+          "parents": [
+            {
+              "class": "pro-jump-timecode",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "pro-smpte-group",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "",
+              "overflow": "visible",
+              "height": 31
+            },
+            {
+              "class": "studio-pro-timeline is-layer-view",
+              "overflow": "visible",
+              "height": 279
+            },
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 280
+            }
+          ]
+        },
+        {
+          "key": "pro-jump-timecode-btn",
+          "rect": {
+            "x": 1880.21875,
+            "y": 914,
+            "width": 30.78125,
+            "height": 22,
+            "bottom": 936
+          },
+          "display": "block",
+          "visibility": "visible",
+          "inViewport": false,
+          "parents": [
+            {
+              "class": "pro-jump-timecode",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "pro-smpte-group",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "",
+              "overflow": "visible",
+              "height": 31
+            },
+            {
+              "class": "studio-pro-timeline is-layer-view",
+              "overflow": "visible",
+              "height": 279
+            },
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 280
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "controls": [
+        {
+          "key": "studio-pro-timeline",
+          "rect": {
+            "x": 0,
+            "y": 482,
+            "width": 1280,
+            "height": 279,
+            "bottom": 761
+          },
+          "display": "flex",
+          "visibility": "visible",
+          "inViewport": false,
+          "parents": [
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 280
+            },
+            {
+              "class": "studio-layout preview-layout-center has-single-preview",
+              "overflow": "hidden",
+              "height": 668
+            },
+            {
+              "class": "viral-studio-container hook-broll-only-mode studio-mode-creator project-rail-closed timeline-dock-open",
+              "overflow": "clip",
+              "height": 720
+            },
+            {
+              "class": "viral-studio-overlay ap-dashboard-redesign",
+              "overflow": "visible",
+              "height": 720
+            },
+            {
+              "class": "dashboard-mode viral-studio-open",
+              "overflow": "hidden",
+              "height": 720
+            }
+          ]
+        },
+        {
+          "key": "FOOTER",
+          "rect": {
+            "x": 1,
+            "y": 729,
+            "width": 1278,
+            "height": 31,
+            "bottom": 760
+          },
+          "display": "flex",
+          "visibility": "visible",
+          "inViewport": false,
+          "parents": [
+            {
+              "class": "studio-pro-timeline is-layer-view",
+              "overflow": "visible",
+              "height": 279
+            },
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 280
+            },
+            {
+              "class": "studio-layout preview-layout-center has-single-preview",
+              "overflow": "hidden",
+              "height": 668
+            },
+            {
+              "class": "viral-studio-container hook-broll-only-mode studio-mode-creator project-rail-closed timeline-dock-open",
+              "overflow": "clip",
+              "height": 720
+            },
+            {
+              "class": "viral-studio-overlay ap-dashboard-redesign",
+              "overflow": "visible",
+              "height": 720
+            }
+          ]
+        },
+        {
+          "key": "pro-smpte-timecode",
+          "rect": {
+            "x": 989.1875,
+            "y": 735.5,
+            "width": 86.859375,
+            "height": 19,
+            "bottom": 754.5
+          },
+          "display": "block",
+          "visibility": "visible",
+          "inViewport": false,
+          "parents": [
+            {
+              "class": "pro-smpte-group",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "",
+              "overflow": "visible",
+              "height": 31
+            },
+            {
+              "class": "studio-pro-timeline is-layer-view",
+              "overflow": "visible",
+              "height": 279
+            },
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 280
+            },
+            {
+              "class": "studio-layout preview-layout-center has-single-preview",
+              "overflow": "hidden",
+              "height": 668
+            }
+          ]
+        },
+        {
+          "key": "pro-jump-timecode-input",
+          "rect": {
+            "x": 1118.21875,
+            "y": 734,
+            "width": 118,
+            "height": 22,
+            "bottom": 756
+          },
+          "display": "block",
+          "visibility": "visible",
+          "inViewport": false,
+          "parents": [
+            {
+              "class": "pro-jump-timecode",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "pro-smpte-group",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "",
+              "overflow": "visible",
+              "height": 31
+            },
+            {
+              "class": "studio-pro-timeline is-layer-view",
+              "overflow": "visible",
+              "height": 279
+            },
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 280
+            }
+          ]
+        },
+        {
+          "key": "pro-jump-timecode-btn",
+          "rect": {
+            "x": 1240.21875,
+            "y": 734,
+            "width": 30.78125,
+            "height": 22,
+            "bottom": 756
+          },
+          "display": "block",
+          "visibility": "visible",
+          "inViewport": false,
+          "parents": [
+            {
+              "class": "pro-jump-timecode",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "pro-smpte-group",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "",
+              "overflow": "visible",
+              "height": 31
+            },
+            {
+              "class": "studio-pro-timeline is-layer-view",
+              "overflow": "visible",
+              "height": 279
+            },
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 280
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "controls": []
+    }
+  ],
+  "candidate": [
+    {
+      "width": 1366,
+      "height": 768,
+      "controls": [
+        {
+          "key": "studio-pro-timeline",
+          "rect": {
+            "x": 0,
+            "y": 492,
+            "width": 1366,
+            "height": 276,
+            "bottom": 768
+          },
+          "display": "flex",
+          "visibility": "visible",
+          "inViewport": true,
+          "parents": [
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 324
+            },
+            {
+              "class": "studio-layout preview-layout-center has-single-preview",
+              "overflow": "hidden",
+              "height": 716
+            },
+            {
+              "class": "viral-studio-container hook-broll-only-mode studio-mode-creator project-rail-closed timeline-dock-open",
+              "overflow": "clip",
+              "height": 768
+            },
+            {
+              "class": "viral-studio-overlay ap-dashboard-redesign",
+              "overflow": "visible",
+              "height": 768
+            },
+            {
+              "class": "dashboard-mode viral-studio-open",
+              "overflow": "hidden",
+              "height": 768
+            }
+          ]
+        },
+        {
+          "key": "FOOTER",
+          "rect": {
+            "x": 1,
+            "y": 736,
+            "width": 1364,
+            "height": 31,
+            "bottom": 767
+          },
+          "display": "flex",
+          "visibility": "visible",
+          "inViewport": true,
+          "parents": [
+            {
+              "class": "studio-pro-timeline is-layer-view",
+              "overflow": "visible",
+              "height": 276
+            },
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 324
+            },
+            {
+              "class": "studio-layout preview-layout-center has-single-preview",
+              "overflow": "hidden",
+              "height": 716
+            },
+            {
+              "class": "viral-studio-container hook-broll-only-mode studio-mode-creator project-rail-closed timeline-dock-open",
+              "overflow": "clip",
+              "height": 768
+            },
+            {
+              "class": "viral-studio-overlay ap-dashboard-redesign",
+              "overflow": "visible",
+              "height": 768
+            }
+          ]
+        },
+        {
+          "key": "pro-smpte-timecode",
+          "rect": {
+            "x": 1075.1875,
+            "y": 742.5,
+            "width": 86.859375,
+            "height": 19,
+            "bottom": 761.5
+          },
+          "display": "block",
+          "visibility": "visible",
+          "inViewport": true,
+          "parents": [
+            {
+              "class": "pro-smpte-group",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "",
+              "overflow": "visible",
+              "height": 31
+            },
+            {
+              "class": "studio-pro-timeline is-layer-view",
+              "overflow": "visible",
+              "height": 276
+            },
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 324
+            },
+            {
+              "class": "studio-layout preview-layout-center has-single-preview",
+              "overflow": "hidden",
+              "height": 716
+            }
+          ]
+        },
+        {
+          "key": "pro-jump-timecode-input",
+          "rect": {
+            "x": 1204.21875,
+            "y": 741,
+            "width": 118,
+            "height": 22,
+            "bottom": 763
+          },
+          "display": "block",
+          "visibility": "visible",
+          "inViewport": true,
+          "parents": [
+            {
+              "class": "pro-jump-timecode",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "pro-smpte-group",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "",
+              "overflow": "visible",
+              "height": 31
+            },
+            {
+              "class": "studio-pro-timeline is-layer-view",
+              "overflow": "visible",
+              "height": 276
+            },
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 324
+            }
+          ]
+        },
+        {
+          "key": "pro-jump-timecode-btn",
+          "rect": {
+            "x": 1326.21875,
+            "y": 741,
+            "width": 30.78125,
+            "height": 22,
+            "bottom": 763
+          },
+          "display": "block",
+          "visibility": "visible",
+          "inViewport": true,
+          "parents": [
+            {
+              "class": "pro-jump-timecode",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "pro-smpte-group",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "",
+              "overflow": "visible",
+              "height": 31
+            },
+            {
+              "class": "studio-pro-timeline is-layer-view",
+              "overflow": "visible",
+              "height": 276
+            },
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 324
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "width": 1920,
+      "height": 900,
+      "controls": [
+        {
+          "key": "studio-pro-timeline",
+          "rect": {
+            "x": 0,
+            "y": 624,
+            "width": 1920,
+            "height": 276,
+            "bottom": 900
+          },
+          "display": "flex",
+          "visibility": "visible",
+          "inViewport": true,
+          "parents": [
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 324
+            },
+            {
+              "class": "studio-layout preview-layout-center has-single-preview",
+              "overflow": "hidden",
+              "height": 848
+            },
+            {
+              "class": "viral-studio-container hook-broll-only-mode studio-mode-creator project-rail-closed timeline-dock-open",
+              "overflow": "clip",
+              "height": 900
+            },
+            {
+              "class": "viral-studio-overlay ap-dashboard-redesign",
+              "overflow": "visible",
+              "height": 900
+            },
+            {
+              "class": "dashboard-mode viral-studio-open",
+              "overflow": "hidden",
+              "height": 900
+            }
+          ]
+        },
+        {
+          "key": "FOOTER",
+          "rect": {
+            "x": 1,
+            "y": 868,
+            "width": 1918,
+            "height": 31,
+            "bottom": 899
+          },
+          "display": "flex",
+          "visibility": "visible",
+          "inViewport": true,
+          "parents": [
+            {
+              "class": "studio-pro-timeline is-layer-view",
+              "overflow": "visible",
+              "height": 276
+            },
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 324
+            },
+            {
+              "class": "studio-layout preview-layout-center has-single-preview",
+              "overflow": "hidden",
+              "height": 848
+            },
+            {
+              "class": "viral-studio-container hook-broll-only-mode studio-mode-creator project-rail-closed timeline-dock-open",
+              "overflow": "clip",
+              "height": 900
+            },
+            {
+              "class": "viral-studio-overlay ap-dashboard-redesign",
+              "overflow": "visible",
+              "height": 900
+            }
+          ]
+        },
+        {
+          "key": "pro-smpte-timecode",
+          "rect": {
+            "x": 1629.1875,
+            "y": 874.5,
+            "width": 86.859375,
+            "height": 19,
+            "bottom": 893.5
+          },
+          "display": "block",
+          "visibility": "visible",
+          "inViewport": true,
+          "parents": [
+            {
+              "class": "pro-smpte-group",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "",
+              "overflow": "visible",
+              "height": 31
+            },
+            {
+              "class": "studio-pro-timeline is-layer-view",
+              "overflow": "visible",
+              "height": 276
+            },
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 324
+            },
+            {
+              "class": "studio-layout preview-layout-center has-single-preview",
+              "overflow": "hidden",
+              "height": 848
+            }
+          ]
+        },
+        {
+          "key": "pro-jump-timecode-input",
+          "rect": {
+            "x": 1758.21875,
+            "y": 873,
+            "width": 118,
+            "height": 22,
+            "bottom": 895
+          },
+          "display": "block",
+          "visibility": "visible",
+          "inViewport": true,
+          "parents": [
+            {
+              "class": "pro-jump-timecode",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "pro-smpte-group",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "",
+              "overflow": "visible",
+              "height": 31
+            },
+            {
+              "class": "studio-pro-timeline is-layer-view",
+              "overflow": "visible",
+              "height": 276
+            },
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 324
+            }
+          ]
+        },
+        {
+          "key": "pro-jump-timecode-btn",
+          "rect": {
+            "x": 1880.21875,
+            "y": 873,
+            "width": 30.78125,
+            "height": 22,
+            "bottom": 895
+          },
+          "display": "block",
+          "visibility": "visible",
+          "inViewport": true,
+          "parents": [
+            {
+              "class": "pro-jump-timecode",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "pro-smpte-group",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "",
+              "overflow": "visible",
+              "height": 31
+            },
+            {
+              "class": "studio-pro-timeline is-layer-view",
+              "overflow": "visible",
+              "height": 276
+            },
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 324
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "controls": [
+        {
+          "key": "studio-pro-timeline",
+          "rect": {
+            "x": 0,
+            "y": 444,
+            "width": 1280,
+            "height": 276,
+            "bottom": 720
+          },
+          "display": "flex",
+          "visibility": "visible",
+          "inViewport": true,
+          "parents": [
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 324
+            },
+            {
+              "class": "studio-layout preview-layout-center has-single-preview",
+              "overflow": "hidden",
+              "height": 668
+            },
+            {
+              "class": "viral-studio-container hook-broll-only-mode studio-mode-creator project-rail-closed timeline-dock-open",
+              "overflow": "clip",
+              "height": 720
+            },
+            {
+              "class": "viral-studio-overlay ap-dashboard-redesign",
+              "overflow": "visible",
+              "height": 720
+            },
+            {
+              "class": "dashboard-mode viral-studio-open",
+              "overflow": "hidden",
+              "height": 720
+            }
+          ]
+        },
+        {
+          "key": "FOOTER",
+          "rect": {
+            "x": 1,
+            "y": 688,
+            "width": 1278,
+            "height": 31,
+            "bottom": 719
+          },
+          "display": "flex",
+          "visibility": "visible",
+          "inViewport": true,
+          "parents": [
+            {
+              "class": "studio-pro-timeline is-layer-view",
+              "overflow": "visible",
+              "height": 276
+            },
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 324
+            },
+            {
+              "class": "studio-layout preview-layout-center has-single-preview",
+              "overflow": "hidden",
+              "height": 668
+            },
+            {
+              "class": "viral-studio-container hook-broll-only-mode studio-mode-creator project-rail-closed timeline-dock-open",
+              "overflow": "clip",
+              "height": 720
+            },
+            {
+              "class": "viral-studio-overlay ap-dashboard-redesign",
+              "overflow": "visible",
+              "height": 720
+            }
+          ]
+        },
+        {
+          "key": "pro-smpte-timecode",
+          "rect": {
+            "x": 989.1875,
+            "y": 694.5,
+            "width": 86.859375,
+            "height": 19,
+            "bottom": 713.5
+          },
+          "display": "block",
+          "visibility": "visible",
+          "inViewport": true,
+          "parents": [
+            {
+              "class": "pro-smpte-group",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "",
+              "overflow": "visible",
+              "height": 31
+            },
+            {
+              "class": "studio-pro-timeline is-layer-view",
+              "overflow": "visible",
+              "height": 276
+            },
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 324
+            },
+            {
+              "class": "studio-layout preview-layout-center has-single-preview",
+              "overflow": "hidden",
+              "height": 668
+            }
+          ]
+        },
+        {
+          "key": "pro-jump-timecode-input",
+          "rect": {
+            "x": 1118.21875,
+            "y": 693,
+            "width": 118,
+            "height": 22,
+            "bottom": 715
+          },
+          "display": "block",
+          "visibility": "visible",
+          "inViewport": true,
+          "parents": [
+            {
+              "class": "pro-jump-timecode",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "pro-smpte-group",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "",
+              "overflow": "visible",
+              "height": 31
+            },
+            {
+              "class": "studio-pro-timeline is-layer-view",
+              "overflow": "visible",
+              "height": 276
+            },
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 324
+            }
+          ]
+        },
+        {
+          "key": "pro-jump-timecode-btn",
+          "rect": {
+            "x": 1240.21875,
+            "y": 693,
+            "width": 30.78125,
+            "height": 22,
+            "bottom": 715
+          },
+          "display": "block",
+          "visibility": "visible",
+          "inViewport": true,
+          "parents": [
+            {
+              "class": "pro-jump-timecode",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "pro-smpte-group",
+              "overflow": "visible",
+              "height": 22
+            },
+            {
+              "class": "",
+              "overflow": "visible",
+              "height": 31
+            },
+            {
+              "class": "studio-pro-timeline is-layer-view",
+              "overflow": "visible",
+              "height": 276
+            },
+            {
+              "class": "studio-pro-timeline-dock is-open",
+              "overflow": "visible",
+              "height": 324
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "controls": []
+    }
+  ],
+  "candidateMethod": "Actual isolated final candidate production build with active Firebase public configuration, API origin and welcome flag preserved",
+  "livePanels": [
+    {
+      "name": "Color",
+      "controlCount": 73
+    },
+    {
+      "name": "Sound",
+      "controlCount": 80
+    },
+    {
+      "name": "Director",
+      "controlCount": 22
+    },
+    {
+      "name": "Export",
+      "controlCount": 20
+    }
+  ],
+  "pageErrors": [],
+  "blockedMutations": [],
+  "readinessPromotion": false,
+  "deploymentPerformed": false,
+  "candidateBundle": "main.05fc45bc.js",
+  "interactions": [
+    {
+      "scenario": "keyboard resize to expanded and minimum dock",
+      "passed": true
+    },
+    {
+      "scenario": "More actions menu pointer targets",
+      "targets": [
+        {
+          "label": "\ud83d\udcac Captions",
+          "receivesPointer": true
+        },
+        {
+          "label": "\u26a1 Cut Silences",
+          "receivesPointer": true
+        },
+        {
+          "label": "\u26a1 Ripple-Cut Dead Air",
+          "receivesPointer": true
+        },
+        {
+          "label": "\ud83d\udc65 Show Everyone",
+          "receivesPointer": true
+        },
+        {
+          "label": "\ud83c\udfaf Solo Speaker",
+          "receivesPointer": true
+        },
+        {
+          "label": "\ud83c\udfaf Punch In (Z)",
+          "receivesPointer": true
+        },
+        {
+          "label": "\u26a1 Auto-Punch",
+          "receivesPointer": true
+        },
+        {
+          "label": "\u2728 Auto-Motion",
+          "receivesPointer": true
+        },
+        {
+          "label": "\ud83c\udfa7 J-Cut (0.8s)",
+          "receivesPointer": true
+        },
+        {
+          "label": "\ud83c\udfa7 L-Cut (0.8s)",
+          "receivesPointer": true
+        },
+        {
+          "label": "\ud83c\udfac Director Mode",
+          "receivesPointer": true
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "minimumDockHeight": 180,
+  "candidatePageErrors": [],
+  "candidateBlockedMutations": [],
+  "welcomeComparisons": {
+    "passed": true,
+    "anonymousViewports": 8,
+    "browserErrors": 0,
+    "versionedAssetsVerified": 19,
+    "publicPagesBuilt": 47
+  },
+  "retainedFailures": [
+    "Original live footer overflow",
+    "Initial minimum-height resize failure at 148px; corrected to 180px",
+    "Initial isolated build used checked-in Firebase key that differs from active local account; retained and rebuilt with active public configuration"
+  ]
+}

@@ -12590,6 +12590,7 @@ def health_check():
     return {
         "status": "ok",
         "service": "python_media_worker",
+        "studioCapabilities": {"selectiveGrading": 1, "regionRecolor": 1, "clonePatch": 1},
         "worker_state": current_job_info,
         "concurrency": MEDIA_WORKER_CONCURRENCY,
         "maxVideoSeconds": MEDIA_WORKER_MAX_VIDEO_SECONDS,
@@ -32181,10 +32182,38 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         )
         finish_filter = ",".join(part for part in (finish_filter, zoom_filter) if part)
         adjustment_layers = (request.finish_plan or {}).get("adjustment_layers") or []
+        if sum(bool((a.get('effects') or {}).get('selective_mask')) for a in adjustment_layers)>32:
+            raise ValueError('Use at most 32 selected-area grades')
         for index, adjustment in enumerate(adjustment_layers):
             effects = adjustment.setdefault("effects", {})
             effects.pop("_worker_cube_path", None)
             effects.pop("_worker_qualifier_cube_path", None)
+            effects.pop('_worker_selective_mask_path',None)
+            effects.pop('_worker_selective_mask_fps',None)
+            effects.pop('_worker_recolor_cube_path',None)
+            if (effects.get('recolor')or{}).get('enabled'):
+                try:
+                    from .studio_selective_mask import write_recolor_cube
+                except ImportError:
+                    from studio_selective_mask import write_recolor_cube
+                recolor_path=os.path.join(SHARED_TMP_DIR,f'{job_id}_region_colour_{index}.cube')
+                sequence_temp_paths.add(recolor_path)
+                write_recolor_cube(effects['recolor'],recolor_path)
+                effects['_worker_recolor_cube_path']=recolor_path
+            if effects.get('selective_mask'):
+                try:
+                    from .studio_selective_mask import render_selective_mask
+                except ImportError:
+                    from studio_selective_mask import render_selective_mask
+                mask_path=os.path.join(SHARED_TMP_DIR,f'{job_id}_selected_area_{index}.mkv')
+                sequence_temp_paths.add(mask_path)
+                picture=next(st for st in probe_media_stream_summary(working_path)['streams']if st.get('codec_type')=='video')
+                num,den=str(picture.get('avg_frame_rate')or'30/1').split('/')
+                mask_path=await asyncio.to_thread(render_selective_mask,effects['selective_mask'],mask_path,
+                    *get_video_dimensions(working_path),get_media_duration(working_path),float(num)/float(den))
+                sequence_temp_paths.add(mask_path)
+                effects['_worker_selective_mask_path']=mask_path
+                effects['_worker_selective_mask_fps']=float(num)/float(den)
             effects["_worker_height"] = get_video_dimensions(working_path)[1]
             if effects.get("color_cube"):
                 try:

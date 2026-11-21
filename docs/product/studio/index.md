@@ -1110,8 +1110,11 @@ Edits deterministic grade parameters and finish keys. Grade controls affect the 
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Open Color in the Studio tool rail. Use global controls for the programme picture.
+2. In the selected-area candidate, add a grade for each area. Draw an ellipse, rectangle, polygon or freehand outline; move its points and feather its edge. Name the region and set its timeline range.
+3. Use per-region exposure, lift/gamma/gain, curves, HSL, LUTs or recolouring. The strength slider mixes that correction from neutral inside the mask.
+4. For local cleanup, draw a small mask over the defect and pick nearby clean same-frame texture. Add position keys and review movement and cuts.
+5. Save a project backup, reopen the edit and inspect the actual exported picture and sound.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
@@ -1121,6 +1124,8 @@ Edits deterministic grade parameters and finish keys. Grade controls affect the 
 
 - This dated development snapshot does not establish professional or production readiness.
 - The WebGL LUT preview uses the same canonical cube and imported strength as export. Identity colours, changed interior cube points and fractional-strength sampling have scoped real WebGL/CPU checks; this does not qualify all film effects, secondary grades, composition stages or full moving picture/audio parity.
+- Independent selected-area grades and clean-patch cloning are a local candidate, pending deployment of the frontend, API capability check and both renderer lanes. Older workers must refuse the new masks rather than grade the whole picture.
+- Region movement uses manual position/size/rotation keys. Automatic tracking, semantic part selection, compound/subtractive mask authoring and advanced skin healing remain unimplemented in this candidate. Clone correction is an explicit same-frame texture patch, not automatic reconstruction.
 
 **Common errors**
 

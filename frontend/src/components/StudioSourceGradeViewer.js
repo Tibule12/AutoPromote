@@ -1,3 +1,4 @@
+import { blendSelectiveGrade, applySelectiveClone, applySelectiveRecolor } from './studioSelectiveMask';
 import {blendStudioNodeMask,captureStudioGradeSurface} from './studioNodeMask';
 import {paintStudioNodeSurface} from './studioNodeEffects';
 import {evaluateWorldLayerPose} from './studioCompRigging';
@@ -75,6 +76,8 @@ export default function StudioSourceGradeViewer({ nodeId, videoRef, mapTime, tim
           for (const layer of state.stack) {
             if (at >= layer.startTime && at < layer.startTime + layer.duration) {
               const before=layer.maskSourceNodeId?captureStudioGradeSurface(ctx):null;
+              const regionOriginal=layer.mask?.space==='programme'?ctx.getImageData(0,0,out.width,out.height):null;
+              if(layer.effects.clone_patch?.enabled)ctx.putImageData(applySelectiveClone(ctx.getImageData(0,0,out.width,out.height),layer.effects.clone_patch,layer.mask,at-layer.startTime),0,0);
               const pixels = ctx.getImageData(0, 0, out.width, out.height);
               applyPrecisionGrade(pixels.data, buildPrecisionGrade(layer.effects.color), out.width, out.height);
               applyPrecisionVignette(pixels.data, out.width, out.height, layer.effects.color.vignette);
@@ -87,6 +90,8 @@ export default function StudioSourceGradeViewer({ nodeId, videoRef, mapTime, tim
                 soft.drawImage(out, 0, 0); ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = glow.intensity;
                 ctx.drawImage(copy, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
               }
+              if(layer.effects.recolor?.enabled)ctx.putImageData(applySelectiveRecolor(ctx.getImageData(0,0,out.width,out.height),layer.effects.recolor),0,0);
+              if(layer.mask?.space==='programme')blendSelectiveGrade(ctx,regionOriginal,layer.mask,at-layer.startTime);
               if(layer.maskSourceNodeId)blend(layer.maskSourceNodeId,before);
             }
             if (`Adjustment:${layer.id}` === state.nodeId) break;

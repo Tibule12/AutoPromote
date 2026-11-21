@@ -1,0 +1,38 @@
+{
+  "pairs": [
+    {
+      "time": 0,
+      "meanAbsoluteRgbError": 1.9524130336934156,
+      "p95RgbError": 7.0,
+      "bestSourceFrameIndex": 1,
+      "expectedSourceFrameIndex": 0,
+      "sourceFrameDelta": 1
+    },
+    {
+      "time": 1,
+      "meanAbsoluteRgbError": 2.4060001929012347,
+      "p95RgbError": 8.0,
+      "bestSourceFrameIndex": 30,
+      "expectedSourceFrameIndex": 30,
+      "sourceFrameDelta": 0
+    },
+    {
+      "time": 2,
+      "meanAbsoluteRgbError": 2.4497378150720164,
+      "p95RgbError": 8.0,
+      "bestSourceFrameIndex": 60,
+      "expectedSourceFrameIndex": 60,
+      "sourceFrameDelta": 0
+    },
+    {
+      "time": 3,
+      "meanAbsoluteRgbError": 2.473946920010288,
+      "p95RgbError": 8.0,
+      "bestSourceFrameIndex": 90,
+      "expectedSourceFrameIndex": 90,
+      "sourceFrameDelta": 0
+    }
+  ],
+  "actualFrameSequencePassed": true,
+  "note": "Measured bounded comparison only; full predictive picture/audio parity remains open"
+}

@@ -1,4 +1,36 @@
 {
+  "selectiveGrading20261121": {
+    "date": "2026-11-21",
+    "evidenceRefs": [
+      "reports/studio-selective-grading-20261121/README.md",
+      "reports/studio-selective-grading-20261121/verification.json"
+    ],
+    "scope": "Independent arbitrary selected-area grades, manual mask keys, compact recolour and same-frame clone through ordinary Studio adjustments; bounded real native authoring and corrected canonical local output.",
+    "readinessPromotion": false,
+    "nextTaskId": "S02",
+    "blockers": [
+      "Not deployed; release frontend/API/GPU/CPU together",
+      "Automatic tracking/semantic selection and advanced healing unfinished",
+      "Cloud preview/capture observer failures retained",
+      "Full predictive picture/audio and broad-media/performance qualification remain open"
+    ]
+  },
+  "productionVisibility20261121": {
+    "date": "2026-11-21",
+    "evidenceRefs": [
+      "reports/studio-production-visibility-20261121/README.md",
+      "reports/studio-production-visibility-20261121/verification.json"
+    ],
+    "scope": "Read-only signed-in production visibility audit and candidate timeline-footer layout correction over the actual production bundle. Local canonical podcast recovery does not qualify the failed production job.",
+    "readinessPromotion": false,
+    "nextTaskId": "S02",
+    "blockers": [
+      "Footer candidate built and browser-verified; not deployed",
+      "Local Event Story not released",
+      "Production podcast worker duration failure remains unreconciled",
+      "Full predictive picture/audio parity and shared S02/S04/S03 remain open"
+    ]
+  },
   "proEditorCorrections20261120": {
     "date": "2026-11-20",
     "evidence": "reports/pro-editor-qa-20261120/correction-verification.json",

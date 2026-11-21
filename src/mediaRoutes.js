@@ -1285,6 +1285,10 @@ router.get("/credits", async (req, res) => {
   }
 });
 
+// Frontend compatibility handshake. Actual GPU/CPU feature qualification is
+// checked by assertRenderWorkerReady before any charge and at dispatch.
+router.get('/studio-grade-capabilities',(_req,res)=>res.json({selectiveGradingVersion:1}));
+
 router.get("/worker-health", async (req, res) => {
   const startedAt = Date.now();
   try {

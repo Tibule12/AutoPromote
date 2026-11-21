@@ -173,7 +173,7 @@ export const compileStudioFinishForRender = document => {
     power_window: activePowerWindow ? { ...activePowerWindow } : null,
     hsl_qualifier: activeQualifier ? { ...activeQualifier } : null,
     node_mask: compileStudioNodeMask(adv.maskSourceNodeId || fx.maskSourceNodeId, state.overlays, adv.maskInvert),
-    adjustment_layers: compileStudioAdjustmentStack(state.adjustmentLayers).map(layer=>({...layer, effects:{...layer.effects, node_mask:compileStudioNodeMask(layer.maskSourceNodeId,state.overlays)}})),
+    adjustment_layers: compileStudioAdjustmentStack(document.audioGraph?.routes?.find(route=>route.trackId==='adjustment')?.state?.visible === false ? [] : state.adjustmentLayers).map(layer=>({...layer, effects:{...layer.effects, node_mask:compileStudioNodeMask(layer.maskSourceNodeId,state.overlays)}})),
     main_frame: { enabled: frame.enabled !== false, shape: "round", inset_percent: frame.insetPercent,
       border_radius_percent: frame.radiusPercent, background: frame.background },
     color: { ...Object.fromEntries(colorFields.filter(field => fx[field] !== undefined)

@@ -17,6 +17,7 @@ export default function StudioAdjustmentControls({
   onMove,
   index = 0,
   count = 1,
+  showLegacySelective = true,
 }) {
   const [error, setError] = useState('');
   const emit = onChange || onUpdate || (() => {});
@@ -203,7 +204,7 @@ export default function StudioAdjustmentControls({
       </details>
 
       {/* Selective Object & Body Part Color Grading */}
-      <details className="ap-grade-subdrawer" open>
+      {showLegacySelective ? (<details className="ap-grade-subdrawer" open>
         <summary>🎯 Selective Object &amp; Body Part Color (HSL Key + Power Window)</summary>
         <div className="ap-flow-field-row">
           <label className="ap-comp-field">
@@ -418,7 +419,7 @@ export default function StudioAdjustmentControls({
             </label>
           </div>
         ) : null}
-      </details>
+      </details>) : null}
 
       {/* 3-Way Color Wheels (Lift / Gamma / Gain) & White Balance (Warmth / Tint) */}
       <details className="ap-grade-subdrawer" open>
@@ -591,7 +592,7 @@ export default function StudioAdjustmentControls({
           <button
             type="button"
             className="ap-flow-reset-btn"
-            onClick={() => update({ advancedColor: {} })}
+            onClick={() => updateAdv({lutPresetId:'',lutData:null,lutName:'',lutFile:null})}
           >
             Remove LUT
           </button>

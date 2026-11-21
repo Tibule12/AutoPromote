@@ -1,5 +1,5 @@
 import {
-  buildColorSpaceTransformCube,
+  buildColorSpaceTransformCube, rgbToHsl, hslToRgb, hexToHsl,
   evaluatePixelRevitalizer,
   evaluateSelectiveColorTransform,
 } from "./studioColorScience";
@@ -142,7 +142,7 @@ export function hasAdvancedGrade(advanced = {}) {
   const intensity = Number(advanced.lutIntensity ?? 100);
   const hasCst = Boolean(advanced.cameraProfile && advanced.cameraProfile !== "rec709");
   return (
-    hasCst ||
+    hasCst || Boolean(advanced.recolor?.enabled) ||
     (!!lutObj && intensity > 0) ||
     [...Object.values(advanced.curve || {}), ...Object.values(advanced.hsl || {})].some(
       value => Number(value) !== 0
@@ -195,6 +195,14 @@ export function buildAdvancedColorCube(advanced = {}, size = 33) {
       const input = rgb.map((value,i) => (value-(imported.domainMin?.[i] ?? 0))/((imported.domainMax?.[i] ?? 1)-(imported.domainMin?.[i] ?? 0)));
       const mapped = sampleColorCube(imported, ...input);
       rgb = rgb.map((value,i) => value*(1-strength)+mapped[i]*strength);
+    }
+    if (advanced.recolor?.enabled) {
+      const target=hexToHsl(advanced.recolor.color);
+      if(!target)throw Error('Choose a valid region colour.');
+      const [h,s,l]=rgbToHsl(...rgb),amount=clamp(Number(advanced.recolor.strength??1));
+      let delta=target[0]-h;if(delta>.5)delta-=1;if(delta<-.5)delta+=1;
+      const mapped=hslToRgb(((h+delta*amount)%1+1)%1,s+(target[1]-s)*amount,l);
+      rgb=mapped;
     }
     if (hasRev) {
       rgb = evaluatePixelRevitalizer(rgb[0], rgb[1], rgb[2], advanced.revitalizer);

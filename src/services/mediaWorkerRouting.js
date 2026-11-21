@@ -56,7 +56,8 @@ function selectMediaWorker(endpoint, payload = {}, env = process.env) {
   // 10s/1080p60 mask + animated PNG exceeded the 120s CPU budget despite having
   // only two overlays; stream duration and a small layer surcharge undercount it.
   const perFrameComposite = rasterLayers.length > 1;
-  const renderCost = Math.max(1 + Math.min(layers, 12) * .15, perFrameComposite ? 8 : 1);
+  const selectedAreas=(payload.finish_plan?.adjustment_layers||[]).filter(layer=>layer.effects?.selective_mask).length;
+  const renderCost = Math.max(1+Math.min(selectedAreas,32)*1.5,1 + Math.min(layers, 12) * .15, perFrameComposite ? 8 : 1);
   const estimatedCpuSeconds = ANALYSIS.has(endpoint) ? seconds || budget + 1
     : seconds ? seconds * pixels * frameRate * renderCost
       : endpoint === "/process-video" ? budget + 1 : 0;
@@ -73,6 +74,7 @@ function cpuWorkerUrl(endpoint, env = process.env) {
 }
 
 function safeToFailOver(error, endpoint) {
+  if(error.code === "STUDIO_SELECTIVE_GRADING_UNAVAILABLE") return true;
   if (["ECONNREFUSED", "ENOTFOUND"].includes(error.code)) return true;
   const status = Number(error.response?.status);
   if ([502, 503, 504].includes(status) && ANALYSIS.has(endpoint)) return true;
@@ -91,6 +93,16 @@ async function requestConfig(target, payload, timeoutMs) {
   return applicationWorkerConfig(target, payload, config);
 }
 
+function needsSelectiveGrading(payload={}) {
+  return (payload.finish_plan?.adjustment_layers||[]).some(layer=>{
+    const fx=layer.effects||{};return !!(fx.selective_mask||fx.recolor?.enabled||fx.clone_patch?.enabled);
+  });
+}
+function assertSelectiveSupport(payload,health) {
+  if(needsSelectiveGrading(payload)&&health?.studioCapabilities?.selectiveGrading!==1)
+    throw Object.assign(new Error('Selected-area grading is unavailable on this worker.'),{code:'STUDIO_SELECTIVE_GRADING_UNAVAILABLE',statusCode:503});
+}
+
 async function postMediaWorker(endpoint, payload, { timeoutMs = 600000, onRoute, preferredDevice } = {}) {
   let route = selectMediaWorker(endpoint, payload);
   if (preferredDevice === "cpu" && route.device !== "cpu")
@@ -99,6 +111,11 @@ async function postMediaWorker(endpoint, payload, { timeoutMs = 600000, onRoute,
     route = { ...route, workerUrl: route.gpuUrl, device: "gpu", reason: "cpu_unavailable" };
   const call = async current => {
     await onRoute?.(current);
+    if(needsSelectiveGrading(payload)){
+      const healthTarget=current.workerUrl+'/health';
+      const health=await axios.get(healthTarget,await buildWorkerRequestConfig(healthTarget,{timeout:60000}));
+      assertSelectiveSupport(payload,health.data);
+    }
     const target = current.workerUrl + endpoint;
     const response = await axios.post(target, payload, await requestConfig(target, payload, timeoutMs));
     return { response, workerUrl: current.workerUrl, device: current.device, routeReason: current.reason };
@@ -129,6 +146,7 @@ async function assertMediaWorkerReady(payload = {}) {
     if (response.data?.status !== "ok") throw Object.assign(new Error("Worker health is not ready"), {
       code: "STUDIO_RENDER_WORKER_UNAVAILABLE", statusCode: 503,
     });
+    assertSelectiveSupport(payload,response.data);
     if (current.device === "gpu" && (response.data.computeDevice !== "cuda" ||
         response.data.videoEncoder !== "h264_nvenc" || response.data.gpuRequired !== true))
       throw new Error("GPU worker has not passed CUDA and NVENC qualification");
@@ -147,7 +165,7 @@ async function assertMediaWorkerReady(payload = {}) {
         reason: route.device === "cpu" ? "cpu_unavailable" : "gpu_unavailable" };
       try { return await check(route); } catch (fallbackError) { error = fallbackError; }
     }
-    if (error.code === "STUDIO_RENDER_WORKER_BUSY") throw error;
+    if (["STUDIO_RENDER_WORKER_BUSY","STUDIO_SELECTIVE_GRADING_UNAVAILABLE"].includes(error.code)) throw error;
     throw Object.assign(new Error("The render workers are unavailable. Try again once they are online; no credits were charged."), {
       code: "STUDIO_RENDER_WORKER_UNAVAILABLE", statusCode: 503,
     });

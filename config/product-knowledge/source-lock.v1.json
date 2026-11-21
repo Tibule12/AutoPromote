@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Integrate owner-scoped Studio recovery, ProRes delivery, and compact monitor corrections into the production base",
-  "reviewed_at": "2026-11-21T09:17:25.435Z",
-  "catalog_sha256": "dbccf16776eba7c2ccdc3147942ca59af341a2bf46c05675c6f85a59221c371a",
+  "reason": "Finalize selective grading evidence and keep existing knowledge JSON encoding",
+  "reviewed_at": "2026-11-21T13:16:58.675Z",
+  "catalog_sha256": "58009a156598eb3afe9965327df39534dd354b6a7a3647e8785c5b3935311d92",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -95,7 +95,7 @@
     },
     {
       "path": "frontend/src/components/StudioControls.css",
-      "sha256": "3dcaa440a47c866c8b6460e3a053c21e41daf2881045211ab7de328b4b21dbcc"
+      "sha256": "6b4de58c9a9fdc44c8b241c2a2ab8dc3060567019d8e599091bc0150ff04529e"
     },
     {
       "path": "frontend/src/components/StudioCreatorWorkbench.js",
@@ -103,7 +103,7 @@
     },
     {
       "path": "frontend/src/components/StudioFinishRack.js",
-      "sha256": "5204d1c5f92a2b5c5d123a31c36d4c864d7fde09f494a34f2854b892fc6cb0f0"
+      "sha256": "e3225daa714ecd7933bfcd19a45c02cf61f54b7ad8d9001705f980fe300c4b6e"
     },
     {
       "path": "frontend/src/components/StudioGeneratedBRollPanel.js",
@@ -174,6 +174,10 @@
       "sha256": "794871ff89fd04af88e572df2a825d9ef55dc19ca03d01f5c66c7c89421e585f"
     },
     {
+      "path": "frontend/src/components/StudioSelectiveGradePanel.js",
+      "sha256": "74cadcbe7a789fe9b39b135025d1b8cc79f85c69cfdb1e0a82d274a877560e39"
+    },
+    {
       "path": "frontend/src/components/StudioSubjectMaskControls.js",
       "sha256": "c9169a1d67b5d69db9fbccf45fbe6e1cbb795da34b6b298fcd1b1dec3dbea486"
     },
@@ -199,7 +203,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "6048dc8cc138ec7a8ee45c38897bee3f1717b6c63ad435ad0aa36b31bbe8eacf"
+      "sha256": "bd14993a66593b57ae3d478f50df77d52a11441724c4d522e3fd4eddfcef8b1f"
     },
     {
       "path": "frontend/src/components/ViralScanner.js",
@@ -359,7 +363,7 @@
     },
     {
       "path": "frontend/src/components/studioRenderCompiler.js",
-      "sha256": "c021548dc13440a3cbd6175ae67ec1f501db43ef8717a9e19582323039789c40"
+      "sha256": "8983414d7b001c40a0e51f5eaa811cd858667446df4352295426cbb13b16f804"
     },
     {
       "path": "frontend/src/components/studioSourcePreview.js",
@@ -475,7 +479,7 @@
     },
     {
       "path": "python_media_worker/main_media_server.py",
-      "sha256": "8429a25cbb80674d6b1703c8f97b1cec948b131f1e029713a31de2faedfb2b3c"
+      "sha256": "5c1d31369aa68e2f58f4b19c6f18167bca4267e25b08bc42efdb591aedf325d8"
     },
     {
       "path": "python_media_worker/studio_audio.py",
@@ -504,6 +508,10 @@
     {
       "path": "python_media_worker/studio_motion.py",
       "sha256": "92046739c2c2b3359b3faf3734554c9779e6ecbeef5e21104bb25d0b24114caf"
+    },
+    {
+      "path": "python_media_worker/studio_selective_mask.py",
+      "sha256": "c4f91a015df3a1b87fb0da468dffdd3a4bc2d24f2f70030b2f315031bd30e088"
     },
     {
       "path": "python_media_worker/studio_text.py",
@@ -763,11 +771,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "e74dbc2b0e66fe93d64f36f5751265184705f59bda0ef1c984e16835cf8729c0"
+      "sha256": "44387c4526a14db68fb31d0b461e5f9ec55a6b976b9ab4652ceefbb23f6b12a4"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "c353ecf4724f404644686e214e700973a34ec8c3e312ece2b217d1e4b1bcd224"
+      "sha256": "2b69328d6ad53f0c4d50869eaccc69325c83d9880587171d631906d01b4f6d07"
     },
     {
       "path": "worker.js",

@@ -116,3 +116,18 @@ test("GPU pre-dispatch busy renders can return to CPU without changing their ide
   expect(result).toMatchObject({device:"cpu",routeReason:"gpu_unavailable"});
   expect(axios.post.mock.calls.map(c=>c[1])).toEqual([body,body]);
 });
+
+test('selected-area grading refuses old workers before dispatch instead of grading the whole image',async()=>{
+ const payload={end_time:4,finish_plan:{adjustment_layers:[{effects:{selective_mask:{version:1}}}]}};
+ axios.get.mockResolvedValue({data:{status:'ok',worker_state:{status:'idle'},computeDevice:'cuda',videoEncoder:'h264_nvenc',gpuRequired:true}});
+ await expect(assertMediaWorkerReady(payload)).rejects.toMatchObject({code:'STUDIO_SELECTIVE_GRADING_UNAVAILABLE'});
+ expect(axios.post).not.toHaveBeenCalled();
+});
+test('selected-area readiness and fallback require the same supported mask version',async()=>{
+ const payload={end_time:4,finish_plan:{adjustment_layers:[{effects:{selective_mask:{version:1}}}]}};
+ axios.get.mockResolvedValueOnce({data:{status:'ok',computeDevice:'cuda',videoEncoder:'h264_nvenc',gpuRequired:true}}).mockResolvedValueOnce({data:{status:'ok',studioCapabilities:{selectiveGrading:1}}});
+ await expect(assertMediaWorkerReady(payload)).resolves.toMatchObject({device:'cpu'});
+ axios.get.mockReset();axios.post.mockReset();axios.get.mockResolvedValueOnce({data:{status:'ok'}}).mockResolvedValueOnce({data:{status:'ok',studioCapabilities:{selectiveGrading:1}}});axios.post.mockResolvedValue({data:{status:'completed'}});
+ await expect(postMediaWorker('/render-viral-clip',payload)).resolves.toMatchObject({device:'cpu'});
+ expect(axios.post).toHaveBeenCalledTimes(1);expect(axios.post.mock.calls[0][0]).toBe('https://cpu.example/render-viral-clip');
+});

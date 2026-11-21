@@ -1,0 +1,168 @@
+{
+  "date": "2026-11-21",
+  "candidateOnly": true,
+  "deployed": false,
+  "privateSourceSha256": "d33e3068783e4d16b1999bc226e9e30a6d72288d73576b1b44bfb399d0c07654",
+  "sourceExcerptSeconds": 3.8,
+  "regions": [
+    {
+      "name": "Screen upper section",
+      "shape": "polygon",
+      "points": 4
+    },
+    {
+      "name": "Upper lip",
+      "shape": "polygon",
+      "points": 7,
+      "manualMotionKeys": 4
+    },
+    {
+      "name": "Wall clean patch",
+      "shape": "rectangle",
+      "sameFrameClone": true
+    }
+  ],
+  "realStudio": {
+    "ownedUpload": true,
+    "nativeAuthoring": true,
+    "undoRedo": true,
+    "coldReopen": true,
+    "independentEditorialRestore": true,
+    "independentRestoreMediaCaveat": "Exact editorial/source identity recovery; only source access URLs renewed. First cloud preview failed; private source transport required a verified-byte Range adapter. Separate restore observer blocked source-frame preparation.",
+    "exportRequestBytes": 14285,
+    "productionJobsSubmitted": 0,
+    "localCanonicalRender": true,
+    "nativeDownloadCorrected": {
+      "nativeDownloadVerified": true,
+      "sha256": "3a80d696dabde0497b3dc801172c705a7afc054b174b3ea4330648e94d4bbd18",
+      "errors": []
+    },
+    "fullFinishedPlayback": {
+      "video": {
+        "path": "/local-master.mp4",
+        "currentTime": 3.8,
+        "duration": 3.8,
+        "error": null
+      },
+      "capture": {
+        "seconds": 4.800999879837036,
+        "capturedPictures": 161,
+        "sourceBytes": 39544354,
+        "viewport": [
+          1920,
+          900
+        ],
+        "source": "Actual Chromium screencast",
+        "visualAnnotations": "Pointer, click ring and actual target outline only",
+        "applicationCodeChanged": false,
+        "audio": "Actual finished movie audio captured through the media element; no narration"
+      },
+      "fullFinishedPlayback": true
+    },
+    "nativeRecovery": "Matching private request/job receipt restored the completed output with no new render; exact-byte local source transport used after a preview-access error."
+  },
+  "final": {
+    "sha256": "3a80d696dabde0497b3dc801172c705a7afc054b174b3ea4330648e94d4bbd18",
+    "bytes": 6067798,
+    "duration": 3.8,
+    "outputSettings": {
+      "resolution": "1080p",
+      "width": 1920,
+      "height": 1080,
+      "fps": 30,
+      "codec": "h264",
+      "encoder": "h264_nvenc",
+      "container": "mp4",
+      "quality": "master",
+      "crf": 16,
+      "preset": "p4",
+      "videoBitrateKbps": null,
+      "audioCodec": "aac",
+      "colorSpace": "rec709"
+    },
+    "audioProof": {
+      "expected": true,
+      "verified": true,
+      "codec": "aac",
+      "channels": 2,
+      "sample_rate": 48000,
+      "duration_seconds": 3.8
+    },
+    "finalQualityGate": {
+      "status": "passed",
+      "media": {
+        "duration": 3.8,
+        "size": 6067798,
+        "video": {
+          "index": 0,
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 1920,
+          "height": 1080,
+          "avg_frame_rate": "30/1"
+        },
+        "audio": {
+          "index": 1,
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "avg_frame_rate": "0/0"
+        }
+      },
+      "duration": {
+        "expected": 3.8,
+        "actual": 3.8,
+        "delta": 0.0,
+        "tolerance": 0.45
+      },
+      "audio_expected": true,
+      "picture_timing": {
+        "duration": 3.8,
+        "container_duration": 3.8,
+        "delta": 0.0,
+        "tolerance": 0.033
+      },
+      "black_ranges": [],
+      "planned_black_ranges": [],
+      "browser_delivery": "h264_yuv420p_faststart"
+    }
+  },
+  "tests": {
+    "frontend": 32,
+    "api": 17,
+    "worker": 17,
+    "maskParityPairs": 9,
+    "maskCoverageErrorMaximum": 0,
+    "recolorGridCellsCompared": 125,
+    "sourceCadenceRates": [
+      24,
+      25,
+      29.97002997002997,
+      30,
+      60
+    ],
+    "anonymousWelcomeViewports": 8
+  },
+  "retainedFailures": [
+    "Initial portrait demonstration used the default aspect; rejected and preserved",
+    "Mask editor toolbar obscured an upper polygon point; commands moved to preview heading",
+    "Initial mask movie time base and fractional setpts produced duplicate picture frames; rejected output retained, exact integer programme timestamps corrected",
+    "QA browser disconnects and localhost media service expiry; canonical final and saved project retained",
+    "First capture completion observer waited on an already stopped audio recorder; failed capture retained"
+  ],
+  "remaining": [
+    "No production deployment; frontend/API/GPU/CPU workers must be released together",
+    "Automatic tracking and semantic body/object-part selection",
+    "Compound/subtractive mask authoring and advanced skin healing",
+    "Whole moving picture/audio predictive parity and broad-media/long-form/performance qualification",
+    "Owner creative/listening approval; earlier full podcast grade remains rejected"
+  ],
+  "readinessPromotion": false,
+  "formalCounts": {
+    "FUNCTIONAL": 17,
+    "PARTIAL": 9,
+    "BROKEN": 1,
+    "UNIMPLEMENTED": 2,
+    "PRO-READY": 0,
+    "PRODUCTION-READY": 0
+  }
+}

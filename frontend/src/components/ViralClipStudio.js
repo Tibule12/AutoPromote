@@ -1,3 +1,6 @@
+import StudioSelectiveGradePanel from './StudioSelectiveGradePanel';
+import StudioSelectiveMaskEditor from './StudioSelectiveMaskEditor';
+import { blendSelectiveGrade, applySelectiveClone, applySelectiveRecolor } from './studioSelectiveMask';
 import { blendStudioNodeMask, captureStudioGradeSurface } from './studioNodeMask';
 import {paintStudioNodeSurface,hasStudioNodeSurface} from './studioNodeEffects';
 import {applyStudioFinishTexture} from './studioFinishTexture';
@@ -2887,8 +2890,10 @@ const ViralClipStudio = ({
   const [studioViewportHeight, setStudioViewportHeight] = useState(() => window.innerHeight);
   // Preserve space for the programme monitor, but let a taller workspace show
   // all edited sound/layer lanes through the existing native resize control.
-  const timelineHeightLimit = Math.max(148, studioViewportHeight - 350);
-  const displayedTimelineHeight = Math.min(timelineDockHeight, timelineHeightLimit);
+  // Tabs, edit tools and timecode need 154px before any track area remains.
+  const minimumTimelineHeight = 180;
+  const timelineHeightLimit = Math.max(minimumTimelineHeight, studioViewportHeight - 350);
+  const displayedTimelineHeight = Math.max(minimumTimelineHeight, Math.min(timelineDockHeight, timelineHeightLimit));
   useEffect(() => {
     const updateHeight = () => setStudioViewportHeight(window.innerHeight);
     window.addEventListener("resize", updateHeight);
@@ -2949,6 +2954,8 @@ const ViralClipStudio = ({
   const [speedKeyframes, setSpeedKeyframes] = useState([]);
   const [voiceovers, setVoiceovers] = useState([]);
   const [adjustmentLayers, setAdjustmentLayers] = useState([]);
+  const [selectedGradeRegionId,setSelectedGradeRegionId]=useState(null);
+  const [gradeRegionEditMode,setGradeRegionEditMode]=useState(null);
   const [nodeFlow, setNodeFlow] = useState({
     version: 1,
     viewerA: "MediaOut",
@@ -8089,7 +8096,7 @@ const ViralClipStudio = ({
   const hookVisualFocusPoint = showHookPreview ? resolvedHookFocusPoint : DEFAULT_HOOK_FOCUS_POINT;
   const hookTransformOrigin = `${hookVisualFocusPoint.x}% ${hookVisualFocusPoint.y}%`;
   const finishPreviewIsLive = comparisonMode !== "before" && !renderedOutputUrl;
-  const compiledAdjustmentGrades = useMemo(() => compileStudioAdjustmentStack(adjustmentLayers), [adjustmentLayers]);
+  const compiledAdjustmentGrades = useMemo(() => trackStates.adjustment?.visible === false ? [] : compileStudioAdjustmentStack(adjustmentLayers), [adjustmentLayers,trackStates.adjustment?.visible]);
   const effectiveFinishFx = useMemo(() => interpolateFinishKeyframes(
     finishFx,
     finishKeyframes,
@@ -13572,6 +13579,12 @@ const ViralClipStudio = ({
           colorSpace: exportSettings.colorSpace || "rec709",
         },
       };
+      if(renderPayload.finishPlan.adjustment_layers.some(layer=>layer.effects?.selective_mask)){
+        const regionToken=await getMediaAuthToken();
+        const regionCompatibility=await fetch(`${API_BASE_URL}/api/media/studio-grade-capabilities`,{headers:{Authorization:`Bearer ${regionToken}`}});
+        const regionSupport=regionCompatibility.ok?await regionCompatibility.json():null;
+        if(regionSupport?.selectiveGradingVersion!==1)throw Error('Selected-area export needs the updated rendering service. Your edit is saved; no render was submitted.');
+      }
       let completedRender = null;
       if (dualCleanAndCaptioned && autoCaptions && !captionReviewCopy) {
         flushSync(() => setExportStatusLabel("Rendering Captioned Master (1/2)…"));
@@ -15258,11 +15271,14 @@ const ViralClipStudio = ({
         if (frameOutputTime < layer.startTime || frameOutputTime >= layer.startTime + layer.duration) continue;
         const adjustment = layer.effects;
         const adjustmentMaskOriginal=layer.maskSourceNodeId?captureStudioGradeSurface(context):null;
+        const regionOriginal=layer.mask?.space==='programme'?context.getImageData(0,0,canvasWidth,canvasHeight):null;
+        if(adjustment.clone_patch?.enabled){const cloned=applySelectiveClone(context.getImageData(0,0,canvasWidth,canvasHeight),adjustment.clone_patch,layer.mask,frameOutputTime-layer.startTime);context.putImageData(cloned,0,0);}
         const grade = adjustment.color;
         if (grade.precisionGrade) {
           const compositor = webglCompositorRef.current;
           if (
             usedWebGL &&
+            !layer.mask &&
             compositor &&
             !compositor.softwareRenderer &&
             compositor.renderGradedFrame({
@@ -15310,6 +15326,8 @@ const ViralClipStudio = ({
           context.save(); context.globalCompositeOperation = 'screen';
           context.globalAlpha = adjustment.glow.intensity; context.drawImage(scratch, 0, 0); context.restore();
         }
+        if(adjustment.recolor?.enabled)context.putImageData(applySelectiveRecolor(context.getImageData(0,0,canvasWidth,canvasHeight),adjustment.recolor),0,0);
+        if(layer.mask?.space==='programme')blendSelectiveGrade(context,regionOriginal,layer.mask,frameOutputTime-layer.startTime);
         if(layer.maskSourceNodeId)blendNodeGrade(layer.maskSourceNodeId,adjustmentMaskOriginal);
       }
       if (pausedRaster) {
@@ -20738,6 +20756,7 @@ const ViralClipStudio = ({
                       }}
                     />
 
+                    <StudioSelectiveMaskEditor toolbarTarget={phoneFrameRef.current?.closest('.phone-preview-container')?.querySelector('.panel-heading')} layer={adjustmentLayers.find(l=>l.id===selectedGradeRegionId)} mode={activeCreativeTool === 'finish' && !renderedOutputUrl && !trackStates.adjustment?.locked ? gradeRegionEditMode : null} time={previewTimelineTime} onChange={next=>{if(!trackStates.adjustment?.locked)setAdjustmentLayers(current=>current.map(l=>l.id===next.id?next:l));}} onDone={()=>setGradeRegionEditMode(null)} insetX={mainFrame.enabled?mainFrameInsetXPercent:0} insetY={mainFrame.enabled?mainFrameInsetYPercent:0}/>
                     <div className="overlays-layer">
                       {hookFocusMode ? (
                         <div
@@ -26293,7 +26312,9 @@ const ViralClipStudio = ({
                       ))}
                     </div>
                   </section>
+                  <StudioSelectiveGradePanel layers={adjustmentLayers} onChange={next=>{if(trackStates.adjustment?.locked)return;setAdjustmentLayers(next);setComparisonMode('after');}} selectedId={selectedGradeRegionId} onSelect={id=>{setSelectedGradeRegionId(id);setGradeRegionEditMode(null);}} time={previewTimelineTime} duration={liveTimelineDuration} createId={createSecureId} onEdit={mode=>{setComparisonMode('after');setGradeRegionEditMode(mode);}} onSeek={jumpToOutputTimelineTime} locked={!!trackStates.adjustment?.locked}/>
                   <StudioFinishRack
+                    showLegacySelective={false}
                     fx={finishFx}
                     hasEffects={hasFinishEffects || hasAdvancedGrade(advancedColor)}
                     onUpdateFx={(field, value) => {
@@ -31637,14 +31658,14 @@ const ViralClipStudio = ({
           >
             <div className="studio-timeline-resize" role="separator" tabIndex={0}
               aria-label="Resize timeline" aria-orientation="horizontal"
-              aria-valuemin={148} aria-valuemax={timelineHeightLimit} aria-valuenow={displayedTimelineHeight}
+              aria-valuemin={minimumTimelineHeight} aria-valuemax={timelineHeightLimit} aria-valuenow={displayedTimelineHeight}
               onPointerDown={event => {
                 timelineResizeRef.current = { y: event.clientY, height: displayedTimelineHeight };
                 event.currentTarget.setPointerCapture(event.pointerId);
               }}
               onPointerMove={event => {
                 if (!timelineResizeRef.current) return;
-                setTimelineDockHeight(Math.max(148, Math.min(timelineHeightLimit,
+                setTimelineDockHeight(Math.max(minimumTimelineHeight, Math.min(timelineHeightLimit,
                   timelineResizeRef.current.height + timelineResizeRef.current.y - event.clientY)));
               }}
               onPointerUp={() => { timelineResizeRef.current = null; }}
@@ -31653,7 +31674,7 @@ const ViralClipStudio = ({
                 if (!["ArrowUp", "ArrowDown"].includes(event.key)) return;
                 event.preventDefault();
                 event.stopPropagation();
-                setTimelineDockHeight(current => Math.max(148, Math.min(timelineHeightLimit,
+                setTimelineDockHeight(current => Math.max(minimumTimelineHeight, Math.min(timelineHeightLimit,
                   Math.min(current, timelineHeightLimit) + (event.key === "ArrowUp" ? 24 : -24))));
               }}
               title="Drag to resize the timeline; use arrow keys when focused">
