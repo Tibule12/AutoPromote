@@ -90,7 +90,7 @@ export default function StudioSourceGradeViewer({ nodeId, videoRef, mapTime, tim
                 soft.drawImage(out, 0, 0); ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = glow.intensity;
                 ctx.drawImage(copy, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
               }
-              if(layer.effects.recolor?.enabled)ctx.putImageData(applySelectiveRecolor(ctx.getImageData(0,0,out.width,out.height),layer.effects.recolor),0,0);
+              if(layer.effects.recolor?.enabled)ctx.putImageData(applySelectiveRecolor(ctx.getImageData(0,0,out.width,out.height),layer.effects.recolor,layer.mask,at-layer.startTime),0,0);
               if(layer.mask?.space==='programme')blendSelectiveGrade(ctx,regionOriginal,layer.mask,at-layer.startTime);
               if(layer.maskSourceNodeId)blend(layer.maskSourceNodeId,before);
             }

@@ -131,3 +131,13 @@ test('selected-area readiness and fallback require the same supported mask versi
  await expect(postMediaWorker('/render-viral-clip',payload)).resolves.toMatchObject({device:'cpu'});
  expect(axios.post).toHaveBeenCalledTimes(1);expect(axios.post.mock.calls[0][0]).toBe('https://cpu.example/render-viral-clip');
 });
+
+test('healing, exclusions, colour mattes and tracked outlines require v2 on every render lane',async()=>{
+ const payload={end_time:4,finish_plan:{adjustment_layers:[{effects:{selective_mask:{material:{enabled:true}}}}]}};
+ axios.get.mockResolvedValue({data:{status:'ok',computeDevice:'cuda',videoEncoder:'h264_nvenc',gpuRequired:true,studioCapabilities:{selectiveGrading:1}}});
+ await expect(postMediaWorker('/render-viral-clip',payload)).rejects.toMatchObject({code:'STUDIO_SELECTIVE_GRADING_UNAVAILABLE'});
+ expect(axios.post).not.toHaveBeenCalled();
+ axios.get.mockReset();axios.get.mockResolvedValue({data:{status:'ok',computeDevice:'cuda',videoEncoder:'h264_nvenc',gpuRequired:true,studioCapabilities:{selectiveGrading:2}}});
+ axios.post.mockResolvedValue({data:{status:'completed'}});
+ await expect(postMediaWorker('/render-viral-clip',payload)).resolves.toMatchObject({device:'gpu'});
+});

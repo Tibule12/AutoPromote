@@ -22,6 +22,14 @@ def validate_selective_mask(mask):
         raise ValueError('Draw a closed outline with 3–64 points')
     keys=mask.get('keyframes')
     if not isinstance(keys,list) or len(keys)>128:raise ValueError('Use at most 128 mask position keys')
+    if 'opacity'in mask and (type(mask['opacity'])not in(int,float)or not math.isfinite(mask['opacity'])or not 0<=mask['opacity']<=1):raise ValueError('Invalid mask visibility')
+    material=mask.get('material')
+    if material is not None:validate_material(material)
+    if 'subtract' in mask:
+        if not isinstance(mask['subtract'],list)or len(mask['subtract'])>8:raise ValueError('Use up to eight exclusion outlines per region')
+        for child in mask['subtract']:
+            if not isinstance(child,dict):raise ValueError('Invalid exclusion outline')
+            validate_selective_mask({**child,'space':'programme','version':1,'inverted':False,'keyframes':[],'subtract':[],'material':None})
     previous=-1
     for key in keys:
         t=key.get('time')
@@ -31,6 +39,8 @@ def validate_selective_mask(mask):
             v=key.get(field);lo,hi=RANGES[field]
             if isinstance(v,bool) or not isinstance(v,(int,float)) or not math.isfinite(v) or not lo<=v<=hi:raise ValueError('Invalid mask position key')
         if 'hold' in key and type(key['hold']) is not bool:raise ValueError('Invalid mask key interpolation')
+        if 'opacity' in key and (type(key['opacity'])not in(int,float)or not math.isfinite(key['opacity'])or not 0<=key['opacity']<=1):raise ValueError('Invalid mask visibility key')
+        if 'points' in key and (mask['shape']!='polygon'or not isinstance(key['points'],list)or len(key['points'])!=len(points)or any(not isinstance(p,list)or len(p)!=2 or any(type(v)not in(int,float)or not math.isfinite(v)or not 0<=v<=1 for v in p)for p in key['points'])):raise ValueError('Outline keys must keep matching points')
     return mask
 
 def mask_at(mask,time):
@@ -38,17 +48,22 @@ def mask_at(mask,time):
     if not keys:return mask
     left=next((k for k in reversed(keys)if k['time']<=time),keys[0]);right=next((k for k in keys if k['time']>=time),keys[-1])
     p=0 if left is right or left.get('hold') else max(0,min(1,(time-left['time'])/(right['time']-left['time'])))
-    return {**mask,**{f:left[f]+(right[f]-left[f])*p for f in FIELDS}}
+    result={**mask,**{f:left[f]+(right[f]-left[f])*p for f in FIELDS},'opacity':left.get('opacity',1)+(right.get('opacity',1)-left.get('opacity',1))*p}
+    if mask.get('points'):
+        lp=left.get('points',mask['points']);rp=right.get('points',mask['points'])
+        result['points']=[[v+(rp[i][j]-v)*p for j,v in enumerate(point)]for i,point in enumerate(lp)]
+    return result
 
-def mask_coverage(mask,width,height,time=0):
-    validate_selective_mask(mask);m=mask_at(mask,time);unit=min(width,height);rx=m['width']*width/unit/2;ry=m['height']*height/unit/2
+def mask_coverage(mask,width,height,time=0,_validated=False):
+    if not _validated:validate_selective_mask(mask)
+    m=mask_at(mask,time);unit=min(width,height);rx=m['width']*width/unit/2;ry=m['height']*height/unit/2
     angle=m['rotation']*math.pi/180;cs,sn=math.cos(angle),math.sin(angle)
     padding=m['feather']*(max(rx,ry)/min(rx,ry)if m['shape']=='ellipse'else 1)
     bx=abs(rx*cs)+abs(ry*sn)+padding;by=abs(rx*sn)+abs(ry*cs)+padding
     x0=max(0,math.floor(m['x']*width-bx*unit));x1=min(width,math.ceil(m['x']*width+bx*unit))
     y0=max(0,math.floor(m['y']*height-by*unit));y1=min(height,math.ceil(m['y']*height+by*unit))
     result=np.full((height,width),1 if m['inverted']else 0,np.float32)
-    if x1<=x0 or y1<=y0:return result
+    if x1<=x0 or y1<=y0:return result*m.get('opacity',1)
     py,px=np.ogrid[y0:y1,x0:x1];dx=((px+.5)/width-m['x'])*width/unit;dy=((py+.5)/height-m['y'])*height/unit
     x=dx*cs+dy*sn;y=-dx*sn+dy*cs
     if m['shape']=='ellipse':distance=(np.hypot(x/rx,y/ry)-1)*min(rx,ry)
@@ -63,6 +78,16 @@ def mask_coverage(mask,width,height,time=0):
         distance=near*np.where(inside,-1,1)
     t=np.clip(.5-distance/m['feather'],0,1)if m['feather'] else (distance<=0).astype(float);alpha=t*t*(3-2*t)
     result[y0:y1,x0:x1]=(1-alpha if m['inverted']else alpha).astype(np.float32)
+    for child in m.get('subtract',[]):
+        lx=(child['x']-.5)*m['width']*width;ly=(child['y']-.5)*m['height']*height
+        transformed={**child,'space':'programme','version':1,'inverted':False,'keyframes':[],
+            'x':m['x']+(lx*cs-ly*sn)/width,'y':m['y']+(lx*sn+ly*cs)/height,
+            'width':child['width']*m['width'],'height':child['height']*m['height'],
+            'rotation':child['rotation']+m['rotation'],
+            'feather':child['feather']*min(m['width']*width,m['height']*height)/unit}
+        exclusion=mask_coverage(transformed,width,height,0,True)
+        result=(1-(1-result)*(1-exclusion)if m['inverted']else result*(1-exclusion)).astype(np.float32)
+    if 'opacity' in m:result*=m['opacity']
     return result
 
 def render_selective_mask(mask,path,width,height,duration,fps):
@@ -84,14 +109,52 @@ def render_selective_mask(mask,path,width,height,duration,fps):
         if process.poll()is None:process.kill();process.wait()
     return str(path)
 
-def masked_grade_filter(grade,path,prefix,fps):
+def masked_grade_filter(grade,path,prefix,fps,material_path=None):
     fps=float(fps)
     if not math.isfinite(fps)or not 0<fps<=120:raise ValueError("Invalid selected-area picture clock")
     escaped=str(path).replace('\\','\\\\').replace(':','\\:').replace("'","\\'")
-    return (f'format=gbrp,split=2[{prefix}original][{prefix}input];'
-            f'[{prefix}input]{grade},format=gbrp[{prefix}graded];'
-            f"movie=filename='{escaped}',settb=expr=1/90000,setpts=round(N/({fps:.12f}*TB)),format=gray[{prefix}coverage];"
-            f'[{prefix}original][{prefix}graded][{prefix}coverage]maskedmerge=planes=7')
+    original=f'{prefix}original'
+    matte=(f"movie=filename='{escaped}',settb=expr=1/90000,setpts=round(N/({fps:.12f}*TB)),format=gray[{prefix}coverage];")
+    if material_path:
+        material_escaped=str(material_path).replace('\\','\\\\').replace(':','\\:').replace("'","\\'")
+        return (f'format=gbrp,split=3[{original}][{prefix}input][{prefix}materialin];'
+            f'[{prefix}input]{grade},format=gbrp[{prefix}graded];'+matte+
+            f"[{prefix}materialin]lut3d=file='{material_escaped}':interp=trilinear,format=gray[{prefix}material];"
+            f'[{prefix}coverage][{prefix}material]blend=all_mode=multiply[{prefix}combined];'
+            f'[{original}][{prefix}graded][{prefix}combined]maskedmerge=planes=7')
+    return (f'format=gbrp,split=2[{original}][{prefix}input];'
+            f'[{prefix}input]{grade},format=gbrp[{prefix}graded];'+matte+
+            f'[{original}][{prefix}graded][{prefix}coverage]maskedmerge=planes=7')
+
+
+def validate_material(material):
+    import re
+    if not isinstance(material,dict)or type(material.get('enabled'))is not bool or not isinstance(material.get('samples'),list)or len(material['samples'])>8 or any(not isinstance(s,str)or not re.fullmatch(r'#[a-fA-F0-9]{6}',s)for s in material['samples']):raise ValueError('Pick up to eight material colours')
+    for field,lo,hi in [('hueRange',.01,.5),('saturationRange',.02,1),('lightnessRange',.02,1),('softness',.05,1)]:
+        v=material.get(field)
+        if type(v)not in(int,float)or not math.isfinite(v)or not lo<=v<=hi:raise ValueError('Invalid material '+field)
+    if material['enabled']and not material['samples']:raise ValueError('Pick a material colour first')
+
+
+def write_material_cube(material,path,size=33):
+    import colorsys
+    validate_material(material)
+    samples=[]
+    for sample in material['samples']:
+        h,l,s=colorsys.rgb_to_hls(*(int(sample[i:i+2],16)/255 for i in (1,3,5)));samples.append((h,s,l))
+    with open(path,'w')as out:
+        out.write(f'LUT_3D_SIZE {size}\nDOMAIN_MIN 0 0 0\nDOMAIN_MAX 1 1 1\n')
+        for b in range(size):
+            for g in range(size):
+                for r in range(size):
+                    h,l,s=colorsys.rgb_to_hls(r/(size-1),g/(size-1),b/(size-1));alpha=0
+                    for sh,ss,sl in samples:
+                        hue=min(abs(h-sh),1-abs(h-sh))
+                        distance=max(0 if ss<.08 else hue/material['hueRange'],abs(s-ss)/material['saturationRange'],abs(l-sl)/material['lightnessRange'])
+                        t=max(0,min(1,(1-distance)/material['softness']));alpha=max(alpha,t*t*(3-2*t))
+                    out.write(' '.join([f'{alpha:.9f}']*3)+'\n')
+    return str(path)
+
 
 
 def write_recolor_cube(spec,path,size=33):

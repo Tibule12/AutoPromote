@@ -1,5 +1,22 @@
 {
+  "selectiveRefinement20261121": {
+    "date": "2026-11-21",
+    "evidenceRefs": [
+      "reports/studio-selective-refinement-20261121/README.md",
+      "reports/studio-selective-refinement-20261121/verification.json"
+    ],
+    "scope": "Material-qualified compound region grades, editable outline/visibility paths, bounded programme tracking and same-frame texture healing in the shared adjustment pipeline.",
+    "readinessPromotion": false,
+    "nextTaskId": "S02",
+    "blockers": [
+      "Bounded native workflow passes; unrestricted professional grade/retouch and owner creative approval remain open",
+      "Not deployed; coordinate frontend/API/GPU/CPU capability v2",
+      "Longer motion paths, moving clean-source reference, non-rigid/occlusion recovery and long-form latency/resources remain open",
+      "Shared S02/S04/S03 and whole predictive picture/audio parity remain open"
+    ]
+  },
   "selectiveGrading20261121": {
+    "ownerReview": {"decision": "REJECTED", "featureComplete": false, "evidence": "reports/studio-selective-grading-20261121/owner-rejection.json"},
     "date": "2026-11-21",
     "evidenceRefs": [
       "reports/studio-selective-grading-20261121/README.md",

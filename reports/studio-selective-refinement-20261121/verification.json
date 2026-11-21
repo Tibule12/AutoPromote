@@ -1,0 +1,164 @@
+{
+  "date": "2026-11-21",
+  "readinessPromotion": false,
+  "productionDeployed": false,
+  "ownerCreativeApproval": false,
+  "qualification": "Bounded local candidate; native signed-in controls and canonical local worker through a private transport bridge. Not production end-to-end qualification.",
+  "frontendCases": 36,
+  "routingHealthAndMultipartCases": 21,
+  "workerCases": 24,
+  "productKnowledgeCases": 17,
+  "nativeTracks": {
+    "wardrobeSamples": 32,
+    "skinSamples": 32,
+    "engine": "programme-lk-ransac-v1",
+    "reviewRequired": true
+  },
+  "nativeControls": [
+    "polygon drawing",
+    "original-picture material picker",
+    "exclusion ellipse",
+    "independent skin saturation/exposure",
+    "forward tracking",
+    "clean patch picking",
+    "heal mode",
+    "copy movement keys",
+    "8x picture/matte inspection",
+    "keyed outline-point edit",
+    "Undo/Redo/Undo",
+    "save",
+    "cold reopen",
+    "backup download",
+    "independent restore",
+    "render request",
+    "finished output access",
+    "native master download",
+    "complete matching finished playback with audio"
+  ],
+  "independentRestore": {
+    "exactEditableState": true,
+    "exactAdjustmentLayers": true,
+    "canonicalMetadataDifferences": [
+      "revision",
+      "journal"
+    ],
+    "geometry": {
+      "width": 13.50555419921875,
+      "height": 13.49951171875
+    },
+    "errors": [],
+    "blocked": []
+  },
+  "finalClient": {
+    "welcomeViewportChecks": 8,
+    "welcomeContentMatches": true,
+    "signedInWorkspace": true,
+    "contextualHelp": {
+      "panel": true,
+      "catalogueStatusPreserved": "Captions and transcription BROKEN",
+      "errors": []
+    }
+  },
+  "export": {
+    "sha256": "1183ab4b41399c69f28e72faf38d2dca197f7c64d05d6c409bb2934f5d09a4ec",
+    "bytes": 6438765,
+    "streams": [
+      {
+        "codec_type": "video",
+        "codec_name": "h264",
+        "width": 1920,
+        "height": 1080,
+        "avg_frame_rate": "30/1",
+        "nb_frames": "114",
+        "duration": "3.800000",
+        "sample_rate": null,
+        "channels": null,
+        "color_space": "bt709",
+        "color_transfer": "bt709",
+        "color_primaries": "bt709"
+      },
+      {
+        "codec_type": "audio",
+        "codec_name": "aac",
+        "width": null,
+        "height": null,
+        "avg_frame_rate": "0/0",
+        "nb_frames": "180",
+        "duration": "3.800000",
+        "sample_rate": "48000",
+        "channels": 2,
+        "color_space": null,
+        "color_transfer": null,
+        "color_primaries": null
+      }
+    ],
+    "duration": "3.800000",
+    "canonicalElapsedSeconds": 116.74023582899827,
+    "actualDownloadSameHash": true,
+    "fullFinishedPlayback": true,
+    "filterDevice": "CPU",
+    "deliveryEncoder": "h264_nvenc",
+    "paidGpuAllocation": false
+  },
+  "previewRender": {
+    "method": "Explicit tagged BT709 limited-range to full RGB decoding; earlier OpenCV conversion retained separately",
+    "pairs": [
+      {
+        "time": 0,
+        "meanAbsoluteError": 1.893666087962963,
+        "p99": 12.0
+      },
+      {
+        "time": 1,
+        "meanAbsoluteError": 2.3505431777263373,
+        "p99": 12.0
+      },
+      {
+        "time": 2,
+        "meanAbsoluteError": 2.3783632330246913,
+        "p99": 12.0
+      },
+      {
+        "time": 3,
+        "meanAbsoluteError": 2.409448945473251,
+        "p99": 12.0
+      }
+    ]
+  },
+  "sound": {
+    "channels": 2,
+    "sampleRate": 48000,
+    "sourceSeconds": 3.8080833333333333,
+    "exportSeconds": 3.8186666666666667,
+    "lagSeconds": 0.0,
+    "correlation": 0.9846770567027695,
+    "sourceRms": 0.0905633419752121,
+    "exportRms": 0.08840745687484741
+  },
+  "crossLanguage": {
+    "compoundAnimatedCoverageCases": 12,
+    "coverageTolerance": 1e-07,
+    "materialCubeCells": 125,
+    "cubeTolerance": 1e-08
+  },
+  "retainedFailures": [
+    "Owner-rejected initial demonstration remains rejected",
+    "Initial magnified handles obscured the small patch; final 13.5px SVG handles pass actual pointer editing",
+    "First isolated v4 browser startup preceded the candidate server and failed; retained private runtime evidence",
+    "Private browser disconnect and exact Undo selector timeouts are retained; corrected actual header selectors pass Undo/Redo/Undo",
+    "Help observer initially targeted Recent Projects behind the parent editing modal; ordinary Cancel then context help pass",
+    "OpenCV RGB measurement used an implicit colour matrix; retain it separately from explicit tagged Rec709 decode comparisons"
+  ],
+  "limits": [
+    "Local only; coordinate frontend/API/GPU/CPU capability v2 before production release",
+    "Tracking is reviewed affine motion with up to ten seconds per pass and 128 keys per region; no automatic semantic/non-rigid/occlusion recovery",
+    "Copying movement bakes independent editable keys; reference changes must be reapplied",
+    "Healing is same-frame annular texture/illumination transfer; clean-source offset stays fixed in programme coordinates and requires repicking around significant rotation/deformation",
+    "The 3.8s three-region 1080p clip took 116.74s locally, with CPU filters and NVENC encoding; long-form latency/resource qualification remains open",
+    "Four paired frames do not qualify full predictive moving picture/audio parity or professional creative acceptance",
+    "Shared S02/S04/S03 and historical typography failures remain open"
+  ],
+  "delivery": "/home/tibule12/Videos/Studio Selective Grading - Refined 2026-11-21",
+  "originalLoginSha256": "00d48e87bd9b77ba9ead11c92bf93039f43fc3e7e6b322c3e379f6b4dac55254",
+  "finalQualification": "Bounded workflow completed; requested unrestricted professional grading remains broader than this candidate."
+}

@@ -1287,7 +1287,32 @@ router.get("/credits", async (req, res) => {
 
 // Frontend compatibility handshake. Actual GPU/CPU feature qualification is
 // checked by assertRenderWorkerReady before any charge and at dispatch.
-router.get('/studio-grade-capabilities',(_req,res)=>res.json({selectiveGradingVersion:1}));
+router.get('/studio-grade-capabilities',(_req,res)=>res.json({selectiveGradingVersion:2,regionTrackingVersion:1}));
+
+// Bounded programme samples are disk spooled and streamed to the existing
+// worker. No base64 body, retained cloud copy, or publication is involved.
+router.post('/track-studio-region', requireTesterEditingFeature('clipRender'), admitMediaTransfer,
+  temporaryMediaUpload(40 * 1024 * 1024).single('file'), async(req,res)=>{
+    if(!req.file)return res.status(400).json({error:'Capture this selected area first.'});
+    const FormData=require('form-data');
+    const controller=new AbortController();
+    res.once('close',()=>{if(!res.writableFinished)controller.abort();});
+    try{
+      const target=`${MEDIA_WORKER_URL}/track-studio-region`;
+      const form=new FormData();
+      form.append('file',fs.createReadStream(temporarySourcePath(req.file.path)),{
+        filename:'programme.stframes',contentType:'application/octet-stream',knownLength:req.file.size});
+      const config=await buildWorkerRequestConfig(target,{timeout:180000});
+      const response=await axios.post(target,form,{...config,headers:{...config.headers,...form.getHeaders()},
+        signal:controller.signal,maxBodyLength:41*1024*1024,maxContentLength:256*1024});
+      return res.json(response.data);
+    }catch(error){
+      const invalid=error.response?.status===422;
+      return res.status(invalid?422:503).json({error:invalid?
+        String(error.response.data?.detail||'These samples cannot be tracked safely.'):
+        'Tracking is unavailable. Your selection has not changed; try again or use manual keys.'});
+    }
+  });
 
 router.get("/worker-health", async (req, res) => {
   const startedAt = Date.now();

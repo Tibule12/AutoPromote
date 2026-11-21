@@ -12590,7 +12590,7 @@ def health_check():
     return {
         "status": "ok",
         "service": "python_media_worker",
-        "studioCapabilities": {"selectiveGrading": 1, "regionRecolor": 1, "clonePatch": 1},
+        "studioCapabilities": {"selectiveGrading": 2, "regionRecolor": 1, "clonePatch": 1, "regionTracking": 1, "materialMatte": 1, "textureHeal": 1},
         "worker_state": current_job_info,
         "concurrency": MEDIA_WORKER_CONCURRENCY,
         "maxVideoSeconds": MEDIA_WORKER_MAX_VIDEO_SECONDS,
@@ -28871,6 +28871,35 @@ async def retired_idea_video():
     raise HTTPException(status_code=410, detail="FEATURE_RETIRED: use AutoPromote Studio")
 
 
+_studio_region_tracking_gate = asyncio.Semaphore(1)
+
+@app.post('/track-studio-region')
+async def track_studio_region(file: UploadFile = File(...)):
+    try:
+        from .studio_region_tracking import MAX_PACKET_BYTES, track_packet
+    except ImportError:
+        from studio_region_tracking import MAX_PACKET_BYTES, track_packet
+    if _studio_region_tracking_gate.locked():
+        raise HTTPException(status_code=503, detail='The selection tracker is busy')
+    async with _studio_region_tracking_gate:
+        with tempfile.TemporaryDirectory(prefix='studio-region-track-')as folder:
+            path=os.path.join(folder,'programme.stframes')
+            try:
+                size=0
+                with open(path,'wb')as target:
+                    while True:
+                        block=await file.read(1024*1024)
+                        if not block:break
+                        size+=len(block)
+                        if size>MAX_PACKET_BYTES:raise ValueError('Selection samples exceed the tracking budget')
+                        target.write(block)
+                return await asyncio.to_thread(track_packet,path)
+            except (ValueError,KeyError,TypeError)as exc:
+                raise HTTPException(status_code=422,detail=str(exc))from exc
+            finally:
+                await file.close()
+
+
 @app.post("/track-studio-faces")
 async def track_studio_faces(request: Dict[str, Any]):
     from studio_face_tracking import track_faces
@@ -30708,9 +30737,9 @@ def build_studio_adjustment_timeline_filter(base_filter, layers, duration):
                   if layer_start <= start + 1e-6 and layer_end >= end - 1e-6]
         output = f"[finish_{index}_out]"
         parts.append(
-            f"[finish_{index}_in]trim=start={start:.6f}:end={end:.6f},setpts=PTS-STARTPTS,"
+            f"[finish_{index}_in]trim=start={start:.6f}:end={end:.6f},setpts=PTS-STARTPTS+{start:.9f}/TB,"
             + (",".join(grades) + "," if grades else "")
-            + f"format=yuv420p,setsar=1{output}"
+            + f"setpts=PTS-STARTPTS,format=yuv420p,setsar=1{output}"
         )
         outputs.append(output)
     parts.append(f"{''.join(outputs)}concat=n={len(outputs)}:v=1:a=0[v_finish]")
@@ -32191,6 +32220,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             effects.pop('_worker_selective_mask_path',None)
             effects.pop('_worker_selective_mask_fps',None)
             effects.pop('_worker_recolor_cube_path',None)
+            effects.pop('_worker_material_cube_path',None)
             if (effects.get('recolor')or{}).get('enabled'):
                 try:
                     from .studio_selective_mask import write_recolor_cube
@@ -32214,7 +32244,17 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 sequence_temp_paths.add(mask_path)
                 effects['_worker_selective_mask_path']=mask_path
                 effects['_worker_selective_mask_fps']=float(num)/float(den)
-            effects["_worker_height"] = get_video_dimensions(working_path)[1]
+                material=effects['selective_mask'].get('material')
+                if material and material.get('enabled'):
+                    try:
+                        from .studio_selective_mask import write_material_cube
+                    except ImportError:
+                        from studio_selective_mask import write_material_cube
+                    material_path=os.path.join(SHARED_TMP_DIR,f'{job_id}_material_{index}.cube')
+                    sequence_temp_paths.add(material_path)
+                    await asyncio.to_thread(write_material_cube,material,material_path)
+                    effects['_worker_material_cube_path']=material_path
+            effects["_worker_width"],effects["_worker_height"] = get_video_dimensions(working_path)
             if effects.get("color_cube"):
                 try:
                     from .studio_color_cube import write_color_cube

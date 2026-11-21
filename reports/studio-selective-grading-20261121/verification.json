@@ -164,5 +164,10 @@
     "UNIMPLEMENTED": 2,
     "PRO-READY": 0,
     "PRODUCTION-READY": 0
+  },
+  "ownerReview": {
+    "decision": "REJECTED",
+    "evidence": "reports/studio-selective-grading-20261121/owner-rejection.json",
+    "featureComplete": false
   }
 }

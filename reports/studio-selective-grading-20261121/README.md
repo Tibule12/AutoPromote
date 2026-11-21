@@ -1,5 +1,7 @@
 # Independent selected-area grading — 21 November 2026
 
+**Owner rejected the delivered demonstration. The requested grading and retouching system is unfinished.** [Review findings](owner-rejection.json). Arithmetic/export passes below remain bounded engineering evidence; they do not qualify the requested visual quality.
+
 The owner rejected the earlier global podcast grade and required editable corrections for arbitrary parts of people and objects. This candidate adds independent timed colour regions to the existing adjustment-layer system. It does not introduce a separate editor or rendering engine.
 
 The Color inspector now adds up to 32 named regions. Each has an ellipse, rectangle, 3–64-point polygon or freehand outline, editable points, rotation/size/position, feather, inversion, range, strength and manual motion keys. The ordinary adjustment controls supply exposure, lift/gamma/gain, white balance, curves/HSL/LUT and finish settings inside that coverage. Recolouring preserves HSL lightness; an explicit clone tool samples nearby texture from the same frame for a small local defect. Clone strength is mixed inside the mask. Masks and their keys remain attached to the timed adjustment when it moves; keys are converted to programme time for export.
@@ -26,4 +28,4 @@ The API exposes a version handshake; pre-charge readiness and dispatch both requ
 
 This is a scoped local candidate. Automatic tracking, semantic part selection, compound/subtractive mask authoring and advanced skin healing remain unfinished. Clone retouch is a manually placed clean texture patch. Skin/edge quality on varied media, occlusion/cut handling, long-form speed, full predictive picture/audio parity and owner creative/listening approval remain open. Preserve shared S02/S04/S03 and historical typography failures. Formal counts remain 17 FUNCTIONAL / 9 PARTIAL / 1 BROKEN / 2 UNIMPLEMENTED / 0 PRO-READY / 0 PRODUCTION-READY.
 
-Next: owner review of the exact local result and controls, then automatic tracking/selection and retouch quality, with normal production deployment/qualification kept separate.
+Next: precise moving selections, boundary/texture preservation, tracking and actual healing; then a convincing ordinary-Studio edit. Owner rejection remains authoritative. Production deployment and qualification remain separate.

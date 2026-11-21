@@ -585,7 +585,15 @@
 .studio-selective-grades fieldset { min-width: 0; margin: 12px 0 0; padding: 10px; border: 1px solid #34475b; border-radius: 8px; }
 .studio-selective-grades label { display: block; margin: 8px 0; font-size: 12px; }
 .studio-selective-grades input[type=range] { width: 100%; }
-.selective-region-tools { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.selective-region-tools { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; margin: 8px 0; }
+.selective-region-tools button { font-size:11px; min-width:0; white-space:normal; }
+.selective-motion-keys { display:flex; flex-wrap:wrap; gap:5px; max-height:140px; overflow:auto; padding:8px 0; }
+.selective-motion-keys > span { display:inline-flex; }
+.studio-selective-grades details { margin:10px 0; padding-top:8px; border-top:1px solid #25384b; }
+.studio-selective-grades select { width:100%; min-height:32px; color:#e4efff; background:#0a1422; border:1px solid #38506a; border-radius:5px; }
+.selective-material-swatches { display:flex; flex-wrap:wrap; gap:6px; }
+.studio-region-editor__bar select { background:#142033; color:#fff; border:1px solid #52657d; border-radius:4px; padding:4px; }
+.studio-selective-grades button:disabled { opacity:.45; cursor:default; }
 .selective-region-list > div { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
 .selective-region-list > div > button:first-child { flex: 1; text-align: left; }
 .selective-region-list button[aria-pressed=true] { border-color: #22d3ee; background: #123e50; }

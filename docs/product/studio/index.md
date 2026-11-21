@@ -1111,10 +1111,12 @@ Edits deterministic grade parameters and finish keys. Grade controls affect the 
 **Workflow**
 
 1. Open Color in the Studio tool rail. Use global controls for the programme picture.
-2. In the selected-area candidate, add a grade for each area. Draw an ellipse, rectangle, polygon or freehand outline; move its points and feather its edge. Name the region and set its timeline range.
-3. Use per-region exposure, lift/gamma/gain, curves, HSL, LUTs or recolouring. The strength slider mixes that correction from neutral inside the mask.
-4. For local cleanup, draw a small mask over the defect and pick nearby clean same-frame texture. Add position keys and review movement and cuts.
-5. Save a project backup, reopen the edit and inspect the actual exported picture and sound.
+2. Add a selected-area grade, draw an ellipse, rectangle, polygon or freehand outline, and name it. Set its timeline range and feather its edge.
+3. Pick material colours from the original picture, adjust hue/saturation/brightness tolerance, and draw exclusion outlines to protect details. Inspect the matte and use 2x/4x/8x magnification.
+4. Apply independent exposure, lift/gamma/gain, curves, HSL, LUTs or recolouring. The correction is limited by both the spatial mask and its material selection.
+5. Track forward or backward from the playhead for up to ten seconds per pass. Review the observed path; uncertain movement or a cut stops the selection. Copy editable movement keys from a larger tracked area to a small correction when needed.
+6. For cleanup, draw a small feathered area and pick nearby clean same-frame texture. Choose Heal to match local lighting or Clone for a direct copy. Adjust the lighting-match radius and repair amount.
+7. Correct outline points at individual keyed frames. Save a project backup, reopen it, and inspect the actual exported picture and sound.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
@@ -1124,8 +1126,9 @@ Edits deterministic grade parameters and finish keys. Grade controls affect the 
 
 - This dated development snapshot does not establish professional or production readiness.
 - The WebGL LUT preview uses the same canonical cube and imported strength as export. Identity colours, changed interior cube points and fractional-strength sampling have scoped real WebGL/CPU checks; this does not qualify all film effects, secondary grades, composition stages or full moving picture/audio parity.
-- Independent selected-area grades and clean-patch cloning are a local candidate, pending deployment of the frontend, API capability check and both renderer lanes. Older workers must refuse the new masks rather than grade the whole picture.
-- Region movement uses manual position/size/rotation keys. Automatic tracking, semantic part selection, compound/subtractive mask authoring and advanced skin healing remain unimplemented in this candidate. Clone correction is an explicit same-frame texture patch, not automatic reconstruction.
+- Selected-area refinements are a local candidate. Release the frontend, authenticated API and both worker lanes together; render capability v2 is required for material mattes, exclusions, outline/visibility keys and healing. Production deployment is not established by local tests.
+- Tracking follows visible picture detail using optical flow and an affine path, with up to ten seconds per pass and 128 editable keys per region. It requires review, stops at uncertain motion/cuts, and is not semantic body-part segmentation or an automatic guarantee of non-rigid/occluded edges. Manual outline keys supply local corrections.
+- Copied movement keys are independent editable keys; later changes to the reference area must be reapplied. Healing borrows same-frame texture and matches surrounding illumination; it does not reconstruct missing facial anatomy or restore absent source detail.
 
 **Common errors**
 

@@ -1,0 +1,20 @@
+{
+  "date": "2026-11-21",
+  "decision": "OWNER_REJECTED",
+  "creativeCompletion": false,
+  "requestedFeatureComplete": false,
+  "findings": [
+    "The cyan screen section is an artificial colour replacement with a visible geometric boundary. It is not a convincing quality-grade demonstration.",
+    "The lip mask uses sparse manual position keys and does not establish precise changing-feature selection across motion.",
+    "The wall texture clone does not qualify blemish healing or detailed skin retouching.",
+    "Passing mask arithmetic and export checks does not establish the requested selection, tracking, texture/edge or creative quality."
+  ],
+  "nextWork": [
+    "Qualify precise editable selections and edge/texture preservation on actual moving footage",
+    "Implement and verify movement tracking and correction through cuts and occlusion",
+    "Build and qualify proper local healing/retouching",
+    "Produce a convincing real edit through the ordinary Studio before claiming completion"
+  ],
+  "publishingApproved": false,
+  "readinessPromotion": false
+}

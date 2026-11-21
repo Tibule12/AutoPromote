@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Finalize selective grading evidence and keep existing knowledge JSON encoding",
-  "reviewed_at": "2026-11-21T13:16:58.675Z",
-  "catalog_sha256": "58009a156598eb3afe9965327df39534dd354b6a7a3647e8785c5b3935311d92",
+  "reason": "Complete bounded native selective-refinement verification, preserve owner rejection, CPU latency and production release limits",
+  "reviewed_at": "2026-11-21T15:00:16.746Z",
+  "catalog_sha256": "9bdf0794e095827ba1ff456dc5d43de1179382375db6ab2fdc92410944586bff",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -95,7 +95,7 @@
     },
     {
       "path": "frontend/src/components/StudioControls.css",
-      "sha256": "6b4de58c9a9fdc44c8b241c2a2ab8dc3060567019d8e599091bc0150ff04529e"
+      "sha256": "540cd83bf75b40a274995a407c92f00a34bf9bc85990531380b78df480d29754"
     },
     {
       "path": "frontend/src/components/StudioCreatorWorkbench.js",
@@ -175,7 +175,7 @@
     },
     {
       "path": "frontend/src/components/StudioSelectiveGradePanel.js",
-      "sha256": "74cadcbe7a789fe9b39b135025d1b8cc79f85c69cfdb1e0a82d274a877560e39"
+      "sha256": "ef795adb4c74293b284dbc6d87e2b22653601de12d1598ea30f47c6ea9127259"
     },
     {
       "path": "frontend/src/components/StudioSubjectMaskControls.js",
@@ -203,7 +203,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "bd14993a66593b57ae3d478f50df77d52a11441724c4d522e3fd4eddfcef8b1f"
+      "sha256": "e59622eaf34bb86ba172862b0b292e93d69697912849cb706f4bbd73ac4a726d"
     },
     {
       "path": "frontend/src/components/ViralScanner.js",
@@ -479,7 +479,7 @@
     },
     {
       "path": "python_media_worker/main_media_server.py",
-      "sha256": "5c1d31369aa68e2f58f4b19c6f18167bca4267e25b08bc42efdb591aedf325d8"
+      "sha256": "83a71da88ce9a6939e26e17704586aeffc3c3aa5e69066c817e379bff3179bb5"
     },
     {
       "path": "python_media_worker/studio_audio.py",
@@ -511,7 +511,7 @@
     },
     {
       "path": "python_media_worker/studio_selective_mask.py",
-      "sha256": "c4f91a015df3a1b87fb0da468dffdd3a4bc2d24f2f70030b2f315031bd30e088"
+      "sha256": "cc7efdcb737a1ac590f6d93b8d3fadd51df350e6dc6c60a4adc0818a1e200800"
     },
     {
       "path": "python_media_worker/studio_text.py",
@@ -771,11 +771,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "44387c4526a14db68fb31d0b461e5f9ec55a6b976b9ab4652ceefbb23f6b12a4"
+      "sha256": "ce117082746b340bed445646ea89036c634026724e261aac754eb0c19cf03e9b"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "2b69328d6ad53f0c4d50869eaccc69325c83d9880587171d631906d01b4f6d07"
+      "sha256": "069b7c1cd7e9149610cd9950429e9c23f2a973adad6adafd6e74aa033e2036fe"
     },
     {
       "path": "worker.js",

@@ -98,8 +98,14 @@ function needsSelectiveGrading(payload={}) {
     const fx=layer.effects||{};return !!(fx.selective_mask||fx.recolor?.enabled||fx.clone_patch?.enabled);
   });
 }
+function requiredSelectiveVersion(payload={}) {
+  return (payload.finish_plan?.adjustment_layers||[]).some(layer=>{
+    const fx=layer.effects||{},mask=fx.selective_mask;
+    return mask?.opacity!==undefined||mask?.material?.enabled||mask?.subtract?.length||mask?.keyframes?.some(k=>k.opacity!==undefined||k.points)||fx.clone_patch?.mode==='heal';
+  })?2:1;
+}
 function assertSelectiveSupport(payload,health) {
-  if(needsSelectiveGrading(payload)&&health?.studioCapabilities?.selectiveGrading!==1)
+  if(needsSelectiveGrading(payload)&&(health?.studioCapabilities?.selectiveGrading||0)<requiredSelectiveVersion(payload))
     throw Object.assign(new Error('Selected-area grading is unavailable on this worker.'),{code:'STUDIO_SELECTIVE_GRADING_UNAVAILABLE',statusCode:503});
 }
 
