@@ -209,8 +209,9 @@ def validate_rendered_media(
     *,
     expected_audio: bool = False,
     minimum_duration: float = 0.05,
+    expected_codec: str = "h264",
 ) -> Dict[str, Any]:
-    """Validate that a render is non-empty, probeable, and browser-compatible."""
+    """Validate a render's duration, streams, and expected picture codec."""
 
     if not os.path.isfile(path) or os.path.getsize(path) < 1024:
         raise RuntimeError("rendered media is missing or empty")
@@ -240,8 +241,9 @@ def validate_rendered_media(
         raise RuntimeError("rendered media duration is invalid")
     if expected_audio and not audio_streams:
         raise RuntimeError("rendered media did not preserve the expected audio stream")
-    if video_streams[0].get("codec_name") != "h264":
-        raise RuntimeError("rendered media is not H.264")
+    if video_streams[0].get("codec_name") != expected_codec:
+        codec_label = {"h264": "H.264", "hevc": "HEVC", "prores": "ProRes"}.get(expected_codec, expected_codec)
+        raise RuntimeError(f"rendered media is not {codec_label}")
     return {
         "duration": duration,
         "size": int((payload.get("format") or {}).get("size") or os.path.getsize(path)),

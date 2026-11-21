@@ -238,7 +238,7 @@ def _probe(path):
     )
 
 
-def render_audio_remix(source, destination, value, *, audio_bitrate=None):
+def render_audio_remix(source, destination, value, *, audio_bitrate=None, pcm_audio=False):
     remix = normalize_audio_remix(value)
     if not remix["enabled"]:
         shutil.copyfile(source, destination)
@@ -248,12 +248,13 @@ def render_audio_remix(source, destination, value, *, audio_bitrate=None):
         raise ValueError("Audio Remix requires a source audio track")
     audio_filter, remix = build_audio_remix_filter(remix)
     bitrate = audio_bitrate or ("256k" if remix["quality"] == "studio" else "160k")
+    audio_encode = ["-c:a", "pcm_s16le"] if pcm_audio else ["-c:a", "aac", "-b:a", bitrate]
     _run(
         [
             "ffmpeg", "-v", "error", "-nostdin", "-i", str(source),
             "-filter_complex", audio_filter,
             "-map", "0:v:0", "-map", "[remix_a]", "-c:v", "copy",
-            "-c:a", "aac", "-b:a", bitrate, "-ar", "48000", "-shortest", "-movflags",
+            *audio_encode, "-ar", "48000", "-shortest", "-movflags",
             "+faststart", "-y", str(destination),
         ]
     )

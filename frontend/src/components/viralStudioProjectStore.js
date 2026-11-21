@@ -26,7 +26,7 @@ export const listViralStudioProjects = async ({ ownerUid = null } = {}) => {
   return filtered.sort((left, right) => Number(right.updatedAt || 0) - Number(left.updatedAt || 0));
 };
 
-export const saveViralStudioProject = async (project, { ownerUid = null } = {}) => {
+export const saveViralStudioProject = async (project, { ownerUid = null, createOnly = false } = {}) => {
   const databasePromise = getDatabase();
   if (!databasePromise) throw new Error("Local project storage is unavailable in this browser.");
   const database = await databasePromise;
@@ -38,7 +38,16 @@ export const saveViralStudioProject = async (project, { ownerUid = null } = {}) 
     createdAt: Number(project.createdAt || now),
     updatedAt: now,
   };
-  await database.put(PROJECT_STORE, record);
+  if (createOnly) {
+    try {
+      await database.add(PROJECT_STORE, record);
+    } catch (error) {
+      if (error?.name === "ConstraintError") throw new Error("This project is already saved on this device.");
+      throw error;
+    }
+  } else {
+    await database.put(PROJECT_STORE, record);
+  }
   // Local timelines and Firebase's session share this origin's browser storage.
   // Ask the browser to protect them from storage-pressure eviction. A denied
   // request is not a promise of cloud durability and must not block saving.

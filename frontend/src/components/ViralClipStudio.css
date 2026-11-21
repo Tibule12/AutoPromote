@@ -16087,6 +16087,13 @@ body.dashboard-mode.viral-studio-open {
   border: 1px solid rgba(167, 139, 250, 0.22);
   border-radius: 12px;
 }
+
+@media (max-width: 480px) {
+  .hook-broll-only-mode .studio-layout {
+    --compact-monitor-min-height: 480px;
+  }
+}
+
 .viral-studio-overlay .voiceover-take-fields {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -17218,7 +17225,7 @@ body.dashboard-mode.viral-studio-open {
   .viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode.project-rail-open .studio-layout.preview-layout-side {
     grid-template-columns: minmax(0, 1fr) !important;
     grid-template-areas: "tools" "rail" "preview" "timeline" "sidebar" !important;
-    grid-template-rows: 64px 360px clamp(400px, 52dvh, 520px) auto auto !important;
+    grid-template-rows: 64px 360px clamp(var(--compact-monitor-min-height, 400px), 52dvh, 520px) auto auto !important;
     align-content: start;
     overflow-x: hidden;
     overflow-y: auto;
@@ -17226,7 +17233,7 @@ body.dashboard-mode.viral-studio-open {
   .viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode.project-rail-closed .studio-layout,
   .viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode.project-rail-closed .studio-layout.preview-layout-side {
     grid-template-areas: "tools" "preview" "timeline" "sidebar" !important;
-    grid-template-rows: 64px clamp(400px, 52dvh, 520px) auto auto !important;
+    grid-template-rows: 64px clamp(var(--compact-monitor-min-height, 400px), 52dvh, 520px) auto auto !important;
   }
   .hook-broll-only-mode .studio-layout > .creative-tool-rail {
     grid-area: tools;

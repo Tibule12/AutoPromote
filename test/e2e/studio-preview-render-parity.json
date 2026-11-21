@@ -1,4 +1,22 @@
 {
+  "proEditorCorrections20261120": {
+    "date": "2026-11-20",
+    "evidence": "reports/pro-editor-qa-20261120/correction-verification.json",
+    "scope": "Owner-scoped project recovery, canonical ProRes HQ MOV delivery, and compact monitor correction.",
+    "readinessPromotion": false
+  },
+  "proEditorQa20261120": {
+    "date": "2026-11-20",
+    "evidence": "reports/pro-editor-qa-20261120/verification.json",
+    "focusIds": [
+      "edited_clock",
+      "caption_layout_animation",
+      "audio_routing_timing"
+    ],
+    "scope": "1,114-frame H.264 movie and interchange at the same tested cadence, three equally long decoded WAV stems, five paused picture samples and measured finished mix. Continuous picture and audio parity remain open.",
+    "readinessPromotion": false,
+    "nextTaskId": "S02"
+  },
   "mediaMemory20261121": {
     "date": "2026-11-21",
     "evidenceRefs": [

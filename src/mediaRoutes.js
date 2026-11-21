@@ -21,9 +21,11 @@ async function refreshCompletedStudioOutput(data,userId,jobId,docRef) {
   if (data.status !== "completed" || data.options?.renderViral !== true) return;
   let storagePath = data.outputStoragePath || data.result?.outputStoragePath;
   if (!storagePath?.startsWith("studio/exports/")) {
-    const expectedSha256=data.result?.outputSha256 || data.result?.output_sha256 || await retainedLocalCompletionHash(jobId);
+    const url=data.outputUrl || data.result?.url || data.result?.output_url;
+    const expectedSha256=data.result?.outputSha256 || data.result?.output_sha256 ||
+      await retainedLocalCompletionHash(jobId, process.env, url);
     const adopted = await persistWorkerBucketOutput({userId,jobId,legacy:true,
-      url:data.outputUrl || data.result?.url || data.result?.output_url,
+      url,
       expectedSha256});
     if (adopted) {
       storagePath=adopted.storagePath;

@@ -9,6 +9,7 @@ const mockVideoEditor = jest.fn();
 const mockGetIdToken = jest.fn();
 let mockSubscriptionLoading = false;
 let mockStudioAllowed = true;
+let mockOwnerUid = "editor-one";
 
 jest.mock("../../hooks/useSubscription", () => ({
   useSubscription: () => ({ canUseFeature: () => mockStudioAllowed, loading: mockSubscriptionLoading }),
@@ -20,7 +21,7 @@ jest.mock("../../utils/sourceUpload", () => ({
 
 jest.mock("firebase/auth", () => ({
   getAuth: () => ({
-    currentUser: { getIdToken: mockGetIdToken },
+    currentUser: { uid: mockOwnerUid, getIdToken: mockGetIdToken },
   }),
 }));
 
@@ -49,6 +50,7 @@ describe("ViralClipStudioPanel", () => {
   beforeEach(() => {
     mockSubscriptionLoading = false;
     mockStudioAllowed = true;
+    mockOwnerUid = "editor-one";
     mockVideoEditor.mockClear();
     mockGetIdToken.mockReset();
     mockGetIdToken.mockResolvedValue("firebase-token");
@@ -86,7 +88,8 @@ describe("ViralClipStudioPanel", () => {
     try {
       render(<ViralClipStudioPanel />);
       fireEvent.change(screen.getByLabelText("Restore project backup"), { target: { files: [file] } });
-      await waitFor(() => expect(saving).toHaveBeenCalledWith(project));
+      await waitFor(() => expect(saving).toHaveBeenCalledWith(project, { ownerUid: "editor-one", createOnly: true }));
+      expect(listing).toHaveBeenCalledWith({ ownerUid: "editor-one" });
       expect(global.fetch.mock.calls.map(([, init]) => JSON.parse(init.body).storagePath).sort())
         .toEqual(["uploads/audio/user/sound.wav", "uploads/videos/user/source.mp4"]);
     } finally { listing.mockRestore(); saving.mockRestore(); global.fetch = originalFetch; }
@@ -139,6 +142,21 @@ describe("ViralClipStudioPanel", () => {
       expect(mockVideoEditor.mock.calls.at(-1)[0].initialSavedProject).toEqual(project);
       expect(onUpgrade).not.toHaveBeenCalled();
     } finally { listing.mockRestore(); global.fetch = originalFetch; }
+  });
+
+  test("recent projects requery the signed-in account and hide the previous owner's edit", async () => {
+    const listing = jest.spyOn(projectStore, "listViralStudioProjects").mockImplementation(async ({ ownerUid }) => [
+      { id: ownerUid, ownerUid, name: ownerUid === "editor-one" ? "First owner's edit" : "Second owner's edit" },
+    ]);
+    try {
+      const view = render(<ViralClipStudioPanel />);
+      expect(await screen.findByRole("button", { name: "First owner's edit" })).toBeInTheDocument();
+      mockOwnerUid = "editor-two";
+      view.rerender(<ViralClipStudioPanel />);
+      expect(screen.queryByRole("button", { name: "First owner's edit" })).toBeNull();
+      expect(await screen.findByRole("button", { name: "Second owner's edit" })).toBeInTheDocument();
+      expect(listing.mock.calls).toEqual([[{ ownerUid: "editor-one" }], [{ ownerUid: "editor-two" }]]);
+    } finally { listing.mockRestore(); }
   });
 
   test('refreshes an expired incoming source before attaching a preview decoder',async()=>{

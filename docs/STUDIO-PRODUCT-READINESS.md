@@ -1,3 +1,11 @@
+<!-- pro-editor-qa-20261120 -->
+
+The 20 November correction scopes Recent Projects by the signed-in owner, preserves QuickTime output through ProRes validation and owned storage, and expands the compact monitor. The canonical CPU renderer passes ProRes 422 HQ MOV and PCM checks for ordinary and caption-review exports. A fresh signed-in browser qualification and production deployment remain open. [Correction evidence](../reports/pro-editor-qa-20261120/README.md#correction-pass)
+
+20 November [professional editor verification](../reports/pro-editor-qa-20261120/README.md) qualifies the scoped 46.463-second H.264 edit, three aligned WAV stems, SRT/VTT, OTIO/EDL, Director apply/history and the H.264 dual-master path in a signed-in loopback browser. The original run found failures in Recent Projects and ProRes delivery. An authenticated lookup retrieves the existing H.264 movie with an identical SHA-256 and no new render. Keep formal readiness at 17 FUNCTIONAL, 9 PARTIAL, 1 BROKEN, 2 UNIMPLEMENTED and zero PRO or PRODUCTION-READY. Repeat the corresponding native flows after deployment, then continue S02 picture and audio conformance.
+
+<!-- /pro-editor-qa-20261120 -->
+
 <!-- media-memory-20261121 -->
 21 November [media memory hardening](../reports/linkedin-streaming-20261121/README.md) extends the LinkedIn OOM repair to Publisher upload/download, disk-backed analysis/face/transcription uploads, social media transfers, streaming source hashes, request memory admission and transactional publishing claims. A separate synthetic check stages two128MiB sources with bounded RSS and rejects a third request; this is local evidence, not serving capacity. LinkedIn submission receipts prevent a blind duplicate after ambiguous provider outcomes. PR552 is not deployed. Dedicated publishing-worker activation, legacy local FFmpeg isolation, actual concurrent load/restart qualification and alerts remain required. No readiness promotion:17 FUNCTIONAL/9 PARTIAL/1 BROKEN/2 UNIMPLEMENTED/0 PRO/0 PRODUCTION; S02/S04/S03 remain. Next: finish checks/review, then an authorized release and measured production concurrency/recovery proof.
 <!-- /media-memory-20261121 -->

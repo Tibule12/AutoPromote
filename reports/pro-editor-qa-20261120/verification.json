@@ -1,0 +1,498 @@
+{
+  "date": "2026-11-20",
+  "scope": "Current Viral Clip Studio professional worktree, isolated signed-in browser and CPU worker, frontend main comparison",
+  "git": {
+    "tested": "11052f818fa68acf1db2cb3d4f407dcabaa59661",
+    "mainComparison": "dd4b80a6a936b7c7bd94b557edf3428f0fb37a76"
+  },
+  "automated": {
+    "frontend": {
+      "passedSuitesExcludingIntegratedEditor": 174,
+      "failedSuitesExcludingIntegratedEditor": 2,
+      "monolithic": null,
+      "integratedEditor": {
+        "byShard": {
+          "passed": 173,
+          "failed": 16,
+          "unreported": 0,
+          "total": 189
+        },
+        "latestPerCase": {
+          "passed": 189,
+          "failed": 0,
+          "unreported": 0,
+          "total": 189
+        },
+        "completedShardCount": 6,
+        "totalShards": 6,
+        "extendedTimeoutRerunForScheduledSoundEffectMs": 120000,
+        "focusedRuns": [
+          {
+            "name": "shell-current-rerun",
+            "pass": 1,
+            "fail": 2,
+            "skipped": 186,
+            "suites": 1
+          },
+          {
+            "name": "shell-current-followup",
+            "pass": 6,
+            "fail": 0,
+            "skipped": 183,
+            "suites": 1
+          },
+          {
+            "name": "shell-current-early-comparison",
+            "pass": 7,
+            "fail": 0,
+            "skipped": 182,
+            "suites": 1
+          },
+          {
+            "name": "shell-current-extended",
+            "pass": 2,
+            "fail": 0,
+            "skipped": 187,
+            "suites": 1
+          },
+          {
+            "name": "shell-current-standard-retry",
+            "pass": 2,
+            "fail": 0,
+            "skipped": 187,
+            "suites": 1
+          }
+        ],
+        "focusedMainComparisons": [
+          {
+            "name": "shell-baseline-rerun",
+            "pass": 3,
+            "fail": 0,
+            "skipped": 186,
+            "suites": 1
+          },
+          {
+            "name": "shell-baseline-followup",
+            "pass": 3,
+            "fail": 0,
+            "skipped": 186,
+            "suites": 1
+          },
+          {
+            "name": "shell-baseline-early-comparison",
+            "pass": 7,
+            "fail": 0,
+            "skipped": 182,
+            "suites": 1
+          }
+        ],
+        "passedOnFocusedRerun": [
+          "preserves uploaded B-roll through duplicate, delete, undo, and redo",
+          "occurrence navigation preserves authored hook settings and the canonical revision",
+          "title position presets center both axes in one undoable edit and respect track locks",
+          "fullscreen inserts respect the saved title stack and native layer reordering reaches export",
+          "runs a podcast cutaway with original, overlay, and mixed audio modes",
+          "keeps uploaded background sound enabled with speech-aware ducking",
+          "generates real timestamped speech captions and keeps every line editable",
+          "shows an actionable error for the uploaded WhatsApp video and allows a retry",
+          "turns a reviewed spoken story beat into approved licensed moving footage",
+          "previews Creative Director captions and pacing without starting a render",
+          "SFX volume keys preserve the fader and change an already playing cue (audio clock: false)",
+          "SFX volume keys preserve the fader and change an already playing cue (audio clock: true)",
+          "places and edits built-in sound effects on the live timeline with undo and redo",
+          "trim end maps finished playback through speed and source trim before editing",
+          "finished Hook playback never jumps or replays the already baked opening",
+          "reopened embedded raster effects use the ordinary image uploader before render"
+        ],
+        "failedCases": []
+      }
+    },
+    "camera": {
+      "pass": 60,
+      "fail": 0,
+      "skipped": 0,
+      "suites": 9
+    },
+    "backend": {
+      "pass": 444,
+      "fail": 0,
+      "skipped": 0,
+      "suites": 41
+    },
+    "teamIntegration": 31,
+    "frameAnchoredReviewPersistence": true,
+    "worker": {
+      "studioPassed": 186,
+      "viralPassed": 107,
+      "hardwareSkipped": 1,
+      "correctedHarnessRetries": 4
+    },
+    "productionModeBuild": true,
+    "studioContract": true,
+    "directorReplayMatches": true,
+    "productKnowledge": true
+  },
+  "signedIn": {
+    "auth": true,
+    "headless": true,
+    "muted": true,
+    "errorCount": 0,
+    "ingestedSeconds": 60.06,
+    "frameRate": "24000/1001",
+    "shuttleBothDirections": true,
+    "preservedAuthoredRate": true,
+    "subtitleCues": 4,
+    "interchange": {
+      "reader": "0.18.1",
+      "fps": 23.976023976023978,
+      "otio": [
+        {
+          "name": "V1",
+          "kind": "Video",
+          "frames": 1114,
+          "clips": [
+            {
+              "sourceInFrames": 48,
+              "frames": 48,
+              "scalar": [
+                1.25
+              ]
+            },
+            {
+              "sourceInFrames": 108,
+              "frames": 1066,
+              "scalar": [
+                1.25
+              ]
+            }
+          ]
+        },
+        {
+          "name": "V2 B-Roll",
+          "kind": "Video",
+          "frames": 106,
+          "clips": [
+            {
+              "sourceInFrames": 0,
+              "frames": 58,
+              "scalar": []
+            }
+          ]
+        },
+        {
+          "name": "A1 Dialogue",
+          "kind": "Audio",
+          "frames": 1114,
+          "clips": [
+            {
+              "sourceInFrames": 48,
+              "frames": 48,
+              "scalar": [
+                1.25
+              ]
+            },
+            {
+              "sourceInFrames": 108,
+              "frames": 1066,
+              "scalar": [
+                1.25
+              ]
+            }
+          ]
+        },
+        {
+          "name": "A2 Music",
+          "kind": "Audio",
+          "frames": 1114,
+          "clips": [
+            {
+              "sourceInFrames": 0,
+              "frames": 1114,
+              "scalar": []
+            }
+          ]
+        }
+      ],
+      "edl": [
+        {
+          "name": "V",
+          "kind": "Video",
+          "frames": 1114,
+          "clips": [
+            {
+              "sourceInFrames": 48,
+              "frames": 48,
+              "scalar": [
+                1.2499987499999998
+              ]
+            },
+            {
+              "sourceInFrames": 108,
+              "frames": 1066,
+              "scalar": [
+                1.2499987499999998
+              ]
+            }
+          ]
+        },
+        {
+          "name": "A1",
+          "kind": "Audio",
+          "frames": 1114,
+          "clips": [
+            {
+              "sourceInFrames": 48,
+              "frames": 48,
+              "scalar": [
+                1.2499987499999998
+              ]
+            },
+            {
+              "sourceInFrames": 108,
+              "frames": 1066,
+              "scalar": [
+                1.2499987499999998
+              ]
+            }
+          ]
+        },
+        {
+          "name": "A2",
+          "kind": "Audio",
+          "frames": 1114,
+          "clips": [
+            {
+              "sourceInFrames": 48,
+              "frames": 48,
+              "scalar": [
+                1.2499987499999998
+              ]
+            },
+            {
+              "sourceInFrames": 108,
+              "frames": 1066,
+              "scalar": [
+                1.2499987499999998
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "audioStems": {
+      "metadata": {
+        "version": 1,
+        "sampleRate": 48000,
+        "channels": 2,
+        "durationSeconds": 46.448
+      },
+      "warnings": 0,
+      "stems": [
+        {
+          "name": "01_dialogue.wav",
+          "frames": 2229504,
+          "seconds": 46.448,
+          "rate": 48000,
+          "channels": 2,
+          "bitDepth": 16,
+          "peak": 23987
+        },
+        {
+          "name": "02_broll.wav",
+          "frames": 2229504,
+          "seconds": 46.448,
+          "rate": 48000,
+          "channels": 2,
+          "bitDepth": 16,
+          "peak": 14980
+        },
+        {
+          "name": "03_music.wav",
+          "frames": 2229504,
+          "seconds": 46.448,
+          "rate": 48000,
+          "channels": 2,
+          "bitDepth": 16,
+          "peak": 762
+        }
+      ]
+    },
+    "nativeExport": {
+      "fps": "24000/1001",
+      "frames": 1114,
+      "duration": 46.463083,
+      "channels": 2,
+      "width": 720,
+      "height": 1280,
+      "sha256": "6df247f9e705ea4395ac5e3def9988740c4efaec511116ea22bf0dd70209b293",
+      "fullDecode": true,
+      "playedToEndInStudio": true
+    },
+    "downloadedBackup": true,
+    "pictureSamples": [
+      {
+        "requested": 1.5,
+        "actual": 1.5,
+        "preview": "live-1.5.png",
+        "width": 372,
+        "height": 660,
+        "frame": 36,
+        "meanAbs8Bit": 4.206,
+        "p95Abs8Bit": 6
+      },
+      {
+        "requested": 2.7,
+        "actual": 2.7,
+        "preview": "live-2.7.png",
+        "width": 372,
+        "height": 660,
+        "frame": 65,
+        "meanAbs8Bit": 5.961,
+        "p95Abs8Bit": 11
+      },
+      {
+        "requested": 10.01,
+        "actual": 10.01,
+        "preview": "live-10.01.png",
+        "width": 372,
+        "height": 660,
+        "frame": 240,
+        "meanAbs8Bit": 2.95,
+        "p95Abs8Bit": 6
+      },
+      {
+        "requested": 24.024,
+        "actual": 24.024,
+        "preview": "live-24.024.png",
+        "width": 372,
+        "height": 660,
+        "frame": 576,
+        "meanAbs8Bit": 2.282,
+        "p95Abs8Bit": 6
+      },
+      {
+        "requested": 40.04,
+        "actual": 40.04,
+        "preview": "live-40.04.png",
+        "width": 372,
+        "height": 660,
+        "frame": 960,
+        "meanAbs8Bit": 2.682,
+        "p95Abs8Bit": 5
+      }
+    ],
+    "mix": {
+      "integratedLufs": -13.8,
+      "truePeakDbtp": -1,
+      "rangeLu": 2.5
+    },
+    "recentProjects": {
+      "visibleAfterReload": false,
+      "ownedRecordInIndexedDb": true,
+      "outputRecoveredIndependently": {
+        "ownerAuthorized": true,
+        "exactMovieRecovered": true,
+        "renderPostCount": 0
+      }
+    },
+    "proRes": {
+      "status": "failed",
+      "codec": "prores",
+      "workerError": "rendered media is not H.264",
+      "outputLinks": 0
+    },
+    "h264Masters": {
+      "status": "passed",
+      "separateApprovals": true,
+      "requests": 2,
+      "files": [
+        {
+          "status": 200,
+          "type": "video/mp4",
+          "codec": "h264",
+          "profile": "High",
+          "pixelFormat": "yuv420p",
+          "audio": "aac",
+          "bytes": 2109120,
+          "sha": "cd1948c14ace74bfb7f440eb0e6d57830668c5d37a9def1b83a4602eb2332f11"
+        },
+        {
+          "status": 200,
+          "type": "video/mp4",
+          "codec": "h264",
+          "profile": "High",
+          "pixelFormat": "yuv420p",
+          "audio": "aac",
+          "bytes": 2023524,
+          "sha": "ec48777823a70c01ae6eff95557a53ccfa67d2f26675bfad7881ad537b3da7f4"
+        }
+      ],
+      "nativeDownloadCount": 2,
+      "pictureEvidence": {
+        "media": {
+          "Captioned master.mp4": {
+            "duration": 8.008,
+            "videoFrames": 192
+          },
+          "Clean master.mp4": {
+            "duration": 8.008,
+            "videoFrames": 192
+          }
+        },
+        "pairedFrameDifferences": [
+          {
+            "time": 1.1,
+            "meanAbsoluteRgb": 1.843,
+            "samplesChangingByOver24": 8915
+          },
+          {
+            "time": 2.9,
+            "meanAbsoluteRgb": 1.779,
+            "samplesChangingByOver24": 8154
+          },
+          {
+            "time": 5.1,
+            "meanAbsoluteRgb": 0.318,
+            "samplesChangingByOver24": 0
+          }
+        ]
+      }
+    },
+    "director": {
+      "localPlanApplied": true,
+      "editableLayers": 8,
+      "motionKeys": 129,
+      "undoRedo": true
+    },
+    "welcomeComparisons": 8,
+    "signedInHelpQuestions": 3
+  },
+  "browserFixtureFindings": {
+    "mobileProgramme": "390x844: programme picture has collapsed",
+    "mobileChecksPassedBeforeTimeout": 14,
+    "sequenceStage": "first native EOF",
+    "secondSourceReached": true,
+    "bothReproducedOnMain": true
+  },
+  "checkpoint": {
+    "snapshotExported": true,
+    "outstandingHolds": 0,
+    "terminalOperations": 5,
+    "states": {
+      "succeeded": 4,
+      "failed": 1
+    }
+  },
+  "privateDeliveryFiles": [
+    "01 Timeline captions.srt",
+    "02 Timeline captions.vtt",
+    "03 Editable sequence.otio",
+    "04 Primary cuts.edl",
+    "05 Project.autopromote.json",
+    "06 Finished programme.mp4",
+    "07 Studio edit and whole playback.mp4",
+    "Audio stems.zip"
+  ],
+  "productionUsed": false,
+  "readinessPromotion": false
+}
