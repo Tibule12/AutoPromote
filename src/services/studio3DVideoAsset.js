@@ -1,5 +1,6 @@
+const { fileSha256 } = require("../utils/temporaryMediaUpload");
 // Owned bytes only. Client duration/aspect/hash never substitutes for probing.
-const fs=require('node:fs/promises'),os=require('node:os'),path=require('node:path'),crypto=require('node:crypto');
+const fs=require('node:fs/promises'),os=require('node:os'),path=require('node:path');
 const {execFile}=require('node:child_process'),{promisify}=require('node:util');
 const execute=promisify(execFile),MAX_BYTES=50*1024**2;
 async function verifyOwnedVideo(file,metadata,scene,ownerUid){
@@ -10,8 +11,7 @@ async function verifyOwnedVideo(file,metadata,scene,ownerUid){
   try{
     const target=path.join(dir,'source.mp4');
     await file.download({destination:target,validation:'crc32c'});
-    const bytes=await fs.readFile(target);
-    if(bytes.length!==Number(metadata.size)||crypto.createHash('sha256').update(bytes).digest('hex')!==scene.assetContentHash)throw Error('Invalid video texture content hash');
+    if((await fs.stat(target)).size!==Number(metadata.size)||await fileSha256(target)!==scene.assetContentHash)throw Error('Invalid video texture content hash');
     const {stdout}=await execute('ffprobe',['-v','error','-show_streams','-show_format','-of','json',target],{timeout:15000,maxBuffer:1024**2});
     const probe=JSON.parse(stdout),video=probe.streams.find(s=>s.codec_type==='video');
     if(!video || video.codec_name!=='h264' || video.width<16 || video.height<16 || video.width*video.height>8192**2 ||

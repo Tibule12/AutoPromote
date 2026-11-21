@@ -174,7 +174,7 @@ async function createCaptions({ contentId, userId, transcript, format = "srt", b
 // that can return headers (for multipart boundary).
 // const { audioTranscriptions } = require("./openaiClient"); // Removed duplicate
 
-async function generateTranscription(filePathOrBuffer) {
+async function generateTranscription(filePathOrBuffer, fileInfo = {}) {
   const FormData = require("form-data");
   const form = new FormData();
 
@@ -204,7 +204,10 @@ async function generateTranscription(filePathOrBuffer) {
     }
 
     if (fs.existsSync(normalizedPath)) {
-      form.append("file", fs.createReadStream(normalizedPath));
+      form.append("file", fs.createReadStream(normalizedPath), {
+        filename: path.basename(fileInfo.filename || normalizedPath),
+        contentType: fileInfo.contentType,
+      });
     }
   } else if (Buffer.isBuffer(filePathOrBuffer)) {
     // OpenAI requires a filename to infer content type.

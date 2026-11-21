@@ -1,3 +1,4 @@
+const { fileSha256 } = require("../utils/temporaryMediaUpload");
 // Transient owned CPU audio from the same mixer as final rendering. No URLs,
 // caller paths, GPU jobs or private media are accepted from a public manifest.
 const fs = require('node:fs/promises');
@@ -145,8 +146,7 @@ async function getOwnedVoiceBusPreview({ ownerUid, input, signal }) {
       readSignal.addEventListener('abort', abortRead, { once: true });
       try { await pipeline(sourceStream, createWriteStream(file, { mode: 0o600 })); }
       finally { sourceStream.removeListener('readable', ready); readSignal.removeEventListener('abort', abortRead); }
-      const bytes = await fs.readFile(file);
-      if (bytes.length !== o.size || digest(bytes) !== input.voices[i].sourceContentHash)
+      if ((await fs.stat(file)).size !== o.size || await fileSha256(file) !== input.voices[i].sourceContentHash)
         throw sourceError(409, 'STUDIO_VOICE_PREVIEW_SOURCE_CHANGED', 'A recording no longer matches this edit');
     }
     const receipt = await renderVoiceBusPreview(folder, input, signal);

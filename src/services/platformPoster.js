@@ -510,7 +510,7 @@ async function dispatchPlatformPost({
     baseArgs.uid = uid;
     baseArgs.contentId = contentId;
   }
-  if (["reddit", "telegram", "discord"].includes(platform)) {
+  if (["reddit", "telegram", "discord", "linkedin"].includes(platform)) {
     baseArgs.submissionReceipt = submissionReceipt;
     baseArgs.onSubmissionAccepted = onSubmissionAccepted;
   }

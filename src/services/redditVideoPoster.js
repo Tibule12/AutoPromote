@@ -9,9 +9,9 @@ const run = promisify(execFile);
 async function createRedditVideoPoster(videoBuffer) {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "autopromote-reddit-poster-"));
   try {
-    const input = path.join(directory, "source.mp4");
+    const input = typeof videoBuffer === "string" ? videoBuffer : path.join(directory, "source.mp4");
     const output = path.join(directory, "poster.png");
-    await fs.writeFile(input, videoBuffer, { mode: 0o600 });
+    if (typeof videoBuffer !== "string") await fs.writeFile(input, videoBuffer, { mode: 0o600 });
     let ffmpeg = process.env.FFMPEG_PATH || "ffmpeg";
     if (!process.env.FFMPEG_PATH) {
       try {

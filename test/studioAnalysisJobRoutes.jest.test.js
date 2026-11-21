@@ -52,9 +52,10 @@ test("upload derives source hash on the server and returns a queued receipt", as
       uid: "owner-1",
       requestId: "request-0001",
       sourceSha256: crypto.createHash("sha256").update(bytes).digest("hex"),
-      buffer: bytes,
+      sourcePath: expect.stringMatching(/autopromote-upload-[^/]+\/source$/),
     })
   );
+  expect(jobs.createStudioAnalysisJob.mock.calls[0][0]).not.toHaveProperty("buffer");
 });
 
 test("malformed anchors fail before creating a job", async () => {

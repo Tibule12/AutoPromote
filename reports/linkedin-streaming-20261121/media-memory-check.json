@@ -1,0 +1,13 @@
+{
+  "checkedAt": "2026-11-21T08:23:41.569Z",
+  "mode": "isolated synthetic disk-backed transfer; no production load claim",
+  "concurrentTransfers": 2,
+  "bytesPerTransfer": 134217728,
+  "totalConsumedBytes": 268435456,
+  "baselineRssBytes": 47906816,
+  "peakRssBytes": 83234816,
+  "rssGrowthBytes": 35328000,
+  "thirdTransferStatus": 503,
+  "activeAfterCleanup": 0,
+  "elapsedMs": 360
+}

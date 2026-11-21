@@ -1,0 +1,180 @@
+{
+  "success": true,
+  "numTotalTestSuites": 29,
+  "numPassedTestSuites": 29,
+  "numTotalTests": 200,
+  "numPassedTests": 200,
+  "numFailedTests": 0,
+  "numFailedTestSuites": 0,
+  "evidenceType": "local Jest route/fixture and CPU preview regressions; not live capacity",
+  "nodeVersion": "v24.14.0",
+  "testMediaRssLimitMiB": 1024,
+  "tests": [
+    {
+      "file": "src/__tests__/studioSourceFrameService.test.js",
+      "status": "passed",
+      "passed": 19
+    },
+    {
+      "file": "src/__tests__/studioVoiceBusPreviewService.test.js",
+      "status": "passed",
+      "passed": 9
+    },
+    {
+      "file": "src/__tests__/server.hostedAdminRoutes.test.js",
+      "status": "passed",
+      "passed": 1
+    },
+    {
+      "file": "src/services/__tests__/platformPoster.options.test.js",
+      "status": "passed",
+      "passed": 1
+    },
+    {
+      "file": "src/__tests__/captionsRoutes.streaming.test.js",
+      "status": "passed",
+      "passed": 1
+    },
+    {
+      "file": "test/contentSourceUpload.jest.test.js",
+      "status": "passed",
+      "passed": 3
+    },
+    {
+      "file": "test/mediaFaceTracking.jest.test.js",
+      "status": "passed",
+      "passed": 12
+    },
+    {
+      "file": "src/__tests__/mediaRoutes.studioSources.test.js",
+      "status": "passed",
+      "passed": 20
+    },
+    {
+      "file": "src/__tests__/mediaRoutes.viralBilling.test.js",
+      "status": "passed",
+      "passed": 9
+    },
+    {
+      "file": "src/utils/__tests__/stagedMedia.test.js",
+      "status": "passed",
+      "passed": 3
+    },
+    {
+      "file": "src/__tests__/mediaRoutes.workerHealth.test.js",
+      "status": "passed",
+      "passed": 2
+    },
+    {
+      "file": "test/studioAnalysisJobRoutes.jest.test.js",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "test/studioAnalysisJob.jest.test.js",
+      "status": "passed",
+      "passed": 30
+    },
+    {
+      "file": "src/services/__tests__/platformPoster.snapchat.test.js",
+      "status": "passed",
+      "passed": 1
+    },
+    {
+      "file": "src/utils/__tests__/mediaStreams.test.js",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "src/services/__tests__/platformPoster.hashtags.test.js",
+      "status": "passed",
+      "passed": 3
+    },
+    {
+      "file": "test/studio3DService.jest.test.js",
+      "status": "passed",
+      "passed": 25
+    },
+    {
+      "file": "src/utils/__tests__/streamLinkedInVideo.test.js",
+      "status": "passed",
+      "passed": 3
+    },
+    {
+      "file": "src/utils/__tests__/temporaryMediaUpload.test.js",
+      "status": "passed",
+      "passed": 1
+    },
+    {
+      "file": "test/backgroundWorkers.idle.jest.test.js",
+      "status": "passed",
+      "passed": 3
+    },
+    {
+      "file": "src/services/__tests__/redditService.test.js",
+      "status": "passed",
+      "passed": 9
+    },
+    {
+      "file": "src/utils/__tests__/mediaTransferBudget.test.js",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "src/services/__tests__/twitterService.streaming.test.js",
+      "status": "passed",
+      "passed": 1
+    },
+    {
+      "file": "src/__tests__/mediaTransform.test.js",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "src/services/__tests__/linkedinService.test.js",
+      "status": "passed",
+      "passed": 8
+    },
+    {
+      "file": "src/services/__tests__/promotionTaskQueue.publishingFailures.test.js",
+      "status": "passed",
+      "passed": 10
+    },
+    {
+      "file": "test/promotionTaskQueue.hashing.jest.test.js",
+      "status": "passed",
+      "passed": 2
+    },
+    {
+      "file": "src/services/__tests__/tiktokService.test.js",
+      "status": "passed",
+      "passed": 2
+    },
+    {
+      "file": "src/services/__tests__/redditPublication.test.js",
+      "status": "passed",
+      "passed": 2
+    }
+  ],
+  "memoryCheck": "media-memory-check.json",
+  "studioContract": "valid; counts unchanged",
+  "documentation": "build/check pass with 8 pre-existing undocumented-surface warnings",
+  "deployed": false,
+  "remaining": [
+    "production concurrency/restart qualification",
+    "dedicated publishing-worker activation and legacy local CPU isolation",
+    "memory/error/queue-age alerting"
+  ],
+  "actionsFollowThrough": {
+    "initialFailures": [
+      "CI integration fixture missing transactions",
+      "CodeQL scratch-path and fixture URL matching findings"
+    ],
+    "integrationLocal": {
+      "passed": 23,
+      "skipped": 1,
+      "failed": 0
+    },
+    "remoteStatus": "corrected commit pending"
+  }
+}

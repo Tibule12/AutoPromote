@@ -1,4 +1,21 @@
 {
+  "mediaMemory20261121": {
+    "date": "2026-11-21",
+    "evidenceRefs": [
+      "reports/linkedin-streaming-20261121/README.md",
+      "reports/linkedin-streaming-20261121/media-memory-check.json"
+    ],
+    "scope": "Stream/spool public media transfers, hash staged sources incrementally, reserve process memory and atomically claim publishing tasks; preserve canonical renders.",
+    "verification": "Local synthetic two128MiB sources, bounded RSS, excess request503, scratch cleanup; focused fixture/route tests. No serving concurrency or provider throughput claim.",
+    "readinessPromotion": false,
+    "deployed": false,
+    "remainingBlockers": [
+      "Production concurrency/restart and memory baseline qualification",
+      "Dedicated publishing-worker activation and legacy local FFmpeg isolation",
+      "Shared S02/S04/S03 and full picture/audio parity"
+    ],
+    "nextTask": "Complete review and authorized release, then measure representative production concurrency and recovery."
+  },
   "camEntryGpuPrimary20261120": {
     "date": "2026-11-20",
     "evidenceRefs": [

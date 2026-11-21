@@ -2,6 +2,8 @@
 const { db, admin } = require("../firebaseAdmin");
 const { safeFetch } = require("../utils/ssrfGuard");
 const { cleanupSourceFile } = require("../utils/cleanupSource");
+const { streamLinkedInVideo } = require("../utils/streamLinkedInVideo");
+const crypto = require("node:crypto");
 
 let fetchFn = global.fetch;
 if (!fetchFn) {
@@ -279,26 +281,13 @@ async function uploadImage({ uid, imageUrl }) {
       .uploadUrl;
   const asset = registerData.value.asset;
 
-  // Step 2: Download image
-  const imageResponse = await safeFetch(imageUrl, fetchFn, { requireHttps: true });
-  if (!imageResponse.ok) throw new Error("Failed to download image");
-  const imageBuffer =
-    typeof imageResponse.buffer === "function"
-      ? await imageResponse.buffer()
-      : Buffer.from(await imageResponse.arrayBuffer());
-
-  // Step 3: Upload image
-  const uploadResponse = await fetch(uploadUrl, {
-    method: "PUT",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body: imageBuffer,
+  await streamLinkedInVideo({
+    videoUrl: imageUrl,
+    uploadUrl,
+    accessToken,
+    fetchImpl: fetchFn,
+    maxBytes: 20 * 1024 * 1024,
   });
-
-  if (!uploadResponse.ok) {
-    throw new Error("Failed to upload image to LinkedIn");
-  }
 
   return asset; // Return asset URN
 }
@@ -353,29 +342,11 @@ async function uploadVideo({ uid, videoUrl }) {
       .uploadUrl;
   const asset = registerData.value.asset;
 
-  // Step 2: Download video stream
-  const videoResponse = await safeFetch(videoUrl, fetchFn, { requireHttps: true });
-  if (!videoResponse.ok) throw new Error("Failed to download video for upload");
+  // Steps 2–3: stream with backpressure instead of buffering the entire video.
+  await streamLinkedInVideo({ videoUrl, uploadUrl, accessToken, fetchImpl: fetchFn });
 
-  // Use buffer for compatibility
-  const videoBuffer =
-    typeof videoResponse.buffer === "function"
-      ? await videoResponse.buffer()
-      : Buffer.from(await videoResponse.arrayBuffer());
-
-  // Step 3: Upload video
-  const uploadResponse = await fetch(uploadUrl, {
-    method: "PUT",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/octet-stream",
-    },
-    body: videoBuffer,
-  });
-
-  if (!uploadResponse.ok) {
-    throw new Error("Failed to upload video bytes to LinkedIn");
-  }
+  // The read endpoint takes the opaque ID, not the digitalmediaAsset URN.
+  const assetId = String(asset).split(":").pop();
 
   // Step 4: Poll for completion
   return new Promise((resolve, reject) => {
@@ -386,24 +357,27 @@ async function uploadVideo({ uid, videoUrl }) {
     const poll = async () => {
       attempts++;
       try {
-        const statusRes = await safeFetch(`https://api.linkedin.com/v2/assets/${asset}`, fetchFn, {
-          fetchOptions: {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "X-Restli-Protocol-Version": "2.0.0",
+        const statusRes = await safeFetch(
+          `https://api.linkedin.com/v2/assets/${encodeURIComponent(assetId)}`,
+          fetchFn,
+          {
+            fetchOptions: {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "X-Restli-Protocol-Version": "2.0.0",
+              },
             },
-          },
-          requireHttps: true,
-          allowHosts: ["api.linkedin.com"],
-        });
+            requireHttps: true,
+            allowHosts: ["api.linkedin.com"],
+          }
+        );
 
         if (statusRes.ok) {
           const statusData = await statusRes.json();
           const state = statusData.recipes[0].status;
           if (state === "AVAILABLE") {
-            // Video is ready on LinkedIn, delete source file
-            cleanupSourceFile(videoUrl).catch(() => {});
+            // Keep the source until the public post has a confirmed identity.
             resolve(asset);
             return;
           } else if (state === "CLIENT_ERROR" || state === "PROCESSING_FAILED") {
@@ -452,6 +426,8 @@ async function postToLinkedIn({
   hashtagString = "",
   companyId = null,
   personId: personIdParam = null,
+  submissionReceipt = null,
+  onSubmissionAccepted,
 }) {
   if (!uid) throw new Error("uid required");
 
@@ -508,6 +484,40 @@ async function postToLinkedIn({
   const authorUrn = hasExplicitOrgTarget
     ? `urn:li:organization:${companyId.trim()}`
     : `urn:li:person:${resolvedPersonId}`;
+  const binding = crypto
+    .createHash("sha256")
+    .update(
+      JSON.stringify({
+        authorUrn,
+        text: resolvedText,
+        hashtagString,
+        title: resolvedTitle,
+        video: useVideo || null,
+        image: useImage || null,
+        article: useArticleUrl || null,
+      })
+    )
+    .digest("hex");
+  if (submissionReceipt) {
+    if (submissionReceipt.platform !== "linkedin" || submissionReceipt.binding !== binding)
+      throw publishingError(
+        "The saved LinkedIn submission does not match this release.",
+        "validation"
+      );
+    if (submissionReceipt.shareId)
+      return {
+        success: true,
+        shareId: submissionReceipt.shareId,
+        url: `https://www.linkedin.com/feed/update/${submissionReceipt.shareId}`,
+        recovered: true,
+      };
+    // LinkedIn write-only access cannot resolve an ambiguous post after a
+    // process dies. Hold for review rather than blindly sending it twice.
+    throw publishingError(
+      "LinkedIn submission was interrupted. Check your profile before retrying.",
+      "publication_unconfirmed"
+    );
+  }
 
   // Build share payload
   const sharePayload = {
@@ -579,6 +589,15 @@ async function postToLinkedIn({
     ];
   }
 
+  // Persist before crossing the public-post boundary. Uploads may be retried;
+  // an interrupted post submission must not silently create a second post.
+  const receipt = {
+    platform: "linkedin",
+    binding,
+    phase: "submitting",
+    submittedAt: new Date().toISOString(),
+  };
+  if (onSubmissionAccepted) await onSubmissionAccepted(receipt);
   // Post to LinkedIn
   const response = await linkedInFetch(uid, "https://api.linkedin.com/v2/ugcPosts", {
     fetchOptions: {
@@ -603,6 +622,10 @@ async function postToLinkedIn({
   }
 
   if (!response.ok) {
+    // An explicit provider rejection permits normal auth/backoff retry. A
+    // missing response leaves the durable submission marker for safe review.
+    if (onSubmissionAccepted && [400, 401, 403, 404, 422, 429].includes(response.status))
+      await onSubmissionAccepted(null);
     const errorMsg = responseData.message || responseData.error || "LinkedIn posting failed";
     const orgHint =
       hasExplicitOrgTarget && response.status === 403
@@ -630,6 +653,7 @@ async function postToLinkedIn({
       "publication_unconfirmed"
     );
   const shareUrl = `https://www.linkedin.com/feed/update/${shareId}`;
+  if (onSubmissionAccepted) await onSubmissionAccepted({ ...receipt, phase: "confirmed", shareId });
 
   // Store post info in Firestore if contentId provided
   if (contentId && shareId) {
@@ -705,7 +729,11 @@ async function getPostStats({ uid, shareId }) {
   return {
     shareId,
     likes: Object.values(data.reactionSummaries || {}).length
-      ? Object.values(data.reactionSummaries).reduce((sum, reaction) => sum + (reaction.count || 0), 0) : null,
+      ? Object.values(data.reactionSummaries).reduce(
+          (sum, reaction) => sum + (reaction.count || 0),
+          0
+        )
+      : null,
     comments: typeof data.commentSummary?.count === "number" ? data.commentSummary.count : null,
     fetchedAt: new Date().toISOString(),
   };

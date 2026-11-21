@@ -3,6 +3,9 @@ const { db, admin } = require("../firebaseAdmin");
 const { safeFetch } = require("../utils/ssrfGuard");
 const { cleanupSourceFile } = require("../utils/cleanupSource");
 const FormData = require("form-data");
+const fs = require("node:fs");
+const { Readable } = require("node:stream");
+const { withStagedMedia } = require("../utils/stagedMedia");
 
 let fetchFn;
 try {
@@ -185,87 +188,92 @@ async function uploadRedditMedia(uid, contentUrl, mimeType, suppliedMedia = {}) 
     else mimeType = "video/mp4";
   }
 
-  let buffer = suppliedMedia.buffer;
-  if (!buffer) {
-    const contentRes = await safeFetch(contentUrl, fetchFn);
-    if (!contentRes.ok) throw new Error("Failed to fetch Reddit upload source");
-    buffer =
-      typeof contentRes.buffer === "function"
-        ? await contentRes.buffer()
-        : Buffer.from(await contentRes.arrayBuffer());
-  }
-
-  // 2. Get Upload Lease
-  const leaseBody = new URLSearchParams({
-    filepath: filename,
-    mimetype: mimeType,
-  });
-
-  const leaseRes = await safeFetch("https://oauth.reddit.com/api/media/asset.json", fetchFn, {
-    fetchOptions: {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "User-Agent": "AutoPromote/1.0",
-      },
-      body: leaseBody,
+  return withStagedMedia(
+    {
+      url: contentUrl,
+      fetchImpl: fetchFn,
+      maxBytes: mimeType.startsWith("image/") ? 20 * 1024 ** 2 : 2 * 1024 ** 3,
+      source: suppliedMedia.buffer
+        ? async () => ({ ok: true, body: Readable.from([suppliedMedia.buffer]) })
+        : undefined,
     },
-    requireHttps: true,
-    allowHosts: ["oauth.reddit.com"],
-  });
+    async ({ filePath, bytes, signal }) => {
+      // 2. Get Upload Lease
+      const leaseBody = new URLSearchParams({
+        filepath: filename,
+        mimetype: mimeType,
+      });
 
-  if (!leaseRes.ok) {
-    const err = await leaseRes.text();
-    throw publishingError(
-      `Reddit Lease failed: ${err}`,
-      [401, 403].includes(leaseRes.status)
-        ? "auth"
-        : leaseRes.status === 429
-          ? "rate_limit"
-          : "transient",
-      leaseRes.status
-    );
-  }
+      const leaseRes = await safeFetch("https://oauth.reddit.com/api/media/asset.json", fetchFn, {
+        fetchOptions: {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "User-Agent": "AutoPromote/1.0",
+          },
+          body: leaseBody,
+          signal,
+        },
+        requireHttps: true,
+        allowHosts: ["oauth.reddit.com"],
+      });
 
-  const leaseData = await leaseRes.json();
-  const s3Url = `https:${leaseData.args.action}`;
-  const fields = leaseData.args.fields;
+      if (!leaseRes.ok) {
+        const err = await leaseRes.text();
+        throw publishingError(
+          `Reddit Lease failed: ${err}`,
+          [401, 403].includes(leaseRes.status)
+            ? "auth"
+            : leaseRes.status === 429
+              ? "rate_limit"
+              : "transient",
+          leaseRes.status
+        );
+      }
 
-  // 3. Upload to S3
-  const form = new FormData();
-  for (const field of fields) {
-    form.append(field.name, field.value);
-  }
-  form.append("file", buffer, { filename, contentType: mimeType });
+      const leaseData = await leaseRes.json();
+      const s3Url = `https:${leaseData.args.action}`;
+      const fields = leaseData.args.fields;
 
-  // Parse host from s3Url for allowHosts (usually reddit-uploaded-*.s3.amazonaws.com)
-  const s3Host = s3Url.replace("https://", "").split("/")[0];
+      // 3. Upload to S3
+      const form = new FormData();
+      for (const field of fields) {
+        form.append(field.name, field.value);
+      }
+      const fileStream = fs.createReadStream(filePath, { signal });
+      form.append("file", fileStream, { filename, contentType: mimeType, knownLength: bytes });
 
-  const uploadRes = await safeFetch(s3Url, fetchFn, {
-    fetchOptions: {
-      method: "POST",
-      body: form,
-      headers: form.getHeaders(),
-    },
-    requireHttps: true,
-    allowHosts: [s3Host, "amazonaws.com"],
-  });
+      // Parse host from s3Url for allowHosts (usually reddit-uploaded-*.s3.amazonaws.com)
+      const s3Host = s3Url.replace("https://", "").split("/")[0];
 
-  if (!uploadRes.ok) {
-    const errorText = await uploadRes.text();
-    console.error("S3 Upload Error Body:", errorText);
-    throw new Error(`S3 Upload failed: ${uploadRes.statusText}`);
-  }
+      const uploadRes = await safeFetch(s3Url, fetchFn, {
+        fetchOptions: {
+          method: "POST",
+          body: form,
+          headers: form.getHeaders(),
+          signal,
+        },
+        requireHttps: true,
+        allowHosts: [s3Host, "amazonaws.com"],
+      });
 
-  // Construct final URL
-  const keyInfo = fields.find(f => f.name === "key");
-  const finalUrl = `${s3Url}/${keyInfo.value}`;
+      if (!uploadRes.ok) {
+        const errorText = await uploadRes.text();
+        console.error("S3 Upload Error Body:", errorText);
+        throw new Error(`S3 Upload failed: ${uploadRes.statusText}`);
+      }
 
-  return {
-    url: finalUrl,
-    assetId: leaseData.asset ? leaseData.asset.asset_id : null,
-    sourceBuffer: buffer,
-  };
+      // Construct final URL
+      const keyInfo = fields.find(f => f.name === "key");
+      const finalUrl = `${s3Url}/${keyInfo.value}`;
+
+      return {
+        url: finalUrl,
+        assetId: leaseData.asset ? leaseData.asset.asset_id : null,
+        posterBuffer: suppliedMedia.createPoster ? await createRedditVideoPoster(filePath) : null,
+      };
+    }
+  );
 }
 
 async function getContentPosterUrl(contentId) {
@@ -388,29 +396,27 @@ async function postToReddit({
   // Handle Video Upload (Native)
   let finalVideoUrl = null;
   let finalPosterUrl = null;
-  let sourceBuffer;
+  let posterBuffer;
 
   if (kind === "video") {
+    const posterSource = thumbnailUrl || (await getContentPosterUrl(contentId));
     // 1. Upload Video
     const vSource = videoUrl || url;
     try {
       // console.log("Uploading video to standard Reddit S3...");
       // Reddit media upload is just the first step.
       // We do NOT cleanup here. We cleanup after successful *submission*.
-      const vResult = await uploadRedditMedia(uid, vSource, "video/mp4");
+      const vResult = await uploadRedditMedia(uid, vSource, "video/mp4", {
+        createPoster: !posterSource,
+      });
       finalVideoUrl = vResult.url;
-      sourceBuffer = vResult.sourceBuffer;
+      posterBuffer = vResult.posterBuffer;
     } catch (e) {
       if (e.errorClass) throw e;
       throw new Error(`Failed to upload video to Reddit: ${e.message}`);
     }
 
     // 2. Upload Thumbnail (required by Reddit video submit API)
-    let posterSource = thumbnailUrl;
-    if (!posterSource) {
-      posterSource = await getContentPosterUrl(contentId);
-    }
-
     if (posterSource) {
       try {
         const tResult = await uploadRedditMedia(uid, posterSource, "image/png");
@@ -420,7 +426,7 @@ async function postToReddit({
         console.warn("[Reddit] Failed to upload thumbnail:", e.message);
       }
     } else {
-      const buffer = await createRedditVideoPoster(sourceBuffer);
+      const buffer = posterBuffer;
       const poster = await uploadRedditMedia(uid, null, "image/png", {
         buffer,
         filename: "video-poster.png",

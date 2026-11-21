@@ -51,6 +51,7 @@ jest.mock("../../utils/cleanupSource", () => ({
   cleanupSourceFile: jest.fn().mockResolvedValue(undefined),
 }));
 const { cleanupSourceFile } = require("../../utils/cleanupSource");
+jest.mock("../redditVideoPoster", () => ({ createRedditVideoPoster: jest.fn() }));
 
 describe("Reddit publication confirmation", () => {
   test("an identified Reddit video remains pending when the attachment is missing", async () => {
@@ -246,4 +247,37 @@ describe("Reddit posting with hashtags", () => {
     // The appended tag string should include the comma-separated tag list
     expect(texts.join("\n")).toContain("a, b");
   });
+});
+
+test("native Reddit uploads and poster generation use an owned staged file", async () => {
+  const fs = require("node:fs"), { Readable, Writable } = require("node:stream");
+  const { pipeline } = require("node:stream/promises");
+  const { createRedditVideoPoster } = require("../redditVideoPoster");
+  const previous = safeFetch.getMockImplementation(), staged = [];
+  createRedditVideoPoster.mockImplementation(async file => {
+    expect(typeof file).toBe("string");
+    expect(fs.existsSync(file)).toBe(true);
+    return Buffer.from("poster-image");
+  });
+  safeFetch.mockImplementation(async (url, _fetch, options) => {
+    if (new URL(url).hostname === "storage.googleapis.com") return { ok: true, body: Readable.from([Buffer.alloc(512)]) };
+    if (url.includes("/api/media/asset.json")) return { ok: true, json: async () => ({
+      args: { action: "//reddit-media.s3.amazonaws.com", fields: [{ name: "key", value: "media" }] }, asset: { asset_id: "fixture" },
+    }) };
+    if (new URL(url).hostname === "reddit-media.s3.amazonaws.com") {
+      const file = options.fetchOptions.body._streams.find(item => item?.source?.path)?.source;
+      staged.push(file.path);
+      let bytes = 0;
+      await pipeline(options.fetchOptions.body, new Writable({ write(chunk, _enc, callback) { bytes += chunk.length; callback(); } }));
+      expect(bytes).toBeGreaterThan(12);
+      return { ok: true };
+    }
+    return previous(url, _fetch, options);
+  });
+  try {
+    await postToReddit({ uid: "user1", subreddit: "test", title: "Real video", kind: "video", videoUrl: "https://storage.googleapis.com/b/movie.mp4" });
+    expect(createRedditVideoPoster).toHaveBeenCalledTimes(1);
+    expect(staged).toHaveLength(2);
+    expect(staged.every(file => !fs.existsSync(file))).toBe(true);
+  } finally { safeFetch.mockImplementation(previous); }
 });

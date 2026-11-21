@@ -1,5 +1,8 @@
 const express = require("express");
 const router = express.Router();
+const { pipeline: streamPipeline } = require("node:stream/promises");
+const { nodeReadable, streamStorageUpload } = require("./utils/mediaStreams");
+const { admitMediaTransfer } = require("./utils/mediaTransferBudget");
 const { db, admin } = require("./firebaseAdmin");
 const logger = require("./utils/logger");
 const { CONTENT_LIST_FIELDS, contentListSummary } = require("./utils/contentListSummary");
@@ -544,7 +547,7 @@ router.post(
   "/upload/source-file",
   authMiddleware,
   rateLimitMiddleware(10, 60000),
-  express.raw({ type: "*/*", limit: "500mb" }),
+  admitMediaTransfer,
   async (req, res) => {
     try {
       const userId = require("./middlewares/workspaceScope").resourceUserId(req);
@@ -560,14 +563,6 @@ router.post(
         return res.status(400).json({ error: "Invalid media type" });
       }
 
-      const fileBuffer = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body || "");
-      if (!fileBuffer.length) {
-        return res.status(400).json({ error: "Missing upload body" });
-      }
-      if (fileBuffer.length > 500 * 1024 * 1024) {
-        return res.status(400).json({ error: "File too large" });
-      }
-
       const rawFileName = normalizeSingleStringInput(
         req.headers["x-file-name"] || req.query.fileName,
         "untitled"
@@ -581,8 +576,7 @@ router.post(
         "application/octet-stream"
       );
 
-      await bucket.file(storagePath).save(fileBuffer, {
-        resumable: false,
+      const size = await streamStorageUpload(req, bucket.file(storagePath), {
         contentType,
         metadata: {
           contentType,
@@ -598,13 +592,14 @@ router.post(
         ok: true,
         storagePath,
         url: buildFirebaseDownloadUrl(bucket.name, storagePath, downloadToken),
-        size: fileBuffer.length,
+        size,
       });
     } catch (error) {
       logger.error("[upload.source-file] Failed to store uploaded media", {
         error: error && error.message ? error.message : String(error),
       });
-      return res.status(500).json({ error: "Failed to upload source file" });
+      if (!res.destroyed && !res.headersSent)
+        return res.status(error.status || 500).json({ error: error.status ? error.message : "Failed to upload source file" });
     }
   }
 );
@@ -1772,7 +1767,7 @@ router.get("/status/:id", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/:id/download", authMiddleware, async (req, res) => {
+router.get("/:id/download", authMiddleware, admitMediaTransfer, async (req, res) => {
   try {
     const userId = require("./middlewares/workspaceScope").resourceUserId(req);
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
@@ -1825,21 +1820,10 @@ router.get("/:id/download", authMiddleware, async (req, res) => {
     const contentLength = upstream.headers.get("content-length");
     if (contentLength) res.setHeader("Content-Length", contentLength);
 
-    if (upstream.body && typeof upstream.body.pipe === "function") {
-      upstream.body.on("error", error => {
-        console.error("[GET /:id/download] stream error:", error);
-        if (!res.headersSent) return res.status(502).json({ error: "Download stream failed" });
-        res.end();
-      });
-      upstream.body.pipe(res);
-      return;
-    }
-
-    const buffer = Buffer.from(await upstream.arrayBuffer());
-    return res.send(buffer);
+    await streamPipeline(nodeReadable(upstream.body), res);
   } catch (error) {
     console.error("[GET /:id/download] Error:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    if (!res.headersSent && !res.destroyed) return res.status(500).json({ error: "Internal server error" });
   }
 });
 

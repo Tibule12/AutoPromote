@@ -1,5 +1,5 @@
 jest.mock("../../firebaseAdmin", () => ({
-  db: { collection: jest.fn() },
+  db: { collection: jest.fn(), runTransaction: jest.fn() },
   admin: { firestore: { FieldValue: { serverTimestamp: () => new Date() } } },
 }));
 jest.mock("../aggregationService", () => ({
@@ -43,7 +43,14 @@ beforeEach(() => {
     createdAt: new Date().toISOString(),
     payload: { text: "hello" },
   };
+  let transactionTail = Promise.resolve();
+  db.runTransaction.mockImplementation(work => {
+    const result = transactionTail.then(() => work({ get: ref => ref.get(), set: (ref, data) => ref.set(data) }));
+    transactionTail = result.catch(() => {});
+    return result;
+  });
   taskRef = {
+    get: async () => ({ exists: true, data: () => structuredClone(task) }),
     set: jest.fn(async data => {
       task = data;
     }),
@@ -189,4 +196,13 @@ test("destination identity and native/link format participate in community de-du
     expect(buildPlatformPostHash(base)).not.toBe(buildPlatformPostHash({ ...base, payload: { ...base.payload, destinationId: "b" } }));
     expect(buildPlatformPostHash(base)).not.toBe(buildPlatformPostHash({ ...base, payload: { ...base.payload, deliveryMode: "link" } }));
   }
+});
+
+
+test("two runners racing the same candidate dispatch only once", async () => {
+  dispatchPlatformPost.mockResolvedValue({ success: true, shareId: "one-post", url: "https://www.linkedin.com/feed/update/one-post" });
+  const outcomes = await Promise.all([processNextPlatformTask(), processNextPlatformTask()]);
+  expect(outcomes.filter(Boolean)).toHaveLength(1);
+  expect(dispatchPlatformPost).toHaveBeenCalledTimes(1);
+  expect(task.status).toBe("completed");
 });

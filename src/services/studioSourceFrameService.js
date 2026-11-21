@@ -1,3 +1,4 @@
+const { fileSha256 } = require("../utils/temporaryMediaUpload");
 // An accurate paused source frame uses the same -ss / fps / PTS sampling as
 // Studio's deterministic sequence renderer. It is transient preview media,
 // never a generated asset or an alternate final rendering engine.
@@ -162,9 +163,8 @@ async function withOwnedSource({ ownerUid, request, signal }, inspect) {
           const object = getStudioSourceBucket(owned.kind, owned.bucketName).file(owned.storagePath, { generation: owned.generation });
           await pipeline(object.createReadStream({ validation: 'crc32c', decompress: false }),
             createWriteStream(file, { mode: 0o600 }), { signal: AbortSignal.timeout(30000) });
-          const bytes = await fs.readFile(file);
-          if (bytes.length !== owned.size) throw new Error('Source size changed');
-          cached.hash = crypto.createHash('sha256').update(bytes).digest('hex');
+          if ((await fs.stat(file)).size !== owned.size) throw new Error('Source size changed');
+          cached.hash = await fileSha256(file);
         } catch (_) {
           sources.delete(key); await fs.rm(folder, { recursive: true, force: true });
           throw sourceError(503, 'STUDIO_FRAME_SOURCE_UNAVAILABLE', 'Could not prepare this saved source');

@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Record serving Cam saved-master playback and contextual-help evidence plus bounded Actions fixture/release repairs; readiness and all shared blockers unchanged",
-  "reviewed_at": "2026-11-20T18:24:59.345Z",
+  "reason": "PR552 Actions follow-through: constrain multipart scratch paths and repair transaction/create/cleanup/cooldown integration fixtures without weakening production claims. No readiness promotion.",
+  "reviewed_at": "2026-11-21T08:47:47.568Z",
   "catalog_sha256": "dbccf16776eba7c2ccdc3147942ca59af341a2bf46c05675c6f85a59221c371a",
   "sources": [
     {
@@ -595,7 +595,7 @@
     },
     {
       "path": "src/contentRoutes.js",
-      "sha256": "b73c44f6a0a247629eaf6be8e804b8c370943871072b989c7f16be52c5e131ba"
+      "sha256": "4a90be8f7ef05b3a868ec152d1dc010f0c90644d2bb65dc74c5f6d191e5e4797"
     },
     {
       "path": "src/creativeTemplates/showcase.js",
@@ -651,7 +651,7 @@
     },
     {
       "path": "src/server.js",
-      "sha256": "663a3b236ea98c28f60e9c78bcd52768279513f1cd1f4e3bacef9e8dd8cfbcc9"
+      "sha256": "8d95636b9b669c46299d5274d4eebcb5236503756bc8d0fba37e9296d11bc60b"
     },
     {
       "path": "src/services/__tests__/publishedVideoRetention.test.js",
@@ -691,15 +691,15 @@
     },
     {
       "path": "src/services/linkedinService.js",
-      "sha256": "37e675e78f0f82e2b81b009cf4e4fad4d4f6b0254ad1decae1ceda8901cf32a3"
+      "sha256": "e9037bd483b4692b66aaf1332f082a0df0db681809d1018ba388eab196bdd40f"
     },
     {
       "path": "src/services/platformPoster.js",
-      "sha256": "242dfad260ade40a21edc519bfec8062f756f99a6a5a3816ddcf9429d5d22407"
+      "sha256": "0b4c2aab764e4afd466a8597d15bcec66d8f4a5778930c87e5a5eddd183f22a2"
     },
     {
       "path": "src/services/promotionTaskQueue.js",
-      "sha256": "16af78eab0766122074478dd0f61eb0ada5b8c4bf96759bb3c202be281b0282d"
+      "sha256": "ae9979a7e6b600a9a202bc6f4d4fe06b65368a44f1a4fc545e6f31ba442e526b"
     },
     {
       "path": "src/services/publishedVideoRetention.js",
@@ -715,15 +715,15 @@
     },
     {
       "path": "src/services/redditPublication.js",
-      "sha256": "3a9a9eaec3584ce3d187e9ec95c8d76acc3a5da3b6fb9700257cbf93ad69fa33"
+      "sha256": "3b732dba085a509db469087086ba86bb83644bd54a9c53ccf5964217e8d96aa2"
     },
     {
       "path": "src/services/redditService.js",
-      "sha256": "4d2f2529ebbd48a79043d721dae45b719e58ffef98e7d66e4ede54a610fe427c"
+      "sha256": "aea28836a06519d7acc72f1eec36231e23be4898fab52f7a3449f982c9778af6"
     },
     {
       "path": "src/services/redditVideoPoster.js",
-      "sha256": "1477c875dc00e1ee20990e2c582cca40fd54285efe3e4438c75b94982a059dd6"
+      "sha256": "c76b43e9d28f168864208ebaa101162449420f67412b8ac1f8a2e77a77dfaa07"
     },
     {
       "path": "src/services/studio3DLocalDurable.js",
@@ -739,7 +739,7 @@
     },
     {
       "path": "src/services/studioSourceFrameService.js",
-      "sha256": "3f84d9391335175d9a177f433dd7c8580891c240cc0473e9142c8a1efc3b4bdd"
+      "sha256": "005e39253d2277c18251066031075a5b3b84259a6fc08c0122ebb4443cac3318"
     },
     {
       "path": "src/services/studioSourceService.js",
@@ -763,11 +763,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "0ab9602dd86d23ae4e1f6de7b460d396a278d0a902dbc433c39b76b3ce9891e9"
+      "sha256": "6114efee613e177a085935368d60041c50486d2981847d6f23243f7c694a669b"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "4a6aea5e419d758bcb9764072c687d9fc72542a32f30b1e6b007b9ed28a3a47c"
+      "sha256": "aff4823be10b374b000fc466c65faa0dc565fd6840775b0b1a6f61e2ab6c5bae"
     },
     {
       "path": "worker.js",
