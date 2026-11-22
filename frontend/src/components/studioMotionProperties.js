@@ -1,5 +1,6 @@
 // Property metadata for the existing canonical transform/keyframe graph.
 import { GROUP_BOUNDS, GROUP_KIND } from './studioGroups';
+import { creativeEffectPropertiesForTarget } from './studioCreativeEffects';
 import { parseStudioMaskPolygon } from './studioMaskGeometry';
 import { PLANE_CORNER_CHANNELS } from './studioPerspective';
 export const STUDIO_MOTION_PROPERTIES = [
@@ -17,7 +18,9 @@ export const STUDIO_MOTION_PROPERTIES = [
   { id: "strokeOffset", label: "Stroke offset", min: -1000, max: 1000, step: 0.1, vectorOnly: true },
 ];
 
-export const studioMotionPropertiesForTarget = target => target?.kind === GROUP_KIND
+export const studioMotionPropertiesForTarget = target => (target?.isCreativeEffect || target?.effectId)
+  ? creativeEffectPropertiesForTarget(target)
+  : target?.kind === GROUP_KIND
   ? STUDIO_MOTION_PROPERTIES.filter(property => Object.hasOwn(GROUP_BOUNDS, property.id))
     .map(property => ({ ...property, min: GROUP_BOUNDS[property.id][0], max: GROUP_BOUNDS[property.id][1] }))
   : [...STUDIO_MOTION_PROPERTIES.filter(property => (!property.perspectiveOnly || !!target?.perspective) && (!property.textAnimatorOnly || !!target?.textAnimator) && (!property.vectorOnly || !!target?.vectorShape) &&

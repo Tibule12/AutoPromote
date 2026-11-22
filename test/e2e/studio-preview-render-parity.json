@@ -26788,5 +26788,17 @@
     "nativeRenderComplete": true,
     "nativeFinishedPlaybackComplete": true,
     "scope": "Native six-second editable fashion mosaic with ordinary masks,7layers,36keys and whoosh; independent exact restore/download. Strict whole-picture parity and production release remain unqualified."
+  },
+  "mainIntegration20261122": {
+    "status": "PARTIAL",
+    "evidence": "reports/studio-main-push-20261122/verification.json",
+    "ownerAuthorizedMainPush": true,
+    "localIntegrationVerified": true,
+    "productionReleaseVerified": false,
+    "remaining": [
+      "Production frontend/API/CPU/GPU deployment completion and live release checks remain separate",
+      "Whole-Studio predictive colour/edge/low-alpha parity, broad device performance and creative/listening approval remain open",
+      "Local45secondframe render took793.2seconds; final encoding usedNVENC but raster preparation is CPU-heavy"
+    ]
   }
 }

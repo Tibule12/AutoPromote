@@ -1,0 +1,298 @@
+.creative-fx-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.creative-fx-search-bar input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(15, 23, 42, 0.72);
+  color: #f8fafc;
+  font-size: 13px;
+}
+
+.creative-fx-category-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.creative-fx-category-pills button {
+  padding: 5px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(15, 23, 42, 0.55);
+  color: #cbd5e1;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.creative-fx-category-pills button.is-active {
+  background: #38bdf8;
+  border-color: #38bdf8;
+  color: #082f49;
+  font-weight: 700;
+}
+
+.creative-fx-catalog-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.creative-fx-card {
+  display: flex;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(15, 23, 42, 0.62);
+  align-items: center;
+}
+
+.creative-fx-thumb-canvas {
+  width: 112px;
+  height: 63px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  flex-shrink: 0;
+  background: #020617;
+}
+
+.creative-fx-card-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.creative-fx-card-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 13px;
+  color: #f8fafc;
+}
+
+.creative-fx-card-body p {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.35;
+  color: #94a3b8;
+}
+
+.creative-fx-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.18);
+  color: #7dd3fc;
+}
+
+.creative-fx-apply-btn {
+  align-self: flex-start;
+  font-size: 11px;
+  padding: 4px 10px;
+}
+
+.creative-fx-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.creative-fx-section-header strong {
+  font-size: 12px;
+  color: #f8fafc;
+}
+
+.creative-fx-section-header small {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.creative-fx-scrapbook-tools,
+.creative-fx-stack-section,
+.creative-fx-inspector,
+.creative-fx-extra-box {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.creative-fx-quick-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.creative-fx-quick-row button,
+.creative-fx-wrap-btn {
+  padding: 5px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(30, 41, 59, 0.85);
+  color: #e2e8f0;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.creative-fx-wrap-btn {
+  margin-top: 8px;
+  width: 100%;
+  background: rgba(56, 189, 248, 0.16);
+  border-color: rgba(56, 189, 248, 0.4);
+  color: #e0f2fe;
+}
+
+.creative-fx-stack-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.creative-fx-stack-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(15, 23, 42, 0.65);
+}
+
+.creative-fx-stack-row.is-selected {
+  border-color: #38bdf8;
+  background: rgba(14, 116, 144, 0.24);
+}
+
+.creative-fx-stack-row.is-disabled {
+  opacity: 0.56;
+}
+
+.creative-fx-row-select {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.creative-fx-row-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.creative-fx-row-select small {
+  font-size: 10px;
+  color: #94a3b8;
+}
+
+.creative-fx-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.creative-fx-row-actions button {
+  padding: 3px 6px;
+  border-radius: 5px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(30, 41, 59, 0.85);
+  color: #e2e8f0;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.creative-fx-timing-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.creative-fx-timing-row label,
+.creative-fx-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  color: #cbd5e1;
+}
+
+.creative-fx-timing-row input,
+.creative-fx-timing-row select,
+.creative-fx-field input[type="text"],
+.creative-fx-field select {
+  padding: 5px 7px;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(15, 23, 42, 0.78);
+  color: #f8fafc;
+  font-size: 12px;
+}
+
+.creative-fx-key-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.creative-fx-kf-btn {
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0 3px;
+}
+
+.creative-fx-kf-btn.is-keyed {
+  color: #f59e0b;
+}
+
+.creative-fx-color-field {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.creative-fx-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #e2e8f0;
+  margin: 4px 0;
+}
+
+.creative-fx-graph-box {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.creative-fx-empty {
+  margin: 4px 0;
+  font-size: 12px;
+  color: #94a3b8;
+}

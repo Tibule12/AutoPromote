@@ -1,0 +1,66 @@
+{
+  "status": "LOCAL_INTEGRATION_VERIFIED",
+  "authorization": "Owner explicitly requested pushing all updated files to main.",
+  "upstreamIntegrated": "5230ff4f28d0cafce080173785104f88fa32ebd0",
+  "sourceCommit": "841f2ce4e",
+  "scope": [
+    "All accumulated selected-area grading, tracking, face restoration and control fixes",
+    "Original12-frame collection, strip transitions, beat/cue actions and8original sounds",
+    "Existing latest-main Creative Effects implementation preserved"
+  ],
+  "integrationRepairs": [
+    "Kept both sound-effect state and Creative Effects state when applying a native scene",
+    "Kept programme grading capture before the Creative Effects drawing pass",
+    "Regenerated shared Director replay after integrating latest compiler",
+    "Removed unused segLens allocation without changing doodle path length evaluation",
+    "Updated expected face-restoration capability from1to2",
+    "Made delivery regression import work under pytest and package unittest"
+  ],
+  "tests": {
+    "frontend": 132,
+    "backend": 29,
+    "workerDistinct": 74,
+    "strictFrontendBuild": true,
+    "postbuildWelcomeAssets": 19,
+    "postbuildPublicPages": 47,
+    "anonymousWelcomeViewportChecks": 8,
+    "signedInSmoke": {
+      "authenticated": true,
+      "normalNativeBackupImport": true,
+      "frameGalleryWorks": true,
+      "creativeEffectsControls": [
+        "\u2726Effects FX"
+      ],
+      "helpButtons": [
+        "\ud83d\udd08Explain This Tab"
+      ],
+      "uploadCount": 0,
+      "renderCount": 0,
+      "errors": [],
+      "blocked": []
+    },
+    "sharedContractValidation": true,
+    "replayCheck": true,
+    "diffCheck": true
+  },
+  "retainedFailures": [
+    "Initial strict build failed on an unused variable in the latest-main Creative Effects module; corrected strict rebuild passed.",
+    "One backend expectation retained the old face-restoration version; corrected suite29passed.",
+    "One worker regression used a relative import under pytest; corrected timing suite11passed. Other73worker cases passed in the initial broad run."
+  ],
+  "excludedRuntimeFiles": [
+    "348MBGFPGANcheckpoint: .gitignore excludes it; pinned build-time installer and manifest are included",
+    "Python bytecode, caches, private owner sessions, QA runtime and local output videos"
+  ],
+  "remaining": [
+    "Production frontend/API/CPU/GPU deployment completion and live release checks remain separate",
+    "Whole-Studio predictive colour/edge/low-alpha parity, broad device performance and creative/listening approval remain open",
+    "Local45secondframe render took793.2seconds; final encoding usedNVENC but raster preparation is CPU-heavy"
+  ],
+  "formalCountsUnchanged": "17 FUNCTIONAL /9 PARTIAL /1 BROKEN /2 UNIMPLEMENTED /0 PRO /0 PRODUCTION",
+  "qaRoot": "/home/tibule12/.local/share/autopromote-qa/studio-main-push-20261122",
+  "sourceIdentity": {
+    "file": "src/generated/studioDirectorReplayKernel.cjs",
+    "sha256": "798b3c0a64d3c66baac408880c02d3dea7aa231962c01b036ed77cbba3aacf43"
+  }
+}

@@ -84,7 +84,7 @@ class StudioDeliveryTimingTests(unittest.TestCase):
 
 class StudioAuthoredDurationRenderTests(unittest.TestCase):
     def test_aac_packet_padding_cannot_extend_the_authored_trim_or_speed_map(self):
-        from . import main_media_server as worker
+        from python_media_worker import main_media_server as worker
         with tempfile.TemporaryDirectory() as folder:
             source = Path(folder) / "source.mp4"
             delivery = Path(folder) / "final.mp4"
