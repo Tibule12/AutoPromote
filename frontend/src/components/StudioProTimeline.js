@@ -902,6 +902,9 @@ export default function StudioProTimeline({
   voiceovers,
   adjustmentLayers,
   creativeEffects,
+  onSelectCreativeEffect,
+  onCreativeEffectMove,
+  onCreativeEffectTrim,
   motionKeyframes,
   graphicGroups = [],
   groupTimingRows = [],
@@ -1055,6 +1058,7 @@ export default function StudioProTimeline({
     setJumpTimecodeValue("");
   };
   const allMotionTargets = [{ ...mainTransform, id: 'main-video' }, ...(overlays || []).filter(layer => !layer.isCaption),
+    ...(creativeEffects || []).filter(item => item.isCreativeEffect || item.effectId).map(item => ({ ...item, isCreativeEffect: true })),
     ...graphicGroups.map(group => ({ ...group, ...group.transform }))];
   const motionTargets = allMotionTargets.filter(layer => !selectedGroupId || layer.id === selectedGroupId)
     .map(layer => ({ id: layer.id, layer, keys: (motionKeyframes || []).filter(key => key.targetId === layer.id) }));
@@ -1063,6 +1067,7 @@ export default function StudioProTimeline({
   const graphTarget = allMotionTargets.find(target => target.id === graphKey?.targetId);
   const keyTrack = key => {
     if (key.targetId === 'main-video') return 'video';
+    if ((creativeEffects || []).some(item => String(item.id) === String(key.targetId))) return 'adjustment';
     const layer = (overlays || []).find(item => item.id === key.targetId);
     return layer?.bRollMode || ['image', 'video'].includes(layer?.type) ? 'broll' : 'graphics';
   };
@@ -1915,7 +1920,8 @@ export default function StudioProTimeline({
                     );
                     const itemLabel =
                       item.name || item.text || item.label || `${label} ${index + 1}`;
-                    if (trackId === "adjustment" && item.effects) {
+                    if (trackId === "adjustment" && (item.effects || item.isCreativeEffect || item.effectId)) {
+                      const isCreative = Boolean(item.isCreativeEffect || item.effectId);
                       return (
                         <BrollClip
                           key={item.id || `${trackId}-${index}`}
@@ -1929,13 +1935,18 @@ export default function StudioProTimeline({
                           displayRate={displayRate}
                           snapping={snapping}
                           snapTargets={snapTargets}
-                          onOverlayMove={onAdjustmentMove}
+                          onOverlayMove={isCreative ? onCreativeEffectMove : onAdjustmentMove}
                           locked={!!state.locked}
-                          onOverlayTrim={onAdjustmentTrim}
+                          onOverlayTrim={isCreative ? onCreativeEffectTrim : onAdjustmentTrim}
                           allowSlip={false}
                           onClick={event => {
                             event.stopPropagation();
-                            onSelectTool?.("composite");
+                            if (isCreative) {
+                              onSelectCreativeEffect?.(item.id);
+                              onSelectTool?.("effects");
+                            } else {
+                              onSelectTool?.("composite");
+                            }
                             onSeek?.(event, start);
                           }}
                         />

@@ -14,6 +14,7 @@ import { studioGroupTree, removeStudioGroupMembers, GROUP_KIND, validateStudioGr
 import { validateSpatialCurve } from "./studioAutomation";
 import { validateStudioVectorShape, validateStudioVectorTrim } from "./studioVectorShape";
 import { validateStudioPerspectiveLayer, encodeStudioPerspective } from './studioPerspective';
+import { normalizeCreativeEffects } from './studioCreativeEffects';
 import { studioLayerEntries } from "./studioLayerOrder";
 import {
   MOTION_DRIVER_PROPERTIES,
@@ -190,6 +191,47 @@ export const compileStudioFinishForRender = document => {
     visualizer: { ...state.podcastVisualizer, source: "original_speech" },
     keyframes: (state.finishKeyframes || []).map(key => ({ id: key.id,
       time: Number(key.time || 0), values: { ...key.values }, interpolation: "linear" })),
+    ...(() => {
+      const normalized = normalizeCreativeEffects(state.creativeEffects || []);
+      if (!normalized.length) return {};
+      const allKeys = state.motionKeyframes || [];
+      return {
+        creative_effects: normalized.map(eff => {
+          const effKeys = allKeys
+            .filter(k => String(k.targetId) === String(eff.id))
+            .map(k => ({
+              id: k.id,
+              targetId: eff.id,
+              property: k.property,
+              time: Number(k.time || 0),
+              value: Number(k.value || 0),
+              easing: k.easing || "ease_in_out",
+              ...(k.curve ? { curve: k.curve.map(Number) } : {}),
+            }));
+          const sourceLayer = eff.tracking?.enabled && eff.tracking?.sourceLayerId
+            ? (state.overlays || []).find(o => String(o.id) === String(eff.tracking.sourceLayerId))
+            : null;
+          const sourceKeys = eff.tracking?.enabled && eff.tracking?.sourceLayerId
+            ? allKeys.filter(k => String(k.targetId) === String(eff.tracking.sourceLayerId))
+            : [];
+          return {
+            ...eff,
+            motion_keyframes: effKeys,
+            ...(eff.tracking?.enabled && eff.tracking?.sourceLayerId
+              ? {
+                  tracking: {
+                    ...eff.tracking,
+                    source_base: sourceLayer
+                      ? { x: Number(sourceLayer.x ?? 50), y: Number(sourceLayer.y ?? 50), scale: Number(sourceLayer.scale ?? 1), rotation: Number(sourceLayer.rotation ?? 0) }
+                      : { x: 50, y: 50, scale: 1, rotation: 0 },
+                    source_keyframes: sourceKeys,
+                  },
+                }
+              : {}),
+          };
+        }),
+      };
+    })(),
   };
 };
 
@@ -318,6 +360,7 @@ export const compileStudioCompositionForRender = document => {
             x: Number(layer.layerShadow?.x || 0), y: Number(layer.layerShadow?.y || 0) },
           motion_blur: { enabled: !!layer.motionBlur?.enabled, samples: Number(layer.motionBlur?.samples || 1),
             shutter: Number(layer.motionBlur?.shutter || 0) },
+          ...(layer.scrapbookFrame?.enabled ? { scrapbook_frame: JSON.parse(JSON.stringify(layer.scrapbookFrame)) } : {}),
         },
         motion_keyframes: effectiveKeys
           .map(key => ({ id: key.id, property: key.property, time: Number(key.time || 0),

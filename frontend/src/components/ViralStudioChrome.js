@@ -213,6 +213,7 @@ const INSPECTOR_TABS = [
   { id: "motion", label: "Motion", icon: "◆" },
   { id: "composite", label: "Composite", icon: "◫" },
   { id: "flow", label: "Node Flow", icon: "☍" },
+  { id: "effects", label: "Effects FX", icon: "✦" },
   { id: "creatorfx", label: "Creator FX", icon: "✺" },
   { id: "pacing", label: "Pacing", icon: "≋" },
   { id: "broll", label: "B-roll", icon: "▣" },

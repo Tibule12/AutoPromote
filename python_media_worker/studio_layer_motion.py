@@ -298,6 +298,13 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1, *, 
             frame_mask = layer_clip_mask(artwork.size, {"enabled": True, "shape": "rectangle", "radius": radius})
             artwork.putalpha(ImageChops.multiply(artwork.getchannel("A"), frame_mask))
 
+    effects = (layer or {}).get("effects") or {}
+    if _get(overlay, "type") in ("image", "video") and not fullscreen and (effects.get("scrapbook_frame") or {}).get("enabled"):
+        try:
+            from .studio_creative_effects import apply_scrapbook_frame_to_layer
+        except ImportError:
+            from studio_creative_effects import apply_scrapbook_frame_to_layer
+        artwork = apply_scrapbook_frame_to_layer(artwork, effects["scrapbook_frame"])
     if (layer or {}).get('perspective'):
         if fullscreen:
             raise ValueError('Perspective is available on ordinary inset media planes')
@@ -306,7 +313,6 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1, *, 
     anchor_y = .5 if fullscreen else max(0, min(100, finite((layer or {}).get("anchor_y", 50), 50))) / 100
     diagonal = max(8, math.ceil(math.hypot(artwork.width, artwork.height) * 2.1))
     anchor = (diagonal // 2, diagonal // 2)
-    effects = (layer or {}).get("effects") or {}
     clip_box = (layer or {}).get("clip_box") or {"x": 0, "y": 0, "width": 1, "height": 1}
     if (abs(pose["rotation"]) <= .001
             and not (effects.get("shadow") or {}).get("enabled")

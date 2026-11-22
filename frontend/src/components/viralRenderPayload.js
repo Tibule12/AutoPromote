@@ -430,6 +430,7 @@ export const buildViralRenderData = ({
     extraOptions.professionalCleanup ?? extraOptions.enhanceQuality ?? false
   );
   addDefined(payload, "creative_plan", extraOptions.creativePlan);
+  addDefined(payload, "creative_effects", extraOptions.creativeEffects);
   addDefined(payload, "finish_plan", extraOptions.finishPlan);
   addDefined(payload, "audio_restoration", extraOptions.audioRestoration);
   addDefined(payload, "audio_automation", extraOptions.audioAutomation);

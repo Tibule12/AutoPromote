@@ -26,6 +26,7 @@ export const STUDIO_ADDITIONAL_LAYER_FIELDS = [
   "parameterLinks", "isCompoundMacro", "isMacroGroup", "macroGroup",
   "opticalFx", "displacementWarp", "depthParallax", "zDepth", "dofBlur", "cornerKeys",
   "trackMatte", "motionDrivers", "isNullRig", "keepMatteVisible", "shy", "solo", "locked",
+  "scrapbookFrame", "underlayRole",
 ];
 export const STUDIO_LAYER_BINDING_FIELDS = [
   "titlePreset",

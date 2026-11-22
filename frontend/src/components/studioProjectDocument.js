@@ -197,7 +197,7 @@ const VISUAL_SETTING_FIELDS = [
   "speakerStackFraming", "speakerStackSourceIds", "speakerStackOffsets",
   "speakerStackCameraCount", "speakerStackLayout", "speakerStackSyncConfirmed",
   "exportSettings", "stabilization", "enhanceQuality", "beatSnapEnabled",
-  "creativeIntent", "creativeEffectsEnabled", "creativePreset", "creativeIntensity", "pacingLevel",
+  "creativeIntent", "creativeEffectsEnabled", "creativePreset", "creativeIntensity", "creativeEffects", "pacingLevel",
   "nodeFlow", "hideShyLayers",
 ];
 const CAMERA_SOURCE_FIELDS = [

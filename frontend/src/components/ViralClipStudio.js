@@ -1,4 +1,14 @@
 import { blendStudioNodeMask, captureStudioGradeSurface } from './studioNodeMask';
+import StudioCreativeEffectsPanel from './StudioCreativeEffectsPanel';
+import {
+  buildScrapbookCollagePreset,
+  buildScrapbookElementLayer,
+  buildSpeedRampingKeyframes,
+  evaluateCreativeEffectParams,
+  normalizeCreativeEffects,
+  renderCreativeEffectsToCanvas,
+  trackSubjectOnVideoFrames,
+} from './studioCreativeEffects';
 import {paintStudioNodeSurface,hasStudioNodeSurface} from './studioNodeEffects';
 import {applyStudioFinishTexture} from './studioFinishTexture';
 import {measureStudioTitleBox} from './studioTitleLayout';
@@ -2411,6 +2421,7 @@ const CREATIVE_STUDIO_TOOLS = [
   { id: "motion", label: "Motion", icon: "◆", helper: "Edit a motion graphic’s text, timing and keyframes. Use the playhead to check its entrance, movement and exit." },
   { id: "composite", label: "Composite", icon: "◫", helper: "Choose the source and subject, then set masking, foreground or background treatment. Generate and review the processed layer before export." },
   { id: "flow", label: "Node Flow", icon: "☍", helper: "Wire AutoPromote signal nodes (Source, Transform, Masks, Null Rigs, Grade, Glow, Merge) and open Comp & Rig." },
+  { id: "effects", label: "Effects FX", icon: "✦", helper: "Creative Effects & Overlays library: ripped paper, scrapbook collages, doodles, vintage film, light leaks and more." },
   { id: "creatorfx", label: "Creator FX", icon: "✺", helper: "Tune the selected effect and its timing. Browser studies use simplified previews; inspect a rendered result before relying on the effect." },
   { id: "pacing", label: "Pacing", icon: "≋", helper: "Set speed and pacing on the selected range. Check the resulting duration and listen to speech after changing speed." },
   { id: "broll", label: "B-roll", icon: "▣", helper: "Add or select an insert. Set its source trim, layout, duration, end behavior and audio mix to control when it covers the main video." },
@@ -3060,6 +3071,11 @@ const ViralClipStudio = ({
   const [creativeEffectsEnabled, setCreativeEffectsEnabled] = useState(false);
   const [creativePreset, setCreativePreset] = useState("auto_story");
   const [creativeIntensity, setCreativeIntensity] = useState("bold");
+  const [creativeEffects, setCreativeEffects] = useState([]);
+  const [activeCreativeEffectId, setActiveCreativeEffectId] = useState(null);
+  const [doodleTrackPickEffectId, setDoodleTrackPickEffectId] = useState(null);
+  const [doodleTrackingBusy, setDoodleTrackingBusy] = useState(false);
+  const freezeFrameCacheRef = useRef(new Map());
   const [contentProfile, setContentProfile] = useState("auto");
   const [cutRangeStart, setCutRangeStart] = useState(null);
   const [cutRangeEnd, setCutRangeEnd] = useState(null);
@@ -3745,6 +3761,7 @@ const ViralClipStudio = ({
     creativeEffectsEnabled,
     creativePreset,
     creativeIntensity,
+    creativeEffects,
     finishFx,
     podcastVisualizer,
     finishKeyframes,
@@ -4458,6 +4475,7 @@ const ViralClipStudio = ({
     setCreativeEffectsEnabled(!!snapshot.creativeEffectsEnabled);
     setCreativePreset(snapshot.creativePreset || "auto_story");
     setCreativeIntensity(snapshot.creativeIntensity || "bold");
+    setCreativeEffects(normalizeCreativeEffects(snapshot.creativeEffects || []));
     replaceFinishFx(snapshot.finishFx);
     setPodcastVisualizer({
       enabled: false,
@@ -4942,6 +4960,48 @@ const ViralClipStudio = ({
   const handlePreviewFrameClick = event => {
     setActiveOverlayId(null);
     setActiveWatermarkRegionId(null);
+
+    if (doodleTrackPickEffectId && !isDragging && phoneFrameRef.current && videoRef.current) {
+      const targetEffect = creativeEffects.find(item => String(item.id) === String(doodleTrackPickEffectId));
+      if (targetEffect) {
+        const rect = phoneFrameRef.current.getBoundingClientRect();
+        const initialX = clampNumber(((event.clientX - rect.left) / Math.max(1, rect.width)) * 100, 5, 95, 50);
+        const initialY = clampNumber(((event.clientY - rect.top) / Math.max(1, rect.height)) * 100, 5, 95, 50);
+        setDoodleTrackPickEffectId(null);
+        setDoodleTrackingBusy(true);
+        setStudioActionMessage("Tracking selected subject motion across frames...");
+        trackSubjectOnVideoFrames({
+          videoElement: videoRef.current,
+          startTime: Number(targetEffect.startTime || 0),
+          duration: Math.max(0.2, Number(targetEffect.duration || 2.0)),
+          initialX,
+          initialY,
+          targetId: targetEffect.id,
+          fps: 8,
+          createId: createSecureId,
+        })
+          .then(trackedKeys => {
+            setMotionKeyframes(current => [
+              ...current.filter(k => !(String(k.targetId) === String(targetEffect.id) && (k.property === "x" || k.property === "y"))),
+              ...trackedKeys,
+            ]);
+            setCreativeEffects(current =>
+              current.map(eff =>
+                String(eff.id) === String(targetEffect.id)
+                  ? { ...eff, params: { ...eff.params, x: initialX, y: initialY } }
+                  : eff
+              )
+            );
+            setComparisonMode("after");
+            setStudioActionMessage(`Tracked ${Math.round(trackedKeys.length / 2)} subject points onto ${targetEffect.name}.`);
+          })
+          .catch(err => setStudioActionMessage(err?.message || "Unable to track subject on video."))
+          .finally(() => setDoodleTrackingBusy(false));
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+    }
 
     if (!hookFocusMode || isDragging) return;
 
@@ -5690,6 +5750,148 @@ const ViralClipStudio = ({
       }
       return { ...layer, duration: Math.max(0.2, Math.min(Number(value) - start, liveTimelineDuration - start)) };
     }));
+  };
+
+  const handleCreativeEffectTimelineMove = (id, newStartTime) => {
+    if (!allowTimelineTimingEdit("adjustment")) return;
+    setCreativeEffects(current =>
+      current.map(eff =>
+        String(eff.id) === String(id)
+          ? { ...eff, startTime: Number(Math.max(0, Math.min(newStartTime, Math.max(0, liveTimelineDuration - Number(eff.duration || 0.2)))).toFixed(3)) }
+          : eff
+      )
+    );
+  };
+
+  const handleCreativeEffectTimelineTrim = (id, edge, value) => {
+    if (!allowTimelineTimingEdit("adjustment")) return;
+    setCreativeEffects(current =>
+      current.map(eff => {
+        if (String(eff.id) !== String(id)) return eff;
+        const start = Number(eff.startTime || 0);
+        const end = start + Number(eff.duration || 0.2);
+        if (edge === "start") {
+          const nextStart = Math.max(0, Math.min(Number(value), end - 0.1));
+          return { ...eff, startTime: Number(nextStart.toFixed(3)), duration: Number((end - nextStart).toFixed(3)) };
+        }
+        return {
+          ...eff,
+          duration: Number(Math.max(0.1, Math.min(Number(value) - start, Math.max(0.1, liveTimelineDuration - start))).toFixed(3)),
+        };
+      })
+    );
+  };
+
+  const handleToggleEffectKeyframe = (effectId, property, value, forceUpdate = false) => {
+    const time = Number(previewTimelineTime || 0);
+    const tolerance = motionKeyframeTolerance(exportSettings.fps || 30, previewSpeed || 1);
+    const existing = motionKeyAtPlayhead(motionKeyframes, effectId, property, time, tolerance);
+    if (!forceUpdate && existing) {
+      removeMotionKeyframe(existing.id);
+      return;
+    }
+    const next = upsertAutomationKeyframe(
+      motionKeyframes,
+      {
+        id: existing?.id || createSecureId("fx-key"),
+        targetId: String(effectId),
+        property,
+        time: existing?.time ?? time,
+        value: Number(value),
+        easing: existing?.easing || "bezier",
+        ...(existing?.curve ? { curve: existing.curve } : { curve: [0.22, 1, 0.36, 1] }),
+      },
+      tolerance
+    );
+    setMotionKeyframes(next);
+    setComparisonMode("after");
+    setPreviewFinishedFile(false);
+  };
+
+  const handleAddScrapbookPreset = presetName => {
+    const start = Math.max(0, Math.min(Math.max(0.2, liveTimelineDuration - 0.5), Number(previewTimelineTime || 0)));
+    const duration = Math.min(4.0, Math.max(1.0, liveTimelineDuration - start));
+    const { fx, layers, keyframes } = buildScrapbookCollagePreset({
+      preset: presetName,
+      startTime: start,
+      duration,
+      createId: createSecureId,
+    });
+    const mediaSelected = overlays.find(ov => String(ov.id) === String(activeOverlayId) && ["image", "video"].includes(ov.type));
+    const updatedOverlays = mediaSelected
+      ? overlays.map(ov =>
+          String(ov.id) === String(mediaSelected.id)
+            ? {
+                ...ov,
+                scrapbookFrame: {
+                  enabled: true,
+                  frameStyle: presetName === "torn_zine" ? "torn_edge" : "polaroid",
+                  borderColor: "#f7f3eb",
+                  borderWidth: 22,
+                  captionText: ov.name || "STUDIO COLLAGE",
+                  tapeTop: true,
+                  tapeColor: "#e6cfa2",
+                },
+              }
+            : ov
+        )
+      : overlays;
+    setOverlays([...updatedOverlays, ...layers]);
+    setMotionKeyframes(current => [...current, ...keyframes]);
+    setCreativeEffects(current => [...current, { ...fx, order: current.length }]);
+    setActiveCreativeEffectId(fx.id);
+    setComparisonMode("after");
+    setStudioActionMessage("Scrapbook collage layers & animated frames added to timeline.");
+  };
+
+  const handleAddScrapbookElement = kind => {
+    const start = Math.max(0, Math.min(Math.max(0.2, liveTimelineDuration - 0.4), Number(previewTimelineTime || 0)));
+    const duration = Math.min(4.0, Math.max(1.0, liveTimelineDuration - start));
+    const layer = buildScrapbookElementLayer({ kind, startTime: start, duration, createId: createSecureId });
+    setOverlays(current => [...current, layer]);
+    setActiveOverlayId(layer.id);
+    setComparisonMode("after");
+    setStudioActionMessage(`${layer.name} added as a draggable collage element.`);
+  };
+
+  const handleToggleOverlayScrapbookFrame = overlayId => {
+    setOverlays(current =>
+      current.map(ov =>
+        String(ov.id) === String(overlayId)
+          ? {
+              ...ov,
+              scrapbookFrame: ov.scrapbookFrame?.enabled
+                ? { ...ov.scrapbookFrame, enabled: false }
+                : {
+                    enabled: true,
+                    frameStyle: "polaroid",
+                    borderColor: "#f7f3eb",
+                    borderWidth: 22,
+                    captionText: ov.name || "MEMORY",
+                    tapeTop: true,
+                    tapeColor: "#e6cfa2",
+                  },
+            }
+          : ov
+      )
+    );
+    setComparisonMode("after");
+  };
+
+  const handleSyncSpeedRampEffect = eff => {
+    if (!eff || !allowTimelineTimingEdit("video")) return;
+    const rampKeys = buildSpeedRampingKeyframes(eff, createSecureId);
+    const sStart = Number(eff.startTime || 0);
+    const sEnd = sStart + Number(eff.duration || 3);
+    setSpeedKeyframes(current => [
+      ...current.filter(k => Number(k.time) < sStart - 0.02 || Number(k.time) > sEnd + 0.02),
+      ...rampKeys,
+    ].sort((a, b) => Number(a.time) - Number(b.time)));
+    setProTimingMode(eff.params?.reverse ? "reverse" : "forward");
+    setOpticalFlowSlowMo(Boolean(eff.params?.opticalFlow));
+    setTimelineDockExpanded(true);
+    setComparisonMode("after");
+    setStudioActionMessage("Speed ramp curve applied to canonical timeline speed & audio sync.");
   };
 
   const updateAdjustmentLayer = (id, field, value) => {
@@ -9829,6 +10031,7 @@ const ViralClipStudio = ({
     setSoundEffects(next.soundEffects);
     setVoiceovers(next.voiceovers);
     setAdjustmentLayers(next.adjustmentLayers);
+    setCreativeEffects(normalizeCreativeEffects(next.creativeEffects || []));
     setMotionScenes(next.motionScenes);
     setCompoundClips(next.compoundClips);
     setCompositionOrder(Array.isArray(next.compositionOrder) ? next.compositionOrder : null);
@@ -9975,6 +10178,7 @@ const ViralClipStudio = ({
     setSoundEffects(next.soundEffects);
     setVoiceovers(next.voiceovers);
     setAdjustmentLayers(next.adjustmentLayers);
+    setCreativeEffects(normalizeCreativeEffects(next.creativeEffects || []));
     setMotionScenes(next.motionScenes);
     setCompositionOrder(Array.isArray(next.compositionOrder) ? next.compositionOrder : null);
     setThreeDScenes(next.threeDScenes);
@@ -10068,6 +10272,7 @@ const ViralClipStudio = ({
       if (Array.isArray(next.threeDScenes)) setThreeDScenes(next.threeDScenes);
       setMotionKeyframes(next.motionKeyframes);
       setAdjustmentLayers(next.adjustmentLayers);
+    setCreativeEffects(normalizeCreativeEffects(next.creativeEffects || []));
       setCompositionOrder(next.compositionOrder);
       setCompoundClips(next.compoundClips || []);
       if (next.finishFx) replaceFinishFx(next.finishFx);
@@ -10551,6 +10756,7 @@ const ViralClipStudio = ({
         "motion",
         "composite",
         "flow",
+        "effects",
         "creatorfx",
         "pacing",
         "broll",
@@ -10713,6 +10919,7 @@ const ViralClipStudio = ({
 
   const motionKeyframeTrack = targetId => {
     if (targetId === "main-video") return "video";
+    if (creativeEffects.some(item => String(item.id) === String(targetId))) return "adjustment";
     const layer = overlays.find(item => item.id === targetId);
     return layer?.bRollMode || ["image", "video"].includes(layer?.type) ? "broll" : "graphics";
   };
@@ -10773,7 +10980,8 @@ const ViralClipStudio = ({
 
   const editMotionPropertyAtPlayhead = (targetId, property, requestedValue, toggle = false) => {
     const group = compositionGroups.byId.get(targetId);
-    const target = group ? { ...group, ...group.transform } : targetId === "main-video" ? mainTransform : overlays.find(item => item.id === targetId);
+    const fxTarget = creativeEffects.find(item => String(item.id) === String(targetId));
+    const target = group ? { ...group, ...group.transform } : fxTarget ? { ...fxTarget, isCreativeEffect: true } : targetId === "main-video" ? mainTransform : overlays.find(item => item.id === targetId);
     const descriptor = studioMotionPropertiesForTarget(target).find(item => item.id === property);
     if (!target || !descriptor || (descriptor.mediaOnly && !["image", "video"].includes(target.type)) ||
         !allowTimelineTimingEdit(motionKeyframeTrack(targetId))) return;
@@ -10784,7 +10992,13 @@ const ViralClipStudio = ({
     const tolerance = motionKeyframeTolerance(exportSettings.fps, previewSpeed);
     const keys = motionKeyframes.filter(key => key.targetId === targetId && key.property === property);
     const existing = motionKeyAtPlayhead(keys, targetId, property, time, tolerance);
-    const evaluated = group ? evaluateStudioGroupTransform(group, keys, time)[property] : buildMotionAutomationStyle(keys, time, target)[property];
+    const evaluated = fxTarget
+      ? (property === "opacity"
+          ? evaluateCreativeEffectParams(fxTarget, keys, time).opacity
+          : evaluateCreativeEffectParams(fxTarget, keys, time).params[property])
+      : group
+        ? evaluateStudioGroupTransform(group, keys, time)[property]
+        : buildMotionAutomationStyle(keys, time, target)[property];
     const value = toggle ? evaluated : Math.max(descriptor.min, Math.min(descriptor.max, Number(requestedValue)));
     if (toggle && existing) {
       removeMotionKeyframe(existing.id);
@@ -10798,6 +11012,16 @@ const ViralClipStudio = ({
         if(target.perspective)validateStudioPerspectiveLayer(target,next.filter(k=>k.targetId===targetId)); }
       catch (error) { setStudioActionMessage(error.message); return; }
       setMotionKeyframes(next);
+    } else if (fxTarget) {
+      setCreativeEffects(current =>
+        current.map(item =>
+          String(item.id) === String(targetId)
+            ? property === "opacity"
+              ? { ...item, opacity: value }
+              : { ...item, params: { ...item.params, [property]: value } }
+            : item
+        )
+      );
     } else if (group) {
       setCompoundClips(current => current.map(item => item.id === targetId ? { ...item, transform: { ...item.transform, [property]: value } } : item));
     } else if (targetId === "main-video") {
@@ -13109,6 +13333,14 @@ const ViralClipStudio = ({
           // those pixels through the ordinary owned image uploader before
           // quoting/rendering, just like an imported image. Inline media must
           // not become part of the credit operation's bounded descriptor.
+          const embeddedSvg = overlay.type === "image" && /^data:image\/svg\+xml;base64,([A-Za-z0-9+/=]+)$/.exec(overlay.src || "");
+          if (!fileToUpload && embeddedSvg) {
+            const svgText = decodeURIComponent(escape(atob(embeddedSvg[1])));
+            fileToUpload = await rasterizeStudioArtwork(svgText, overlay.name || "Scrapbook artwork");
+            generatedExtension = "png";
+            isNewBlob = true;
+          }
+
           const embeddedRaster = overlay.type === "image" &&
             /^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/=]+)$/.exec(overlay.src || "");
           if (embeddedRaster && !overlay.vectorShape) {
@@ -13865,6 +14097,7 @@ const ViralClipStudio = ({
     creativeEffectsEnabled,
     creativePreset,
     creativeIntensity,
+    creativeEffects,
     finishFx,
     podcastVisualizer,
     finishKeyframes,
@@ -14625,7 +14858,7 @@ const ViralClipStudio = ({
       if (!context) return;
       context.imageSmoothingQuality = "high";
       const pausedPaint = !moving && soloFinishRasterEnabled && !overlays.length &&
-        !compiledAdjustmentGrades.length && pausedSourceFrame?.status === 'accurate'
+        !compiledAdjustmentGrades.length && !creativeEffects.length && pausedSourceFrame?.status === 'accurate'
         ? [programmeVideo.currentSrc,programmeVideo.currentTime,pausedSourceFrame.image,
             canvasWidth,canvasHeight,targetWidth,targetHeight,rect.width,rect.height] : null;
       if (pausedPaint && lastPausedPaint && pausedPaint.every((value,index)=>Object.is(value,lastPausedPaint[index]))) return;
@@ -15312,6 +15545,69 @@ const ViralClipStudio = ({
         }
         if(layer.maskSourceNodeId)blendNodeGrade(layer.maskSourceNodeId,adjustmentMaskOriginal);
       }
+      if (finishPreviewIsLive && creativeEffects.length > 0) {
+        const resolveTrackedPose = (fx, t) => {
+          if (!fx.tracking?.enabled || !fx.tracking?.sourceLayerId) return null;
+          const srcLayer = overlays.find(o => String(o.id) === String(fx.tracking.sourceLayerId));
+          if (!srcLayer) return null;
+          const srcKeys = previewMotionKeyframes.filter(k => String(k.targetId) === String(srcLayer.id));
+          const pose = srcLayer.parentId || srcLayer.parameterLinks || srcLayer.zDepth
+            ? evaluateWorldLayerPose(srcLayer, overlays, previewMotionKeyframes, t, mainTransform)
+            : buildMotionAutomationStyle(srcKeys, t, srcLayer);
+          return {
+            x: clampNumber(pose.x + Number(fx.tracking.offsetX || 0), 5, 95, 50),
+            y: clampNumber(pose.y + Number(fx.tracking.offsetY || 0), 5, 95, 45),
+            scale: clampNumber(Number(pose.scale || 1) * Number(fx.params?.scale || 1), 0.2, 3.0, 1),
+            rotation: Number(pose.rotation || 0) + Number(fx.params?.rotation || 0),
+          };
+        };
+        const drawBehindLayer = (targetCtx, targetW, targetH, t) => {
+          const activeTear = creativeEffects.find(eff => eff.enabled !== false && eff.effectId === "ripped_paper" && eff.params?.behindOverlayId && t >= eff.startTime && t <= eff.startTime + eff.duration);
+          if (!activeTear) return;
+          const bid = String(activeTear.params.behindOverlayId);
+          const ov = overlays.find(item => String(item.id) === bid);
+          if (!ov) return;
+          if (ov.type === "text") {
+            targetCtx.save();
+            targetCtx.fillStyle = ov.color || "#ffffff";
+            targetCtx.font = `800 ${Math.max(18, Math.round(targetH * 0.06))}px Inter, sans-serif`;
+            targetCtx.textAlign = "center";
+            targetCtx.textBaseline = "middle";
+            targetCtx.fillText(ov.text || "", targetW * 0.5, targetH * 0.5, targetW * 0.85);
+            targetCtx.restore();
+            return;
+          }
+          const mediaEl = ov.type === "video"
+            ? overlayMediaRefsRef.current.get(bid)
+            : phoneFrameRef.current?.querySelector(`[data-studio-layer-id="${bid}"] img`);
+          if (mediaEl) {
+            try {
+              targetCtx.drawImage(mediaEl, 0, 0, targetW, targetH);
+            } catch (_) {}
+          }
+        };
+        const getFreezeSourceCanvas = (fx, targetW, targetH) => {
+          const fTime = Number(fx.params?.freezeTime ?? fx.startTime ?? 0);
+          const key = `${fx.id}:${fTime.toFixed(2)}:${targetW}x${targetH}`;
+          const existing = freezeFrameCacheRef.current.get(key);
+          if (existing) return existing;
+          const snap = document.createElement("canvas");
+          snap.width = targetW;
+          snap.height = targetH;
+          snap.getContext("2d").drawImage(paintCanvas, 0, 0, targetW, targetH);
+          freezeFrameCacheRef.current.set(key, snap);
+          return snap;
+        };
+        renderCreativeEffectsToCanvas(
+          context,
+          canvasWidth,
+          canvasHeight,
+          creativeEffects,
+          previewMotionKeyframes,
+          frameOutputTime,
+          { fps: exportSettings.fps || 30, drawBehindLayer, resolveTrackedPose, getFreezeSourceCanvas, beatMarkers: musicBeatMarkers }
+        );
+      }
       if (pausedRaster) {
         // Finish precedes the inset frame in the canonical worker. Preserve
         // that order, including its even-pixel cover/crop, in an exact still.
@@ -15459,6 +15755,7 @@ const ViralClipStudio = ({
     effectiveFinishFx,
     mainFrame,
     overlays,
+    creativeEffects,
     soloFinishRasterEnabled,
     framedSoloRasterEnabled,
     compiledAdjustmentGrades,
@@ -21189,7 +21486,14 @@ const ViralClipStudio = ({
                                 opacity: overlay.isNullRig ? 1 : overlayMotion.opacity * titlePose.opacity,
                                 display: overlay.isNullRig && (activeOverlayId !== overlay.id || !isPreviewPaused || isPreviewFullscreen) ? 'none' : undefined,
                                 visibility: (isHiddenTrackMatteSource(overlay, overlays) && overlay.type === 'video') ||
+                                  (comparisonMode !== "before" && creativeEffects.some(eff => eff.enabled !== false && eff.effectId === "ripped_paper" && String(eff.params?.behindOverlayId || "") === String(overlay.id) && compositionTime >= eff.startTime && compositionTime <= eff.startTime + eff.duration)) ||
                                   (overlay.perspective && (compositionTime < Number(overlay.startTime || 0) || compositionTime >= Number(overlay.startTime || 0)+Number(overlay.duration || 0))) ? 'hidden' : undefined,
+                                ...(overlay.scrapbookFrame?.enabled ? {
+                                  backgroundColor: overlay.scrapbookFrame.borderColor || "#f7f3eb",
+                                  padding: "10px 10px 26px 10px",
+                                  boxShadow: "0 10px 26px rgba(0,0,0,0.45)",
+                                  borderRadius: "2px",
+                                } : {}),
                                 "--layer-opacity": overlay.type === "image"
                                   ? overlayMotion.opacity * titlePose.opacity : undefined,
                                 mixBlendMode: trackMatteUri ? "normal" : (overlay.blendMode || "normal"),
@@ -21350,6 +21654,26 @@ const ViralClipStudio = ({
                               ) : null}
 
                               {isMediaOverlay && <StudioNodeEffectSurface layer={overlay} videoRef={videoRef} mapTime={getPreviewTimelineTime} time={previewTimelineTime} overlays={overlays} keyframes={previewMotionKeyframes} mainTransform={mainTransform} programmeHeight={studioSoloPictureDimensions({sourceWidth:videoRef.current?.videoWidth,sourceHeight:videoRef.current?.videoHeight,aspect:reframeAspect,resolution:exportSettings.resolution,frame:mainFrame})?.height||720} />}
+                              {overlay.scrapbookFrame?.enabled ? (
+                                <>
+                                  {overlay.scrapbookFrame.tapeTop !== false ? (
+                                    <span style={{
+                                      position: "absolute", top: "-8px", left: "50%", transform: "translateX(-50%) rotate(-3deg)",
+                                      width: "36%", height: "14px", background: overlay.scrapbookFrame.tapeColor || "#e6cfa2",
+                                      opacity: 0.82, pointerEvents: "none", borderRadius: "2px",
+                                    }} />
+                                  ) : null}
+                                  {overlay.scrapbookFrame.captionText ? (
+                                    <span style={{
+                                      position: "absolute", bottom: "5px", left: "8px", right: "8px", textAlign: "center",
+                                      fontSize: "10px", fontWeight: 700, color: "#1f2937", pointerEvents: "none",
+                                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                                    }}>
+                                      {overlay.scrapbookFrame.captionText}
+                                    </span>
+                                  ) : null}
+                                </>
+                              ) : null}
                               </StudioPerspectiveSurface>
                               {comparisonMode !== "split" &&
                                 activeOverlayId === overlay.id &&
@@ -26830,6 +27154,47 @@ const ViralClipStudio = ({
                 </div>
               ) : null}
 
+              {studioInspectorTab === "effects" ? (
+                <StudioCreativeEffectsPanel
+                  creativeEffects={creativeEffects}
+                  activeEffectId={activeCreativeEffectId}
+                  onSelectEffect={setActiveCreativeEffectId}
+                  onChangeCreativeEffects={next => {
+                    setCreativeEffects(next);
+                    setComparisonMode("after");
+                    setPreviewFinishedFile(false);
+                    setProjectSaveState("unsaved");
+                  }}
+                  motionKeyframes={motionKeyframes}
+                  onToggleEffectKeyframe={handleToggleEffectKeyframe}
+                  onUpdateMotionKeyframe={updateMotionKeyframe}
+                  overlays={overlays}
+                  captionSegments={captionSegments}
+                  activeOverlayId={activeOverlayId}
+                  onSelectOverlay={setActiveOverlayId}
+                  onChangeOverlays={setOverlays}
+                  onAddScrapbookPreset={handleAddScrapbookPreset}
+                  onAddScrapbookElement={handleAddScrapbookElement}
+                  onToggleOverlayScrapbookFrame={handleToggleOverlayScrapbookFrame}
+                  onSyncSpeedRampEffect={handleSyncSpeedRampEffect}
+                  onStartDoodleSubjectTrack={id => {
+                    setDoodleTrackPickEffectId(current => (current === id ? null : id));
+                    setComparisonMode("after");
+                    setStudioActionMessage("Click the subject on the video preview to track its motion path.");
+                  }}
+                  doodleTrackPickEffectId={doodleTrackPickEffectId}
+                  doodleTrackingBusy={doodleTrackingBusy}
+                  currentTime={previewTimelineTime}
+                  programmeDuration={liveTimelineDuration}
+                  frameRate={exportSettings.fps}
+                  onSeek={t => jumpToOutputTimelineTime(Number(t || 0))}
+                  onOpenCurveEditor={id => {
+                    setMotionTargetId(id);
+                    setTimelineDockExpanded(true);
+                  }}
+                />
+              ) : null}
+
               {studioInspectorTab === "creatorfx" ? (
                 <StudioCreatorWorkbench
                   value={creatorPreview}
@@ -31835,7 +32200,8 @@ const ViralClipStudio = ({
               voiceovers={voiceovers}
               adjustmentLayers={adjustmentLayers}
               creativeEffects={
-                [...(audioRemix.enabled ? [{id:'audio-remix-effect',name:`Remix · ${AUDIO_REMIX_PRESETS.find(preset=>preset.id===audioRemix.preset)?.name || audioRemix.preset}`,
+                [...creativeEffects.map(eff => ({ ...eff, isCreativeEffect: true })),
+                  ...(audioRemix.enabled ? [{id:'audio-remix-effect',name:`Remix · ${AUDIO_REMIX_PRESETS.find(preset=>preset.id===audioRemix.preset)?.name || audioRemix.preset}`,
                   startTime:0,duration:liveTimelineDuration,toolId:'sound'}] : []), ...(creativeEffectsEnabled
                   ? [
                       {
@@ -31914,6 +32280,14 @@ const ViralClipStudio = ({
               onOverlaySlip={handleOverlayTimelineSlip}
               onAdjustmentMove={handleAdjustmentTimelineMove}
               onAdjustmentTrim={handleAdjustmentTimelineTrim}
+              onSelectCreativeEffect={id => {
+                setActiveCreativeEffectId(id);
+                setStudioInspectorTab("effects");
+                setActiveCreativeTool("effects");
+                setComparisonMode("after");
+              }}
+              onCreativeEffectMove={handleCreativeEffectTimelineMove}
+              onCreativeEffectTrim={handleCreativeEffectTimelineTrim}
               onSelectOverlay={id => { setSelectedGroupId(null); setActiveOverlayId(id); }}
               onMotionMove={handleMotionTimelineMove}
               onMotionTrim={handleMotionTimelineTrim}

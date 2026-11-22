@@ -31059,6 +31059,7 @@ class RenderViralRequest(BaseModel):
     # frontend's Quality Enhancement control explicitly requests it.
     professional_cleanup: bool = False
     creative_plan: Optional[ViralCreativePlan] = None
+    creative_effects: Optional[List[Dict[str, Any]]] = None
     finish_plan: Optional[Dict[str, Any]] = None
     audio_restoration: Optional[Dict[str, Any]] = None
     audio_automation: Optional[Dict[str, Any]] = None
@@ -32742,6 +32743,63 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     "reason": str(creative_error),
                 }
 
+        # 2.86. Creative Effects & Overlays (Phase 1-3 deterministic compositor)
+        raw_creative_effects = (
+            request.creative_effects
+            if request.creative_effects is not None
+            else ((request.finish_plan or {}).get("creative_effects") or [])
+        )
+        behind_tear_overlay_ids = set()
+        if raw_creative_effects:
+            try:
+                from .studio_creative_effects import normalize_creative_effects, render_creative_effects_video
+            except ImportError:
+                from studio_creative_effects import normalize_creative_effects, render_creative_effects_video
+            normalized_studio_fx = normalize_creative_effects(raw_creative_effects, duration=rendered_timeline_duration)
+            enabled_studio_fx = [eff for eff in normalized_studio_fx if eff.get("enabled", True)]
+            if enabled_studio_fx:
+                report_progress(56, "Applying Studio creative effects")
+                fx_keyframes = list(((request.editor_timeline or {}).get("motion_keyframes") or []))
+                for eff in enabled_studio_fx:
+                    for raw_eff in raw_creative_effects:
+                        if isinstance(raw_eff, dict) and str(raw_eff.get("id")) == str(eff["id"]):
+                            fx_keyframes.extend(raw_eff.get("motion_keyframes") or [])
+                behind_image_path = None
+                behind_video_path = None
+                for eff in enabled_studio_fx:
+                    if eff["effectId"] == "ripped_paper":
+                        bid = str((eff.get("params") or {}).get("behindOverlayId") or "").strip()
+                        if bid:
+                            behind_ov = next((o for o in request.overlays if str(o.id) == bid), None)
+                            if behind_ov and behind_ov.src:
+                                behind_tear_overlay_ids.add(bid)
+                                if behind_ov.type == "image":
+                                    from studio_image_sources import materialize_studio_image
+                                    behind_image_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_behind_{bid}.png")
+                                    sequence_temp_paths.add(behind_image_path)
+                                    await materialize_studio_image(behind_ov.src, behind_image_path, job_id=job_id)
+                                elif behind_ov.type == "video":
+                                    behind_video_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_behind_{bid}.mp4")
+                                    sequence_temp_paths.add(behind_video_path)
+                                    await materialize_video_input(behind_ov.src, behind_video_path, keep_audio=False)
+                creative_fx_out = os.path.join(SHARED_TMP_DIR, f"{job_id}_studio_creative_fx.mp4")
+                sequence_temp_paths.add(creative_fx_out)
+                await asyncio.to_thread(
+                    render_creative_effects_video,
+                    working_path,
+                    creative_fx_out,
+                    enabled_studio_fx,
+                    motion_keyframes=fx_keyframes,
+                    duration=rendered_timeline_duration,
+                    behind_image_path=behind_image_path,
+                    behind_video_path=behind_video_path,
+                    beat_markers=((request.finish_plan or {}).get("magnetic_beats") or {}).get("markers") or [],
+                    apply_standalone_speed=False,
+                )
+                prev_path = working_path
+                working_path = creative_fx_out
+                remove_replaced_temp_media(prev_path, working_path, SHARED_TMP_DIR)
+
         # 2.9. Burn the browser's speech-reactive visualizer into the exported
         # file. The graph reads the real source voice and preserves that same
         # audio stream for the final mix.
@@ -33113,7 +33171,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                                       composition_fps)
             overlay_filter_blocks.append((str(overlay.id), block, input_label, current_v_label))
 
-        video_overlays = [o for o in request.overlays if o.type == 'video' and o.src]
+        video_overlays = [o for o in request.overlays if o.type == 'video' and o.src and str(o.id) not in behind_tear_overlay_ids]
         overlay_audio_specs = []
         prepared_overlay_ranges = {}
         prepared_overlay_audio_ranges = {}
@@ -33246,7 +33304,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 remember_overlay_block(ov, block_start, block_input)
 
         # Process Image Overlays (e.g. Cute Captions)
-        image_overlays = [o for o in request.overlays if o.type == 'image' and o.src]
+        image_overlays = [o for o in request.overlays if o.type == 'image' and o.src and str(o.id) not in behind_tear_overlay_ids]
         try:
             from .studio_image_sources import materialize_studio_image
         except ImportError:
@@ -33301,6 +33359,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         or (layer_effects.get("colorize") or {}).get("enabled")
                         or (layer_effects.get("shadow") or {}).get("enabled")
                         or (layer_effects.get("motion_blur") or {}).get("enabled")
+                        or (layer_effects.get("scrapbook_frame") or {}).get("enabled")
                         or getattr(ov, "motionDesign", False)
                     )
                 )
