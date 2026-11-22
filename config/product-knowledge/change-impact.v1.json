@@ -633,6 +633,22 @@
         "docs/STUDIO-COMPLETION-CONTRACT.md"
       ],
       "reason": "Knowledge1.0.65 distinguishes verified working local/deployed scopes from broader family ratings; retained evidence and release state are reconciled without importing feature implementations or promoting readiness."
+    },
+    {
+      "feature_id": "publishing.publish",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "frontend/src/features/publishing/UnifiedPublisher.js",
+        "frontend/src/utils/tiktokDisclosures.js",
+        "src/utils/tiktokDisclosures.js",
+        "src/services/tiktokService.js",
+        "src/routes/tiktokRoutes.js"
+      ],
+      "reason": "Knowledge 1.0.66 documents independent TikTok disclosures, explicit off choices, requested-label review, required-disclosure limits and automatic provider labels. Regression tests use mocked provider transport; no live publishing or readiness promotion."
     }
   ]
 }

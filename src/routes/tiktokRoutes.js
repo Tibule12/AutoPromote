@@ -22,6 +22,7 @@ const { safeFetch } = require("../utils/ssrfGuard");
 const { tokenInfo, objSummary } = require("../utils/logSanitizer");
 // Helper to extract/decrypt stored token blobs from connection documents
 const { tokensFromDoc } = require("../services/connectionTokenUtils");
+const { resolveTikTokDisclosures, tikTokDisclosurePostInfo } = require("../utils/tiktokDisclosures");
 
 // Rate limiters for TikTok routes (router-level).
 // `rateLimiter` is a facade that uses a distributed limiter when available,
@@ -990,6 +991,13 @@ router.post(
       // Accept payload fields used by frontend: url (storage URL), title, meta, platform_options
       const { meta = {}, platform_options = {} } = req.body || {};
       const tiktokOpts = platform_options && platform_options.tiktok;
+      let conn = null;
+      let disclosures;
+      try {
+        disclosures = resolveTikTokDisclosures({ platform_options: { tiktok: tiktokOpts || {} } });
+      } catch (error) {
+        return res.status(400).json({ error: error.code, message: error.message });
+      }
 
       // If TikTok options present, validate required UX fields (privacy + consent)
       if (tiktokOpts) {
@@ -1026,7 +1034,7 @@ router.post(
           .collection("connections")
           .doc("tiktok")
           .get();
-        const conn = connSnap.exists ? connSnap.data() : null;
+        conn = connSnap.exists ? connSnap.data() : null;
 
         // Conservative default info
         const defaultInfo = {
@@ -1168,9 +1176,9 @@ router.post(
         // If commercial content is enabled, require at least one of yourBrand or brandedContent
         if (
           tiktokOpts &&
-          tiktokOpts.commercial &&
-          tiktokOpts.commercial.yourBrand === false &&
-          tiktokOpts.commercial.brandedContent === false
+          disclosures.isCommercial &&
+          !disclosures.brandOrganic &&
+          !disclosures.brandedContent
         ) {
           try {
             await db.collection("admin_audit").add({
@@ -1198,8 +1206,7 @@ router.post(
         // Branded content cannot be private: enforce invariant server-side as well
         if (
           tiktokOpts &&
-          tiktokOpts.commercial &&
-          tiktokOpts.commercial.brandedContent &&
+          disclosures.brandedContent &&
           tiktokOpts.privacy === "SELF_ONLY"
         ) {
           try {
@@ -1251,7 +1258,7 @@ router.post(
           }
 
           // Require disclosure when content is marked as AI-generated
-          if (tiktokOpts.is_aigc) {
+          if (disclosures.aiGenerated) {
             if (!tiktokOpts.disclosure) {
               try {
                 await db.collection("admin_audit").add({
@@ -1279,8 +1286,7 @@ router.post(
 
           // Require disclosure when any commercial/branded flag is selected
           if (
-            tiktokOpts.commercial &&
-            (tiktokOpts.commercial.yourBrand || tiktokOpts.commercial.brandedContent)
+            disclosures.brandOrganic || disclosures.brandedContent
           ) {
             if (!tiktokOpts.disclosure) {
               try {
@@ -1310,8 +1316,7 @@ router.post(
         // Branded content cannot be private: enforce invariant server-side as well
         if (
           tiktokOpts &&
-          tiktokOpts.commercial &&
-          tiktokOpts.commercial.brandedContent &&
+          disclosures.brandedContent &&
           tiktokOpts.privacy === "SELF_ONLY"
         ) {
           try {
@@ -1492,7 +1497,6 @@ router.post(
 
       // 3. Initiate Upload
       const { safeFetch } = require("../utils/ssrfGuard");
-      const { validateUrl } = require("../utils/urlValidator"); // Assuming this exists or we use safeFetch
 
       console.log("[TikTok Upload] Initializing upload for open_id:", openId);
 
@@ -1542,6 +1546,7 @@ router.post(
                   disable_comment: tiktokOpts?.interactions?.comments === false,
                   disable_stitch: tiktokOpts?.interactions?.stitch === false,
                   video_cover_timestamp_ms: 1000, // Optional: default cover
+                  ...tikTokDisclosurePostInfo(disclosures),
                 },
                 source_info: {
                   source: "FILE_UPLOAD",

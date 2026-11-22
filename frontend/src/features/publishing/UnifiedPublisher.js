@@ -1033,13 +1033,6 @@ const UnifiedPublisher = ({
           if (tiktokCaption) {
             platformOptionsMap[p].caption = tiktokCaption;
           }
-          platformOptionsMap[p].commercial = {
-            isCommercial: data.commercialContent,
-            yourBrand: data.yourBrand,
-            brandedContent: data.brandedContent,
-            is_commercial_content: data.commercialContent,
-          };
-          platformOptionsMap[p].commercialContent = data.commercialContent;
         }
       });
 

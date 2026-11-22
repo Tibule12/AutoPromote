@@ -71,6 +71,14 @@ test("Page selection and company targets stay distinct from connection status", 
   expect(platformIssues("linkedin", { file, postingTarget: "company", companyId: "" }, connected)).toContain("Enter the company Page ID");
 });
 
+test("TikTok submission clears stale aliases when visible disclosure controls are off", () => {
+  const options = preparePlatformOptions("tiktok", { commercialContent: false, yourBrand: true,
+    brandedContent: true, brand_organic_toggle: true, brand_content_toggle: true, aiGenerated: false, is_aigc: true });
+  expect(options).toMatchObject({ commercialContent: false, yourBrand: false, brandedContent: false,
+    brand_organic_toggle: false, brand_content_toggle: false, is_aigc: false, disclosure: false,
+    commercial: { isCommercial: false, yourBrand: false, brandedContent: false } });
+});
+
 test("master copy copies text only and submission/review use the same caption builder", () => {
   expect(masterCopyFor("facebook", "Master", "Body")).toEqual({ title: "Master", description: "Body", message: "Body" });
   expect(masterCopyFor("reddit", "Master", "Body")).not.toHaveProperty("subreddit");
