@@ -241,7 +241,7 @@ def _bounded_text_pose(artwork, overlay, layer, pose, canvas_size, sample_opacit
     return projected
 
 
-def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1, *, reference_surface=False):
+def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1, *, reference_surface=False, resize_cache=None):
     region=((layer or {}).get('perspective') or {}).get('sourceRect')
     if region is not None:
         validate_perspective(layer['perspective'])
@@ -270,7 +270,17 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1, *, 
     else:
         target_height = box_height
         target_width = max(2, round(box_height * source_ratio))
-    artwork = asset.resize((target_width, target_height), Image.Resampling.LANCZOS)
+    resize_size = (target_width, target_height)
+    if (resize_cache is not None and resize_cache.get('asset') is asset
+            and resize_cache.get('size') == resize_size):
+        artwork = resize_cache['artwork']
+    else:
+        artwork = asset.resize(resize_size, Image.Resampling.LANCZOS)
+        if resize_cache is not None:
+            # One immutable source/size only, scoped to this layer call. The
+            # subsequent crop, masks and effects never modify this surface.
+            # Video frames and changing vector/title artwork invalidate it.
+            resize_cache.update(asset=asset, size=resize_size, artwork=artwork)
     if fit == "cover":
         left = max(0, (artwork.width - box_width) // 2)
         top = max(0, (artwork.height - box_height) // 2)
@@ -538,13 +548,15 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
         # preceding identical sampled pose, retaining one bounded canvas.
         # Decoded video frames always go through the compositor independently.
         held_pose = held_sample_opacity = held_raster = None
+        held_frame_pose = held_frame_bytes = None
+        resize_cache = {} if frame_source is None else None
         vector_trim = text_progress = None
         try:
             for frame_index in range(frame_count):
                 if frame_source is not None:
                     asset = frame_source(frame_index)
                 absolute_output = output_start + frame_index / fps
-                frame = Image.new("RGBA", (width, height))
+                frame = frame_bytes = None
                 for sample in range(samples):
                     sample_output = max(output_start, absolute_output - (samples - 1 - sample) * shutter / fps)
                     edit_time = (
@@ -564,6 +576,13 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
                         pose["scale"] *= animation["scale"]
                         pose["x"] += animation["x"]
                         pose["y"] += animation["y"]
+                    if frame_source is None and samples == 1 and pose == held_frame_pose:
+                        # A hold has identical final bytes as well as identical
+                        # geometry. Avoid re-compositing and copying its whole
+                        # transparent canvas on every frame. Moving video and
+                        # multi-sample shutters never take this path.
+                        frame_bytes = held_frame_bytes
+                        break
                     if pose["opacity"] <= 0:
                         continue
                     sample_opacity = 1 if sample == samples - 1 else .28 / max(1, samples - 1)
@@ -577,6 +596,8 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
                             raster = title_animator.project(pose["text_progress"], layer, pose,
                                                             (width, height), sample_opacity)
                             held_pose, held_sample_opacity, held_raster = pose, sample_opacity, raster
+                            if frame is None:
+                                frame = Image.new("RGBA", (width, height))
                             frame.alpha_composite(raster)
                             continue
                         if title_animator is not None and text_progress != pose["text_progress"]:
@@ -587,12 +608,19 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
                             if trim != vector_trim:
                                 asset = rasterize_vector_shape(vector_shape, stroke_start=trim[0], stroke_end=trim[1], stroke_offset=trim[2])
                                 vector_trim = trim
-                        raster = _render_pose(asset, overlay, layer, pose, (width, height), sample_opacity)
+                        raster = _render_pose(asset, overlay, layer, pose, (width, height), sample_opacity,
+                                              resize_cache=resize_cache)
                         if frame_source is None:
                             held_pose, held_sample_opacity, held_raster = pose, sample_opacity, raster
+                    if frame is None:
+                        frame = Image.new("RGBA", (width, height))
                     frame.alpha_composite(raster)
+                if frame_bytes is None:
+                    frame_bytes = (frame if frame is not None else Image.new("RGBA", (width, height))).tobytes()
+                if frame_source is None and samples == 1:
+                    held_frame_pose, held_frame_bytes = pose, frame_bytes
                 try:
-                    process.stdin.write(frame.tobytes())
+                    process.stdin.write(frame_bytes)
                 except BrokenPipeError as error:
                     process.wait(timeout=10); log.seek(0)
                     raise RuntimeError(f'Layer encoder stopped ({process.returncode}): '+log.read().decode(errors='replace')[-1200:]) from error

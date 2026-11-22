@@ -1,4 +1,60 @@
 {
+  "renderThroughput20261122": {
+    "date": "2026-11-22",
+    "evidenceRefs": [
+      "reports/studio-render-throughput-20261122/README.md",
+      "reports/studio-render-throughput-20261122/verification.json"
+    ],
+    "scope": "Bounded large-source paused-frame disk streaming, honest credit copy, per-export source/preparation reuse, immutable resize/hold reuse and quota-bounded parallel canonical layer preparation.",
+    "readinessPromotion": false,
+    "nextTaskId": "S02",
+    "localComparison": {
+      "secondsBefore": 757.970194205991,
+      "secondsAfter": 441.46774216598715,
+      "byteIdentical": true
+    },
+    "blockers": [
+      "PR #554 remains unmerged; owner holds merge/deployment pending further instruction",
+      "One additional 45s production retest is approved up to5 credits but remains on hold and unstarted",
+      "Actual CPU failover, concurrency/load, host loss and notification delivery remain unqualified",
+      "Whole predictive parity, broader S02/S04/S03 and creative approval remain separate"
+    ],
+    "ciFollowup": {
+      "failedRun": "https://github.com/Tibule12/AutoPromote/actions/runs/45037430598/job/137254182794",
+      "failure": "ModuleNotFoundError: pytest via test_studio_video_reuse importing test_studio_overlay_zero.run",
+      "imageBuild": "passed",
+      "failedImageTests": 1,
+      "imageTestCount": 192,
+      "fix": "Self-contained subprocess FFmpeg helper; explicitly CPU-render cached and independently prepared reference sources, comparing every decoded RGB byte instead of spatial H.264 symmetry",
+      "validationStatus": "Passed: exact17 image-gate module list,192 tests on local CPU with pytest and original pytest fixture imports explicitly refused",
+      "releaseState": "Owner holds merge/deployment and production retest until further instruction",
+      "readinessPromotion": false,
+      "productionRetestStarted": false,
+      "localFirstReplay": {
+        "testCount": 192,
+        "failures": 1,
+        "elapsedSeconds": 98.508,
+        "cause": "CPU lossy H.264 spatial window equality assumption",
+        "resolution": "Compare shared-preparation output against a full independent-source reference; exact array equality, no relaxed thresholds"
+      },
+      "focusedVerification": {
+        "testCount": 5,
+        "elapsedSeconds": 5.533,
+        "status": "passed",
+        "pytestImports": "explicitly refused",
+        "finalFrameComparison": "exact decoded RGB equality across all24 frames and both moving windows"
+      },
+      "localFinalReplay": {
+        "testCount": 192,
+        "elapsedSeconds": 100.115,
+        "status": "passed",
+        "pytestImports": "explicitly refused",
+        "runtime": "Local Python3.12 and FFmpeg6.1; remote Python3.11/FFmpeg7.1 image rerun remains separate",
+        "logSha256": "47a526a28ebc7dec3c088ac5b893dfc2026a71d1269ef2842c89b9856df3a574"
+      },
+      "remoteActionState": "Fix to be pushed to PR#554; automatic new-head checks remain separate from local validation"
+    }
+  },
   "videoSync20261121": {
     "date": "2026-11-21",
     "evidenceRefs": [
@@ -27447,6 +27503,31 @@
       "Production frontend/API/CPU/GPU deployment completion and live release checks remain separate",
       "Whole-Studio predictive colour/edge/low-alpha parity, broad device performance and creative/listening approval remain open",
       "Local45secondframe render took793.2seconds; final encoding usedNVENC but raster preparation is CPU-heavy"
+    ]
+  },
+  "productionVerification20261122": {
+    "status": "PARTIAL",
+    "evidence": "reports/studio-live-verification-20261122/verification.json",
+    "releaseCommit": "506de43b30e6838157f2ff3e057fe982455ffa1c",
+    "actualProductionRenders": 2,
+    "creditsDeducted": 10,
+    "gpuRenderAndDecodeVerified": true,
+    "cpuCapabilitiesVerified": true,
+    "automaticCpuFailoverVerified": false,
+    "nativeColdAndIndependentRestore": true,
+    "sameJobRetryWithoutDuplicateCharge": true,
+    "accuratePausedPreviewForLargeSources": "FAILED \u2014128MiBlimitrejects293713235bytepodcast",
+    "concurrencyOrLoadTested": false,
+    "emailCompletionVerified": false,
+    "productionFullyReady": false,
+    "remaining": [
+      "Accurate paused previews of sources above128MiB need a bounded large-source path.",
+      "The static No render credits used label is misleading after a paid export.",
+      "Healthy CPU capability and GPU execution are verified; actual automatic GPU-to-CPU failover was not forced.",
+      "No concurrency/load/worker-host-failure test was authorized or executed.",
+      "Notifications API returned200but contained neither job ID; email completion was not independently verified.",
+      "Drawn moving material recolour/heal/tracking and every Creative Effects preset were not exhaustively executed on production within these two renders.",
+      "Whole predictive colour/edge/low-alpha parity, device coverage, capture smoothness and owner creative/listening approval remain separate."
     ]
   }
 }
