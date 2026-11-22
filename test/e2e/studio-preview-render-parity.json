@@ -1,4 +1,27 @@
 {
+  "renderThroughputRelease20261122": {
+    "date": "2026-11-22",
+    "evidenceRefs": [
+      "reports/studio-render-throughput-20261122/README.md",
+      "reports/studio-render-throughput-20261122/release-verification.json"
+    ],
+    "scope": "PR554 merged and serving on frontend/API/CPU/GPU; one normal-account45s production retest, original film bytes, large-source PNG and credit label verified.",
+    "readinessPromotion": false,
+    "nextTaskId": "S02",
+    "productionComparison": {
+      "secondsBefore": 348.134,
+      "secondsAfter": 133.335,
+      "elapsedReductionPercent": 61.700092493120465,
+      "byteIdentical": true,
+      "actualCredits": 5,
+      "uniqueRenders": 1
+    },
+    "blockers": [
+      "One scoped timing comparison does not qualify concurrent users, forced CPU failover, cold starts, host loss, notifications or SLA",
+      "Headless captured playback drops82/1354 counters; smooth predictive real-time playback remains unqualified",
+      "Whole predictive picture/audio parity, broad source/preset coverage, sharedS02/S04/S03 and owner creative acceptance remain separate"
+    ]
+  },
   "renderThroughput20261122": {
     "date": "2026-11-22",
     "evidenceRefs": [
@@ -14,10 +37,9 @@
       "byteIdentical": true
     },
     "blockers": [
-      "PR #554 remains unmerged; owner holds merge/deployment pending further instruction",
-      "One additional 45s production retest is approved up to5 credits but remains on hold and unstarted",
-      "Actual CPU failover, concurrency/load, host loss and notification delivery remain unqualified",
-      "Whole predictive parity, broader S02/S04/S03 and creative approval remain separate"
+      "One scoped timing comparison does not qualify concurrent users, forced CPU failover, cold starts, host loss, notifications or SLA",
+      "Headless captured playback drops82/1354 counters; smooth predictive real-time playback remains unqualified",
+      "Whole predictive picture/audio parity, broad source/preset coverage, sharedS02/S04/S03 and owner creative acceptance remain separate"
     ],
     "ciFollowup": {
       "failedRun": "https://github.com/Tibule12/AutoPromote/actions/runs/45037430598/job/137254182794",
@@ -53,7 +75,8 @@
         "logSha256": "47a526a28ebc7dec3c088ac5b893dfc2026a71d1269ef2842c89b9856df3a574"
       },
       "remoteActionState": "Fix to be pushed to PR#554; automatic new-head checks remain separate from local validation"
-    }
+    },
+    "releaseEvidenceRef": "reports/studio-render-throughput-20261122/release-verification.json"
   },
   "videoSync20261121": {
     "date": "2026-11-21",
@@ -26880,6 +26903,22 @@
       "Notifications API returned200but contained neither job ID; email completion was not independently verified.",
       "Drawn moving material recolour/heal/tracking and every Creative Effects preset were not exhaustively executed on production within these two renders.",
       "Whole predictive colour/edge/low-alpha parity, device coverage, capture smoothness and owner creative/listening approval remain separate."
+    ]
+  },
+  "documentationEvidenceReconciliation20261122": {
+    "date": "2026-11-22",
+    "evidenceRefs": [
+      "docs/VERIFIED-FUNCTIONALITY-AND-RELEASE-STATUS.md",
+      "reports/studio-feature-documentation-20261122/retained-local-proofs.json",
+      "reports/studio-feature-documentation-20261122/README.md"
+    ],
+    "scope": "Recognize retained working caption/export/Node scopes separately from main/deployment and wider family limitations; seven private media hashes reverified. Documentation only.",
+    "readinessPromotion": false,
+    "nextTaskId": "S02",
+    "blockers": [
+      "Expanded caption/delivery implementations remain outside main; this task does not merge them",
+      "Overall recognition defects and broad preview/device/combination limits remain explicit",
+      "Newer local Node/VFX edits need matching-revision evidence reconciliation"
     ]
   }
 }

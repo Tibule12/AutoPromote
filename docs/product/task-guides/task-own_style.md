@@ -1,8 +1,8 @@
 # Edit a video in your own style
 
-Development documentation • product 1.2.0 • knowledge 1.0.64 • 2026-11-18
+Development documentation • product 1.2.0 • knowledge 1.0.65 • 2026-11-22
 
-Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
+Overall feature ratings and working subfeatures are separate. PARTIAL or BROKEN does not mean every control fails; entries identify verified workflows, release state and the remaining limitation. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
 ID: `task.own_style` • **PARTIAL** • SUPPORTED_WITH_LIMITATIONS
 
@@ -47,12 +47,12 @@ Change ordinary clips, titles, framing, captions, motion, colour and sound manua
 - studio.transforms — **FUNCTIONAL**: Edits position, scale, rotation, anchor, crop and opacity of ordinary layers. Native transform animation is preserved after save and reopen.
 - studio.keyframes — **FUNCTIONAL**: Edit property keys, spatial position handles and value/velocity graphs on the same editable project. Curve the route between paired positions while retaining ordinary history, saving and final compilation.
 - studio.color — **FUNCTIONAL**: Edits deterministic grade parameters and finish keys. Grade controls affect the selected supported stage; they do not establish arbitrary film-grade workflow parity.
-- studio.captions — **BROKEN**: Creates editable timed captions with a speech-language choice. Regeneration replaces only the selected source and preserves edits made while listening. Mixed-language wording still needs review.
+- studio.captions — **BROKEN**: Creates editable speech drafts. The expanded local correction workflow has passing tests and a real signed-in save/reopen/export example. The overall BROKEN rating refers to remaining recognition errors; it does not mean the tested correction controls fail. Expanded uncertain-word review, missing-speech markers and names/terms are not yet part of the released build.
 - studio.audio — **FUNCTIONAL**: Mixes owned original audio, master podcast, voiceover, music, B-roll and SFX buses. Cues and gain keys remain editable in the project.
-- studio.compositing — **PARTIAL**: Combines ordinary layers and animated graphic groups with shared order, static masks, alpha-aware blending and editable group clip timing. Broad preview/export picture and sound agreement remains incomplete.
+- studio.compositing — **PARTIAL**: Combines editable layers and groups with native masks, blending and timing. The retained Node repair passes six fixed picture comparisons and three playback profiles. Broad preview/export picture and sound agreement remains partial; those wider limits do not invalidate the passed Node workflows.
 - studio.templates — **PARTIAL**: Instantiates a pinned draft template into ordinary editable clips, layers, keyframes and audio. Retained signed-in local lifecycle evidence exists; public qualification and the showroom handoff remain incomplete.
 - studio.revision — **FUNCTIONAL**: Preserves canonical revision and provenance for manual edits, Director proposals, artifact review and output binding. Stale proposals must be reviewed again.
-- studio.export — **PARTIAL**: Requests a final movie and downloads the exact completed output after applicable ownership and review checks. Full preview parity and all product combinations are not qualified.
+- studio.export — **PARTIAL**: Downloads the exact completed movie. The released 45-second GPU export is verified, including a faster byte-identical retest. Strict size enforcement, Opus, Display P3 and SDR-mapped HDR10/PCM32 also have retained native local proof; those extensions have not reached the released build. PARTIAL applies to the wider delivery and compatibility scope.
 
 ## Result and limitations
 

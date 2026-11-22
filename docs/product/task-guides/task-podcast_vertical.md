@@ -1,8 +1,8 @@
 # Turn a podcast into a vertical promo
 
-Development documentation • product 1.2.0 • knowledge 1.0.64 • 2026-11-18
+Development documentation • product 1.2.0 • knowledge 1.0.65 • 2026-11-22
 
-Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
+Overall feature ratings and working subfeatures are separate. PARTIAL or BROKEN does not mean every control fails; entries identify verified workflows, release state and the remaining limitation. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
 ID: `task.podcast_vertical` • **PARTIAL** • SUPPORTED_WITH_LIMITATIONS
 
@@ -28,11 +28,11 @@ Select an owned conversation excerpt, prepare the authoritative audio and refine
 
 ## Feature readiness
 
-- studio.export — **PARTIAL**: Requests a final movie and downloads the exact completed output after applicable ownership and review checks. Full preview parity and all product combinations are not qualified.
+- studio.export — **PARTIAL**: Downloads the exact completed movie. The released 45-second GPU export is verified, including a faster byte-identical retest. Strict size enforcement, Opus, Display P3 and SDR-mapped HDR10/PCM32 also have retained native local proof; those extensions have not reached the released build. PARTIAL applies to the wider delivery and compatibility scope.
 - cam_combiner.synchronization — **PARTIAL**: Aligns camera material and optional master audio using the existing deterministic synchronization path. Review offsets before editing.
 - director.find_viral_clips — **PARTIAL**: Finds source-bound short-form candidates with requested length, opening/context/payoff, audio and visual evidence, transcript review flags and duplicate filtering. Preview a range and send it into the editable Studio.
 - studio.crop_reframe — **FUNCTIONAL**: Reframes a source or crops an overlay using the shared time map and existing renderer. Preserve subject framing and inspect source geometry at cuts.
-- studio.captions — **BROKEN**: Creates editable timed captions with a speech-language choice. Regeneration replaces only the selected source and preserves edits made while listening. Mixed-language wording still needs review.
+- studio.captions — **BROKEN**: Creates editable speech drafts. The expanded local correction workflow has passing tests and a real signed-in save/reopen/export example. The overall BROKEN rating refers to remaining recognition errors; it does not mean the tested correction controls fail. Expanded uncertain-word review, missing-speech markers and names/terms are not yet part of the released build.
 
 ## Result and limitations
 

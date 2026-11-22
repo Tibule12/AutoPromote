@@ -1,0 +1,39 @@
+{
+  "date": "2026-11-22",
+  "documentationOnly": true,
+  "knowledgeVersion": "1.0.65",
+  "generatedFiles": 43,
+  "knowledgeAndAssistanceTests": {
+    "passed": 52,
+    "failed": 0
+  },
+  "studioContractValid": true,
+  "studioFamilyCounts": {
+    "FUNCTIONAL": 17,
+    "PARTIAL": 9,
+    "BROKEN": 1,
+    "UNIMPLEMENTED": 2,
+    "PRO-READY": 0,
+    "PRODUCTION-READY": 0
+  },
+  "retainedMediaHashesRechecked": 7,
+  "allRecheckedHashesMatch": true,
+  "existingDeferredInventoryWarnings": 8,
+  "warningScope": [
+    "workspace.team",
+    "workspace.rewards",
+    "workspace.notifications",
+    "workspace.profile",
+    "workspace.security",
+    "workspace.earnings",
+    "workspace.memetic",
+    "assistant.existing_chat"
+  ],
+  "newPaidExecutions": 0,
+  "applicationImplementationMerged": false,
+  "releaseState": "documentation prepared on docs/verified-features-20261122; not yet merged",
+  "initialCorrections": [
+    "The first catalogue validation rejected an overly long availability label and too many compositing source references. The label was shortened and the Node proof uses an existing example/reference chain; schema limits remain unchanged."
+  ],
+  "privateTestLog": "studio-render-speed-20261122/docs-reconciliation-tests.log"
+}

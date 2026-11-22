@@ -1,8 +1,14 @@
 # AutoPromote
 
-Latest security update: Added comprehensive rate limiting and security enhancements.
+AutoPromote provides creator tools for video editing, finding short clips, camera combining, sound, publishing and scheduling. It is under active founder testing. Processing can use app credits and cloud resources; availability depends on the account and the supported workflow.
 
-AutoPromote is a free, automated content promotion platform that helps creators distribute content across major platforms, drive traffic to monetized landing pages, and generate daily revenue. Phase 1 is built entirely with free and open‑source tools; premium features (VFX‑style enhancements, auto‑tune, realistic background replacement) will be phased in later as the platform scales.
+## Current documentation — 22 November 2026
+
+Start with [verified functionality and release status](docs/VERIFIED-FUNCTIONALITY-AND-RELEASE-STATUS.md) and the [product guides](docs/product/README.md). The register identifies what works, its proof, whether it is local or deployed, and what still needs work. A broader PARTIAL/BROKEN family label does not invalidate its tested working subfeatures.
+
+The released Studio GPU timing retest completes the same 45-second master in 133.335 seconds instead of 348.134 seconds, with identical movie bytes and sound. Expanded caption correction and additional delivery profiles also have retained native local proof; they are separate from the released build. [Production verification](reports/studio-render-throughput-20261122/release-verification.json) · [Local evidence reconciliation](reports/studio-feature-documentation-20261122/README.md).
+
+These are specific verified workflows. They do not certify every feature, combination or production workload.
 
 ## Vision
 
@@ -10,7 +16,9 @@ AutoPromote is a free, automated content promotion platform that helps creators 
 - Route traffic to monetized landing pages you own (you keep 100% of AutoPromote revenue)
 - Users retain 100% of any revenue they earn directly from external platforms (TikTok, YouTube, Instagram, etc.)
 
-## MVP Features (Current Status)
+## Historical MVP checklist
+
+This older checklist is retained as development history. Use the dated product guides and release register above for current behaviour and limitations.
 
 - Auth & Profiles
   - [x] Firebase Auth with token verification and Firestore user provisioning (`src/authMiddleware.js`)

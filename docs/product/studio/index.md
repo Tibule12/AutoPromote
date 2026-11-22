@@ -1,8 +1,8 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.64 • 2026-11-18
+Development documentation • product 1.2.0 • knowledge 1.0.65 • 2026-11-22
 
-Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
+Overall feature ratings and working subfeatures are separate. PARTIAL or BROKEN does not mean every control fails; entries identify verified workflows, release state and the remaining limitation. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
 ## Timeline
 
@@ -392,11 +392,11 @@ Reframes a source or crops an overlay using the shared time map and existing ren
 
 ID: `studio.captions` • **BROKEN** • DETERMINISTIC
 
-Creates editable timed captions with a speech-language choice. Regeneration replaces only the selected source and preserves edits made while listening. Mixed-language wording still needs review.
+Creates editable speech drafts. The expanded local correction workflow has passing tests and a real signed-in save/reopen/export example. The overall BROKEN rating refers to remaining recognition errors; it does not mean the tested correction controls fail. Expanded uncertain-word review, missing-speech markers and names/terms are not yet part of the released build.
 
 **Purpose:** Generate timed speech drafts, correct wording and speaker/language labels, and retain editable caption styles in the shared Studio project.
 
-**Available to:** signed-in users with owned project and applicable entitlement
+**Available to:** signed-in users with owned project and applicable entitlement; Expanded review and names/terms: verified local build only; not released
 
 **Media:** video with speech, reviewed transcript phrases
 
@@ -417,9 +417,13 @@ Creates editable timed captions with a speech-language choice. Regeneration repl
 
 **Limits**
 
-- This dated development snapshot does not establish professional or production readiness.
-- Speech language is a source preference, not detected-language evidence. Code-switched wording still needs review; the prior broad automatic-caption qualification remains open.
+- Verified working locally on 14 November: 104 focused checks and an eight-second human-speech generation, spelling-context correction, Undo/Redo, exact save/reopen, export and finished-playback workflow.
+- Word-level issue selection/navigation, editable speech-gap markers and approval guards have passing component/worker checks. A separate full native gap-only or multilingual lifecycle remains unqualified.
+- Automatic recognition still mishears some words and numbers. BROKEN describes that wider accuracy gap, not the working correction and persistence paths.
+- The retained local movies and recordings are evidence, not an announcement that these extra controls are deployed.
+- Speech language is a source preference, not detected-language evidence. Code-switched wording still needs review.
 - Automatic English translation is unavailable for the explicit South African language choices. Import reviewed English subtitles when needed.
+- Broad accent/noise coverage, every style/retime combination and whole predictive picture/sound agreement remain open.
 
 **Common errors**
 
@@ -561,7 +565,7 @@ Applies the supported deterministic visual effects and source-bound subject scen
 
 ID: `studio.compositing` • **PARTIAL** • DETERMINISTIC
 
-Combines ordinary layers and animated graphic groups with shared order, static masks, alpha-aware blending and editable group clip timing. Broad preview/export picture and sound agreement remains incomplete.
+Combines editable layers and groups with native masks, blending and timing. The retained Node repair passes six fixed picture comparisons and three playback profiles. Broad preview/export picture and sound agreement remains partial; those wider limits do not invalidate the passed Node workflows.
 
 **Purpose:** Compose editable graphic hierarchies while preserving child-local edits, timing and property animation through the shared preview and render path.
 
@@ -602,6 +606,7 @@ Combines ordinary layers and animated graphic groups with shared order, static m
 
 **Limits**
 
+- Node repair evidence from 16 November includes 178 frontend cases, 258 renderer cases plus 13 subtests, exact save/reopen and native control checks. Newer local Node/VFX edits need evidence for their own revision.
 - Image and title geometric masks support feather and inversion. Inspect their boundaries in the exported movie, especially with soft edges.
 - Supported ordinary video layers can use geometric masks and direct two-dimensional video track mattes in the canonical composition path. That does not isolate people automatically. Main-video masks, arbitrary nesting and global effect ordering need separate qualification; inspect the actual export.
 - This dated development snapshot does not establish professional or production readiness.
@@ -945,7 +950,9 @@ Adds owned music and adjusts cue placement and volume automation in the same pro
 
 ID: `studio.sfx` • **PARTIAL** • DETERMINISTIC
 
-Places sound cues on the native timeline. Included sound-design presets synthesize deterministic PCM; owned external sound files can be used in the supported audio path.
+Places sound cues in editable projects. The deployed 45-second frame collection verifies 12 sound cues plus its original score through native save/reopen, GPU rendering, exact download and finished playback with sound. Broader audio/template combinations retain their separate limits.
+
+**Purpose:** Places sound cues on the native timeline. Included sound-design presets synthesize deterministic PCM; owned external sound files can be used in the supported audio path.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
@@ -970,6 +977,7 @@ Places sound cues on the native timeline. Included sound-design presets synthesi
 
 **Limits**
 
+- The demonstrated sound-cue workflow is working in production. The broader PARTIAL label is not a failure of that passed case; every microphone/voiceover path and audio combination is not established.
 - This dated development snapshot does not establish professional or production readiness.
 
 **Common errors**
@@ -1434,7 +1442,9 @@ Instantiates a pinned draft template into ordinary editable clips, layers, keyfr
 
 ID: `studio.preview` • **PARTIAL** • DETERMINISTIC
 
-Shows the existing project programme with mapped source frames and sound. Retained fixes improve selected cases; whole-stage live playback, stalls and picture/sound agreement remain open.
+Source and completed-movie playback work. Larger-source paused extraction is verified live on the 293.7 MB podcast. The retained Node repair also passes its six fixed picture comparisons and three playback profiles. PARTIAL refers to wider predictive picture/sound agreement and continuous playback limits, not absence of these working paths.
+
+**Purpose:** Shows the existing project programme with mapped source frames and sound. Retained fixes improve selected cases; whole-stage live playback, stalls and picture/sound agreement remain open.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
@@ -1455,8 +1465,11 @@ Shows the existing project programme with mapped source frames and sound. Retain
 
 **Limits**
 
+- Accurate paused extraction is deployed for sources up to 512 MiB on disk-backed preview hosts, with shared admission/storage limits and a 90-second request window. RAM-backed temporary storage retains a smaller allowance.
+- The live larger-source check verifies one authenticated original-clock PNG and its source identity. It does not establish whole moving-preview parity.
+- The retained 16 November Node repair passes six fixed picture pairs and three playback profiles. This is dated local-build evidence; it does not automatically qualify later Node edits.
+- The 22 November headless finished-film recording reports 82 dropped-picture counters of 1354; smooth predictive real-time playback remains unqualified.
 - This dated development snapshot does not establish professional or production readiness.
-- Accurate paused source pictures remain bounded to qualified clip clocks,90-second windows and128MiB sources. Strict ellipse mask/effect raster agreement and broad continuous picture/sound remain open.
 - The 15 October programme-clock repair removes an erroneous black fade over dim footage. A20s CPU export completes in244.079s with all480 decoded picture frames unchanged; full colour/raster/live sound remains unqualified.
 - Continuous playback paints directly from the decoded video without filling the optional bitmap cache. Paused frame capture retains source dimensions and allows one pending capture. These bounds do not establish smooth playback, whole picture/audio equality or production readiness.
 - Moving playback adapts the preview resolution to measured paint cost and displays the reduced resolution. Pausing restores full detail. All paused source PNG profiles describe the decoded RGB surface consistently; broad optical effects, moving audio/picture equality and general device performance remain unqualified.
@@ -1476,7 +1489,9 @@ Shows the existing project programme with mapped source frames and sound. Retain
 
 ID: `studio.render` • **FUNCTIONAL** • DETERMINISTIC
 
-Compiles the canonical project into the existing deterministic final path. Output must match the current project revision and owned source evidence.
+Renders the canonical project through the shared worker. A deployed 45-second GPU master is verified end to end, and the optimized retest produces exactly the original movie bytes in 133.335 seconds instead of 348.134 seconds.
+
+**Purpose:** Compiles the canonical project into the existing deterministic final path. Output must match the current project revision and owned source evidence.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
@@ -1497,6 +1512,7 @@ Compiles the canonical project into the existing deterministic final path. Outpu
 
 **Limits**
 
+- The timing result is one production project, not a capacity or completion-time guarantee. Actual concurrent-user throughput, forced GPU-to-CPU failover, cold starts and host loss remain separate.
 - This dated development snapshot does not establish professional or production readiness.
 - The 15 October programme-clock repair removes an erroneous black fade over dim footage. A20s CPU export completes in244.079s with all480 decoded picture frames unchanged; full colour/raster/live sound remains unqualified.
 
@@ -1514,7 +1530,9 @@ Compiles the canonical project into the existing deterministic final path. Outpu
 
 ID: `studio.export` • **PARTIAL** • DETERMINISTIC
 
-Requests a final movie and downloads the exact completed output after applicable ownership and review checks. Full preview parity and all product combinations are not qualified.
+Downloads the exact completed movie. The released 45-second GPU export is verified, including a faster byte-identical retest. Strict size enforcement, Opus, Display P3 and SDR-mapped HDR10/PCM32 also have retained native local proof; those extensions have not reached the released build. PARTIAL applies to the wider delivery and compatibility scope.
+
+**Purpose:** Requests a final movie and downloads the exact completed output after applicable ownership and review checks. Full preview parity and all product combinations are not qualified.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
@@ -1537,10 +1555,13 @@ Requests a final movie and downloads the exact completed output after applicable
 
 **Limits**
 
-- Match first source uses a constant output rate. Variable-rate timestamp preservation still requires qualification.
-- Studio delivers Rec.709 SDR MP4 with AAC when audio is present. Video compression follows the selected Quality preset and byte size varies with the footage.
-- This dated development snapshot does not establish professional or production readiness.
-- The eight-second native 24 fps clock regression is verified at 192 frames. This bounded result does not qualify every fractional source duration, retime, hook, caption, picture or audio combination.
+- Verified in production on 22 November: the same 45-second 720p/30fps master completes in 133.335 seconds versus 348.134 seconds, with identical finished MP4 bytes and sound. This is one comparison, not a speed guarantee.
+- Working local size enforcement delivered 941,576 bytes under a selected 1 MB maximum through a normal native export. Main currently contains size-budget estimation; it is not the separately tested strict cap.
+- Working local H.264/Opus/Display P3 delivery has exact download, decode and finished-picture playback evidence. It is not yet part of the released build.
+- Working local HEVC/PCM32 SDR-to-HDR10 delivery fully decodes externally. The tested browser cannot decode its pictures; the download remains available. This is 100-nit SDR mapping, not a complete HDR grading pipeline.
+- Main separately implements ProRes/MOV with PCM and explicit video bitrate. Implementation and retained evidence must be checked for the requested delivery combination.
+- Match first source uses a constant output rate. Preservation of variable-rate timestamps remains a separate qualification.
+- All devices, delivery combinations, long-job recovery and whole predictive picture/audio parity are not qualified.
 
 **Common errors**
 

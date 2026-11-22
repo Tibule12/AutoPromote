@@ -1,0 +1,324 @@
+{
+  "date": "2026-11-22",
+  "mergedPr": "https://github.com/Tibule12/AutoPromote/pull/554",
+  "mergeCommit": "abd7354fdf75f7a6df5050e1ace3776469e5b6e3",
+  "deployment": {
+    "frontendBundle": "https://autopromote.org/static/js/main.70304da1.js",
+    "liveApiCommit": "abd7354fdf75f7a6df5050e1ace3776469e5b6e3",
+    "gpuRevision": "media-worker-gpu-00020-mux",
+    "workerDeploymentAction": "https://github.com/Tibule12/AutoPromote/actions/runs/45041081115",
+    "allMergeCommitWorkflows": "passed, including automatic Playwright retry",
+    "workerHealth": {
+      "status": 200,
+      "computeDevice": "cuda",
+      "videoEncoder": "h264_nvenc",
+      "gpuRequired": true
+    }
+  },
+  "render": {
+    "jobId": "viral_d0faff7c27b7bb9295808f39d1c63564d111a14eaa951a5982a3e31a41b84839",
+    "status": "completed",
+    "executionDevice": "gpu",
+    "workerRouteReason": "gpu_primary",
+    "createdAt": "2026-11-22T16:27:30.081Z",
+    "completedAt": "2026-11-22T16:29:43.416Z",
+    "acceptedToCompleteSeconds": 133.335,
+    "previousAcceptedToCompleteSeconds": 348.134,
+    "elapsedReductionPercent": 61.700092493120465,
+    "speedRatio": 2.610972362845464,
+    "workerTerminalFromAcceptedSeconds": 128.751,
+    "performanceTiming": {
+      "stages_seconds": {
+        "video_layer_rasterization": 39.686,
+        "final_composite_encode": 8.502,
+        "video_source_preparation": 10.275,
+        "image_layer_rasterization": 32.07
+      },
+      "image_raster_count": 71,
+      "video_occurrence_count": 25,
+      "video_preparation_count": 18,
+      "video_source_count": 3,
+      "video_raster_count": 25,
+      "elapsed_seconds": 127.929
+    },
+    "duration": 45,
+    "outputSettings": {
+      "container": "mp4",
+      "preset": "p4",
+      "quality": "master",
+      "width": 720,
+      "fps": 30,
+      "audioCodec": "aac",
+      "height": 1280,
+      "encoder": "h264_nvenc",
+      "resolution": "720p",
+      "colorSpace": "rec709",
+      "crf": 16,
+      "videoBitrateKbps": null,
+      "codec": "h264"
+    },
+    "outputBytes": 37531440,
+    "outputSha256": "d0cdec4e1090b9d66c7da71013786e68a339f6442050668a465390e4008dc43b",
+    "previousOutputSha256": "d0cdec4e1090b9d66c7da71013786e68a339f6442050668a465390e4008dc43b",
+    "byteIdenticalToPreviousProduction": true,
+    "mediaValidation": {
+      "video": {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "index": 0,
+        "height": 1280,
+        "width": 720,
+        "avg_frame_rate": "30/1"
+      },
+      "duration": 45,
+      "audio": {
+        "codec_type": "audio",
+        "index": 1,
+        "codec_name": "aac",
+        "avg_frame_rate": "0/0"
+      },
+      "size": 37531440
+    },
+    "finalQualityGate": {
+      "planned_black_ranges": [],
+      "audio_expected": true,
+      "duration": {
+        "expected": 45,
+        "tolerance": 1.575,
+        "actual": 45,
+        "delta": 0
+      },
+      "browser_delivery": "h264_yuv420p_faststart",
+      "media": {
+        "video": {
+          "index": 0,
+          "width": 720,
+          "height": 1280,
+          "avg_frame_rate": "30/1",
+          "codec_type": "video",
+          "codec_name": "h264"
+        },
+        "duration": 45,
+        "audio": {
+          "index": 1,
+          "avg_frame_rate": "0/0",
+          "codec_name": "aac",
+          "codec_type": "audio"
+        },
+        "size": 37531440
+      },
+      "black_ranges": [],
+      "picture_timing": {
+        "duration": 45,
+        "container_duration": 45,
+        "delta": 0,
+        "tolerance": 0.033
+      },
+      "status": "passed"
+    }
+  },
+  "budget": {
+    "maxUniqueRenders": 1,
+    "uniqueSubmittedRenders": 1,
+    "approvedAppCreditMaximum": 5,
+    "actualAppCredits": 5,
+    "startingBalance": 148,
+    "endingBalance": 143,
+    "uploads": 0,
+    "additionalProductionRenders": 0,
+    "creditGrants": 0,
+    "changedGpuAllocation": false
+  },
+  "largeSourcePreview": {
+    "http": 200,
+    "seconds": 15.471,
+    "sourceContentHash": "b14bf07a916e41331f8516d9e00921d9c4fa2a37a492e2998ae9f463df3c280b",
+    "sourceGeneration": "1795259377743011",
+    "sampler": "studio-original-sequence-frame-v1",
+    "frameIndex": 150,
+    "imageContentHash": "6480dcaec6a965f3b30f27ad52de83685954addf50c97ad52bf2378459af223f",
+    "pngBytes": 2788323
+  },
+  "creditLabel": "Local editing uses no credits",
+  "nativeRestore": {
+    "restoredExactCanonicalDocument": true,
+    "layers": 120,
+    "soundCues": 12,
+    "score": true,
+    "creditBadge": "\u25cf Local editing uses no credits",
+    "projectSha256": "b0776daba4516d24cc2f132d12bc3fce74c45878458e767a2067825c04a3a8e0",
+    "errors": [],
+    "blocked": [],
+    "renderSubmitted": false
+  },
+  "localFailuresAndRecovery": [
+    "Pre-admission QA guards refused signed-URL representation refreshes and null local-file metadata. Same owned objects and all16 render-input groups were then compared canonically. No refused request reached the API or charged credits; native Dismiss cleared the pending local recovery notice.",
+    "Status API exposes a compact output URL result; initial QA download comparison expected a missing hash there. The exact output hash was verified from the authenticated owned Firestore execution receipt. The file matches that receipt and the previous production film.",
+    "Read-only gcloud CLI configuration inspection failed with Bad file descriptor; successful deployment logs attest GPU revision promotion, while the live worker health and actual owned execution establish CUDA/NVENC routing."
+  ],
+  "limitations": [
+    "One completed production retest of the same project; no concurrent-user capacity, SLA, forced failover, cold-start, host-loss or broad preset qualification.",
+    "Actual Google billing savings are not measured.",
+    "Source/preview verification here includes a direct signed-in API request and the native credit label/project controls; whole predictive preview parity remains separate.",
+    "Owner creative approval and formal readiness counts remain unchanged.",
+    "The headless screencast playback reported82 dropped pictures of1354 displayed/decoded counters; this recording does not qualify smooth predictive real-time playback."
+  ],
+  "readinessPromotion": false,
+  "nextTaskId": "S02",
+  "privateEvidenceRoot": "/home/tibule12/.local/share/autopromote-qa/studio-render-speed-20261122/production",
+  "nativeVerification": {
+    "jobId": "viral_d0faff7c27b7bb9295808f39d1c63564d111a14eaa951a5982a3e31a41b84839",
+    "nativeDownloadSha256": "d0cdec4e1090b9d66c7da71013786e68a339f6442050668a465390e4008dc43b",
+    "workerHashMatches": true,
+    "startingCredits": 148,
+    "endingCredits": 143,
+    "creditsCharged": 5,
+    "uniqueSubmittedJobs": 1,
+    "uploads": 0,
+    "fullFinishedPlayback": {
+      "time": 44.976547,
+      "duration": 45,
+      "muted": false,
+      "volume": 1,
+      "error": null,
+      "quality": {
+        "total": 1354,
+        "dropped": 82
+      }
+    },
+    "playbackWallSeconds": 55.852,
+    "capture": {
+      "seconds": 45.133999824523926,
+      "capturedPictures": 363,
+      "sourceBytes": 53093589,
+      "viewport": [
+        1920,
+        900
+      ],
+      "source": "Actual Chromium screencast",
+      "visualAnnotations": "Pointer, click ring and actual target outline only",
+      "applicationCodeChanged": false,
+      "audio": "Original finished-video soundtrack captured separately in the browser"
+    },
+    "capturedAudioBytes": 729585,
+    "originalLoginUnchanged": true
+  },
+  "savedProject": {
+    "savedMatchingProject": true,
+    "layers": 120,
+    "sounds": 12,
+    "exactCanonicalDocument": true,
+    "uniqueRenders": 1
+  },
+  "browserCleanup": {
+    "closed": true,
+    "uniqueRenders": 1,
+    "maxAppCredits": 5,
+    "originalLoginUnchanged": true
+  },
+  "mediaProbe": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 720,
+        "height": 1280,
+        "r_frame_rate": "30/1",
+        "start_time": "0.000000",
+        "duration": "45.000000",
+        "nb_read_frames": "1350"
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "sample_rate": "48000",
+        "channels": 2,
+        "r_frame_rate": "0/0",
+        "start_time": "0.000000",
+        "duration": "45.000000",
+        "nb_read_frames": "2110"
+      }
+    ],
+    "format": {
+      "duration": "45.000000",
+      "size": "37531440"
+    }
+  },
+  "fullDecodePassed": false,
+  "deliveryFolder": "/home/tibule12/Videos/Studio - Production Tests - 2026-11-22",
+  "playbackCaptureAlignment": {
+    "pictureMatches": [
+      {
+        "screenTime": 1.2,
+        "movieTime": 0.9,
+        "offset": 0.29999999999999993,
+        "mse": 222.53361689814815
+      },
+      {
+        "screenTime": 7,
+        "movieTime": 6.7,
+        "offset": 0.2999999999999998,
+        "mse": 63.0080787037037
+      },
+      {
+        "screenTime": 14,
+        "movieTime": 13.8,
+        "offset": 0.1999999999999993,
+        "mse": 283.11671296296294
+      },
+      {
+        "screenTime": 22,
+        "movieTime": 21.7,
+        "offset": 0.3000000000000007,
+        "mse": 286.01159722222224
+      },
+      {
+        "screenTime": 30,
+        "movieTime": 29.766666666666666,
+        "offset": 0.23333333333333428,
+        "mse": 35.95218171296296
+      },
+      {
+        "screenTime": 38,
+        "movieTime": 37.8,
+        "offset": 0.20000000000000284,
+        "mse": 315.32563657407405
+      },
+      {
+        "screenTime": 44,
+        "movieTime": 43.8,
+        "offset": 0.20000000000000284,
+        "mse": 251.88554398148148
+      }
+    ],
+    "pictureOffsetSeconds": 0.23333333333333428,
+    "capturedAudioOffsetSeconds": 0.0065,
+    "muxDelaySeconds": 0.22683333333333427,
+    "programmeRetiming": false,
+    "rms": 0.11936388909816742
+  },
+  "deliveryFiles": [
+    {
+      "name": "07 - Faster production retest - 45 seconds.mp4",
+      "bytes": 37531440,
+      "sha256": "d0cdec4e1090b9d66c7da71013786e68a339f6442050668a465390e4008dc43b"
+    },
+    {
+      "name": "08 - Faster production editable project.autopromote.json",
+      "bytes": 1034647,
+      "sha256": "450981bb1e0791731d929181099194ef23980ecfaebd9de649e5ac8f4b3ef3f8"
+    },
+    {
+      "name": "09 - Faster production Studio playback with sound.mp4",
+      "bytes": 8110785,
+      "sha256": "ca18272f67e63232a2fa0783b33a7147d70c03cb0b1cd4feae6939ddd49a5afd"
+    },
+    {
+      "name": "10 - Production timing retest.txt",
+      "bytes": 996,
+      "sha256": "df3c32141c278b19470e5ae20f842ad35db88b48840d4d789a27e49ad0c0a654"
+    }
+  ],
+  "fullCapturedPlaybackDecodePassed": true
+}
