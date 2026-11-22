@@ -1,7 +1,10 @@
 """Canonical moving texture repair in the ordinary timed grade filter."""
 import math
 
-from studio_selective_mask import mask_at,validate_selective_mask
+try:
+    from .studio_selective_mask import mask_at, validate_selective_mask
+except ImportError:
+    from studio_selective_mask import mask_at, validate_selective_mask
 
 
 def validate_repair(clone):

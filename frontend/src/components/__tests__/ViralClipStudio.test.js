@@ -255,9 +255,9 @@ describe("ViralClipStudio timeline sequencing", () => {
     canvas.getBoundingClientRect = () => ({ width: 270, height: 480, x: 0, y: 0 });
     fireEvent.loadedData(video);
     const quality = screen.getByLabelText('Preview quality');
-    expect(quality).toHaveValue('full');
-    fireEvent.change(quality, { target: { value: 'auto' } });
+    expect(quality).toHaveValue('auto');
     fireEvent.change(quality, { target: { value: 'full' } });
+    expect(quality).toHaveValue('full');
     fireEvent.resize(window);
     fireEvent.click(screen.getByRole('button', { name: 'Play comparison', exact: true }));
     fireEvent.timeUpdate(video);

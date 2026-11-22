@@ -14,7 +14,10 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from studio_selective_mask import mask_coverage, validate_selective_mask
+try:
+    from .studio_selective_mask import mask_coverage, validate_selective_mask
+except ImportError:
+    from studio_selective_mask import mask_coverage, validate_selective_mask
 
 MAX_PACKET_BYTES = 40 * 1024 * 1024
 MAGIC = b'APGRD001'

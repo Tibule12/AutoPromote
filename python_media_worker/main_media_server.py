@@ -32936,7 +32936,10 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                             if behind_ov and behind_ov.src:
                                 behind_tear_overlay_ids.add(bid)
                                 if behind_ov.type == "image":
-                                    from studio_image_sources import materialize_studio_image
+                                    try:
+                                        from .studio_image_sources import materialize_studio_image
+                                    except ImportError:
+                                        from studio_image_sources import materialize_studio_image
                                     behind_image_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_behind_{bid}.png")
                                     sequence_temp_paths.add(behind_image_path)
                                     await materialize_studio_image(behind_ov.src, behind_image_path, job_id=job_id)
