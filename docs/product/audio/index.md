@@ -1,8 +1,8 @@
 # Audio editing and sound design
 
-Development documentation • product 1.2.0 • knowledge 1.0.64 • 2026-11-18
+Development documentation • product 1.2.0 • knowledge 1.0.65 • 2026-11-22
 
-Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
+Overall feature ratings and working subfeatures are separate. PARTIAL or BROKEN does not mean every control fails; entries identify verified workflows, release state and the remaining limitation. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
 ## Audio lanes and mixing
 
@@ -119,7 +119,9 @@ Adds owned music and adjusts cue placement and volume automation in the same pro
 
 ID: `studio.sfx` • **PARTIAL** • DETERMINISTIC
 
-Places sound cues on the native timeline. Included sound-design presets synthesize deterministic PCM; owned external sound files can be used in the supported audio path.
+Places sound cues in editable projects. The deployed 45-second frame collection verifies 12 sound cues plus its original score through native save/reopen, GPU rendering, exact download and finished playback with sound. Broader audio/template combinations retain their separate limits.
+
+**Purpose:** Places sound cues on the native timeline. Included sound-design presets synthesize deterministic PCM; owned external sound files can be used in the supported audio path.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
@@ -144,6 +146,7 @@ Places sound cues on the native timeline. Included sound-design presets synthesi
 
 **Limits**
 
+- The demonstrated sound-cue workflow is working in production. The broader PARTIAL label is not a failure of that passed case; every microphone/voiceover path and audio combination is not established.
 - This dated development snapshot does not establish professional or production readiness.
 
 **Common errors**
@@ -272,7 +275,9 @@ Keeps music lower during placed dialogue using the available automation and spee
 
 ID: `creative.audio` • **PARTIAL** • DETERMINISTIC
 
-Template definitions place editable music/SFX/voice cues in normal audio lanes. Professional sound quality still requires listening to the actual film.
+Places sound cues in editable projects. The deployed 45-second frame collection verifies 12 sound cues plus its original score through native save/reopen, GPU rendering, exact download and finished playback with sound. Broader audio/template combinations retain their separate limits.
+
+**Purpose:** Template definitions place editable music/SFX/voice cues in normal audio lanes. Professional sound quality still requires listening to the actual film.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
@@ -293,6 +298,7 @@ Template definitions place editable music/SFX/voice cues in normal audio lanes. 
 
 **Limits**
 
+- The demonstrated sound-cue workflow is working in production. The broader PARTIAL label is not a failure of that passed case; every microphone/voiceover path and audio combination is not established.
 - This dated development snapshot does not establish professional or production readiness.
 
 **Common errors**

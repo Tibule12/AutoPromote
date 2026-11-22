@@ -521,6 +521,118 @@
         "frontend/src/components/ViralClipStudio.js"
       ],
       "reason": "21 October source audit: document the actual optional Composite replacement and manual style workflow, expose in-product guides, retain model availability/source-specific fringe limits and unchanged readiness."
+    },
+    {
+      "feature_id": "studio.captions",
+      "documentation_impact": [
+        "FEATURE",
+        "READINESS"
+      ],
+      "status_before": "BROKEN",
+      "status_after": "BROKEN",
+      "source_paths": [
+        "docs/VERIFIED-FUNCTIONALITY-AND-RELEASE-STATUS.md",
+        "reports/studio-feature-documentation-20261122/retained-local-proofs.json",
+        "reports/studio-render-throughput-20261122/release-verification.json",
+        "docs/STUDIO-COMPLETION-CONTRACT.md"
+      ],
+      "reason": "Knowledge1.0.65 distinguishes verified working local/deployed scopes from broader family ratings; retained evidence and release state are reconciled without importing feature implementations or promoting readiness."
+    },
+    {
+      "feature_id": "studio.export",
+      "documentation_impact": [
+        "FEATURE",
+        "READINESS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "docs/VERIFIED-FUNCTIONALITY-AND-RELEASE-STATUS.md",
+        "reports/studio-feature-documentation-20261122/retained-local-proofs.json",
+        "reports/studio-render-throughput-20261122/release-verification.json",
+        "docs/STUDIO-COMPLETION-CONTRACT.md"
+      ],
+      "reason": "Knowledge1.0.65 distinguishes verified working local/deployed scopes from broader family ratings; retained evidence and release state are reconciled without importing feature implementations or promoting readiness."
+    },
+    {
+      "feature_id": "studio.preview",
+      "documentation_impact": [
+        "FEATURE",
+        "READINESS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "docs/VERIFIED-FUNCTIONALITY-AND-RELEASE-STATUS.md",
+        "reports/studio-feature-documentation-20261122/retained-local-proofs.json",
+        "reports/studio-render-throughput-20261122/release-verification.json",
+        "docs/STUDIO-COMPLETION-CONTRACT.md"
+      ],
+      "reason": "Knowledge1.0.65 distinguishes verified working local/deployed scopes from broader family ratings; retained evidence and release state are reconciled without importing feature implementations or promoting readiness."
+    },
+    {
+      "feature_id": "studio.compositing",
+      "documentation_impact": [
+        "FEATURE",
+        "READINESS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "docs/VERIFIED-FUNCTIONALITY-AND-RELEASE-STATUS.md",
+        "reports/studio-feature-documentation-20261122/retained-local-proofs.json",
+        "reports/studio-render-throughput-20261122/release-verification.json",
+        "docs/STUDIO-COMPLETION-CONTRACT.md"
+      ],
+      "reason": "Knowledge1.0.65 distinguishes verified working local/deployed scopes from broader family ratings; retained evidence and release state are reconciled without importing feature implementations or promoting readiness."
+    },
+    {
+      "feature_id": "studio.sfx",
+      "documentation_impact": [
+        "FEATURE",
+        "READINESS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "docs/VERIFIED-FUNCTIONALITY-AND-RELEASE-STATUS.md",
+        "reports/studio-feature-documentation-20261122/retained-local-proofs.json",
+        "reports/studio-render-throughput-20261122/release-verification.json",
+        "docs/STUDIO-COMPLETION-CONTRACT.md"
+      ],
+      "reason": "Knowledge1.0.65 distinguishes verified working local/deployed scopes from broader family ratings; retained evidence and release state are reconciled without importing feature implementations or promoting readiness."
+    },
+    {
+      "feature_id": "creative.audio",
+      "documentation_impact": [
+        "FEATURE",
+        "READINESS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "docs/VERIFIED-FUNCTIONALITY-AND-RELEASE-STATUS.md",
+        "reports/studio-feature-documentation-20261122/retained-local-proofs.json",
+        "reports/studio-render-throughput-20261122/release-verification.json",
+        "docs/STUDIO-COMPLETION-CONTRACT.md"
+      ],
+      "reason": "Knowledge1.0.65 distinguishes verified working local/deployed scopes from broader family ratings; retained evidence and release state are reconciled without importing feature implementations or promoting readiness."
+    },
+    {
+      "feature_id": "studio.render",
+      "documentation_impact": [
+        "FEATURE",
+        "READINESS"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "docs/VERIFIED-FUNCTIONALITY-AND-RELEASE-STATUS.md",
+        "reports/studio-feature-documentation-20261122/retained-local-proofs.json",
+        "reports/studio-render-throughput-20261122/release-verification.json",
+        "docs/STUDIO-COMPLETION-CONTRACT.md"
+      ],
+      "reason": "Knowledge1.0.65 distinguishes verified working local/deployed scopes from broader family ratings; retained evidence and release state are reconciled without importing feature implementations or promoting readiness."
     }
   ]
 }

@@ -1486,7 +1486,7 @@
       "capability": "Captions",
       "readiness": "BROKEN",
       "complete": false,
-      "assessmentReason": "Real GPU ASR produces repeated low-confidence wording on the representative source; manual/draft caption subsets remain usable.",
+      "assessmentReason": "Released automatic recognition still has measured wording errors. The separate local spelling-context/correction workflow is proven by 104 focused cases and an actual signed-in eight-second export lifecycle. BROKEN applies to the wider recognition scope, not those working controls; the expanded implementation remains outside main.",
       "verifiedScope": "Real GPU transcription returned editable review drafts without the false English label Fresh normally signed-in CUDA retest yields 3 editable unapproved drafts without falsely identifying the speech as English; repeated wording persists.",
       "strongestVerifiedSlice": {
         "readiness": "PARTIAL",
@@ -1738,6 +1738,22 @@
         "reports/studio-canonical-completion-20261008/paired-speed-2x-r2/clock-retest-review.json",
         "reports/studio-canonical-completion-20261008/paired-speed-2x-gpu-r4/gpu-delivery-review.json",
         "reports/studio-canonical-completion-20261008/frame-controls-r11/source-border-review.json"
+      ],
+      "verifiedSubfeatures": [
+        {
+          "name": "Saved spelling context and caption correction",
+          "status": "FUNCTIONAL",
+          "releaseState": "VERIFIED_LOCAL_OUTSIDE_MAIN",
+          "scope": "104 focused checks and one native human-speech generation/edit/Undo/Redo/save/reopen/export/playback workflow",
+          "evidenceRef": "reports/studio-feature-documentation-20261122/retained-local-proofs.json"
+        },
+        {
+          "name": "Uncertain-word navigation and omitted-speech markers",
+          "status": "PASSING_COMPONENT_AND_WORKER_CHECKS",
+          "releaseState": "LOCAL_OUTSIDE_MAIN",
+          "scope": "Exact review offsets, next issue, gaps, guards and canonical persistence; gap-only/multilingual native coverage remains separate",
+          "evidenceRef": "reports/studio-feature-documentation-20261122/retained-local-proofs.json"
+        }
       ]
     },
     {
@@ -4601,7 +4617,16 @@
       "latestProfessionalGroupWorkflowEvidence": "reports/studio-professional-group-workflow-20261014/README.md",
       "latestProfessionalGroupWorkflowScope": "Real 20-second footage edit: group clip pointer/numeric move, trim, opacity keys, locks, group delete/undo, source split/history, exact save/cold reopen, one owned CPU export/download/full decode and full editable Studio playback pass. Nine native visibility gates pass; nine declared whole-footage source comparisons fail. Full picture/live sound and export speed remain unqualified.",
       "latestMotionFlowEvidence": "reports/studio-motion-flow-parity-20261031/README.md",
-      "latestMotionFlowScope": "Native AutoPromote Comp & Rig Alpha/Luma Track Mattes, Null Rig parenting, Motion Drivers, and Signal Node Flow [1]/[2] A/B viewer wipe pass headless muted loopback authoring, exact cold-reload SHA-256 recovery, and 4-frame local CPU FFmpeg render parity (min IoU 0.976516, max boundary p95 1.4142px) with zero competitor brand leaks; formal readiness remains PARTIAL."
+      "latestMotionFlowScope": "Native AutoPromote Comp & Rig Alpha/Luma Track Mattes, Null Rig parenting, Motion Drivers, and Signal Node Flow [1]/[2] A/B viewer wipe pass headless muted loopback authoring, exact cold-reload SHA-256 recovery, and 4-frame local CPU FFmpeg render parity (min IoU 0.976516, max boundary p95 1.4142px) with zero competitor brand leaks; formal readiness remains PARTIAL.",
+      "verifiedSubfeatures": [
+        {
+          "name": "16 November Node repair",
+          "status": "FUNCTIONAL_WITHIN_RECORDED_SCOPE",
+          "releaseState": "REPAIR_REPRESENTED_IN_MAIN",
+          "scope": "Six fixed picture comparisons and three playback profiles; recorded build only,not newer22November edits",
+          "evidenceRef": "reports/studio-node-repair-20261116/README.md"
+        }
+      ]
     },
     {
       "id": "vfx",
@@ -6371,7 +6396,7 @@
       "capability": "Export",
       "readiness": "PARTIAL",
       "complete": false,
-      "assessmentReason": "Selected H.264/Master/AAC256 native output works; four active export controls are ignored by the final consumer and keep the broader feature PARTIAL.",
+      "assessmentReason": "Released resolution/rate/codec/quality/AAC paths and the exact faster GPU master work; main also implements explicit bitrate and ProRes/MOV PCM. Strict file-size enforcement, Opus, Display P3 and SDR-mapped HDR10/PCM32 have native local proof outside main. Wider delivery/device combinations and whole parity remain partial.",
       "verifiedScope": "Native Chromium download completed; full independent decode, 12s clock and 1280x720 verified This hour: two real CPU exports; caption output played and downloaded with the worker stopped, identical SHA and full 12s decode. Unsigned object GET returned 403. Oct 8: five actual CPU outputs (including failed visual cases retained); clean 12s landscape agent export and corrected portrait export fully decoded and visually inspected. No current GPU run. Oct 8 L40S: clean 12s 1280x720 subject export via Studio, actual NVENC, native download/full decode and six-frame review; GPU ASR draft export also decodes. Fresh real NVIDIA 3D output survives cold reopen, paused-frame seek, native download with identical SHA, and switching between saved projects.",
       "strongestVerifiedSlice": {
         "readiness": "FUNCTIONAL",
@@ -6700,6 +6725,29 @@
         "reports/studio-canonical-completion-20261008/native-worker-unavailable-ui/receipt.json",
         "reports/studio-canonical-completion-20261008/subject-programme-history-tests.log",
         "reports/studio-canonical-completion-20261008/programme-export-component-retest.log"
+      ],
+      "verifiedSubfeatures": [
+        {
+          "name": "Strict 1 MB cap and Opus/Display P3 profiles",
+          "status": "FUNCTIONAL",
+          "releaseState": "VERIFIED_LOCAL_OUTSIDE_MAIN",
+          "scope": "Native 12-second saves/reopens/exports/downloads/decoded-picture playback; all corresponding retained hashes match",
+          "evidenceRef": "reports/studio-feature-documentation-20261122/retained-local-proofs.json"
+        },
+        {
+          "name": "HDR10 SDR mapping and PCM32 delivery",
+          "status": "FUNCTIONAL_EXTERNAL_DECODE",
+          "releaseState": "VERIFIED_LOCAL_OUTSIDE_MAIN",
+          "scope": "Native 12-second file externally decodes; tested browser pictures unavailable; not full HDR grading",
+          "evidenceRef": "reports/studio-feature-documentation-20261122/retained-local-proofs.json"
+        },
+        {
+          "name": "Identical faster GPU master",
+          "status": "FUNCTIONAL",
+          "releaseState": "DEPLOYED",
+          "scope": "One 45-second 720p30 master,133.335s versus348.134s,exact original bytes,five credits",
+          "evidenceRef": "reports/studio-render-throughput-20261122/release-verification.json"
+        }
       ]
     },
     {
@@ -7646,7 +7694,7 @@
       "capability": "Voice-over / SFX",
       "readiness": "PARTIAL",
       "complete": false,
-      "assessmentReason": "Owned WAV import/faded export works technically; no new listening acceptance or microphone roundtrip proof.",
+      "assessmentReason": "The deployed 45-second original frame collection verifies 12 sound cues plus its score through native export/download/full finished playback. Earlier owned WAV/fade proofs remain. Broader microphone/voiceover roundtrips, mixes and human listening/creative acceptance remain separate; the combined family stays PARTIAL.",
       "verifiedScope": "Real owned speech WAV import, original audio muted, 0.2s fades, actual GPU 12s export/native download; full decode and representative footage checked.",
       "strongestVerifiedSlice": {
         "readiness": "PARTIAL",
@@ -7876,7 +7924,16 @@
       "latestCompleteBlendCueClockEvidence": "reports/model-capability-runtime-v1-20261009/CUE-CLOCK-AND-COMPLETE-BLENDS-20261011.md",
       "latestCompleteBlendCueClockScope": "Nine ordinary flat overlay blend modes, one native CPU delivery, live/finished view switch and bounded source/cue clock repairs; whole Studio remains unqualified.",
       "latestNativeVoiceoverDuckingEvidence": "reports/model-capability-runtime-v1-20261009/VOICEOVER-DUCKING-AND-RECOVERY-20261012.md",
-      "latestNativeVoiceoverDuckingScope": "Real import/trim/gain/history/owned save/cold-reopen/CPU export/full Studio timeline; short1x voice phase corrected. Full retimed sound/picture, speech DSP and human review remain unqualified."
+      "latestNativeVoiceoverDuckingScope": "Real import/trim/gain/history/owned save/cold-reopen/CPU export/full Studio timeline; short1x voice phase corrected. Full retimed sound/picture, speech DSP and human review remain unqualified.",
+      "verifiedSubfeatures": [
+        {
+          "name": "Original frame-film sound cues and score",
+          "status": "FUNCTIONAL",
+          "releaseState": "DEPLOYED",
+          "scope": "12 editable cues and score in the actual45-second GPU master with exact download and complete finished playback",
+          "evidenceRef": "reports/studio-render-throughput-20261122/release-verification.json"
+        }
+      ]
     },
     {
       "id": "three_d_audio",
@@ -34188,6 +34245,22 @@
       "Notifications API returned200but contained neither job ID; email completion was not independently verified.",
       "Drawn moving material recolour/heal/tracking and every Creative Effects preset were not exhaustively executed on production within these two renders.",
       "Whole predictive colour/edge/low-alpha parity, device coverage, capture smoothness and owner creative/listening approval remain separate."
+    ]
+  },
+  "documentationEvidenceReconciliation20261122": {
+    "date": "2026-11-22",
+    "evidenceRefs": [
+      "docs/VERIFIED-FUNCTIONALITY-AND-RELEASE-STATUS.md",
+      "reports/studio-feature-documentation-20261122/retained-local-proofs.json",
+      "reports/studio-feature-documentation-20261122/README.md"
+    ],
+    "scope": "Recognize retained working caption/export/Node scopes separately from main/deployment and wider family limitations; seven private media hashes reverified. Documentation only.",
+    "readinessPromotion": false,
+    "nextTaskId": "S02",
+    "blockers": [
+      "Expanded caption/delivery implementations remain outside main; this task does not merge them",
+      "Overall recognition defects and broad preview/device/combination limits remain explicit",
+      "Newer local Node/VFX edits need matching-revision evidence reconciliation"
     ]
   }
 }

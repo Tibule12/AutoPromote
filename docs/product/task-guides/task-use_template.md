@@ -1,8 +1,8 @@
 # Use a creative template
 
-Development documentation • product 1.2.0 • knowledge 1.0.64 • 2026-11-18
+Development documentation • product 1.2.0 • knowledge 1.0.65 • 2026-11-22
 
-Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
+Overall feature ratings and working subfeatures are separate. PARTIAL or BROKEN does not mean every control fails; entries identify verified workflows, release state and the remaining limitation. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
 ID: `task.use_template` • **PARTIAL** • SUPPORTED_WITH_LIMITATIONS
 
@@ -25,7 +25,7 @@ Resolve an exact draft version and bind customer-owned inputs into the shared ca
 
 ## Feature readiness
 
-- studio.export — **PARTIAL**: Requests a final movie and downloads the exact completed output after applicable ownership and review checks. Full preview parity and all product combinations are not qualified.
+- studio.export — **PARTIAL**: Downloads the exact completed movie. The released 45-second GPU export is verified, including a faster byte-identical retest. Strict size enforcement, Opus, Display P3 and SDR-mapped HDR10/PCM32 also have retained native local proof; those extensions have not reached the released build. PARTIAL applies to the wider delivery and compatibility scope.
 - creative.shared_templates — **PARTIAL**: One exact versioned definition instantiates an editable canonical project for Studio and Director; approved output may later supply the welcome showroom.
 - studio.templates — **PARTIAL**: Instantiates a pinned draft template into ordinary editable clips, layers, keyframes and audio. Retained signed-in local lifecycle evidence exists; public qualification and the showroom handoff remain incomplete.
 - studio.persistence — **FUNCTIONAL**: Saves canonical project assets, occurrences, layers, keys and audio; reopening restores editable state. Temporary or expired sources require owned source repair.

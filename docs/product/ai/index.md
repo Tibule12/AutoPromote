@@ -1,8 +1,8 @@
 # AutoPromote public documentation for AI readers
 
-Development documentation • product 1.2.0 • knowledge 1.0.64 • 2026-11-18
+Development documentation • product 1.2.0 • knowledge 1.0.65 • 2026-11-22
 
-Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
+Overall feature ratings and working subfeatures are separate. PARTIAL or BROKEN does not mean every control fails; entries identify verified workflows, release state and the remaining limitation. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
 Use the [package index](../_data/ai-package.v1.json), [feature catalogue](../_data/knowledge.public.v1.json), [controls](../_data/controls.public.v1.json), [task guides](../_data/tasks.public.v1.json) and [relationship graph](../_data/graph.public.v1.json). Human-readable canonical documents are linked from the package index. All derive from the same public projection.
 

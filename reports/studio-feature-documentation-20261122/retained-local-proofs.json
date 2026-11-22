@@ -1,0 +1,241 @@
+{
+  "date": "2026-11-22",
+  "scope": "Reinspection of retained proof and seven local media hashes; no repeated render/model/browser test",
+  "sourceWorktree": "AutoPromote-studio-live-owner-20261105",
+  "mainCompared": "abd7354fdf75f7a6df5050e1ace3776469e5b6e3",
+  "proofReports": [
+    {
+      "relativeToSourceWorktree": "reports/studio-caption-readiness-20261113/README.md",
+      "sha256": "08870c0b84c558f08bd754338a237f4e3607b40b49d1bc51da1b0311cb8fc1e7",
+      "bytes": 5085
+    },
+    {
+      "relativeToSourceWorktree": "reports/studio-caption-readiness-20261113/verification.json",
+      "sha256": "9bdd01194e4fb300c8de24741648c4188514ab865c7a68ae910ef433dcb46c31",
+      "bytes": 5536
+    },
+    {
+      "relativeToSourceWorktree": "reports/studio-english-recognition-20261114/README.md",
+      "sha256": "ab1659f18c42783ff4cb0c4390ac281dee13eeae7a87fc0f87488c76450959f1",
+      "bytes": 4206
+    },
+    {
+      "relativeToSourceWorktree": "reports/studio-english-recognition-20261114/verification.json",
+      "sha256": "e56ed8f146331672c84d7cea3dc82fc5a751e768267b554d56d59d1c45d051bc",
+      "bytes": 5544
+    },
+    {
+      "relativeToSourceWorktree": "reports/studio-caption-review-20261114/README.md",
+      "sha256": "d052a6f22c1c418f31a40e19c609c30344fed193d4756a44727271341363acdf",
+      "bytes": 3563
+    },
+    {
+      "relativeToSourceWorktree": "reports/studio-caption-review-20261114/verification.json",
+      "sha256": "f9a97db9c52b9926833de4fdbeb6fd5a9a51b03a24fb0716cc24447c0c55d2b7",
+      "bytes": 2205
+    }
+  ],
+  "verifiedFiles": [
+    {
+      "case": "export-size",
+      "role": "movie",
+      "relativeToSourceWorktree": "reports/studio-caption-readiness-20261113/private/export-size/reviewed-you-native.mp4",
+      "sha256": "d62fd36a4995b5da955dc5d5f020fa2195a37e0a996f138264956959ef29e72e",
+      "bytes": 941576,
+      "matchesRecordedHash": true
+    },
+    {
+      "case": "export-size",
+      "role": "studio_recording",
+      "relativeToSourceWorktree": "reports/studio-caption-readiness-20261113/private/export-size/editing-in-studio.mp4",
+      "sha256": "bffec6fa673c1514f68372a467c50e2017732bacf0cead2af7f037b9905356f4",
+      "bytes": 832846,
+      "matchesRecordedHash": true
+    },
+    {
+      "case": "export-p3-opus",
+      "role": "movie",
+      "relativeToSourceWorktree": "reports/studio-caption-readiness-20261113/private/export-p3-opus/reviewed-you-native.mp4",
+      "sha256": "f5f1d846313d740b4e763ecb3ce4b9024fefc67cd474f03acb026270351a0b94",
+      "bytes": 2132644,
+      "matchesRecordedHash": true
+    },
+    {
+      "case": "export-p3-opus",
+      "role": "studio_recording",
+      "relativeToSourceWorktree": "reports/studio-caption-readiness-20261113/private/export-p3-opus/editing-in-studio.mp4",
+      "sha256": "a58f5b3f88628514cb2bcaa506192ad2debde241a602397ccfcbcfe633475ddc",
+      "bytes": 871257,
+      "matchesRecordedHash": true
+    },
+    {
+      "case": "export-hdr-pcm",
+      "role": "movie",
+      "relativeToSourceWorktree": "reports/studio-caption-readiness-20261113/private/export-hdr-pcm/reviewed-you-native.mp4",
+      "sha256": "7ca49aa37b89874339bd242152d6fc44b4b410964ff1787f3bab917ca7346e0e",
+      "bytes": 5268750,
+      "matchesRecordedHash": true
+    },
+    {
+      "case": "export-hdr-pcm",
+      "role": "studio_recording",
+      "relativeToSourceWorktree": "reports/studio-caption-readiness-20261113/private/export-hdr-pcm/editing-in-studio.mp4",
+      "sha256": "dbd19cabc726695fa00b692aa344d93b27d29aad07ac19118406bc0410d38203",
+      "bytes": 141854,
+      "matchesRecordedHash": true
+    },
+    {
+      "case": "caption-vocabulary",
+      "role": "movie",
+      "relativeToSourceWorktree": "reports/studio-english-recognition-20261114/private/native/vocabulary-native.mp4",
+      "sha256": "d986dd263e680203068dc71c8e85658d2fb8879ab335e43f72d482df2577d38d",
+      "bytes": 141339,
+      "matchesRecordedHash": true
+    }
+  ],
+  "exportCases": [
+    {
+      "case": "export-size",
+      "sha256": "d62fd36a4995b5da955dc5d5f020fa2195a37e0a996f138264956959ef29e72e",
+      "bytes": 941576,
+      "seconds": 12,
+      "frames": 288,
+      "fps": 24,
+      "width": 720,
+      "height": 1280,
+      "selected": {
+        "codec": "h264",
+        "audioCodec": "aac",
+        "colorSpace": "rec709",
+        "videoBitrate": "5",
+        "targetFileSizeMb": "1"
+      },
+      "nativeHistory": true,
+      "coldReopenExact": true,
+      "nativeDownload": true,
+      "fullDecode": true,
+      "completeFinishedPicturePlayback": true
+    },
+    {
+      "case": "export-p3-opus",
+      "sha256": "f5f1d846313d740b4e763ecb3ce4b9024fefc67cd474f03acb026270351a0b94",
+      "bytes": 2132644,
+      "seconds": 12,
+      "frames": 288,
+      "fps": 24,
+      "width": 720,
+      "height": 1280,
+      "selected": {
+        "codec": "h264",
+        "audioCodec": "opus",
+        "colorSpace": "display_p3",
+        "videoBitrate": "auto",
+        "targetFileSizeMb": ""
+      },
+      "nativeHistory": true,
+      "coldReopenExact": true,
+      "nativeDownload": true,
+      "fullDecode": true,
+      "completeFinishedPicturePlayback": true
+    },
+    {
+      "case": "export-hdr-pcm",
+      "sha256": "7ca49aa37b89874339bd242152d6fc44b4b410964ff1787f3bab917ca7346e0e",
+      "bytes": 5268750,
+      "seconds": 12,
+      "frames": 288,
+      "fps": 24,
+      "width": 720,
+      "height": 1280,
+      "selected": {
+        "codec": "h265",
+        "audioCodec": "pcm",
+        "colorSpace": "hdr10",
+        "videoBitrate": "auto",
+        "targetFileSizeMb": ""
+      },
+      "nativeHistory": true,
+      "coldReopenExact": true,
+      "nativeDownload": true,
+      "fullDecode": true,
+      "completeFinishedPicturePlayback": false
+    }
+  ],
+  "caption": {
+    "checks": {
+      "workerTestsPassed": 51,
+      "captionReviewAndCanonicalTestsPassed": 27,
+      "selectedProductionEditorCasesPassed": 7,
+      "backendAndReplayCasesPassed": 16,
+      "apiOptionCasesPassed": 3,
+      "focusedEngineeringCasesPassed": 104,
+      "wholeEditorSuiteRun": false,
+      "realLocalSpeechCoverageSmoke": true,
+      "realUnhintedAndHintedNameRecognition": true,
+      "nativeSavedHintUndoRedoColdReopenRecognitionExport": true,
+      "sameFileCompleteFinishedPlayback": true,
+      "knowledgeAndHelpCasesPassed": 51,
+      "generatedKnowledgeValid": true,
+      "studioRecordsValid": true,
+      "anonymousCandidateViewports": 4,
+      "realSignedInHelpQuestions": 3,
+      "anonymousBaselineComparison": false
+    },
+    "native": {
+      "movieSha256": "d986dd263e680203068dc71c8e85658d2fb8879ab335e43f72d482df2577d38d",
+      "seconds": 8,
+      "frames": 192,
+      "width": 720,
+      "height": 1280,
+      "before": "I don't believe Anne knew any magic,",
+      "after": "I don't believe Ann knew any magic,",
+      "hint": "Ann.",
+      "exactCanonicalReopen": true,
+      "sameAcceptedExportRecoveredWithoutResubmission": true,
+      "fullPlaybackEnded": true,
+      "decodedFramesObserved": 198,
+      "droppedFramesObserved": 20,
+      "smoothnessQualified": false,
+      "fullPixelAudioParityQualified": false,
+      "scope": "One human LibriSpeech voice with a blank test picture, Selected phrases; not a creative demonstration."
+    },
+    "remaining": [
+      "Unhinted number recognition still mishears forty-two.",
+      "Representative accent/noise/code-switched and full caption style/retiming/parity qualification.",
+      "Native gap-only/multilingual and independent complete-speech coverage qualification."
+    ]
+  },
+  "wordReview": {
+    "implemented": [
+      "Select exact uncertain word in cue editor",
+      "Next wording issue navigation",
+      "Draft vs human Reviewed labels",
+      "Timed [Unclear speech] gaps for discarded output",
+      "Unfilled-gap bulk approval and ordinary final-render guards",
+      "Canonical review metadata recovery and Undo",
+      "No blanket wording warning solely because the cue is multilingual",
+      "English zero/missing confidence and English translation require review"
+    ],
+    "checks": {
+      "workerTestsPassed": 39,
+      "helperComponentPersistenceCasesPassed": 30,
+      "productionEditorCasesPassed": 7,
+      "serverReplayCasesPassed": 4,
+      "allEditorCasesRun": false,
+      "realEnglishAccuracyBenchmark": false,
+      "newAuthenticatedNativeLifecycle": false,
+      "knowledgeAndAssistanceCasesPassed": 51,
+      "studioContractRecordValid": true,
+      "generatedKnowledgeCheckValid": true
+    },
+    "remaining": [
+      "Representative English recognition accuracy measurement",
+      "Actual mixed-language generate/correct/save/reopen/export run",
+      "General translation beyond already supported source/model choices",
+      "Full caption style/retiming/raster and shared S02/S04/S03 parity"
+    ]
+  },
+  "localImplementationReleaseState": "Outside main at the compared revision; existing deployed controls are a separate scope",
+  "newPaidExecutions": 0,
+  "readinessPromotion": false
+}

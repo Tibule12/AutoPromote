@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Actual20s video workflow, measured adaptive picture-clock improvement and preserved automatic face-tracking failure",
-  "reviewed_at": "2026-11-21T15:48:11.666Z",
-  "catalog_sha256": "9d78593a436da2aac3131f0264935d14199b44c48a4949bebd4decdba9951278",
+  "reason": "Document retained passing caption/export/Node workflows, exact release boundaries, seven verified media hashes and the deployed GPU/source-frame proof; preserve wider family ratings",
+  "reviewed_at": "2026-11-22T17:05:48.549Z",
+  "catalog_sha256": "08fe898c9f963df9eef1f6c1ead5a82673134a81c8b264959a3b63165b885ec4",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -15,7 +15,7 @@
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
-      "sha256": "dc572ea2ff90078718232fb743901f3c341265998729526759ce42e3e4a75c35"
+      "sha256": "31c4d1d7e968e99bbfef66274244d48f37eadf669794eeaea03f6ba30b3c216e"
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
@@ -95,7 +95,7 @@
     },
     {
       "path": "frontend/src/components/StudioControls.css",
-      "sha256": "540cd83bf75b40a274995a407c92f00a34bf9bc85990531380b78df480d29754"
+      "sha256": "e9082814953dde132a20399c20c0a6b06c35a87dae328cc29d4530af64fdc0ed"
     },
     {
       "path": "frontend/src/components/StudioCreatorWorkbench.js",
@@ -103,7 +103,7 @@
     },
     {
       "path": "frontend/src/components/StudioFinishRack.js",
-      "sha256": "e3225daa714ecd7933bfcd19a45c02cf61f54b7ad8d9001705f980fe300c4b6e"
+      "sha256": "dc6ae82d5e8a6e958500a49106354f61d1bf43396cf12caf6b72022622cde6b9"
     },
     {
       "path": "frontend/src/components/StudioGeneratedBRollPanel.js",
@@ -171,11 +171,11 @@
     },
     {
       "path": "frontend/src/components/StudioProTimeline.js",
-      "sha256": "794871ff89fd04af88e572df2a825d9ef55dc19ca03d01f5c66c7c89421e585f"
+      "sha256": "43ef58f271280f4e09619f48d06ac7b0b9579503721198db1a8482b573fdcaa5"
     },
     {
       "path": "frontend/src/components/StudioSelectiveGradePanel.js",
-      "sha256": "39cbbce39efcde72cc0ca41e69cdfa865c2d41ad0138c2bbcab814df7f8c5d99"
+      "sha256": "eb0e56364184b7f9d8f3e5628cf316c2c821039ba64346ca1226df46b4b18f56"
     },
     {
       "path": "frontend/src/components/StudioSubjectMaskControls.js",
@@ -203,7 +203,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "7c456719a9da5cc96645e43d6f8e02d554829f00163bc795f5380efd166d5220"
+      "sha256": "5e3f36c7759c65afa5afb9456a54634d8f99c383f07bf1bab04dedcb4fcc6f76"
     },
     {
       "path": "frontend/src/components/ViralScanner.js",
@@ -219,7 +219,7 @@
     },
     {
       "path": "frontend/src/components/motion/soundDesign.js",
-      "sha256": "1b31bf90778feb9d05aef2b6ff79949c198151f7b91e40fe6162c7190f930242"
+      "sha256": "c73bbd9accc23c97b042aeb9f343ff9f9d4299bd7e2325f98496a1b6c0219470"
     },
     {
       "path": "frontend/src/components/motion/textMetrics.v1.json",
@@ -279,7 +279,7 @@
     },
     {
       "path": "frontend/src/components/studioGraphicsPackage.js",
-      "sha256": "dc76cf6e604d2abd1fbafc173ca2bcf6185cb64be64a2bb774e7c1a4b6a15dc9"
+      "sha256": "40a1c13642b072248036daec8a1224e306060f1c6a569f50bf10b75b6c3f8442"
     },
     {
       "path": "frontend/src/components/studioGroupTiming.js",
@@ -347,7 +347,7 @@
     },
     {
       "path": "frontend/src/components/studioMotionProperties.js",
-      "sha256": "c3c726f4f0e4c4a21fe4e30d971856cc95cb5248bccd23ffc4a43924e3513145"
+      "sha256": "fa544dd293aa79bab479cfaea4aed98b2b5ef7c4017dc6b5401b828003105c70"
     },
     {
       "path": "frontend/src/components/studioPreviewBudget.js",
@@ -359,11 +359,11 @@
     },
     {
       "path": "frontend/src/components/studioProjectDocument.js",
-      "sha256": "63263bb612337c95c3ce77c8ebc6c27046cd5ea814d9aea1488a7004ce478624"
+      "sha256": "9c3b983edbd6aba4a3c23855fad8a2d75abe3696e8dc91fa9661b6c59b72a105"
     },
     {
       "path": "frontend/src/components/studioRenderCompiler.js",
-      "sha256": "8983414d7b001c40a0e51f5eaa811cd858667446df4352295426cbb13b16f804"
+      "sha256": "020045b82a3539966d584ee89dcdd551f6aff185a62bd85240c9559e2762a98b"
     },
     {
       "path": "frontend/src/components/studioSourcePreview.js",
@@ -427,7 +427,7 @@
     },
     {
       "path": "frontend/src/components/viralRenderPayload.js",
-      "sha256": "a8229495e125d999f42de6b740a42c01fe9c9de79f0a61000572d4d2ac18d1e5"
+      "sha256": "071a54d082197139294a814c2d2b9d4b8c6730449afe04103b6f39e22b04b3fa"
     },
     {
       "path": "frontend/src/docs/content.js",
@@ -443,7 +443,7 @@
     },
     {
       "path": "frontend/src/hooks/useCinematicEffects.js",
-      "sha256": "23857a9d12d0299ef7b124d7759a6f09111b2c04ab2342d21a24f0fe38072096"
+      "sha256": "48cd4d608674edd986902c844ae3498a113685044fb2039a828ea39c9f244532"
     },
     {
       "path": "frontend/src/publicPageContent.js",
@@ -479,7 +479,7 @@
     },
     {
       "path": "python_media_worker/main_media_server.py",
-      "sha256": "a6c18421d5f26a1bbb1edb5159f7a047182d6bcca66b4efd01da80820d59379d"
+      "sha256": "fd52d3b4acd94ced6e40ee7e655350e48ca05d4886186f449fa749e0f131205b"
     },
     {
       "path": "python_media_worker/studio_audio.py",
@@ -499,7 +499,7 @@
     },
     {
       "path": "python_media_worker/studio_layer_motion.py",
-      "sha256": "0f014adf4a69ea44ab90ff69d748220f506c78d26127ed9ee4141a05e6db7c4f"
+      "sha256": "2ae96e759e33f002de31e8616c4b54ef1355f35701a13025c3083af9ccc3d6b0"
     },
     {
       "path": "python_media_worker/studio_matte_surface.py",
@@ -554,6 +554,10 @@
       "sha256": "4e3f7d5e173f176eeeb4a9d35e25f071b7f952786e8ec65bf2c8d9be888b9afe"
     },
     {
+      "path": "reports/studio-feature-documentation-20261122/retained-local-proofs.json",
+      "sha256": "31ad9031b781346cf16886fdd568ce44819d832ea46bd09688239224f240917d"
+    },
+    {
       "path": "reports/studio-logo-design-20261018/README.md",
       "sha256": "06e3804d90a19930b59ed14422b99c4db135b7706bc0ce394852bf169c670266"
     },
@@ -562,8 +566,16 @@
       "sha256": "669d2f2a2cd780b80c5d598004d3bb8f5e0e827fa94518ac53157a20831e41a1"
     },
     {
+      "path": "reports/studio-node-repair-20261116/README.md",
+      "sha256": "8c1229f9d6ddb1b1d2ffb2f01a03805a4c60b4cf6b60e8f7bb39a1cfe236ae16"
+    },
+    {
       "path": "reports/studio-professional-group-workflow-20261014/README.md",
       "sha256": "aeff96b2daa31071a68a663aee2e7ba8020487096ebcbaeb66646a7f19690080"
+    },
+    {
+      "path": "reports/studio-render-throughput-20261122/release-verification.json",
+      "sha256": "00325727093004d526dc5d90713a02cf9bbbee2d4a12675a62b727b7e33ef769"
     },
     {
       "path": "reports/studio-source-parity-repair-20261015/README.md",
@@ -639,7 +651,7 @@
     },
     {
       "path": "src/productKnowledge/generate.js",
-      "sha256": "d448c06e6e87e14b12875baca243ee2d5e8eb0a5ea4e2f1f485bec60ad44c872"
+      "sha256": "75b966f4b99de7ed4eedcde4b057e356547057b9edb90064a555c7faf99f62fb"
     },
     {
       "path": "src/promotionService.js",
@@ -659,7 +671,7 @@
     },
     {
       "path": "src/server.js",
-      "sha256": "8d95636b9b669c46299d5274d4eebcb5236503756bc8d0fba37e9296d11bc60b"
+      "sha256": "4b17e1bf2b33ab6bc661e4281d392405c94a775be193773eae05b40a3adb71eb"
     },
     {
       "path": "src/services/__tests__/publishedVideoRetention.test.js",
@@ -747,7 +759,7 @@
     },
     {
       "path": "src/services/studioSourceFrameService.js",
-      "sha256": "005e39253d2277c18251066031075a5b3b84259a6fc08c0122ebb4443cac3318"
+      "sha256": "bb7c4d96aef96f000cfe47ab6c694eb2af223fb07de843b2f764b406945ce3d8"
     },
     {
       "path": "src/services/studioSourceService.js",
@@ -771,11 +783,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "7a517814c2f1ebb58713b64b1524090d86232522c006bc15fcec5e5b0be7be5a"
+      "sha256": "df24606d6861b4c298b5c9f5429c74e0a242432d8faa5dbf056188f218472962"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "c10307a1f688c8e2763f197403f53666d0590eb5b46544b96eab87c81e617b57"
+      "sha256": "8ce7955b7b5ddb6af9afbfa4ab8db19a94e747a3009539885af934da7f281e38"
     },
     {
       "path": "worker.js",

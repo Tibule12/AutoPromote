@@ -1,18 +1,18 @@
 # Captions and reviewed transcription
 
-Development documentation • product 1.2.0 • knowledge 1.0.64 • 2026-11-18
+Development documentation • product 1.2.0 • knowledge 1.0.65 • 2026-11-22
 
-Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
+Overall feature ratings and working subfeatures are separate. PARTIAL or BROKEN does not mean every control fails; entries identify verified workflows, release state and the remaining limitation. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
 ## Captions and transcription
 
 ID: `studio.captions` • **BROKEN** • DETERMINISTIC
 
-Creates editable timed captions with a speech-language choice. Regeneration replaces only the selected source and preserves edits made while listening. Mixed-language wording still needs review.
+Creates editable speech drafts. The expanded local correction workflow has passing tests and a real signed-in save/reopen/export example. The overall BROKEN rating refers to remaining recognition errors; it does not mean the tested correction controls fail. Expanded uncertain-word review, missing-speech markers and names/terms are not yet part of the released build.
 
 **Purpose:** Generate timed speech drafts, correct wording and speaker/language labels, and retain editable caption styles in the shared Studio project.
 
-**Available to:** signed-in users with owned project and applicable entitlement
+**Available to:** signed-in users with owned project and applicable entitlement; Expanded review and names/terms: verified local build only; not released
 
 **Media:** video with speech, reviewed transcript phrases
 
@@ -33,9 +33,13 @@ Creates editable timed captions with a speech-language choice. Regeneration repl
 
 **Limits**
 
-- This dated development snapshot does not establish professional or production readiness.
-- Speech language is a source preference, not detected-language evidence. Code-switched wording still needs review; the prior broad automatic-caption qualification remains open.
+- Verified working locally on 14 November: 104 focused checks and an eight-second human-speech generation, spelling-context correction, Undo/Redo, exact save/reopen, export and finished-playback workflow.
+- Word-level issue selection/navigation, editable speech-gap markers and approval guards have passing component/worker checks. A separate full native gap-only or multilingual lifecycle remains unqualified.
+- Automatic recognition still mishears some words and numbers. BROKEN describes that wider accuracy gap, not the working correction and persistence paths.
+- The retained local movies and recordings are evidence, not an announcement that these extra controls are deployed.
+- Speech language is a source preference, not detected-language evidence. Code-switched wording still needs review.
 - Automatic English translation is unavailable for the explicit South African language choices. Import reviewed English subtitles when needed.
+- Broad accent/noise coverage, every style/retime combination and whole predictive picture/sound agreement remain open.
 
 **Common errors**
 

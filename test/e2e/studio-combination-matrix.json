@@ -27552,5 +27552,21 @@
       "Drawn moving material recolour/heal/tracking and every Creative Effects preset were not exhaustively executed on production within these two renders.",
       "Whole predictive colour/edge/low-alpha parity, device coverage, capture smoothness and owner creative/listening approval remain separate."
     ]
+  },
+  "documentationEvidenceReconciliation20261122": {
+    "date": "2026-11-22",
+    "evidenceRefs": [
+      "docs/VERIFIED-FUNCTIONALITY-AND-RELEASE-STATUS.md",
+      "reports/studio-feature-documentation-20261122/retained-local-proofs.json",
+      "reports/studio-feature-documentation-20261122/README.md"
+    ],
+    "scope": "Recognize retained working caption/export/Node scopes separately from main/deployment and wider family limitations; seven private media hashes reverified. Documentation only.",
+    "readinessPromotion": false,
+    "nextTaskId": "S02",
+    "blockers": [
+      "Expanded caption/delivery implementations remain outside main; this task does not merge them",
+      "Overall recognition defects and broad preview/device/combination limits remain explicit",
+      "Newer local Node/VFX edits need matching-revision evidence reconciliation"
+    ]
   }
 }

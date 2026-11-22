@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.64",
+  "knowledge_version": "1.0.65",
   "product_version": "1.2.0",
   "release_channel": "development",
-  "updated_at": "2026-11-18",
+  "updated_at": "2026-11-22",
   "features": [
     {
       "feature_id": "studio.timeline",
@@ -676,11 +676,12 @@
       "name": "Captions and transcription",
       "area": "Studio",
       "status": "BROKEN",
-      "summary": "Creates editable timed captions with a speech-language choice. Regeneration replaces only the selected source and preserves edits made while listening. Mixed-language wording still needs review.",
+      "summary": "Creates editable speech drafts. The expanded local correction workflow has passing tests and a real signed-in save/reopen/export example. The overall BROKEN rating refers to remaining recognition errors; it does not mean the tested correction controls fail. Expanded uncertain-word review, missing-speech markers and names/terms are not yet part of the released build.",
       "purpose": "Generate timed speech drafts, correct wording and speaker/language labels, and retain editable caption styles in the shared Studio project.",
       "implementation_kind": "DETERMINISTIC",
       "available_to": [
-        "signed-in users with owned project and applicable entitlement"
+        "signed-in users with owned project and applicable entitlement",
+        "Expanded review and names/terms: verified local build only; not released"
       ],
       "supported_media": [
         "video with speech",
@@ -700,9 +701,13 @@
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
       "limitations": [
-        "This dated development snapshot does not establish professional or production readiness.",
-        "Speech language is a source preference, not detected-language evidence. Code-switched wording still needs review; the prior broad automatic-caption qualification remains open.",
-        "Automatic English translation is unavailable for the explicit South African language choices. Import reviewed English subtitles when needed."
+        "Verified working locally on 14 November: 104 focused checks and an eight-second human-speech generation, spelling-context correction, Undo/Redo, exact save/reopen, export and finished-playback workflow.",
+        "Word-level issue selection/navigation, editable speech-gap markers and approval guards have passing component/worker checks. A separate full native gap-only or multilingual lifecycle remains unqualified.",
+        "Automatic recognition still mishears some words and numbers. BROKEN describes that wider accuracy gap, not the working correction and persistence paths.",
+        "The retained local movies and recordings are evidence, not an announcement that these extra controls are deployed.",
+        "Speech language is a source preference, not detected-language evidence. Code-switched wording still needs review.",
+        "Automatic English translation is unavailable for the explicit South African language choices. Import reviewed English subtitles when needed.",
+        "Broad accent/noise coverage, every style/retime combination and whole predictive picture/sound agreement remain open."
       ],
       "common_errors": [
         {
@@ -721,7 +726,7 @@
       "related_features": [],
       "templates_using_feature": [],
       "aliases": [],
-      "updated_at": "2026-10-21",
+      "updated_at": "2026-11-22",
       "product_version": "1.2.0"
     },
     {
@@ -880,7 +885,7 @@
       "name": "Compositing",
       "area": "Studio",
       "status": "PARTIAL",
-      "summary": "Combines ordinary layers and animated graphic groups with shared order, static masks, alpha-aware blending and editable group clip timing. Broad preview/export picture and sound agreement remains incomplete.",
+      "summary": "Combines editable layers and groups with native masks, blending and timing. The retained Node repair passes six fixed picture comparisons and three playback profiles. Broad preview/export picture and sound agreement remains partial; those wider limits do not invalidate the passed Node workflows.",
       "purpose": "Compose editable graphic hierarchies while preserving child-local edits, timing and property animation through the shared preview and render path.",
       "implementation_kind": "DETERMINISTIC",
       "available_to": [
@@ -948,6 +953,7 @@
       "preview_behavior": "Full-canvas nested wrappers evaluate existing canonical motion keys on the shared preview clock, preserve child edits and apply a shared SVG geometric mask before the group transform/opacity. CSS group isolation retains the sibling backdrop for group and child blending. One native Multiply/Screen nested image/two-motion edit with 16 group keys has four scoped geometry and image-interior color pairs; whole glyph/alpha/raster/picture/sound and broad modes/media remain unqualified.",
       "render_behavior": "The shared compiler carries group mask/blend decisions and transform keys into the existing CPU compositor. The ordinary geometric matte rasterizer clips assembled local child alpha before transform/opacity; registered request-owned matte scratch is cleaned after the render. RGB blend color weights the blend result by backdrop alpha, preserving foreground color over transparent isolated parents. Group and child blending share the existing leaf compositor and inverse programme clock. Static/Normal paths retain previous pixels. Source/source-VFX/generated-caption stages remain separate; inspect the exact final movie.",
       "limitations": [
+        "Node repair evidence from 16 November includes 178 frontend cases, 258 renderer cases plus 13 subtests, exact save/reopen and native control checks. Newer local Node/VFX edits need evidence for their own revision.",
         "Image and title geometric masks support feather and inversion. Inspect their boundaries in the exported movie, especially with soft edges.",
         "Supported ordinary video layers can use geometric masks and direct two-dimensional video track mattes in the canonical composition path. That does not isolate people automatically. Main-video masks, arbitrary nesting and global effect ordering need separate qualification; inspect the actual export.",
         "This dated development snapshot does not establish professional or production readiness.",
@@ -1017,7 +1023,7 @@
         }
       ],
       "aliases": [],
-      "updated_at": "2026-11-17",
+      "updated_at": "2026-11-22",
       "product_version": "1.2.0"
     },
     {
@@ -1470,7 +1476,7 @@
       "name": "Sound effects",
       "area": "Studio",
       "status": "PARTIAL",
-      "summary": "Places sound cues on the native timeline. Included sound-design presets synthesize deterministic PCM; owned external sound files can be used in the supported audio path.",
+      "summary": "Places sound cues in editable projects. The deployed 45-second frame collection verifies 12 sound cues plus its original score through native save/reopen, GPU rendering, exact download and finished playback with sound. Broader audio/template combinations retain their separate limits.",
       "purpose": "Places sound cues on the native timeline. Included sound-design presets synthesize deterministic PCM; owned external sound files can be used in the supported audio path.",
       "implementation_kind": "DETERMINISTIC",
       "available_to": [
@@ -1498,6 +1504,7 @@
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
       "limitations": [
+        "The demonstrated sound-cue workflow is working in production. The broader PARTIAL label is not a failure of that passed case; every microphone/voiceover path and audio combination is not established.",
         "This dated development snapshot does not establish professional or production readiness."
       ],
       "common_errors": [
@@ -1590,7 +1597,7 @@
         "placed sound effects",
         "SFX controls"
       ],
-      "updated_at": "2026-10-21",
+      "updated_at": "2026-11-22",
       "product_version": "1.2.0"
     },
     {
@@ -2226,7 +2233,7 @@
       "name": "Studio playback preview",
       "area": "Studio",
       "status": "PARTIAL",
-      "summary": "Shows the existing project programme with mapped source frames and sound. Retained fixes improve selected cases; whole-stage live playback, stalls and picture/sound agreement remain open.",
+      "summary": "Source and completed-movie playback work. Larger-source paused extraction is verified live on the 293.7 MB podcast. The retained Node repair also passes its six fixed picture comparisons and three playback profiles. PARTIAL refers to wider predictive picture/sound agreement and continuous playback limits, not absence of these working paths.",
       "purpose": "Shows the existing project programme with mapped source frames and sound. Retained fixes improve selected cases; whole-stage live playback, stalls and picture/sound agreement remain open.",
       "implementation_kind": "DETERMINISTIC",
       "available_to": [
@@ -2247,8 +2254,11 @@
       "preview_behavior": "Preview quality offers Full detail, Auto, Half and Quarter. Full detail is the default and does not reduce resolution under playback load. Auto alone uses the adaptive display budget. Pausing restores full detail; the Before comparison follows the quality choice instead of using a fixed 540p canvas. The choice is saved with the project and does not alter export settings.",
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
       "limitations": [
+        "Accurate paused extraction is deployed for sources up to 512 MiB on disk-backed preview hosts, with shared admission/storage limits and a 90-second request window. RAM-backed temporary storage retains a smaller allowance.",
+        "The live larger-source check verifies one authenticated original-clock PNG and its source identity. It does not establish whole moving-preview parity.",
+        "The retained 16 November Node repair passes six fixed picture pairs and three playback profiles. This is dated local-build evidence; it does not automatically qualify later Node edits.",
+        "The 22 November headless finished-film recording reports 82 dropped-picture counters of 1354; smooth predictive real-time playback remains unqualified.",
         "This dated development snapshot does not establish professional or production readiness.",
-        "Accurate paused source pictures remain bounded to qualified clip clocks,90-second windows and128MiB sources. Strict ellipse mask/effect raster agreement and broad continuous picture/sound remain open.",
         "The 15 October programme-clock repair removes an erroneous black fade over dim footage. A20s CPU export completes in244.079s with all480 decoded picture frames unchanged; full colour/raster/live sound remains unqualified.",
         "Continuous playback paints directly from the decoded video without filling the optional bitmap cache. Paused frame capture retains source dimensions and allows one pending capture. These bounds do not establish smooth playback, whole picture/audio equality or production readiness.",
         "Moving playback adapts the preview resolution to measured paint cost and displays the reduced resolution. Pausing restores full detail. All paused source PNG profiles describe the decoded RGB surface consistently; broad optical effects, moving audio/picture equality and general device performance remain unqualified.",
@@ -2263,7 +2273,7 @@
       "related_features": [],
       "templates_using_feature": [],
       "aliases": [],
-      "updated_at": "2026-10-15",
+      "updated_at": "2026-11-22",
       "product_version": "1.2.0"
     },
     {
@@ -2271,7 +2281,7 @@
       "name": "Final deterministic render",
       "area": "Studio",
       "status": "FUNCTIONAL",
-      "summary": "Compiles the canonical project into the existing deterministic final path. Output must match the current project revision and owned source evidence.",
+      "summary": "Renders the canonical project through the shared worker. A deployed 45-second GPU master is verified end to end, and the optimized retest produces exactly the original movie bytes in 133.335 seconds instead of 348.134 seconds.",
       "purpose": "Compiles the canonical project into the existing deterministic final path. Output must match the current project revision and owned source evidence.",
       "implementation_kind": "DETERMINISTIC",
       "available_to": [
@@ -2292,6 +2302,7 @@
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
       "limitations": [
+        "The timing result is one production project, not a capacity or completion-time guarantee. Actual concurrent-user throughput, forced GPU-to-CPU failover, cold starts and host loss remain separate.",
         "This dated development snapshot does not establish professional or production readiness.",
         "The 15 October programme-clock repair removes an erroneous black fade over dim footage. A20s CPU export completes in244.079s with all480 decoded picture frames unchanged; full colour/raster/live sound remains unqualified."
       ],
@@ -2381,7 +2392,7 @@
         }
       ],
       "aliases": [],
-      "updated_at": "2026-10-15",
+      "updated_at": "2026-11-22",
       "product_version": "1.2.0"
     },
     {
@@ -2389,7 +2400,7 @@
       "name": "Export and download",
       "area": "Studio",
       "status": "PARTIAL",
-      "summary": "Requests a final movie and downloads the exact completed output after applicable ownership and review checks. Full preview parity and all product combinations are not qualified.",
+      "summary": "Downloads the exact completed movie. The released 45-second GPU export is verified, including a faster byte-identical retest. Strict size enforcement, Opus, Display P3 and SDR-mapped HDR10/PCM32 also have retained native local proof; those extensions have not reached the released build. PARTIAL applies to the wider delivery and compatibility scope.",
       "purpose": "Requests a final movie and downloads the exact completed output after applicable ownership and review checks. Full preview parity and all product combinations are not qualified.",
       "implementation_kind": "DETERMINISTIC",
       "available_to": [
@@ -2413,10 +2424,13 @@
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "The shared worker derives the programme clock from the requested source intervals on the canonical 90 kHz timebase before applying speed. Codec padding in intermediate files cannot append an unrequested speed-plan tail. The declared clock is checked against those intervals. Downloads retain the exact completed output hash.",
       "limitations": [
-        "Match first source uses a constant output rate. Variable-rate timestamp preservation still requires qualification.",
-        "Studio delivers Rec.709 SDR MP4 with AAC when audio is present. Video compression follows the selected Quality preset and byte size varies with the footage.",
-        "This dated development snapshot does not establish professional or production readiness.",
-        "The eight-second native 24 fps clock regression is verified at 192 frames. This bounded result does not qualify every fractional source duration, retime, hook, caption, picture or audio combination."
+        "Verified in production on 22 November: the same 45-second 720p/30fps master completes in 133.335 seconds versus 348.134 seconds, with identical finished MP4 bytes and sound. This is one comparison, not a speed guarantee.",
+        "Working local size enforcement delivered 941,576 bytes under a selected 1 MB maximum through a normal native export. Main currently contains size-budget estimation; it is not the separately tested strict cap.",
+        "Working local H.264/Opus/Display P3 delivery has exact download, decode and finished-picture playback evidence. It is not yet part of the released build.",
+        "Working local HEVC/PCM32 SDR-to-HDR10 delivery fully decodes externally. The tested browser cannot decode its pictures; the download remains available. This is 100-nit SDR mapping, not a complete HDR grading pipeline.",
+        "Main separately implements ProRes/MOV with PCM and explicit video bitrate. Implementation and retained evidence must be checked for the requested delivery combination.",
+        "Match first source uses a constant output rate. Preservation of variable-rate timestamps remains a separate qualification.",
+        "All devices, delivery combinations, long-job recovery and whole predictive picture/audio parity are not qualified."
       ],
       "common_errors": [
         {
@@ -2429,7 +2443,7 @@
       ],
       "templates_using_feature": [],
       "aliases": [],
-      "updated_at": "2026-10-17",
+      "updated_at": "2026-11-22",
       "product_version": "1.2.0"
     },
     {
@@ -4808,7 +4822,7 @@
       "name": "Audio template cues",
       "area": "Templates",
       "status": "PARTIAL",
-      "summary": "Template definitions place editable music/SFX/voice cues in normal audio lanes. Professional sound quality still requires listening to the actual film.",
+      "summary": "Places sound cues in editable projects. The deployed 45-second frame collection verifies 12 sound cues plus its original score through native save/reopen, GPU rendering, exact download and finished playback with sound. Broader audio/template combinations retain their separate limits.",
       "purpose": "Template definitions place editable music/SFX/voice cues in normal audio lanes. Professional sound quality still requires listening to the actual film.",
       "implementation_kind": "DETERMINISTIC",
       "available_to": [
@@ -4829,6 +4843,7 @@
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
       "limitations": [
+        "The demonstrated sound-cue workflow is working in production. The broader PARTIAL label is not a failure of that passed case; every microphone/voiceover path and audio combination is not established.",
         "This dated development snapshot does not establish professional or production readiness."
       ],
       "common_errors": [
@@ -4840,7 +4855,7 @@
       "related_features": [],
       "templates_using_feature": [],
       "aliases": [],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-11-22",
       "product_version": "1.2.0"
     },
     {
@@ -13278,10 +13293,11 @@
       ],
       "expected_result": "An owned editable result with current revision and reviewed output; inspect the actual moving picture and sound.",
       "limitations": [
+        "Expanded caption review and additional delivery profiles have retained local proof but are not all released. A broad feature label must not be read as a failure of every tested control.",
         "The empty-hint repetition trigger is repaired on retained speech, but code-switched wording still needs correction. Broad automatic transcription, all caption styles and full preview/export parity are not qualified."
       ],
       "aliases": [],
-      "updated_at": "2026-10-21",
+      "updated_at": "2026-11-22",
       "product_version": "1.2.0"
     },
     {
@@ -13547,10 +13563,11 @@
       ],
       "expected_result": "An owned editable result with current revision and reviewed output; inspect the actual moving picture and sound.",
       "limitations": [
+        "Expanded caption review and additional delivery profiles have retained local proof but are not all released. A broad feature label must not be read as a failure of every tested control.",
         "Follow the linked feature readiness; these steps do not promote the workflow to professional or production readiness."
       ],
       "aliases": [],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-11-22",
       "product_version": "1.2.0"
     },
     {
