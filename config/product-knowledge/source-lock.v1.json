@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Document retained passing caption/export/Node workflows, exact release boundaries, seven verified media hashes and the deployed GPU/source-frame proof; preserve wider family ratings",
-  "reviewed_at": "2026-11-22T17:05:48.549Z",
-  "catalog_sha256": "08fe898c9f963df9eef1f6c1ead5a82673134a81c8b264959a3b63165b885ec4",
+  "reason": "TikTok disclosure selection and final label review; 38 backend and 24 frontend regression checks pass with mocked transport. Required disclosures and provider auto-label limits retained; no live publication or readiness promotion.",
+  "reviewed_at": "2026-11-22T19:13:59.524Z",
+  "catalog_sha256": "c76b18fb11778189cbcc87268392cc0d05c0c561ea03ee64b511f7c0ec8a4632",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -15,7 +15,7 @@
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
-      "sha256": "31c4d1d7e968e99bbfef66274244d48f37eadf669794eeaea03f6ba30b3c216e"
+      "sha256": "e62ca50f319739bab1431ee0d8c824d6a1b308dca6ca5dea4d084a66c839bf22"
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
@@ -435,7 +435,7 @@
     },
     {
       "path": "frontend/src/features/publishing/UnifiedPublisher.js",
-      "sha256": "ee52a76b780fee76bd54b4c893acc6fea2d1b20b0c57c3bd20ae3df735c40df8"
+      "sha256": "1c154ced9f1f6e5e88c6831488cc86995bd080a0c9d80c30984f1a8526b9b48b"
     },
     {
       "path": "frontend/src/features/publishing/utils/publishingUtils.js",
