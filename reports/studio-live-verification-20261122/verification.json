@@ -1,0 +1,459 @@
+{
+  "status": "PARTIAL",
+  "release": {
+    "apiCommit": "506de43b30e6838157f2ff3e057fe982455ffa1c",
+    "frontend": "https://autopromote.org/static/js/main.e1f7c340.js",
+    "workerDeploymentWorkflow": "https://github.com/Tibule12/AutoPromote/actions/runs/45023807026",
+    "normalSignedInProductionInterface": true
+  },
+  "authorization": {
+    "reply": "Approve both \u2014 10 credits maximum",
+    "uniqueJobs": 2,
+    "approvedAppCredits": 10,
+    "scope": "45second frame/sound export and6second grading/restoration export,720p30; normal GPU-first routing. No load test or additional render."
+  },
+  "execution": {
+    "frames": {
+      "jobId": "viral_5d481dfb21ff19acce14f91587085167e297e736f9c2e9e14b93a35d78f9662a",
+      "seconds": 45,
+      "layers": 120,
+      "motionKeys": 136,
+      "footageWindows": 25,
+      "soundCues": 12,
+      "originalScore": "Prism Circuit,128BPM,45seconds",
+      "device": "gpu",
+      "route": "gpu_primary",
+      "encoder": "h264_nvenc",
+      "elapsedSeconds": 348.134,
+      "outputSha256": "d0cdec4e1090b9d66c7da71013786e68a339f6442050668a465390e4008dc43b",
+      "nativeDownloadMatchesWorker": true,
+      "fullDecode": {
+        "video": {
+          "codec_name": "h264",
+          "width": 720,
+          "height": 1280,
+          "duration": "45.000000",
+          "nb_frames": "1350",
+          "r_frame_rate": "30/1",
+          "color_space": "bt709",
+          "color_transfer": "bt709",
+          "color_primaries": "bt709"
+        },
+        "audio": {
+          "codec_name": "aac",
+          "channels": 2,
+          "sample_rate": "48000",
+          "duration": "45.000000"
+        },
+        "fullDecodePassed": true
+      },
+      "finishedPlayback": {
+        "currentTime": 45,
+        "duration": 45,
+        "error": null,
+        "volume": 1,
+        "muted": false
+      },
+      "qualityGate": "passed"
+    },
+    "grading": {
+      "jobId": "viral_bfb83405d3a46036192c56270840c8759a0dc4cbbf119a8fe0282a690bb9448d",
+      "seconds": 6,
+      "device": "gpu",
+      "route": "gpu_primary",
+      "encoder": "h264_nvenc",
+      "outputSha256": "cc5c1d2b3d95408635d216c16bf78ca842d099e0cb7b1b8bbbc30df59fe98c08",
+      "faceRestoration": {
+        "fps": 30,
+        "elapsedSeconds": 7.189977666000001,
+        "device": "cuda",
+        "strength": 0.85,
+        "modelSamples": "24",
+        "unrestoredFrames": "0",
+        "fallbackReason": null,
+        "originalAudioPreserved": true,
+        "modelSha256": "e2cd4703ab14f4d01fd1383a8a8b266f9a5833dacee8e6a79d3bf21a1b6be5ad",
+        "generativeDetail": true,
+        "decoder": "ffmpeg-source-rgb-v1",
+        "model": "gfpgan-v1.4-natural-v2",
+        "frames": "180",
+        "stability": 0.65
+      },
+      "elapsedSeconds": 24.9,
+      "adjustmentLayers": 2,
+      "nativeDownloadMatchesWorker": true,
+      "fullDecode": {
+        "video": {
+          "codec_name": "h264",
+          "width": 1280,
+          "height": 720,
+          "duration": "6.000000",
+          "nb_frames": "180",
+          "r_frame_rate": "30/1",
+          "color_space": "bt709",
+          "color_transfer": "bt709",
+          "color_primaries": "bt709"
+        },
+        "audio": {
+          "codec_name": "aac",
+          "channels": 2,
+          "sample_rate": "48000",
+          "duration": "6.000000"
+        },
+        "fullDecodePassed": true
+      },
+      "finishedPlayback": {
+        "currentTime": 6,
+        "duration": 6,
+        "readyState": 4,
+        "error": null,
+        "muted": false,
+        "volume": 1
+      },
+      "sourceAudio": {
+        "source": "Original unchanged podcast",
+        "seconds": 6,
+        "sampleRate": 16000,
+        "outputRms": 0.12554974019412157,
+        "correlation": 0.9950247157321179,
+        "lagSamples": 0,
+        "lagSeconds": 0.0,
+        "nonSilent": true,
+        "sourceAudioPreserved": true
+      },
+      "qualityGate": "passed"
+    }
+  },
+  "liveAuthoring": {
+    "all12FrameRecipesApplied": true,
+    "undoRedoAndSave": true,
+    "coldProjectRestore": {
+      "coldPageReload": true,
+      "normalProjectReopen": true,
+      "exactCanonicalDocument": true,
+      "exactKeysAndSounds": true,
+      "layers": 120,
+      "errors": [],
+      "httpErrors": [],
+      "qaGuardBlockedTelemetry": 2
+    },
+    "independentInitialRestore": {
+      "freshAuthenticatedBrowser": true,
+      "normalBackupImport": true,
+      "exactCanonicalDocument": true,
+      "exactKeys": true,
+      "exactSounds": true,
+      "uploads": 0,
+      "renders": 0,
+      "errors": [],
+      "httpErrors": []
+    },
+    "independentUploadedProjectRestore": {
+      "freshAuthenticatedBrowser": true,
+      "normalBackupImport": true,
+      "exactCanonicalDocument": true,
+      "exactKeys": true,
+      "exactSounds": true,
+      "uploads": 0,
+      "renders": 0,
+      "errors": [],
+      "httpErrors": []
+    },
+    "creativeEffectControls": {
+      "liveEffectSearch": true,
+      "filmGrainApplied": true,
+      "durationEdited": true,
+      "undoRedoSaved": true,
+      "creativeEffects": [
+        {
+          "id": "film_grain",
+          "duration": 2
+        }
+      ],
+      "renders": 0,
+      "uploads": 0,
+      "errors": [],
+      "httpErrors": []
+    },
+    "numericRestorationControls": {
+      "numericRestorationAmountEditUndoRedo": true,
+      "originalAmountRestored": "0.85",
+      "pausedSamples": [
+        {
+          "time": 0
+        },
+        {
+          "time": 2
+        },
+        {
+          "time": 5
+        }
+      ],
+      "renderStarted": false,
+      "errors": [],
+      "httpErrors": [
+        {
+          "status": 422,
+          "host": "api.autopromote.org",
+          "path": "/api/media/studio-assets/source-frame"
+        },
+        {
+          "status": 422,
+          "host": "api.autopromote.org",
+          "path": "/api/media/studio-assets/source-frame"
+        },
+        {
+          "status": 422,
+          "host": "api.autopromote.org",
+          "path": "/api/media/studio-assets/source-frame"
+        }
+      ]
+    },
+    "originalSoundButtons": 8,
+    "note": "Initial last-style observer used a rounded30fps time beyond the45second boundary. Native beat snapping corrected the authoring request; no render or charge occurred in that attempt."
+  },
+  "gpuHealth": {
+    "computeDevice": "cuda",
+    "videoEncoder": "h264_nvenc",
+    "gpuRequired": true,
+    "studioCapabilities": {
+      "selectiveGrading": 3,
+      "regionRecolor": 1,
+      "clonePatch": 1,
+      "regionTracking": 1,
+      "materialMatte": 1,
+      "textureHeal": 1,
+      "faceRestoration": 2,
+      "originalSounds": 1
+    }
+  },
+  "cpuHealth": {
+    "computeDevice": "cpu",
+    "videoEncoder": "libx264",
+    "gpuRequired": false,
+    "studioCapabilities": {
+      "selectiveGrading": 3,
+      "regionRecolor": 1,
+      "clonePatch": 1,
+      "regionTracking": 1,
+      "materialMatte": 1,
+      "textureHeal": 1,
+      "faceRestoration": 2,
+      "originalSounds": 1
+    }
+  },
+  "recovery": {
+    "reloadDuringFrameRender": {
+      "pageReloadDuringRender": true,
+      "sameProjectReopened": true,
+      "noAdditionalRender": true,
+      "renderSubmissions": 2,
+      "ownedArtworkBindings": 96,
+      "ownedMusic": true,
+      "errors": []
+    },
+    "completedJobRetry": {
+      "sameRenderRequestId": true,
+      "sameJobId": true,
+      "reused": true,
+      "http": 200,
+      "balanceBefore": 148,
+      "balanceAfter": 148,
+      "additionalCharge": 0,
+      "uniqueApprovedRenders": 2
+    },
+    "bothAttemptLookupsRemainCompleted": [
+      {
+        "which": "grading",
+        "http": 200,
+        "sameJob": true,
+        "status": "completed"
+      },
+      {
+        "which": "frames",
+        "http": 200,
+        "sameJob": true,
+        "status": "completed"
+      }
+    ]
+  },
+  "billing": {
+    "approvedMaximum": 10,
+    "actualCreditsDeducted": 10,
+    "uniqueJobs": 2,
+    "paidRenderAttempts": 2,
+    "sameIdentityRecoveryRequests": 1,
+    "extraRecoveryCharge": 0,
+    "ownedAssetUploads": 37,
+    "creditGrantsOrPlanChanges": 0
+  },
+  "access": {
+    "anonymousCalls": [
+      {
+        "which": "grading",
+        "anonymousStatus": 401
+      },
+      {
+        "which": "frames",
+        "anonymousStatus": 401
+      }
+    ],
+    "crossAccountSecondUserTested": false
+  },
+  "accuratePausedPreviewFailure": {
+    "status": 422,
+    "code": "STUDIO_FRAME_SOURCE_LIMIT",
+    "sourceBytes": 293713235,
+    "endpointLimitBytes": 134217728,
+    "scope": "Accurate paused-source PNG for the owned four-minute podcast; ordinary moving preview and the approved six-second final export still work.",
+    "reproducedAtSeconds": [
+      0,
+      2,
+      5
+    ],
+    "cause": "studioSourceFrameService.withOwnedSource refuses source files over128MiB before downloading them.",
+    "nextFix": "Add a bounded worker-side or ranged-source precise-frame path for large owned files while retaining source identity, byte limits, cancellation and the small API memory budget. Do not simply remove the server limit."
+  },
+  "uiCopyFinding": {
+    "file": "frontend/src/components/ViralStudioChrome.js",
+    "observed": "No render credits used remains static after a paid export.",
+    "billingLedgerCorrect": true,
+    "fixPrepared": false
+  },
+  "remaining": [
+    "Accurate paused previews of sources above128MiB need a bounded large-source path.",
+    "The static No render credits used label is misleading after a paid export.",
+    "Healthy CPU capability and GPU execution are verified; actual automatic GPU-to-CPU failover was not forced.",
+    "No concurrency/load/worker-host-failure test was authorized or executed.",
+    "Notifications API returned200but contained neither job ID; email completion was not independently verified.",
+    "Drawn moving material recolour/heal/tracking and every Creative Effects preset were not exhaustively executed on production within these two renders.",
+    "Whole predictive colour/edge/low-alpha parity, device coverage, capture smoothness and owner creative/listening approval remain separate."
+  ],
+  "productionFullyReady": false,
+  "formalCountsUnchanged": "17 FUNCTIONAL /9 PARTIAL /1 BROKEN /2 UNIMPLEMENTED /0 PRO /0 PRODUCTION",
+  "sourceAndLogin": {
+    "sha256": "00d48e87bd9b77ba9ead11c92bf93039f43fc3e7e6b322c3e379f6b4dac55254",
+    "unchanged": true
+  },
+  "publishingOrScheduling": false,
+  "newPaidInstanceAllocation": false,
+  "qaRoot": "/home/tibule12/.local/share/autopromote-qa/studio-live-verification-20261122",
+  "delivery": "/home/tibule12/Videos/Studio - Production Tests - 2026-11-22",
+  "playbackAlignment": {
+    "pictureMatches": [
+      {
+        "wall": 1.2,
+        "movieTime": 0.9333333333333333,
+        "offset": 0.2666666666666666,
+        "mse": 222.82847800925927
+      },
+      {
+        "wall": 7,
+        "movieTime": 6.7,
+        "offset": 0.2999999999999998,
+        "mse": 62.67413194444445
+      },
+      {
+        "wall": 14,
+        "movieTime": 13.8,
+        "offset": 0.1999999999999993,
+        "mse": 283.19131944444445
+      },
+      {
+        "wall": 22,
+        "movieTime": 21.733333333333334,
+        "offset": 0.2666666666666657,
+        "mse": 284.92898148148146
+      },
+      {
+        "wall": 30,
+        "movieTime": 29.7,
+        "offset": 0.3000000000000007,
+        "mse": 37.17578125
+      },
+      {
+        "wall": 38,
+        "movieTime": 37.766666666666666,
+        "offset": 0.23333333333333428,
+        "mse": 316.1071875
+      },
+      {
+        "wall": 44,
+        "movieTime": 43.733333333333334,
+        "offset": 0.2666666666666657,
+        "mse": 251.1246585648148
+      }
+    ],
+    "screenStartOffsetSeconds": 0.2666666666666657,
+    "capturedAudioOffsetSeconds": 0.0065,
+    "audioDelaySeconds": 0.2601666666666657,
+    "retiming": false,
+    "audio": {
+      "sampleRate": 12000,
+      "rms": 0.11936388909816742,
+      "peak": 0.6789342164993286,
+      "silent": false
+    }
+  },
+  "deliveryFiles": [
+    {
+      "name": "04 - Editable production grading project.autopromote.json",
+      "bytes": 39946,
+      "sha256": "89356c88664b2b88f52b58adbc3b70c6ff9701860f36631637945b6576913678"
+    },
+    {
+      "name": "01 - Production original frames and sound - 45 seconds.mp4",
+      "bytes": 37531440,
+      "sha256": "d0cdec4e1090b9d66c7da71013786e68a339f6442050668a465390e4008dc43b"
+    },
+    {
+      "name": "05 - Complete production Studio playback with sound.mp4",
+      "bytes": 8437284,
+      "sha256": "f561341d447db5e9003d85457c03ee4fb03e59bb9be5640ace9386c5c2c76032"
+    },
+    {
+      "name": "06 - Actual production frames.jpg",
+      "bytes": 358061,
+      "sha256": "73f9a3e92f222ef72d251d911e5eefbd4f4130cc7093d05e7175f9810ce01e94"
+    },
+    {
+      "name": "02 - Production grading and restoration - 6 seconds.mp4",
+      "bytes": 6828433,
+      "sha256": "cc5c1d2b3d95408635d216c16bf78ca842d099e0cb7b1b8bbbc30df59fe98c08"
+    },
+    {
+      "name": "Read me.txt",
+      "bytes": 1843,
+      "sha256": "9a5bdcff9642839e9e8d34149646a8e48c477b22892cc3d9e3923ca059610a19"
+    },
+    {
+      "name": "03 - Editable production frame project.autopromote.json",
+      "bytes": 1015211,
+      "sha256": "816536dfdb99d209e72c3942aa1c0da6118050e967ce640dc1a94e27639bad73"
+    }
+  ],
+  "runtimeClosure": {
+    "ownedLiveBrowserClosed": true,
+    "originalLoginUnchanged": true,
+    "uniqueProductionRenders": 2,
+    "maximumAppCredits": 10,
+    "ownedControllerStopped": true
+  },
+  "contractValidation": {
+    "valid": true,
+    "capabilities": 29,
+    "counts": {
+      "UNIMPLEMENTED": 2,
+      "BROKEN": 1,
+      "PARTIAL": 9,
+      "FUNCTIONAL": 17,
+      "PRO-READY": 0,
+      "PRODUCTION-READY": 0
+    },
+    "combinations": 13,
+    "parityChecks": 17,
+    "presentFixtures": 4,
+    "newCapabilityExecutions": 0,
+    "note": "Record validation only; no browser, provider or GPU execution."
+  }
+}

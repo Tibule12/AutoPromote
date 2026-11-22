@@ -1,4 +1,25 @@
 {
+  "renderThroughput20261122": {
+    "date": "2026-11-22",
+    "evidenceRefs": [
+      "reports/studio-render-throughput-20261122/README.md",
+      "reports/studio-render-throughput-20261122/verification.json"
+    ],
+    "scope": "Bounded large-source paused-frame disk streaming, honest credit copy, per-export source/preparation reuse, immutable resize/hold reuse and quota-bounded parallel canonical layer preparation.",
+    "readinessPromotion": false,
+    "nextTaskId": "S02",
+    "localComparison": {
+      "secondsBefore": 757.970194205991,
+      "secondsAfter": 441.46774216598715,
+      "byteIdentical": true
+    },
+    "blockers": [
+      "Release candidate frontend/API/CPU/GPU changes before claiming live fixes",
+      "A new bounded production render approval is needed to measure the revised worker; both previous exports/10 credits are used",
+      "Actual CPU failover, concurrency/load, host loss and notification delivery remain unqualified",
+      "Whole predictive parity, broader S02/S04/S03 and creative approval remain separate"
+    ]
+  },
   "videoSync20261121": {
     "date": "2026-11-21",
     "evidenceRefs": [
@@ -26799,6 +26820,31 @@
       "Production frontend/API/CPU/GPU deployment completion and live release checks remain separate",
       "Whole-Studio predictive colour/edge/low-alpha parity, broad device performance and creative/listening approval remain open",
       "Local45secondframe render took793.2seconds; final encoding usedNVENC but raster preparation is CPU-heavy"
+    ]
+  },
+  "productionVerification20261122": {
+    "status": "PARTIAL",
+    "evidence": "reports/studio-live-verification-20261122/verification.json",
+    "releaseCommit": "506de43b30e6838157f2ff3e057fe982455ffa1c",
+    "actualProductionRenders": 2,
+    "creditsDeducted": 10,
+    "gpuRenderAndDecodeVerified": true,
+    "cpuCapabilitiesVerified": true,
+    "automaticCpuFailoverVerified": false,
+    "nativeColdAndIndependentRestore": true,
+    "sameJobRetryWithoutDuplicateCharge": true,
+    "accuratePausedPreviewForLargeSources": "FAILED \u2014128MiBlimitrejects293713235bytepodcast",
+    "concurrencyOrLoadTested": false,
+    "emailCompletionVerified": false,
+    "productionFullyReady": false,
+    "remaining": [
+      "Accurate paused previews of sources above128MiB need a bounded large-source path.",
+      "The static No render credits used label is misleading after a paid export.",
+      "Healthy CPU capability and GPU execution are verified; actual automatic GPU-to-CPU failover was not forced.",
+      "No concurrency/load/worker-host-failure test was authorized or executed.",
+      "Notifications API returned200but contained neither job ID; email completion was not independently verified.",
+      "Drawn moving material recolour/heal/tracking and every Creative Effects preset were not exhaustively executed on production within these two renders.",
+      "Whole predictive colour/edge/low-alpha parity, device coverage, capture smoothness and owner creative/listening approval remain separate."
     ]
   }
 }

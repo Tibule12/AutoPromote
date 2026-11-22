@@ -1,5 +1,18 @@
 from copy import deepcopy
 from python_media_worker.studio_layer_cache import video_layer_raster_key
+from python_media_worker.studio_layer_cache import video_preparation_key
+
+
+def test_prepared_video_reuse_retains_every_source_trim_speed_and_audio_decision():
+    from python_media_worker.studio_broll import overlay_commands
+    def key(prefix='one', source='owned.mp4', seek=.15, duration=2.3, behavior='loop', offset=.25, audio=True, rate=1):
+        commands, _, _, _ = overlay_commands(source, prefix, 1.2, seek, duration,
+            behavior, 4.5, [{'start_time': 0, 'end_time': 10, 'rate': rate}], audio, offset)
+        return video_preparation_key(source, commands, prefix)
+    assert key() == key(prefix='two')
+    for changed in [dict(source='other-owned.mp4'), dict(seek=.2), dict(duration=2.2),
+                    dict(behavior='hold'), dict(offset=.3), dict(audio=False), dict(rate=1.5)]:
+        assert key(**changed) != key()
 
 
 def test_only_pixel_identical_native_video_layers_share_the_pre_matte_movie(tmp_path):

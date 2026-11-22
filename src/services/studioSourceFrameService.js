@@ -1,4 +1,3 @@
-const { fileSha256 } = require("../utils/temporaryMediaUpload");
 // An accurate paused source frame uses the same -ss / fps / PTS sampling as
 // Studio's deterministic sequence renderer. It is transient preview media,
 // never a generated asset or an alternate final rendering engine.
@@ -10,17 +9,28 @@ const { execFile } = require('node:child_process');
 const { promisify } = require('node:util');
 const { pipeline } = require('node:stream/promises');
 const { createWriteStream } = require('node:fs');
+const { Transform } = require('node:stream');
 const { getStudioSourceBucket, resolveOwnedStudioVideoSource, sourceError } = require('./studioSourceService');
 const execute = promisify(execFile);
 const { SEQUENCE_SAMPLER, ORIGINAL_SEQUENCE_SAMPLER, sequencePictureWindow } = require('../../frontend/src/components/studioSequencePictureClock');
 const SAMPLER = 'studio-sequence-source-frame-v1';
 const TEXTURE_SAMPLER = 'studio-3d-texture-frame-v1';
-const MAX_SOURCE_BYTES = 128 * 1024 * 1024;
+// Sources are streamed to private disk, never held in the API heap. Reserve
+// their full size (plus a possible legacy derivative) before starting a read.
+const MAX_SOURCE_BYTES = 512 * 1024 * 1024;
+const MAX_CACHE_BYTES = 640 * 1024 * 1024;
+const MIN_FREE_BYTES = 64 * 1024 * 1024;
 const MAX_SEQUENCE_BYTES = 32 * 1024 * 1024;
 const LOCAL_VIDEO_INPUT = ['-protocol_whitelist','file,pipe','-format_whitelist','mov,matroska,avi,mpeg,mpegts'];
 const TTL = 2 * 60 * 1000;
 const sources = new Map();
 const activeOwners = new Set();
+let cacheQueue = Promise.resolve();
+function exclusiveCache(action) {
+  const result = cacheQueue.then(action);
+  cacheQueue = result.catch(() => {});
+  return result;
+}
 
 function validateFrameRequest(input) {
   const fields = ['storagePath', 'sourceContentHash', 'sourceGeneration', 'start', 'end', 'fps', 'frameIndex', 'sampling',
@@ -128,15 +138,71 @@ async function prepareSequencePreviewSource(file, output, signal) {
   return {file:output,size};
 }
 
-async function prune() {
-  let size = [...sources.values()].reduce((sum, item) => sum + item.size, 0);
+async function prune(reservation = 0, limit = MAX_CACHE_BYTES) {
+  let size = [...sources.values()].reduce((sum, item) => sum + item.reserved, 0);
   for (const [key, item] of [...sources].sort((a,b) => a[1].used-b[1].used)) {
-    if (item.refs || (Date.now()-item.used < TTL && size <= MAX_SOURCE_BYTES)) continue;
-    sources.delete(key); size -= item.size;
+    if (item.refs || (!item.failed && Date.now()-item.used < TTL && size + reservation <= limit)) continue;
+    sources.delete(key); size -= item.reserved;
     await fs.rm(item.folder, { recursive: true, force: true });
   }
+  return size;
 }
-setInterval(() => prune().catch(() => {}), TTL).unref();
+setInterval(() => exclusiveCache(() => prune()).catch(() => {}), TTL).unref();
+
+async function reserveSource(owned, signal) {
+  const key = crypto.createHash('sha256').update(`${owned.kind}:${owned.bucketName}:${owned.storagePath}:${owned.generation}`).digest('hex');
+  return exclusiveCache(async () => {
+    let cached = sources.get(key);
+    if (cached && !cached.failed) {
+      cached.refs++; cached.used = Date.now();
+      return cached;
+    }
+    const reserved = owned.size + MAX_SEQUENCE_BYTES;
+    const disk = await fs.statfs(os.tmpdir());
+    // Some serverless hosts mount /tmp in RAM. A disk allowance must never
+    // silently become a larger memory allowance on those hosts.
+    const limit = Number(disk.type) === 0x01021994 ? 128 * 1024 * 1024 : MAX_CACHE_BYTES;
+    if (reserved > limit)
+      throw sourceError(422, 'STUDIO_FRAME_SOURCE_LIMIT', 'This preview host needs disk storage for a larger source');
+    const size = await prune(reserved, limit);
+    if (size + reserved > limit)
+      throw sourceError(429, 'STUDIO_FRAME_BUSY', 'A preview source is still being prepared. Try again shortly.');
+    const available = await fs.statfs(os.tmpdir());
+    const pending = [...sources.values()].reduce((sum, item) => sum + item.reserved - (item.diskBytes || 0), 0);
+    if (Number(available.bavail) * Number(available.bsize) < reserved + pending + MIN_FREE_BYTES)
+      throw sourceError(503, 'STUDIO_FRAME_DISK_BUSY', 'Preview storage is busy. Try again shortly.');
+    signal?.throwIfAborted();
+    const folder = await fs.mkdtemp(path.join(os.tmpdir(), 'studio-source-frame-'));
+    await fs.chmod(folder, 0o700);
+    const file = path.join(folder, 'source');
+    cached = { folder, file, reserved, size: owned.size, used: Date.now(), refs: 1 };
+    sources.set(key, cached);
+    cached.ready = (async () => {
+      try {
+        const object = getStudioSourceBucket(owned.kind, owned.bucketName).file(owned.storagePath, { generation: owned.generation });
+        const hash = crypto.createHash('sha256');
+        let received = 0;
+        const meter = new Transform({ transform(chunk, _encoding, callback) {
+          received += chunk.length;
+          if (received > owned.size) return callback(new Error('Source exceeds its declared size'));
+          hash.update(chunk); callback(null, chunk);
+        } });
+        await pipeline(object.createReadStream({ validation: 'crc32c', decompress: false }), meter,
+          createWriteStream(file, { mode: 0o600, flags: 'wx' }),
+          { signal: AbortSignal.any([signal, AbortSignal.timeout(60000)].filter(Boolean)) });
+        if (received !== owned.size) throw new Error('Source size changed');
+        cached.diskBytes = received;
+        cached.hash = hash.digest('hex');
+      } catch (_) {
+        cached.failed = true;
+        // Admission remains reserved until the partial file is deleted.
+        await fs.rm(folder, { recursive: true, force: true });
+        throw sourceError(503, 'STUDIO_FRAME_SOURCE_UNAVAILABLE', 'Could not prepare this saved source');
+      }
+    })();
+    return cached;
+  });
+}
 
 async function withOwnedSource({ ownerUid, request, signal }, inspect) {
   // Authorization is checked even when bytes are already cached. The exact
@@ -144,35 +210,14 @@ async function withOwnedSource({ ownerUid, request, signal }, inspect) {
   const owned = await resolveOwnedStudioVideoSource({ userId: ownerUid, storagePath: request.storagePath, signRead: false });
   if (request.sourceGeneration && owned.generation !== request.sourceGeneration)
     throw sourceError(409, 'STUDIO_FRAME_SOURCE_CHANGED', 'The saved source generation has changed. Refresh its link.');
-  if (!owned.generation || owned.size > MAX_SOURCE_BYTES ||
-      request.sampling===SEQUENCE_SAMPLER && owned.size>MAX_SOURCE_BYTES-MAX_SEQUENCE_BYTES)
+  if (!owned.generation || !Number.isSafeInteger(owned.size) || owned.size <= 0 || owned.size > MAX_SOURCE_BYTES)
     throw sourceError(422, 'STUDIO_FRAME_SOURCE_LIMIT', 'Accurate paused frames are unavailable for this source');
   if (activeOwners.has(ownerUid) || activeOwners.size >= 2)
     throw sourceError(429, 'STUDIO_FRAME_BUSY', 'A preview frame is still being prepared');
   activeOwners.add(ownerUid);
   let cached;
   try {
-    const key = crypto.createHash('sha256').update(`${owned.kind}:${owned.storagePath}:${owned.generation}`).digest('hex');
-    cached = sources.get(key);
-    if (!cached) {
-      const folder = await fs.mkdtemp(path.join(os.tmpdir(), 'studio-source-frame-'));
-      const file = path.join(folder, 'source');
-      cached = { folder, file, size: owned.size, used: Date.now(), refs: 0 };
-      cached.ready = (async () => {
-        try {
-          const object = getStudioSourceBucket(owned.kind, owned.bucketName).file(owned.storagePath, { generation: owned.generation });
-          await pipeline(object.createReadStream({ validation: 'crc32c', decompress: false }),
-            createWriteStream(file, { mode: 0o600 }), { signal: AbortSignal.timeout(30000) });
-          if ((await fs.stat(file)).size !== owned.size) throw new Error('Source size changed');
-          cached.hash = await fileSha256(file);
-        } catch (_) {
-          sources.delete(key); await fs.rm(folder, { recursive: true, force: true });
-          throw sourceError(503, 'STUDIO_FRAME_SOURCE_UNAVAILABLE', 'Could not prepare this saved source');
-        }
-      })();
-      sources.set(key, cached);
-    }
-    cached.refs++; cached.used = Date.now();
+    cached = await reserveSource(owned, signal);
     await cached.ready;
     if (signal?.aborted) throw new Error('Preview request was superseded');
     if (request.sourceContentHash && cached.hash !== request.sourceContentHash)
@@ -182,8 +227,10 @@ async function withOwnedSource({ ownerUid, request, signal }, inspect) {
     if (error.statusCode) throw error;
     throw sourceError(503, 'STUDIO_FRAME_UNAVAILABLE', 'Accurate paused preview is temporarily unavailable');
   } finally {
-    if (cached) { cached.refs--; cached.used = Date.now(); }
-    activeOwners.delete(ownerUid); await prune().catch(() => {});
+    await exclusiveCache(async () => {
+      if (cached) { cached.refs--; cached.used = Date.now(); }
+      await prune();
+    }).catch(() => {}).finally(() => activeOwners.delete(ownerUid));
   }
 }
 
@@ -195,6 +242,7 @@ async function getOwnedSourceFrame({ ownerUid, input, signal }) {
       if (!cached.sequenceReady) cached.sequenceReady = prepareSequencePreviewSource(cached.file,
         path.join(cached.folder, 'sequence.mp4'), signal).then(prepared => {
         cached.size += prepared.size;
+        cached.diskBytes += prepared.size;
         return prepared.file;
       }).catch(async error => {
         cached.sequenceReady = null;

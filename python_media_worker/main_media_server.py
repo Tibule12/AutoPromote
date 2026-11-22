@@ -31249,6 +31249,8 @@ async def render_viral_clip(request: RenderViralRequest):
     return await render_viral_clip_impl(request)
 
 async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: str = None):
+    render_perf_started = time.monotonic()
+    render_stage_seconds = {}
     try:
         from .studio_composition import validate_layer_order, validate_graphic_groups
     except ImportError:
@@ -33342,6 +33344,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         prepared_overlay_audio_ranges = {}
         prepared_video_sources = []
         video_layer_rasters = {}  # Scoped to this export; track mattes remain independent.
+        overlay_source_cache = {}  # Exact URL/ingest options, scoped to this owned job.
+        overlay_preparation_cache = {}
+        overlay_prepare_started = time.monotonic()
         
         for prepared_index, ov in enumerate(video_overlays):
             try:
@@ -33351,8 +33356,10 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             prefix = os.path.join(SHARED_TMP_DIR, f"{job_id}_ov_{prepared_index}_{input_idx}")
             ov_dl_path = f"{prefix}_source.mp4"
             overlay_temp_paths.append(ov_dl_path)
-            ov_path = await materialize_video_input(ov.src, ov_dl_path, keep_audio=True)
-            source_duration = get_media_duration(ov_path)
+            if ov.src not in overlay_source_cache:
+                ov_path = await materialize_video_input(ov.src, ov_dl_path, keep_audio=True)
+                overlay_source_cache[ov.src] = (ov_path, get_media_duration(ov_path), has_audio_stream(ov_path))
+            ov_path, source_duration, source_audio = overlay_source_cache[ov.src]
             cue_start = max(0, float(ov.start_time or 0))
             timeline_end = max((p["end_time"] for p in speed_plan), default=0)
             cue_duration = min(float(ov.duration) if ov.duration is not None else timeline_end-cue_start,
@@ -33361,18 +33368,29 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 continue
             commands, prepared_path, visible_duration, _ = overlay_commands(
                 ov_path, prefix, source_duration, ov.sourceStartTime, cue_duration,
-                ov.sourceEndBehavior, cue_start, speed_plan, has_audio_stream(ov_path), ov.sourceOffsetTime)
+                ov.sourceEndBehavior, cue_start, speed_plan, source_audio, ov.sourceOffsetTime)
             if visible_duration <= 0:
                 continue
             audio_duration = audible_duration(source_duration, ov.sourceStartTime, visible_duration,
                 ov.sourceEndBehavior, ov.sourceOffsetTime)
             prepared_overlay_audio_ranges[str(ov.id)] = ov.model_copy(update={"start_time": cue_start, "duration": audio_duration})
-            for command in commands:
-                overlay_temp_paths.append(command[-1])
-                await run_subprocess_async(command, check=True)
+            try:
+                from .studio_layer_cache import video_preparation_key
+            except ImportError:
+                from studio_layer_cache import video_preparation_key
+            preparation_key = video_preparation_key(ov_path, commands, prefix)
+            if preparation_key in overlay_preparation_cache:
+                prepared_path = overlay_preparation_cache[preparation_key]
+            else:
+                for command in commands:
+                    overlay_temp_paths.append(command[-1])
+                    await run_subprocess_async(command, check=True)
+                overlay_preparation_cache[preparation_key] = prepared_path
             ov = ov.model_copy(update={"start_time": cue_start, "duration": visible_duration})
             prepared_overlay_ranges[str(ov.id)] = ov
             prepared_video_sources.append((ov, prepared_path))
+
+        render_stage_seconds['video_source_preparation'] = round(time.monotonic() - overlay_prepare_started, 3)
 
         # The main picture fills the half opposite a left/right split cutaway.
         try:
@@ -33394,38 +33412,44 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 base_width, base_height, bounded_layout, rendered_timeline_time(start), rendered_timeline_time(end)))
             current_v_label = split_label
 
-        for ov, ov_path in prepared_video_sources:
+        try:
+            from .studio_layer_cache import video_layer_uses_canonical_raster, video_layer_raster_key
+            from .studio_layer_batch import prepare_layer_batch
+        except ImportError:
+            from studio_layer_cache import video_layer_uses_canonical_raster, video_layer_raster_key
+            from studio_layer_batch import prepare_layer_batch
+        video_jobs, video_motion_paths, video_raster_keys = [], {}, {}
+        for video_index, (ov, ov_path) in enumerate(prepared_video_sources):
+            layer_plan = composition_layer(request.composition_plan, ov.id)
+            if not video_layer_uses_canonical_raster(ov.id, layer_plan, request.composition_plan, ov):
+                continue
+            raster_key = await asyncio.to_thread(video_layer_raster_key, ov_path, ov, layer_plan,
+                base_width, base_height, rendered_timeline_duration, speed_plan, composition_fps)
+            video_raster_keys[video_index] = raster_key
+            if raster_key not in video_motion_paths:
+                suffix = 'mkv' if layer_plan.get('perspective') else 'mov'
+                motion_layer_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_video_motion_{video_index}.{suffix}")
+                overlay_temp_paths.append(motion_layer_path)
+                video_motion_paths[raster_key] = motion_layer_path
+                video_jobs.append((raster_key, (ov_path, motion_layer_path, ov, layer_plan,
+                    base_width, base_height, rendered_timeline_duration, speed_plan, composition_fps)))
+        video_progress_at = [0.0]
+        def video_progress(completed, total):
+            if completed == total or time.monotonic() - video_progress_at[0] >= 8:
+                video_progress_at[0] = time.monotonic()
+                report_progress(60 + int(completed / max(1, total)), f"Preparing video layers {completed}/{total}")
+        report_progress(60, f"Preparing video layers 0/{len(video_jobs)}")
+        layer_batch_started = time.monotonic()
+        video_layer_rasters = await prepare_layer_batch(video_jobs, render_video_layer_motion, video_progress)
+        render_stage_seconds['video_layer_rasterization'] = round(time.monotonic() - layer_batch_started, 3)
+        for video_index, (ov, ov_path) in enumerate(prepared_video_sources):
             cue_start = max(0, float(ov.start_time or 0))
             if ov_path:
                 block_start, block_input = len(filter_chain), current_v_label
                 layer_plan = composition_layer(request.composition_plan, ov.id)
-                try:
-                    from .studio_layer_cache import video_layer_uses_canonical_raster
-                except ImportError:
-                    from studio_layer_cache import video_layer_uses_canonical_raster
-                if video_layer_uses_canonical_raster(ov.id, layer_plan, request.composition_plan, ov):
-                    # A moving video uses the same canonical pose/alpha
-                    # compositor as images, after ordinary B-roll preparation.
-                    suffix = 'mkv' if layer_plan.get('perspective') else 'mov'
-                    motion_layer_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_video_motion_{input_idx}.{suffix}")
-                    overlay_temp_paths.append(motion_layer_path)
-                    try:
-                        from .studio_layer_cache import video_layer_raster_key
-                    except ImportError:
-                        from studio_layer_cache import video_layer_raster_key
-                    layer_fps = composition_fps
-                    raster_key = await asyncio.to_thread(video_layer_raster_key,
-                        ov_path, ov, layer_plan, base_width, base_height,
-                        rendered_timeline_duration, speed_plan, layer_fps)
-                    cached_raster = video_layer_rasters.get(raster_key)
-                    if cached_raster and os.path.isfile(cached_raster[0]):
-                        motion_layer_path, receipt = cached_raster
-                        logger.info("Reusing pixel-identical moving media raster before its independent matte")
-                    else:
-                        receipt = await asyncio.to_thread(render_video_layer_motion,
-                            ov_path, motion_layer_path, ov, layer_plan, base_width, base_height,
-                            rendered_timeline_duration, speed_plan, layer_fps)
-                        video_layer_rasters[raster_key] = (motion_layer_path, receipt)
+                if video_index in video_raster_keys:
+                    raster_key = video_raster_keys[video_index]
+                    motion_layer_path, receipt = video_motion_paths[raster_key], video_layer_rasters[raster_key]
                     if getattr(ov, "useOverlayAudio", False) and has_audio_stream(ov_path):
                         inputs.extend(["-itsoffset", str(rendered_timeline_time(cue_start)), "-i", ov_path])
                         overlay_audio_specs.append((input_idx, ov))
@@ -33468,84 +33492,58 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 input_idx += 1
                 remember_overlay_block(ov, block_start, block_input)
 
-        # Process Image Overlays (e.g. Cute Captions)
+        # Prepare independent images together, then assemble their original
+        # ordered graph. Downloads remain serial and export-scoped so repeated
+        # uploaded assets cannot race the shared image-source cache.
         image_overlays = [o for o in request.overlays if o.type == 'image' and o.src and str(o.id) not in behind_tear_overlay_ids]
         try:
             from .studio_image_sources import materialize_studio_image
+            from .studio_layer_cache import image_layer_uses_canonical_raster
+            from .studio_layer_batch import prepare_layer_batch
         except ImportError:
             from studio_image_sources import materialize_studio_image
-        image_sources = {}
-        
-        for ov in image_overlays:
-            ov_path = ""
-            if ov.src.startswith(("http://","https://","data:image/")):
-                 ext = "png" if ov.src.startswith('data:') else ov.src.split('?')[0].split('.')[-1]
-                 if len(ext) > 4: ext = "png"
-                 ov_dl_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_img_{input_idx}.{ext}")
-                 overlay_temp_paths.append(ov_dl_path)
-                 
-                 # Async download via executor
-                 loop = asyncio.get_running_loop()
-                 try:
-                     ov_path = await loop.run_in_executor(None, materialize_studio_image, ov.src, ov_dl_path, image_sources)
-                 except Exception as e:
-                     raise RuntimeError(f"Image layer {ov.id} could not be loaded; export stopped") from e
-            else:
+            from studio_layer_cache import image_layer_uses_canonical_raster
+            from studio_layer_batch import prepare_layer_batch
+        image_sources, image_inputs, image_motion_paths, image_jobs = {}, {}, {}, []
+        for image_index, ov in enumerate(image_overlays):
+            if not ov.src.startswith(("http://", "https://", "data:image/")):
                 raise ValueError(f"Image layer {ov.id} requires an uploaded or self-contained image source")
-            
+            ext = "png" if ov.src.startswith('data:') else ov.src.split('?')[0].split('.')[-1]
+            if len(ext) > 4:
+                ext = "png"
+            ov_dl_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_image_source_{image_index}.{ext}")
+            overlay_temp_paths.append(ov_dl_path)
+            try:
+                ov_path = await asyncio.to_thread(materialize_studio_image, ov.src, ov_dl_path, image_sources)
+            except Exception as e:
+                raise RuntimeError(f"Image layer {ov.id} could not be loaded; export stopped") from e
+            image_inputs[image_index] = ov_path
+            layer_plan = composition_layer(request.composition_plan, ov.id)
+            if image_layer_uses_canonical_raster(layer_plan, request.composition_plan, ov):
+                suffix = 'mkv' if layer_plan.get('perspective') else 'mov'
+                motion_layer_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_image_motion_{image_index}.{suffix}")
+                overlay_temp_paths.append(motion_layer_path)
+                image_motion_paths[str(image_index)] = motion_layer_path
+                image_jobs.append((str(image_index), (ov_path, motion_layer_path, ov, layer_plan,
+                    base_width, base_height, rendered_timeline_duration, speed_plan, composition_fps)))
+        image_progress_at = [0.0]
+        def image_progress(completed, total):
+            if completed == total or time.monotonic() - image_progress_at[0] >= 8:
+                image_progress_at[0] = time.monotonic()
+                report_progress(62 + int(2 * completed / max(1, total)),
+                                f"Preparing image layers {completed}/{total}")
+        report_progress(62, f"Preparing image layers 0/{len(image_jobs)}")
+        layer_batch_started = time.monotonic()
+        image_receipts = await prepare_layer_batch(image_jobs, render_image_layer_motion, image_progress)
+        render_stage_seconds['image_layer_rasterization'] = round(time.monotonic() - layer_batch_started, 3)
+        for image_index, ov in enumerate(image_overlays):
+            ov_path = image_inputs[image_index]
             if ov_path:
                 block_start, block_input = len(filter_chain), current_v_label
                 layer_plan = composition_layer(request.composition_plan, ov.id)
-                layer_effects = (layer_plan or {}).get("effects") or {}
-                is_track_matte_participant = bool(
-                    layer_plan
-                    and (
-                        ((layer_plan.get("track_matte") or {}).get("mode") or "none") != "none"
-                        or any(
-                            str(((cand.get("track_matte") or {}).get("source_layer_id") or "")) == str(ov.id)
-                            for cand in ((request.composition_plan or {}).get("layers") or [])
-                        )
-                    )
-                )
-                layer_has_motion = bool(
-                    layer_plan
-                    and (
-                        is_track_matte_participant
-                        or layer_plan.get("vector_shape") is not None
-                        or layer_plan.get('perspective') is not None
-                        or
-                        layer_plan.get("motion_keyframes")
-                        or (layer_effects.get("mask") or {}).get("enabled")
-                        or float((layer_plan.get("base_transform") or {}).get("crop_x") or 0) > 0
-                        or float((layer_plan.get("base_transform") or {}).get("crop_y") or 0) > 0
-                        or layer_effects.get("node")
-                        or float(layer_effects.get("blur") or 0) > 0
-                        or (layer_effects.get("glow") or {}).get("enabled")
-                        or (layer_effects.get("colorize") or {}).get("enabled")
-                        or (layer_effects.get("shadow") or {}).get("enabled")
-                        or (layer_effects.get("motion_blur") or {}).get("enabled")
-                        or (layer_effects.get("scrapbook_frame") or {}).get("enabled")
-                        or getattr(ov, "motionDesign", False)
-                    )
-                )
-                if layer_has_motion:
-                    suffix = 'mkv' if layer_plan.get('perspective') else 'mov'
-                    motion_layer_path = os.path.join(
-                        SHARED_TMP_DIR, f"{job_id}_image_motion_{input_idx}.{suffix}"
-                    )
-                    overlay_temp_paths.append(motion_layer_path)
-                    receipt = await asyncio.to_thread(
-                        render_image_layer_motion,
-                        ov_path,
-                        motion_layer_path,
-                        ov,
-                        layer_plan,
-                        base_width,
-                        base_height,
-                        rendered_timeline_duration,
-                        speed_plan,
-                        composition_fps,
-                    )
+                if str(image_index) in image_receipts:
+                    motion_layer_path = image_motion_paths[str(image_index)]
+                    receipt = image_receipts[str(image_index)]
                     inputs.extend(["-itsoffset", f"{receipt['start_time']:.6f}", "-i", motion_layer_path])
                     media_label = f'{input_idx}:v'
                     overlay_options = 'eof_action=pass'
@@ -34367,7 +34365,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         cmd = bounded_studio_ffmpeg_command(cmd)
         report_progress(75, "Rendering final video")
         logger.info(f"Running FFmpeg: {' '.join(cmd)}")
+        final_encode_started = time.monotonic()
         await run_subprocess_async(cmd, check=True)
+        render_stage_seconds['final_composite_encode'] = round(time.monotonic() - final_encode_started, 3)
 
         if watermark_cleanup_receipt.get("method") == "local_lama_masked":
             try:
@@ -34496,7 +34496,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 }
             
             result_data = {
-                "status": "completed", 
+                "status": "completed",
                 "progress": 100,
                 "detail": "Render complete",
                 "job_id": job_id, 
@@ -34533,6 +34533,15 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 "audio_track_states": audio_track_states,
                 "audio_remix_receipt": audio_remix_receipt,
                 "studio_plan_validation": studio_plan_validation,
+                "performance_timing": {
+                    "elapsed_seconds": round(time.monotonic() - render_perf_started, 3),
+                    "stages_seconds": render_stage_seconds,
+                    "video_source_count": len(overlay_source_cache),
+                    "video_occurrence_count": len(video_overlays),
+                    "video_preparation_count": len(overlay_preparation_cache),
+                    "video_raster_count": len(video_jobs),
+                    "image_raster_count": len(image_jobs),
+                },
             }
             
             if request.async_mode:

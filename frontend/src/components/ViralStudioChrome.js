@@ -167,7 +167,7 @@ export function ViralStudioHeader({
 
       <div className="studio-header-actions">
         <span className="studio-autosave-state">● Local edit active</span>
-        <span className="studio-credit-safe">● No render credits used</span>
+        <span className="studio-credit-safe">● Local editing uses no credits</span>
         <button
           type="button"
           className="tool-btn tool-btn-compact"

@@ -26,6 +26,8 @@ docker run --rm \
   python_media_worker.test_studio_sequence_packet_clock \
   python_media_worker.test_studio_colour_contract \
   python_media_worker.test_studio_text_animator \
+  python_media_worker.test_studio_layer_batch \
+  python_media_worker.test_studio_video_reuse \
   python_media_worker.test_studio_multicam_filters \
   python_media_worker.test_caption_quality \
   python_media_worker.test_content_aware_reality \
