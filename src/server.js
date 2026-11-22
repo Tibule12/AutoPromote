@@ -1092,6 +1092,8 @@ try {
       "x-file-name",
       "x-media-type",
     ],
+    // Browser upload queues must be able to read the server cooldown.
+    exposedHeaders: ["Retry-After"],
     credentials: true,
     optionsSuccessStatus: 204,
   };

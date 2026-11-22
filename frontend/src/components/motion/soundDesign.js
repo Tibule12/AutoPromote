@@ -11,6 +11,16 @@ export const DESIGN_SOUNDS = [
   { id: "tape_stop", name: "Tape stop", emoji: "↘", duration: 0.55, tone: "tape_stop", volume: 0.28 },
   { id: "sparkle", name: "Sparkle tail", emoji: "✦", duration: 1.6, tone: "sparkle", volume: 0.22 },
 ];
+export const ORIGINAL_STUDIO_SOUNDS = [
+  { id: 'prism_sweep', name: 'Prism sweep', emoji: '◇', duration: .8, tone: 'prism_sweep', volume: .28 },
+  { id: 'velvet_hit', name: 'Velvet hit', emoji: '●', duration: .65, tone: 'velvet_hit', volume: .34 },
+  { id: 'glass_flick', name: 'Glass flick', emoji: '✧', duration: .5, tone: 'glass_flick', volume: .22 },
+  { id: 'paper_snap', name: 'Paper snap', emoji: '▱', duration: .18, tone: 'paper_snap', volume: .25 },
+  { id: 'orbit_rise', name: 'Orbit rise', emoji: '◌', duration: 1.2, tone: 'orbit_rise', volume: .22 },
+  { id: 'pulse_drop', name: 'Pulse drop', emoji: '◉', duration: .9, tone: 'pulse_drop', volume: .32 },
+  { id: 'shutter_tick', name: 'Shutter tick', emoji: '▣', duration: .16, tone: 'shutter_tick', volume: .23 },
+  { id: 'reverse_spark', name: 'Reverse spark', emoji: '✦', duration: .7, tone: 'reverse_spark', volume: .2 },
+];
 export const SOUND_EFFECT_PRESETS = [
   { id: "whoosh", name: "Whoosh", emoji: "💨", duration: 0.8, tone: "sweep" },
   { id: "impact", name: "Impact", emoji: "💥", duration: 0.65, tone: "impact" },
@@ -18,6 +28,7 @@ export const SOUND_EFFECT_PRESETS = [
   { id: "click", name: "Click", emoji: "🖱️", duration: 0.16, tone: "click" },
   { id: "riser", name: "Riser", emoji: "🚀", duration: 1.5, tone: "riser" },
   ...DESIGN_SOUNDS,
+  ...ORIGINAL_STUDIO_SOUNDS,
 ];
 export function synthesizeEffect(effect, sampleRate = 48000) {
   const duration = Math.max(0.05, Math.min(15, Number(effect.duration) || 0.7));
@@ -38,7 +49,28 @@ export function synthesizeEffect(effect, sampleRate = 48000) {
     const previousNoise = filteredNoise;
     filteredNoise += Math.min(1, 2400 / sampleRate) * (noise - filteredNoise);
     let value;
-    if (tone === "cinematic_hit") {
+    if (tone === 'prism_sweep') {
+      phase += tau * (480 + 2100 * p * p) / sampleRate;
+      value = (.42 * (noise - previousNoise) + .16 * Math.sin(phase) + .08 * Math.sin(phase * 1.5)) * Math.pow(Math.sin(Math.PI * p), 2);
+    } else if (tone === 'velvet_hit') {
+      phase += tau * (46 + 115 * Math.exp(-45 * t)) / sampleRate;
+      value = .7 * Math.sin(phase) * Math.exp(-6 * p) + .13 * filteredNoise * Math.exp(-19 * p);
+    } else if (tone === 'glass_flick') {
+      value = (.3 * Math.sin(tau * 1480 * t) + .18 * Math.sin(tau * 2220 * t) + .1 * Math.sin(tau * 3130 * t)) * (1 - Math.exp(-500 * t)) * Math.exp(-8 * p);
+    } else if (tone === 'paper_snap') {
+      value = .65 * (noise - previousNoise) * Math.exp(-35 * p) + .13 * Math.sin(tau * 410 * t) * Math.exp(-30 * p);
+    } else if (tone === 'orbit_rise') {
+      phase += tau * (120 + 1000 * p * p) / sampleRate;
+      value = (.34 * Math.sin(phase) + .13 * Math.sin(2 * phase) + .1 * filteredNoise) * Math.pow(Math.sin(Math.PI * p), .7) * (.3 + .7 * p);
+    } else if (tone === 'pulse_drop') {
+      phase += tau * (36 + 120 * Math.exp(-16 * t)) / sampleRate;
+      value = .72 * Math.sin(phase) * Math.exp(-4 * p) + .08 * filteredNoise * Math.exp(-25 * p);
+    } else if (tone === 'shutter_tick') {
+      const second = Math.max(0, t - .025);
+      value = .48 * noise * Math.exp(-90 * p) + .23 * Math.sin(tau * 1700 * t) * Math.exp(-60 * p) + (t >= .025 ? .32 * Math.sin(tau * 1150 * second) * Math.exp(-140 * second) : 0);
+    } else if (tone === 'reverse_spark') {
+      value = (.27 * Math.sin(tau * 900 * t) + .18 * Math.sin(tau * 1350 * t) + .1 * (noise - previousNoise)) * Math.pow(p, 2.5);
+    } else if (tone === "cinematic_hit") {
       phase += (tau * (42 + 105 * Math.exp(-32 * t))) / sampleRate;
       value = 0.62 * Math.sin(phase) * Math.exp(-3.6 * p) +
         0.26 * filteredNoise * Math.exp(-12 * p) +

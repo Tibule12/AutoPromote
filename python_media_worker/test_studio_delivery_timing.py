@@ -111,6 +111,25 @@ class StudioAuthoredDurationRenderTests(unittest.TestCase):
                 ({"fps": "30"}, True, 1.25, 1.6),
             ]:
                 with self.subTest(settings=settings, sequence=sequence, speed=speed):
+                    cleanup_audio_checks = []
+                    actual_run = worker.run_subprocess_async
+
+                    async def verify_picture_cleanup(command, *args, **kwargs):
+                        result = await actual_run(command, *args, **kwargs)
+                        if str(command[-1]).endswith("_professional_cleanup.mp4"):
+                            # Check decoded sound at the actual stage boundary,
+                            # including the retimed sequence case. A picture
+                            # enhancement must not filter, limit or reencode it.
+                            original = command[command.index("-i") + 1]
+                            def pcm(path):
+                                return subprocess.check_output([
+                                    "ffmpeg", "-v", "error", "-i", str(path),
+                                    "-map", "0:a:0", "-f", "f32le", "-",
+                                ])
+                            self.assertEqual(pcm(original), pcm(command[-1]))
+                            cleanup_audio_checks.append(True)
+                        return result
+
                     request = worker.RenderViralRequest(
                         video_url="isolated-source", start_time=0, end_time=2,
                         timeline_segments=[worker.ViralTimelineSegment(url="isolated-source", start_time=0, end_time=2)] if sequence else None,
@@ -124,12 +143,14 @@ class StudioAuthoredDurationRenderTests(unittest.TestCase):
                     )
                     with patch.object(worker, "materialize_video_input", ingest), \
                          patch.object(worker, "upload_file_to_firebase", upload), \
+                         patch.object(worker, "run_subprocess_async", verify_picture_cleanup), \
                          patch.object(worker, "__file__", str(Path(folder) / "worker" / "main_media_server.py")), \
                          patch("sys.path", [str(Path(__file__).parent), *sys.path]):
                         result = asyncio.run(worker.render_viral_clip_impl(request))
                     self.assertEqual(result["status"], "completed")
                     self.assertEqual(result["final_quality_gate"]["duration"]["expected"], duration)
                     self.assertTrue(result["audio_proof"]["verified"])
+                    self.assertEqual(cleanup_audio_checks, [True])
                     probe = json.loads(subprocess.check_output([
                         "ffprobe", "-v", "error", "-count_frames", "-show_streams", "-of", "json", str(delivery),
                     ]))

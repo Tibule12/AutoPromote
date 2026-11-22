@@ -1,0 +1,1978 @@
+{
+  "status": "PARTIAL",
+  "localImplementation": "Original frame collection, shared native authoring and original sound design; no production release or formal readiness promotion.",
+  "qaRoot": "/home/tibule12/.local/share/autopromote-qa/studio-frame-collection-20261122",
+  "delivery": "/home/tibule12/Videos/Studio - Original Frames and Sound - 2026-11-22",
+  "originalFrameStyles": [
+    "Museum",
+    "Nocturne",
+    "Contact 35",
+    "Stereo",
+    "Oval Triptych",
+    "Depth Stack",
+    "Redline",
+    "Orbital",
+    "CinemaScope",
+    "Hex Aperture",
+    "Studio Collage",
+    "Paper Cut"
+  ],
+  "originalSoundEffects": [
+    "prism_sweep",
+    "velvet_hit",
+    "glass_flick",
+    "paper_snap",
+    "orbit_rise",
+    "pulse_drop",
+    "shutter_tick",
+    "reverse_spark"
+  ],
+  "totalBuiltInSounds": 23,
+  "nativeProject": {
+    "id": "viral-project-3c66ad2e-d7a3-455b-a513-ada6a61d3c26",
+    "layers": 120,
+    "motionKeys": 136,
+    "footageWindows": 25,
+    "soundCues": 13,
+    "seconds": 45.0000111111,
+    "aspect": "9:16",
+    "score": "Prism Circuit, original sample-free synthesis, 128 BPM",
+    "beatMode": "Explicit 128 BPM grid; automatic transient detector estimated120BPM, so automatic tempo/downbeat accuracy is not qualified."
+  },
+  "nativeBackupBoundToActualSubmittedComposition": {
+    "nativeBackupCompositionMatchesSubmitted": true,
+    "layerCount": 120,
+    "keyCount": 136
+  },
+  "independentRestore": {
+    "freshAuthenticatedContext": true,
+    "normalBackupImport": true,
+    "exactCanonicalDocument": true,
+    "exactMotionKeys": true,
+    "exactSound": true,
+    "uploads": 0,
+    "renders": 0,
+    "errors": [],
+    "blocked": []
+  },
+  "sourceClockChecks": {
+    "settledStyles": 12,
+    "videoSamples": 25,
+    "maxClockError": 6.666666685362088e-07,
+    "errors": [],
+    "blocked": []
+  },
+  "normalSaveColdReopen": {
+    "exactCanonicalDocumentKeysAndSound": true,
+    "errors": [],
+    "blocked": [
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      },
+      {
+        "method": "POST",
+        "host": "firebasestorage.googleapis.com",
+        "path": "/v0/b/autopromote-cc6d3.firebasestorage.app/o"
+      }
+    ]
+  },
+  "ownedAssetBindings": {
+    "layers": 120,
+    "keys": 136,
+    "sounds": 13,
+    "ownedImageBindings": 71,
+    "ownedMusic": true,
+    "mediaFilesRemaining": 0
+  },
+  "uiLayouts": {
+    "views": [
+      {
+        "viewport": 1920,
+        "inspector": {
+          "width": 241,
+          "overflow": 0,
+          "controls": [
+            {
+              "label": "Main footage",
+              "width": 195
+            },
+            {
+              "label": "Frame source 1 start (s)",
+              "width": 195
+            },
+            {
+              "label": "Second view (optional)",
+              "width": 195
+            },
+            {
+              "label": "Frame source 2 start (s)",
+              "width": 195
+            },
+            {
+              "label": "Third view (optional)",
+              "width": 195
+            },
+            {
+              "label": "Frame source 3 start (s)",
+              "width": 195
+            },
+            {
+              "label": "Frame caption",
+              "width": 195
+            },
+            {
+              "label": "Frame background colour",
+              "width": 59.65625
+            },
+            {
+              "label": "Frame frame colour",
+              "width": 59.671875
+            },
+            {
+              "label": "Frame accent colour",
+              "width": 59.671875
+            },
+            {
+              "label": "Frame duration (s)",
+              "width": 195
+            },
+            {
+              "label": "Border width (%)",
+              "width": 195
+            },
+            {
+              "label": "Frame motion",
+              "width": 195
+            },
+            {
+              "label": "Frame motion amount",
+              "width": 195
+            },
+            {
+              "label": "Frame beat source",
+              "width": 195
+            },
+            {
+              "label": "Snap frame start to beat",
+              "width": 18
+            },
+            {
+              "label": "Frame sound placement",
+              "width": 195
+            },
+            {
+              "label": "Frame sound effect",
+              "width": 195
+            },
+            {
+              "label": "Frame cue volume",
+              "width": 195
+            }
+          ]
+        },
+        "gallery": {
+          "left": 400,
+          "right": 1520,
+          "overflow": 0,
+          "cards": 12
+        }
+      },
+      {
+        "viewport": 1440,
+        "inspector": {
+          "width": 241,
+          "overflow": 0,
+          "controls": [
+            {
+              "label": "Main footage",
+              "width": 195
+            },
+            {
+              "label": "Frame source 1 start (s)",
+              "width": 195
+            },
+            {
+              "label": "Second view (optional)",
+              "width": 195
+            },
+            {
+              "label": "Frame source 2 start (s)",
+              "width": 195
+            },
+            {
+              "label": "Third view (optional)",
+              "width": 195
+            },
+            {
+              "label": "Frame source 3 start (s)",
+              "width": 195
+            },
+            {
+              "label": "Frame caption",
+              "width": 195
+            },
+            {
+              "label": "Frame background colour",
+              "width": 59.65625
+            },
+            {
+              "label": "Frame frame colour",
+              "width": 59.671875
+            },
+            {
+              "label": "Frame accent colour",
+              "width": 59.671875
+            },
+            {
+              "label": "Frame duration (s)",
+              "width": 195
+            },
+            {
+              "label": "Border width (%)",
+              "width": 195
+            },
+            {
+              "label": "Frame motion",
+              "width": 195
+            },
+            {
+              "label": "Frame motion amount",
+              "width": 195
+            },
+            {
+              "label": "Frame beat source",
+              "width": 195
+            },
+            {
+              "label": "Snap frame start to beat",
+              "width": 18
+            },
+            {
+              "label": "Frame sound placement",
+              "width": 195
+            },
+            {
+              "label": "Frame sound effect",
+              "width": 195
+            },
+            {
+              "label": "Frame cue volume",
+              "width": 195
+            }
+          ]
+        },
+        "gallery": {
+          "left": 160,
+          "right": 1280,
+          "overflow": 0,
+          "cards": 12
+        }
+      },
+      {
+        "viewport": 1200,
+        "inspector": {
+          "width": 241,
+          "overflow": 0,
+          "controls": [
+            {
+              "label": "Main footage",
+              "width": 195
+            },
+            {
+              "label": "Frame source 1 start (s)",
+              "width": 195
+            },
+            {
+              "label": "Second view (optional)",
+              "width": 195
+            },
+            {
+              "label": "Frame source 2 start (s)",
+              "width": 195
+            },
+            {
+              "label": "Third view (optional)",
+              "width": 195
+            },
+            {
+              "label": "Frame source 3 start (s)",
+              "width": 195
+            },
+            {
+              "label": "Frame caption",
+              "width": 195
+            },
+            {
+              "label": "Frame background colour",
+              "width": 59.65625
+            },
+            {
+              "label": "Frame frame colour",
+              "width": 59.671875
+            },
+            {
+              "label": "Frame accent colour",
+              "width": 59.671875
+            },
+            {
+              "label": "Frame duration (s)",
+              "width": 195
+            },
+            {
+              "label": "Border width (%)",
+              "width": 195
+            },
+            {
+              "label": "Frame motion",
+              "width": 195
+            },
+            {
+              "label": "Frame motion amount",
+              "width": 195
+            },
+            {
+              "label": "Frame beat source",
+              "width": 195
+            },
+            {
+              "label": "Snap frame start to beat",
+              "width": 18
+            },
+            {
+              "label": "Frame sound placement",
+              "width": 195
+            },
+            {
+              "label": "Frame sound effect",
+              "width": 195
+            },
+            {
+              "label": "Frame cue volume",
+              "width": 195
+            }
+          ]
+        },
+        "gallery": {
+          "left": 40,
+          "right": 1160,
+          "overflow": 0,
+          "cards": 12
+        }
+      }
+    ],
+    "sounds": [
+      "Prism sweep",
+      "Velvet hit",
+      "Glass flick",
+      "Paper snap",
+      "Orbit rise",
+      "Pulse drop",
+      "Shutter tick",
+      "Reverse spark"
+    ],
+    "capture": {
+      "seconds": 21.746999979019165,
+      "capturedPictures": 491,
+      "sourceBytes": 93947470,
+      "viewport": [
+        1920,
+        900
+      ],
+      "source": "Actual Chromium screencast",
+      "visualAnnotations": "Pointer, click ring and actual target outline only",
+      "applicationCodeChanged": false,
+      "audio": "Narration added in final production"
+    }
+  },
+  "originalInputs": [
+    {
+      "path": "/home/tibule12/.local/share/autopromote-qa/session/studio-session.private.json",
+      "sha256": "00d48e87bd9b77ba9ead11c92bf93039f43fc3e7e6b322c3e379f6b4dac55254",
+      "unchanged": true
+    },
+    {
+      "path": "/home/tibule12/Videos/Studio - Facial Restoration - 2026-11-21/01 - UNMUTED - Restored video with sound.mp4",
+      "sha256": "9f576b87a6fc9a29bb34d92077f05ecf7ea465381fa0aa33adf23adeac31a7e9",
+      "unchanged": true
+    },
+    {
+      "path": "/home/tibule12/Videos/Studio - Refined Colour and Room - 2026-11-22/01 - UNMUTED - Refined faces, clothing and room.mp4",
+      "sha256": "9c836fd6db58f38d3c29abdf291c53d08734dc3215a0b012964f33818c44f979",
+      "unchanged": true
+    },
+    {
+      "path": "/home/tibule12/Videos/Studio - Natural Texture V3 - 2026-11-22/01 - UNMUTED - Natural texture and detail V3.mp4",
+      "sha256": "c44669af9f00771d3488c9bbf8bfdbdea69266fea2b895ef50f3abc359236ed9",
+      "unchanged": true
+    },
+    {
+      "path": "/home/tibule12/Videos/AutoPromote Background Replacement - 2026-11-01/Four-minute repair - 2026-11-03/Original podcast - first four minutes.mp4",
+      "sha256": "b14bf07a916e41331f8516d9e00921d9c4fa2a37a492e2998ae9f463df3c280b",
+      "unchanged": true
+    },
+    {
+      "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/reports/studio-template-collection-20261104/sources/watch.mp4",
+      "sha256": "0a1ea5fbcfeebf62f521bd782348a0d61e7a001118b13318cbfe278e03129d4b",
+      "unchanged": true
+    },
+    {
+      "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/reports/studio-template-collection-20261104/sources/coast.mp4",
+      "sha256": "19aa1634a3f25ba28266b048d2a8b5df57eb6677e20f2cb67013bc77156296a3",
+      "unchanged": true
+    },
+    {
+      "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/reports/studio-template-collection-20261104/sources/fashion-camaro.mp4",
+      "sha256": "9366befc8264e2d6e000859f101f8033915df4f953a04b50360a1f8a8e58e307",
+      "unchanged": true
+    }
+  ],
+  "canonicalRender": {
+    "completed": true,
+    "elapsedSeconds": 793.1989723690203,
+    "outputSha256": "56a851ae9090995ed335101dc03837acf41a18c829833b6ff2ebe423693de5e1",
+    "outputSettings": {
+      "resolution": "720p",
+      "width": 720,
+      "height": 1280,
+      "fps": 30,
+      "codec": "h264",
+      "encoder": "h264_nvenc",
+      "container": "mp4",
+      "quality": "master",
+      "crf": 16,
+      "preset": "p4",
+      "videoBitrateKbps": null,
+      "audioCodec": "aac",
+      "colorSpace": "rec709"
+    },
+    "warning": "Measured local45second/120layer render took793.2seconds. NVENC final encoding is GPU-backed; layer rasterization remains CPU-heavy. This is not real-time or a production throughput qualification."
+  },
+  "nativeDownload": {
+    "finishedReady": true,
+    "downloadSha256": "56a851ae9090995ed335101dc03837acf41a18c829833b6ff2ebe423693de5e1",
+    "errors": [
+      {
+        "nativeAsset": "Native asset upload did not succeed: 429"
+      },
+      {
+        "nativeAsset": "Native asset upload did not succeed: 429"
+      },
+      {
+        "nativeAsset": "Native asset upload did not succeed: 429"
+      },
+      {
+        "nativeAsset": "Native asset upload did not succeed: 429"
+      },
+      {
+        "nativeAsset": "Native asset upload did not succeed: 429"
+      },
+      {
+        "nativeAsset": "Native asset upload did not succeed: 429"
+      },
+      {
+        "nativeAsset": "Native asset upload did not succeed: 429"
+      },
+      {
+        "nativeAsset": "Native asset upload did not succeed: 429"
+      },
+      {
+        "nativeAsset": "Native asset upload did not succeed: 429"
+      },
+      {
+        "nativeAsset": "Native asset upload did not succeed: 429"
+      },
+      {
+        "nativeAsset": "Native asset upload did not succeed: 429"
+      },
+      {
+        "nativeAsset": "Native asset upload did not succeed: 429"
+      },
+      {
+        "nativeAsset": "Native asset upload did not succeed: 429"
+      },
+      {
+        "nativeAsset": "Native asset upload did not succeed: 429"
+      },
+      {
+        "nativeAsset": "Native asset upload did not succeed: 429"
+      },
+      {
+        "nativeAsset": "Native asset upload did not succeed: 429"
+      },
+      {
+        "nativeAsset": "Native asset upload did not succeed: 429"
+      },
+      {
+        "nativeAsset": "Native asset upload did not succeed: 429"
+      },
+      {
+        "nativeAsset": "Native asset upload did not succeed: 429"
+      },
+      {
+        "nativeAsset": "Native asset upload did not succeed: 429"
+      },
+      {
+        "nativeAsset": "Native asset upload did not succeed: 429"
+      },
+      {
+        "nativeAsset": "Native asset upload did not succeed: 429"
+      },
+      {
+        "nativeAsset": "Native asset upload did not succeed: 429"
+      },
+      {
+        "nativeAsset": "Native asset upload did not succeed: 429"
+      },
+      {
+        "nativeAsset": "Native asset upload did not succeed: 429"
+      },
+      {
+        "nativeAsset": "Native asset upload did not succeed: 429"
+      }
+    ]
+  },
+  "completeFinishedPlayback": {
+    "video": {
+      "path": "/local-master.mp4",
+      "currentTime": 45,
+      "duration": 45,
+      "error": null
+    },
+    "capture": {
+      "seconds": 45.37400007247925,
+      "capturedPictures": 391,
+      "sourceBytes": 57630535,
+      "viewport": [
+        1920,
+        900
+      ],
+      "source": "Actual Chromium screencast",
+      "visualAnnotations": "Pointer, click ring and actual target outline only",
+      "applicationCodeChanged": false,
+      "audio": "Original finished-video soundtrack captured separately in the browser"
+    },
+    "fullFinishedPlayback": true
+  },
+  "tests": {
+    "frontendFrameSceneGraphicsAndStrip": 73,
+    "nativeComponentAssetPurpose": 2,
+    "sourceUploader": 14,
+    "backendRoutingAndCors": 26,
+    "workerMotionGraphicsAndAll23TonePcmParity": 14,
+    "totalDistinctFocusedCases": 129,
+    "strictBuild": true,
+    "replayKernel": true,
+    "anonymousWelcomeViewports": 8,
+    "welcomeBrowserErrors": 0
+  },
+  "repaired": [
+    "Frame SVG artwork now explicitly stretches into native programme-space boxes; previous graphics keep contain by default. Initial artwork-fit visual failure retained.",
+    "Small generated graphic uploads use the bounded authenticated Studio asset path. Owner bytes/hash and repeated asset reuse stay intact.",
+    "CORS exposes Retry-After so normal serialized uploads honor explicit429 cooldown without changing rate limits.",
+    "Original sounds are version-advertised by the actual installed worker tones; older workers refuse before charge, qualified CPU/GPU fallback remains."
+  ],
+  "retainedFailures": [
+    "First four-style native take exposed contain sizing; native Undo restored the base and corrected take authored the final project.",
+    "One proof command looked for Render while the inspector had changed; observer timeout retained, no worker submission.",
+    "QA guard initially blocked SDK artwork uploads, then aborted the undispatched attempt; no render was created.",
+    "QA raw-upload adapter initially turned429 into a connection error. That observer error is retained; actual429 is now passed through. The same test uncovered missing production Retry-After CORS exposure; code and server regression were repaired.",
+    "Actual upload cooldowns were honored; no rate-limit bypass or extra cloud render was used."
+  ],
+  "limits": [
+    "Full strict picture/colour/edge/low-alpha and live device throughput remain unqualified.",
+    "Native moving proof is portrait; landscape/square are canonical preparation cases, not native exports.",
+    "This is the first curated12style set, not every possible frame/CapCut effect.",
+    "Automatic beat/downbeat accuracy remains limited; precise explicit tempo grids work.",
+    "Control recordings are actual headless/muted actions at original timing, without added narration; capture smoothness remains separate.",
+    "Director replay exports the same recipe builder; no new model-planning integration is claimed.",
+    "Production worker/API/client release, actual credit admission and owner creative/listening approval remain open."
+  ],
+  "formalCountsUnchanged": "17 FUNCTIONAL /9 PARTIAL /1 BROKEN /2 UNIMPLEMENTED /0 PRO /0 PRODUCTION",
+  "scheduling": "Five existing holds preserved; zero new publications, schedules, paid allocations, main merge or deployment.",
+  "nativeDownloadFileSha256": "56a851ae9090995ed335101dc03837acf41a18c829833b6ff2ebe423693de5e1",
+  "previewExportDiagnostics": {
+    "pairs": [
+      {
+        "style": "Museum",
+        "time": 0.75,
+        "mse": 539.4815986823661,
+        "psnr": 20.81103725059361,
+        "strictPictureParityQualified": false
+      },
+      {
+        "style": "Nocturne",
+        "time": 4.5,
+        "mse": 720.0110141575553,
+        "psnr": 19.557412208932213,
+        "strictPictureParityQualified": false
+      },
+      {
+        "style": "Contact35",
+        "time": 8.25,
+        "mse": 724.0535709279507,
+        "psnr": 19.533096611104074,
+        "strictPictureParityQualified": false
+      },
+      {
+        "style": "Stereo",
+        "time": 12.0,
+        "mse": 1003.3339676198486,
+        "psnr": 18.116348454418556,
+        "strictPictureParityQualified": false
+      },
+      {
+        "style": "Oval Triptych",
+        "time": 15.75,
+        "mse": 340.3945156994673,
+        "psnr": 22.81097806578291,
+        "strictPictureParityQualified": false
+      },
+      {
+        "style": "Depth Stack",
+        "time": 19.5,
+        "mse": 621.5922238575833,
+        "psnr": 20.195747880815937,
+        "strictPictureParityQualified": false
+      },
+      {
+        "style": "Redline",
+        "time": 23.25,
+        "mse": 743.1023689374824,
+        "psnr": 19.420317150719836,
+        "strictPictureParityQualified": false
+      },
+      {
+        "style": "Orbital",
+        "time": 27.0,
+        "mse": 98.1613365573311,
+        "psnr": 28.211398977879,
+        "strictPictureParityQualified": false
+      },
+      {
+        "style": "CinemaScope",
+        "time": 30.75,
+        "mse": 154.36410148584244,
+        "psnr": 26.245340515217734,
+        "strictPictureParityQualified": false
+      },
+      {
+        "style": "Hex Aperture",
+        "time": 34.5,
+        "mse": 197.91871320437343,
+        "psnr": 25.165935021987536,
+        "strictPictureParityQualified": false
+      },
+      {
+        "style": "Studio Collage",
+        "time": 38.25,
+        "mse": 859.9646586767592,
+        "psnr": 18.785997571325357,
+        "strictPictureParityQualified": false
+      },
+      {
+        "style": "Paper Cut",
+        "time": 42.0,
+        "mse": 625.2757569386039,
+        "psnr": 20.17008770236007,
+        "strictPictureParityQualified": false
+      }
+    ],
+    "diagnosticOnly": true,
+    "wholePredictiveParityQualified": false
+  },
+  "deliveryFiles": [
+    {
+      "name": "04 - Complete Studio playback with sound.mp4",
+      "bytes": 8482296,
+      "sha256": "76428a832241acd946ef9fafb6785a3ee3239e45818f3bead57afe8392091a58"
+    },
+    {
+      "name": "07 - AutoPromote original sound pack.zip",
+      "bytes": 382909,
+      "sha256": "4177a87d70d3c2c871e483ff4d2ab14f87ca9dbb91ae56875b6ae5202a803ccf"
+    },
+    {
+      "name": "08 - All twelve finished frames.jpg",
+      "bytes": 363226,
+      "sha256": "e797178090aab4fdf0cdcbc05ec041eb52ff366898f5e6b988e2fdd5972f9c55"
+    },
+    {
+      "name": "05 - Prism Circuit - original 128 BPM score.wav",
+      "bytes": 8640078,
+      "sha256": "4e41b2496ae534e9e4dc33fa45373b820089f6d09cd15e20da84426620ed01de"
+    },
+    {
+      "name": "02 - Editable Studio project.autopromote.json",
+      "bytes": 1007393,
+      "sha256": "501911ec644268df47d9ba9e02c2a33a00950b0a98cf8ba4f9f937cec2a45b09"
+    },
+    {
+      "name": "03 - Actual Studio editing controls.mp4",
+      "bytes": 78208748,
+      "sha256": "f8e18e1efc9c8055da28ffebb215802e568830ba0e45bb1c8667ebc1c96fca6f"
+    },
+    {
+      "name": "Read me.txt",
+      "bytes": 3038,
+      "sha256": "85968d0f3b6b1357fb17e697271be3ea518c16823ce4cd3254a70e3f3c6b3708"
+    },
+    {
+      "name": "01 - Original frames - finished Studio video.mp4",
+      "bytes": 40473335,
+      "sha256": "56a851ae9090995ed335101dc03837acf41a18c829833b6ff2ebe423693de5e1"
+    },
+    {
+      "name": "06 - All twelve native frame styles.jpg",
+      "bytes": 333766,
+      "sha256": "cb2a25db3f31293b21cdde9653959fd5d2c0396e95b4d687cf08cad55098ed4d"
+    },
+    {
+      "name": "Source footage/fashion-camaro.mp4",
+      "bytes": 3644299,
+      "sha256": "9366befc8264e2d6e000859f101f8033915df4f953a04b50360a1f8a8e58e307"
+    },
+    {
+      "name": "Source footage/coast.mp4",
+      "bytes": 9558228,
+      "sha256": "19aa1634a3f25ba28266b048d2a8b5df57eb6677e20f2cb67013bc77156296a3"
+    },
+    {
+      "name": "Source footage/watch.mp4",
+      "bytes": 3041983,
+      "sha256": "0a1ea5fbcfeebf62f521bd782348a0d61e7a001118b13318cbfe278e03129d4b"
+    },
+    {
+      "name": "Original sound effects/AutoPromote - Glass flick.wav",
+      "bytes": 48044,
+      "sha256": "d6f9e976a36ca2a7cd767163bdc081abfa8973589c8334bb3906147ae0152300"
+    },
+    {
+      "name": "Original sound effects/AutoPromote - Orbit rise.wav",
+      "bytes": 115244,
+      "sha256": "3286890d0353559d03abbe32148b8ba2edef0460f8707b066ae888a56f32dd77"
+    },
+    {
+      "name": "Original sound effects/AutoPromote - Shutter tick.wav",
+      "bytes": 15404,
+      "sha256": "96c8f5bd1d353258c3eab21a7667edc497caf2723e9a31d0c04b99ee814265f0"
+    },
+    {
+      "name": "Original sound effects/AutoPromote - Prism sweep.wav",
+      "bytes": 76844,
+      "sha256": "a3ee510adc2b28d97057478378be592ad6411b2fcdeb6e7eca336668216c2d1b"
+    },
+    {
+      "name": "Original sound effects/AutoPromote - Velvet hit.wav",
+      "bytes": 62444,
+      "sha256": "22c90831f4a531da7ba10957f711e88c229a437703d3543248c8830df33fba31"
+    },
+    {
+      "name": "Original sound effects/AutoPromote - Paper snap.wav",
+      "bytes": 17324,
+      "sha256": "a5e8611e41d3acdf5fcae882561aad79497dd8b9da6df366db3375ec55ab0e71"
+    },
+    {
+      "name": "Original sound effects/AutoPromote - Reverse spark.wav",
+      "bytes": 67244,
+      "sha256": "53dd767d4d01fa712bd3e069cc5101445c6b70a7f26bd0386d1630f3f022c983"
+    },
+    {
+      "name": "Original sound effects/AutoPromote - Pulse drop.wav",
+      "bytes": 86444,
+      "sha256": "024ac1c8afaa4cead498ce8672934c277fff1b4edbb3684008c37214ed5cf95e"
+    }
+  ],
+  "nativeProbe": {
+    "video": {
+      "codec_name": "h264",
+      "width": 720,
+      "height": 1280,
+      "r_frame_rate": "30/1",
+      "duration": "45.000000",
+      "nb_frames": "1350",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+    },
+    "audio": {
+      "codec_name": "aac",
+      "sample_rate": "48000",
+      "channels": 2,
+      "duration": "45.000000"
+    },
+    "fullDecodePassed": true,
+    "fullDecodeCommand": "ffmpeg -nostdin -v error -i canonical-verified.mp4 -f null -"
+  },
+  "playbackRecordingAlignment": {
+    "pictureMatches": [
+      {
+        "wall": 1.2,
+        "movieTime": 0.9,
+        "offset": 0.29999999999999993,
+        "mse": 222.4529224537037
+      },
+      {
+        "wall": 7,
+        "movieTime": 6.633333333333334,
+        "offset": 0.36666666666666625,
+        "mse": 64.0246701388889
+      },
+      {
+        "wall": 14,
+        "movieTime": 13.7,
+        "offset": 0.3000000000000007,
+        "mse": 282.8508159722222
+      },
+      {
+        "wall": 22,
+        "movieTime": 21.633333333333333,
+        "offset": 0.36666666666666714,
+        "mse": 256.111255787037
+      },
+      {
+        "wall": 30,
+        "movieTime": 29.733333333333334,
+        "offset": 0.2666666666666657,
+        "mse": 36.62733217592593
+      },
+      {
+        "wall": 38,
+        "movieTime": 37.666666666666664,
+        "offset": 0.3333333333333357,
+        "mse": 298.40082175925926
+      },
+      {
+        "wall": 44,
+        "movieTime": 43.666666666666664,
+        "offset": 0.3333333333333357,
+        "mse": 251.51534722222223
+      }
+    ],
+    "screenStartOffsetSeconds": 0.3333333333333357,
+    "capturedAudioOffsetSeconds": 0.0065,
+    "audioDelaySeconds": 0.3268333333333357,
+    "retiming": false,
+    "audio": {
+      "sampleRate": 12000,
+      "rms": 0.11919150501489639,
+      "peak": 0.6781443357467651,
+      "silent": false
+    }
+  },
+  "contractValidation": {
+    "valid": true,
+    "capabilities": 29,
+    "counts": {
+      "UNIMPLEMENTED": 2,
+      "BROKEN": 1,
+      "PARTIAL": 9,
+      "FUNCTIONAL": 17,
+      "PRO-READY": 0,
+      "PRODUCTION-READY": 0
+    },
+    "combinations": 13,
+    "parityChecks": 17,
+    "presentFixtures": 4,
+    "newCapabilityExecutions": 0,
+    "note": "Record validation only; no browser, provider or GPU execution."
+  },
+  "fullDecodePassed": true,
+  "completedPlaybackFile": "/home/tibule12/Videos/Studio - Original Frames and Sound - 2026-11-22/04 - Complete Studio playback with sound.mp4",
+  "outputHashMatchesNativeDownload": true,
+  "runtimeClosure": [
+    {
+      "root": "/home/tibule12/.local/share/autopromote-qa/studio-frame-collection-20261122",
+      "browser": {
+        "ownedBrowserClosed": true,
+        "originalLoginUnchanged": true
+      },
+      "owned-controller.json": "Stopped verified owned PID 1518527",
+      "owned-server.json": "Stopped verified owned PID 1525783"
+    },
+    {
+      "root": "/home/tibule12/.local/share/autopromote-qa/studio-strip-transition-20261122",
+      "browser": {
+        "ownedBrowserClosed": true,
+        "originalLoginUnchanged": true
+      },
+      "owned-controller.json": "Stopped verified owned PID 1495985",
+      "owned-server.json": "Stopped verified owned PID 1509473"
+    },
+    {
+      "welcomeBaselinePid": 1495419,
+      "stoppedVerifiedOwned": "python3 -m http.server 5102 --bind 127.0.0.1 --directory /home/tibule12/.local/share/autopromote-qa/studio-texture-rebuild-20261122/build-final "
+    }
+  ]
+}

@@ -1,0 +1,341 @@
+{
+  "date": "2026-11-22",
+  "status": "private_local_delivery",
+  "ownerDirection": "Preserve the approved facial restoration and refine colour/detail of speakers, clothing and room; repair cramped grading controls.",
+  "approvedBaseSha256": "9f576b87a6fc9a29bb34d92077f05ecf7ea465381fa0aa33adf23adeac31a7e9",
+  "outputSha256": "9c836fd6db58f38d3c29abdf291c53d08734dc3215a0b012964f33818c44f979",
+  "video": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "frames": 7200,
+    "duration": 240.001,
+    "encoder": "h264_nvenc",
+    "fullRenderSeconds": 1037.2850592079922
+  },
+  "processing": {
+    "approvedFacialRestorationBakedIntoSource": true,
+    "newNeuralRestorationPass": false,
+    "technicalPictureCleanup": true,
+    "losslessCleanupIntermediate": true,
+    "cleanupAudioCopiedWithoutProcessing": true,
+    "automaticReframing": false,
+    "nativeMaterialQualifiedWallsAndCreamClothing": true,
+    "nativeFullFrameToneGrade": true
+  },
+  "sound": {
+    "eight30SecondWindows": [
+      {
+        "start": 0,
+        "duration": 30.0,
+        "lagSamples": 0,
+        "lagSeconds": 0.0,
+        "zeroLagCorrelation": 0.9934200048446655
+      },
+      {
+        "start": 30,
+        "duration": 30.0,
+        "lagSamples": 0,
+        "lagSeconds": 0.0,
+        "zeroLagCorrelation": 0.9933489561080933
+      },
+      {
+        "start": 60,
+        "duration": 30.0,
+        "lagSamples": 0,
+        "lagSeconds": 0.0,
+        "zeroLagCorrelation": 0.9926075339317322
+      },
+      {
+        "start": 90,
+        "duration": 30.0,
+        "lagSamples": 0,
+        "lagSeconds": 0.0,
+        "zeroLagCorrelation": 0.9918801784515381
+      },
+      {
+        "start": 120,
+        "duration": 30.0,
+        "lagSamples": 0,
+        "lagSeconds": 0.0,
+        "zeroLagCorrelation": 0.9958006143569946
+      },
+      {
+        "start": 150,
+        "duration": 30.0,
+        "lagSamples": 0,
+        "lagSeconds": 0.0,
+        "zeroLagCorrelation": 0.9965256452560425
+      },
+      {
+        "start": 180,
+        "duration": 30.0,
+        "lagSamples": 0,
+        "lagSeconds": 0.0,
+        "zeroLagCorrelation": 0.9953310489654541
+      },
+      {
+        "start": 210,
+        "duration": 30.0,
+        "lagSamples": 0,
+        "lagSeconds": 0.0,
+        "zeroLagCorrelation": 0.9950501322746277
+      }
+    ],
+    "minimumCorrelation": 0.9918801784515381,
+    "maximumMeasuredLagSeconds": 0.0
+  },
+  "ui": {
+    "views": [
+      {
+        "width": 1920,
+        "height": 900,
+        "sliderWidth": 275,
+        "sliderRight": 1853,
+        "scrollWidth": 355,
+        "clientWidth": 355,
+        "columns": "72px 220px 1228px 400px"
+      },
+      {
+        "width": 1440,
+        "height": 900,
+        "sliderWidth": 275,
+        "sliderRight": 1373,
+        "scrollWidth": 355,
+        "clientWidth": 355,
+        "columns": "72px 220px 748px 400px"
+      },
+      {
+        "width": 1200,
+        "height": 850,
+        "sliderWidth": 195,
+        "sliderRight": 1133,
+        "scrollWidth": 275,
+        "clientWidth": 275,
+        "columns": "72px 210px 598px 320px"
+      }
+    ],
+    "invalidInputCannotCommit": true,
+    "escapeRestoresDraft": true,
+    "errors": [],
+    "blocked": []
+  },
+  "projectRestore": {
+    "freshAuthenticatedContext": true,
+    "normalBackupImport": true,
+    "exactCanonicalDocument": true,
+    "exactAdjustmentLayers": true,
+    "cleanupPreserved": true,
+    "portableNativeMediaRelinkManifest": true,
+    "cloudUploads": 0,
+    "errors": [],
+    "blocked": []
+  },
+  "portableFileRelink": {
+    "freshPortableImport": true,
+    "providedSourceFileRelinked": true,
+    "actualBlobVideoDecoded": true,
+    "savedColourValuesPreserved": true,
+    "cloudUploads": 0,
+    "errors": []
+  },
+  "finishedStudioPlayback": {
+    "video": {
+      "path": "/local-master.mp4",
+      "currentTime": 240.001,
+      "duration": 240.001,
+      "error": null
+    },
+    "capture": {
+      "seconds": 240.23099994659424,
+      "capturedPictures": 2146,
+      "sourceBytes": 426464924,
+      "viewport": [
+        1920,
+        900
+      ],
+      "source": "Actual Chromium screencast",
+      "visualAnnotations": "Pointer, click ring and actual target outline only",
+      "applicationCodeChanged": false,
+      "audio": "Original finished-video soundtrack captured separately in the browser"
+    },
+    "fullFinishedPlayback": true
+  },
+  "recordingClock": {
+    "screenRectangle": [
+      542,
+      152,
+      728,
+      410
+    ],
+    "templateScore": 0.9963878393173218,
+    "pictureMatches": [
+      {
+        "wallTime": 10,
+        "matchedMovieTime": 9.733333333333333,
+        "offsetSeconds": 0.2666666666666675,
+        "mse": 203.44801330566406
+      },
+      {
+        "wallTime": 30,
+        "matchedMovieTime": 29.766666666666666,
+        "offsetSeconds": 0.23333333333333428,
+        "mse": 206.12942504882812
+      },
+      {
+        "wallTime": 60,
+        "matchedMovieTime": 59.8,
+        "offsetSeconds": 0.20000000000000284,
+        "mse": 195.71994018554688
+      },
+      {
+        "wallTime": 120,
+        "matchedMovieTime": 119.8,
+        "offsetSeconds": 0.20000000000000284,
+        "mse": 191.377197265625
+      },
+      {
+        "wallTime": 180,
+        "matchedMovieTime": 179.83333333333334,
+        "offsetSeconds": 0.1666666666666572,
+        "mse": 109.03665161132812
+      },
+      {
+        "wallTime": 239,
+        "matchedMovieTime": 238.8,
+        "offsetSeconds": 0.19999999999998863,
+        "mse": 194.50877380371094
+      }
+    ],
+    "screenStartOffsetSeconds": 0.20000000000000284,
+    "capturedAudioStartOffsetSeconds": 0.0065,
+    "neededAudioDelaySeconds": 0.19350000000000284,
+    "trimAfterSeconds": 240.55100000000002,
+    "rawRecordingSeconds": 240.266667,
+    "retiming": false,
+    "administrativeTailCaptured": false,
+    "removedAdministrativeTailSeconds": 0,
+    "recordingEndPolicy": "Picture capture stopped as the programme ended, before transferring recorded sound."
+  },
+  "tests": {
+    "uniqueFocusedFrontendCases": 35,
+    "workerCases": 17,
+    "strictBuild": true,
+    "anonymousWelcomeViewports": 8,
+    "contractValidation": "passed"
+  },
+  "protected": [
+    {
+      "kind": "approved_master",
+      "sha256": "9f576b87a6fc9a29bb34d92077f05ecf7ea465381fa0aa33adf23adeac31a7e9",
+      "unchanged": true
+    },
+    {
+      "kind": "original_podcast",
+      "sha256": "b14bf07a916e41331f8516d9e00921d9c4fa2a37a492e2998ae9f463df3c280b",
+      "unchanged": true
+    },
+    {
+      "kind": "original_login",
+      "sha256": "00d48e87bd9b77ba9ead11c92bf93039f43fc3e7e6b322c3e379f6b4dac55254",
+      "unchanged": true
+    }
+  ],
+  "qualification": {
+    "localNativeAppAuthoringExportDownloadAndPlayback": true,
+    "canonicalLocalWorkerViaPrivateTransport": true,
+    "productionAdmissionBillingOrDeployment": false,
+    "wholeStudioPreviewRenderPixelParity": false,
+    "newOwnerCreativeApproval": false,
+    "formalCountsChanged": false
+  },
+  "retainedFailures": [
+    "Initial diagnostic missing landscape reframe declaration",
+    "Private loopback server interruption and retry",
+    "Unexpected legacy automatic stabilization stopped before delivery",
+    "Portable relink observers corrected to open the Color workspace and Media library",
+    "The initial control capture retained a prior-job recovery overlay; the delivered demonstration is a fresh authenticated replay without another render."
+  ],
+  "deliveryDirectory": "/home/tibule12/Videos/Studio - Refined Colour and Room - 2026-11-22",
+  "privateEvidenceDirectory": "/home/tibule12/.local/share/autopromote-qa/studio-room-refinement-20261122",
+  "remaining": [
+    "Owner review of V2 creative result",
+    "Broad identity, occlusion, material, temporal and performance qualification",
+    "Coordinated production release and deployed verification"
+  ],
+  "sampledWallColourComparison": {
+    "measurements": [
+      {
+        "time": 0,
+        "region": "unobstructed wall",
+        "box": [
+          100,
+          100,
+          350,
+          350
+        ],
+        "approvedV1": {
+          "meanRGB": [
+            206.108,
+            203.869,
+            215.918
+          ],
+          "channelSpread": 12.0487060546875
+        },
+        "refinedV2": {
+          "meanRGB": [
+            201.03,
+            201.844,
+            209.824
+          ],
+          "channelSpread": 8.793212890625
+        }
+      },
+      {
+        "time": 180,
+        "region": "unobstructed wall",
+        "box": [
+          850,
+          100,
+          1050,
+          250
+        ],
+        "approvedV1": {
+          "meanRGB": [
+            169.182,
+            169.075,
+            135.677
+          ],
+          "channelSpread": 33.50480651855469
+        },
+        "refinedV2": {
+          "meanRGB": [
+            165.08,
+            166.145,
+            153.171
+          ],
+          "channelSpread": 12.973587036132812
+        }
+      }
+    ],
+    "scope": "Descriptive channel balance in two original-source wall regions; not calibrated colour accuracy or owner creative approval."
+  },
+  "controlDemonstration": {
+    "capture": {
+      "seconds": 34.16100001335144,
+      "capturedPictures": 522,
+      "sourceBytes": 130451996,
+      "viewport": [
+        1920,
+        900
+      ],
+      "source": "Actual Chromium screencast",
+      "visualAnnotations": "Pointer, click ring and actual target outline only",
+      "applicationCodeChanged": false,
+      "audio": "No added narration; actual UI actions"
+    },
+    "context": "Independent native restoration of the exact saved project; actual grade changes return to final values. Export control is shown without submitting another render.",
+    "extraRenders": 0,
+    "errors": []
+  }
+}

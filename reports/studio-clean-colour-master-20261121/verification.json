@@ -1,0 +1,156 @@
+{
+  "date": "2026-11-21",
+  "status": "LOCAL_REVIEW_TARGET_NOT_YET_ACHIEVED",
+  "readinessPromotion": false,
+  "ownerCreativeApproval": false,
+  "rejectedPreviousMovieSha256": "bd2f5563246ec2e31ce7c433a0bb43c7fc16d4f00c9d94f32144d8bb2bf0a6e4",
+  "referenceTargetMet": false,
+  "sourceSha256": "b14bf07a916e41331f8516d9e00921d9c4fa2a37a492e2998ae9f463df3c280b",
+  "outputSha256": "1fbf5b665fca19c7f54f4417b3706dfd37a48fc0bf3789c624515c6ead22ceb4",
+  "duration": 240.001,
+  "frames": 7200,
+  "renderSeconds": 513.4719857669988,
+  "nativeDownloadMatches": true,
+  "coldRestore": {
+    "coldReload": true,
+    "normalBackupImport": true,
+    "exactCanonicalDocument": true,
+    "exactGrade": true,
+    "snapshotDifferences": [
+      "projectMedia",
+      "timeline"
+    ],
+    "errors": [],
+    "blocked": []
+  },
+  "audioSegments": [
+    {
+      "start": 0,
+      "duration": 30.0,
+      "lagSamples": 0,
+      "lagSeconds": 0.0,
+      "zeroLagCorrelation": 0.992841362953186
+    },
+    {
+      "start": 30,
+      "duration": 30.0,
+      "lagSamples": 0,
+      "lagSeconds": 0.0,
+      "zeroLagCorrelation": 0.9935072660446167
+    },
+    {
+      "start": 60,
+      "duration": 30.0,
+      "lagSamples": 0,
+      "lagSeconds": 0.0,
+      "zeroLagCorrelation": 0.9939488172531128
+    },
+    {
+      "start": 90,
+      "duration": 30.0,
+      "lagSamples": 0,
+      "lagSeconds": 0.0,
+      "zeroLagCorrelation": 0.9935510158538818
+    },
+    {
+      "start": 120,
+      "duration": 30.0,
+      "lagSamples": 0,
+      "lagSeconds": 0.0,
+      "zeroLagCorrelation": 0.996239423751831
+    },
+    {
+      "start": 150,
+      "duration": 30.0,
+      "lagSamples": 0,
+      "lagSeconds": 0.0,
+      "zeroLagCorrelation": 0.9965927600860596
+    },
+    {
+      "start": 180,
+      "duration": 30.0,
+      "lagSamples": 0,
+      "lagSeconds": 0.0,
+      "zeroLagCorrelation": 0.9954056739807129
+    },
+    {
+      "start": 210,
+      "duration": 30.0,
+      "lagSamples": 0,
+      "lagSeconds": 0.0,
+      "zeroLagCorrelation": 0.9955816268920898
+    }
+  ],
+  "pairedPictures": [
+    {
+      "time": 0,
+      "mae": 2.0913986947016463,
+      "p95": 6.0
+    },
+    {
+      "time": 30,
+      "mae": 2.1937110982510286,
+      "p95": 6.0
+    },
+    {
+      "time": 63.6,
+      "mae": 2.1103743891460907,
+      "p95": 6.0
+    },
+    {
+      "time": 120,
+      "mae": 1.9010238233024692,
+      "p95": 6.0
+    },
+    {
+      "time": 180,
+      "mae": 9.90523710776749,
+      "p95": 18.0
+    },
+    {
+      "time": 239,
+      "mae": 1.9322509966563786,
+      "p95": 6.0
+    }
+  ],
+  "wholeTemporalPixelParityQualified": false,
+  "workerTests": 43,
+  "frontendTests": 18,
+  "anonymousWelcomeChecks": 8,
+  "strictBuild": true,
+  "productionDeployed": false,
+  "privateEvidence": "/home/tibule12/.local/share/autopromote-qa/studio-colour-full-master-20261121",
+  "remainingBlockers": [
+    "The owner reference is more detailed/cleaner than the verified moving face; no reference-quality facial restoration has been achieved.",
+    "Full master uses whole-programme balance and detail-preserving encoding; the separate20s contour proof is not full-programme retouching.",
+    "At180s the sampled preview/native difference is MAE9.905/p9518; whole temporal picture/edge parity remains unqualified.",
+    "Broad selected-part/blemish/occlusion/long-programme retouching and detailed preview throughput remain incomplete.",
+    "Coordinated production release, production concurrency/recovery, sharedS02/S04/S03 and historical typography gaps remain."
+  ],
+  "finishedPlayback": {
+    "video": {
+      "path": "/local-master.mp4",
+      "currentTime": 240.001,
+      "duration": 240.001,
+      "error": null
+    },
+    "capture": {
+      "seconds": 261.41600012779236,
+      "capturedPictures": 3238,
+      "sourceBytes": 660724768,
+      "viewport": [
+        1920,
+        900
+      ],
+      "source": "Actual Chromium screencast",
+      "visualAnnotations": "Pointer, click ring and actual target outline only",
+      "applicationCodeChanged": false,
+      "audio": "Original finished-video soundtrack captured separately in the browser"
+    },
+    "fullFinishedPlayback": true
+  },
+  "observerFailure": "The client observer expired while capture encoding completed; the same native playback succeeded and retained its receipt. No render or playback resubmission.",
+  "videosDelivery": "/home/tibule12/Videos/Studio - Colour and Detail Review - 2026-11-21",
+  "originalLoginSha256": "00d48e87bd9b77ba9ead11c92bf93039f43fc3e7e6b322c3e379f6b4dac55254",
+  "sourceSearch": "Existing original and Downloads candidate thumbnails checked; no higher-detail original of this interview found in the inspected files. This is not proof none exists elsewhere."
+}

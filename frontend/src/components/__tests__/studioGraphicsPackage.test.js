@@ -124,3 +124,15 @@ test('ordinary layer and group masks survive import into the existing render gra
     input.layers[0].mask={...mask,...invalid};expect(()=>validateStudioGraphicsPackage(input,{duration:4,aspect:16/9})).toThrow();
   }
 });
+
+test('artwork stretch is explicit and existing artwork keeps contain sizing',async()=>{
+  for(const mediaFit of [undefined,'stretch']){
+    const input=spec();input.layers=[{...artwork('plate'),...(mediaFit?{mediaFit}:{})}];input.groups=[];
+    let n=0;const result=await buildStudioGraphicsPackage({input,overlays:[],keyframes:[],compounds:[],order:[],duration:4,aspect:16/9,
+      createId:()=>`plate-${++n}`,rasterize:async()=>new File(['png'],'plate.png'),createUrl:()=>`blob:plate-${n}`});
+    expect(result.layers[0].mediaFit).toBe(mediaFit||'contain');
+  }
+  const invalid=spec();invalid.layers=[{...artwork('invalid'),mediaFit:'magic'}];invalid.groups=[];
+  expect(()=>validateStudioGraphicsPackage(invalid,{duration:4,aspect:16/9})).toThrow(/contain, cover or stretch/);
+  const text=spec();text.layers[0].mediaFit='stretch';expect(()=>validateStudioGraphicsPackage(text,{duration:4,aspect:16/9})).toThrow(/Text layers/);
+});

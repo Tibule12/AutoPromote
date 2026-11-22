@@ -74,7 +74,7 @@ function cpuWorkerUrl(endpoint, env = process.env) {
 }
 
 function safeToFailOver(error, endpoint) {
-  if(error.code === "STUDIO_SELECTIVE_GRADING_UNAVAILABLE") return true;
+  if(["STUDIO_SELECTIVE_GRADING_UNAVAILABLE","STUDIO_FACE_RESTORATION_UNAVAILABLE","STUDIO_ORIGINAL_SOUNDS_UNAVAILABLE"].includes(error.code)) return true;
   if (["ECONNREFUSED", "ENOTFOUND"].includes(error.code)) return true;
   const status = Number(error.response?.status);
   if ([502, 503, 504].includes(status) && ANALYSIS.has(endpoint)) return true;
@@ -105,12 +105,32 @@ function requiredSelectiveVersion(payload={}) {
     return mask?.opacity!==undefined||mask?.material?.enabled||mask?.subtract?.length||mask?.keyframes?.some(k=>k.opacity!==undefined||k.points)||fx.clone_patch?.mode==='heal';
   })?2:1;
 }
+const ORIGINAL_SOUND_TONES = new Set(['prism_sweep','velvet_hit','glass_flick','paper_snap','orbit_rise','pulse_drop','shutter_tick','reverse_spark']);
+function needsOriginalSounds(payload={}) {
+  return (payload.sound_effects||[]).some(cue=>cue.enabled!==false&&cue.builtIn!==false&&ORIGINAL_SOUND_TONES.has(cue.tone));
+}
 function assertSelectiveSupport(payload,health) {
+  if(needsOriginalSounds(payload)&&(health?.studioCapabilities?.originalSounds||0)<1)
+    throw Object.assign(new Error('Original Studio sounds are unavailable on this worker; no credits were charged.'),{code:'STUDIO_ORIGINAL_SOUNDS_UNAVAILABLE',statusCode:503});
+  const faceVersion=payload.finish_plan?.face_restoration?.model==='gfpgan-v1.4-natural-v2'?2:1;
+  if(payload.finish_plan?.face_restoration?.enabled && (health?.studioCapabilities?.faceRestoration||0)<faceVersion)
+    throw Object.assign(new Error('Face restoration is unavailable on this worker; no credits were charged.'),{code:'STUDIO_FACE_RESTORATION_UNAVAILABLE',statusCode:503});
   if(needsSelectiveGrading(payload)&&(health?.studioCapabilities?.selectiveGrading||0)<requiredSelectiveVersion(payload))
     throw Object.assign(new Error('Selected-area grading is unavailable on this worker.'),{code:'STUDIO_SELECTIVE_GRADING_UNAVAILABLE',statusCode:503});
 }
 
+function validateFaceRestorationPlan(payload) {
+  const fx=payload.finish_plan?.face_restoration;
+  if(!fx?.enabled)return;
+  if((fx.model && !['gfpgan-v1.4-temporal-v1','gfpgan-v1.4-natural-v2'].includes(fx.model)) ||
+      [['strength',.85],['stability',.65]].some(([field,fallback])=>{
+        const value=fx[field]??fallback;
+        return typeof value!=='number'||!Number.isFinite(value)||value<0||value>1;
+      }))throw Object.assign(new Error('Choose valid facial restoration settings.'),{code:'STUDIO_FACE_RESTORATION_INVALID',statusCode:400});
+}
+
 async function postMediaWorker(endpoint, payload, { timeoutMs = 600000, onRoute, preferredDevice } = {}) {
+  validateFaceRestorationPlan(payload);
   let route = selectMediaWorker(endpoint, payload);
   if (preferredDevice === "cpu" && route.device !== "cpu")
     route = { ...route, workerUrl: cpuWorkerUrl(endpoint), device: "cpu", reason: "gpu_unavailable" };
@@ -118,7 +138,7 @@ async function postMediaWorker(endpoint, payload, { timeoutMs = 600000, onRoute,
     route = { ...route, workerUrl: route.gpuUrl, device: "gpu", reason: "cpu_unavailable" };
   const call = async current => {
     await onRoute?.(current);
-    if(needsSelectiveGrading(payload)){
+    if(needsSelectiveGrading(payload)||needsOriginalSounds(payload)){
       const healthTarget=current.workerUrl+'/health';
       const health=await axios.get(healthTarget,await buildWorkerRequestConfig(healthTarget,{timeout:60000}));
       assertSelectiveSupport(payload,health.data);
@@ -143,6 +163,7 @@ async function postMediaWorker(endpoint, payload, { timeoutMs = 600000, onRoute,
 }
 
 async function assertMediaWorkerReady(payload = {}) {
+  validateFaceRestorationPlan(payload);
   let route = selectMediaWorker("/render-viral-clip", payload);
   const check = async current => {
     const target = current.workerUrl + "/health";
@@ -172,7 +193,7 @@ async function assertMediaWorkerReady(payload = {}) {
         reason: route.device === "cpu" ? "cpu_unavailable" : "gpu_unavailable" };
       try { return await check(route); } catch (fallbackError) { error = fallbackError; }
     }
-    if (["STUDIO_RENDER_WORKER_BUSY","STUDIO_SELECTIVE_GRADING_UNAVAILABLE"].includes(error.code)) throw error;
+    if (["STUDIO_RENDER_WORKER_BUSY","STUDIO_SELECTIVE_GRADING_UNAVAILABLE","STUDIO_FACE_RESTORATION_UNAVAILABLE","STUDIO_ORIGINAL_SOUNDS_UNAVAILABLE"].includes(error.code)) throw error;
     throw Object.assign(new Error("The render workers are unavailable. Try again once they are online; no credits were charged."), {
       code: "STUDIO_RENDER_WORKER_UNAVAILABLE", statusCode: 503,
     });

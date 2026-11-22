@@ -32,6 +32,7 @@ WORKDIR /app
 # Install Python dependencies
 COPY requirements.txt .
 COPY requirements.motion-sculpture.txt .
+RUN pip install --no-cache-dir torch==2.7.1+cpu --index-url https://download.pytorch.org/whl/cpu
 RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install --no-cache-dir --no-deps -r requirements.motion-sculpture.txt
 RUN python -c "import cv2, mediapipe as mp; assert hasattr(mp.solutions, 'selfie_segmentation'); print('Motion Sculpture CPU segmentation ready')"
@@ -47,6 +48,7 @@ RUN python -c "from faster_whisper import WhisperModel; WhisperModel('digiphyte/
 
 # Copy source code
 COPY . .
+RUN python install_face_restoration_model.py
 
 # Create the shared tmp directory used by main_media_server.py
 RUN mkdir -p /tmp

@@ -8632,7 +8632,15 @@ def has_studio_node_grade_masks(plan):
         for item in plan.get('adjustment_layers') or []))
 
 
-def build_studio_sequence_encode_args(reviewed_subject=False, fps=None, preserve_samples=False):
+def has_studio_precision_grades(plan):
+    plan = plan or {}
+    return bool((plan.get('color') or {}).get('precisionGrade') or any(
+        layer.get('enabled', True) and ((layer.get('effects') or {}).get('color') or {}).get('precisionGrade')
+        for layer in plan.get('adjustment_layers') or []))
+
+
+def build_studio_sequence_encode_args(reviewed_subject=False, fps=None, preserve_samples=False,
+                                      precision_grade=False):
     # A reviewed replacement is already encoded. The default x264 CRF 23
     # temporary cut visibly removes skin, cloth and thin equipment detail
     # before the selected delivery profile even runs. Preserve its YUV samples
@@ -8640,6 +8648,12 @@ def build_studio_sequence_encode_args(reviewed_subject=False, fps=None, preserve
     args = ["-c:v", "libx264", "-preset", "ultrafast"]
     if reviewed_subject or preserve_samples:
         args.extend(["-crf", "0"])
+    elif precision_grade:
+        # Long precision-grade programmes exceed the bounded lossless scratch
+        # profile. Keep a compressed high-quality intermediate rather than
+        # silently using x264's CRF 23 before the user's master grade.
+        args[args.index('-preset') + 1] = 'veryfast'
+        args.extend(['-crf', '14'])
     if fps is not None:
         # FFmpeg 7.1 can omit a short MP4's final packet duration. Even with
         # the right frame count, concat then starts the following clip early
@@ -9210,6 +9224,7 @@ async def render_reframe_timeline_sequential(
     preserve_samples=False,
     delivery_fps=None,
     multicam_programme_path=None,
+    precision_grade=False,
 ):
     """Render bounded framing intervals on one source or delivery picture clock."""
     if programme_fps is not None and delivery_fps is not None:
@@ -9272,8 +9287,9 @@ async def render_reframe_timeline_sequential(
                 "-t", f"{segment['end']-segment['start']:.9f}",
                 "-filter_complex", graph,
                 "-map", "[vout]", "-an",
-                *(build_studio_sequence_encode_args(reviewed_subject=reviewed_subject,preserve_samples=preserve_samples)
-                  if reviewed_subject or preserve_samples else
+                *(build_studio_sequence_encode_args(reviewed_subject=reviewed_subject,preserve_samples=preserve_samples,
+                                                     precision_grade=precision_grade)
+                  if reviewed_subject or preserve_samples or precision_grade else
                   build_viral_export_encode_args(resolve_viral_export_profile({}, target_width, target_height))),
                 "-movflags", "+faststart", "-y", segment_path,
             ])
@@ -12587,10 +12603,21 @@ def read_root():
 
 @app.get("/health")
 def health_check():
+    try:
+        from .studio_face_restoration import capability_version as face_restoration_capability_version
+    except ImportError:
+        from studio_face_restoration import capability_version as face_restoration_capability_version
+    try:
+        from .viral_motion_graphics import SOUNDS as installed_sound_palette
+    except ImportError:
+        from viral_motion_graphics import SOUNDS as installed_sound_palette
+    original_sounds_available = all(tone in installed_sound_palette for tone in (
+        'prism_sweep', 'velvet_hit', 'glass_flick', 'paper_snap', 'orbit_rise', 'pulse_drop', 'shutter_tick', 'reverse_spark'))
     return {
         "status": "ok",
         "service": "python_media_worker",
-        "studioCapabilities": {"selectiveGrading": 3, "regionRecolor": 1, "clonePatch": 1, "regionTracking": 1, "materialMatte": 1, "textureHeal": 1},
+        "studioCapabilities": {"selectiveGrading": 3, "regionRecolor": 1, "clonePatch": 1, "regionTracking": 1, "materialMatte": 1, "textureHeal": 1,
+                               "faceRestoration": face_restoration_capability_version(), "originalSounds": int(original_sounds_available)},
         "worker_state": current_job_info,
         "concurrency": MEDIA_WORKER_CONCURRENCY,
         "maxVideoSeconds": MEDIA_WORKER_MAX_VIDEO_SECONDS,
@@ -30568,6 +30595,12 @@ def build_studio_finish_filter(finish_plan, color_cube_path=None, qualifier_cube
     sharpness = clamp_float(color.get("sharpness", 0.0), 0.0, 1.0)
     vignette = clamp_float(color.get("vignette", 0.0), 0.0, 0.85)
     grain = clamp_float(texture.get("film_grain", 0.0), 0.0, 1.0)
+    # Selected grades are composed in RGB. Do not repeatedly subsample colour
+    # detail inside an otherwise pure precision grade; delivery owns YUV420.
+    preserve_rgb = plan.get('_preserve_rgb') is True and bool(color.get('precisionGrade')) and sharpness <= .005 and vignette <= .005 and not any(
+        float(texture.get(name,0) or 0) > .005 for name in (
+            'film_grain','chromatic_aberration','vhs_tracking','light_leak',
+            'lens_blur','halation','dream_glow','anamorphic_flare'))
 
     brightness_expression = build_finish_keyframe_expression(
         plan, "brightness", brightness + 1.0, lambda value: clamp_float(value - 1.0, -0.35, 0.35)
@@ -30615,8 +30648,9 @@ def build_studio_finish_filter(finish_plan, color_cube_path=None, qualifier_cube
     # Sharpness/texture negotiate a YUV input. Letting FFmpeg insert that RGB
     # conversion implicitly can use a different matrix while retaining the
     # programme's BT.709 metadata; even a neutral grade then changes colours.
-    filters.extend(["scale=out_color_matrix=bt709:out_range=tv", "format=yuv420p",
-                    "setparams=range=limited:colorspace=bt709"])
+    if not preserve_rgb:
+        filters.extend(["scale=out_color_matrix=bt709:out_range=tv", "format=yuv420p",
+                        "setparams=range=limited:colorspace=bt709"])
     if sharpness > 0.005:
         filters.append(f"unsharp=5:5:{sharpness * 0.65:.4f}:3:3:{sharpness * 0.18:.4f}")
     if vignette > 0.005:
@@ -30697,8 +30731,11 @@ def build_studio_finish_filter(finish_plan, color_cube_path=None, qualifier_cube
         )
     # RGB finish stages explicitly return to the programme YUV matrix/range.
     # Otherwise runtime negotiation can retain incompatible full-range tags.
-    filters.extend(["scale=out_color_matrix=bt709:out_range=tv", "format=yuv420p",
-                    "setparams=range=limited:colorspace=bt709", "setsar=1"])
+    if preserve_rgb:
+        filters.extend(["format=gbrp", "setparams=range=full:colorspace=gbr", "setsar=1"])
+    else:
+        filters.extend(["scale=out_color_matrix=bt709:out_range=tv", "format=yuv420p",
+                        "setparams=range=limited:colorspace=bt709", "setsar=1"])
     return ",".join(filters)
 
 
@@ -30739,7 +30776,7 @@ def build_studio_adjustment_timeline_filter(base_filter, layers, duration):
         parts.append(
             f"[finish_{index}_in]trim=start={start:.6f}:end={end:.6f},setpts=PTS-STARTPTS+{start:.9f}/TB,"
             + (",".join(grades) + "," if grades else "")
-            + f"setpts=PTS-STARTPTS,format=yuv420p,setsar=1{output}"
+            + f"setpts=PTS-STARTPTS,scale=out_color_matrix=bt709:out_range=tv,format=yuv420p,setparams=range=limited:colorspace=bt709,setsar=1{output}"
         )
         outputs.append(output)
     parts.append(f"{''.join(outputs)}concat=n={len(outputs)}:v=1:a=0[v_finish]")
@@ -30801,6 +30838,9 @@ async def render_studio_finish_timeline_sequential(
     specs = plan_studio_adjustment_segments(layers, duration)
     if not specs:
         raise ValueError("A sequential Finish Rack render needs at least one timed adjustment")
+    full_chroma = any(bool(((layer.get('effects') or {}).get('color')or{}).get('precisionGrade'))
+                      for layer in layers if isinstance(layer,dict)and layer.get('enabled')is not False)
+    intermediate_pixel_format = 'yuv444p' if full_chroma else 'yuv420p'
     work_dir = os.path.dirname(os.path.abspath(output_path))
     segment_paths = []
     concat_path = os.path.join(work_dir, f"{job_id}_finish.ffconcat")
@@ -30826,18 +30866,19 @@ async def render_studio_finish_timeline_sequential(
             # so neighbouring sections cannot drop or duplicate a frame.
             filters = [part for part in [f"setpts=PTS-STARTPTS+{start_time:.9f}/TB",
                        base_filter, *segment["grades"], "setpts=PTS-STARTPTS",
-                       "format=yuv420p", "setsar=1"] if part]
+                       "scale=out_color_matrix=bt709:out_range=tv", f"format={intermediate_pixel_format}",
+                       "setparams=range=limited:colorspace=bt709", "setsar=1"] if part]
             await run_subprocess_async([
                 "ffmpeg", "-ss", f"{start_time:.9f}", "-i", source_path,
                 "-t", f"{frame_count/fps:.9f}", "-frames:v", str(frame_count),
                 "-vf", ",".join(filters), "-an",
                 # This is encoded again by the final caption/delivery graph.
-                # Veryfast keeps the intermediate compact enough for Cloud
-                # Run's memory-backed filesystem while preserving CRF 19.
+                # Precision grades keep full chroma and a higher-quality
+                # intermediate; only the delivery encode subsamples colour.
                 *(build_studio_sequence_encode_args(reviewed_subject=reviewed_subject,preserve_samples=preserve_samples)
                   if reviewed_subject or preserve_samples else
-                  ["-c:v", "libx264", "-preset", "veryfast", "-crf", "19"]),
-                "-pix_fmt", "yuv420p", "-fps_mode", "passthrough",
+                  ["-c:v", "libx264", "-preset", "veryfast", "-crf", "10" if full_chroma else "19"]),
+                "-pix_fmt", intermediate_pixel_format, "-fps_mode", "passthrough",
                 "-bf", "0", *build_studio_cfr_packet_args(fps), "-y", segment_path,
             ], check=True, job_context=job_id, timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS)
         # The concat demuxer rebases every segment's packet timestamps. Binary
@@ -31297,6 +31338,18 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             "Upload or reconnect these media layers before rendering: " + ", ".join(missing_media)
         ))
 
+    try:
+        from .studio_face_restoration import validate_settings as validate_face_restoration, available as face_restoration_available
+    except ImportError:
+        from studio_face_restoration import validate_settings as validate_face_restoration, available as face_restoration_available
+    try:
+        face_restoration_settings = validate_face_restoration((request.finish_plan or {}).get('face_restoration'))
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+    if face_restoration_settings and not face_restoration_available():
+        raise HTTPException(status_code=503, detail='The verified facial restoration model/runtime is unavailable on this worker')
+    face_restoration_receipt = {"status": "disabled"}
+
     job_id = provided_job_id or str(uuid.uuid4())
     SHARED_TMP_DIR = studio_render_scratch_directory(os.path.dirname(__file__))
     if not os.path.exists(SHARED_TMP_DIR): os.makedirs(SHARED_TMP_DIR)
@@ -31547,6 +31600,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     "-map", "0:v:0", "-an",
                     *build_studio_sequence_encode_args(
                         reviewed_subject=segment_picture_path != segment_source_path,
+                        precision_grade=has_studio_precision_grades(request.finish_plan),
                         # Preserve reviewed fine detail through short bounded
                         # assemblies. The final delivery still owns quality.
                         # Raw YUV bounds the extra scratch even for noisy media;
@@ -32024,6 +32078,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                             reframe_target_height,programme_fps or float(source_delivery_rate or (request.output_settings or {}).get('fps',30)),
                             reframe_duration,manual_reframe_keyframes or has_studio_node_grade_masks(request.finish_plan)),
                         multicam_programme_path=multicam_programme_path,
+                        precision_grade=has_studio_precision_grades(request.finish_plan),
                     )
                     if multicam_programme_path:
                         os.remove(multicam_programme_path)
@@ -32137,6 +32192,46 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     SHARED_TMP_DIR,
                 )
 
+        # Restore the measured main face in the compiled programme. This is
+        # explicit generative detail reconstruction, separate from technical
+        # cleanup and ordinary colour grading. The original audio is copied.
+        if face_restoration_settings:
+            face_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_face_restored.mp4")
+            sequence_temp_paths.update({face_path, face_path+'.receipt.json', face_path+'.ffmpeg.log', face_path+'.progress.json'})
+            report_progress(44, "Restoring facial detail across the video")
+            face_task = asyncio.create_task(run_subprocess_async([
+                sys.executable, os.path.join(os.path.dirname(__file__), 'studio_face_restoration.py'),
+                '--input', working_path, '--output', face_path,
+                '--strength', str(face_restoration_settings['strength']),
+                '--model', face_restoration_settings['model'],
+                '--stability', str(face_restoration_settings['stability']),
+                '--progress', face_path+'.progress.json',
+            ], check=True, job_context=job_id, timeout_seconds=min(3300,max(600,programme_duration*14))))
+            try:
+                while not face_task.done():
+                    await asyncio.wait({face_task}, timeout=10)
+                    try:
+                        with open(face_path+'.progress.json') as progress_file:
+                            face_progress = json.load(progress_file)
+                        # Bound the display to this stage's reserved interval.
+                        face_fps = float(face_progress.get('fps') or 30)
+                        completed_seconds = min(programme_duration,float(face_progress['frames'])/face_fps)
+                        report_progress(44+int(4*completed_seconds/max(.001,programme_duration)),
+                            f"Restoring facial detail: {completed_seconds:.0f}/{programme_duration:.0f}s")
+                    except (OSError,ValueError,TypeError,KeyError):
+                        pass
+                await face_task
+            finally:
+                if not face_task.done():
+                    face_task.cancel()
+                    try:await face_task
+                    except asyncio.CancelledError:pass
+            with open(face_path+'.receipt.json') as receipt_file:
+                face_restoration_receipt = json.load(receipt_file)
+            face_source = working_path
+            working_path = face_path
+            remove_replaced_temp_media(face_source, working_path, SHARED_TMP_DIR)
+
         # 2.7. Establish a professional technical baseline before any creative
         # transformation. This refines the captured pixels; it never invents a
         # background, face, or story visual.
@@ -32149,22 +32244,20 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 "-vf", build_quality_enhancement_filter_chain("safe_clean"),
             ]
             if cleanup_has_audio:
-                cleanup_cmd.extend(
-                    [
-                        "-af",
-                        "highpass=f=55,lowpass=f=16000,afftdn=nr=6:nf=-35,alimiter=limit=0.95",
-                        "-c:a", "aac", "-b:a", "192k",
-                    ]
-                )
+                # Picture cleanup must not silently change the creator's
+                # sound. Explicit Sound controls own speech processing.
+                cleanup_cmd.extend(["-c:a", "copy"])
             else:
                 cleanup_cmd.append("-an")
             cleanup_cmd.extend(
                 [
-                    "-c:v", "libx264", "-preset", "veryfast", "-crf", "19",
+                    # This is a working intermediate, before selected-area
+                    # grades and final delivery. Avoid another lossy encode.
+                    "-c:v", "libx264", "-preset", "veryfast", "-crf", "0",
                     "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-y", cleanup_path,
                 ]
             )
-            report_progress(45, "Cleaning picture and speech")
+            report_progress(45, "Cleaning picture detail")
             await run_subprocess_async(cleanup_cmd, check=True, job_context=job_id)
             cleanup_validation = validate_rendered_media(
                 cleanup_path,
@@ -32175,7 +32268,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 "status": "applied",
                 "profile": "safe_clean",
                 "video": "denoise_color_balance_face_safe_detail",
-                "audio": "band_limit_light_denoise_peak_protection" if cleanup_has_audio else "no_audio",
+                "audio": "preserved_original" if cleanup_has_audio else "no_audio",
                 "validation": cleanup_validation,
             }
 
@@ -34371,6 +34464,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 "creative_receipt": creative_receipt,
                 "creative_template_instance": request.creative_template_instance,
                 "professional_cleanup": cleanup_receipt,
+                "face_restoration": face_restoration_receipt,
                 "watermark_cleanup": watermark_cleanup_receipt,
                 "audio_restoration": restoration_receipt if has_main_audio else None,
                 "audio_automation": audio_automation_receipt,

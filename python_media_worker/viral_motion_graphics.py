@@ -17,7 +17,8 @@ from PIL import Image, ImageDraw, ImageFont
 
 PRESETS = ("brand_reveal", "title", "kinetic", "counter", "comparison", "lower_third", "callout", "watermark", "badge", "progress", "quote", "cta")
 SOUNDS = ("sweep", "impact", "pop", "click", "riser", "chime", "reverse", "glitch", "subdrop",
-          "cinematic_hit", "airy_whoosh", "bass_punch", "metal_hit", "tape_stop", "sparkle")
+          "cinematic_hit", "airy_whoosh", "bass_punch", "metal_hit", "tape_stop", "sparkle",
+          "prism_sweep", "velvet_hit", "glass_flick", "paper_snap", "orbit_rise", "pulse_drop", "shutter_tick", "reverse_spark")
 FONT = Path(__file__).parent / "assets/fonts/StudioMotion-Bold.ttf"
 SAMPLE_RATE = 48000
 
@@ -444,7 +445,28 @@ def synthesize_effect(effect, sample_rate=SAMPLE_RATE):
         noise = seed/4294967296*2-1
         previous_noise = filtered_noise
         filtered_noise += min(1, 2400/sample_rate)*(noise-filtered_noise)
-        if tone == "cinematic_hit":
+        if tone == 'prism_sweep':
+            phase += tau*(480+2100*p*p)/sample_rate
+            value = (.42*(noise-previous_noise)+.16*math.sin(phase)+.08*math.sin(phase*1.5))*math.sin(math.pi*p)**2
+        elif tone == 'velvet_hit':
+            phase += tau*(46+115*math.exp(-45*t))/sample_rate
+            value = .7*math.sin(phase)*math.exp(-6*p)+.13*filtered_noise*math.exp(-19*p)
+        elif tone == 'glass_flick':
+            value = (.3*math.sin(tau*1480*t)+.18*math.sin(tau*2220*t)+.1*math.sin(tau*3130*t))*(1-math.exp(-500*t))*math.exp(-8*p)
+        elif tone == 'paper_snap':
+            value = .65*(noise-previous_noise)*math.exp(-35*p)+.13*math.sin(tau*410*t)*math.exp(-30*p)
+        elif tone == 'orbit_rise':
+            phase += tau*(120+1000*p*p)/sample_rate
+            value = (.34*math.sin(phase)+.13*math.sin(2*phase)+.1*filtered_noise)*math.sin(math.pi*p)**.7*(.3+.7*p)
+        elif tone == 'pulse_drop':
+            phase += tau*(36+120*math.exp(-16*t))/sample_rate
+            value = .72*math.sin(phase)*math.exp(-4*p)+.08*filtered_noise*math.exp(-25*p)
+        elif tone == 'shutter_tick':
+            second = max(0,t-.025)
+            value = .48*noise*math.exp(-90*p)+.23*math.sin(tau*1700*t)*math.exp(-60*p)+(.32*math.sin(tau*1150*second)*math.exp(-140*second) if t>=.025 else 0)
+        elif tone == 'reverse_spark':
+            value = (.27*math.sin(tau*900*t)+.18*math.sin(tau*1350*t)+.1*(noise-previous_noise))*p**2.5
+        elif tone == "cinematic_hit":
             phase += tau*(42+105*math.exp(-32*t))/sample_rate
             value = (.62*math.sin(phase)*math.exp(-3.6*p) +
                      .26*filtered_noise*math.exp(-12*p) + .10*math.sin(tau*196*t)*math.exp(-6*p))

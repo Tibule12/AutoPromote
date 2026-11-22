@@ -1,0 +1,11 @@
+{
+  "id": "gfpgan-v1.4-temporal-v1",
+  "upstream": "https://github.com/TencentARC/GFPGAN",
+  "codeRevision": "7552a7791caad982045a7bbe5634bbf1cd5c8679",
+  "weightsUrl": "https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/GFPGANv1.4.pth",
+  "weightsSha256": "e2cd4703ab14f4d01fd1383a8a8b266f9a5833dacee8e6a79d3bf21a1b6be5ad",
+  "filename": "GFPGANv1.4.pth",
+  "license": "Apache-2.0 with upstream third-party notices",
+  "generativeDetail": true,
+  "runtimeDownload": false
+}

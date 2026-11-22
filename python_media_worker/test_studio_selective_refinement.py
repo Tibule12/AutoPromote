@@ -3,6 +3,8 @@ import math
 import struct
 import subprocess
 import tempfile
+from types import SimpleNamespace
+from unittest.mock import MagicMock, patch
 from pathlib import Path
 
 import cv2
@@ -10,7 +12,7 @@ import numpy as np
 from PIL import Image
 
 from studio_adjustment_grade import adjustment_grade_filter
-from studio_region_tracking import read_packet, track_frames
+from studio_region_tracking import read_packet, track_frames, _bind_face_outline, _outline_key
 from studio_selective_mask import mask_coverage, mask_at, write_material_cube
 from studio_texture_repair import repair_offset_at,repair_bounds
 
@@ -96,6 +98,57 @@ def test_binary_packet_rejects_missing_bytes_and_noncontinuous_clocks():
         write({**header,'times':[0,8]})
         try:read_packet(path);assert False,'Sparse clock was accepted'
         except ValueError:pass
+
+
+def test_face_outline_binding_follows_expression_without_moving_an_unrelated_vertex():
+    reference=np.array([[20,20],[60,20],[60,60],[20,60],[40,40]],np.float64)
+    outline=np.array([[30,25],[50,25],[50,50],[30,50]],np.float64)
+    bindings=_bind_face_outline(reference,outline,80,80)
+    moved=reference.copy();moved[2,1]=72;moved[3,1]=72
+    actual=np.array([weights@moved[ids]for ids,weights in bindings])
+    np.testing.assert_allclose(actual[:2],outline[:2],atol=1e-6)
+    assert actual[2,1]>outline[2,1] and actual[3,1]>outline[3,1]
+    key=_outline_key(actual,0,1,80,80)
+    recovered=(np.array(key['points'])-.5)*[key['width']*80,key['height']*80]+[key['x']*80,key['y']*80]
+    np.testing.assert_allclose(recovered,actual,atol=1e-6)
+
+
+def test_face_packet_rejects_unsupported_targets_and_outside_picture_windows():
+    header=dict(width=32,height=32,times=[0,.125],mask=mask(),target='face')
+    with tempfile.TemporaryDirectory()as folder:
+        path=Path(folder)/'frames'
+        for extra in [dict(target='unknown'),dict(crop=dict(x=.9,y=0,width=.5,height=.5)),dict(crop=dict(x=0,y=0,width=float('nan'),height=.5)),
+                      dict(sceneSamples=[[]]),dict(sceneSamples=[[False]*144]*2),dict(sceneSamples=[[.5]*144]*2)]:
+            body=json.dumps({**header,**extra}).encode();path.write_bytes(b'APGRD001'+struct.pack('<I',len(body))+body+bytes(32*32*2))
+            try:read_packet(path);assert False,'Unsafe face packet was accepted'
+            except ValueError:pass
+
+
+def test_face_cut_check_uses_whole_picture_and_hides_missing_faces_in_both_directions():
+    coordinates=np.array(np.meshgrid(np.linspace(.1,.9,24),np.linspace(.1,.9,20))).reshape(2,-1).T[:478]
+    landmarks=[SimpleNamespace(x=float(x),y=float(y))for x,y in coordinates]
+    tracker=MagicMock();tracker.detect.return_value=SimpleNamespace(face_landmarks=[landmarks])
+    factory=MagicMock();factory.create_from_options.return_value.__enter__.return_value=tracker
+    sdk=SimpleNamespace(tasks=SimpleNamespace(BaseOptions=MagicMock(),vision=SimpleNamespace(
+        FaceLandmarker=factory,FaceLandmarkerOptions=MagicMock(),RunningMode=SimpleNamespace(IMAGE='IMAGE'))),
+        Image=MagicMock(),ImageFormat=SimpleNamespace(SRGB='SRGB'))
+    rng=np.random.default_rng(16);first=rng.integers(70,150,(64,64),dtype=np.uint8)
+    frames=np.array([first,first+30])
+    with patch.dict('sys.modules',{'mediapipe':sdk}):
+        # Local lighting/movement is not a cut in the full programme picture.
+        same_scene=[[100]*144,[100]*144]
+        result=track_frames(frames,[0,.125],mask(),target='face',scene_samples=same_scene)
+        assert result['stopReason']is None and result['trackedSamples']==2
+        assert result['shape']=='polygon'and len(result['keyframes'][0]['points'])==32
+        contour=track_frames(frames,[0,.125],mask(),target='face',scene_samples=same_scene,face_contour=True)
+        assert contour['faceContour']is True and len(contour['keyframes'][0]['points'])==36
+        cut=track_frames(frames,[0,.125],mask(),target='face',scene_samples=[[100]*144,[150]*144])
+        assert cut['stopReason']=='cut'and cut['keyframes'][-1]['opacity']==0
+        for times in ([0,.125],[.125,0]):
+            tracker.detect.side_effect=[SimpleNamespace(face_landmarks=[landmarks]),SimpleNamespace(face_landmarks=[])]
+            lost=track_frames(frames,times,mask(),target='face',scene_samples=same_scene)
+            assert lost['stopReason']=='face_not_visible'
+            assert next(key for key in lost['keyframes']if key['time']==times[1])['opacity']==0
 
 
 def test_actual_frontend_material_and_animated_compound_coverage_match_worker():

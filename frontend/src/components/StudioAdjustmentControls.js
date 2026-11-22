@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import StudioGradeValueControl from './StudioGradeValueControl';
 import {
   CINEMA_3D_LUT_PRESETS,
   buildProceduralColorCube,
@@ -112,26 +113,16 @@ export default function StudioAdjustmentControls({
           ['contrast', 'Contrast', 0.65, 1.75, 0.01, 1],
           ['saturation', 'Saturation', 0, 1.8, 0.01, 1],
         ].map(([key, label, min, max, step, fallback]) => (
-          <label key={key} className="ap-comp-field">
-            <span>
-              {label} {Number(fx[key] > 10 ? fx[key] / 100 : (fx[key] ?? fallback)).toFixed(2)}
-            </span>
-            <input
-              aria-label={`Adjustment ${label.toLowerCase()}`}
-              type="range"
-              min={min}
-              max={max}
-              step={step}
-              value={fx[key] > 10 ? fx[key] / 100 : (fx[key] ?? fallback)}
-              onChange={e => update({ [key]: Number(e.target.value) })}
-            />
-          </label>
+          <StudioGradeValueControl key={`${layer.id}:${key}`} label={label}
+            ariaLabel={`Adjustment ${label.toLowerCase()}`} min={min} max={max} step={step}
+            value={fx[key] > 10 ? fx[key] / 100 : (fx[key] ?? fallback)}
+            onChange={value => update({ [key]: value })} />
         ))}
       </div>
 
       {/* Dead-Content Revitalizer ("Bring to Life Dead Quality Content") */}
-      <details className="ap-grade-subdrawer" open>
-        <summary>⚡ Dead-Content Revitalizer (Restore Flat / Dark / Lifeless Footage)</summary>
+      <details className="ap-grade-subdrawer">
+        <summary>Restore tone &amp; colour</summary>
         <div className="ap-flow-field-row">
           <label className="ap-comp-field">
             <span>1-Click Revival Preset</span>
@@ -423,7 +414,7 @@ export default function StudioAdjustmentControls({
 
       {/* 3-Way Color Wheels (Lift / Gamma / Gain) & White Balance (Warmth / Tint) */}
       <details className="ap-grade-subdrawer" open>
-        <summary>3-Way Wheels (Lift · Gamma · Gain) &amp; White Balance</summary>
+        <summary>Tone &amp; white balance</summary>
         <div className="ap-flow-field-row">
           {[
             ['lift', 'Lift (Shadows)', -0.15, 0.15, 0.005, 0],
@@ -432,20 +423,9 @@ export default function StudioAdjustmentControls({
             ['temperature', 'Warmth', -1, 1, 0.02, 0],
             ['tint', 'Tint (G/M)', -1, 1, 0.02, 0],
           ].map(([key, label, min, max, step, fallback]) => (
-            <label key={key} className="ap-comp-field">
-              <span>
-                {label} {Number(fx[key] ?? fallback).toFixed(2)}
-              </span>
-              <input
-                aria-label={`Adjustment ${key}`}
-                type="range"
-                min={min}
-                max={max}
-                step={step}
-                value={fx[key] ?? fallback}
-                onChange={e => update({ [key]: Number(e.target.value) })}
-              />
-            </label>
+            <StudioGradeValueControl key={`${layer.id}:${key}`} label={label}
+              ariaLabel={`Adjustment ${key}`} min={min} max={max} step={step}
+              value={fx[key] ?? fallback} onChange={value => update({ [key]: value })} />
           ))}
         </div>
       </details>

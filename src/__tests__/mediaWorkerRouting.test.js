@@ -22,6 +22,22 @@ beforeEach(() => {
 });
 afterAll(() => { process.env = prior; });
 
+test('original Studio sounds refuse older workers before admission or dispatch',async()=>{
+ const payload={end_time:4,sound_effects:[{builtIn:true,tone:'prism_sweep',enabled:true}]};
+ axios.get.mockResolvedValue({data:{status:'ok',computeDevice:'cuda',videoEncoder:'h264_nvenc',gpuRequired:true}});
+ await expect(assertMediaWorkerReady(payload)).rejects.toMatchObject({code:'STUDIO_ORIGINAL_SOUNDS_UNAVAILABLE'});
+ await expect(postMediaWorker('/render-viral-clip',payload)).rejects.toMatchObject({code:'STUDIO_ORIGINAL_SOUNDS_UNAVAILABLE'});
+ expect(axios.post).not.toHaveBeenCalled();
+});
+test('original sounds retain the same payload through qualified CPU fallback',async()=>{
+ const payload={end_time:4,sound_effects:[{builtIn:true,tone:'orbit_rise',enabled:true}]};
+ axios.get.mockResolvedValueOnce({data:{status:'ok',computeDevice:'cuda',videoEncoder:'h264_nvenc',gpuRequired:true}})
+  .mockResolvedValueOnce({data:{status:'ok',studioCapabilities:{originalSounds:1}}});
+ const ready=await assertMediaWorkerReady(payload);expect(ready.device).toBe('cpu');
+ axios.get.mockResolvedValue({data:{status:'ok',studioCapabilities:{originalSounds:1}}});axios.post.mockResolvedValueOnce({data:{status:'completed'}});
+ await postMediaWorker('/render-viral-clip',payload,{preferredDevice:ready.device});expect(axios.post).toHaveBeenCalledTimes(1);expect(axios.post.mock.calls[0][1]).toBe(payload);
+});
+
 test("all speech sources use the GPU first, including short recordings", () => {
   expect(selectMediaWorker("/analyze-clips", { source_duration_seconds: 375 })).toMatchObject({device:"gpu",reason:"gpu_primary"});
   expect(selectMediaWorker("/analyze-clips", { source_duration_seconds: 20 })).toMatchObject({device:"gpu"});
@@ -149,4 +165,29 @@ test('moving repair references and extended video paths require v3 before charge
  expect(axios.post).not.toHaveBeenCalled();
  axios.get.mockReset();axios.get.mockResolvedValue({data:{status:'ok',computeDevice:'cuda',videoEncoder:'h264_nvenc',gpuRequired:true,studioCapabilities:{selectiveGrading:3}}});
  await expect(assertMediaWorkerReady(payload)).resolves.toMatchObject({device:'gpu'});
+});
+
+test('facial restoration refuses workers without the verified model before dispatch, and retains qualified CPU fallback',async()=>{
+ const payload={end_time:240,finish_plan:{face_restoration:{enabled:true,model:'gfpgan-v1.4-temporal-v1',strength:.85,stability:.65}}};
+ axios.get.mockReset();axios.get.mockResolvedValue({data:{status:'ok',computeDevice:'cuda',videoEncoder:'h264_nvenc',gpuRequired:true}});
+ await expect(assertMediaWorkerReady(payload)).rejects.toMatchObject({code:'STUDIO_FACE_RESTORATION_UNAVAILABLE'});expect(axios.post).not.toHaveBeenCalled();
+ axios.get.mockReset();axios.get.mockResolvedValueOnce({data:{status:'ok',computeDevice:'cuda',videoEncoder:'h264_nvenc',gpuRequired:true}})
+ .mockResolvedValueOnce({data:{status:'ok',computeDevice:'cpu',studioCapabilities:{faceRestoration:1}}});
+ await expect(assertMediaWorkerReady(payload)).resolves.toMatchObject({device:'cpu',reason:'gpu_unavailable'});
+});
+
+test('invalid face reconstruction requests are refused before admission, charging or network dispatch',async()=>{
+ const payload={finish_plan:{face_restoration:{enabled:true,strength:500}}};
+ await expect(assertMediaWorkerReady(payload)).rejects.toMatchObject({code:'STUDIO_FACE_RESTORATION_INVALID',statusCode:400});
+ await expect(postMediaWorker('/render-viral-clip',payload)).rejects.toMatchObject({code:'STUDIO_FACE_RESTORATION_INVALID'});
+ expect(axios.get).not.toHaveBeenCalled();expect(axios.post).not.toHaveBeenCalled();
+});
+
+test('natural texture refuses older workers and accepts the versioned implementation',async()=>{
+ const payload={end_time:240,finish_plan:{face_restoration:{enabled:true,model:'gfpgan-v1.4-natural-v2',strength:.85,stability:.65}}};
+ axios.get.mockReset();axios.get.mockResolvedValue({data:{status:'ok',computeDevice:'cpu',studioCapabilities:{faceRestoration:1}}});
+ await expect(assertMediaWorkerReady(payload)).rejects.toMatchObject({code:'STUDIO_FACE_RESTORATION_UNAVAILABLE'});
+ expect(axios.post).not.toHaveBeenCalled();
+ axios.get.mockReset();axios.get.mockResolvedValue({data:{status:'ok',computeDevice:'cpu',studioCapabilities:{faceRestoration:2}}});
+ await expect(assertMediaWorkerReady(payload)).resolves.toMatchObject({device:'cpu'});
 });

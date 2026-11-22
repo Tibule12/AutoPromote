@@ -19,6 +19,8 @@ import { insertStudioProgrammeTime } from './studioSequenceEdits';
 import {studioMatteSurfaceStyle} from './studioMatteSurface';
 import StudioDirectorCreativePanel from './StudioDirectorCreativePanel';
 import StudioSubjectEchoControls from './StudioSubjectEchoControls';
+import StudioStripTransitionPanel from './StudioStripTransitionPanel';
+import StudioFrameStylesPanel from './StudioFrameStylesPanel';
 import StudioWatermarkControls from './StudioWatermarkControls';
 import { bindStudioOverlayMedia, prepareStudioOverlayMedia } from './studioOverlayMedia';
 import StudioSceneActionsPanel from './StudioSceneActionsPanel';
@@ -8120,7 +8122,7 @@ const ViralClipStudio = ({
     const color='#'+[image.data[index],image.data[index+1],image.data[index+2]].map(v=>v.toString(16).padStart(2,'0')).join('');
     setAdjustmentLayers(current=>current.map(layer=>layer.id!==sample.layerId?layer:{...layer,mask:{...layer.mask,material:{...newMaterialQualifier(),...layer.mask.material,enabled:true,samples:[...new Set([...(layer.mask.material?.samples||[]),color])].slice(0,8)}}}));
   };
-  const trackGradeRegion=async(layer,direction,span=10)=>{
+  const trackGradeRegion=async(layer,direction,span=10,target='texture',faceContour=false)=>{
     if(gradeTrackingRequestRef.current)return;
     if(layer.enabled===false||trackStates.adjustment?.visible===false||trackStates.adjustment?.locked){setGradeTrackingStatus('Enable and unlock this adjustment track before tracking.');return;}
     const controller=new AbortController(),initial=gradeTrackingContextRef.current,returnTime=previewTimelineTime;
@@ -8132,7 +8134,7 @@ const ViralClipStudio = ({
     pauseSynchronizedPreview();setGradeRegionEditMode(null);setGradeTrackingBusy(true);setGradeTrackingStatus('Capturing this area’s programme frames…');
     try{
       const token=await getMediaAuthToken();if(!token)throw Error('Sign in to track this selection.');
-      const next=await trackRegionRange({layer,start:first,end:last,direction,frameRate:exportSettings.fps,isCurrent,
+      const next=await trackRegionRange({layer,start:first,end:last,direction,target,faceContour,frameRate:exportSettings.fps,isCurrent,
         capture:sample=>captureRegionTracking({...sample,
           seek:async time=>gradeTrackingSeekRef.current(time),getFrame:()=>gradeRegionInputFrameRef.current,isCurrent}),
         analyze:async packet=>{
@@ -10127,6 +10129,7 @@ const ViralClipStudio = ({
       if (Array.isArray(next.threeDScenes)) setThreeDScenes(next.threeDScenes);
       setMotionKeyframes(next.motionKeyframes);
       setAdjustmentLayers(next.adjustmentLayers);
+      if (Array.isArray(next.soundEffects)) setSoundEffects(next.soundEffects);
       setCompositionOrder(next.compositionOrder);
       setCompoundClips(next.compoundClips || []);
       if (next.finishFx) replaceFinishFx(next.finishFx);
@@ -13240,7 +13243,7 @@ const ViralClipStudio = ({
                       ? "image"
                       : "audio",
                 fileName,
-                purpose: finalOverlay.type === "video" ? "studio_project" : undefined,
+                purpose: "studio_project",
                 onProgress: (transferred, total) => {
                   const percent = total > 0 ? Math.round((transferred / total) * 100) : 0;
                   setExportStatusLabel(`Uploading layers ${percent}%`);
@@ -13547,6 +13550,7 @@ const ViralClipStudio = ({
         speakerFocusCuts: normalizeSpeakerFocusCuts(speakerFocusCuts),
         enhanceQuality,
         professionalCleanup: enhanceQuality,
+        visualEnhance: false,
         silenceRemoval,
         silenceThreshold,
         minSilenceDuration,
@@ -13631,11 +13635,12 @@ const ViralClipStudio = ({
           colorSpace: exportSettings.colorSpace || "rec709",
         },
       };
-      if(renderPayload.finishPlan.adjustment_layers.some(layer=>layer.effects?.selective_mask)){
+      if(renderPayload.finishPlan.face_restoration?.enabled || renderPayload.finishPlan.adjustment_layers.some(layer=>layer.effects?.selective_mask)){
         const regionToken=await getMediaAuthToken();
         const regionCompatibility=await fetch(`${API_BASE_URL}/api/media/studio-grade-capabilities`,{headers:{Authorization:`Bearer ${regionToken}`}});
         const regionSupport=regionCompatibility.ok?await regionCompatibility.json():null;
-        if((regionSupport?.selectiveGradingVersion||0)<3)throw Error('Selected-area export needs the updated rendering service. Your edit is saved; no render was submitted.');
+        if(renderPayload.finishPlan.adjustment_layers.some(layer=>layer.effects?.selective_mask) && (regionSupport?.selectiveGradingVersion||0)<3)throw Error('Selected-area export needs the updated rendering service. Your edit is saved; no render was submitted.');
+        if(renderPayload.finishPlan.face_restoration?.enabled && (regionSupport?.faceRestorationVersion||0)<(renderPayload.finishPlan.face_restoration.model==='gfpgan-v1.4-natural-v2'?2:1))throw Error('Face restoration needs the updated rendering service. Your edit is saved; no render was submitted.');
       }
       let completedRender = null;
       if (dualCleanAndCaptioned && autoCaptions && !captionReviewCopy) {
@@ -26385,6 +26390,8 @@ const ViralClipStudio = ({
                   </section>
                   <StudioSelectiveGradePanel aspect={Number(reframeAspect.split(':')[0])/Number(reframeAspect.split(':')[1])} onMotionError={setGradeTrackingStatus} onTrack={trackGradeRegion} onCancelTrack={cancelGradeTracking} trackingBusy={gradeTrackingBusy} trackingStatus={gradeTrackingStatus} layers={adjustmentLayers} onChange={next=>{if(trackStates.adjustment?.locked)return;setAdjustmentLayers(next);setComparisonMode('after');}} selectedId={selectedGradeRegionId} onSelect={id=>{if(gradeTrackingBusy)cancelGradeTracking();setSelectedGradeRegionId(id);setGradeRegionEditMode(null);}} time={previewTimelineTime} duration={liveTimelineDuration} createId={createSecureId} onEdit={mode=>{pauseSynchronizedPreview();setComparisonMode('after');setGradeRegionEditMode(mode);}} onSeek={jumpToOutputTimelineTime} locked={!!trackStates.adjustment?.locked}/>
                   <StudioFinishRack
+                    qualityCleanup={enhanceQuality}
+                    onQualityCleanupChange={setEnhanceQuality}
                     showLegacySelective={false}
                     fx={finishFx}
                     hasEffects={hasFinishEffects || hasAdvancedGrade(advancedColor)}
@@ -27245,6 +27252,13 @@ const ViralClipStudio = ({
               {studioInspectorTab === "broll" ? (
                 <fieldset className="clip-inspector-body" role="tabpanel" aria-label="B-roll controls" disabled={Boolean(trackStates.broll?.locked) || bRollImportPending} style={{border:0, margin:0, minWidth:0}}>
                   {bRollImportPending ? <p role="status">Reading B-roll source… Controls will be ready when the new clip is selected.</p> : null}
+                  <StudioFrameStylesPanel getSnapshot={getEditorSnapshot} projectMedia={projectMedia} time={previewTimelineTime}
+                    beatMarkers={musicBeatMarkers} getSize={() => { const ratio = studioProjectAspect(getEditorSnapshot()).ratio;
+                      return ratio >= 1 ? { width: Math.round(720 * ratio), height: 720 } : { width: 720, height: Math.round(720 / ratio) }; }}
+                    locked={!!(trackStates.graphics?.locked || trackStates.broll?.locked || trackStates.video?.locked)} onApply={applyReviewedScenePlan} />
+                  <StudioStripTransitionPanel getSnapshot={getEditorSnapshot} projectMedia={projectMedia} time={previewTimelineTime}
+                    locked={!!(trackStates.graphics?.locked || trackStates.broll?.locked || trackStates.video?.locked)}
+                    onApply={applyReviewedScenePlan} />
                   <StudioGeneratedBRollPanel projectId={projectId} apiBase={API_BASE_URL}
                     getToken={getMediaAuthToken} getRequest={getGeneratedBRollRequest}
                     jobId={bRollGenerationJobId} onRemember={setBRollGenerationJobId}

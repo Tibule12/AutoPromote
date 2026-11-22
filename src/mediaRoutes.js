@@ -1287,7 +1287,7 @@ router.get("/credits", async (req, res) => {
 
 // Frontend compatibility handshake. Actual GPU/CPU feature qualification is
 // checked by assertRenderWorkerReady before any charge and at dispatch.
-router.get('/studio-grade-capabilities',(_req,res)=>res.json({selectiveGradingVersion:3,regionTrackingVersion:1}));
+router.get('/studio-grade-capabilities',(_req,res)=>res.json({selectiveGradingVersion:3,regionTrackingVersion:1,faceRestorationVersion:2}));
 
 // Bounded programme samples are disk spooled and streamed to the existing
 // worker. No base64 body, retained cloud copy, or publication is involved.

@@ -47,5 +47,5 @@ test('missing samples and rejected worker analysis leave the selection unchanged
 test('old live APIs cannot advertise the new render and tracking protocol',async()=>{
   const response=await request(app()).get('/api/media/studio-grade-capabilities');
   expect(response.statusCode).toBe(200);
-  expect(response.body).toEqual({selectiveGradingVersion:3,regionTrackingVersion:1});
+  expect(response.body).toEqual({selectiveGradingVersion:3,regionTrackingVersion:1,faceRestorationVersion:1});
 });

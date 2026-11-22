@@ -1,0 +1,317 @@
+{
+  "date": "2026-11-21",
+  "status": "LOCAL_NATIVE_MOVIE_COMPLETED",
+  "ownerCreativeApproval": false,
+  "readinessPromotion": false,
+  "sourceSha256": "b14bf07a916e41331f8516d9e00921d9c4fa2a37a492e2998ae9f463df3c280b",
+  "outputSha256": "9f576b87a6fc9a29bb34d92077f05ecf7ea465381fa0aa33adf23adeac31a7e9",
+  "outputBytes": 469851877,
+  "duration": 240.001,
+  "frames": 7200,
+  "resolution": [
+    1920,
+    1080
+  ],
+  "fps": 30,
+  "renderSeconds": 1402.263405368998,
+  "faceRestoration": {
+    "model": "gfpgan-v1.4-temporal-v1",
+    "modelSha256": "e2cd4703ab14f4d01fd1383a8a8b266f9a5833dacee8e6a79d3bf21a1b6be5ad",
+    "device": "cuda",
+    "frames": 7200,
+    "unrestoredFrames": 2,
+    "modelSamples": 900,
+    "fps": 30.0,
+    "strength": 0.85,
+    "stability": 0.65,
+    "elapsedSeconds": 874.1642878029961,
+    "generativeDetail": true,
+    "originalAudioPreserved": true
+  },
+  "nativeDownloadMatches": {
+    "finishedReady": true,
+    "downloadSha256": "9f576b87a6fc9a29bb34d92077f05ecf7ea465381fa0aa33adf23adeac31a7e9",
+    "errors": []
+  },
+  "coldRestore": {
+    "coldReload": true,
+    "normalBackupImport": true,
+    "exactCanonicalDocument": true,
+    "exactGrade": true,
+    "snapshotDifferences": [
+      "projectMedia",
+      "timeline"
+    ],
+    "errors": [],
+    "blocked": []
+  },
+  "completeFinishedPlayback": {
+    "video": {
+      "path": "/local-master.mp4",
+      "currentTime": 240.001,
+      "duration": 240.001,
+      "error": null
+    },
+    "capture": {
+      "seconds": 259.396999835968,
+      "capturedPictures": 2114,
+      "sourceBytes": 416446644,
+      "viewport": [
+        1920,
+        900
+      ],
+      "source": "Actual Chromium screencast",
+      "visualAnnotations": "Pointer, click ring and actual target outline only",
+      "applicationCodeChanged": false,
+      "audio": "Original finished-video soundtrack captured separately in the browser"
+    },
+    "fullFinishedPlayback": true
+  },
+  "audioSegments": [
+    {
+      "start": 0,
+      "duration": 30.0,
+      "lagSamples": 0,
+      "lagSeconds": 0.0,
+      "zeroLagCorrelation": 0.992841362953186
+    },
+    {
+      "start": 30,
+      "duration": 30.0,
+      "lagSamples": 0,
+      "lagSeconds": 0.0,
+      "zeroLagCorrelation": 0.9935072660446167
+    },
+    {
+      "start": 60,
+      "duration": 30.0,
+      "lagSamples": 0,
+      "lagSeconds": 0.0,
+      "zeroLagCorrelation": 0.9939488172531128
+    },
+    {
+      "start": 90,
+      "duration": 30.0,
+      "lagSamples": 0,
+      "lagSeconds": 0.0,
+      "zeroLagCorrelation": 0.9935510158538818
+    },
+    {
+      "start": 120,
+      "duration": 30.0,
+      "lagSamples": 0,
+      "lagSeconds": 0.0,
+      "zeroLagCorrelation": 0.996239423751831
+    },
+    {
+      "start": 150,
+      "duration": 30.0,
+      "lagSamples": 0,
+      "lagSeconds": 0.0,
+      "zeroLagCorrelation": 0.9965927600860596
+    },
+    {
+      "start": 180,
+      "duration": 30.0,
+      "lagSamples": 0,
+      "lagSeconds": 0.0,
+      "zeroLagCorrelation": 0.9954056739807129
+    },
+    {
+      "start": 210,
+      "duration": 30.0,
+      "lagSamples": 0,
+      "lagSeconds": 0.0,
+      "zeroLagCorrelation": 0.9955816268920898
+    }
+  ],
+  "humanListeningApproval": false,
+  "cpuFallback": {
+    "actualCpuModelInference": true,
+    "forcedCudaFaultRecovered": true,
+    "sameFrameSameWeightsMaxError": 0.0,
+    "elapsedSeconds": 15.114948222995736,
+    "actualHardwareLoss": false
+  },
+  "laterRgbDecoderVerification": {
+    "outsideFacePictures": [
+      {
+        "time": 0,
+        "unchangedRegionMae": 1.2227233333333334,
+        "p95": 4.0
+      },
+      {
+        "time": 5,
+        "unchangedRegionMae": 1.5039,
+        "p95": 5.0
+      },
+      {
+        "time": 10,
+        "unchangedRegionMae": 1.34394,
+        "p95": 5.0
+      },
+      {
+        "time": 15,
+        "unchangedRegionMae": 1.450201111111111,
+        "p95": 5.0
+      },
+      {
+        "time": 19,
+        "unchangedRegionMae": 1.335411111111111,
+        "p95": 4.0
+      }
+    ],
+    "sourceSha256": "ca4fae025b4e1414fba8e09bb77b66bc80494939afd9d29443e8c460a31d6da4",
+    "outputSha256": "96f5d387eb0c0217e168ae8140ba810918d0886b51b8cbaacdc60449279107e4",
+    "modelReceipt": {
+      "model": "gfpgan-v1.4-temporal-v1",
+      "modelSha256": "e2cd4703ab14f4d01fd1383a8a8b266f9a5833dacee8e6a79d3bf21a1b6be5ad",
+      "device": "cuda",
+      "frames": 600,
+      "unrestoredFrames": 0,
+      "modelSamples": 76,
+      "fps": 30.0,
+      "decoder": "ffmpeg-source-rgb-v1",
+      "strength": 0.85,
+      "stability": 0.65,
+      "elapsedSeconds": 88.58470841600501,
+      "generativeDetail": true,
+      "originalAudioPreserved": true,
+      "fallbackReason": null
+    }
+  },
+  "latestWorkerSixFrameSmoke": {
+    "status": "completed",
+    "finalQualityGate": "passed",
+    "restoration": {
+      "model": "gfpgan-v1.4-temporal-v1",
+      "modelSha256": "e2cd4703ab14f4d01fd1383a8a8b266f9a5833dacee8e6a79d3bf21a1b6be5ad",
+      "device": "cuda",
+      "frames": 6,
+      "unrestoredFrames": 0,
+      "modelSamples": 2,
+      "fps": 30.0,
+      "decoder": "ffmpeg-source-rgb-v1",
+      "strength": 0.85,
+      "stability": 0.65,
+      "elapsedSeconds": 2.5099820670002373,
+      "generativeDetail": true,
+      "originalAudioPreserved": true,
+      "fallbackReason": null
+    },
+    "elapsedSeconds": 14.716529316996457,
+    "qualification": "Actual shared worker only; modified bounded request, not another normal App export"
+  },
+  "tests": {
+    "frontend": 24,
+    "backend": 23,
+    "workerCombinedBeforeRgbFollowup": 38,
+    "finalFaceWorker": 7,
+    "strictFrontendBuild": true,
+    "anonymousWelcomeViewports": 8,
+    "signedInHelp": {
+      "normalSignedInWorkspace": true,
+      "helpPanelOpens": true,
+      "noQuestionSubmitted": true,
+      "errors": [],
+      "blocked": []
+    }
+  },
+  "delivery": "/home/tibule12/Videos/Studio - Facial Restoration - 2026-11-21",
+  "privateEvidence": "/home/tibule12/.local/share/autopromote-qa/studio-face-restoration-20261121",
+  "productionDeployed": false,
+  "originalLoginSha256": "00d48e87bd9b77ba9ead11c92bf93039f43fc3e7e6b322c3e379f6b4dac55254",
+  "remainingBlockers": [
+    "AI reconstructs plausible detail and can alter small facial features; owner creative approval and original-identity fidelity are not qualified.",
+    "Full master uses the initial OpenCV decoding snapshot. Later FFmpeg Rec.709 decode correction is tested on a real20s model video and a6-frame shared-worker export; this does not requalify the4min master against that later decoder.",
+    "Two uncertain full-master frames retain the original; difficult faces, occlusion, multiple comparable faces and unrestricted long-form/cut cases remain unqualified.",
+    "Live edit shows the source, not real-time neural processing. Whole live colour/edge/audio/device/frame-drop throughput remains unqualified. The raw259.397s capture includes an administrative still tail; matched pictures show no cumulative playback lag in this finished-file check.",
+    "Prepared CPU/GPU Docker recipes and production admission are not built/deployed/qualified on production. Full local render takes1402.263s.",
+    "Shared S02/S04/S03, historical typography and whole grading/retouch-family readiness remain unchanged."
+  ],
+  "cleanup": {
+    "stoppedOwnPrivateServices": [
+      1007348,
+      1007331,
+      1017428
+    ],
+    "activeRestorationPids": [],
+    "releasedOwnExtractedTorchRuntime": true,
+    "retainedRuntimeArchive": "/home/tibule12/.cache/autopromote-model-runtime/local-cu118-support-verified-20261117/local-tools.tar.zst",
+    "retainedModel": "/home/tibule12/Projects/AutoPromte/AutoPromote-visible-controls-20261121/python_media_worker/models/face-restoration/GFPGANv1.4.pth"
+  },
+  "originalSourceUnchanged": true,
+  "originalLoginUnchanged": true,
+  "recordingAlignment": {
+    "screenRectangle": [
+      577,
+      152,
+      728,
+      410
+    ],
+    "templateScore": 0.9963138103485107,
+    "pictureMatches": [
+      {
+        "wallTime": 10,
+        "matchedMovieTime": 9.8,
+        "offsetSeconds": 0.1999999999999993,
+        "mse": 172.65032958984375
+      },
+      {
+        "wallTime": 30,
+        "matchedMovieTime": 29.733333333333334,
+        "offsetSeconds": 0.2666666666666657,
+        "mse": 174.1795196533203
+      },
+      {
+        "wallTime": 60,
+        "matchedMovieTime": 59.766666666666666,
+        "offsetSeconds": 0.23333333333333428,
+        "mse": 168.49508666992188
+      },
+      {
+        "wallTime": 120,
+        "matchedMovieTime": 119.7,
+        "offsetSeconds": 0.29999999999999716,
+        "mse": 163.8524627685547
+      },
+      {
+        "wallTime": 180,
+        "matchedMovieTime": 179.8,
+        "offsetSeconds": 0.19999999999998863,
+        "mse": 97.52851104736328
+      },
+      {
+        "wallTime": 239,
+        "matchedMovieTime": 238.76666666666668,
+        "offsetSeconds": 0.23333333333332007,
+        "mse": 165.62814331054688
+      }
+    ],
+    "screenStartOffsetSeconds": 0.23333333333332718,
+    "capturedAudioStartOffsetSeconds": 0.0065,
+    "neededAudioDelaySeconds": 0.22683333333332717,
+    "trimAfterSeconds": 240.58433333333332,
+    "rawRecordingSeconds": 259.396999835968,
+    "retiming": false,
+    "removedOnlyAdministrativeTail": true
+  },
+  "recordingDeliveryProbe": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_type": "video",
+        "start_time": "0.000000",
+        "duration": "240.700000"
+      },
+      {
+        "codec_type": "audio",
+        "start_time": "0.205000",
+        "duration": "240.145333"
+      }
+    ],
+    "format": {
+      "duration": "240.700000"
+    }
+  }
+}

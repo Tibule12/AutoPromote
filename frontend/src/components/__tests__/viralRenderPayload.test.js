@@ -7,6 +7,14 @@ import {
 } from "../viralRenderPayload";
 
 describe("viralRenderPayload", () => {
+  test("manual Studio picture cleanup preserves authored framing", () => {
+    const payload = buildViralRenderData({finalVideoUrl: "https://example.com/source.mp4",
+      selectedClip: {start: 0, end: 8}, extraOptions: {
+        enhanceQuality: true, professionalCleanup: true, visualEnhance: false,
+      }});
+    expect(payload.professional_cleanup).toBe(true);
+    expect(payload.visual_enhance).toBe(false);
+  });
   test("derives the programme clock from the edit instead of retaining a stale intermediate duration", () => {
     const payload = buildViralRenderData({finalVideoUrl: "https://example.com/source.mp4", selectedClip: {start: 0, end: 8},
       extraOptions: {timelineSegments: [{id: "a", start_time: 4, end_time: 7, duration: 3},

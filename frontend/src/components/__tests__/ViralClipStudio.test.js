@@ -4013,13 +4013,14 @@ describe("ViralClipStudio timeline sequencing", () => {
     );
   });
 
-  test("uploads a repeated overlay File once and preserves each occurrence when exporting", async () => {
-    const shared = new File(["same media"], "repeat.mp4", { type: "video/mp4", lastModified: 12 });
-    const reopenedCopy = new File(["same media"], "repeat.mp4", { type: "video/mp4", lastModified: 12 });
-    const distinct = new File(["different!"], "repeat.mp4", { type: "video/mp4", lastModified: 12 });
+  test.each(["video", "image"])("uploads repeated %s overlay bytes once through the bounded Studio uploader and preserves every occurrence", async mediaType => {
+    const fileName = mediaType === "image" ? "repeat.png" : "repeat.mp4";
+    const shared = new File(["same media"], fileName, { type: mediaType === "image" ? "image/png" : "video/mp4", lastModified: 12 });
+    const reopenedCopy = new File(["same media"], fileName, { type: mediaType === "image" ? "image/png" : "video/mp4", lastModified: 12 });
+    const distinct = new File(["different!"], fileName, { type: mediaType === "image" ? "image/png" : "video/mp4", lastModified: 12 });
     const source = { id: "main", name: "Owned source", url: "https://example.com/source.mp4",
       storagePath: "studio/sources/test-user/source.mp4", start: 0, end: 6, duration: 6 };
-    const layer = (id, file, startTime) => ({ id, name: id, type: "video", file, src: "blob:local-media",
+    const layer = (id, file, startTime) => ({ id, name: id, type: mediaType, file, src: "blob:local-media",
       isLocal: true, bRollMode: "pip", startTime, duration: 2, sourceDuration: 6,
       sourceStartTime: 0, width: 30, height: 20, x: 50, y: 50, scale: 1, opacity: 1 });
     const overlays = [layer("first", shared, 0), layer("second", shared, 2), layer("reopened", reopenedCopy, 3), layer("different", distinct, 4)];
@@ -4042,6 +4043,8 @@ describe("ViralClipStudio timeline sequencing", () => {
     await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
     expect(uploadSourceFileViaBackend.mock.calls.filter(([args]) => (args.file === shared || args.file === reopenedCopy))).toHaveLength(1);
     expect(uploadSourceFileViaBackend.mock.calls.filter(([args]) => args.file === distinct)).toHaveLength(1);
+    expect(uploadSourceFileViaBackend.mock.calls.filter(([args]) => args.file === shared || args.file === reopenedCopy || args.file === distinct)
+      .every(([args]) => args.purpose === "studio_project")).toBe(true);
     expect(onSave.mock.calls[0][1]).toEqual(expect.arrayContaining([
       expect.objectContaining({ id: "first", startTime: 0, duration: 2, src: "https://example.com/shared.mp4" }),
       expect.objectContaining({ id: "second", startTime: 2, duration: 2, src: "https://example.com/shared.mp4" }),

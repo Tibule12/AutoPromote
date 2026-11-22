@@ -599,3 +599,86 @@
 .selective-region-list button[aria-pressed=true] { border-color: #22d3ee; background: #123e50; }
 .studio-selective-grades button { min-height: 30px; padding: 5px 8px; border: 1px solid #38506a; border-radius: 5px; color: #e4efff; background: #132237; }
 .studio-selective-grades button:focus-visible { outline: 2px solid #22d3ee; outline-offset: 2px; }
+
+/* A grade needs room for its label, exact value and useful slider travel. */
+.viral-studio-overlay .ap-adj-grade-suite {
+  color: #e4edf8;
+  --mfx-muted: #aabbd0;
+  --mfx-text: #edf4ff;
+  --mfx-border: #35475f;
+}
+.viral-studio-overlay .ap-adj-grade-suite .ap-flow-field-row {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  margin: 12px 0;
+}
+.viral-studio-overlay .studio-grade-value-control { min-width: 0; }
+.viral-studio-overlay .studio-grade-value-control__header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 84px;
+  align-items: center;
+  gap: 12px;
+}
+.viral-studio-overlay .studio-grade-value-control__header label {
+  margin: 0;
+  color: #dce7f7;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.viral-studio-overlay .studio-grade-value-control input[type=number] {
+  width: 100%;
+  min-width: 0;
+  min-height: 34px;
+  box-sizing: border-box;
+  padding: 5px 8px;
+  border: 1px solid #415875;
+  border-radius: 7px;
+  background: #091423;
+  color: #f1f6ff;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.viral-studio-overlay .studio-grade-value-control input[type=range] {
+  width: 100%;
+  min-height: 30px;
+  margin: 4px 0 0;
+  accent-color: #8e74ff;
+}
+.viral-studio-overlay .studio-grade-value-control input:focus-visible {
+  outline: 2px solid #67dce9;
+  outline-offset: 2px;
+}
+.viral-studio-overlay .studio-grade-value-control input[aria-invalid=true] { border-color: #fb899a; }
+.viral-studio-overlay .studio-grade-value-control small { display: block; color: #ffabb8; }
+.viral-studio-overlay .ap-adj-grade-suite .ap-grade-subdrawer { padding-top: 12px; }
+.viral-studio-overlay .ap-adj-grade-suite .ap-grade-subdrawer > summary {
+  color: #e4edf8;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  cursor: pointer;
+}
+.viral-studio-overlay .selective-region-list > div > button:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.45;
+}
+.viral-studio-overlay .studio-selective-grades input:not([type=range]):not([type=checkbox]):not([type=color]),
+.viral-studio-overlay .studio-selective-grades select { max-width: 100%; box-sizing: border-box; }
+.viral-studio-overlay .studio-selective-grades legend { max-width: 100%; overflow-wrap: anywhere; line-height: 1.5; }
+@media (min-width: 1440px) {
+  .viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode.project-rail-open .studio-layout.preview-layout-center:has(.studio-selective-grades) {
+    grid-template-columns: 72px 220px minmax(0, 1fr) 400px !important;
+  }
+  .viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode.project-rail-closed .studio-layout.preview-layout-center:has(.studio-selective-grades) {
+    grid-template-columns: 72px minmax(0, 1fr) 400px !important;
+  }
+}
+
+.viral-studio-overlay [data-testid="finish-face-restoration"] > summary { font-size: 13px; line-height: 1.5; }
+.viral-studio-overlay .studio-face-enable-field { display: flex; align-items: center; gap: 8px; margin: 12px 0; font-size: 12px; }
+.viral-studio-overlay .studio-face-style-field { display: block; margin: 12px 0; font-size: 12px; line-height: 1.5; }
+.viral-studio-overlay .studio-face-style-field select { display: block; width: 100%; margin-top: 6px; }
+.viral-studio-overlay [data-testid="finish-face-restoration"] .studio-grade-value-control { margin: 16px 0; }
+.viral-studio-overlay [data-testid="finish-face-restoration"] > small { display: block; font-size: 12px; line-height: 1.5; }

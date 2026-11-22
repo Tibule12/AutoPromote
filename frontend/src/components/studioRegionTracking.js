@@ -7,10 +7,13 @@ export function trackingTimes(start,end,direction=1,fps=8) {
   return direction<0?times.reverse():times;
 }
 
-export async function captureRegionTracking({layer,start,end,direction=1,seek,getFrame,isCurrent,onProgress}) {
-  const times=trackingTimes(start,end,direction),frames=[];
-  let width,height;
-  const full=document.createElement('canvas'),small=document.createElement('canvas');
+export async function captureRegionTracking({layer,start,end,direction=1,target='texture',faceContour=false,seek,getFrame,isCurrent,onProgress}) {
+  if(!['texture','face'].includes(target))throw Error('Choose a supported tracking target.');
+  const times=trackingTimes(start,end,direction),frames=[],sceneSamples=[];
+  let width,height,crop,rect;
+  const pose=selectiveMaskAt(layer.mask,Math.max(0,times[0]-layer.startTime));
+  const full=document.createElement('canvas'),small=document.createElement('canvas'),scene=document.createElement('canvas');
+  scene.width=16;scene.height=9;
   for(let index=0;index<times.length;index++) {
     if(!isCurrent())throw Error('Selection tracking cancelled.');
     await seek(times[index]);
@@ -25,20 +28,31 @@ export async function captureRegionTracking({layer,start,end,direction=1,seek,ge
     if(!sample)throw Error('The programme did not settle at the requested frame. No tracking was applied.');
     const image=sample.image;
     if(!width) {
-      const scale=Math.min(1,640/Math.max(image.width,image.height));
-      width=Math.max(32,Math.round(image.width*scale));height=Math.max(32,Math.round(image.height*scale));
+      rect={x:0,y:0,width:image.width,height:image.height};
+      if(target==='face') {
+        const side=Math.min(image.width,image.height,Math.max(pose.width*image.width*2.5,pose.height*image.height*2.5,Math.min(image.width,image.height)*.4));
+        rect={x:Math.max(0,Math.min(image.width-side,pose.x*image.width-side/2)),y:Math.max(0,Math.min(image.height-side,pose.y*image.height-side/2)),width:side,height:side};
+        crop={x:rect.x/image.width,y:rect.y/image.height,width:rect.width/image.width,height:rect.height/image.height};
+      }
+      const scale=Math.min(1,640/Math.max(rect.width,rect.height));
+      width=Math.max(32,Math.round(rect.width*scale));height=Math.max(32,Math.round(rect.height*scale));
       if(width*height*times.length>39*1024*1024)throw Error('Shorten this tracking range.');
       small.width=width;small.height=height;full.width=image.width;full.height=image.height;
     }
     if(full.width!==image.width||full.height!==image.height)throw Error('The programme size changed during tracking.');
     full.getContext('2d').putImageData(image,0,0);
-    const ctx=small.getContext('2d',{willReadFrequently:true});ctx.drawImage(full,0,0,width,height);
+    if(target==='face') {
+      const ctx=scene.getContext('2d',{willReadFrequently:true});ctx.drawImage(full,0,0,16,9);
+      const rgba=ctx.getImageData(0,0,16,9).data;
+      sceneSamples.push(Array.from({length:144},(_,p)=>Math.round(rgba[p*4]*.299+rgba[p*4+1]*.587+rgba[p*4+2]*.114)));
+    }
+    const ctx=small.getContext('2d',{willReadFrequently:true});ctx.drawImage(full,rect.x,rect.y,rect.width,rect.height,0,0,width,height);
     const rgba=ctx.getImageData(0,0,width,height).data,gray=new Uint8Array(width*height);
     for(let p=0;p<gray.length;p++)gray[p]=Math.round(rgba[p*4]*.299+rgba[p*4+1]*.587+rgba[p*4+2]*.114);
     frames.push(gray);onProgress?.(index+1,times.length);
   }
-  const pose=selectiveMaskAt(layer.mask,Math.max(0,times[0]-layer.startTime));
-  const header=new TextEncoder().encode(JSON.stringify({width,height,times,mask:{...pose,keyframes:[],material:undefined,opacity:undefined}}));
+  const samplePose=crop?{...pose,x:(pose.x-crop.x)/crop.width,y:(pose.y-crop.y)/crop.height,width:pose.width/crop.width,height:pose.height/crop.height}:pose;
+  const header=new TextEncoder().encode(JSON.stringify({width,height,times,target,faceContour,crop,...(target==='face'?{sceneSamples}:{}),mask:{...samplePose,keyframes:[],material:undefined,opacity:undefined}}));
   const prefix=new Uint8Array(12);prefix.set(new TextEncoder().encode('APGRD001'));new DataView(prefix.buffer).setUint32(8,header.length,true);
   return new Blob([prefix,header,...frames],{type:'application/octet-stream'});
 }
@@ -60,32 +74,38 @@ export function applyRegionTracking(layer,result,requestedStart,requestedEnd,fra
   }
   const merged=[...retained,...keys].sort((a,b)=>a.time-b.time);
   if(merged.length>2048)throw Error('This region has reached 2048 motion keys. Start another region or clear unneeded keys.');
-  const next={...layer,mask:{...layer.mask,keyframes:merged},tracking:{engine:result.engine,
+  if(result.shape!==undefined&&result.shape!=='polygon')throw Error('Tracking returned an unsupported outline.');
+  const outline=result.shape==='polygon'?{shape:'polygon',points:keys[0].points}:{};
+  // Do not silently change an earlier authored ellipse's interpolation schema.
+  if(result.shape==='polygon'&&retained.length&&(layer.mask.shape!=='polygon'||layer.mask.points.length!==keys[0].points.length))throw Error('Clear the old motion keys before changing the tracked outline.');
+  const next={...layer,mask:{...layer.mask,...outline,keyframes:merged},tracking:{engine:result.engine,
     range:[requestedStart,requestedEnd],stopReason:result.stopReason,reviewRequired:true,
     reviewTime:result.stopReason?result.keyframes.find(k=>k.opacity===0)?.time:undefined,
     observations:result.observations||[]}};
   validateSelectiveMask(next.mask);return next;
 }
 
-export async function trackRegionRange({layer,start,end,direction=1,frameRate=30,capture,analyze,isCurrent,onProgress}) {
+export async function trackRegionRange({layer,start,end,direction=1,target='texture',faceContour=false,frameRate=30,capture,analyze,isCurrent,onProgress}) {
   if(end<=start||end-start>60.01)throw Error('Choose a tracking range up to sixty seconds.');
   let working=layer,cursor=direction>0?start:end,samples=1,stopReason=null;
   const observations=[];
   while(direction>0?cursor<end-.001:cursor>start+.001) {
     if(!isCurrent())throw Error('Selection tracking cancelled.');
     const low=direction>0?cursor:Math.max(start,cursor-10),high=direction>0?Math.min(end,cursor+10):cursor;
-    const packet=await capture({layer:working,start:low,end:high,direction,
+    const packet=await capture({layer:working,start:low,end:high,direction,target,faceContour,
       onProgress:(done,total)=>onProgress?.({start:low,end:high,done,total})});
     if(!isCurrent())throw Error('Selection tracking cancelled.');
     const result=await analyze(packet);
     if(!isCurrent())throw Error('The edit changed; tracking was not applied.');
+    if(target==='face'&&(result.engine!=='programme-face-mesh-v1'||result.shape!=='polygon'))throw Error('This worker does not support facial outlines. The selection is unchanged.');
+    if(faceContour&&result.faceContour!==true)throw Error('This worker does not support the facial contour. The selection is unchanged.');
     working=applyRegionTracking(working,result,low,high,frameRate);
     observations.push(...(result.observations||[]));samples+=Math.max(0,(result.trackedSamples||result.keyframes.length)-1);
     stopReason=result.stopReason;
     if(stopReason)break;
     cursor=direction>0?high:low;
   }
-  return {...working,tracking:{...working.tracking,range:[start,end],observations,trackedSamples:samples,stopReason,reviewRequired:true}};
+  return {...working,tracking:{...working.tracking,target,faceContour,range:[start,end],observations,trackedSamples:samples,stopReason,reviewRequired:true}};
 }
 
 // Transfer an observed head/object path to a small local correction. This

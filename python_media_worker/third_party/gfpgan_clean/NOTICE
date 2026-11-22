@@ -1,0 +1,8 @@
+GFPGAN clean inference architecture, Tencent ARC.
+https://github.com/TencentARC/GFPGAN
+Pinned upstream: 7552a7791caad982045a7bbe5634bbf1cd5c8679
+Copyright (C) 2021 THL A29 Limited, a Tencent company.
+Apache License 2.0; see LICENSE for upstream third-party notices.
+Modified for isolated inference: BasicSR training registry/initializer imports
+use a local compatibility shim. Every inference parameter is strictly loaded
+from the hash-pinned official GFPGANv1.4 checkpoint. No training occurs.

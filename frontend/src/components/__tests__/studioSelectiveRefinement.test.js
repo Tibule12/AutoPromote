@@ -66,6 +66,34 @@ test('tracking stops visibility at lost samples and does not continue into unobs
   expect(trackingTimes(1,2,-1)).toEqual([2,1.875,1.75,1.625,1.5,1.375,1.25,1.125,1]);
 });
 
+test('deforming facial outlines survive canonical recovery and final compilation',()=>{
+  const original={id:'face',startTime:0,duration:2,enabled:true,mask:newSelectiveMask(),finishFx:{precisionGrade:true,advancedColor:{saturation:.8}}};
+  const pose={x:.4,y:.3,width:.2,height:.3,rotation:0,opacity:1};
+  const points=[[0,.5],[.5,0],[1,.5],[.5,1]],changed=[[0,.5],[.5,0],[1,.5],[.5,.8]];
+  const next=applyRegionTracking(original,{version:1,engine:'programme-face-mesh-v1',shape:'polygon',keyframes:[{time:0,...pose,points},{time:2,...pose,points:changed}]},0,2);
+  expect(next.mask.shape).toBe('polygon');
+  expect(selectiveMaskAt(next.mask,1).points[3][1]).toBeCloseTo(.9);
+  const timeline=[{id:'occurrence',sourceClipId:'source',url:'https://example.test/source.mp4',startRequest:0,endRequest:2}];
+  const doc=adaptStudioSnapshotToDocument({snapshot:{timeline,adjustmentLayers:[next]},projectId:'face-mesh'});
+  const recovered=projectStudioEditableStateToSnapshot(doc,{timeline}).adjustmentLayers[0];
+  expect(recovered.mask).toEqual(next.mask);
+  expect(compileStudioAdjustmentGrade(recovered).effects.selective_mask.keyframes[1].points).toEqual(changed);
+  expect(original.mask.shape).toBe('ellipse');
+});
+
+test('face mode refuses an older worker and does not replace the authored selection',async()=>{
+  const layer={id:'face',startTime:0,duration:2,mask:newSelectiveMask()};
+  const oldResult={version:1,engine:'programme-lk-ransac-v1',keyframes:[{time:0,x:.5,y:.5,width:.2,height:.3,rotation:0}]};
+  await expect(trackRegionRange({layer,start:0,end:2,target:'face',isCurrent:()=>true,capture:async()=>new Blob(),analyze:async()=>oldResult})).rejects.toThrow('does not support facial outlines');
+  expect(layer.mask.keyframes).toEqual([]);
+});
+
+test('facial contour refuses a worker that only supports the authored outline',async()=>{
+  const layer={id:'face',startTime:0,duration:2,mask:newSelectiveMask()};
+  const old={version:1,engine:'programme-face-mesh-v1',shape:'polygon',keyframes:[{time:0,x:.5,y:.5,width:.2,height:.3,rotation:0,points:[[0,0],[1,0],[1,1]]}]};
+  await expect(trackRegionRange({layer,start:0,end:2,target:'face',faceContour:true,isCurrent:()=>true,capture:async()=>new Blob(),analyze:async()=>old})).rejects.toThrow('does not support the facial contour');
+});
+
 test('small repairs reuse a larger tracked area while preserving their local offset and size',()=>{
   const reference={id:'face',startTime:0,duration:2,mask:keySelectiveMask(keySelectiveMask(newSelectiveMask(),0),2,{x:.6,y:.55,width:.5,height:.6})};
   const child={id:'repair',startTime:0,duration:2,mask:{...newSelectiveMask(),x:.55,y:.5,width:.01,height:.02}};

@@ -6,6 +6,12 @@ process.env.FIREBASE_ADMIN_BYPASS = "1";
 const app = require("../src/server");
 
 describe("API CORS preflight", () => {
+  test("browser clients can read the declared upload retry cooldown", async () => {
+    const res = await request(app).get("/health").set("Origin", "https://autopromote.org");
+    expect(res.headers["access-control-allow-origin"]).toBe("https://autopromote.org");
+    expect(String(res.headers["access-control-expose-headers"] || "")).toMatch(/retry-after/i);
+  });
+
   test("production ignores the broad override and preserves canonical site access", async () => {
     const original = process.env.NODE_ENV;
     process.env.NODE_ENV = "production";

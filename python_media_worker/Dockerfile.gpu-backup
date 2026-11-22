@@ -2,6 +2,7 @@ ARG MEDIA_WORKER_BASE_IMAGE
 FROM ${MEDIA_WORKER_BASE_IMAGE}
 # Keep the exact production FFmpeg, fonts and compositor. Add the CUDA
 # libraries required by the existing CTranslate2 speech engine.
+RUN pip install --no-cache-dir torch==2.7.1+cu128 --index-url https://download.pytorch.org/whl/cu128
 RUN pip install --no-cache-dir nvidia-cublas-cu12==12.9.3.13 nvidia-cudnn-cu12==9.10.2.21
 ENV LD_LIBRARY_PATH=/usr/local/lib/python3.11/site-packages/nvidia/cublas/lib:/usr/local/lib/python3.11/site-packages/nvidia/cudnn/lib \
     NVIDIA_DRIVER_CAPABILITIES=compute,utility,video \

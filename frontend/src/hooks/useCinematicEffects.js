@@ -393,6 +393,7 @@ export default function useCinematicEffects({ clockRef } = {}) {
 
   const hasEffects = useMemo(
     () =>
+      !!fx.faceRestoration?.enabled ||
       (fx.precisionGrade && (fx.exposureStops !== 0 || fx.lift !== 0 || fx.gamma !== 1 || fx.gain !== 1 || fx.tint !== 0)) ||
       fx.brightness !== 1 ||
       fx.contrast !== 1 ||

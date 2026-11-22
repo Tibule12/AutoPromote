@@ -43,6 +43,9 @@ class SequencePacketClockTests(unittest.TestCase):
     def test_short_reviewed_sequence_preserves_intermediates_but_keeps_delivery_quality(self):
         self.render_sequence(24, framed=True)
 
+    def test_precision_grade_keeps_detail_when_lossless_scratch_budget_is_exceeded(self):
+        self.render_sequence(24, precision=True)
+
     def test_prores_movie_passes_the_canonical_delivery_gate(self):
         self.render_sequence(24, codec="prores")
 
@@ -50,7 +53,7 @@ class SequencePacketClockTests(unittest.TestCase):
         self.render_sequence(24, codec="prores", caption_review=True)
 
     def render_sequence(self, fps, duration=2, tail_cut=None, framed=False,
-                        codec="h264", caption_review=False):
+                        codec="h264", caption_review=False, precision=False):
         with tempfile.TemporaryDirectory(prefix="studio-packet-clock-") as folder, ExitStack() as patches:
             tmp_path = Path(folder)
 
@@ -103,6 +106,12 @@ class SequencePacketClockTests(unittest.TestCase):
             original_run = worker.run_subprocess_async
             checked_segments = []
             checked_finish = []
+            checked_precision = []
+            if precision:
+                # Exercise the bounded compressed path used by long movies,
+                # without creating gigabytes of test footage.
+                from python_media_worker import studio_sequence_video
+                replace(studio_sequence_video, "preserve_reviewed_sequence_samples", lambda *args: False)
 
             async def inspect_intermediates(command, **options):
                 result = await original_run(command, **options)
@@ -118,6 +127,9 @@ class SequencePacketClockTests(unittest.TestCase):
                     expected = "23" if output.name.endswith("_viral.mp4") else "0"
                     self.assertEqual(command[command.index("-crf") + 1], expected)
                     checked_finish.append(output.name)
+                if precision and ("_segment_v_" in output.name or "_reframe_0" in output.name):
+                    self.assertEqual(command[command.index("-crf") + 1], "14")
+                    checked_precision.append(output.name)
                 return result
 
             replace(worker, "run_subprocess_async", inspect_intermediates)
@@ -141,6 +153,9 @@ class SequencePacketClockTests(unittest.TestCase):
                 brand_watermark=False,
                 caption_review_copy=caption_review,
             )
+            if precision:
+                request.finish_plan["adjustment_layers"] = [{"enabled": True, "startTime": 0,
+                    "duration": duration, "effects": {"color": {"precisionGrade": True, "exposureStops": .1}}}]
             result = asyncio.run(worker.render_viral_clip_impl(request, f"packet-clock-{fps}"))
             assert result["status"] == "completed"
             if codec == "prores":
@@ -158,6 +173,8 @@ class SequencePacketClockTests(unittest.TestCase):
             assert len(checked_segments) == 3
             if framed:
                 self.assertEqual(len(checked_finish), 3)
+            if precision:
+                self.assertGreaterEqual(len(checked_precision), 3)
             picture = next(s for s in probe(final) if s["codec_type"] == "video")
             assert int(picture["nb_frames"]) == round(duration * fps)
             assert abs(float(picture["duration"]) - round(duration * fps)/fps) < 1e-6

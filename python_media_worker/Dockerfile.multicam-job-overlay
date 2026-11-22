@@ -4,6 +4,10 @@ ARG WORKER_BASE_IMAGE
 FROM ${WORKER_BASE_IMAGE}
 WORKDIR /app
 COPY *.py ./
+COPY third_party ./third_party
+COPY models/face-restoration ./models/face-restoration
+RUN python install_face_restoration_model.py
 COPY assets ./assets
 COPY models/yunet ./models/yunet
+COPY models/face-landmarker ./models/face-landmarker
 CMD ["python3", "multicam_job_runner.py"]

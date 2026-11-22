@@ -447,7 +447,9 @@ export const buildViralRenderData = ({
 
   addDefined(payload, "smart_crop", extraOptions.smartCrop, Boolean);
   addDefined(payload, "smart_crop_mode", extraOptions.smartCropMode);
-  addDefined(payload, "visual_enhance", extraOptions.enhanceQuality, Boolean);
+  // Automatic zoom/stabilization is distinct from technical picture cleanup.
+  // Preserve legacy callers, while the manual Studio explicitly opts out.
+  addDefined(payload, "visual_enhance", extraOptions.visualEnhance ?? extraOptions.enhanceQuality, Boolean);
   addDefined(payload, "silence_removal", extraOptions.silenceRemoval, Boolean);
   addDefined(payload, "silence_threshold_db", extraOptions.silenceThreshold, Number);
   addDefined(payload, "min_silence_duration", extraOptions.minSilenceDuration, Number);

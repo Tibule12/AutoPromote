@@ -11,6 +11,7 @@ def adjustment_grade_filter(effects, build_finish, prefix):
     parts=[repair]if repair else[]
     parts += [build_finish({"enabled": True, "color": effects.get("color") or {},
                            "texture": effects.get("texture") or {},
+                           "_preserve_rgb": True,
                            "_label_prefix": prefix})]
     # Only the worker's request preparation sets this path, after validating and
     # materializing the actual LUT bytes. Client-supplied paths are discarded.

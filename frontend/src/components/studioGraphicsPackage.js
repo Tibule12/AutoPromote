@@ -70,7 +70,7 @@ export function validateStudioGraphicsPackage(input, { duration, aspect, existin
   const cleanLayers = input.layers.map(layer => {
     only(layer, ['id', 'name', 'type', 'text', 'svg', 'startTime', 'duration', 'x', 'y', 'scale', 'rotation', 'opacity',
       'width', 'height', 'fontWeight', 'color', 'textAlign', 'strokeWidth', 'strokeColor', 'mask', 'keys',
-      'textAnimator', 'textProgress', 'vectorShape', 'strokeStart', 'strokeEnd', 'strokeOffset'], 'layer');
+      'textAnimator', 'textProgress', 'vectorShape', 'strokeStart', 'strokeEnd', 'strokeOffset', 'mediaFit'], 'layer');
     identity(layer, {
       ...bounds,
       ...(layer.textAnimator ? { textProgress: [0, 100] } : {}),
@@ -87,7 +87,7 @@ export function validateStudioGraphicsPackage(input, { duration, aspect, existin
       if (layer.strokeWidth !== undefined) number(layer.strokeWidth, 0, 8, 'Outline width');
       if (![400, 600, 800, 900].includes(layer.fontWeight) || !['left', 'center', 'right'].includes(layer.textAlign))
         throw Error('Choose Inter weight 400, 600, 800 or 900 and a supported title alignment.');
-      if (layer.svg !== undefined || layer.vectorShape !== undefined || layer.height !== undefined) throw Error('Text layers use copy and title sizing; artwork uses SVG and height.');
+      if (layer.svg !== undefined || layer.vectorShape !== undefined || layer.height !== undefined || layer.mediaFit !== undefined) throw Error('Text layers use copy and title sizing; artwork uses SVG and height.');
       return { ...layer };
     }
     if (layer.type !== 'artwork' || (!layer.vectorShape && (typeof layer.svg !== 'string' || layer.svg.length > 512 * 1024)))
@@ -100,6 +100,7 @@ export function validateStudioGraphicsPackage(input, { duration, aspect, existin
     if (['text', 'color', 'fontWeight', 'textAlign', 'strokeWidth', 'strokeColor', 'textAnimator', 'textProgress'].some(field => layer[field] !== undefined))
       throw Error('Artwork styling belongs in its SVG, not in title fields.');
     number(layer.height, 1, 100, 'Artwork height');
+    if (layer.mediaFit !== undefined && !['contain', 'cover', 'stretch'].includes(layer.mediaFit)) throw Error('Choose contain, cover or stretch for artwork.');
     const svg = layer.vectorShape ? studioVectorSvg(layer.vectorShape, layer) : sanitizeLogoSvg(layer.svg);
     artworkBytes += svg.length;
     return layer.vectorShape ? { ...layer } : { ...layer, svg };
@@ -150,7 +151,7 @@ export async function buildStudioGraphicsPackage({ input, overlays, keyframes, c
         animation: { enter: 'none', exit: 'none', enterDuration: 0, exitDuration: 0 } };
       if (layer.type === 'artwork') {
         const file = await rasterize(layer.vectorShape ? studioVectorSvg(layer.vectorShape) : layer.svg, layer.name), src = createUrl(file); urls.push(src);
-        Object.assign(ordinary, { type: 'image', file, src, isLocal: true, bRollMode: 'pip', mediaFit: 'contain',
+        Object.assign(ordinary, { type: 'image', file, src, isLocal: true, bRollMode: 'pip', mediaFit: layer.mediaFit || 'contain',
           frameShape: 'edge', borderRadius: 0, glow: { enabled: false }, layerShadow: { enabled: false }, motionBlur: { enabled: false } });
       }
       layers.push(ordinary); addKeys(layer);

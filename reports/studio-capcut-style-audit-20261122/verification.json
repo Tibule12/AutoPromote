@@ -1,0 +1,264 @@
+{
+  "date": "2026-11-22",
+  "scope": "Read-only reference/style capability audit requested by owner; colour grading work paused.",
+  "repositoryBranch": "fix/studio-visible-controls-20261121",
+  "head": "b50a2e313ba265f91c17117e72e06a945aacb2b0",
+  "sourceDirectory": "/home/tibule12/Videos/CapCut style edit",
+  "referenceCount": 7,
+  "referenceDurationSeconds": 165.79416,
+  "references": [
+    {
+      "name": "Fashion strip/mosaic transition",
+      "observed": "An incoming shot appears in several independently positioned rectangular strips, then the strips resolve to the full shot.",
+      "referenceTimeSeconds": [
+        3.4,
+        5.2
+      ],
+      "support": "Existing manual building blocks and comparable native film",
+      "currentTools": [
+        "Video layers with source trims",
+        "Rectangle/polygon masks and crop",
+        "Position/scale/rotation keys, easing and parent rigs",
+        "Director fragment choreography and Editorial fan template"
+      ],
+      "evidence": [
+        "frontend/src/components/StudioDirectorFragmentControls.js",
+        "frontend/src/components/studioMaskGeometry.js",
+        "frontend/src/templates/editorial_fan_v1.json",
+        "reports/studio-director-cut-through-20261107/verification.json"
+      ],
+      "gap": "The exact multi-source strip sequence is not a verified reusable preset. Dense simultaneous video layers retain preview throughput and edge/colour parity limits.",
+      "reference": 1,
+      "file": "/home/tibule12/Videos/CapCut style edit/ScreenRecording_11-21-2026 13-25-28_1.mp4",
+      "sha256": "291c3e1952aa115d53211c69094c70b6dd1cb94ef2880543267ecefc8340b312",
+      "durationSeconds": 20.14,
+      "frameInspection": "Full-interval 2fps sequence with overview; refs1,2,6 additionally inspected at5fps in dense transition windows.",
+      "exactReferenceNativeRecreation": "NOT_RUN",
+      "liveDeployment": "NOT_CHECKED"
+    },
+    {
+      "name": "NEW YORK video-filled lettering and zoom-through",
+      "observed": "Letters enter at different times with city footage visible inside them; the complete title enlarges until its footage fills the screen.",
+      "referenceTimeSeconds": [
+        0.5,
+        5.0
+      ],
+      "support": "Existing manual building blocks and comparable native film",
+      "currentTools": [
+        "Alpha/luma track mattes",
+        "Editable text and letter/word animation",
+        "Scale keys and grouping",
+        "Living type cinematic X template"
+      ],
+      "evidence": [
+        "frontend/src/components/StudioKineticTypePanel.js",
+        "frontend/src/components/studioTextAnimator.js",
+        "python_media_worker/studio_composition.py",
+        "frontend/src/templates/living_infinity_v1.json",
+        "reports/studio-make-your-move-20261102/episode/README.md"
+      ],
+      "gap": "The exact multi-letter animated-matte entrance and uninterrupted zoom-through have not been reconstructed or paired against export in this audit. Historical typography/moving matte parity limits remain.",
+      "reference": 2,
+      "file": "/home/tibule12/Videos/CapCut style edit/ScreenRecording_11-21-2026 13-27-02_1.mp4",
+      "sha256": "efcb3b3337749303de8a0c26bf0306a3f5b1728d47ac24b8c3df3e353bb222ff",
+      "durationSeconds": 9.673333,
+      "frameInspection": "Full-interval 2fps sequence with overview; refs1,2,6 additionally inspected at5fps in dense transition windows.",
+      "exactReferenceNativeRecreation": "NOT_RUN",
+      "liveDeployment": "NOT_CHECKED"
+    },
+    {
+      "name": "Rolling-year recap and end credits",
+      "observed": "A vertical stack of years scrolls past a fixed indicator with defocused neighbours, followed by a rapid montage beneath a long centred credit roll.",
+      "referenceTimeSeconds": [
+        0,
+        6,
+        8,
+        21
+      ],
+      "support": "Partial; generic number reveal exists, exact treatment not established",
+      "currentTools": [
+        "Motion Number reveal counter",
+        "Manually timed text/video layers",
+        "Position, opacity and scale animation",
+        "Music lane and cut timing"
+      ],
+      "evidence": [
+        "frontend/src/components/motion/motionModel.js",
+        "frontend/src/components/motion/MotionPanel.js",
+        "frontend/src/components/studioTextAnimator.js",
+        "reports/studio-text-choreography-20261018/README.md"
+      ],
+      "gap": "The existing zero-to-value counter does not implement this rolling stack with fixed-year selection and blurred neighbours. No matching dedicated year/credit preset was identified. Existing single-title choreography is bounded to180 characters/12 wrapped rows, so long credits need a different authoring treatment or several layers.",
+      "reference": 3,
+      "file": "/home/tibule12/Videos/CapCut style edit/ScreenRecording_11-21-2026 13-28-19_1.mp4",
+      "sha256": "6e39609c4520dc7022f78e0ffbd216345d08e3914dfbad4132e433c36557ee9a",
+      "durationSeconds": 23.673378,
+      "frameInspection": "Full-interval 2fps sequence with overview; refs1,2,6 additionally inspected at5fps in dense transition windows.",
+      "exactReferenceNativeRecreation": "NOT_RUN",
+      "liveDeployment": "NOT_CHECKED"
+    },
+    {
+      "name": "Cinematic COMING SOON teaser",
+      "observed": "A narrow diagonal light/reveal opens on footage, short titles appear over dark city shots, black interruptions separate beats, and a poster-style closing card layers several lines of text.",
+      "referenceTimeSeconds": [
+        1.5,
+        5,
+        6.5,
+        8,
+        13,
+        16.5
+      ],
+      "support": "Core manual techniques present; exact effect stack unverified",
+      "currentTools": [
+        "Feathered/inverted animated masks",
+        "Timed title layers",
+        "Opacity dips and flash transitions",
+        "Glow/light-leak finishing and imported/synthesized sound cues"
+      ],
+      "evidence": [
+        "frontend/src/components/studioMaskGeometry.js",
+        "frontend/src/components/StudioFinishRack.js",
+        "frontend/src/components/studioSourcePreview.js",
+        "frontend/src/components/motion/soundDesign.js",
+        "frontend/src/templates/brand_trailer_momentum_v1.0.1.json"
+      ],
+      "gap": "No exact spotlight/black-flash/teaser preset match or sound/transition timing qualification was run. A diagonal masked reveal is not a volumetric-light simulation.",
+      "reference": 4,
+      "file": "/home/tibule12/Videos/CapCut style edit/ScreenRecording_11-21-2026 13-29-42_1.mp4",
+      "sha256": "d60cba303ebce4240d9837b34b6156f05173693763d4bf6ca1987aa43d039449",
+      "durationSeconds": 18.281667,
+      "frameInspection": "Full-interval 2fps sequence with overview; refs1,2,6 additionally inspected at5fps in dense transition windows.",
+      "exactReferenceNativeRecreation": "NOT_RUN",
+      "liveDeployment": "NOT_CHECKED"
+    },
+    {
+      "name": "2026 memory/travel collage montage",
+      "observed": "A year title overlays quick changing shots, inset cards, layered video frames and a tiled photo/video collage.",
+      "referenceTimeSeconds": [
+        0,
+        3,
+        6,
+        12.5,
+        18.5,
+        24.5
+      ],
+      "support": "Existing manual building blocks and comparable native films",
+      "currentTools": [
+        "Multi-source sequence",
+        "B-roll inserts and split-screen/PiP layouts",
+        "Independent title/video timing",
+        "Transform keys, fan/card templates and music/SFX lanes"
+      ],
+      "evidence": [
+        "frontend/src/components/StudioBRollPowerhousePanel.js",
+        "frontend/src/components/studioBRollPowerhouse.js",
+        "frontend/src/templates/coastal_postcards_v1.json",
+        "frontend/src/templates/editorial_fan_v1.json",
+        "reports/studio-broll-controls-20261115/verification.json",
+        "reports/studio-template-collection-20261104/collection-verification.json"
+      ],
+      "gap": "The exact long collage choreography and its musical accents are not supplied as a verified ready-made template. Existing recipes are authored structures, not automatic understanding of arbitrary footage.",
+      "reference": 5,
+      "file": "/home/tibule12/Videos/CapCut style edit/ScreenRecording_11-21-2026 13-30-37_1.mp4",
+      "sha256": "e1099a58547b8a4434896acc9cca17a4fe0ed8482427e828125135c3ecd7a6ba",
+      "durationSeconds": 34.60941,
+      "frameInspection": "Full-interval 2fps sequence with overview; refs1,2,6 additionally inspected at5fps in dense transition windows.",
+      "exactReferenceNativeRecreation": "NOT_RUN",
+      "liveDeployment": "NOT_CHECKED"
+    },
+    {
+      "name": "DAY IN MY LIFE diagonal beat-style edit",
+      "observed": "Multiple clips move through diagonal panels and crossing wedges under a fixed title, with rotations and later bright/zoom-like transitions.",
+      "referenceTimeSeconds": [
+        4.7,
+        6.9,
+        12,
+        15,
+        20.5,
+        26.5
+      ],
+      "support": "Partial; diagonal masks/motion present, exact transition pack unverified",
+      "currentTools": [
+        "Polygon point animation",
+        "Independent video transforms and layer order",
+        "Split impact template",
+        "Beat markers, grade pulses and layer motion blur"
+      ],
+      "evidence": [
+        "frontend/src/components/studioMaskGeometry.js",
+        "frontend/src/templates/split_impact_v1.json",
+        "frontend/src/components/studioFinishKeyframes.js",
+        "frontend/src/components/StudioAdvancedInspectors.js",
+        "python_media_worker/studio_layer_motion.py"
+      ],
+      "gap": "Beat markers and grade pulses do not themselves create or validate the complete edit. Perspective planes reject masks, crop and motion blur in the same layer; that combination needs supported alternative construction or shared implementation work. Whole multilayer blur/cut/live-export timing remains unqualified.",
+      "reference": 6,
+      "file": "/home/tibule12/Videos/CapCut style edit/ScreenRecording_11-21-2026 13-31-51_1.mp4",
+      "sha256": "75f55b5aaa28a9f0e530ee93e6c9c03419fdd6e3be5f0afd84c51c100521f5f8",
+      "durationSeconds": 33.099637,
+      "frameInspection": "Full-interval 2fps sequence with overview; refs1,2,6 additionally inspected at5fps in dense transition windows.",
+      "exactReferenceNativeRecreation": "NOT_RUN",
+      "liveDeployment": "NOT_CHECKED"
+    },
+    {
+      "name": "Viral sound-effects reel",
+      "observed": "Named flash, synth-hit, rewind, gunshot, metallic-hit, whoosh, deep-bass, gear, swoosh and charge cues are presented with animated waveform cards.",
+      "referenceTimeSeconds": [
+        0,
+        2.5,
+        4.5,
+        7,
+        9.5,
+        12,
+        14,
+        16.5,
+        19,
+        21.5
+      ],
+      "support": "Several comparable synthesized cues plus audio import; exact sound pack absent from identified catalogue",
+      "currentTools": [
+        "Whoosh, impact, pop, click, riser, chime, reverse, glitch and sub-drop",
+        "Cinematic hit, airy whoosh, bass punch, metallic hit, tape stop and sparkle",
+        "Uploaded audio effects with timing, volume and fades",
+        "Separate editable artwork/visualizer for waveform presentation"
+      ],
+      "evidence": [
+        "frontend/src/components/motion/soundDesign.js",
+        "frontend/src/components/ViralClipStudio.js",
+        "frontend/src/components/studioCueBuffer.js"
+      ],
+      "gap": "Built-in sounds are synthesized alternatives, not the identical recordings in the reference. No dedicated gunshot/gear entry was identified. Listening quality and exact reference sound matching were not tested.",
+      "reference": 7,
+      "file": "/home/tibule12/Videos/CapCut style edit/ScreenRecording_11-21-2026 13-33-22_1.mp4",
+      "sha256": "3e19adc87e2b8bbd5ac785a5273fb13bb3aeccdb9ecfb614c935c888f1ffd292",
+      "durationSeconds": 26.316735,
+      "frameInspection": "Full-interval 2fps sequence with overview; refs1,2,6 additionally inspected at5fps in dense transition windows.",
+      "exactReferenceNativeRecreation": "NOT_RUN",
+      "liveDeployment": "NOT_CHECKED"
+    }
+  ],
+  "privateFrameEvidenceDirectory": "/home/tibule12/.local/share/autopromote-qa/capcut-style-audit-20261122",
+  "checksPerformed": [
+    "Read-only ffprobe for all seven original screen recordings",
+    "Extracted331 frames at2fps; visually reviewed84 full-interval overview samples across seven recordings.",
+    "Visually reviewed51 additional5fps cropped samples across strip, text-zoom and diagonal-panel transition windows.",
+    "Trace current UI/preview/compiler/worker building blocks and inspect retained native lifecycle evidence",
+    "Hash all seven reference originals without modifying them"
+  ],
+  "checksNotPerformed": [
+    "No new native recreation/export",
+    "No new authenticated or production browser verification",
+    "No new model inference or paid/cloud/GPU job",
+    "No subjective listening or exact music/beat matching"
+  ],
+  "conclusion": "Studio has substantial reusable manual foundations for these styles. Exact CapCut-style preset equivalence, smooth preview and matching final output are not established for this set. Rolling-year/long-credit authoring and reusable combined transition controls are the clearest gaps.",
+  "nextTask": "Build and qualify one editable strip/mosaic transition from reference1 using the existing native graph, then verify save/reopen and paired pre-final/native output before expanding the reusable pack.",
+  "readinessPromotion": false,
+  "productionChanged": false,
+  "colourGradeChanged": false,
+  "frameEvidence": {
+    "decodedAt2fps": 331,
+    "overviewSamplesVisuallyReviewed": 84,
+    "additionalDenseTransitionSamplesVisuallyReviewed": 51
+  }
+}

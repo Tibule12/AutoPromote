@@ -1,0 +1,8 @@
+.studio-strip-transition { padding: 14px; border: 1px solid #3b4160; border-radius: 12px; background: #111727; }
+.studio-strip-transition summary { cursor: pointer; font-weight: 700; }
+.studio-strip-transition p { font-size: 12px; line-height: 1.6; color: #b8c4db; }
+.studio-strip-transition fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+.studio-strip-transition label { display: flex; flex-direction: column; gap: 6px; min-width: 0; font-size: 12px; line-height: 1.45; color: #e1e7f3; }
+.studio-strip-transition input, .studio-strip-transition select { box-sizing: border-box; width: 100%; min-width: 0; min-height: 38px; padding: 8px; border: 1px solid #424d69; border-radius: 7px; color: #f2f5fc; background: #080e1c; }
+.studio-strip-transition__grid { display: grid; grid-template-columns: minmax(0,1fr); gap: 12px; margin: 14px 0; }
+.studio-strip-transition :focus-visible { outline: 2px solid #bba4ff; outline-offset: 2px; }

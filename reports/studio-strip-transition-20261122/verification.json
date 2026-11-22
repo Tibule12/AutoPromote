@@ -1,0 +1,322 @@
+{
+  "status": "PARTIAL",
+  "scope": "Native editable fashion-mosaic transition; original first frame collection is separate.",
+  "qaRoot": "/home/tibule12/.local/share/autopromote-qa/studio-strip-transition-20261122",
+  "delivery": "/home/tibule12/Videos/Studio - Fashion Strip Transition - 2026-11-22",
+  "nativeProjectId": "viral-project-eebef47f-3da1-45ee-a5c0-314eb52bce72",
+  "nativeOutputSha256": "7f5fbb65af8681693bb15539f7020eb84e0fcaeae8bf741757d3945e6f088384",
+  "output": {
+    "seconds": 6,
+    "width": 720,
+    "height": 1280,
+    "fps": 30,
+    "encoder": "h264_nvenc",
+    "audio": "AAC",
+    "layers": 7,
+    "keys": 36
+  },
+  "nativeCanonicalBinding": {
+    "nativeBackupCompositionMatchesSubmitted": true,
+    "layerCount": 7,
+    "keyCount": 36
+  },
+  "independentRestore": {
+    "freshAuthenticatedContext": true,
+    "normalBackupImport": true,
+    "exactCanonicalDocument": true,
+    "exactMotionKeys": true,
+    "exactSound": true,
+    "uploads": 0,
+    "renders": 0,
+    "errors": [],
+    "blocked": []
+  },
+  "nativeDownload": {
+    "finishedReady": true,
+    "downloadSha256": "7f5fbb65af8681693bb15539f7020eb84e0fcaeae8bf741757d3945e6f088384",
+    "errors": []
+  },
+  "fullPlayback": {
+    "video": {
+      "path": "/local-master.mp4",
+      "currentTime": 6,
+      "duration": 6,
+      "error": null
+    },
+    "capture": {
+      "seconds": 6.269999980926514,
+      "capturedPictures": 59,
+      "sourceBytes": 8487965,
+      "viewport": [
+        1920,
+        900
+      ],
+      "source": "Actual Chromium screencast",
+      "visualAnnotations": "Pointer, click ring and actual target outline only",
+      "applicationCodeChanged": false,
+      "audio": "Original finished-video soundtrack captured separately in the browser"
+    },
+    "fullFinishedPlayback": true
+  },
+  "uiLayouts": {
+    "views": [
+      {
+        "viewport": [
+          1920,
+          900
+        ],
+        "width": 243,
+        "overflow": 0,
+        "fields": [
+          {
+            "label": "LayoutFashion mosaicVertical stripsHoriz",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "Outgoing footageChoose saved videofashio",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "Incoming footageChoose saved videofashio",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "Outgoing source start (s)",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "Incoming source start (s)",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "Opening hold (s)",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "Transition duration (s)",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "Incoming hold (s)",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "Piece stagger (s)",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "TravelAlternatingLeftRightUpDown",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "Pieces3456",
+            "width": 195,
+            "font": "12px"
+          }
+        ]
+      },
+      {
+        "viewport": [
+          1440,
+          900
+        ],
+        "width": 243,
+        "overflow": 0,
+        "fields": [
+          {
+            "label": "LayoutFashion mosaicVertical stripsHoriz",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "Outgoing footageChoose saved videofashio",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "Incoming footageChoose saved videofashio",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "Outgoing source start (s)",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "Incoming source start (s)",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "Opening hold (s)",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "Transition duration (s)",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "Incoming hold (s)",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "Piece stagger (s)",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "TravelAlternatingLeftRightUpDown",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "Pieces3456",
+            "width": 195,
+            "font": "12px"
+          }
+        ]
+      },
+      {
+        "viewport": [
+          1200,
+          850
+        ],
+        "width": 243,
+        "overflow": 0,
+        "fields": [
+          {
+            "label": "LayoutFashion mosaicVertical stripsHoriz",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "Outgoing footageChoose saved videofashio",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "Incoming footageChoose saved videofashio",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "Outgoing source start (s)",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "Incoming source start (s)",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "Opening hold (s)",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "Transition duration (s)",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "Incoming hold (s)",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "Piece stagger (s)",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "TravelAlternatingLeftRightUpDown",
+            "width": 195,
+            "font": "12px"
+          },
+          {
+            "label": "Pieces3456",
+            "width": 195,
+            "font": "12px"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  "previewExport": {
+    "pairs": 9,
+    "diagnosticPsnrRange": [
+      25.26,
+      33.8
+    ],
+    "strictWholePictureParityQualified": false
+  },
+  "retainedFailures": [
+    "First local input adapter rejected renewed URL format; no renderer effect failure. Native known-failed-job dismissal and corrected verified-owned-byte transport yielded the successful second native job.",
+    "Earlier captures and original input receipts retained."
+  ],
+  "limits": [
+    "No exact reference recreation claim",
+    "No whole-picture colour/edge parity or owner listening/creative qualification",
+    "Shared S02/S04/S03 remain",
+    "Local candidate, no deployment, paid GPU allocation, publishing or scheduling"
+  ],
+  "formalCountsUnchanged": "17 FUNCTIONAL /9 PARTIAL /1 BROKEN /2 UNIMPLEMENTED /0 PRO /0 PRODUCTION",
+  "deliveryFiles": [
+    {
+      "name": "04 - Complete Studio playback with sound.mp4",
+      "bytes": 1089101,
+      "sha256": "c30423e46bc5a3a4f214494a4db44cf051f309f2acd93ab6ff27dbb3e01ada7a"
+    },
+    {
+      "name": "06 - Moving transition sequence.jpg",
+      "bytes": 121435,
+      "sha256": "b9cc6eb057392db854ada987d82f1fb78f2ace2d3d0622d14608c5ab142669ff"
+    },
+    {
+      "name": "01 - Fashion mosaic - finished Studio video.mp4",
+      "bytes": 4302592,
+      "sha256": "7f5fbb65af8681693bb15539f7020eb84e0fcaeae8bf741757d3945e6f088384"
+    },
+    {
+      "name": "05 - Studio preview and native export.jpg",
+      "bytes": 116676,
+      "sha256": "323930731ec73ce445c6bbc7a6f50ee7c07239d6cf8ef576e2a796e34c7fb7d8"
+    },
+    {
+      "name": "02 - Editable Studio project.autopromote.json",
+      "bytes": 81480,
+      "sha256": "a343a622cf08023e985dd0679fdfd948edee9b4d36dd543f44b05d334d9c1bd1"
+    },
+    {
+      "name": "03 - Actual Studio editing controls.mp4",
+      "bytes": 9494506,
+      "sha256": "b2298ad09c8d5a68d4c711a35caae3f2f5e1c28c4616e5d4054c8a81bffb987f"
+    },
+    {
+      "name": "Read me.txt",
+      "bytes": 1233,
+      "sha256": "5602c3300f938e733e5e343f5d8933f96424771c9af493a18b53d16738d631d0"
+    },
+    {
+      "name": "Original neon fashion footage.mp4",
+      "bytes": 3644299,
+      "sha256": "9366befc8264e2d6e000859f101f8033915df4f953a04b50360a1f8a8e58e307"
+    }
+  ]
+}

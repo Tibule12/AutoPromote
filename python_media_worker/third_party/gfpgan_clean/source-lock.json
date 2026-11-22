@@ -1,0 +1,10 @@
+{
+  "gfpganv1_clean_arch.py": {
+    "upstreamSha256": "576f44f3aae39e21a8138fe51f8ec96c0b94559e08fc10c78416e8658ac290a9",
+    "inferenceSourceSha256": "03a9f2bf9874a8f62f0414f8f3781970af9341f7950e34f9d9e95b6cfd34eb2b"
+  },
+  "stylegan2_clean_arch.py": {
+    "upstreamSha256": "274f6a66c0c56ee565e0df9e77a90d2a475c766419e15026273ca10f0dfd0ba0",
+    "inferenceSourceSha256": "4a17ecc66b943ed349a06906c571e37d017524f025024798a05bdeac12d535c1"
+  }
+}

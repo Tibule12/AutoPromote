@@ -1,4 +1,5 @@
 import React from "react";
+import StudioGradeValueControl from './StudioGradeValueControl';
 import { CINEMATIC_PRESETS } from "../hooks/useCinematicEffects";
 import {
   DEAD_CONTENT_REVITALIZER_PRESETS,
@@ -53,6 +54,8 @@ export default function StudioFinishRack({
   showLegacySelective = true,
   mainFrame,
   onUpdateMainFrame,
+  qualityCleanup = false,
+  onQualityCleanupChange,
 }) {
   const qualifier = fx.qualifier || fx.advancedColor?.qualifier || {};
   const powerWindow = fx.powerWindow || fx.advancedColor?.powerWindow || {};
@@ -132,6 +135,35 @@ export default function StudioFinishRack({
           Reset
         </button>
       </div>
+
+      {onQualityCleanupChange && <details className="finish-rack-section" open>
+        <summary><span>Video cleanup</span><small>Export finish</small></summary>
+        <label><input type="checkbox" aria-label="Clean video noise and compression"
+          checked={qualityCleanup} onChange={event => onQualityCleanupChange(event.target.checked)} />
+          Reduce noise and refine detail</label>
+        <small>Applies to the exported video. Review it with Show Finished Video; your soundtrack stays unchanged.</small>
+      </details>}
+
+      <details className="finish-rack-section" data-testid="finish-face-restoration" open>
+        <summary><span>Restore facial detail</span><small>Processed video</small></summary>
+        <p>Clean compressed facial detail across moving frames. AI reconstructs detail and can change small features; review eyes, mouth and head turns in the finished video.</p>
+        <label className="studio-face-enable-field"><input type="checkbox" aria-label="Restore facial detail" checked={!!fx.faceRestoration?.enabled}
+          onChange={event => onUpdateFx("faceRestoration", { model: "gfpgan-v1.4-natural-v2", strength: .85, stability: .65, ...fx.faceRestoration, enabled: event.target.checked })} />Enable face restoration</label>
+        {fx.faceRestoration?.enabled && <>
+          <label className="studio-face-style-field">Restoration style<select aria-label="Face restoration style"
+            value={fx.faceRestoration.model || 'gfpgan-v1.4-temporal-v1'}
+            onChange={event => onUpdateFx('faceRestoration', {...fx.faceRestoration, model: event.target.value})}>
+            <option value="gfpgan-v1.4-natural-v2">Natural texture</option>
+            <option value="gfpgan-v1.4-temporal-v1">Classic reconstruction</option>
+          </select></label>
+          {fx.faceRestoration.model === 'gfpgan-v1.4-natural-v2' && <p>Preserves more of the source’s facial structure and gently refines surface detail. Review the finished video before choosing the amount.</p>}
+          <StudioGradeValueControl label="Restoration amount" ariaLabel="Face restoration amount" value={fx.faceRestoration.strength ?? .85} min={0} max={1} step={.01}
+            onChange={strength => onUpdateFx("faceRestoration", { ...fx.faceRestoration, strength })} />
+          <StudioGradeValueControl label="Temporal stability" ariaLabel="Face temporal stability" value={fx.faceRestoration.stability ?? .65} min={0} max={1} step={.01}
+            onChange={stability => onUpdateFx("faceRestoration", { ...fx.faceRestoration, stability })} />
+          <small>Follows the main visible face. Render, then use Show Finished Video to review the processed result. The live edit shows the source.</small>
+        </>}
+      </details>
 
       <details className="finish-rack-section" open>
         <summary>

@@ -1,0 +1,419 @@
+{
+  "date": "2026-11-22",
+  "status": "private_local_delivery",
+  "ownerDirection": "Finish the natural texture/soft clothing weaknesses identified in V2.",
+  "sourceSha256": "b14bf07a916e41331f8516d9e00921d9c4fa2a37a492e2998ae9f463df3c280b",
+  "outputSha256": "c44669af9f00771d3488c9bbf8bfdbdea69266fea2b895ef50f3abc359236ed9",
+  "processing": {
+    "source": "original_four_minute_podcast",
+    "reconstructionStyle": "gfpgan-v1.4-natural-v2",
+    "checkpointSha256": "e2cd4703ab14f4d01fd1383a8a8b266f9a5833dacee8e6a79d3bf21a1b6be5ad",
+    "sourceLowFrequencyStructureRetention": 0.3,
+    "boundedReconstructionMicrocontrast": true,
+    "sourceSurfaceContrastAdaptiveSharpening": 0.17,
+    "additionalGenerativeBodyRestoration": false,
+    "globalSmoothingDisabled": true,
+    "automaticReframingDisabled": true,
+    "sourceDecoder": "ffmpeg-source-rgb-v1"
+  },
+  "video": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "frames": 7200,
+    "duration": 240.001,
+    "encoder": "h264_nvenc",
+    "fullRenderSeconds": 1662.5992266730173
+  },
+  "audioWindows": [
+    {
+      "start": 0,
+      "duration": 30.0,
+      "lagSamples": 0,
+      "lagSeconds": 0.0,
+      "zeroLagCorrelation": 0.992841362953186
+    },
+    {
+      "start": 30,
+      "duration": 30.0,
+      "lagSamples": 0,
+      "lagSeconds": 0.0,
+      "zeroLagCorrelation": 0.9935072660446167
+    },
+    {
+      "start": 60,
+      "duration": 30.0,
+      "lagSamples": 0,
+      "lagSeconds": 0.0,
+      "zeroLagCorrelation": 0.9939488172531128
+    },
+    {
+      "start": 90,
+      "duration": 30.0,
+      "lagSamples": 0,
+      "lagSeconds": 0.0,
+      "zeroLagCorrelation": 0.9935510158538818
+    },
+    {
+      "start": 120,
+      "duration": 30.0,
+      "lagSamples": 0,
+      "lagSeconds": 0.0,
+      "zeroLagCorrelation": 0.996239423751831
+    },
+    {
+      "start": 150,
+      "duration": 30.0,
+      "lagSamples": 0,
+      "lagSeconds": 0.0,
+      "zeroLagCorrelation": 0.9965927600860596
+    },
+    {
+      "start": 180,
+      "duration": 30.0,
+      "lagSamples": 0,
+      "lagSeconds": 0.0,
+      "zeroLagCorrelation": 0.9954056739807129
+    },
+    {
+      "start": 210,
+      "duration": 30.0,
+      "lagSamples": 0,
+      "lagSeconds": 0.0,
+      "zeroLagCorrelation": 0.9955816268920898
+    }
+  ],
+  "minimumAudioCorrelation": 0.992841362953186,
+  "maximumMeasuredAudioLagSeconds": 0.0,
+  "naturalControls": {
+    "views": [
+      {
+        "width": 1920,
+        "height": 900,
+        "sliderWidth": 321,
+        "font": 12,
+        "overflow": 0,
+        "styleFieldDisplay": "block"
+      },
+      {
+        "width": 1440,
+        "height": 900,
+        "sliderWidth": 321,
+        "font": 12,
+        "overflow": 0,
+        "styleFieldDisplay": "block"
+      },
+      {
+        "width": 1200,
+        "height": 850,
+        "sliderWidth": 241,
+        "font": 12,
+        "overflow": 0,
+        "styleFieldDisplay": "block"
+      }
+    ],
+    "exactAmountEntry": true,
+    "styleSwitches": true,
+    "recording": {
+      "seconds": 19.253999948501587,
+      "capturedPictures": 180,
+      "sourceBytes": 49882779,
+      "viewport": [
+        1920,
+        900
+      ],
+      "source": "Actual Chromium screencast",
+      "visualAnnotations": "Pointer, click ring and actual target outline only",
+      "applicationCodeChanged": false,
+      "audio": "No added narration; actual UI actions"
+    },
+    "extraRenders": 0,
+    "errors": []
+  },
+  "exactColdProjectRestore": {
+    "freshAuthenticatedContext": true,
+    "normalBackupImport": true,
+    "exactCanonicalDocument": true,
+    "exactAdjustmentLayers": true,
+    "cleanupPreserved": true,
+    "naturalStylePreserved": true,
+    "cloudUploads": 0,
+    "errors": [],
+    "blocked": []
+  },
+  "actualCpuInferenceAndInjectedCudaFault": {
+    "actualCpuModelInference": true,
+    "forcedCudaFaultRecovered": true,
+    "sameFrameSameWeightsMaxError": 0.0,
+    "elapsedSeconds": 19.439804669003934,
+    "actualHardwareLoss": false
+  },
+  "fullFinishedStudioPlayback": {
+    "video": {
+      "path": "/local-master.mp4",
+      "currentTime": 240.001,
+      "duration": 240.001,
+      "error": null
+    },
+    "capture": {
+      "seconds": 240.24399995803833,
+      "capturedPictures": 2094,
+      "sourceBytes": 417301822,
+      "viewport": [
+        1920,
+        900
+      ],
+      "source": "Actual Chromium screencast",
+      "visualAnnotations": "Pointer, click ring and actual target outline only",
+      "applicationCodeChanged": false,
+      "audio": "Original finished-video soundtrack captured separately in the browser"
+    },
+    "fullFinishedPlayback": true
+  },
+  "recordingClock": {
+    "screenRectangle": [
+      542,
+      152,
+      728,
+      410
+    ],
+    "templateScore": 0.9964131116867065,
+    "pictureMatches": [
+      {
+        "wallTime": 10,
+        "matchedMovieTime": 9.7,
+        "offsetSeconds": 0.3000000000000007,
+        "mse": 176.20742797851562
+      },
+      {
+        "wallTime": 30,
+        "matchedMovieTime": 29.766666666666666,
+        "offsetSeconds": 0.23333333333333428,
+        "mse": 177.21815490722656
+      },
+      {
+        "wallTime": 60,
+        "matchedMovieTime": 59.7,
+        "offsetSeconds": 0.29999999999999716,
+        "mse": 167.56121826171875
+      },
+      {
+        "wallTime": 120,
+        "matchedMovieTime": 119.73333333333333,
+        "offsetSeconds": 0.2666666666666657,
+        "mse": 163.6844024658203
+      },
+      {
+        "wallTime": 180,
+        "matchedMovieTime": 179.73333333333332,
+        "offsetSeconds": 0.26666666666667993,
+        "mse": 98.96308135986328
+      },
+      {
+        "wallTime": 239,
+        "matchedMovieTime": 238.8,
+        "offsetSeconds": 0.19999999999998863,
+        "mse": 166.2416229248047
+      }
+    ],
+    "screenStartOffsetSeconds": 0.2666666666666728,
+    "capturedAudioStartOffsetSeconds": 0.0065,
+    "neededAudioDelaySeconds": 0.2601666666666728,
+    "trimAfterSeconds": 240.61766666666668,
+    "rawRecordingSeconds": 240.266667,
+    "retiming": false,
+    "administrativeTailCaptured": false,
+    "removedAdministrativeTailSeconds": 0,
+    "maximumPictureOffsetResidualSeconds": 0.0666666666666842
+  },
+  "tests": {
+    "frontendCases": 17,
+    "backendCases": 20,
+    "workerCases": 20,
+    "strictBuild": true,
+    "anonymousWelcomeViewports": 8,
+    "contractValidation": "passed"
+  },
+  "protected": [
+    {
+      "item": "approvedV1",
+      "sha256": "9f576b87a6fc9a29bb34d92077f05ecf7ea465381fa0aa33adf23adeac31a7e9",
+      "unchanged": true
+    },
+    {
+      "item": "retainedV2",
+      "sha256": "9c836fd6db58f38d3c29abdf291c53d08734dc3215a0b012964f33818c44f979",
+      "unchanged": true
+    },
+    {
+      "item": "originalSource",
+      "sha256": "b14bf07a916e41331f8516d9e00921d9c4fa2a37a492e2998ae9f463df3c280b",
+      "unchanged": true
+    },
+    {
+      "item": "originalLogin",
+      "sha256": "00d48e87bd9b77ba9ead11c92bf93039f43fc3e7e6b322c3e379f6b4dac55254",
+      "unchanged": true
+    }
+  ],
+  "privateEvidenceDirectory": "/home/tibule12/.local/share/autopromote-qa/studio-texture-rebuild-20261122",
+  "deliveryDirectory": "/home/tibule12/Videos/Studio - Natural Texture V3 - 2026-11-22",
+  "retainedEvaluation": {
+    "strongSurfaceReconstruction": "Rejected as illustrated/overly smooth; evaluation files retained. Not integrated into the app.",
+    "nineSecondThreeShotProof": "Actual CUDA reconstruction of270 frames, followed by shared grading/export; diagnostic precursor to the full native export.",
+    "observerInterruptions": "Initial responsive/control capture interrupted; isolated repeat passes without page errors."
+  },
+  "qualification": {
+    "actualNativeUiSaveExportDownloadAndFinishedPlayback": true,
+    "canonicalWorkerViaBoundedLocalTransport": true,
+    "productionReleaseAndFinancialLifecycle": false,
+    "wholeTemporalPixelParity": false,
+    "recoveredGroundTruthSkinOrFabricTexture": false,
+    "newOwnerCreativeApproval": false,
+    "formalReadinessPromotion": false
+  },
+  "remaining": [
+    "Owner review of the exact V3 result",
+    "Broad identity/occlusion/multi-person/long-form and device-throughput qualification",
+    "Coordinated CPU/GPU release and deployed lifecycle verification"
+  ],
+  "deliveryMedia": [
+    {
+      "file": "01 - UNMUTED - Natural texture and detail V3.mp4",
+      "programs": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 1920,
+          "height": 1080
+        },
+        {
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "sample_rate": "48000",
+          "channels": 2
+        }
+      ],
+      "format": {
+        "duration": "240.001000",
+        "size": "478200367"
+      }
+    },
+    {
+      "file": "04 - Complete Studio playback with sound.mp4",
+      "programs": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 1920,
+          "height": 900
+        },
+        {
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "sample_rate": "48000",
+          "channels": 2
+        }
+      ],
+      "format": {
+        "duration": "240.316333",
+        "size": "107051386"
+      }
+    },
+    {
+      "file": "05 - Actual natural-texture controls.mp4",
+      "programs": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 1920,
+          "height": 900
+        }
+      ],
+      "format": {
+        "duration": "19.266667",
+        "size": "2722190"
+      }
+    },
+    {
+      "file": "Preview - 9 second moving texture test.mp4",
+      "programs": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 1920,
+          "height": 1080
+        },
+        {
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "sample_rate": "48000",
+          "channels": 2
+        }
+      ],
+      "format": {
+        "duration": "9.000000",
+        "size": "17650810"
+      }
+    }
+  ],
+  "faceRestorationReceipt": {
+    "model": "gfpgan-v1.4-natural-v2",
+    "modelSha256": "e2cd4703ab14f4d01fd1383a8a8b266f9a5833dacee8e6a79d3bf21a1b6be5ad",
+    "device": "cuda",
+    "frames": 7200,
+    "unrestoredFrames": 1,
+    "modelSamples": 900,
+    "fps": 30.0,
+    "decoder": "ffmpeg-source-rgb-v1",
+    "strength": 0.85,
+    "stability": 0.65,
+    "elapsedSeconds": 930.6671748840017,
+    "generativeDetail": true,
+    "originalAudioPreserved": true,
+    "fallbackReason": null
+  },
+  "reviewedPictures": {
+    "sourceAndFinalTimesSeconds": [
+      0,
+      30,
+      63.6,
+      120,
+      180,
+      239
+    ],
+    "retainedVersionDetailComparison": "06 - V2 and V3 detail comparison.jpg",
+    "completeFinishedPlaybackScreenshotSeconds": 90,
+    "conclusion": "V3 retains more facial structure and source fabric detail than V2. This scoped visual review does not qualify ground-truth identity/detail recovery or owner creative acceptance."
+  },
+  "cleanup": {
+    "processes": [
+      {
+        "pid": 1433004,
+        "alreadyStopped": true,
+        "identity": "controller-final.cjs"
+      },
+      {
+        "pid": 1433003,
+        "alreadyStopped": true,
+        "identity": "serve-render.cjs"
+      },
+      {
+        "pid": 1437357,
+        "stopped": true,
+        "identity": "http.server"
+      }
+    ],
+    "removedOwnedExtractedRuntimeBytes": 5323118688,
+    "verifiedRuntimeArchiveRetained": true,
+    "onlyOwnedProcessesStopped": true
+  },
+  "ownedBrowserClosed": {
+    "closedOwnedBrowser": true,
+    "originalLoginUnchanged": true
+  }
+}

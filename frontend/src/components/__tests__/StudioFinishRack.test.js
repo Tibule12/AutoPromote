@@ -96,3 +96,25 @@ test("drives professional finish, dead-content revitalizer, selective object col
   });
   expect(onUpdateFx).toHaveBeenCalledWith("lensBlur", 0.35);
 });
+
+test('face restoration has explicit reconstruction disclosure, amount and temporal controls',()=>{
+ const onUpdateFx=jest.fn();const view=render(<StudioFinishRack fx={fx} hasEffects={false} onUpdateFx={onUpdateFx} onReset={()=>{}} visualizer={visualizer} />);
+ fireEvent.click(screen.getByRole('checkbox',{name:'Restore facial detail'}));
+ expect(onUpdateFx).toHaveBeenCalledWith('faceRestoration',{model:'gfpgan-v1.4-natural-v2',enabled:true,strength:.85,stability:.65});
+ view.rerender(<StudioFinishRack fx={{...fx,faceRestoration:{enabled:true,strength:.85,stability:.65}}} hasEffects onUpdateFx={onUpdateFx} onReset={()=>{}} visualizer={visualizer} />);
+ expect(screen.getByText(/AI reconstructs detail/)).toBeInTheDocument();
+ expect(screen.getByText(/The live edit shows the source/)).toBeInTheDocument();
+ fireEvent.change(screen.getByRole('slider',{name:'Face temporal stability'}),{target:{value:'.75'}});
+ expect(onUpdateFx).toHaveBeenLastCalledWith('faceRestoration',{enabled:true,strength:.85,stability:.75});
+ fireEvent.change(screen.getByRole('combobox',{name:'Face restoration style'}),{target:{value:'gfpgan-v1.4-natural-v2'}});
+ expect(onUpdateFx).toHaveBeenLastCalledWith('faceRestoration',{enabled:true,strength:.85,stability:.65,model:'gfpgan-v1.4-natural-v2'});
+});
+
+test('picture cleanup is discoverable in Color and changes the saved cleanup option', () => {
+  const change = jest.fn();
+  render(<StudioFinishRack fx={fx} visualizer={visualizer} qualityCleanup={false}
+    onQualityCleanupChange={change} onUpdateFx={jest.fn()} onApplyPreset={jest.fn()} onReset={jest.fn()} />);
+  fireEvent.click(screen.getByLabelText('Clean video noise and compression'));
+  expect(change).toHaveBeenCalledWith(true);
+  expect(screen.getByText(/your soundtrack stays unchanged/)).toBeInTheDocument();
+});

@@ -85,3 +85,4 @@ functions/.firebase/
 functions/firebase-debug.log/
 functions/functions/.firebase/
 functions/functions/firebase-debug.log/
+python_media_worker/models/face-restoration/*.pth

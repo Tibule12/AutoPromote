@@ -1,0 +1,40 @@
+.studio-frame-styles { padding: 14px; border: 1px solid #484366; border-radius: 12px; background: linear-gradient(145deg,#171a2c,#0c1422); }
+.studio-frame-styles>summary { cursor:pointer;font-weight:700; }
+.studio-frame-styles fieldset { border:0;padding:0;margin:0;min-width:0;display:grid;gap:13px; }
+.studio-frame-styles label { display:flex;flex-direction:column;gap:6px;font-size:12px;line-height:1.45;min-width:0; }
+.studio-frame-styles input,.studio-frame-styles select { width:100%;min-width:0;box-sizing:border-box;min-height:38px;padding:8px;border:1px solid #47516d;border-radius:7px;color:#f1f5ff;background:#080f1d; }
+.studio-frame-styles p { color:#bbc6da;font-size:12px;line-height:1.6; }
+.studio-frame-current { display:grid;grid-template-columns:76px minmax(0,1fr);gap:12px;margin:16px 0;align-items:center; }
+.studio-frame-current strong { display:block;font-size:17px;color:#f4f3ff;margin:4px 0; }
+.studio-frame-current small { font-size:9px;letter-spacing:.07em;color:#b2a2e4; }
+.studio-frame-current p { font-size:11px;margin:0; }
+.studio-frame-thumbnail { width:100%;height:auto;aspect-ratio:1;display:block;border-radius:6px; }
+.studio-frame-source { display:grid;gap:8px;padding-bottom:10px;border-bottom:1px solid #303950; }
+.studio-frame-palette { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px; }
+.studio-frame-palette label { font-size:10px; }
+.studio-frame-palette input { padding:3px;height:38px; }
+.studio-frame-styles .studio-frame-check { flex-direction:row;align-items:center;gap:8px; }
+.studio-frame-check input { width:16px;min-height:16px; }
+.studio-frame-subsection { padding-top:10px;border-top:1px solid #343d55; }
+.studio-frame-subsection>summary { cursor:pointer;font-size:12px;font-weight:700;margin-bottom:12px; }
+.studio-frame-subsection>label { margin:10px 0; }
+.studio-frame-gallery-backdrop { position:fixed;inset:0;z-index:100000;background:#030611d9;display:grid;place-items:center;padding:24px; }
+.studio-frame-gallery { width:min(1120px,100%);max-height:calc(100vh - 48px);overflow:auto;background:#101725;border:1px solid #53506e;border-radius:22px;padding:24px;box-shadow:0 25px 100px #000a; }
+.studio-frame-gallery header { display:flex;justify-content:space-between;gap:20px;align-items:flex-start; }
+.studio-frame-gallery header small { font-size:10px;letter-spacing:.13em;color:#b6a1ef; }
+.studio-frame-gallery h3 { margin:8px 0 20px;color:#f2f5fd;font-size:27px;line-height:1.2; }
+.studio-frame-gallery header>button { color:#ecf1ff;background:#222c43;border:1px solid #4c5873;border-radius:50%;width:36px;height:36px;font-size:24px;flex-shrink:0; }
+.studio-frame-categories { display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px; }
+.studio-frame-categories button { color:#c7d1e8;background:#182237;border:1px solid #354361;border-radius:20px;padding:7px 14px;font-size:12px; }
+.studio-frame-categories button[aria-pressed=true] { background:#6543b0;color:white;border-color:#ad8bfc; }
+.studio-frame-gallery-grid { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px; }
+.studio-frame-style-card { text-align:left;background:#182237;border:1px solid #35405c;border-radius:13px;padding:10px;cursor:pointer;transition:border-color .15s,transform .15s;min-width:0; }
+.studio-frame-style-card:hover { transform:translateY(-3px);border-color:#b69af4; }
+.studio-frame-style-card[aria-pressed=true] { border:2px solid #b69af4;padding:9px; }
+.studio-frame-style-card>span { display:flex;justify-content:space-between;gap:6px;margin:12px 0 7px;align-items:baseline; }
+.studio-frame-style-card strong { color:#f4f5fd;font-size:14px; }
+.studio-frame-style-card small { color:#afbdd7;font-size:10px; }
+.studio-frame-style-card p { margin:0;font-size:11px;line-height:1.5; }
+.studio-frame-styles :focus-visible { outline:2px solid #c4a6ff;outline-offset:3px; }
+@media(max-width:850px) { .studio-frame-gallery-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media(max-width:600px) { .studio-frame-gallery-backdrop { padding:10px; }.studio-frame-gallery { padding:14px;max-height:calc(100vh - 20px); }.studio-frame-gallery-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }.studio-frame-gallery h3 { font-size:21px; } }

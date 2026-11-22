@@ -448,3 +448,15 @@ test('native keyer/depth/optics and grade-mask identities survive canonical comp
  expect(layer.effects.node).toMatchObject({version:1,key:{enabled:true},defocus:2,depth:40,optical:{halation:.6,streak:.5},warp:{enabled:true,x:16,y:10}});expect(layer.base_transform.scale).toBeCloseTo(1.25,6);
  const finish=compileStudioFinishForRender(doc);expect(finish.node_mask).toEqual({layer_id:'plate',operation:'ChromaKeyer'});expect(finish.adjustment_layers[0].effects.node_mask).toEqual({layer_id:'plate',operation:'Transform'});expect(finish.power_window).toBe(null);
 });
+
+test('source-bound face restoration survives canonical serialization and refuses unsafe parameters',()=>{
+ const make=faceRestoration=>adaptStudioSnapshotToDocument({projectId:'face-restoration',snapshot:{
+ orderedClips:[{id:'source',start:0,end:2}],selectedClipId:'source',timeline:[{id:'main',sourceClipId:'source',startRequest:0,endRequest:2}],
+ finishFx:{faceRestoration}}});
+ const settings={enabled:true,model:'gfpgan-v1.4-temporal-v1',strength:.85,stability:.65},doc=make(settings);
+ const exportPlan=compileStudioFinishForRender(JSON.parse(JSON.stringify(doc)));
+ expect(exportPlan.face_restoration).toEqual(settings);exportPlan.face_restoration.strength=.1;
+ expect(compileStudioFinishForRender(doc).face_restoration.strength).toBe(.85);
+ expect(compileStudioFinishForRender(make({...settings,enabled:false})).face_restoration).toBeNull();
+ for(const invalid of [{strength:NaN},{stability:2},{model:'unverified'}])expect(()=>compileStudioFinishForRender(make({...settings,...invalid}))).toThrow(/valid face restoration/);
+});

@@ -12,6 +12,8 @@ function ColourHex({value,onChange}) {
 
 export default function StudioSelectiveGradePanel({layers, onChange, selectedId, onSelect, time, duration, createId, onEdit, onSeek, onTrack, onCancelTrack, onMotionError, trackingStatus, trackingBusy=false, aspect=16/9, locked=false}) {
   const [trackSpan,setTrackSpan]=useState(10);
+  const [trackTarget,setTrackTarget]=useState('texture');
+  const [faceContour,setFaceContour]=useState(false);
   const regions=layers.filter(l=>l.mask?.space==='programme'),selected=regions.find(l=>l.id===selectedId);
   const replace=next=>onChange(layers.map(l=>l.id===next.id?next:l));
   const updateMask=patch=>{const m=selected.mask;replace({...selected,mask:m.keyframes.length?keySelectiveMask(m,Math.max(0,time-selected.startTime),patch):{...m,...patch}});};
@@ -38,9 +40,12 @@ export default function StudioSelectiveGradePanel({layers, onChange, selectedId,
         {[['hueRange','Hue width',.01,.5],['saturationRange','Saturation width',.02,1],['lightnessRange','Brightness width',.02,1],['softness','Selection softness',.05,1]].map(([field,label,min,max])=><label key={field}>{label}<input type="range" aria-label={`Material ${label.toLowerCase()}`} min={min} max={max} step=".01" value={selected.mask.material[field]} onChange={e=>replace({...selected,mask:{...selected.mask,material:{...selected.mask.material,[field]:Number(e.target.value)}}})}/></label>)}</>}
       </details>
       <details open><summary>Follow movement</summary><p>Track the moving picture from the playhead. Longer ranges continue in small batches. Tracking stops at uncertain movement or a cut; review the path before exporting.</p>
+        <label>Tracking target<select aria-label="Selected-area tracking target" value={trackTarget} onChange={e=>setTrackTarget(e.target.value)}><option value="texture">Object or surface detail</option><option value="face">Face movement</option></select></label>
+        {trackTarget==='face'&&<small>Follows facial detail and expressions with an editable outline. Review head turns and occlusions before export.</small>}
+        {trackTarget==='face'&&<label><input type="checkbox" aria-label="Track actual facial contour" checked={faceContour} onChange={e=>setFaceContour(e.target.checked)}/>Use the facial contour instead of my drawn outline</label>}
         <label>Tracking range<select aria-label="Selected-area tracking range" value={trackSpan} onChange={e=>setTrackSpan(Number(e.target.value))}>{[10,30,60].map(n=><option value={n} key={n}>{n} seconds</option>)}</select></label>
-        <button type="button" disabled={!onTrack||time<selected.startTime||time>=selected.startTime+selected.duration} onClick={()=>onTrack(selected,1,trackSpan)}>Track forward</button>
-        <button type="button" disabled={!onTrack||time<=selected.startTime||time>selected.startTime+selected.duration} onClick={()=>onTrack(selected,-1,trackSpan)}>Track backward</button>
+        <button type="button" disabled={!onTrack||time<selected.startTime||time>=selected.startTime+selected.duration} onClick={()=>onTrack(selected,1,trackSpan,trackTarget,trackTarget==='face'&&faceContour)}>Track forward</button>
+        <button type="button" disabled={!onTrack||time<=selected.startTime||time>selected.startTime+selected.duration} onClick={()=>onTrack(selected,-1,trackSpan,trackTarget,trackTarget==='face'&&faceContour)}>Track backward</button>
         <label>Use tracked movement from<select aria-label="Copy movement from tracked area" value="" onChange={e=>{const reference=regions.find(l=>l.id===e.target.value);if(reference)try{replace(inheritRegionMotion(selected,reference,time,aspect));}catch(error){onMotionError?.(error.message);}}}><option value="">Choose a tracked area…</option>{regions.filter(l=>l.id!==selected.id&&l.mask.keyframes.length>=2).map(l=><option key={l.id} value={l.id}>{l.name}</option>)}</select></label>
         <small>Copies editable motion keys. Review the small selection’s edges; reapply if its reference path changes.</small>
         {!!selected.mask.keyframes.length&&<button type="button" onClick={()=>replace({...selected,mask:{...selectiveMaskAt(selected.mask,Math.max(0,time-selected.startTime)),keyframes:[],opacity:undefined},tracking:undefined})}>Keep this frame; clear motion keys</button>}

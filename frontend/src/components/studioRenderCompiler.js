@@ -136,6 +136,11 @@ export const compileStudioFinishForRender = document => {
     ? compileBaseTransform({ ...transform, ...mainBaked.initialPose })
     : compileBaseTransform(transform);
   const adv = state.advancedColor || {};
+  if (fx.faceRestoration?.enabled && (!['gfpgan-v1.4-temporal-v1','gfpgan-v1.4-natural-v2'].includes(fx.faceRestoration.model) ||
+      ['strength','stability'].some(key => typeof fx.faceRestoration[key] !== 'number' ||
+        !Number.isFinite(fx.faceRestoration[key]) || fx.faceRestoration[key] < 0 || fx.faceRestoration[key] > 1))) {
+    throw Error('Choose valid face restoration amount and stability values.');
+  }
   const colorFields = ["preset", "exposureStops", "lift", "gamma", "gain", "tint",
     "brightness", "contrast", "saturation", "temperature", "sharpness", "vignette",
     "dehaze", "clarity", "shadowRecovery", "highlightRollOff", "vibrance", "skinToneProtect",
@@ -165,6 +170,7 @@ export const compileStudioFinishForRender = document => {
   return {
     // Bake curve/HSL/LUT/revitalizer into color_cube once, and keep secondary
     // hsl_qualifier in its dedicated field so main_media_server applies it once.
+    face_restoration: fx.faceRestoration?.enabled ? { ...fx.faceRestoration } : null,
     color_cube: buildAdvancedColorCube({
       ...adv,
       ...(activeRevitalizer ? { revitalizer: activeRevitalizer } : {}),

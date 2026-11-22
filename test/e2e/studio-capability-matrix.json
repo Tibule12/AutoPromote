@@ -32,7 +32,11 @@
     ]
   },
   "selectiveGrading20261121": {
-    "ownerReview": {"decision": "REJECTED", "featureComplete": false, "evidence": "reports/studio-selective-grading-20261121/owner-rejection.json"},
+    "ownerReview": {
+      "decision": "REJECTED",
+      "featureComplete": false,
+      "evidence": "reports/studio-selective-grading-20261121/owner-rejection.json"
+    },
     "date": "2026-11-21",
     "evidenceRefs": [
       "reports/studio-selective-grading-20261121/README.md",
@@ -326,7 +330,7 @@
   },
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-11-20T15:00:00.000Z",
+  "updatedAt": "2026-11-22",
   "studioTransportHandoff20261119": {
     "evidence": "reports/studio-transport-handoff-20261119/verification.json",
     "focusIds": [
@@ -33925,5 +33929,149 @@
     "lateSilenceAnalysisInvalidated": true,
     "orderedMediaHistoryCases": 3,
     "unitStepBudgetMinutes": 30
+  },
+  "faceTrackingRepair20261121": {
+    "date": "2026-11-21",
+    "evidenceRefs": [
+      "reports/studio-face-tracking-repair-20261121/README.md",
+      "reports/studio-face-tracking-repair-20261121/verification.json"
+    ],
+    "scope": "Explicit face-mesh tracking into ordinary deforming region keys; actual20s face/texture native edit, restore and canonical local movie.",
+    "readinessPromotion": false,
+    "nextTaskId": "S02",
+    "blockers": [
+      "The whole grading feature/four-minute master and owner creative approval remain incomplete.",
+      "Render296.46s/20s and native capture145\u2013193s; detailed live/hardware/long-form throughput remains unqualified.",
+      "Small anatomical selections, head turns and occlusion recovery require further qualification.",
+      "Five paired pictures/audio correlation do not qualify whole predictive picture/audio parity.",
+      "No coordinated production release; sharedS02/S04/S03 and historical typography gaps remain."
+    ]
+  },
+  "cleanColourMaster20261121": {
+    "date": "2026-11-21",
+    "evidenceRefs": [
+      "reports/studio-clean-colour-master-20261121/README.md",
+      "reports/studio-clean-colour-master-20261121/verification.json"
+    ],
+    "scope": "Native full4min colour-balance/detail-preservation master, actual20s facial-contour repair, RGB/full-chroma and compressed source-preparation corrections. Reference-quality facial restoration remains unmet.",
+    "readinessPromotion": false,
+    "ownerCreativeApproval": false,
+    "nextTaskId": "S02",
+    "blockers": [
+      "The owner reference is more detailed/cleaner than the verified moving face; no reference-quality facial restoration has been achieved.",
+      "Full master uses whole-programme balance and detail-preserving encoding; the separate20s contour proof is not full-programme retouching.",
+      "At180s the sampled preview/native difference is MAE9.905/p9518; whole temporal picture/edge parity remains unqualified.",
+      "Broad selected-part/blemish/occlusion/long-programme retouching and detailed preview throughput remain incomplete.",
+      "Coordinated production release, production concurrency/recovery, sharedS02/S04/S03 and historical typography gaps remain."
+    ]
+  },
+  "faceRestoration20261121": {
+    "date": "2026-11-21",
+    "evidenceRefs": [
+      "reports/studio-face-restoration-20261121/README.md",
+      "reports/studio-face-restoration-20261121/verification.json"
+    ],
+    "scope": "Actual canonical four-minute neural facial-restoration movie with native controls/download/restore/full playback; later RGB-decoder qualification remains separately scoped.",
+    "readinessPromotion": false,
+    "ownerCreativeApproval": false,
+    "nextTaskId": "S02",
+    "blockers": [
+      "AI reconstructs plausible detail and can alter small facial features; owner creative approval and original-identity fidelity are not qualified.",
+      "Full master uses the initial OpenCV decoding snapshot. Later FFmpeg Rec.709 decode correction is tested on a real20s model video and a6-frame shared-worker export; this does not requalify the4min master against that later decoder.",
+      "Two uncertain full-master frames retain the original; difficult faces, occlusion, multiple comparable faces and unrestricted long-form/cut cases remain unqualified.",
+      "Live edit shows the source, not real-time neural processing. Whole live colour/edge/audio/device/frame-drop throughput remains unqualified. The raw259.397s capture includes an administrative still tail; matched pictures show no cumulative playback lag in this finished-file check.",
+      "Prepared CPU/GPU Docker recipes and production admission are not built/deployed/qualified on production. Full local render takes1402.263s.",
+      "Shared S02/S04/S03, historical typography and whole grading/retouch-family readiness remain unchanged."
+    ]
+  },
+  "roomRefinement20261122": {
+    "status": "PARTIAL",
+    "evidence": "reports/studio-room-refinement-20261122/verification.json",
+    "scope": "Private native four-minute V2, technical picture cleanup/material colour finish and grading inspector usability.",
+    "verified": [
+      "Native saved/cold-reopened colour settings and portable source relink",
+      "Native export/download hash binding; 7200 frames, Rec709 and stereo sound",
+      "Zero measured added audio lag in eight windows",
+      "Actual finished Studio playback and captured-sound recording",
+      "Core grade numeric entry/validation and responsive inspector at three desktop widths",
+      "Picture cleanup keeps sound and authored framing"
+    ],
+    "unqualified": [
+      "Production release/billing",
+      "Whole-Studio temporal pixel parity and device throughput",
+      "Broad neural identity/occlusion/body reconstruction"
+    ],
+    "readinessPromotion": false
+  },
+  "naturalTexture20261122": {
+    "status": "PARTIAL",
+    "evidence": "reports/studio-natural-texture-20261122/verification.json",
+    "scope": "Versioned natural face/surface finish, exact native V3 and restored source texture controls.",
+    "verified": [
+      "Natural/classic styles survive native save and exact cold import",
+      "Older workers refuse v2 before charge; capability requires the actual CAS filter",
+      "Actual CUDA reconstruction and equivalent CPU inference after an injected CUDA fault",
+      "Native four-minute export/download and complete sound playback",
+      "Three supported desktop inspector widths and exact numeric restoration controls"
+    ],
+    "unqualified": [
+      "Production release/admission/billing",
+      "Whole predictive picture/audio/edge parity",
+      "Ground-truth detail recovery and broad identity/material/device performance"
+    ],
+    "readinessPromotion": false
+  },
+  "capcutStyleAudit20261122": {
+    "status": "PARTIAL",
+    "evidence": "reports/studio-capcut-style-audit-20261122/verification.json",
+    "scope": "Seven owner-supplied CapCut-style reference recordings; local source and retained native-evidence comparison only.",
+    "referenceCount": 7,
+    "verified": [
+      "All seven references inspected across sampled frame sequences; strip/text-zoom/diagonal transitions sampled more densely",
+      "Existing manual primitives and comparable historical native evidence mapped per reference"
+    ],
+    "notRun": [
+      "Exact reference recreation or new render",
+      "Live production availability",
+      "New pre-final/export parity or listening check"
+    ],
+    "gaps": [
+      "Exact rolling-year stack and convenient long-credit authoring",
+      "Reusable combined strip/text-zoom/diagonal transition presets",
+      "Heavy multilayer preview throughput and paired timing/edge/colour conformance"
+    ],
+    "nextTask": "Build and qualify one editable strip/mosaic transition from reference1 using the existing native graph, then verify save/reopen and paired pre-final/native output before expanding the reusable pack.",
+    "readinessPromotion": false
+  },
+  "originalFrames20261122": {
+    "status": "PARTIAL",
+    "evidence": "reports/studio-original-frames-20261122/verification.json",
+    "scope": "12original native editable frame styles, explicit/detected beat inputs, ordinary sound cues and8original synthesized effects; local candidate.",
+    "verified": [
+      "120layer/136key/25window/13cue native authored project",
+      "Normal Undo/Redo, exact canonical cold reopen and fresh authenticated restore",
+      "All25source windows match at12settled programme times",
+      "129focused cases, strict build/replay,8anonymous viewports",
+      "Actual native composition bound to saved project"
+    ],
+    "remaining": [
+      "Full strict picture/colour/edge/low-alpha and live device throughput remain unqualified.",
+      "Native moving proof is portrait; landscape/square are canonical preparation cases, not native exports.",
+      "This is the first curated12style set, not every possible frame/CapCut effect.",
+      "Automatic beat/downbeat accuracy remains limited; precise explicit tempo grids work.",
+      "Control recordings are actual headless/muted actions at original timing, without added narration; capture smoothness remains separate.",
+      "Director replay exports the same recipe builder; no new model-planning integration is claimed.",
+      "Production worker/API/client release, actual credit admission and owner creative/listening approval remain open."
+    ],
+    "productionReleased": false,
+    "nativeRenderComplete": true,
+    "nativeFinishedPlaybackComplete": true
+  },
+  "stripTransition20261122": {
+    "status": "PARTIAL",
+    "evidence": "reports/studio-strip-transition-20261122/verification.json",
+    "nativeRenderComplete": true,
+    "nativeFinishedPlaybackComplete": true,
+    "scope": "Native six-second editable fashion mosaic with ordinary masks,7layers,36keys and whoosh; independent exact restore/download. Strict whole-picture parity and production release remain unqualified."
   }
 }

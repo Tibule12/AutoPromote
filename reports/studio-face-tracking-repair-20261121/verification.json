@@ -1,0 +1,176 @@
+{
+  "date": "2026-11-21",
+  "status": "LOCAL_BOUNDED_REPAIR_NOT_FEATURE_COMPLETION",
+  "readinessPromotion": false,
+  "sourceSha256": "ca4fae025b4e1414fba8e09bb77b66bc80494939afd9d29443e8c460a31d6da4",
+  "nativeMovieSha256": "bd2f5563246ec2e31ce7c433a0bb43c7fc16d4f00c9d94f32144d8bb2bf0a6e4",
+  "projectSha256": "5c30f308119bdbe49e3583fefef3864594e84ba24b644b6a99f252a06859bc1c",
+  "nativeExportAndDownloadMatch": true,
+  "completeNativeFinishedPlayback": {
+    "video": {
+      "path": "/local-master.mp4",
+      "currentTime": 20,
+      "duration": 20,
+      "error": null
+    },
+    "capture": {
+      "seconds": 23.167999982833862,
+      "capturedPictures": 823,
+      "sourceBytes": 241506608,
+      "viewport": [
+        1920,
+        900
+      ],
+      "source": "Actual Chromium screencast",
+      "visualAnnotations": "Pointer, click ring and actual target outline only",
+      "applicationCodeChanged": false,
+      "audio": "Narration added in final production"
+    },
+    "fullFinishedPlayback": true
+  },
+  "tracking": {
+    "face": "Tracked 161 frames. Scrub the range to review the selection.",
+    "texture": "Tracked 161 frames. Scrub the range to review the selection.",
+    "sampleFps": 8,
+    "movieFps": 30,
+    "keyCountPerTrackedRegion": 161,
+    "outlinePoints": 32,
+    "modelPoints": 478,
+    "modelSha256": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff",
+    "nativeControlSdk": "0.10.31",
+    "pinnedSdkCheck": "0.10.21 with NumPy1.26.4: actual retained 81-frame problem packet completes",
+    "uncertaintyReviewStillRequired": true
+  },
+  "tests": {
+    "frontend": 17,
+    "worker": 11,
+    "strictBuild": true,
+    "anonymousWelcomeComparisons": 8
+  },
+  "pictureAudio": {
+    "pairs": [
+      {
+        "time": 0,
+        "wholeMae": 2.615105390548706,
+        "wholeP95": 8.0,
+        "faceMae": 3.2121779918670654,
+        "faceP95": 9.0
+      },
+      {
+        "time": 5,
+        "wholeMae": 2.7419562339782715,
+        "wholeP95": 8.0,
+        "faceMae": 3.313087224960327,
+        "faceP95": 9.0
+      },
+      {
+        "time": 10,
+        "wholeMae": 2.7102103233337402,
+        "wholeP95": 8.0,
+        "faceMae": 3.3441414833068848,
+        "faceP95": 10.0
+      },
+      {
+        "time": 15,
+        "wholeMae": 2.7935616970062256,
+        "wholeP95": 8.0,
+        "faceMae": 3.271048069000244,
+        "faceP95": 9.0
+      },
+      {
+        "time": 19,
+        "wholeMae": 2.7058639526367188,
+        "wholeP95": 8.0,
+        "faceMae": 3.3088574409484863,
+        "faceP95": 9.0
+      }
+    ],
+    "audio": {
+      "lagSeconds": 0.0,
+      "correlation": 0.9927425723900424,
+      "sourceRms": 0.07539394006679775,
+      "outputRms": 0.07482907093857054,
+      "secondsCompared": 20.0106875
+    }
+  },
+  "canonicalRenderSeconds": 296.4610780560033,
+  "renderDevice": "CPU colour/matte/repair filters; h264_nvenc delivery",
+  "nativeLayers": [
+    {
+      "name": "Skin \u00b7 facial expression tracking",
+      "enabled": true,
+      "shape": "polygon",
+      "motionKeys": 161,
+      "materialQualifier": true
+    },
+    {
+      "name": "Cheek \u00b7 tracked clean texture",
+      "enabled": true,
+      "shape": "polygon",
+      "motionKeys": 161,
+      "materialQualifier": false
+    },
+    {
+      "name": "Scene \u00b7 neutral white balance",
+      "enabled": true,
+      "shape": "rectangle",
+      "motionKeys": 0,
+      "materialQualifier": false
+    }
+  ],
+  "preservedSourceAndLogin": true,
+  "originalLoginSha256": "00d48e87bd9b77ba9ead11c92bf93039f43fc3e7e6b322c3e379f6b4dac55254",
+  "productionDeployment": false,
+  "productionRenderCharges": 0,
+  "providerInferenceCalls": 0,
+  "publications": 0,
+  "paidGpuAllocations": 0,
+  "actualAudioListeningApproval": false,
+  "ownerCreativeApproval": false,
+  "remainingBlockers": [
+    "This20-second repair is not the whole four-minute master or a complete professional grading feature.",
+    "Dedicated anatomical selection, individual iris/lip/ear visibility and difficult occlusion/head-turn recovery remain unqualified.",
+    "Full-resolution live CPU and real hardware playback, render speed and long-form/concurrency remain unqualified.",
+    "The canonical render took296.46s for20s; final encoding alone usesNVENC.",
+    "Five pixel pairs and audio correlation are diagnostic; full temporal/edge/material parity and human listening approval remain open.",
+    "No coordinated frontend/API/CPU/GPU production release.",
+    "SharedS02/S04/S03 and historical typography failures remain separate."
+  ],
+  "restore": {
+    "coldReload": true,
+    "normalBackupImport": true,
+    "exactMasksMovementAndTexture": true,
+    "snapshotDifferences": [
+      "projectMedia",
+      "timeline"
+    ],
+    "errors": [],
+    "blocked": []
+  },
+  "canonicalDocumentExactlyRestored": true,
+  "remainingSnapshotDifferences": [
+    "projectMedia URLs/error normalization",
+    "timeline access URL renewal"
+  ],
+  "deliveryDirectory": "/home/tibule12/Videos/Studio Grading - Face Tracking Review - 2026-11-21",
+  "nativePacketArchivesVerified": 5,
+  "privateServicesStopped": [
+    {
+      "pid": 905957,
+      "program": "controller-final.cjs"
+    },
+    {
+      "pid": 909214,
+      "program": "serve-render.cjs"
+    },
+    {
+      "pid": 910846,
+      "program": "serve.cjs"
+    },
+    {
+      "pid": 915215,
+      "program": "worker-server.py"
+    }
+  ],
+  "browserClosed": true
+}

@@ -1,7 +1,9 @@
 {
-  "checkedAt": "2026-10-21T20:01:25.551Z",
-  "baseline": "http://localhost:5006/",
-  "candidate": "http://localhost:5000/",
+  "checkedAt": "2026-11-22T10:43:51.433Z",
+  "baseline": "http://localhost:5102",
+  "candidate": "http://localhost:5111",
+  "candidateLoopback": "127.0.0.1",
+  "baselineLoopback": "127.0.0.1",
   "headless": true,
   "muted": true,
   "mockedResponses": false,
@@ -64,16 +66,7 @@
       "noOverflow": true
     }
   ],
-  "authenticated": {
-    "realSavedLogin": true,
-    "questions": 3,
-    "savedSessionUnchanged": true,
-    "savedProjectRecordsUnchanged": 0
-  },
+  "authenticated": null,
   "browserErrors": [],
-  "apiWrites": [
-    "/api/product-assistance/ask",
-    "/api/product-assistance/ask",
-    "/api/product-assistance/ask"
-  ]
+  "apiWrites": []
 }

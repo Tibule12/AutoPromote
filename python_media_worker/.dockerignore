@@ -12,3 +12,4 @@ output/
 deploy.sh
 deploy_to_cloud_run.ps1
 check_dependencies.py
+models/face-restoration/*.pth

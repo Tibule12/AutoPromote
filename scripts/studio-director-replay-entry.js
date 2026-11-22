@@ -11,4 +11,5 @@ export { buildViralRenderData } from "../frontend/src/components/viralRenderPayl
 export { mapCaptionSegmentsToTimeline } from "../frontend/src/components/viralRenderPayload";
 export { createModelArtifactReference } from "../frontend/src/components/studioModelArtifactReference";
 export { instantiateStudioCreativeTemplate, proposeStudioDirectorTemplate, PRODUCT_LAUNCH_TEMPLATE } from "../frontend/src/components/studioCreativeTemplate";
+export { buildStudioFramePlan, STUDIO_FRAME_STYLES } from "../frontend/src/components/studioFrameStyles";
 export { validateCinematicScene, buildCinematicGraph, planCinematicIntent } from "../frontend/src/components/threeD/cinematicContract";

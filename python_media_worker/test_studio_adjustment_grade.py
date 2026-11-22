@@ -1,14 +1,45 @@
 import subprocess
+import asyncio
+import json
 import tempfile
 import unittest
 from pathlib import Path
 import numpy as np
+from unittest.mock import patch
 from python_media_worker.main_media_server import build_studio_finish_filter, plan_studio_adjustment_segments
 from python_media_worker.studio_adjustment_grade import adjustment_grade_filter
 from python_media_worker.studio_color_cube import write_color_cube
 
 
 class AdjustmentGradeTests(unittest.TestCase):
+    def test_precision_video_intermediate_keeps_full_chroma_and_picture_timing(self):
+        from python_media_worker import main_media_server as worker
+        with tempfile.TemporaryDirectory()as directory:
+            root=Path(directory);source=root/'source.mp4';output=root/'graded.mp4'
+            pixels=np.empty((32,64,3),np.uint8);pixels[:,::2]=[172,108,72];pixels[:,1::2]=[78,72,126]
+            subprocess.run(['ffmpeg','-v','error','-y','-f','rawvideo','-pix_fmt','rgb24','-s','64x32','-r','24','-i','pipe:0',
+                '-frames:v','8','-c:v','libx264rgb','-crf','0','-preset','ultrafast',str(source)],input=pixels.tobytes()*8,capture_output=True,check=True)
+            layers=[{'startTime':0,'duration':8/24,'effects':{'color':{'precisionGrade':True}}}]
+            with patch.object(worker,'FIREBASE_STATUS_UPDATES_ENABLED',False):
+                asyncio.run(worker.render_studio_finish_timeline_sequential(str(source),str(output),'',layers,8/24,job_id='colour-edge-test'))
+            probe=json.loads(subprocess.run(['ffprobe','-v','error','-count_frames','-select_streams','v:0','-show_streams','-of','json',str(output)],capture_output=True,check=True).stdout)['streams'][0]
+            self.assertEqual(probe['pix_fmt'],'yuv444p')
+            self.assertEqual(int(probe['nb_read_frames']),8)
+            self.assertEqual(probe['color_space'],'bt709')
+            decoded=subprocess.run(['ffmpeg','-v','error','-threads','1','-i',str(output),'-frames:v','1','-f','rawvideo','-pix_fmt','rgb24','pipe:1'],capture_output=True,check=True).stdout
+            actual=np.frombuffer(decoded,np.uint8).reshape(pixels.shape)
+            self.assertLess(float(np.abs(actual.astype(float)-pixels).mean()),3)
+
+    def test_stacked_precision_grades_preserve_thin_colour_edges_before_delivery(self):
+        image=np.empty((32,64,3),np.uint8)
+        image[:,::2]=[172,108,72]
+        image[:,1::2]=[78,72,126]
+        graph=','.join(adjustment_grade_filter({'color':{'precisionGrade':True}},build_studio_finish_filter,f'edge{i}_')for i in range(3))
+        result=subprocess.run(['ffmpeg','-v','error','-filter_threads','1','-f','rawvideo','-pix_fmt','rgb24','-s','64x32','-i','pipe:0',
+            '-vf',graph,'-frames:v','1','-f','rawvideo','-pix_fmt','rgb24','pipe:1'],input=image.tobytes(),capture_output=True,check=True)
+        actual=np.frombuffer(result.stdout,np.uint8).reshape(image.shape)
+        np.testing.assert_array_equal(actual,image)
+
     def render(self, effects):
         filters = adjustment_grade_filter(effects, build_studio_finish_filter, 'test_')
         output = subprocess.run(['ffmpeg', '-v', 'error', '-filter_threads', '1', '-f', 'lavfi',

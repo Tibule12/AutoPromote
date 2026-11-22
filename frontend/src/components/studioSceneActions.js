@@ -24,6 +24,7 @@ import {
 import { buildBeatSyncedGradePulses, normalizeFinishKeyframes } from './studioFinishKeyframes';
 import { STUDIO_EXPORT_BLEND_MODES } from './studioBlendModes';
 import { normalizeStudio3DScene } from './threeD/studio3DModel';
+import { SOUND_EFFECT_PRESETS } from './motion/soundDesign';
 
 const only = (value, fields) => {
   if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).some(k => !fields.includes(k)))
@@ -58,6 +59,8 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
   const threeDScenes = [...(snapshot.threeDScenes || [])];
   let touchedThreeD = Array.isArray(snapshot.threeDScenes);
   const adjustmentLayers = [...(snapshot.adjustmentLayers || [])];
+  const soundEffects = [...(snapshot.soundEffects || [])];
+  let touchedSound = false;
   const compositionOrder = [...(snapshot.compositionOrder || snapshot.overlays.map(o => o.id))];
   const ids = new Map();
   const target = id => id === 'main-video' ? id : ids.get(id) || (overlays.some(layer => layer.id === id) ? id : null);
@@ -69,8 +72,25 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
     return legacy[property] || [field.min, field.max];
   };
   for (const action of plan.actions) {
-    only(action, ['type', 'id', 'name', 'startTime', 'duration', 'transform', 'text', 'sourceMediaId', 'sourceStart', 'mediaFit', 'perspective', 'mask', 'motionDrivers', 'targetId', 'parentId', 'matteSourceId', 'mode', 'keys', 'grade', 'advancedColor', 'beatSyncPulses', 'beats', 'beforeId', 'property', 'sourceId', 'port', 'driver', 'style', 'scene', 'bRollLayoutPreset', 'bRollAudioPreset', 'bRollLookPreset', 'motionBlur', 'textAnimator', 'textAnimatorPreset', 'textProgress', 'color', 'fontWeight', 'textAlign', 'strokeColor', 'strokeWidth', 'width']);
+    only(action, ['type', 'id', 'name', 'startTime', 'duration', 'transform', 'text', 'sourceMediaId', 'sourceStart', 'mediaFit', 'perspective', 'mask', 'motionDrivers', 'targetId', 'parentId', 'matteSourceId', 'mode', 'keys', 'grade', 'advancedColor', 'beatSyncPulses', 'beats', 'beforeId', 'property', 'sourceId', 'port', 'driver', 'style', 'scene', 'bRollLayoutPreset', 'bRollAudioPreset', 'bRollLookPreset', 'motionBlur', 'textAnimator', 'textAnimatorPreset', 'textProgress', 'color', 'fontWeight', 'textAlign', 'strokeColor', 'strokeWidth', 'width', 'height', 'tone', 'volume', 'fadeIn', 'fadeOut']);
     const type = action.type;
+    if (action.height !== undefined && type !== 'media_plane') throw Error('Explicit scene height applies to media planes only.');
+    if (type === 'sound_cue') {
+      only(action, ['type', 'id', 'name', 'startTime', 'duration', 'tone', 'volume', 'fadeIn', 'fadeOut']);
+      string(action.id); string(action.name, 100);
+      if (ids.has(action.id) || soundEffects.length >= 128) throw Error('Duplicate sound identifier or too many sound cues.');
+      const preset = SOUND_EFFECT_PRESETS.find(item => item.tone === action.tone);
+      if (!preset) throw Error('Choose a supported Studio sound effect.');
+      const startTime = finite(action.startTime, 0, duration), length = finite(action.duration ?? preset.duration, .05, 15);
+      if (startTime + length > duration + 1 / 90000) throw Error('Sound cue extends past the programme.');
+      const id = createId('sfx'); ids.set(action.id, id);
+      soundEffects.push({ id, name: action.name, tone: preset.tone, emoji: preset.emoji, builtIn: true,
+        enabled: true, startTime, duration: length, trimStart: 0,
+        volume: finite(action.volume ?? preset.volume ?? .3, 0, 1),
+        fadeIn: finite(action.fadeIn ?? .008, 0, length), fadeOut: finite(action.fadeOut ?? Math.min(.12, length / 3), 0, length) });
+      touchedSound = true;
+      continue;
+    }
     if (type === 'three_d_scene') {
       string(action.id); string(action.name, 100);
       if (!action.scene || typeof action.scene !== 'object' || Array.isArray(action.scene)) {
@@ -198,7 +218,8 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
         if (sourceStart + length > Number(media.duration) + .001) throw Error('Scene plane would run past its source video.');
         Object.assign(layer, { type: 'video', src: media.url, file: media.file, sourceMediaId: media.id,
           sourceDuration: Number(media.duration), contentHash: media.contentHash || null,
-          sourceStoragePath: media.storagePath, sourceStartTime: sourceStart, width: 70, height: 70,
+          sourceStoragePath: media.storagePath, sourceStartTime: sourceStart,
+          width: finite(action.width ?? 70, 2, 100), height: finite(action.height ?? 70, 2, 100),
           bRollMode: 'pip', mediaFit: action.mediaFit || 'contain', frameShape: 'edge', borderRadius: 0, volume: 0, muted: true,
           layerShadow: {enabled: true, color: '#000000', opacity: .35, blur: 12, x: 0, y: 16},
           ...(action.perspective ? { perspective: action.perspective } : {}) });
@@ -324,6 +345,7 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
     ...(touchedThreeD ? { threeDScenes } : {}),
     motionKeyframes,
     adjustmentLayers,
+    ...(touchedSound ? { soundEffects } : {}),
     compositionOrder,
   };
   const document = reconcileStudioDocument({ snapshot: next, projectId: doc.projectId, storedDocument: doc });
