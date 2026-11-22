@@ -14,11 +14,46 @@
       "byteIdentical": true
     },
     "blockers": [
-      "Release candidate frontend/API/CPU/GPU changes before claiming live fixes",
-      "A new bounded production render approval is needed to measure the revised worker; both previous exports/10 credits are used",
+      "PR #554 remains unmerged; owner holds merge/deployment pending further instruction",
+      "One additional 45s production retest is approved up to5 credits but remains on hold and unstarted",
       "Actual CPU failover, concurrency/load, host loss and notification delivery remain unqualified",
       "Whole predictive parity, broader S02/S04/S03 and creative approval remain separate"
-    ]
+    ],
+    "ciFollowup": {
+      "failedRun": "https://github.com/Tibule12/AutoPromote/actions/runs/45037430598/job/137254182794",
+      "failure": "ModuleNotFoundError: pytest via test_studio_video_reuse importing test_studio_overlay_zero.run",
+      "imageBuild": "passed",
+      "failedImageTests": 1,
+      "imageTestCount": 192,
+      "fix": "Self-contained subprocess FFmpeg helper; explicitly CPU-render cached and independently prepared reference sources, comparing every decoded RGB byte instead of spatial H.264 symmetry",
+      "validationStatus": "Passed: exact17 image-gate module list,192 tests on local CPU with pytest and original pytest fixture imports explicitly refused",
+      "releaseState": "Owner holds merge/deployment and production retest until further instruction",
+      "readinessPromotion": false,
+      "productionRetestStarted": false,
+      "localFirstReplay": {
+        "testCount": 192,
+        "failures": 1,
+        "elapsedSeconds": 98.508,
+        "cause": "CPU lossy H.264 spatial window equality assumption",
+        "resolution": "Compare shared-preparation output against a full independent-source reference; exact array equality, no relaxed thresholds"
+      },
+      "focusedVerification": {
+        "testCount": 5,
+        "elapsedSeconds": 5.533,
+        "status": "passed",
+        "pytestImports": "explicitly refused",
+        "finalFrameComparison": "exact decoded RGB equality across all24 frames and both moving windows"
+      },
+      "localFinalReplay": {
+        "testCount": 192,
+        "elapsedSeconds": 100.115,
+        "status": "passed",
+        "pytestImports": "explicitly refused",
+        "runtime": "Local Python3.12 and FFmpeg6.1; remote Python3.11/FFmpeg7.1 image rerun remains separate",
+        "logSha256": "47a526a28ebc7dec3c088ac5b893dfc2026a71d1269ef2842c89b9856df3a574"
+      },
+      "remoteActionState": "Fix to be pushed to PR#554; automatic new-head checks remain separate from local validation"
+    }
   },
   "videoSync20261121": {
     "date": "2026-11-21",
