@@ -124,6 +124,7 @@
     "postinstall": "node ../scripts/patch-security-dependencies.js && node ../scripts/patch-brace-expansion-compat.js",
     "start": "node scripts/start-react.js",
     "start:landing": "node scripts/preview-public-homepage.js",
+    "prebuild": "node ../scripts/build-legal-pages.js --check",
     "build": "react-scripts build",
     "format": "prettier --write \"src/**/*.{js,jsx,css}\"",
     "format:check": "prettier --check \"src/**/*.{js,jsx,css}\"",
