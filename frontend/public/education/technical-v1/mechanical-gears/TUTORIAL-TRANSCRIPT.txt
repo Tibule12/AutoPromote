@@ -1,0 +1,65 @@
+0.00s — Workspace → Viral Clip Studio
+Click Viral Clip Studio in the workspace. Each tool path shown at the top identifies where we are; long panel scrolling is shortened.
+
+9.49s — Viral Clip Studio → Choose videos
+Choose videos and select source dot M P four from the practice kit. It is a plain stage with our concept narration, not a finished animation.
+
+19.81s — Viral Clip Studio → Open Creator Studio
+Open Creator Studio. Keep the preview, tools and timeline visible together. We will build the explanation with ordinary editable layers.
+
+29.64s — Preview → After → Full
+Pause the comparison, choose After and set preview quality to Full. This shows the actual editable composition before any final render.
+
+40.23s — Reframe → 16:9; View options → Fit full
+Open Reframe. Choose sixteen by nine and Show Everyone. Under View options choose Fit full and turn the main frame off. Rounded footage stays off.
+
+51.33s — Sound → Keep original audio
+Open Sound. Keep original audio on and voice repair off. The source carries the disclosed synthetic teaching voice; Studio will preserve it.
+
+61.75s — Captions → Preview captions off
+Open Captions and leave preview captions off. The diagram labels explain the concept; there are no subtitle or caption tracks.
+
+71.05s — Graphics → Import animated graphics
+Click Graphics. Close Logo Workshop, then open Import animated graphics. The path label keeps you oriented while we move directly to the right control.
+
+82.56s — Graphics → Import graphics composition…
+Import starter dot graphics dot J S O N. Prepared static diagrams become ordinary native layers and keys. One deliberately incomplete value lets us practise the real motion controls.
+
+96.33s — Motion → Transform keyframes → Target layer
+Click Motion, then Transform keyframes. Always check Target layer before changing a value. The supplied scaffold remains editable; it is not a flattened animation.
+
+108.26s — Motion → Curve keyframe
+Choose Driver gear. In the curve editor choose rotation at twenty-four seconds. The starter ends at ninety degrees, so its last interval is incomplete.
+
+119.20s — Motion → Selected key value / easing
+Change the selected key value to one hundred and eighty and choose Linear. From minus one eighty to plus one eighty is one full revolution.
+
+129.59s — Motion → related target / mask
+Choose Driven gear. Its keys are ninety, forty-five, zero, minus forty-five and minus ninety at four, nine, fourteen, nineteen and twenty-four seconds. Linear keeps the opposite half-speed relationship.
+
+144.33s — Graphics → Add title layer → Label
+Now create an original annotation. Click Graphics, find Add title layer and choose Label. This is a normal editable text layer.
+
+153.34s — Graphics → Title text / time / size
+Type Predict first. Set its start to twenty-four seconds, duration four seconds, size point five five and box width sixty percent.
+
+180.86s — Motion → Transform keyframes → X / Y
+Select the new title in Motion. Set X to fifty and Y to eighty-four. That places it in the reserved footer; check that it never covers the technical diagram.
+
+201.08s — Graphics → selected title → Remove
+Return to Graphics and remove this practice label. Our final lesson already has its own footer callout. Keep the exercise project separately if you want to develop it.
+
+212.38s — Preview → seek zero → Play
+Return the playhead to zero and play the full editable lesson. Check the relationships, timing, labels and sound before spending render time.
+
+248.00s — Show media → Project name → Save
+Choose Show media. Give this project a unique subject name and save it. The diagram layers, keys, audio and technical decisions stay editable.
+
+263.53s — Export → 720p → 24 fps
+Open Export. Choose seven twenty p and twenty-four frames per second. Keep the full twenty-eight-second programme and its original narration.
+
+275.79s — Export → Render Final Clip
+Click Render Final Clip. This recording uses the isolated local C P U worker and finite symbolic credits. The unattended processing wait is omitted.
+
+290.00s — Export → Show Finished Video
+Choose Show Finished Video, then watch the complete native Studio export. Compare it with the editable preview. The tutorial ends with the actual result and its sound.

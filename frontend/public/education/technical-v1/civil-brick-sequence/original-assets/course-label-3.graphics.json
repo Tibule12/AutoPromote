@@ -1,0 +1,29 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Course label 3 \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Course label 3",
+      "name": "Course label 3",
+      "type": "text",
+      "text": "03",
+      "x": 14.84375,
+      "y": 55.55555555555556,
+      "width": 94,
+      "scale": 0.5,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9daec8",
+      "keys": []
+    }
+  ],
+  "groups": []
+}

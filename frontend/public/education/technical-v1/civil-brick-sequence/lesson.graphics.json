@@ -1,0 +1,833 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Build the bond, course by course.",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Pathway marker",
+      "name": "Pathway marker",
+      "type": "text",
+      "text": "AUTOPROMOTE EDUCATION  /  CIVIL TECHNOLOGY",
+      "x": 50.0,
+      "y": 4.166666666666667,
+      "width": 94,
+      "scale": 0.35,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8eefd0",
+      "keys": []
+    },
+    {
+      "id": "Lesson title",
+      "name": "Lesson title",
+      "type": "text",
+      "text": "Build the bond, course by course.",
+      "x": 50.0,
+      "y": 10.13888888888889,
+      "width": 94,
+      "scale": 0.94,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 800,
+      "textAlign": "center",
+      "color": "#eff5ff",
+      "keys": []
+    },
+    {
+      "id": "Stage dividers",
+      "name": "Stage dividers",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><line x1=\"56\" y1=\"119\" x2=\"1224\" y2=\"119\" stroke=\"#25334b\" stroke-width=\"1\"/><line x1=\"56\" y1=\"610\" x2=\"1224\" y2=\"610\" stroke=\"#25334b\" stroke-width=\"1\"/></svg>",
+      "x": 50.0,
+      "y": 50.0,
+      "width": 100.0,
+      "height": 100.0,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "contain",
+      "keys": []
+    },
+    {
+      "id": "Prepared support",
+      "name": "Prepared support",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><rect x=\"238\" y=\"560\" width=\"814\" height=\"27\" rx=\"3\" fill=\"#526176\"/></svg>",
+      "x": 50.0,
+      "y": 50.0,
+      "width": 100.0,
+      "height": 100.0,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "contain",
+      "keys": []
+    },
+    {
+      "id": "Schematic DPC",
+      "name": "Schematic DPC",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><rect x=\"250\" y=\"550\" width=\"790\" height=\"8\" fill=\"#131c30\" stroke=\"#8c9bb3\" stroke-width=\"1\"/></svg>",
+      "x": 50.0,
+      "y": 50.0,
+      "width": 100.0,
+      "height": 100.0,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "contain",
+      "keys": []
+    },
+    {
+      "id": "Support note",
+      "name": "Support note",
+      "type": "text",
+      "text": "PREPARED SUPPORT + SCHEMATIC DPC",
+      "x": 50.0,
+      "y": 25.416666666666664,
+      "width": 94,
+      "scale": 0.44,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9daec8",
+      "keys": []
+    },
+    {
+      "id": "Course label 1",
+      "name": "Course label 1",
+      "type": "text",
+      "text": "01",
+      "x": 14.84375,
+      "y": 72.22222222222221,
+      "width": 94,
+      "scale": 0.5,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 3,
+      "duration": 25,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9daec8",
+      "keys": []
+    },
+    {
+      "id": "Course label 2",
+      "name": "Course label 2",
+      "type": "text",
+      "text": "02",
+      "x": 14.84375,
+      "y": 63.888888888888886,
+      "width": 94,
+      "scale": 0.5,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 8,
+      "duration": 20,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9daec8",
+      "keys": []
+    },
+    {
+      "id": "Course label 3",
+      "name": "Course label 3",
+      "type": "text",
+      "text": "03",
+      "x": 14.84375,
+      "y": 55.55555555555556,
+      "width": 94,
+      "scale": 0.5,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 13,
+      "duration": 15,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9daec8",
+      "keys": []
+    },
+    {
+      "id": "Course label 4",
+      "name": "Course label 4",
+      "type": "text",
+      "text": "04",
+      "x": 14.84375,
+      "y": 47.22222222222222,
+      "width": 94,
+      "scale": 0.5,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 18,
+      "duration": 10,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9daec8",
+      "keys": []
+    },
+    {
+      "id": "Course 1",
+      "name": "Course 1",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1120\" height=\"60\" viewBox=\"0 0 1120 60\"><rect width=\"1120\" height=\"60\" fill=\"#bac1ca\"/><rect x=\"-160\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"-152\" y1=\"8\" x2=\"-20\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"0\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"8\" y1=\"8\" x2=\"140\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"160\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"168\" y1=\"8\" x2=\"300\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"320\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"328\" y1=\"8\" x2=\"460\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"480\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"488\" y1=\"8\" x2=\"620\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"640\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"648\" y1=\"8\" x2=\"780\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"800\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"808\" y1=\"8\" x2=\"940\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"960\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"968\" y1=\"8\" x2=\"1100\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"1120\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"1128\" y1=\"8\" x2=\"1260\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/></svg>",
+      "x": 63.28125,
+      "y": 72.22222222222221,
+      "width": 87.5,
+      "height": 8.333333333333334,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 3,
+      "duration": 25,
+      "mediaFit": "contain",
+      "keys": [
+        {
+          "property": "y",
+          "time": 3,
+          "value": 68.888889,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 3.9,
+          "value": 72.222222,
+          "easing": "ease_out"
+        },
+        {
+          "property": "opacity",
+          "time": 3,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 3.5,
+          "value": 1,
+          "easing": "ease_out"
+        }
+      ]
+    },
+    {
+      "id": "Course 2",
+      "name": "Course 2",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1120\" height=\"60\" viewBox=\"0 0 1120 60\"><rect width=\"1120\" height=\"60\" fill=\"#bac1ca\"/><rect x=\"-240\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"-232\" y1=\"8\" x2=\"-100\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"-80\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"-72\" y1=\"8\" x2=\"60\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"80\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"88\" y1=\"8\" x2=\"220\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"240\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"248\" y1=\"8\" x2=\"380\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"400\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"408\" y1=\"8\" x2=\"540\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"560\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"568\" y1=\"8\" x2=\"700\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"720\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"728\" y1=\"8\" x2=\"860\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"880\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"888\" y1=\"8\" x2=\"1020\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"1040\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"1048\" y1=\"8\" x2=\"1180\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/></svg>",
+      "x": 63.28125,
+      "y": 63.888888888888886,
+      "width": 87.5,
+      "height": 8.333333333333334,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 8,
+      "duration": 20,
+      "mediaFit": "contain",
+      "keys": [
+        {
+          "property": "y",
+          "time": 8,
+          "value": 60.555556,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 8.9,
+          "value": 63.888889,
+          "easing": "ease_out"
+        },
+        {
+          "property": "opacity",
+          "time": 8,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 8.5,
+          "value": 1,
+          "easing": "ease_out"
+        }
+      ]
+    },
+    {
+      "id": "Course 3",
+      "name": "Course 3",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1120\" height=\"60\" viewBox=\"0 0 1120 60\"><rect width=\"1120\" height=\"60\" fill=\"#bac1ca\"/><rect x=\"-160\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"-152\" y1=\"8\" x2=\"-20\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"0\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"8\" y1=\"8\" x2=\"140\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"160\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"168\" y1=\"8\" x2=\"300\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"320\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"328\" y1=\"8\" x2=\"460\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"480\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"488\" y1=\"8\" x2=\"620\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"640\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"648\" y1=\"8\" x2=\"780\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"800\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"808\" y1=\"8\" x2=\"940\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"960\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"968\" y1=\"8\" x2=\"1100\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"1120\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"1128\" y1=\"8\" x2=\"1260\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/></svg>",
+      "x": 63.28125,
+      "y": 55.55555555555556,
+      "width": 87.5,
+      "height": 8.333333333333334,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 13,
+      "duration": 15,
+      "mediaFit": "contain",
+      "keys": [
+        {
+          "property": "y",
+          "time": 13,
+          "value": 52.222222,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.9,
+          "value": 55.555556,
+          "easing": "ease_out"
+        },
+        {
+          "property": "opacity",
+          "time": 13,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 13.5,
+          "value": 1,
+          "easing": "ease_out"
+        }
+      ]
+    },
+    {
+      "id": "Course 4",
+      "name": "Course 4",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1120\" height=\"60\" viewBox=\"0 0 1120 60\"><rect width=\"1120\" height=\"60\" fill=\"#bac1ca\"/><rect x=\"-240\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"-232\" y1=\"8\" x2=\"-100\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"-80\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"-72\" y1=\"8\" x2=\"60\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"80\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"88\" y1=\"8\" x2=\"220\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"240\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"248\" y1=\"8\" x2=\"380\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"400\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"408\" y1=\"8\" x2=\"540\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"560\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"568\" y1=\"8\" x2=\"700\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"720\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"728\" y1=\"8\" x2=\"860\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"880\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"888\" y1=\"8\" x2=\"1020\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"1040\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"1048\" y1=\"8\" x2=\"1180\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/></svg>",
+      "x": 63.28125,
+      "y": 47.22222222222222,
+      "width": 87.5,
+      "height": 8.333333333333334,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 18,
+      "duration": 10,
+      "mediaFit": "contain",
+      "keys": [
+        {
+          "property": "y",
+          "time": 18,
+          "value": 43.888889,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 18.9,
+          "value": 47.222222,
+          "easing": "ease_out"
+        },
+        {
+          "property": "opacity",
+          "time": 18,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 18.5,
+          "value": 1,
+          "easing": "ease_out"
+        }
+      ]
+    },
+    {
+      "id": "Bed joint annotation",
+      "name": "Bed joint annotation",
+      "type": "artwork",
+      "x": 50.0,
+      "y": 67.36111111111111,
+      "width": 60.15625,
+      "height": 1.5277777777777777,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 14,
+      "duration": 14,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 0.8,
+            "y": 0.8,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.2,
+            "y": 0.8,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.2,
+            "y": 99.2,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 0.8,
+            "y": 99.2,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ffffff",
+          "endColor": "#ffffff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#8eefd0",
+          "width": 0.8
+        }
+      },
+      "keys": [
+        {
+          "property": "strokeEnd",
+          "time": 14,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "strokeEnd",
+          "time": 14.8,
+          "value": 100,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "Bed joint label",
+      "name": "Bed joint label",
+      "type": "text",
+      "text": "BED JOINT",
+      "x": 87.96875,
+      "y": 67.36111111111111,
+      "width": 94,
+      "scale": 0.42,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 14,
+      "duration": 14,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8eefd0",
+      "keys": []
+    },
+    {
+      "id": "Perp joint annotation",
+      "name": "Perp joint annotation",
+      "type": "artwork",
+      "x": 31.640625,
+      "y": 71.66666666666667,
+      "width": 1.09375,
+      "height": 6.25,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 10,
+      "duration": 18,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 0.8,
+            "y": 0.8,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.2,
+            "y": 0.8,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.2,
+            "y": 99.2,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 0.8,
+            "y": 99.2,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ffffff",
+          "endColor": "#ffffff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#ffcc79",
+          "width": 0.8
+        }
+      },
+      "keys": [
+        {
+          "property": "strokeEnd",
+          "time": 10,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "strokeEnd",
+          "time": 10.8,
+          "value": 100,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "Perp joint label",
+      "name": "Perp joint label",
+      "type": "text",
+      "text": "PERP JOINT",
+      "x": 87.96875,
+      "y": 73.61111111111111,
+      "width": 94,
+      "scale": 0.42,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 10,
+      "duration": 18,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#ffcc79",
+      "keys": []
+    },
+    {
+      "id": "Level and plumb guides",
+      "name": "Level and plumb guides",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><line x1=\"245\" y1=\"302\" x2=\"245\" y2=\"555\" stroke=\"#74bfff\" stroke-width=\"2\" stroke-dasharray=\"5 5\"/><line x1=\"245\" y1=\"302\" x2=\"1047\" y2=\"302\" stroke=\"#74bfff\" stroke-width=\"2\" stroke-dasharray=\"5 5\"/></svg>",
+      "x": 50.0,
+      "y": 50.0,
+      "width": 100.0,
+      "height": 100.0,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 21,
+      "duration": 7,
+      "mediaFit": "contain",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 21,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 21.7,
+          "value": 1,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "Crop note",
+      "name": "Crop note",
+      "type": "text",
+      "text": "CROPPED ELEVATION  /  WALL CONTINUES AT BOTH EDGES",
+      "x": 50.0,
+      "y": 31.805555555555554,
+      "width": 94,
+      "scale": 0.41,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9daec8",
+      "keys": []
+    },
+    {
+      "id": "Callout 1",
+      "name": "Callout 1",
+      "type": "text",
+      "text": "Prepared support and schematic damp-proof course",
+      "x": 50.0,
+      "y": 91.66666666666667,
+      "width": 94,
+      "scale": 0.68,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 7,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8eefd0",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 0.35,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 0,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 0.5,
+          "value": 91.666667,
+          "easing": "ease_out"
+        }
+      ]
+    },
+    {
+      "id": "Callout 2",
+      "name": "Callout 2",
+      "type": "text",
+      "text": "Bed joints + perp joints",
+      "x": 50.0,
+      "y": 91.66666666666667,
+      "width": 94,
+      "scale": 0.68,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 7,
+      "duration": 7,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8eefd0",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 7,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 7.35,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 7,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 7.5,
+          "value": 91.666667,
+          "easing": "ease_out"
+        }
+      ]
+    },
+    {
+      "id": "Callout 3",
+      "name": "Callout 3",
+      "type": "text",
+      "text": "Alternate courses: half-module offset",
+      "x": 50.0,
+      "y": 91.66666666666667,
+      "width": 94,
+      "scale": 0.68,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 14,
+      "duration": 7,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8eefd0",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 14,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 14.35,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.5,
+          "value": 91.666667,
+          "easing": "ease_out"
+        }
+      ]
+    },
+    {
+      "id": "Callout 4",
+      "name": "Callout 4",
+      "type": "text",
+      "text": "Level + plumb guides · supervised practicals remain essential",
+      "x": 50.0,
+      "y": 91.66666666666667,
+      "width": 94,
+      "scale": 0.68,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 21,
+      "duration": 7,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8eefd0",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 21,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 21.35,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 21,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 21.5,
+          "value": 91.666667,
+          "easing": "ease_out"
+        }
+      ]
+    }
+  ],
+  "groups": [
+    {
+      "id": "Wall crop",
+      "name": "Wall crop",
+      "layerIds": [
+        "Course 1",
+        "Course 2",
+        "Course 3",
+        "Course 4"
+      ],
+      "startTime": 0,
+      "duration": 28,
+      "mask": {
+        "enabled": true,
+        "shape": "polygon",
+        "path": "polygon(19.53125% 38%, 81.25% 38%, 81.25% 76.388889%, 19.53125% 76.388889%)",
+        "feather": 0,
+        "inverted": false
+      },
+      "keys": []
+    }
+  ]
+}

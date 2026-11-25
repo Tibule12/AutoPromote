@@ -1,0 +1,29 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Open again \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Open again",
+      "name": "Open again",
+      "type": "text",
+      "text": "OPEN AGAIN  /  LAMP OFF",
+      "x": 50.0,
+      "y": 65.0,
+      "width": 94,
+      "scale": 0.58,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#ffcc79",
+      "keys": []
+    }
+  ],
+  "groups": []
+}

@@ -1,0 +1,29 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Course label 4 \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Course label 4",
+      "name": "Course label 4",
+      "type": "text",
+      "text": "04",
+      "x": 14.84375,
+      "y": 47.22222222222222,
+      "width": 94,
+      "scale": 0.5,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9daec8",
+      "keys": []
+    }
+  ],
+  "groups": []
+}

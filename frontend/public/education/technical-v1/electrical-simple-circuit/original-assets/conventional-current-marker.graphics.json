@@ -1,0 +1,28 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Conventional current marker \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Conventional current marker",
+      "name": "Conventional current marker",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\" fill=\"#ffcf53\" stroke=\"none\" stroke-width=\"1\"/></svg>",
+      "x": 18.75,
+      "y": 38.888888888888886,
+      "width": 1.875,
+      "height": 3.333333333333333,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "contain",
+      "keys": []
+    }
+  ],
+  "groups": []
+}

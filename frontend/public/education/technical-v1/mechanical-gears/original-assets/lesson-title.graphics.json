@@ -1,0 +1,29 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Lesson title \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Lesson title",
+      "name": "Lesson title",
+      "type": "text",
+      "text": "Two gears. One clear ratio.",
+      "x": 50.0,
+      "y": 10.13888888888889,
+      "width": 94,
+      "scale": 0.94,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 800,
+      "textAlign": "center",
+      "color": "#eff5ff",
+      "keys": []
+    }
+  ],
+  "groups": []
+}

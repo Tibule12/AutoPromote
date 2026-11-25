@@ -1,0 +1,29 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Top label \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Top label",
+      "name": "Top label",
+      "type": "text",
+      "text": "TOP  \u00b7  80 \u00d7 50",
+      "x": 56.25,
+      "y": 20.555555555555554,
+      "width": 94,
+      "scale": 0.51,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8eefd0",
+      "keys": []
+    }
+  ],
+  "groups": []
+}

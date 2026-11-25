@@ -1,0 +1,29 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Side label \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Side label",
+      "name": "Side label",
+      "type": "text",
+      "text": "RIGHT SIDE  \u00b7  50 \u00d7 40",
+      "x": 76.171875,
+      "y": 75.27777777777777,
+      "width": 94,
+      "scale": 0.47,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#ffcc79",
+      "keys": []
+    }
+  ],
+  "groups": []
+}

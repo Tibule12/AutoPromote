@@ -1,0 +1,8 @@
+RECREATE IN YOUR OWN AUTHORISED STUDIO ACCOUNT
+1. Upload source.mp4 normally and open Creator Studio.
+2. Set 16:9, Show Everyone, Fit full, main frame off, Rounded off, captions off, keep original sound, voice repair off.
+3. Graphics → Import animated graphics → Import graphics composition… → lesson.graphics.json (completed) or starter.graphics.json (exercise). Static original SVGs are available separately in original-assets.
+4. Follow STUDIO-RECIPE.txt and the narrated tutorial. Each imported object is an ordinary native layer and its motion keys remain editable.
+5. Save under your own project name, cold reopen and inspect before any export. A render uses normal permissions/credits; this kit grants none.
+
+Actual owner project backups are retained in the founder’s separate local Owner projects directory, alongside the exact authenticated export receipts. Private owner Storage permissions do not transfer. The shareable kit deliberately excludes owner backups, tokens, signed URLs, private runtime receipts and accounts. A new source upload receives your own media identity. Independent learner/hardware trials remain pending.

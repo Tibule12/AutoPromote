@@ -1,0 +1,98 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Top focus \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Top focus",
+      "name": "Top focus",
+      "type": "artwork",
+      "x": 56.25,
+      "y": 34.72222222222222,
+      "width": 20.625,
+      "height": 24.166666666666664,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 0.8,
+            "y": 0.8,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.2,
+            "y": 0.8,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.2,
+            "y": 99.2,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 0.8,
+            "y": 99.2,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ffffff",
+          "endColor": "#ffffff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#8eefd0",
+          "width": 0.8
+        }
+      },
+      "keys": []
+    }
+  ],
+  "groups": []
+}

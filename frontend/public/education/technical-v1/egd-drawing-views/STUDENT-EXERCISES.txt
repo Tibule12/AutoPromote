@@ -1,0 +1,7 @@
+TECHNICAL EXERCISE
+Sketch the three views of this solid before replaying. Then change width to 100 and the tall portion to 40, keeping depth 50, overall height 40 and step height 20. Draw all three updated views; explain which edges move. Teacher checks the drawing before animation.
+
+CREATIVE EDITING EXERCISE
+Use the original separate SVG views. Import or replace each through normal Studio Graphics/media controls. Apply blue/front, mint/top and amber/right-side consistently. Build a native draw-on outline for one view using Stroke end 0→100 over 0.8s. Keep third-angle layout. Submit the native project, exact key table and a complete explanation.
+
+Submit predictions/reasoning, original assets, editable Studio project, exact keys and complete movie. The starter deliberately contains one incomplete value; correct it using the lesson.

@@ -1,0 +1,3162 @@
+{
+  "version": 1,
+  "scope": [
+    "IT",
+    "CAT",
+    "Technical Education"
+  ],
+  "reviewStatus": "private-teacher-review",
+  "publicRelease": false,
+  "lessons": [
+    {
+      "id": "egd-drawing-views",
+      "subject": "Engineering Graphics and Design",
+      "title": "One object. Three connected views.",
+      "grade": "Grade 10 introduction; Grades 11–12 revision",
+      "releaseStatus": "private-review",
+      "duration": 28,
+      "reference": {
+        "title": "DBE CAPS Grades 10–12 — Engineering Graphics and Design",
+        "url": "https://www.education.gov.za/LinkClick.aspx?fileticket=pqcxCwUTO98%3D&forcedownload=true&mid=1558&portalid=0&tabid=570",
+        "pdfPages": [
+          18,
+          22
+        ],
+        "note": "Teacher must confirm the current annual teaching plan and specialisation. Page numbers count the PDF cover.",
+        "sha256": "f5f1251d07edd0ed7ff05c1d78b28e6632a04b7653475db6c742b5ee30d08dc3"
+      },
+      "concept": "The same stepped solid has width 80, depth 50 and maximum height 40 model units; its lower step is 20 high and its tall portion 30 wide. Third-angle arrangement places the top above the front, and the right-side view to the right. The isometric picture shows appearance; the orthographic views preserve face dimensions.",
+      "objectives": [
+        "Match visible edges of a stepped isometric object to its front, top and right-side views.",
+        "Distinguish pictorial appearance from dimension-preserving orthographic views.",
+        "Explain and use the stated third-angle layout.",
+        "Animate native outlines and matching colours to communicate corresponding views."
+      ],
+      "voices": [
+        "One stepped object. The isometric picture shows its shape. The front view shows its stepped height.",
+        "The top view shows width and depth. Its internal line marks where the height changes.",
+        "The right-side view shows depth and height. The horizontal edge separates the two levels.",
+        "This is third-angle projection: top above front, right-side on the right. Match every view to the same object."
+      ],
+      "technicalExercise": "Sketch the three views of this solid before replaying. Then change width to 100 and the tall portion to 40, keeping depth 50, overall height 40 and step height 20. Draw all three updated views; explain which edges move. Teacher checks the drawing before animation.",
+      "creativeExercise": "Use the original separate SVG views. Import or replace each through normal Studio Graphics/media controls. Apply blue/front, mint/top and amber/right-side consistently. Build a native draw-on outline for one view using Stroke end 0→100 over 0.8s. Keep third-angle layout. Submit the native project, exact key table and a complete explanation.",
+      "questions": [
+        [
+          "Where does the top view go in this stated convention?",
+          "Above the front view. This lesson explicitly uses third-angle projection."
+        ],
+        [
+          "Why is there a line at x=30 in the top view?",
+          "It marks the visible change from the tall portion to the lower step; it is not a separate slot."
+        ],
+        [
+          "What width does the right-side view show?",
+          "The depth, 50 model units; its height is 40. The front view width is 80."
+        ]
+      ],
+      "criteria": [
+        "Correct front, top and right-side geometry and matching dimensions (6).",
+        "State third-angle convention and align the views correctly (4).",
+        "Explain a new dimension change without relying on colour alone (4).",
+        "Accurate native outline timing, readable labels and safe placement (3).",
+        "Editable Studio reconstruction and justified technique choices (3)."
+      ],
+      "limits": "Prepared original static isometric/orthographic SVG assets, not Studio CAD, automatic projection, an engineered working drawing or a rendered 3D scene. Model units are explanatory; no manufacturing dimensions or SANS compliance certification is claimed.",
+      "evidence": {
+        "teacherFeedbackReceived": false,
+        "independentLearnerRecreation": false,
+        "schoolHardwareTrial": false,
+        "publicRelease": false,
+        "nativeExport": true,
+        "actualNativeDownload": true,
+        "completeMovingPreview": true,
+        "completeFinishedPlayback": true,
+        "exactColdRecovery": true,
+        "tutorial": true,
+        "technicalAccuracyChecked": true,
+        "bundle": true
+      },
+      "demoControl": {
+        "target": "Front focus",
+        "property": "strokeEnd",
+        "time": 2.8,
+        "value": 100,
+        "starterValue": 55,
+        "secondTarget": "Top focus",
+        "secondProperty": "strokeEnd",
+        "secondTime": 8.8,
+        "secondValue": 100,
+        "reason": "Draw attention to a corresponding view without moving or distorting its technical geometry."
+      },
+      "number": 1,
+      "layerReference": [
+        {
+          "id": "Pathway marker",
+          "name": "Pathway marker",
+          "type": "text",
+          "text": "AUTOPROMOTE EDUCATION  /  EGD",
+          "x": 50.0,
+          "y": 4.166666666666667,
+          "width": 94,
+          "scale": 0.35,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#8eefd0",
+          "keys": []
+        },
+        {
+          "id": "Lesson title",
+          "name": "Lesson title",
+          "type": "text",
+          "text": "One object. Three connected views.",
+          "x": 50.0,
+          "y": 10.13888888888889,
+          "width": 94,
+          "scale": 0.94,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "fontWeight": 800,
+          "textAlign": "center",
+          "color": "#eff5ff",
+          "keys": []
+        },
+        {
+          "id": "Stage dividers",
+          "name": "Stage dividers",
+          "type": "artwork",
+          "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><line x1=\"56\" y1=\"119\" x2=\"1224\" y2=\"119\" stroke=\"#25334b\" stroke-width=\"1\"/><line x1=\"56\" y1=\"610\" x2=\"1224\" y2=\"610\" stroke=\"#25334b\" stroke-width=\"1\"/></svg>",
+          "x": 50.0,
+          "y": 50.0,
+          "width": 100.0,
+          "height": 100.0,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "mediaFit": "contain",
+          "keys": []
+        },
+        {
+          "id": "Isometric object",
+          "name": "Isometric object",
+          "type": "artwork",
+          "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><polygon points=\"270.000,266.000 324.560,297.500 233.627,350.000 179.067,318.500\" fill=\"#419d8c\" stroke=\"#d9e9ff\" stroke-width=\"2\" stroke-linejoin=\"round\"/><polygon points=\"324.560,339.500 415.492,392.000 324.560,444.500 233.627,392.000\" fill=\"#7be2c4\" stroke=\"#d9e9ff\" stroke-width=\"2\" stroke-linejoin=\"round\"/><polygon points=\"324.560,339.500 233.627,392.000 233.627,350.000 324.560,297.500\" fill=\"#b88842\" stroke=\"#d9e9ff\" stroke-width=\"2\" stroke-linejoin=\"round\"/><polygon points=\"415.492,434.000 324.560,486.500 324.560,444.500 415.492,392.000\" fill=\"#d5a663\" stroke=\"#d9e9ff\" stroke-width=\"2\" stroke-linejoin=\"round\"/><polygon points=\"179.067,402.500 324.560,486.500 324.560,444.500 233.627,392.000 233.627,350.000 179.067,318.500\" fill=\"#588fc4\" stroke=\"#d9e9ff\" stroke-width=\"2\" stroke-linejoin=\"round\"/></svg>",
+          "x": 50.0,
+          "y": 50.0,
+          "width": 100.0,
+          "height": 100.0,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "mediaFit": "contain",
+          "keys": []
+        },
+        {
+          "id": "Isometric label",
+          "name": "Isometric label",
+          "type": "text",
+          "text": "ISOMETRIC",
+          "x": 23.046875,
+          "y": 72.22222222222221,
+          "width": 94,
+          "scale": 0.55,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#9daec8",
+          "keys": []
+        },
+        {
+          "id": "Front view",
+          "name": "Front view",
+          "type": "artwork",
+          "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><polygon points=\"600.000,500.000 840.000,500.000 840.000,440.000 690.000,440.000 690.000,380.000 600.000,380.000\" fill=\"#23486c\" stroke=\"#74bfff\" stroke-width=\"3\" stroke-linejoin=\"round\"/></svg>",
+          "x": 50.0,
+          "y": 50.0,
+          "width": 100.0,
+          "height": 100.0,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "mediaFit": "contain",
+          "keys": []
+        },
+        {
+          "id": "Top view",
+          "name": "Top view",
+          "type": "artwork",
+          "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><polygon points=\"600.000,175.000 840.000,175.000 840.000,325.000 600.000,325.000\" fill=\"#1b4b41\" stroke=\"#8eefd0\" stroke-width=\"3\" stroke-linejoin=\"round\"/><line x1=\"690\" y1=\"175\" x2=\"690\" y2=\"325\" stroke=\"#8eefd0\" stroke-width=\"3\"/></svg>",
+          "x": 50.0,
+          "y": 50.0,
+          "width": 100.0,
+          "height": 100.0,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "mediaFit": "contain",
+          "keys": []
+        },
+        {
+          "id": "Right-side view",
+          "name": "Right-side view",
+          "type": "artwork",
+          "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><polygon points=\"900.000,380.000 1050.000,380.000 1050.000,500.000 900.000,500.000\" fill=\"#57452b\" stroke=\"#ffcc79\" stroke-width=\"3\" stroke-linejoin=\"round\"/><line x1=\"900\" y1=\"440\" x2=\"1050\" y2=\"440\" stroke=\"#ffcc79\" stroke-width=\"3\"/></svg>",
+          "x": 50.0,
+          "y": 50.0,
+          "width": 100.0,
+          "height": 100.0,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "mediaFit": "contain",
+          "keys": []
+        },
+        {
+          "id": "Projection alignment guides",
+          "name": "Projection alignment guides",
+          "type": "artwork",
+          "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><line x1=\"600\" y1=\"331\" x2=\"600\" y2=\"372\" stroke=\"#41536e\" stroke-width=\"1\" stroke-dasharray=\"4 6\"/><line x1=\"840\" y1=\"331\" x2=\"840\" y2=\"432\" stroke=\"#41536e\" stroke-width=\"1\" stroke-dasharray=\"4 6\"/><line x1=\"846\" y1=\"380\" x2=\"895\" y2=\"380\" stroke=\"#41536e\" stroke-width=\"1\" stroke-dasharray=\"4 6\"/><line x1=\"846\" y1=\"500\" x2=\"895\" y2=\"500\" stroke=\"#41536e\" stroke-width=\"1\" stroke-dasharray=\"4 6\"/></svg>",
+          "x": 50.0,
+          "y": 50.0,
+          "width": 100.0,
+          "height": 100.0,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "mediaFit": "contain",
+          "keys": []
+        },
+        {
+          "id": "Front label",
+          "name": "Front label",
+          "type": "text",
+          "text": "FRONT  ·  80 × 40",
+          "x": 56.25,
+          "y": 75.27777777777777,
+          "width": 94,
+          "scale": 0.51,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#74bfff",
+          "keys": []
+        },
+        {
+          "id": "Top label",
+          "name": "Top label",
+          "type": "text",
+          "text": "TOP  ·  80 × 50",
+          "x": 56.25,
+          "y": 20.555555555555554,
+          "width": 94,
+          "scale": 0.51,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#8eefd0",
+          "keys": []
+        },
+        {
+          "id": "Side label",
+          "name": "Side label",
+          "type": "text",
+          "text": "RIGHT SIDE  ·  50 × 40",
+          "x": 76.171875,
+          "y": 75.27777777777777,
+          "width": 94,
+          "scale": 0.47,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#ffcc79",
+          "keys": []
+        },
+        {
+          "id": "Convention",
+          "name": "Convention",
+          "type": "text",
+          "text": "THIRD-ANGLE LAYOUT",
+          "x": 23.046875,
+          "y": 78.47222222222221,
+          "width": 94,
+          "scale": 0.44,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#9daec8",
+          "keys": []
+        },
+        {
+          "id": "Front focus",
+          "name": "Front focus",
+          "type": "artwork",
+          "x": 56.25,
+          "y": 61.11111111111111,
+          "width": 20.625,
+          "height": 20.0,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 2,
+          "duration": 26,
+          "mediaFit": "stretch",
+          "vectorShape": {
+            "version": 1,
+            "closed": true,
+            "nodes": [
+              {
+                "x": 0.8,
+                "y": 0.8,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 99.2,
+                "y": 0.8,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 99.2,
+                "y": 99.2,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 0.8,
+                "y": 99.2,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "fill": {
+              "kind": "none",
+              "color": "#ffffff",
+              "endColor": "#ffffff",
+              "start": [
+                0,
+                0
+              ],
+              "end": [
+                100,
+                100
+              ]
+            },
+            "stroke": {
+              "color": "#74bfff",
+              "width": 0.8
+            }
+          },
+          "keys": [
+            {
+              "property": "strokeEnd",
+              "time": 2,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "strokeEnd",
+              "time": 2.8,
+              "value": 100,
+              "easing": "ease_in_out"
+            }
+          ]
+        },
+        {
+          "id": "Top focus",
+          "name": "Top focus",
+          "type": "artwork",
+          "x": 56.25,
+          "y": 34.72222222222222,
+          "width": 20.625,
+          "height": 24.166666666666664,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 8,
+          "duration": 20,
+          "mediaFit": "stretch",
+          "vectorShape": {
+            "version": 1,
+            "closed": true,
+            "nodes": [
+              {
+                "x": 0.8,
+                "y": 0.8,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 99.2,
+                "y": 0.8,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 99.2,
+                "y": 99.2,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 0.8,
+                "y": 99.2,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "fill": {
+              "kind": "none",
+              "color": "#ffffff",
+              "endColor": "#ffffff",
+              "start": [
+                0,
+                0
+              ],
+              "end": [
+                100,
+                100
+              ]
+            },
+            "stroke": {
+              "color": "#8eefd0",
+              "width": 0.8
+            }
+          },
+          "keys": [
+            {
+              "property": "strokeEnd",
+              "time": 8,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "strokeEnd",
+              "time": 8.8,
+              "value": 100,
+              "easing": "ease_in_out"
+            }
+          ]
+        },
+        {
+          "id": "Side focus",
+          "name": "Side focus",
+          "type": "artwork",
+          "x": 76.171875,
+          "y": 61.11111111111111,
+          "width": 13.59375,
+          "height": 20.0,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 15,
+          "duration": 13,
+          "mediaFit": "stretch",
+          "vectorShape": {
+            "version": 1,
+            "closed": true,
+            "nodes": [
+              {
+                "x": 0.8,
+                "y": 0.8,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 99.2,
+                "y": 0.8,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 99.2,
+                "y": 99.2,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 0.8,
+                "y": 99.2,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "fill": {
+              "kind": "none",
+              "color": "#ffffff",
+              "endColor": "#ffffff",
+              "start": [
+                0,
+                0
+              ],
+              "end": [
+                100,
+                100
+              ]
+            },
+            "stroke": {
+              "color": "#ffcc79",
+              "width": 0.8
+            }
+          },
+          "keys": [
+            {
+              "property": "strokeEnd",
+              "time": 15,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "strokeEnd",
+              "time": 15.8,
+              "value": 100,
+              "easing": "ease_in_out"
+            }
+          ]
+        },
+        {
+          "id": "Callout 1",
+          "name": "Callout 1",
+          "type": "text",
+          "text": "Front: width and stepped height",
+          "x": 50.0,
+          "y": 91.66666666666667,
+          "width": 94,
+          "scale": 0.68,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 7,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#8eefd0",
+          "keys": [
+            {
+              "property": "opacity",
+              "time": 0,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "opacity",
+              "time": 0.35,
+              "value": 1,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 0,
+              "value": 94,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 0.5,
+              "value": 91.666667,
+              "easing": "ease_out"
+            }
+          ]
+        },
+        {
+          "id": "Callout 2",
+          "name": "Callout 2",
+          "type": "text",
+          "text": "Top: width and depth",
+          "x": 50.0,
+          "y": 91.66666666666667,
+          "width": 94,
+          "scale": 0.68,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 7,
+          "duration": 7,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#8eefd0",
+          "keys": [
+            {
+              "property": "opacity",
+              "time": 7,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "opacity",
+              "time": 7.35,
+              "value": 1,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 7,
+              "value": 94,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 7.5,
+              "value": 91.666667,
+              "easing": "ease_out"
+            }
+          ]
+        },
+        {
+          "id": "Callout 3",
+          "name": "Callout 3",
+          "type": "text",
+          "text": "Right side: depth and height",
+          "x": 50.0,
+          "y": 91.66666666666667,
+          "width": 94,
+          "scale": 0.68,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 14,
+          "duration": 7,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#8eefd0",
+          "keys": [
+            {
+              "property": "opacity",
+              "time": 14,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "opacity",
+              "time": 14.35,
+              "value": 1,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 14,
+              "value": 94,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 14.5,
+              "value": 91.666667,
+              "easing": "ease_out"
+            }
+          ]
+        },
+        {
+          "id": "Callout 4",
+          "name": "Callout 4",
+          "type": "text",
+          "text": "Third angle: top above · right side to the right",
+          "x": 50.0,
+          "y": 91.66666666666667,
+          "width": 94,
+          "scale": 0.68,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 21,
+          "duration": 7,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#8eefd0",
+          "keys": [
+            {
+              "property": "opacity",
+              "time": 21,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "opacity",
+              "time": 21.35,
+              "value": 1,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 21,
+              "value": 94,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 21.5,
+              "value": 91.666667,
+              "easing": "ease_out"
+            }
+          ]
+        }
+      ],
+      "groupReference": [],
+      "graphics": {
+        "layers": 20,
+        "keys": 22
+      },
+      "studioSteps": [
+        {
+          "title": "Upload the original stage",
+          "control": "Workspace → Viral Clip Studio → Choose videos → Open Creator Studio",
+          "value": "source.mp4 · 1280×720 · 28 seconds · original offline synthetic narration",
+          "why": "The source is a plain stage with sound. It contains no animated teaching diagrams."
+        },
+        {
+          "title": "Keep the whole composition visible",
+          "control": "After → Preview quality; Reframe; View options; Sound; Captions",
+          "value": "Full; 16:9; Show Everyone; Fit full; main frame off; Rounded off; keep original audio; voice repair off; captions off",
+          "why": "Preserve precise drawing relationships and a stable full-frame lesson."
+        },
+        {
+          "title": "Import the editable scaffold",
+          "control": "Graphics → Import animated graphics → Import graphics composition…",
+          "value": "starter.graphics.json; native text, artwork, masks and motion keys",
+          "why": "Static original SVGs become ordinary editable image layers. Existing keys use the canonical Studio animation graph; they are not an external movie."
+        },
+        {
+          "title": "Complete the key deliberately",
+          "control": "Motion → Transform keyframes → Target layer → Motion value curve editor → Curve keyframe → Selected motion key value",
+          "value": "Front focus; strokeEnd at 2.8s = 100; easing ease_in_out",
+          "why": "Draw attention to a corresponding view without moving or distorting its technical geometry."
+        },
+        {
+          "title": "Inspect the matching layer or group",
+          "control": "Motion → Target layer; Layer geometry & timing; Graphics → Groups where applicable",
+          "value": "Top focus; see the full layer/group table below",
+          "why": "Check the relationship between layers, rather than judging one moving part in isolation."
+        },
+        {
+          "title": "Add your own annotation",
+          "control": "Graphics → Add title layer → Label; Copy/time/size; Motion → Transform keyframes → Target layer = Predict first → X/Y",
+          "value": "Practice label: Predict first; start24s; duration4s; size0.55; width60%; explicitly select Predict first in Target layer; X50 Y84. Remove the practice label before final save.",
+          "why": "Graphics selection and Motion target are separate. Confirm the new title before editing X/Y so the technical diagram layers remain fixed."
+        },
+        {
+          "title": "Save, export and reopen",
+          "control": "Show media → Project name → Save; Export → Render Final Clip; Show Finished Video; saved project",
+          "value": "Unique project name; 720p; 24 fps; original audio; normal local CPU render/download; complete 28s playback; cold reopen",
+          "why": "The actual authored graph must supply the final result and restore through normal Studio controls."
+        }
+      ],
+      "media": {
+        "resultSha256": "afc831c3eb3213c515836bec1fb29f9b0686ae17ee3afcbc2510f308e870e17d",
+        "tutorialSha256": "92db6c6df44a91f11bb9f7e887e4e42be0c7379daf0b0fe4f1f0ffaad071abb5",
+        "tutorialSeconds": 320.041667
+      }
+    },
+    {
+      "id": "mechanical-gears",
+      "subject": "Mechanical Technology",
+      "title": "Two gears. One clear ratio.",
+      "grade": "Grade 10 systems and control; Grades 11–12 extension",
+      "releaseStatus": "private-review",
+      "duration": 28,
+      "reference": {
+        "title": "DBE CAPS Grades 10–12 — Mechanical Technology",
+        "url": "https://www.education.gov.za/LinkClick.aspx?fileticket=Pu7gZywTv48%3D&forcedownload=true&mid=1558&portalid=0&tabid=570",
+        "pdfPages": [
+          28,
+          34,
+          37
+        ],
+        "note": "Teacher must confirm the current annual teaching plan and specialisation. Page numbers count the PDF cover.",
+        "sha256": "3bd88940d9c9f8484138c8b4f608b1fb0cd4f3e1ebe996ca0e2b09521af03665"
+      },
+      "concept": "Two external spur gears have equal module and pressure angle, with 20 driver teeth and 40 driven teeth. Pitch radii are 72 and 144 drawing pixels, fixed centre distance 216. For ideal rolling at the pitch circles, n₁z₁=n₂z₂ and θ₂=−θ₁/2 plus the initial tooth phase. The larger gear turns in the opposite direction at half the speed. A reduction transmits power and ideally increases torque; losses reduce output power.",
+      "objectives": [
+        "Identify driver and driven gear.",
+        "Use tooth counts to calculate a 2:1 speed reduction.",
+        "Predict opposite directions for two external gears.",
+        "Relate reduced speed and increased ideal torque without claiming energy creation.",
+        "Build constant-rate native rotation using linear keys and fixed centres."
+      ],
+      "voices": [
+        "The small gear is the driver: twenty teeth. It transfers motion through the meshing teeth.",
+        "The driven gear has forty teeth. It rotates in the opposite direction. Watch the coloured index dots.",
+        "Forty divided by twenty is two. One driver turn produces half a driven turn: half the rotational speed.",
+        "Gears transmit mechanical power. Ideally, lower speed gives higher torque. Real friction causes losses; power is not created."
+      ],
+      "technicalExercise": "Predict direction and turns for a 20-tooth driver and 40-tooth driven gear. Calculate output speed for 120 revolutions per minute input. Then consider a 30-tooth driven gear: state the new ratio, direction, output speed and required pitch-centre distance for drawing module 7.2 pixels.",
+      "creativeExercise": "Recreate the two supplied original gear SVGs as separate native image layers. Set centres to (470,350) and (686,350) pixels; preserve dimensions and aspect. Use the key table to complete one full driver turn and half an opposite driven turn over 20 seconds. Do not ease constant-speed rotation. Explain why independent arbitrary spins would mislead a learner.",
+      "questions": [
+        [
+          "If the driver turns clockwise, what does the driven gear do?",
+          "Counterclockwise, because these are two external gears in direct mesh."
+        ],
+        [
+          "What is the output speed for a 120 rpm input?",
+          "60 rpm, since 120 × 20 / 40 = 60."
+        ],
+        [
+          "Does twice the ideal torque create extra power?",
+          "No. Ideal power is torque × angular speed: doubling torque while halving speed preserves power. Friction reduces actual output."
+        ],
+        [
+          "For a 30-tooth driven gear at drawing module 7.2, what changes?",
+          "Output is 80 rpm for 120 rpm input, ratio 1.5:1, opposite direction. Pitch radii 72 and 108 give centre distance 180 drawing pixels. New geometry and initial mesh phase are required."
+        ]
+      ],
+      "criteria": [
+        "Identify driver/driven and justify opposing direction (4).",
+        "Correct ratio, turn counts and 120→60 rpm calculation (6).",
+        "Explain ideal power/torque and real losses (4).",
+        "Maintain native fixed centres, correct tooth phase and linear rates (3).",
+        "Recreate/edit the project and explain a new gear pair (3)."
+      ],
+      "limits": "Illustrative planar kinematics using prepared original 20° involute SVG contours. Native Studio supplies layer rotation, not gear simulation, contact forces, material stress or manufacturing CAD. Root transitions are simplified, not a cutter/fabrication profile. Drawing pixels are not engineering module in millimetres. Physical angular speed is deliberately slowed for teaching; no real motor is simulated.",
+      "evidence": {
+        "teacherFeedbackReceived": false,
+        "independentLearnerRecreation": false,
+        "schoolHardwareTrial": false,
+        "publicRelease": false,
+        "nativeExport": true,
+        "actualNativeDownload": true,
+        "completeMovingPreview": true,
+        "completeFinishedPlayback": true,
+        "exactColdRecovery": true,
+        "tutorial": true,
+        "technicalAccuracyChecked": true,
+        "bundle": true
+      },
+      "demoControl": {
+        "target": "Driver gear",
+        "property": "rotation",
+        "time": 24,
+        "value": 180,
+        "starterValue": 90,
+        "secondTarget": "Driven gear",
+        "secondProperty": "rotation",
+        "secondTime": 24,
+        "secondValue": -90,
+        "reason": "A complete 360° driver interval corresponds to an opposite 180° driven interval. Linear interpolation preserves the fixed ratio."
+      },
+      "number": 2,
+      "layerReference": [
+        {
+          "id": "Pathway marker",
+          "name": "Pathway marker",
+          "type": "text",
+          "text": "AUTOPROMOTE EDUCATION  /  MECHANICAL TECHNOLOGY",
+          "x": 50.0,
+          "y": 4.166666666666667,
+          "width": 94,
+          "scale": 0.35,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#8eefd0",
+          "keys": []
+        },
+        {
+          "id": "Lesson title",
+          "name": "Lesson title",
+          "type": "text",
+          "text": "Two gears. One clear ratio.",
+          "x": 50.0,
+          "y": 10.13888888888889,
+          "width": 94,
+          "scale": 0.94,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "fontWeight": 800,
+          "textAlign": "center",
+          "color": "#eff5ff",
+          "keys": []
+        },
+        {
+          "id": "Stage dividers",
+          "name": "Stage dividers",
+          "type": "artwork",
+          "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><line x1=\"56\" y1=\"119\" x2=\"1224\" y2=\"119\" stroke=\"#25334b\" stroke-width=\"1\"/><line x1=\"56\" y1=\"610\" x2=\"1224\" y2=\"610\" stroke=\"#25334b\" stroke-width=\"1\"/></svg>",
+          "x": 50.0,
+          "y": 50.0,
+          "width": 100.0,
+          "height": 100.0,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "mediaFit": "contain",
+          "keys": []
+        },
+        {
+          "id": "Driver gear",
+          "name": "Driver gear",
+          "type": "artwork",
+          "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"164.4\" height=\"164.4\" viewBox=\"0 0 164.4 164.4\"><polygon points=\"144.925,76.322 149.563,75.887 150.725,75.922 151.898,76.079 153.077,76.320 154.260,76.631 155.445,77.005 156.631,77.437 157.817,77.925 159.001,78.466 160.183,79.058 161.360,79.699 161.360,84.701 161.360,84.701 160.183,85.342 159.001,85.934 157.817,86.475 156.631,86.963 155.445,87.395 154.260,87.769 153.077,88.080 151.898,88.321 150.725,88.478 149.563,88.513 144.925,88.078 143.672,95.992 143.672,95.992 148.217,97.012 149.311,97.405 150.378,97.917 151.425,98.510 152.454,99.171 153.465,99.893 154.460,100.671 155.437,101.501 156.396,102.381 157.337,103.309 158.259,104.283 156.713,109.041 156.713,109.041 155.395,109.286 154.088,109.484 152.795,109.632 151.516,109.730 150.255,109.775 149.012,109.764 147.791,109.694 146.595,109.559 145.431,109.346 144.315,109.020 140.039,107.174 136.401,114.313 136.401,114.313 140.408,116.687 141.328,117.399 142.185,118.216 142.997,119.103 143.771,120.050 144.510,121.049 145.215,122.096 145.888,123.188 146.528,124.321 147.136,125.495 147.712,126.706 144.772,130.753 144.772,130.753 143.442,130.579 142.138,130.363 140.862,130.105 139.617,129.802 138.403,129.455 137.224,129.061 136.085,128.618 134.989,128.119 133.948,127.557 132.987,126.902 129.490,123.825 123.825,129.490 123.825,129.490 126.902,132.987 127.557,133.948 128.119,134.989 128.618,136.085 129.061,137.224 129.455,138.403 129.802,139.617 130.105,140.862 130.363,142.138 130.579,143.442 130.753,144.772 126.706,147.712 126.706,147.712 125.495,147.136 124.321,146.528 123.188,145.888 122.096,145.215 121.049,144.510 120.050,143.771 119.103,142.997 118.216,142.185 117.399,141.328 116.687,140.408 114.313,136.401 107.174,140.039 107.174,140.039 109.020,144.315 109.346,145.431 109.559,146.595 109.694,147.791 109.764,149.012 109.775,150.255 109.730,151.516 109.632,152.795 109.484,154.088 109.286,155.395 109.041,156.713 104.283,158.259 104.283,158.259 103.309,157.337 102.381,156.396 101.501,155.437 100.671,154.460 99.893,153.465 99.171,152.454 98.510,151.425 97.917,150.378 97.405,149.311 97.012,148.217 95.992,143.672 88.078,144.925 88.078,144.925 88.513,149.563 88.478,150.725 88.321,151.898 88.080,153.077 87.769,154.260 87.395,155.445 86.963,156.631 86.475,157.817 85.934,159.001 85.342,160.183 84.701,161.360 79.699,161.360 79.699,161.360 79.058,160.183 78.466,159.001 77.925,157.817 77.437,156.631 77.005,155.445 76.631,154.260 76.320,153.077 76.079,151.898 75.922,150.725 75.887,149.563 76.322,144.925 68.408,143.672 68.408,143.672 67.388,148.217 66.995,149.311 66.483,150.378 65.890,151.425 65.229,152.454 64.507,153.465 63.729,154.460 62.899,155.437 62.019,156.396 61.091,157.337 60.117,158.259 55.359,156.713 55.359,156.713 55.114,155.395 54.916,154.088 54.768,152.795 54.670,151.516 54.625,150.255 54.636,149.012 54.706,147.791 54.841,146.595 55.054,145.431 55.380,144.315 57.226,140.039 50.087,136.401 50.087,136.401 47.713,140.408 47.001,141.328 46.184,142.185 45.297,142.997 44.350,143.771 43.351,144.510 42.304,145.215 41.212,145.888 40.079,146.528 38.905,147.136 37.694,147.712 33.647,144.772 33.647,144.772 33.821,143.442 34.037,142.138 34.295,140.862 34.598,139.617 34.945,138.403 35.339,137.224 35.782,136.085 36.281,134.989 36.843,133.948 37.498,132.987 40.575,129.490 34.910,123.825 34.910,123.825 31.413,126.902 30.452,127.557 29.411,128.119 28.315,128.618 27.176,129.061 25.997,129.455 24.783,129.802 23.538,130.105 22.262,130.363 20.958,130.579 19.628,130.753 16.688,126.706 16.688,126.706 17.264,125.495 17.872,124.321 18.512,123.188 19.185,122.096 19.890,121.049 20.629,120.050 21.403,119.103 22.215,118.216 23.072,117.399 23.992,116.687 27.999,114.313 24.361,107.174 24.361,107.174 20.085,109.020 18.969,109.346 17.805,109.559 16.609,109.694 15.388,109.764 14.145,109.775 12.884,109.730 11.605,109.632 10.312,109.484 9.005,109.286 7.687,109.041 6.141,104.283 6.141,104.283 7.063,103.309 8.004,102.381 8.963,101.501 9.940,100.671 10.935,99.893 11.946,99.171 12.975,98.510 14.022,97.917 15.089,97.405 16.183,97.012 20.728,95.992 19.475,88.078 19.475,88.078 14.837,88.513 13.675,88.478 12.502,88.321 11.323,88.080 10.140,87.769 8.955,87.395 7.769,86.963 6.583,86.475 5.399,85.934 4.217,85.342 3.040,84.701 3.040,79.699 3.040,79.699 4.217,79.058 5.399,78.466 6.583,77.925 7.769,77.437 8.955,77.005 10.140,76.631 11.323,76.320 12.502,76.079 13.675,75.922 14.837,75.887 19.475,76.322 20.728,68.408 20.728,68.408 16.183,67.388 15.089,66.995 14.022,66.483 12.975,65.890 11.946,65.229 10.935,64.507 9.940,63.729 8.963,62.899 8.004,62.019 7.063,61.091 6.141,60.117 7.687,55.359 7.687,55.359 9.005,55.114 10.312,54.916 11.605,54.768 12.884,54.670 14.145,54.625 15.388,54.636 16.609,54.706 17.805,54.841 18.969,55.054 20.085,55.380 24.361,57.226 27.999,50.087 27.999,50.087 23.992,47.713 23.072,47.001 22.215,46.184 21.403,45.297 20.629,44.350 19.890,43.351 19.185,42.304 18.512,41.212 17.872,40.079 17.264,38.905 16.688,37.694 19.628,33.647 19.628,33.647 20.958,33.821 22.262,34.037 23.538,34.295 24.783,34.598 25.997,34.945 27.176,35.339 28.315,35.782 29.411,36.281 30.452,36.843 31.413,37.498 34.910,40.575 40.575,34.910 40.575,34.910 37.498,31.413 36.843,30.452 36.281,29.411 35.782,28.315 35.339,27.176 34.945,25.997 34.598,24.783 34.295,23.538 34.037,22.262 33.821,20.958 33.647,19.628 37.694,16.688 37.694,16.688 38.905,17.264 40.079,17.872 41.212,18.512 42.304,19.185 43.351,19.890 44.350,20.629 45.297,21.403 46.184,22.215 47.001,23.072 47.713,23.992 50.087,27.999 57.226,24.361 57.226,24.361 55.380,20.085 55.054,18.969 54.841,17.805 54.706,16.609 54.636,15.388 54.625,14.145 54.670,12.884 54.768,11.605 54.916,10.312 55.114,9.005 55.359,7.687 60.117,6.141 60.117,6.141 61.091,7.063 62.019,8.004 62.899,8.963 63.729,9.940 64.507,10.935 65.229,11.946 65.890,12.975 66.483,14.022 66.995,15.089 67.388,16.183 68.408,20.728 76.322,19.475 76.322,19.475 75.887,14.837 75.922,13.675 76.079,12.502 76.320,11.323 76.631,10.140 77.005,8.955 77.437,7.769 77.925,6.583 78.466,5.399 79.058,4.217 79.699,3.040 84.701,3.040 84.701,3.040 85.342,4.217 85.934,5.399 86.475,6.583 86.963,7.769 87.395,8.955 87.769,10.140 88.080,11.323 88.321,12.502 88.478,13.675 88.513,14.837 88.078,19.475 95.992,20.728 95.992,20.728 97.012,16.183 97.405,15.089 97.917,14.022 98.510,12.975 99.171,11.946 99.893,10.935 100.671,9.940 101.501,8.963 102.381,8.004 103.309,7.063 104.283,6.141 109.041,7.687 109.041,7.687 109.286,9.005 109.484,10.312 109.632,11.605 109.730,12.884 109.775,14.145 109.764,15.388 109.694,16.609 109.559,17.805 109.346,18.969 109.020,20.085 107.174,24.361 114.313,27.999 114.313,27.999 116.687,23.992 117.399,23.072 118.216,22.215 119.103,21.403 120.050,20.629 121.049,19.890 122.096,19.185 123.188,18.512 124.321,17.872 125.495,17.264 126.706,16.688 130.753,19.628 130.753,19.628 130.579,20.958 130.363,22.262 130.105,23.538 129.802,24.783 129.455,25.997 129.061,27.176 128.618,28.315 128.119,29.411 127.557,30.452 126.902,31.413 123.825,34.910 129.490,40.575 129.490,40.575 132.987,37.498 133.948,36.843 134.989,36.281 136.085,35.782 137.224,35.339 138.403,34.945 139.617,34.598 140.862,34.295 142.138,34.037 143.442,33.821 144.772,33.647 147.712,37.694 147.712,37.694 147.136,38.905 146.528,40.079 145.888,41.212 145.215,42.304 144.510,43.351 143.771,44.350 142.997,45.297 142.185,46.184 141.328,47.001 140.408,47.713 136.401,50.087 140.039,57.226 140.039,57.226 144.315,55.380 145.431,55.054 146.595,54.841 147.791,54.706 149.012,54.636 150.255,54.625 151.516,54.670 152.795,54.768 154.088,54.916 155.395,55.114 156.713,55.359 158.259,60.117 158.259,60.117 157.337,61.091 156.396,62.019 155.437,62.899 154.460,63.729 153.465,64.507 152.454,65.229 151.425,65.890 150.378,66.483 149.311,66.995 148.217,67.388 143.672,68.408 144.925,76.322\" fill=\"#74bfff\" stroke=\"#d8e8f5\" stroke-width=\"1.2\" stroke-linejoin=\"round\"/><circle cx=\"82.2\" cy=\"82.2\" r=\"34.56\" fill=\"#0c1628\" stroke=\"#6c8199\" stroke-width=\"1\"/><circle cx=\"82.2\" cy=\"82.2\" r=\"7\" fill=\"#eff5ff\" stroke=\"none\" stroke-width=\"1\"/><circle cx=\"132.6\" cy=\"82.2\" r=\"6\" fill=\"#ff3366\" stroke=\"none\" stroke-width=\"1\"/><circle cx=\"82.2\" cy=\"82.2\" r=\"72.0\" fill=\"none\" stroke=\"#cce1f7\" stroke-width=\".6\" stroke-dasharray=\"3 6\" opacity=\".5\"/></svg>",
+          "x": 36.71875,
+          "y": 48.61111111111111,
+          "width": 12.84375,
+          "height": 22.833333333333332,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "mediaFit": "contain",
+          "keys": [
+            {
+              "property": "rotation",
+              "time": 4,
+              "value": -180,
+              "easing": "linear"
+            },
+            {
+              "property": "rotation",
+              "time": 9,
+              "value": -90,
+              "easing": "linear"
+            },
+            {
+              "property": "rotation",
+              "time": 14,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "rotation",
+              "time": 19,
+              "value": 90,
+              "easing": "linear"
+            },
+            {
+              "property": "rotation",
+              "time": 24,
+              "value": 180,
+              "easing": "linear"
+            }
+          ]
+        },
+        {
+          "id": "Driven gear",
+          "name": "Driven gear",
+          "type": "artwork",
+          "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"308.4\" height=\"308.4\" viewBox=\"0 0 308.4 308.4\"><polygon points=\"289.160,157.489 289.476,157.497 291.059,157.699 292.639,158.039 294.216,158.472 295.789,158.982 297.358,159.561 298.922,160.203 300.481,160.904 302.035,161.660 303.583,162.470 305.124,163.331 304.694,168.791 304.694,168.791 303.037,169.400 301.382,169.958 299.729,170.462 298.079,170.910 296.434,171.300 294.794,171.626 293.160,171.884 291.535,172.065 289.922,172.154 288.326,172.106 288.013,172.064 286.984,178.561 286.984,178.561 287.294,178.618 288.827,179.065 290.334,179.648 291.824,180.322 293.297,181.073 294.756,181.890 296.201,182.769 297.632,183.705 299.048,184.695 300.450,185.737 301.837,186.829 300.559,192.154 300.559,192.154 298.827,192.497 297.105,192.788 295.393,193.028 293.694,193.212 292.008,193.339 290.337,193.405 288.683,193.405 287.050,193.329 285.442,193.164 283.873,192.867 283.571,192.777 281.538,199.033 281.538,199.033 281.836,199.138 283.280,199.819 284.677,200.631 286.043,201.530 287.381,202.501 288.694,203.537 289.984,204.631 291.250,205.779 292.494,206.979 293.716,208.227 294.916,209.522 292.820,214.582 292.820,214.582 291.056,214.650 289.309,214.669 287.581,214.637 285.873,214.554 284.188,214.415 282.527,214.219 280.894,213.960 279.293,213.630 277.731,213.216 276.228,212.676 275.943,212.540 272.957,218.401 272.957,218.401 273.235,218.551 274.554,219.450 275.808,220.471 277.016,221.572 278.185,222.741 279.320,223.969 280.423,225.251 281.494,226.583 282.535,227.963 283.547,229.387 284.529,230.854 281.667,235.524 281.667,235.524 279.914,235.314 278.186,235.060 276.484,234.759 274.811,234.409 273.168,234.009 271.559,233.555 269.986,233.043 268.456,232.467 266.978,231.813 265.578,231.046 265.318,230.867 261.452,236.188 261.452,236.188 261.702,236.380 262.865,237.474 263.943,238.678 264.964,239.955 265.937,241.293 266.866,242.683 267.754,244.122 268.604,245.605 269.416,247.131 270.192,248.696 270.933,250.298 267.376,254.463 267.376,254.463 265.677,253.982 264.010,253.460 262.377,252.896 260.779,252.289 259.219,251.637 257.700,250.937 256.227,250.186 254.806,249.377 253.448,248.500 252.185,247.523 251.957,247.305 247.305,251.957 247.305,251.957 247.523,252.185 248.500,253.448 249.377,254.806 250.186,256.227 250.937,257.700 251.637,259.219 252.289,260.779 252.896,262.377 253.460,264.010 253.982,265.677 254.463,267.376 250.298,270.933 250.298,270.933 248.696,270.192 247.131,269.416 245.605,268.604 244.122,267.754 242.683,266.866 241.293,265.937 239.955,264.964 238.678,263.943 237.474,262.865 236.380,261.702 236.188,261.452 230.867,265.318 230.867,265.318 231.046,265.578 231.813,266.978 232.467,268.456 233.043,269.986 233.555,271.559 234.009,273.168 234.409,274.811 234.759,276.484 235.060,278.186 235.314,279.914 235.524,281.667 230.854,284.529 230.854,284.529 229.387,283.547 227.963,282.535 226.583,281.494 225.251,280.423 223.969,279.320 222.741,278.185 221.572,277.016 220.471,275.808 219.450,274.554 218.551,273.235 218.401,272.957 212.540,275.943 212.540,275.943 212.676,276.228 213.216,277.731 213.630,279.293 213.960,280.894 214.219,282.527 214.415,284.188 214.554,285.873 214.637,287.581 214.669,289.309 214.650,291.056 214.582,292.820 209.522,294.916 209.522,294.916 208.227,293.716 206.979,292.494 205.779,291.250 204.631,289.984 203.537,288.694 202.501,287.381 201.530,286.043 200.631,284.677 199.819,283.280 199.138,281.836 199.033,281.538 192.777,283.571 192.777,283.571 192.867,283.873 193.164,285.442 193.329,287.050 193.405,288.683 193.405,290.337 193.339,292.008 193.212,293.694 193.028,295.393 192.788,297.105 192.497,298.827 192.154,300.559 186.829,301.837 186.829,301.837 185.737,300.450 184.695,299.048 183.705,297.632 182.769,296.201 181.890,294.756 181.073,293.297 180.322,291.824 179.648,290.334 179.065,288.827 178.618,287.294 178.561,286.984 172.064,288.013 172.064,288.013 172.106,288.326 172.154,289.922 172.065,291.535 171.884,293.160 171.626,294.794 171.300,296.434 170.910,298.079 170.462,299.729 169.958,301.382 169.400,303.037 168.791,304.694 163.331,305.124 163.331,305.124 162.470,303.583 161.660,302.035 160.904,300.481 160.203,298.922 159.561,297.358 158.982,295.789 158.472,294.216 158.039,292.639 157.699,291.059 157.497,289.476 157.489,289.160 150.911,289.160 150.911,289.160 150.903,289.476 150.701,291.059 150.361,292.639 149.928,294.216 149.418,295.789 148.839,297.358 148.197,298.922 147.496,300.481 146.740,302.035 145.930,303.583 145.069,305.124 139.609,304.694 139.609,304.694 139.000,303.037 138.442,301.382 137.938,299.729 137.490,298.079 137.100,296.434 136.774,294.794 136.516,293.160 136.335,291.535 136.246,289.922 136.294,288.326 136.336,288.013 129.839,286.984 129.839,286.984 129.782,287.294 129.335,288.827 128.752,290.334 128.078,291.824 127.327,293.297 126.510,294.756 125.631,296.201 124.695,297.632 123.705,299.048 122.663,300.450 121.571,301.837 116.246,300.559 116.246,300.559 115.903,298.827 115.612,297.105 115.372,295.393 115.188,293.694 115.061,292.008 114.995,290.337 114.995,288.683 115.071,287.050 115.236,285.442 115.533,283.873 115.623,283.571 109.367,281.538 109.367,281.538 109.262,281.836 108.581,283.280 107.769,284.677 106.870,286.043 105.899,287.381 104.863,288.694 103.769,289.984 102.621,291.250 101.421,292.494 100.173,293.716 98.878,294.916 93.818,292.820 93.818,292.820 93.750,291.056 93.731,289.309 93.763,287.581 93.846,285.873 93.985,284.188 94.181,282.527 94.440,280.894 94.770,279.293 95.184,277.731 95.724,276.228 95.860,275.943 89.999,272.957 89.999,272.957 89.849,273.235 88.950,274.554 87.929,275.808 86.828,277.016 85.659,278.185 84.431,279.320 83.149,280.423 81.817,281.494 80.437,282.535 79.013,283.547 77.546,284.529 72.876,281.667 72.876,281.667 73.086,279.914 73.340,278.186 73.641,276.484 73.991,274.811 74.391,273.168 74.845,271.559 75.357,269.986 75.933,268.456 76.587,266.978 77.354,265.578 77.533,265.318 72.212,261.452 72.212,261.452 72.020,261.702 70.926,262.865 69.722,263.943 68.445,264.964 67.107,265.937 65.717,266.866 64.278,267.754 62.795,268.604 61.269,269.416 59.704,270.192 58.102,270.933 53.937,267.376 53.937,267.376 54.418,265.677 54.940,264.010 55.504,262.377 56.111,260.779 56.763,259.219 57.463,257.700 58.214,256.227 59.023,254.806 59.900,253.448 60.877,252.185 61.095,251.957 56.443,247.305 56.443,247.305 56.215,247.523 54.952,248.500 53.594,249.377 52.173,250.186 50.700,250.937 49.181,251.637 47.621,252.289 46.023,252.896 44.390,253.460 42.723,253.982 41.024,254.463 37.467,250.298 37.467,250.298 38.208,248.696 38.984,247.131 39.796,245.605 40.646,244.122 41.534,242.683 42.463,241.293 43.436,239.955 44.457,238.678 45.535,237.474 46.698,236.380 46.948,236.188 43.082,230.867 43.082,230.867 42.822,231.046 41.422,231.813 39.944,232.467 38.414,233.043 36.841,233.555 35.232,234.009 33.589,234.409 31.916,234.759 30.214,235.060 28.486,235.314 26.733,235.524 23.871,230.854 23.871,230.854 24.853,229.387 25.865,227.963 26.906,226.583 27.977,225.251 29.080,223.969 30.215,222.741 31.384,221.572 32.592,220.471 33.846,219.450 35.165,218.551 35.443,218.401 32.457,212.540 32.457,212.540 32.172,212.676 30.669,213.216 29.107,213.630 27.506,213.960 25.873,214.219 24.212,214.415 22.527,214.554 20.819,214.637 19.091,214.669 17.344,214.650 15.580,214.582 13.484,209.522 13.484,209.522 14.684,208.227 15.906,206.979 17.150,205.779 18.416,204.631 19.706,203.537 21.019,202.501 22.357,201.530 23.723,200.631 25.120,199.819 26.564,199.138 26.862,199.033 24.829,192.777 24.829,192.777 24.527,192.867 22.958,193.164 21.350,193.329 19.717,193.405 18.063,193.405 16.392,193.339 14.706,193.212 13.007,193.028 11.295,192.788 9.573,192.497 7.841,192.154 6.563,186.829 6.563,186.829 7.950,185.737 9.352,184.695 10.768,183.705 12.199,182.769 13.644,181.890 15.103,181.073 16.576,180.322 18.066,179.648 19.573,179.065 21.106,178.618 21.416,178.561 20.387,172.064 20.387,172.064 20.074,172.106 18.478,172.154 16.865,172.065 15.240,171.884 13.606,171.626 11.966,171.300 10.321,170.910 8.671,170.462 7.018,169.958 5.363,169.400 3.706,168.791 3.276,163.331 3.276,163.331 4.817,162.470 6.365,161.660 7.919,160.904 9.478,160.203 11.042,159.561 12.611,158.982 14.184,158.472 15.761,158.039 17.341,157.699 18.924,157.497 19.240,157.489 19.240,150.911 19.240,150.911 18.924,150.903 17.341,150.701 15.761,150.361 14.184,149.928 12.611,149.418 11.042,148.839 9.478,148.197 7.919,147.496 6.365,146.740 4.817,145.930 3.276,145.069 3.706,139.609 3.706,139.609 5.363,139.000 7.018,138.442 8.671,137.938 10.321,137.490 11.966,137.100 13.606,136.774 15.240,136.516 16.865,136.335 18.478,136.246 20.074,136.294 20.387,136.336 21.416,129.839 21.416,129.839 21.106,129.782 19.573,129.335 18.066,128.752 16.576,128.078 15.103,127.327 13.644,126.510 12.199,125.631 10.768,124.695 9.352,123.705 7.950,122.663 6.563,121.571 7.841,116.246 7.841,116.246 9.573,115.903 11.295,115.612 13.007,115.372 14.706,115.188 16.392,115.061 18.063,114.995 19.717,114.995 21.350,115.071 22.958,115.236 24.527,115.533 24.829,115.623 26.862,109.367 26.862,109.367 26.564,109.262 25.120,108.581 23.723,107.769 22.357,106.870 21.019,105.899 19.706,104.863 18.416,103.769 17.150,102.621 15.906,101.421 14.684,100.173 13.484,98.878 15.580,93.818 15.580,93.818 17.344,93.750 19.091,93.731 20.819,93.763 22.527,93.846 24.212,93.985 25.873,94.181 27.506,94.440 29.107,94.770 30.669,95.184 32.172,95.724 32.457,95.860 35.443,89.999 35.443,89.999 35.165,89.849 33.846,88.950 32.592,87.929 31.384,86.828 30.215,85.659 29.080,84.431 27.977,83.149 26.906,81.817 25.865,80.437 24.853,79.013 23.871,77.546 26.733,72.876 26.733,72.876 28.486,73.086 30.214,73.340 31.916,73.641 33.589,73.991 35.232,74.391 36.841,74.845 38.414,75.357 39.944,75.933 41.422,76.587 42.822,77.354 43.082,77.533 46.948,72.212 46.948,72.212 46.698,72.020 45.535,70.926 44.457,69.722 43.436,68.445 42.463,67.107 41.534,65.717 40.646,64.278 39.796,62.795 38.984,61.269 38.208,59.704 37.467,58.102 41.024,53.937 41.024,53.937 42.723,54.418 44.390,54.940 46.023,55.504 47.621,56.111 49.181,56.763 50.700,57.463 52.173,58.214 53.594,59.023 54.952,59.900 56.215,60.877 56.443,61.095 61.095,56.443 61.095,56.443 60.877,56.215 59.900,54.952 59.023,53.594 58.214,52.173 57.463,50.700 56.763,49.181 56.111,47.621 55.504,46.023 54.940,44.390 54.418,42.723 53.937,41.024 58.102,37.467 58.102,37.467 59.704,38.208 61.269,38.984 62.795,39.796 64.278,40.646 65.717,41.534 67.107,42.463 68.445,43.436 69.722,44.457 70.926,45.535 72.020,46.698 72.212,46.948 77.533,43.082 77.533,43.082 77.354,42.822 76.587,41.422 75.933,39.944 75.357,38.414 74.845,36.841 74.391,35.232 73.991,33.589 73.641,31.916 73.340,30.214 73.086,28.486 72.876,26.733 77.546,23.871 77.546,23.871 79.013,24.853 80.437,25.865 81.817,26.906 83.149,27.977 84.431,29.080 85.659,30.215 86.828,31.384 87.929,32.592 88.950,33.846 89.849,35.165 89.999,35.443 95.860,32.457 95.860,32.457 95.724,32.172 95.184,30.669 94.770,29.107 94.440,27.506 94.181,25.873 93.985,24.212 93.846,22.527 93.763,20.819 93.731,19.091 93.750,17.344 93.818,15.580 98.878,13.484 98.878,13.484 100.173,14.684 101.421,15.906 102.621,17.150 103.769,18.416 104.863,19.706 105.899,21.019 106.870,22.357 107.769,23.723 108.581,25.120 109.262,26.564 109.367,26.862 115.623,24.829 115.623,24.829 115.533,24.527 115.236,22.958 115.071,21.350 114.995,19.717 114.995,18.063 115.061,16.392 115.188,14.706 115.372,13.007 115.612,11.295 115.903,9.573 116.246,7.841 121.571,6.563 121.571,6.563 122.663,7.950 123.705,9.352 124.695,10.768 125.631,12.199 126.510,13.644 127.327,15.103 128.078,16.576 128.752,18.066 129.335,19.573 129.782,21.106 129.839,21.416 136.336,20.387 136.336,20.387 136.294,20.074 136.246,18.478 136.335,16.865 136.516,15.240 136.774,13.606 137.100,11.966 137.490,10.321 137.938,8.671 138.442,7.018 139.000,5.363 139.609,3.706 145.069,3.276 145.069,3.276 145.930,4.817 146.740,6.365 147.496,7.919 148.197,9.478 148.839,11.042 149.418,12.611 149.928,14.184 150.361,15.761 150.701,17.341 150.903,18.924 150.911,19.240 157.489,19.240 157.489,19.240 157.497,18.924 157.699,17.341 158.039,15.761 158.472,14.184 158.982,12.611 159.561,11.042 160.203,9.478 160.904,7.919 161.660,6.365 162.470,4.817 163.331,3.276 168.791,3.706 168.791,3.706 169.400,5.363 169.958,7.018 170.462,8.671 170.910,10.321 171.300,11.966 171.626,13.606 171.884,15.240 172.065,16.865 172.154,18.478 172.106,20.074 172.064,20.387 178.561,21.416 178.561,21.416 178.618,21.106 179.065,19.573 179.648,18.066 180.322,16.576 181.073,15.103 181.890,13.644 182.769,12.199 183.705,10.768 184.695,9.352 185.737,7.950 186.829,6.563 192.154,7.841 192.154,7.841 192.497,9.573 192.788,11.295 193.028,13.007 193.212,14.706 193.339,16.392 193.405,18.063 193.405,19.717 193.329,21.350 193.164,22.958 192.867,24.527 192.777,24.829 199.033,26.862 199.033,26.862 199.138,26.564 199.819,25.120 200.631,23.723 201.530,22.357 202.501,21.019 203.537,19.706 204.631,18.416 205.779,17.150 206.979,15.906 208.227,14.684 209.522,13.484 214.582,15.580 214.582,15.580 214.650,17.344 214.669,19.091 214.637,20.819 214.554,22.527 214.415,24.212 214.219,25.873 213.960,27.506 213.630,29.107 213.216,30.669 212.676,32.172 212.540,32.457 218.401,35.443 218.401,35.443 218.551,35.165 219.450,33.846 220.471,32.592 221.572,31.384 222.741,30.215 223.969,29.080 225.251,27.977 226.583,26.906 227.963,25.865 229.387,24.853 230.854,23.871 235.524,26.733 235.524,26.733 235.314,28.486 235.060,30.214 234.759,31.916 234.409,33.589 234.009,35.232 233.555,36.841 233.043,38.414 232.467,39.944 231.813,41.422 231.046,42.822 230.867,43.082 236.188,46.948 236.188,46.948 236.380,46.698 237.474,45.535 238.678,44.457 239.955,43.436 241.293,42.463 242.683,41.534 244.122,40.646 245.605,39.796 247.131,38.984 248.696,38.208 250.298,37.467 254.463,41.024 254.463,41.024 253.982,42.723 253.460,44.390 252.896,46.023 252.289,47.621 251.637,49.181 250.937,50.700 250.186,52.173 249.377,53.594 248.500,54.952 247.523,56.215 247.305,56.443 251.957,61.095 251.957,61.095 252.185,60.877 253.448,59.900 254.806,59.023 256.227,58.214 257.700,57.463 259.219,56.763 260.779,56.111 262.377,55.504 264.010,54.940 265.677,54.418 267.376,53.937 270.933,58.102 270.933,58.102 270.192,59.704 269.416,61.269 268.604,62.795 267.754,64.278 266.866,65.717 265.937,67.107 264.964,68.445 263.943,69.722 262.865,70.926 261.702,72.020 261.452,72.212 265.318,77.533 265.318,77.533 265.578,77.354 266.978,76.587 268.456,75.933 269.986,75.357 271.559,74.845 273.168,74.391 274.811,73.991 276.484,73.641 278.186,73.340 279.914,73.086 281.667,72.876 284.529,77.546 284.529,77.546 283.547,79.013 282.535,80.437 281.494,81.817 280.423,83.149 279.320,84.431 278.185,85.659 277.016,86.828 275.808,87.929 274.554,88.950 273.235,89.849 272.957,89.999 275.943,95.860 275.943,95.860 276.228,95.724 277.731,95.184 279.293,94.770 280.894,94.440 282.527,94.181 284.188,93.985 285.873,93.846 287.581,93.763 289.309,93.731 291.056,93.750 292.820,93.818 294.916,98.878 294.916,98.878 293.716,100.173 292.494,101.421 291.250,102.621 289.984,103.769 288.694,104.863 287.381,105.899 286.043,106.870 284.677,107.769 283.280,108.581 281.836,109.262 281.538,109.367 283.571,115.623 283.571,115.623 283.873,115.533 285.442,115.236 287.050,115.071 288.683,114.995 290.337,114.995 292.008,115.061 293.694,115.188 295.393,115.372 297.105,115.612 298.827,115.903 300.559,116.246 301.837,121.571 301.837,121.571 300.450,122.663 299.048,123.705 297.632,124.695 296.201,125.631 294.756,126.510 293.297,127.327 291.824,128.078 290.334,128.752 288.827,129.335 287.294,129.782 286.984,129.839 288.013,136.336 288.013,136.336 288.326,136.294 289.922,136.246 291.535,136.335 293.160,136.516 294.794,136.774 296.434,137.100 298.079,137.490 299.729,137.938 301.382,138.442 303.037,139.000 304.694,139.609 305.124,145.069 305.124,145.069 303.583,145.930 302.035,146.740 300.481,147.496 298.922,148.197 297.358,148.839 295.789,149.418 294.216,149.928 292.639,150.361 291.059,150.701 289.476,150.903 289.160,150.911 289.160,157.489\" fill=\"#8eefd0\" stroke=\"#d8e8f5\" stroke-width=\"1.2\" stroke-linejoin=\"round\"/><circle cx=\"154.2\" cy=\"154.2\" r=\"69.12\" fill=\"#0c1628\" stroke=\"#6c8199\" stroke-width=\"1\"/><circle cx=\"154.2\" cy=\"154.2\" r=\"7\" fill=\"#eff5ff\" stroke=\"none\" stroke-width=\"1\"/><circle cx=\"255.0\" cy=\"154.2\" r=\"6\" fill=\"#30ff70\" stroke=\"none\" stroke-width=\"1\"/><circle cx=\"154.2\" cy=\"154.2\" r=\"144.0\" fill=\"none\" stroke=\"#cce1f7\" stroke-width=\".6\" stroke-dasharray=\"3 6\" opacity=\".5\"/></svg>",
+          "x": 53.59375,
+          "y": 48.61111111111111,
+          "width": 24.093749999999996,
+          "height": 42.83333333333333,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "mediaFit": "contain",
+          "keys": [
+            {
+              "property": "rotation",
+              "time": 4,
+              "value": 90,
+              "easing": "linear"
+            },
+            {
+              "property": "rotation",
+              "time": 9,
+              "value": 45,
+              "easing": "linear"
+            },
+            {
+              "property": "rotation",
+              "time": 14,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "rotation",
+              "time": 19,
+              "value": -45,
+              "easing": "linear"
+            },
+            {
+              "property": "rotation",
+              "time": 24,
+              "value": -90,
+              "easing": "linear"
+            }
+          ]
+        },
+        {
+          "id": "Driver label",
+          "name": "Driver label",
+          "type": "text",
+          "text": "DRIVER  /  20 TEETH",
+          "x": 30.859375,
+          "y": 77.08333333333333,
+          "width": 94,
+          "scale": 0.57,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#74bfff",
+          "keys": []
+        },
+        {
+          "id": "Driven label",
+          "name": "Driven label",
+          "type": "text",
+          "text": "DRIVEN  /  40 TEETH",
+          "x": 62.890625,
+          "y": 77.08333333333333,
+          "width": 94,
+          "scale": 0.57,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#8eefd0",
+          "keys": []
+        },
+        {
+          "id": "Ratio badge",
+          "name": "Ratio badge",
+          "type": "text",
+          "text": "2 : 1",
+          "x": 84.375,
+          "y": 41.94444444444444,
+          "width": 94,
+          "scale": 1.22,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#ffcc79",
+          "keys": []
+        },
+        {
+          "id": "Ratio explanation",
+          "name": "Ratio explanation",
+          "type": "text",
+          "text": "SPEED REDUCTION",
+          "x": 84.375,
+          "y": 48.61111111111111,
+          "width": 94,
+          "scale": 0.4,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#9daec8",
+          "keys": []
+        },
+        {
+          "id": "Turn relation",
+          "name": "Turn relation",
+          "type": "text",
+          "text": "1 turn → ½ turn",
+          "x": 84.375,
+          "y": 54.30555555555556,
+          "width": 94,
+          "scale": 0.49,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#eff5ff",
+          "keys": []
+        },
+        {
+          "id": "Motion note",
+          "name": "Motion note",
+          "type": "text",
+          "text": "FIXED CENTRES  /  CONSTANT RATE",
+          "x": 50.0,
+          "y": 21.805555555555554,
+          "width": 94,
+          "scale": 0.38,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#9daec8",
+          "keys": []
+        },
+        {
+          "id": "Callout 1",
+          "name": "Callout 1",
+          "type": "text",
+          "text": "Driver → tooth contact → driven",
+          "x": 50.0,
+          "y": 91.66666666666667,
+          "width": 94,
+          "scale": 0.68,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 7,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#8eefd0",
+          "keys": [
+            {
+              "property": "opacity",
+              "time": 0,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "opacity",
+              "time": 0.35,
+              "value": 1,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 0,
+              "value": 94,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 0.5,
+              "value": 91.666667,
+              "easing": "ease_out"
+            }
+          ]
+        },
+        {
+          "id": "Callout 2",
+          "name": "Callout 2",
+          "type": "text",
+          "text": "External gears turn in opposite directions",
+          "x": 50.0,
+          "y": 91.66666666666667,
+          "width": 94,
+          "scale": 0.68,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 7,
+          "duration": 7,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#8eefd0",
+          "keys": [
+            {
+              "property": "opacity",
+              "time": 7,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "opacity",
+              "time": 7.35,
+              "value": 1,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 7,
+              "value": 94,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 7.5,
+              "value": 91.666667,
+              "easing": "ease_out"
+            }
+          ]
+        },
+        {
+          "id": "Callout 3",
+          "name": "Callout 3",
+          "type": "text",
+          "text": "40 ÷ 20 = 2  ·  driven speed = driver speed ÷ 2",
+          "x": 50.0,
+          "y": 91.66666666666667,
+          "width": 94,
+          "scale": 0.68,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 14,
+          "duration": 7,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#8eefd0",
+          "keys": [
+            {
+              "property": "opacity",
+              "time": 14,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "opacity",
+              "time": 14.35,
+              "value": 1,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 14,
+              "value": 94,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 14.5,
+              "value": 91.666667,
+              "easing": "ease_out"
+            }
+          ]
+        },
+        {
+          "id": "Callout 4",
+          "name": "Callout 4",
+          "type": "text",
+          "text": "Power is transmitted, not created",
+          "x": 50.0,
+          "y": 91.66666666666667,
+          "width": 94,
+          "scale": 0.68,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 21,
+          "duration": 7,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#8eefd0",
+          "keys": [
+            {
+              "property": "opacity",
+              "time": 21,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "opacity",
+              "time": 21.35,
+              "value": 1,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 21,
+              "value": 94,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 21.5,
+              "value": 91.666667,
+              "easing": "ease_out"
+            }
+          ]
+        }
+      ],
+      "groupReference": [],
+      "graphics": {
+        "layers": 15,
+        "keys": 26
+      },
+      "studioSteps": [
+        {
+          "title": "Upload the original stage",
+          "control": "Workspace → Viral Clip Studio → Choose videos → Open Creator Studio",
+          "value": "source.mp4 · 1280×720 · 28 seconds · original offline synthetic narration",
+          "why": "The source is a plain stage with sound. It contains no animated teaching diagrams."
+        },
+        {
+          "title": "Keep the whole composition visible",
+          "control": "After → Preview quality; Reframe; View options; Sound; Captions",
+          "value": "Full; 16:9; Show Everyone; Fit full; main frame off; Rounded off; keep original audio; voice repair off; captions off",
+          "why": "Preserve precise drawing relationships and a stable full-frame lesson."
+        },
+        {
+          "title": "Import the editable scaffold",
+          "control": "Graphics → Import animated graphics → Import graphics composition…",
+          "value": "starter.graphics.json; native text, artwork, masks and motion keys",
+          "why": "Static original SVGs become ordinary editable image layers. Existing keys use the canonical Studio animation graph; they are not an external movie."
+        },
+        {
+          "title": "Complete the key deliberately",
+          "control": "Motion → Transform keyframes → Target layer → Motion value curve editor → Curve keyframe → Selected motion key value",
+          "value": "Driver gear; rotation at 24s = 180; easing linear",
+          "why": "A complete 360° driver interval corresponds to an opposite 180° driven interval. Linear interpolation preserves the fixed ratio."
+        },
+        {
+          "title": "Inspect the matching layer or group",
+          "control": "Motion → Target layer; Layer geometry & timing; Graphics → Groups where applicable",
+          "value": "Driven gear; see the full layer/group table below",
+          "why": "Check the relationship between layers, rather than judging one moving part in isolation."
+        },
+        {
+          "title": "Add your own annotation",
+          "control": "Graphics → Add title layer → Label; Copy/time/size; Motion → Transform keyframes → Target layer = Predict first → X/Y",
+          "value": "Practice label: Predict first; start24s; duration4s; size0.55; width60%; explicitly select Predict first in Target layer; X50 Y84. Remove the practice label before final save.",
+          "why": "Graphics selection and Motion target are separate. Confirm the new title before editing X/Y so the technical diagram layers remain fixed."
+        },
+        {
+          "title": "Save, export and reopen",
+          "control": "Show media → Project name → Save; Export → Render Final Clip; Show Finished Video; saved project",
+          "value": "Unique project name; 720p; 24 fps; original audio; normal local CPU render/download; complete 28s playback; cold reopen",
+          "why": "The actual authored graph must supply the final result and restore through normal Studio controls."
+        }
+      ],
+      "media": {
+        "resultSha256": "bb050ac9f3b122ca757457e6db1f931c3ea926c900250255b1da993e58f23ddb",
+        "tutorialSha256": "1184319746e61061d3e1ef834d012d89f053ac2e0f3b8ab6e0e12c2a002f12f9",
+        "tutorialSeconds": 335.041667
+      }
+    },
+    {
+      "id": "electrical-simple-circuit",
+      "subject": "Electrical Technology",
+      "title": "Close the path. Light the load.",
+      "grade": "Grade 10 basic principles; Grades 11–12 revision",
+      "releaseStatus": "private-review",
+      "duration": 28,
+      "reference": {
+        "title": "DBE CAPS Grades 10–12 — Electrical Technology",
+        "url": "https://www.education.gov.za/LinkClick.aspx?fileticket=D5mc22RBvDA%3D&forcedownload=true&mid=1558&portalid=0&tabid=570",
+        "pdfPages": [
+          11,
+          23,
+          26
+        ],
+        "note": "Teacher must confirm the current annual teaching plan and specialisation. Page numbers count the PDF cover.",
+        "sha256": "9ea0f234087adae42f2375871830d8081099d4735c8b330e3dda0d4440a47690"
+      },
+      "concept": "A low-voltage DC source supplies potential difference; conductors, a switch and a suitable lamp form a series path. Opening the switch breaks the path and the lamp is off. Closing it completes the path and permits current. Conventional current is shown through the external circuit from positive to negative; this is distinct from electron drift in metal. Moving indicators communicate direction, not measured current or the speed of electrons.",
+      "objectives": [
+        "Identify source, conductor, switch and load in a simple DC schematic.",
+        "Predict lamp state for open and closed paths.",
+        "Trace conventional current through the external circuit from positive to negative.",
+        "Distinguish an illustrative animation from an electrical calculation or simulation.",
+        "Coordinate switch rotation, lamp opacity and current-marker position keys."
+      ],
+      "voices": [
+        "A three-volt source, conductors, a switch and a lamp form a simple circuit. The open switch breaks the path.",
+        "Close the switch. The conducting path is complete, so the lamp can light.",
+        "The moving indicators show conventional current: from positive, through the external circuit, back to negative. They are not electrons.",
+        "Open the switch again: the lamp goes off. This is an illustration, not a simulation. Practical work needs teacher supervision."
+      ],
+      "technicalExercise": "Draw and label the source, switch, conductors and lamp. Predict lamp state before and after closing the switch. Trace conventional current only in the external circuit. Explain why the animation does not measure current, voltage, electron speed or lamp suitability. No physical wiring is required.",
+      "creativeExercise": "Use separate native switch, lamp-light and indicator layers. Close the switch from −35° to 0° at 8.5–9.5s, switch the light on only at closure, and keep indicators inside 10–24s. Open at 24–25s and switch off as contact is broken. Add an original label that distinguishes conventional current from electrons.",
+      "questions": [
+        [
+          "Why is the lamp off with the switch open?",
+          "The conducting loop is interrupted. In this elementary ideal DC illustration, no steady current flows through the lamp."
+        ],
+        [
+          "Which way is conventional current shown?",
+          "From the positive terminal through the external circuit and load to the negative terminal. Electron drift in metal is opposite."
+        ],
+        [
+          "Do the moving dots measure current or electron speed?",
+          "No. Their speed and spacing are visual teaching choices. A simulation or measurement would require a circuit model and component values."
+        ]
+      ],
+      "criteria": [
+        "Correct component identification and open/closed reasoning (6).",
+        "Correct conventional current direction and distinction from electrons (6).",
+        "Clear simulation/supervision limits (2).",
+        "Switch/light/marker timings remain causally consistent (3).",
+        "Editable project, exact native controls and justified visual choices (3)."
+      ],
+      "limits": "Illustrative low-voltage DC schematic, not an electrical solver or practical wiring plan. 3V is an example source label; component ratings/current are not calculated. No mains activity or unsupervised workshop task. Any real practical must use teacher-approved components and direct supervision.",
+      "evidence": {
+        "teacherFeedbackReceived": false,
+        "independentLearnerRecreation": false,
+        "schoolHardwareTrial": false,
+        "publicRelease": false,
+        "nativeExport": true,
+        "actualNativeDownload": true,
+        "completeMovingPreview": true,
+        "completeFinishedPlayback": true,
+        "exactColdRecovery": true,
+        "tutorial": true,
+        "technicalAccuracyChecked": true,
+        "bundle": true
+      },
+      "demoControl": {
+        "target": "Switch lever",
+        "property": "rotation",
+        "time": 9.5,
+        "value": 0,
+        "starterValue": -15,
+        "secondTarget": "Lamp light",
+        "secondProperty": "opacity",
+        "secondTime": 9.5,
+        "secondValue": 1,
+        "reason": "The switch must actually touch the contact before the load is shown as on. The marker communicates direction only."
+      },
+      "number": 3,
+      "layerReference": [
+        {
+          "id": "Pathway marker",
+          "name": "Pathway marker",
+          "type": "text",
+          "text": "AUTOPROMOTE EDUCATION  /  ELECTRICAL TECHNOLOGY",
+          "x": 50.0,
+          "y": 4.166666666666667,
+          "width": 94,
+          "scale": 0.35,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#8eefd0",
+          "keys": []
+        },
+        {
+          "id": "Lesson title",
+          "name": "Lesson title",
+          "type": "text",
+          "text": "Close the path. Light the load.",
+          "x": 50.0,
+          "y": 10.13888888888889,
+          "width": 94,
+          "scale": 0.94,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "fontWeight": 800,
+          "textAlign": "center",
+          "color": "#eff5ff",
+          "keys": []
+        },
+        {
+          "id": "Stage dividers",
+          "name": "Stage dividers",
+          "type": "artwork",
+          "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><line x1=\"56\" y1=\"119\" x2=\"1224\" y2=\"119\" stroke=\"#25334b\" stroke-width=\"1\"/><line x1=\"56\" y1=\"610\" x2=\"1224\" y2=\"610\" stroke=\"#25334b\" stroke-width=\"1\"/></svg>",
+          "x": 50.0,
+          "y": 50.0,
+          "width": 100.0,
+          "height": 100.0,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "mediaFit": "contain",
+          "keys": []
+        },
+        {
+          "id": "Conductors and symbols",
+          "name": "Conductors and symbols",
+          "type": "artwork",
+          "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><line x1=\"240\" y1=\"280\" x2=\"240\" y2=\"200\" stroke=\"#74bfff\" stroke-width=\"5\"/><line x1=\"240\" y1=\"200\" x2=\"500\" y2=\"200\" stroke=\"#74bfff\" stroke-width=\"5\"/><line x1=\"620\" y1=\"200\" x2=\"900\" y2=\"200\" stroke=\"#74bfff\" stroke-width=\"5\"/><line x1=\"900\" y1=\"200\" x2=\"900\" y2=\"310\" stroke=\"#74bfff\" stroke-width=\"5\"/><line x1=\"900\" y1=\"390\" x2=\"900\" y2=\"520\" stroke=\"#74bfff\" stroke-width=\"5\"/><line x1=\"900\" y1=\"520\" x2=\"240\" y2=\"520\" stroke=\"#74bfff\" stroke-width=\"5\"/><line x1=\"240\" y1=\"520\" x2=\"240\" y2=\"420\" stroke=\"#74bfff\" stroke-width=\"5\"/><line x1=\"240\" y1=\"280\" x2=\"240\" y2=\"316\" stroke=\"#eff5ff\" stroke-width=\"4\"/><line x1=\"204\" y1=\"316\" x2=\"276\" y2=\"316\" stroke=\"#eff5ff\" stroke-width=\"5\"/><line x1=\"219\" y1=\"332\" x2=\"261\" y2=\"332\" stroke=\"#eff5ff\" stroke-width=\"5\"/><line x1=\"240\" y1=\"332\" x2=\"240\" y2=\"360\" stroke=\"#eff5ff\" stroke-width=\"4\"/><line x1=\"204\" y1=\"360\" x2=\"276\" y2=\"360\" stroke=\"#eff5ff\" stroke-width=\"5\"/><line x1=\"219\" y1=\"377\" x2=\"261\" y2=\"377\" stroke=\"#eff5ff\" stroke-width=\"5\"/><line x1=\"240\" y1=\"377\" x2=\"240\" y2=\"420\" stroke=\"#eff5ff\" stroke-width=\"4\"/><circle cx=\"900\" cy=\"350\" r=\"40\" fill=\"none\" stroke=\"#eff5ff\" stroke-width=\"4\"/><line x1=\"872\" y1=\"322\" x2=\"928\" y2=\"378\" stroke=\"#eff5ff\" stroke-width=\"3\"/><line x1=\"872\" y1=\"378\" x2=\"928\" y2=\"322\" stroke=\"#eff5ff\" stroke-width=\"3\"/><circle cx=\"500\" cy=\"200\" r=\"6\" fill=\"#eff5ff\" stroke=\"none\" stroke-width=\"1\"/><circle cx=\"620\" cy=\"200\" r=\"6\" fill=\"#eff5ff\" stroke=\"none\" stroke-width=\"1\"/></svg>",
+          "x": 50.0,
+          "y": 50.0,
+          "width": 100.0,
+          "height": 100.0,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "mediaFit": "contain",
+          "keys": []
+        },
+        {
+          "id": "Switch lever",
+          "name": "Switch lever",
+          "type": "artwork",
+          "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"280\" height=\"280\" viewBox=\"0 0 280 280\"><line x1=\"140\" y1=\"140\" x2=\"260\" y2=\"140\" stroke=\"#ffcc79\" stroke-width=\"6\"/><circle cx=\"140\" cy=\"140\" r=\"7\" fill=\"#ffcc79\" stroke=\"none\" stroke-width=\"1\"/></svg>",
+          "x": 39.0625,
+          "y": 27.77777777777778,
+          "width": 21.875,
+          "height": 38.888888888888886,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "mediaFit": "contain",
+          "keys": [
+            {
+              "property": "rotation",
+              "time": 0,
+              "value": -35,
+              "easing": "linear"
+            },
+            {
+              "property": "rotation",
+              "time": 8.5,
+              "value": -35,
+              "easing": "linear"
+            },
+            {
+              "property": "rotation",
+              "time": 9.5,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "rotation",
+              "time": 24,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "rotation",
+              "time": 25,
+              "value": -35,
+              "easing": "linear"
+            }
+          ]
+        },
+        {
+          "id": "Lamp light",
+          "name": "Lamp light",
+          "type": "artwork",
+          "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"128\" height=\"128\" viewBox=\"0 0 128 128\"><defs><radialGradient id=\"light\"><stop stop-color=\"#ffdf86\" stop-opacity=\".7\"/><stop offset=\"1\" stop-color=\"#ffdf86\" stop-opacity=\"0\"/></radialGradient></defs><circle cx=\"64\" cy=\"64\" r=\"64\" fill=\"url(#light)\" stroke=\"none\" stroke-width=\"1\"/></svg>",
+          "x": 70.3125,
+          "y": 48.61111111111111,
+          "width": 12.5,
+          "height": 22.22222222222222,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "mediaFit": "contain",
+          "keys": [
+            {
+              "property": "opacity",
+              "time": 0,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "opacity",
+              "time": 9.49,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "opacity",
+              "time": 9.5,
+              "value": 1,
+              "easing": "hold"
+            },
+            {
+              "property": "opacity",
+              "time": 24,
+              "value": 1,
+              "easing": "linear"
+            },
+            {
+              "property": "opacity",
+              "time": 24.05,
+              "value": 0,
+              "easing": "hold"
+            }
+          ]
+        },
+        {
+          "id": "Source label",
+          "name": "Source label",
+          "type": "text",
+          "text": "3 V DC SOURCE",
+          "x": 18.671875,
+          "y": 79.02777777777777,
+          "width": 94,
+          "scale": 0.5,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#eff5ff",
+          "keys": []
+        },
+        {
+          "id": "Positive terminal",
+          "name": "Positive terminal",
+          "type": "text",
+          "text": "+",
+          "x": 22.890625,
+          "y": 39.86111111111111,
+          "width": 94,
+          "scale": 0.65,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#ffcc79",
+          "keys": []
+        },
+        {
+          "id": "Negative terminal",
+          "name": "Negative terminal",
+          "type": "text",
+          "text": "−",
+          "x": 22.890625,
+          "y": 58.33333333333333,
+          "width": 94,
+          "scale": 0.65,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#74bfff",
+          "keys": []
+        },
+        {
+          "id": "Switch label",
+          "name": "Switch label",
+          "type": "text",
+          "text": "SWITCH",
+          "x": 44.6875,
+          "y": 20.416666666666668,
+          "width": 94,
+          "scale": 0.5,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#eff5ff",
+          "keys": []
+        },
+        {
+          "id": "Load label",
+          "name": "Load label",
+          "type": "text",
+          "text": "LAMP / LOAD",
+          "x": 80.9375,
+          "y": 48.61111111111111,
+          "width": 94,
+          "scale": 0.5,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#eff5ff",
+          "keys": []
+        },
+        {
+          "id": "Flow note",
+          "name": "Flow note",
+          "type": "text",
+          "text": "ILLUSTRATIVE CONVENTIONAL CURRENT",
+          "x": 50.0,
+          "y": 80.27777777777777,
+          "width": 94,
+          "scale": 0.39,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#9daec8",
+          "keys": []
+        },
+        {
+          "id": "Conventional current marker",
+          "name": "Conventional current marker",
+          "type": "artwork",
+          "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\" fill=\"#ffcf53\" stroke=\"none\" stroke-width=\"1\"/></svg>",
+          "x": 18.75,
+          "y": 38.888888888888886,
+          "width": 1.875,
+          "height": 3.333333333333333,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 10,
+          "duration": 13.1,
+          "mediaFit": "contain",
+          "keys": [
+            {
+              "property": "x",
+              "time": 10.0,
+              "value": 18.75,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 10.0,
+              "value": 38.888889,
+              "easing": "linear"
+            },
+            {
+              "property": "x",
+              "time": 10.571428571428571,
+              "value": 18.75,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 10.571428571428571,
+              "value": 27.777778,
+              "easing": "linear"
+            },
+            {
+              "property": "x",
+              "time": 12.428571428571429,
+              "value": 39.0625,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 12.428571428571429,
+              "value": 27.777778,
+              "easing": "linear"
+            },
+            {
+              "property": "x",
+              "time": 13.285714285714285,
+              "value": 48.4375,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 13.285714285714285,
+              "value": 27.777778,
+              "easing": "linear"
+            },
+            {
+              "property": "x",
+              "time": 15.285714285714285,
+              "value": 70.3125,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 15.285714285714285,
+              "value": 27.777778,
+              "easing": "linear"
+            },
+            {
+              "property": "x",
+              "time": 16.357142857142858,
+              "value": 70.3125,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 16.357142857142858,
+              "value": 48.611111,
+              "easing": "linear"
+            },
+            {
+              "property": "x",
+              "time": 17.57142857142857,
+              "value": 70.3125,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 17.57142857142857,
+              "value": 72.222222,
+              "easing": "linear"
+            },
+            {
+              "property": "x",
+              "time": 22.285714285714285,
+              "value": 18.75,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 22.285714285714285,
+              "value": 72.222222,
+              "easing": "linear"
+            },
+            {
+              "property": "x",
+              "time": 23.0,
+              "value": 18.75,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 23.0,
+              "value": 58.333333,
+              "easing": "linear"
+            },
+            {
+              "property": "opacity",
+              "time": 10,
+              "value": 1,
+              "easing": "linear"
+            },
+            {
+              "property": "opacity",
+              "time": 23.05,
+              "value": 0,
+              "easing": "hold"
+            }
+          ]
+        },
+        {
+          "id": "Open state",
+          "name": "Open state",
+          "type": "text",
+          "text": "OPEN PATH  /  LAMP OFF",
+          "x": 50.0,
+          "y": 65.0,
+          "width": 94,
+          "scale": 0.58,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 8.5,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#ffcc79",
+          "keys": []
+        },
+        {
+          "id": "Closed state",
+          "name": "Closed state",
+          "type": "text",
+          "text": "CLOSED PATH  /  LAMP ON",
+          "x": 50.0,
+          "y": 65.0,
+          "width": 94,
+          "scale": 0.58,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 9.5,
+          "duration": 14.5,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#8eefd0",
+          "keys": []
+        },
+        {
+          "id": "Open again",
+          "name": "Open again",
+          "type": "text",
+          "text": "OPEN AGAIN  /  LAMP OFF",
+          "x": 50.0,
+          "y": 65.0,
+          "width": 94,
+          "scale": 0.58,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 25,
+          "duration": 3,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#ffcc79",
+          "keys": []
+        },
+        {
+          "id": "Callout 1",
+          "name": "Callout 1",
+          "type": "text",
+          "text": "Open switch: the path is broken",
+          "x": 50.0,
+          "y": 91.66666666666667,
+          "width": 94,
+          "scale": 0.68,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 7,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#8eefd0",
+          "keys": [
+            {
+              "property": "opacity",
+              "time": 0,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "opacity",
+              "time": 0.35,
+              "value": 1,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 0,
+              "value": 94,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 0.5,
+              "value": 91.666667,
+              "easing": "ease_out"
+            }
+          ]
+        },
+        {
+          "id": "Callout 2",
+          "name": "Callout 2",
+          "type": "text",
+          "text": "Closed switch: a complete conducting path",
+          "x": 50.0,
+          "y": 91.66666666666667,
+          "width": 94,
+          "scale": 0.68,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 7,
+          "duration": 7,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#8eefd0",
+          "keys": [
+            {
+              "property": "opacity",
+              "time": 7,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "opacity",
+              "time": 7.35,
+              "value": 1,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 7,
+              "value": 94,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 7.5,
+              "value": 91.666667,
+              "easing": "ease_out"
+            }
+          ]
+        },
+        {
+          "id": "Callout 3",
+          "name": "Callout 3",
+          "type": "text",
+          "text": "Conventional current: external + → −",
+          "x": 50.0,
+          "y": 91.66666666666667,
+          "width": 94,
+          "scale": 0.68,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 14,
+          "duration": 7,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#8eefd0",
+          "keys": [
+            {
+              "property": "opacity",
+              "time": 14,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "opacity",
+              "time": 14.35,
+              "value": 1,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 14,
+              "value": 94,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 14.5,
+              "value": 91.666667,
+              "easing": "ease_out"
+            }
+          ]
+        },
+        {
+          "id": "Callout 4",
+          "name": "Callout 4",
+          "type": "text",
+          "text": "Illustration only · practical work needs supervision",
+          "x": 50.0,
+          "y": 91.66666666666667,
+          "width": 94,
+          "scale": 0.68,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 21,
+          "duration": 7,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#8eefd0",
+          "keys": [
+            {
+              "property": "opacity",
+              "time": 21,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "opacity",
+              "time": 21.35,
+              "value": 1,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 21,
+              "value": 94,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 21.5,
+              "value": 91.666667,
+              "easing": "ease_out"
+            }
+          ]
+        }
+      ],
+      "groupReference": [],
+      "graphics": {
+        "layers": 20,
+        "keys": 46
+      },
+      "studioSteps": [
+        {
+          "title": "Upload the original stage",
+          "control": "Workspace → Viral Clip Studio → Choose videos → Open Creator Studio",
+          "value": "source.mp4 · 1280×720 · 28 seconds · original offline synthetic narration",
+          "why": "The source is a plain stage with sound. It contains no animated teaching diagrams."
+        },
+        {
+          "title": "Keep the whole composition visible",
+          "control": "After → Preview quality; Reframe; View options; Sound; Captions",
+          "value": "Full; 16:9; Show Everyone; Fit full; main frame off; Rounded off; keep original audio; voice repair off; captions off",
+          "why": "Preserve precise drawing relationships and a stable full-frame lesson."
+        },
+        {
+          "title": "Import the editable scaffold",
+          "control": "Graphics → Import animated graphics → Import graphics composition…",
+          "value": "starter.graphics.json; native text, artwork, masks and motion keys",
+          "why": "Static original SVGs become ordinary editable image layers. Existing keys use the canonical Studio animation graph; they are not an external movie."
+        },
+        {
+          "title": "Complete the key deliberately",
+          "control": "Motion → Transform keyframes → Target layer → Motion value curve editor → Curve keyframe → Selected motion key value",
+          "value": "Switch lever; rotation at 9.5s = 0; easing linear",
+          "why": "The switch must actually touch the contact before the load is shown as on. The marker communicates direction only."
+        },
+        {
+          "title": "Inspect the matching layer or group",
+          "control": "Motion → Target layer; Layer geometry & timing; Graphics → Groups where applicable",
+          "value": "Lamp light; see the full layer/group table below",
+          "why": "Check the relationship between layers, rather than judging one moving part in isolation."
+        },
+        {
+          "title": "Add your own annotation",
+          "control": "Graphics → Add title layer → Label; Copy/time/size; Motion → Transform keyframes → Target layer = Predict first → X/Y",
+          "value": "Practice label: Predict first; start24s; duration4s; size0.55; width60%; explicitly select Predict first in Target layer; X50 Y84. Remove the practice label before final save.",
+          "why": "Graphics selection and Motion target are separate. Confirm the new title before editing X/Y so the technical diagram layers remain fixed."
+        },
+        {
+          "title": "Save, export and reopen",
+          "control": "Show media → Project name → Save; Export → Render Final Clip; Show Finished Video; saved project",
+          "value": "Unique project name; 720p; 24 fps; original audio; normal local CPU render/download; complete 28s playback; cold reopen",
+          "why": "The actual authored graph must supply the final result and restore through normal Studio controls."
+        }
+      ],
+      "media": {
+        "resultSha256": "f4b2b0e520fddbb3eb14a0b8469eb76f6770c76ec960684001ff1a9cd73729d8",
+        "tutorialSha256": "7913841af8c5d0e580de0831cede4c164873096e72afd6d50d0387d908436745",
+        "tutorialSeconds": 318.333333
+      }
+    },
+    {
+      "id": "civil-brick-sequence",
+      "subject": "Civil Technology",
+      "title": "Build the bond, course by course.",
+      "grade": "Grade 10 Construction specialisation; Grades 11–12 revision",
+      "releaseStatus": "private-review",
+      "duration": 28,
+      "reference": {
+        "title": "DBE CAPS Grades 10–12 — Civil Technology",
+        "url": "https://www.education.gov.za/LinkClick.aspx?fileticket=-ObkWQR3PVo%3D&forcedownload=true&mid=1558&portalid=0&tabid=570",
+        "pdfPages": [
+          47,
+          49,
+          56,
+          58
+        ],
+        "note": "Teacher must confirm the current annual teaching plan and specialisation. Page numbers count the PDF cover.",
+        "sha256": "d32a03fe99471b7330d241d2496b465dbcc2f5fb3f92c4b351b746f0b538004f"
+      },
+      "concept": "A cropped front elevation illustrates four stretcher-bond courses. Bed joints separate courses horizontally; vertical perp joints separate adjacent bricks. Alternate courses are offset by half the brick-plus-joint module so their vertical joints do not align. The wall continues beyond both cropped edges. A prepared base and a schematic damp-proof course are contextual layers, not a foundation or waterproofing specification.",
+      "objectives": [
+        "Identify courses, horizontal bed joints and vertical perp joints.",
+        "Explain the half-module stagger in stretcher bond.",
+        "Sequence the courses from the prepared support upward.",
+        "Distinguish a cropped elevation from an end/corner construction detail.",
+        "Use native layers, group masking and eased vertical/opacity keys to reveal a sequence."
+      ],
+      "voices": [
+        "Start at the prepared support. The dark strip marks a schematic damp-proof course. This is a cropped elevation.",
+        "Lay the first stretcher course in the illustration. Mortar forms horizontal bed joints and vertical perp joints.",
+        "Offset the next course by half a module. The vertical joints are staggered rather than stacked.",
+        "Continue upward, checking the illustrated level and plumb guides. The wall extends beyond the crop. Real construction needs supervised practical training."
+      ],
+      "technicalExercise": "Draw a three-course cropped stretcher-bond elevation. Mark a bed joint and a perp joint, and explain why alternate joints are staggered. Predict which next-course pattern follows. Explain why cropped edge fragments do not specify cut-brick sizes, corner bonding, foundations or safe construction.",
+      "creativeExercise": "Import the four original course assets as separate ordinary image layers. Offset alternate patterns by 80 drawing pixels for the 160-pixel module. Use a native group polygon mask to crop the continuous wall. Reveal courses from bottom to top with Y and opacity keys; add native level/plumb annotations without claiming a site measurement.",
+      "questions": [
+        [
+          "What is a bed joint?",
+          "The horizontal mortar joint between courses. A perp joint is vertical between neighbouring bricks."
+        ],
+        [
+          "How far is the pattern offset?",
+          "Half the brick-plus-joint module: 80 drawing pixels for this 160-pixel module. These are illustration units, not a site dimension specification."
+        ],
+        [
+          "Are the cropped end fragments instructions for half-brick cuts?",
+          "No. They show a wall continuing beyond the displayed crop. End/corner details and actual cutting/bonding require the teacher’s technical drawing and supervised instruction."
+        ]
+      ],
+      "criteria": [
+        "Correctly label courses, bed joints and perp joints (6).",
+        "Predict alternating half-module stagger and explain its purpose (6).",
+        "State crop/base/DPC and practical limits (2).",
+        "Correct native layer order, mask and course timings (3).",
+        "Recreate an editable sequence and justify the motion/annotation choices (3)."
+      ],
+      "limits": "Supplementary front-elevation illustration, not structural design, a construction method statement or an alternative to supervised workshop training. No real dimensions, mortar mix, load capacity, foundation specification or DPC installation detail is supplied. The colour strip only identifies a contextual DPC layer. Cropped fragments continue outside the frame.",
+      "evidence": {
+        "teacherFeedbackReceived": false,
+        "independentLearnerRecreation": false,
+        "schoolHardwareTrial": false,
+        "publicRelease": false,
+        "nativeExport": true,
+        "actualNativeDownload": true,
+        "completeMovingPreview": true,
+        "completeFinishedPlayback": true,
+        "exactColdRecovery": true,
+        "tutorial": true,
+        "technicalAccuracyChecked": true,
+        "bundle": true
+      },
+      "demoControl": {
+        "target": "Course 2",
+        "property": "y",
+        "time": 8.9,
+        "value": 63.888888888888886,
+        "starterValue": 61.11111111111111,
+        "secondTarget": "Wall crop",
+        "secondProperty": null,
+        "reason": "The course settles onto the previous bed joint. The shared native polygon mask clips a continuing wall, rather than inventing end-brick sizes."
+      },
+      "number": 4,
+      "layerReference": [
+        {
+          "id": "Pathway marker",
+          "name": "Pathway marker",
+          "type": "text",
+          "text": "AUTOPROMOTE EDUCATION  /  CIVIL TECHNOLOGY",
+          "x": 50.0,
+          "y": 4.166666666666667,
+          "width": 94,
+          "scale": 0.35,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#8eefd0",
+          "keys": []
+        },
+        {
+          "id": "Lesson title",
+          "name": "Lesson title",
+          "type": "text",
+          "text": "Build the bond, course by course.",
+          "x": 50.0,
+          "y": 10.13888888888889,
+          "width": 94,
+          "scale": 0.94,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "fontWeight": 800,
+          "textAlign": "center",
+          "color": "#eff5ff",
+          "keys": []
+        },
+        {
+          "id": "Stage dividers",
+          "name": "Stage dividers",
+          "type": "artwork",
+          "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><line x1=\"56\" y1=\"119\" x2=\"1224\" y2=\"119\" stroke=\"#25334b\" stroke-width=\"1\"/><line x1=\"56\" y1=\"610\" x2=\"1224\" y2=\"610\" stroke=\"#25334b\" stroke-width=\"1\"/></svg>",
+          "x": 50.0,
+          "y": 50.0,
+          "width": 100.0,
+          "height": 100.0,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "mediaFit": "contain",
+          "keys": []
+        },
+        {
+          "id": "Prepared support",
+          "name": "Prepared support",
+          "type": "artwork",
+          "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><rect x=\"238\" y=\"560\" width=\"814\" height=\"27\" rx=\"3\" fill=\"#526176\"/></svg>",
+          "x": 50.0,
+          "y": 50.0,
+          "width": 100.0,
+          "height": 100.0,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "mediaFit": "contain",
+          "keys": []
+        },
+        {
+          "id": "Schematic DPC",
+          "name": "Schematic DPC",
+          "type": "artwork",
+          "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><rect x=\"250\" y=\"550\" width=\"790\" height=\"8\" fill=\"#131c30\" stroke=\"#8c9bb3\" stroke-width=\"1\"/></svg>",
+          "x": 50.0,
+          "y": 50.0,
+          "width": 100.0,
+          "height": 100.0,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "mediaFit": "contain",
+          "keys": []
+        },
+        {
+          "id": "Support note",
+          "name": "Support note",
+          "type": "text",
+          "text": "PREPARED SUPPORT + SCHEMATIC DPC",
+          "x": 50.0,
+          "y": 25.416666666666664,
+          "width": 94,
+          "scale": 0.44,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#9daec8",
+          "keys": []
+        },
+        {
+          "id": "Course label 1",
+          "name": "Course label 1",
+          "type": "text",
+          "text": "01",
+          "x": 14.84375,
+          "y": 72.22222222222221,
+          "width": 94,
+          "scale": 0.5,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 3,
+          "duration": 25,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#9daec8",
+          "keys": []
+        },
+        {
+          "id": "Course label 2",
+          "name": "Course label 2",
+          "type": "text",
+          "text": "02",
+          "x": 14.84375,
+          "y": 63.888888888888886,
+          "width": 94,
+          "scale": 0.5,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 8,
+          "duration": 20,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#9daec8",
+          "keys": []
+        },
+        {
+          "id": "Course label 3",
+          "name": "Course label 3",
+          "type": "text",
+          "text": "03",
+          "x": 14.84375,
+          "y": 55.55555555555556,
+          "width": 94,
+          "scale": 0.5,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 13,
+          "duration": 15,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#9daec8",
+          "keys": []
+        },
+        {
+          "id": "Course label 4",
+          "name": "Course label 4",
+          "type": "text",
+          "text": "04",
+          "x": 14.84375,
+          "y": 47.22222222222222,
+          "width": 94,
+          "scale": 0.5,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 18,
+          "duration": 10,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#9daec8",
+          "keys": []
+        },
+        {
+          "id": "Course 1",
+          "name": "Course 1",
+          "type": "artwork",
+          "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1120\" height=\"60\" viewBox=\"0 0 1120 60\"><rect width=\"1120\" height=\"60\" fill=\"#bac1ca\"/><rect x=\"-160\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"-152\" y1=\"8\" x2=\"-20\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"0\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"8\" y1=\"8\" x2=\"140\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"160\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"168\" y1=\"8\" x2=\"300\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"320\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"328\" y1=\"8\" x2=\"460\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"480\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"488\" y1=\"8\" x2=\"620\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"640\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"648\" y1=\"8\" x2=\"780\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"800\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"808\" y1=\"8\" x2=\"940\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"960\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"968\" y1=\"8\" x2=\"1100\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"1120\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"1128\" y1=\"8\" x2=\"1260\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/></svg>",
+          "x": 63.28125,
+          "y": 72.22222222222221,
+          "width": 87.5,
+          "height": 8.333333333333334,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 3,
+          "duration": 25,
+          "mediaFit": "contain",
+          "keys": [
+            {
+              "property": "y",
+              "time": 3,
+              "value": 68.888889,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 3.9,
+              "value": 72.222222,
+              "easing": "ease_out"
+            },
+            {
+              "property": "opacity",
+              "time": 3,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "opacity",
+              "time": 3.5,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ]
+        },
+        {
+          "id": "Course 2",
+          "name": "Course 2",
+          "type": "artwork",
+          "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1120\" height=\"60\" viewBox=\"0 0 1120 60\"><rect width=\"1120\" height=\"60\" fill=\"#bac1ca\"/><rect x=\"-240\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"-232\" y1=\"8\" x2=\"-100\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"-80\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"-72\" y1=\"8\" x2=\"60\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"80\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"88\" y1=\"8\" x2=\"220\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"240\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"248\" y1=\"8\" x2=\"380\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"400\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"408\" y1=\"8\" x2=\"540\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"560\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"568\" y1=\"8\" x2=\"700\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"720\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"728\" y1=\"8\" x2=\"860\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"880\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"888\" y1=\"8\" x2=\"1020\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"1040\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"1048\" y1=\"8\" x2=\"1180\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/></svg>",
+          "x": 63.28125,
+          "y": 63.888888888888886,
+          "width": 87.5,
+          "height": 8.333333333333334,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 8,
+          "duration": 20,
+          "mediaFit": "contain",
+          "keys": [
+            {
+              "property": "y",
+              "time": 8,
+              "value": 60.555556,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 8.9,
+              "value": 63.888889,
+              "easing": "ease_out"
+            },
+            {
+              "property": "opacity",
+              "time": 8,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "opacity",
+              "time": 8.5,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ]
+        },
+        {
+          "id": "Course 3",
+          "name": "Course 3",
+          "type": "artwork",
+          "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1120\" height=\"60\" viewBox=\"0 0 1120 60\"><rect width=\"1120\" height=\"60\" fill=\"#bac1ca\"/><rect x=\"-160\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"-152\" y1=\"8\" x2=\"-20\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"0\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"8\" y1=\"8\" x2=\"140\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"160\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"168\" y1=\"8\" x2=\"300\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"320\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"328\" y1=\"8\" x2=\"460\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"480\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"488\" y1=\"8\" x2=\"620\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"640\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"648\" y1=\"8\" x2=\"780\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"800\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"808\" y1=\"8\" x2=\"940\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"960\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"968\" y1=\"8\" x2=\"1100\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"1120\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"1128\" y1=\"8\" x2=\"1260\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/></svg>",
+          "x": 63.28125,
+          "y": 55.55555555555556,
+          "width": 87.5,
+          "height": 8.333333333333334,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 13,
+          "duration": 15,
+          "mediaFit": "contain",
+          "keys": [
+            {
+              "property": "y",
+              "time": 13,
+              "value": 52.222222,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 13.9,
+              "value": 55.555556,
+              "easing": "ease_out"
+            },
+            {
+              "property": "opacity",
+              "time": 13,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "opacity",
+              "time": 13.5,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ]
+        },
+        {
+          "id": "Course 4",
+          "name": "Course 4",
+          "type": "artwork",
+          "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1120\" height=\"60\" viewBox=\"0 0 1120 60\"><rect width=\"1120\" height=\"60\" fill=\"#bac1ca\"/><rect x=\"-240\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"-232\" y1=\"8\" x2=\"-100\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"-80\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"-72\" y1=\"8\" x2=\"60\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"80\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"88\" y1=\"8\" x2=\"220\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"240\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"248\" y1=\"8\" x2=\"380\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"400\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"408\" y1=\"8\" x2=\"540\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"560\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"568\" y1=\"8\" x2=\"700\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"720\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"728\" y1=\"8\" x2=\"860\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"880\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"888\" y1=\"8\" x2=\"1020\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"1040\" y=\"0\" width=\"150\" height=\"52\" fill=\"#d18a63\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"1048\" y1=\"8\" x2=\"1180\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/></svg>",
+          "x": 63.28125,
+          "y": 47.22222222222222,
+          "width": 87.5,
+          "height": 8.333333333333334,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 18,
+          "duration": 10,
+          "mediaFit": "contain",
+          "keys": [
+            {
+              "property": "y",
+              "time": 18,
+              "value": 43.888889,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 18.9,
+              "value": 47.222222,
+              "easing": "ease_out"
+            },
+            {
+              "property": "opacity",
+              "time": 18,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "opacity",
+              "time": 18.5,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ]
+        },
+        {
+          "id": "Bed joint annotation",
+          "name": "Bed joint annotation",
+          "type": "artwork",
+          "x": 50.0,
+          "y": 67.36111111111111,
+          "width": 60.15625,
+          "height": 1.5277777777777777,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 14,
+          "duration": 14,
+          "mediaFit": "stretch",
+          "vectorShape": {
+            "version": 1,
+            "closed": true,
+            "nodes": [
+              {
+                "x": 0.8,
+                "y": 0.8,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 99.2,
+                "y": 0.8,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 99.2,
+                "y": 99.2,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 0.8,
+                "y": 99.2,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "fill": {
+              "kind": "none",
+              "color": "#ffffff",
+              "endColor": "#ffffff",
+              "start": [
+                0,
+                0
+              ],
+              "end": [
+                100,
+                100
+              ]
+            },
+            "stroke": {
+              "color": "#8eefd0",
+              "width": 0.8
+            }
+          },
+          "keys": [
+            {
+              "property": "strokeEnd",
+              "time": 14,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "strokeEnd",
+              "time": 14.8,
+              "value": 100,
+              "easing": "ease_in_out"
+            }
+          ]
+        },
+        {
+          "id": "Bed joint label",
+          "name": "Bed joint label",
+          "type": "text",
+          "text": "BED JOINT",
+          "x": 87.96875,
+          "y": 67.36111111111111,
+          "width": 94,
+          "scale": 0.42,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 14,
+          "duration": 14,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#8eefd0",
+          "keys": []
+        },
+        {
+          "id": "Perp joint annotation",
+          "name": "Perp joint annotation",
+          "type": "artwork",
+          "x": 31.640625,
+          "y": 71.66666666666667,
+          "width": 1.09375,
+          "height": 6.25,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 10,
+          "duration": 18,
+          "mediaFit": "stretch",
+          "vectorShape": {
+            "version": 1,
+            "closed": true,
+            "nodes": [
+              {
+                "x": 0.8,
+                "y": 0.8,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 99.2,
+                "y": 0.8,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 99.2,
+                "y": 99.2,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "x": 0.8,
+                "y": 99.2,
+                "in": [
+                  0,
+                  0
+                ],
+                "out": [
+                  0,
+                  0
+                ]
+              }
+            ],
+            "fill": {
+              "kind": "none",
+              "color": "#ffffff",
+              "endColor": "#ffffff",
+              "start": [
+                0,
+                0
+              ],
+              "end": [
+                100,
+                100
+              ]
+            },
+            "stroke": {
+              "color": "#ffcc79",
+              "width": 0.8
+            }
+          },
+          "keys": [
+            {
+              "property": "strokeEnd",
+              "time": 10,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "strokeEnd",
+              "time": 10.8,
+              "value": 100,
+              "easing": "ease_in_out"
+            }
+          ]
+        },
+        {
+          "id": "Perp joint label",
+          "name": "Perp joint label",
+          "type": "text",
+          "text": "PERP JOINT",
+          "x": 87.96875,
+          "y": 73.61111111111111,
+          "width": 94,
+          "scale": 0.42,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 10,
+          "duration": 18,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#ffcc79",
+          "keys": []
+        },
+        {
+          "id": "Level and plumb guides",
+          "name": "Level and plumb guides",
+          "type": "artwork",
+          "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><line x1=\"245\" y1=\"302\" x2=\"245\" y2=\"555\" stroke=\"#74bfff\" stroke-width=\"2\" stroke-dasharray=\"5 5\"/><line x1=\"245\" y1=\"302\" x2=\"1047\" y2=\"302\" stroke=\"#74bfff\" stroke-width=\"2\" stroke-dasharray=\"5 5\"/></svg>",
+          "x": 50.0,
+          "y": 50.0,
+          "width": 100.0,
+          "height": 100.0,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 21,
+          "duration": 7,
+          "mediaFit": "contain",
+          "keys": [
+            {
+              "property": "opacity",
+              "time": 21,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "opacity",
+              "time": 21.7,
+              "value": 1,
+              "easing": "linear"
+            }
+          ]
+        },
+        {
+          "id": "Crop note",
+          "name": "Crop note",
+          "type": "text",
+          "text": "CROPPED ELEVATION  /  WALL CONTINUES AT BOTH EDGES",
+          "x": 50.0,
+          "y": 31.805555555555554,
+          "width": 94,
+          "scale": 0.41,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 28,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#9daec8",
+          "keys": []
+        },
+        {
+          "id": "Callout 1",
+          "name": "Callout 1",
+          "type": "text",
+          "text": "Prepared support and schematic damp-proof course",
+          "x": 50.0,
+          "y": 91.66666666666667,
+          "width": 94,
+          "scale": 0.68,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 0,
+          "duration": 7,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#8eefd0",
+          "keys": [
+            {
+              "property": "opacity",
+              "time": 0,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "opacity",
+              "time": 0.35,
+              "value": 1,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 0,
+              "value": 94,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 0.5,
+              "value": 91.666667,
+              "easing": "ease_out"
+            }
+          ]
+        },
+        {
+          "id": "Callout 2",
+          "name": "Callout 2",
+          "type": "text",
+          "text": "Bed joints + perp joints",
+          "x": 50.0,
+          "y": 91.66666666666667,
+          "width": 94,
+          "scale": 0.68,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 7,
+          "duration": 7,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#8eefd0",
+          "keys": [
+            {
+              "property": "opacity",
+              "time": 7,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "opacity",
+              "time": 7.35,
+              "value": 1,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 7,
+              "value": 94,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 7.5,
+              "value": 91.666667,
+              "easing": "ease_out"
+            }
+          ]
+        },
+        {
+          "id": "Callout 3",
+          "name": "Callout 3",
+          "type": "text",
+          "text": "Alternate courses: half-module offset",
+          "x": 50.0,
+          "y": 91.66666666666667,
+          "width": 94,
+          "scale": 0.68,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 14,
+          "duration": 7,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#8eefd0",
+          "keys": [
+            {
+              "property": "opacity",
+              "time": 14,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "opacity",
+              "time": 14.35,
+              "value": 1,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 14,
+              "value": 94,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 14.5,
+              "value": 91.666667,
+              "easing": "ease_out"
+            }
+          ]
+        },
+        {
+          "id": "Callout 4",
+          "name": "Callout 4",
+          "type": "text",
+          "text": "Level + plumb guides · supervised practicals remain essential",
+          "x": 50.0,
+          "y": 91.66666666666667,
+          "width": 94,
+          "scale": 0.68,
+          "rotation": 0,
+          "opacity": 1,
+          "startTime": 21,
+          "duration": 7,
+          "fontWeight": 600,
+          "textAlign": "center",
+          "color": "#8eefd0",
+          "keys": [
+            {
+              "property": "opacity",
+              "time": 21,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "property": "opacity",
+              "time": 21.35,
+              "value": 1,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 21,
+              "value": 94,
+              "easing": "linear"
+            },
+            {
+              "property": "y",
+              "time": 21.5,
+              "value": 91.666667,
+              "easing": "ease_out"
+            }
+          ]
+        }
+      ],
+      "groupReference": [
+        {
+          "id": "Wall crop",
+          "name": "Wall crop",
+          "layerIds": [
+            "Course 1",
+            "Course 2",
+            "Course 3",
+            "Course 4"
+          ],
+          "startTime": 0,
+          "duration": 28,
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(19.53125% 38%, 81.25% 38%, 81.25% 76.388889%, 19.53125% 76.388889%)",
+            "feather": 0,
+            "inverted": false
+          },
+          "keys": []
+        }
+      ],
+      "graphics": {
+        "layers": 24,
+        "keys": 38
+      },
+      "studioSteps": [
+        {
+          "title": "Upload the original stage",
+          "control": "Workspace → Viral Clip Studio → Choose videos → Open Creator Studio",
+          "value": "source.mp4 · 1280×720 · 28 seconds · original offline synthetic narration",
+          "why": "The source is a plain stage with sound. It contains no animated teaching diagrams."
+        },
+        {
+          "title": "Keep the whole composition visible",
+          "control": "After → Preview quality; Reframe; View options; Sound; Captions",
+          "value": "Full; 16:9; Show Everyone; Fit full; main frame off; Rounded off; keep original audio; voice repair off; captions off",
+          "why": "Preserve precise drawing relationships and a stable full-frame lesson."
+        },
+        {
+          "title": "Import the editable scaffold",
+          "control": "Graphics → Import animated graphics → Import graphics composition…",
+          "value": "starter.graphics.json; native text, artwork, masks and motion keys",
+          "why": "Static original SVGs become ordinary editable image layers. Existing keys use the canonical Studio animation graph; they are not an external movie."
+        },
+        {
+          "title": "Complete the key deliberately",
+          "control": "Motion → Transform keyframes → Target layer → Motion value curve editor → Curve keyframe → Selected motion key value",
+          "value": "Course 2; y at 8.9s = 63.888889; easing ease_out",
+          "why": "The course settles onto the previous bed joint. The shared native polygon mask clips a continuing wall, rather than inventing end-brick sizes."
+        },
+        {
+          "title": "Inspect the matching layer or group",
+          "control": "Composite → Graphic groups → Wall crop → Enable group mask / Mask shape / Polygon path",
+          "value": "Mask enabled; polygon; feather 0; not inverted; polygon(19.53125% 38%, 81.25% 38%, 81.25% 76.388889%, 19.53125% 76.388889%)",
+          "why": "Toggle the native group mask off and on to show the continuing courses, then restore the exact crop. Edge fragments are not prescribed cutting sizes."
+        },
+        {
+          "title": "Add your own annotation",
+          "control": "Graphics → Add title layer → Label; Copy/time/size; Motion → Transform keyframes → Target layer = Predict first → X/Y",
+          "value": "Practice label: Predict first; start24s; duration4s; size0.55; width60%; explicitly select Predict first in Target layer; X50 Y84. Remove the practice label before final save.",
+          "why": "Graphics selection and Motion target are separate. Confirm the new title before editing X/Y so the technical diagram layers remain fixed."
+        },
+        {
+          "title": "Save, export and reopen",
+          "control": "Show media → Project name → Save; Export → Render Final Clip; Show Finished Video; saved project",
+          "value": "Unique project name; 720p; 24 fps; original audio; normal local CPU render/download; complete 28s playback; cold reopen",
+          "why": "The actual authored graph must supply the final result and restore through normal Studio controls."
+        }
+      ],
+      "media": {
+        "resultSha256": "76b7c5ba4d02f6cdfa8820a0e25958b5cb622e245e69bac3fcbb3e8c7ef23555",
+        "tutorialSha256": "3b1f49efdc6b78619074dc071bc25f63a0f455a3be2e2827ae25bf8565e5d702",
+        "tutorialSeconds": 362.208333
+      }
+    }
+  ]
+}

@@ -1,0 +1,150 @@
+{
+  "lessonId": "civil-brick-sequence",
+  "sha256": "76b7c5ba4d02f6cdfa8820a0e25958b5cb622e245e69bac3fcbb3e8c7ef23555",
+  "framesDecoded": 672,
+  "seconds": 28.0,
+  "width": 1280,
+  "height": 720,
+  "fps": 24.0,
+  "allFramesNonblank": true,
+  "nativeWorkflowProof": "tutorial/proof.json",
+  "geometryAssessment": {
+    "courses": 4,
+    "bottomUpNativeStartsSeconds": [
+      3,
+      8,
+      13,
+      18
+    ],
+    "drawingModulePixels": 160,
+    "alternateOffsetPixels": 80,
+    "brickHeightPixels": 52,
+    "bedJointPixels": 8,
+    "perpJointPixels": 10,
+    "nativeGroupCrop": {
+      "enabled": true,
+      "shape": "polygon",
+      "path": "polygon(19.53125% 38%, 81.25% 38%, 81.25% 76.388889%, 19.53125% 76.388889%)",
+      "feather": 0,
+      "inverted": false
+    },
+    "cropFragmentsNotCutInstructions": true,
+    "structuralOrConstructionSpecification": false,
+    "assessment": "Bounded geometry/kinematic/timing checks; not educator sign-off",
+    "teacherFeedbackReceived": false,
+    "independentLearnerRecreation": false,
+    "schoolHardwareTrial": false
+  },
+  "pairedPreFinalPreview": [
+    {
+      "time": 2,
+      "meanAbsoluteRgbDifference": 4.8172395833333335,
+      "p95RgbDifference": 5.0,
+      "previewPixels": [
+        1280,
+        720
+      ],
+      "outputFrame": 48,
+      "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+    },
+    {
+      "time": 4,
+      "meanAbsoluteRgbDifference": 5.074189091435185,
+      "p95RgbDifference": 8.0,
+      "previewPixels": [
+        1280,
+        720
+      ],
+      "outputFrame": 96,
+      "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+    },
+    {
+      "time": 9,
+      "meanAbsoluteRgbDifference": 11.501833767361111,
+      "p95RgbDifference": 63.0,
+      "previewPixels": [
+        1280,
+        720
+      ],
+      "outputFrame": 216,
+      "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+    },
+    {
+      "time": 14,
+      "meanAbsoluteRgbDifference": 10.942851924189815,
+      "p95RgbDifference": 49.0,
+      "previewPixels": [
+        1280,
+        720
+      ],
+      "outputFrame": 336,
+      "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+    },
+    {
+      "time": 20,
+      "meanAbsoluteRgbDifference": 5.711783130787037,
+      "p95RgbDifference": 11.0,
+      "previewPixels": [
+        1280,
+        720
+      ],
+      "outputFrame": 480,
+      "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+    },
+    {
+      "time": 24,
+      "meanAbsoluteRgbDifference": 6.83216652199074,
+      "p95RgbDifference": 14.0,
+      "previewPixels": [
+        1280,
+        720
+      ],
+      "outputFrame": 576,
+      "scope": "Pre-final paused canvas versus native final. No strict whole-picture parity promotion."
+    }
+  ],
+  "nativeGearMotion": null,
+  "strictWholeStudioPixelParity": false,
+  "externalTeacherReview": false,
+  "independentLearnerRecreation": false,
+  "actualSchoolHardwareTrial": false,
+  "creativeOwnerApproval": false,
+  "reviewLimit": "Geometry/kinematic/timing and actual decoded-film checks support a private teacher-review candidate. Teachers must judge educational suitability and practical terminology; full human listening and school-device trials remain required.",
+  "audioRms": 0.13902777433395386,
+  "noSubtitleTracks": true,
+  "nativePixelSemanticChecks": {
+    "all672CourseOrderAndSettledPresenceChecks": true,
+    "all672RightCropNoLeakChecks": true,
+    "actualVerticalJointCentresPixels": [
+      [
+        404.5,
+        564.5,
+        724.5,
+        884.5
+      ],
+      [
+        324.5,
+        484.5,
+        644.5,
+        804.5,
+        964.5
+      ],
+      [
+        404.5,
+        564.5,
+        724.5,
+        884.5
+      ],
+      [
+        324.5,
+        484.5,
+        644.5,
+        804.5,
+        964.5
+      ]
+    ],
+    "actualAlternateHalfModuleOffsetPixels": 80,
+    "jointPositionTolerancePixels": 2,
+    "source": "Actual native frame sequence and final mortar-joint detection; cropped elevation, not a construction specification."
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Motion note \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Motion note",
+      "name": "Motion note",
+      "type": "text",
+      "text": "FIXED CENTRES  /  CONSTANT RATE",
+      "x": 50.0,
+      "y": 21.805555555555554,
+      "width": 94,
+      "scale": 0.38,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9daec8",
+      "keys": []
+    }
+  ],
+  "groups": []
+}

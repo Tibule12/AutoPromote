@@ -18,6 +18,9 @@ if(fs.existsSync(base))for(const name of fs.readdirSync(base))if(name.endsWith('
 // The owner authorised a public, read-only CAT teacher presentation. This is
 // distinct from an approved learner release; IT gates remain unchanged.
 const catCatalog = require('../src/education/catCatalog.json');
+// The new technical-school brief explicitly withholds production deployment.
+// Local review builds may contain complete proof; normal builds cannot copy it.
+if (!preview) fs.rmSync(path.join(build, 'education/technical-v1'), { recursive: true, force: true });
 const catBuild = path.join(build, 'education/cat-html-v1');
 if (!preview && catCatalog.presentationRelease?.channel !== 'teacher-review') {
   fs.rmSync(catBuild, { recursive: true, force: true });

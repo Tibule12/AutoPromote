@@ -1,0 +1,65 @@
+0.00s — Workspace → Viral Clip Studio
+Click Viral Clip Studio in the workspace. Each tool path shown at the top identifies where we are; long panel scrolling is shortened.
+
+9.71s — Viral Clip Studio → Choose videos
+Choose videos and select source dot M P four from the practice kit. It is a plain stage with our concept narration, not a finished animation.
+
+20.32s — Viral Clip Studio → Open Creator Studio
+Open Creator Studio. Keep the preview, tools and timeline visible together. We will build the explanation with ordinary editable layers.
+
+30.21s — Preview → After → Full
+Pause the comparison, choose After and set preview quality to Full. This shows the actual editable composition before any final render.
+
+41.50s — Reframe → 16:9; View options → Fit full
+Open Reframe. Choose sixteen by nine and Show Everyone. Under View options choose Fit full and turn the main frame off. Rounded footage stays off.
+
+52.63s — Sound → Keep original audio
+Open Sound. Keep original audio on and voice repair off. The source carries the disclosed synthetic teaching voice; Studio will preserve it.
+
+62.88s — Captions → Preview captions off
+Open Captions and leave preview captions off. The diagram labels explain the concept; there are no subtitle or caption tracks.
+
+72.12s — Graphics → Import animated graphics
+Click Graphics. Close Logo Workshop, then open Import animated graphics. The path label keeps you oriented while we move directly to the right control.
+
+83.48s — Graphics → Import graphics composition…
+Import starter dot graphics dot J S O N. Prepared static diagrams become ordinary native layers and keys. One deliberately incomplete value lets us practise the real motion controls.
+
+97.88s — Motion → Transform keyframes → Target layer
+Click Motion, then Transform keyframes. Always check Target layer before changing a value. The supplied scaffold remains editable; it is not a flattened animation.
+
+109.68s — Motion → Curve keyframe
+Choose Front focus. In the curve editor choose stroke End at two point eight seconds. The starter stops at fifty-five percent.
+
+118.52s — Motion → Selected key value / easing
+Set the selected key value to one hundred, with Ease in out. Now the native outline draws all the way around the front view.
+
+128.38s — Motion → related target / mask
+Choose Top focus next. Its outline reaches one hundred at eight point eight seconds. Compare the matching dimensions and third-angle layout.
+
+138.04s — Graphics → Add title layer → Label
+Now create an original annotation. Click Graphics, find Add title layer and choose Label. This is a normal editable text layer.
+
+146.85s — Graphics → Title text / time / size
+Type Predict first. Set its start to twenty-four seconds, duration four seconds, size point five five and box width sixty percent.
+
+171.70s — Motion → Transform keyframes → X / Y
+Select the new title in Motion. Set X to fifty and Y to eighty-four. That places it in the reserved footer; check that it never covers the technical diagram.
+
+186.73s — Graphics → selected title → Remove
+Return to Graphics and remove this practice label. Our final lesson already has its own footer callout. Keep the exercise project separately if you want to develop it.
+
+198.06s — Preview → seek zero → Play
+Return the playhead to zero and play the full editable lesson. Check the relationships, timing, labels and sound before spending render time.
+
+232.62s — Show media → Project name → Save
+Choose Show media. Give this project a unique subject name and save it. The diagram layers, keys, audio and technical decisions stay editable.
+
+247.18s — Export → 720p → 24 fps
+Open Export. Choose seven twenty p and twenty-four frames per second. Keep the full twenty-eight-second programme and its original narration.
+
+261.50s — Export → Render Final Clip
+Click Render Final Clip. This recording uses the isolated local C P U worker and finite symbolic credits. The unattended processing wait is omitted.
+
+275.89s — Export → Show Finished Video
+Choose Show Finished Video, then watch the complete native Studio export. Compare it with the editable preview. The tutorial ends with the actual result and its sound.

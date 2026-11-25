@@ -1,0 +1,28 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Front view \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Front view",
+      "name": "Front view",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><polygon points=\"600.000,500.000 840.000,500.000 840.000,440.000 690.000,440.000 690.000,380.000 600.000,380.000\" fill=\"#23486c\" stroke=\"#74bfff\" stroke-width=\"3\" stroke-linejoin=\"round\"/></svg>",
+      "x": 50.0,
+      "y": 50.0,
+      "width": 100.0,
+      "height": 100.0,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "contain",
+      "keys": []
+    }
+  ],
+  "groups": []
+}

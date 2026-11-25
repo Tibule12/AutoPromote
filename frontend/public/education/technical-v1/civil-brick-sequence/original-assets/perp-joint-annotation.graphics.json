@@ -1,0 +1,98 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Perp joint annotation \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Perp joint annotation",
+      "name": "Perp joint annotation",
+      "type": "artwork",
+      "x": 31.640625,
+      "y": 71.66666666666667,
+      "width": 1.09375,
+      "height": 6.25,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 0.8,
+            "y": 0.8,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.2,
+            "y": 0.8,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.2,
+            "y": 99.2,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 0.8,
+            "y": 99.2,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ffffff",
+          "endColor": "#ffffff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#ffcc79",
+          "width": 0.8
+        }
+      },
+      "keys": []
+    }
+  ],
+  "groups": []
+}

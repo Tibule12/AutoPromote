@@ -1,0 +1,36 @@
+SUPPLEMENTARY PRIVATE TEACHER REVIEW — NOT CAPS APPROVED
+Build the bond, course by course.
+Grade 10 Construction specialisation; Grades 11–12 revision
+
+OBJECTIVES
+Identify courses, horizontal bed joints and vertical perp joints.
+Explain the half-module stagger in stretcher bond.
+Sequence the courses from the prepared support upward.
+Distinguish a cropped elevation from an end/corner construction detail.
+Use native layers, group masking and eased vertical/opacity keys to reveal a sequence.
+
+DRAFT RUBRIC /20
+Correctly label courses, bed joints and perp joints (6).
+Predict alternating half-module stagger and explain its purpose (6).
+State crop/base/DPC and practical limits (2).
+Correct native layer order, mask and course timings (3).
+Recreate an editable sequence and justify the motion/annotation choices (3).
+
+REASONING GUIDE
+What is a bed joint?
+The horizontal mortar joint between courses. A perp joint is vertical between neighbouring bricks.
+
+How far is the pattern offset?
+Half the brick-plus-joint module: 80 drawing pixels for this 160-pixel module. These are illustration units, not a site dimension specification.
+
+Are the cropped end fragments instructions for half-brick cuts?
+No. They show a wall continuing beyond the displayed crop. End/corner details and actual cutting/bonding require the teacher’s technical drawing and supervised instruction.
+
+LIMITS
+Supplementary front-elevation illustration, not structural design, a construction method statement or an alternative to supervised workshop training. No real dimensions, mortar mix, load capacity, foundation specification or DPC installation detail is supplied. The colour strip only identifies a contextual DPC layer. Cropped fragments continue outside the frame.
+
+REFERENCE
+DBE CAPS Grades 10–12 — Civil Technology; PDF pages 47, 49, 56, 58
+https://www.education.gov.za/LinkClick.aspx?fileticket=-ObkWQR3PVo%3D&forcedownload=true&mid=1558&portalid=0&tabid=570
+
+Teacher confirms current ATP, specialisation, terminology and suitability before learner use. No teacher endorsement or learning-speed claim is made.

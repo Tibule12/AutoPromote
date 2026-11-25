@@ -1,0 +1,29 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Positive terminal \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Positive terminal",
+      "name": "Positive terminal",
+      "type": "text",
+      "text": "+",
+      "x": 22.890625,
+      "y": 39.86111111111111,
+      "width": 94,
+      "scale": 0.65,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#ffcc79",
+      "keys": []
+    }
+  ],
+  "groups": []
+}

@@ -1,0 +1,29 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Isometric label \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Isometric label",
+      "name": "Isometric label",
+      "type": "text",
+      "text": "ISOMETRIC",
+      "x": 23.046875,
+      "y": 72.22222222222221,
+      "width": 94,
+      "scale": 0.55,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9daec8",
+      "keys": []
+    }
+  ],
+  "groups": []
+}

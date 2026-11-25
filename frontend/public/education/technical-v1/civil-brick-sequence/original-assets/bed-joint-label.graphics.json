@@ -1,0 +1,29 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Bed joint label \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Bed joint label",
+      "name": "Bed joint label",
+      "type": "text",
+      "text": "BED JOINT",
+      "x": 87.96875,
+      "y": 67.36111111111111,
+      "width": 94,
+      "scale": 0.42,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8eefd0",
+      "keys": []
+    }
+  ],
+  "groups": []
+}

@@ -1,0 +1,48 @@
+{
+  "lessons": [
+    {
+      "lessonId": "egd-drawing-views",
+      "freshBrowserSourceAndGraphicsImport": true,
+      "normalAccountSignIn": true,
+      "ownerBackupUsed": false,
+      "exactLayerAndKeyValues": true,
+      "exactColdRecovery": true,
+      "layers": 20,
+      "scope": "Technical recreation in a clean browser using the same isolated adult fixture account. Not an independent learner, cross-account sharing or real school-device qualification."
+    },
+    {
+      "lessonId": "mechanical-gears",
+      "freshBrowserSourceAndGraphicsImport": true,
+      "normalAccountSignIn": true,
+      "ownerBackupUsed": false,
+      "exactLayerAndKeyValues": true,
+      "exactColdRecovery": true,
+      "layers": 15,
+      "scope": "Technical recreation in a clean browser using the same isolated adult fixture account. Not an independent learner, cross-account sharing or real school-device qualification."
+    },
+    {
+      "lessonId": "electrical-simple-circuit",
+      "freshBrowserSourceAndGraphicsImport": true,
+      "normalAccountSignIn": true,
+      "ownerBackupUsed": false,
+      "exactLayerAndKeyValues": true,
+      "exactColdRecovery": true,
+      "layers": 20,
+      "scope": "Technical recreation in a clean browser using the same isolated adult fixture account. Not an independent learner, cross-account sharing or real school-device qualification."
+    },
+    {
+      "lessonId": "civil-brick-sequence",
+      "freshBrowserSourceAndGraphicsImport": true,
+      "normalAccountSignIn": true,
+      "ownerBackupUsed": false,
+      "exactLayerAndKeyValues": true,
+      "exactColdRecovery": true,
+      "layers": 24,
+      "scope": "Technical recreation in a clean browser using the same isolated adult fixture account. Not an independent learner, cross-account sharing or real school-device qualification."
+    }
+  ],
+  "renderRequests": 0,
+  "paidJobs": 0,
+  "independentLearnerRecreation": false,
+  "schoolHardwareTrial": false
+}

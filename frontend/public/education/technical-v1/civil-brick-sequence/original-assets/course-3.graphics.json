@@ -1,0 +1,28 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Course 3 \u2014 original static layer",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Course 3",
+      "name": "Course 3",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1120\" height=\"60\" viewBox=\"0 0 1120 60\"><rect width=\"1120\" height=\"60\" fill=\"#bac1ca\"/><rect x=\"-160\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"-152\" y1=\"8\" x2=\"-20\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"0\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"8\" y1=\"8\" x2=\"140\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"160\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"168\" y1=\"8\" x2=\"300\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"320\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"328\" y1=\"8\" x2=\"460\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"480\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"488\" y1=\"8\" x2=\"620\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"640\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"648\" y1=\"8\" x2=\"780\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"800\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"808\" y1=\"8\" x2=\"940\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"960\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"968\" y1=\"8\" x2=\"1100\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/><rect x=\"1120\" y=\"0\" width=\"150\" height=\"52\" fill=\"#be6e4b\" stroke=\"#e7a67d\" stroke-width=\"1\"/><line x1=\"1128\" y1=\"8\" x2=\"1260\" y2=\"8\" stroke=\"#e6a27d\" stroke-width=\"1\"/></svg>",
+      "x": 63.28125,
+      "y": 55.55555555555556,
+      "width": 87.5,
+      "height": 8.333333333333334,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "contain",
+      "keys": []
+    }
+  ],
+  "groups": []
+}

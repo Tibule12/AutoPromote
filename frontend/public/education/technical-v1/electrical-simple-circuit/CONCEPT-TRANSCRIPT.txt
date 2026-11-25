@@ -1,0 +1,7 @@
+0.15s — A three-volt source, conductors, a switch and a lamp form a simple circuit. The open switch breaks the path.
+
+7.15s — Close the switch. The conducting path is complete, so the lamp can light.
+
+14.15s — The moving indicators show conventional current: from positive, through the external circuit, back to negative. They are not electrons.
+
+21.15s — Open the switch again: the lamp goes off. This is an illustration, not a simulation. Practical work needs teacher supervision.
