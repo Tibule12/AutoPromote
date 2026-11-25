@@ -73,3 +73,6 @@ The CAT landing now keeps all three finished films, expandable real Studio guide
 
 
 Owner authorisation, 25 November: publish the completed CAT presentation and push this work to main for a live teacher demonstration. The normal public build now exposes the six complete CAT lessons under an explicit teacher-review channel. This supersedes the earlier private-only hosting restriction for these six presentation artifacts. It does not set teacher feedback, formal curriculum approval, learner enrolment, school entitlements or general IT lesson release. The build validates all required CAT evidence/files and removes unlisted drafts and private project backups. The complete pack is a versioned public GitHub Release asset; individual films, lesson kits and source materials are served with the app. Prior rejected/unreviewed IT workflows remain gated.
+
+
+Public feedback persistence: guest auth cleanup retains exactly the device-local CAT review-note and IT progress records. It still removes account credentials and other session data; owner-scoped render recovery keeps its existing server checks. Learning data remain on the device or in the reviewer’s explicit JSON download. This does not create teacher approval or school records.

@@ -36,7 +36,7 @@ jobs:
         working-directory: frontend
         env:
           CI: "true"
-        run: npm test -- --watch=false --runInBand --runTestsByPath src/education/__tests__/catLearningPath.test.js src/education/__tests__/catPresentation.test.js src/components/__tests__/studioLogoDesign.test.js
+        run: npm test -- --watch=false --runInBand --runTestsByPath src/education/__tests__/catLearningPath.test.js src/education/__tests__/catPresentation.test.js src/utils/__tests__/viralRenderRecovery.test.js src/components/__tests__/studioLogoDesign.test.js
 
       - name: Build frontend
         working-directory: frontend

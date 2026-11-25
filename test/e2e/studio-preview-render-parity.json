@@ -15,7 +15,8 @@
       "reports/education-cat-20261124/printable-materials.json",
       "reports/education-cat-20261124/additional-delivery-verification.json",
       "reports/education-cat-20261124/additional-html-accuracy.json",
-      "reports/education-cat-20261124/additional-full-movie-playback.json"
+      "reports/education-cat-20261124/additional-full-movie-playback.json",
+      "reports/education-cat-20261124/public-review-notes.json"
     ],
     "readinessPromotion": false,
     "nextTaskId": "S02",
@@ -49,7 +50,8 @@
       "completeOfflineZIP": true,
       "deviceLocalNotesAndDownload": true,
       "approvalInferred": false,
-      "originalThreeNativeMoviesUnchanged": true
+      "originalThreeNativeMoviesUnchanged": true,
+      "deviceNotesSurviveGuestSessionCleanup": true
     },
     "additionalLessons": {
       "nativeExports": 3,

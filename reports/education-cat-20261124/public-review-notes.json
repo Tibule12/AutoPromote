@@ -1,0 +1,13 @@
+{
+  "date": "2026-11-25",
+  "reproduced": "Anonymous account cleanup on page startup removed device-local review notes and IT progress from localStorage.",
+  "correction": "Preserve exactly the two declared device education keys while removing account credentials and other session keys.",
+  "tests": {
+    "publicGuestStartupRestoresNotes": true,
+    "newEditsStillPersist": true,
+    "privateTokensAndUndeclaredEducationSessionKeysStillRemoved": true
+  },
+  "newRenderJobs": 0,
+  "teacherApprovalInferred": false,
+  "liveServingRetest": "Required after deployment; retained with the release verification."
+}

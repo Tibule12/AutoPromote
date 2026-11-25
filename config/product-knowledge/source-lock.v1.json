@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Owner-authorised six-lesson live CAT teacher presentation; preserve learner and readiness gates",
-  "reviewed_at": "2026-11-25T11:04:46.586Z",
+  "reason": "Preserve exactly the declared device education records during guest-session cleanup; account tokens still clear",
+  "reviewed_at": "2026-11-25T11:41:54.445Z",
   "catalog_sha256": "c09a26f3a093fe05b546f1006e2da1ed4c5f10efb8e49ab84c2fe77a452e29c1",
   "sources": [
     {
@@ -35,7 +35,7 @@
     },
     {
       "path": "docs/EDUCATION-ARCHITECTURE.md",
-      "sha256": "f8c0bdf16d41ce7ed0266fff91f8fcda0488dafaf47e74aca9b04a354af26712"
+      "sha256": "fe47d9c6bcff10b919e87df85e028be3a06293b02c2daa7eb05e13f533d4a268"
     },
     {
       "path": "frontend/src/App.js",
@@ -815,11 +815,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "1dcc29ed1e3e713e65f8d3f4f994a1fe21c61e0e8bd0d408175bcf42f893d683"
+      "sha256": "ca3f1a70734fd4384ec711c3fd7556c6c67eb5e8d2cd8fd33783343896bb2058"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "15ac261da97e8a1e0aa0c9844856d19219d31c70557cfe8c246d311d2997c128"
+      "sha256": "9eb6b6ed5de4995f85ca83bc21190ed1c4ef370c3e60db9221e619fcae359ad6"
     },
     {
       "path": "worker.js",

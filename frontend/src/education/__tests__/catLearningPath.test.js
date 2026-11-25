@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import CatLearningPath from '../CatLearningPath';
 import catalog from '../catCatalog.json';
 jest.mock('../educationCatalog', () => ({ EDUCATION_PREVIEW: true, educationRoute: path => '/#/education/' + path }));
@@ -32,4 +32,24 @@ test.each(catalog.lessons.map(lesson => lesson.id))('%s separates concept and cr
  expect(screen.getByRole('link',{name:'Student worksheet PDF ↓'})).toHaveAttribute('href',expect.stringContaining('student-worksheet.pdf'));
  expect(screen.getByText('Exact editable graphics settings')).toBeInTheDocument();
  expect(container.querySelector('video track')).toBeNull();
+});
+
+test('public guest startup retains saved notes while clearing account credentials',async()=>{
+ const {renderToString}=require('react-dom/server.node');
+ const {createRoot}=require('react-dom/client');
+ const {clearSessionPreservingRenderAttempts}=require('../../utils/viralRenderRecovery');
+ const container=document.createElement('div');
+ container.innerHTML=renderToString(<CatLearningPath route="cat"/>);
+ document.body.appendChild(container);
+ localStorage.setItem('autopromote.education.cat.review.v1',JSON.stringify({'html-images-links':'Keep this teacher feedback after reloading.'}));
+ localStorage.setItem('token','expired private token');
+ clearSessionPreservingRenderAttempts();
+ let root;
+ try {
+  await act(async()=>{root=createRoot(container);root.render(<CatLearningPath route="cat"/>);});
+  await waitFor(()=>expect(screen.getByLabelText('Review notes for lesson 2')).toHaveValue('Keep this teacher feedback after reloading.'));
+  expect(localStorage.getItem('token')).toBeNull();
+  fireEvent.change(screen.getByLabelText('Review notes for lesson 2'),{target:{value:'An updated observation.'}});
+  expect(JSON.parse(localStorage.getItem('autopromote.education.cat.review.v1'))['html-images-links']).toBe('An updated observation.');
+ } finally {if(root)await act(async()=>root.unmount());container.remove();}
 });
