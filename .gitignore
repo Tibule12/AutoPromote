@@ -289,3 +289,5 @@ reports/**/checkpoint-*/storage_export/
 frontend/public/education/cat-html-v1/teacher-review-pack.zip
 # Versioned educational practice and selected proof movies are build inputs.
 !frontend/public/education/**/*.mp4
+# Required production build guard; it is not a temporary verification script.
+!frontend/scripts/verify-education-assets.js
