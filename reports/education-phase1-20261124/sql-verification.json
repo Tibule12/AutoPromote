@@ -1,0 +1,16 @@
+{
+  "engine": "3.45.1",
+  "originalFictionalData": true,
+  "rows": [
+    [
+      "Prism",
+      80
+    ],
+    [
+      "Orbit",
+      75
+    ]
+  ],
+  "foreignKeyConstraintChecked": true,
+  "studioExecutesSql": false
+}

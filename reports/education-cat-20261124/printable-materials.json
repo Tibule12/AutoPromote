@@ -1,0 +1,79 @@
+{
+  "worksheets": [
+    {
+      "lessonId": "html-structure",
+      "file": "student-worksheet.pdf",
+      "bytes": 37197,
+      "textReadable": true
+    },
+    {
+      "lessonId": "html-structure",
+      "file": "teacher-guide.pdf",
+      "bytes": 32643,
+      "textReadable": true
+    },
+    {
+      "lessonId": "html-images-links",
+      "file": "student-worksheet.pdf",
+      "bytes": 36012,
+      "textReadable": true
+    },
+    {
+      "lessonId": "html-images-links",
+      "file": "teacher-guide.pdf",
+      "bytes": 31372,
+      "textReadable": true
+    },
+    {
+      "lessonId": "html-lists-tables",
+      "file": "student-worksheet.pdf",
+      "bytes": 35803,
+      "textReadable": true
+    },
+    {
+      "lessonId": "html-lists-tables",
+      "file": "teacher-guide.pdf",
+      "bytes": 32213,
+      "textReadable": true
+    },
+    {
+      "lessonId": "html-headings-formatting",
+      "file": "student-worksheet.pdf",
+      "bytes": 36207,
+      "textReadable": true
+    },
+    {
+      "lessonId": "html-headings-formatting",
+      "file": "teacher-guide.pdf",
+      "bytes": 31365,
+      "textReadable": true
+    },
+    {
+      "lessonId": "html-readable-design",
+      "file": "student-worksheet.pdf",
+      "bytes": 37838,
+      "textReadable": true
+    },
+    {
+      "lessonId": "html-readable-design",
+      "file": "teacher-guide.pdf",
+      "bytes": 31808,
+      "textReadable": true
+    },
+    {
+      "lessonId": "html-path-troubleshooting",
+      "file": "student-worksheet.pdf",
+      "bytes": 35783,
+      "textReadable": true
+    },
+    {
+      "lessonId": "html-path-troubleshooting",
+      "file": "teacher-guide.pdf",
+      "bytes": 32195,
+      "textReadable": true
+    }
+  ],
+  "completePackBytes": 264563529,
+  "nativeMoviesChanged": false,
+  "privateOwnedProjectsExcluded": true
+}

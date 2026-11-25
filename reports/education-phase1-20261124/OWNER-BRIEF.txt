@@ -1,0 +1,286 @@
+# AUTOPROMOTE EDUCATION — CREATIVE TECHNOLOGY LEARNING PLATFORM
+
+## 1. New strategic direction
+
+AutoPromote is expanding beyond its commercial creative technology platform into educational digital skills development.
+
+The objective is to provide high school learners, particularly learners in underserved South African communities, with free, limited and supervised access to modern creative technology.
+
+The educational initiative must teach practical, transferable skills in video editing, visual effects, motion graphics, compositing, digital storytelling and responsible artificial intelligence use.
+
+Our initial focus is **Viral Clip Studio**, the main creative editing environment within AutoPromote.
+
+This is not simply a documentation page, FAQ section, collection of promotional videos or superficial product tour. We are building a structured, practical creative technology learning platform.
+
+## 2. Inspect the existing repository first
+
+Before implementing anything, thoroughly inspect the existing AutoPromote codebase.
+
+Identify:
+
+- All implemented Viral Clip Studio features.
+- All available editing tools and controls.
+- Effects and their adjustable parameters.
+- Timeline operations.
+- Layer management.
+- Transform controls.
+- Keyframe functionality.
+- Masks and compositing.
+- Motion and Flow functionality.
+- AI-assisted editing capabilities.
+- Background removal and replacement.
+- Preview and rendering behaviour.
+- Export capabilities.
+- Existing tutorial infrastructure.
+- Existing sample media and test assets.
+
+Determine which features are genuinely functional, partially implemented, broken or unavailable.
+
+Do not invent tools, controls, parameters or capabilities that do not exist.
+
+Do not classify functionality as educationally ready merely because automated tests pass.
+
+## 3. Build a dedicated AutoPromote Education section
+
+Create a dedicated Education section that integrates with the existing AutoPromote website and design system.
+
+Include:
+
+- Education landing page.
+- Explanation of the initiative.
+- Benefits for learners.
+- Benefits for teachers and schools.
+- Creative technology career pathways.
+- Structured learning library.
+- Beginner, intermediate and advanced learning paths.
+- Individual lesson pages.
+- Practical assignments.
+- Learning progress tracking.
+- School partnership information.
+- Sponsor and funding partnership information.
+
+The Education section must feel like a genuine modern learning platform rather than a generic marketing template.
+
+## 4. Studio-first curriculum
+
+Create a structured curriculum based on verified Viral Clip Studio functionality.
+
+Organize lessons progressively around the following areas where supported by the actual implementation:
+
+### Foundation
+
+- Understanding digital video.
+- Introduction to creative storytelling.
+- Understanding the Studio interface.
+- Importing and organizing media.
+- Understanding the timeline.
+- Video trimming and splitting.
+- Layers and track organization.
+- Audio management.
+- Text and captions.
+- Exporting completed projects.
+
+### Intermediate editing
+
+- Video transitions.
+- Transformations and positioning.
+- Scaling and rotation.
+- Keyframes and animation.
+- Colour correction and grading.
+- Speed manipulation.
+- Audio synchronisation.
+- Masks and compositing.
+- Background removal and replacement.
+- Motion graphics.
+
+### Advanced creative techniques
+
+- Visual effects.
+- Subject tracking.
+- Advanced masking.
+- Multi-layer compositing.
+- Motion and Flow compositions.
+- Animated typography.
+- Cinematic effects.
+- Advanced keyframe animation.
+- 3D workflows where genuinely supported.
+- AI-assisted creative production.
+
+Only publish lessons for functionality that has been verified.
+
+Features that are incomplete or unreliable must remain unpublished until they work correctly.
+
+## 5. Mandatory lesson structure
+
+Every individual lesson must contain:
+
+1. Lesson title.
+2. Difficulty level.
+3. Estimated completion time.
+4. Learning objectives.
+5. Explanation of the creative technique.
+6. Real-world applications of the technique.
+7. Required practice assets.
+8. Original source footage.
+9. Actual completed target-result video.
+10. Detailed step-by-step instructions.
+11. Exact Studio controls used.
+12. Exact parameter values where applicable.
+13. Explanation of what changing each parameter does.
+14. Screenshots showing the actual Studio interface.
+15. Narrated tutorial demonstrating the complete workflow.
+16. Common mistakes and troubleshooting.
+17. Practical student assignment.
+18. Assessment criteria.
+19. Lesson completion tracking.
+20. Next recommended lesson.
+
+Tutorials must teach students both how to operate the software and why the underlying creative technique matters.
+
+## 6. Proof-driven tutorial production
+
+This requirement is non-negotiable.
+
+Every demonstrated creative result must be produced using the actual AutoPromote Studio implementation.
+
+For each tutorial:
+
+- Use real moving source footage.
+- Execute the demonstrated editing workflow.
+- Record the actual Studio interface.
+- Apply the actual controls and parameter values.
+- Show the moving preview.
+- Export the completed result.
+- Inspect the rendered output.
+- Confirm that the preview and export agree.
+- Include the original footage and final result in the lesson.
+
+Do not use fabricated interface screenshots.
+
+Do not use externally generated finished videos while claiming they were produced by AutoPromote.
+
+Do not substitute static images for moving video demonstrations.
+
+Do not claim completion based only on screenshots, test results or successful HTTP responses.
+
+Where effects involve tracking, masking, compositing or background removal, inspect the output across the entire relevant video duration for visual defects, flickering, disappearing subjects and incorrect motion.
+
+If a feature cannot reliably reproduce the demonstrated result, report the limitation and do not publish its tutorial.
+
+## 7. Guided practical learning
+
+Where technically appropriate, provide an interactive learning experience.
+
+Students should be able to:
+
+- Watch a lesson.
+- Preview the expected result.
+- Open the relevant Studio workspace.
+- Load a prepared practice project.
+- Access the supplied source media.
+- Follow guided instructions.
+- Adjust the actual Studio controls.
+- Preview their work.
+- Complete and export their own project.
+
+Explore deep linking into the Studio and reusable lesson project templates.
+
+Do not build a fake Studio simulator that is disconnected from the real editing engine.
+
+## 8. Tutorial media production system
+
+Establish a reusable tutorial production pipeline.
+
+Where appropriate, use existing browser automation, Playwright, FFmpeg and available media tooling to produce:
+
+- Actual interface recordings.
+- Narrated demonstrations.
+- Highlighted controls.
+- Cursor guidance.
+- Readable annotations.
+- Before-and-after comparisons.
+- Exported proof videos.
+- Captions and transcripts.
+- Downloadable practice assets.
+
+Narration must explain what is being done, why it is being done and what result the student should expect.
+
+Do not merely generate a video that moves a cursor around the interface without teaching anything.
+
+Use legally reusable or original practice footage. Maintain records of asset permissions and attribution where necessary.
+
+Design the learning content so that English and isiXhosa versions can be supported later.
+
+## 9. Educational relevance
+
+Lessons must connect creative techniques to practical student opportunities, including:
+
+- School presentations.
+- Digital storytelling.
+- School documentaries.
+- Interviews.
+- Creative arts projects.
+- Entrepreneurship.
+- Business Studies promotional assignments.
+- School media clubs.
+- Film and television production.
+- Digital marketing.
+- Creative portfolios.
+
+Explain how the skills transfer beyond AutoPromote to other professional creative tools and workflows.
+
+Do not claim that the programme is CAPS-approved, accredited or endorsed by education authorities unless formal approval has actually been obtained.
+
+## 10. Education account architecture
+
+Plan a separate educational entitlement system supporting:
+
+- School-managed accounts.
+- Teacher and learner roles.
+- Restricted processing credits.
+- Storage limits.
+- Rendering duration limits.
+- Usage monitoring.
+- Cost controls.
+- Private student projects.
+- Teacher supervision.
+- Disabled public publishing by default.
+- No compulsory purchases.
+- No targeted advertising to learners.
+- Appropriate privacy, consent and safeguarding controls.
+- School-level participation and learning outcome reports.
+
+Do not automatically grant unlimited free processing to educational users.
+
+Do not onboard minors or enable school registration in production until the necessary safeguards and permissions are established.
+
+## 11. Implementation priorities
+
+Phase 1 must focus on:
+
+1. Complete audit of existing Studio functionality.
+2. Education landing page.
+3. Structured Studio learning library.
+4. Reusable lesson architecture.
+5. Actual tutorial production pipeline.
+6. First five complete, proof-verified beginner lessons.
+7. Practice projects and downloadable source assets.
+8. End-to-end testing of the learning experience.
+
+After the first five lessons are genuinely complete, continue expanding the curriculum.
+
+Do not prioritize Cam Combiner, Publisher, Scheduler or unrelated platform development during this initial educational implementation.
+
+Do not deploy to production or initiate paid cloud/GPU workloads without my approval.
+
+## 12. Acceptance criteria
+
+The first five lessons are complete only when a beginner can follow the published instructions, use the actual Studio controls and reproduce the demonstrated creative result.
+
+Provide actual working lesson pages, tutorial videos, source assets, exported proof videos and tested practice projects.
+
+A written implementation report, passing tests, mockups or placeholder tutorials alone will not constitute completion.
+
+The long-term objective is to develop AutoPromote Education into a credible digital creative skills initiative that schools, teachers, learners, corporate sponsors and funding institutions can participate in.
+
+Begin by inspecting the existing repository, establish the implementation architecture and proceed with the first phase.

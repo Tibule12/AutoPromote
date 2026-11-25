@@ -1,0 +1,13 @@
+Tell the story of a test
+
+Original teaching script, read using disclosed standard synthetic narration.
+
+A useful test report explains normal, boundary and invalid cases. We will put three recordings into one twelve-second sequence.
+
+The first clip shows eighteen working normally. Set the source start to one second and its end to five seconds.
+
+Import the boundary recording and add it to the sequence. Use source seconds three to seven so the upper limit, two hundred and fifty-five, stays visible.
+
+Import the invalid recording, add it to the sequence, and use seconds one to five. The program must reject two hundred and fifty-six.
+
+Review the cuts at four and eight seconds. The movie should support a written test table with expected and actual results, not replace it.

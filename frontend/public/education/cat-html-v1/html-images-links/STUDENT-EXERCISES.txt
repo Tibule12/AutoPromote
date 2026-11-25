@@ -1,0 +1,7 @@
+HTML EXERCISE
+Create your own original image and a second page. Use a relative src, useful alt text and a relative href. Break the image path deliberately, record expected/actual output, correct it, and test the hyperlink. Explain why alt is not normally drawn on top of a loaded image.
+
+CREATIVE EDITING EXERCISE
+Record the broken and corrected browser cases. Retarget the code/output outlines to your own coordinates. Use a contrasting callout for the error and a calm colour for the fixed result. Keep the working hyperlink click in the source evidence.
+
+Submit your working files, test table, native editable project and complete movie. Explain one different example without relying on the animation. Do not submit learner names or personal information.

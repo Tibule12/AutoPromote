@@ -1,0 +1,14 @@
+{
+  "lessonId": "first-project",
+  "practiceSource": "normal-input.mp4",
+  "normalEmulatorSignIn": true,
+  "authBypass": false,
+  "existingFeatureGuard": true,
+  "actualSourceUpload": true,
+  "freshCurrentOwnerProject": true,
+  "nativeTimelineAndSave": true,
+  "exactColdReopen": true,
+  "noRenderStarted": true,
+  "noSchoolEntitlementGranted": true,
+  "uiErrors": []
+}

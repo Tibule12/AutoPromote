@@ -1,0 +1,147 @@
+[
+  {
+    "id": "source",
+    "title": "Choose the empty source",
+    "text": "We will build the first bubble sort swap ourselves. Start at Choose videos. Click it and select the six-second empty stage. Nothing is animated yet."
+  },
+  {
+    "id": "open",
+    "title": "Open the editor",
+    "text": "Look at Open Creator Studio. Click once the upload is ready. The large middle panel is the picture; the bottom panel is the editable timeline."
+  },
+  {
+    "id": "name",
+    "title": "Name the editable project",
+    "text": "In the open media panel, click Project name and enter First adjacent swap. Then click Save project. Naming and saving the editable project keeps this lesson easy to find again."
+  },
+  {
+    "id": "aspect",
+    "title": "Set the picture shape",
+    "text": "On the left, click Reframe. Then choose sixteen by nine. This gives us a wide teaching canvas."
+  },
+  {
+    "id": "preserve",
+    "title": "Keep the whole canvas",
+    "text": "Click Preserve frame. This keeps the whole canvas visible instead of automatically cropping it."
+  },
+  {
+    "id": "graphics",
+    "title": "Find the title controls",
+    "text": "On the far left, click Graphics. In the right panel, find the three title buttons. We will use a title background as an editable number card."
+  },
+  {
+    "id": "headline5",
+    "title": "Create the first editable card",
+    "text": "Click Headline. One title layer appears on the timeline. It fades in, so its first frame can be transparent. Next we will place the playhead inside it so you can see each change."
+  },
+  {
+    "id": "show5",
+    "title": "Make the title visible before editing",
+    "text": "Set Title start time to zero and Title duration to six seconds. Then move Edited output position to half a second. You can now see the title while you change its words and colours."
+  },
+  {
+    "id": "text5",
+    "title": "Set the stored value",
+    "text": "In the Copy box, replace the sample words with the number five. This number is an array value, not an array index."
+  },
+  {
+    "id": "bg5",
+    "title": "Colour the first card",
+    "text": "Find Background. Set the hex colour to A eight E D C D. Watch the background behind five turn mint. Colour helps us recognise this same value while it moves."
+  },
+  {
+    "id": "ink5",
+    "title": "Make the number readable",
+    "text": "Find Text colour. Set it to one zero one B two B. The dark number stays readable against the pale card."
+  },
+  {
+    "id": "size5",
+    "title": "Set card size and duration",
+    "text": "Set Size to one hundred and ninety percent, Text box width to fifteen percent, Start to zero and Duration to six seconds. These settings keep this card visible for the whole small example."
+  },
+  {
+    "id": "motion5",
+    "title": "Open Motion",
+    "text": "Click Motion on the far left. If Transform keyframes is shown, open it. Target layer identifies which layer these controls will change. Choose the title five."
+  },
+  {
+    "id": "x5",
+    "title": "Place five in the left slot",
+    "text": "In Motion, set X to thirty. X is a percentage across the picture. The number card moves to the left slot. Y stays fifty, halfway down the picture."
+  },
+  {
+    "id": "key5zero",
+    "title": "Remember the starting position",
+    "text": "The edited output position is zero seconds. Click Add position key. Studio now remembers X thirty and Y fifty at this time. The diamond on the timeline represents a stored value."
+  },
+  {
+    "id": "hold5",
+    "title": "Hold until one second",
+    "text": "Move Edited output position to one second. Click Add position key again. The same position at zero and one seconds creates a pause before the swap."
+  },
+  {
+    "id": "middle5",
+    "title": "Lift five during the swap",
+    "text": "Move Edited output position to one point seven five seconds. Add a position key, then set X fifty and Y thirty-five. Five moves through the centre above the other value."
+  },
+  {
+    "id": "end5",
+    "title": "Land five in the right slot",
+    "text": "Move Edited output position to two point five seconds. Add a position key, then set X seventy and Y fifty. Five now lands in the right slot."
+  },
+  {
+    "id": "graphics1",
+    "title": "Create the second value",
+    "text": "Return to Graphics and click Headline again. Replace its Copy with one. This creates a separate editable layer; we are not changing five into one."
+  },
+  {
+    "id": "style1",
+    "title": "Give one its own card",
+    "text": "Set the background to eight six D nine F two and the text to one zero one B two B. Use the same size, width, start and six-second duration as five."
+  },
+  {
+    "id": "motion1",
+    "title": "Place one in the right slot",
+    "text": "Return to Motion and choose title one. Move the playhead back to zero, then set X seventy and Y fifty. Always check Target layer before editing a position."
+  },
+  {
+    "id": "key1zero",
+    "title": "Remember one at time zero",
+    "text": "At zero seconds, click Add position key. Studio stores one in the right slot. Each value now has its own layer and its own keys."
+  },
+  {
+    "id": "hold1",
+    "title": "Hold one until one second",
+    "text": "Move to one second and add another position key. This matches the pause on five, so both values begin moving together."
+  },
+  {
+    "id": "middle1",
+    "title": "Pass one below five",
+    "text": "Move to one point seven five seconds. Add a position key, then set X fifty and Y sixty-five. One goes below while five goes above. They remain visible as separate values."
+  },
+  {
+    "id": "end1",
+    "title": "Land one in the left slot",
+    "text": "Move to two point five seconds. Add a position key, then set X thirty and Y fifty. The pair is now one, five. Both values still exist; only their positions changed."
+  },
+  {
+    "id": "play",
+    "title": "Watch the comparison and swap",
+    "text": "Move back to zero and press Play. Ask why these values swap: five is greater than one. For ascending bubble sort, compare neighbours and exchange only an out-of-order pair. A smaller left value would stay."
+  },
+  {
+    "id": "save",
+    "title": "Save editable work",
+    "text": "Click Save project. The editable project keeps both cards and all sixteen position keys. A movie alone cannot show how you constructed the explanation."
+  },
+  {
+    "id": "export",
+    "title": "Render the proof",
+    "text": "Click Export. Choose seven twenty p and twenty-four frames per second. Click Render Final Clip, read the normal cost confirmation, and approve only when your account permits it. This demonstration uses local test credits."
+  },
+  {
+    "id": "finish",
+    "title": "Review the actual result",
+    "text": "Play the downloaded Studio result from beginning to end. You have built one real comparison and swap manually. The longer four-value lesson repeats this construction and adds the comparison outline, fixed indices and pass labels."
+  }
+]

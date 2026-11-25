@@ -1,0 +1,1019 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Lists, tables and readable design",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "Lesson title",
+      "name": "Lesson title",
+      "type": "text",
+      "text": "03  /  Give information a structure",
+      "x": 50,
+      "y": 7,
+      "width": 94,
+      "scale": 0.95,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 800,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "Teacher review marker",
+      "name": "Teacher review marker",
+      "type": "text",
+      "text": "AUTOPROMOTE EDUCATION  /  CAT",
+      "x": 50,
+      "y": 3,
+      "width": 94,
+      "scale": 0.34,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8ee7d1",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "Callout 1",
+      "name": "Callout 1",
+      "type": "text",
+      "text": "ul + li: a group of items",
+      "x": 50,
+      "y": 92,
+      "width": 94,
+      "scale": 0.69,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#b7f4e1",
+      "startTime": 0,
+      "duration": 9,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 0.3,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 0,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 0.45,
+          "value": 92,
+          "easing": "ease_out"
+        }
+      ]
+    },
+    {
+      "id": "Callout 2",
+      "name": "Callout 2",
+      "type": "text",
+      "text": "ol + li: ordered items",
+      "x": 50,
+      "y": 92,
+      "width": 94,
+      "scale": 0.69,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#b7f4e1",
+      "startTime": 9,
+      "duration": 7,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 9,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 9.3,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 9,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 9.45,
+          "value": 92,
+          "easing": "ease_out"
+        }
+      ]
+    },
+    {
+      "id": "Callout 3",
+      "name": "Callout 3",
+      "type": "text",
+      "text": "tr → row; th / td → cells",
+      "x": 50,
+      "y": 92,
+      "width": 94,
+      "scale": 0.69,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#b7f4e1",
+      "startTime": 16,
+      "duration": 8,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 16,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 16.3,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 16,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 16.45,
+          "value": 92,
+          "easing": "ease_out"
+        }
+      ]
+    },
+    {
+      "id": "Callout 4",
+      "name": "Callout 4",
+      "type": "text",
+      "text": "clarity before decoration",
+      "x": 50,
+      "y": 92,
+      "width": 94,
+      "scale": 0.69,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#b7f4e1",
+      "startTime": 24,
+      "duration": 4,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 24,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 24.3,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 24,
+          "value": 94,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 24.45,
+          "value": 92,
+          "easing": "ease_out"
+        }
+      ]
+    },
+    {
+      "id": "Code focus 1",
+      "name": "Code focus 1",
+      "type": "artwork",
+      "x": 29.4921875,
+      "y": 50.763888888888886,
+      "width": 48.671875,
+      "height": 11.805555555555555,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 9,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 0.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 0.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ffffff",
+          "endColor": "#ffffff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#a8efd4",
+          "width": 0.55
+        }
+      },
+      "keys": [
+        {
+          "property": "strokeEnd",
+          "time": 0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "strokeEnd",
+          "time": 0.7,
+          "value": 100,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "Browser focus 1",
+      "name": "Browser focus 1",
+      "type": "artwork",
+      "x": 77.1875,
+      "y": 41.08506944444444,
+      "width": 39.0625,
+      "height": 8.333333333333334,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 9,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 0.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 0.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ffffff",
+          "endColor": "#ffffff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#77cfff",
+          "width": 0.55
+        }
+      },
+      "keys": [
+        {
+          "property": "strokeEnd",
+          "time": 0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "strokeEnd",
+          "time": 0.7,
+          "value": 100,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "Code focus 2",
+      "name": "Code focus 2",
+      "type": "artwork",
+      "x": 29.4921875,
+      "y": 50.763888888888886,
+      "width": 48.671875,
+      "height": 11.805555555555555,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 9,
+      "duration": 7,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 0.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 0.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ffffff",
+          "endColor": "#ffffff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#a8efd4",
+          "width": 0.55
+        }
+      },
+      "keys": [
+        {
+          "property": "strokeEnd",
+          "time": 9,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "strokeEnd",
+          "time": 9.7,
+          "value": 100,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "Browser focus 2",
+      "name": "Browser focus 2",
+      "type": "artwork",
+      "x": 77.1875,
+      "y": 41.08506944444444,
+      "width": 39.0625,
+      "height": 8.333333333333334,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 9,
+      "duration": 7,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 0.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 0.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ffffff",
+          "endColor": "#ffffff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#77cfff",
+          "width": 0.55
+        }
+      },
+      "keys": [
+        {
+          "property": "strokeEnd",
+          "time": 9,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "strokeEnd",
+          "time": 9.7,
+          "value": 100,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "Code focus 3",
+      "name": "Code focus 3",
+      "type": "artwork",
+      "x": 29.4921875,
+      "y": 63.888888888888886,
+      "width": 48.671875,
+      "height": 15.555555555555555,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 16,
+      "duration": 8,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 0.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 0.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ffffff",
+          "endColor": "#ffffff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#a8efd4",
+          "width": 0.55
+        }
+      },
+      "keys": [
+        {
+          "property": "strokeEnd",
+          "time": 16,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "strokeEnd",
+          "time": 16.7,
+          "value": 100,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "Browser focus 3",
+      "name": "Browser focus 3",
+      "type": "artwork",
+      "x": 62.52685546875,
+      "y": 53.58506944444444,
+      "width": 9.7412109375,
+      "height": 11.666666666666666,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 16,
+      "duration": 8,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 0.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 0.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ffffff",
+          "endColor": "#ffffff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#77cfff",
+          "width": 0.55
+        }
+      },
+      "keys": [
+        {
+          "property": "strokeEnd",
+          "time": 16,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "strokeEnd",
+          "time": 16.7,
+          "value": 100,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "Code focus 4",
+      "name": "Code focus 4",
+      "type": "artwork",
+      "x": 29.4921875,
+      "y": 63.888888888888886,
+      "width": 48.671875,
+      "height": 15.555555555555555,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 24,
+      "duration": 4,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 0.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 0.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ffffff",
+          "endColor": "#ffffff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#a8efd4",
+          "width": 0.55
+        }
+      },
+      "keys": [
+        {
+          "property": "strokeEnd",
+          "time": 24,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "strokeEnd",
+          "time": 24.7,
+          "value": 100,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "Browser focus 4",
+      "name": "Browser focus 4",
+      "type": "artwork",
+      "x": 62.52685546875,
+      "y": 53.58506944444444,
+      "width": 9.7412109375,
+      "height": 11.666666666666666,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 24,
+      "duration": 4,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 0.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 0.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 0.5,
+            "y": 99.5,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ffffff",
+          "endColor": "#ffffff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#77cfff",
+          "width": 0.55
+        }
+      },
+      "keys": [
+        {
+          "property": "strokeEnd",
+          "time": 24,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "strokeEnd",
+          "time": 24.7,
+          "value": 100,
+          "easing": "ease_in_out"
+        }
+      ]
+    }
+  ],
+  "groups": []
+}

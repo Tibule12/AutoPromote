@@ -1,0 +1,13 @@
+From working code to a clear demonstration
+
+Original teaching script, read using disclosed standard synthetic narration.
+
+A video can show what your program does. In this project, we explain a byte converter. Keep the code and the output visible, and use only non-personal practice data.
+
+Choose the normal input recording. Open Creator Studio. The media library holds sources; the timeline decides what the audience will see.
+
+In Reframe, choose sixteen by nine and preserve the frame. Cropping a screen recording can hide the evidence you are trying to explain.
+
+Play the original recording. The input is eighteen. Sixteen and two are the active bit positions, so the output is correct.
+
+Give the project a useful name and save it. Export a viewing copy separately. Your source code, editable project and movie each serve a different purpose.

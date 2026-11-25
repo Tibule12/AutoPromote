@@ -1,0 +1,63 @@
+AUTOPROMOTE EDUCATION — IT FOUNDATION PROJECT
+Private curriculum review · Not a school enrolment invitation
+
+Project: Explain a byte
+Audience: IT students working with an adult teacher or facilitator
+Concepts: Input–process–output, unsigned eight-bit representation, validation,
+normal/boundary/invalid test cases, and communicating evidence.
+
+Why video?
+A student must choose visible evidence, explain why a result is correct, and
+make it understandable to another person. The editable timeline makes those
+communication decisions reviewable. Editing supports the IT task; the source
+code and test table remain part of the assessment.
+
+Five practical lessons
+1. Import an original screen recording. Preserve the complete 16:9 code and
+   output screen. Name, save and reopen the editable project.
+2. Trim a six-second interval and split it at programme three seconds.
+   Explain the difference between source and programme time.
+3. Build a twelve-second test report: normal case, boundary case, invalid case.
+4. Add one accurate technical label without obscuring the evidence.
+5. Add a clear explanation, review timing, export and inspect the complete file.
+
+Suggested review rubric (adapt to your class; not an official curriculum rubric)
+Technical accuracy 0–4: code, bit weights and explanation agree.
+Test reasoning 0–4: input, expected and actual results are distinguished.
+Understanding 0–4: the student can explain the work without reading a script.
+Readability 0–3: essential code, results and text can be read.
+Purposeful editing 0–3: cuts and audio support a clear explanation.
+Responsible use 0–2: permitted assets, private data and AI disclosure checked.
+A serious technical error needs correction even if the video looks polished.
+
+Submission
+Source code; input/expected/actual test table; original screen footage; editable
+Studio project; final movie; and a short reflection on a revision after review.
+Ask a classmate to explain the programme before supplying the intended answer.
+
+Access and safeguarding
+School registration, minor onboarding, supervised school allowances and teacher
+account reports are not enabled. The current local site is for review. Any
+learner pilot needs school agreement, adult supervision, privacy and permissions,
+bounded processing/storage, private projects and default-disabled public posting.
+Do not upload learner names, grades, faces, passwords, API keys or private code
+in practice media. Existing authorised account exports use normal permissions
+and costs; this brief grants no unlimited/free processing.
+
+Review learning, not just engagement
+Compare whether students can explain a test correctly before and after the task.
+Record time and confidence only with agreed permissions. Do not promise faster
+learning until a real teaching pilot supports the claim. No accreditation,
+CAPS approval or education-authority endorsement is claimed.
+
+English materials are the initial draft. isiXhosa versions require language
+review. Narrative voice is a disclosed standard synthetic preset, not a cloned
+teacher or learner. Source app and recordings are original AutoPromote practice
+material; see ASSET-PERMISSIONS.txt for reuse terms.
+
+
+CONCEPT LAB EXTENSION
+The byte foundation now leads into native animated variables/loops, validation/debugging, bubble sort and database relationships. Use CURRICULUM-AND-ASSESSMENT.txt for source references, technical accuracy criteria, questions, reasoning guides and exact motion parameters. The original 20-point beginner rubric is supplementary; the expanded 40/30/20/10 weighting is optional. Neither is an official CAPS assessment.
+Native concept result movies are silent teacher-led visuals. Actual Studio workflow tutorials include disclosed standard synthetic English narration.
+
+Owner delivery instruction: no caption/subtitle tracks or sidecars. Spoken explanation and separate written steps/transcripts remain.

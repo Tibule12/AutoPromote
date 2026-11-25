@@ -1,0 +1,52 @@
+[
+  {
+    "lessonId": "first-project",
+    "resultSha256": "80bb975ba08dc4ed55680a0bc6327d3120a196737a3a5fba9dfb44b9b38a115d",
+    "tutorialSha256": "b9441343fffb7c10e85c5df1f6ea1d1c63bc6cd11a6845d13ae9e46c1b073449",
+    "tutorialSeconds": 83.417007,
+    "resultSeconds": 11.25,
+    "nativeProjectHash": "cf2890d223817c83408f3423813503fa53b3822ba7e85b96aa8508adceb57699",
+    "teacherReview": false,
+    "releaseStatus": "review"
+  },
+  {
+    "lessonId": "precise-cuts",
+    "resultSha256": "e6433006e331aee0fda8447a7b834d2c11a20d63b063e1d33c446ca901dd5202",
+    "tutorialSha256": "d772202ddb21a489d5b921c98cf18781f68af8fa653d842559f1d0ecbc844ee6",
+    "tutorialSeconds": 50.917007,
+    "resultSeconds": 6.0,
+    "nativeProjectHash": "41e7e917ac76404e3186bf4cb3ffb38ac58d6d9a2b30c6fe03852dcb48131441",
+    "teacherReview": false,
+    "releaseStatus": "review"
+  },
+  {
+    "lessonId": "sequence-test-cases",
+    "resultSha256": "ecbb84c8dfc6a01dcaaf30a8c9d36f8c1cc9b003dc5b7ec6972d331711144f9d",
+    "tutorialSha256": "b61de94a0b2e55e02b344c5231d8031527724b9be635da7d8cad04a4ae264724",
+    "tutorialSeconds": 83.750023,
+    "resultSeconds": 12.0,
+    "nativeProjectHash": "d2c5009f59b77c72a8b18733bc59a25be80e730c58429b69c9c13d8035505957",
+    "teacherReview": false,
+    "releaseStatus": "review"
+  },
+  {
+    "lessonId": "explain-with-text",
+    "resultSha256": "c1306db9d064b563a78bef01f8de6270b239aa820ae069ba2d835de0182914f1",
+    "tutorialSha256": "9e39c1190843518052c34a0f398f6a596a31866d94f532494085663177ec8757",
+    "tutorialSeconds": 61.292018,
+    "resultSeconds": 6.0,
+    "nativeProjectHash": "0e50f4c27a9d5cc531a198cc844cfac7fa3bf6389f8b49ee846423e530904a82",
+    "teacherReview": false,
+    "releaseStatus": "review"
+  },
+  {
+    "lessonId": "sound-and-delivery",
+    "resultSha256": "b4f4e339037a772a361d1e239eeacc755c544bdde81af12ef3642fc20d24b564",
+    "tutorialSha256": "378b13a6e1614979c1aee42581dc66ca614fa128c9c3687db4180eceba67aa0e",
+    "tutorialSeconds": 71.833333,
+    "resultSeconds": 6.0,
+    "nativeProjectHash": "4fd941dc1088cb80e3708dbe3913bb04c831158be48c47eac76553499bac0926",
+    "teacherReview": false,
+    "releaseStatus": "review"
+  }
+]

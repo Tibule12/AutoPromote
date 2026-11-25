@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "reference": {
+    "title": "DBE IT CAPS 2024 · Section 3 amendment",
+    "url": "https://www.education.gov.za/LinkClick.aspx?fileticket=sgM2WgtQFqU%3D&mid=1208&portalid=0&tabid=570",
+    "portal": "https://www.education.gov.za/Curriculum/CurriculumAssessmentPolicyStatements(CAPS)/CAPSFET.aspx",
+    "reviewed": "2026-11-24",
+    "scope": "Curriculum reference, not formal approval. Page numbers are PDF pages of the amendment. Original pseudocode/JavaScript/SQLite examples supplement the school language and DBMS; they do not replace the CAPS Delphi practical."
+  },
+  "topics": [
+    {
+      "topic": "Variables and assignment",
+      "grade": "Grade 10",
+      "pages": [
+        10
+      ],
+      "project": "variables-loops",
+      "editing": "Separate text states on a watch panel; Hold timing makes changes explicit."
+    },
+    {
+      "topic": "Conditional statements",
+      "grade": "Grade 10",
+      "pages": [
+        10,
+        13
+      ],
+      "project": "validation-debugging",
+      "editing": "Timed guards and a decision token show why a branch is chosen."
+    },
+    {
+      "topic": "Loops and trace tables",
+      "grade": "Grade 10",
+      "pages": [
+        13,
+        14
+      ],
+      "project": "variables-loops",
+      "editing": "Fixed index labels, timed watch values and grouped reading tokens."
+    },
+    {
+      "topic": "Input validation and debugging",
+      "grade": "Grades 10–11",
+      "pages": [
+        13,
+        20,
+        21
+      ],
+      "project": "validation-debugging",
+      "editing": "Contrast an incorrect boundary with the repaired range; retain the failing case."
+    },
+    {
+      "topic": "One-dimensional arrays and bubble sort",
+      "grade": "Grade 11",
+      "pages": [
+        18
+      ],
+      "project": "bubble-sort",
+      "editing": "Grouped card/value pairs, neighbouring-slot outline and X/Y swap keys."
+    },
+    {
+      "topic": "Database design and SQL joins",
+      "grade": "Grades 11–12",
+      "pages": [
+        21,
+        24,
+        25
+      ],
+      "project": "database-joins",
+      "editing": "Separate table rows, primary/foreign-key labels and a moving relationship highlight."
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+ul and ol express unordered and ordered lists; li is a list item. A table organises related data into rows and cells. th provides header cells, td data cells. Logical order, readable labels and purposeful formatting support good webpage design.
+
+Before editing: open index.html in a browser. Open the same file in a plain text editor. Save changes, reload the browser and compare. The source recording contains a real browser iframe; its page zoom is 150% for readability. Code and output are shown simultaneously. The teacher can use the standalone files without Studio.

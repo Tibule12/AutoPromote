@@ -1,0 +1,11 @@
+{
+  "actualChromium": true,
+  "checks": [
+    "head/title/body/heading/paragraph/formatting and title-only prediction",
+    "working source image and alt, actual hyperlink navigation, broken-path failure and corrected retest",
+    "unordered/ordered lists, two rows/four table cells and correct header/data correspondence"
+  ],
+  "allPassed": true,
+  "formalCurriculumApproval": false,
+  "teacherReview": false
+}

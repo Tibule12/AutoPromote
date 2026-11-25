@@ -1,0 +1,63 @@
+[
+  {
+    "lessonId": "bubble-sort",
+    "nativeResultSha256": "13bc8f19e6cf389151addf83548b48b01671ed9cd6ef2f32de851111b8c7c555",
+    "fullDecode": true,
+    "frames": 672,
+    "width": 1280,
+    "height": 720,
+    "fps": 24.0,
+    "seconds": 28,
+    "layers": 34,
+    "groups": 4,
+    "previewExportPairs": [
+      {
+        "time": 10.5,
+        "meanAbsoluteRgbDifference": 8.437537977430555,
+        "strictPixelParityClaimed": false
+      },
+      {
+        "time": 16.5,
+        "meanAbsoluteRgbDifference": 8.421176576967593,
+        "strictPixelParityClaimed": false
+      },
+      {
+        "time": 2.5,
+        "meanAbsoluteRgbDifference": 8.383429542824073,
+        "strictPixelParityClaimed": false
+      },
+      {
+        "time": 2.0,
+        "meanAbsoluteRgbDifference": 8.641644241898149,
+        "strictPixelParityClaimed": false
+      },
+      {
+        "time": 20.5,
+        "meanAbsoluteRgbDifference": 8.745344328703704,
+        "strictPixelParityClaimed": false
+      },
+      {
+        "time": 25.0,
+        "meanAbsoluteRgbDifference": 8.307928602430556,
+        "strictPixelParityClaimed": false
+      },
+      {
+        "time": 3.625,
+        "meanAbsoluteRgbDifference": 8.898963396990741,
+        "strictPixelParityClaimed": false
+      }
+    ],
+    "bubbleAllFrameGeometry": {
+      "frames": 672,
+      "cardsPerFrame": 4,
+      "settledPosesMaximumAxisErrorPixels": 2.0,
+      "settledLimitPixels": 3,
+      "movingColourFootprintMaximumAxisErrorPixels": 4.3320000000000505,
+      "movingFootprintsOutsideThreePixelLimit": 2,
+      "movingGeometryQualified": false,
+      "measurementLimitation": "White outline occlusion and encoded colour fringes interrupt the coloured footprint during swaps. Moving measurements remain diagnostic; no threshold was widened to qualify them."
+    },
+    "teacherApproval": false,
+    "independentLearnerReproduction": false
+  }
+]

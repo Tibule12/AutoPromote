@@ -1,0 +1,7 @@
+0.00s HTML describes a webpage. The head contains information about the page.
+
+6.50s Title names the browser tab. It is different from the visible heading.
+
+13.00s The body holds visible content. H one creates a heading. P starts a paragraph.
+
+20.00s B makes Friday bold; I makes the time italic. Close nested tags in reverse order. Predict a title-only change.

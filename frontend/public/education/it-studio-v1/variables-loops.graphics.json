@@ -1,0 +1,1093 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "A loop changes the state.",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "course",
+      "name": "course",
+      "type": "text",
+      "text": "AUTOPROMOTE EDUCATION  /  CONCEPTS IN MOTION",
+      "x": 50,
+      "y": 6,
+      "width": 94,
+      "scale": 0.48,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9ce9ca",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "heading",
+      "name": "heading",
+      "type": "text",
+      "text": "A loop changes the state.",
+      "x": 50,
+      "y": 15,
+      "width": 94,
+      "scale": 1.2,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "subtitle",
+      "name": "subtitle",
+      "type": "text",
+      "text": "Read each array value once. Add it to a running total. Keep indices separate from values.",
+      "x": 50,
+      "y": 24,
+      "width": 95,
+      "scale": 0.59,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "footnote",
+      "name": "footnote",
+      "type": "text",
+      "text": "ORIGINAL SUPPLEMENTARY TEACHING EXAMPLE  /  PAUSE, PREDICT, EXPLAIN",
+      "x": 50,
+      "y": 96,
+      "width": 95,
+      "scale": 0.38,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8398b3",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "array-card-0",
+      "name": "array-card-0",
+      "type": "artwork",
+      "x": 25,
+      "y": 42,
+      "width": 14,
+      "height": 14,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 1,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 1,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "solid",
+          "color": "#a8edcd",
+          "endColor": "#a8edcd",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#426078",
+          "width": 0
+        }
+      },
+      "keys": []
+    },
+    {
+      "id": "array-value-0",
+      "name": "array-value-0",
+      "type": "text",
+      "text": "2",
+      "x": 25,
+      "y": 42,
+      "width": 12,
+      "scale": 1.55,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#101b2b",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "array-index-0",
+      "name": "array-index-0",
+      "type": "text",
+      "text": "index 0",
+      "x": 25,
+      "y": 32,
+      "width": 18,
+      "scale": 0.52,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#b4c2d5",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "array-card-1",
+      "name": "array-card-1",
+      "type": "artwork",
+      "x": 50,
+      "y": 42,
+      "width": 14,
+      "height": 14,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 1,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 1,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "solid",
+          "color": "#86d9f2",
+          "endColor": "#86d9f2",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#426078",
+          "width": 0
+        }
+      },
+      "keys": []
+    },
+    {
+      "id": "array-value-1",
+      "name": "array-value-1",
+      "type": "text",
+      "text": "4",
+      "x": 50,
+      "y": 42,
+      "width": 12,
+      "scale": 1.55,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#101b2b",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "array-index-1",
+      "name": "array-index-1",
+      "type": "text",
+      "text": "index 1",
+      "x": 50,
+      "y": 32,
+      "width": 18,
+      "scale": 0.52,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#b4c2d5",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "array-card-2",
+      "name": "array-card-2",
+      "type": "artwork",
+      "x": 75,
+      "y": 42,
+      "width": 14,
+      "height": 14,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 1,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 1,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "solid",
+          "color": "#c4afff",
+          "endColor": "#c4afff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#426078",
+          "width": 0
+        }
+      },
+      "keys": []
+    },
+    {
+      "id": "array-value-2",
+      "name": "array-value-2",
+      "type": "text",
+      "text": "6",
+      "x": 75,
+      "y": 42,
+      "width": 12,
+      "scale": 1.55,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#101b2b",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "array-index-2",
+      "name": "array-index-2",
+      "type": "text",
+      "text": "index 2",
+      "x": 75,
+      "y": 32,
+      "width": 18,
+      "scale": 0.52,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#b4c2d5",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "current-index",
+      "name": "current-index",
+      "type": "artwork",
+      "x": 25,
+      "y": 42,
+      "width": 18,
+      "height": 18,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 1,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 1,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ffffff",
+          "endColor": "#ffffff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#ffffff",
+          "width": 1.7
+        }
+      },
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "opacity",
+          "time": 3,
+          "value": 1,
+          "easing": "hold"
+        },
+        {
+          "property": "opacity",
+          "time": 21,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 0,
+          "value": 25,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 9,
+          "value": 50,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 15,
+          "value": 75,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "id": "watch-panel",
+      "name": "watch-panel",
+      "type": "artwork",
+      "x": 50,
+      "y": 68,
+      "width": 72,
+      "height": 12,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 1,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 1,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "solid",
+          "color": "#15263d",
+          "endColor": "#15263d",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#426078",
+          "width": 0
+        }
+      },
+      "keys": []
+    },
+    {
+      "id": "initial-state",
+      "name": "initial-state",
+      "type": "text",
+      "text": "i = 0     sum = 0",
+      "x": 50,
+      "y": 68,
+      "width": 68,
+      "scale": 0.82,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 0,
+      "duration": 6,
+      "keys": []
+    },
+    {
+      "id": "watch-6",
+      "name": "watch-6",
+      "type": "text",
+      "text": "i = 0     sum = 2",
+      "x": 50,
+      "y": 68,
+      "width": 68,
+      "scale": 0.82,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9ce9ca",
+      "startTime": 6,
+      "duration": 2,
+      "keys": []
+    },
+    {
+      "id": "watch-8",
+      "name": "watch-8",
+      "type": "text",
+      "text": "i = 1     sum = 2",
+      "x": 50,
+      "y": 68,
+      "width": 68,
+      "scale": 0.82,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9ce9ca",
+      "startTime": 8,
+      "duration": 4,
+      "keys": []
+    },
+    {
+      "id": "watch-12",
+      "name": "watch-12",
+      "type": "text",
+      "text": "i = 1     sum = 6",
+      "x": 50,
+      "y": 68,
+      "width": 68,
+      "scale": 0.82,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9ce9ca",
+      "startTime": 12,
+      "duration": 2,
+      "keys": []
+    },
+    {
+      "id": "watch-14",
+      "name": "watch-14",
+      "type": "text",
+      "text": "i = 2     sum = 6",
+      "x": 50,
+      "y": 68,
+      "width": 68,
+      "scale": 0.82,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9ce9ca",
+      "startTime": 14,
+      "duration": 4,
+      "keys": []
+    },
+    {
+      "id": "watch-18",
+      "name": "watch-18",
+      "type": "text",
+      "text": "i = 2     sum = 12",
+      "x": 50,
+      "y": 68,
+      "width": 68,
+      "scale": 0.82,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9ce9ca",
+      "startTime": 18,
+      "duration": 2,
+      "keys": []
+    },
+    {
+      "id": "watch-20",
+      "name": "watch-20",
+      "type": "text",
+      "text": "i = 3     sum = 12",
+      "x": 50,
+      "y": 68,
+      "width": 68,
+      "scale": 0.82,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9ce9ca",
+      "startTime": 20,
+      "duration": 8,
+      "keys": []
+    },
+    {
+      "id": "start-rule",
+      "name": "start-rule",
+      "type": "text",
+      "text": "Initialise: i = 0; sum = 0. Test i before reading values[i].",
+      "x": 50,
+      "y": 82,
+      "width": 95,
+      "scale": 0.64,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 0,
+      "duration": 3,
+      "keys": []
+    },
+    {
+      "id": "read-copy-0",
+      "name": "read-copy-0",
+      "type": "text",
+      "text": "2",
+      "x": 25,
+      "y": 42,
+      "width": 12,
+      "scale": 0.8,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#ffffff",
+      "startTime": 3.5,
+      "duration": 3,
+      "keys": []
+    },
+    {
+      "id": "iteration-0",
+      "name": "iteration-0",
+      "type": "text",
+      "text": "Iteration 1: i = 0 is less than 3. Read 2; add it; then increment i.",
+      "x": 50,
+      "y": 82,
+      "width": 95,
+      "scale": 0.61,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 3,
+      "duration": 6,
+      "keys": []
+    },
+    {
+      "id": "read-copy-1",
+      "name": "read-copy-1",
+      "type": "text",
+      "text": "4",
+      "x": 50,
+      "y": 42,
+      "width": 12,
+      "scale": 0.8,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#ffffff",
+      "startTime": 9.5,
+      "duration": 3,
+      "keys": []
+    },
+    {
+      "id": "iteration-1",
+      "name": "iteration-1",
+      "type": "text",
+      "text": "Iteration 2: i = 1 is less than 3. Read 4; add it; then increment i.",
+      "x": 50,
+      "y": 82,
+      "width": 95,
+      "scale": 0.61,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 9,
+      "duration": 6,
+      "keys": []
+    },
+    {
+      "id": "read-copy-2",
+      "name": "read-copy-2",
+      "type": "text",
+      "text": "6",
+      "x": 75,
+      "y": 42,
+      "width": 12,
+      "scale": 0.8,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#ffffff",
+      "startTime": 15.5,
+      "duration": 3,
+      "keys": []
+    },
+    {
+      "id": "iteration-2",
+      "name": "iteration-2",
+      "type": "text",
+      "text": "Iteration 3: i = 2 is less than 3. Read 6; add it; then increment i.",
+      "x": 50,
+      "y": 82,
+      "width": 95,
+      "scale": 0.61,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 15,
+      "duration": 6,
+      "keys": []
+    },
+    {
+      "id": "stop",
+      "name": "stop",
+      "type": "text",
+      "text": "i = 3 is not less than 3. Stop. There is no index 3 in this array.",
+      "x": 50,
+      "y": 82,
+      "width": 95,
+      "scale": 0.61,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 21,
+      "duration": 3,
+      "keys": []
+    },
+    {
+      "id": "exercise",
+      "name": "exercise",
+      "type": "text",
+      "text": "Predict: initialise sum to 10 instead. What is the final total, and why?",
+      "x": 50,
+      "y": 82,
+      "width": 95,
+      "scale": 0.61,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f2f6fc",
+      "startTime": 24,
+      "duration": 4,
+      "keys": []
+    }
+  ],
+  "groups": [
+    {
+      "id": "read-0",
+      "name": "Read value 2 · copied token",
+      "layerIds": [
+        "read-copy-0"
+      ],
+      "startTime": 0,
+      "duration": 28,
+      "keys": [
+        {
+          "property": "x",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 3.5,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 5.5,
+          "value": 25,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "y",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 3.5,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 5.5,
+          "value": 26,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "read-1",
+      "name": "Read value 4 · copied token",
+      "layerIds": [
+        "read-copy-1"
+      ],
+      "startTime": 0,
+      "duration": 28,
+      "keys": [
+        {
+          "property": "x",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 9.5,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 11.5,
+          "value": 0,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "y",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 9.5,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 11.5,
+          "value": 26,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "read-2",
+      "name": "Read value 6 · copied token",
+      "layerIds": [
+        "read-copy-2"
+      ],
+      "startTime": 0,
+      "duration": 28,
+      "keys": [
+        {
+          "property": "x",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 15.5,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 17.5,
+          "value": -25,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "y",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 15.5,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 17.5,
+          "value": 26,
+          "easing": "ease_in_out"
+        }
+      ]
+    }
+  ]
+}

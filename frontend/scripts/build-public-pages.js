@@ -52,6 +52,7 @@ webpack(config, (error, stats) => {
     if (!shell.includes('<div id="root"></div>'))
       throw new Error("Missing application root in production HTML");
     const styles = [
+      "src/education/EducationPage.css",
       "src/components/public/PublicPage.css",
       "src/components/public/CompanyPages.css",
       "src/components/AutoPromoteLogo.css",
@@ -80,8 +81,8 @@ webpack(config, (error, stats) => {
       }
       const rendered = renderPublicPage(route);
       if (rendered) {
-        const title = rendered.match(/<h1>([^<]+)<\/h1>/)?.[1];
-        const description = rendered.match(/<p class="public-intro">([^<]+)<\/p>/)?.[1];
+        const title = rendered.match(/<h1[^>]*>([\s\S]*?)<\/h1>/)?.[1]?.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+        const description = rendered.match(/<p class="public-intro">([^<]+)<\/p>/)?.[1] || (route.startsWith("/education") ? "Practical creative technology learning for IT students and teachers. Explain real code with video, editing and responsible technology use." : null);
         if (!title || !description) throw new Error(`Missing page identity: ${route}`);
         // Use a replacer: rendered content must never be interpreted as $& or $1.
         html = html

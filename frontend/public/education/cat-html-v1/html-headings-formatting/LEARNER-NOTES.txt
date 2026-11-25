@@ -1,0 +1,1 @@
+HTML heading levels express hierarchy. h1 is a top-level heading and h2 a subordinate section heading. Bold, italic and underline affect presentation; they do not turn paragraph text into a heading.

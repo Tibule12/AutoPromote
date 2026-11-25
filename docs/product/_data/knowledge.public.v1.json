@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.66",
+  "knowledge_version": "1.0.71",
   "product_version": "1.2.0",
   "release_channel": "development",
-  "updated_at": "2026-11-22",
+  "updated_at": "2026-11-25",
   "features": [
     {
       "feature_id": "studio.timeline",
@@ -5442,6 +5442,152 @@
         "logo SVG"
       ],
       "updated_at": "2026-10-21",
+      "product_version": "1.2.0"
+    },
+    {
+      "feature_id": "education.it_foundation",
+      "name": "AutoPromote Education · IT concepts and creative editing",
+      "area": "Education",
+      "status": "PARTIAL",
+      "summary": "An IT-first learning section pairs the five byte-conversion foundations with four native motion concept labs: variable/loop state, conditional validation/debugging, bubble sort and database relationships. Every lesson teaches the concept and the actual Studio techniques.",
+      "purpose": "Help IT students understand and explain computational ideas through creative visual construction, prediction and transfer exercises, with teacher review before learner release.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "Public initiative information after an approved release",
+        "Private local curriculum review; school enrolment is closed"
+      ],
+      "supported_media": [
+        "Original program screen recordings",
+        "Written steps, narrated workflow videos and editable Studio practice projects",
+        "Original empty stages expanded into editable native motion graphics",
+        "Concept explanations, exact layer/key tables and teacher reasoning guides"
+      ],
+      "requires": [
+        "studio.timeline",
+        "studio.export"
+      ],
+      "optional_capabilities": [
+        "studio.titles",
+        "studio.audio"
+      ],
+      "controls": [],
+      "workflow": [
+        "Read the initiative and teacher information. School registration and minor onboarding are not open.",
+        "Released lessons must include actual Studio source, controls, moving result, narration and reviewed reproduction evidence. Unreviewed lessons remain hidden from the normal library.",
+        "In an existing authorised Studio account, explicitly load a curated practice recording through the normal upload flow and open a fresh editable project.",
+        "Predict a trace or query result before editing. Review the actual code or SQL, conceptual explanation, editable project, complete movie and a different unseen input. Device-local checklists are self-reported practice only."
+      ],
+      "preview_behavior": "The lesson site plays recorded teaching media. Practice opens the existing Studio; it does not simulate the editor or automatically start a render.",
+      "render_behavior": "Practice exports use the normal owned Studio renderer and account cost controls. The initiative grants no unlimited processing or school entitlement.",
+      "limitations": [
+        "All nine lessons remain private review candidates, not teacher-approved or independently learner-reproduced releases. Per-artifact export and moving-preview evidence is required; passing technical checks alone does not qualify teaching quality.",
+        "School-managed accounts, teacher and learner roles, safeguarded participation, consent arrangements, private school reporting and finite funded allowances are planned and not enabled.",
+        "No compulsory purchases or targeted learner advertising are intended for a school programme. Do not onboard minors before the necessary school permissions and safeguards exist.",
+        "English is the initial draft language. isiXhosa versions need language review before release. No faster-learning, accreditation, CAPS approval or education-authority endorsement is claimed.",
+        "Production deployment and paid processing require separate owner approval. Existing normal account permissions and costs remain authoritative."
+      ],
+      "common_errors": [
+        {
+          "condition": "A lesson is unavailable",
+          "resolution": "It may be unreleased or awaiting review. Open the learning library and do not infer availability from a private preview."
+        },
+        {
+          "condition": "Practice cannot open in Studio",
+          "resolution": "Use an existing authorised account, upload the supplied recording through the normal controls, and check its source readiness and entitlement."
+        }
+      ],
+      "related_features": [
+        "studio.trim",
+        "studio.cut",
+        "studio.titles",
+        "studio.audio"
+      ],
+      "templates_using_feature": [],
+      "aliases": [
+        "education",
+        "learn IT",
+        "IT students",
+        "school lessons",
+        "teacher resources",
+        "learn Studio",
+        "explain your code",
+        "bubble sort lesson",
+        "CAPS reference",
+        "visual IT concepts",
+        "loops and variables"
+      ],
+      "updated_at": "2026-11-24",
+      "product_version": "1.2.0"
+    },
+    {
+      "feature_id": "education.cat_html",
+      "name": "AutoPromote Education · CAT HTML visual learning",
+      "area": "Education",
+      "status": "PARTIAL",
+      "summary": "A dedicated private CAT pathway preserves the IT materials and pairs six original working HTML examples with real browser output, native Studio focus motion, detailed tutorials, exercises and teacher criteria.",
+      "purpose": "Help students connect HTML source to browser behaviour and learn creative visual explanation, for professional CAT teacher evaluation.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "Public teacher-review presentation authorised by the owner",
+        "School/learner enrolment remains closed"
+      ],
+      "supported_media": [
+        "Working local HTML, original vector image and relative linked files",
+        "Real Chromium source/output recordings with original synthetic narration",
+        "Native editable focus outlines, callouts and property keys",
+        "Actual Studio result movies, tutorials, exact settings, exercises and teacher review materials"
+      ],
+      "requires": [
+        "studio.timeline",
+        "studio.export"
+      ],
+      "optional_capabilities": [
+        "studio.titles",
+        "studio.audio"
+      ],
+      "controls": [],
+      "workflow": [
+        "Open the private CAT teacher-evaluation pathway. No learner registration is enabled.",
+        "Run the supplied HTML files and predict the browser output before watching the visual explanation.",
+        "Upload the original source through ordinary Studio controls, select full 16:9 framing and import the disclosed native graphics starter.",
+        "Inspect/adapt copy, placement, timing and stroke keys; create an original practice label manually. Export through normal account controls.",
+        "Assess HTML correctness and transfer reasoning separately from creative communication and reproduction."
+      ],
+      "preview_behavior": "The lesson site plays recorded teaching media. Practice opens the existing Studio; it does not simulate the editor or automatically start a render.",
+      "render_behavior": "Practice exports use the normal owned Studio renderer and account cost controls. The initiative grants no unlimited processing or school entitlement.",
+      "limitations": [
+        "Six focused mini-lessons are supplementary, not full CAT curriculum coverage.",
+        "Professional teacher feedback and independent learner recreation remain pending; an interested teacher is not an endorsement.",
+        "Legacy presentational attributes used for classroom comparison are distinguished from modern HTML/CSS standards; teacher to confirm the current tag sheet.",
+        "No formal CAPS approval, faster-learning claim, school account access, new entitlement or paid allowance is granted.",
+        "The owner authorises this completed teacher-review presentation; wider curriculum release and school enrolment remain pending."
+      ],
+      "common_errors": [
+        {
+          "condition": "A lesson is unavailable",
+          "resolution": "It may be unreleased or awaiting review. Open the learning library and do not infer availability from a private preview."
+        },
+        {
+          "condition": "Practice cannot open in Studio",
+          "resolution": "Use an existing authorised account, upload the supplied recording through the normal controls, and check its source readiness and entitlement."
+        }
+      ],
+      "related_features": [
+        "studio.trim",
+        "studio.cut",
+        "studio.titles",
+        "studio.audio"
+      ],
+      "templates_using_feature": [],
+      "aliases": [
+        "CAT",
+        "CAT HTML",
+        "learn HTML",
+        "web design lesson",
+        "HTML browser explanation",
+        "CAT teacher review"
+      ],
+      "updated_at": "2026-11-25",
       "product_version": "1.2.0"
     }
   ],
@@ -15962,6 +16108,46 @@
       "from": "studio.preview",
       "type": "editable_with",
       "to": "studio.preview.quality"
+    },
+    {
+      "from": "education.it_foundation",
+      "type": "requires",
+      "to": "studio.timeline"
+    },
+    {
+      "from": "education.it_foundation",
+      "type": "requires",
+      "to": "studio.export"
+    },
+    {
+      "from": "education.it_foundation",
+      "type": "optionally_uses",
+      "to": "studio.titles"
+    },
+    {
+      "from": "education.it_foundation",
+      "type": "optionally_uses",
+      "to": "studio.audio"
+    },
+    {
+      "from": "education.cat_html",
+      "type": "requires",
+      "to": "studio.timeline"
+    },
+    {
+      "from": "education.cat_html",
+      "type": "requires",
+      "to": "studio.export"
+    },
+    {
+      "from": "education.cat_html",
+      "type": "optionally_uses",
+      "to": "studio.titles"
+    },
+    {
+      "from": "education.cat_html",
+      "type": "optionally_uses",
+      "to": "studio.audio"
     }
   ]
 }

@@ -1,3 +1,5 @@
+import EducationStudioGuide from "../education/EducationStudioGuide";
+import { requestedEducationLesson, createEducationPracticeProject } from "../education/educationStudioPractice";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getAuth } from "firebase/auth";
 import VideoEditor from "../components/VideoEditor";
@@ -145,6 +147,8 @@ function ViralClipStudioPanel({
   const [resumingProject, setResumingProject] = useState(false);
   const [restoringBackup, setRestoringBackup] = useState(false);
   const [preparingLogoCanvas, setPreparingLogoCanvas] = useState(false);
+  const [practiceLesson] = useState(() => requestedEducationLesson());
+  const [practiceArmed, setPracticeArmed] = useState(false);
 
   const restoreBackup = async file => {
     if (!file || restoringBackup || subscriptionLoading) return;
@@ -430,6 +434,10 @@ function ViralClipStudioPanel({
         </button>
       ) : null}
       <div className="creator-studio-entry">
+        <EducationStudioGuide lesson={practiceLesson} busy={subscriptionLoading || ["uploading", "validating"].includes(sourceState)} onPrepare={async file => {
+          if (!canUseFeature("viralClipStudio")) { onUpgrade?.(); return; }
+          setPracticeArmed(true); setSelectedClip(null); setAdditionalSourceFiles([]); await prepareSource(file);
+        }} />
         <div className="studio-entry-main">
           <div className="studio-entry-section-heading">
             <span className="studio-entry-eyebrow">START CREATING</span>
@@ -534,6 +542,10 @@ function ViralClipStudioPanel({
                   if (!canUseFeature("viralClipStudio")) {
                     onUpgrade?.();
                     return;
+                  }
+                  if (practiceArmed && practiceLesson) {
+                    try { setResumedProject(createEducationPracticeProject(practiceLesson, sourceFile, sourceDuration)); }
+                    catch (error) { setSourceError(error.message); return; }
                   }
                   setStudioSource(createStudioSource(sourceFile, selectedClip, sourceDuration, initialClips));
                 }}

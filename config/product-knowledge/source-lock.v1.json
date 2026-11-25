@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "TikTok disclosure selection and final label review; 38 backend and 24 frontend regression checks pass with mocked transport. Required disclosures and provider auto-label limits retained; no live publication or readiness promotion.",
-  "reviewed_at": "2026-11-22T19:13:59.524Z",
-  "catalog_sha256": "c76b18fb11778189cbcc87268392cc0d05c0c561ea03ee64b511f7c0ec8a4632",
+  "reason": "Owner-authorised six-lesson live CAT teacher presentation; preserve learner and readiness gates",
+  "reviewed_at": "2026-11-25T11:04:46.586Z",
+  "catalog_sha256": "c09a26f3a093fe05b546f1006e2da1ed4c5f10efb8e49ab84c2fe77a452e29c1",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -15,11 +15,11 @@
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
-      "sha256": "e62ca50f319739bab1431ee0d8c824d6a1b308dca6ca5dea4d084a66c839bf22"
+      "sha256": "1439670e68fa50d006246770f0714d64af8ab8af770a6f055d84d1ab82bf1ca8"
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
-      "sha256": "62ab0bb73d7d384715cf26a8e951aec94dd583f635aafe9bd1879492c2e6c4d9"
+      "sha256": "9add14832ff39c78eea54dd8076819fb2c7acdd385468c77d2b19cca0bfd928e"
     },
     {
       "path": "contracts/model-capabilities-v1.json",
@@ -34,8 +34,12 @@
       "sha256": "5645aeb4644e9ecfca139b504fb993469039b9dc9401204d9709575ff1f3ec5a"
     },
     {
+      "path": "docs/EDUCATION-ARCHITECTURE.md",
+      "sha256": "f8c0bdf16d41ce7ed0266fff91f8fcda0488dafaf47e74aca9b04a354af26712"
+    },
+    {
       "path": "frontend/src/App.js",
-      "sha256": "59a98781581bea5cecda277ab1163aa0c8a34f9ea4c9cd56f8de58594f974b99"
+      "sha256": "299aa9cdfc67a29852920945bdd421ab961ea3e215f2089c0a59442a0138235d"
     },
     {
       "path": "frontend/src/Docs.js",
@@ -51,7 +55,7 @@
     },
     {
       "path": "frontend/src/UserDashboardTabs/ViralClipStudioPanel.js",
-      "sha256": "c65a67612a8d8f4fceeff18a21ce64047e89ac4e9cd108385cfff4123523fff3"
+      "sha256": "349e8b84ea274e54fbc1424fa38850b594d29b812534aac49e609226250e156e"
     },
     {
       "path": "frontend/src/UserDashboard_full.js",
@@ -231,7 +235,7 @@
     },
     {
       "path": "frontend/src/components/public/PublicFooter.js",
-      "sha256": "06e3c41556d083fd583f3147e513e03e16dac13b3ee303092cbaa49dd77834f5"
+      "sha256": "2d7dd1385403a30e3f9b6afa396997df1b60af35b863da32db5fad6e904ef778"
     },
     {
       "path": "frontend/src/components/public/PublicPage.css",
@@ -303,7 +307,7 @@
     },
     {
       "path": "frontend/src/components/studioLogoDesign.js",
-      "sha256": "019149a3fa7303b8c3f1f217bc00c95abaa9fb2ed5fb7b792da817d17af727a0"
+      "sha256": "e123d02914d30e17b39d39a44f7b696ce9a6bc01aedf1d7be115d764284badfb"
     },
     {
       "path": "frontend/src/components/studioLogoDiamondMotion.js",
@@ -432,6 +436,34 @@
     {
       "path": "frontend/src/docs/content.js",
       "sha256": "27f966f3381f77ceb055974d08a5816cee69bf07749c3c2bcf5290f3f36f60b0"
+    },
+    {
+      "path": "frontend/src/education/CatLearningPath.js",
+      "sha256": "e1aca1a2a111b1d33f78faacf936edd7f32fcd2b6660feae24f36e8651998595"
+    },
+    {
+      "path": "frontend/src/education/EducationPage.js",
+      "sha256": "57691588d10c822cecfef172a41965746ae9cd0fb789fb5bd8e745bbdf3234df"
+    },
+    {
+      "path": "frontend/src/education/EducationStudioGuide.js",
+      "sha256": "520d9242253c7dacbcf8b3af9b413b8baaae24793ffa3b1c3ff494f6f0ebe4bf"
+    },
+    {
+      "path": "frontend/src/education/catCatalog.json",
+      "sha256": "3324bd607a49371b44778acbfa53bdae3f3dbb7cfef34d46d59345c0f7a3ac83"
+    },
+    {
+      "path": "frontend/src/education/curriculum.json",
+      "sha256": "9203ca4c8038c0d03f3946b005a7ad407eb1a648f79dabee8437b804ce575882"
+    },
+    {
+      "path": "frontend/src/education/educationCatalog.js",
+      "sha256": "4a4c6f5c821e1465ca1b65a9bb6323b756c1c124a93bf8a5d535d65ec5ce2106"
+    },
+    {
+      "path": "frontend/src/education/educationStudioPractice.js",
+      "sha256": "fb01f5fa8b2559e269f89a5d9547bd791079c744faf1343b015b777712bf30e0"
     },
     {
       "path": "frontend/src/features/publishing/UnifiedPublisher.js",
@@ -651,7 +683,7 @@
     },
     {
       "path": "src/productKnowledge/generate.js",
-      "sha256": "75b966f4b99de7ed4eedcde4b057e356547057b9edb90064a555c7faf99f62fb"
+      "sha256": "acaee1b11e13d8e4a144e0b06d47f8666832427957c56a9100b1d7b9ed541ab9"
     },
     {
       "path": "src/promotionService.js",
@@ -783,11 +815,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "df24606d6861b4c298b5c9f5429c74e0a242432d8faa5dbf056188f218472962"
+      "sha256": "1dcc29ed1e3e713e65f8d3f4f994a1fe21c61e0e8bd0d408175bcf42f893d683"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "8ce7955b7b5ddb6af9afbfa4ab8db19a94e747a3009539885af934da7f281e38"
+      "sha256": "15ac261da97e8a1e0aa0c9844856d19219d31c70557cfe8c246d311d2997c128"
     },
     {
       "path": "worker.js",

@@ -1,4 +1,110 @@
 {
+  "catTeaching20261125": {
+    "date": "2026-11-25",
+    "scope": "Dedicated private CAT HTML teacher-evaluation pathway; preserve IT work. Six real HTML/browser sources with native Studio focus motion, exact recipes, separate concept/editing exercises and teacher criteria. Per-artifact native/tutorial receipts are authoritative.",
+    "evidenceRefs": [
+      "reports/education-cat-20261124/README.md",
+      "reports/education-cat-20261124/curriculum-reference.json",
+      "reports/education-cat-20261124/html-accuracy.json",
+      "reports/education-cat-20261124/pathway-pages.json",
+      "reports/education-cat-20261124/graphics-fixed-images.json",
+      "reports/education-cat-20261124/delivery-verification.json",
+      "reports/education-cat-20261124/preserved-it.json",
+      "reports/education-cat-20261124/teacher-pack-player.json",
+      "reports/education-cat-20261124/review-hub-verification.json",
+      "reports/education-cat-20261124/printable-materials.json",
+      "reports/education-cat-20261124/additional-delivery-verification.json",
+      "reports/education-cat-20261124/additional-html-accuracy.json",
+      "reports/education-cat-20261124/additional-full-movie-playback.json"
+    ],
+    "readinessPromotion": false,
+    "nextTaskId": "S02",
+    "teacherFeedbackReceived": false,
+    "formalCAPSApproval": false,
+    "paidCloudJobs": 0,
+    "preservedITPathway": true,
+    "fullFrame": "16:9, Fit full, Rounded frame off; header/footer reserved for text",
+    "captionTracks": false,
+    "graphicsImageFix": "Nested logo SVG master no longer duplicates preserveAspectRatio; XML and real browser decode verified.",
+    "localDownloadFix": "Signed local attachment intent is honoured after the same owner/generation/hash checks; no production signing change.",
+    "blockers": [
+      "Owner picture/listening approval, professional teacher usefulness/grade/pacing feedback and independent beginner recreation remain pending.",
+      "These are six focused supplementary mini-lessons, not complete CAT coverage or approval. Teacher must confirm current ATP/tag sheet.",
+      "No school/learner enrolment, new entitlement or paid rendering; owner authorises this bounded live teacher presentation, not broad readiness.",
+      "Shared S02/S04/S03, whole picture/audio/colour/edge/latency parity and strict typography 13/16 failures remain unchanged."
+    ],
+    "completedNativeMovies": 6,
+    "completedDetailedTutorials": 6,
+    "nativeMovieSecondsEach": 28,
+    "nativeExportsAndColdRecoveryVerified": true,
+    "captureLimitFailureRetained": true,
+    "explicitSavedProjectContinuation": true,
+    "completeRuntimeReplayQualified": false,
+    "singlePageReviewHub": {
+      "videoCount": 12,
+      "finishedFilmCount": 6,
+      "studioGuideCount": 6,
+      "realHTMLAndSource": true,
+      "printablePDFCount": 12,
+      "completeOfflineZIP": true,
+      "deviceLocalNotesAndDownload": true,
+      "approvalInferred": false,
+      "originalThreeNativeMoviesUnchanged": true
+    },
+    "additionalLessons": {
+      "nativeExports": 3,
+      "additionalRendersForRecovery": 0,
+      "snapshotFailureRetained": true,
+      "sourceAndCompletedDeliveryRecovery": true,
+      "fullOriginalRuntimeReplayQualified": false
+    },
+    "ownerAuthorizedLiveTeacherPresentation": true
+  },
+  "education20261124": {
+    "date": "2026-11-24",
+    "evidenceRefs": [
+      "reports/education-phase1-20261124/README.md",
+      "reports/education-phase1-20261124/lesson-verification.json",
+      "reports/education-phase1-20261124/concept-verification.json",
+      "reports/education-phase1-20261124/guided-first-project.json",
+      "reports/education-phase1-20261124/manual-click-proof.json",
+      "reports/education-phase1-20261124/no-captions-delivery.json",
+      "reports/education-phase1-20261124/steady-navigation.json",
+      "reports/education-phase1-20261124/clean-timeline-studio.json",
+      "reports/education-phase1-20261124/continuous-navigation-player.json"
+    ],
+    "scope": "Education is integrated locally: byte-conversion foundations followed by native visual IT concept labs. Per-artifact receipts distinguish actual App exports, exact cold recovery, paused comparisons and concept checks. All lessons remain private review; no production release.",
+    "readinessPromotion": false,
+    "nextTaskId": "S02",
+    "blockers": [
+      "Teacher concept/communication review and independent learner reproduction remain required before lesson publication.",
+      "Original five-minute local graphics render failed; its signed termination and refused follow-up remain retained. Only the separately bounded local CPU window changes.",
+      "No production education deployment, school/minor onboarding, paid cloud job, public creative acceptance or concurrent-user qualification.",
+      "Whole predictive picture/audio/colour/edge/latency parity and shared S02/S04/S03 remain open; no strict pixel-parity claim."
+    ],
+    "manualTeachingCorrection": {
+      "actualManualActions": 29,
+      "positionKeys": 16,
+      "shortChapterCount": 9,
+      "maximumChapterSeconds": 106,
+      "subtitleTracks": false,
+      "addedBannerRemoved": true,
+      "teacherReview": false
+    },
+    "ownerTeachingClarification": "Owner accepts the video subject and starting small; tutorial control switching is rejected. Keep native content, correct demonstration to one task in one panel, pause for consequence; no captions. Additional recordings stopped pending the presentation correction.",
+    "continuousTeachingTake": {
+      "normalAuthenticatedStudio": true,
+      "visibleScrolling": true,
+      "automaticScroll": false,
+      "subtitles": false,
+      "localDemoBadgeVisible": false,
+      "renderStarted": false,
+      "ownerAndTeacherApproval": false,
+      "builtStudioBadgeRemovalVerified": true,
+      "injectedStylesRequired": false,
+      "anonymousWelcomeChecks": 8
+    }
+  },
   "renderThroughputRelease20261122": {
     "date": "2026-11-22",
     "evidenceRefs": [

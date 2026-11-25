@@ -1,0 +1,50 @@
+[
+  {
+    "id": "workspace",
+    "text": "Start in your workspace. Click Viral Clip Studio."
+  },
+  {
+    "id": "upload",
+    "text": "Click Choose videos. Select the supplied practice stage."
+  },
+  {
+    "id": "open",
+    "text": "The file is ready. Click Open Creator Studio."
+  },
+  {
+    "id": "pause",
+    "text": "Pause the preview, then click the beginning of the playback bar. We will add the title at the start."
+  },
+  {
+    "id": "view",
+    "text": "Click After so we can see the changes we make."
+  },
+  {
+    "id": "graphics",
+    "text": "On the left, click Graphics. Keep watching the panel on the right."
+  },
+  {
+    "id": "scroll_titles",
+    "text": "Scroll down in the Graphics panel. Stop at the Headline button."
+  },
+  {
+    "id": "headline",
+    "text": "Click Headline once. This adds one editable title layer to the picture and timeline."
+  },
+  {
+    "id": "show",
+    "text": "Press Play briefly, then pause. The title fades in, so we need to look inside its duration."
+  },
+  {
+    "id": "scroll_copy",
+    "text": "Scroll a little farther down, until you see the Copy box."
+  },
+  {
+    "id": "type",
+    "text": "Click inside Copy. Select the existing words, then type five."
+  },
+  {
+    "id": "result",
+    "text": "Look at the preview. The text now reads five. This card represents a value for our later array animation. Pause here and repeat this one step."
+  }
+]

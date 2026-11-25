@@ -1,0 +1,21 @@
+Animate bubble sort, comparison by comparison
+
+Original narration read by a disclosed standard synthetic voice. Native result is a silent teacher-led visual. Studio controls and full matching final playback are actual recordings. Unattended render waiting is abbreviated; original complete capture and timing receipts are retained privately.
+
+Start with the empty twenty-eight-second stage. It contains no array animation. Every card and movement will be an editable Studio layer or group.
+
+In Graphics, open Import animated graphics. This original composition imports separate editable rectangle cards, number titles, fixed indices and motion keys. It is not an imported animation video.
+
+The four values start at five, one, four and two. Indices zero to three stay fixed. Use the edited output position to seek to two seconds. The white outline marks the two neighbouring slots being compared.
+
+In Composite, each element groups its card and number. At three seconds, element five has X zero and Y zero. The group moves both layers together, so the value cannot detach from its card.
+
+Rebuild the first endpoint using actual keys. At four point two five seconds, set the X key of element five to seventeen percent, with Ease In Out. Its Y key returns to zero. The matching element one moves minus seventeen percent.
+
+At three point six two five seconds, element five lifts by minus ten percent and element one drops by plus ten. Their paths separate during the swap. Inspect the Y key and its value graph before playing.
+
+Now play the complete moving preview. Compare neighbours, swap only when the left value is greater, and keep the last value fixed after each pass. A comparison without a swap is still a comparison.
+
+The first pass ends at one, four, two, five. Five is settled. After all three passes, the result is one, two, four, five: six comparisons and four swaps. Predict what changes for three, two, two, one before editing.
+
+Choose seven twenty p and twenty-four frames per second. Render. The wait is cut; here is the finished movie.

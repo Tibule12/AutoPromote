@@ -1,0 +1,7 @@
+0.00s The link names details dot H T M. Check that exact filename before guessing.
+
+7.00s Click the link. That file is missing, so the browser reports a not-found error.
+
+14.00s The supplied file is details dot H T M L. Correct the reference and save it.
+
+21.00s Retest the corrected link. The right page loads. Record expected and actual results.

@@ -438,3 +438,8 @@ Returns restored weights + emits alert & history doc.
 | email_delivery_failure | warning | Email provider send failed |
 
 ```
+
+
+## AutoPromote Education · CAT teacher presentation
+
+The [CAT HTML review hub](https://www.autopromote.org/education/cat) presents six supplementary HTML lessons: structure, images/links, lists/tables, heading hierarchy, readable design and troubleshooting. Each pairs an actual native Studio film with a narrated control guide, working HTML, exact settings, separate exercises and teacher criteria. Complete materials are downloadable. This is a professional teacher-review presentation; no formal CAPS approval or learner/school enrolment is claimed. The existing IT/byte-conversion work is preserved. See [the education architecture](docs/EDUCATION-ARCHITECTURE.md) and [artifact evidence](reports/education-cat-20261124/README.md).

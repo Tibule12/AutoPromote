@@ -1,0 +1,57 @@
+{
+  "format": "autopromote-education-practice",
+  "version": 1,
+  "lessonId": "variables-loops",
+  "projectName": "Animate a loop and its changing variables",
+  "sourceFiles": [
+    "algorithm-stage.mp4",
+    "variables-loops.graphics.json",
+    "variables-loops-trace.json"
+  ],
+  "openInStudio": "/?tab=viral_clip_studio&educationLesson=variables-loops",
+  "accountBinding": "Fresh stage upload through existing account. Import the graphics composition separately in Graphics. This recipe transfers no owner, credential, Storage path, credits or render.",
+  "startingSettings": {
+    "aspect": "16:9",
+    "captions": false,
+    "resolution": "720p",
+    "fps": 24
+  },
+  "steps": [
+    {
+      "title": "Open an empty stage",
+      "control": "Choose videos \u2192 algorithm-stage.mp4 \u2192 Open Creator Studio \u2192 Reframe",
+      "value": "16:9; Preserve frame; Rounded main footage off; preview captions off; source sound and voice repair off",
+      "why": "The stage has no finished animation. The native layers and timeline supply the concept demonstration."
+    },
+    {
+      "title": "Import editable graphics",
+      "control": "Graphics \u2192 Import animated graphics \u2192 Import graphics composition\u2026",
+      "value": "variables-loops.graphics.json; composition 1280 \u00d7 720; duration 28 seconds",
+      "why": "The composition expands to ordinary editable artwork, text, groups and keys. It is not a pre-rendered animation."
+    },
+    {
+      "title": "Inspect the layers and fixed labels",
+      "control": "Graphics \u2192 Titles / Vector artwork; Motion \u2192 Target layer",
+      "value": "Inter text; rotation 0; opacity 1; native rectangle geometry; exact layer sizes and timings in the parameter tables below",
+      "why": "Separate labels from animated values. A teacher or learner can correct wording and state without rebuilding a movie elsewhere."
+    },
+    {
+      "title": "Reproduce a motion endpoint",
+      "control": "Composite \u2192 Graphic groups \u2192 Read value 2 \u00b7 copied token \u2192 Curve keyframe",
+      "value": "y \u00b7 5.500s; Selected group key value = 26; Selected group key easing = Ease In Out",
+      "why": "This is an actual group-property key. The percentages are offsets from the original layer positions, not absolute slot coordinates."
+    },
+    {
+      "title": "Trace the full timeline",
+      "control": "Edited output position; Play comparison; pause before each transition",
+      "value": "Programme seconds 0\u201328; follow the exact layer timing and property-key tables",
+      "why": "Predict each concept state before watching it. A smooth animation must still represent the correct algorithm or query."
+    },
+    {
+      "title": "Save, export and inspect",
+      "control": "Save project \u2192 Export \u2192 Export resolution / Export frame rate \u2192 Render Final Clip",
+      "value": "720p; 24 fps; H.264; AAC if narration is added; one normal render after account confirmation",
+      "why": "Save the editable project separately, then download and review the entire movie. Local proof does not guarantee every production route."
+    }
+  ]
+}

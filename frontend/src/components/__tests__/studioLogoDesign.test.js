@@ -138,6 +138,25 @@ test("portable colour and monochrome masters retain transparent holes and distin
   expect(dark).toContain("#111827");
   expect(JSON.stringify(d)).toBe(original);
 });
+
+test.each(["flow", "orbit", "facet", "prism", "crown", "pulse", "infinity"])(
+  "%s preview is valid XML for the browser image decoder",
+  family => {
+    const design = buildStudioLogoDesign({ ...LOGO_DESIGN_DEFAULT, family });
+    for (const fit of ["contain", "cover", "stretch"]) {
+      const layers = design.layers.map(layer => ({ ...layer, mediaFit: fit }));
+      const svg = studioLogoMasterSvg(layers);
+      const parsed = new DOMParser().parseFromString(svg, "image/svg+xml");
+      expect(parsed.querySelector("parsererror")).toBeNull();
+      expect(parsed.querySelectorAll("svg")).toHaveLength(layers.length + 1);
+      for (const nested of [...parsed.querySelectorAll("svg")].slice(1)) {
+        expect(nested.getAttribute("preserveAspectRatio")).toBe(
+          fit === "stretch" ? "none" : fit === "cover" ? "xMidYMid slice" : "xMidYMid meet"
+        );
+      }
+    }
+  }
+);
 test.each([
   { name: "👋" },
   { name: "" },

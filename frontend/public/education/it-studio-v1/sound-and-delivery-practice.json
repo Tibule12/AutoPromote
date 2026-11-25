@@ -1,0 +1,56 @@
+{
+  "format": "autopromote-education-practice",
+  "version": 1,
+  "lessonId": "sound-and-delivery",
+  "projectName": "IT practice 5 \u00b7 Explain a byte",
+  "sourceFiles": [
+    "normal-input.mp4",
+    "byte-explanation.wav"
+  ],
+  "openInStudio": "/?tab=viral_clip_studio&educationLesson=sound-and-delivery",
+  "accountBinding": "Upload practice media through the normal authenticated Studio entry. The starter is fresh and belongs to that account. This recipe transfers no owner, Storage path, cloud allowance or completed render.",
+  "startingSettings": {
+    "aspect": "16:9",
+    "captions": false,
+    "resolution": "720p",
+    "fps": 24
+  },
+  "steps": [
+    {
+      "title": "Open your edit",
+      "control": "Choose videos; Open Creator Studio",
+      "value": "normal-input.mp4; start 1 s; end 7 s",
+      "why": "Keep the six-second sequence and preserve the whole code/output frame."
+    },
+    {
+      "title": "Import the provided explanation",
+      "control": "Sound \u2192 Import voiceover",
+      "value": "byte-explanation.wav",
+      "why": "The supplied voice is disclosed synthetic narration. Do not clone a learner or teacher."
+    },
+    {
+      "title": "Set timing and gain",
+      "control": "Start for byte-explanation.wav; Volume for byte-explanation.wav; Keep original audio",
+      "value": "Start 0 s; volume 100%; Keep original audio off for this silent source",
+      "why": "Gain changes loudness; moving the clip changes when the words align with the picture."
+    },
+    {
+      "title": "Review synchronisation",
+      "control": "Play comparison",
+      "value": "Play the complete six seconds",
+      "why": "\u201cEighteen\u201d must refer to the visible input and \u201csixteen plus two\u201d to the visible active bit weights."
+    },
+    {
+      "title": "Choose export settings",
+      "control": "Export \u2192 Resolution; Frame rate; Codec",
+      "value": "720p; 24 fps; H.264; AAC",
+      "why": "These are delivery settings, not instructions to publish publicly."
+    },
+    {
+      "title": "Inspect the downloaded movie",
+      "control": "Render Final Clip; Download Rendered Clip",
+      "value": "Play the complete file, with sound",
+      "why": "Listen for clipping, check duration and readability, then retain the editable backup alongside your code."
+    }
+  ]
+}

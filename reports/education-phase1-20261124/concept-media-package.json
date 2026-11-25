@@ -1,0 +1,12 @@
+[
+  {
+    "lessonId": "variables-loops",
+    "nativeResultSha256": "116375cfea36ad6d4f8597a142fe69800f2792a9bdbfb59b4729366559bde05a",
+    "tutorialSha256": "609ab677a7f8b3da121883c88b9e8f003ed80bc722d0fb5118a013370574e851",
+    "tutorialSeconds": 182.333333,
+    "nativeProjectHash": "f1f129b896e925a754d46480ee5da1404a3e59706dbff6d71e92b0cbd4806abb",
+    "resultSilentTeacherLed": true,
+    "teacherReview": false,
+    "releaseStatus": "review"
+  }
+]

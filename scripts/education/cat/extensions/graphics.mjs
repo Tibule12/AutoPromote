@@ -1,0 +1,15 @@
+// Declarative interchange only. Native Studio imports editable artwork/titles
+// and renders the animated highlights through its canonical compositor.
+import fs from 'node:fs';import path from 'node:path';import {fileURLToPath}from'node:url';
+const R=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../../../..'),A=R+'/frontend/public/education/cat-html-v1',W='/home/tibule12/.local/share/autopromote-qa/education-20261124/cat/extensions',catalog=JSON.parse(fs.readFileSync(W+'/catalog.json'));
+const key=(property,time,value,easing='linear')=>({property,time,value,easing});
+for(const l of catalog.lessons){const geometry=JSON.parse(fs.readFileSync(W+'/'+l.id+'/geometry.json')),layers=[];
+const text=(id,copy,y,scale,startTime=0,duration=28,color='#f2f6fc')=>{const layer={id,name:id,type:'text',text:copy,x:50,y,width:94,scale,rotation:0,opacity:1,fontWeight:600,textAlign:'center',color,startTime,duration,keys:[]};layers.push(layer);return layer};
+text('Lesson title',l.heading,7,.95).fontWeight=800;
+text('Teacher review marker','AUTOPROMOTE EDUCATION  /  CAT',3,.34,0,28,'#8ee7d1');
+for(let i=0;i<l.labels.length;i++){const [copy,start,dur]=l.labels[i],layer=text('Callout '+(i+1),copy,92,.69,start,dur,l.phases[i].color||'#b7f4e1');layer.keys=[key('opacity',start,0),key('opacity',start+.3,1),key('y',start,94),key('y',start+.45,92,'ease_out')];}
+const phases=l.phases;
+function outline(name,bounds,start,duration,color){const x=(bounds.x+bounds.width/2)/12.8,y=(bounds.y+bounds.height/2)/7.2,width=bounds.width/12.8,height=bounds.height/7.2;const o={id:name,name,type:'artwork',x,y,width,height,scale:1,rotation:0,opacity:1,startTime:start,duration,mediaFit:'stretch',vectorShape:{version:1,closed:true,nodes:[[.5,.5],[99.5,.5],[99.5,99.5],[.5,99.5]].map(([x,y])=>({x,y,in:[0,0],out:[0,0]})),fill:{kind:'none',color:'#ffffff',endColor:'#ffffff',start:[0,0],end:[100,100]},stroke:{color,width:.55}},keys:[key('strokeEnd',start,0),key('strokeEnd',start+.7,100,'ease_in_out')]};layers.push(o)}
+for(let i=0;i<phases.length;i++){const p=phases[i],g=geometry[p.code],a=g.lines[p.lines[0]-1],b=g.lines[p.lines[1]-1];outline('Code focus '+(i+1),{x:a.x+29,y:a.y-2,width:a.width-31,height:b.y+b.height-a.y+4},p.start,p.duration,p.color||'#a8efd4');const e=geometry[p.output].browser.elements.filter(e=>e.tag===p.selector)[p.index||0];if(!e)throw Error(l.id+' '+p.output+' '+p.selector);outline('Browser focus '+(i+1),{x:e.x-3,y:e.y-3,width:Math.min(500,e.width+6),height:e.height+6},p.start,p.duration,p.color||'#77cfff');}
+const scene={format:'autopromote-graphics',version:1,name:l.title,width:1280,height:720,duration:28,layers,groups:[]};fs.writeFileSync(A+'/'+l.id+'/lesson.graphics.json',JSON.stringify(scene,null,2)+'\n');l.graphics={layers:layers.length,keys:layers.flatMap(l=>l.keys).length};l.layerReference=layers;l.studioSteps=JSON.parse(fs.readFileSync(A+'/catalog.json')).lessons[0].studioSteps.map(step=>({...step,value:step.value.replace('html-structure',l.id)}));}
+fs.writeFileSync(W+'/catalog.json',JSON.stringify(catalog,null,2)+'\n');console.log('Three editable native scenes authored with DOM-measured code/output positions.');

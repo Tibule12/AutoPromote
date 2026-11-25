@@ -1,0 +1,22 @@
+SUPPLEMENTARY TEACHER REVIEW
+Headings give a page its structure
+
+Use an appropriate main heading and subordinate sections (4).
+Explain structural headings versus presentational formatting (4).
+Predict and verify a heading-level change in real HTML/browser output (4).
+Keep focus outlines/callouts readable and correctly placed (4).
+Recreate and adapt native timing/key values for a different page (4).
+
+REASONING GUIDE
+Is bold paragraph text equivalent to h2?
+No. b changes presentation; h2 identifies a heading level in the document structure.
+
+Does the file break when h2 is changed to h1?
+It can still render. The example loses the intended top-level/subordinate distinction; this is a structural/design problem rather than necessarily a loading error.
+
+Why can an underlined word be confusing?
+Readers may expect underlined text to be a link. Underline by itself does not add href or navigation.
+
+Reference: DBE CAT CAPS 2024 Section 3 amendment, PDF pages 19, 20.
+https://www.education.gov.za/Portals/0/Documents/Publications/2025/CAT%20CAPS%202024%20-Section%203.pdf?ver=2025-11-28-102551-830
+No formal CAPS approval claimed. Teacher feedback and independent learner recreation are pending.

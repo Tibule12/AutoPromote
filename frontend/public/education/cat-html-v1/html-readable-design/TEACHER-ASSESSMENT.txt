@@ -1,0 +1,22 @@
+SUPPLEMENTARY TEACHER REVIEW
+Design for the person reading
+
+Identify and correct a readability problem (4).
+Use purposeful hierarchy, concise content and descriptive links (4).
+Test the real destination and justify the design decisions (4).
+Make the before/after comparison and focus regions accurate (4).
+Recreate the edit and explain how motion/colour aid communication (4).
+
+REASONING GUIDE
+Does colourful text automatically improve a webpage?
+No. Colour must preserve readability and serve a purpose. Very low contrast can make information difficult to read.
+
+Why is Read the workshop plan more informative than Click here?
+It tells the reader what to expect from the destination rather than describing a generic action.
+
+Is font color modern HTML styling?
+The example demonstrates a legacy presentational attribute still encountered in classroom material. Modern standards-based websites normally use CSS. The teacher should confirm current assessment syntax.
+
+Reference: DBE CAT CAPS 2024 Section 3 amendment, PDF pages 2, 20, 29.
+https://www.education.gov.za/Portals/0/Documents/Publications/2025/CAT%20CAPS%202024%20-Section%203.pdf?ver=2025-11-28-102551-830
+No formal CAPS approval claimed. Teacher feedback and independent learner recreation are pending.

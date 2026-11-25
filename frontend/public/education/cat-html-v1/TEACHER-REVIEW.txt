@@ -1,0 +1,23 @@
+AUTOPROMOTE EDUCATION — CAT TEACHER REVIEW
+Public professional teacher-review presentation. Original supplementary material; no CAPS approval, endorsement or measured learning-speed claim.
+The founder reports interest from a practising South African CAT teacher; professional assessment has not yet occurred. No teacher identity or learner data is collected here.
+
+Reference: DBE amended CAT CAPS Section 3 (2024), published on the DBE website. PDF pages 19–20: Grade 10 HTML; 26 and 29: Grade 11 tables, lists, images, attributes, links and troubleshooting; page 2 overview: Grade 12 table formatting and good webpage design. Teacher to confirm current annual teaching plan and assessment tag sheet.
+https://www.education.gov.za/Portals/0/Documents/Publications/2025/CAT%20CAPS%202024%20-Section%203.pdf?ver=2025-11-28-102551-830
+
+This is six focused mini-lessons, not complete coverage of all CAT practical work. Broader Grade 12 table attributes and multi-page design remain an extension. Some legacy presentational tags/attributes remain in CAPS; the materials explicitly distinguish those from modern standards-based HTML/CSS.
+Lessons 1–3 introduce structure, images/links and lists/tables. Lessons 4–6 extend this with heading hierarchy/presentational formatting, readable webpage design and an evidence-led broken-link/correction/retest. The .htm extension is not inherently invalid; references must match an existing file. The troubleshooting film uses a real local HTTP404; file:// sessions may show a different missing-file message.
+
+All examples are fictional club content, run locally, with original vector artwork. No third-party music, learner accounts, production jobs or publication is involved.
+
+Separate assessment: HTML correctness (12) and creative explanation/reproduction (8), total 20 per lesson. Suggested scores are teacher-review drafts, not official assessment marks.
+
+Teacher review form:
+1. Is the concept technically correct and appropriate for the intended grade?
+2. Can a learner predict and explain a different browser result?
+3. Are code, output and focus regions readable without guessing?
+4. Can a beginner follow the shown clicks, scrolling and parameter values?
+5. Does motion clarify the relationship rather than distract?
+6. Is pacing suitable, with enough time to pause or predict?
+7. What should change before a supervised classroom trial?
+Record comments against lesson ID and video time. Do not send learner names or records. Teacher feedback/independent learner recreation remain pending.

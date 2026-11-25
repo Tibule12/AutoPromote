@@ -1,0 +1,11 @@
+AutoPromote Education · IT Studio practice kit · 24 November 2026
+
+The Byte Lab program, algorithm source, screen recordings, screenshots and lesson scripts are original AutoPromote educational practice material. Permission is provided to download, copy, edit and use these practice files for learning, teaching and student portfolios. Credit “AutoPromote Education · Byte Lab practice project” when sharing an adapted lesson. No school approval or endorsement is implied.
+
+The screen recordings demonstrate the real supplied program running in a browser. They contain no learner data, account, passwords or identifiable student. They are raw practice input; completed lesson result files are separately exported through the actual AutoPromote Studio.
+
+Narration: original teaching scripts read offline using the standard en_US-ljspeech-high Piper voice. This is synthetic narration, not a cloned person or a claim that a teacher recorded it. The voice model's official model card identifies its training dataset as public domain: https://huggingface.co/rhasspy/piper-voices/blob/main/en/en_US/ljspeech/high/MODEL_CARD . Piper is used as a local production tool; its application/library and model weights are not redistributed in this practice kit.
+
+No third-party stock footage is redistributed in this IT pathway. Do not include private code, API keys, passwords or student information in your own screen recording. Follow your school's participation and asset-use requirements.
+
+Owner delivery instruction: no caption/subtitle tracks or sidecars. Spoken explanation and separate written steps/transcripts remain.

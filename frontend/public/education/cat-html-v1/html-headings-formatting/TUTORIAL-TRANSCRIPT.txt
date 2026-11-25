@@ -1,0 +1,47 @@
+0.00s Open Viral Clip Studio from the workspace. We will turn the real HTML and browser recording into an explanation.
+
+7.88s Click the upload area. Select source dot M P four from this lesson's downloaded kit. The file includes the original teaching voice.
+
+18.74s Click Open Creator Studio. The recording enters the normal editable timeline.
+
+24.62s Pause playback. Select After, so one complete edited frame fills the preview.
+
+32.70s Open Reframe on the left. Choose sixteen by nine and Show Everyone. Open View options, click Fit full and turn Rounded frame off. Both code and browser must stay visible.
+
+45.23s Open Sound. Keep original audio stays on. Turn voice repair off: this is already clean narration.
+
+77.01s Open Captions. Keep Preview captions switched off. The source code and creative callouts remain part of the picture.
+
+105.72s Open Graphics. Close Logo Workshop to make room for this lesson’s controls. Then scroll down through the panel.
+
+113.31s Scroll down to Import animated graphics. Open it, click Import graphics composition, and select lesson dot graphics dot J S O N. These become ordinary editable layers and motion keys.
+
+127.00s Play briefly, then pause. The title stays above the content, and the callout stays below it. Neither covers the code.
+
+136.37s Stay in Graphics. Scroll to Title layers and choose the first explanatory callout. Then scroll to Copy. This is the text you can adapt.
+
+145.89s Select the words in Copy and enter the same short explanation shown in your recipe. Keep it concise enough to read during its pause.
+
+154.57s Scroll to the title controls. Check the text colour and transparent background. The size and timing are listed in the recipe, so another editor can reproduce them.
+
+166.41s Now open Motion and choose Transform keyframes. In Target layer, select Code focus one. We are inspecting the real vector outline, not an animation baked into the source.
+
+179.23s Scroll down to Property keyframe. Choose Stroke end at zero point seven seconds. Its value is one hundred; the arrival easing is Ease In Out. The first key starts at zero.
+
+191.98s Set the endpoint to eighty and compare it with one hundred. The drawing stops early at eighty. Restore one hundred so the outline closes around the source.
+
+202.62s Return to Graphics. Scroll to Add title layer and click Label. We will create a separate practice label by hand, then remove it to preserve the lesson result.
+
+213.20s In Copy, type Predict first. Scroll to the timing fields. Start at twenty-four seconds and use a four-second duration. Set size to fifty-five percent and text box width to sixty percent.
+
+229.27s Open Motion. The new label is selected. Set X to fifty and Y to eighty-four percent. It sits in the clear space below the panels. Placement must serve the explanation.
+
+250.74s Return to Graphics. Scroll down and click Remove for the practice label. The original lesson remains. Save your own variation in a separate project. Now play the complete twenty-eight-second explanation.
+
+304.50s Show media. Open the project section, give this lesson a clear name, then click Save. The editable timeline and every native key are retained.
+
+315.56s Open Export. Choose seven twenty p and twenty-four frames per second. These are the settings for our complete twenty-eight-second lesson.
+
+324.79s Now click Render Final Clip. Approve the local render. The unattended processing wait is omitted from this tutorial.
+
+338.74s The actual Studio export is ready. Choose Show Finished Video. Then watch the whole result and check the code, the focus regions, the narration and the browser output.

@@ -1,0 +1,25 @@
+{
+  "lessonId": "html-lists-tables",
+  "normalAuthenticatedStudio": true,
+  "apiMocks": false,
+  "authBypass": false,
+  "fullFrame": "16:9 contain",
+  "captions": false,
+  "nativeGraphicsLayers": 14,
+  "nativeKeyCount": 32,
+  "actualNativeDownload": true,
+  "exactColdRecovery": true,
+  "canonicalHash": "175349665118688ad827394d0b17c7befcb74823a5eec8b0c2100409bc2d6179",
+  "outputSha256": "435df531ad3a7dd0abfd9adee50b63f48d1d38141a52fadaa3e678556426932c",
+  "duration": 28,
+  "completeLivePreview": true,
+  "completeFinishedPlayback": {
+    "start": 0,
+    "end": 28,
+    "duration": 28
+  },
+  "paidCloudJobs": 0,
+  "localCPU": true,
+  "teacherFeedbackReceived": false,
+  "independentLearnerRecreation": false
+}

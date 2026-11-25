@@ -1,0 +1,41 @@
+{
+  "itLessonRecords": 9,
+  "existingNativeFilms": [
+    {
+      "file": "frontend/public/education/it-studio-v1/first-project-result.mp4",
+      "sha256": "80bb975ba08dc4ed55680a0bc6327d3120a196737a3a5fba9dfb44b9b38a115d",
+      "unchanged": true
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/precise-cuts-result.mp4",
+      "sha256": "e6433006e331aee0fda8447a7b834d2c11a20d63b063e1d33c446ca901dd5202",
+      "unchanged": true
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/sequence-test-cases-result.mp4",
+      "sha256": "ecbb84c8dfc6a01dcaaf30a8c9d36f8c1cc9b003dc5b7ec6972d331711144f9d",
+      "unchanged": true
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/explain-with-text-result.mp4",
+      "sha256": "c1306db9d064b563a78bef01f8de6270b239aa820ae069ba2d835de0182914f1",
+      "unchanged": true
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/sound-and-delivery-result.mp4",
+      "sha256": "b4f4e339037a772a361d1e239eeacc755c544bdde81af12ef3642fc20d24b564",
+      "unchanged": true
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/variables-loops-result.mp4",
+      "sha256": "116375cfea36ad6d4f8597a142fe69800f2792a9bdbfb59b4729366559bde05a",
+      "unchanged": true
+    },
+    {
+      "file": "frontend/public/education/it-studio-v1/bubble-sort-result.mp4",
+      "sha256": "13bc8f19e6cf389151addf83548b48b01671ed9cd6ef2f32de851111b8c7c555",
+      "unchanged": true
+    }
+  ],
+  "newPathway": "CAT HTML, separate catalog"
+}

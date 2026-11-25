@@ -63,6 +63,7 @@ import { isLocalTestAuthEndpoint, isRuntimeE2EEnabled, getRuntimeE2EToken } from
 import { getVerifiedSessionUser, isAdminDashboardPath, shouldShowAdminDashboard } from "./utils/dashboardAccess";
 
 // Static Pages — lazy loaded for bundle splitting
+const EducationPage = lazy(() => import("./education/EducationPage"));
 const About = lazy(() => import("./About"));
 const Blog = lazy(() => import("./Blog"));
 const Careers = lazy(() => import("./Careers"));
@@ -1615,6 +1616,7 @@ function App() {
       <Suspense fallback={<PageLoader />}>
         <Routes>
           {/* Static Content Pages */}
+          <Route path="/education/*" element={<EducationPage />} />
           <Route path="/about" element={<About />} />
           <Route path="/blog/*" element={<Blog />} />
           <Route path="/careers" element={<Careers />} />

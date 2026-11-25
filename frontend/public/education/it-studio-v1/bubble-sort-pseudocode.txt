@@ -1,0 +1,31 @@
+ORIGINAL TEACHING EXAMPLE — ASCENDING, ZERO-BASED BUBBLE SORT
+Use the school language for the practical. This is not an official assessed task.
+
+values = [5, 1, 4, 2]
+end = length(values) - 1
+WHILE end > 0
+    changed = false
+    j = 0
+    WHILE j < end
+        IF values[j] > values[j + 1]
+            temporary = values[j]
+            values[j] = values[j + 1]
+            values[j + 1] = temporary
+            changed = true
+        END IF
+        j = j + 1
+    END WHILE
+    IF changed = false
+        STOP
+    END IF
+    end = end - 1
+END WHILE
+
+Pass 1: [5,1,4,2] -> [1,5,4,2] -> [1,4,5,2] -> [1,4,2,5]
+Pass 2: [1,4,2,5] -> [1,4,2,5] -> [1,2,4,5]
+Pass 3: [1,2,4,5] -> [1,2,4,5]; no swaps, stop.
+Comparisons = 6; swaps = 4.
+Equal keys are not swapped: strict > preserves their relative order.
+Do not confuse six comparisons with six swaps.
+Worst-case comparisons are quadratic; the early-exit version makes n-1
+comparisons on an already sorted nonempty input and exits after that pass.

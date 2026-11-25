@@ -66,13 +66,15 @@ const bucket = new Proxy(rawBucket, {
     if (key === "file")
       return (name, options) => {
         const file = target.file(name, options);
-        file.getSignedUrl = async () => {
+        file.getSignedUrl = async (options = {}) => {
           const [meta] = await file.getMetadata();
           const uid =
             meta.metadata?.ownerUid ||
             meta.metadata?.userId ||
             config.cohort.find(id => name.split("/").includes(id));
-          return [await gateway.signedUrl(uid, name)];
+          return [await gateway.signedUrl(uid, name, {
+            attachment: /^attachment(?:;|$)/i.test(options.responseDisposition || ""),
+          })];
         };
         file.makePublic = async () => {
           throw new Error("PRIVATE_STORAGE_REQUIRED");

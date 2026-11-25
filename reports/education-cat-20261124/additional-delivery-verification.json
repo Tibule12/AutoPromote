@@ -1,0 +1,945 @@
+[
+  {
+    "lessonId": "html-headings-formatting",
+    "nativeSha256": "27983a597edc1df8d333eca81d46926e23d3506ed2fa3110b149506e559ca8ee",
+    "nativeDuration": 28.0,
+    "tutorialSeconds": 382.041667,
+    "tutorialSha256": "7f801337b02bd0db597e10f5453fbcbad4c910440703311d986b706a8883d489",
+    "completeNativeDecode": true,
+    "noSubtitleTracks": true,
+    "audio": true,
+    "nativeProjectRecovery": true,
+    "htmlTestReference": "additional-html-accuracy.json",
+    "nativeProof": {
+      "actualNativeDownload": true,
+      "exactColdRecovery": true,
+      "outputSha256": "27983a597edc1df8d333eca81d46926e23d3506ed2fa3110b149506e559ca8ee",
+      "nativeRenderReceipt": {
+        "startedAt": "2026-11-25T03:21:29.589Z",
+        "completedAt": "2026-11-25T03:23:15.713Z",
+        "submittedJobId": "viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+        "events": [
+          {
+            "path": "/api/media/process",
+            "status": 200
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_24f52d55b570cf3129086bd89737df24df7d42063af36b786d94f2dd0a24cc1e",
+            "status": 200,
+            "jobStatus": "completed"
+          }
+        ],
+        "serverOutputSha256": "27983a597edc1df8d333eca81d46926e23d3506ed2fa3110b149506e559ca8ee",
+        "projectId": "viral-project-fe9c2966-5f8b-42d5-8c1a-d3101cd8aaff",
+        "projectHash": "74c5d447a3f0ae4ac5d8a1250dddc5f681fc9dc818d113bceccf65c0a01a3f65",
+        "projectHashBeforeMediaUpload": "389e91c06e436fcd35599bd0bef461795c3e59f4f580ad9a76f8c59fc2c66531",
+        "templateRef": null
+      }
+    },
+    "tutorialProof": {
+      "lessonId": "html-headings-formatting",
+      "exactColdRecovery": true,
+      "normalAuthenticatedStudio": true,
+      "actualClicksAndVisibleScrolling": true,
+      "automaticScrollCalls": 0,
+      "visibleWheelEvents": 132,
+      "captionTracks": 0,
+      "addedBanner": false,
+      "fullFramePreview": "16:9 contain",
+      "originalLabelManuallyCreatedAndRemoved": true,
+      "nativeExport": true,
+      "renderWaitOmitted": true,
+      "completeFinishedPlayback": true,
+      "finishedMovieAudioStart": 353.2186670457764,
+      "segmentedCaptureAtStableBoundaries": true,
+      "canonicalHash": "74c5d447a3f0ae4ac5d8a1250dddc5f681fc9dc818d113bceccf65c0a01a3f65",
+      "outputSha256": "27983a597edc1df8d333eca81d46926e23d3506ed2fa3110b149506e559ca8ee",
+      "teacherFeedbackReceived": false
+    },
+    "teacherFeedbackReceived": false,
+    "independentLearnerRecreation": false
+  },
+  {
+    "lessonId": "html-readable-design",
+    "nativeSha256": "a9fcab7b87e7c7716c0d0469fcd9a9ff47a5fd2e47f86c53e92d7e657884d9d2",
+    "nativeDuration": 28.0,
+    "tutorialSeconds": 408.125,
+    "tutorialSha256": "da52b671c101cd6b6d63dfc4d85082d18bee170d6d90db5bef2409335efde4f1",
+    "completeNativeDecode": true,
+    "noSubtitleTracks": true,
+    "audio": true,
+    "nativeProjectRecovery": true,
+    "htmlTestReference": "additional-html-accuracy.json",
+    "nativeProof": {
+      "actualNativeDownload": true,
+      "exactColdRecovery": true,
+      "outputSha256": "a9fcab7b87e7c7716c0d0469fcd9a9ff47a5fd2e47f86c53e92d7e657884d9d2",
+      "nativeRenderReceipt": {
+        "startedAt": "2026-11-25T03:25:10.696Z",
+        "completedAt": "2026-11-25T03:27:01.551Z",
+        "submittedJobId": "viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+        "events": [
+          {
+            "path": "/api/media/process",
+            "status": 200
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_4d112aea98b052e8ed6568a7ba162c5cd948a6cb573ca120f2c869dc9310ec6d",
+            "status": 200,
+            "jobStatus": "completed"
+          }
+        ],
+        "serverOutputSha256": "a9fcab7b87e7c7716c0d0469fcd9a9ff47a5fd2e47f86c53e92d7e657884d9d2",
+        "projectId": "viral-project-9ae56545-8f4a-4cc4-bf56-8c5f2727366c",
+        "projectHash": "6aa9a78dcc4f58449fab3f570b1be6b05a221c7a0edb28036fc3eeeec8f6eba9",
+        "projectHashBeforeMediaUpload": "649be77ec4c18ff53f92dbbe5dc1c08a73f56a41ca5224d6aa1350212eb8c006",
+        "templateRef": null
+      }
+    },
+    "tutorialProof": {
+      "lessonId": "html-readable-design",
+      "exactColdRecovery": true,
+      "normalAuthenticatedStudio": true,
+      "actualClicksAndVisibleScrolling": true,
+      "automaticScrollCalls": 0,
+      "visibleWheelEvents": 132,
+      "captionTracks": 0,
+      "addedBanner": false,
+      "fullFramePreview": "16:9 contain",
+      "originalLabelManuallyCreatedAndRemoved": true,
+      "nativeExport": true,
+      "renderWaitOmitted": true,
+      "completeFinishedPlayback": true,
+      "finishedMovieAudioStart": 379.3423340629425,
+      "segmentedCaptureAtStableBoundaries": true,
+      "canonicalHash": "6aa9a78dcc4f58449fab3f570b1be6b05a221c7a0edb28036fc3eeeec8f6eba9",
+      "outputSha256": "a9fcab7b87e7c7716c0d0469fcd9a9ff47a5fd2e47f86c53e92d7e657884d9d2",
+      "teacherFeedbackReceived": false,
+      "snapshotFailureRetained": true,
+      "originalAuthAndSourcesRecovered": true,
+      "newRendersDuringRecovery": 0
+    },
+    "teacherFeedbackReceived": false,
+    "independentLearnerRecreation": false
+  },
+  {
+    "lessonId": "html-path-troubleshooting",
+    "nativeSha256": "5cb685f2a8a519621a0cb41b5077e8d7a9a57599167a13a87f2f0fdc8c4767fa",
+    "nativeDuration": 28.0,
+    "tutorialSeconds": 378.333333,
+    "tutorialSha256": "b4367f14936ef9b57f955a321b5e8c64baffd2d484638a91a6953376c3a38353",
+    "completeNativeDecode": true,
+    "noSubtitleTracks": true,
+    "audio": true,
+    "nativeProjectRecovery": true,
+    "htmlTestReference": "additional-html-accuracy.json",
+    "nativeProof": {
+      "actualNativeDownload": true,
+      "exactColdRecovery": true,
+      "outputSha256": "5cb685f2a8a519621a0cb41b5077e8d7a9a57599167a13a87f2f0fdc8c4767fa",
+      "nativeRenderReceipt": {
+        "startedAt": "2026-11-25T03:23:17.916Z",
+        "completedAt": "2026-11-25T03:25:08.666Z",
+        "submittedJobId": "viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+        "events": [
+          {
+            "path": "/api/media/process",
+            "status": 200
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "processing"
+          },
+          {
+            "path": "/api/media/status/viral_5d4f38d2106eb7a773333776e69cc1f4b4b576f6a6369d6bdaa06fa17b436bb2",
+            "status": 200,
+            "jobStatus": "completed"
+          }
+        ],
+        "serverOutputSha256": "5cb685f2a8a519621a0cb41b5077e8d7a9a57599167a13a87f2f0fdc8c4767fa",
+        "projectId": "viral-project-a19dd169-83ec-4a14-aa0a-2cb11bad3550",
+        "projectHash": "31e29b41460b2a179f8bc279a115af6031590efa042c5a5f3c3091f126967b4d",
+        "projectHashBeforeMediaUpload": "e711e05bf188a45dbc1a59db03820b6a531c853f8f858012fc324cb2a62b5f3b",
+        "templateRef": null
+      }
+    },
+    "tutorialProof": {
+      "lessonId": "html-path-troubleshooting",
+      "exactColdRecovery": true,
+      "normalAuthenticatedStudio": true,
+      "actualClicksAndVisibleScrolling": true,
+      "automaticScrollCalls": 0,
+      "visibleWheelEvents": 132,
+      "captionTracks": 0,
+      "addedBanner": false,
+      "fullFramePreview": "16:9 contain",
+      "originalLabelManuallyCreatedAndRemoved": true,
+      "nativeExport": true,
+      "renderWaitOmitted": true,
+      "completeFinishedPlayback": true,
+      "finishedMovieAudioStart": 349.54900002479553,
+      "segmentedCaptureAtStableBoundaries": true,
+      "canonicalHash": "31e29b41460b2a179f8bc279a115af6031590efa042c5a5f3c3091f126967b4d",
+      "outputSha256": "5cb685f2a8a519621a0cb41b5077e8d7a9a57599167a13a87f2f0fdc8c4767fa",
+      "teacherFeedbackReceived": false
+    },
+    "teacherFeedbackReceived": false,
+    "independentLearnerRecreation": false
+  }
+]

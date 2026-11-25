@@ -1,0 +1,41 @@
+[
+  {
+    "lesson": "html-structure",
+    "fullNativePlayback": true,
+    "seconds": 28,
+    "sampledTimes": [
+      3,
+      8,
+      12,
+      18,
+      23,
+      27
+    ]
+  },
+  {
+    "lesson": "html-images-links",
+    "fullNativePlayback": true,
+    "seconds": 28,
+    "sampledTimes": [
+      3,
+      8,
+      12,
+      18,
+      23,
+      27
+    ]
+  },
+  {
+    "lesson": "html-lists-tables",
+    "fullNativePlayback": true,
+    "seconds": 28,
+    "sampledTimes": [
+      3,
+      8,
+      12,
+      18,
+      23,
+      27
+    ]
+  }
+]

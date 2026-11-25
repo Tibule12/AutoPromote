@@ -1,0 +1,1366 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Bubble sort · four values · teaching v1",
+  "width": 1280,
+  "height": 720,
+  "duration": 28,
+  "layers": [
+    {
+      "id": "kicker",
+      "name": "Course identity",
+      "type": "text",
+      "text": "AUTOPROMOTE EDUCATION  /  ALGORITHMS IN MOTION",
+      "x": 50,
+      "y": 6,
+      "width": 88,
+      "scale": 0.48,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9ce9ca",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "title",
+      "name": "Lesson title",
+      "type": "text",
+      "text": "Bubble sort. One pair at a time.",
+      "x": 50,
+      "y": 15,
+      "width": 94,
+      "scale": 1.28,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#f4f7fb",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "subtitle",
+      "name": "Comparison rule",
+      "type": "text",
+      "text": "Ascending order  •  Compare neighbours  •  Swap only when left is greater",
+      "x": 50,
+      "y": 25,
+      "width": 94,
+      "scale": 0.6,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f4f7fb",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "card-5",
+      "name": "Card 5",
+      "type": "artwork",
+      "x": 24,
+      "y": 47,
+      "width": 12,
+      "height": 16,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 1,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 1,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "solid",
+          "color": "#a8edcd",
+          "endColor": "#a8edcd",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#a1b2c8",
+          "width": 0
+        }
+      },
+      "keys": []
+    },
+    {
+      "id": "value-5",
+      "name": "Value 5",
+      "type": "text",
+      "text": "5",
+      "x": 24,
+      "y": 47,
+      "width": 11,
+      "scale": 1.9,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#101b2b",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "index-0",
+      "name": "Fixed index 0",
+      "type": "text",
+      "text": "index 0",
+      "x": 24,
+      "y": 69,
+      "width": 15,
+      "scale": 0.57,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#b4c2d5",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "card-1",
+      "name": "Card 1",
+      "type": "artwork",
+      "x": 41,
+      "y": 47,
+      "width": 12,
+      "height": 16,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 1,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 1,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "solid",
+          "color": "#86d9f2",
+          "endColor": "#86d9f2",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#a1b2c8",
+          "width": 0
+        }
+      },
+      "keys": []
+    },
+    {
+      "id": "value-1",
+      "name": "Value 1",
+      "type": "text",
+      "text": "1",
+      "x": 41,
+      "y": 47,
+      "width": 11,
+      "scale": 1.9,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#101b2b",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "index-1",
+      "name": "Fixed index 1",
+      "type": "text",
+      "text": "index 1",
+      "x": 41,
+      "y": 69,
+      "width": 15,
+      "scale": 0.57,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#b4c2d5",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "card-4",
+      "name": "Card 4",
+      "type": "artwork",
+      "x": 58,
+      "y": 47,
+      "width": 12,
+      "height": 16,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 1,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 1,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "solid",
+          "color": "#c4afff",
+          "endColor": "#c4afff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#a1b2c8",
+          "width": 0
+        }
+      },
+      "keys": []
+    },
+    {
+      "id": "value-4",
+      "name": "Value 4",
+      "type": "text",
+      "text": "4",
+      "x": 58,
+      "y": 47,
+      "width": 11,
+      "scale": 1.9,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#101b2b",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "index-2",
+      "name": "Fixed index 2",
+      "type": "text",
+      "text": "index 2",
+      "x": 58,
+      "y": 69,
+      "width": 15,
+      "scale": 0.57,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#b4c2d5",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "card-2",
+      "name": "Card 2",
+      "type": "artwork",
+      "x": 75,
+      "y": 47,
+      "width": 12,
+      "height": 16,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 1,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 1,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "solid",
+          "color": "#ffc982",
+          "endColor": "#ffc982",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#a1b2c8",
+          "width": 0
+        }
+      },
+      "keys": []
+    },
+    {
+      "id": "value-2",
+      "name": "Value 2",
+      "type": "text",
+      "text": "2",
+      "x": 75,
+      "y": 47,
+      "width": 11,
+      "scale": 1.9,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#101b2b",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "index-3",
+      "name": "Fixed index 3",
+      "type": "text",
+      "text": "index 3",
+      "x": 75,
+      "y": 69,
+      "width": 15,
+      "scale": 0.57,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#b4c2d5",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    },
+    {
+      "id": "comparison",
+      "name": "Compared neighbouring slots",
+      "type": "artwork",
+      "x": 32.5,
+      "y": 47,
+      "width": 30,
+      "height": 20,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 28,
+      "mediaFit": "stretch",
+      "vectorShape": {
+        "version": 1,
+        "closed": true,
+        "nodes": [
+          {
+            "x": 1,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 1,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 99,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 1,
+            "y": 99,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ffffff",
+          "endColor": "#ffffff",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#ffffff",
+          "width": 1.8
+        }
+      },
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "opacity",
+          "time": 2,
+          "value": 1,
+          "easing": "hold"
+        },
+        {
+          "property": "opacity",
+          "time": 20,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 0,
+          "value": 32.5,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 2,
+          "value": 32.5,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 5,
+          "value": 49.5,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 8,
+          "value": 66.5,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 11,
+          "value": 32.5,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 14,
+          "value": 49.5,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 17,
+          "value": 32.5,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "id": "intro",
+      "name": "Initial state prompt",
+      "type": "text",
+      "text": "Start: [5, 1, 4, 2]  •  Indices stay fixed. Values move.",
+      "x": 50,
+      "y": 77,
+      "width": 94,
+      "scale": 0.72,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f4f7fb",
+      "startTime": 0,
+      "duration": 2,
+      "keys": []
+    },
+    {
+      "id": "compare-0",
+      "name": "Comparison 1",
+      "type": "text",
+      "text": "Pass 1  /  j = 0  /  5 is greater than 1  /  SWAP",
+      "x": 50,
+      "y": 77,
+      "width": 94,
+      "scale": 0.68,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f4f7fb",
+      "startTime": 2,
+      "duration": 3,
+      "keys": []
+    },
+    {
+      "id": "trace-0",
+      "name": "Trace state 1",
+      "type": "text",
+      "text": "Comparisons: 1  •  Swaps after this step: 1",
+      "x": 50,
+      "y": 87,
+      "width": 90,
+      "scale": 0.52,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9ce9ca",
+      "startTime": 2,
+      "duration": 3,
+      "keys": []
+    },
+    {
+      "id": "compare-1",
+      "name": "Comparison 2",
+      "type": "text",
+      "text": "Pass 1  /  j = 1  /  5 is greater than 4  /  SWAP",
+      "x": 50,
+      "y": 77,
+      "width": 94,
+      "scale": 0.68,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f4f7fb",
+      "startTime": 5,
+      "duration": 3,
+      "keys": []
+    },
+    {
+      "id": "trace-1",
+      "name": "Trace state 2",
+      "type": "text",
+      "text": "Comparisons: 2  •  Swaps after this step: 2",
+      "x": 50,
+      "y": 87,
+      "width": 90,
+      "scale": 0.52,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9ce9ca",
+      "startTime": 5,
+      "duration": 3,
+      "keys": []
+    },
+    {
+      "id": "compare-2",
+      "name": "Comparison 3",
+      "type": "text",
+      "text": "Pass 1  /  j = 2  /  5 is greater than 2  /  SWAP",
+      "x": 50,
+      "y": 77,
+      "width": 94,
+      "scale": 0.68,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f4f7fb",
+      "startTime": 8,
+      "duration": 3,
+      "keys": []
+    },
+    {
+      "id": "trace-2",
+      "name": "Trace state 3",
+      "type": "text",
+      "text": "Comparisons: 3  •  Swaps after this step: 3",
+      "x": 50,
+      "y": 87,
+      "width": 90,
+      "scale": 0.52,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9ce9ca",
+      "startTime": 8,
+      "duration": 3,
+      "keys": []
+    },
+    {
+      "id": "compare-3",
+      "name": "Comparison 4",
+      "type": "text",
+      "text": "Pass 2  /  j = 0  /  1 is not greater than 4  /  KEEP",
+      "x": 50,
+      "y": 77,
+      "width": 94,
+      "scale": 0.68,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f4f7fb",
+      "startTime": 11,
+      "duration": 3,
+      "keys": []
+    },
+    {
+      "id": "trace-3",
+      "name": "Trace state 4",
+      "type": "text",
+      "text": "Comparisons: 4  •  Swaps after this step: 3",
+      "x": 50,
+      "y": 87,
+      "width": 90,
+      "scale": 0.52,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9ce9ca",
+      "startTime": 11,
+      "duration": 3,
+      "keys": []
+    },
+    {
+      "id": "compare-4",
+      "name": "Comparison 5",
+      "type": "text",
+      "text": "Pass 2  /  j = 1  /  4 is greater than 2  /  SWAP",
+      "x": 50,
+      "y": 77,
+      "width": 94,
+      "scale": 0.68,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f4f7fb",
+      "startTime": 14,
+      "duration": 3,
+      "keys": []
+    },
+    {
+      "id": "trace-4",
+      "name": "Trace state 5",
+      "type": "text",
+      "text": "Comparisons: 5  •  Swaps after this step: 4",
+      "x": 50,
+      "y": 87,
+      "width": 90,
+      "scale": 0.52,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9ce9ca",
+      "startTime": 14,
+      "duration": 3,
+      "keys": []
+    },
+    {
+      "id": "compare-5",
+      "name": "Comparison 6",
+      "type": "text",
+      "text": "Pass 3  /  j = 0  /  1 is not greater than 2  /  KEEP",
+      "x": 50,
+      "y": 77,
+      "width": 94,
+      "scale": 0.68,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f4f7fb",
+      "startTime": 17,
+      "duration": 3,
+      "keys": []
+    },
+    {
+      "id": "trace-5",
+      "name": "Trace state 6",
+      "type": "text",
+      "text": "Comparisons: 6  •  Swaps after this step: 4",
+      "x": 50,
+      "y": 87,
+      "width": 90,
+      "scale": 0.52,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9ce9ca",
+      "startTime": 17,
+      "duration": 3,
+      "keys": []
+    },
+    {
+      "id": "finish",
+      "name": "Sorted result",
+      "type": "text",
+      "text": "Sorted: [1, 2, 4, 5]  •  6 comparisons  •  4 swaps",
+      "x": 50,
+      "y": 77,
+      "width": 94,
+      "scale": 0.79,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9ce9ca",
+      "startTime": 20,
+      "duration": 4,
+      "keys": []
+    },
+    {
+      "id": "stop",
+      "name": "Early exit explanation",
+      "type": "text",
+      "text": "Pass 3 made no swaps. Stop after the unchanged pass.",
+      "x": 50,
+      "y": 87,
+      "width": 94,
+      "scale": 0.56,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f4f7fb",
+      "startTime": 20,
+      "duration": 4,
+      "keys": []
+    },
+    {
+      "id": "challenge",
+      "name": "Learner prediction exercise",
+      "type": "text",
+      "text": "Your turn: trace [3, 2, 2, 1]. Do equal values need to swap?",
+      "x": 50,
+      "y": 77,
+      "width": 94,
+      "scale": 0.67,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#f4f7fb",
+      "startTime": 24,
+      "duration": 4,
+      "keys": []
+    },
+    {
+      "id": "challenge-detail",
+      "name": "Learner explanation prompt",
+      "type": "text",
+      "text": "Explain the rule before changing the animation.",
+      "x": 50,
+      "y": 87,
+      "width": 94,
+      "scale": 0.56,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#9ce9ca",
+      "startTime": 24,
+      "duration": 4,
+      "keys": []
+    },
+    {
+      "id": "footer",
+      "name": "Supplementary resource identity",
+      "type": "text",
+      "text": "ZERO-BASED INDICES  /  ORIGINAL TEACHING EXAMPLE  /  NOT AN ASSESSED CAPS TASK",
+      "x": 50,
+      "y": 96,
+      "width": 96,
+      "scale": 0.35,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#8398b3",
+      "startTime": 0,
+      "duration": 28,
+      "keys": []
+    }
+  ],
+  "groups": [
+    {
+      "id": "element-5",
+      "name": "Element 5 · card + value",
+      "layerIds": [
+        "card-5",
+        "value-5"
+      ],
+      "startTime": 0,
+      "duration": 28,
+      "keys": [
+        {
+          "property": "x",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 3,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 4.25,
+          "value": 17,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "y",
+          "time": 3,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 3.625,
+          "value": -10,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "y",
+          "time": 4.25,
+          "value": 0,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "x",
+          "time": 6,
+          "value": 17,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 7.25,
+          "value": 34,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "y",
+          "time": 6,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 6.625,
+          "value": -10,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "y",
+          "time": 7.25,
+          "value": 0,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "x",
+          "time": 9,
+          "value": 34,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 10.25,
+          "value": 51,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "y",
+          "time": 9,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 9.625,
+          "value": -10,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "y",
+          "time": 10.25,
+          "value": 0,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "element-1",
+      "name": "Element 1 · card + value",
+      "layerIds": [
+        "card-1",
+        "value-1"
+      ],
+      "startTime": 0,
+      "duration": 28,
+      "keys": [
+        {
+          "property": "x",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 3,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 4.25,
+          "value": -17,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "y",
+          "time": 3,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 3.625,
+          "value": 10,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "y",
+          "time": 4.25,
+          "value": 0,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "element-4",
+      "name": "Element 4 · card + value",
+      "layerIds": [
+        "card-4",
+        "value-4"
+      ],
+      "startTime": 0,
+      "duration": 28,
+      "keys": [
+        {
+          "property": "x",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 6,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 7.25,
+          "value": -17,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "y",
+          "time": 6,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 6.625,
+          "value": 10,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "y",
+          "time": 7.25,
+          "value": 0,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "x",
+          "time": 15,
+          "value": -17,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 16.25,
+          "value": 0,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "y",
+          "time": 15,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 15.625,
+          "value": -10,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "y",
+          "time": 16.25,
+          "value": 0,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "element-2",
+      "name": "Element 2 · card + value",
+      "layerIds": [
+        "card-2",
+        "value-2"
+      ],
+      "startTime": 0,
+      "duration": 28,
+      "keys": [
+        {
+          "property": "x",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 9,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 10.25,
+          "value": -17,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "y",
+          "time": 9,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 9.625,
+          "value": 10,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "y",
+          "time": 10.25,
+          "value": 0,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "x",
+          "time": 15,
+          "value": -17,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 16.25,
+          "value": -34,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "y",
+          "time": 15,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 15.625,
+          "value": 10,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "y",
+          "time": 16.25,
+          "value": 0,
+          "easing": "ease_in_out"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "lessonId": "html-structure",
+  "normalAuthenticatedStudio": true,
+  "apiMocks": false,
+  "authBypass": false,
+  "fullFrame": "16:9 contain",
+  "captions": false,
+  "nativeGraphicsLayers": 14,
+  "actualNativeDownload": true,
+  "exactColdRecovery": true,
+  "canonicalHash": "05839c498080bcac4ee37adbc87c0ee7a7e7a7f33689523d5818b4ebbeb5a2ef",
+  "outputSha256": "907a5c68430bb310f8fcb57652b12faf6abb68edd5fbbeced134bb696a405eaa",
+  "duration": 28,
+  "completeLivePreview": true,
+  "completeFinishedPlayback": true,
+  "paidCloudJobs": 0,
+  "localCPU": true,
+  "earlierNativeMovieRetained": true,
+  "earlierFailedDownloadRetained": true,
+  "teacherFeedbackReceived": false,
+  "independentLearnerRecreation": false
+}

@@ -1,0 +1,87 @@
+[
+  {
+    "lessonId": "first-project",
+    "nativeResultSha256": "80bb975ba08dc4ed55680a0bc6327d3120a196737a3a5fba9dfb44b9b38a115d",
+    "fullDecode": true,
+    "width": 1280,
+    "height": 720,
+    "duration": 11.25,
+    "frames": 270,
+    "previewFinalPair": {
+      "time": 2.5,
+      "meanAbsoluteRgbDifference": 3.854896195023148,
+      "fractionOver24": 0.028639322916666668,
+      "toleranceQualified": false
+    },
+    "mappedReferenceFrames": 270,
+    "technicalCorrectnessReview": "pending full moving comparison; no automated teaching approval"
+  },
+  {
+    "lessonId": "precise-cuts",
+    "nativeResultSha256": "e6433006e331aee0fda8447a7b834d2c11a20d63b063e1d33c446ca901dd5202",
+    "fullDecode": true,
+    "width": 1280,
+    "height": 720,
+    "duration": 6.0,
+    "frames": 144,
+    "previewFinalPair": {
+      "time": 2.5,
+      "meanAbsoluteRgbDifference": 3.825703486689815,
+      "fractionOver24": 0.027626953125,
+      "toleranceQualified": false
+    },
+    "mappedReferenceFrames": 144,
+    "technicalCorrectnessReview": "pending full moving comparison; no automated teaching approval"
+  },
+  {
+    "lessonId": "sequence-test-cases",
+    "nativeResultSha256": "ecbb84c8dfc6a01dcaaf30a8c9d36f8c1cc9b003dc5b7ec6972d331711144f9d",
+    "fullDecode": true,
+    "width": 1280,
+    "height": 720,
+    "duration": 12.0,
+    "frames": 288,
+    "previewFinalPair": {
+      "time": 2.5,
+      "meanAbsoluteRgbDifference": 3.8260232204861113,
+      "fractionOver24": 0.02760959201388889,
+      "toleranceQualified": false
+    },
+    "mappedReferenceFrames": 288,
+    "technicalCorrectnessReview": "pending full moving comparison; no automated teaching approval"
+  },
+  {
+    "lessonId": "explain-with-text",
+    "nativeResultSha256": "c1306db9d064b563a78bef01f8de6270b239aa820ae069ba2d835de0182914f1",
+    "fullDecode": true,
+    "width": 1280,
+    "height": 720,
+    "duration": 6.0,
+    "frames": 144,
+    "previewFinalPair": {
+      "time": 2.5,
+      "meanAbsoluteRgbDifference": 4.864416232638889,
+      "fractionOver24": 0.030336371527777777,
+      "toleranceQualified": false
+    },
+    "mappedReferenceFrames": 0,
+    "technicalCorrectnessReview": "pending full moving comparison; no automated teaching approval"
+  },
+  {
+    "lessonId": "sound-and-delivery",
+    "nativeResultSha256": "b4f4e339037a772a361d1e239eeacc755c544bdde81af12ef3642fc20d24b564",
+    "fullDecode": true,
+    "width": 1280,
+    "height": 720,
+    "duration": 6.0,
+    "frames": 144,
+    "previewFinalPair": {
+      "time": 2.5,
+      "meanAbsoluteRgbDifference": 3.8260232204861113,
+      "fractionOver24": 0.02760959201388889,
+      "toleranceQualified": false
+    },
+    "mappedReferenceFrames": 144,
+    "technicalCorrectnessReview": "pending full moving comparison; no automated teaching approval"
+  }
+]

@@ -1,0 +1,57 @@
+{
+  "format": "autopromote-education-practice",
+  "version": 1,
+  "lessonId": "sequence-test-cases",
+  "projectName": "IT practice 3 \u00b7 Explain a byte",
+  "sourceFiles": [
+    "normal-input.mp4",
+    "boundary-input.mp4",
+    "invalid-input.mp4"
+  ],
+  "openInStudio": "/?tab=viral_clip_studio&educationLesson=sequence-test-cases",
+  "accountBinding": "Upload practice media through the normal authenticated Studio entry. The starter is fresh and belongs to that account. This recipe transfers no owner, Storage path, cloud allowance or completed render.",
+  "startingSettings": {
+    "aspect": "16:9",
+    "captions": false,
+    "resolution": "720p",
+    "fps": 24
+  },
+  "steps": [
+    {
+      "title": "Start with normal behaviour",
+      "control": "Choose videos; Open Creator Studio; Trim start to here; Trim end to here",
+      "value": "normal-input.mp4; start 1 s; end 5 s",
+      "why": "Four seconds establish the ordinary conversion."
+    },
+    {
+      "title": "Add the boundary recording",
+      "control": "Import project videos; Add to sequence",
+      "value": "boundary-input.mp4; programme 7 s \u2192 trim start; programme 8 s \u2192 trim end (source 3\u20137 s)",
+      "why": "The original includes 0 and 255. Keep the maximum-value result readable."
+    },
+    {
+      "title": "Add rejection evidence",
+      "control": "Import project videos; Add to sequence",
+      "value": "invalid-input.mp4; programme 9 s \u2192 trim start; programme 12 s \u2192 trim end (source 1\u20135 s)",
+      "why": "Show the 256 validation message. Do not label this as a successful conversion."
+    },
+    {
+      "title": "Read the timeline",
+      "control": "Sequence tracks",
+      "value": "Normal \u2192 Boundary \u2192 Invalid; 12 s total",
+      "why": "Order communicates an argument. Dragging a source into the library alone does not place it in the programme."
+    },
+    {
+      "title": "Review every cut",
+      "control": "Edited output position; Play comparison",
+      "value": "Inspect just before and after 4 s and 8 s",
+      "why": "Watch for hidden output, missing validation and incorrect source timing."
+    },
+    {
+      "title": "Save and export",
+      "control": "Save project; Export",
+      "value": "720p; 24 fps; H.264",
+      "why": "A twelve-second summary can accompany a longer written test table."
+    }
+  ]
+}

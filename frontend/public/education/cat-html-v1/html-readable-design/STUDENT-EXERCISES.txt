@@ -1,0 +1,7 @@
+HTML EXERCISE
+Improve the deliberately poor index.html. Make the important information readable, organise it with meaningful headings and replace the vague link label. Test the linked page. Explain each decision. The font tag in the poor example is legacy classroom syntax; ask your teacher which syntax the current tag sheet requires, and distinguish it from modern CSS styling.
+
+CREATIVE EDITING EXERCISE
+Build a brief before/after explanation from your own page. Use one caution-coloured callout for the fault, a calm colour for the improvement and measured native outlines around the corresponding source/output. Keep all original content visible; make the final link test genuine.
+
+Submit working files, expected/actual test evidence, the native editable project and complete movie.

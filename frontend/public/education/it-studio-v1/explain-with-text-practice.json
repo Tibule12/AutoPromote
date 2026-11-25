@@ -1,0 +1,55 @@
+{
+  "format": "autopromote-education-practice",
+  "version": 1,
+  "lessonId": "explain-with-text",
+  "projectName": "IT practice 4 \u00b7 Explain a byte",
+  "sourceFiles": [
+    "normal-input.mp4"
+  ],
+  "openInStudio": "/?tab=viral_clip_studio&educationLesson=explain-with-text",
+  "accountBinding": "Upload practice media through the normal authenticated Studio entry. The starter is fresh and belongs to that account. This recipe transfers no owner, Storage path, cloud allowance or completed render.",
+  "startingSettings": {
+    "aspect": "16:9",
+    "captions": false,
+    "resolution": "720p",
+    "fps": 24
+  },
+  "steps": [
+    {
+      "title": "Open the normal case",
+      "control": "Choose videos; Open Creator Studio",
+      "value": "normal-input.mp4; start 1 s; end 7 s",
+      "why": "Use the six-second source interval from the trimming lesson."
+    },
+    {
+      "title": "Create a text layer",
+      "control": "Graphics \u2192 Add Text",
+      "value": "18 = 16 + 2",
+      "why": "Use an explanatory label. Automatic transcription is not required."
+    },
+    {
+      "title": "Set text timing",
+      "control": "Title start time; Title duration",
+      "value": "Start 1 s; duration 4 s",
+      "why": "The label should appear after the conversion and leave enough time for the viewer to read it."
+    },
+    {
+      "title": "Set a readable position",
+      "control": "Graphics \u2192 Lower; Motion \u2192 Transform keyframes \u2192 Target layer \u2192 Y",
+      "value": "X 50%; Y 93%",
+      "why": "Choose the text layer, then set Y to 93%. This keeps the label below the test cards instead of covering their headings. Increasing Y moves the layer down the frame."
+    },
+    {
+      "title": "Choose text appearance",
+      "control": "Title size; Title text color; Title background color",
+      "value": "Inter; size 100%; white #ffffff; background #0b1020; Headline defaults: weight 900, 45% box, 0.3 s entrance/exit fades",
+      "why": "Check the actual result at lesson size. Do not rely on a small thumbnail."
+    },
+    {
+      "title": "Preview, save and export",
+      "control": "Play comparison; Save project; Export",
+      "value": "720p; 24 fps; H.264",
+      "why": "The words, timing and placement must agree in preview and export. If they do not, do not hand in the video."
+    }
+  ]
+}

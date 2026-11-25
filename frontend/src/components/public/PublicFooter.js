@@ -17,6 +17,7 @@ export const FOOTER_GROUPS = [
   [
     "Resources",
     [
+      ["Education", "/education"],
       ["Documentation", "/docs"],
       ["Help Center", "/help"],
       ["Blog", "/blog"],

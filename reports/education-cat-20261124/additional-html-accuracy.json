@@ -1,0 +1,11 @@
+{
+  "actualChromium": true,
+  "checks": [
+    "Real heading hierarchy and deliberately flattened comparison; presentational b/i/u are distinguished from heading semantics and links.",
+    "Actual pale-on-white versus black text; real h1/h2 hierarchy and descriptive link navigates to the supplied plan. Legacy font syntax is disclosed.",
+    "Actual anchor requests missing details.htm with HTTP404, then corrected details.html with HTTP200. Materials explain .htm can work if the real file matches and file:// errors differ."
+  ],
+  "allPassed": true,
+  "formalCurriculumApproval": false,
+  "teacherReview": false
+}

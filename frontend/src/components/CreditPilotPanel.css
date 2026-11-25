@@ -45,3 +45,25 @@
   width: min(480px, 100%);
   box-shadow: 0 15px 60px #0007;
 }
+
+/* The staging balance badge must not cover the Studio's editable timeline.
+   Keep its separate confirmation dialog visible when an operation needs it. */
+body:has([data-testid="studio-pro-timeline"]) .credit-pilot {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  box-shadow: none;
+}
+body:has([data-testid="studio-pro-timeline"]) .credit-pilot > small,
+body:has([data-testid="studio-pro-timeline"]) .credit-pilot > details {
+  display: none;
+}
+/* Clean tutorial capture also hides the staging badge on the entry page. */
+body[data-education-recording="true"] .credit-pilot {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  box-shadow: none;
+}
+body[data-education-recording="true"] .credit-pilot > small,
+body[data-education-recording="true"] .credit-pilot > details { display: none; }

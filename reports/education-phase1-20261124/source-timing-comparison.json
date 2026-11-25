@@ -1,0 +1,42 @@
+[
+  {
+    "lessonId": "first-project",
+    "framesCompared": 270,
+    "frameCountDifference": 0,
+    "meanAbsoluteRgbDifference": 2.7957386402606312,
+    "worstFrameMeanAbsoluteRgbDifference": 3.1586921296296295,
+    "worstFrame": 246,
+    "sameMappedSourceClock": true,
+    "qualification": "Measurement for full-duration reviewer inspection; not a universal Studio raster tolerance or teacher approval."
+  },
+  {
+    "lessonId": "precise-cuts",
+    "framesCompared": 144,
+    "frameCountDifference": 0,
+    "meanAbsoluteRgbDifference": 2.787350662294239,
+    "worstFrameMeanAbsoluteRgbDifference": 3.125792824074074,
+    "worstFrame": 99,
+    "sameMappedSourceClock": true,
+    "qualification": "Measurement for full-duration reviewer inspection; not a universal Studio raster tolerance or teacher approval."
+  },
+  {
+    "lessonId": "sequence-test-cases",
+    "framesCompared": 288,
+    "frameCountDifference": 0,
+    "meanAbsoluteRgbDifference": 2.786742541152263,
+    "worstFrameMeanAbsoluteRgbDifference": 3.204675925925926,
+    "worstFrame": 147,
+    "sameMappedSourceClock": true,
+    "qualification": "Measurement for full-duration reviewer inspection; not a universal Studio raster tolerance or teacher approval."
+  },
+  {
+    "lessonId": "sound-and-delivery",
+    "framesCompared": 144,
+    "frameCountDifference": 0,
+    "meanAbsoluteRgbDifference": 2.7794531250000003,
+    "worstFrameMeanAbsoluteRgbDifference": 3.06912037037037,
+    "worstFrame": 99,
+    "sameMappedSourceClock": true,
+    "qualification": "Measurement for full-duration reviewer inspection; not a universal Studio raster tolerance or teacher approval."
+  }
+]

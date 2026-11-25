@@ -1,0 +1,1 @@
+Good webpage design helps a reader find and use information. Readable contrast, purposeful heading hierarchy, concise content and descriptive links matter. The poor example uses a legacy font attribute for a classroom contrast comparison; modern sites normally style colour with CSS.
