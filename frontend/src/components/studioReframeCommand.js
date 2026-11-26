@@ -87,7 +87,7 @@ export const applyStudioReframeOperation = (document, operation) => {
   return { ...document, output: { ...document.output, aspectRatio: operation.aspect },
     visualGraph: { ...document.visualGraph, settings: { ...settings,
       reframeAspect: operation.aspect, speakerTrackZoom: operation.zoom,
-      smartCrop: true, smartCropMode: settings.smartCrop ? settings.smartCropMode : "off",
+      smartCrop: true, smartCropMode: singleClip ? "speaker_track" : (settings.smartCrop ? settings.smartCropMode : "off"),
       ...(singleClip ? { videoFit: "cover", safeFaceFraming: false } : {}) } },
     linkedTiming: { ...document.linkedTiming, keys: { ...document.linkedTiming.keys,
       reframeKeyframes: toKeys(keyframes), reframeModeCuts: toKeys(cuts) } } };

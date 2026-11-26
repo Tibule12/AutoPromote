@@ -212,6 +212,7 @@ export default function StudioDirectorCreativePanel({
   onApply,
   onOpenNodes,
   locked = false,
+  verticalControls = null,
 }) {
   const [brief, setBrief] = useState("");
   const [duration, setDuration] = useState(12);
@@ -546,6 +547,91 @@ export default function StudioDirectorCreativePanel({
           it changes your timeline.
         </p>
       </div>
+      {verticalControls ? (
+        <div
+          className="studio-director-creative__vertical"
+          data-testid="director-vertical-controls"
+          style={{
+            padding: "10px",
+            marginBottom: "10px",
+            borderRadius: "10px",
+            border: "1px solid rgba(139, 92, 246, 0.32)",
+            background: "rgba(15, 23, 42, 0.55)",
+            display: "grid",
+            gap: "8px",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px" }}>
+            <strong style={{ fontSize: "0.78rem" }}>9:16 Reels, Shorts &amp; Face Tracking</strong>
+            <span style={{ fontSize: "0.7rem", opacity: 0.85 }}>
+              {verticalControls.reframeAspect || "9:16"} · {Number(verticalControls.clipDurationSeconds || 0).toFixed(1)}s
+            </span>
+          </div>
+          <div className="studio-director-preset-pills" role="group" aria-label="Target vertical platform">
+            {[
+              { value: "shorts", label: "YouTube Shorts (≤60s)" },
+              { value: "reels", label: "Instagram Reels (≤90s)" },
+              { value: "tiktok", label: "TikTok" },
+            ].map(option => (
+              <button
+                key={option.value}
+                type="button"
+                className={`studio-director-preset-pill ${verticalControls.targetDestination === option.value ? "is-active" : ""}`}
+                aria-pressed={verticalControls.targetDestination === option.value}
+                data-testid={`director-dest-${option.value}`}
+                onClick={() => verticalControls.onChangeDestination?.(option.value)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+            <button
+              type="button"
+              className="studio-director-preset-pill"
+              data-testid="director-direct-vertical-track"
+              disabled={busy || locked || verticalControls.faceTrackingStatus === "processing"}
+              onClick={() => verticalControls.onProposeTrackedVertical?.()}
+            >
+              {verticalControls.faceTrackingStatus === "processing"
+                ? "Tracking speaker faces…"
+                : "✦ Direct 9:16 + Track Face"}
+            </button>
+            <button
+              type="button"
+              className={`studio-director-preset-pill ${verticalControls.showSafeZones ? "is-active" : ""}`}
+              aria-pressed={Boolean(verticalControls.showSafeZones)}
+              data-testid="director-toggle-safe-zones"
+              onClick={() => verticalControls.onToggleSafeZones?.()}
+            >
+              Safe zones {verticalControls.showSafeZones ? "ON" : "OFF"}
+            </button>
+            {verticalControls.durationLimitSeconds &&
+            Number(verticalControls.clipDurationSeconds || 0) > Number(verticalControls.durationLimitSeconds) ? (
+              <button
+                type="button"
+                className="studio-director-preset-pill"
+                data-testid="director-fit-destination-limit"
+                disabled={locked}
+                onClick={() => verticalControls.onFitToDestinationLimit?.(verticalControls.durationLimitSeconds - 2)}
+              >
+                Fit clip ≤{verticalControls.durationLimitSeconds}s
+              </button>
+            ) : null}
+            {verticalControls.splitSuggestionCount > 0 ? (
+              <button
+                type="button"
+                className="studio-director-preset-pill"
+                data-testid="director-apply-two-speaker-split"
+                disabled={locked}
+                onClick={() => verticalControls.onSwitchToTwoSpeakerSplit?.()}
+              >
+                2 speakers detected · Split view
+              </button>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
       <div
         className="studio-director-preset-pills"
         data-testid="director-brief-presets"

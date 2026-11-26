@@ -3433,6 +3433,7 @@ def build_find_viral_studio_package(candidate, index=0):
             "hook_dark_overlay": True,
             "caption_style": treatment["caption_style"],
             "auto_captions": True,
+            "aspect": "9:16",
             "smart_crop": True,
             "smart_crop_mode": "speaker_track",
             "brand_watermark": True,
@@ -7765,12 +7766,45 @@ def _estimate_safe_zoom_ratio(width, height, face_count=0, lead_size_ratio=0.0, 
     return round(max(0.8, min(0.98, safe_zoom_ratio)), 3)
 
 
-def detect_speaker_positions(video_path, sample_interval=0.5, return_metadata=False):
+def _load_yunet_face_detector():
+    try:
+        from .studio_face_tracking import create_yunet_face_detector
+    except ImportError:
+        from studio_face_tracking import create_yunet_face_detector
+    try:
+        return create_yunet_face_detector(0.55)
+    except Exception as detector_error:
+        logger.warning("YuNet face tracking unavailable: %s", detector_error)
+        return None
+
+
+def _safe_detect_source_cuts(video_path, duration=None):
+    """Best-effort scene-cut lookup so tracking never blurs across camera cuts."""
+    try:
+        clip_duration = float(duration or 0)
+        if clip_duration < 0.8:
+            return []
+        try:
+            from .studio_face_tracking import detect_source_cuts
+        except ImportError:
+            from studio_face_tracking import detect_source_cuts
+        return [
+            round(float(t), 4)
+            for t in (detect_source_cuts(video_path, 0.0, min(clip_duration, 900.0)) or [])
+            if 0.05 < float(t) < clip_duration - 0.05
+        ]
+    except Exception as cut_error:
+        logger.debug("Scene cut lookup skipped during speaker tracking: %s", cut_error)
+        return []
+
+
+def detect_speaker_positions(video_path, sample_interval=0.5, return_metadata=False, cuts=None):
     """
-    Track real faces with MediaPipe and fall back to Haar when MediaPipe is absent.
+    Track real faces with MediaPipe or bundled YuNet, falling back to Haar.
     Returns (timestamp, center_x_ratio, center_y_ratio) tuples.
     """
     face_cascade = _load_face_cascade()
+    yunet_detector = _load_yunet_face_detector()
     face_detector = None
     if mp is not None and hasattr(mp, "solutions"):
         try:
@@ -7780,7 +7814,7 @@ def detect_speaker_positions(video_path, sample_interval=0.5, return_metadata=Fa
             )
         except Exception as detector_error:
             logger.warning("MediaPipe face tracking unavailable: %s", detector_error)
-    if face_detector is None and face_cascade is None:
+    if face_detector is None and yunet_detector is None and face_cascade is None:
         logger.warning("No face detector found for speaker tracking")
         return []
 
@@ -7793,10 +7827,25 @@ def detect_speaker_positions(video_path, sample_interval=0.5, return_metadata=Fa
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH) or 1080)
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) or 1920)
     duration = total_frames / fps if fps > 0 else 0
+    resolved_cuts = (
+        sorted({float(c) for c in cuts if 0.0 < float(c) < duration})
+        if cuts is not None
+        else (_safe_detect_source_cuts(video_path, duration) if yunet_detector is not None else [])
+    )
 
     positions = []
     metadata = []
-    sample_times = [t for t in _frange(0, duration, sample_interval)]
+    cut_inset = min(0.08, 2.0 / max(float(fps), 1.0))
+    base_times = [
+        t for t in _frange(0, duration, sample_interval)
+        if not any(abs(float(t) - c) <= 0.05 for c in resolved_cuts)
+    ]
+    cut_samples = [
+        round(min(duration - 0.02, c + cut_inset), 3)
+        for c in resolved_cuts
+        if duration > 0.05
+    ]
+    sample_times = sorted(set(base_times + cut_samples))
     last_focus_x = 0.5
     last_focus_y = 0.5
 
@@ -7833,6 +7882,21 @@ def detect_speaker_positions(video_path, sample_interval=0.5, return_metadata=Fa
                         box_height * height,
                     )
                 )
+        if not face_boxes and yunet_detector is not None:
+            yunet_scale = min(1.0, 640.0 / max(frame.shape[1], 1))
+            yunet_frame = (
+                cv2.resize(frame, None, fx=yunet_scale, fy=yunet_scale, interpolation=cv2.INTER_AREA)
+                if yunet_scale < 0.999
+                else frame
+            )
+            yunet_detector.setInputSize((yunet_frame.shape[1], yunet_frame.shape[0]))
+            _, yunet_detections = yunet_detector.detect(yunet_frame)
+            yunet_area = max(float(yunet_frame.shape[0] * yunet_frame.shape[1]), 1.0)
+            for detection in yunet_detections if yunet_detections is not None else []:
+                fx, fy, fw, fh = [float(val) for val in detection[:4]]
+                if fw <= 0 or fh <= 0 or (fw * fh) / yunet_area < 0.0015:
+                    continue
+                face_boxes.append((fx / yunet_scale, fy / yunet_scale, fw / yunet_scale, fh / yunet_scale))
         if not face_boxes and face_cascade is not None:
             haar_faces = face_cascade.detectMultiScale(
                 gray,
@@ -7955,7 +8019,7 @@ def detect_speaker_positions(video_path, sample_interval=0.5, return_metadata=Fa
     cap.release()
     if face_detector is not None:
         face_detector.close()
-    smoothed_positions = smooth_positions(positions, window=5)
+    smoothed_positions = smooth_positions(positions, window=5, cuts=resolved_cuts)
     if not return_metadata:
         return smoothed_positions
 
@@ -7977,20 +8041,31 @@ def _frange(start, stop, step):
         val += step
 
 
-def smooth_positions(positions, window=5, cut_threshold=0.16):
-    """Smooth tracking within a shot without drifting across hard camera cuts."""
-    if len(positions) <= window:
-        return positions
-
+def _assign_position_shot_ids(positions, cut_threshold=0.16, cuts=None):
+    if not positions:
+        return []
+    ordered_cuts = sorted(float(c) for c in (cuts or []) if float(c) > 0)
     shot_ids = [0]
     shot_id = 0
     for previous, current in zip(positions, positions[1:]):
+        prev_t, cur_t = float(previous[0]), float(current[0])
+        crossed_cut = any(prev_t < cut_t <= cur_t + 1e-6 for cut_t in ordered_cuts)
         if (
-            abs(float(current[1]) - float(previous[1])) >= cut_threshold
+            crossed_cut
+            or abs(float(current[1]) - float(previous[1])) >= cut_threshold
             or abs(float(current[2]) - float(previous[2])) >= cut_threshold
         ):
             shot_id += 1
         shot_ids.append(shot_id)
+    return shot_ids
+
+
+def smooth_positions(positions, window=5, cut_threshold=0.16, cuts=None):
+    """Smooth tracking within a shot without drifting across hard camera cuts."""
+    if not positions or (len(positions) <= window and not cuts):
+        return positions
+
+    shot_ids = _assign_position_shot_ids(positions, cut_threshold=cut_threshold, cuts=cuts)
 
     smoothed = []
     for i in range(len(positions)):
@@ -8062,6 +8137,41 @@ def apply_manual_reframe_keyframes(positions, manual_keyframes):
         x_value, y_value = corrected_position(timestamp)
         corrected.append((timestamp, x_value, y_value))
     return corrected
+
+
+def build_tracked_speaker_keyframes(
+    positions, window=7, source_aspect=None, output_aspect=None, zoom=1.0, cuts=None
+):
+    """Convert smoothed (time, cx, cy) speaker ratios into cut-aware crop-travel keyframes."""
+    raw = list(positions or [])
+    if not raw:
+        return []
+    shot_ids = _assign_position_shot_ids(raw, cuts=cuts)
+    smoothed = smooth_positions(raw, window=window, cuts=cuts)
+    has_aspects = bool(source_aspect and output_aspect and source_aspect > 0 and output_aspect > 0)
+    zoom_val = max(1.0, float(zoom or 1.0))
+    width_ratio = min(1.0, float(output_aspect) / float(source_aspect)) / zoom_val if has_aspects else None
+    height_ratio = min(1.0, float(source_aspect) / float(output_aspect)) / zoom_val if has_aspects else None
+    keyframes = []
+    for index, (timestamp, cx, cy) in enumerate(smoothed):
+        x_pct = float(cx) * 100.0
+        y_pct = float(cy) * 100.0
+        if has_aspects:
+            proj_x = 50.0 if width_ratio >= 0.99999 else (x_pct - width_ratio * 50.0) / (1.0 - width_ratio)
+            proj_y = 50.0 if height_ratio >= 0.99999 else (y_pct - height_ratio * 50.0) / (1.0 - height_ratio)
+            clamped_x = clamp_float(proj_x, 0.0, 100.0)
+            clamped_y = clamp_float(proj_y, 0.0, 100.0)
+        else:
+            clamped_x = clamp_float(x_pct, 5.0, 95.0)
+            clamped_y = clamp_float(y_pct, 8.0, 92.0)
+        is_cut = index > 0 and shot_ids[index] != shot_ids[index - 1]
+        keyframes.append({
+            "time": round(float(timestamp), 3),
+            "x": round(clamped_x, 3),
+            "y": round(clamped_y, 3),
+            **({"cut": True} if is_cut else {}),
+        })
+    return keyframes
 
 
 def build_speaker_track_crop_filter(positions, src_width, src_height, target_aspect="9:16"):
@@ -14385,6 +14495,12 @@ async def analyze_clips(request: Dict[str, Any]):
             studio_package["titleSuggestion"] = source_hook
             studio_package["renderDefaults"]["hook_text"] = source_hook
             studio_package["destinations"] = settings["destinations"]
+            studio_package["recommendedDestination"] = candidate.get("recommendedDestination")
+            studio_package["destinationScores"] = candidate.get("destinationScores")
+            studio_package["formatTags"] = candidate.get("formatTags")
+            studio_package["targetAspectRatio"] = "9:16"
+            candidate["targetAspectRatio"] = "9:16"
+            candidate["exportFormat"] = "vertical_9_16"
             candidate["hookText"] = studio_package["hookText"]
             candidate["captionSuggestion"] = studio_package["captionSuggestion"]
             candidate["titleSuggestion"] = studio_package["titleSuggestion"]
@@ -32060,6 +32176,32 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     )
                     if not podcast_preflight["passed"]:
                         raise ValueError("Podcast timeline preflight failed: " + "; ".join(podcast_preflight["blockers"]))
+                    resolved_solo_keyframes = manual_reframe_keyframes
+                    if not resolved_solo_keyframes and any(
+                        str(cut.get("mode") or "").lower() == "speaker_track"
+                        for cut in reframe_timeline_cuts
+                    ):
+                        loop = asyncio.get_running_loop()
+                        detected_positions = await loop.run_in_executor(
+                            None, detect_speaker_positions, reframe_source_path, 0.35
+                        )
+                        timeline_cuts = [
+                            float(cut.get("time", 0) or 0)
+                            for cut in reframe_timeline_cuts
+                            if float(cut.get("time", 0) or 0) > 0.05
+                        ]
+                        if not timeline_cuts:
+                            timeline_cuts = await loop.run_in_executor(
+                                None, _safe_detect_source_cuts, reframe_source_path, reframe_duration
+                            )
+                        if detected_positions and len(detected_positions) >= 3:
+                            resolved_solo_keyframes = build_tracked_speaker_keyframes(
+                                detected_positions,
+                                source_aspect=src_w / max(src_h, 1),
+                                output_aspect=reframe_target_width / max(reframe_target_height, 1),
+                                zoom=finish_reframe_plan.get("zoom", 1),
+                                cuts=timeline_cuts,
+                            )
                     await render_reframe_timeline_sequential(
                         reframe_source_path,
                         cropped_path,
@@ -32071,7 +32213,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         reframe_timeline_cuts,
                         split_framing=finish_reframe_plan.get("split_source") or {},
                         speaker_order_cuts=finish_reframe_plan.get("speaker_order_cuts") or [],
-                        solo_keyframes=manual_reframe_keyframes,
+                        solo_keyframes=resolved_solo_keyframes,
                         solo_zoom=finish_reframe_plan.get("zoom", 1),
                         fallback_mode=crop_mode,
                         job_id=job_id,
@@ -32079,7 +32221,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         reviewed_subject=bool(request.subjectVfx),
                         preserve_samples=preserve_reviewed_sequence_samples(reframe_target_width,
                             reframe_target_height,programme_fps or float(source_delivery_rate or (request.output_settings or {}).get('fps',30)),
-                            reframe_duration,manual_reframe_keyframes or has_studio_node_grade_masks(request.finish_plan)),
+                            reframe_duration,resolved_solo_keyframes or has_studio_node_grade_masks(request.finish_plan)),
                         multicam_programme_path=multicam_programme_path,
                         precision_grade=has_studio_precision_grades(request.finish_plan),
                     )
@@ -32100,7 +32242,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         "-c:a", "copy", "-y", cropped_path,
                     ], check=True)
                     working_path = cropped_path
-                elif crop_mode == "speaker_track" and (manual_reframe_keyframes or "zoom" in finish_reframe_plan):
+                elif crop_mode == "speaker_track" and manual_reframe_keyframes:
                     try:
                         from .studio_sequence_video import preserve_reviewed_sequence_samples
                     except ImportError:
@@ -32113,7 +32255,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     await run_subprocess_async([
                         "ffmpeg", "-i", reframe_source_path,
                         "-vf", build_reviewed_reframe_filter(
-                            manual_reframe_keyframes or [{"time": 0, "x": 50, "y": 50}],
+                            manual_reframe_keyframes,
                             reframe_target_width, reframe_target_height, finish_reframe_plan.get("zoom", 1)),
                         "-map", "0:v:0", "-map", "0:a?",
                         *(build_studio_sequence_encode_args(preserve_samples=True) if preserve_reframe_samples else
@@ -32124,30 +32266,66 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 elif crop_mode in {"speaker_track", "ai_director"}:
                     logger.info("Applying Speaker-Tracking Smart Crop...")
                     src_w, src_h = get_video_dimensions(reframe_source_path)
+                    fallback_duration = get_media_duration(reframe_source_path) or 0.0
                     loop = asyncio.get_running_loop()
                     positions = await loop.run_in_executor(
                         None, detect_speaker_positions, reframe_source_path, 0.35
                     )
+                    solo_zoom = float(finish_reframe_plan.get("zoom", 1) or 1)
+                    scene_cuts = (
+                        await loop.run_in_executor(
+                            None, _safe_detect_source_cuts, reframe_source_path, fallback_duration
+                        )
+                        if positions and len(positions) >= 3
+                        else []
+                    )
 
                     if positions and len(positions) >= 3:
-                        positions = apply_manual_reframe_keyframes(
-                            positions, manual_reframe_keyframes
-                        )
-                        keyframes, crop_w, crop_h = build_speaker_track_crop_filter(
-                            positions, src_w, src_h, requested_reframe_aspect
-                        )
-                        sendcmd_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_sendcmd.txt")
-                        with open(sendcmd_path, "w") as f:
-                            f.write("\n".join(keyframes))
-                        vf_track = (
-                            f"sendcmd=f='{sendcmd_path}',"
-                            f"crop={crop_w}:{crop_h}:0:0,"
-                            f"scale={reframe_target_width}:{reframe_target_height}:flags=lanczos,setsar=1"
-                        )
+                        if solo_zoom > 1.001 or scene_cuts:
+                            tracked_keyframes = build_tracked_speaker_keyframes(
+                                positions,
+                                source_aspect=src_w / max(src_h, 1),
+                                output_aspect=reframe_target_width / max(reframe_target_height, 1),
+                                zoom=solo_zoom,
+                                cuts=scene_cuts,
+                            )
+                            await run_subprocess_async([
+                                "ffmpeg", "-i", reframe_source_path,
+                                "-vf", build_reviewed_reframe_filter(
+                                    tracked_keyframes,
+                                    reframe_target_width, reframe_target_height, solo_zoom),
+                                "-map", "0:v:0", "-map", "0:a?",
+                                "-c:v", GPU_VIDEO_ENCODER, "-preset", GPU_PRESET,
+                                "-c:a", "copy", "-y", cropped_path,
+                            ], check=True)
+                        else:
+                            keyframes, crop_w, crop_h = build_speaker_track_crop_filter(
+                                positions, src_w, src_h, requested_reframe_aspect
+                            )
+                            sendcmd_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_sendcmd.txt")
+                            with open(sendcmd_path, "w") as f:
+                                f.write("\n".join(keyframes))
+                            vf_track = (
+                                f"sendcmd=f='{sendcmd_path}',"
+                                f"crop={crop_w}:{crop_h}:0:0,"
+                                f"scale={reframe_target_width}:{reframe_target_height}:flags=lanczos,setsar=1"
+                            )
+                            await run_subprocess_async([
+                                "ffmpeg", "-i", reframe_source_path,
+                                "-vf", vf_track,
+                                "-c:v", GPU_VIDEO_ENCODER, "-preset", GPU_PRESET, "-c:a", "copy", "-y", cropped_path
+                            ], check=True)
+                        working_path = cropped_path
+                    elif crop_mode == "speaker_track" and solo_zoom > 1.001:
+                        logger.info("Speaker tracking found no faces; applying centered zoom reframe")
                         await run_subprocess_async([
                             "ffmpeg", "-i", reframe_source_path,
-                            "-vf", vf_track,
-                            "-c:v", GPU_VIDEO_ENCODER, "-preset", GPU_PRESET, "-c:a", "copy", "-y", cropped_path
+                            "-vf", build_reviewed_reframe_filter(
+                                [{"time": 0, "x": 50, "y": 50}],
+                                reframe_target_width, reframe_target_height, solo_zoom),
+                            "-map", "0:v:0", "-map", "0:a?",
+                            "-c:v", GPU_VIDEO_ENCODER, "-preset", GPU_PRESET,
+                            "-c:a", "copy", "-y", cropped_path,
                         ], check=True)
                         working_path = cropped_path
                     else:
@@ -32175,7 +32353,13 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     ], check=True)
                     working_path = cropped_path
             except Exception as e:
-                if reframe_timeline_cuts or crop_mode == "group_stack" or finish_reframe_plan.get("split_source") or "zoom" in finish_reframe_plan:
+                if (
+                    reframe_timeline_cuts
+                    or crop_mode == "group_stack"
+                    or finish_reframe_plan.get("split_source")
+                    or manual_reframe_keyframes
+                    or float(finish_reframe_plan.get("zoom", 1) or 1) > 1.001
+                ):
                     raise RuntimeError(f"Framing could not reproduce the reviewed edit: {e}") from e
                 logger.error(f"Smart Crop failed: {e}. Proceeding with original aspect ratio.")
                 # Fallback to trimmed_path

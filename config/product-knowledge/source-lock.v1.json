@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "reviewer": "Codex",
-  "reason": "Review bounded negative-only retention cache; unchanged features, prices, creative gates and financial controls.",
-  "reviewed_at": "2026-11-27T04:25:59.943Z",
+  "reviewer": "AutoPromote Engineering",
+  "reason": "Reviewed Find Viral Clips vertical sorting and Studio AI Director cut-aware tracking updates",
+  "reviewed_at": "2026-11-27T13:10:21.537Z",
   "catalog_sha256": "c09a26f3a093fe05b546f1006e2da1ed4c5f10efb8e49ab84c2fe77a452e29c1",
   "sources": [
     {
@@ -15,7 +15,7 @@
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
-      "sha256": "a9487649a594838cae3126c5055360d88f52657fd09816d31e10c6efbf74c7d7"
+      "sha256": "f3af15a94d6448df4062b7396bb1d016e271fcaa9c600a7eb8dc2be6186dc091"
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
@@ -47,7 +47,7 @@
     },
     {
       "path": "frontend/src/UserDashboardTabs/FindViralClipsPanel.js",
-      "sha256": "d0c03a1ca7b353b3be9d6ba1bc768e39ac02dc96f7fbbaa3139754c8832e2fbc"
+      "sha256": "001c6984a1db2a5bb0ab230bccee8c7d2ffbae4b22a7962468363f7dd4df6a3d"
     },
     {
       "path": "frontend/src/UserDashboardTabs/SchedulesPanel.js",
@@ -207,11 +207,11 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "5e3f36c7759c65afa5afb9456a54634d8f99c383f07bf1bab04dedcb4fcc6f76"
+      "sha256": "8f9dd6822e0f46ecc2929daa5e3af31264a5580098a7b4521722bbf83f9b42a2"
     },
     {
       "path": "frontend/src/components/ViralScanner.js",
-      "sha256": "a1d1ebae962f0f16bd795d911d8dcbb9a3bc711c0aa50e63bd974e0f674b3030"
+      "sha256": "29f2dbb0ecf09800240fe0262d7d79074de3b8be29710a9148fe3e8316a6710b"
     },
     {
       "path": "frontend/src/components/landing/StudioWelcomePage.js",
@@ -483,7 +483,7 @@
     },
     {
       "path": "frontend/src/utils/clipSelectionSettings.js",
-      "sha256": "025f0a6c7aa91cab9fa23c3fde768f2eddc93fc38e93623b56fa4b44fcffbdc8"
+      "sha256": "4d7243c39e3bdd403715de1de9f0a1b79d681308f23d3af035742859d902917c"
     },
     {
       "path": "frontend/src/utils/multicamProxyUpload.js",
@@ -511,7 +511,7 @@
     },
     {
       "path": "python_media_worker/main_media_server.py",
-      "sha256": "fd52d3b4acd94ced6e40ee7e655350e48ca05d4886186f449fa749e0f131205b"
+      "sha256": "b650eef562986c455f8f82a34fc615fededb6091d4ce8fd5e92a90631c08abd7"
     },
     {
       "path": "python_media_worker/studio_audio.py",
@@ -567,7 +567,7 @@
     },
     {
       "path": "python_media_worker/viral_moment_selection.py",
-      "sha256": "76531a55b1d5b082c6ea8c243d0be8bf50f500e21747df7cadc6aa9356043d56"
+      "sha256": "599ae344dccb9b6f55f27a0b83f5a9da8d374f094fb66f05b89d56e164389c33"
     },
     {
       "path": "python_media_worker/viral_render_contract.py",

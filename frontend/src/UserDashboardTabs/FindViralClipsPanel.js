@@ -1,7 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import ViralScanner from "../components/ViralScanner";
 import { SafeVideo } from "../components/SafeMedia";
-import {clipSelectionSettings} from '../utils/clipSelectionSettings';
+import {
+  clipSelectionSettings,
+  DESTINATION_LABELS,
+  sortMomentsByFormat,
+} from "../utils/clipSelectionSettings";
 
 const DESTINATIONS = ["TikTok", "YouTube Shorts", "Instagram Reels"];
 
@@ -27,7 +31,12 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
   const [targetLength, setTargetLength] = useState("30–60 seconds");
   const [destinations, setDestinations] = useState(DESTINATIONS);
   const [focus, setFocus] = useState('');
+  const [activeFormatSort, setActiveFormatSort] = useState("all");
   const settings=useMemo(()=>clipSelectionSettings(targetLength,destinations,focus),[targetLength,destinations,focus]);
+  const displayedClips = useMemo(
+    () => sortMomentsByFormat(suggestedClips, activeFormatSort, settings.destinations),
+    [suggestedClips, activeFormatSort, settings.destinations]
+  );
   const sourceVideoRef = useRef(null);
   const previewRangeRef = useRef(null);
 
@@ -36,6 +45,7 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
     setSourceFile(initialFile || null);
     setSelectedClip(null);
     setSuggestedClips([]);
+    setActiveFormatSort("all");
     setHasAnalysed(false);
     setScannerOpen(false);
   }, [initialFile]);
@@ -82,7 +92,7 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
     setScannerOpen(false);
   };
 
-  useEffect(()=>{setSuggestedClips([]);setSelectedClip(null);setHasAnalysed(false);previewRangeRef.current=null;},[settings]);
+  useEffect(()=>{setSuggestedClips([]);setSelectedClip(null);setActiveFormatSort("all");setHasAnalysed(false);previewRangeRef.current=null;},[settings]);
 
   const previewClip = clip => {
     const video = sourceVideoRef.current;
@@ -226,9 +236,11 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
               onUpgrade?.();
             }}
             onResults={clips => {
+              const sorted = sortMomentsByFormat(clips, "all", settings.destinations);
               setHasAnalysed(true);
               setSuggestedClips(clips);
-              setSelectedClip(clips[0] || null);
+              setActiveFormatSort("all");
+              setSelectedClip(sorted[0] || clips[0] || null);
               setScannerOpen(false);
             }}
             onSelectClip={clip => {
@@ -238,56 +250,128 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
               setSelectedClip(clip);
             }}
           />
-        ) : suggestedClips.length ? (
-          <div className="viral-moment-list">
-            {suggestedClips.map((clip, index) => {
-              const score = Math.round(Number(clip.score || clip.guidedScore || 0));
-              const confidence = clip.scoreConfidenceLabel || 'Review the source evidence';
-              return (
-                <article
-                  key={clip.id || `${clip.start}-${clip.end}`}
-                  className={selectedClip?.id === clip.id ? "selected" : ""}
+        ) : displayedClips.length ? (
+          <>
+            <div className="viral-format-sort-bar" data-testid="viral-format-sort-bar">
+              <div className="viral-format-sort-buttons" role="group" aria-label="Sort by destination format">
+                <span>Sort by format</span>
+                <button
+                  type="button"
+                  className={activeFormatSort === "all" ? "active" : ""}
+                  aria-pressed={activeFormatSort === "all"}
+                  onClick={() => setActiveFormatSort("all")}
                 >
-                  <span className="viral-moment-rank" aria-label={`Rank ${index+1}`}>{index + 1}</span>
-                  <div className="viral-moment-copy">
-                    <strong>
-                      {clip.hookText || clip.reason || `Suggested moment ${index + 1}`}
-                    </strong>
-                    <small>
-                      {Number(clip.start || 0).toFixed(1)}s –{" "}
-                      {Number(clip.end || clip.start || 0).toFixed(1)}s
-                    </small>
-                    {clip.text||clip.transcript?<p>{String(clip.text||clip.transcript).slice(0,360)}</p>:null}
-                    {Array.isArray(clip.reviewFlags)&&clip.reviewFlags.length?<small>{clip.reviewFlags.join(' · ')}</small>:null}
-                  </div>
-                  <div className="viral-moment-confidence">
-                    <span>{confidence}</span>
-                    <div aria-label={`Editorial score ${score} out of 100`}>
-                      {[20, 40, 60, 75, 90].map(threshold => (
-                        <i key={threshold} className={score >= threshold ? "filled" : ""} />
-                      ))}
+                  All selected
+                </button>
+                {settings.destinations.map(destId => (
+                  <button
+                    key={destId}
+                    type="button"
+                    className={activeFormatSort === destId ? "active" : ""}
+                    aria-pressed={activeFormatSort === destId}
+                    onClick={() => setActiveFormatSort(destId)}
+                  >
+                    {DESTINATION_LABELS[destId] || destId}
+                  </button>
+                ))}
+              </div>
+              <span className="viral-aspect-pill">9:16 Vertical · Face tracking in Studio</span>
+            </div>
+            <div className="viral-moment-list">
+              {displayedClips.map((clip, index) => {
+                const score = Math.round(Number(clip.score || clip.guidedScore || 0));
+                const confidence = clip.scoreConfidenceLabel || 'Review the source evidence';
+                const activeFormatTags = Array.isArray(clip.formatTags) ? clip.formatTags : [];
+                const highlightedTag =
+                  (activeFormatSort !== "all"
+                    ? activeFormatTags.find(tag => tag.id === activeFormatSort)
+                    : activeFormatTags.find(tag => tag.id === clip.recommendedDestination)) ||
+                  activeFormatTags[0];
+                const studioHandoffClips = displayedClips.map(item => ({
+                  ...item,
+                  autoTrackOnOpen: true,
+                  targetAspectRatio: item.targetAspectRatio || "9:16",
+                }));
+                const studioClip = {
+                  ...clip,
+                  autoTrackOnOpen: true,
+                  targetAspectRatio: clip.targetAspectRatio || "9:16",
+                  preferredDestination:
+                    activeFormatSort !== "all"
+                      ? activeFormatSort
+                      : clip.recommendedDestination || settings.destinations[0] || "instagram_reels",
+                };
+                return (
+                  <article
+                    key={clip.id || `${clip.start}-${clip.end}`}
+                    className={selectedClip?.id === clip.id ? "selected" : ""}
+                  >
+                    <span className="viral-moment-rank" aria-label={`Rank ${index+1}`}>{index + 1}</span>
+                    <div className="viral-moment-copy">
+                      <strong>
+                        {clip.hookText || clip.reason || `Suggested moment ${index + 1}`}
+                      </strong>
+                      <small>
+                        {Number(clip.start || 0).toFixed(1)}s –{" "}
+                        {Number(clip.end || clip.start || 0).toFixed(1)}s
+                      </small>
+                      {activeFormatTags.length ? (
+                        <div className="viral-moment-formats">
+                          <span className="viral-aspect-pill">{clip.targetAspectRatio || "9:16"}</span>
+                          {activeFormatTags.map(tag => (
+                            <span
+                              key={tag.id}
+                              className={`viral-format-pill ${
+                                tag.fit === "Trim needed"
+                                  ? "is-warn"
+                                  : tag.id === highlightedTag?.id
+                                    ? "is-top"
+                                    : ""
+                              }`}
+                            >
+                              {tag.label}
+                              {tag.fit === "Trim needed"
+                                ? " · Trim ≤60s"
+                                : tag.id === highlightedTag?.id
+                                  ? ` · ${tag.fit}`
+                                  : ""}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
+                      {clip.text||clip.transcript?<p>{String(clip.text||clip.transcript).slice(0,360)}</p>:null}
+                      {highlightedTag?.note?<small>{highlightedTag.note}</small>:null}
+                      {Array.isArray(clip.reviewFlags)&&clip.reviewFlags.length?<small>{clip.reviewFlags.join(' · ')}</small>:null}
                     </div>
-                  </div>
-                  <div className="viral-moment-actions">
-                    <button
-                      type="button"
-                      className="btn-secondary"
-                      onClick={() => previewClip(clip)}
-                    >
-                      ▷ Preview
-                    </button>
-                    <button
-                      type="button"
-                      className="check-quality"
-                      onClick={() => onOpenStudio?.(sourceFile, clip, suggestedClips)}
-                    >
-                      ✂ Create clip
-                    </button>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+                    <div className="viral-moment-confidence">
+                      <span>{confidence}</span>
+                      <div aria-label={`Editorial score ${score} out of 100`}>
+                        {[20, 40, 60, 75, 90].map(threshold => (
+                          <i key={threshold} className={score >= threshold ? "filled" : ""} />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="viral-moment-actions">
+                      <button
+                        type="button"
+                        className="btn-secondary"
+                        onClick={() => previewClip(clip)}
+                      >
+                        ▷ Preview
+                      </button>
+                      <button
+                        type="button"
+                        className="check-quality"
+                        onClick={() => onOpenStudio?.(sourceFile, studioClip, studioHandoffClips)}
+                      >
+                        ✂ Create clip
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </>
         ) : hasAnalysed ? (
           <p role="status">No moments matched this scan. Try a shorter target length or a different brief, or review the source in Studio.</p>
         ) : (

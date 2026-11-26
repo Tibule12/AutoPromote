@@ -123,3 +123,62 @@ test("unapproved framing and moment requests survive the same source-bound save/
     expect(restored.request).toEqual(request);expect(restored).not.toHaveProperty("reviewReceipt");
   }
 });
+
+test("Director moment selection prefers destination-ready duration and destinationScores for Shorts", () => {
+  const source = {
+    id: "source",
+    start: 0,
+    end: 120,
+    duration: 120,
+    contentHash: "e".repeat(64),
+    storagePath: "studio/sources/owner/a.mp4",
+  };
+  const snapshot = {
+    orderedClips: [source],
+    selectedClipId: source.id,
+    timeline: [{ ...source, id: "main", sourceClipId: "source", startRequest: 0, endRequest: 120 }],
+    smartCrop: false,
+    smartCropMode: "off",
+    reframeAspect: "16:9",
+    speakerTrackZoom: 1,
+    reframeKeyframes: [],
+    reframeModeCuts: [],
+    overlays: [],
+    motionScenes: [],
+    threeDScenes: [],
+    soundEffects: [],
+    voiceovers: [],
+    adjustmentLayers: [],
+  };
+  const document = adaptStudioSnapshotToDocument({ projectId: "director-shorts-project", snapshot });
+  const request = buildDirectorMomentRequest({
+    document,
+    occurrenceId: "main",
+    proposalId: "shorts-moment",
+    idempotencyKey: "shorts-moment-cmd",
+    preferredDestination: "youtube_shorts",
+    candidates: [
+      { start: 0, end: 75, storagePath: "studio/sources/owner/a.mp4", score: 99 },
+      {
+        start: 10,
+        end: 42,
+        storagePath: "studio/sources/owner/a.mp4",
+        score: 85,
+        destinationScores: { youtube_shorts: 96, instagram_reels: 80 },
+      },
+      {
+        start: 50,
+        end: 90,
+        storagePath: "studio/sources/owner/a.mp4",
+        score: 90,
+        destinationScores: { youtube_shorts: 72, instagram_reels: 95 },
+      },
+    ],
+  });
+  expect(request).not.toBeNull();
+  expect(request.operation.keep).toEqual({
+    space: "source",
+    startTick: 10 * 90000,
+    endTick: 42 * 90000,
+  });
+});
