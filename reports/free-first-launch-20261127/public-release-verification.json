@@ -1,7 +1,7 @@
 {
   "status": "Free-and-Plus-live",
   "publicOrigin": "https://autopromote.org",
-  "verifiedApiCommit": "2f175989bfba0689ccac941b0c83fe8a2360ec0e",
+  "verifiedApiCommit": "ad49be71be3431c223acfff02a9628988b4a2a76",
   "freeWorkflow": {
     "ordinaryRegisteredVerifiedAccount": true,
     "localEditSavedAndColdReopened": true,
@@ -77,7 +77,7 @@
     ]
   },
   "followup": {
-    "processingTopups": "implemented and locally tested; deployment pending",
+    "processingTopups": "live and verified on the real public website; all three packs available; no additional live purchase executed",
     "hiddenConnections": [
       "snapchat",
       "twitter",
@@ -85,9 +85,42 @@
       "spotify"
     ],
     "remainingActions": [
-      "full emulator rerun",
-      "corrected Playwright rerun"
-    ]
+      "verify corrective PayPal transport security rescan and deployed API"
+    ],
+    "liveUiCheckedAt": "2026-11-27T20:01:32.236Z",
+    "verifiedWidths": [
+      1440,
+      390,
+      360
+    ],
+    "hiddenConnectionStatusRequests": 0,
+    "paymentTransport": {
+      "newAlerts": [
+        1281,
+        1282
+      ],
+      "change": "Construct PayPal URLs using fixed endpoint prefixes and encoded resource IDs; reject redirects and invalid paths before OAuth",
+      "localTransportAndPaymentTestsPassed": 9,
+      "providerRescan": "pending"
+    }
   },
-  "existingProjectsEducationWalletsTesterCreditsAndPublicationsPreserved": true
+  "existingProjectsEducationWalletsTesterCreditsAndPublicationsPreserved": true,
+  "actions": {
+    "commit": "ad49be71be3431c223acfff02a9628988b4a2a76",
+    "allWorkflowsPassed": true,
+    "emulator": {
+      "run": 46058289324,
+      "suitesPassed": 458,
+      "suitesSkipped": 4,
+      "testsPassed": 3262,
+      "testsSkipped": 5
+    },
+    "playwright": {
+      "run": 46058289270,
+      "passed": 30,
+      "existingSkipped": 17
+    },
+    "backendDeployRun": 46058289463,
+    "pagesDeployRun": 46058289292
+  }
 }

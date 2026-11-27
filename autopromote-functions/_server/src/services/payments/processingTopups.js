@@ -92,19 +92,30 @@ function createProcessingTopups({db,ledger,provider,origin,now=Date.now}) {
     },
   };
 }
+function paymentResourceUrl(base,path) {
+  // Pick server-owned endpoint prefixes. Only a validated, encoded resource ID
+  // can come from a checkout or webhook; input never supplies an origin/path.
+  if(path==='/v2/checkout/orders')return base+'/v2/checkout/orders';
+  if(typeof path!=='string')fail('INVALID_PAYMENT_RESOURCE',503);
+  const order=/^\/v2\/checkout\/orders\/([A-Z0-9]{8,40})(\/capture)?$/.exec(path);
+  if(order&&order[0]===path)return base+'/v2/checkout/orders/'+encodeURIComponent(order[1])+(order[2]?'/capture':'');
+  const payment=/^\/v2\/payments\/(captures|refunds)\/([A-Z0-9]{8,40})$/.exec(path);
+  if(payment&&payment[0]===path)return base+(payment[1]==='captures'?'/v2/payments/captures/':'/v2/payments/refunds/')+encodeURIComponent(payment[2]);
+  fail('INVALID_PAYMENT_RESOURCE',503);
+}
 function liveProvider(env=process.env) {
   const base=env.PAYPAL_MODE==='live'?'https://api-m.paypal.com':'https://api-m.sandbox.paypal.com';
   let cached;
   return async(method,path,body,requestId)=>{
-    if(!/^\/v2\/(?:checkout\/orders(?:\/[A-Z0-9]{8,40}(?:\/capture)?)?|payments\/(?:captures|refunds)\/[A-Z0-9]{8,40})$/.test(path))fail('INVALID_PAYMENT_RESOURCE',503);
+    const destination=paymentResourceUrl(base,path);
     if(!cached||cached.expires<Date.now()){
-      const response=await fetch(base+'/v1/oauth2/token',{method:'POST',signal:AbortSignal.timeout(15000),headers:{
+      const response=await fetch(base+'/v1/oauth2/token',{method:'POST',redirect:'error',signal:AbortSignal.timeout(15000),headers:{
         Authorization:'Basic '+Buffer.from(env.PAYPAL_CLIENT_ID+':'+env.PAYPAL_CLIENT_SECRET).toString('base64'),
         'Content-Type':'application/x-www-form-urlencoded'},body:'grant_type=client_credentials'});
       if(!response.ok)fail('PAYPAL_UNAVAILABLE',503);
       const token=await response.json();cached={value:token.access_token,expires:Date.now()+Math.min(300,token.expires_in||300)*1000};
     }
-    const response=await fetch(base+path,{method,signal:AbortSignal.timeout(15000),headers:{Authorization:'Bearer '+cached.value,
+    const response=await fetch(destination,{method,redirect:'error',signal:AbortSignal.timeout(15000),headers:{Authorization:'Bearer '+cached.value,
       'Content-Type':'application/json',...(requestId?{'PayPal-Request-Id':requestId}:{})},...(body?{body:JSON.stringify(body)}:{})});
     const result=await response.json().catch(()=>null);
     if(!response.ok)fail('PAYPAL_TOPUP_RECONCILIATION_REQUIRED',503);

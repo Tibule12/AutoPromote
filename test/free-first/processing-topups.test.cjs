@@ -1,9 +1,24 @@
 const {test,after}=require('node:test'),assert=require('node:assert/strict'),crypto=require('node:crypto');
 const {createSandboxDatabase}=require('../../src/services/unifiedCredits/runtime');
 const {createProcessingService}=require('../../src/services/processingTokens/service');
-const {createProcessingTopups,verifiedCapture,reconcileTopupRefund}=require('../../src/services/payments/processingTopups');
+const {createProcessingTopups,verifiedCapture,reconcileTopupRefund,liveProvider}=require('../../src/services/payments/processingTopups');
 const db=createSandboxDatabase();after(()=>db.terminate());
 const random=()=>crypto.randomBytes(10).toString('hex').toUpperCase();
+test('PayPal transport keeps a fixed merchant origin, rejects path injection before OAuth and refuses redirects',async t=>{
+ const requests=[];
+ t.mock.method(global,'fetch',async(url,options)=>{
+  requests.push({url,options});return{ok:true,json:async()=>url.endsWith('/v1/oauth2/token')?{access_token:'isolated-fixture-token',expires_in:300}:{id:'ORDER123456'}};
+ });
+ const provider=liveProvider({PAYPAL_MODE:'live',PAYPAL_CLIENT_ID:'fixture',PAYPAL_CLIENT_SECRET:'fixture'});
+ for(const path of ['https://127.0.0.1/v2/checkout/orders','//evil.example/v2/checkout/orders','/v2/checkout/orders/../admin','/v2/checkout/orders/ORDER123456?redirect=https://evil.example','/v2/checkout/orders/ORDER123456#evil','/v2/checkout/orders/%2f%2fevil','/v2/checkout/orders/ORDER123456\n',null])
+  await assert.rejects(provider('GET',path),{code:'INVALID_PAYMENT_RESOURCE'});
+ assert.equal(requests.length,0);
+ for(const path of ['/v2/checkout/orders','/v2/checkout/orders/ORDER123456','/v2/checkout/orders/ORDER123456/capture','/v2/payments/captures/CAPTURE12345','/v2/payments/refunds/REFUND123456'])await provider('GET',path);
+ assert.equal(requests.length,6);
+ for(const {url,options} of requests){assert.equal(new URL(url).origin,'https://api-m.paypal.com');assert.equal(options.redirect,'error');assert.equal(new URL(url).search,'');assert.equal(new URL(url).hash,'');}
+ assert.equal(requests[3].url,'https://api-m.paypal.com/v2/checkout/orders/ORDER123456/capture');
+ assert.equal(requests[5].url,'https://api-m.paypal.com/v2/payments/refunds/REFUND123456');
+});
 async function fixture(){
  let time=Date.now(),order,posts=0,captures=0,loseCapture=false;
  const uid='topup-'+random(),namespace='processing_qualification_topup_'+random().toLowerCase();
